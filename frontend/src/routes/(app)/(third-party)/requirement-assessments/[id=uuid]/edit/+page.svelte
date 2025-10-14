@@ -32,7 +32,11 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { computeRequirementScoreAndResult, formatScoreValue, displayScoreColor } from '$lib/utils/helpers';
+	import {
+		computeRequirementScoreAndResult,
+		formatScoreValue,
+		displayScoreColor
+	} from '$lib/utils/helpers';
 
 	interface Props {
 		data: PageData;
@@ -595,9 +599,19 @@
 							<span class="font-medium">{m.result()}</span>
 							<span
 								class="badge text-sm font-semibold"
-								style="background-color: {complianceResultColorMap[computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).result] || '#ddd'}"
+								style="background-color: {complianceResultColorMap[
+									computeRequirementScoreAndResult(
+										page.data.requirementAssessment.requirement.questions,
+										data.answers
+									).result
+								] || '#ddd'}"
 							>
-								{safeTranslate(computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).result)}
+								{safeTranslate(
+									computeRequirementScoreAndResult(
+										page.data.requirementAssessment.requirement.questions,
+										data.answers
+									).result
+								)}
 							</span>
 						</p>
 					{:else}
@@ -613,10 +627,26 @@
 							<span class="font-medium">{m.score()}</span>
 							<ProgressRing
 								strokeWidth="20px"
-								meterStroke={displayScoreColor(computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).score, page.data.compliance_assessment_score.max_score)}
-								value={formatScoreValue(computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).score, page.data.compliance_assessment_score.max_score)}
+								meterStroke={displayScoreColor(
+									computeRequirementScoreAndResult(
+										page.data.requirementAssessment.requirement.questions,
+										data.answers
+									).score,
+									page.data.compliance_assessment_score.max_score
+								)}
+								value={formatScoreValue(
+									computeRequirementScoreAndResult(
+										page.data.requirementAssessment.requirement.questions,
+										data.answers
+									).score,
+									page.data.compliance_assessment_score.max_score
+								)}
 								classes="shrink-0"
-								size="size-10">{computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).score}</ProgressRing
+								size="size-10"
+								>{computeRequirementScoreAndResult(
+									page.data.requirementAssessment.requirement.questions,
+									data.answers
+								).score}</ProgressRing
 							>
 						</div>
 					{:else}

@@ -21,7 +21,11 @@
 		complianceResultTailwindColorMap,
 		complianceStatusTailwindColorMap
 	} from '$lib/utils/constants';
-	import { displayScoreColor, computeRequirementScoreAndResult, formatScoreValue } from '$lib/utils/helpers';
+	import {
+		displayScoreColor,
+		computeRequirementScoreAndResult,
+		formatScoreValue
+	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { Accordion, ProgressRing, Switch } from '@skeletonlabs/skeleton-svelte';
@@ -562,9 +566,19 @@
 									{#if computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).result}
 										<span
 											class="badge text-sm font-semibold"
-											style="background-color: {complianceResultColorMap[computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).result] || '#ddd'}"
+											style="background-color: {complianceResultColorMap[
+												computeRequirementScoreAndResult(
+													requirementAssessment.requirement.questions,
+													requirementAssessment.answers
+												).result
+											] || '#ddd'}"
 										>
-											{safeTranslate(computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).result)}
+											{safeTranslate(
+												computeRequirementScoreAndResult(
+													requirementAssessment.requirement.questions,
+													requirementAssessment.answers
+												).result
+											)}
 										</span>
 									{:else}
 										<RadioGroup
@@ -606,10 +620,26 @@
 										<span class="font-medium">{m.score()}</span>
 										<ProgressRing
 											strokeWidth="20px"
-											meterStroke={displayScoreColor(computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).score, complianceAssessment.max_score)}
-											value={formatScoreValue(computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).score, complianceAssessment.max_score)}
+											meterStroke={displayScoreColor(
+												computeRequirementScoreAndResult(
+													requirementAssessment.requirement.questions,
+													requirementAssessment.answers
+												).score,
+												complianceAssessment.max_score
+											)}
+											value={formatScoreValue(
+												computeRequirementScoreAndResult(
+													requirementAssessment.requirement.questions,
+													requirementAssessment.answers
+												).score,
+												complianceAssessment.max_score
+											)}
 											classes="shrink-0"
-											size="size-10">{computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).score}</ProgressRing
+											size="size-10"
+											>{computeRequirementScoreAndResult(
+												requirementAssessment.requirement.questions,
+												requirementAssessment.answers
+											).score}</ProgressRing
 										>
 									</div>
 								{:else}

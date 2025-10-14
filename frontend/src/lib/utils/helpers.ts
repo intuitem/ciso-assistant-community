@@ -180,7 +180,6 @@ export function normalizeSearchString(str: string): string {
 		.trim();
 }
 
-
 export function isQuestionVisible(question: any, answers: any): boolean {
 	if (!question.depends_on) return true;
 
@@ -220,23 +219,23 @@ export function computeRequirementScoreAndResult(questions: any, answers: any) {
 		const selectedChoiceURNs = answers?.[q_urn];
 		if (!selectedChoiceURNs) continue;
 
-		const choiceURNs = Array.isArray(selectedChoiceURNs) ? selectedChoiceURNs : [selectedChoiceURNs];
+		const choiceURNs = Array.isArray(selectedChoiceURNs)
+			? selectedChoiceURNs
+			: [selectedChoiceURNs];
 
 		for (const urn of choiceURNs) {
-		const selectedChoice = question.choices.find(
-				(choice: any) => choice.urn === urn
-		);
+			const selectedChoice = question.choices.find((choice: any) => choice.urn === urn);
 
-		if (!selectedChoice) continue;
+			if (!selectedChoice) continue;
 
-		if (selectedChoice.add_score !== undefined && selectedChoice.add_score !== null) {
-			totalScore += selectedChoice.add_score;
+			if (selectedChoice.add_score !== undefined && selectedChoice.add_score !== null) {
+				totalScore += selectedChoice.add_score;
+			}
+
+			if (selectedChoice.compute_result !== undefined && selectedChoice.compute_result !== null) {
+				results.push(selectedChoice.compute_result);
+			}
 		}
-
-		if (selectedChoice.compute_result !== undefined && selectedChoice.compute_result !== null) {
-			results.push(selectedChoice.compute_result);
-		}
-	}
 	}
 
 	let result = 'not_assessed';

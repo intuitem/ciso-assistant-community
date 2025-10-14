@@ -54,12 +54,11 @@
 					suggestions = r['reference_controls'].length > 0;
 
 					defaultImplementationGroups = implementation_groups
-						.filter(group => group.default_selected)
-						.map(group => group.ref_id);
+						.filter((group) => group.default_selected)
+						.map((group) => group.ref_id);
 
-					
 					form.form.update((currentData) => {
-						return { ...currentData, selected_implementation_groups: defaultImplementationGroups};
+						return { ...currentData, selected_implementation_groups: defaultImplementationGroups };
 					});
 				});
 		}

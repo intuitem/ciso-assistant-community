@@ -1547,7 +1547,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             self._send_assignment_notifications(
                 assessment, [user.id for user in authors_data]
             )
-        
+
         if assessment.framework.implementation_groups_definition:
             default_implementation_groups = []
             for ig in assessment.framework.implementation_groups_definition:
@@ -1716,7 +1716,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 "The specified Compliance Assessment does not exist."
             )
-    
+
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
         instance.compute_score_and_result()

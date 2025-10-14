@@ -40,7 +40,12 @@ from library.helpers import (
 from global_settings.models import GlobalSettings
 
 from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
-from .utils import camel_case, sha256, update_selected_implementation_groups, _is_question_visible
+from .utils import (
+    camel_case,
+    sha256,
+    update_selected_implementation_groups,
+    _is_question_visible,
+)
 from .validators import (
     validate_file_name,
     validate_file_size,
@@ -5574,11 +5579,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         self.compliance_assessment.save(update_fields=["updated_at"])
 
         self.compliance_assessment.upsert_daily_metrics()
-        
+
         # Recalculate selected IGs for the parent compliance assessment
         # Use transaction.on_commit to avoid nested save conflicts
-        transaction.on_commit(lambda: update_selected_implementation_groups(self.compliance_assessment))
-    
+        transaction.on_commit(
+            lambda: update_selected_implementation_groups(self.compliance_assessment)
+        )
+
     def compute_score_and_result(self):
         questions = self.requirement.questions or {}
         answers = self.answers or {}

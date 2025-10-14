@@ -655,6 +655,7 @@ def _generate_occurrences(template, start_date, end_date):
 
     return occurrences
 
+
 def _is_question_visible(question, answers):
     """Check if a question is visible based on depends_on logic."""
     depends_on = question.get("depends_on")
@@ -682,7 +683,11 @@ def update_selected_implementation_groups(compliance_assessment):
     """Recalculate selected IGs based on all visible answers in the assessment."""
     igs_to_select = set()
 
-    requirement_assessments = compliance_assessment.requirement_assessments.select_related("requirement").all()
+    requirement_assessments = (
+        compliance_assessment.requirement_assessments.select_related(
+            "requirement"
+        ).all()
+    )
     for ra in requirement_assessments:
         answers = ra.answers or {}
         for question_urn, question in ra.requirement.questions.items():
@@ -698,7 +703,7 @@ def update_selected_implementation_groups(compliance_assessment):
             for choice in question["choices"]:
                 if choice["urn"] in question_answers:
                     igs_to_select.update(choice.get("select_implementation_groups", []))
-        
+
         for ig in ra.requirement.framework.implementation_groups_definition:
             if ig.get("default_selected"):
                 igs_to_select.add(ig["ref_id"])

@@ -168,11 +168,7 @@
 		const totalCount = visibleQuestions.length;
 
 		const backgroundColor =
-			answeredCount === 0
-				? '#fca5a5'
-				: answeredCount === totalCount
-				? '#bbf7d0'
-				: '#fef08a';
+			answeredCount === 0 ? '#fca5a5' : answeredCount === totalCount ? '#bbf7d0' : '#fef08a';
 
 		return {
 			backgroundColor,
