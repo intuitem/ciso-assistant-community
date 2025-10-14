@@ -885,7 +885,7 @@
 	"mtdHelpText": "Temps d'arrêt maximal tolérable",
 	"disasterRecoveryObjectives": "Objectifs de reprise d'activité",
 	"noExpirationDateSet": "Aucune date d'expiration définie",
-	"sumpageTotal": "Total",
+	"sumpageTotal": "Total (toutes catégories)",
 	"sumpageActive": "Actif",
 	"sumpageDeprecated": "Obsolète",
 	"sumpageToDo": "A faire",
