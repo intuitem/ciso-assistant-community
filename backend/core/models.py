@@ -40,7 +40,7 @@ from library.helpers import (
 from global_settings.models import GlobalSettings
 
 from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
-from .utils import camel_case, sha256, update_selected_implementation_groups
+from .utils import camel_case, sha256, update_selected_implementation_groups, _is_question_visible
 from .validators import (
     validate_file_name,
     validate_file_size,
@@ -5578,6 +5578,50 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         # Recalculate selected IGs for the parent compliance assessment
         # Use transaction.on_commit to avoid nested save conflicts
         transaction.on_commit(lambda: update_selected_implementation_groups(self.compliance_assessment))
+    
+    def compute_score_and_result(self):
+        questions = self.requirement.questions or {}
+        answers = self.answers or {}
+
+        total_score = 0
+        results = []
+
+        for q_urn, question in questions.items():
+            if _is_question_visible(question, answers) is False:
+                continue
+            selected_choice_urn = answers.get(q_urn)
+            if not selected_choice_urn:
+                continue
+
+            # Handle both single choice and multiple choices
+            if isinstance(selected_choice_urn, list):
+                choice_urns = selected_choice_urn
+            else:
+                choice_urns = [selected_choice_urn]
+
+            for choice in question.get("choices", []):
+                if choice.get("urn") in choice_urns:
+                    add_score = choice.get("add_score")
+                    compute_result = choice.get("compute_result")
+
+                    if add_score is not None:
+                        self.is_scored = True
+                        total_score += add_score
+
+                    if compute_result is not None:
+                        results.append(compute_result)
+        self.score = total_score
+
+        if not results:
+            self.result = "not_assessed"
+        elif all(results):
+            self.result = "compliant"
+        elif any(results):
+            self.result = "partially_compliant"
+        else:
+            self.result = "non_compliant"
+
+        self.save(update_fields=["score", "result", "is_scored"])
 
 
 class FindingsAssessment(Assessment):

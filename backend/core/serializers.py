@@ -1716,6 +1716,11 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 "The specified Compliance Assessment does not exist."
             )
+    
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        instance.compute_score_and_result()
+        return instance
 
     class Meta:
         model = RequirementAssessment
