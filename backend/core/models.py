@@ -2332,27 +2332,71 @@ class Asset(
         return agg_obj
 
     @classmethod
-    def _aggregate_security_capabilities(cls, supporting_descendants: set) -> dict:
-        """Aggregates security capabilities from supporting descendants (lowest value wins - worst case)."""
+    def _aggregate_security_capabilities(
+        cls, supporting_descendants: set, parent_asset=None
+    ) -> dict:
+        """
+        Aggregates security capabilities from supporting descendants (lowest value wins - worst case).
+        Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly.
+        """
+        # Track which asset overrides which capability
+        overridden_caps = {}
+        for asset in supporting_descendants:
+            overridden = asset.overridden_children_capabilities.values_list(
+                "name", flat=True
+            )
+            for cap_name in overridden:
+                overridden_caps[cap_name] = asset
+
         agg_cap = {}
         for asset in supporting_descendants:
             capabilities = asset.security_capabilities.get("objectives", {})
             for key, content in capabilities.items():
                 if not content.get("is_enabled", False):
                     continue
+                # Skip if this capability is overridden (will be handled separately)
+                if key in overridden_caps:
+                    continue
 
                 value = content.get("value", 4)
                 if key not in agg_cap or value < agg_cap[key].get("value", 4):
                     agg_cap[key] = content.copy()
+
+        # For overridden capabilities, use the overriding asset's value
+        for cap_name, overriding_asset in overridden_caps.items():
+            cap_value = overriding_asset.security_capabilities.get(
+                "objectives", {}
+            ).get(cap_name)
+            if cap_value and cap_value.get("is_enabled", False):
+                agg_cap[cap_name] = cap_value.copy()
+
         return agg_cap
 
     @classmethod
-    def _aggregate_recovery_capabilities(cls, supporting_descendants: set) -> dict:
-        """Aggregates recovery capabilities from supporting descendants (highest value wins - worst case)."""
+    def _aggregate_recovery_capabilities(
+        cls, supporting_descendants: set, parent_asset=None
+    ) -> dict:
+        """
+        Aggregates recovery capabilities from supporting descendants (highest value wins - worst case).
+        Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly.
+        """
+        # Track which asset overrides which capability
+        overridden_caps = {}
+        for asset in supporting_descendants:
+            overridden = asset.overridden_children_capabilities.values_list(
+                "name", flat=True
+            )
+            for cap_name in overridden:
+                overridden_caps[cap_name] = asset
+
         agg_cap = {}
         for asset in supporting_descendants:
             capabilities = asset.recovery_capabilities.get("objectives", {})
             for key, content in capabilities.items():
+                # Skip if this capability is overridden (will be handled separately)
+                if key in overridden_caps:
+                    continue
+
                 value = content.get("value")
                 if value is None:
                     continue
@@ -2360,6 +2404,15 @@ class Asset(
                 current_value = agg_cap.get(key, {}).get("value")
                 if current_value is None or value > current_value:
                     agg_cap[key] = content.copy()
+
+        # For overridden capabilities, use the overriding asset's value
+        for cap_name, overriding_asset in overridden_caps.items():
+            cap_value = overriding_asset.recovery_capabilities.get(
+                "objectives", {}
+            ).get(cap_name)
+            if cap_value and cap_value.get("value") is not None:
+                agg_cap[cap_name] = cap_value.copy()
+
         return agg_cap
 
     @classmethod
@@ -2442,6 +2495,7 @@ class Asset(
         If the asset is a supporting asset, the security capabilities are directly stored in the asset.
         If the asset is a primary asset, the security capabilities are the union of the security capabilities of all the supporting assets it depends on.
         If multiple descendants share the same security capability, its value in the result is its lowest value among the descendants (worst case scenario).
+        Supporting assets can override capabilities propagation using overridden_children_capabilities - in this case, the primary asset uses its own capability value.
         """
         if self.security_capabilities.get("objectives"):
             self.security_capabilities["objectives"] = {
@@ -2453,11 +2507,20 @@ class Asset(
         if not self.is_primary:
             return self.security_capabilities
 
-        # For primary assets, aggregate from supporting assets (descendants)
-        descendants = self.child_assets.all()
+        # For primary assets, aggregate from supporting assets (all descendants, not just direct children)
+        descendants = self.get_descendants()
         supporting_assets = {asset for asset in descendants if not asset.is_primary}
         if not supporting_assets:
             return {}
+
+        # Track which asset overrides which capability
+        overridden_caps = {}
+        for asset in supporting_assets:
+            overridden = asset.overridden_children_capabilities.values_list(
+                "name", flat=True
+            )
+            for cap_name in overridden:
+                overridden_caps[cap_name] = asset
 
         security_capabilities = {}
         for asset in supporting_assets:
@@ -2465,6 +2528,9 @@ class Asset(
                 "objectives", {}
             ).items():
                 if not content.get("is_enabled", False):
+                    continue
+                # Skip if this capability is overridden (will be handled separately)
+                if key in overridden_caps:
                     continue
                 if key not in security_capabilities:
                     security_capabilities[key] = content
@@ -2475,6 +2541,14 @@ class Asset(
                         content.get("value", 4),
                     )
 
+        # For overridden capabilities, use the overriding asset's value
+        for cap_name, overriding_asset in overridden_caps.items():
+            cap_value = overriding_asset.security_capabilities.get(
+                "objectives", {}
+            ).get(cap_name)
+            if cap_value and cap_value.get("is_enabled", False):
+                security_capabilities[cap_name] = cap_value
+
         return {"objectives": security_capabilities}
 
     def get_recovery_capabilities(self) -> dict[str, dict[str, dict[str, int]]]:
@@ -2483,21 +2557,34 @@ class Asset(
         If the asset is a supporting asset, the recovery capabilities are directly stored in the asset.
         If the asset is a primary asset, the recovery capabilities are the union of the recovery capabilities of all the supporting assets it depends on.
         If multiple descendants share the same recovery capability, its value in the result is its highest value among the descendants (worst case scenario).
+        Supporting assets can override capabilities propagation using overridden_children_capabilities - in this case, the primary asset uses its own capability value.
         """
         if not self.is_primary:
             return self.recovery_capabilities
 
-        # For primary assets, aggregate from supporting assets (descendants)
-        descendants = self.child_assets.all()
+        # For primary assets, aggregate from supporting assets (all descendants, not just direct children)
+        descendants = self.get_descendants()
         supporting_assets = {asset for asset in descendants if not asset.is_primary}
         if not supporting_assets:
             return {}
+
+        # Track which asset overrides which capability
+        overridden_caps = {}
+        for asset in supporting_assets:
+            overridden = asset.overridden_children_capabilities.values_list(
+                "name", flat=True
+            )
+            for cap_name in overridden:
+                overridden_caps[cap_name] = asset
 
         recovery_capabilities = {}
         for asset in supporting_assets:
             for key, content in asset.recovery_capabilities.get(
                 "objectives", {}
             ).items():
+                # Skip if this capability is overridden (will be handled separately)
+                if key in overridden_caps:
+                    continue
                 if key not in recovery_capabilities:
                     recovery_capabilities[key] = content
                 else:
@@ -2506,6 +2593,14 @@ class Asset(
                         recovery_capabilities[key].get("value", 0),
                         content.get("value", 0),
                     )
+
+        # For overridden capabilities, use the overriding asset's value
+        for cap_name, overriding_asset in overridden_caps.items():
+            cap_value = overriding_asset.recovery_capabilities.get(
+                "objectives", {}
+            ).get(cap_name)
+            if cap_value and cap_value.get("value") is not None:
+                recovery_capabilities[cap_name] = cap_value
 
         return {"objectives": recovery_capabilities}
 
