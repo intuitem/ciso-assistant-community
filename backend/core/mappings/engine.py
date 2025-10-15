@@ -128,70 +128,79 @@ class MappingEngine:
         for path_list in paths.values():
             yield from path_list
 
-    def map_audit_results(self, source_audit_results: dict, rms: dict) -> dict:
-        if not source_audit_results:
+    def map_audit_results(
+        self, source_audit: dict[str, dict[str, str]], rms: dict
+    ) -> dict[str, dict[str, str]]:
+        if not source_audit:
             return {}
-        target_results = {}
+        target_audit = defaultdict(dict)
         for mapping in rms["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
             dst = mapping["target_requirement_urn"]
             rel = mapping["relationship"]
 
-            if rel in ("equal", "superset") and src in source_audit_results:
-                target_results[dst] = source_audit_results[src]
-            elif rel in ("subset", "intersect") and src in source_audit_results:
-                r = source_audit_results[src]
-                if r in ("not_assessed", "non_compliant"):
-                    target_results[dst] = r
-                elif r in ("compliant", "partially_compliant"):
-                    target_results[dst] = "partially_compliant"
-        return target_results
+            if rel in ("equal", "superset") and src in source_audit:
+                target_audit[dst] = source_audit[src]
+            elif rel in ("subset", "intersect") and src in source_audit:
+                result = source_audit[src]["result"]
+                if result in ("not_assessed", "non_compliant"):
+                    target_audit[dst]["result"] = result
+                elif result in ("compliant", "partially_compliant"):
+                    target_audit[dst]["result"] = "partially_compliant"
+        return target_audit
 
-    def best_mapping_results(
+    def best_mapping_inferrences(
         self,
-        source_audit_results: dict,
+        source_audit: dict,
         source_urn: str,
         dest_urn: str,
         max_depth: Optional[int] = None,
     ) -> tuple[dict, list[str]]:
         paths = self.all_paths_between(source_urn, dest_urn, max_depth)
-        results = {}
+        inferrences = {}
         best_path = []
 
         for path in paths:
-            tmp_results = source_audit_results.copy()
+            tmp_inferrences = source_audit.copy()
             tmp_urn = source_urn
 
             for urn in path[1:]:
                 rms = self.get_rms((tmp_urn, urn))
                 if not rms:
                     break
-                tmp_results = self.map_audit_results(tmp_results, rms)
+                tmp_inferrences = self.map_audit_results(tmp_inferrences, rms)
                 tmp_urn = urn
 
-            if len(tmp_results) > len(results):
-                results = tmp_results
+            if len(tmp_inferrences) > len(inferrences):
+                inferrences = tmp_inferrences
                 best_path = path
 
-        return results, best_path
+        return inferrences, best_path
 
-    def load_audit_results(self, audit: ComplianceAssessment) -> dict[str, str]:
+    def load_audit_fields(
+        self,
+        audit: ComplianceAssessment,
+        fields: list = ["result", "status", "score", "is_scored", "observation"],
+    ) -> dict[str, dict[str, str]]:
         """
         Extracts requirement assessments from a compliance audit.
         Args:
             audit: The compliance assessment object.
+            fields: The fields to extrract from each requirement assessment.
         Returns:
-            A dictionary mapping requirement URNs to their result status.
+            A dictionary mapping requirement URNs to their requested fields.
         """
         all_ra = audit.get_requirement_assessments(include_non_assessable=False)
         audit_results = {}
         for ra in all_ra:
-            audit_results[ra.requirement.urn] = ra.result
+            audit_results[ra.requirement.urn] = {
+                field: getattr(ra, field) for field in fields
+            }
         return audit_results
 
     def summary_results(self, audit_results: dict[str, str]) -> dict[str, int]:
         """Summarizes audit result counts by status."""
         res = defaultdict(int)
-        for _, result in audit_results.items():
-            res[result] += 1
+        for _, audit in audit_results.items():
+            res[audit["result"]] += 1
         return dict(res)

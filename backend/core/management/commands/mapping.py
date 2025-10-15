@@ -168,7 +168,7 @@ class Command(BaseCommand):
 
             for audit in audits:
                 source_urn = audit.framework.urn
-                audit_from_results = engine.load_audit_results(audit)
+                audit_from_results = engine.load_audit_fields(audit)
                 summary = engine.summary_results(audit_from_results)
                 pretty_summary = self.format_summary_inline(summary)
 
@@ -180,7 +180,7 @@ class Command(BaseCommand):
                         continue  # skip same framework
 
                     start_time = time.time()
-                    best_results, best_path = engine.best_mapping_results(
+                    best_results, best_path = engine.best_mapping_inferrences(
                         audit_from_results, source_urn, dest_urn, max_depth
                     )
                     elapsed_ms = (time.time() - start_time) * 1000

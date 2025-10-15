@@ -6033,7 +6033,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 engine.load_rms_data()
                 source_urn = baseline.framework.urn
                 print(f"source urn = {repr(source_urn)}")
-                audit_from_results = engine.load_audit_results(baseline)
+                audit_from_results = engine.load_audit_fields(baseline)
 
                 frameworks_in_mappings = set()
                 for src, tgt in engine.all_rms.keys():
@@ -6045,7 +6045,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     if dest_urn == source_urn:
                         continue  # skip same framework
 
-                    best_results, _ = engine.best_mapping_results(
+                    best_results, _ = engine.best_mapping_inferrences(
                         audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
                     )
 
@@ -6059,7 +6059,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     )
 
                     for req in target_requirement_assessments:
-                        req.result = best_results[req.requirement.urn]
+                        req.result = best_results[req.requirement.urn]["result"]
                         requirement_assessments_to_update.append(req)
 
                     RequirementAssessment.objects.bulk_update(
