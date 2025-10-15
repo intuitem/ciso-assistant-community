@@ -1,5 +1,6 @@
 import hashlib
 from enum import Enum
+import json
 from re import sub
 from typing import Literal
 from datetime import datetime, timedelta, date
@@ -13,6 +14,16 @@ import calendar
 from dateutil import relativedelta as rd
 
 logger = structlog.get_logger(__name__)
+
+
+def sizeof_json(obj) -> int:
+    """
+    Returns the size of a JSON-encoded object in bytes.
+    If obj is already bytes (compressed), return its length directly.
+    """
+    if isinstance(obj, (bytes, bytearray, memoryview)):
+        return len(obj)
+    return len(json.dumps(obj).encode("utf-8"))
 
 
 def camel_case(s):
