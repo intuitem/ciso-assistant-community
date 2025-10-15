@@ -547,17 +547,11 @@
 										<span
 											class="badge text-sm font-semibold"
 											style="background-color: {complianceResultColorMap[
-												computeRequirementScoreAndResult(
-													requirementAssessment.requirement.questions,
-													requirementAssessment.answers
-												).result
+												requirementAssessment.result
 											] || '#ddd'}"
 										>
 											{safeTranslate(
-												computeRequirementScoreAndResult(
-													requirementAssessment.requirement.questions,
-													requirementAssessment.answers
-												).result
+												requirementAssessment.result
 											)}
 										</span>
 									{:else}
@@ -601,25 +595,16 @@
 										<ProgressRing
 											strokeWidth="20px"
 											meterStroke={displayScoreColor(
-												computeRequirementScoreAndResult(
-													requirementAssessment.requirement.questions,
-													requirementAssessment.answers
-												).score,
+												requirementAssessment.score,
 												complianceAssessment.max_score
 											)}
 											value={formatScoreValue(
-												computeRequirementScoreAndResult(
-													requirementAssessment.requirement.questions,
-													requirementAssessment.answers
-												).score,
+												requirementAssessment.score,
 												complianceAssessment.max_score
 											)}
 											classes="shrink-0"
 											size="size-10"
-											>{computeRequirementScoreAndResult(
-												requirementAssessment.requirement.questions,
-												requirementAssessment.answers
-											).score}</ProgressRing
+											>{requirementAssessment.score}</ProgressRing
 										>
 									</div>
 								{:else}
