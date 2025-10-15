@@ -116,7 +116,7 @@
 										? 'preset-filled-primary-500 rounded-base'
 										: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
 									style={selected
-										? `background-color: ${option.color ?? '#2563eb'}; color: white;`
+										? `background-color: ${option.color ?? ''}; color: white;`
 										: ''}
 									onclick={() => {
 										if (internalAnswers[urn] === option.urn) {
@@ -158,7 +158,7 @@
 										? 'preset-filled-primary-500 rounded-base'
 										: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
 									style={selected
-										? `background-color: ${option.color ?? '#2563eb'}; color: white;`
+										? `background-color: ${option.color ?? ''}; color: white;`
 										: ''}
 									onclick={() => toggleSelection(urn, option.urn)}
 								>

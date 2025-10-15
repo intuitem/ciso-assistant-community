@@ -1765,7 +1765,8 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
-        instance.compute_score_and_result()
+        if instance.compliance_assessment.framework.is_dynamic():
+            instance.compute_score_and_result()
         return instance
 
     class Meta:

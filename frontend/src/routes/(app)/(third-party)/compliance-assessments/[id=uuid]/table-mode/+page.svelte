@@ -23,7 +23,6 @@
 	} from '$lib/utils/constants';
 	import {
 		displayScoreColor,
-		computeRequirementScoreAndResult,
 		formatScoreValue
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -135,7 +134,7 @@
 			[field]: value
 		});
 
-		if (invalidateAll && ['answers', 'evidences'].includes(field)) {
+		if (invalidateAll) {
 			await invalidateAll();
 		}
 
@@ -541,7 +540,7 @@
 									<p class="flex items-center font-semibold text-purple-600 italic">
 										{m.result()}
 									</p>
-									{#if computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).result}
+									{#if complianceAssessment.framework.is_dynamic}
 										<span
 											class="badge text-sm font-semibold"
 											style="background-color: {complianceResultColorMap[
@@ -585,7 +584,7 @@
 						{/if}
 						<div class="flex flex-col w-full place-items-center">
 							{#if !shallow}
-								{#if computeRequirementScoreAndResult(requirementAssessment.requirement.questions, requirementAssessment.answers).score !== null}
+								{#if complianceAssessment.framework.is_dynamic}
 									<div class="flex flex-row items-center space-x-4">
 										<span class="font-medium">{m.score()}</span>
 										<ProgressRing
