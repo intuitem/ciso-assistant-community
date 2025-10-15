@@ -78,7 +78,7 @@
 	let hideSuggestionHashmap: Record<string, boolean> = $state({});
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
-	
+
 	const hasQuestions = $derived(
 		requirementAssessments.some(
 			(requirementAssessment) => requirementAssessment.requirement.questions
@@ -145,7 +145,6 @@
 		}
 	}
 
-
 	let questionnaireMode = $state(
 		questionnaireOnly ? true : !hasQuestions ? false : page.data.user.is_third_party ? true : false
 	);
@@ -172,7 +171,6 @@
 	}
 
 	let addedEvidence = $state(0);
-
 
 	const requirementAssessmentScores = Object.fromEntries(
 		// svelte-ignore state_referenced_locally
@@ -550,9 +548,7 @@
 												requirementAssessment.result
 											] || '#ddd'}"
 										>
-											{safeTranslate(
-												requirementAssessment.result
-											)}
+											{safeTranslate(requirementAssessment.result)}
 										</span>
 									{:else}
 										<RadioGroup
@@ -603,8 +599,7 @@
 												complianceAssessment.max_score
 											)}
 											classes="shrink-0"
-											size="size-10"
-											>{requirementAssessment.score}</ProgressRing
+											size="size-10">{requirementAssessment.score}</ProgressRing
 										>
 									</div>
 								{:else}

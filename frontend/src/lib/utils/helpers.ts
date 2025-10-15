@@ -229,14 +229,8 @@ export function computeRequirementScoreAndResult(questions: any, answers: any) {
 		const hasAnswer =
 			selectedChoiceURNs !== undefined &&
 			selectedChoiceURNs !== null &&
-			!(
-				typeof selectedChoiceURNs === 'string' &&
-				selectedChoiceURNs.trim() === ''
-			) &&
-			!(
-				Array.isArray(selectedChoiceURNs) &&
-				selectedChoiceURNs.length === 0
-			);
+			!(typeof selectedChoiceURNs === 'string' && selectedChoiceURNs.trim() === '') &&
+			!(Array.isArray(selectedChoiceURNs) && selectedChoiceURNs.length === 0);
 
 		if (!hasAnswer) {
 			// visible but unanswered -> will lead to 'not_assessed' overall

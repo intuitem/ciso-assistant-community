@@ -113,13 +113,11 @@
 									name="question"
 									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
 										{selected
-											? 'preset-filled-primary-500 rounded-base'
-											: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
-									style={
-										selected
-											? `background-color: ${option.color ?? '#2563eb'}; color: white;`
-											: ''
-									}
+										? 'preset-filled-primary-500 rounded-base'
+										: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
+									style={selected
+										? `background-color: ${option.color ?? '#2563eb'}; color: white;`
+										: ''}
 									onclick={() => {
 										if (internalAnswers[urn] === option.urn) {
 											internalAnswers[urn] = null;
@@ -150,19 +148,18 @@
 					{:else if question.type === 'multiple_choice'}
 						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
 							{#each question.choices as option}
-							{@const selected = Array.isArray(internalAnswers[urn]) && internalAnswers[urn].includes(option.urn)}
+								{@const selected =
+									Array.isArray(internalAnswers[urn]) && internalAnswers[urn].includes(option.urn)}
 								<button
 									type="button"
 									name="question"
 									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
 										{selected
-											? 'preset-filled-primary-500 rounded-base'
-											: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
-									style={
-										selected
-											? `background-color: ${option.color ?? '#2563eb'}; color: white;`
-											: ''
-									}
+										? 'preset-filled-primary-500 rounded-base'
+										: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
+									style={selected
+										? `background-color: ${option.color ?? '#2563eb'}; color: white;`
+										: ''}
 									onclick={() => toggleSelection(urn, option.urn)}
 								>
 									{option.value}
@@ -174,7 +171,7 @@
 											triggerBase="underline"
 											contentBase="card preset-filled p-4"
 											openDelay={50}
-											>
+										>
 											{#snippet trigger()}<i class="ml-2 fa-solid fa-circle-info"></i>{/snippet}
 											{#snippet content()}{option.description}{/snippet}
 										</Tooltip>
