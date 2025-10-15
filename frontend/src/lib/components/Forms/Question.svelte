@@ -58,6 +58,7 @@
 		} else {
 			internalAnswers[urn] = [...internalAnswers[urn], optionUrn];
 		}
+		onChange(urn, internalAnswers[urn]);
 	}
 
 	function saveTextAnswer(urn: string) {
