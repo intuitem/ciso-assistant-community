@@ -2552,7 +2552,9 @@ class Asset(
             return self.security_capabilities
 
         # For primary assets, delegate to class method for aggregation
-        descendants = self.get_descendants()
+        # Use prefetch pattern to avoid N+1 queries even in detail views
+        graph = self._prefetch_graph_data([self])
+        descendants = self._get_all_descendants(self, graph["parent_to_children"])
         supporting_assets = {asset for asset in descendants if not asset.is_primary}
         if not supporting_assets:
             return {}
@@ -2572,7 +2574,9 @@ class Asset(
             return self.recovery_capabilities
 
         # For primary assets, delegate to class method for aggregation
-        descendants = self.get_descendants()
+        # Use prefetch pattern to avoid N+1 queries even in detail views
+        graph = self._prefetch_graph_data([self])
+        descendants = self._get_all_descendants(self, graph["parent_to_children"])
         supporting_assets = {asset for asset in descendants if not asset.is_primary}
         if not supporting_assets:
             return {}
