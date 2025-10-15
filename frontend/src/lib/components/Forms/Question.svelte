@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import RadioGroup from './RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { isQuestionVisible } from '$lib/utils/helpers';
 	import * as m from '$paraglide/messages';
+	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		class?: string;
@@ -68,6 +68,9 @@
 	function resetTextAnswer(urn: string) {
 		questionBuffers[urn] = internalAnswers[urn] || '';
 	}
+
+	let openStateUniqueChoice = $state(false);
+	let openStateMultipleChoice = $state(false);
 </script>
 
 <div>
@@ -101,32 +104,80 @@
 							<p class="text-gray-400 italic">{m.noAnswer()}</p>
 						{/if}
 					{:else if question.type === 'unique_choice'}
-						<RadioGroup
-							possibleOptions={question.choices}
-							{form}
-							initialValue={internalAnswers[urn]}
-							nullable={true}
-							key="urn"
-							labelKey="value"
-							field="answers"
-							onChange={(newValue) => {
-								internalAnswers[urn] = newValue;
-								onChange(urn, newValue);
-							}}
-						/>
-					{:else if question.type === 'multiple_choice'}
 						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
 							{#each question.choices as option}
+								{@const selected = internalAnswers[urn] === option.urn}
 								<button
 									type="button"
 									name="question"
-									class="shadow-md p-1
-										{internalAnswers[urn] && internalAnswers[urn].includes(option.urn)
-										? 'preset-filled-primary-500 rounded-base'
-										: 'hover:preset-tonal-primary bg-gray-200 rounded-base'}"
+									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
+										{selected
+											? 'preset-filled-primary-500 rounded-base'
+											: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
+									style={
+										selected
+											? `background-color: ${option.color ?? '#2563eb'}; color: white;`
+											: ''
+									}
+									onclick={() => {
+										if (internalAnswers[urn] === option.urn) {
+											internalAnswers[urn] = null;
+											onChange(urn, null);
+										} else {
+											internalAnswers[urn] = option.urn;
+											onChange(urn, option.urn);
+										}
+									}}
+								>
+									{option.value}
+									{#if option.description}
+										<Tooltip
+											open={openStateUniqueChoice}
+											onOpenChange={(e) => (openStateUniqueChoice = e.open)}
+											positioning={{ placement: 'top' }}
+											triggerBase="underline"
+											contentBase="card preset-filled p-4"
+											openDelay={50}
+										>
+											{#snippet trigger()}<i class="ml-2 fa-solid fa-circle-info"></i>{/snippet}
+											{#snippet content()}{option.description}{/snippet}
+										</Tooltip>
+									{/if}
+								</button>
+							{/each}
+						</div>
+					{:else if question.type === 'multiple_choice'}
+						<div class="flex flex-col gap-1 p-1 border border-surface-500 rounded-base">
+							{#each question.choices as option}
+							{@const selected = Array.isArray(internalAnswers[urn]) && internalAnswers[urn].includes(option.urn)}
+								<button
+									type="button"
+									name="question"
+									class="shadow-sm p-1 rounded-base border border-gray-300 transition-all duration-150
+										{selected
+											? 'preset-filled-primary-500 rounded-base'
+											: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
+									style={
+										selected
+											? `background-color: ${option.color ?? '#2563eb'}; color: white;`
+											: ''
+									}
 									onclick={() => toggleSelection(urn, option.urn)}
 								>
 									{option.value}
+									{#if option.description}
+										<Tooltip
+											open={openStateMultipleChoice}
+											onOpenChange={(e) => (openStateMultipleChoice = e.open)}
+											positioning={{ placement: 'top' }}
+											triggerBase="underline"
+											contentBase="card preset-filled p-4"
+											openDelay={50}
+											>
+											{#snippet trigger()}<i class="ml-2 fa-solid fa-circle-info"></i>{/snippet}
+											{#snippet content()}{option.description}{/snippet}
+										</Tooltip>
+									{/if}
 								</button>
 							{/each}
 						</div>
