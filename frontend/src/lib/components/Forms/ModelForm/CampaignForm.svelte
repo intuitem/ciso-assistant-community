@@ -75,6 +75,7 @@
 	/>
 {/if}
 <AutocompleteSelect
+	multiple
 	{form}
 	optionsEndpoint="perimeters"
 	optionsExtraFields={[['folder', 'str']]}
