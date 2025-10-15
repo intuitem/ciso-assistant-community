@@ -48,7 +48,9 @@
 
 	// Determine if domain selection should be disabled
 	let isDomainDisabled = $derived(
-		selectedModel === 'ComplianceAssessment' || selectedModel === 'FindingsAssessment' || selectedModel === 'RiskAssessment'
+		selectedModel === 'ComplianceAssessment' ||
+			selectedModel === 'FindingsAssessment' ||
+			selectedModel === 'RiskAssessment'
 	);
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
@@ -57,7 +59,10 @@
 
 	// Determine if perimeter selection should be disabled
 	let isPerimeterDisabled = $derived(
-		selectedModel === 'Asset' || selectedModel === 'AppliedControl' || selectedModel === 'Perimeter'
+		selectedModel === 'Asset' ||
+			selectedModel === 'AppliedControl' ||
+			selectedModel === 'Perimeter' ||
+			selectedModel === 'ElementaryAction'
 	);
 
 	// Fixed: Check files correctly
@@ -275,6 +280,27 @@
 								name="model"
 								value="RiskAssessment"
 								id="RiskAssessment"
+								class="size-5 border-gray-300 text-blue-500"
+								bind:group={selectedModel}
+							/>
+						</label>
+					</div>
+
+					<div>
+						<label
+							for="ElementaryAction"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
+						>
+							<div>
+								<p class="text-gray-700">{m.elementaryActions()}</p>
+								<p class="text-gray-500 text-xs">{m.dataWizardElementaryActionDescription()}</p>
+							</div>
+
+							<input
+								type="radio"
+								name="model"
+								value="ElementaryAction"
+								id="ElementaryAction"
 								class="size-5 border-gray-300 text-blue-500"
 								bind:group={selectedModel}
 							/>

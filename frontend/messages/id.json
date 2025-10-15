@@ -16,6 +16,7 @@
 	"swedish": "Swedia",
 	"indonesian": "Bahasa Indonesia",
 	"danish": "Denmark",
+	"croatian": "Kroasia",
 	"addThreat": "Tambahkan ancaman",
 	"addVulnerability": "Tambahkan kerentanan",
 	"addReferenceControl": "Tambahkan kontrol referensi",
@@ -1154,5 +1155,7 @@
 	"securityObjectiveScale": "Skala properti keamanan",
 	"securityObjectiveScaleHelpText": "Pilih skala untuk properti keamanan Anda (1 hingga 4 secara default)",
 	"actor": "Pelaku",
-	"action": "Aksi"
+	"action": "Aksi",
+	"viewMore": "Lihat lebih banyak",
+	"viewLess": "Lihat lebih sedikit"
 }

@@ -16,6 +16,7 @@
 	"swedish": "Suedez",
 	"indonesian": "indoneziană",
 	"danish": "danez",
+	"croatian": "croată",
 	"addThreat": "Adaugă amenințare",
 	"addVulnerability": "Adăugați vulnerabilitate",
 	"addReferenceControl": "Adaugă control de referință",
@@ -966,5 +967,7 @@
 	"securityObjectiveScale": "Scară proprietăți de securitate",
 	"securityObjectiveScaleHelpText": "Alegeți scala dvs. pentru proprietățile de securitate (1 la 4 implicit)",
 	"actor": "Actor",
-	"action": "Acțiune"
+	"action": "Acțiune",
+	"viewMore": "Vizualizați mai mult",
+	"viewLess": "Vizualizați mai puțin"
 }

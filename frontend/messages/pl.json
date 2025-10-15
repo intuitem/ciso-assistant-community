@@ -19,6 +19,7 @@
 	"hungarian": "Węgierski",
 	"ukrainian": "Ukraiński",
 	"greek": "Grecki",
+	"croatian": "Chorwacki",
 	"addThreat": "Dodaj zagrożenie",
 	"addVulnerability": "Dodaj lukę",
 	"addReferenceControl": "Dodaj kontrolę referencyjną",
@@ -1709,5 +1710,7 @@
 	"image": "Obraz",
 	"securityObjectives": "Właściwości bezpieczeństwa",
 	"securityObjectiveScale": "Skala właściwości bezpieczeństwa",
-	"securityObjectiveScaleHelpText": "Wybierz skalę dla właściwości bezpieczeństwa (domyślnie 1 do 4)"
+	"securityObjectiveScaleHelpText": "Wybierz skalę dla właściwości bezpieczeństwa (domyślnie 1 do 4)",
+	"viewMore": "Voir plus",
+	"viewLess": "Voir moins"
 }

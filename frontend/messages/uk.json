@@ -17,6 +17,7 @@
 	"indonesian": "Індонезійська",
 	"danish": "Данська",
 	"hungarian": "Угорська",
+	"croatian:": "хорватська",
 	"addThreat": "Додати загрозу",
 	"addVulnerability": "Додати вразливість",
 	"addReferenceControl": "Додати відповідний контроль",
@@ -1483,5 +1484,7 @@
 	"securityObjectiveScale": "Шкала властивостей безпеки",
 	"securityObjectiveScaleHelpText": "Виберіть шкалу для властивостей безпеки (за замовчуванням 1 до 4)",
 	"actor": "Актор",
-	"action": "Дія"
+	"action": "Дія",
+	"viewMore": "Переглянути більше",
+	"viewLess": "Переглянути менше"
 }

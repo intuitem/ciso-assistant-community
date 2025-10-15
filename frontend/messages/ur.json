@@ -16,6 +16,7 @@
 	"swedish": "سویڈش",
 	"indonesian": "انڈونیشین",
 	"danish": "ڈینش",
+	"croatian": "کروشیائی",
 	"addThreat": "خطرہ شامل کریں",
 	"addVulnerability": "کمزوری شامل کریں",
 	"addReferenceControl": "حوالہ کنٹرول شامل کریں",
@@ -937,5 +938,7 @@
 	"securityObjectiveScale": "سیکیورٹی خصوصیات کی پیمانہ",
 	"securityObjectiveScaleHelpText": "سیکیورٹی خصوصیات کے لیے اپنی پیمانہ منتخب کریں (ڈیفالٹ طور پر 1 سے 4)",
 	"actor": "اداکار",
-	"action": "عمل"
+	"action": "عمل",
+	"viewMore": "مزید دیکھیں",
+	"viewLess": "کم دیکھیں"
 }

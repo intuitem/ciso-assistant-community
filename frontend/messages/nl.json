@@ -16,6 +16,7 @@
 	"swedish": "Zweeds",
 	"indonesian": "Indonesisch",
 	"danish": "Deens",
+	"croatian": "Kroatisch",
 	"addThreat": "Bedreiging toevoegen",
 	"addVulnerability": "Kwetsbaarheid toevoegen",
 	"addReferenceControl": "Referentiecontrole toevoegen",
@@ -970,5 +971,7 @@
 	"securityObjectiveScale": "Schaal voor beveiligingskenmerken",
 	"securityObjectiveScaleHelpText": "Kies uw schaal voor beveiligingskenmerken (standaard 1 tot 4)",
 	"actor": "Actor",
-	"action": "Actie"
+	"action": "Actie",
+	"viewMore": "Afficher plus",
+	"viewLess": "Afficher moins"
 }

@@ -16,6 +16,7 @@
 	"swedish": "Schwedisch",
 	"indonesian": "Indonesisch",
 	"danish": "dänisch",
+	"croatian": "Kroatisch",
 	"addThreat": "Bedrohung hinzufügen",
 	"addVulnerability": "Schwachstellen hinzufügen",
 	"addReferenceControl": "Referenzkontrolle hinzufügen",
@@ -974,5 +975,7 @@
 	"securityObjectiveScale": "Skala für Sicherheitsmerkmale",
 	"securityObjectiveScaleHelpText": "Wählen Sie Ihre Skala für Sicherheitsmerkmale (Standardmäßig 1 bis 4)",
 	"actor": "Akteur",
-	"action": "Aktion"
+	"action": "Aktion",
+	"viewMore": "Mehr anzeigen",
+	"viewLess": "Weniger anzeigen"
 }

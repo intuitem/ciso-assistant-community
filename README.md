@@ -45,6 +45,8 @@ CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC*
 - Supports custom frameworks via a simple syntax and flexible tooling,
 - Provides rich **import/export** capabilities across various channels and formats (UI, CLI, Kafka, reports, etc.).
 
+![Single Hub](single_hub.png)
+
 Our vision is to create a **one-stop-shop** for cybersecurity management—modernizing GRC through **simplification** and **interoperability**.
 
 As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.
@@ -70,8 +72,6 @@ Here’s an extract of some of the building blocks in CISO Assistant to illustra
 ![Core Objects](core_objects.png)
 
 For full details, check the [data model documentation](documentation/architecture/data-model.md).
-
-
 
 ---
 
@@ -364,7 +364,7 @@ export POSTGRES_PASSWORD_FILE=<XXX>  # alternative way to specify password
 export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
-# CISO Assistant will use filesystem storage backend bu default.
+# CISO Assistant will use filesystem storage backend by default.
 # You can use a S3 Bucket by declaring these variables
 # The S3 bucket must be created before starting CISO Assistant
 export USE_S3=True
@@ -578,6 +578,7 @@ Set DJANGO_DEBUG=False for security reason.
 18. UK: Ukrainian
 19. EL: Greek
 20. TR: Turkish
+21. HR: Croatian
 
 ## Contributors 🤝
 

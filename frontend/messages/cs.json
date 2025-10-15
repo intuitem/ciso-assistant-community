@@ -16,6 +16,7 @@
 	"swedish": "švédský",
 	"indonesian": "indonéština",
 	"danish": "dánština",
+	"croatian": "chorvatština",
 	"addThreat": "Přidat hrozbu",
 	"addVulnerability": "Přidat zranitelnost",
 	"addReferenceControl": "Přidat referenční kontrolu",
@@ -957,5 +958,7 @@
 	"securityObjectiveScale": "Měřítko bezpečnostních vlastností",
 	"securityObjectiveScaleHelpText": "Vyberte měřítko pro bezpečnostní vlastnosti (1 až 4 výchozí)",
 	"actor": "Aktér",
-	"action": "Akce"
+	"action": "Akce",
+	"viewMore": "Zobrazit více",
+	"viewLess": "Zobrazit méně"
 }

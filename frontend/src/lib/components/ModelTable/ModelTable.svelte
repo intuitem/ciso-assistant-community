@@ -2,11 +2,11 @@
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { run } from 'svelte/legacy';
 
-	import { goto as _goto, afterNavigate } from '$app/navigation';
+	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { CUSTOM_ACTIONS_COMPONENT, FIELD_COMPONENT_MAP, URL_MODEL_MAP } from '$lib/utils/crud';
+	import { CUSTOM_ACTIONS_COMPONENT, getFieldComponentMap, URL_MODEL_MAP } from '$lib/utils/crud';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount } from 'svelte';
@@ -18,14 +18,14 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { goto } from '$lib/utils/breadcrumbs';
+	import { goto, breadcrumbs } from '$lib/utils/breadcrumbs';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isDark } from '$lib/utils/helpers';
 	import { contextMenuActions, listViewFields } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types.js';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
-	import { type SvelteEvent } from '@skeletonlabs/skeleton-svelte';
+	import type { SvelteEvent } from '@skeletonlabs/skeleton-svelte';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -76,6 +76,7 @@
 		detailQueryParameter?: string;
 		fields?: string[];
 		canSelectObject?: boolean;
+		overrideFilters?: { [key: string]: any[] };
 		hideFilters?: boolean;
 		folderId?: string;
 		forcePreventDelete?: boolean;
@@ -108,7 +109,7 @@
 		regionHead = '',
 		regionHeadCell = 'uppercase bg-white text-gray-700',
 		regionBody = 'bg-white',
-		regionCell = 'max-w-[65ch] text-ellipsis',
+		regionCell = 'max-w-[65ch] max-h-[8em] overflow-hidden hover:overflow-y-auto',
 		regionFoot = '',
 		regionFootCell = '',
 		displayActions = true,
@@ -123,6 +124,7 @@
 		detailQueryParameter = $bindable(),
 		fields = [],
 		canSelectObject = false,
+		overrideFilters = {},
 		hideFilters = $bindable(false),
 		folderId = '',
 		forcePreventDelete = false,
@@ -167,6 +169,7 @@
 		event.stopPropagation();
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
+
 		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
 			label:
 				rowMetaData.str ??
@@ -263,11 +266,12 @@
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
 
 	const filters =
-		tableURLModel &&
+		source?.filters ??
+		(tableURLModel &&
 		listViewFields[tableURLModel] &&
 		Object.hasOwn(listViewFields[tableURLModel], 'filters')
 			? listViewFields[tableURLModel].filters
-			: (source?.filters ?? {});
+			: {});
 
 	const filteredFields = Object.keys(filters);
 	const filterValues: { [key: string]: any } = $state(
@@ -285,17 +289,30 @@
 
 	$effect(() => {
 		for (const field of filteredFields) {
+			const filterValue = filterValues[field];
+			const overrideFilterValue = overrideFilters[field];
+			const finalFilterValue = overrideFilterValue || filterValue;
+
 			handler.filter(
-				filterValues[field] ? filterValues[field].map((v: Record<string, any>) => v.value) : [],
+				finalFilterValue ? finalFilterValue.map((v: Record<string, any>) => v.value) : [],
 				field
 			);
 			page.url.searchParams.delete(field);
-			if (filterValues[field] && filterValues[field].length > 0) {
-				for (const value of filterValues[field]) {
+			if (finalFilterValue && finalFilterValue.length > 0) {
+				for (const value of finalFilterValue) {
 					page.url.searchParams.append(field, value.value);
 				}
 			}
+
+			const hrefPattern = new RegExp(`^/${URLModel}(\\?.*)?$`);
+			const fullPath = page.url.pathname + page.url.search;
+			if (hrefPattern.test(fullPath)) {
+				breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
+			}
 		}
+		setTimeout(() => {
+			handler.invalidate();
+		}, 10);
 	});
 
 	const filterInitialData: Record<string, string[]> = {};
@@ -335,7 +352,7 @@
 		}
 	});
 
-	let field_component_map = $derived(FIELD_COMPONENT_MAP[URLModel] ?? {});
+	let fieldComponentMap = $derived(getFieldComponentMap(URLModel));
 	let canCreateObject = $derived(
 		model
 			? page.params.id
@@ -504,7 +521,7 @@
 			{/if}
 		</thead>
 		<ContextMenu.Root>
-			<tbody class="table-body w-full border-b border-b-surface-100-900 {regionBody}">
+			<tbody class="w-full border-b border-b-surface-100-900 {regionBody}">
 				{#each $rows as row, rowIndex}
 					{@const meta = row?.meta ?? row}
 					<ContextMenu.Trigger asChild>
@@ -524,110 +541,122 @@
 							>
 								{#each Object.entries(row) as [key, value]}
 									{#if key !== 'meta'}
-										{@const component = field_component_map[key]}
-										<td class={regionCell} role="gridcell">
-											{#if component && browser}
-												{@const CellComponent = component}
-												{#if CellComponent === LecChartPreview}
-													{#key `${meta?.id || rowIndex}-${key}`}
-														<CellComponent {meta} cell={value} />
-													{/key}
-												{:else}
-													<CellComponent {meta} cell={value} />
-												{/if}
-											{:else}
-												<span class="base-font-family whitespace-pre-line break-words">
-													{#if Array.isArray(value)}
-														<ul class="list-disc pl-4 whitespace-normal">
-															{#each value.sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
-																<li>
-																	{#if val.str && val.id && key !== 'qualifications'}
-																		{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
-																		<Anchor href={itemHref} class="anchor" stopPropagation
-																			>{val.str}</Anchor
-																		>
-																	{:else if val.str}
-																		{safeTranslate(val.str)}
-																	{:else if unsafeTranslate(val.split(':')[0])}
-																		<span class="text"
-																			>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																			{val.split(':')[1]}</span
-																		>
-																	{:else}
-																		{val ?? '-'}
-																	{/if}
-																</li>
-															{/each}
-														</ul>
-													{:else if value && value.str}
-														{#if value.id}
-															{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
-															{#if key === 'ro_to_couple'}
-																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																	>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
-																		'-'
-																	)[1]}</Anchor
-																>
-															{:else}
-																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																	>{value.str}</Anchor
-																>
-															{/if}
-														{:else}
-															{value.str ?? '-'}
-														{/if}
-													{:else if value && value.hexcolor}
-														<p
-															class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
-																value.hexcolor
-															)}"
-															style="background-color: {value.hexcolor}"
-														>
-															{safeTranslate(value.name ?? value.str) ?? '-'}
-														</p>
-													{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp')}
-														{formatDateOrDateTime(value, getLocale())}
-													{:else if [true, false].includes(value)}
-														<span class="ml-4">{safeTranslate(value ?? '-')}</span>
-													{:else if key === 'progress'}
-														<span class="ml-9"
-															>{safeTranslate('percentageDisplay', { number: value })}</span
-														>
-													{:else if key === 'translations'}
-														{#if Object.keys(value).length > 0}
-															<div class="flex flex-col gap-2">
-																{#each Object.entries(value) as [lang, translation]}
-																	<div class="flex flex-row gap-2">
-																		<strong>{lang}:</strong>
-																		<span>{safeTranslate(translation)}</span>
-																	</div>
-																{/each}
-															</div>
-														{:else}
-															--
-														{/if}
-													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
-														<div class="flex items-center space-x-2">
-															<span>{safeTranslate(value ?? '-')}</span>
-															<span
-																class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
-															>
-																{m.accept()}
-															</span>
-														</div>
-													{:else if key === 'icon_fa_class'}
-														<i class="text-lg fa {value}"></i>
+										{@const component = fieldComponentMap[key]}
+										<td role="gridcell">
+											<div class={regionCell}>
+												{#if component && browser}
+													{@const CellComponent = component}
+													{#if CellComponent === LecChartPreview}
+														{#key `${meta?.id || rowIndex}-${key}`}
+															<CellComponent {meta} cell={value} />
+														{/key}
 													{:else}
-														<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-														{#if value?.length > 300}
-															{safeTranslate(value ?? '-').slice(0, 300)}...
-														{:else}
-															{safeTranslate(value ?? '-')}
-														{/if}
+														<CellComponent {meta} cell={value} />
 													{/if}
-													{@render badge?.(key, row)}
-												</span>
-											{/if}
+												{:else}
+													<div
+														data-testid="model-table-td-array-elem"
+														class="base-font-family whitespace-pre-line break-words"
+													>
+														{#if Array.isArray(value)}
+															<ul class="list-disc pl-4 whitespace-normal">
+																{#each [...value].sort((a, b) => {
+																	if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+																}) as val}
+																	<li>
+																		{#if key === 'security_objectives'}
+																			{@const [securityObjectiveName, securityObjectiveValue] =
+																				Object.entries(val)[0]}
+																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
+																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
+																			<Anchor href={itemHref} class="anchor" stopPropagation
+																				>{val.str}</Anchor
+																			>
+																		{:else if val.str}
+																			{safeTranslate(val.str)}
+																		{:else if unsafeTranslate(val.split(':')[0])}
+																			<span class="text"
+																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
+																				{val.split(':')[1]}</span
+																			>
+																		{:else}
+																			{val ?? '-'}
+																		{/if}
+																	</li>
+																{/each}
+															</ul>
+														{:else if value && value.str}
+															{#if value.id}
+																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+																{#if key === 'ro_to_couple'}
+																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																		>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+																			'-'
+																		)[1]}</Anchor
+																	>
+																{:else}
+																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																		>{value.str}</Anchor
+																	>
+																{/if}
+															{:else}
+																{value.str ?? '-'}
+															{/if}
+														{:else if value && value.hexcolor}
+															<p
+																class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
+																	value.hexcolor
+																)}"
+																style="background-color: {value.hexcolor}"
+															>
+																{safeTranslate(value.name ?? value.str) ?? '-'}
+															</p>
+														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
+															{formatDateOrDateTime(value, getLocale())}
+														{:else if [true, false].includes(value)}
+															<span class="ml-4">{safeTranslate(value ?? '-')}</span>
+														{:else if key === 'progress'}
+															<span class="ml-9"
+																>{safeTranslate('percentageDisplay', { number: value })}</span
+															>
+														{:else if key === 'translations'}
+															{#if Object.keys(value).length > 0}
+																<div class="flex flex-col gap-2">
+																	{#each Object.entries(value) as [lang, translation]}
+																		<div class="flex flex-row gap-2">
+																			<strong>{lang}:</strong>
+																			<span>{safeTranslate(translation)}</span>
+																		</div>
+																	{/each}
+																</div>
+															{:else}
+																--
+															{/if}
+														{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
+															<div class="flex items-center space-x-2">
+																<span>{safeTranslate(value ?? '-')}</span>
+																<span
+																	class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
+																>
+																	{m.accept()}
+																</span>
+															</div>
+														{:else if key === 'icon_fa_class'}
+															<i class="text-lg fa {value}"></i>
+														{:else}
+															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
+															{#if value?.length > 300}
+																{safeTranslate(value ?? '-').slice(0, 300)}...
+															{:else}
+																{safeTranslate(value ?? '-')}
+															{/if}
+														{/if}
+														{@render badge?.(key, row)}
+													</div>
+												{/if}
+											</div>
 										</td>
 									{/if}
 								{/each}
@@ -636,7 +665,7 @@
 										{#if actions}{@render actions({
 												meta: row.meta
 											})}{:else if row.meta[identifierField]}
-											{@const actionsComponent = field_component_map[CUSTOM_ACTIONS_COMPONENT]}
+											{@const actionsComponent = fieldComponentMap[CUSTOM_ACTIONS_COMPONENT]}
 											{@const actionsURLModel = URLModel}
 											<TableRowActions
 												deleteForm={disableDelete ? null : deleteForm}
@@ -735,7 +764,7 @@
 			<RowCount {handler} />
 		{/if}
 		{#if pagination}
-			<Pagination {handler} />
+			<Pagination {handler} {URLModel} />
 		{/if}
 	</footer>
 </div>

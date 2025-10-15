@@ -16,6 +16,7 @@
 	"swedish": "Svenska",
 	"indonesian": "indonesiska",
 	"danish": "danska",
+	"croatian": "kroatiska",
 	"addThreat": "Lägg till hot",
 	"addVulnerability": "Lägg till sårbarhet",
 	"addReferenceControl": "Lägg till referenskontroll",
@@ -960,5 +961,7 @@
 	"securityObjectiveScale": "Skala för säkerhetsmål",
 	"securityObjectiveScaleHelpText": "Välj din skala för säkerhetsmål (1 till 4 som standard)",
 	"actor": "Aktör",
-	"action": "Åtgärd"
+	"action": "Åtgärd",
+	"viewMore": "Visa mer",
+	"viewLess": "Visa mindre"
 }

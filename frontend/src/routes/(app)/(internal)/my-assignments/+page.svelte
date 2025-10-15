@@ -3,11 +3,20 @@
 	import { m } from '$paraglide/messages';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
+	import { listViewFields } from '$lib/utils/table';
+
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
+
+	const appliedControlFilters = listViewFields['applied-controls'].filters;
+	const APPLIED_CONTROL_FILTERS = {
+		status: appliedControlFilters.status,
+		priority: appliedControlFilters.priority,
+		folder: appliedControlFilters.folder
+	};
 </script>
 
 <div class="grid grid-cols-12 gap-4 p-2">
@@ -25,9 +34,9 @@
 					eta: 'eta',
 					folder: 'folder'
 				},
-				body: []
+				body: [],
+				filters: APPLIED_CONTROL_FILTERS
 			}}
-			hideFilters={true}
 			URLModel="applied-controls"
 			baseEndpoint="/applied-controls?owner={data.user.id}"
 		/>
@@ -189,6 +198,46 @@
 			hideFilters={true}
 			URLModel="findings"
 			baseEndpoint="/findings?owner={data.user.id}"
+		/>
+	</div>
+	<div class="col-span-6 bg-linear-to-br from-green-200 to-green-50 p-2 rounded">
+		<div class="font-bold mb-2">
+			<i class="fa-solid fa-bullseye mr-2" />{m.organisationObjectives()}
+		</div>
+		<ModelTable
+			source={{
+				head: {
+					ref_id: 'ref_id',
+					name: 'name',
+					status: 'status',
+					health: 'health',
+					folder: 'folder'
+				},
+				body: []
+			}}
+			hideFilters={true}
+			URLModel="organisation-objectives"
+			baseEndpoint="/organisation-objectives?assigned_to={data.user.id}"
+		/>
+	</div>
+	<div class="col-span-6 bg-linear-to-br from-orange-200 to-orange-50 p-2 rounded">
+		<div class="font-bold mb-2">
+			<i class="fa-solid fa-user-shield mr-2" />{m.rightRequests()}
+		</div>
+		<ModelTable
+			source={{
+				head: {
+					ref_id: 'ref_id',
+					name: 'name',
+					request_type: 'request_type',
+					status: 'status',
+					due_date: 'due_date'
+				},
+				body: []
+			}}
+			hideFilters={true}
+			URLModel="right-requests"
+			baseEndpoint="/right-requests?owner={data.user.id}"
 		/>
 	</div>
 </div>

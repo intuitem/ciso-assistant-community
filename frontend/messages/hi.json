@@ -16,6 +16,7 @@
 	"swedish": "स्वीडिश",
 	"indonesian": "इन्डोनेशियाई",
 	"danish": "डेनिश",
+	"croatian": "क्रोएशियाई",
 	"addThreat": "खतरा जोड़ें",
 	"addVulnerability": "भेद्यता जोड़ें",
 	"addReferenceControl": "संदर्भ नियंत्रण जोड़ें",
@@ -938,5 +939,7 @@
 	"securityObjectiveScale": "सुरक्षा गुण स्केल",
 	"securityObjectiveScaleHelpText": "सुरक्षा गुणों के लिए अपना स्केल चुनें (डिफ़ॉल्ट रूप से 1 से 4)",
 	"actor": "अभिनेता",
-	"action": "क्रिया"
+	"action": "क्रिया",
+	"viewMore": "और देखें",
+	"viewLess": "कम देखें"
 }

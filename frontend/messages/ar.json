@@ -16,6 +16,7 @@
 	"swedish": "السويدية",
 	"indonesian": "الإندونيسية",
 	"danish": "دانماركي",
+	"croatian": "الكرواتية",
 	"addThreat": "أضف تهديدًا",
 	"addVulnerability": "إضافة الضعف",
 	"addReferenceControl": "أضف تحكمًا مرجعيًا",
@@ -937,5 +938,7 @@
 	"securityObjectiveScale": "مقياس خصائص الأمان",
 	"securityObjectiveScaleHelpText": "اختر مقياسك لخصائص الأمان (1 إلى 4 بشكل افتراضي)",
 	"actor": "فاعل",
-	"action": "إجراء"
+	"action": "إجراء",
+	"viewMore": "عرض المزيد",
+	"viewLess": "عرض أقل"
 }

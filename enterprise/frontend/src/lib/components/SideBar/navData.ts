@@ -110,9 +110,7 @@ export const navData = {
 					name: 'roles',
 					fa_icon: 'fa-solid fa-shield-halved',
 					href: '/roles',
-					permissions: [
-						'add_role',
-					]
+					permissions: ['add_role']
 				},
 				{
 					name: 'roleAssignments',
@@ -209,7 +207,7 @@ export const navData = {
 				},
 				{
 					name: 'policies',
-					fa_icon: 'fa-solid fa-book',
+					fa_icon: 'fa-solid fa-file-alt',
 					href: '/policies',
 					permissions: ['view_appliedcontrol']
 				},
@@ -370,6 +368,35 @@ export const navData = {
 					fa_icon: 'fa-solid fa-diamond',
 					href: '/purposes',
 					permissions: ['view_purpose']
+				},
+				{
+					name: 'rightRequests',
+					fa_icon: 'fa-solid fa-user-shield',
+					href: '/right-requests',
+					permissions: ['view_rightrequest']
+				},
+				{
+					name: 'dataBreaches',
+					fa_icon: 'fa-solid fa-triangle-exclamation',
+					href: '/data-breaches',
+					permissions: ['view_databreach']
+				}
+			]
+		},
+		{
+			name: 'projectManagement',
+			items: [
+				{
+					name: 'genericCollections',
+					fa_icon: 'fa-solid fa-box-archive',
+					href: '/generic-collections',
+					permissions: ['view_genericcollection']
+				},
+				{
+					name: 'accreditations',
+					fa_icon: 'fa-solid fa-award',
+					href: '/accreditations',
+					permissions: ['view_accreditation']
 				}
 			]
 		},

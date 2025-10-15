@@ -181,6 +181,7 @@ INSTALLED_APPS = [
     "tailwind",
     "iam",
     "global_settings",
+    "pmbok",
     "ebios_rm",
     "tprm",
     "privacy",
@@ -377,6 +378,7 @@ LANGUAGES = [
     ("uk", "Ukrainian"),
     ("el", "Greek"),
     ("tr", "Turkish"),
+    ("hr", "Croatian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
