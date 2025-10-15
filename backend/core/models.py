@@ -2354,12 +2354,15 @@ class Asset(
             for key, content in capabilities.items():
                 if not content.get("is_enabled", False):
                     continue
-                # Skip if this capability is overridden (will be handled separately)
+                # Skip if this capability is overridden (will be handled on the next routine)
                 if key in overridden_caps:
                     continue
 
-                value = content.get("value", 4)
-                if key not in agg_cap or value < agg_cap[key].get("value", 4):
+                value = content.get("value")
+                if value is None:
+                    continue
+
+                if key not in agg_cap or value < agg_cap[key].get("value"):
                     agg_cap[key] = content.copy()
 
         # For overridden capabilities, use the overriding asset's value
@@ -2532,13 +2535,18 @@ class Asset(
                 # Skip if this capability is overridden (will be handled separately)
                 if key in overridden_caps:
                     continue
+
+                # Raw values are always 0-4, regardless of display scale
+                value = content.get("value")
+                if value is None:
+                    continue
+
                 if key not in security_capabilities:
                     security_capabilities[key] = content
                 else:
                     # Take minimum value (worst case scenario)
                     security_capabilities[key]["value"] = min(
-                        security_capabilities[key].get("value", 4),
-                        content.get("value", 4),
+                        security_capabilities[key]["value"], value
                     )
 
         # For overridden capabilities, use the overriding asset's value
@@ -2585,13 +2593,18 @@ class Asset(
                 # Skip if this capability is overridden (will be handled separately)
                 if key in overridden_caps:
                     continue
+
+                # Recovery values are time in seconds (RTO, RPO, MTD)
+                value = content.get("value")
+                if value is None:
+                    continue
+
                 if key not in recovery_capabilities:
                     recovery_capabilities[key] = content
                 else:
                     # Take maximum value (worst case scenario - longer recovery time)
                     recovery_capabilities[key]["value"] = max(
-                        recovery_capabilities[key].get("value", 0),
-                        content.get("value", 0),
+                        recovery_capabilities[key]["value"], value
                     )
 
         # For overridden capabilities, use the overriding asset's value
