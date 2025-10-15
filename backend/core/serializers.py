@@ -1146,10 +1146,13 @@ class PermissionReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
     def get_normalized_model(self, obj):
-        return obj.content_type.model_class().__name__
+        model_class = obj.content_type.model_class()
+        return model_class.__name__ if model_class else obj.content_type.model
 
     def get_normalized_codename(self, obj):
-        return f"{obj.codename.split('_')[0]}{obj.content_type.model_class().__name__}"
+        model_class = obj.content_type.model_class()
+        model_name = model_class.__name__ if model_class else obj.content_type.model
+        return f"{obj.codename.split('_')[0]}{model_name}"
 
 
 class PermissionWriteSerializer(BaseModelSerializer):
