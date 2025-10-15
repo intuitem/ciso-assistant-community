@@ -224,6 +224,23 @@ python semantic_mapper.py \
   - Processing time: 30-60 minutes (depending on model and hardware)
   - Use `--checkpoint-interval 10` to reduce overhead by ~10-20%
 
+### Performance Optimizations (Built-in)
+
+The tool includes several optimizations for faster Ollama inference:
+
+1. **HTTP Connection Pooling**: Reuses persistent connections (saves ~50-100ms per request)
+2. **Model Keep-Alive**: Keeps model loaded in memory for 30 minutes (prevents 10-30s reload delays)
+3. **Pre-warming**: Loads model into memory at startup
+4. **Optimized Parameters**:
+   - `temperature=0.1` for consistent results
+   - `num_predict=200` to limit token generation
+   - `num_ctx=2048` for appropriate context window
+
+**Additional Tips**:
+- Use smaller models for speed: `qwen2.5:3b`, `phi3:mini` (3-4x faster)
+- Set `OLLAMA_NUM_PARALLEL=4` environment variable for parallel processing
+- Increase checkpoint interval (`--checkpoint-interval 10`) for large frameworks
+
 ## Comparing Model Performance
 
 To compare how different models perform on the same mapping task, use the `compare_models.py` script:
