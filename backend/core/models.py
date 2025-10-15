@@ -2337,16 +2337,24 @@ class Asset(
     ) -> dict:
         """
         Aggregates security capabilities from supporting descendants (lowest value wins - worst case).
-        Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly.
+        Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
+        and its descendants are excluded for that capability only (not globally).
         """
-        # Track which asset overrides which capability
-        overridden_caps = {}
+        # Build descendant map for each supporting asset
+        descendants_map = {}
+        for asset in supporting_descendants:
+            descendants_map[asset.id] = asset.get_descendants()
+
+        # Track which capabilities are overridden by which assets
+        overrides = {}  # {cap_name: [list of assets that override it]}
         for asset in supporting_descendants:
             overridden = asset.overridden_children_capabilities.values_list(
                 "name", flat=True
             )
             for cap_name in overridden:
-                overridden_caps[cap_name] = asset
+                if cap_name not in overrides:
+                    overrides[cap_name] = []
+                overrides[cap_name].append(asset)
 
         agg_cap = {}
         for asset in supporting_descendants:
@@ -2354,24 +2362,29 @@ class Asset(
             for key, content in capabilities.items():
                 if not content.get("is_enabled", False):
                     continue
-                # Skip if this capability is overridden (will be handled on the next routine)
-                if key in overridden_caps:
-                    continue
 
                 value = content.get("value")
                 if value is None:
                     continue
 
-                if key not in agg_cap or value < agg_cap[key].get("value"):
-                    agg_cap[key] = content.copy()
+                # Check if this asset should be skipped due to an ancestor's override
+                skip = False
+                if key in overrides:
+                    for overriding_asset in overrides[key]:
+                        # Skip if this asset is a descendant of an overriding asset
+                        if asset != overriding_asset and asset in descendants_map.get(
+                            overriding_asset.id, set()
+                        ):
+                            skip = True
+                            break
 
-        # For overridden capabilities, use the overriding asset's value
-        for cap_name, overriding_asset in overridden_caps.items():
-            cap_value = overriding_asset.security_capabilities.get(
-                "objectives", {}
-            ).get(cap_name)
-            if cap_value and cap_value.get("is_enabled", False):
-                agg_cap[cap_name] = cap_value.copy()
+                if skip:
+                    continue
+
+                if key not in agg_cap or value < agg_cap.get(key, {}).get(
+                    "value", float("inf")
+                ):
+                    agg_cap[key] = content.copy()
 
         return agg_cap
 
@@ -2381,40 +2394,50 @@ class Asset(
     ) -> dict:
         """
         Aggregates recovery capabilities from supporting descendants (highest value wins - worst case).
-        Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly.
+        Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
+        and its descendants are excluded for that capability only (not globally).
         """
-        # Track which asset overrides which capability
-        overridden_caps = {}
+        # Build descendant map for each supporting asset
+        descendants_map = {}
+        for asset in supporting_descendants:
+            descendants_map[asset.id] = asset.get_descendants()
+
+        # Track which capabilities are overridden by which assets
+        overrides = {}  # {cap_name: [list of assets that override it]}
         for asset in supporting_descendants:
             overridden = asset.overridden_children_capabilities.values_list(
                 "name", flat=True
             )
             for cap_name in overridden:
-                overridden_caps[cap_name] = asset
+                if cap_name not in overrides:
+                    overrides[cap_name] = []
+                overrides[cap_name].append(asset)
 
         agg_cap = {}
         for asset in supporting_descendants:
             capabilities = asset.recovery_capabilities.get("objectives", {})
             for key, content in capabilities.items():
-                # Skip if this capability is overridden (will be handled separately)
-                if key in overridden_caps:
-                    continue
-
                 value = content.get("value")
                 if value is None:
+                    continue
+
+                # Check if this asset should be skipped due to an ancestor's override
+                skip = False
+                if key in overrides:
+                    for overriding_asset in overrides[key]:
+                        # Skip if this asset is a descendant of an overriding asset
+                        if asset != overriding_asset and asset in descendants_map.get(
+                            overriding_asset.id, set()
+                        ):
+                            skip = True
+                            break
+
+                if skip:
                     continue
 
                 current_value = agg_cap.get(key, {}).get("value")
                 if current_value is None or value > current_value:
                     agg_cap[key] = content.copy()
-
-        # For overridden capabilities, use the overriding asset's value
-        for cap_name, overriding_asset in overridden_caps.items():
-            cap_value = overriding_asset.recovery_capabilities.get(
-                "objectives", {}
-            ).get(cap_name)
-            if cap_value and cap_value.get("value") is not None:
-                agg_cap[cap_name] = cap_value.copy()
 
         return agg_cap
 
@@ -2516,14 +2539,21 @@ class Asset(
         if not supporting_assets:
             return {}
 
-        # Track which asset overrides which capability
-        overridden_caps = {}
+        # Build descendant map for each supporting asset
+        descendants_map = {}
+        for asset in supporting_assets:
+            descendants_map[asset.id] = asset.get_descendants()
+
+        # Track which capabilities are overridden by which assets
+        overrides = {}  # {cap_name: [list of assets that override it]}
         for asset in supporting_assets:
             overridden = asset.overridden_children_capabilities.values_list(
                 "name", flat=True
             )
             for cap_name in overridden:
-                overridden_caps[cap_name] = asset
+                if cap_name not in overrides:
+                    overrides[cap_name] = []
+                overrides[cap_name].append(asset)
 
         security_capabilities = {}
         for asset in supporting_assets:
@@ -2532,13 +2562,24 @@ class Asset(
             ).items():
                 if not content.get("is_enabled", False):
                     continue
-                # Skip if this capability is overridden (will be handled separately)
-                if key in overridden_caps:
-                    continue
 
                 # Raw values are always 0-4, regardless of display scale
                 value = content.get("value")
                 if value is None:
+                    continue
+
+                # Check if this asset should be skipped due to an ancestor's override
+                skip = False
+                if key in overrides:
+                    for overriding_asset in overrides[key]:
+                        # Skip if this asset is a descendant of an overriding asset
+                        if asset != overriding_asset and asset in descendants_map.get(
+                            overriding_asset.id, set()
+                        ):
+                            skip = True
+                            break
+
+                if skip:
                     continue
 
                 if key not in security_capabilities:
@@ -2548,14 +2589,6 @@ class Asset(
                     security_capabilities[key]["value"] = min(
                         security_capabilities[key]["value"], value
                     )
-
-        # For overridden capabilities, use the overriding asset's value
-        for cap_name, overriding_asset in overridden_caps.items():
-            cap_value = overriding_asset.security_capabilities.get(
-                "objectives", {}
-            ).get(cap_name)
-            if cap_value and cap_value.get("is_enabled", False):
-                security_capabilities[cap_name] = cap_value
 
         return {"objectives": security_capabilities}
 
@@ -2576,27 +2609,44 @@ class Asset(
         if not supporting_assets:
             return {}
 
-        # Track which asset overrides which capability
-        overridden_caps = {}
+        # Build descendant map for each supporting asset
+        descendants_map = {}
+        for asset in supporting_assets:
+            descendants_map[asset.id] = asset.get_descendants()
+
+        # Track which capabilities are overridden by which assets
+        overrides = {}  # {cap_name: [list of assets that override it]}
         for asset in supporting_assets:
             overridden = asset.overridden_children_capabilities.values_list(
                 "name", flat=True
             )
             for cap_name in overridden:
-                overridden_caps[cap_name] = asset
+                if cap_name not in overrides:
+                    overrides[cap_name] = []
+                overrides[cap_name].append(asset)
 
         recovery_capabilities = {}
         for asset in supporting_assets:
             for key, content in asset.recovery_capabilities.get(
                 "objectives", {}
             ).items():
-                # Skip if this capability is overridden (will be handled separately)
-                if key in overridden_caps:
-                    continue
-
                 # Recovery values are time in seconds (RTO, RPO, MTD)
                 value = content.get("value")
                 if value is None:
+                    continue
+
+                # Check if this asset should be skipped due to an ancestor's override
+                skip = False
+                if key in overrides:
+                    for overriding_asset in overrides[key]:
+                        # Skip if this asset is a descendant of an overriding asset
+                        if asset != overriding_asset and asset in descendants_map.get(
+                            overriding_asset.id, set()
+                        ):
+                            skip = True
+                            break
+
+                if skip:
                     continue
 
                 if key not in recovery_capabilities:
@@ -2606,14 +2656,6 @@ class Asset(
                     recovery_capabilities[key]["value"] = max(
                         recovery_capabilities[key]["value"], value
                     )
-
-        # For overridden capabilities, use the overriding asset's value
-        for cap_name, overriding_asset in overridden_caps.items():
-            cap_value = overriding_asset.recovery_capabilities.get(
-                "objectives", {}
-            ).get(cap_name)
-            if cap_value and cap_value.get("value") is not None:
-                recovery_capabilities[cap_name] = cap_value
 
         return {"objectives": recovery_capabilities}
 
