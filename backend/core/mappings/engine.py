@@ -51,7 +51,8 @@ class MappingEngine:
                         self.all_rms[index] = self._compress_rms(obj)
 
         for src, tgt in self.all_rms:
-            self.framework_mappings[src].append(tgt)
+            # NOTE: Only allowing direct mappings for now
+            # self.framework_mappings[src].append(tgt)
             self.direct_mappings.add((src, tgt))
 
     def all_paths_between(
