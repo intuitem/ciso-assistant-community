@@ -372,30 +372,69 @@ class AssetWriteSerializer(BaseModelSerializer):
         allow_null=True,
         write_only=True,
     )
+    support_assets = serializers.PrimaryKeyRelatedField(
+        source="child_assets",
+        many=True,
+        queryset=Asset.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = Asset
         exclude = ["business_value"]
 
-    def validate_parent_assets(self, parent_assets):
+    def validate(self, data):
+        parent_assets = data.get("parent_assets", [])
+        support_assets = data.get("child_assets", [])
         """
         Check that the assets graph will not contain cycles
         """
-        if not self.instance:
-            return parent_assets
+        myset = set()
+        if self.instance:
+            myset = set([self.instance])
         if parent_assets:
+            myset = myset | set(support_assets)
+
             for asset in parent_assets:
-                if self.instance in asset.ancestors_plus_self():
+                if myset & set(asset.ancestors_plus_self()):
                     raise serializers.ValidationError(
                         "errorAssetGraphMustNotContainCycles"
                     )
-        return parent_assets
+        return data
+
+    def create(self, validated_data):
+        child_assets = validated_data.pop("child_assets", None)
+        asset = super().create(validated_data)
+
+        if child_assets is not None:
+            asset.child_assets.set(child_assets)
+
+        return asset
+
+    def update(self, instance, validated_data):
+        child_assets = validated_data.pop("child_assets", None)
+        old_type = instance.type
+        new_type = validated_data.get("type", old_type)
+
+        # If switching to PRIMARY type, clear parent_assets and prevent reapplication
+        if old_type != new_type and new_type == Asset.Type.PRIMARY:
+            validated_data.pop("parent_assets", None)
+            instance.parent_assets.clear()
+
+        instance = super().update(instance, validated_data)
+
+        # Set support_assets (child_assets) if provided (both PRIMARY and SUPPORT can have children)
+        if child_assets is not None:
+            instance.child_assets.set(child_assets)
+
+        return instance
 
 
 class AssetReadSerializer(AssetWriteSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
+    support_assets = FieldsRelatedField(source="child_assets", many=True)
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
@@ -1107,10 +1146,17 @@ class PermissionReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
     def get_normalized_model(self, obj):
-        return obj.content_type.model_class().__name__
+        model_class = obj.content_type.model_class()
+        return (
+            model_class.__name__ if model_class else obj.content_type.model.capitalize()
+        )
 
     def get_normalized_codename(self, obj):
-        return f"{obj.codename.split('_')[0]}{obj.content_type.model_class().__name__}"
+        model_class = obj.content_type.model_class()
+        model_name = (
+            model_class.__name__ if model_class else obj.content_type.model.capitalize()
+        )
+        return f"{obj.codename.split('_')[0]}{model_name}"
 
 
 class PermissionWriteSerializer(BaseModelSerializer):
