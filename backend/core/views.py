@@ -726,12 +726,8 @@ class AssetViewSet(BaseModelViewSet):
 
                 # For primary assets, aggregate capabilities from supporting descendants
                 supporting_descendants = {d for d in descendants if not d.is_primary}
-                sec_cap = Asset._aggregate_security_capabilities(
-                    supporting_descendants, asset
-                )
-                rec_cap = Asset._aggregate_recovery_capabilities(
-                    supporting_descendants, asset
-                )
+                sec_cap = Asset._aggregate_security_capabilities(supporting_descendants)
+                rec_cap = Asset._aggregate_recovery_capabilities(supporting_descendants)
             else:
                 ancestors = Asset._get_all_ancestors(asset, child_to_parents)
                 primary_ancestors = {anc for anc in ancestors if anc.is_primary}

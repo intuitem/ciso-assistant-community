@@ -2332,9 +2332,7 @@ class Asset(
         return agg_obj
 
     @classmethod
-    def _aggregate_security_capabilities(
-        cls, supporting_descendants: set, parent_asset=None
-    ) -> dict:
+    def _aggregate_security_capabilities(cls, supporting_descendants: set) -> dict:
         """
         Aggregates security capabilities from supporting descendants (lowest value wins - worst case).
         Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
@@ -2389,9 +2387,7 @@ class Asset(
         return agg_cap
 
     @classmethod
-    def _aggregate_recovery_capabilities(
-        cls, supporting_descendants: set, parent_asset=None
-    ) -> dict:
+    def _aggregate_recovery_capabilities(cls, supporting_descendants: set) -> dict:
         """
         Aggregates recovery capabilities from supporting descendants (highest value wins - worst case).
         Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
@@ -2521,7 +2517,7 @@ class Asset(
         If the asset is a supporting asset, the security capabilities are directly stored in the asset.
         If the asset is a primary asset, the security capabilities are the union of the security capabilities of all the supporting assets it depends on.
         If multiple descendants share the same security capability, its value in the result is its lowest value among the descendants (worst case scenario).
-        Supporting assets can override capabilities propagation using overridden_children_capabilities - in this case, the primary asset uses its own capability value.
+        Supporting assets can override capabilities propagation using overridden_children_capabilities - in this case, the overriding asset's value is used directly.
         """
         if self.security_capabilities.get("objectives"):
             self.security_capabilities["objectives"] = {
@@ -2533,64 +2529,14 @@ class Asset(
         if not self.is_primary:
             return self.security_capabilities
 
-        # For primary assets, aggregate from supporting assets (all descendants, not just direct children)
+        # For primary assets, delegate to class method for aggregation
         descendants = self.get_descendants()
         supporting_assets = {asset for asset in descendants if not asset.is_primary}
         if not supporting_assets:
             return {}
 
-        # Build descendant map for each supporting asset
-        descendants_map = {}
-        for asset in supporting_assets:
-            descendants_map[asset.id] = asset.get_descendants()
-
-        # Track which capabilities are overridden by which assets
-        overrides = {}  # {cap_name: [list of assets that override it]}
-        for asset in supporting_assets:
-            overridden = asset.overridden_children_capabilities.values_list(
-                "name", flat=True
-            )
-            for cap_name in overridden:
-                if cap_name not in overrides:
-                    overrides[cap_name] = []
-                overrides[cap_name].append(asset)
-
-        security_capabilities = {}
-        for asset in supporting_assets:
-            for key, content in asset.security_capabilities.get(
-                "objectives", {}
-            ).items():
-                if not content.get("is_enabled", False):
-                    continue
-
-                # Raw values are always 0-4, regardless of display scale
-                value = content.get("value")
-                if value is None:
-                    continue
-
-                # Check if this asset should be skipped due to an ancestor's override
-                skip = False
-                if key in overrides:
-                    for overriding_asset in overrides[key]:
-                        # Skip if this asset is a descendant of an overriding asset
-                        if asset != overriding_asset and asset in descendants_map.get(
-                            overriding_asset.id, set()
-                        ):
-                            skip = True
-                            break
-
-                if skip:
-                    continue
-
-                if key not in security_capabilities:
-                    security_capabilities[key] = content
-                else:
-                    # Take minimum value (worst case scenario)
-                    security_capabilities[key]["value"] = min(
-                        security_capabilities[key]["value"], value
-                    )
-
-        return {"objectives": security_capabilities}
+        aggregated = self._aggregate_security_capabilities(supporting_assets)
+        return {"objectives": aggregated}
 
     def get_recovery_capabilities(self) -> dict[str, dict[str, dict[str, int]]]:
         """
@@ -2598,66 +2544,19 @@ class Asset(
         If the asset is a supporting asset, the recovery capabilities are directly stored in the asset.
         If the asset is a primary asset, the recovery capabilities are the union of the recovery capabilities of all the supporting assets it depends on.
         If multiple descendants share the same recovery capability, its value in the result is its highest value among the descendants (worst case scenario).
-        Supporting assets can override capabilities propagation using overridden_children_capabilities - in this case, the primary asset uses its own capability value.
+        Supporting assets can override capabilities propagation using overridden_children_capabilities - in this case, the overriding asset's value is used directly.
         """
         if not self.is_primary:
             return self.recovery_capabilities
 
-        # For primary assets, aggregate from supporting assets (all descendants, not just direct children)
+        # For primary assets, delegate to class method for aggregation
         descendants = self.get_descendants()
         supporting_assets = {asset for asset in descendants if not asset.is_primary}
         if not supporting_assets:
             return {}
 
-        # Build descendant map for each supporting asset
-        descendants_map = {}
-        for asset in supporting_assets:
-            descendants_map[asset.id] = asset.get_descendants()
-
-        # Track which capabilities are overridden by which assets
-        overrides = {}  # {cap_name: [list of assets that override it]}
-        for asset in supporting_assets:
-            overridden = asset.overridden_children_capabilities.values_list(
-                "name", flat=True
-            )
-            for cap_name in overridden:
-                if cap_name not in overrides:
-                    overrides[cap_name] = []
-                overrides[cap_name].append(asset)
-
-        recovery_capabilities = {}
-        for asset in supporting_assets:
-            for key, content in asset.recovery_capabilities.get(
-                "objectives", {}
-            ).items():
-                # Recovery values are time in seconds (RTO, RPO, MTD)
-                value = content.get("value")
-                if value is None:
-                    continue
-
-                # Check if this asset should be skipped due to an ancestor's override
-                skip = False
-                if key in overrides:
-                    for overriding_asset in overrides[key]:
-                        # Skip if this asset is a descendant of an overriding asset
-                        if asset != overriding_asset and asset in descendants_map.get(
-                            overriding_asset.id, set()
-                        ):
-                            skip = True
-                            break
-
-                if skip:
-                    continue
-
-                if key not in recovery_capabilities:
-                    recovery_capabilities[key] = content
-                else:
-                    # Take maximum value (worst case scenario - longer recovery time)
-                    recovery_capabilities[key]["value"] = max(
-                        recovery_capabilities[key]["value"], value
-                    )
-
-        return {"objectives": recovery_capabilities}
+        aggregated = self._aggregate_recovery_capabilities(supporting_assets)
+        return {"objectives": aggregated}
 
     def get_security_objectives_display(self) -> list[dict[str, int]]:
         """
