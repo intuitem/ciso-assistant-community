@@ -5598,15 +5598,23 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         total_score = 0
         results = []
+        visible_questions = 0
+        answered_visible_questions = 0
 
         for q_urn, question in questions.items():
+            # Skip hidden questions (depends_on not satisfied)
             if _is_question_visible(question, answers) is False:
                 continue
-            selected_choice_urn = answers.get(q_urn)
-            if not selected_choice_urn:
-                continue
 
-            # Handle both single choice and multiple choices
+            visible_questions += 1
+            selected_choice_urn = answers.get(q_urn)
+
+            if not selected_choice_urn:
+                continue  # Visible but unanswered
+
+            answered_visible_questions += 1
+
+            # Handle both single and multiple choice questions
             if isinstance(selected_choice_urn, list):
                 choice_urns = selected_choice_urn
             else:
@@ -5622,7 +5630,24 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         total_score += add_score
 
                     if compute_result is not None:
-                        results.append(compute_result)
+                        results.append(bool(compute_result))
+
+        # No visible questions → not applicable
+        if visible_questions == 0:
+            self.result = "not_applicable"
+            self.score = 0
+            self.is_scored = False
+            self.save(update_fields=["score", "result", "is_scored"])
+            return
+
+        # Not all visible questions are answered → not assessed
+        if answered_visible_questions < visible_questions:
+            self.result = "not_assessed"
+            self.score = total_score
+            self.save(update_fields=["score", "result", "is_scored"])
+            return
+
+        # Compute overall result
         self.score = total_score
 
         if not results:

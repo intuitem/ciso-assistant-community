@@ -208,16 +208,42 @@ export function isQuestionVisible(question: any, answers: any): boolean {
 }
 
 export function computeRequirementScoreAndResult(questions: any, answers: any) {
+	if (!questions) return { score: 0, result: 'not_assessed' };
+
 	let totalScore = 0;
 	let results: boolean[] = [];
-
-	if (!questions) return { score: 0, result: 'not_assessed' };
+	let visibleCount = 0;
+	let answeredVisibleCount = 0;
 
 	for (const [q_urn, question] of Object.entries(questions)) {
 		if (!isQuestionVisible(question, answers)) continue;
 
+		visibleCount++;
+
 		const selectedChoiceURNs = answers?.[q_urn];
-		if (!selectedChoiceURNs) continue;
+
+		// Determine if the question is actually answered:
+		// - not answered if undefined or null
+		// - not answered if string and empty after trim
+		// - not answered if array and empty (important for multiple_choice)
+		const hasAnswer =
+			selectedChoiceURNs !== undefined &&
+			selectedChoiceURNs !== null &&
+			!(
+				typeof selectedChoiceURNs === 'string' &&
+				selectedChoiceURNs.trim() === ''
+			) &&
+			!(
+				Array.isArray(selectedChoiceURNs) &&
+				selectedChoiceURNs.length === 0
+			);
+
+		if (!hasAnswer) {
+			// visible but unanswered -> will lead to 'not_assessed' overall
+			continue;
+		}
+
+		answeredVisibleCount++;
 
 		const choiceURNs = Array.isArray(selectedChoiceURNs)
 			? selectedChoiceURNs
@@ -225,7 +251,6 @@ export function computeRequirementScoreAndResult(questions: any, answers: any) {
 
 		for (const urn of choiceURNs) {
 			const selectedChoice = question.choices.find((choice: any) => choice.urn === urn);
-
 			if (!selectedChoice) continue;
 
 			if (selectedChoice.add_score !== undefined && selectedChoice.add_score !== null) {
@@ -233,11 +258,22 @@ export function computeRequirementScoreAndResult(questions: any, answers: any) {
 			}
 
 			if (selectedChoice.compute_result !== undefined && selectedChoice.compute_result !== null) {
-				results.push(selectedChoice.compute_result);
+				results.push(!!selectedChoice.compute_result);
 			}
 		}
 	}
 
+	// No visible questions → not applicable
+	if (visibleCount === 0) {
+		return { score: 0, result: 'not_applicable' };
+	}
+
+	// Not all visible questions are answered → not assessed
+	if (answeredVisibleCount < visibleCount) {
+		return { score: totalScore, result: 'not_assessed' };
+	}
+
+	// Compute overall result
 	let result = 'not_assessed';
 	if (results.length > 0) {
 		if (results.every((r) => r === true)) result = 'compliant';
