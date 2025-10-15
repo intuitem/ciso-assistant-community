@@ -10,7 +10,6 @@ from django_filters.utils import try_dbfield
 import regex
 import os
 import uuid
-import itertools
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
@@ -69,6 +68,7 @@ from django.apps import apps
 from django.contrib.auth.models import Permission
 from django.conf import settings
 from django.core.files.storage import default_storage
+from core.mappings.engine import MappingEngine
 from django.db import models, transaction
 from django.forms import ValidationError
 from django.http import FileResponse, HttpResponse, StreamingHttpResponse
@@ -151,6 +151,8 @@ logger = structlog.get_logger(__name__)
 SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
+
+MAPPING_MAX_DETPH=5
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
@@ -2827,7 +2829,6 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
         return context
 
     def get_queryset(self):
-        from django.db.models import Q
 
         compliance_assessment_pk = self.kwargs["pk"]
 
@@ -6028,6 +6029,34 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 instance.show_documentation_score = baseline.show_documentation_score
                 instance.save()
 
+
+            elif baseline and baseline.framework != instance.framework:
+                engine = MappingEngine()
+                engine.load_rms_data()
+                source_urn = baseline.framework.urn
+                print(f"source urn = {repr(source_urn)}")
+                audit_from_results = engine.load_audit_results(baseline)
+
+                frameworks_in_mappings = set()
+                for src, tgt in engine.all_rms.keys():
+                    frameworks_in_mappings.add(src)
+                    frameworks_in_mappings.add(tgt)
+
+                for dest_urn in sorted(frameworks_in_mappings):
+                    print(f"dest urn = {repr(dest_urn)}")
+                    if dest_urn == source_urn:
+                        continue  # skip same framework
+
+                    best_results, best_path = engine.best_mapping_results(
+                        audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
+                    )
+
+
+
+                
+
+
+            """
             # Handle different framework case
             elif baseline and baseline.framework != instance.framework:
                 # Fetch mapping set and prefetch related data
@@ -6110,6 +6139,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 # Create applied controls in bulk for each assessment
                 for requirement_assessment in assessments:
                     requirement_assessment.create_applied_controls_from_suggestions()
+            """
 
     def perform_update(self, serializer):
         compliance_assessment = serializer.save()
@@ -7543,7 +7573,6 @@ class FindingViewSet(BaseModelViewSet):
             queryset = queryset.filter(folder=folder)
 
         # Build Sankey data structure
-        from django.db.models import Count
 
         # Get category -> severity -> status combinations
         nodes = []
@@ -7997,7 +8026,7 @@ class IncidentViewSet(BaseModelViewSet):
         total_incidents = queryset.count()
 
         # Incidents this month
-        from datetime import datetime, date
+        from datetime import date
         import calendar
 
         today = date.today()
