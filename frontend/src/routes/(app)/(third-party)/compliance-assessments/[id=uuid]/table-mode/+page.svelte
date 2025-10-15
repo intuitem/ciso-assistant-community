@@ -34,6 +34,8 @@
 	import TableOfContents from '$lib/components/TableOfContents/TableOfContents.svelte';
 	import { generateTocFromElements, type TocItem } from '$lib/utils/toc';
 	import { onMount } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
+
 	interface Props {
 		data: PageData;
 		form: Actions;
@@ -41,7 +43,7 @@
 		shallow?: boolean;
 		actionPath?: string;
 		questionnaireOnly?: boolean;
-		invalidateAll?: boolean;
+		invalidateAllBool?: boolean;
 		[key: string]: any;
 	}
 
@@ -51,7 +53,7 @@
 		shallow = false,
 		actionPath = '',
 		questionnaireOnly = false,
-		invalidateAll = true
+		invalidateAllBool = true
 	}: Props = $props();
 
 	const result_options = [
@@ -74,8 +76,9 @@
 
 	// Initialize hide suggestion state
 	let hideSuggestionHashmap: Record<string, boolean> = $state({});
-	const requirementAssessments = $state(data.requirement_assessments);
-	const complianceAssessment = $state(data.compliance_assessment);
+	let requirementAssessments = $derived(data.requirement_assessments);
+	let complianceAssessment = $derived(data.compliance_assessment);
+	
 	const hasQuestions = $derived(
 		requirementAssessments.some(
 			(requirementAssessment) => requirementAssessment.requirement.questions
@@ -86,8 +89,6 @@
 	requirementAssessments.forEach((ra) => {
 		hideSuggestionHashmap[ra.id] = false;
 	});
-
-	let createdEvidence = $derived(form?.createdEvidence);
 
 	// Memoized title function
 	const titleMap = new Map();
@@ -134,24 +135,16 @@
 			[field]: value
 		});
 
+		if (invalidateAll && ['answers', 'evidences'].includes(field)) {
+			await invalidateAll();
+		}
+
 		// Update requirementAssessment.updateForm.data with the specified field and value
 		if (requirementAssessment.updateForm && requirementAssessment.updateForm.data) {
 			requirementAssessment.updateForm.data[field] = value;
 		}
 	}
 
-	// Memoized color function
-	const colorCache = new Map();
-
-	function addColor(result: string, map: Record<string, string>) {
-		const cacheKey = `${result}-${JSON.stringify(map)}`;
-		if (colorCache.has(cacheKey)) {
-			return colorCache.get(cacheKey);
-		}
-		const color = map[result];
-		colorCache.set(cacheKey, color);
-		return color;
-	}
 
 	let questionnaireMode = $state(
 		questionnaireOnly ? true : !hasQuestions ? false : page.data.user.is_third_party ? true : false
@@ -165,7 +158,7 @@
 			props: {
 				form: createform,
 				formAction: `${actionPath}?/createEvidence`,
-				invalidateAll: invalidateAll,
+				invalidateAll: invalidateAllBool,
 				model: data.evidenceModel,
 				debug: false
 			}
@@ -180,19 +173,6 @@
 
 	let addedEvidence = $state(0);
 
-	run(() => {
-		if (createdEvidence && shallow) {
-			const requirement = data.requirements.find((ra) => ra.id === createdEvidence.requirements[0]);
-			if (requirement) {
-				requirement.evidences.push({
-					str: createdEvidence.name,
-					id: createdEvidence.id
-				});
-				createdEvidence = undefined;
-				addedEvidence += 1;
-			}
-		}
-	});
 
 	const requirementAssessmentScores = Object.fromEntries(
 		// svelte-ignore state_referenced_locally
