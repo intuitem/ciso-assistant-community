@@ -157,12 +157,20 @@ class SemanticMapper:
     ):
         self.ollama_url = ollama_url
         self.model = model
+        # Create persistent HTTP session for connection pooling
+        self.session = requests.Session()
+        self.session.headers.update({"Connection": "keep-alive"})
         self._verify_model()
+
+    def __del__(self):
+        """Cleanup: close HTTP session"""
+        if hasattr(self, "session"):
+            self.session.close()
 
     def _verify_model(self):
         """Verify that the specified model is available in Ollama"""
         try:
-            response = requests.get(f"{self.ollama_url}/api/tags", timeout=5)
+            response = self.session.get(f"{self.ollama_url}/api/tags", timeout=5)
             response.raise_for_status()
             data = response.json()
             available_models = [m["name"] for m in data.get("models", [])]
@@ -179,6 +187,20 @@ class SemanticMapper:
                     )
 
             print(f"Using Ollama model: {self.model}")
+
+            # Pre-warm: load model into memory and keep it loaded
+            print(f"Pre-loading model into memory...")
+            self.session.post(
+                f"{self.ollama_url}/api/generate",
+                json={
+                    "model": self.model,
+                    "prompt": "warmup",
+                    "stream": False,
+                    "keep_alive": "30m",  # Keep model loaded for 30 minutes
+                },
+                timeout=30,
+            )
+            print(f"Model loaded and ready")
 
         except requests.exceptions.RequestException as e:
             raise ConnectionError(
@@ -226,13 +248,20 @@ Respond in JSON format:
 {{"relationship": "equal|intersect|no_relationship", "score": 0.0, "explanation": "..."}}"""
 
         try:
-            response = requests.post(
+            response = self.session.post(
                 f"{self.ollama_url}/api/generate",
                 json={
                     "model": self.model,
                     "prompt": prompt,
                     "stream": False,
                     "format": "json",
+                    "keep_alive": "30m",  # Keep model loaded for 30 minutes
+                    "options": {
+                        "temperature": 0.1,  # Lower for more consistent results
+                        "num_ctx": 2048,  # Context window size
+                        "num_predict": 200,  # Max tokens to generate
+                        "top_p": 0.9,  # Nucleus sampling
+                    },
                 },
                 timeout=60,
             )
