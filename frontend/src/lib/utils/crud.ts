@@ -170,6 +170,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'folder',
 				urlModel: 'users',
 				detail: true,
+				disableCreate: true,
+				disableDelete: true,
 				endpointUrl: './users',
 				folderPermsNeeded: [{ model: 'folder', action: 'change' }],
 				tableFields: ['email', 'first_name', 'last_name', 'is_active', 'roles']
@@ -479,6 +481,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
+			{ field: 'support_assets', urlModel: 'assets' },
 			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'asset_class', urlModel: 'asset-class' },
@@ -528,6 +531,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'user_groups',
 				urlModel: 'users',
+				disableCreate: true,
+				disableDelete: true,
 				folderPermsNeeded: [{ model: 'folder', action: 'change' }]
 			}
 		],

@@ -151,14 +151,31 @@
 	cacheLock={cacheLocks['parent_assets']}
 	bind:cachedValue={formDataCache['parent_assets']}
 	label={m.parentAssets()}
+	helpText={m.supportedAssetsHelpText()}
 />
-<TextField
+<AutocompleteSelect
+	disabled={data.type === 'PR'}
+	hidden={data.type === 'PR'}
+	multiple
 	{form}
-	field="reference_link"
-	label={m.link()}
-	helpText={m.linkHelpText()}
-	cacheLock={cacheLocks['reference_link']}
-	bind:cachedValue={formDataCache['reference_link']}
+	optionsEndpoint="assets?type=SP"
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type'
+			}
+		],
+		classes: 'text-blue-500'
+	}}
+	optionsDetailedUrlParameters={[['exclude_parents', object.id]]}
+	optionsLabelField="auto"
+	pathField="path"
+	optionsSelf={object}
+	field="support_assets"
+	cacheLock={cacheLocks['support_assets']}
+	bind:cachedValue={formDataCache['support_assets']}
+	label={m.supportAssets()}
+	helpText={m.supportingAssetsHelpText()}
 />
 {#if data.type === 'PR'}
 	<Dropdown
@@ -262,27 +279,59 @@
 			{/each}
 		</div>
 	</Dropdown>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="assets?type=SP"
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type'
+				}
+			],
+			classes: 'text-blue-500'
+		}}
+		optionsDetailedUrlParameters={[['exclude_parents', object.id]]}
+		optionsLabelField="auto"
+		pathField="path"
+		optionsSelf={object}
+		field="support_assets"
+		cacheLock={cacheLocks['support_assets']}
+		bind:cachedValue={formDataCache['support_assets']}
+		label={m.supportAssets()}
+		helpText={m.supportingAssetsHelpText()}
+	/>
 {/if}
-<AutocompleteSelect
-	multiple
-	{form}
-	createFromSelection={true}
-	optionsEndpoint="filtering-labels"
-	optionsLabelField="label"
-	field="filtering_labels"
-	helpText={m.labelsHelpText()}
-	label={m.labels()}
-	translateOptions={false}
-	allowUserOptions="append"
-/>
-<MarkdownField
-	{form}
-	field="observation"
-	label={m.observation()}
-	helpText={m.observationHelpText()}
-	cacheLock={cacheLocks['observation']}
-	bind:cachedValue={formDataCache['observation']}
-/>
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<TextField
+		{form}
+		field="reference_link"
+		label={m.link()}
+		helpText={m.linkHelpText()}
+		cacheLock={cacheLocks['reference_link']}
+		bind:cachedValue={formDataCache['reference_link']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		translateOptions={false}
+		allowUserOptions="append"
+	/>
+	<MarkdownField
+		{form}
+		field="observation"
+		label={m.observation()}
+		helpText={m.observationHelpText()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
+	/>
+</Dropdown>
 {#if initialData.ebios_rm_studies}
 	<AutocompleteSelect
 		{form}

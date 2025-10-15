@@ -1255,6 +1255,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             "is_visible": True,
         },
     ]
+    is_published = models.BooleanField(_("published"), default=True)
     field_path = models.CharField(
         max_length=100,
         verbose_name=_("Field path"),
@@ -5441,8 +5442,9 @@ class ComplianceAssessment(Assessment):
 
     def compute_requirement_assessments_results(
         self, mapping_set: RequirementMappingSet, source_assessment: Self
-    ) -> list["RequirementAssessment"]:
+    ) -> tuple[list["RequirementAssessment"], dict["RequirementAssessment", list[str]]]:
         requirement_assessments: list[RequirementAssessment] = []
+        assessment_source_dict: dict[RequirementAssessment, list[str]] = {}
         result_order = (
             RequirementAssessment.Result.NOT_ASSESSED,
             RequirementAssessment.Result.NOT_APPLICABLE,
@@ -5507,6 +5509,10 @@ class ComplianceAssessment(Assessment):
                     )
                     ref = refs[inferences.index(selected_inference)]
 
+                assessment_source_dict[requirement_assessment] = [
+                    str(ref.id) for ref in refs
+                ]
+
                 assign_attributes(requirement_assessment, selected_inference)
                 requirement_assessment.mapping_inference = {
                     "result": requirement_assessment.result,
@@ -5533,7 +5539,7 @@ class ComplianceAssessment(Assessment):
             ],
             batch_size=1000,
         )
-        return requirement_assessments
+        return requirement_assessments, assessment_source_dict
 
     def get_progress(self) -> int:
         requirement_assessments = list(

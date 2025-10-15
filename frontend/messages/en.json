@@ -175,9 +175,12 @@
 	"library": "Library",
 	"typicalEvidence": "Typical evidence",
 	"parentAsset": "Supported asset",
-	"parentAssets": "Supported assets",
-	"childrenAssets": "Underlying assets",
+	"parentAssets": "Supported assets ↑",
+	"supportedAssetsHelpText": "Other assets supported by this one (upstream)",
+	"childrenAssets": "Underlying dependencies",
+	"supportAssets": "Supporting assets ↓",
 	"approver": "Approver",
+	"supportingAssetsHelpText": "Specifiy the assets supporting this one (downstream)",
 	"state": "State",
 	"justification": "Justification",
 	"parentFolder": "Parent folder",
@@ -912,7 +915,7 @@
 	"disasterRecoveryObjectives": "Disaster Recovery objectives",
 	"recoveryCapabilities": "Recovery capabilities",
 	"noExpirationDateSet": "No expiration date set",
-	"sumpageTotal": "total",
+	"sumpageTotal": "total (all categories)",
 	"sumpageActive": "active",
 	"sumpageDeprecated": "deprecated",
 	"sumpageToDo": "to do",
@@ -2469,5 +2472,6 @@
 	"viewTerminology": "View terminology",
 	"viewThreat": "View threat",
 	"viewTimelineEntry": "View timeline entry",
-	"viewVulnerability": "View vulnerability"
+	"viewVulnerability": "View vulnerability",
+	"dataFlowOverview": "Data flow overview"
 }
