@@ -152,7 +152,7 @@ SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
-MAPPING_MAX_DETPH=5
+MAPPING_MAX_DETPH = 5
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
@@ -2829,7 +2829,6 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
         return context
 
     def get_queryset(self):
-
         compliance_assessment_pk = self.kwargs["pk"]
 
         # Check permissions for compliance assessment
@@ -6029,7 +6028,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 instance.show_documentation_score = baseline.show_documentation_score
                 instance.save()
 
-
             elif baseline and baseline.framework != instance.framework:
                 engine = MappingEngine()
                 engine.load_rms_data()
@@ -6047,14 +6045,26 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     if dest_urn == source_urn:
                         continue  # skip same framework
 
-                    best_results, best_path = engine.best_mapping_results(
+                    best_results, _ = engine.best_mapping_results(
                         audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
                     )
 
+                    requirement_assessments_to_update = []
 
+                    target_requirement_assessments = (
+                        RequirementAssessment.objects.filter(
+                            compliance_assessment=instance,
+                            requirement__urn__in=best_results,
+                        )
+                    )
 
-                
+                    for req in target_requirement_assessments:
+                        req.result = best_results[req.requirement.urn]
+                        requirement_assessments_to_update.append(req)
 
+                    RequirementAssessment.objects.bulk_update(
+                        requirement_assessments_to_update, ["result"], batch_size=500
+                    )
 
             """
             # Handle different framework case
