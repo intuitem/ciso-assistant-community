@@ -2332,16 +2332,27 @@ class Asset(
         return agg_obj
 
     @classmethod
-    def _aggregate_security_capabilities(cls, supporting_descendants: set) -> dict:
+    def _aggregate_security_capabilities(
+        cls, supporting_descendants: set, parent_asset=None
+    ) -> dict:
         """
         Aggregates security capabilities from supporting descendants (lowest value wins - worst case).
         Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
         and its descendants are excluded for that capability only (not globally).
         """
-        # Build descendant map for each supporting asset
+        # Build descendant map with constant DB queries using prefetched graph data
         descendants_map = {}
-        for asset in supporting_descendants:
-            descendants_map[asset.id] = asset.get_descendants()
+        if parent_asset is not None:
+            graph = cls._prefetch_graph_data([parent_asset])
+            parent_to_children = graph["parent_to_children"]
+            for asset in supporting_descendants:
+                descendants_map[asset.id] = cls._get_all_descendants(
+                    asset, parent_to_children
+                )
+        else:
+            # Fallback for when parent_asset is not provided
+            for asset in supporting_descendants:
+                descendants_map[asset.id] = asset.get_descendants()
 
         # Track which capabilities are overridden by which assets
         overrides = {}  # {cap_name: [list of assets that override it]}
@@ -2387,16 +2398,27 @@ class Asset(
         return agg_cap
 
     @classmethod
-    def _aggregate_recovery_capabilities(cls, supporting_descendants: set) -> dict:
+    def _aggregate_recovery_capabilities(
+        cls, supporting_descendants: set, parent_asset=None
+    ) -> dict:
         """
         Aggregates recovery capabilities from supporting descendants (highest value wins - worst case).
         Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
         and its descendants are excluded for that capability only (not globally).
         """
-        # Build descendant map for each supporting asset
+        # Build descendant map with constant DB queries using prefetched graph data
         descendants_map = {}
-        for asset in supporting_descendants:
-            descendants_map[asset.id] = asset.get_descendants()
+        if parent_asset is not None:
+            graph = cls._prefetch_graph_data([parent_asset])
+            parent_to_children = graph["parent_to_children"]
+            for asset in supporting_descendants:
+                descendants_map[asset.id] = cls._get_all_descendants(
+                    asset, parent_to_children
+                )
+        else:
+            # Fallback for when parent_asset is not provided
+            for asset in supporting_descendants:
+                descendants_map[asset.id] = asset.get_descendants()
 
         # Track which capabilities are overridden by which assets
         overrides = {}  # {cap_name: [list of assets that override it]}
@@ -2535,7 +2557,7 @@ class Asset(
         if not supporting_assets:
             return {}
 
-        aggregated = self._aggregate_security_capabilities(supporting_assets)
+        aggregated = self._aggregate_security_capabilities(supporting_assets, self)
         return {"objectives": aggregated}
 
     def get_recovery_capabilities(self) -> dict[str, dict[str, dict[str, int]]]:
@@ -2555,7 +2577,7 @@ class Asset(
         if not supporting_assets:
             return {}
 
-        aggregated = self._aggregate_recovery_capabilities(supporting_assets)
+        aggregated = self._aggregate_recovery_capabilities(supporting_assets, self)
         return {"objectives": aggregated}
 
     def get_security_objectives_display(self) -> list[dict[str, int]]:
