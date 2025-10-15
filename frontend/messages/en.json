@@ -915,6 +915,7 @@
 	"disasterRecoveryObjectives": "Disaster Recovery objectives",
 	"recoveryCapabilities": "Recovery capabilities",
 	"overriddenChildrenCapabilities": "Overridden capabilities",
+	"overriddenChildrenCapabilitiesHelpText": "If mentioned on this list, these capabilites from this asset will override those of its supporting assets",
 	"noExpirationDateSet": "No expiration date set",
 	"sumpageTotal": "total (all categories)",
 	"sumpageActive": "active",

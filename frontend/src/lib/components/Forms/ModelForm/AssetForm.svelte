@@ -276,6 +276,7 @@
 			cacheLock={cacheLocks['overridden_children_capabilities']}
 			bind:cachedValue={formDataCache['overridden_children_capabilities']}
 			label={m.overriddenChildrenCapabilities()}
+			helpText={m.overriddenChildrenCapabilitiesHelpText()}
 		/>
 	{/if}
 	<MarkdownField
