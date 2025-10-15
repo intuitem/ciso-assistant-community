@@ -1,6 +1,6 @@
 from core.models import StoredLibrary, ComplianceAssessment
 from collections import defaultdict, deque
-from typing import Dict, Tuple, List, Optional
+from typing import Optional
 import json
 import zlib
 
@@ -8,9 +8,9 @@ import zlib
 class MappingEngine:
     def __init__(self):
         # Values are compressed (zlib) JSON bytes of the RMS object.
-        self.all_rms: Dict[Tuple[str, str], bytes] = {}
-        self.framework_mappings: Dict[str, List[str]] = defaultdict(list)
-        self.direct_mappings: set[Tuple[str, str]] = set()
+        self.all_rms: dict[tuple[str, str], bytes] = {}
+        self.framework_mappings: dict[str, list[str]] = defaultdict(list)
+        self.direct_mappings: set[tuple[str, str]] = set()
 
     # --- Compression helpers ---
     def _compress_rms(self, obj: dict) -> bytes:
@@ -19,7 +19,7 @@ class MappingEngine:
     def _decompress_rms(self, data: bytes) -> dict:
         return json.loads(zlib.decompress(data).decode("utf-8"))
 
-    def get_rms(self, index: Tuple[str, str]) -> Optional[dict]:
+    def get_rms(self, index: tuple[str, str]) -> Optional[dict]:
         data = self.all_rms.get(index)
         if data is None:
             return None
@@ -57,7 +57,7 @@ class MappingEngine:
 
     def all_paths_between(
         self, source_urn: str, dest_urn: str, max_depth: Optional[int] = None
-    ) -> List[List[str]]:
+    ) -> list[list[str]]:
         # ✅ 1. Return only direct path if it exists
         if (source_urn, dest_urn) in self.direct_mappings:
             return [[source_urn, dest_urn]]
@@ -153,7 +153,7 @@ class MappingEngine:
         source_urn: str,
         dest_urn: str,
         max_depth: Optional[int] = None,
-    ) -> Tuple[dict, List[str]]:
+    ) -> tuple[dict, list[str]]:
         paths = self.all_paths_between(source_urn, dest_urn, max_depth)
         results = {}
         best_path = []
@@ -175,7 +175,7 @@ class MappingEngine:
 
         return results, best_path
 
-    def load_audit_results(self, audit: ComplianceAssessment) -> Dict[str, str]:
+    def load_audit_results(self, audit: ComplianceAssessment) -> dict[str, str]:
         """
         Extracts requirement assessments from a compliance audit.
         Args:
@@ -189,7 +189,7 @@ class MappingEngine:
             audit_results[ra.requirement.urn] = ra.result
         return audit_results
 
-    def summary_results(self, audit_results: Dict[str, str]) -> Dict[str, int]:
+    def summary_results(self, audit_results: dict[str, str]) -> dict[str, int]:
         """Summarizes audit result counts by status."""
         res = defaultdict(int)
         for _, result in audit_results.items():
