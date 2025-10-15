@@ -950,7 +950,7 @@ def startup(sender: AppConfig, **kwargs):
     """
     from django.contrib.auth.models import Permission
 
-    from core.models import AssetClass, Terminology
+    from core.models import AssetCapability, AssetClass, Terminology
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import ProcessingNature
@@ -1101,6 +1101,12 @@ def startup(sender: AppConfig, **kwargs):
         AssetClass.create_default_values()
     except Exception as e:
         logger.error("Error creating default AssetClass", exc_info=e)
+
+    # Create default AssetCapability
+    try:
+        AssetCapability.create_default_values()
+    except Exception as e:
+        logger.error("Error creating default AssetCapability", exc_info=e)
 
     # Create default Terminologies
     try:

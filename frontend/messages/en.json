@@ -914,6 +914,7 @@
 	"mtdHelpText": "Maximum Tolerable Downtime",
 	"disasterRecoveryObjectives": "Disaster Recovery objectives",
 	"recoveryCapabilities": "Recovery capabilities",
+	"overriddenChildrenCapabilities": "Overridden capabilities",
 	"noExpirationDateSet": "No expiration date set",
 	"sumpageTotal": "total (all categories)",
 	"sumpageActive": "active",

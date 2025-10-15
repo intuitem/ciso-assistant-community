@@ -488,7 +488,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
-			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
+			{ field: 'overridden_children_capabilities', urlModel: 'asset-capabilities' }
 		],
 		selectFields: [{ field: 'type' }, { field: 'asset_class' }],
 		filters: [
@@ -507,6 +508,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assetClasses',
 		verboseName: 'assetclass',
 		verboseNamePlural: 'assetclasses'
+	},
+	'asset-capabilities': {
+		endpointUrl: 'asset-capabilities',
+		name: 'asset-capability',
+		localName: 'assetCapability',
+		localNamePlural: 'assetCapabilities',
+		verboseName: 'Asset capability',
+		verboseNamePlural: 'Asset capabilities'
 	},
 	users: {
 		name: 'user',

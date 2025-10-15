@@ -300,7 +300,8 @@ export const AssetSchema = z.object({
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	ref_id: z.string().max(100).optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	overridden_children_capabilities: z.string().uuid().optional().array().optional()
 });
 
 export const FilteringLabelSchema = z.object({
