@@ -14,8 +14,6 @@
 	}
 
 	$effect(() => {
-		// Ensure page title includes "print" class when printing
-		const mediaQueryList = window.matchMedia('print');
 		const handlePrint = () => {
 			document.documentElement.classList.add('is-printing');
 		};
@@ -360,10 +358,10 @@
 								>{m.name()}</th
 							>
 							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
-								>{m.status()}</th
+								>{m.folder()}</th
 							>
 							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
-								>{m.owner()}</th
+								>{m.status()}</th
 							>
 							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
 								>{m.eta()}</th
@@ -374,11 +372,9 @@
 						{#each appliedControls as control}
 							<tr class="border-b hover:bg-gray-50">
 								<td class="px-4 py-3 text-sm text-gray-900">{control.str || control.name}</td>
+								<td class="px-4 py-3 text-sm text-gray-900">{control.folder.str}</td>
 								<td class="px-4 py-3 text-sm text-gray-700">
 									{control.status ? safeTranslate(control.status) : '--'}
-								</td>
-								<td class="px-4 py-3 text-sm text-gray-700">
-									{control.owner?.str || '--'}
 								</td>
 								<td class="px-4 py-3 text-sm text-gray-700">
 									{control.eta ? formatDateOrDateTime(control.eta) : '--'}
