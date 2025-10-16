@@ -6031,40 +6031,36 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             elif baseline and baseline.framework != instance.framework:
                 engine = MappingEngine()
                 engine.load_rms_data()
+                engine.load_frameworks()
                 source_urn = baseline.framework.urn
-                print(f"source urn = {repr(source_urn)}")
                 audit_from_results = engine.load_audit_fields(baseline)
+                dest_urn = serializer.validated_data["framework"].urn
 
-                frameworks_in_mappings = set()
-                for src, tgt in engine.all_rms.keys():
-                    frameworks_in_mappings.add(src)
-                    frameworks_in_mappings.add(tgt)
+                best_results, _ = engine.best_mapping_inferrences(
+                    audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
+                )
+                ic(best_results)
 
-                for dest_urn in sorted(frameworks_in_mappings):
-                    print(f"dest urn = {repr(dest_urn)}")
-                    if dest_urn == source_urn:
-                        continue  # skip same framework
+                requirement_assessments_to_update = []
 
-                    best_results, _ = engine.best_mapping_inferrences(
-                        audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
-                    )
+                target_requirement_assessments = RequirementAssessment.objects.filter(
+                    compliance_assessment=instance,
+                    requirement__urn__in=best_results,
+                )
 
-                    requirement_assessments_to_update = []
+                for req in target_requirement_assessments:
+                    for field in ["result", "status", "observation"]:
+                        if best_results[req.requirement.urn].get(field):
+                            req.__setattr__(
+                                field, best_results[req.requirement.urn][field]
+                            )
+                    requirement_assessments_to_update.append(req)
 
-                    target_requirement_assessments = (
-                        RequirementAssessment.objects.filter(
-                            compliance_assessment=instance,
-                            requirement__urn__in=best_results,
-                        )
-                    )
-
-                    for req in target_requirement_assessments:
-                        req.result = best_results[req.requirement.urn]["result"]
-                        requirement_assessments_to_update.append(req)
-
-                    RequirementAssessment.objects.bulk_update(
-                        requirement_assessments_to_update, ["result"], batch_size=500
-                    )
+                RequirementAssessment.objects.bulk_update(
+                    requirement_assessments_to_update,
+                    ["result", "status", "observation"],
+                    batch_size=500,
+                )
 
             """
             # Handle different framework case
