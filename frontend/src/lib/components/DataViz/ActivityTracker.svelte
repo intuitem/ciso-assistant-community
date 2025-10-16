@@ -6,6 +6,8 @@
 		metrics: any;
 	}
 
+	import { m } from '$paraglide/messages';
+import { safeTranslate } from '$lib/utils/i18n';
 	let { classesContainer = '', name = 'metrics_tracker', metrics }: Props = $props();
 	const chart_id = `${name}_div`;
 
@@ -28,7 +30,7 @@
 
 			gaugeData.push({
 				value: value,
-				name: key,
+				name: safeTranslate(key),
 				title: {
 					offsetCenter: ['0%', `${titlePosition}%`]
 				},

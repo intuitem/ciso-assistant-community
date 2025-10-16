@@ -408,7 +408,7 @@
 	"packagerColon": "Éditeur :",
 	"dependencies": "Dépendances",
 	"extraDependencies": "Dépendances additionnelles",
-	"extraDependenciesHelpText": "D'autres actifs qui peuvent affecter la résilience de celui-ci.\nLes relations primaire/support sont automatiquement capturés. Pas besoin de les remettre.",
+	"extraDependenciesHelpText": "D'autres actifs qui peuvent affecter la résilience de celui-ci.\nLes relations primaire/support sont automatiquement capturées. Pas besoin de les remettre.",
 	"associatedControlsBiaHelpText": "Des mesures dédiées à l'amélioration de la résilience de cet actif",
 	"evidencesBiaHelpText": "Des preuves liées à l'implémentation ou les tests de résilience",
 	"scopedAsset": "Typiquement un actif primaire / fonction métier qui sera le focus de cette entrée",

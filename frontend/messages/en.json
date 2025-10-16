@@ -1729,6 +1729,8 @@
 	"value": "Value",
 	"isEnabled": "Enabled",
 	"objectives": "Objectives",
+	"documentation": "Documentation",
+	"tests": "Tests",
 	"errorUpdatingObject": "An error occurred while updating the {object} object.",
 	"assetClassDevices": "Devices",
 	"assetClassEnterpriseAssets": "Enterprise Assets",
