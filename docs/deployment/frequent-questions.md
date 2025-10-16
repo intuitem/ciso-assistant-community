@@ -40,6 +40,18 @@ Alternatively, in a docker environment:
 
 and you should get a prompt now 😉
 
+
+
+### Lost the first user password&#x20;
+
+
+
+`docker compose exec backend poetry run python manage.py changepassword <user_email>`&#x20;
+
+
+
+You'll get a prompt to change the password
+
 ### Random issues after upgrading&#x20;
 
 In some rare cases, the migration of database schemas can take longer than expected or fail silently. First thing to check is the backend container logs:
