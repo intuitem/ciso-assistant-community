@@ -1,4 +1,5 @@
-from core.models import StoredLibrary, ComplianceAssessment
+from icecream import ic
+from core.models import Framework, StoredLibrary, ComplianceAssessment
 from collections import defaultdict, deque
 from typing import Optional
 import json
@@ -11,6 +12,14 @@ class MappingEngine:
         self.all_rms: dict[tuple[str, str], bytes] = {}
         self.framework_mappings: dict[str, list[str]] = defaultdict(list)
         self.direct_mappings: set[tuple[str, str]] = set()
+        self.frameworks = defaultdict(dict)
+        self.fields_to_map: list[str] = [
+            "result",
+            "status",
+            "score",
+            "is_scored",
+            "observation",
+        ]
 
     # --- Compression helpers ---
     def _compress_rms(self, obj: dict) -> bytes:
@@ -54,6 +63,14 @@ class MappingEngine:
             # NOTE: Only allowing direct mappings for now
             # self.framework_mappings[src].append(tgt)
             self.direct_mappings.add((src, tgt))
+
+    def load_frameworks(self) -> None:
+        self.frameworks = dict(
+            [
+                (f.urn, {"min_score": f.min_score, "max_score": f.max_score})
+                for f in Framework.objects.all()
+            ]
+        )
 
     def all_paths_between(
         self, source_urn: str, dest_urn: str, max_depth: Optional[int] = None
@@ -129,20 +146,41 @@ class MappingEngine:
             yield from path_list
 
     def map_audit_results(
-        self, source_audit: dict[str, dict[str, str]], rms: dict
+        self,
+        source_audit: dict[str, str | dict[str, str]],
+        requirement_mapping_set: dict,
     ) -> dict[str, dict[str, str]]:
-        if not source_audit:
+        if not source_audit.get("requirement_assessments"):
             return {}
         target_audit = defaultdict(dict)
-        for mapping in rms["requirement_mappings"]:
+        ic(self.frameworks[requirement_mapping_set["target_framework_urn"]])
+        for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
             dst = mapping["target_requirement_urn"]
             rel = mapping["relationship"]
 
-            if rel in ("equal", "superset") and src in source_audit:
-                target_audit[dst] = source_audit[src]
-            elif rel in ("subset", "intersect") and src in source_audit:
-                result = source_audit[src]["result"]
+            if (
+                rel in ("equal", "superset")
+                and src in source_audit["requirement_assessments"]
+            ):
+                if self.frameworks[requirement_mapping_set["target_framework_urn"]].get(
+                    "min_score"
+                ) == source_audit.get("min_score") and self.frameworks[
+                    requirement_mapping_set["target_framework_urn"]
+                ].get("max_score") == source_audit.get("max_score"):
+                    target_audit[dst] = source_audit["requirement_assessments"][src]
+                else:
+                    for field in self.fields_to_map:
+                        if field not in ["score", "is_scored"]:
+                            target_audit[dst][field] = source_audit[
+                                "requirement_assessments"
+                            ][src][field]
+
+            elif (
+                rel in ("subset", "intersect")
+                and src in source_audit["requirement_assessments"]
+            ):
+                result = source_audit["requirement_assessments"][src]["result"]
                 if result in ("not_assessed", "non_compliant"):
                     target_audit[dst]["result"] = result
                 elif result in ("compliant", "partially_compliant"):
@@ -151,7 +189,7 @@ class MappingEngine:
 
     def best_mapping_inferrences(
         self,
-        source_audit: dict,
+        source_audit: dict[str, str | dict[str, str]],
         source_urn: str,
         dest_urn: str,
         max_depth: Optional[int] = None,
@@ -180,8 +218,7 @@ class MappingEngine:
     def load_audit_fields(
         self,
         audit: ComplianceAssessment,
-        fields: list = ["result", "status", "score", "is_scored", "observation"],
-    ) -> dict[str, dict[str, str]]:
+    ) -> dict[str, str | dict[str, str]]:
         """
         Extracts requirement assessments from a compliance audit.
         Args:
@@ -190,15 +227,22 @@ class MappingEngine:
         Returns:
             A dictionary mapping requirement URNs to their requested fields.
         """
+        fields = self.fields_to_map
         all_ra = audit.get_requirement_assessments(include_non_assessable=False)
-        audit_results = {}
+        audit_results = {
+            "min_score": audit.min_score,
+            "max_score": audit.max_score,
+            "requirement_assessments": {},
+        }
         for ra in all_ra:
-            audit_results[ra.requirement.urn] = {
+            audit_results["requirement_assessments"][ra.requirement.urn] = {
                 field: getattr(ra, field) for field in fields
             }
         return audit_results
 
-    def summary_results(self, audit_results: dict[str, str]) -> dict[str, int]:
+    def summary_results(
+        self, audit_results: dict[str, dict[str, str]]
+    ) -> dict[str, int]:
         """Summarizes audit result counts by status."""
         res = defaultdict(int)
         for _, audit in audit_results.items():
