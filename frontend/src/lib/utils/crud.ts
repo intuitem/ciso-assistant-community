@@ -475,18 +475,18 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'name' },
 			{ field: 'ref_id' },
 			{ field: 'type' },
+			{ field: 'asset_class' },
 			{ field: 'parent_assets' },
 			{ field: 'support_assets' },
 			{ field: 'children_assets' },
-			{ field: 'reference_link' },
 			{ field: 'owner' },
-			{ field: 'asset_class' },
-			{ field: 'observation' },
 			{ field: 'filtering_labels' },
 			{ field: 'security_objectives', tooltip: 'securityObjectivesTooltip' },
-			{ field: 'security_capabilities', tooltip: 'securityCapabilitiesTooltip' },
 			{ field: 'disaster_recovery_objectives', tooltip: 'disasterRecoveryObjectivesTooltip' },
-			{ field: 'recovery_capabilities', tooltip: 'recoveryCapabilitiesTooltip' }
+			{ field: 'security_capabilities', tooltip: 'securityCapabilitiesTooltip' },
+			{ field: 'recovery_capabilities', tooltip: 'recoveryCapabilitiesTooltip' },
+			{ field: 'reference_link' },
+			{ field: 'observation' }
 		],
 		reverseForeignKeyFields: [
 			{

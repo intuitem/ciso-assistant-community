@@ -91,6 +91,19 @@
 			: data.data
 	);
 
+	// Get ordered entries based on detailViewFields configuration
+	let orderedEntries = $derived(() => {
+		if (data.model?.detailViewFields) {
+			// Return entries in the order specified by detailViewFields
+			return data.model.detailViewFields
+				.map((fieldConfig) => [fieldConfig.field, data.data[fieldConfig.field]])
+				.filter(([key, value]) => value !== undefined);
+		} else {
+			// Fall back to original order from data object
+			return Object.entries(filteredData);
+		}
+	});
+
 	// Helper to get field configuration including tooltip
 	const getFieldConfig = (fieldName: string) => {
 		return data.model?.detailViewFields?.find((field) => field.field === fieldName);
@@ -333,7 +346,7 @@
 					: 'w-full'}"
 			>
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
-					{#each Object.entries(filteredData).filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
+					{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
 						<div
 							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4 {index >=
 								MAX_ROWS && !expandedTable
@@ -525,7 +538,7 @@
 				</div>
 			{/if}
 		</div>
-		{#if Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
+		{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
 			<button
 				onclick={() => (expandedTable = !expandedTable)}
 				class="m-5 text-blue-800"
