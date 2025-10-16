@@ -2584,7 +2584,7 @@ class Asset(
         aggregated = self._aggregate_recovery_capabilities(supporting_assets, self)
         return {"objectives": aggregated}
 
-    def get_security_objectives_display(self) -> list[dict[str, str]]:
+    def get_security_objectives_display(self) -> list[dict[str, int]]:
         """
         Gets the security objectives values of a given asset.
         """
@@ -2598,10 +2598,7 @@ class Asset(
             else "1-4"
         )
         return [
-            {
-                "str": f"{key}: {self.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}",
-                key: self.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)],
-            }
+            {key: self.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)]}
             for key, content in sorted(
                 security_objectives.get("objectives", {}).items(),
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
@@ -2640,7 +2637,7 @@ class Asset(
             if content.get("value", 0)
         ]
 
-    def get_security_capabilities_display(self) -> list[dict[str, str]]:
+    def get_security_capabilities_display(self) -> list[dict[str, int]]:
         """
         Gets the security capabilities values of a given asset.
         """
@@ -2654,10 +2651,7 @@ class Asset(
             else "1-4"
         )
         return [
-            {
-                "str": f"{key}: {self.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}",
-                key: self.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)],
-            }
+            {key: self.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)]}
             for key, content in sorted(
                 security_capabilities.get("objectives", {}).items(),
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
