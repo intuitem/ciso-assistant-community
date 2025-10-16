@@ -148,7 +148,7 @@
 									<i class="fa-solid fa-cube text-blue-500 mt-1"></i>
 								{/if}
 								<div class="flex-1">
-									<div class="font-semibold text-gray-900">{assetAssessment.asset.str}</div>
+									<div class="font-semibold text-gray-900">{assetAssessment.asset.name}</div>
 									{#if assetAssessment.asset.folder}
 										<div class="text-xs text-gray-600">
 											<span class="font-medium">{m.domain()}:</span>

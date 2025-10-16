@@ -2692,61 +2692,49 @@ class Asset(
 
     def get_security_objectives_comparison(self) -> list[dict]:
         """
-        Compare security objectives (expectation) vs capabilities (reality).
-        Returns list with objective, expectation, reality, and verdict.
+        Compare security objectives (expectation) vs capabilities (reality) using RAW values.
+        Returns a list of dicts with: objective, expectation, reality, verdict.
         """
-        objectives = self.get_security_objectives_display()
-        capabilities = self.get_security_capabilities_display()
+        # Read raw JSON structures (no display/scales)
+        so = (
+            self.get_security_objectives()
+            if hasattr(self, "get_security_objectives")
+            else self.security_objectives
+        )
+        sc = (
+            self.get_security_capabilities()
+            if hasattr(self, "get_security_capabilities")
+            else self.security_capabilities
+        )
 
-        # Create a mapping of objectives and capabilities by key
-        obj_map = {}
-        cap_map = {}
+        so_obj = (so or {}).get("objectives", {}) or {}
+        sc_obj = (sc or {}).get("objectives", {}) or {}
 
-        for obj in objectives:
-            for key, value in obj.items():
-                if key not in ("str", "value"):
-                    obj_map[key] = value
-
-        for cap in capabilities:
-            for key, value in cap.items():
-                if key not in ("str", "value"):
-                    cap_map[key] = value
+        # Build ordered list of objective keys: defaults first (if present), then any extras
+        default_order = list(getattr(self, "DEFAULT_SECURITY_OBJECTIVES", []))
+        extra_keys = sorted([k for k in so_obj.keys() if k not in default_order])
+        ordered_keys = [k for k in default_order if k in so_obj] + extra_keys
 
         result = []
-        for obj_key, exp_value in obj_map.items():
-            real_value = cap_map.get(obj_key)
+        for key in ordered_keys:
+            o = so_obj.get(key) or {}
+            # Only compare enabled and valid (0..4) expectations
+            if not o.get("is_enabled", False):
+                continue
+            exp_value = o.get("value", None)
+            if not isinstance(exp_value, int) or not (0 <= exp_value <= 4):
+                continue
 
-            # Determine verdict: success if reality >= expectation, else danger
-            # If either value is missing, verdict is neutral (None)
-            # Values are already numeric from SECURITY_OBJECTIVES_SCALES
+            c = sc_obj.get(key) or {}
+            real_value = c.get("value", None) if isinstance(c, dict) else None
+
             verdict = None
-            if exp_value is not None and real_value is not None:
-                try:
-                    # Handle both numeric and string values (e.g., FIPS-199 scale)
-                    if isinstance(exp_value, str) and isinstance(real_value, str):
-                        # For string scales like FIPS-199
-                        scale_order = ["low", "moderate", "high"]
-                        exp_idx = (
-                            scale_order.index(exp_value.lower())
-                            if exp_value.lower() in scale_order
-                            else -1
-                        )
-                        real_idx = (
-                            scale_order.index(real_value.lower())
-                            if real_value.lower() in scale_order
-                            else -1
-                        )
-                        if exp_idx >= 0 and real_idx >= 0:
-                            verdict = "success" if real_idx >= exp_idx else "danger"
-                    else:
-                        # Numeric comparison (higher is better for security)
-                        verdict = "success" if real_value >= exp_value else "danger"
-                except (ValueError, TypeError):
-                    verdict = None
+            if isinstance(real_value, int):
+                verdict = "success" if real_value >= exp_value else "danger"
 
             result.append(
                 {
-                    "objective": obj_key,
+                    "objective": key,
                     "expectation": exp_value,
                     "reality": real_value,
                     "verdict": verdict,
@@ -2759,65 +2747,77 @@ class Asset(
         """
         Compare recovery objectives (expectation) vs capabilities (reality).
         Returns list with objective, expectation, reality, and verdict.
+        Compares raw seconds numerically, outputs formatted display strings.
         """
-        objectives = self.get_disaster_recovery_objectives_display()
-        capabilities = self.get_recovery_capabilities_display()
 
-        # Create mappings by parsing the "key: value" format
-        obj_map = {}
-        cap_map = {}
+        dr_src = (
+            self.get_disaster_recovery_objectives()
+            if hasattr(self, "get_disaster_recovery_objectives")
+            else (getattr(self, "disaster_recovery_objectives", {}) or {})
+        )
+        rc_src = (
+            self.get_recovery_capabilities()
+            if hasattr(self, "get_recovery_capabilities")
+            else (getattr(self, "recovery_capabilities", {}) or {})
+        )
 
-        for obj in objectives:
-            parts = obj["str"].split(":", 1)
-            if len(parts) == 2:
-                obj_map[parts[0].strip()] = parts[1].strip()
+        def _normalize_seconds(source: dict) -> dict[str, int]:
+            if not isinstance(source, dict):
+                return {}
+            inner = source.get("objectives")
+            data = inner if isinstance(inner, dict) else source
+            out: dict[str, int] = {}
+            for k, v in data.items():
+                if isinstance(v, dict):
+                    val = v.get("value")
+                    if isinstance(val, (int, float)) and val >= 0:
+                        out[k] = int(val)
+            return out
 
-        for cap in capabilities:
-            parts = cap["str"].split(":", 1)
-            if len(parts) == 2:
-                cap_map[parts[0].strip()] = parts[1].strip()
+        objectives = _normalize_seconds(dr_src)
+        capabilities = _normalize_seconds(rc_src)
 
-        def parse_time_to_seconds(time_str: str) -> int:
-            """Parse time string like '2h00m00s' to seconds."""
-            import re
+        default_order = list(getattr(self, "DEFAULT_DISASTER_RECOVERY_OBJECTIVES", []))
+        extras = sorted([k for k in objectives.keys() if k not in default_order])
+        ordered_keys = [k for k in default_order if k in objectives] + extras
 
-            hours = re.search(r"(\d+)h", time_str)
-            minutes = re.search(r"(\d+)m", time_str)
-            seconds = re.search(r"(\d+)s", time_str)
+        result: list[dict] = []
+        for key in ordered_keys:
+            exp_value = objectives.get(key)
+            real_value = capabilities.get(key)
 
-            return (
-                (int(hours.group(1)) * 3600 if hours else 0)
-                + (int(minutes.group(1)) * 60 if minutes else 0)
-                + (int(seconds.group(1)) if seconds else 0)
-            )
-
-        result = []
-        for key in obj_map:
-            exp_value = obj_map.get(key)
-            real_value = cap_map.get(key)
-
-            # Determine verdict: success if reality <= expectation (lower time is better)
-            # If either value is missing, verdict is neutral (None)
             verdict = None
-            if exp_value and real_value:
-                exp_seconds = parse_time_to_seconds(exp_value)
-                real_seconds = parse_time_to_seconds(real_value)
-                verdict = "success" if real_seconds <= exp_seconds else "danger"
+            if isinstance(exp_value, int) and isinstance(real_value, int):
+                verdict = "success" if real_value <= exp_value else "danger"
 
             result.append(
                 {
                     "objective": key,
-                    "expectation": exp_value or None,
-                    "reality": real_value or None,
                     "verdict": verdict,
                 }
             )
 
-        return result
+        # inject display strings for rendering
+        def _parse_display(data):
+            parsed = {}
+            for item in data:
+                s = item.get("str", "")
+                if ":" in s:
+                    k, v = s.split(":", 1)
+                    parsed[k.strip().lower()] = v.strip()
+            return parsed
 
-    def save(self, *args, **kwargs) -> None:
-        self.full_clean()
-        return super().save(*args, **kwargs)
+        display_objectives = _parse_display(
+            self.get_disaster_recovery_objectives_display()
+        )
+        display_capabilities = _parse_display(self.get_recovery_capabilities_display())
+
+        for item in result:
+            key = item["objective"].lower()
+            item["expectation"] = display_objectives.get(key)
+            item["reality"] = display_capabilities.get(key)
+
+        return result
 
 
 class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
