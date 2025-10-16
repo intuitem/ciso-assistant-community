@@ -2584,7 +2584,7 @@ class Asset(
         aggregated = self._aggregate_recovery_capabilities(supporting_assets, self)
         return {"objectives": aggregated}
 
-    def get_security_objectives_display(self) -> list[dict[str, int]]:
+    def get_security_objectives_display(self) -> list[dict[str, str]]:
         """
         Gets the security objectives values of a given asset.
         """
@@ -2598,7 +2598,10 @@ class Asset(
             else "1-4"
         )
         return [
-            {key: self.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)]}
+            {
+                "str": f"{key}: {self.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}",
+                key: self.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)],
+            }
             for key, content in sorted(
                 security_objectives.get("objectives", {}).items(),
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
@@ -2637,7 +2640,7 @@ class Asset(
             if content.get("value", 0)
         ]
 
-    def get_security_capabilities_display(self) -> list[dict[str, int]]:
+    def get_security_capabilities_display(self) -> list[dict[str, str]]:
         """
         Gets the security capabilities values of a given asset.
         """
@@ -2651,7 +2654,10 @@ class Asset(
             else "1-4"
         )
         return [
-            {key: self.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)]}
+            {
+                "str": f"{key}: {self.SECURITY_OBJECTIVES_SCALES[scale][content.get('value', 0)]}",
+                key: self.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)],
+            }
             for key, content in sorted(
                 security_capabilities.get("objectives", {}).items(),
                 key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
@@ -2689,6 +2695,134 @@ class Asset(
             )
             if content.get("value", 0)
         ]
+
+    def get_security_objectives_comparison(self) -> list[dict]:
+        """
+        Compare security objectives (expectation) vs capabilities (reality).
+        Returns list with objective, expectation, reality, and verdict.
+        """
+        objectives = self.get_security_objectives_display()
+        capabilities = self.get_security_capabilities_display()
+
+        # Create a mapping of objectives and capabilities by key
+        obj_map = {}
+        cap_map = {}
+
+        for obj in objectives:
+            for key, value in obj.items():
+                if key != "str" and key != "value":
+                    obj_map[key] = value
+
+        for cap in capabilities:
+            for key, value in cap.items():
+                if key != "str" and key != "value":
+                    cap_map[key] = value
+
+        result = []
+        for obj in objectives:
+            for key, exp_value in obj.items():
+                if key == "str":
+                    continue
+                real_value = cap_map.get(key)
+
+                # Determine verdict: success if reality >= expectation, else danger
+                # If either value is missing, verdict is neutral (None)
+                # Values are already numeric from SECURITY_OBJECTIVES_SCALES
+                verdict = None
+                if exp_value is not None and real_value is not None:
+                    try:
+                        # Handle both numeric and string values (e.g., FIPS-199 scale)
+                        if isinstance(exp_value, str) and isinstance(real_value, str):
+                            # For string scales like FIPS-199
+                            scale_order = ["low", "moderate", "high"]
+                            exp_idx = (
+                                scale_order.index(exp_value.lower())
+                                if exp_value.lower() in scale_order
+                                else -1
+                            )
+                            real_idx = (
+                                scale_order.index(real_value.lower())
+                                if real_value.lower() in scale_order
+                                else -1
+                            )
+                            if exp_idx >= 0 and real_idx >= 0:
+                                verdict = "success" if real_idx >= exp_idx else "danger"
+                        else:
+                            # Numeric comparison (higher is better for security)
+                            verdict = "success" if real_value >= exp_value else "danger"
+                    except (ValueError, TypeError):
+                        verdict = None
+
+                result.append(
+                    {
+                        "objective": key,
+                        "expectation": exp_value,
+                        "reality": real_value,
+                        "verdict": verdict,
+                    }
+                )
+
+        return result
+
+    def get_recovery_objectives_comparison(self) -> list[dict]:
+        """
+        Compare recovery objectives (expectation) vs capabilities (reality).
+        Returns list with objective, expectation, reality, and verdict.
+        """
+        objectives = self.get_disaster_recovery_objectives_display()
+        capabilities = self.get_recovery_capabilities_display()
+
+        # Create mappings by parsing the "key: value" format
+        obj_map = {}
+        cap_map = {}
+
+        for obj in objectives:
+            parts = obj["str"].split(":", 1)
+            if len(parts) == 2:
+                obj_map[parts[0].strip()] = parts[1].strip()
+
+        for cap in capabilities:
+            parts = cap["str"].split(":", 1)
+            if len(parts) == 2:
+                cap_map[parts[0].strip()] = parts[1].strip()
+
+        def parse_time_to_seconds(time_str: str) -> int:
+            """Parse time string like '2h00m00s' to seconds."""
+            import re
+
+            hours = re.search(r"(\d+)h", time_str)
+            minutes = re.search(r"(\d+)m", time_str)
+            seconds = re.search(r"(\d+)s", time_str)
+
+            return (
+                (int(hours.group(1)) * 3600 if hours else 0)
+                + (int(minutes.group(1)) * 60 if minutes else 0)
+                + (int(seconds.group(1)) if seconds else 0)
+            )
+
+        result = []
+        for key in obj_map:
+            exp_value = obj_map.get(key)
+            real_value = cap_map.get(key)
+
+            # Determine verdict: success if reality <= expectation (lower time is better)
+            # If either value is missing, verdict is neutral (None)
+            verdict = None
+            if exp_value and real_value:
+                exp_seconds = parse_time_to_seconds(exp_value)
+                real_seconds = parse_time_to_seconds(real_value)
+                verdict = "success" if real_seconds <= exp_seconds else "danger"
+
+            result.append(
+                {
+                    "objective": key,
+                    "expectation": exp_value or None,
+                    "reality": real_value or None,
+                    "verdict": verdict,
+                }
+            )
+
+        return result
 
     def save(self, *args, **kwargs) -> None:
         self.full_clean()
