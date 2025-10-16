@@ -52,7 +52,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
     model = AssetAssessment
     filterset_fields = ["bia", "asset"]
     search_fields = ["bia__name", "asset__name"]
-    ordering = ["asset"]
+    ordering = ["asset__name"]
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):

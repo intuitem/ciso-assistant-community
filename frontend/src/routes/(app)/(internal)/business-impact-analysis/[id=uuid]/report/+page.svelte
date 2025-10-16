@@ -2,6 +2,7 @@
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import TimelineTable from '$lib/components/BIA/TimelineTable.svelte';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
@@ -33,14 +34,58 @@
 	let { data }: Props = $props();
 	pageTitle.set('Business Impact Analysis Report');
 
-	const { bia, timelineData, metrics, assets } = data;
+	const { bia, timelineData, metrics, assets, appliedControls } = data;
 
 	function exportPDF() {
 		window.print();
 	}
+
+	// Helper functions for objectives vs capabilities table
+	function formatComparison(comparison: any[], field: 'expectation' | 'reality'): string {
+		const items = comparison
+			.map((c: any) => {
+				const value = c[field];
+				if (value === null || value === undefined) return null;
+				return `${safeTranslate(c.objective)}: ${value}`;
+			})
+			.filter((item: any) => item !== null);
+		return items.length > 0 ? items.join('\n') : '';
+	}
+
+	function getSecurityObjectives(asset: any): string {
+		return formatComparison(asset.security_objectives_comparison || [], 'expectation');
+	}
+
+	function getSecurityCapabilities(asset: any): string {
+		return formatComparison(asset.security_objectives_comparison || [], 'reality');
+	}
+
+	function getRecoveryObjectives(asset: any): string {
+		return formatComparison(asset.recovery_objectives_comparison || [], 'expectation');
+	}
+
+	function getRecoveryCapabilities(asset: any): string {
+		return formatComparison(asset.recovery_objectives_comparison || [], 'reality');
+	}
+
+	function getOverallVerdict(asset: any): 'success' | 'danger' | null {
+		const securityComparison = asset.security_objectives_comparison || [];
+		const recoveryComparison = asset.recovery_objectives_comparison || [];
+		const allComparisons = [...securityComparison, ...recoveryComparison];
+
+		if (allComparisons.length === 0) return null;
+
+		const hasDanger = allComparisons.some((c: any) => c.verdict === 'danger');
+		if (hasDanger) return 'danger';
+
+		const hasSuccess = allComparisons.some((c: any) => c.verdict === 'success');
+		if (hasSuccess) return 'success';
+
+		return null;
+	}
 </script>
 
-<div class="bg-white shadow-sm p-4 px-8 max-w-5xl mx-auto relative">
+<div class="bg-white shadow-sm p-4 px-8 mx-auto relative">
 	<!-- Back to BIA Link and Export Button -->
 	<div class="mb-4 flex justify-between items-center no-print">
 		<Anchor
@@ -128,14 +173,223 @@
 	</section>
 
 	<!-- Section 3: Recovery Insights -->
-	<section class="mb-8">
+	<section class="mb-8 page-break-section">
 		<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 			{m.recoveryInsights()}
 		</h2>
-		<div class="flex items-center justify-center bg-gray-50 rounded-lg p-6">
+		<div class="flex items-center justify-center bg-gray-50 rounded-lg p-6 mb-6">
 			<ActivityTracker {metrics} />
 		</div>
+
+		<!-- Asset Assessment Status Table -->
+		{#if assets && assets.length > 0}
+			<div class="overflow-x-auto">
+				<table class="min-w-full bg-white border border-gray-200 rounded-lg">
+					<thead class="bg-gray-100">
+						<tr>
+							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
+								>{m.asset()}</th
+							>
+							<th class="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b"
+								>{m.documented()}</th
+							>
+							<th class="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b"
+								>{m.tested()}</th
+							>
+							<th class="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b"
+								>{m.objectivesMet()}</th
+							>
+						</tr>
+					</thead>
+					<tbody>
+						{#each assets as assetAssessment}
+							<tr class="border-b hover:bg-gray-50">
+								<td class="px-4 py-3 text-sm font-medium text-gray-900">
+									{assetAssessment.asset.name}
+								</td>
+								<td class="px-4 py-3 text-center">
+									<span
+										class="inline-flex items-center justify-center w-6 h-6 rounded-full"
+										class:bg-green-500={assetAssessment.recovery_documented}
+										class:bg-gray-400={!assetAssessment.recovery_documented}
+									>
+										{#if assetAssessment.recovery_documented}
+											<i class="fa-solid fa-check text-white text-xs"></i>
+										{:else}
+											<i class="fa-solid fa-xmark text-white text-xs"></i>
+										{/if}
+									</span>
+								</td>
+								<td class="px-4 py-3 text-center">
+									<span
+										class="inline-flex items-center justify-center w-6 h-6 rounded-full"
+										class:bg-green-500={assetAssessment.recovery_tested}
+										class:bg-gray-400={!assetAssessment.recovery_tested}
+									>
+										{#if assetAssessment.recovery_tested}
+											<i class="fa-solid fa-check text-white text-xs"></i>
+										{:else}
+											<i class="fa-solid fa-xmark text-white text-xs"></i>
+										{/if}
+									</span>
+								</td>
+								<td class="px-4 py-3 text-center">
+									<span
+										class="inline-flex items-center justify-center w-6 h-6 rounded-full"
+										class:bg-green-500={assetAssessment.recovery_targets_met}
+										class:bg-gray-400={!assetAssessment.recovery_targets_met}
+									>
+										{#if assetAssessment.recovery_targets_met}
+											<i class="fa-solid fa-check text-white text-xs"></i>
+										{:else}
+											<i class="fa-solid fa-xmark text-white text-xs"></i>
+										{/if}
+									</span>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		{/if}
 	</section>
+
+	<!-- Section 4: Objectives vs Capabilities Comparison -->
+	<section class="mb-8 page-break-section">
+		<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+			{m.objectivesVsCapabilities()}
+		</h2>
+		{#if assets && assets.length > 0}
+			<div class="overflow-x-auto">
+				<table class="min-w-full bg-white border border-gray-200 rounded-lg">
+					<thead class="bg-gray-100">
+						<tr>
+							<th
+								rowspan="2"
+								class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b align-middle"
+								>{m.asset()}</th
+							>
+							<th
+								colspan="2"
+								class="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b border-l"
+								>{m.security()}</th
+							>
+							<th
+								colspan="2"
+								class="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b border-l"
+								>{m.recovery()}</th
+							>
+							<th
+								rowspan="2"
+								class="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b border-l align-middle"
+								>{m.alignment()}</th
+							>
+						</tr>
+						<tr>
+							<th class="px-4 py-2 text-center text-xs font-medium text-gray-600 border-b border-l"
+								>{m.objective()}</th
+							>
+							<th class="px-4 py-2 text-center text-xs font-medium text-gray-600 border-b"
+								>{m.capability()}</th
+							>
+							<th class="px-4 py-2 text-center text-xs font-medium text-gray-600 border-b border-l"
+								>{m.objective()}</th
+							>
+							<th class="px-4 py-2 text-center text-xs font-medium text-gray-600 border-b"
+								>{m.capability()}</th
+							>
+						</tr>
+					</thead>
+					<tbody>
+						{#each assets as assetAssessment}
+							{@const verdict = getOverallVerdict(assetAssessment.asset)}
+							{@const securityObjectives = getSecurityObjectives(assetAssessment.asset)}
+							{@const securityCapabilities = getSecurityCapabilities(assetAssessment.asset)}
+							{@const recoveryObjectives = getRecoveryObjectives(assetAssessment.asset)}
+							{@const recoveryCapabilities = getRecoveryCapabilities(assetAssessment.asset)}
+							<tr class="border-b hover:bg-gray-50">
+								<td class="px-4 py-3 text-sm font-medium text-gray-900">
+									{assetAssessment.asset.name}
+								</td>
+								<td class="px-4 py-3 text-xs text-gray-700 border-l whitespace-pre-line align-top">
+									{securityObjectives || '--'}
+								</td>
+								<td class="px-4 py-3 text-xs text-gray-700 whitespace-pre-line align-top">
+									{securityCapabilities || '--'}
+								</td>
+								<td class="px-4 py-3 text-xs text-gray-700 border-l whitespace-pre-line align-top">
+									{recoveryObjectives || '--'}
+								</td>
+								<td class="px-4 py-3 text-xs text-gray-700 whitespace-pre-line align-top">
+									{recoveryCapabilities || '--'}
+								</td>
+								<td class="px-4 py-3 text-center border-l align-middle">
+									{#if verdict !== null}
+										<span
+											class="inline-flex items-center justify-center w-6 h-6 rounded-full"
+											class:bg-green-500={verdict === 'success'}
+											class:bg-red-500={verdict === 'danger'}
+										>
+											{#if verdict === 'success'}
+												<i class="fa-solid fa-check text-white text-xs"></i>
+											{:else}
+												<i class="fa-solid fa-xmark text-white text-xs"></i>
+											{/if}
+										</span>
+									{/if}
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		{/if}
+	</section>
+
+	<!-- Section 5: Applied Controls -->
+	{#if appliedControls && appliedControls.length > 0}
+		<section class="mb-8 page-break-section">
+			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+				{m.appliedControls()}
+			</h2>
+			<div class="overflow-x-auto">
+				<table class="min-w-full bg-white border border-gray-200 rounded-lg">
+					<thead class="bg-gray-100">
+						<tr>
+							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
+								>{m.name()}</th
+							>
+							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
+								>{m.status()}</th
+							>
+							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
+								>{m.owner()}</th
+							>
+							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
+								>{m.eta()}</th
+							>
+						</tr>
+					</thead>
+					<tbody>
+						{#each appliedControls as control}
+							<tr class="border-b hover:bg-gray-50">
+								<td class="px-4 py-3 text-sm text-gray-900">{control.str || control.name}</td>
+								<td class="px-4 py-3 text-sm text-gray-700">
+									{control.status ? safeTranslate(control.status) : '--'}
+								</td>
+								<td class="px-4 py-3 text-sm text-gray-700">
+									{control.owner?.str || '--'}
+								</td>
+								<td class="px-4 py-3 text-sm text-gray-700">
+									{control.eta ? formatDateOrDateTime(control.eta) : '--'}
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		</section>
+	{/if}
 </div>
 
 <style>
@@ -165,8 +419,8 @@
 
 		/* Default page setup - portrait */
 		@page {
-			size: A4 portrait;
-			margin: 1.5cm 2cm;
+			size: A3 landscape;
+			margin: 1cm 1cm;
 		}
 
 		/* Reset all layout constraints */
@@ -199,8 +453,8 @@
 
 		/* Page breaks before major sections */
 		.page-break-section {
-			page-break-before: auto !important;
-			break-before: auto !important;
+			page-break-before: always !important;
+			break-before: page !important;
 		}
 
 		/* Prevent page breaks inside important elements */

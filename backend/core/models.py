@@ -2710,57 +2710,54 @@ class Asset(
 
         for obj in objectives:
             for key, value in obj.items():
-                if key != "str" and key != "value":
+                if key not in ("str", "value"):
                     obj_map[key] = value
 
         for cap in capabilities:
             for key, value in cap.items():
-                if key != "str" and key != "value":
+                if key not in ("str", "value"):
                     cap_map[key] = value
 
         result = []
-        for obj in objectives:
-            for key, exp_value in obj.items():
-                if key == "str":
-                    continue
-                real_value = cap_map.get(key)
+        for obj_key, exp_value in obj_map.items():
+            real_value = cap_map.get(obj_key)
 
-                # Determine verdict: success if reality >= expectation, else danger
-                # If either value is missing, verdict is neutral (None)
-                # Values are already numeric from SECURITY_OBJECTIVES_SCALES
-                verdict = None
-                if exp_value is not None and real_value is not None:
-                    try:
-                        # Handle both numeric and string values (e.g., FIPS-199 scale)
-                        if isinstance(exp_value, str) and isinstance(real_value, str):
-                            # For string scales like FIPS-199
-                            scale_order = ["low", "moderate", "high"]
-                            exp_idx = (
-                                scale_order.index(exp_value.lower())
-                                if exp_value.lower() in scale_order
-                                else -1
-                            )
-                            real_idx = (
-                                scale_order.index(real_value.lower())
-                                if real_value.lower() in scale_order
-                                else -1
-                            )
-                            if exp_idx >= 0 and real_idx >= 0:
-                                verdict = "success" if real_idx >= exp_idx else "danger"
-                        else:
-                            # Numeric comparison (higher is better for security)
-                            verdict = "success" if real_value >= exp_value else "danger"
-                    except (ValueError, TypeError):
-                        verdict = None
+            # Determine verdict: success if reality >= expectation, else danger
+            # If either value is missing, verdict is neutral (None)
+            # Values are already numeric from SECURITY_OBJECTIVES_SCALES
+            verdict = None
+            if exp_value is not None and real_value is not None:
+                try:
+                    # Handle both numeric and string values (e.g., FIPS-199 scale)
+                    if isinstance(exp_value, str) and isinstance(real_value, str):
+                        # For string scales like FIPS-199
+                        scale_order = ["low", "moderate", "high"]
+                        exp_idx = (
+                            scale_order.index(exp_value.lower())
+                            if exp_value.lower() in scale_order
+                            else -1
+                        )
+                        real_idx = (
+                            scale_order.index(real_value.lower())
+                            if real_value.lower() in scale_order
+                            else -1
+                        )
+                        if exp_idx >= 0 and real_idx >= 0:
+                            verdict = "success" if real_idx >= exp_idx else "danger"
+                    else:
+                        # Numeric comparison (higher is better for security)
+                        verdict = "success" if real_value >= exp_value else "danger"
+                except (ValueError, TypeError):
+                    verdict = None
 
-                result.append(
-                    {
-                        "objective": key,
-                        "expectation": exp_value,
-                        "reality": real_value,
-                        "verdict": verdict,
-                    }
-                )
+            result.append(
+                {
+                    "objective": obj_key,
+                    "expectation": exp_value,
+                    "reality": real_value,
+                    "verdict": verdict,
+                }
+            )
 
         return result
 
