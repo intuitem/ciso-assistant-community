@@ -26,7 +26,7 @@
 	{#snippet widgets()}
 		<div class="h-full flex flex-col space-y-4">
 			<div class="card p-4 bg-gray-50 shadow-xs grow">
-				<div class="font-bold text-xl mb-4 capitalize">{m.recoveryInsights()}</div>
+				<div class="font-bold text-xl mb-4">{m.recoveryInsights()}</div>
 				<div class="flex items-center justify-center">
 					<ActivityTracker metrics={data.metrics} />
 				</div>
