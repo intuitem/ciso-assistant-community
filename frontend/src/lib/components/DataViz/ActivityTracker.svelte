@@ -7,7 +7,7 @@
 	}
 
 	import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '$lib/utils/i18n';
 	let { classesContainer = '', name = 'metrics_tracker', metrics }: Props = $props();
 	const chart_id = `${name}_div`;
 
