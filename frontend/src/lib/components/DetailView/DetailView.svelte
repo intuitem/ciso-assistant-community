@@ -91,6 +91,11 @@
 			: data.data
 	);
 
+	// Helper to get field configuration including tooltip
+	const getFieldConfig = (fieldName: string) => {
+		return data.model?.detailViewFields?.find((field) => field.field === fieldName);
+	};
+
 	let hasWidgets = $derived(!!widgets);
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -336,10 +341,29 @@
 								: ''}"
 						>
 							<dt
-								class="font-medium text-gray-900"
+								class="font-medium text-gray-900 flex items-center gap-2"
 								data-testid="{key.replace('_', '-')}-field-title"
 							>
-								{safeTranslate(key)}
+								<span>{safeTranslate(key)}</span>
+								{#if getFieldConfig(key)?.tooltip}
+									{@const tooltipKey = getFieldConfig(key)?.tooltip}
+									{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
+									<Tooltip
+										positioning={{ placement: 'right' }}
+										contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
+										openDelay={200}
+										closeDelay={100}
+										arrow
+										arrowBase="arrow bg-gray-800 border border-gray-700"
+									>
+										{#snippet trigger()}
+											<i class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"></i>
+										{/snippet}
+										{#snippet content()}
+											<p class="text-sm">{tooltipText}</p>
+										{/snippet}
+									</Tooltip>
+								{/if}
 							</dt>
 							<dd class="text-gray-700 sm:col-span-2">
 								<ul class="">

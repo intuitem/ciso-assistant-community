@@ -114,6 +114,7 @@ interface Field {
 	keyNameOverride?: string;
 	field: string;
 	type?: 'date' | 'datetime';
+	tooltip?: string;
 }
 
 interface SelectField {
@@ -468,6 +469,25 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assets',
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'name' },
+			{ field: 'ref_id' },
+			{ field: 'type' },
+			{ field: 'parent_assets' },
+			{ field: 'support_assets' },
+			{ field: 'children_assets' },
+			{ field: 'reference_link' },
+			{ field: 'owner' },
+			{ field: 'asset_class' },
+			{ field: 'observation' },
+			{ field: 'filtering_labels' },
+			{ field: 'security_objectives', tooltip: 'securityObjectivesTooltip' },
+			{ field: 'security_capabilities', tooltip: 'securityCapabilitiesTooltip' },
+			{ field: 'disaster_recovery_objectives', tooltip: 'disasterRecoveryObjectivesTooltip' },
+			{ field: 'recovery_capabilities', tooltip: 'recoveryCapabilitiesTooltip' }
+		],
 		reverseForeignKeyFields: [
 			{
 				field: 'assets',
