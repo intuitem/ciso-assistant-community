@@ -10,6 +10,7 @@
 	import * as m from '$paraglide/messages.js';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import NumberField from '../NumberField.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -299,7 +300,7 @@
 		bind:cachedValue={formDataCache['findings_assessment']}
 		label={m.findingsAssessment()}
 	/>
-	<TextArea
+	<MarkdownField
 		{form}
 		field="observation"
 		label={m.observation()}
