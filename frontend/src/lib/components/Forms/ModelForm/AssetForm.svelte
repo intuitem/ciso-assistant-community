@@ -81,6 +81,26 @@
 	const securityObjectiveOptions: Option[] = filterDuplicateLabels(
 		securityObjectiveScaleMap.map(createOption)
 	);
+
+	// Dynamic configuration based on asset type
+	const typeConfig = $derived.by(() => {
+		if (data.type === 'PR') {
+			return {
+				securityKey: 'security_objectives',
+				recoveryKey: 'disaster_recovery_objectives',
+				securityLabel: m.securityObjectives(),
+				recoveryLabel: m.disasterRecoveryObjectives()
+			};
+		} else if (data.type === 'SP') {
+			return {
+				securityKey: 'security_capabilities',
+				recoveryKey: 'recovery_capabilities',
+				securityLabel: m.securityCapabilities(),
+				recoveryLabel: m.recoveryCapabilities()
+			};
+		}
+		return null;
+	});
 </script>
 
 <AutocompleteSelect
@@ -130,7 +150,6 @@
 	bind:cachedValue={formDataCache['type']}
 />
 <AutocompleteSelect
-	disabled={data.type === 'PR'}
 	hidden={data.type === 'PR'}
 	multiple
 	{form}
@@ -154,8 +173,6 @@
 	helpText={m.supportedAssetsHelpText()}
 />
 <AutocompleteSelect
-	disabled={data.type === 'PR'}
-	hidden={data.type === 'PR'}
 	multiple
 	{form}
 	optionsEndpoint="assets?type=SP"
@@ -177,12 +194,12 @@
 	label={m.supportAssets()}
 	helpText={m.supportingAssetsHelpText()}
 />
-{#if data.type === 'PR'}
+{#if typeConfig}
 	<Dropdown
 		open={false}
 		style="hover:text-primary-700"
 		icon="fa-solid fa-shield-halved"
-		header={m.securityObjectives()}
+		header={typeConfig.securityLabel}
 	>
 		<div class="flex flex-col space-y-4">
 			{#each securityObjectives as objective}
@@ -191,7 +208,7 @@
 						{form}
 						field={objective}
 						label={''}
-						valuePath="security_objectives.objectives.{objective}.is_enabled"
+						valuePath="{typeConfig.securityKey}.objectives.{objective}.is_enabled"
 						checkboxComponent="switch"
 						class="h-full flex flex-row items-center justify-center my-1"
 						classesContainer="h-full"
@@ -203,8 +220,8 @@
 						labelKey="label"
 						key="value"
 						field={objective}
-						valuePath="security_objectives.objectives.{objective}.value"
-						disabled={data.security_objectives?.objectives?.[objective]?.is_enabled === false}
+						valuePath="{typeConfig.securityKey}.objectives.{objective}.value"
+						disabled={data[typeConfig.securityKey]?.objectives?.[objective]?.is_enabled === false}
 					/>
 				</span>
 			{/each}
@@ -214,7 +231,7 @@
 		open={false}
 		style="hover:text-indigo-700"
 		icon="fa-regular fa-clock"
-		header={m.disasterRecoveryObjectives()}
+		header={typeConfig.recoveryLabel}
 	>
 		<div class="flex flex-col space-y-4">
 			{#each disasterRecoveryObjectives as objective}
@@ -223,33 +240,11 @@
 					field={objective}
 					label={safeTranslate(objective)}
 					helpText={Object.hasOwn(m, `${objective}HelpText`) ? m[`${objective}HelpText`]() : ''}
-					valuePath="disaster_recovery_objectives.objectives.{objective}.value"
+					valuePath="{typeConfig.recoveryKey}.objectives.{objective}.value"
 				/>
 			{/each}
 		</div>
 	</Dropdown>
-	<AutocompleteSelect
-		multiple
-		{form}
-		optionsEndpoint="assets?type=SP"
-		optionsInfoFields={{
-			fields: [
-				{
-					field: 'type'
-				}
-			],
-			classes: 'text-blue-500'
-		}}
-		optionsDetailedUrlParameters={[['exclude_parents', object.id]]}
-		optionsLabelField="auto"
-		pathField="path"
-		optionsSelf={object}
-		field="support_assets"
-		cacheLock={cacheLocks['support_assets']}
-		bind:cachedValue={formDataCache['support_assets']}
-		label={m.supportAssets()}
-		helpText={m.supportingAssetsHelpText()}
-	/>
 {/if}
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<TextField
@@ -272,6 +267,18 @@
 		translateOptions={false}
 		allowUserOptions="append"
 	/>
+	{#if data.type === 'SP'}
+		<AutocompleteSelect
+			multiple
+			{form}
+			optionsEndpoint="asset-capabilities"
+			field="overridden_children_capabilities"
+			cacheLock={cacheLocks['overridden_children_capabilities']}
+			bind:cachedValue={formDataCache['overridden_children_capabilities']}
+			label={m.overriddenChildrenCapabilities()}
+			helpText={m.overriddenChildrenCapabilitiesHelpText()}
+		/>
+	{/if}
 	<MarkdownField
 		{form}
 		field="observation"
