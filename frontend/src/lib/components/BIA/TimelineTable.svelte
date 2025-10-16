@@ -10,6 +10,7 @@
 				value: number;
 				hexcolor?: string;
 				name?: string;
+				description?: string;
 			}
 		>;
 	}
@@ -27,6 +28,35 @@
 					.map(Number)
 					.sort((a, b) => a - b)
 			: [];
+
+	// Extract unique impact levels for legend from the data
+	const impactLevels = $derived.by(() => {
+		const levelsMap = new Map<
+			number,
+			{ value: number; name: string; description: string; hexcolor: string }
+		>();
+
+		data.forEach((entry) => {
+			Object.values(entry.data).forEach((point) => {
+				if (
+					point.name &&
+					point.hexcolor &&
+					point.value >= 0 &&
+					point.name !== '--' &&
+					!levelsMap.has(point.value)
+				) {
+					levelsMap.set(point.value, {
+						value: point.value,
+						name: point.name,
+						description: point.description || '',
+						hexcolor: point.hexcolor
+					});
+				}
+			});
+		});
+
+		return Array.from(levelsMap.values()).sort((a, b) => a.value - b.value);
+	});
 
 	function formatTimePoint(seconds: number) {
 		if (seconds === 0) return '0';
@@ -54,48 +84,80 @@
 	}
 </script>
 
-<div class="bg-white shadow-sm flex overflow-x-auto">
-	<div class="w-full">
-		<table class="min-w-full border-collapse">
-			<thead>
-				<tr class="bg-gray-100">
-					<th class="px-4 py-2 text-left font-medium text-gray-600">{m.asset()}</th>
-					{#each xAxisPoints as point, i}
-						<th class="px-4 py-2 text-center font-medium text-gray-600">
-							T{i}
+<div class="space-y-4">
+	<!-- Legend -->
+	{#if impactLevels.length > 0}
+		<div class="bg-white shadow-sm rounded-lg p-4">
+			<h3 class="text-sm font-medium text-gray-700 mb-3">{m.impact()}</h3>
+			<div class="flex flex-wrap gap-4">
+				{#each impactLevels as level}
+					<div class="flex items-center gap-2">
+						<div
+							class="w-6 h-6 rounded border border-gray-300 flex-shrink-0"
+							style="background-color: {level.hexcolor}"
+						></div>
+						<div class="flex flex-col">
+							<span class="text-sm font-semibold text-gray-800">{level.name}</span>
+							{#if level.description}
+								<span class="text-xs text-gray-600">{level.description}</span>
+							{/if}
+						</div>
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
+
+	<!-- Timeline Table -->
+	<div class="bg-white shadow-sm overflow-x-auto">
+		<div class="w-full">
+			<table class="min-w-full border-collapse">
+				<thead>
+					<tr class="bg-gray-100">
+						<th class="sticky-col px-4 py-2 text-left font-medium text-gray-600 bg-gray-100">
+							{m.asset()}
 						</th>
-					{/each}
-				</tr>
-			</thead>
-			<tbody>
-				{#each data as entry}
-					<tr class="border-t border-gray-200">
-						<td class="px-4 py-2 font-medium">{entry.folder}/{entry.asset}</td>
 						{#each xAxisPoints as point, i}
-							<td
-								class="px-4 py-2 text-center"
-								style="background-color: {entry.data[point].hexcolor || '#f9fafb'};
-								       {!isImpactChange(entry, i) ? 'border-left: none;' : ''}"
-							>
-								{#if isImpactChange(entry, i)}
-									<div class="font-medium">{entry.data[point].name || '--'}</div>
-								{/if}
+							<th class="px-4 py-2 text-center font-medium text-gray-600">
+								T{i}
+							</th>
+						{/each}
+					</tr>
+				</thead>
+				<tbody>
+					{#each data as entry}
+						<tr class="border-t border-gray-200">
+							<td class="sticky-col px-4 py-2 font-medium bg-white">
+								{entry.folder}/{entry.asset}
+							</td>
+							{#each xAxisPoints as point, i}
+								<td
+									class="px-4 py-2 text-center"
+									style="background-color: {entry.data[point].hexcolor || '#f9fafb'};
+									       {!isImpactChange(entry, i) ? 'border-left: none;' : ''}"
+								>
+									{#if isImpactChange(entry, i)}
+										<div class="font-medium">{entry.data[point].name || '--'}</div>
+									{/if}
+								</td>
+							{/each}
+						</tr>
+					{/each}
+				</tbody>
+				<tfoot>
+					<tr class="bg-gray-50 border-t-2 border-gray-200">
+						<td class="sticky-col px-4 py-2 font-medium text-gray-600 capitalize bg-gray-50">
+							{m.time()}
+						</td>
+						{#each xAxisPoints as point}
+							<td class="px-4 py-2 text-center text-sm text-gray-600">
+								{formatTimePoint(point)}
 							</td>
 						{/each}
 					</tr>
-				{/each}
-			</tbody>
-			<tfoot>
-				<tr class="bg-gray-50 border-t-2 border-gray-200">
-					<td class="px-4 py-2 font-medium text-gray-600 capitalize">{m.time()}</td>
-					{#each xAxisPoints as point}
-						<td class="px-4 py-2 text-center text-sm text-gray-600">
-							{formatTimePoint(point)}
-						</td>
-					{/each}
-				</tr>
-			</tfoot>
-		</table>
+				</tfoot>
+			</table>
+		</div>
 	</div>
 </div>
 
@@ -116,6 +178,20 @@
 	th:last-child,
 	td:last-child {
 		border-right: none;
+	}
+
+	/* Sticky first column */
+	.sticky-col {
+		position: sticky;
+		left: 0;
+		z-index: 10;
+		box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+		min-width: 200px;
+		max-width: 300px;
+	}
+
+	thead .sticky-col {
+		z-index: 20;
 	}
 
 	/* Add visual cues for impact transitions */
