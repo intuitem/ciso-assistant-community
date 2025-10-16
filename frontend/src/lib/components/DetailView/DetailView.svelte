@@ -370,7 +370,9 @@
 										arrowBase="arrow bg-gray-800 border border-gray-700"
 									>
 										{#snippet trigger()}
-											<i class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"></i>
+											<i
+												class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
+											></i>
 										{/snippet}
 										{#snippet content()}
 											<p class="text-sm">{tooltipText}</p>
