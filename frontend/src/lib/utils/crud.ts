@@ -843,6 +843,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'asset', urlModel: 'assets' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'asset_folder', urlModel: 'folders' },
+			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'dependencies', urlModel: 'assets' },
 			{ field: 'associated_controls', urlModel: 'applied-controls' },
 			{

@@ -250,4 +250,9 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
     @property
     def get_impact_compact_display(self):
         raw = self.get_impact_display
-        return {"value": raw["value"], "name": raw["name"], "hexcolor": raw["hexcolor"]}
+        return {
+            "value": raw["value"],
+            "name": raw["name"],
+            "description": raw["description"],
+            "hexcolor": raw["hexcolor"],
+        }
