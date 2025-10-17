@@ -66,18 +66,18 @@
 		return formatComparison(asset.recovery_objectives_comparison || [], 'reality');
 	}
 
-	function getOverallVerdict(asset: any): 'success' | 'danger' | null {
+	function getOverallVerdict(asset: any): boolean | null {
 		const securityComparison = asset.security_objectives_comparison || [];
 		const recoveryComparison = asset.recovery_objectives_comparison || [];
 		const allComparisons = [...securityComparison, ...recoveryComparison];
 
 		if (allComparisons.length === 0) return null;
 
-		const hasDanger = allComparisons.some((c: any) => c.verdict === 'danger');
-		if (hasDanger) return 'danger';
+		const hasFailed = allComparisons.some((c: any) => c.verdict === false);
+		if (hasFailed) return false;
 
-		const hasSuccess = allComparisons.some((c: any) => c.verdict === 'success');
-		if (hasSuccess) return 'success';
+		const hasPassed = allComparisons.some((c: any) => c.verdict === true);
+		if (hasPassed) return true;
 
 		return null;
 	}
@@ -325,10 +325,10 @@
 									{#if verdict !== null}
 										<span
 											class="inline-flex items-center justify-center w-6 h-6 rounded-full"
-											class:bg-green-500={verdict === 'success'}
-											class:bg-red-500={verdict === 'danger'}
+											class:bg-green-500={verdict === true}
+											class:bg-red-500={verdict === false}
 										>
-											{#if verdict === 'success'}
+											{#if verdict === true}
 												<i class="fa-solid fa-check text-white text-xs"></i>
 											{:else}
 												<i class="fa-solid fa-xmark text-white text-xs"></i>

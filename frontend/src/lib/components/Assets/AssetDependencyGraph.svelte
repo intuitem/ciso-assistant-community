@@ -6,7 +6,7 @@
 		id: string;
 		label: string;
 		folder: string;
-		verdict?: 'success' | 'danger' | null;
+		verdict?: boolean | null;
 	};
 
 	type LinkDatum = {
@@ -27,9 +27,9 @@
 	};
 
 	// Status map for verdict styling - using colors from Unovis example
-	const StatusMap = {
-		success: { color: '#47e845', text: '✓' }, // bright green with checkmark
-		danger: { color: '#ffc226', text: '⚠' }, // yellow with warning
+	const StatusMap: Record<string, { color: string; text: string }> = {
+		true: { color: '#47e845', text: '✓' }, // bright green with checkmark (objectives met)
+		false: { color: '#ffc226', text: '⚠' }, // yellow with warning (objectives not met)
 		null: { color: '#dddddd', text: '' } // light gray, no icon
 	};
 
@@ -120,19 +120,23 @@
 
 	// Color nodes based on verdict
 	const nodeStroke = (node: NodeDatum) => {
-		const status = node.verdict || 'null';
-		return StatusMap[status as keyof typeof StatusMap].color;
+		const status = String(node.verdict ?? 'null');
+		return StatusMap[status]?.color || StatusMap['null'].color;
 	};
 
 	const nodeFill = () => '#ffffff'; // white fill for all nodes
 
 	// Add status badge to nodes
 	const nodeSideLabels = (node: NodeDatum) => {
-		const status = node.verdict || 'null';
-		const statusConfig = StatusMap[status as keyof typeof StatusMap];
-
-		if (!node.verdict) {
+		if (node.verdict === null || node.verdict === undefined) {
 			return []; // No badge for nodes without verdict
+		}
+
+		const status = String(node.verdict);
+		const statusConfig = StatusMap[status];
+
+		if (!statusConfig) {
+			return [];
 		}
 
 		return [

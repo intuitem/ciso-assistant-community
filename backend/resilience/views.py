@@ -60,7 +60,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
     def _get_asset_verdict(self, asset):
         """
         Calculate verdict based on security and recovery objectives vs capabilities.
-        Returns 'danger' if any objective is not met, 'success' if all are met, None otherwise.
+        Returns False if any objective is not met, True if all are met, None otherwise.
         """
         # Get comparisons from the asset's methods
         security_comparison = asset.get_security_objectives_comparison()
@@ -76,15 +76,15 @@ class AssetAssessmentViewSet(BaseModelViewSet):
         if not all_comparisons:
             return None
 
-        # Check if any comparison has danger verdict
+        # Check if any comparison has failed (verdict is False)
         for comp in all_comparisons:
-            if comp.get("verdict") == "danger":
-                return "danger"
+            if comp.get("verdict") is False:
+                return False
 
-        # Check if any comparison has success verdict
+        # Check if any comparison has passed (verdict is True)
         for comp in all_comparisons:
-            if comp.get("verdict") == "success":
-                return "success"
+            if comp.get("verdict") is True:
+                return True
 
         return None
 

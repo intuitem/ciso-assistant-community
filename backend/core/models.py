@@ -2698,6 +2698,7 @@ class Asset(
         """
         Compare security objectives (expectation) vs capabilities (reality) using RAW values.
         Returns a list of dicts with: objective, expectation, reality, verdict.
+        Verdict is True if objective is met, False if not met, None if cannot be determined.
         """
         # Read raw JSON structures (no display/scales)
         so = (
@@ -2734,7 +2735,7 @@ class Asset(
 
             verdict = None
             if isinstance(real_value, int):
-                verdict = "success" if real_value >= exp_value else "danger"
+                verdict = real_value >= exp_value
 
             result.append(
                 {
@@ -2752,6 +2753,7 @@ class Asset(
         Compare recovery objectives (expectation) vs capabilities (reality).
         Returns list with objective, expectation, reality, and verdict.
         Compares raw seconds numerically, outputs formatted display strings.
+        Verdict is True if objective is met, False if not met, None if cannot be determined.
         """
 
         dr_src = (
@@ -2792,7 +2794,7 @@ class Asset(
 
             verdict = None
             if isinstance(exp_value, int) and isinstance(real_value, int):
-                verdict = "success" if real_value <= exp_value else "danger"
+                verdict = real_value <= exp_value
 
             result.append(
                 {
