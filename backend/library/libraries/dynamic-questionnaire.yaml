@@ -6,7 +6,7 @@ description: >
   Ce formulaire illustre l'utilisation des champs add_score, compute_result,
   select_implementation_groups, description et color, ainsi que la logique depends_on.
 copyright: Intuitem
-version: 5
+version: 1
 publication_date: 2025-10-13
 provider: Intuitem
 packager: Intuitem
@@ -45,6 +45,7 @@ objects:
       - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1
         assessable: true
         depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_fondamentaux
         ref_id: 1_Gouvernance-1
         name: Politique d'accès et gouvernance
         description: >
@@ -130,6 +131,7 @@ objects:
       - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_gouvernance-2
         assessable: true
         depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_fondamentaux
         ref_id: 2_Gouvernance-2
         name: Sensibilisation à la cybersécurité
         description: >
@@ -176,6 +178,7 @@ objects:
       - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avance-1
         assessable: true
         depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avances
         ref_id: 3_Avancé-1
         name: Supervision et journalisation
         description: >
@@ -211,6 +214,7 @@ objects:
       - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_avance-2
         assessable: true
         depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avances
         ref_id: 4_Avancé-2
         name: Protection des données et sauvegardes
         description: >

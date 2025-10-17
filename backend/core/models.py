@@ -5890,9 +5890,14 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         self.compliance_assessment.upsert_daily_metrics()
 
-        # Recalculate selected IGs for the parent compliance assessment
+        # Recalculate selected IGs only when answers were updated
         # Use transaction.on_commit to avoid nested save conflicts
-        if self.compliance_assessment.framework.is_dynamic():
+        update_fields = kwargs.get("update_fields")
+        answers_changed = (
+            update_fields is None  # full save
+            or "answers" in set(update_fields or [])
+        )
+        if answers_changed and self.compliance_assessment.framework.is_dynamic():
             transaction.on_commit(
                 lambda: update_selected_implementation_groups(
                     self.compliance_assessment

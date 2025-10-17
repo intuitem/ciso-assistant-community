@@ -225,10 +225,10 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	for (const [q_urn, question] of Object.entries(questions)) {
 		if (question.choices && Array.isArray(question.choices)) {
 			for (const choice of question.choices) {
-				if (choice.add_score !== undefined && choice.add_score !== null) {
+				if (choice.add_score) {
 					hasAnyScorableQuestions = true;
 				}
-				if (choice.compute_result !== undefined && choice.compute_result !== null) {
+				if (choice.compute_result) {
 					hasAnyResultQuestions = true;
 				}
 			}
@@ -292,7 +292,7 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	}
 
 	// Not all visible questions are answered → not assessed
-	if (answeredVisibleCount < visibleCount) {
+	if (answeredVisibleCount < visibleCount && hasAnyResultQuestions) {
 		return { score: totalScore, result: 'not_assessed' };
 	}
 
