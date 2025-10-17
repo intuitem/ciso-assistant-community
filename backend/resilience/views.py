@@ -77,18 +77,14 @@ class AssetAssessmentViewSet(BaseModelViewSet):
             return None
 
         # Check if any comparison has failed (verdict is False)
-        has_false = any(comp.get("verdict") is False for comp in all_comparisons)
-        if has_false:
+        if any(comp.get("verdict") is False for comp in all_comparisons):
             return False
 
-        # Check if all non-None comparisons have passed
-        has_true = any(comp.get("verdict") is True for comp in all_comparisons)
-        has_none = any(comp.get("verdict") is None for comp in all_comparisons)
+        # Check if all comparisons have passed (verdict is True)
+        if all(comp.get("verdict") is True for comp in all_comparisons):
+            return True
 
-        if has_true and not has_none:
-            return True  # All determinable verdicts passed
-
-        return None  # Some are indeterminate or all are None
+        return None  # Some are indeterminate
 
     @action(detail=True, name="Get risk matrix", url_path="risk-matrix")
     def risk_matrix(self, request, pk=None):
