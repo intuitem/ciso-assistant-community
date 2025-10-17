@@ -9,12 +9,12 @@
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import { enhance } from '$app/forms';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -41,22 +41,16 @@
 	let openAccordionItems = $state(['saml', 'idp', 'sp']);
 	let showSecretField = $state(!page.data?.ssoSettings.oidc_has_secret);
 
-	let isGenerating = $state(false);
-
 	const handleGenerateKeys = ({ cancel }) => {
 		if (!data.is_enabled || !data.authn_request_signed) {
 			cancel();
 			return;
 		}
-		isGenerating = true;
 
 		return async ({ result, update }) => {
-			isGenerating = false;
-
 			if (result.type === 'success' && result.data?.generatedKeys?.cert) {
 				$formStore.sp_x509cert = result.data.generatedKeys.cert;
 			}
-
 			await update({ invalidateAll: false });
 		};
 	};
