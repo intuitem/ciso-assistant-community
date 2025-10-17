@@ -28,6 +28,8 @@ from django.utils.translation import gettext_lazy as _
 from structlog import get_logger
 from django.utils.timezone import now
 
+from crq.models import QuantitativeRiskStudy
+from ebios_rm.models import EbiosRMStudy
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
 
 from library.helpers import (
@@ -37,6 +39,7 @@ from library.helpers import (
     update_translations_in_object,
 )
 from global_settings.models import GlobalSettings
+from tprm.models import EntityAssessment
 
 from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from .utils import camel_case, sha256
@@ -6369,6 +6372,80 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"
+
+
+class ValidationFlow(AbstractBaseModel, FolderMixin):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        ACCEPTED = "accepted", "Accepted"
+        REJECTED = "rejected", "Rejected"
+        REVOKED = "revoked", "Revoked"
+        EXPIRED = "expired", "Expired"
+
+    compliance_assessments = models.ManyToManyField(
+        ComplianceAssessment,
+        blank=True,
+    )
+    risk_assessments = models.ManyToManyField(
+        RiskAssessment,
+        blank=True,
+    )
+    crq_studies = models.ManyToManyField(
+        QuantitativeRiskStudy,
+        blank=True,
+    )
+
+    ebios_studies = models.ManyToManyField(
+        EbiosRMStudy,
+        blank=True,
+    )
+    entity_assessments = models.ManyToManyField(
+        EntityAssessment,
+        blank=True,
+    )
+    findings_assessments = models.ManyToManyField(
+        FindingsAssessment,
+        blank=True,
+    )
+    documents = models.ManyToManyField(
+        Evidence,
+        blank=True,
+    )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+    )
+
+    policies = models.ManyToManyField(
+        Policy,
+        blank=True,
+    )
+    request_notes = models.TextField(null=True, blank=True)
+    approver = models.ForeignKey(
+        User,
+        max_length=200,
+        on_delete=models.SET_NULL,
+    )
+    approver_observation = models.TextField(null=True, blank=True)
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+    )
+    severity = models.SmallIntegerField(
+        verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
+    )
+    status = models.CharField(
+        choices=Status.choices,
+        default=Status.PENDING,
+        max_length=20,
+    )
+    expiration_date = models.DateField(
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = "Validation flow"
+        verbose_name_plural = "Validation flows"
 
 
 common_exclude = ["created_at", "updated_at"]
