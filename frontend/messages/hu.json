@@ -970,7 +970,7 @@
 	"securityObjectiveScale": "Biztonsági tulajdonságok skálája",
 	"securityObjectiveScaleHelpText": "Válassza ki a biztonsági tulajdonságok skáláját (alapértelmezés szerint 1-től 4-ig)",
 	"actor": "Szereplő",
-	"action": "Akció",
+	"action": "Művelet",
 	"privateKey": "Privát kulcs",
 	"generate": "Generálás",
 	"samlKeysGenerated": "SAML kulcsok sikeresen generálva",
