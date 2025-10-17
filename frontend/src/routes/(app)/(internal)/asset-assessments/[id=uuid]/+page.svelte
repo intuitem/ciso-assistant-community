@@ -3,7 +3,9 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import LineHeatmap from '$lib/components/DataViz/LineHeatmap.svelte';
 	import ObjectivesComparisonTable from '$lib/components/Assets/ObjectivesComparisonTable.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
 
 	interface Props {
 		data: PageData;
@@ -36,5 +38,15 @@
 				<LineHeatmap data={data.aaMetrics} />
 			</div>
 		</div>
+	{/snippet}
+	{#snippet actions()}
+		<Anchor
+			breadcrumbAction="push"
+			href={`${page.url.pathname}/dependencies`}
+			class="btn preset-filled-secondary-500 h-fit"
+		>
+			<i class="fa-solid fa-sitemap mr-2"></i>
+			{m.assetDependencies()}
+		</Anchor>
 	{/snippet}
 </DetailView>
