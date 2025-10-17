@@ -32,6 +32,7 @@ router.register(r"risk-scenarios", RiskScenarioViewSet, basename="risk-scenarios
 router.register(r"applied-controls", AppliedControlViewSet, basename="applied-controls")
 router.register(r"policies", PolicyViewSet, basename="policies")
 router.register(r"risk-acceptances", RiskAcceptanceViewSet, basename="risk-acceptances")
+router.register(r"validation-flows", ValidationFlowViewSet, basename="validation-flows")
 router.register(
     r"reference-controls", ReferenceControlViewSet, basename="reference-controls"
 )

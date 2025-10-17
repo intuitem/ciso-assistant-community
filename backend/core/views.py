@@ -3425,6 +3425,41 @@ class UserFilter(GenericFilterSet):
         ]
 
 
+class ValidationFlowFilterSet(GenericFilterSet):
+    class Meta:
+        model = ValidationFlow
+        fields = [
+            "folder",
+            "status",
+            "approver",
+            "compliance_assessments",
+            "risk_assessments",
+            "crq_studies",
+            "ebios_studies",
+            "entity_assessments",
+            "findings_assessments",
+            "evidences",
+            "security_exceptions",
+            "policies",
+        ]
+
+
+class ValidationFlowViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows validation flows to be viewed or edited.
+    """
+
+    model = ValidationFlow
+    serializer_class = ValidationFlowWriteSerializer
+    filterset_class = ValidationFlowFilterSet
+    search_fields = ["ref_id", "request_notes", "approver_observation"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(ValidationFlow.Status.choices))
+
+
 class UserViewSet(BaseModelViewSet):
     """
     API endpoint that allows users to be viewed or edited

@@ -2385,6 +2385,32 @@ class TerminologyWriteSerializer(BaseModelSerializer):
         exclude = ["folder", "is_published"]
 
 
+class ValidationFlowWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = ValidationFlow
+        fields = "__all__"
+
+
+class ValidationFlowReadSerializer(BaseModelSerializer):
+    path = PathField(read_only=True)
+    folder = FieldsRelatedField()
+    compliance_assessments = FieldsRelatedField(many=True)
+    risk_assessments = FieldsRelatedField(many=True)
+    crq_studies = FieldsRelatedField(many=True)
+    ebios_studies = FieldsRelatedField(many=True)
+    entity_assessments = FieldsRelatedField(many=True)
+    findings_assessments = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(many=True)
+    security_exceptions = FieldsRelatedField(many=True)
+    policies = FieldsRelatedField(many=True)
+    approver = FieldsRelatedField(["id", "first_name", "last_name"])
+    status = serializers.CharField(source="get_status_display")
+
+    class Meta:
+        model = ValidationFlow
+        fields = "__all__"
+
+
 class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
     """Serializer for evidences in the context of compliance assessments"""
 

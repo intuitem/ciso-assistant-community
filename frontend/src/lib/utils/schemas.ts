@@ -220,6 +220,25 @@ export const RiskAcceptanceSchema = z.object({
 	risk_scenarios: z.array(z.string())
 });
 
+export const ValidationFlowSchema = z.object({
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	status: z.string().default('pending'),
+	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	request_notes: z.string().optional().nullable(),
+	approver: z.string(),
+	approver_observation: z.string().optional().nullable(),
+	compliance_assessments: z.array(z.string()).optional(),
+	risk_assessments: z.array(z.string()).optional(),
+	crq_studies: z.array(z.string()).optional(),
+	ebios_studies: z.array(z.string()).optional(),
+	entity_assessments: z.array(z.string()).optional(),
+	findings_assessments: z.array(z.string()).optional(),
+	evidences: z.array(z.string()).optional(),
+	security_exceptions: z.array(z.string()).optional(),
+	policies: z.array(z.string()).optional()
+});
+
 export const ReferenceControlSchema = z.object({
 	...NameDescriptionMixin,
 	provider: z.string().optional().nullable(),
@@ -1239,6 +1258,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'applied-controls_duplicate': AppliedControlDuplicateSchema,
 	policies: PolicySchema,
 	'risk-acceptances': RiskAcceptanceSchema,
+	'validation-flows': ValidationFlowSchema,
 	'reference-controls': ReferenceControlSchema,
 	assets: AssetSchema,
 	'requirement-assessments': RequirementAssessmentSchema,

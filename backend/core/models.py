@@ -28,8 +28,6 @@ from django.utils.translation import gettext_lazy as _
 from structlog import get_logger
 from django.utils.timezone import now
 
-from crq.models import QuantitativeRiskStudy
-from ebios_rm.models import EbiosRMStudy
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
 
 from library.helpers import (
@@ -39,7 +37,6 @@ from library.helpers import (
     update_translations_in_object,
 )
 from global_settings.models import GlobalSettings
-from tprm.models import EntityAssessment
 
 from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from .utils import camel_case, sha256
@@ -6391,23 +6388,23 @@ class ValidationFlow(AbstractBaseModel, FolderMixin):
         blank=True,
     )
     crq_studies = models.ManyToManyField(
-        QuantitativeRiskStudy,
+        "crq.QuantitativeRiskStudy",
         blank=True,
     )
 
     ebios_studies = models.ManyToManyField(
-        EbiosRMStudy,
+        "ebios_rm.EbiosRMStudy",
         blank=True,
     )
     entity_assessments = models.ManyToManyField(
-        EntityAssessment,
+        "tprm.EntityAssessment",
         blank=True,
     )
     findings_assessments = models.ManyToManyField(
         FindingsAssessment,
         blank=True,
     )
-    documents = models.ManyToManyField(
+    evidences = models.ManyToManyField(
         Evidence,
         blank=True,
     )
@@ -6423,16 +6420,14 @@ class ValidationFlow(AbstractBaseModel, FolderMixin):
     request_notes = models.TextField(null=True, blank=True)
     approver = models.ForeignKey(
         User,
-        max_length=200,
         on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
     approver_observation = models.TextField(null=True, blank=True)
 
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
-    )
-    severity = models.SmallIntegerField(
-        verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
     )
     status = models.CharField(
         choices=Status.choices,
