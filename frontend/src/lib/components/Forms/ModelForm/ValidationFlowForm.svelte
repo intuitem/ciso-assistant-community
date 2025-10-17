@@ -97,7 +97,7 @@
 		bind:cachedValue={formDataCache['compliance_assessments']}
 		label={m.complianceAssessments()}
 		multiple
-	  disabled={initialData.compliance_assessments}
+		disabled={initialData.compliance_assessments}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -107,7 +107,7 @@
 		bind:cachedValue={formDataCache['risk_assessments']}
 		label={m.riskAssessments()}
 		multiple
-	  disabled={initialData.risk_assessments}
+		disabled={initialData.risk_assessments}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -117,7 +117,7 @@
 		bind:cachedValue={formDataCache['crq_studies']}
 		label={m.quantitativeRiskStudies()}
 		multiple
-	  disabled={initialData.crq_studies}
+		disabled={initialData.crq_studies}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -127,7 +127,7 @@
 		bind:cachedValue={formDataCache['ebios_studies']}
 		label={m.ebiosRMStudies()}
 		multiple
-	  disabled={initialData.ebios_studies}
+		disabled={initialData.ebios_studies}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -137,7 +137,7 @@
 		bind:cachedValue={formDataCache['entity_assessments']}
 		label={m.entityAssessments()}
 		multiple
-	  disabled={initialData.entity_assessments}
+		disabled={initialData.entity_assessments}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -147,7 +147,7 @@
 		bind:cachedValue={formDataCache['findings_assessments']}
 		label={m.findingsAssessments()}
 		multiple
-	  disabled={initialData.findings_assessments}
+		disabled={initialData.findings_assessments}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -157,7 +157,7 @@
 		bind:cachedValue={formDataCache['evidences']}
 		label={m.evidences()}
 		multiple
-	  disabled={initialData.evidences}
+		disabled={initialData.evidences}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -167,7 +167,7 @@
 		bind:cachedValue={formDataCache['security_exceptions']}
 		label={m.securityExceptions()}
 		multiple
-	  disabled={initialData.security_exceptions}
+		disabled={initialData.security_exceptions}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -177,6 +177,6 @@
 		bind:cachedValue={formDataCache['policies']}
 		label={m.policies()}
 		multiple
-	  disabled={initialData.policies}
+		disabled={initialData.policies}
 	/>
 </Dropdown>
