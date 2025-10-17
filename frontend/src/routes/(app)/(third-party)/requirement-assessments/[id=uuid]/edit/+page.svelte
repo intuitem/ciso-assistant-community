@@ -265,7 +265,19 @@
 {/if}
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex justify-between">
-		<span class="code left h-min">{data.requirement.urn}</span>
+		<div class="flex">
+			<span class="code left h-min">{data.requirement.urn}</span>
+			{#if data.requirement.implementation_groups.length > 0}
+				<div class="ml-3">
+					<b class="mr-2">Implemetation Groups :</b>
+					{#each data.requirement.implementation_groups as ig}
+						<span class="badge bg-blue-100">
+							{ig}
+						</span>
+					{/each}
+				</div>
+			{/if}
+		</div>
 		<a
 			class="text-pink-500 hover:text-pink-400"
 			href={complianceAssessmentURL}
