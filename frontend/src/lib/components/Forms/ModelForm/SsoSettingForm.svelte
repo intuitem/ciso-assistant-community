@@ -57,7 +57,7 @@
 				$formStore.sp_x509cert = result.data.generatedKeys.cert;
 			}
 
-			await update();
+			await update({ invalidateAll: false });
 		};
 	};
 </script>
