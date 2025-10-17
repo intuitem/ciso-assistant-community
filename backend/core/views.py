@@ -10,6 +10,7 @@ from django_filters.utils import try_dbfield
 import regex
 import os
 import uuid
+import itertools
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
@@ -627,10 +628,19 @@ class AssetFilter(GenericFilterSet):
         method="filter_exclude_children",
         label="Exclude children",
     )
+    exclude_parents = df.ModelChoiceFilter(
+        queryset=Asset.objects.all(),
+        method="filter_exclude_parents",
+        label="Exclude parents",
+    )
 
     def filter_exclude_children(self, queryset, name, value):
         descendants = value.get_descendants()
         return queryset.exclude(id__in=[descendant.id for descendant in descendants])
+
+    def filter_exclude_parents(self, queryset, name, value):
+        ancestors = value.ancestors_plus_self()
+        return queryset.exclude(id__in=[ancestor.id for ancestor in ancestors])
 
     class Meta:
         model = Asset
@@ -639,6 +649,7 @@ class AssetFilter(GenericFilterSet):
             "type",
             "parent_assets",
             "exclude_children",
+            "exclude_parents",
             "ebios_rm_studies",
             "risk_scenarios",
             "security_exceptions",
@@ -647,6 +658,11 @@ class AssetFilter(GenericFilterSet):
             "asset_class",
             "personal_data",
         ]
+
+
+class AssetCapabilityViewSet(BaseModelViewSet):
+    model = AssetCapability
+    search_fields = ["name"]
 
 
 class AssetViewSet(BaseModelViewSet):
@@ -671,6 +687,7 @@ class AssetViewSet(BaseModelViewSet):
                 "security_exceptions",
                 "filtering_labels",
                 "personal_data",
+                "overridden_children_capabilities",
             )
         )
 
@@ -691,6 +708,8 @@ class AssetViewSet(BaseModelViewSet):
         scale = Asset._get_security_objective_scale()
         sec_obj_results = {}
         dro_obj_results = {}
+        sec_cap_results = {}
+        rec_cap_results = {}
         descendant_results = {}
 
         for asset in initial_assets:
@@ -704,21 +723,40 @@ class AssetViewSet(BaseModelViewSet):
             if asset.is_primary:
                 sec_obj = asset.security_objectives.get("objectives", {})
                 dro_obj = asset.disaster_recovery_objectives.get("objectives", {})
+
+                # For primary assets, aggregate capabilities from supporting descendants
+                supporting_descendants = {d for d in descendants if not d.is_primary}
+                sec_cap = Asset._aggregate_security_capabilities(
+                    supporting_descendants, asset
+                )
+                rec_cap = Asset._aggregate_recovery_capabilities(
+                    supporting_descendants, asset
+                )
             else:
                 ancestors = Asset._get_all_ancestors(asset, child_to_parents)
                 primary_ancestors = {anc for anc in ancestors if anc.is_primary}
                 sec_obj = Asset._aggregate_security_objectives(primary_ancestors)
                 dro_obj = Asset._aggregate_dro_objectives(primary_ancestors)
 
+                # For supporting assets, use stored capabilities
+                sec_cap = asset.security_capabilities.get("objectives", {})
+                rec_cap = asset.recovery_capabilities.get("objectives", {})
+
             sec_obj_results[asset.id] = self._format_security_objectives(sec_obj, scale)
             dro_obj_results[asset.id] = self._format_disaster_recovery_objectives(
                 dro_obj
+            )
+            sec_cap_results[asset.id] = self._format_security_objectives(sec_cap, scale)
+            rec_cap_results[asset.id] = self._format_disaster_recovery_objectives(
+                rec_cap
             )
 
         optimized_data.update(
             {
                 "security_objectives": sec_obj_results,
                 "disaster_recovery_objectives": dro_obj_results,
+                "security_capabilities": sec_cap_results,
+                "recovery_capabilities": rec_cap_results,
                 "descendants": descendant_results,
             }
         )
@@ -6028,15 +6066,16 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 # Compute results and get all affected requirement assessments
-                computed_assessments = instance.compute_requirement_assessments_results(
-                    mapping_set, baseline
+                computed_assessments, assessment_source_dict = (
+                    instance.compute_requirement_assessments_results(
+                        mapping_set, baseline
+                    )
                 )
 
                 # Collect all source requirement assessment IDs
-                source_assessment_ids = [
-                    assessment.mapping_inference["source_requirement_assessment"]["id"]
-                    for assessment in computed_assessments
-                ]
+                source_assessment_ids = itertools.chain.from_iterable(
+                    assessment_source_dict.values()
+                )
 
                 # Fetch all baseline requirement assessments in one query
                 baseline_assessments = {
@@ -6051,21 +6090,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 m2m_operations = []
 
                 for requirement_assessment in computed_assessments:
-                    source_id = requirement_assessment.mapping_inference[
+                    selected_source_id = requirement_assessment.mapping_inference[
                         "source_requirement_assessment"
                     ]["id"]
-                    baseline_ra = baseline_assessments[source_id]
+                    selected_baseline_ra = baseline_assessments[selected_source_id]
 
                     # Update observation
-                    requirement_assessment.observation = baseline_ra.observation
+                    requirement_assessment.observation = (
+                        selected_baseline_ra.observation
+                    )
                     updates.append(requirement_assessment)
+
+                    source_ids = assessment_source_dict[requirement_assessment]
+                    baseline_requirement_assessments = [
+                        baseline_assessments[source_id] for source_id in source_ids
+                    ]
 
                     # Store M2M operations for later
                     m2m_operations.append(
                         (
                             requirement_assessment,
-                            baseline_ra.evidences.all(),
-                            baseline_ra.applied_controls.all(),
+                            selected_baseline_ra.evidences.all(),
+                            itertools.chain.from_iterable(
+                                requirement_assessment.applied_controls.all()
+                                for requirement_assessment in baseline_requirement_assessments
+                            ),
                         )
                     )
 

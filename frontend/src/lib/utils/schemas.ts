@@ -237,6 +237,7 @@ export const AssetSchema = z.object({
 	folder: z.string(),
 	asset_class: z.string().optional(),
 	parent_assets: z.string().optional().array().optional(),
+	support_assets: z.string().optional().array().optional(),
 	security_objectives: z
 		.object({
 			objectives: z
@@ -262,6 +263,31 @@ export const AssetSchema = z.object({
 				.optional()
 		})
 		.optional(),
+	security_capabilities: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional(),
+						is_enabled: z.boolean().default(false)
+					})
+				)
+				.optional()
+		})
+		.optional(),
+	recovery_capabilities: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional()
+					})
+				)
+				.optional()
+		})
+		.optional(),
 	reference_link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
@@ -274,7 +300,8 @@ export const AssetSchema = z.object({
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	ref_id: z.string().max(100).optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	overridden_children_capabilities: z.string().uuid().optional().array().optional()
 });
 
 export const FilteringLabelSchema = z.object({

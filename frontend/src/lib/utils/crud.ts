@@ -114,6 +114,7 @@ interface Field {
 	keyNameOverride?: string;
 	field: string;
 	type?: 'date' | 'datetime';
+	tooltip?: string;
 }
 
 interface SelectField {
@@ -468,6 +469,25 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assets',
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'name' },
+			{ field: 'ref_id' },
+			{ field: 'type' },
+			{ field: 'asset_class' },
+			{ field: 'parent_assets' },
+			{ field: 'support_assets' },
+			{ field: 'children_assets' },
+			{ field: 'owner' },
+			{ field: 'filtering_labels' },
+			{ field: 'security_objectives', tooltip: 'securityObjectivesTooltip' },
+			{ field: 'disaster_recovery_objectives', tooltip: 'disasterRecoveryObjectivesTooltip' },
+			{ field: 'security_capabilities', tooltip: 'securityCapabilitiesTooltip' },
+			{ field: 'recovery_capabilities', tooltip: 'recoveryCapabilitiesTooltip' },
+			{ field: 'reference_link' },
+			{ field: 'observation' }
+		],
 		reverseForeignKeyFields: [
 			{
 				field: 'assets',
@@ -481,13 +501,15 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
+			{ field: 'support_assets', urlModel: 'assets' },
 			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'asset_class', urlModel: 'asset-class' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
-			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
+			{ field: 'overridden_children_capabilities', urlModel: 'asset-capabilities' }
 		],
 		selectFields: [{ field: 'type' }, { field: 'asset_class' }],
 		filters: [
@@ -506,6 +528,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assetClasses',
 		verboseName: 'assetclass',
 		verboseNamePlural: 'assetclasses'
+	},
+	'asset-capabilities': {
+		endpointUrl: 'asset-capabilities',
+		name: 'asset-capability',
+		localName: 'assetCapability',
+		localNamePlural: 'assetCapabilities',
+		verboseName: 'Asset capability',
+		verboseNamePlural: 'Asset capabilities'
 	},
 	users: {
 		name: 'user',
