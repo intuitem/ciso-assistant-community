@@ -8,10 +8,9 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 
-	let displayCurrency = $state('€'); // Default to Euro
+	let displayCurrency = $derived(page.data?.settings?.currency ?? '€'); // Default to Euro
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -37,12 +36,6 @@
 
 	// Declare form store at top level
 	const formStore = form.form;
-
-	onMount(async () => {
-		if (page.data?.generalSettings?.currency) {
-			displayCurrency = page.data.generalSettings.currency;
-		}
-	});
 </script>
 
 <AutocompleteSelect
