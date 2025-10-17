@@ -254,6 +254,13 @@
 	$effect(() => {
 		if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
 	});
+
+	let computedScoreAndResult = $derived(
+		computeRequirementScoreAndResult(data.requirementAssessment, $formStore.answers)
+	);
+
+	let computedResult = $derived(computedScoreAndResult.result);
+	let computedScore = $derived(computedScoreAndResult.score);
 </script>
 
 {#if data.requirementAssessment.compliance_assessment.is_locked}
@@ -594,19 +601,17 @@
 						field="status"
 						label={m.status()}
 					/>
-					{#if computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers).result}
+					{#if computedResult}
 						<p class="flex flex-row items-center space-x-4">
 							<span class="font-medium">{m.result()}</span>
 							<span
 								class="badge text-sm font-semibold"
 								style="background-color: {complianceResultColorMap[
-									computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers)
-										.result || 'not_assessed'
+									computedResult || 'not_assessed'
 								] || '#ddd'}"
 							>
 								{safeTranslate(
-									computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers)
-										.result || 'not_assessed'
+									computedResult || 'not_assessed'
 								)}
 							</span>
 						</p>
@@ -618,25 +623,22 @@
 							label={m.result()}
 						/>
 					{/if}
-					{#if computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers).score !== null}
+					{#if computedScore !== null}
 						<div class="flex flex-row items-center space-x-4">
 							<span class="font-medium">{m.score()}</span>
 							<ProgressRing
 								strokeWidth="20px"
 								meterStroke={displayScoreColor(
-									computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers)
-										.score,
+									computedScore,
 									page.data.compliance_assessment_score.max_score
 								)}
 								value={formatScoreValue(
-									computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers)
-										.score || 0,
+									computedScore || 0,
 									page.data.compliance_assessment_score.max_score
 								)}
 								classes="shrink-0"
 								size="size-10"
-								>{computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers)
-									.score}</ProgressRing
+								>{computedScore}</ProgressRing
 							>
 						</div>
 					{:else}
