@@ -45,15 +45,17 @@
 	label={m.domain()}
 	hidden={initialData.folder}
 />
-<Select
-	{form}
-	field="status"
-	options={model.selectOptions['status']}
-	cacheLock={cacheLocks['status']}
-	bind:cachedValue={formDataCache['status']}
-	label={m.status()}
-	disableDoubleDash={true}
-/>
+{#if object?.id}
+	<Select
+		{form}
+		field="status"
+		options={model.selectOptions['status']}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+		label={m.status()}
+		disableDoubleDash={true}
+	/>
+{/if}
 <TextField
 	{form}
 	type="date"
@@ -81,13 +83,15 @@
 	helpText={m.approverHelpText()}
 	disabled={initialData.approver}
 />
-<TextArea
-	{form}
-	field="approver_observation"
-	label={m.approverObservation()}
-	cacheLock={cacheLocks['approver_observation']}
-	bind:cachedValue={formDataCache['approver_observation']}
-/>
+{#if object?.id}
+	<TextArea
+		{form}
+		field="approver_observation"
+		label={m.approverObservation()}
+		cacheLock={cacheLocks['approver_observation']}
+		bind:cachedValue={formDataCache['approver_observation']}
+	/>
+{/if}
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<AutocompleteSelect
 		{form}
