@@ -7,7 +7,6 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import { onMount } from 'svelte';
 
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { page } from '$app/state';
