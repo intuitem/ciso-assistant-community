@@ -185,7 +185,7 @@ export function isQuestionVisible(question: any, answers: any): boolean {
 
 	const dependency = question.depends_on;
 	const targetAnswer = answers[dependency.question];
-	if (!targetAnswer) return false;
+	if (targetAnswer === undefined || targetAnswer === null) return false;
 
 	if (dependency.condition === 'any') {
 		// If targetAnswer is an array (multiple choice)
@@ -288,7 +288,12 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 	// No visible questions → not applicable
 	if (visibleCount === 0) {
-		return { score: 0, result: 'not_applicable' };
+		return { score: null, result: 'not_applicable' };
+	}
+
+	// Ensure totalScore stays within boundaries
+	if (totalScore !== null) {
+		totalScore = Math.max(min_score, Math.min(max_score, totalScore));
 	}
 
 	// Not all visible questions are answered → not assessed
@@ -302,11 +307,6 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 		if (results.every((r) => r === true)) result = 'compliant';
 		else if (results.some((r) => r === true)) result = 'partially_compliant';
 		else result = 'non_compliant';
-	}
-
-	// Ensure totalScore stays within boundaries
-	if (totalScore !== null) {
-		totalScore = Math.max(min_score, Math.min(max_score, totalScore));
 	}
 
 	return { score: totalScore, result };

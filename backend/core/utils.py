@@ -685,7 +685,8 @@ def update_selected_implementation_groups(compliance_assessment):
 
     requirement_assessments = (
         compliance_assessment.requirement_assessments.select_related(
-            "requirement"
+            "requirement",
+            "requirement__framework"
         ).all()
     )
     for ra in requirement_assessments:

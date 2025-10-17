@@ -69,6 +69,12 @@
 	function resetTextAnswer(urn: string) {
 		questionBuffers[urn] = internalAnswers[urn] || '';
 	}
+
+	function sanitizeColor(color: string): string {
+		// Only allow hex colors, rgb(), rgba(), or named colors
+		const validColorRegex = /^(#[0-9A-Fa-f]{3,6}|rgb\(|rgba\(|[a-z]+)$/;
+		return validColorRegex.test(color) ? color : '';
+	}
 </script>
 
 <div>
@@ -112,7 +118,7 @@
 										{selected
 										? 'preset-filled-primary-500 rounded-base'
 										: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
-									style={selected ? `background-color: ${option.color ?? ''}; color: white;` : ''}
+									style={selected ? `background-color: ${sanitizeColor(option.color) ?? ''}; color: white;` : ''}
 									onclick={() => {
 										if (internalAnswers[urn] === option.urn) {
 											internalAnswers[urn] = null;
@@ -150,7 +156,7 @@
 										{selected
 										? 'preset-filled-primary-500 rounded-base'
 										: 'bg-gray-100 rounded-base hover:bg-gray-300'}"
-									style={selected ? `background-color: ${option.color ?? ''}; color: white;` : ''}
+									style={selected ? `background-color: ${sanitizeColor(option.color) ?? ''}; color: white;` : ''}
 									onclick={() => toggleSelection(urn, option.urn)}
 								>
 									{option.value}
