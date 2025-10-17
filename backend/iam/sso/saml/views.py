@@ -1,6 +1,6 @@
 # === Python standard library ===
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.http.response import Http404
 from django.urls import reverse
@@ -245,8 +245,8 @@ class GenerateSAMLKeyView(SAMLViewMixin, APIView):
             .issuer_name(issuer)
             .public_key(key.public_key())
             .serial_number(x509.random_serial_number())
-            .not_valid_before(datetime.utcnow())
-            .not_valid_after(datetime.utcnow() + timedelta(days=days))
+            .not_valid_before(datetime.now(timezone.utc))
+            .not_valid_after(datetime.now(timezone.utc) + timedelta(days=days))
             .sign(private_key=key, algorithm=hashes.SHA256())
         )
 
