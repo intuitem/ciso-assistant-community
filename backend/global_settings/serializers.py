@@ -35,7 +35,7 @@ class GlobalSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GlobalSettings
-        fields = "__all__"
+        fields = ["id", "name", "created_at", "updated_at"]
 
 
 class GeneralSettingsSerializer(serializers.ModelSerializer):
