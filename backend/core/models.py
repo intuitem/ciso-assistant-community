@@ -1924,6 +1924,38 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
             )
 
 
+class AssetCapability(ReferentialObjectMixin, I18nObjectMixin):
+    DEFAULT_ASSET_CAPABILITIES = [
+        "confidentiality",
+        "integrity",
+        "availability",
+        "proof",
+        "authenticity",
+        "privacy",
+        "safety",
+        "rto",
+        "rpo",
+        "mtd",
+    ]
+
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def create_default_values(cls):
+        for value in cls.DEFAULT_ASSET_CAPABILITIES:
+            AssetCapability.objects.update_or_create(
+                name=value,
+            )
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Asset Capability"
+        verbose_name_plural = "Asset Capabilities"
+
+
 class Asset(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):
@@ -2046,6 +2078,27 @@ class Asset(
         validators=[
             JSONSchemaInstanceValidator(DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA)
         ],
+    )
+
+    security_capabilities = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Security capabilities"),
+        help_text=_("Actual security capabilities"),
+        validators=[JSONSchemaInstanceValidator(SECURITY_OBJECTIVES_JSONSCHEMA)],
+    )
+
+    recovery_capabilities = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Recovery objectives"),
+        help_text=_("Actual recovery objectives"),
+        validators=[
+            JSONSchemaInstanceValidator(DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA)
+        ],
+    )
+    overridden_children_capabilities = models.ManyToManyField(
+        AssetCapability, blank=True, verbose_name=_("Overridden children capabilities")
     )
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
@@ -2291,6 +2344,134 @@ class Asset(
         return agg_obj
 
     @classmethod
+    def _aggregate_security_capabilities(
+        cls, supporting_descendants: set, parent_asset=None
+    ) -> dict:
+        """
+        Aggregates security capabilities from supporting descendants (lowest value wins - worst case).
+        Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
+        and its descendants are excluded for that capability only (not globally).
+        """
+        # Build descendant map with constant DB queries using prefetched graph data
+        descendants_map = {}
+        if parent_asset is not None:
+            graph = cls._prefetch_graph_data([parent_asset])
+            parent_to_children = graph["parent_to_children"]
+            for asset in supporting_descendants:
+                descendants_map[asset.id] = cls._get_all_descendants(
+                    asset, parent_to_children
+                )
+        else:
+            # Fallback for when parent_asset is not provided
+            for asset in supporting_descendants:
+                descendants_map[asset.id] = asset.get_descendants()
+
+        # Track which capabilities are overridden by which assets
+        overrides = {}  # {cap_name: [list of assets that override it]}
+        for asset in supporting_descendants:
+            overridden = asset.overridden_children_capabilities.values_list(
+                "name", flat=True
+            )
+            for cap_name in overridden:
+                if cap_name not in overrides:
+                    overrides[cap_name] = []
+                overrides[cap_name].append(asset)
+
+        agg_cap = {}
+        for asset in supporting_descendants:
+            capabilities = asset.security_capabilities.get("objectives", {})
+            for key, content in capabilities.items():
+                if not content.get("is_enabled", False):
+                    continue
+
+                value = content.get("value")
+                if value is None:
+                    continue
+
+                # Check if this asset should be skipped due to an ancestor's override
+                skip = False
+                if key in overrides:
+                    for overriding_asset in overrides[key]:
+                        # Skip if this asset is a descendant of an overriding asset
+                        if asset != overriding_asset and asset in descendants_map.get(
+                            overriding_asset.id, set()
+                        ):
+                            skip = True
+                            break
+
+                if skip:
+                    continue
+
+                if key not in agg_cap or value < agg_cap.get(key, {}).get(
+                    "value", float("inf")
+                ):
+                    agg_cap[key] = content.copy()
+
+        return agg_cap
+
+    @classmethod
+    def _aggregate_recovery_capabilities(
+        cls, supporting_descendants: set, parent_asset=None
+    ) -> dict:
+        """
+        Aggregates recovery capabilities from supporting descendants (highest value wins - worst case).
+        Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
+        and its descendants are excluded for that capability only (not globally).
+        """
+        # Build descendant map with constant DB queries using prefetched graph data
+        descendants_map = {}
+        if parent_asset is not None:
+            graph = cls._prefetch_graph_data([parent_asset])
+            parent_to_children = graph["parent_to_children"]
+            for asset in supporting_descendants:
+                descendants_map[asset.id] = cls._get_all_descendants(
+                    asset, parent_to_children
+                )
+        else:
+            # Fallback for when parent_asset is not provided
+            for asset in supporting_descendants:
+                descendants_map[asset.id] = asset.get_descendants()
+
+        # Track which capabilities are overridden by which assets
+        overrides = {}  # {cap_name: [list of assets that override it]}
+        for asset in supporting_descendants:
+            overridden = asset.overridden_children_capabilities.values_list(
+                "name", flat=True
+            )
+            for cap_name in overridden:
+                if cap_name not in overrides:
+                    overrides[cap_name] = []
+                overrides[cap_name].append(asset)
+
+        agg_cap = {}
+        for asset in supporting_descendants:
+            capabilities = asset.recovery_capabilities.get("objectives", {})
+            for key, content in capabilities.items():
+                value = content.get("value")
+                if value is None:
+                    continue
+
+                # Check if this asset should be skipped due to an ancestor's override
+                skip = False
+                if key in overrides:
+                    for overriding_asset in overrides[key]:
+                        # Skip if this asset is a descendant of an overriding asset
+                        if asset != overriding_asset and asset in descendants_map.get(
+                            overriding_asset.id, set()
+                        ):
+                            skip = True
+                            break
+
+                if skip:
+                    continue
+
+                current_value = agg_cap.get(key, {}).get("value")
+                if current_value is None or value > current_value:
+                    agg_cap[key] = content.copy()
+
+        return agg_cap
+
+    @classmethod
     def _get_security_objective_scale(cls) -> str:
         """Fetches the global setting for the security objective scale."""
         settings = GlobalSettings.objects.filter(name="general").first()
@@ -2364,6 +2545,57 @@ class Asset(
 
         return {"objectives": disaster_recovery_objectives}
 
+    def get_security_capabilities(self) -> dict[str, dict[str, dict[str, int | bool]]]:
+        """
+        Gets the security capabilities of a given asset.
+        If the asset is a supporting asset, the security capabilities are directly stored in the asset.
+        If the asset is a primary asset, the security capabilities are the union of the security capabilities of all the supporting assets it depends on.
+        If multiple descendants share the same security capability, its value in the result is its lowest value among the descendants (worst case scenario).
+        Supporting assets can override capabilities propagation using overridden_children_capabilities - in this case, the overriding asset's value is used directly.
+        """
+        if self.security_capabilities.get("objectives"):
+            self.security_capabilities["objectives"] = {
+                key: self.security_capabilities["objectives"][key]
+                for key in Asset.DEFAULT_SECURITY_OBJECTIVES
+                if key in self.security_capabilities["objectives"]
+            }
+
+        if not self.is_primary:
+            return self.security_capabilities
+
+        # For primary assets, delegate to class method for aggregation
+        # Use prefetch pattern to avoid N+1 queries even in detail views
+        graph = self._prefetch_graph_data([self])
+        descendants = self._get_all_descendants(self, graph["parent_to_children"])
+        supporting_assets = {asset for asset in descendants if not asset.is_primary}
+        if not supporting_assets:
+            return {}
+
+        aggregated = self._aggregate_security_capabilities(supporting_assets, self)
+        return {"objectives": aggregated}
+
+    def get_recovery_capabilities(self) -> dict[str, dict[str, dict[str, int]]]:
+        """
+        Gets the recovery capabilities of a given asset.
+        If the asset is a supporting asset, the recovery capabilities are directly stored in the asset.
+        If the asset is a primary asset, the recovery capabilities are the union of the recovery capabilities of all the supporting assets it depends on.
+        If multiple descendants share the same recovery capability, its value in the result is its highest value among the descendants (worst case scenario).
+        Supporting assets can override capabilities propagation using overridden_children_capabilities - in this case, the overriding asset's value is used directly.
+        """
+        if not self.is_primary:
+            return self.recovery_capabilities
+
+        # For primary assets, delegate to class method for aggregation
+        # Use prefetch pattern to avoid N+1 queries even in detail views
+        graph = self._prefetch_graph_data([self])
+        descendants = self._get_all_descendants(self, graph["parent_to_children"])
+        supporting_assets = {asset for asset in descendants if not asset.is_primary}
+        if not supporting_assets:
+            return {}
+
+        aggregated = self._aggregate_recovery_capabilities(supporting_assets, self)
+        return {"objectives": aggregated}
+
     def get_security_objectives_display(self) -> list[dict[str, int]]:
         """
         Gets the security objectives values of a given asset.
@@ -2412,6 +2644,59 @@ class Asset(
             {"str": f"{key}: {format_seconds(content.get('value', 0))}"}
             for key, content in sorted(
                 disaster_recovery_objectives.get("objectives", {}).items(),
+                key=lambda x: self.DEFAULT_DISASTER_RECOVERY_OBJECTIVES.index(x[0]),
+            )
+            if content.get("value", 0)
+        ]
+
+    def get_security_capabilities_display(self) -> list[dict[str, int]]:
+        """
+        Gets the security capabilities values of a given asset.
+        """
+        security_capabilities = self.get_security_capabilities()
+        if len(security_capabilities) == 0:
+            return []
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        scale = (
+            general_settings.value.get("security_objective_scale", "1-4")
+            if general_settings
+            else "1-4"
+        )
+        return [
+            {key: self.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)]}
+            for key, content in sorted(
+                security_capabilities.get("objectives", {}).items(),
+                key=lambda x: self.DEFAULT_SECURITY_OBJECTIVES.index(x[0]),
+            )
+            if content.get("is_enabled", False)
+            and content.get("value", -1) in range(0, 5)
+        ]
+
+    def get_recovery_capabilities_display(self) -> list[dict[str, str]]:
+        def format_seconds(seconds: int) -> str:
+            hours, remainder = divmod(seconds, 3600)
+            minutes, secs = divmod(remainder, 60)
+
+            parts = []
+            if hours > 0:
+                parts.append(f"{hours}h")
+            if minutes > 0:
+                parts.append(f"{minutes:02d}m")
+            if secs > 0 or (
+                not parts
+            ):  # Always show seconds if no other parts, or if > 0
+                parts.append(f"{secs:02d}s")
+
+            return "".join(parts)
+
+        """
+        Gets the recovery capabilities of a given asset as strings.
+        """
+        recovery_capabilities = self.get_recovery_capabilities()
+        return [
+            {"str": f"{key}: {format_seconds(content.get('value', 0))}"}
+            for key, content in sorted(
+                recovery_capabilities.get("objectives", {}).items(),
                 key=lambda x: self.DEFAULT_DISASTER_RECOVERY_OBJECTIVES.index(x[0]),
             )
             if content.get("value", 0)

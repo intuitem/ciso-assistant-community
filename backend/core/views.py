@@ -661,6 +661,11 @@ class AssetFilter(GenericFilterSet):
         ]
 
 
+class AssetCapabilityViewSet(BaseModelViewSet):
+    model = AssetCapability
+    search_fields = ["name"]
+
+
 class AssetViewSet(BaseModelViewSet):
     """
     API endpoint that allows assets to be viewed or edited.
@@ -683,6 +688,7 @@ class AssetViewSet(BaseModelViewSet):
                 "security_exceptions",
                 "filtering_labels",
                 "personal_data",
+                "overridden_children_capabilities",
             )
         )
 
@@ -703,6 +709,8 @@ class AssetViewSet(BaseModelViewSet):
         scale = Asset._get_security_objective_scale()
         sec_obj_results = {}
         dro_obj_results = {}
+        sec_cap_results = {}
+        rec_cap_results = {}
         descendant_results = {}
 
         for asset in initial_assets:
@@ -716,21 +724,40 @@ class AssetViewSet(BaseModelViewSet):
             if asset.is_primary:
                 sec_obj = asset.security_objectives.get("objectives", {})
                 dro_obj = asset.disaster_recovery_objectives.get("objectives", {})
+
+                # For primary assets, aggregate capabilities from supporting descendants
+                supporting_descendants = {d for d in descendants if not d.is_primary}
+                sec_cap = Asset._aggregate_security_capabilities(
+                    supporting_descendants, asset
+                )
+                rec_cap = Asset._aggregate_recovery_capabilities(
+                    supporting_descendants, asset
+                )
             else:
                 ancestors = Asset._get_all_ancestors(asset, child_to_parents)
                 primary_ancestors = {anc for anc in ancestors if anc.is_primary}
                 sec_obj = Asset._aggregate_security_objectives(primary_ancestors)
                 dro_obj = Asset._aggregate_dro_objectives(primary_ancestors)
 
+                # For supporting assets, use stored capabilities
+                sec_cap = asset.security_capabilities.get("objectives", {})
+                rec_cap = asset.recovery_capabilities.get("objectives", {})
+
             sec_obj_results[asset.id] = self._format_security_objectives(sec_obj, scale)
             dro_obj_results[asset.id] = self._format_disaster_recovery_objectives(
                 dro_obj
+            )
+            sec_cap_results[asset.id] = self._format_security_objectives(sec_cap, scale)
+            rec_cap_results[asset.id] = self._format_disaster_recovery_objectives(
+                rec_cap
             )
 
         optimized_data.update(
             {
                 "security_objectives": sec_obj_results,
                 "disaster_recovery_objectives": dro_obj_results,
+                "security_capabilities": sec_cap_results,
+                "recovery_capabilities": rec_cap_results,
                 "descendants": descendant_results,
             }
         )
