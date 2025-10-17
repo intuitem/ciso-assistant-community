@@ -69,9 +69,6 @@
 	function resetTextAnswer(urn: string) {
 		questionBuffers[urn] = internalAnswers[urn] || '';
 	}
-
-	let openStateUniqueChoice = $state(false);
-	let openStateMultipleChoice = $state(false);
 </script>
 
 <div>
@@ -129,8 +126,6 @@
 									{option.value}
 									{#if option.description}
 										<Tooltip
-											open={openStateUniqueChoice}
-											onOpenChange={(e) => (openStateUniqueChoice = e.open)}
 											positioning={{ placement: 'top' }}
 											triggerBase="underline"
 											contentBase="card preset-filled p-4"
@@ -161,8 +156,6 @@
 									{option.value}
 									{#if option.description}
 										<Tooltip
-											open={openStateMultipleChoice}
-											onOpenChange={(e) => (openStateMultipleChoice = e.open)}
 											positioning={{ placement: 'top' }}
 											triggerBase="underline"
 											contentBase="card preset-filled p-4"
