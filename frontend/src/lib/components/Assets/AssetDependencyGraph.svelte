@@ -223,7 +223,7 @@
 			{linkArrowSize}
 			{linkFlow}
 			{linkBandWidth}
-			linkArrowColor={linkArrowColor}
+			{linkArrowColor}
 		/>
 	</VisSingleContainer>
 </div>
