@@ -977,7 +977,7 @@
 	"actor": "Actor",
 	"action": "Acción",
 	"privateKey": "Clave privada",
-	"generateDots": "Generando...",
+	"generate": "Generar",
 	"samlKeysGenerated": "Claves SAML generadas con éxito",
 	"samlPrivateKeyHelpText": "Sólo escritura: utilice este campo solo si necesita proporcionar su propia clave/certificado privado. De lo contrario, la aplicación lo generará.",
 	"samlCertificateHelpText": "Puede especificar su propio certificado o dejar que la aplicación lo genere.",

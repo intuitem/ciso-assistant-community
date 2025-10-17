@@ -1940,7 +1940,7 @@
 	"lossThreshold": "Prag gubitka",
 	"lossThresholdHelpText": "Maksimalni prihvatljivi gubitak koji će služiti kao osnova za toleranciju",
 	"privateKey": "Privatni ključ",
-	"generateDots": "Generiraj...",
+	"generate": "Generiraj",
 	"samlKeysGenerated": "SAML ključevi uspješno generirani",
 	"samlPrivateKeyHelpText": "Samo za pisanje: koristite ovo polje samo ako trebate unijeti vlastiti privatni ključ/certifikat. U suprotnom, aplikacija će ga generirati.",
 	"samlCertificateHelpText": "Možete navesti vlastiti certifikat ili pustiti aplikaciju da ga generira.",

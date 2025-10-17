@@ -1252,7 +1252,7 @@
 	"actor": "Aktør",
 	"action": "Handling",
 	"privateKey": "Privat nøgle",
-	"generateDots": "Genererer...",
+	"generate": "Genererer",
 	"samlKeysGenerated": "SAML-nøgler genereret med succes",
 	"samlPrivateKeyHelpText": "Skrivebeskyttet: brug kun dette felt, hvis du skal angive din egen private nøgle/certifikat. Ellers vil applikationen generere det.",
 	"samlCertificateHelpText": "Du kan angive dit eget certifikat eller lade applikationen generere det.",

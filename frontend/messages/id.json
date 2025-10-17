@@ -1157,7 +1157,7 @@
 	"actor": "Pelaku",
 	"action": "Aksi",
 	"privateKey": "Kunci privat",
-	"generateDots": "Membuat...",
+	"generate": "Membuat",
 	"samlKeysGenerated": "Kunci Saml berhasil dibuat",
 	"samlPrivateKeyHelpText": "Hanya tulis: gunakan bidang ini hanya jika Anda perlu menyediakan kunci/certifikat privat Anda sendiri. Jika tidak, aplikasi akan membuatnya.",
 	"samlCertificateHelpText": "Anda dapat menentukan sertifikat Anda sendiri atau biarkan aplikasi membuatnya.",

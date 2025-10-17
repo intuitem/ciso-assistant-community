@@ -973,7 +973,7 @@
 	"actor": "Actor",
 	"action": "Actie",
 	"privateKey": "Privésleutel",
-	"generateDots": "Genereren...",
+	"generate": "Genereren",
 	"samlKeysGenerated": "Saml-sleutels succesvol gegenereerd",
 	"samlPrivateKeyHelpText": "Alleen-schrijven: gebruik dit veld alleen als u uw eigen privésleutel/certificaat moet opgeven. Anders genereert de applicatie het.",
 	"samlCertificateHelpText": "U kunt uw eigen certificaat opgeven of de applicatie laten genereren.",

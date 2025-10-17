@@ -1712,7 +1712,7 @@
 	"securityObjectiveScale": "Skala właściwości bezpieczeństwa",
 	"securityObjectiveScaleHelpText": "Wybierz skalę dla właściwości bezpieczeństwa (domyślnie 1 do 4)",
 	"privateKey": "Klucz prywatny",
-	"generateDots": "Generowanie...",
+	"generate": "Generowanie",
 	"samlKeysGenerated": "Klucze SAML pomyślnie wygenerowane",
 	"samlPrivateKeyHelpText": "Tylko do zapisu: użyj tego pola tylko wtedy, gdy musisz dostarczyć własny klucz prywatny/certyfikat. W przeciwnym razie aplikacja wygeneruje go.",
 	"samlCertificateHelpText": "Możesz określić własny certyfikat lub pozwolić aplikacji wygenerować go.",

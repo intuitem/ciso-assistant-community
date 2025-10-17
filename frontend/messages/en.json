@@ -2120,7 +2120,7 @@
 	"addEvidenceRevision": "Add Revision",
 	"associatedEvidenceRevisions": "Associated versions",
 	"privateKey": "Private Key",
-	"generateDots": "Generate...",
+	"generate": "Generate",
 	"samlKeysGenerated": "Saml keys successfully generated",
 	"samlPrivateKeyHelpText": "Write-only: use this field only if you need to supply your own private key/certificate. Otherwise, the application will generate it.",
 	"samlCertificateHelpText": "You can specify your own certificate or let the application generate it.",

@@ -977,7 +977,7 @@
 	"actor": "Akteur",
 	"action": "Aktion",
 	"privateKey": "Privater Schlüssel",
-	"generateDots": "Generiere...",
+	"generate": "Generiere",
 	"samlKeysGenerated": "SAML-Schlüssel erfolgreich generiert",
 	"samlPrivateKeyHelpText": "Schreibgeschützt: Verwenden Sie dieses Feld nur, wenn Sie Ihren eigenen privaten Schlüssel/Zertifikat angeben müssen. Andernfalls generiert die Anwendung ihn.",
 	"samlCertificateHelpText": "Sie können Ihr eigenes Zertifikat angeben oder die Anwendung generieren lassen.",

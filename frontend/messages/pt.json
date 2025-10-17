@@ -970,7 +970,7 @@
 	"actor": "Ator",
 	"action": "Ação",
 	"privateKey": "Chave Privada",
-	"generateDots": "Gerar...",
+	"generate": "Gerar",
 	"samlKeysGenerated": "Chaves SAML geradas com sucesso",
 	"samlPrivateKeyHelpText": "Somente escrita: use este campo apenas se precisar fornecer sua própria chave/certificado privada. Caso contrário, o aplicativo irá gerá-lo.",
 	"samlCertificateHelpText": "Você pode especificar seu próprio certificado ou deixar que o aplicativo o gere.",

@@ -384,7 +384,7 @@
 							<button
 								type="submit"
 								disabled={!data.is_enabled || !data.authn_request_signed}
-								class="btn preset-filled-secondary-500">{m.generateDots()}</button
+								class="btn preset-filled-secondary-500">{m.generate()}</button
 							>
 						</form>
 						{#if data.is_enabled && data.authn_request_signed}

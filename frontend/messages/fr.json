@@ -2040,7 +2040,7 @@
 	"evidenceRevisions": "Révisions",
 	"addEvidenceRevision": "Nouvelle révision",
 	"privateKey": "Clé privée",
-	"generateDots": "Générer...",
+	"generate": "Générer",
 	"samlKeysGenerated": "Clés SAML générées avec succès",
 	"samlPrivateKeyHelpText": "Écriture seule : utilisez ce champ uniquement si vous devez fournir votre propre clé/certificat privée. Sinon, l'application générera celle-ci.",
 	"samlCertificateHelpText": "Vous pouvez spécifier votre propre certificat ou laisser l'application le générer.",

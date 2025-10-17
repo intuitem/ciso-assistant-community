@@ -1705,7 +1705,7 @@
 	"securityObjectiveScale": "Güvenlik özellikleri ölçeği",
 	"securityObjectiveScaleHelpText": "Güvenlik özellikleri için ölçeğinizi seçin (varsayılan olarak 1 ile 4)",
 	"privateKey": "Özel Anahtar",
-	"generateDots": "Oluşturuluyor...",
+	"generate": "Oluşturuluyor",
 	"samlKeysGenerated": "Saml anahtarları başarıyla oluşturuldu",
 	"samlPrivateKeyHelpText": "Yalnızca yazma: özel anahtar/belgenizi sağlamanız gerekiyorsa bu alanı kullanın. Aksi takdirde uygulama onu oluşturacaktır.",
 	"samlCertificateHelpText": "Kendi sertifikanızı belirleyebilir veya uygulamanın oluşturmasını sağlayabilirsiniz.",

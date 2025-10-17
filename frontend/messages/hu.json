@@ -972,7 +972,7 @@
 	"actor": "Szereplő",
 	"action": "Akció",
 	"privateKey": "Privát kulcs",
-	"generateDots": "Generálás...",
+	"generate": "Generálás",
 	"samlKeysGenerated": "SAML kulcsok sikeresen generálva",
 	"samlPrivateKeyHelpText": "Csak írásra használható: csak akkor használja ezt a mezőt, ha saját privát kulcs/tanúsítványt kell megadnia. Ellenkező esetben az alkalmazás generálja.",
 	"samlCertificateHelpText": "Saját tanúsítványt adhat meg, vagy az alkalmazás generálhatja.",

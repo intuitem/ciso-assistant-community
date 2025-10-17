@@ -960,7 +960,7 @@
 	"actor": "Aktér",
 	"action": "Akce",
 	"privateKey": "Soukromý klíč",
-	"generateDots": "Generování...",
+	"generate": "Generování",
 	"samlKeysGenerated": "SAML klíče úspěšně vygenerovány",
 	"samlPrivateKeyHelpText": "Pouze pro zápis: použijte toto pole pouze v případě, že potřebujete zadat vlastní soukromý klíč/certifikát. Jinak aplikace vygeneruje klíč.",
 	"samlCertificateHelpText": "Můžete zadat vlastní certifikát nebo nechat aplikaci vygenerovat klíč.",
