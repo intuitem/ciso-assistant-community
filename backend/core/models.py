@@ -2690,6 +2690,10 @@ class Asset(
             if content.get("value", 0)
         ]
 
+    def save(self, *args, **kwargs) -> None:
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
     def get_security_objectives_comparison(self) -> list[dict]:
         """
         Compare security objectives (expectation) vs capabilities (reality) using RAW values.
