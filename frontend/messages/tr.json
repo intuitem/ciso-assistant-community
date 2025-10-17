@@ -1706,7 +1706,7 @@
 	"securityObjectiveScaleHelpText": "Güvenlik özellikleri için ölçeğinizi seçin (varsayılan olarak 1 ile 4)",
 	"privateKey": "Özel Anahtar",
 	"generate": "Oluşturuluyor",
-	"samlKeysGenerated": "Saml anahtarları başarıyla oluşturuldu",
+	"samlKeysGenerated": "SAML anahtarları başarıyla oluşturuldu",
 	"samlPrivateKeyHelpText": "Yalnızca yazma: özel anahtar/belgenizi sağlamanız gerekiyorsa bu alanı kullanın. Aksi takdirde uygulama onu oluşturacaktır.",
 	"samlCertificateHelpText": "Kendi sertifikanızı belirleyebilir veya uygulamanın oluşturmasını sağlayabilirsiniz.",
 	"samlAuthnRequestSignedHelpText": "Etkinleştirildiğinde, SAML kimlik doğrulama isteği aşağıdaki özel anahtar ile imzalanır. İmzayı doğrulayabilmesi için ilgili genel sertifika Kimlik Sağlayıcıya gönderilir.",
