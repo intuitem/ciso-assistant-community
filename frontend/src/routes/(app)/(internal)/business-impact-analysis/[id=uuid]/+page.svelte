@@ -21,6 +21,11 @@
 				breadcrumbAction="push"
 				><i class="fa-solid fa-stopwatch mr-2"></i>{m.impactOverTime()}</Anchor
 			>
+			<Anchor
+				href={`${page.url.pathname}/report`}
+				class="btn preset-filled-primary-500 h-fit"
+				breadcrumbAction="push"><i class="fa-solid fa-file-lines mr-2"></i>{m.report()}</Anchor
+			>
 		</div>
 	{/snippet}
 	{#snippet widgets()}
