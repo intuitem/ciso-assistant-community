@@ -10,6 +10,7 @@
 	import { onMount } from 'svelte';
 
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import { page } from '$app/state';
 
 	let displayCurrency = $state('€'); // Default to Euro
 
@@ -40,19 +41,8 @@
 
 	// Fetch currency from global settings
 	onMount(async () => {
-		try {
-			const response = await fetch('/global-settings');
-			if (response.ok) {
-				const globalSettings = await response.json();
-				const generalSetting = globalSettings.results?.find(
-					(setting: any) => setting.name === 'general'
-				);
-				if (generalSetting?.value?.currency) {
-					displayCurrency = generalSetting.value.currency;
-				}
-			}
-		} catch (error) {
-			console.warn('Could not fetch global settings for currency:', error);
+		if (page.data?.generalSettings?.currency) {
+			displayCurrency = page.data.generalSettings.currency;
 		}
 	});
 </script>
