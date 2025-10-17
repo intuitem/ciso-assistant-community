@@ -1240,9 +1240,7 @@ export const listViewFields = {
 			'disasterRecoveryObjectives',
 			'owner',
 			'domain',
-			'labels',
-			'securityCapabilities',
-			'recoveryCapabilities'
+			'labels'
 		],
 		body: [
 			'ref_id',
@@ -1252,9 +1250,7 @@ export const listViewFields = {
 			'disaster_recovery_objectives',
 			'owner',
 			'folder',
-			'filtering_labels',
-			'security_capabilities',
-			'recovery_capabilities'
+			'filtering_labels'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
