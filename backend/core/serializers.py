@@ -1765,8 +1765,27 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
-        if instance.requirement.add_score or instance.requirement.compute_result:
+
+        requirement = instance.requirement
+
+        # Safely get all choices across all questions
+        choices = []
+        for _, question in (
+            requirement.questions.items() if requirement.questions else []
+        ):
+            for choice in question.get("choices", []):
+                choices.append(choice)
+
+        # Check if any choice has scoring or result logic
+        has_score_or_result = any(
+            choice.get("add_score") is not None
+            or choice.get("compute_result") is not None
+            for choice in choices
+        )
+
+        if has_score_or_result:
             instance.compute_score_and_result()
+
         return instance
 
     class Meta:

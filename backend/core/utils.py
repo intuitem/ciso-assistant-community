@@ -690,6 +690,8 @@ def update_selected_implementation_groups(compliance_assessment):
     )
     for ra in requirement_assessments:
         answers = ra.answers or {}
+        if not ra.requirement.questions:
+            continue
         for question_urn, question in ra.requirement.questions.items():
             if not _is_question_visible(question, answers):
                 continue

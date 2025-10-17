@@ -1623,6 +1623,12 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             ]
         return node_dict
 
+    def is_dynamic(self) -> bool:
+        return RequirementNode.objects.filter(
+            framework=self,
+            questions__icontains="select_implementation_groups",
+        ).exists()
+
     def __str__(self) -> str:
         return f"{self.provider} - {self.name}"
 
@@ -5588,9 +5594,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         # Recalculate selected IGs for the parent compliance assessment
         # Use transaction.on_commit to avoid nested save conflicts
-        transaction.on_commit(
-            lambda: update_selected_implementation_groups(self.compliance_assessment)
-        )
+        if self.compliance_assessment.framework.is_dynamic():
+            transaction.on_commit(
+                lambda: update_selected_implementation_groups(
+                    self.compliance_assessment
+                )
+            )
 
     def compute_score_and_result(self):
         questions = self.requirement.questions or {}
@@ -5600,9 +5609,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         results = []
         visible_questions = 0
         answered_visible_questions = 0
+        is_score_computed = False
+        is_result_computed = False
 
         for q_urn, question in questions.items():
-            # Skip hidden questions (depends_on not satisfied)
             if _is_question_visible(question, answers) is False:
                 continue
 
@@ -5610,15 +5620,16 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             selected_choice_urn = answers.get(q_urn)
 
             if not selected_choice_urn:
-                continue  # Visible but unanswered
+                continue
 
             answered_visible_questions += 1
 
             # Handle both single and multiple choice questions
-            if isinstance(selected_choice_urn, list):
-                choice_urns = selected_choice_urn
-            else:
-                choice_urns = [selected_choice_urn]
+            choice_urns = (
+                selected_choice_urn
+                if isinstance(selected_choice_urn, list)
+                else [selected_choice_urn]
+            )
 
             for choice in question.get("choices", []):
                 if choice.get("urn") in choice_urns:
@@ -5626,32 +5637,34 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                     compute_result = choice.get("compute_result")
 
                     if add_score is not None:
+                        is_score_computed = True
                         self.is_scored = True
                         total_score += add_score
 
                     if compute_result is not None:
+                        is_result_computed = True
                         results.append(bool(compute_result))
+
+        self.score = total_score
 
         # No visible questions → not applicable
         if visible_questions == 0:
             self.result = "not_applicable"
-            self.score = 0
-            self.is_scored = False
             self.save(update_fields=["score", "result", "is_scored"])
             return
 
         # Not all visible questions are answered → not assessed
         if answered_visible_questions < visible_questions:
             self.result = "not_assessed"
-            self.score = total_score
             self.save(update_fields=["score", "result", "is_scored"])
             return
 
         # Compute overall result
-        self.score = total_score
-
         if not results:
-            self.result = "not_assessed"
+            # All answered but no compliance checks defined
+            self.result = (
+                "not_assessed"  # or "compliant" depending on your business logic
+            )
         elif all(results):
             self.result = "compliant"
         elif any(results):
@@ -5659,7 +5672,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         else:
             self.result = "non_compliant"
 
-        self.save(update_fields=["score", "result", "is_scored"])
+        if is_score_computed and is_result_computed:
+            self.save(update_fields=["score", "result", "is_scored"])
+        elif is_score_computed:
+            self.save(update_fields=["score", "is_scored"])
+        elif is_result_computed:
+            self.save(update_fields=["result"])
 
 
 class FindingsAssessment(Assessment):

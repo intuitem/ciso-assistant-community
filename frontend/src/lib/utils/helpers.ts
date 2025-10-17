@@ -208,13 +208,35 @@ export function isQuestionVisible(question: any, answers: any): boolean {
 }
 
 export function computeRequirementScoreAndResult(questions: any, answers: any) {
-	if (!questions) return { score: 0, result: 'not_assessed' };
+	if (!questions) return { score: null, result: null };
 
-	let totalScore = 0;
-	let results: boolean[] = [];
+	let totalScore: number | null = 0;
+	let results: boolean[] | null = [];
 	let visibleCount = 0;
 	let answeredVisibleCount = 0;
+	let hasAnyScorableQuestions = false;
+	let hasAnyResultQuestions = false;
 
+	// First pass: check if ANY question (visible or not) has scoring/result capability
+	for (const [q_urn, question] of Object.entries(questions)) {
+		if (question.choices && Array.isArray(question.choices)) {
+			for (const choice of question.choices) {
+				if (choice.add_score !== undefined && choice.add_score !== null) {
+					hasAnyScorableQuestions = true;
+				}
+				if (choice.compute_result !== undefined && choice.compute_result !== null) {
+					hasAnyResultQuestions = true;
+				}
+			}
+		}
+	}
+
+	// If there are no scorable questions at all, return early
+	if (!hasAnyScorableQuestions) {
+		totalScore = null;
+	}
+
+	// Second pass: compute actual scores and results from visible, answered questions
 	for (const [q_urn, question] of Object.entries(questions)) {
 		if (!isQuestionVisible(question, answers)) continue;
 
@@ -243,6 +265,9 @@ export function computeRequirementScoreAndResult(questions: any, answers: any) {
 			? selectedChoiceURNs
 			: [selectedChoiceURNs];
 
+		// Validate that choices array exists before iterating
+		if (!question.choices || !Array.isArray(question.choices)) continue;
+
 		for (const urn of choiceURNs) {
 			const selectedChoice = question.choices.find((choice: any) => choice.urn === urn);
 			if (!selectedChoice) continue;
@@ -268,8 +293,8 @@ export function computeRequirementScoreAndResult(questions: any, answers: any) {
 	}
 
 	// Compute overall result
-	let result = 'not_assessed';
-	if (results.length > 0) {
+	let result = hasAnyResultQuestions ? 'not_assessed' : null;
+	if (results?.length > 0) {
 		if (results.every((r) => r === true)) result = 'compliant';
 		else if (results.some((r) => r === true)) result = 'partially_compliant';
 		else result = 'non_compliant';
