@@ -212,7 +212,22 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         required=False,
         source="settings.advanced.want_name_id_encrypted",
     )
+    sp_x509cert = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        source="settings.advanced.x509cert",
+    )
+    sp_private_key = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        trim_whitespace=False,
+        source="settings.advanced.private_key",
+        write_only=True,
+    )
     oidc_has_secret = serializers.SerializerMethodField()
+    saml_has_sp_private_key = serializers.SerializerMethodField()
 
     def get_oidc_has_secret(self, obj) -> bool:
         try:
@@ -220,17 +235,48 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         except SSOSettings.DoesNotExist:
             return False
 
+    def get_saml_has_sp_private_key(self, obj) -> bool:
+        try:
+            return bool(
+                SSOSettings.objects.get()
+                .settings.get("advanced", {})
+                .get("private_key")
+            )
+        except SSOSettings.DoesNotExist:
+            return False
+
     class Meta:
         model = SSOSettings
         exclude = ["value"]
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        # remove nested private_key if present
+        advanced = data.get("settings", {}).get("advanced", {})
+        if "private_key" in advanced:
+            advanced.pop("private_key")
+
+        return data
+
     def update(self, instance, validated_data):
         settings_object = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
 
-        # Use stored secret if no secret is transmitted
+        # Use stored secret and sp_private_key if no transmitted
         validated_data["secret"] = validated_data.get(
             "secret", settings_object.value.get("secret", "")
         )
+        validated_data["settings"]["advanced"]["private_key"] = (
+            validated_data.get("settings", {})
+            .get("advanced", {})
+            .get(
+                "private_key",
+                settings_object.value.get("settings", {})
+                .get("advanced", {})
+                .get("private_key", ""),
+            )
+        )
+
         validated_data["provider_id"] = validated_data.get("provider", "n/a")
         if "settings" not in validated_data:
             validated_data["settings"] = {}

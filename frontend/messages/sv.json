@@ -962,6 +962,13 @@
 	"securityObjectiveScaleHelpText": "Välj din skala för säkerhetsmål (1 till 4 som standard)",
 	"actor": "Aktör",
 	"action": "Åtgärd",
+	"privateKey": "Privat nyckel",
+	"generate": "Genererar",
+	"samlKeysGenerated": "SAML-nycklar genererades framgångsrikt",
+	"samlPrivateKeyHelpText": "Skrivskyddad: använd endast detta fält om du behöver ange din egen privata nyckel/certifikat. Annars kommer applikationen att generera det.",
+	"samlCertificateHelpText": "Du kan ange ditt eget certifikat eller låta applikationen generera det.",
+	"samlAuthnRequestSignedHelpText": "När det är aktiverat, signeras SAML-autentiseringsbegäran med den privata nyckeln nedan. Det motsvarande offentliga certifikatet skickas till identitetsleverantören så att den kan verifiera signaturen.",
+	"downloadCertificate": "Ladda ner certifikat",
 	"viewMore": "Visa mer",
 	"viewLess": "Visa mindre"
 }
