@@ -40,6 +40,7 @@
 
 	let openAccordionItems = $state(['saml', 'idp', 'sp']);
 	let showSecretField = $state(!page.data?.ssoSettings.oidc_has_secret);
+	let showPrivateKeyField = $state(!page.data?.ssoSettings.saml_has_sp_private_key);
 
 	const handleGenerateKeys = ({ cancel }) => {
 		if (!data.is_enabled || !data.authn_request_signed) {
@@ -401,15 +402,30 @@
 							cacheLock={cacheLocks['sp_x509cert']}
 							bind:cachedValue={formDataCache['sp_x509cert']}
 						/>
-						<TextArea
-							{form}
-							field="sp_private_key"
-							label={m.privateKey()}
-							helpText={m.samlPrivateKeyHelpText()}
-							disabled={!data.is_enabled || !data.authn_request_signed}
-							cacheLock={cacheLocks['sp_private_key']}
-							bind:cachedValue={formDataCache['sp_private_key']}
-						/>
+						{#if showPrivateKeyField}
+							<TextArea
+								{form}
+								field="sp_private_key"
+								label={m.privateKey()}
+								helpText={m.samlPrivateKeyHelpText()}
+								disabled={!data.is_enabled || !data.authn_request_signed}
+								cacheLock={cacheLocks['sp_private_key']}
+								bind:cachedValue={formDataCache['sp_private_key']}
+							/>
+						{:else}
+							<div
+								class="w-full p-4 flex flex-col text-center items-center justify-center preset-tonal-secondary gap-2"
+							>
+								<p>{m.spPrivateKeyAlreadySetHelpText()}</p>
+								<button
+									class="btn preset-filled"
+									onclick={() => {
+										showPrivateKeyField = true;
+										$formStore.sp_private_key = '';
+									}}>{m.resetSpPrivateKey()}</button
+								>
+							</div>
+						{/if}
 					</div>
 				</div>
 			{/snippet}

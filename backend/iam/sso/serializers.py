@@ -227,10 +227,21 @@ class SSOSettingsWriteSerializer(BaseModelSerializer):
         write_only=True,
     )
     oidc_has_secret = serializers.SerializerMethodField()
+    saml_has_sp_private_key = serializers.SerializerMethodField()
 
     def get_oidc_has_secret(self, obj) -> bool:
         try:
             return bool(SSOSettings.objects.get().secret)
+        except SSOSettings.DoesNotExist:
+            return False
+
+    def get_saml_has_sp_private_key(self, obj) -> bool:
+        try:
+            return bool(
+                SSOSettings.objects.get()
+                .settings.get("advanced", {})
+                .get("private_key")
+            )
         except SSOSettings.DoesNotExist:
             return False
 
