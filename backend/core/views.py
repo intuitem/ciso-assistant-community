@@ -10,11 +10,10 @@ from django_filters.utils import try_dbfield
 import regex
 import os
 import uuid
-import itertools
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Mapping, Tuple
 import time
 from django.db.models import (
     F,
@@ -69,6 +68,7 @@ from django.apps import apps
 from django.contrib.auth.models import Permission
 from django.conf import settings
 from django.core.files.storage import default_storage
+from core.mappings.engine import engine
 from django.db import models, transaction
 from django.forms import ValidationError
 from django.http import FileResponse, HttpResponse, StreamingHttpResponse
@@ -151,6 +151,8 @@ logger = structlog.get_logger(__name__)
 SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
+
+MAPPING_MAX_DETPH = 5
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
@@ -2854,8 +2856,6 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
         return context
 
     def get_queryset(self):
-        from django.db.models import Q
-
         compliance_assessment_pk = self.kwargs["pk"]
 
         # Check permissions for compliance assessment
@@ -6055,6 +6055,41 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 instance.show_documentation_score = baseline.show_documentation_score
                 instance.save()
 
+            elif baseline and baseline.framework != instance.framework:
+                engine = MappingEngine()
+                engine.load_rms_data()
+                engine.load_frameworks()
+                source_urn = baseline.framework.urn
+                audit_from_results = engine.load_audit_fields(baseline)
+                dest_urn = serializer.validated_data["framework"].urn
+
+                best_results, _ = engine.best_mapping_inferrences(
+                    audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
+                )
+                ic(best_results)
+
+                requirement_assessments_to_update = []
+
+                target_requirement_assessments = RequirementAssessment.objects.filter(
+                    compliance_assessment=instance,
+                    requirement__urn__in=best_results,
+                )
+
+                for req in target_requirement_assessments:
+                    for field in ["result", "status", "observation"]:
+                        if best_results[req.requirement.urn].get(field):
+                            req.__setattr__(
+                                field, best_results[req.requirement.urn][field]
+                            )
+                    requirement_assessments_to_update.append(req)
+
+                RequirementAssessment.objects.bulk_update(
+                    requirement_assessments_to_update,
+                    ["result", "status", "observation"],
+                    batch_size=500,
+                )
+
+            """
             # Handle different framework case
             elif baseline and baseline.framework != instance.framework:
                 # Fetch mapping set and prefetch related data
@@ -6137,6 +6172,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 # Create applied controls in bulk for each assessment
                 for requirement_assessment in assessments:
                     requirement_assessment.create_applied_controls_from_suggestions()
+            """
 
     def perform_update(self, serializer):
         compliance_assessment = serializer.save()
@@ -6583,6 +6619,12 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             ).values_list("provider", flat=True)
         )
         return Response({p: p for p in providers})
+
+    def perform_create(self, serializer):
+        # create the new requirement mapping set and reload the engine.
+        instance = serializer.save()
+        engine.load_rms_data()
+        return instance
 
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
@@ -7570,7 +7612,6 @@ class FindingViewSet(BaseModelViewSet):
             queryset = queryset.filter(folder=folder)
 
         # Build Sankey data structure
-        from django.db.models import Count
 
         # Get category -> severity -> status combinations
         nodes = []
@@ -8024,7 +8065,7 @@ class IncidentViewSet(BaseModelViewSet):
         total_incidents = queryset.count()
 
         # Incidents this month
-        from datetime import datetime, date
+        from datetime import date
         import calendar
 
         today = date.today()
