@@ -667,6 +667,26 @@ Combining importance=mandatory with result=non-compliant/partially conpliant can
 
 The order_id variable allows to sort the requirements nodes, it starts at 0 and is incremented automatically in a given group at import.
 
+```yaml
+{
+  - urn: urn:intuitem:risk:req_node:example-questionnaire:1_governance-1
+        assessable: true
+        weight: 1
+        importance: mandatory
+        depth: 2
+        ref_id: Governance-1
+        name: Access and governance policy
+        description: >
+          The company implements an access control and governance policy tailored to its needs.
+        annotation: >
+          A well-defined access policy ensures the protection of sensitive systems and data.
+        typical_evidence: >
+          Copy of the access management policy, description of roles and responsibilities.
+        implementation_groups:
+          - "base"
+}
+```
+
 A framework always has a numerical score scale from min_score to max_score. If not explicit, the default values are 0 and 100 (percentage). It is also possible to have a scores_definition json, that contains a list of score levels objects. Each score level is an object containing the following fields (example from TISAX):
 
 ```json
