@@ -153,9 +153,6 @@ MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
 MAPPING_MAX_DETPH = 5
-MAPPING_ENGINE = MappingEngine()
-MAPPING_FRAMEWORKS = Framework.objects.all()
-MAPPINGS = RequirementMappingSet.objects.all()
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS

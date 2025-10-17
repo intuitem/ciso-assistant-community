@@ -7,12 +7,22 @@ import zlib
 
 
 class MappingEngine:
+    frameworks=None
+    direct_mappings=None
+
     def __init__(self):
         # Values are compressed (zlib) JSON bytes of the RMS object.
         self.all_rms: dict[tuple[str, str], bytes] = {}
         self.framework_mappings: dict[str, list[str]] = defaultdict(list)
-        self.direct_mappings: set[tuple[str, str]] = set()
-        self.frameworks = defaultdict(dict)
+        
+        if self.frameworks == None:
+            self.frameworks = defaultdict(dict)
+            self.load_frameworks()
+
+        if self.direct_mappings == None:
+            self.direct_mappings: set[tuple[str, str]] = set()
+            self.load_rms_data()
+
         self.fields_to_map: list[str] = [
             "result",
             "status",
@@ -20,6 +30,7 @@ class MappingEngine:
             "is_scored",
             "observation",
         ]
+
 
     # --- Compression helpers ---
     def _compress_rms(self, obj: dict) -> bytes:
@@ -248,3 +259,6 @@ class MappingEngine:
         for _, audit in audit_results.items():
             res[audit["result"]] += 1
         return dict(res)
+
+
+engine = MappingEngine()
