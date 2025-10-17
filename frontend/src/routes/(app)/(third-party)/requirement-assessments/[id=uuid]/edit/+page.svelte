@@ -610,9 +610,7 @@
 									computedResult || 'not_assessed'
 								] || '#ddd'}"
 							>
-								{safeTranslate(
-									computedResult || 'not_assessed'
-								)}
+								{safeTranslate(computedResult || 'not_assessed')}
 							</span>
 						</p>
 					{:else}
@@ -637,8 +635,7 @@
 									page.data.compliance_assessment_score.max_score
 								)}
 								classes="shrink-0"
-								size="size-10"
-								>{computedScore}</ProgressRing
+								size="size-10">{computedScore}</ProgressRing
 							>
 						</div>
 					{:else}
