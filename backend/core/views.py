@@ -68,7 +68,7 @@ from django.apps import apps
 from django.contrib.auth.models import Permission
 from django.conf import settings
 from django.core.files.storage import default_storage
-from core.mappings.engine import MappingEngine
+from core.mappings.engine import engine
 from django.db import models, transaction
 from django.forms import ValidationError
 from django.http import FileResponse, HttpResponse, StreamingHttpResponse
@@ -6619,6 +6619,12 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             ).values_list("provider", flat=True)
         )
         return Response({p: p for p in providers})
+
+    def perform_create(self, serializer):
+        # create the new requirement mapping set and reload the engine.
+        instance = serializer.save()
+        engine.load_rms_data()
+        return instance
 
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
