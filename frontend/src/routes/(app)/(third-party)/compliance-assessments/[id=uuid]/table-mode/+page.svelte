@@ -21,10 +21,7 @@
 		complianceResultTailwindColorMap,
 		complianceStatusTailwindColorMap
 	} from '$lib/utils/constants';
-	import {
-		displayScoreColor,
-		formatScoreValue
-	} from '$lib/utils/helpers';
+	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { Accordion, ProgressRing, Switch } from '@skeletonlabs/skeleton-svelte';

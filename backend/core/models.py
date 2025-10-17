@@ -1622,12 +1622,12 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
                 for reference_control in node.reference_controls.all()
             ]
         return node_dict
-    
+
     def is_dynamic(self) -> bool:
         # Use annotated value if available (avoid extra query)
         if hasattr(self, "is_dynamic"):
             return bool(getattr(self, "is_dynamic"))
-        
+
         # Fallback if annotation not present
         return RequirementNode.objects.filter(
             framework=self,
