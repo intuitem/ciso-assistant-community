@@ -2493,5 +2493,7 @@
 	"viewThreat": "View threat",
 	"viewTimelineEntry": "View timeline entry",
 	"viewVulnerability": "View vulnerability",
-	"dataFlowOverview": "Data flow overview"
+	"dataFlowOverview": "Data flow overview",
+	"spPrivateKeyAlreadySetHelpText": "A private key has already been set. For security reasons, you cannot view it again. You can only replace it with a new one.",
+	"resetSpPrivateKey": "Reset private key"
 }
