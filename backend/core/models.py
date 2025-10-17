@@ -1634,6 +1634,12 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
+    class Importance(models.TextChoices):
+        MANDATORY = "mandatory", _("Mandatory")
+        RECOMMENDED = "recommended", _("Recommended")
+        NICE_TO_HAVE = "nice_to_have", _("Nice to have")
+        UNDEFINED = "undefined", _("Undefined")
+
     threats = models.ManyToManyField(
         "Threat",
         blank=True,
@@ -1666,6 +1672,13 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         null=True, blank=True, verbose_name=_("Typical evidence")
     )
     questions = models.JSONField(blank=True, null=True, verbose_name=_("Questions"))
+    weight = models.IntegerField(default=1, verbose_name=_("Weight"))
+    importance = models.CharField(
+        max_length=20,
+        choices=Importance.choices,
+        default=Importance.UNDEFINED,
+        verbose_name=_("Importance"),
+    )
 
     @property
     def associated_reference_controls(self):
