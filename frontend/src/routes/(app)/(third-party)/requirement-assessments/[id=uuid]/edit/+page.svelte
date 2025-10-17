@@ -594,23 +594,19 @@
 						field="status"
 						label={m.status()}
 					/>
-					{#if computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).result}
+					{#if computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers).result}
 						<p class="flex flex-row items-center space-x-4">
 							<span class="font-medium">{m.result()}</span>
 							<span
 								class="badge text-sm font-semibold"
 								style="background-color: {complianceResultColorMap[
-									computeRequirementScoreAndResult(
-										page.data.requirementAssessment.requirement.questions,
-										data.answers
-									).result
+									computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers)
+										.result || 'not_assessed'
 								] || '#ddd'}"
 							>
 								{safeTranslate(
-									computeRequirementScoreAndResult(
-										page.data.requirementAssessment.requirement.questions,
-										data.answers
-									).result
+									computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers)
+										.result || 'not_assessed'
 								)}
 							</span>
 						</p>
@@ -622,31 +618,25 @@
 							label={m.result()}
 						/>
 					{/if}
-					{#if computeRequirementScoreAndResult(page.data.requirementAssessment.requirement.questions, data.answers).score !== null}
+					{#if computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers).score !== null}
 						<div class="flex flex-row items-center space-x-4">
 							<span class="font-medium">{m.score()}</span>
 							<ProgressRing
 								strokeWidth="20px"
 								meterStroke={displayScoreColor(
-									computeRequirementScoreAndResult(
-										page.data.requirementAssessment.requirement.questions,
-										data.answers
-									).score,
+									computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers)
+										.score,
 									page.data.compliance_assessment_score.max_score
 								)}
 								value={formatScoreValue(
-									computeRequirementScoreAndResult(
-										page.data.requirementAssessment.requirement.questions,
-										data.answers
-									).score,
+									computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers)
+										.score || 0,
 									page.data.compliance_assessment_score.max_score
 								)}
 								classes="shrink-0"
 								size="size-10"
-								>{computeRequirementScoreAndResult(
-									page.data.requirementAssessment.requirement.questions,
-									data.answers
-								).score}</ProgressRing
+								>{computeRequirementScoreAndResult(page.data.requirementAssessment, data.answers)
+									.score}</ProgressRing
 							>
 						</div>
 					{:else}

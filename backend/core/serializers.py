@@ -1706,7 +1706,9 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     description = serializers.CharField(source="get_requirement_description")
     evidences = FieldsRelatedField(many=True)
-    compliance_assessment = FieldsRelatedField(["id", "name", "is_locked"])
+    compliance_assessment = FieldsRelatedField(
+        ["id", "name", "is_locked", "min_score", "max_score"]
+    )
     folder = FieldsRelatedField()
     perimeter = FieldsRelatedField(source="compliance_assessment.perimeter")
     assessable = serializers.BooleanField(source="requirement.assessable")
@@ -1736,15 +1738,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         compliance_assessment = self.get_compliance_assessment()
 
         if value is not None:
-            if (
-                value < compliance_assessment.min_score
-                or value > compliance_assessment.max_score
-            ):
-                raise serializers.ValidationError(
-                    {
-                        "score": f"Score must be between {compliance_assessment.min_score} and {compliance_assessment.max_score}"
-                    }
+            value = max(
+                (
+                    compliance_assessment.min_score,
+                    min(value, compliance_assessment.max_score),
                 )
+            )
         return value
 
     def get_compliance_assessment(self):

@@ -207,10 +207,14 @@ export function isQuestionVisible(question: any, answers: any): boolean {
 	return true; // fallback
 }
 
-export function computeRequirementScoreAndResult(questions: any, answers: any) {
+export function computeRequirementScoreAndResult(requirementAssessment: any, answers: any) {
+	const questions = requirementAssessment.requirement.questions;
+
 	if (!questions) return { score: null, result: null };
 
 	let totalScore: number | null = 0;
+	const min_score = requirementAssessment.compliance_assessment.min_score || 0;
+	const max_score = requirementAssessment.compliance_assessment.max_score || 100;
 	let results: boolean[] | null = [];
 	let visibleCount = 0;
 	let answeredVisibleCount = 0;
@@ -298,6 +302,11 @@ export function computeRequirementScoreAndResult(questions: any, answers: any) {
 		if (results.every((r) => r === true)) result = 'compliant';
 		else if (results.some((r) => r === true)) result = 'partially_compliant';
 		else result = 'non_compliant';
+	}
+
+	// Ensure totalScore stays within boundaries
+	if (totalScore !== null) {
+		totalScore = Math.max(min_score, Math.min(max_score, totalScore));
 	}
 
 	return { score: totalScore, result };

@@ -5606,6 +5606,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         answers = self.answers or {}
 
         total_score = 0
+        min_score = self.compliance_assessment.min_score or 0
+        max_score = self.compliance_assessment.max_score or 100
         results = []
         visible_questions = 0
         answered_visible_questions = 0
@@ -5645,7 +5647,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                         is_result_computed = True
                         results.append(bool(compute_result))
 
-        self.score = total_score
+        self.score = max(min(total_score, max_score), min_score)
 
         # No visible questions → not applicable
         if visible_questions == 0:
