@@ -743,6 +743,8 @@
 	"waitingRiskAcceptances": "Olá! No momento, você tem {number} aceitação de risco{s} pendente. Você pode encontrá-los no menu de governança.",
 	"licenseSeats": "Assentos de licença",
 	"licenseExpiration": "Expiração da licença",
+	"diskSpace": "Espaço em disco",
+	"diskUsed": "Disco usado",
 	"answer": "Responder",
 	"questionnaireMode": "Modo questionário",
 	"assessmentMode": "Modo de avaliação",
