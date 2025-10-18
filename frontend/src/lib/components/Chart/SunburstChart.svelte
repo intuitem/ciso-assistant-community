@@ -71,16 +71,11 @@
 					fontSize: 12
 				},
 				formatter: function (params: any) {
-					const ancestry = [];
-					let currentData = params.data;
+					// Use ECharts' treePathInfo to get the full path
+					const path = params.treePathInfo
+						? params.treePathInfo.map((node: any) => node.name).join(' → ')
+						: params.name;
 
-					// Build the path from root to current node
-					while (currentData) {
-						ancestry.unshift(currentData.name);
-						currentData = currentData.parent;
-					}
-
-					const path = ancestry.join(' → ');
 					const count = params.data.value || 0;
 					const percentage = params.percent ? `${params.percent.toFixed(1)}%` : '';
 
@@ -97,7 +92,7 @@
 			series: {
 				type: 'sunburst',
 				data: translatedData,
-				radius: [0, '90%'],
+				radius: [0, '95%'],
 				center: ['50%', '50%'],
 				sort: undefined,
 				emphasis: {
@@ -111,11 +106,11 @@
 						}
 					},
 					{
-						// Level 1: Domains/Folders
-						r0: '10%',
-						r: '30%',
+						// Level 1: CSF Functions
+						r0: '15%',
+						r: '40%',
 						itemStyle: {
-							borderWidth: 3,
+							borderWidth: 1,
 							borderColor: '#fff'
 						},
 						label: {
@@ -129,11 +124,11 @@
 						}
 					},
 					{
-						// Level 2: CSF Functions
-						r0: '30%',
-						r: '50%',
+						// Level 2: Categories
+						r0: '40%',
+						r: '65%',
 						itemStyle: {
-							borderWidth: 2,
+							borderWidth: 1,
 							borderColor: '#fff'
 						},
 						label: {
@@ -145,11 +140,11 @@
 						}
 					},
 					{
-						// Level 3: Categories
-						r0: '50%',
-						r: '70%',
+						// Level 3: Priority
+						r0: '65%',
+						r: '85%',
 						itemStyle: {
-							borderWidth: 2,
+							borderWidth: 1,
 							borderColor: '#fff'
 						},
 						label: {
@@ -161,11 +156,11 @@
 						}
 					},
 					{
-						// Level 4: Priority
-						r0: '70%',
-						r: '85%',
+						// Level 4: Status (outermost)
+						r0: '85%',
+						r: '98%',
 						itemStyle: {
-							borderWidth: 2,
+							borderWidth: 1,
 							borderColor: '#fff'
 						},
 						label: {
@@ -174,22 +169,6 @@
 							color: '#777',
 							rotate: 'tangential',
 							minAngle: 25 // Only show labels if segment is large enough
-						}
-					},
-					{
-						// Level 5: Status (outermost)
-						r0: '85%',
-						r: '95%',
-						itemStyle: {
-							borderWidth: 1,
-							borderColor: '#fff'
-						},
-						label: {
-							show: true,
-							fontSize: 7,
-							color: '#888',
-							rotate: 'tangential',
-							minAngle: 30 // Only show labels if segment is large enough
 						}
 					}
 				]

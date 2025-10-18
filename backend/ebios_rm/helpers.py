@@ -16,6 +16,185 @@ from core.models import Asset
 import textwrap
 
 
+def ecosystem_circular_chart_data(stakeholders_queryset: QuerySet):
+    """
+    Generate data for circular ecosystem chart.
+    Returns stakeholders grouped by maturity clusters (cyber reliability) with simple format:
+    {
+        "maturity_groups": ["<4", "4-5", "6-7", ">7"],
+        "current": {
+            "<4": [[criticality, angle, exposure, label], ...],
+            "4-5": [...],
+            ...
+        },
+        "residual": { ... },
+        "not_displayed": 0
+    }
+    """
+    qs = stakeholders_queryset
+    max_val = GlobalSettings.objects.get(name="general").value.get("ebios_radar_max", 6)
+
+    def get_maturity_group(reliability_value):
+        """Group by cyber reliability (maturity * trust)"""
+        if reliability_value < 4:
+            return "<4"
+        if reliability_value >= 4 and reliability_value < 6:
+            return "4-5"
+        if reliability_value >= 6 and reliability_value <= 7:
+            return "6-7"
+        if reliability_value > 7:
+            return ">7"
+        return "<4"
+
+    # Get unique categories for angle distribution
+    categories = set()
+    for sh in qs:
+        if sh.category:
+            categories.add(sh.category.name)
+
+    categories_list = sorted(list(categories))
+    num_categories = len(categories_list)
+
+    if num_categories == 0:
+        return {
+            "maturity_groups": ["<4", "4-5", "6-7", ">7"],
+            "current": {},
+            "residual": {},
+            "not_displayed": len(qs),
+        }
+
+    # Calculate angle section for each category
+    angle_step = 360 / num_categories
+    # Add offset to align properly: for 4 categories, shift by 45° to get + instead of X
+    angle_offset = angle_step / 2
+    category_angles = {}
+    for i, cat in enumerate(categories_list):
+        # Apply offset so boundaries align at 0°, 90°, 180°, 270° for 4 categories
+        category_angles[cat] = {
+            "base": i * angle_step + angle_offset,
+            "start": i * angle_step,
+            "end": (i + 1) * angle_step,
+        }
+
+    # Initialize data structures for maturity groups
+    maturity_groups = ["<4", "4-5", "6-7", ">7"]
+    current_data = {group: [] for group in maturity_groups}
+    residual_data = {group: [] for group in maturity_groups}
+    not_displayed = 0
+    max_criticality_found = 0
+
+    # Group stakeholders by category and maturity
+    stakeholders_by_category = {cat: [] for cat in categories_list}
+    for sh in qs:
+        if not sh.category:
+            not_displayed += 1
+            continue
+        category_name = sh.category.name
+        stakeholders_by_category[category_name].append(sh)
+
+    # Sort stakeholders within each category by current criticality (descending)
+    for cat in categories_list:
+        stakeholders_by_category[cat].sort(
+            key=lambda sh: sh.current_criticality, reverse=True
+        )
+
+    # Process stakeholders category by category, ordered by criticality
+    for category_name in categories_list:
+        cat_stakeholders = stakeholders_by_category[category_name]
+        cat_info = category_angles[category_name]
+        section_width = angle_step * 0.8  # Use 80% of section width
+
+        # Distribute stakeholders evenly within category's angular range
+        num_in_category = len(cat_stakeholders)
+        if num_in_category == 0:
+            continue
+
+        for idx, sh in enumerate(cat_stakeholders):
+            # Distribute evenly across the section
+            if num_in_category == 1:
+                # Center single item
+                offset = 0
+            else:
+                # Spread multiple items evenly
+                offset = (idx / (num_in_category - 1) - 0.5) * section_width
+
+            jitter = random.uniform(-2, 2)  # Small jitter for natural look
+            angle = cat_info["base"] + offset + jitter
+
+            # Normalize angle to 0-360
+            angle = angle % 360
+
+            # Current data
+            c_criticality = math.floor(sh.current_criticality * 100) / 100.0
+            c_exposure = sh.current_dependency * sh.current_penetration
+            c_exposure_val = c_exposure * 4  # Scale for size
+            c_reliability = sh.current_maturity * sh.current_trust
+            c_maturity_group = get_maturity_group(c_reliability)
+
+            # Track max criticality across both current and residual
+            max_criticality_found = max(max_criticality_found, c_criticality)
+
+            current_data[c_maturity_group].append(
+                [
+                    c_criticality,
+                    angle,
+                    c_exposure_val,
+                    f"{sh.entity.name}-{category_name}",
+                ]
+            )
+
+            # Residual data
+            r_criticality = math.floor(sh.residual_criticality * 100) / 100.0
+            r_exposure = sh.residual_dependency * sh.residual_penetration
+            r_exposure_val = r_exposure * 4  # Scale for size
+            r_reliability = sh.residual_maturity * sh.residual_trust
+            r_maturity_group = get_maturity_group(r_reliability)
+
+            # Track max criticality across both current and residual
+            max_criticality_found = max(max_criticality_found, r_criticality)
+
+            residual_data[r_maturity_group].append(
+                [
+                    r_criticality,
+                    angle,
+                    r_exposure_val,
+                    f"{sh.entity.name}-{category_name}",
+                ]
+            )
+
+    # Calculate consistent chart max for both current and residual comparison
+    # Add small offset to ensure highest criticality points don't end up at center
+    chart_max = (
+        max(max_val, max_criticality_found) + 0.5
+        if max_criticality_found > 0
+        else max_val
+    )
+
+    # Prepare category boundaries for delimiter lines
+    category_boundaries = []
+    category_label_positions = []
+    for i, cat in enumerate(categories_list):
+        angle_info = category_angles[cat]
+        # Add the start boundary of each category section (at 0°, 90°, 180°, 270° for 4 cats)
+        boundary_angle = (i * angle_step) % 360
+        category_boundaries.append(boundary_angle)
+        # Add middle angle for category label positioning
+        category_label_positions.append(
+            {"category": cat, "angle": angle_info["base"] % 360}
+        )
+
+    return {
+        "maturity_groups": maturity_groups,
+        "categories": categories_list,
+        "current": current_data,
+        "residual": residual_data,
+        "not_displayed": not_displayed,
+        "chart_max": chart_max,
+        "category_boundaries": category_boundaries,
+        "category_label_positions": category_label_positions,
+    }
+
+
 def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
     qs = stakeholders_queryset
 
@@ -73,7 +252,8 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
             else max_val - 1 + 0.25
         )
 
-        angle = angle_offset[sh.category] + (
+        category_name = sh.category.name if sh.category else "partner"
+        angle = angle_offset.get(category_name, 225) + (
             get_exposure_segment_id(c_exposure) * (45 / 4)
         )
 
@@ -93,7 +273,7 @@ def ecosystem_radar_chart_data(stakeholders_queryset: QuerySet):
             else max_val - 1 + 0.25
         )
 
-        angle = angle_offset[sh.category] + (
+        angle = angle_offset.get(category_name, 225) + (
             get_exposure_segment_id(r_exposure) * (45 / 4)
         )
 

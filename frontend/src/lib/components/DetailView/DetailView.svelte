@@ -91,6 +91,24 @@
 			: data.data
 	);
 
+	// Get ordered entries based on detailViewFields configuration
+	let orderedEntries = $derived(() => {
+		if (data.model?.detailViewFields) {
+			// Return entries in the order specified by detailViewFields
+			return data.model.detailViewFields
+				.map((fieldConfig) => [fieldConfig.field, data.data[fieldConfig.field]])
+				.filter(([key, value]) => value !== undefined);
+		} else {
+			// Fall back to original order from data object
+			return Object.entries(filteredData);
+		}
+	});
+
+	// Helper to get field configuration including tooltip
+	const getFieldConfig = (fieldName: string) => {
+		return data.model?.detailViewFields?.find((field) => field.field === fieldName);
+	};
+
 	let hasWidgets = $derived(!!widgets);
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -202,6 +220,25 @@
 		modalStore.trigger(modal);
 	}
 
+	function getReverseForeignKeyEndpoint({
+		parentModel,
+		targetUrlModel,
+		field,
+		id,
+		endpointUrl
+	}: {
+		parentModel: ModelMapEntry;
+		targetUrlModel: string;
+		field: string;
+		id: string;
+		endpointUrl?: string;
+	}) {
+		if (endpointUrl?.startsWith('./')) {
+			return `/${parentModel.urlModel}/${id}/${endpointUrl.slice(2)}`;
+		}
+		return `/${targetUrlModel}?${field}=${id}`;
+	}
+
 	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -309,7 +346,7 @@
 					: 'w-full'}"
 			>
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
-					{#each Object.entries(filteredData).filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
+					{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
 						<div
 							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4 {index >=
 								MAX_ROWS && !expandedTable
@@ -317,10 +354,31 @@
 								: ''}"
 						>
 							<dt
-								class="font-medium text-gray-900"
+								class="font-medium text-gray-900 flex items-center gap-2"
 								data-testid="{key.replace('_', '-')}-field-title"
 							>
-								{safeTranslate(key)}
+								<span>{safeTranslate(key)}</span>
+								{#if getFieldConfig(key)?.tooltip}
+									{@const tooltipKey = getFieldConfig(key)?.tooltip}
+									{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
+									<Tooltip
+										positioning={{ placement: 'right' }}
+										contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
+										openDelay={200}
+										closeDelay={100}
+										arrow
+										arrowBase="arrow bg-gray-800 border border-gray-700"
+									>
+										{#snippet trigger()}
+											<i
+												class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
+											></i>
+										{/snippet}
+										{#snippet content()}
+											<p class="text-sm">{tooltipText}</p>
+										{/snippet}
+									</Tooltip>
+								{/if}
 							</dt>
 							<dd class="text-gray-700 sm:col-span-2">
 								<ul class="">
@@ -395,7 +453,7 @@
 															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if key === 'security_objectives'}
+																{#if key === 'security_objectives' || key === 'security_capabilities'}
 																	{@const [securityObjectiveName, securityObjectiveValue] =
 																		Object.entries(val)[0]}
 																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
@@ -482,7 +540,7 @@
 				</div>
 			{/if}
 		</div>
-		{#if Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
+		{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
 			<button
 				onclick={() => (expandedTable = !expandedTable)}
 				class="m-5 text-blue-800"
@@ -589,7 +647,12 @@
 
 {#if relatedModels.length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-white">
-		<Tabs value={group} onValueChange={(e) => (group = e.value)} listJustify="justify-center">
+		<Tabs
+			value={group}
+			onValueChange={(e) => (group = e.value)}
+			listJustify="justify-center"
+			listClasses="flex flex-wrap"
+		>
 			{#snippet list()}
 				{#each relatedModels as [urlmodel, model]}
 					<Tabs.Control value={urlmodel}>
@@ -612,13 +675,21 @@
 							{@const field = data.model.reverseForeignKeyFields.find(
 								(item) => item.urlModel === urlmodel
 							)}
-							{@const fieldsToUse = getListViewFields({
-								key: urlmodel,
-								featureFlags: page.data?.featureflags
-							}).body.filter((v) => v !== field.field)}
+							{@const fieldsToUse =
+								field?.tableFields ||
+								getListViewFields({
+									key: urlmodel,
+									featureFlags: page.data?.featureflags
+								}).body.filter((v) => v !== field.field)}
 							{#if model.table}
 								<ModelTable
-									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+									baseEndpoint={getReverseForeignKeyEndpoint({
+										parentModel: data.model,
+										targetUrlModel: urlmodel,
+										field: field.field,
+										id: data.data.id,
+										endpointUrl: field.endpointUrl
+									})}
 									source={model.table}
 									disableCreate={disableCreate || model.disableCreate}
 									disableDelete={disableDelete || model.disableDelete}

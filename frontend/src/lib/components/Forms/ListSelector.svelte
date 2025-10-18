@@ -27,7 +27,7 @@
 		helpText?: string;
 		optionsEndpoint: string;
 		optionsLabelField?: string;
-		groupBy?: { field: string; path: string[] }[] | string;
+		groupBy?: { field: string; path?: string[] }[] | string;
 		cacheLock?: CacheLock;
 		cachedValue?: (string | number)[] | undefined;
 		translateOptions?: boolean;
@@ -173,8 +173,10 @@
 						? groupBy
 								.map((group) => {
 									let grp = option[group.field];
-									for (const p of group.path) {
-										grp = grp?.[p];
+									if (group.path) {
+										for (const p of group.path) {
+											grp = grp?.[p];
+										}
 									}
 									return grp;
 								})
