@@ -6502,6 +6502,78 @@ class TaskNode(AbstractBaseModel, FolderMixin):
         verbose_name_plural = "Task nodes"
 
 
+class ValidationFlow(AbstractBaseModel, FolderMixin):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        ACCEPTED = "accepted", "Accepted"
+        REJECTED = "rejected", "Rejected"
+        REVOKED = "revoked", "Revoked"
+        EXPIRED = "expired", "Expired"
+
+    compliance_assessments = models.ManyToManyField(
+        ComplianceAssessment,
+        blank=True,
+    )
+    risk_assessments = models.ManyToManyField(
+        RiskAssessment,
+        blank=True,
+    )
+    crq_studies = models.ManyToManyField(
+        "crq.QuantitativeRiskStudy",
+        blank=True,
+    )
+
+    ebios_studies = models.ManyToManyField(
+        "ebios_rm.EbiosRMStudy",
+        blank=True,
+    )
+    entity_assessments = models.ManyToManyField(
+        "tprm.EntityAssessment",
+        blank=True,
+    )
+    findings_assessments = models.ManyToManyField(
+        FindingsAssessment,
+        blank=True,
+    )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+    )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+    )
+
+    policies = models.ManyToManyField(
+        Policy,
+        blank=True,
+    )
+    request_notes = models.TextField(null=True, blank=True)
+    approver = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    approver_observation = models.TextField(null=True, blank=True)
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+    )
+    status = models.CharField(
+        choices=Status.choices,
+        default=Status.PENDING,
+        max_length=20,
+    )
+    expiration_date = models.DateField(
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = "Validation flow"
+        verbose_name_plural = "Validation flows"
+
+
 common_exclude = ["created_at", "updated_at"]
 
 auditlog.register(
