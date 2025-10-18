@@ -25,6 +25,15 @@
 		object = {},
 		initialData = {}
 	}: Props = $props();
+
+	// Check if we're coming from a specific assessment context
+	const hasPresetAssessments =
+		initialData.risk_assessments ||
+		initialData.compliance_assessments ||
+		initialData.crq_studies ||
+		initialData.ebios_studies ||
+		initialData.entity_assessments ||
+		initialData.findings_assessments;
 </script>
 
 <TextField
@@ -92,95 +101,97 @@
 		bind:cachedValue={formDataCache['approver_observation']}
 	/>
 {/if}
-<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="compliance-assessments"
-		field="compliance_assessments"
-		cacheLock={cacheLocks['compliance_assessments']}
-		bind:cachedValue={formDataCache['compliance_assessments']}
-		label={m.complianceAssessments()}
-		multiple
-		disabled={initialData.compliance_assessments}
-	/>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="risk-assessments"
-		field="risk_assessments"
-		cacheLock={cacheLocks['risk_assessments']}
-		bind:cachedValue={formDataCache['risk_assessments']}
-		label={m.riskAssessments()}
-		multiple
-		disabled={initialData.risk_assessments}
-	/>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="quantitative-risk-studies"
-		field="crq_studies"
-		cacheLock={cacheLocks['crq_studies']}
-		bind:cachedValue={formDataCache['crq_studies']}
-		label={m.quantitativeRiskStudies()}
-		multiple
-		disabled={initialData.crq_studies}
-	/>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="ebios-rm"
-		field="ebios_studies"
-		cacheLock={cacheLocks['ebios_studies']}
-		bind:cachedValue={formDataCache['ebios_studies']}
-		label={m.ebiosRMStudies()}
-		multiple
-		disabled={initialData.ebios_studies}
-	/>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="entity-assessments"
-		field="entity_assessments"
-		cacheLock={cacheLocks['entity_assessments']}
-		bind:cachedValue={formDataCache['entity_assessments']}
-		label={m.entityAssessments()}
-		multiple
-		disabled={initialData.entity_assessments}
-	/>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="findings-assessments"
-		field="findings_assessments"
-		cacheLock={cacheLocks['findings_assessments']}
-		bind:cachedValue={formDataCache['findings_assessments']}
-		label={m.findingsAssessments()}
-		multiple
-		disabled={initialData.findings_assessments}
-	/>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="evidences"
-		field="evidences"
-		cacheLock={cacheLocks['evidences']}
-		bind:cachedValue={formDataCache['evidences']}
-		label={m.evidences()}
-		multiple
-		disabled={initialData.evidences}
-	/>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="security-exceptions"
-		field="security_exceptions"
-		cacheLock={cacheLocks['security_exceptions']}
-		bind:cachedValue={formDataCache['security_exceptions']}
-		label={m.securityExceptions()}
-		multiple
-		disabled={initialData.security_exceptions}
-	/>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="policies"
-		field="policies"
-		cacheLock={cacheLocks['policies']}
-		bind:cachedValue={formDataCache['policies']}
-		label={m.policies()}
-		multiple
-		disabled={initialData.policies}
-	/>
-</Dropdown>
+{#if !hasPresetAssessments}
+	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="compliance-assessments"
+			field="compliance_assessments"
+			cacheLock={cacheLocks['compliance_assessments']}
+			bind:cachedValue={formDataCache['compliance_assessments']}
+			label={m.complianceAssessments()}
+			multiple
+			disabled={initialData.compliance_assessments}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="risk-assessments"
+			field="risk_assessments"
+			cacheLock={cacheLocks['risk_assessments']}
+			bind:cachedValue={formDataCache['risk_assessments']}
+			label={m.riskAssessments()}
+			multiple
+			disabled={initialData.risk_assessments}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="quantitative-risk-studies"
+			field="crq_studies"
+			cacheLock={cacheLocks['crq_studies']}
+			bind:cachedValue={formDataCache['crq_studies']}
+			label={m.quantitativeRiskStudies()}
+			multiple
+			disabled={initialData.crq_studies}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="ebios-rm"
+			field="ebios_studies"
+			cacheLock={cacheLocks['ebios_studies']}
+			bind:cachedValue={formDataCache['ebios_studies']}
+			label={m.ebiosRMStudies()}
+			multiple
+			disabled={initialData.ebios_studies}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="entity-assessments"
+			field="entity_assessments"
+			cacheLock={cacheLocks['entity_assessments']}
+			bind:cachedValue={formDataCache['entity_assessments']}
+			label={m.entityAssessments()}
+			multiple
+			disabled={initialData.entity_assessments}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="findings-assessments"
+			field="findings_assessments"
+			cacheLock={cacheLocks['findings_assessments']}
+			bind:cachedValue={formDataCache['findings_assessments']}
+			label={m.findingsAssessments()}
+			multiple
+			disabled={initialData.findings_assessments}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="evidences"
+			field="evidences"
+			cacheLock={cacheLocks['evidences']}
+			bind:cachedValue={formDataCache['evidences']}
+			label={m.evidences()}
+			multiple
+			disabled={initialData.evidences}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="security-exceptions"
+			field="security_exceptions"
+			cacheLock={cacheLocks['security_exceptions']}
+			bind:cachedValue={formDataCache['security_exceptions']}
+			label={m.securityExceptions()}
+			multiple
+			disabled={initialData.security_exceptions}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="policies"
+			field="policies"
+			cacheLock={cacheLocks['policies']}
+			bind:cachedValue={formDataCache['policies']}
+			label={m.policies()}
+			multiple
+			disabled={initialData.policies}
+		/>
+	</Dropdown>
+{/if}

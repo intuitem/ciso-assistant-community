@@ -1140,8 +1140,8 @@ export const listViewFields = {
 		}
 	},
 	'validation-flows': {
-		head: ['ref_id', 'status', 'approver', 'domain'],
-		body: ['ref_id', 'status', 'approver', 'folder'],
+		head: ['ref_id', 'status', 'createdAt', 'approver', 'domain'],
+		body: ['ref_id', 'status', 'created_at', 'approver', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: {

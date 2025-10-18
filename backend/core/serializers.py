@@ -2400,6 +2400,32 @@ class TerminologyWriteSerializer(BaseModelSerializer):
 
 
 class ValidationFlowWriteSerializer(BaseModelSerializer):
+    def update(self, instance: ValidationFlow, validated_data: dict) -> ValidationFlow:
+        """
+        Override update to ensure only the assigned approver can modify
+        status and approver_observation fields.
+        """
+        request_user = self.context["request"].user
+
+        # Fields that only the approver can modify
+        approver_only_fields = {"status", "approver_observation"}
+
+        # Check if any approver-only fields are being modified
+        modified_approver_fields = approver_only_fields.intersection(
+            validated_data.keys()
+        )
+
+        if modified_approver_fields:
+            # Verify the user making the change is the assigned approver
+            if instance.approver != request_user:
+                raise PermissionDenied(
+                    {
+                        "error": "Only the assigned approver can modify status and observations"
+                    }
+                )
+
+        return super().update(instance, validated_data)
+
     class Meta:
         model = ValidationFlow
         fields = "__all__"
