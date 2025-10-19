@@ -744,6 +744,30 @@ def create_library(
                                 if val != "":
                                     choices[i]["compute_result"] = val
 
+                        # --- Optional: add_score column ------------------------------------------
+                        add_score_raw = str(data.get("add_score", "") or "").strip()
+                        if add_score_raw:
+                            score_lines = [line.strip() for line in add_score_raw.split("\n")]
+                            if len(score_lines) == 1:
+                                score_lines *= len(choices)
+                            if len(score_lines) != len(choices):
+                                raise ValueError(
+                                    f"(answers_definition) Invalid add_score count for answer ID '{answer_id}': "
+                                    f"{len(score_lines)} values for {n} choices."
+                                )
+
+                            for i, val in enumerate(score_lines):
+                                val = val.strip()
+                                if val != "":
+                                    try:
+                                        choices[i]["add_score"] = int(val)
+                                    except (TypeError, ValueError):
+                                        raise ValueError(
+                                            f"(answers_definition) Invalid add_score value '{val}' "
+                                            f"for answer ID '{answer_id}', choice #{i+1} — must be an integer (0 or negative allowed)."
+                                        )
+
+
                         answers_dict[answer_id] = {
                             "type": answer_type,
                             "choices": choices,
