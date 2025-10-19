@@ -324,7 +324,7 @@ The `_content` tab for a "answers" object contains the following columns:
   - description: Each description is separated by line breaks. To make a description written on several lines, start the next line with a `|`.
   - select_implementation_groups: A choice provokes the selection of the indicated Implementation Groups (IG). For the same choice, separate IGs with commas. To define IGs for each choice, separate IG groups with line breaks.
   - add_score: Positive or negative integer. The score is calculated based on this choice. All values selected within a requirement assessment are summed, and the sum is clipped by the scale. Each choice is separated by line breaks.
-  - compute_result: Boolean. True = `TRUE`/`T`/`YES`/`Y`/`O` ; False = `FALSE`/`F`/`NO`/`N`/`X` ; Undefined = Empty cell. If `TRUE`, this choice contributes to compliance. If `FALSE`, this choice contributes to non-compliance. Each boolean is separated by line breaks. If `Undefined`, the choice contributes to nothing.
+  - compute_result: Boolean. True = `YES` ; False = `NO` ; Undefined = Empty cell. If `YES`, this choice contributes to compliance. If `NO`, this choice contributes to non-compliance. Each boolean is separated by line breaks. If empty, the choice contributes to nothing.
   - color: Hexadecimal value in the format `#xxxxxx`. Each choice color is separated by line breaks.
 
 
