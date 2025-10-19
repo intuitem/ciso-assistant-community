@@ -425,7 +425,7 @@ def parse_risk_matrix(meta, content_ws, wb):
     return risk_matrix
 
 
-# --- Mapping logic ---------------------------------------------------------------
+# --- Mapping logic ------------------------------------------------------------
 
 
 def revert_relationship(relation: str):
@@ -437,8 +437,23 @@ def revert_relationship(relation: str):
         return relation
 
 
-# --- Main logic ---------------------------------------------------------------
+# --- Extract optional columns for answers -------------------------------------
 
+def _per_choice_lines(data: dict, col: str, n_choices: int, answer_id: str):
+    raw = str(data.get(col, "") or "").strip()
+    if not raw:
+        return None
+    lines = [line.strip() for line in raw.split("\n")]
+    if len(lines) == 1:
+        lines *= n_choices
+    if len(lines) != n_choices:
+        raise ValueError(
+            f"(answers_definition) Invalid {col} count for answer ID '{answer_id}': "
+            f"{len(lines)} values for {n_choices} choices."
+        )
+    return lines
+
+# --- Main logic ---------------------------------------------------------------
 
 def create_library(
     input_file: str, output_file: str, compat_mode: int = 0, verbose: bool = False
@@ -720,45 +735,24 @@ def create_library(
                             else:
                                 choices.append({"urn": "", "value": line})
 
-                        # --- Optional: compute_result column -------------------------------------
-                        compute_raw = str(data.get("compute_result", "") or "").strip()
-                        if compute_raw:
-                            compute_lines = [line.strip().lower() for line in compute_raw.split("\n")]
-
-                            # If only one value, apply it to all choices
-                            if len(compute_lines) == 1:
-                                compute_lines *= len(choices)
-
-                            if len(compute_lines) != len(choices):
-                                raise ValueError(
-                                    f"(answers_definition) Invalid compute_result count for answer ID '{answer_id}': "
-                                    f"{len(compute_lines)} values for {len(choices)} choices."
-                                )
-
+                        # --- Optional: compute_result -----------------------------------------
+                        compute_lines = _per_choice_lines(data, "compute_result", len(choices), answer_id)
+                        if compute_lines:
                             for i, val in enumerate(compute_lines):
-                                if val not in ("true", "false", ""):
+                                v = val.lower()
+                                if v not in ("true", "false", ""):
                                     raise ValueError(
                                         f"(answers_definition) Invalid compute_result value '{val}' "
                                         f"for answer ID '{answer_id}', choice #{i+1} — must be 'true', 'false', or empty."
                                     )
-                                if val != "":
-                                    choices[i]["compute_result"] = val
+                                if v:
+                                    choices[i]["compute_result"] = v
 
-                        # --- Optional: add_score column ------------------------------------------
-                        add_score_raw = str(data.get("add_score", "") or "").strip()
-                        if add_score_raw:
-                            score_lines = [line.strip() for line in add_score_raw.split("\n")]
-                            if len(score_lines) == 1:
-                                score_lines *= len(choices)
-                            if len(score_lines) != len(choices):
-                                raise ValueError(
-                                    f"(answers_definition) Invalid add_score count for answer ID '{answer_id}': "
-                                    f"{len(score_lines)} values for {n} choices."
-                                )
-
+                        # --- Optional: add_score ----------------------------------------------
+                        score_lines = _per_choice_lines(data, "add_score", len(choices), answer_id)
+                        if score_lines:
                             for i, val in enumerate(score_lines):
-                                val = val.strip()
-                                if val != "":
+                                if val:
                                     try:
                                         choices[i]["add_score"] = int(val)
                                     except (TypeError, ValueError):
@@ -767,27 +761,26 @@ def create_library(
                                             f"for answer ID '{answer_id}', choice #{i+1} — must be an integer (0 or negative allowed)."
                                         )
 
-                        # --- Optional: select_implementation_groups column -------------------------
-                        sig_raw = str(data.get("select_implementation_groups", "") or "").strip()
-                        if sig_raw:
-                            sig_lines = [line.strip() for line in sig_raw.split("\n")]
-
-                            # If only one value, apply it to all choices
-                            if len(sig_lines) == 1:
-                                sig_lines *= len(choices)
-
-                            if len(sig_lines) != len(choices):
-                                raise ValueError(
-                                    f"(answers_definition) Invalid select_implementation_groups count for answer ID '{answer_id}': "
-                                    f"{len(sig_lines)} values for {len(choices)} choices."
-                                )
-
+                        # --- Optional: select_implementation_groups ---------------------------
+                        sig_lines = _per_choice_lines(data, "select_implementation_groups", len(choices), answer_id)
+                        if sig_lines:
                             for i, val in enumerate(sig_lines):
-                                if val != "":
+                                if val:
                                     groups = [s.strip() for s in val.split(",") if s.strip()]
                                     if groups:
                                         choices[i]["select_implementation_groups"] = groups
 
+                        # --- Optional: color ---------------------------------------------------
+                        color_lines = _per_choice_lines(data, "color", len(choices), answer_id)
+                        if color_lines:
+                            for i, val in enumerate(color_lines):
+                                if val:
+                                    if not re.fullmatch(r"#([0-9a-fA-F]{6})", val):
+                                        raise ValueError(
+                                            f"(answers_definition) Invalid color value '{val}' "
+                                            f"for answer ID '{answer_id}', choice #{i+1} — must match #RRGGBB."
+                                        )
+                                    choices[i]["color"] = val.upper()
 
                         answers_dict[answer_id] = {
                             "type": answer_type,
