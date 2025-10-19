@@ -287,7 +287,7 @@
 	let classesSidebarOpen = $derived((open: boolean) => (open ? '' : '-ml-56 pointer-events-none'));
 </script>
 
-<div data-testid="sidebar">
+<div data-testid="sidebar" class="sidebar">
 	<aside
 		class="flex w-64 shadow transition-all duration-300 fixed h-screen overflow-visible top-0 left-0 z-20 {classesSidebarOpen(
 			open

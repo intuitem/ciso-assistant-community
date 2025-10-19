@@ -745,6 +745,8 @@
 	"waitingRiskAcceptances": "Hallo! Sie haben derzeit {number} Risiko{s} zur Annahme ausstehend. Sie finden sie im Menü „Governance“.",
 	"licenseSeats": "Lizenzplätze",
 	"licenseExpiration": "Ablauf der Lizenz",
+	"diskSpace": "Festplattenspeicher",
+	"diskUsed": "Festplatte verwendet",
 	"answer": "Antwort",
 	"questionnaireMode": "Fragebogenmodus",
 	"assessmentMode": "Bewertungsmodus",

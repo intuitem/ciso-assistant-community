@@ -114,6 +114,7 @@ interface Field {
 	keyNameOverride?: string;
 	field: string;
 	type?: 'date' | 'datetime';
+	tooltip?: string;
 }
 
 interface SelectField {
@@ -468,6 +469,25 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assets',
 		verboseName: 'Asset',
 		verboseNamePlural: 'Assets',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'name' },
+			{ field: 'ref_id' },
+			{ field: 'type' },
+			{ field: 'asset_class' },
+			{ field: 'parent_assets' },
+			{ field: 'support_assets' },
+			{ field: 'children_assets' },
+			{ field: 'owner' },
+			{ field: 'filtering_labels' },
+			{ field: 'security_objectives', tooltip: 'securityObjectivesTooltip' },
+			{ field: 'disaster_recovery_objectives', tooltip: 'disasterRecoveryObjectivesTooltip' },
+			{ field: 'security_capabilities', tooltip: 'securityCapabilitiesTooltip' },
+			{ field: 'recovery_capabilities', tooltip: 'recoveryCapabilitiesTooltip' },
+			{ field: 'reference_link' },
+			{ field: 'observation' }
+		],
 		reverseForeignKeyFields: [
 			{
 				field: 'assets',
@@ -481,13 +501,15 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
+			{ field: 'support_assets', urlModel: 'assets' },
 			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'asset_class', urlModel: 'asset-class' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
-			{ field: 'security_exceptions', urlModel: 'security-exceptions' }
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
+			{ field: 'overridden_children_capabilities', urlModel: 'asset-capabilities' }
 		],
 		selectFields: [{ field: 'type' }, { field: 'asset_class' }],
 		filters: [
@@ -506,6 +528,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assetClasses',
 		verboseName: 'assetclass',
 		verboseNamePlural: 'assetclasses'
+	},
+	'asset-capabilities': {
+		endpointUrl: 'asset-capabilities',
+		name: 'asset-capability',
+		localName: 'assetCapability',
+		localNamePlural: 'assetCapabilities',
+		verboseName: 'Asset capability',
+		verboseNamePlural: 'Asset capabilities'
 	},
 	users: {
 		name: 'user',
@@ -606,16 +636,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [{ field: 'status' }],
 		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
 			{ field: 'folder' },
-			{ field: 'filtering_labels' },
 			{ field: 'owner' },
 			{ field: 'status' },
 			{ field: 'link' },
+			{ field: 'expiry_date' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
-			{ field: 'name' },
-			{ field: 'description' },
-			{ field: 'expiry_date' }
+			{ field: 'filtering_labels' }
 		]
 	},
 	'evidence-revisions': {
@@ -813,6 +843,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'asset', urlModel: 'assets' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'asset_folder', urlModel: 'folders' },
+			{ field: 'children_assets', urlModel: 'assets' },
 			{ field: 'dependencies', urlModel: 'assets' },
 			{ field: 'associated_controls', urlModel: 'applied-controls' },
 			{
@@ -895,11 +926,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'folder' },
 			{ field: 'assigned_to' },
 			{ field: 'status' },
 			{ field: 'dpia_required' },
 			{ field: 'dpia_reference' },
-			{ field: 'folder' },
 			{ field: 'nature' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
@@ -1256,13 +1287,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		selectFields: [{ field: 'attack_stage', valueType: 'number' }, { field: 'icon' }],
 		detailViewFields: [
-			{ field: 'folder' },
 			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'threat' },
 			{ field: 'icon' },
 			{ field: 'attack_stage' },
+			{ field: 'folder' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' }
 		]
@@ -1499,6 +1530,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'start_date' },
 			{ field: 'due_date' },
+			{ field: 'folder' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' }
 		],
@@ -1579,18 +1611,18 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: [{ field: 'folder' }, { field: 'status' }],
 		detailViewFields: [
-			{ field: 'id' },
-			{ field: 'folder' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'id' },
+			{ field: 'status' },
 			{ field: 'authors' },
 			{ field: 'eta', type: 'date' },
 			{ field: 'due_date', type: 'date' },
-			{ field: 'status' },
 			{ field: 'risk_tolerance_display' },
 			{ field: 'loss_threshold_display' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'folder' },
 			{ field: 'observation' }
 		]
 	},
@@ -1615,10 +1647,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		detailViewFields: [
 			{ field: 'id' },
-			{ field: 'ref_id' },
-			{ field: 'folder' },
-			{ field: 'quantitative_risk_study' },
 			{ field: 'name' },
+			{ field: 'ref_id' },
+			{ field: 'quantitative_risk_study' },
 			{ field: 'description' },
 			{ field: 'priority' },
 			{ field: 'current_ale_display' },
@@ -1626,6 +1657,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets' },
 			{ field: 'threats' },
 			{ field: 'qualifications' },
+			{ field: 'folder' },
 			{ field: 'observation' },
 			{ field: 'is_selected' }
 		],
@@ -1663,9 +1695,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'risk_stage', endpointUrl: 'crq/quantitative-risk-hypotheses' }],
 		detailViewFields: [
 			{ field: 'id' },
-			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'ref_id' },
 			{ field: 'quantitative_risk_scenario' },
 			{ field: 'simulation_parameters_display' },
 			{ field: 'is_simulation_fresh' },
@@ -1726,11 +1758,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		endpointUrl: 'pmbok/generic-collections',
 		detailViewFields: [
 			{ field: 'id' },
-			{ field: 'folder' },
-			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'ref_id' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'folder' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		],
