@@ -767,6 +767,27 @@ def create_library(
                                             f"for answer ID '{answer_id}', choice #{i+1} — must be an integer (0 or negative allowed)."
                                         )
 
+                        # --- Optional: select_implementation_groups column -------------------------
+                        sig_raw = str(data.get("select_implementation_groups", "") or "").strip()
+                        if sig_raw:
+                            sig_lines = [line.strip() for line in sig_raw.split("\n")]
+
+                            # If only one value, apply it to all choices
+                            if len(sig_lines) == 1:
+                                sig_lines *= len(choices)
+
+                            if len(sig_lines) != len(choices):
+                                raise ValueError(
+                                    f"(answers_definition) Invalid select_implementation_groups count for answer ID '{answer_id}': "
+                                    f"{len(sig_lines)} values for {len(choices)} choices."
+                                )
+
+                            for i, val in enumerate(sig_lines):
+                                if val != "":
+                                    groups = [s.strip() for s in val.split(",") if s.strip()]
+                                    if groups:
+                                        choices[i]["select_implementation_groups"] = groups
+
 
                         answers_dict[answer_id] = {
                             "type": answer_type,
