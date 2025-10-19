@@ -217,8 +217,11 @@ def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_d
         if qtype in {"unique_choice", "multiple_choice"}:
             choices = []
             for j, choice in enumerate(answer_meta["choices"]):
-                choice_urn = f"{q_urn}:choice:{j + 1}"
-                choices.append({"urn": choice_urn, "value": choice["value"]})
+                # make a shallow copy so we don't mutate the original dict
+                entry = choice.copy()
+                # overwrite / add the per-question urn
+                entry["urn"] = f"{q_urn}:choice:{j + 1}"
+                choices.append(entry)
             question_entry["choices"] = choices
         question_entry["text"] = question_text
         question_block[q_urn] = question_entry
@@ -716,6 +719,30 @@ def create_library(
                                 choices[-1]["value"] += "\n" + line[1:].strip()
                             else:
                                 choices.append({"urn": "", "value": line})
+
+                        # --- Optional: compute_result column -------------------------------------
+                        compute_raw = str(data.get("compute_result", "") or "").strip()
+                        if compute_raw:
+                            compute_lines = [line.strip().lower() for line in compute_raw.split("\n")]
+
+                            # If only one value, apply it to all choices
+                            if len(compute_lines) == 1:
+                                compute_lines *= len(choices)
+
+                            if len(compute_lines) != len(choices):
+                                raise ValueError(
+                                    f"(answers_definition) Invalid compute_result count for answer ID '{answer_id}': "
+                                    f"{len(compute_lines)} values for {len(choices)} choices."
+                                )
+
+                            for i, val in enumerate(compute_lines):
+                                if val not in ("true", "false", ""):
+                                    raise ValueError(
+                                        f"(answers_definition) Invalid compute_result value '{val}' "
+                                        f"for answer ID '{answer_id}', choice #{i+1} — must be 'true', 'false', or empty."
+                                    )
+                                if val != "":
+                                    choices[i]["compute_result"] = val
 
                         answers_dict[answer_id] = {
                             "type": answer_type,
