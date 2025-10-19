@@ -954,6 +954,14 @@ def create_library(
                         node["annotation"] = str(data["annotation"]).strip()
                     if "typical_evidence" in data and data["typical_evidence"]:
                         node["typical_evidence"] = str(data["typical_evidence"]).strip()
+                    # Optional: weight (integer)
+                    if "weight" in data and data["weight"] is not None and str(data["weight"]).strip() != "":
+                        try:
+                            if (w := int(data["weight"])) <= 0:
+                                raise ValueError
+                            node["weight"] = w
+                        except (TypeError, ValueError):
+                            raise ValueError(f"(framework) Invalid weight at row #{row[0].row}: {data["weight"]} — must be a strictly positive integer.")
                     if (
                         "implementation_groups" in data
                         and data["implementation_groups"]
