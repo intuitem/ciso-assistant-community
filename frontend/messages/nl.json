@@ -745,6 +745,8 @@
 	"waitingRiskAcceptances": "Hallo! U hebt momenteel {number} risico{s} acceptatie in behandeling. U kunt ze vinden in het bestuursmenu.",
 	"licenseSeats": "Licentieplaatsen",
 	"licenseExpiration": "Licentie verloopt",
+	"diskSpace": "Schijfruimte",
+	"diskUsed": "Schijf gebruikt",
 	"answer": "Antwoord",
 	"questionnaireMode": "Vragenlijstmodus",
 	"assessmentMode": "Beoordelingsmodus",

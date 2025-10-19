@@ -536,13 +536,19 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 ## API and Swagger
 
-- The API is available only on dev mode. To get that, you need to switch on the backend, for instance, `export DJANGO_DEBUG=True`
-- The API documentation will be available on `<backend_endpoint>/api/schema/swagger/`, for instance <http://127.0.0.1:8000/api/schema/swagger/>
+- The interactive API documentation (Swagger UI) is available only in development mode.  
+  To enable it, set `export DJANGO_DEBUG=True` before starting the backend.  
+- Once the server is running, the documentation will be accessible at `<backend_endpoint>/api/schema/swagger/`,  
+  for example: <http://127.0.0.1:8000/api/schema/swagger/>.
 
-To interact with it:
+To interact with the API via Swagger or directly with HTTP calls:
 
-- call `/api/iam/login/` with your credentials in the body to get the token
-- pass it then as a header `Authorization: Token {token}` for your next calls. Notice it's `Token` not `Bearer`.
+1. Authenticate by sending a POST request to `/api/iam/login/` with your credentials in the request body. The response will include an authentication token.
+2. Include this token in the header of subsequent requests as: `Authorization: Token <token>`
+
+⚠️ Note: use `Token`, **not** `Bearer`.
+
+When using the interactive Swagger UI, simply log in, the token will be automatically handled for subsequent requests.
 
 ## Setting CISO Assistant for production
 
