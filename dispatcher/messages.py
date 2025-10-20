@@ -36,16 +36,26 @@ def get_resource_endpoint(message: dict, resource_endpoint: str | None = None) -
     return resource_endpoint
 
 
+def get_values(message: dict) -> dict:
+    """
+    Extracts and validates the update values from the message.
+    Returns the values dictionary.
+    """
+    values = message.get("values", {})
+
+    if not values:
+        raise Exception("No values provided in the message.")
+
+    return values
+
+
 def extract_update_data(message: dict) -> tuple[dict, dict]:
     """
     Extracts and validates the selector and update values from the message.
     Returns a tuple of (selector, values).
     """
+    values = get_values(message)
     selector = message.get("selector", {})
-    values = message.get("values", {})
-
-    if not values:
-        raise Exception("No update values provided in the message.")
 
     if not selector:
         raise Exception("No selector provided.")
@@ -120,6 +130,51 @@ def update_single_object(resource_endpoint: str, obj_id: str, values: dict) -> d
     return res.json() if res.text else {"id": obj_id, **values}
 
 
+def create_object(message: dict, resource_endpoint: str) -> str:
+    objects_endpoint = f"{API_URL}/{resource_endpoint}/"
+    values = get_values(message)
+    logger.info("Creating new object", values=values)
+    response = api.post(
+        objects_endpoint,
+        data=values,
+        headers={"Authorization": f"Token {get_access_token()}"},
+        verify=VERIFY_CERTIFICATE,
+    )
+    if not response.ok:
+        logger.error(
+            "Failed to create object",
+            status_code=response.status_code,
+            response=response.text,
+        )
+        raise Exception(
+            f"Failed to create object: {response.status_code}, {response.text}"
+        )
+    data = response.json()
+    object_id = data["id"]
+    logger.info("Created object", object_id=object_id, object=data)
+    return object_id
+
+
+def get_or_create(resource: str, selector: dict, values: dict, name: str) -> str:
+    """
+    Either finds an existing object using a selector or creates a new object.
+    """
+    if selector:
+        logger.info("Using provided selector to find object", selector=selector)
+        selector["target"] = "single"
+        object_ids = get_object_ids(selector, resource)
+        if not object_ids:
+            logger.error(
+                "No object found for the provided selector.", selector=selector
+            )
+            raise Exception("No object found for the provided selector.")
+        object_id = object_ids[0]
+        logger.info("Found object", object_id=object_id)
+    else:
+        object_id = create_object(resource, values, name)
+    return object_id
+
+
 def update_objects(
     message: dict,
     resource_endpoint: str | None = None,
@@ -180,6 +235,26 @@ def update_requirement_assessment(message: dict):
     return update_objects(message, "requirement-assessments")
 
 
+def create_folder(message: dict):
+    return create_object(message, "folders")
+
+
+def update_folder(message: dict):
+    return update_objects(message, "folders")
+
+
+def create_user(message: dict):
+    return create_object(message, "users")
+
+
+def update_user(message: dict):
+    return update_objects(message, "users")
+
+
+def update_user_group(message: dict):
+    return update_objects(message, "user-groups")
+
+
 def get_file_from_message(values: dict) -> tuple[str, io.IOBase]:
     """
     Determines how to load the file.
@@ -228,45 +303,6 @@ def get_file_from_message(values: dict) -> tuple[str, io.IOBase]:
         raise Exception(
             "No valid file source provided. Provide base64 file content or S3 bucket and key."
         )
-
-
-def get_or_create(resource: str, selector: dict, values: dict, name: str) -> str:
-    """
-    Either finds an existing object using a selector or creates a new object.
-    """
-    objects_endpoint = f"{API_URL}/{resource}/"
-    if selector:
-        logger.info("Using provided selector to find object", selector=selector)
-        selector["target"] = "single"
-        object_ids = get_object_ids(selector, resource)
-        if not object_ids:
-            logger.error(
-                "No object found for the provided selector.", selector=selector
-            )
-            raise Exception("No object found for the provided selector.")
-        object_id = object_ids[0]
-        logger.info("Found object", object_id=object_id)
-    else:
-        logger.info("Creating new object with name: {}", name, values=values)
-        response = api.post(
-            objects_endpoint,
-            data={"name": values.get("name", name)},
-            headers={"Authorization": f"Token {get_access_token()}"},
-            verify=VERIFY_CERTIFICATE,
-        )
-        if not response.ok:
-            logger.error(
-                "Failed to create object",
-                status_code=response.status_code,
-                response=response.text,
-            )
-            raise Exception(
-                f"Failed to create object: {response.status_code}, {response.text}"
-            )
-        data = response.json()
-        object_id = data["id"]
-        logger.info("Created object", object_id=object_id, object=data)
-    return object_id
 
 
 def upload_file_to_evidence(
@@ -389,3 +425,8 @@ def upload_attachment(message: dict):
 message_registry.add(update_applied_control)
 message_registry.add(update_requirement_assessment)
 message_registry.add(upload_attachment)
+message_registry.add(create_folder)
+message_registry.add(update_folder)
+message_registry.add(create_user)
+message_registry.add(update_user)
+message_registry.add(update_user_group)
