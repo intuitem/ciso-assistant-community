@@ -8,7 +8,6 @@ from collections import defaultdict, deque
 from typing import Optional
 import json
 import zlib
-from django.db.models import Q
 
 
 class MappingEngine:
@@ -161,17 +160,17 @@ class MappingEngine:
         self,
         source_audit: dict[str, str | dict[str, str]],
         requirement_mapping_set: dict,
-    ) -> dict[str, dict[str, str]]:
+    ) -> dict[str, str | dict[str, str]]:
         if not source_audit.get("requirement_assessments"):
             return {}
-        target_audit = defaultdict(dict)
+        target_audit: dict[str, str | dict[str, str]] = defaultdict(dict)
         # Framework info may be missing (library references frameworks not in DB).
         # Use .get() and treat missing info as "non equal" so we don't attempt
         # to copy scores that cannot be validated against a target framework.
-        target_fw_urn = requirement_mapping_set.get("target_framework_urn")
-        target_fw_info = self.frameworks.get(target_fw_urn)
-        if target_fw_info is not None:
-            ic(target_fw_info)
+        target_framework_urn = requirement_mapping_set.get("target_framework_urn", "")
+        target_framework = self.frameworks.get(target_framework_urn)
+        if target_framework is not None:
+            ic(target_framework)
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
             dst = mapping["target_requirement_urn"]
@@ -186,9 +185,11 @@ class MappingEngine:
                 # copy non-score fields to avoid misrepresenting scores.
                 src_assessment = source_audit["requirement_assessments"][src]
                 if (
-                    target_fw_info
-                    and target_fw_info.get("min_score") == source_audit.get("min_score")
-                    and target_fw_info.get("max_score") == source_audit.get("max_score")
+                    target_framework
+                    and target_framework.get("min_score")
+                    == source_audit.get("min_score")
+                    and target_framework.get("max_score")
+                    == source_audit.get("max_score")
                 ):
                     target_audit[dst] = src_assessment
                 else:
