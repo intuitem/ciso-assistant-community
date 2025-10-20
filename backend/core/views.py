@@ -6065,7 +6065,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
                 ic(best_results)
 
-                requirement_assessments_to_update = []
+                requirement_assessments_to_update: list[RequirementAssessment] = []
 
                 target_requirement_assessments = RequirementAssessment.objects.filter(
                     compliance_assessment=instance,
@@ -6085,6 +6085,35 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     ["result", "status", "observation"],
                     batch_size=500,
                 )
+
+                for ra in requirement_assessments_to_update:
+                    if best_results[ra.requirement.urn].get("applied_controls"):
+                        ra.applied_controls.add(
+                            *[
+                                control
+                                for control in best_results[ra.requirement.urn][
+                                    "applied_controls"
+                                ]
+                            ]
+                        )
+                    if best_results[ra.requirement.urn].get("evidences"):
+                        ra.evidences.add(
+                            *[
+                                evidence
+                                for evidence in best_results[ra.requirement.urn][
+                                    "evidences"
+                                ]
+                            ]
+                        )
+                    if best_results[ra.requirement.urn].get("security_exceptions"):
+                        ra.security_exceptions.add(
+                            *[
+                                exception
+                                for exception in best_results[ra.requirement.urn][
+                                    "security_exceptions"
+                                ]
+                            ]
+                        )
 
             """
             # Handle different framework case

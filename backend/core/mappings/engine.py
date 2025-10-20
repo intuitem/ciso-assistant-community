@@ -32,6 +32,8 @@ class MappingEngine:
             "observation",
         ]
 
+        self.m2m_fields = ["applied_controls", "security_exceptions", "evidences"]
+
     # --- Compression helpers ---
     def _compress_rms(self, obj: dict) -> bytes:
         return zlib.compress(json.dumps(obj, separators=(",", ":")).encode("utf-8"))
@@ -261,17 +263,10 @@ class MappingEngine:
             audit_results["requirement_assessments"][ra.requirement.urn] = {
                 field: getattr(ra, field) for field in fields
             }
-
-            audit_results["requirement_assessments"][ra.requirement.urn][
-                "security_exceptions"
-            ] = ra.security_exceptions.all().values()
-            audit_results["requirement_assessments"][ra.requirement.urn][
-                "applied_controls"
-            ] = ra.applied_controls.all().values()
-            audit_results["requirement_assessments"][ra.requirement.urn][
-                "evidences"
-            ] = ra.evidences.all().values()
-
+            for m2m_field in self.m2m_fields:
+                audit_results["requirement_assessments"][ra.requirement.urn][
+                    m2m_field
+                ] = getattr(ra, m2m_field).all().values_list("id", flat=True)
         return audit_results
 
     def summary_results(
