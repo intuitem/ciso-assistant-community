@@ -97,7 +97,7 @@ erDiagram
 
 ```
 
-### Project management model
+* [ ] Project management model
 
 ```mermaid
 erDiagram
@@ -254,7 +254,9 @@ erDiagram
         int     order_id
         json    implementation_groups
         boolean assessable
-        json    question
+        json    questions
+        int     weight
+        string  importance
     }
 
     REFERENCE_CONTROL {
@@ -317,7 +319,7 @@ erDiagram
         bool   selected
         string review_conclusion
         string review_observation
-        json   answer
+        json   answers
     }
 
     EVIDENCE {
@@ -650,13 +652,40 @@ The implementation_groups field contains a comma-separated list of implementatio
 {
   "ref_id": "1",
   "name": "Foundational",
-  "description": "Practices that correspond to the basic safeguarding requirements specified in 48 CFR 52.204-21 commonly referred to as the FAR Clause"
+  "description": "Practices that correspond to the basic safeguarding requirements specified in 48 CFR 52.204-21 commonly referred to as the FAR Clause",
+  "default_selected": true
 }
 ```
 
 A requirement node can be covered by typical reference controls. A requirement node can cover typical threats. This information is provided in the form of optional links between requirement nodes and reference controls/threats. This is only informative, but is an important added value of CISO Assistant.
 
+A requirement node can have a positive integer weight, that is used for score weighting. The default weight (if undefined) is 1.
+
+A requirement node has an "importance" field that can take the following values: mandatory/recommended/nice to have/undefined. The default value is "undefined".
+
+Combining importance=mandatory with result=non-compliant/partially conpliant can be used to generate a list of attention points in an audit.
+
 The order_id variable allows to sort the requirements nodes, it starts at 0 and is incremented automatically in a given group at import.
+
+```yaml
+{
+  - urn: urn:intuitem:risk:req_node:example-questionnaire:1_governance-1
+        assessable: true
+        weight: 1
+        importance: mandatory
+        depth: 2
+        ref_id: Governance-1
+        name: Access and governance policy
+        description: >
+          The company implements an access control and governance policy tailored to its needs.
+        annotation: >
+          A well-defined access policy ensures the protection of sensitive systems and data.
+        typical_evidence: >
+          Copy of the access management policy, description of roles and responsibilities.
+        implementation_groups:
+          - "base"
+}
+```
 
 A framework always has a numerical score scale from min_score to max_score. If not explicit, the default values are 0 and 100 (percentage). It is also possible to have a scores_definition json, that contains a list of score levels objects. Each score level is an object containing the following fields (example from TISAX):
 
@@ -734,6 +763,8 @@ Both types of assessments have common fields:
 - a status: (--/planned/in progress/in review/done/deprecated) that facilitates reporting.
 - a list of authors
 - a list of reviewers
+- an observation
+- an is_locked boolean
 
 An assessment review can be asked. When at least one principal is defined, the _done_ status can only be set if a representant of each principal has reviewed and validated the assessment.
 
@@ -752,16 +783,19 @@ Here are the specific fields for requirement assessments:
 - score: --/`<integer value from min_score to max_score>`.
 - a status: (todo/in progress/in review/done) that facilitates reporting.
 
-The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
+The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requirement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
 
 Requirement assessments can have attached evidences. An evidence contains a name, a description, an attached file, a url link.
 
 The auditor is free to use the result field (qualitative assessment), the score field (quantitative assessment), or both of them.
 
 Compliance assessments have a selected_implementation_groups field that contains the selected implementation groups. The None default value consists in selecting all groups, which makes sense also for the case no implementation groups are defined.
+
 For the sake of performance, when a change is done on the selected implementation groups, the "selected" field of corresponding requirement assessments is updated. When changing the selection, no data shall be lost, so auditors can easily test the effect of various selections.
 
 Note: the selection is persistent, and used in particular for reporting and analytics. The UX could provide dynamic capacity to show or hide implementation groups independently of the selection (e.g. a button "show unselected requirements").
+
+If the framework used by the compliance assessment has default_selected implementation groups, then the corresponding IGs are selected initialy.
 
 Compliance assessments have a score scale (min_score, max_score, score definition) that is inherited from the corresponding framework. But it is possible during the creation of the assessment to specify another score scale. The following hardcoded score scales are proposed as an alternative:
 
@@ -770,9 +804,164 @@ Compliance assessments have a score scale (min_score, max_score, score definitio
 - 0-5 (0-5, no score definition)
 - 0-10 (0-10, no score definition)
 
+Note: for now, the score scale is not selectable, it is defined by the framework.
+
+### Question and answer format
+
+The format for questions and answers json fields will evolve over time. The initial format is the following:
+
+- questions:
+
+```json
+{
+  "urn:intuitem:risk:req_node:example:a.1:question:1": {
+    "type": "unique_choice",
+    "text": "Do you maintain an access control policy?",
+    "choices": [
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
+        "value": "yes",
+        "add_score": 20,
+        "compute_result": true,
+        "select_implementation_groups": ["1"],
+        "description": "Indicates that a formal access control policy is in place", // (optional, to add context if needed without overloading the interface),
+        "color": "#28a745" // to be retrieved with the excel cell
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
+        "value": "no",
+        "add_score": 0,
+        "compute_result": false,
+        "description": "No policy exists or is documented",
+        "color": "#dc3545"
+      }
+    ]
+  },
+
+  "urn:intuitem:risk:req_node:example:a.1:question:2": {
+    "type": "unique_choice",
+    "text": "Is the policy reviewed annually?",
+    "depends_on": {
+      "question": "urn:intuitem:risk:req_node:example:a.1:question:1",
+      "answers": [
+        "urn:intuitem:risk:framework:example:answer01:choice:1"
+      ],
+      "condition": "any"
+    },
+    "choices": [
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer02:choice:1",
+        "value": "yes",
+        "add_score": 10,
+        "compute_result": true,
+        "select_implementation_groups": ["2"]
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer02:choice:2",
+        "value": "no",
+        "add_score": 0,
+        "compute_result": false
+      }
+    ]
+  },
+
+  "urn:intuitem:risk:req_node:example:a.1:question:3": {
+    "type": "multiple_choice",
+    "text": "Which access controls are implemented?",
+    "depends_on": {
+      "question": "urn:intuitem:risk:req_node:example:a.1:question:1",
+      "answers": [
+        "urn:intuitem:risk:framework:example:answer01:choice:1"
+      ],
+      "condition": "any" // or "all" (optional, defaults to "any")
+    },
+    "choices": [
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer03:choice:1",
+        "value": "Role-based access control",
+        "add_score": 5,
+        "compute_result": true
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer03:choice:2",
+        "value": "MFA for privileged accounts",
+        "add_score": 5,
+        "compute_result": true,
+        "select_implementation_groups": ["1", "2"]
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer03:choice:3",
+        "value": "Audit logging",
+        "add_score": 5,
+        "compute_result": true
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer03:choice:4",
+        "value": "None of the above", // or N/A
+        "add_score": 0,
+        "compute_result": false
+      }
+    ]
+  }
+}
+```
+
+- answers:
+
+```json
+{
+    "urn:intuitem:risk:req_node:example:a.1:question:1": "urn:intuitem:risk:framework:example:answer01:choice:1",
+    "urn:intuitem:risk:req_node:example:a.1:question:2": "urn:intuitem:risk:framework:example:answer02:choice:2",
+    "urn:intuitem:risk:req_node:example:a.1:question:3": [
+        "urn:intuitem:risk:framework:example:answer03:choice:1",
+        "urn:intuitem:risk:framework:example:answer03:choice:2"
+    ]
+    ...
+}
+```
+
+The schema variable follows JSON Schema standard (WIP).
+
+### Automation based on questions
+
+Questions can have additional fieds for automation.
+
+#### Score computing
+
+- add_score: `<integer-value>`
+
+The score is calculated based on this choice. The integer value can be positive or negative. All values selected within a requirement assessment are summed, and the sum is clipped by the scale.
+
+The score cannot be changed manually as long as one choice with add_score is selected.
+
+#### Result computing
+
+- compute_result: `<boolean-value>`
+
+If true, this choice contributes to compliance. If false, this choice contributes to non-compliance.
+
+When compute_result is defined for one or several answered questions, the result is calculated based on the following rules:
+
+- if all answered questions with compute_result have true values, the result is "compliant"
+- else if at least one answered question with compute_result has a true value, the result is "partially compliant"
+- else, the result is "non compliant".
+
+To select "not-applicable" result, the user shall not answer any of the questions with compute_result flag.
+
+#### IG piloted selection
+
+- select_implementation_groups: <IG1, IG2, ...>
+
+This choice provokes the selection of the indicated IG to the selected_implementation_groups of the compliance assessment.
+
+If there is at least one select_implementation_groups field, then the selection of IGs is deemded to be in piloted mode:
+
+- The user cannot select IGs
+- The list of selected IGs is computed as the union of the initial implementation_groups with the IGs that are selected via the select_implementation_groups choices. This is done at each saving of a requirement assessment.
+
 ### Requirement Mapping set
 
-Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see <https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf>).
+Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see [https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf](https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf)).
 
 A requirement mapping set contains a unique specific attribute in json format called mapping_rules.
 
@@ -907,6 +1096,7 @@ The performance of the UX shall be optimized, by avoiding to preload all possibl
 ## Incidents
 
 Significant security incidents can be traced in CISO Assistant. An incident object has the following fields:
+
 - ref_id/name/description
 - qualifications
 - severity (like security exceptions)
@@ -917,6 +1107,7 @@ Incidents can be linked to threats, assets, owners.
 Incidents contain a table of timeline_entry objects.
 
 Timeline_entry objects have the following fields:
+
 - entry (a string to describe the entry)
 - entry_type within detection/mitigation/observation/status_changed/severity_changed
 - observation
@@ -1146,6 +1337,7 @@ A user can be authenticated either locally or with SSO.
 When SSO is activated, all users can use SSO.
 
 When the force_sso global flag is set, all users without keep_local_login:
+
 - have their password disabled,
 - cannot ask for a password reset,
 - cannot have their password changed by an administrator.
@@ -1239,12 +1431,6 @@ erDiagram
         string      description
     }
 
-    COMPLIANCE_ASSESSMENT {
-        string      review_conclusion
-        string      review_observation
-        json        implementation_groups_selector
-    }
-
 ```
 
 ```mermaid
@@ -1301,83 +1487,6 @@ This represents a person that is linked to an entity (typically an employee), an
 
 There is no link between representatives (modeling of the ecosystem) and users of the solution (access control mechanism).
 
-### Evolution of existing models
-
-## Assessments (risk/compliance/entity)
-
-- add field observation
-
-### Requirement assessment
-
-- add the following fields:
-  - answers: a json corresponding to the answers of the requirement node questions.
-
-### Compliance assessment
-
-- add the following fields:
-  - implementation_group_selector: a json describing a form that allows the selection of relevant implementation groups by answering simple questions.
-
-### Requirement node
-
-- Add the following fields:
-  - questions: a json corresponding to the optional questions of the requirement node.
-
-### Applied control
-
-- Add a "contract" category
-- Add a foreign key "contract" to point to a contract
-
-The foreign key contract shall be non-null only if the category is set to "contract". The UX shall reflect this constraint.
-
-Note: in the future, we will use the same approach for policies.
-
-### Question and answer format
-
-The format for questions and answers json fields will evolve over time. The initial format is the following:
-
-- questions:
-
-```json
-{
-    "urn:intuitem:risk:req_node:example:a.1:question:1": {
-        "type": "unique_choice",
-        "choices": [
-            {
-                "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
-                "value": "yes"
-            },
-            {
-                "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
-                "value": "no"
-            },
-            {
-                "urn": "urn:intuitem:risk:framework:example:answer01:choice:3",
-                "value": "n/a"
-            }
-        ],
-        "text": "Question title",
-    },
-    "urn:intuitem:risk:req_node:example:a.1:question:2": {
-    ...
-    }
-}
-```
-
-- answers:
-
-```json
-{
-    "urn:intuitem:risk:req_node:example:a.1:question:1": [
-        "urn:intuitem:risk:framework:example:answer01:choice:1",
-        "urn:intuitem:risk:framework:example:answer01:choice:2"
-    ],
-    "urn:intuitem:risk:req_node:example:a.1:question:2": "yes",
-    ...
-}
-```
-
-The schema variable follows JSON Schema standard (WIP).
-
 ### Enclave security approach
 
 The objects manipulated by the third party (compliance assessment and evidences) are put in a dedicated folder called an "enclave". This folder is a subfolder of the domain. Enclaves are not shown in the UI, they are only used for security implementation.
@@ -1387,9 +1496,6 @@ The objects manipulated by the third party (compliance assessment and evidences)
 - The main entity is automatically created and owns the global domain. The name is set to "Main", and can be changed.
 - Other entities own no domain.
 - Solutions are automatically provided to the main entity.
-- The change in applied control is not retained.
-- implementation_group_selector is not retained.
-- ebios-RM parameters are not retained.
 
 ## EBIOS-RM evolution
 
@@ -1643,9 +1749,11 @@ erDiagram
 This new type of assessments is intended to gather and manage findings. The section is present in governance with the name "follow-up"/"Suivi".
 
 A findings assessment has the following specific fields:
+
 - category: --/pentest/audit/internal
 
 A finding ("constat") has the following fields:
+
 - ref_id/name/description
 - severity, like for vulnerabilities
 - a status among: --/draft/Identified/Confirmed/Dismissed/Assigned/In Progress/Mitigated/Resolved/Deprecated
@@ -1755,6 +1863,7 @@ The task_date is copied in the due_date of the task_node for a non-recurring tas
 When enabled is set to False, the schedule is suspended (for recurring task), and generated tasks are hidden (past and future).
 
 The following concepts will not be included in the MVP:
+
 - subtasks
 - exceptions
 - overdue_behavior (will be NO_IMPACT)
@@ -1762,6 +1871,7 @@ The following concepts will not be included in the MVP:
 ### Implementation
 
 Future task_nodes are generated partially in advance at creation/update of a task_template and with a daily refresh done with huey. This shall take in account end_date, and the following limits:
+
 - 5 years for yearly frequency
 - 24 months for monthly frequency
 - 53 weeks for weekly frequency
@@ -1878,6 +1988,7 @@ QUANT_AGGREGATION {
 7. All the LEC generated for the study are available in a reporting section.
 
 The json field `estimated_parameters` contains:
+
 - the reference period as a drop-down value (hour/day/week/month/year)
 - the reference period in seconds (for calculations)
 - the probability if a real that can be entered directly as percentage, or cacluated from:
@@ -1893,6 +2004,7 @@ The json field `simulation_data` contains the MC simulation parameters (or a sam
 An aggregation can only be simulated if it contains compatible hypotheses. Two hypotheses are compatible if and only if the don't contain any control that is added in one and removed from the other.
 
 Notes for MVP:
+
 - the proability is entered as a percentage
 - the reference period is hardcoded to year
 - aggregations are not implemented
