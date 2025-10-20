@@ -10,6 +10,8 @@
 	import Checkbox from '../Checkbox.svelte';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import { page } from '$app/state';
+	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -84,18 +86,39 @@
 	label={m.perimeter()}
 	hidden={initialData.perimeter}
 />
-<AutocompleteSelect
-	{form}
-	disabled={object.id}
-	optionsEndpoint="frameworks"
-	optionsDetailedUrlParameters={[['baseline', initialData.baseline]]}
-	field="framework"
-	cacheLock={cacheLocks['framework']}
-	bind:cachedValue={formDataCache['framework']}
-	label={m.targetFramework()}
-	onChange={async (e) => handleFrameworkChange(e)}
-	mount={async (e) => handleFrameworkChange(e)}
-/>
+{#if context === 'fromBaseline' && initialData.baseline}
+	<AutocompleteSelect
+		{form}
+		disabled={object.id}
+		optionsEndpoint="compliance-assessments/{page.params.id}/frameworks"
+		field="framework"
+		cacheLock={cacheLocks['framework']}
+		optionsLabelField="str"
+		optionsValueField="id"
+		bind:cachedValue={formDataCache['framework']}
+		label={m.targetFramework()}
+		onChange={async (e) => handleFrameworkChange(e)}
+		mount={async (e) => handleFrameworkChange(e)}
+		includeAllOptionFields
+	>
+		{#snippet optionSnippet(option: Record<string, any>)}
+			<FrameworkResultSnippet {option} />
+		{/snippet}
+	</AutocompleteSelect>
+{:else}
+	<AutocompleteSelect
+		{form}
+		disabled={object.id}
+		optionsEndpoint="frameworks"
+		optionsDetailedUrlParameters={[['baseline', initialData.baseline]]}
+		field="framework"
+		cacheLock={cacheLocks['framework']}
+		bind:cachedValue={formDataCache['framework']}
+		label={m.targetFramework()}
+		onChange={async (e) => handleFrameworkChange(e)}
+		mount={async (e) => handleFrameworkChange(e)}
+	/>
+{/if}
 {#if implementationGroupsChoices.length > 0}
 	<AutocompleteSelect
 		multiple
