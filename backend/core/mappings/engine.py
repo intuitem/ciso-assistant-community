@@ -7,14 +7,14 @@ import zlib
 
 
 class MappingEngine:
-    frameworks=None
-    direct_mappings=None
+    frameworks = None
+    direct_mappings = None
 
     def __init__(self):
         # Values are compressed (zlib) JSON bytes of the RMS object.
         self.all_rms: dict[tuple[str, str], bytes] = {}
         self.framework_mappings: dict[str, list[str]] = defaultdict(list)
-        
+
         if self.frameworks == None:
             self.frameworks = defaultdict(dict)
             self.load_frameworks()
@@ -30,7 +30,6 @@ class MappingEngine:
             "is_scored",
             "observation",
         ]
-
 
     # --- Compression helpers ---
     def _compress_rms(self, obj: dict) -> bytes:
