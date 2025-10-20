@@ -71,7 +71,6 @@ def extract_translations_from_metadata(meta_dict, prefix):
 
 # --- Sheet parsing ------------------------------------------------------------
 
-
 def parse_key_value_sheet(sheet):
     result = {}
     for row in sheet.iter_rows(min_row=1, max_col=2, values_only=True):
@@ -992,6 +991,10 @@ def create_library(
                         node["translations"] = translations
                     if node.get("urn") in all_urns:
                         raise ValueError(f"urn already used: {node.get('urn')}")
+
+                    if node.get("assessable", False) is False and node.get("annotation", ""):
+                        raise ValueError(f"Requirement(with name={repr(node.get("name"))}) can't have a non-empty 'annotation' because it is not an assessable requirement.")
+
                     all_urns.add(node.get("urn"))
                     requirement_nodes.append(node)
 
