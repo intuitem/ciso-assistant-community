@@ -792,11 +792,14 @@ def create_library(
                             for i, val in enumerate(score_lines):
                                 if val:
                                     try:
-                                        choices[i]["add_score"] = int(val)
+                                        score_to_add = int(val)
+                                        if score_to_add != 0:
+                                            choices[i]["add_score"] = score_to_add
+
                                     except (TypeError, ValueError):
                                         raise ValueError(
                                             f"(answers_definition) Invalid add_score value '{val}' "
-                                            f"for answer ID '{answer_id}', choice #{i+1} — must be an integer (0 or negative allowed)."
+                                            f"for answer ID '{answer_id}', choice #{i+1}. Must be an integer (0 or negative allowed)."
                                         )
 
                         # --- Optional: select_implementation_groups ---------------------------
