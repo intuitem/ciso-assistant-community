@@ -844,6 +844,8 @@ def create_library(
                 if verbose:
                     print(f'💬 ℹ️  No "Score Definition" found')
 
+
+            # [CONTENT] Implementation Groups
             ig_name = meta.get("implementation_groups_definition")
             if ig_name and ig_name in object_blocks:
                 ig_content = object_blocks[ig_name]["content_sheet"]
@@ -863,10 +865,12 @@ def create_library(
                     ig_entry = {
                         "ref_id": str(data.get("ref_id", "")).strip(),
                         "name": str(data.get("name", "")).strip(),
-                        "description": str(data.get("description", "")).strip()
-                        if data.get("description")
-                        else None,
+                        "description": str(data.get("description", "")).strip() if data.get("description") else None,
                     }
+
+                    if data.get("default_selected") is not None:
+                        ig_entry["default_selected"] = bool(data.get("default_selected"))
+                    
                     translations = extract_translations_from_row(ig_header, row)
                     if translations:
                         ig_entry["translations"] = translations
