@@ -6115,79 +6115,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                             ]
                         )
 
-            """
-            # Handle different framework case
-            elif baseline and baseline.framework != instance.framework:
-                # Fetch mapping set and prefetch related data
-                mapping_set = RequirementMappingSet.objects.select_related(
-                    "source_framework", "target_framework"
-                ).get(
-                    target_framework=serializer.validated_data["framework"],
-                    source_framework=baseline.framework,
-                )
-
-                # Compute results and get all affected requirement assessments
-                computed_assessments, assessment_source_dict = (
-                    instance.compute_requirement_assessments_results(
-                        mapping_set, baseline
-                    )
-                )
-
-                # Collect all source requirement assessment IDs
-                source_assessment_ids = itertools.chain.from_iterable(
-                    assessment_source_dict.values()
-                )
-
-                # Fetch all baseline requirement assessments in one query
-                baseline_assessments = {
-                    str(ra.id): ra
-                    for ra in RequirementAssessment.objects.filter(
-                        id__in=source_assessment_ids
-                    ).prefetch_related("evidences", "applied_controls")
-                }
-
-                # Prepare bulk updates
-                updates = []
-                m2m_operations = []
-
-                for requirement_assessment in computed_assessments:
-                    selected_source_id = requirement_assessment.mapping_inference[
-                        "source_requirement_assessment"
-                    ]["id"]
-                    selected_baseline_ra = baseline_assessments[selected_source_id]
-
-                    # Update observation
-                    requirement_assessment.observation = (
-                        selected_baseline_ra.observation
-                    )
-                    updates.append(requirement_assessment)
-
-                    source_ids = assessment_source_dict[requirement_assessment]
-                    baseline_requirement_assessments = [
-                        baseline_assessments[source_id] for source_id in source_ids
-                    ]
-
-                    # Store M2M operations for later
-                    m2m_operations.append(
-                        (
-                            requirement_assessment,
-                            selected_baseline_ra.evidences.all(),
-                            itertools.chain.from_iterable(
-                                requirement_assessment.applied_controls.all()
-                                for requirement_assessment in baseline_requirement_assessments
-                            ),
-                        )
-                    )
-
-                # Bulk update observations
-                if updates:
-                    RequirementAssessment.objects.bulk_update(updates, ["observation"])
-
-                # Handle M2M relationships in bulk
-                for assessment, evidences, controls in m2m_operations:
-                    assessment.evidences.add(*[ev.id for ev in evidences])
-                    assessment.applied_controls.add(*[ac.id for ac in controls])
-
             # Handle applied controls creation
             if create_applied_controls:
                 # Prefetch all requirement assessments with their suggestions
@@ -6198,7 +6125,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 # Create applied controls in bulk for each assessment
                 for requirement_assessment in assessments:
                     requirement_assessment.create_applied_controls_from_suggestions()
-            """
 
     def perform_update(self, serializer):
         compliance_assessment = serializer.save()
