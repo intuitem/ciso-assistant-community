@@ -1023,6 +1023,17 @@ def create_library(
                         node["annotation"] = str(data["annotation"]).strip()
                     if "typical_evidence" in data and data["typical_evidence"]:
                         node["typical_evidence"] = str(data["typical_evidence"]).strip()
+                    # Optional: importance: mandatory/recommended/nice to have/undefined or empty (= undefined)
+                    if "importance" in data and data["importance"]:
+                        
+                        importance = str(data["importance"]).strip().lower()
+                        
+                        if importance not in ["mandatory", "recommended", "nice to have", "undefined"]:
+                            raise ValueError(f'(framework_content) Invalid "importance" at row #{row[0].row}: "{data["importance"]}". Must be "mandatory"/"recommended"/"nice to have"/"undefined" or empty.')
+
+                        if importance != "undefined":
+                            node["importance"] = importance
+
                     # Optional: weight (integer)
                     if "weight" in data and data["weight"] is not None and str(data["weight"]).strip() != "":
                         try:
