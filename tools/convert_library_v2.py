@@ -808,6 +808,11 @@ def create_library(
                             for i, val in enumerate(sig_lines):
                                 if val:
                                     groups = [s.strip() for s in val.split(",") if s.strip()]
+                                    
+                                    # If IG for choice == "/undefined", continue
+                                    if len(groups) == 1 and groups[0].lower() == "/undefined":
+                                        continue
+                                    
                                     if groups:
                                         choices[i]["select_implementation_groups"] = groups
 
