@@ -3723,13 +3723,35 @@ class AppliedControl(
         verbose_name_plural = _("Applied controls")
 
     def save(self, *args, **kwargs):
+        from core.webhooks import send_webhook_notification, get_applied_control_payload
+        is_new = self.pk is None
+        old_status = None
+        if not is_new:
+            try:
+                old = type(self).objects.get(pk=self.pk)
+                old_status = old.status
+            except type(self).DoesNotExist:
+                old_status = None
+        
+        # Original save logic
         if self.reference_control and self.category is None:
             self.category = self.reference_control.category
         if self.reference_control and self.csf_function is None:
             self.csf_function = self.reference_control.csf_function
         if self.status == "active":
             self.progress_field = 100
+        
         super(AppliedControl, self).save(*args, **kwargs)
+        
+        # After save, check for status change or creation
+        if is_new:
+            payload = get_applied_control_payload(self, old_status=None)
+            payload['type'] = 'applied_control_created'
+            send_webhook_notification(payload)
+        elif old_status != self.status:
+            payload = get_applied_control_payload(self, old_status)
+            payload['type'] = 'applied_control_status_changed'
+            send_webhook_notification(payload)
 
     @property
     def risk_scenarios(self):
@@ -5045,12 +5067,35 @@ class ComplianceAssessment(Assessment):
         )
 
     def save(self, *args, **kwargs) -> None:
+        from core.webhooks import send_webhook_notification, get_compliance_assessment_payload
+        is_new = self.pk is None
+        old_status = None
+        if not is_new:
+            try:
+                old = type(self).objects.get(pk=self.pk)
+                old_status = old.status
+            except type(self).DoesNotExist:
+                old_status = None
+        # Default framework‐provided scoring when unset
         if self.min_score is None:
-            self.min_score = self.framework.min_score
-            self.max_score = self.framework.max_score
+            self.min_score = self.framework.min_score or 0
+        if self.max_score is None:
+            self.max_score = self.framework.max_score or 100
+        if not self.scores_definition:
             self.scores_definition = self.framework.scores_definition
         super().save(*args, **kwargs)
+        # Restore daily metrics tracking
         self.upsert_daily_metrics()
+
+        # After save, check for status change or creation
+        if is_new:
+            payload = get_compliance_assessment_payload(self, old_status=None)
+            payload['type'] = 'compliance_assessment_created'
+            send_webhook_notification(payload)
+        elif old_status != self.status:
+            payload = get_compliance_assessment_payload(self, old_status)
+            payload['type'] = 'compliance_assessment_status_changed'
+            send_webhook_notification(payload)
 
     def create_requirement_assessments(
         self, baseline: Self | None = None
@@ -5748,19 +5793,25 @@ class ComplianceAssessment(Assessment):
         return requirement_assessments, assessment_source_dict
 
     def get_progress(self) -> int:
-        requirement_assessments = list(
-            self.get_requirement_assessments(include_non_assessable=False)
-        )
-        total_cnt = len(requirement_assessments)
-        assessed_cnt = len(
-            [
-                r
-                for r in requirement_assessments
-                if (r.result != RequirementAssessment.Result.NOT_ASSESSED)
-                or r.score != None
-            ]
-        )
-        return int((assessed_cnt / total_cnt) * 100) if total_cnt > 0 else 0
+        """Get the progress percentage based on assessed requirements."""
+        total_requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self
+        ).count()
+        if total_requirements == 0:
+            return 0
+        assessed_requirements = RequirementAssessment.objects.filter(
+            compliance_assessment=self, status=RequirementAssessment.Status.DONE
+        ).count()
+        return int((assessed_requirements / total_requirements) * 100)
+
+    def get_compliance_percentage(self) -> int:
+        """Get the compliance percentage based on compliant requirements."""
+        requirement_assessments = self.get_requirement_assessments(include_non_assessable=False)
+        total_count = len(requirement_assessments)
+        if total_count == 0:
+            return 0
+        compliant_count = sum(1 for ra in requirement_assessments if ra.result == RequirementAssessment.Result.COMPLIANT)
+        return int((compliant_count / total_count) * 100)
 
     @property
     def answers_progress(self) -> int:
