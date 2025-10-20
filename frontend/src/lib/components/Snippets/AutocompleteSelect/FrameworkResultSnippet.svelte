@@ -6,7 +6,6 @@
 		idx?: number | undefined;
 	}
 	let { option }: Props = $props();
-	$inspect(option);
 
 	const REQUIREMENT_ASSESSMENT_RESULT = [
 		'compliant',
@@ -39,7 +38,7 @@
 	);
 </script>
 
-<span>
+<span class="w-full">
 	{option.label}
 	<div class="flex grow bg-gray-200 rounded-md overflow-hidden h-4 shrink self-center">
 		{#each orderedResultPercentages as rp}
