@@ -12,20 +12,17 @@ from django.db.models import Q
 
 
 class MappingEngine:
-    frameworks = None
-    direct_mappings = None
-
     def __init__(self):
         # Values are compressed (zlib) JSON bytes of the RMS object.
         self.all_rms: dict[tuple[str, str], bytes] = {}
         self.framework_mappings: dict[str, list[str]] = defaultdict(list)
+        self.frameworks: dict[str, dict[str, int]] = defaultdict(dict)
+        self.direct_mappings: set[tuple[str, str]] = set()
 
-        if self.frameworks == None:
-            self.frameworks = defaultdict(dict)
+        if not self.frameworks:
             self.load_frameworks()
 
-        if self.direct_mappings == None:
-            self.direct_mappings: set[tuple[str, str]] = set()
+        if not self.direct_mappings:
             self.load_rms_data()
 
         self.fields_to_map: list[str] = [

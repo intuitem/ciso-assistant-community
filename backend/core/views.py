@@ -13,7 +13,7 @@ import uuid
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
-from typing import Dict, Any, List, Mapping, Tuple
+from typing import Dict, Any, List, Tuple
 import time
 from django.db.models import (
     F,
@@ -6056,9 +6056,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 instance.save()
 
             elif baseline and baseline.framework != instance.framework:
-                engine = MappingEngine()
-                engine.load_rms_data()
-                engine.load_frameworks()
                 source_urn = baseline.framework.urn
                 audit_from_results = engine.load_audit_fields(baseline)
                 dest_urn = serializer.validated_data["framework"].urn
