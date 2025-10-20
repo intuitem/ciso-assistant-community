@@ -1,11 +1,18 @@
 from icecream import ic
-from core.models import Framework, StoredLibrary, ComplianceAssessment, Asset, Evidence, AppliedControl, SecurityException
+from core.models import (
+    Framework,
+    StoredLibrary,
+    ComplianceAssessment,
+    Asset,
+    Evidence,
+    AppliedControl,
+    SecurityException,
+)
 from collections import defaultdict, deque
 from typing import Optional
 import json
 import zlib
 from django.db.models import Q
-
 
 
 class MappingEngine:
@@ -260,10 +267,18 @@ class MappingEngine:
                 field: getattr(ra, field) for field in fields
             }
 
-            audit_results["requirement_assessments"][ra.requirement.urn]["assets"] = ra.compliance_assessment.assets.all().values()
-            audit_results["requirement_assessments"][ra.requirement.urn]["exceptions"] = ra.security_exceptions.all().values()
-            audit_results["requirement_assessments"][ra.requirement.urn]["applied_controls"] = ra.applied_controls.all().values()
-            audit_results["requirement_assessments"][ra.requirement.urn]["evidences"] = ra.evidences.all().values()
+            audit_results["requirement_assessments"][ra.requirement.urn]["assets"] = (
+                ra.compliance_assessment.assets.all().values()
+            )
+            audit_results["requirement_assessments"][ra.requirement.urn][
+                "exceptions"
+            ] = ra.security_exceptions.all().values()
+            audit_results["requirement_assessments"][ra.requirement.urn][
+                "applied_controls"
+            ] = ra.applied_controls.all().values()
+            audit_results["requirement_assessments"][ra.requirement.urn][
+                "evidences"
+            ] = ra.evidences.all().values()
 
         return audit_results
 
@@ -272,13 +287,15 @@ class MappingEngine:
     ) -> dict[str, int]:
         """Summarizes audit result counts by status."""
         res = defaultdict(int)
-        if isinstance(audit_results, dict) and "requirement_assessments" in audit_results:
+        if (
+            isinstance(audit_results, dict)
+            and "requirement_assessments" in audit_results
+        ):
             iterable = audit_results["requirement_assessments"].items()
         else:
             iterable = getattr(audit_results, "items", lambda: [])()
 
         for _, audit in iterable:
-  
             result = audit.get("result")
             if result is None:
                 continue
