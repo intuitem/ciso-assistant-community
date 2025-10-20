@@ -169,6 +169,7 @@ class MappingEngine:
         # to copy scores that cannot be validated against a target framework.
         target_framework_urn = requirement_mapping_set.get("target_framework_urn", "")
         target_framework = self.frameworks.get(target_framework_urn)
+        # TODO: Make this more resilient
         if target_framework is not None:
             ic(target_framework)
         for mapping in requirement_mapping_set["requirement_mappings"]:
