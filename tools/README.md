@@ -217,7 +217,7 @@ The `_content` tab for a `framework` object contains the following columns:
 - weight: Positive integer `>= 1`. Used for score weighting. The default weight (if undefined) is `1`.
 - questions: 1 or several (n) questions, separated by line breaks
 - answer: 1 (same for all questions) or n (one answer per question) answers, separated by line breaks
-- depends_on: Format: `line_where_the_requirement_containing_the_question_is:question_line:choice_line`. Set one among `UNDEFINED`/`undefined` if the question depends on nothing. See the cell note in `example_framework_UPDATE.xlsx`, at line `41`, column `depends_on` for better understanding.
+- depends_on: Format: `line_where_the_requirement_containing_the_question_is:question_line:choice_line`. Set `undefined` if the question depends on nothing. See the cell note in `example_framework_UPDATE.xlsx`, at line `41`, column `depends_on` for better understanding.
 - urn_id (+): this is reserved for specific compatibility issues to force the urn calculation
 - skip_count (+): trick to fix a referential without changing the URNs (subtract `1` from the counter) [Works with Compatibility mode `1` in `convert_library_v2.py`]
 - fix_count (+): negative or positive integer. Better version of `skip_count`  (adds the integer to the counter) [Works with Compatibility mode `3` in `convert_library_v2.py`]
@@ -324,7 +324,7 @@ The `_content` tab for a "answers" object contains the following columns:
   - description: Each description is separated by line breaks. To make a description written on several lines, start the next line with a `|`.
   - select_implementation_groups: A choice provokes the selection of the indicated Implementation Groups (IG). For the same choice, separate IGs with commas. To define IGs for each choice, separate IG groups with line breaks.
   - add_score: Positive or negative integer. The score is calculated based on this choice. All values selected within a requirement assessment are summed, and the sum is clipped by the scale. Each choice is separated by line breaks.
-  - compute_result: Boolean/None. True = `true` ; False = `false` ; None = empty cell. If true, this choice contributes to compliance. If false, this choice contributes to non-compliance. If empty, the choice contributes to nothing. Each boolean is separated by line breaks.
+  - compute_result: Boolean/None. True = `true` ; False = `false` ; None = `undefined` or empty cell. If true, this choice contributes to compliance. If false, this choice contributes to non-compliance. If empty, the choice contributes to nothing. Each boolean is separated by line breaks.
   - color: Hexadecimal value in the format `#xxxxxx`. Each choice color is separated by line breaks.
 
 Note: Unsupported values should be rejected.

@@ -26,6 +26,7 @@ import datetime
 import argparse
 import unicodedata
 import openpyxl
+from typing import List
 from pathlib import Path
 from collections import Counter
 
@@ -440,17 +441,41 @@ def revert_relationship(relation: str):
 # --- Extract optional columns for answers -------------------------------------
 
 def _per_choice_lines(data: dict, col: str, n_choices: int, answer_id: str):
+
     raw = str(data.get(col, "") or "").strip()
+
     if not raw:
         return None
-    lines = [line.strip() for line in raw.split("\n")]
+
+    lines: List[str] = []
+
+    # If col == "description", take into consideration the multiline description logic
+    if col.lower() == "description":
+        for desc in raw.split("\n"):
+
+            desc = desc.strip()
+
+            if not desc:
+                continue
+
+            # if line starts with "|", concatenate the whole line with the previous description (without the "|")
+            if desc.startswith("|") and lines:
+                # Multi-line value, append to previous
+                lines[-1] += "\n" + desc[1:].strip()
+            else:
+                lines.append(desc)
+    else:
+        lines = [line.strip() for line in raw.split("\n")]
+
     if len(lines) == 1:
         lines *= n_choices
+
     if len(lines) != n_choices:
         raise ValueError(
             f"(answers_definition) Invalid {col} count for answer ID '{answer_id}': "
             f"{len(lines)} values for {n_choices} choices."
         )
+
     return lines
 
 # --- Main logic ---------------------------------------------------------------
@@ -735,17 +760,30 @@ def create_library(
                             else:
                                 choices.append({"urn": "", "value": line})
 
+                        # --- Optional: description ---------------------------
+                        description_lines = _per_choice_lines(data, "description", len(choices), answer_id)
+                        if description_lines:
+                            for i, desc in enumerate(description_lines):
+                                if desc:
+                                    choices[i]["description"] = desc
+
                         # --- Optional: compute_result -----------------------------------------
                         compute_lines = _per_choice_lines(data, "compute_result", len(choices), answer_id)
                         if compute_lines:
                             for i, val in enumerate(compute_lines):
                                 v = val.lower()
-                                if v not in ("true", "false", ""):
+                                if v not in ("true", "false", "undefined", ""):
                                     raise ValueError(
                                         f"(answers_definition) Invalid compute_result value '{val}' "
-                                        f"for answer ID '{answer_id}', choice #{i+1} — must be 'true', 'false', or empty."
+                                        f"for answer ID '{answer_id}', choice #{i+1} — must be 'true', 'false', 'undefined' or empty."
                                     )
-                                if v:
+                                
+                                # Use Boolean instead of string
+                                if v == "undefined" or v == "": v = None
+                                elif v == "true": v = True
+                                elif v == "false": v = False
+                                
+                                if v is not None:
                                     choices[i]["compute_result"] = v
 
                         # --- Optional: add_score ----------------------------------------------
