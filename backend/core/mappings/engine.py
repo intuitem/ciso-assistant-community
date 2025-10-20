@@ -3,10 +3,6 @@ from core.models import (
     Framework,
     StoredLibrary,
     ComplianceAssessment,
-    Asset,
-    Evidence,
-    AppliedControl,
-    SecurityException,
 )
 from collections import defaultdict, deque
 from typing import Optional
@@ -267,11 +263,8 @@ class MappingEngine:
                 field: getattr(ra, field) for field in fields
             }
 
-            audit_results["requirement_assessments"][ra.requirement.urn]["assets"] = (
-                ra.compliance_assessment.assets.all().values()
-            )
             audit_results["requirement_assessments"][ra.requirement.urn][
-                "exceptions"
+                "security_exceptions"
             ] = ra.security_exceptions.all().values()
             audit_results["requirement_assessments"][ra.requirement.urn][
                 "applied_controls"
