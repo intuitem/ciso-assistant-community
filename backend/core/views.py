@@ -5573,6 +5573,38 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
+    @action(
+        detail=True,
+        name="Get target frameworks mapping options with compliance distribution",
+    )
+    def frameworks(self, request, pk):
+        audit = ComplianceAssessment.objects.get(id=pk)
+        audit_from_results = engine.load_audit_fields(audit)
+        frameworks_in_mappings = set()
+        data = []
+        for src, tgt in engine.all_rms.keys():
+            frameworks_in_mappings.add(src)
+            frameworks_in_mappings.add(tgt)
+        for dest_urn in sorted(frameworks_in_mappings):
+            best_results, _ = engine.best_mapping_inferrences(
+                audit_from_results, audit.framework.urn, dest_urn
+            )
+            if best_results:
+                framework = Framework.objects.filter(urn=dest_urn).first()
+                if framework:
+                    assessable_requirements_count = framework.requirement_nodes.filter(
+                        assessable=True
+                    ).count()
+                    data.append(
+                        {
+                            "id": framework.id,
+                            "str": str(framework),
+                            "results": engine.summary_results(best_results),
+                            "assessable_requirements_count": assessable_requirements_count,
+                        }
+                    )
+        return Response(data, status=status.HTTP_200_OK)
+
     @action(detail=True, name="Get compliance assessment (audit) CSV")
     def compliance_assessment_csv(self, request, pk):
         response = HttpResponse(content_type="text/csv")
