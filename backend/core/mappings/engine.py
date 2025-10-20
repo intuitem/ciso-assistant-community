@@ -1,9 +1,11 @@
 from icecream import ic
-from core.models import Framework, StoredLibrary, ComplianceAssessment
+from core.models import Framework, StoredLibrary, ComplianceAssessment, Asset, Evidence, AppliedControl, SecurityException
 from collections import defaultdict, deque
 from typing import Optional
 import json
 import zlib
+from django.db.models import Q
+
 
 
 class MappingEngine:
@@ -163,7 +165,13 @@ class MappingEngine:
         if not source_audit.get("requirement_assessments"):
             return {}
         target_audit = defaultdict(dict)
-        ic(self.frameworks[requirement_mapping_set["target_framework_urn"]])
+        # Framework info may be missing (library references frameworks not in DB).
+        # Use .get() and treat missing info as "non equal" so we don't attempt
+        # to copy scores that cannot be validated against a target framework.
+        target_fw_urn = requirement_mapping_set.get("target_framework_urn")
+        target_fw_info = self.frameworks.get(target_fw_urn)
+        if target_fw_info is not None:
+            ic(target_fw_info)
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
             dst = mapping["target_requirement_urn"]
@@ -173,23 +181,26 @@ class MappingEngine:
                 rel in ("equal", "superset")
                 and src in source_audit["requirement_assessments"]
             ):
-                if self.frameworks[requirement_mapping_set["target_framework_urn"]].get(
-                    "min_score"
-                ) == source_audit.get("min_score") and self.frameworks[
-                    requirement_mapping_set["target_framework_urn"]
-                ].get("max_score") == source_audit.get("max_score"):
-                    target_audit[dst] = source_audit["requirement_assessments"][src]
+                # If we have matching score ranges on the target framework, copy
+                # the whole assessment (including score fields). Otherwise only
+                # copy non-score fields to avoid misrepresenting scores.
+                src_assessment = source_audit["requirement_assessments"][src]
+                if (
+                    target_fw_info
+                    and target_fw_info.get("min_score") == source_audit.get("min_score")
+                    and target_fw_info.get("max_score") == source_audit.get("max_score")
+                ):
+                    target_audit[dst] = src_assessment
                 else:
                     for field in self.fields_to_map:
                         if field not in ["score", "is_scored"]:
-                            target_audit[dst][field] = source_audit[
-                                "requirement_assessments"
-                            ][src][field]
+                            target_audit[dst][field] = src_assessment.get(field)
 
             elif (
                 rel in ("subset", "intersect")
                 and src in source_audit["requirement_assessments"]
             ):
+                # TODO: Add applied controls
                 result = source_audit["requirement_assessments"][src]["result"]
                 if result in ("not_assessed", "non_compliant"):
                     target_audit[dst]["result"] = result
@@ -248,6 +259,12 @@ class MappingEngine:
             audit_results["requirement_assessments"][ra.requirement.urn] = {
                 field: getattr(ra, field) for field in fields
             }
+
+            audit_results["requirement_assessments"][ra.requirement.urn]["assets"] = ra.compliance_assessment.assets.all().values()
+            audit_results["requirement_assessments"][ra.requirement.urn]["exceptions"] = ra.security_exceptions.all().values()
+            audit_results["requirement_assessments"][ra.requirement.urn]["applied_controls"] = ra.applied_controls.all().values()
+            audit_results["requirement_assessments"][ra.requirement.urn]["evidences"] = ra.evidences.all().values()
+
         return audit_results
 
     def summary_results(
@@ -255,8 +272,19 @@ class MappingEngine:
     ) -> dict[str, int]:
         """Summarizes audit result counts by status."""
         res = defaultdict(int)
-        for _, audit in audit_results.items():
-            res[audit["result"]] += 1
+        if isinstance(audit_results, dict) and "requirement_assessments" in audit_results:
+            iterable = audit_results["requirement_assessments"].items()
+        else:
+            iterable = getattr(audit_results, "items", lambda: [])()
+
+        for _, audit in iterable:
+  
+            result = audit.get("result")
+            if result is None:
+                continue
+
+            res[result] += 1
+
         return dict(res)
 
 
