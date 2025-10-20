@@ -458,6 +458,8 @@ class AssetReadSerializer(AssetWriteSerializer):
     disaster_recovery_objectives = serializers.SerializerMethodField()
     security_capabilities = serializers.SerializerMethodField()
     recovery_capabilities = serializers.SerializerMethodField()
+    security_objectives_comparison = serializers.SerializerMethodField()
+    recovery_objectives_comparison = serializers.SerializerMethodField()
 
     def get_children_assets(self, obj):
         """
@@ -516,6 +518,18 @@ class AssetReadSerializer(AssetWriteSerializer):
 
         # Fallback for single object serialization
         return obj.get_recovery_capabilities_display()
+
+    def get_security_objectives_comparison(self, obj):
+        """
+        Gets comparison of security objectives vs capabilities with verdict.
+        """
+        return obj.get_security_objectives_comparison()
+
+    def get_recovery_objectives_comparison(self, obj):
+        """
+        Gets comparison of recovery objectives vs capabilities with verdict.
+        """
+        return obj.get_recovery_objectives_comparison()
 
 
 class AssetImportExportSerializer(BaseModelSerializer):

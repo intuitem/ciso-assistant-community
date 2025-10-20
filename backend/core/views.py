@@ -6718,20 +6718,20 @@ def get_build(request):
     if disk_info:
         total, used, free = disk_info
         disk_response = {
-            "Disk space": f"{humanize.naturalsize(total)}",
-            "Used": f"{humanize.naturalsize(used)} ({int((used / total) * 100)} %)",
+            "diskSpace": f"{humanize.naturalsize(total)}",
+            "diskUsed": f"{humanize.naturalsize(used)} ({int((used / total) * 100)} %)",
         }
     else:
         disk_response = {
-            "Disk space": "Unable to retrieve disk usage",
+            "diskSpace": "Unable to retrieve disk usage",
         }
 
     return Response(
         {
             "version": VERSION,
             "build": BUILD,
-            **disk_response,
             "infrastructure": database_type,
+            **disk_response,
         }
     )
 

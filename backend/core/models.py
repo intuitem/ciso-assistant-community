@@ -2719,6 +2719,137 @@ class Asset(
         self.full_clean()
         return super().save(*args, **kwargs)
 
+    def get_security_objectives_comparison(self) -> list[dict]:
+        """
+        Compare security objectives (expectation) vs capabilities (reality) using RAW values.
+        Returns a list of dicts with: objective, expectation, reality, verdict.
+        Verdict is True if objective is met, False if not met, None if cannot be determined.
+        """
+        # Read raw JSON structures (no display/scales)
+        so = (
+            self.get_security_objectives()
+            if hasattr(self, "get_security_objectives")
+            else self.security_objectives
+        )
+        sc = (
+            self.get_security_capabilities()
+            if hasattr(self, "get_security_capabilities")
+            else self.security_capabilities
+        )
+
+        so_obj = (so or {}).get("objectives", {}) or {}
+        sc_obj = (sc or {}).get("objectives", {}) or {}
+
+        # Build ordered list of objective keys: defaults first (if present), then any extras
+        default_order = list(getattr(self, "DEFAULT_SECURITY_OBJECTIVES", []))
+        extra_keys = sorted([k for k in so_obj.keys() if k not in default_order])
+        ordered_keys = [k for k in default_order if k in so_obj] + extra_keys
+
+        result = []
+        for key in ordered_keys:
+            o = so_obj.get(key) or {}
+            # Only compare enabled and valid (0..4) expectations
+            if not o.get("is_enabled", False):
+                continue
+            exp_value = o.get("value", None)
+            if not isinstance(exp_value, int) or not (0 <= exp_value <= 4):
+                continue
+
+            c = sc_obj.get(key) or {}
+            real_value = c.get("value", None) if isinstance(c, dict) else None
+
+            verdict = None
+            if isinstance(real_value, int):
+                verdict = real_value >= exp_value
+
+            result.append(
+                {
+                    "objective": key,
+                    "expectation": exp_value,
+                    "reality": real_value,
+                    "verdict": verdict,
+                }
+            )
+
+        return result
+
+    def get_recovery_objectives_comparison(self) -> list[dict]:
+        """
+        Compare recovery objectives (expectation) vs capabilities (reality).
+        Returns list with objective, expectation, reality, and verdict.
+        Compares raw seconds numerically, outputs formatted display strings.
+        Verdict is True if objective is met, False if not met, None if cannot be determined.
+        """
+
+        dr_src = (
+            self.get_disaster_recovery_objectives()
+            if hasattr(self, "get_disaster_recovery_objectives")
+            else (getattr(self, "disaster_recovery_objectives", {}) or {})
+        )
+        rc_src = (
+            self.get_recovery_capabilities()
+            if hasattr(self, "get_recovery_capabilities")
+            else (getattr(self, "recovery_capabilities", {}) or {})
+        )
+
+        def _normalize_seconds(source: dict) -> dict[str, int]:
+            if not isinstance(source, dict):
+                return {}
+            inner = source.get("objectives")
+            data = inner if isinstance(inner, dict) else source
+            out: dict[str, int] = {}
+            for k, v in data.items():
+                if isinstance(v, dict):
+                    val = v.get("value")
+                    if isinstance(val, (int, float)) and val >= 0:
+                        out[k] = int(val)
+            return out
+
+        objectives = _normalize_seconds(dr_src)
+        capabilities = _normalize_seconds(rc_src)
+
+        default_order = list(getattr(self, "DEFAULT_DISASTER_RECOVERY_OBJECTIVES", []))
+        extras = sorted([k for k in objectives.keys() if k not in default_order])
+        ordered_keys = [k for k in default_order if k in objectives] + extras
+
+        result: list[dict] = []
+        for key in ordered_keys:
+            exp_value = objectives.get(key)
+            real_value = capabilities.get(key)
+
+            verdict = None
+            if isinstance(exp_value, int) and isinstance(real_value, int):
+                verdict = real_value <= exp_value
+
+            result.append(
+                {
+                    "objective": key,
+                    "verdict": verdict,
+                }
+            )
+
+        # inject display strings for rendering
+        def _parse_display(data):
+            parsed = {}
+            for item in data:
+                s = item.get("str", "")
+                if ":" in s:
+                    k, v = s.split(":", 1)
+                    parsed[k.strip().lower()] = v.strip()
+            return parsed
+
+        display_objectives = _parse_display(
+            self.get_disaster_recovery_objectives_display()
+        )
+        display_capabilities = _parse_display(self.get_recovery_capabilities_display())
+
+        for item in result:
+            key = item["objective"].lower()
+            item["expectation"] = display_objectives.get(key)
+            item["reality"] = display_capabilities.get(key)
+
+        return result
+
 
 class AssetClass(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     parent = models.ForeignKey(

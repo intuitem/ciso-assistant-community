@@ -38,7 +38,9 @@ class AssetAssessmentReadSerializer(BaseModelSerializer):
 
     dependencies = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
-    associated_controls = FieldsRelatedField(many=True)
+    associated_controls = FieldsRelatedField(
+        ["id", "folder", "name", "status", "eta"], many=True
+    )
 
     class Meta:
         model = AssetAssessment
