@@ -99,6 +99,9 @@
 		label={m.targetFramework()}
 		onChange={async (e) => handleFrameworkChange(e)}
 		mount={async (e) => handleFrameworkChange(e)}
+		additionalMultiselectOptions={{
+			liOptionClass: 'flex items-center w-full border-t-8 border-b-8 border-transparent'
+		}}
 		includeAllOptionFields
 	>
 		{#snippet optionSnippet(option: Record<string, any>)}

@@ -47,6 +47,7 @@
 		optionsValueField?: string;
 		browserCache?: RequestCache;
 		optionsExtraFields?: [string, string][];
+		additionalMultiselectOptions?: Record<string, any>;
 		optionsInfoFields?: {
 			fields: {
 				field: string; // Field name in the object
@@ -99,6 +100,7 @@
 			separator: ' ',
 			classes: 'text-surface-500'
 		},
+		additionalMultiselectOptions = {},
 		pathField = '',
 		optionsSuggestions = [],
 		optionsSelf = null,
@@ -149,8 +151,11 @@
 		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
 		outerDivClass: '!input !bg-surface-100 !px-2 !flex',
-		closeDropdownOnSelect: !multiple
+		closeDropdownOnSelect: !multiple,
+		...additionalMultiselectOptions
 	};
+
+	$inspect(field, multiSelectOptions);
 
 	let isLoading = $state(false);
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
