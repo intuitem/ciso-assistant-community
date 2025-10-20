@@ -293,7 +293,7 @@
 			<MarkdownRenderer content={data.requirement.description} />
 		</div>
 	{/if}
-	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
+	{#if has_threats || has_reference_controls || annotation || mappingInference.result || typical_evidence}
 		<div class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto">
 			<h2 class="font-semibold text-base flex flex-row justify-between">
 				<div>
