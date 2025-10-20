@@ -775,7 +775,7 @@ def create_library(
                                 if v not in ("true", "false", "undefined", ""):
                                     raise ValueError(
                                         f"(answers_definition) Invalid compute_result value '{val}' "
-                                        f"for answer ID '{answer_id}', choice #{i+1} — must be 'true', 'false', 'undefined' or empty."
+                                        f"for answer ID '{answer_id}', choice #{i+1}. Must be 'true', 'false', 'undefined' or empty."
                                     )
                                 
                                 # Use Boolean instead of string
@@ -813,12 +813,14 @@ def create_library(
                         if color_lines:
                             for i, val in enumerate(color_lines):
                                 if val:
-                                    if not re.fullmatch(r"#([0-9a-fA-F]{6})", val):
+                                    if not re.fullmatch(r"#([0-9a-fA-F]{6})", val) and val.lower() != "undefined":
                                         raise ValueError(
                                             f"(answers_definition) Invalid color value '{val}' "
-                                            f"for answer ID '{answer_id}', choice #{i+1} — must match #RRGGBB."
+                                            f"for answer ID '{answer_id}', choice #{i+1}. Must match #RRGGBB, be 'undefined' or the cell must be empty."
                                         )
-                                    choices[i]["color"] = val.upper()
+                                        
+                                    if val.lower() != 'undefined':
+                                        choices[i]["color"] = val.upper()
 
                         answers_dict[answer_id] = {
                             "type": answer_type,
