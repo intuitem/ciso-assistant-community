@@ -2133,10 +2133,11 @@ class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
     author = FieldsRelatedField()
     folder = FieldsRelatedField()
     incident = FieldsRelatedField()
+    evidences = FieldsRelatedField(many=True)
 
     class Meta:
         model = TimelineEntry
-        exclude = ["evidences"]
+        exclude = []
 
 
 class IncidentWriteSerializer(BaseModelSerializer):
