@@ -209,7 +209,7 @@
 	"observation": "Observation",
 	"observationHelpText": "Notes et commentaires supplémentaires au format markdown",
 	"noObservation": "Aucune observation",
-	"requestNotes": "Notes de demande",
+	"requestNotes": "Notes du demandeur",
 	"approverObservation": "Observation de l'approbateur",
 	"importMatrices": "Importer des matrices",
 	"importFrameworks": "Importer des référentiels",

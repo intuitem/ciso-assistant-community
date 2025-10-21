@@ -4,6 +4,7 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -15,6 +16,7 @@
 		formDataCache?: Record<string, any>;
 		object?: Record<string, any>;
 		initialData?: Record<string, any>;
+		updated_fields?: Set<string>;
 	}
 
 	let {
@@ -23,7 +25,8 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		object = {},
-		initialData = {}
+		initialData = {},
+		updated_fields = new Set()
 	}: Props = $props();
 
 	// Check if we're coming from a specific assessment context
@@ -34,16 +37,25 @@
 		initialData.ebios_studies ||
 		initialData.entity_assessments ||
 		initialData.findings_assessments;
+
+	async function fetchDefaultRefId(folderId: string) {
+		try {
+			const response = await fetch(`/validation-flows/default-ref-id/?folder=${folderId}`);
+			const result = await response.json();
+			if (response.ok && result.results) {
+				form.form.update((currentData) => {
+					updated_fields.add('ref_id');
+					return { ...currentData, ref_id: result.results };
+				});
+			} else {
+				console.error(result.error || 'Failed to fetch default ref_id');
+			}
+		} catch (error) {
+			console.error('Error fetching default ref_id:', error);
+		}
+	}
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-	disabled={initialData.ref_id}
-/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO"
@@ -53,6 +65,19 @@
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
 	hidden={initialData.folder}
+	onChange={async (e) => {
+		if (e && !object?.id) {
+			await fetchDefaultRefId(e);
+		}
+	}}
+/>
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+	disabled={initialData.ref_id}
 />
 {#if object?.id}
 	<Select
@@ -65,22 +90,38 @@
 		disableDoubleDash={true}
 	/>
 {/if}
-<TextField
-	{form}
-	type="date"
-	field="expiration_date"
-	label={m.expiryDate()}
-	cacheLock={cacheLocks['expiration_date']}
-	bind:cachedValue={formDataCache['expiration_date']}
-	disabled={initialData.expiration_date}
-/>
-<TextArea
-	{form}
-	field="request_notes"
-	label={m.requestNotes()}
-	cacheLock={cacheLocks['request_notes']}
-	bind:cachedValue={formDataCache['request_notes']}
-/>
+{#if object?.id}
+	{#if object.expiration_date}
+		<div class="space-y-2">
+			<label class="text-sm font-medium text-gray-700">{m.expiryDate()}</label>
+			<p class="p-3 bg-gray-50 rounded-lg text-sm">{object.expiration_date}</p>
+		</div>
+	{/if}
+{:else}
+	<TextField
+		{form}
+		type="date"
+		field="expiration_date"
+		label={m.expiryDate()}
+		cacheLock={cacheLocks['expiration_date']}
+		bind:cachedValue={formDataCache['expiration_date']}
+		disabled={initialData.expiration_date}
+	/>
+{/if}
+{#if object?.id}
+	<div class="space-y-2">
+		<label class="text-sm font-medium text-gray-700">{m.requestNotes()}</label>
+		<MarkdownRenderer content={object.request_notes} class="p-3 bg-gray-50 rounded-lg" />
+	</div>
+{:else}
+	<TextArea
+		{form}
+		field="request_notes"
+		label={m.requestNotes()}
+		cacheLock={cacheLocks['request_notes']}
+		bind:cachedValue={formDataCache['request_notes']}
+	/>
+{/if}
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="users?is_approver=true"

@@ -6573,6 +6573,25 @@ class ValidationFlow(AbstractBaseModel, FolderMixin):
         verbose_name = "Validation flow"
         verbose_name_plural = "Validation flows"
 
+    @classmethod
+    def get_default_ref_id(cls, folder):
+        """return default ref_id for validation flow in folder"""
+        flows_ref_ids = [
+            x.ref_id for x in cls.objects.filter(folder=folder) if x.ref_id
+        ]
+        nb_flows = len(flows_ref_ids) + 1
+        candidates = [f"VAL.{i:02d}" for i in range(1, nb_flows + 1)]
+        return next(x for x in candidates if x not in flows_ref_ids)
+
+    @property
+    def name(self) -> str:
+        key = str(self.id).split("-")[0]
+        return f"Validation {key}"
+
+    def __str__(self) -> str:
+        key = str(self.id).split("-")[0]
+        return f"Validation {key}"
+
 
 common_exclude = ["created_at", "updated_at"]
 
