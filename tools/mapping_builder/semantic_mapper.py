@@ -11,6 +11,7 @@ import yaml
 import requests
 import json
 import pandas as pd
+import re
 from typing import Dict, List, Optional
 from pathlib import Path
 
@@ -153,10 +154,15 @@ class SemanticMapper:
     """Uses Ollama LLM to semantically compare framework items"""
 
     def __init__(
-        self, ollama_url: str = "http://localhost:11434", model: str = "mistral"
+        self,
+        ollama_url: str = "http://localhost:11434",
+        model: str = "mistral",
+        verbose: bool = False,
     ):
         self.ollama_url = ollama_url
         self.model = model
+        self.verbose = verbose
+        self.failed_responses = []  # Track failed responses for debugging
         # Create persistent HTTP session for connection pooling
         self.session = requests.Session()
         self.session.headers.update({"Connection": "keep-alive"})
@@ -270,8 +276,33 @@ Respond in JSON format:
             result = response.json()
             response_text = result.get("response", "{}")
 
-            # Parse JSON response
-            parsed = json.loads(response_text)
+            # Try to parse JSON response with multiple strategies
+            parsed = self._parse_json_response(response_text)
+
+            if parsed is None:
+                # Track failed response for debugging
+                self.failed_responses.append(
+                    {
+                        "source_ref": source_item.ref_id,
+                        "target_ref": target_item.ref_id,
+                        "response": response_text,
+                    }
+                )
+
+                if self.verbose:
+                    print(f"\n{'=' * 60}")
+                    print(f"JSON PARSE FAILED")
+                    print(f"Source: {source_item.ref_id}")
+                    print(f"Target: {target_item.ref_id}")
+                    print(f"Raw response: {response_text}")
+                    print(f"{'=' * 60}\n")
+                else:
+                    print(
+                        f"Warning: Failed to parse JSON for {source_item.ref_id} -> {target_item.ref_id}"
+                    )
+
+                return "no_relationship", 0.0, "Error: Invalid JSON response from model"
+
             relationship = parsed.get("relationship", "no_relationship")
             score = float(parsed.get("score", 0.0))
             explanation = parsed.get("explanation", "No explanation provided")
@@ -290,6 +321,65 @@ Respond in JSON format:
             print(f"Error comparing items: {e}")
             return "no_relationship", 0.0, f"Error: {str(e)}"
 
+    def _parse_json_response(self, response_text: str) -> Optional[dict]:
+        """
+        Try multiple strategies to extract JSON from LLM response
+
+        Some models may return:
+        - Pure JSON (ideal)
+        - JSON wrapped in markdown code blocks
+        - JSON with extra text before/after
+        - Malformed JSON
+        """
+        if not response_text or not response_text.strip():
+            return None
+
+        # Strategy 1: Direct JSON parse
+        try:
+            return json.loads(response_text)
+        except json.JSONDecodeError:
+            pass
+
+        # Strategy 2: Extract JSON from markdown code blocks
+        # Look for ```json ... ``` or ``` ... ```
+        code_block_pattern = r"```(?:json)?\s*(\{.*?\})\s*```"
+        match = re.search(code_block_pattern, response_text, re.DOTALL)
+        if match:
+            try:
+                return json.loads(match.group(1))
+            except json.JSONDecodeError:
+                pass
+
+        # Strategy 3: Find JSON object in text (look for {...})
+        json_pattern = r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}"
+        matches = re.findall(json_pattern, response_text, re.DOTALL)
+        for match in matches:
+            try:
+                parsed = json.loads(match)
+                # Verify it has expected fields
+                if "relationship" in parsed or "score" in parsed:
+                    return parsed
+            except json.JSONDecodeError:
+                continue
+
+        # Strategy 4: Try to clean and parse
+        # Remove common prefixes/suffixes
+        cleaned = response_text.strip()
+        for prefix in ["```json", "```", "Here is the JSON:", "Response:"]:
+            if cleaned.startswith(prefix):
+                cleaned = cleaned[len(prefix) :].strip()
+        for suffix in ["```"]:
+            if cleaned.endswith(suffix):
+                cleaned = cleaned[: -len(suffix)].strip()
+
+        try:
+            return json.loads(cleaned)
+        except json.JSONDecodeError:
+            pass
+
+        # All strategies failed
+        return None
+
 
 def build_mapping_table(
     source_path: str,
@@ -301,6 +391,7 @@ def build_mapping_table(
     checkpoint_interval: int = 1,
     top_n: Optional[int] = None,
     threshold: Optional[float] = None,
+    verbose: bool = False,
 ) -> pd.DataFrame:
     """
     Build a semantic mapping table between two frameworks
@@ -315,6 +406,7 @@ def build_mapping_table(
         checkpoint_interval: Save progress every N source items (default: 1)
         top_n: Return top N matches per source item (default: 1 = best match only)
         threshold: Minimum score threshold for matches (0.0-1.0)
+        verbose: Enable verbose logging for debugging
 
     Returns:
         pandas DataFrame with mapping results
@@ -330,7 +422,7 @@ def build_mapping_table(
     print(f"Found {len(target_items)} assessable items in target")
 
     print(f"\nInitializing semantic mapper with model: {model}")
-    mapper = SemanticMapper(ollama_url=ollama_url, model=model)
+    mapper = SemanticMapper(ollama_url=ollama_url, model=model, verbose=verbose)
 
     # Check for existing results to resume from
     results = []
@@ -458,6 +550,15 @@ def build_mapping_table(
             df.to_csv(output_path, index=False)
         print(f"\nMapping table saved to: {output_path}")
 
+        # Save failed responses for debugging
+        if mapper.failed_responses:
+            failed_path = output_file.with_suffix(".failed.json")
+            with open(failed_path, "w", encoding="utf-8") as f:
+                json.dump(mapper.failed_responses, f, indent=2)
+            print(
+                f"⚠ {len(mapper.failed_responses)} failed responses saved to: {failed_path}"
+            )
+
     return df
 
 
@@ -503,6 +604,11 @@ def main():
         default=None,
         help="Minimum score threshold for matches, 0.0-1.0 (default: None = all matches)",
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose logging for debugging JSON parsing issues",
+    )
 
     args = parser.parse_args()
 
@@ -524,6 +630,7 @@ def main():
         checkpoint_interval=args.checkpoint_interval,
         top_n=top_n,
         threshold=args.threshold,
+        verbose=args.verbose,
     )
 
     # Print summary
