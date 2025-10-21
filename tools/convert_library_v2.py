@@ -397,7 +397,7 @@ def inject_questions_into_node(qa_data: dict[str, Any], node, answers_dict, fw_u
                 dependency_question_answers = [int(c) for c in dep_split[2].split(",")]
 
                 ##### Recreate correct URN for Question & Answers (Choices) #####
-                # TODO: Checks for this will be processed in ./check_library_v2.py
+                # SOON: Checks for this will be processed in ./check_library_v2.py
 
                 # Get URN of the line we refer to
                 depends_on_urn = fw_urns[dependency_line]
@@ -408,7 +408,7 @@ def inject_questions_into_node(qa_data: dict[str, Any], node, answers_dict, fw_u
                     depends_on_question_answers.append(depends_on_question_urn + f":choice:{str(choice)}")
                     
                 depends_on_block["question"] = depends_on_question_urn
-                depends_on_block["answers"]  = depends_on_question_answers
+                depends_on_block["answers"] = depends_on_question_answers
 
                 question_entry["depends_on"] = depends_on_block
 
