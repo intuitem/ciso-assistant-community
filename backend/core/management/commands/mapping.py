@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from core.mappings.engine import MappingEngine
+from core.mappings.engine import engine
 from core.models import StoredLibrary, ComplianceAssessment
 import random
 import uuid
@@ -104,8 +104,6 @@ class Command(BaseCommand):
         test_mode = options.get("test")
         max_depth = options.get("depth")
 
-        engine = MappingEngine()
-
         if test_mode:
             print("🔧 Test mode enabled: generating simulated data...")
             engine.all_rms = self.generate_test_data()
@@ -139,13 +137,8 @@ class Command(BaseCommand):
             print(f"⏱️ Path exploration time: {explore_duration * 1000:.2f} ms")
 
         else:
-            # ⏱️ Measure data loading time
-            start_load = time.time()
             nb_libraries = StoredLibrary.objects.count()
             print(f"📚 Loaded {nb_libraries} libraries from the database.")
-            engine.load_rms_data()
-            load_duration = time.time() - start_load
-            print(f"🕒 Data load completed in {load_duration * 1000:.2f} ms.")
 
             # 📦 Estimate serialized sizes
             rms_size_bytes = sum(sizeof_json(obj) for obj in engine.all_rms.values())

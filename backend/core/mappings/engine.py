@@ -3,33 +3,25 @@ from core.models import (
     Framework,
     StoredLibrary,
     ComplianceAssessment,
-    Asset,
-    Evidence,
-    AppliedControl,
-    SecurityException,
 )
 from collections import defaultdict, deque
 from typing import Optional
 import json
 import zlib
-from django.db.models import Q
 
 
 class MappingEngine:
-    frameworks = None
-    direct_mappings = None
-
     def __init__(self):
         # Values are compressed (zlib) JSON bytes of the RMS object.
         self.all_rms: dict[tuple[str, str], bytes] = {}
         self.framework_mappings: dict[str, list[str]] = defaultdict(list)
+        self.frameworks: dict[str, dict[str, int]] = defaultdict(dict)
+        self.direct_mappings: set[tuple[str, str]] = set()
 
-        if self.frameworks == None:
-            self.frameworks = defaultdict(dict)
+        if not self.frameworks:
             self.load_frameworks()
 
-        if self.direct_mappings == None:
-            self.direct_mappings: set[tuple[str, str]] = set()
+        if not self.direct_mappings:
             self.load_rms_data()
 
         self.fields_to_map: list[str] = [
@@ -39,6 +31,8 @@ class MappingEngine:
             "is_scored",
             "observation",
         ]
+
+        self.m2m_fields = ["applied_controls", "security_exceptions", "evidences"]
 
     # --- Compression helpers ---
     def _compress_rms(self, obj: dict) -> bytes:
@@ -168,17 +162,18 @@ class MappingEngine:
         self,
         source_audit: dict[str, str | dict[str, str]],
         requirement_mapping_set: dict,
-    ) -> dict[str, dict[str, str]]:
+    ) -> dict[str, str | dict[str, str]]:
         if not source_audit.get("requirement_assessments"):
             return {}
-        target_audit = defaultdict(dict)
+        target_audit: dict[str, str | dict[str, str]] = defaultdict(dict)
         # Framework info may be missing (library references frameworks not in DB).
         # Use .get() and treat missing info as "non equal" so we don't attempt
         # to copy scores that cannot be validated against a target framework.
-        target_fw_urn = requirement_mapping_set.get("target_framework_urn")
-        target_fw_info = self.frameworks.get(target_fw_urn)
-        if target_fw_info is not None:
-            ic(target_fw_info)
+        target_framework_urn = requirement_mapping_set.get("target_framework_urn", "")
+        target_framework = self.frameworks.get(target_framework_urn)
+        # TODO: Make this more resilient
+        if target_framework is not None:
+            ic(target_framework)
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
             dst = mapping["target_requirement_urn"]
@@ -193,9 +188,11 @@ class MappingEngine:
                 # copy non-score fields to avoid misrepresenting scores.
                 src_assessment = source_audit["requirement_assessments"][src]
                 if (
-                    target_fw_info
-                    and target_fw_info.get("min_score") == source_audit.get("min_score")
-                    and target_fw_info.get("max_score") == source_audit.get("max_score")
+                    target_framework
+                    and target_framework.get("min_score")
+                    == source_audit.get("min_score")
+                    and target_framework.get("max_score")
+                    == source_audit.get("max_score")
                 ):
                     target_audit[dst] = src_assessment
                 else:
@@ -266,20 +263,10 @@ class MappingEngine:
             audit_results["requirement_assessments"][ra.requirement.urn] = {
                 field: getattr(ra, field) for field in fields
             }
-
-            audit_results["requirement_assessments"][ra.requirement.urn]["assets"] = (
-                ra.compliance_assessment.assets.all().values()
-            )
-            audit_results["requirement_assessments"][ra.requirement.urn][
-                "exceptions"
-            ] = ra.security_exceptions.all().values()
-            audit_results["requirement_assessments"][ra.requirement.urn][
-                "applied_controls"
-            ] = ra.applied_controls.all().values()
-            audit_results["requirement_assessments"][ra.requirement.urn][
-                "evidences"
-            ] = ra.evidences.all().values()
-
+            for m2m_field in self.m2m_fields:
+                audit_results["requirement_assessments"][ra.requirement.urn][
+                    m2m_field
+                ] = getattr(ra, m2m_field).all().values_list("id", flat=True)
         return audit_results
 
     def summary_results(

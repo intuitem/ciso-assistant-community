@@ -13,7 +13,7 @@ import uuid
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
-from typing import Dict, Any, List, Mapping, Tuple
+from typing import Dict, Any, List, Tuple
 import time
 from django.db.models import (
     F,
@@ -5573,6 +5573,38 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
+    @action(
+        detail=True,
+        name="Get target frameworks mapping options with compliance distribution",
+    )
+    def frameworks(self, request, pk):
+        audit = ComplianceAssessment.objects.get(id=pk)
+        audit_from_results = engine.load_audit_fields(audit)
+        frameworks_in_mappings = set()
+        data = []
+        for src, tgt in engine.all_rms.keys():
+            frameworks_in_mappings.add(src)
+            frameworks_in_mappings.add(tgt)
+        for dest_urn in sorted(frameworks_in_mappings):
+            best_results, _ = engine.best_mapping_inferrences(
+                audit_from_results, audit.framework.urn, dest_urn
+            )
+            if best_results:
+                framework = Framework.objects.filter(urn=dest_urn).first()
+                if framework:
+                    assessable_requirements_count = framework.requirement_nodes.filter(
+                        assessable=True
+                    ).count()
+                    data.append(
+                        {
+                            "id": framework.id,
+                            "str": str(framework),
+                            "results": engine.summary_results(best_results),
+                            "assessable_requirements_count": assessable_requirements_count,
+                        }
+                    )
+        return Response(data, status=status.HTTP_200_OK)
+
     @action(detail=True, name="Get compliance assessment (audit) CSV")
     def compliance_assessment_csv(self, request, pk):
         response = HttpResponse(content_type="text/csv")
@@ -6056,9 +6088,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 instance.save()
 
             elif baseline and baseline.framework != instance.framework:
-                engine = MappingEngine()
-                engine.load_rms_data()
-                engine.load_frameworks()
                 source_urn = baseline.framework.urn
                 audit_from_results = engine.load_audit_fields(baseline)
                 dest_urn = serializer.validated_data["framework"].urn
@@ -6068,7 +6097,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
                 ic(best_results)
 
-                requirement_assessments_to_update = []
+                requirement_assessments_to_update: list[RequirementAssessment] = []
 
                 target_requirement_assessments = RequirementAssessment.objects.filter(
                     compliance_assessment=instance,
@@ -6089,78 +6118,34 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     batch_size=500,
                 )
 
-            """
-            # Handle different framework case
-            elif baseline and baseline.framework != instance.framework:
-                # Fetch mapping set and prefetch related data
-                mapping_set = RequirementMappingSet.objects.select_related(
-                    "source_framework", "target_framework"
-                ).get(
-                    target_framework=serializer.validated_data["framework"],
-                    source_framework=baseline.framework,
-                )
-
-                # Compute results and get all affected requirement assessments
-                computed_assessments, assessment_source_dict = (
-                    instance.compute_requirement_assessments_results(
-                        mapping_set, baseline
-                    )
-                )
-
-                # Collect all source requirement assessment IDs
-                source_assessment_ids = itertools.chain.from_iterable(
-                    assessment_source_dict.values()
-                )
-
-                # Fetch all baseline requirement assessments in one query
-                baseline_assessments = {
-                    str(ra.id): ra
-                    for ra in RequirementAssessment.objects.filter(
-                        id__in=source_assessment_ids
-                    ).prefetch_related("evidences", "applied_controls")
-                }
-
-                # Prepare bulk updates
-                updates = []
-                m2m_operations = []
-
-                for requirement_assessment in computed_assessments:
-                    selected_source_id = requirement_assessment.mapping_inference[
-                        "source_requirement_assessment"
-                    ]["id"]
-                    selected_baseline_ra = baseline_assessments[selected_source_id]
-
-                    # Update observation
-                    requirement_assessment.observation = (
-                        selected_baseline_ra.observation
-                    )
-                    updates.append(requirement_assessment)
-
-                    source_ids = assessment_source_dict[requirement_assessment]
-                    baseline_requirement_assessments = [
-                        baseline_assessments[source_id] for source_id in source_ids
-                    ]
-
-                    # Store M2M operations for later
-                    m2m_operations.append(
-                        (
-                            requirement_assessment,
-                            selected_baseline_ra.evidences.all(),
-                            itertools.chain.from_iterable(
-                                requirement_assessment.applied_controls.all()
-                                for requirement_assessment in baseline_requirement_assessments
-                            ),
+                for ra in requirement_assessments_to_update:
+                    if best_results[ra.requirement.urn].get("applied_controls"):
+                        ra.applied_controls.add(
+                            *[
+                                control
+                                for control in best_results[ra.requirement.urn][
+                                    "applied_controls"
+                                ]
+                            ]
                         )
-                    )
-
-                # Bulk update observations
-                if updates:
-                    RequirementAssessment.objects.bulk_update(updates, ["observation"])
-
-                # Handle M2M relationships in bulk
-                for assessment, evidences, controls in m2m_operations:
-                    assessment.evidences.add(*[ev.id for ev in evidences])
-                    assessment.applied_controls.add(*[ac.id for ac in controls])
+                    if best_results[ra.requirement.urn].get("evidences"):
+                        ra.evidences.add(
+                            *[
+                                evidence
+                                for evidence in best_results[ra.requirement.urn][
+                                    "evidences"
+                                ]
+                            ]
+                        )
+                    if best_results[ra.requirement.urn].get("security_exceptions"):
+                        ra.security_exceptions.add(
+                            *[
+                                exception
+                                for exception in best_results[ra.requirement.urn][
+                                    "security_exceptions"
+                                ]
+                            ]
+                        )
 
             # Handle applied controls creation
             if create_applied_controls:
@@ -6172,7 +6157,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 # Create applied controls in bulk for each assessment
                 for requirement_assessment in assessments:
                     requirement_assessment.create_applied_controls_from_suggestions()
-            """
 
     def perform_update(self, serializer):
         compliance_assessment = serializer.save()
