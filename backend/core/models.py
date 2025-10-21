@@ -3723,13 +3723,70 @@ class AppliedControl(
         verbose_name_plural = _("Applied controls")
 
     def save(self, *args, **kwargs):
+        # Track what changed
+        changed_fields = []
+        if self.pk:
+            old_instance = AppliedControl.objects.get(pk=self.pk)
+            changed_fields = self._get_changed_fields(old_instance)
+
         if self.reference_control and self.category is None:
             self.category = self.reference_control.category
         if self.reference_control and self.csf_function is None:
             self.csf_function = self.reference_control.csf_function
         if self.status == "active":
             self.progress_field = 100
+
+        # Save first
+        is_new = self.pk is None
         super(AppliedControl, self).save(*args, **kwargs)
+
+        # Then trigger sync (async, non-blocking)
+        if not kwargs.get("skip_sync", False):
+            self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
+
+    def _get_changed_fields(self, old_instance):
+        """Detect which fields changed"""
+        changed = []
+        # Check syncable fields only
+        syncable_fields = [
+            "name",
+            "description",
+            "status",
+            "priority",
+            "eta",
+            "start_date",
+            "effort",
+            "observation",
+        ]
+
+        for field in syncable_fields:
+            old_val = getattr(old_instance, field)
+            new_val = getattr(self, field)
+            if old_val != new_val:
+                changed.append(field)
+
+        return changed
+
+    def _trigger_sync(self, is_new: bool, changed_fields: List[str]):
+        """Queue sync tasks for all active integrations"""
+        from integrations.tasks import sync_object_to_integrations
+
+        # Find all active ITSM integrations for this folder
+        configurations = IntegrationConfiguration.objects.filter(
+            folder=self.folder, provider__provider_type="itsm", is_active=True
+        )
+
+        if configurations.exists() and (is_new or changed_fields):
+            # Dispatch async task
+            sync_object_to_integrations.schedule(
+                args=(
+                    "AppliedControl",
+                    self.pk,
+                    list(configurations.values_list("id", flat=True)),
+                    changed_fields,
+                ),
+                delay=1,  # Small delay to ensure transaction is committed
+            )
 
     @property
     def risk_scenarios(self):

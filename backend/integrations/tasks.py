@@ -1,0 +1,37 @@
+from huey.contrib.djhuey import task
+from integrations.models import IntegrationConfiguration
+from .registry import IntegrationRegistry
+
+from structlog import get_logger
+
+logger = get_logger(__name__)
+
+
+@task()
+def sync_object_to_integrations(
+    model_name: str, object_id: int, config_ids: list[int], changed_fields: list[str]
+):
+    """Push local changes to all configured integrations"""
+    from django.apps import apps
+
+    Model = apps.get_model("your_app", model_name)
+    obj = Model.objects.get(pk=object_id)
+
+    for config_id in config_ids:
+        try:
+            config = IntegrationConfiguration.objects.get(pk=config_id)
+            orchestrator = IntegrationRegistry.get_orchestrator(config)
+            orchestrator.push_changes(obj, changed_fields)
+        except Exception as e:
+            logger.error(f"Sync failed for config {config_id}: {e}")
+            # Don't fail the whole batch if one integration fails
+
+
+@task()
+def process_webhook_event(config_id: int, event_type: str, payload: dict):
+    """Process incoming webhook from remote system"""
+    config = IntegrationConfiguration.objects.get(pk=config_id)
+    orchestrator = IntegrationRegistry.get_orchestrator(config)
+
+    # Let the specific orchestrator handle the event
+    orchestrator.handle_webhook_event(event_type, payload)

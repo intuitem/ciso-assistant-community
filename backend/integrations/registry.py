@@ -1,0 +1,411 @@
+from typing import Type, Optional
+from django.utils.module_loading import import_string
+import logging
+
+from integrations.models import IntegrationConfiguration
+
+from .base import (
+    BaseIntegrationClient,
+    BaseFieldMapper,
+    BaseSyncOrchestrator,
+)
+
+logger = logging.getLogger(__name__)
+
+
+class IntegrationProvider:
+    """Represents a registered integration provider"""
+
+    def __init__(
+        self,
+        name: str,
+        provider_type: str,
+        client_class: Type[BaseIntegrationClient],
+        mapper_class: Type[BaseFieldMapper],
+        orchestrator_class: Type[BaseSyncOrchestrator],
+        display_name: str = "",
+        description: str = "",
+        config_schema: dict = {},
+    ):
+        self.name = name
+        self.provider_type = provider_type
+        self.client_class = client_class
+        self.mapper_class = mapper_class
+        self.orchestrator_class = orchestrator_class
+        self.display_name = display_name or name.title()
+        self.description = description
+        self.config_schema = config_schema or {}
+
+    def create_orchestrator(
+        self, configuration: IntegrationConfiguration
+    ) -> BaseSyncOrchestrator:
+        """Create an orchestrator instance for this provider"""
+        return self.orchestrator_class(configuration)
+
+    def create_client(
+        self, configuration: IntegrationConfiguration
+    ) -> BaseIntegrationClient:
+        """Create a client instance for this provider"""
+        return self.client_class(configuration)
+
+    def create_mapper(self, configuration: IntegrationConfiguration) -> BaseFieldMapper:
+        """Create a mapper instance for this provider"""
+        return self.mapper_class(configuration)
+
+    def validate_configuration(self, config: dict) -> tuple[bool, list[str]]:
+        """Validate configuration against schema
+
+        Returns:
+            (is_valid, list_of_errors)
+        """
+        errors = []
+
+        # Check required fields from schema
+        required_fields = self.config_schema.get("required", [])
+        for field in required_fields:
+            if field not in config:
+                errors.append(f"Missing required field: {field}")
+
+        # Check credentials structure
+        if "credentials" in self.config_schema:
+            required_creds = self.config_schema["credentials"].get("required", [])
+            credentials = config.get("credentials", {})
+            for cred in required_creds:
+                if cred not in credentials:
+                    errors.append(f"Missing required credential: {cred}")
+
+        return len(errors) == 0, errors
+
+
+class IntegrationRegistry:
+    """Central registry for all integration providers"""
+
+    _providers: dict[str, IntegrationProvider] = {}
+    _initialized = False
+
+    @classmethod
+    def register(
+        cls,
+        name: str,
+        provider_type: str,
+        client_class: Type[BaseIntegrationClient],
+        mapper_class: Type[BaseFieldMapper],
+        orchestrator_class: Type[BaseSyncOrchestrator],
+        display_name: str = "",
+        description: str = "",
+        config_schema: dict = {},
+    ) -> None:
+        """Register a new integration provider
+
+        Args:
+            name: Unique identifier (e.g., 'jira', 'servicenow')
+            provider_type: Category (e.g., 'itsm', 'directory', 'hr')
+            client_class: Client implementation class
+            mapper_class: Field mapper implementation class
+            orchestrator_class: Orchestrator implementation class
+            display_name: Human-readable name
+            description: Provider description
+            config_schema: JSON schema for configuration validation
+        """
+        if name in cls._providers:
+            logger.warning(f"Provider {name} is already registered. Overwriting.")
+
+        provider = IntegrationProvider(
+            name=name,
+            provider_type=provider_type,
+            client_class=client_class,
+            mapper_class=mapper_class,
+            orchestrator_class=orchestrator_class,
+            display_name=display_name,
+            description=description,
+            config_schema=config_schema,
+        )
+
+        cls._providers[name] = provider
+        logger.info(f"Registered integration provider: {name} ({provider_type})")
+
+    @classmethod
+    def register_from_path(
+        cls,
+        name: str,
+        provider_type: str,
+        client_path: str,
+        mapper_path: str,
+        orchestrator_path: str,
+        display_name: str = None,
+        description: str = "",
+        config_schema: dict = None,
+    ) -> None:
+        """Register a provider using dotted import paths
+
+        Args:
+            name: Unique identifier
+            provider_type: Category
+            client_path: Dotted path to client class (e.g., 'integrations.itsm.jira.client.JiraClient')
+            mapper_path: Dotted path to mapper class
+            orchestrator_path: Dotted path to orchestrator class
+            display_name: Human-readable name
+            description: Provider description
+            config_schema: Configuration schema
+        """
+        try:
+            client_class = import_string(client_path)
+            mapper_class = import_string(mapper_path)
+            orchestrator_class = import_string(orchestrator_path)
+
+            cls.register(
+                name=name,
+                provider_type=provider_type,
+                client_class=client_class,
+                mapper_class=mapper_class,
+                orchestrator_class=orchestrator_class,
+                display_name=display_name,
+                description=description,
+                config_schema=config_schema,
+            )
+        except ImportError as e:
+            logger.error(f"Failed to register provider {name}: {e}")
+            raise
+
+    @classmethod
+    def unregister(cls, name: str) -> bool:
+        """Unregister an integration provider
+
+        Returns:
+            True if provider was unregistered, False if not found
+        """
+        if name in cls._providers:
+            del cls._providers[name]
+            logger.info(f"Unregistered integration provider: {name}")
+            return True
+        return False
+
+    @classmethod
+    def get_provider(cls, name: str) -> Optional[IntegrationProvider]:
+        """Get a registered provider by name"""
+        return cls._providers.get(name)
+
+    @classmethod
+    def get_providers_by_type(cls, provider_type: str) -> list[IntegrationProvider]:
+        """Get all providers of a specific type"""
+        return [
+            provider
+            for provider in cls._providers.values()
+            if provider.provider_type == provider_type
+        ]
+
+    @classmethod
+    def list_providers(cls) -> list[IntegrationProvider]:
+        """Get all registered providers"""
+        return list(cls._providers.values())
+
+    @classmethod
+    def list_provider_names(cls) -> list[str]:
+        """Get all registered provider names"""
+        return list(cls._providers.keys())
+
+    @classmethod
+    def get_orchestrator(
+        cls, configuration: "IntegrationConfiguration"
+    ) -> BaseSyncOrchestrator:
+        """Get an orchestrator instance for a configuration
+
+        Args:
+            configuration: IntegrationConfiguration instance
+
+        Returns:
+            Orchestrator instance
+
+        Raises:
+            ValueError: If provider not found
+        """
+        # Get provider name from configuration
+        if hasattr(configuration, "provider"):
+            provider_name = configuration.provider.name
+        else:
+            raise ValueError("Configuration must have a provider")
+
+        provider = cls.get_provider(provider_name)
+        if not provider:
+            raise ValueError(f"Provider {provider_name} is not registered")
+
+        return provider.create_orchestrator(configuration)
+
+    @classmethod
+    def get_client(
+        cls, configuration: "IntegrationConfiguration"
+    ) -> BaseIntegrationClient:
+        """Get a client instance for a configuration"""
+        if hasattr(configuration, "provider"):
+            provider_name = configuration.provider.name
+        else:
+            raise ValueError("Configuration must have a provider")
+
+        provider = cls.get_provider(provider_name)
+        if not provider:
+            raise ValueError(f"Provider {provider_name} is not registered")
+
+        return provider.create_client(configuration)
+
+    @classmethod
+    def get_mapper(cls, configuration: "IntegrationConfiguration") -> BaseFieldMapper:
+        """Get a mapper instance for a configuration"""
+        if hasattr(configuration, "provider"):
+            provider_name = configuration.provider.name
+        else:
+            raise ValueError("Configuration must have a provider")
+
+        provider = cls.get_provider(provider_name)
+        if not provider:
+            raise ValueError(f"Provider {provider_name} is not registered")
+
+        return provider.create_mapper(configuration)
+
+    @classmethod
+    def validate_configuration(
+        cls, provider_name: str, config: dict
+    ) -> tuple[bool, list[str]]:
+        """Validate a configuration for a specific provider
+
+        Returns:
+            (is_valid, list_of_errors)
+        """
+        provider = cls.get_provider(provider_name)
+        if not provider:
+            return False, [f"Provider {provider_name} is not registered"]
+
+        return provider.validate_configuration(config)
+
+    @classmethod
+    def autodiscover(cls) -> None:
+        """Auto-discover and register all integrations
+
+        Looks for integration modules following the convention:
+        integrations/<type>/<provider>/integration.py
+
+        Each integration.py should call IntegrationRegistry.register()
+        """
+        if cls._initialized:
+            return
+
+        from django.apps import apps
+        import importlib
+
+        # Look for integration modules in installed apps
+        for app_config in apps.get_app_configs():
+            # Try to import integrations module from each app
+            try:
+                module_name = f"{app_config.name}.integrations"
+                importlib.import_module(module_name)
+                logger.debug(f"Loaded integrations from {module_name}")
+            except ImportError:
+                # No integrations module in this app
+                pass
+
+        # Also try to import from integrations package directly
+        try:
+            # Import all integration modules
+            from pathlib import Path
+
+            integrations_path = Path(__file__).parent
+
+            # Walk through integration directories
+            for provider_type_dir in integrations_path.iterdir():
+                if not provider_type_dir.is_dir() or provider_type_dir.name.startswith(
+                    "_"
+                ):
+                    continue
+
+                # Look for provider directories
+                for provider_dir in provider_type_dir.iterdir():
+                    if not provider_dir.is_dir() or provider_dir.name.startswith("_"):
+                        continue
+
+                    # Try to import integration.py
+                    integration_file = provider_dir / "integration.py"
+                    if integration_file.exists():
+                        module_path = f"integrations.{provider_type_dir.name}.{provider_dir.name}.integration"
+                        try:
+                            importlib.import_module(module_path)
+                            logger.debug(f"Loaded integration from {module_path}")
+                        except ImportError as e:
+                            logger.warning(
+                                f"Failed to load integration {module_path}: {e}"
+                            )
+        except Exception as e:
+            logger.warning(f"Error during integration autodiscovery: {e}")
+
+        cls._initialized = True
+        logger.info(
+            f"Integration registry initialized with {len(cls._providers)} providers"
+        )
+
+    @classmethod
+    def clear(cls) -> None:
+        """Clear all registered providers (mainly for testing)"""
+        cls._providers.clear()
+        cls._initialized = False
+        logger.info("Integration registry cleared")
+
+
+# Decorator for easy registration
+def register_integration(
+    name: str,
+    provider_type: str,
+    display_name: str = "",
+    description: str = "",
+    config_schema: dict = {},
+):
+    """Decorator to register an integration orchestrator class
+
+    Usage:
+        @register_integration('jira', 'itsm', display_name='Jira')
+        class JiraOrchestrator(BaseITSMOrchestrator):
+            ...
+    """
+
+    def decorator(orchestrator_class: Type[BaseSyncOrchestrator]):
+        # The orchestrator class should have _get_client and _get_mapper methods
+        # that return the appropriate classes
+
+        # Create a temporary instance to get the client and mapper classes
+        # This is a bit hacky but allows the decorator to work
+        try:
+            # Try to get class references from the orchestrator
+            if hasattr(orchestrator_class, "client_class"):
+                client_class = orchestrator_class.client
+            else:
+                raise AttributeError(
+                    "Orchestrator must define 'client_class' class attribute"
+                )
+
+            if hasattr(orchestrator_class, "mapper_class"):
+                mapper_class = orchestrator_class.mapper
+            else:
+                raise AttributeError(
+                    "Orchestrator must define 'mapper_class' class attribute"
+                )
+
+            IntegrationRegistry.register(
+                name=name,
+                provider_type=provider_type,
+                client_class=client_class,
+                mapper_class=mapper_class,
+                orchestrator_class=orchestrator_class,
+                display_name=display_name,
+                description=description,
+                config_schema=config_schema,
+            )
+        except Exception as e:
+            logger.error(f"Failed to register integration {name}: {e}")
+            raise
+
+        return orchestrator_class
+
+    return decorator
+
+
+# Initialize registry when module is imported
+def init_registry():
+    """Initialize the integration registry"""
+    IntegrationRegistry.autodiscover()
