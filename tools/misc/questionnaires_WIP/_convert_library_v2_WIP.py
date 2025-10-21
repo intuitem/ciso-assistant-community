@@ -1,4 +1,21 @@
 """
+!!! WARNING !!! DO NOT USE THIS SCRIPT !!!
+!!! WARNING !!! DO NOT USE _example_framework_WIP.xlsx !!!
+
+
+This is a version in which, in dynamic questionnaires, we can "mention" questions from
+other requirements for a question ("depends_on" can take the URN of a question from
+a requirement different from the one in which "depends_on" is located). 
+
+NOTE: This is a FINAL and FUNCTIONAL version of the code. It's just not used yet
+because this feature has not yet been implemented in the backend.
+The _README_WIP.md is also a final version for this script and the logic in general
+
+"""
+
+
+
+"""
 Convert Library v2 - Build a CISO Assistant YAML library from a v2 Excel file
 
 This script processes an Excel file in v2 format (with *_meta and *_content tabs),
@@ -170,8 +187,146 @@ def expand_urns_from_prefixed_list(
 # --- question management ------------------------------------------------------------
 
 
+# Get all URNs once for a line (Useful only for "inject_questions_into_node")
+def _compute_urns(framework_ws, fw_base_urn: str, compat_mode: int) -> Dict[int, str]:
+   
+    rows = list(framework_ws.iter_rows())
 
-def inject_questions_into_node(qa_data: dict[str, Any], node: Dict[str, Any], answers_dict: dict) -> None:
+    if rows:
+        header = [
+            str(c.value).strip().lower() if c.value else "" for c in rows[0]
+        ]
+        parent_for_depth = {}
+        count_for_depth = {}
+        previous_node_urn = None
+        previous_depth = 0
+        counter = 0
+        counter_fix = -1
+
+        urn_dict = {} # Store URN with line number
+        all_urns = set()  # to detect duplicates
+        
+        for idx, row in enumerate(rows[1:]):
+            counter += 1
+            data = {
+                header[i]: row[i].value
+                for i in range(len(header))
+                if i < len(row)
+            }
+            if all(value is None for value in data.values()):
+                print(f"empty line {counter}")
+                continue
+            depth = int(data.get("depth", 1))
+            ref_id = data.get("ref_id")
+            ref_id = str(ref_id).strip() if ref_id is not None else None
+            name = data.get("name")
+            name = str(name).strip() if name is not None else None
+
+            if depth == previous_depth + 1:
+                parent_for_depth[depth] = previous_node_urn
+                count_for_depth[depth] = 1
+            elif depth <= previous_depth:
+                pass
+            else:
+                raise ValueError(
+                    f"Invalid depth jump from {previous_depth} to {depth} at row {counter}"
+                )
+
+            # calculate urn
+            if (
+                compat_mode == 1
+            ):  # Use legacy URN fallback logic (for requirements without ref_id)
+                skip_count = str(
+                    data.get("skip_count", "")
+                ).strip().lower() in ("1", "true", "yes", "x")
+                if skip_count:
+                    counter_fix += 1
+                    ref_id_urn = f"node{counter - counter_fix}-{counter_fix+1}"
+                else:
+                    # Adds the ability to use the "urn_id" column despite compatibility mode set to "1"
+                    if data.get("urn_id") and data.get("urn_id").strip():
+                        ref_id_urn = data.get("urn_id").strip()
+                    else:
+                        ref_id_urn = (
+                            ref_id.lower().replace(" ", "-")
+                            if ref_id
+                            else f"node{counter - counter_fix}"
+                        )
+
+                urn = f"{fw_base_urn}:{ref_id_urn}"
+            elif (
+                compat_mode == 3
+            ):  # Updated version of "[< v2]" (Compat Mode 1). Handling of the new "fix_count" column in order to ADD or SUBTRACT from the counter (replace "skip_count").
+                # Fixed the URN writing issue when "skip_count" was true and a "ref_id" was defined.
+                
+                try:
+                    fix_count = int(data.get("fix_count", ""))
+                except Exception as e:
+                    fix_count = None
+
+                if fix_count:
+                    counter_fix += fix_count
+                    
+                    # If "ref_id" is already defined, use the defined "ref_id"
+                    if data.get("urn_id") and data.get("urn_id").strip():
+                        ref_id_urn = data.get('urn_id').strip()
+                    # Else if no "ref_id", use the custom node version
+                    else:
+                        ref_id_urn = f"node{counter + counter_fix}"
+
+                else:
+                    # Adds the ability to use the "urn_id" column despite compatibility mode set to "3"
+                    if data.get("urn_id") and data.get("urn_id").strip():
+                        ref_id_urn = data.get("urn_id").strip()
+                    else:
+                        ref_id_urn = (
+                            ref_id.lower().replace(" ", "-")
+                            if ref_id
+                            else f"node{counter + counter_fix}"
+                        )
+
+                urn = f"{fw_base_urn}:{ref_id_urn}"
+
+            else:  # If compat mode = {0,2}
+                if data.get("urn_id") and data.get("urn_id").strip():
+                    urn = f"{fw_base_urn}:{data.get('urn_id').strip()}"
+                elif ref_id:
+                    # [+] Compat check
+                    ref_id_clean = clean_urn_suffix(
+                        ref_id, compat_mode=compat_mode
+                    )
+
+                    urn = f"{fw_base_urn}:{ref_id_clean}"
+                else:
+                    p = parent_for_depth.get(depth)
+                    c = count_for_depth.get(depth, 1)
+                    if p:
+                        urn = f"{p}:{c}" if p else f"{fw_base_urn}:{c}"
+                    elif name:
+                        # [+] Compat check
+                        name_clean = clean_urn_suffix(
+                            name, compat_mode=compat_mode
+                        )
+
+                        urn = f"{fw_base_urn}:{name_clean}"
+                    else:
+                        urn = f"{fw_base_urn}:node{c}"
+                    count_for_depth[depth] = c + 1
+            previous_node_urn = urn
+            previous_depth = depth
+
+            if urn in all_urns:
+                raise ValueError(f"urn already used: {urn}")
+            all_urns.add(urn)
+            urn_dict[idx + 2] = urn
+        
+        return urn_dict
+
+    return None
+
+
+
+def inject_questions_into_node(qa_data: dict[str, Any], node, answers_dict, fw_urns: Dict[int, str] = None) -> None:
     """
     Injects parsed questions and their metadata into a requirement node.
     Ensures that question type is valid and handles multiple questions/answers.
@@ -179,13 +334,13 @@ def inject_questions_into_node(qa_data: dict[str, Any], node: Dict[str, Any], an
     :param qa_data: Allows to retrieve the string from the following columns: "questions", "answer" and "depends_on"
     :param node: The requirement node (dict)
     :param answers_dict: Dictionary of all available answers (from answer sheet)
+    :param fw_urns: Useful for the "depends_on" parameter only
     """
 
 
     raw_question_str = qa_data.get("questions")
     raw_answer_str = qa_data.get("answer")
     raw_depends_on_str = qa_data.get("depends_on")
-    raw_condition_str = qa_data.get("condition")
 
     if not raw_question_str:
         return
@@ -199,21 +354,10 @@ def inject_questions_into_node(qa_data: dict[str, Any], node: Dict[str, Any], an
         depends_on_lines = [dep.strip() for dep in str(raw_depends_on_str).split("\n") if dep.strip()]
         depends_on_lines = [None if dep.lower() == "undefined" else dep for dep in depends_on_lines]
         
-        if not node.get('urn'):
+        if not fw_urns:
             raise ValueError(
                 f"(inject_questions_into_node) Missing Framework URNs to compute the 'depends_on' column"
             )
-            
-    condition_lines = None
-    if raw_condition_str:
-        condition_lines = [cond.strip() for cond in str(raw_condition_str).split("\n") if cond.strip()]
-        condition_lines = [None if cond.lower() == "undefined" else cond for cond in condition_lines]
-    # If NO condition [AND]  
-    elif not raw_condition_str and depends_on_lines:
-        raise ValueError(
-            f"(inject_questions_into_node) Missing value 'condition' to compute 'depends_on' column"
-        )
-        
 
     answer_ids = (
         [a.strip() for a in str(raw_answer_str).split("\n") if raw_answer_str]
@@ -223,26 +367,19 @@ def inject_questions_into_node(qa_data: dict[str, Any], node: Dict[str, Any], an
 
     if len(answer_ids) != 1 and len(answer_ids) != len(question_lines):
         raise ValueError(
-            f"Mismatch between questions and 'answers' for node {node.get('urn')}"
+            f"Mismatch between questions and answers for node {node.get('urn')}"
         )
         
     if depends_on_lines and len(depends_on_lines) != 1 and len(depends_on_lines) != len(question_lines):
         raise ValueError(
-            f"Mismatch between questions and 'depends_on' for node {node.get('urn')}"
-        )
-    
-    if condition_lines and len(condition_lines) != 1 and len(condition_lines) != len(question_lines):
-        raise ValueError(
-            f"Mismatch between questions and 'condition' for node {node.get('urn')}"
+            f"Mismatch between questions and depends_on for node {node.get('urn')}"
         )
 
     question_block = {}
 
     for idx, question_text in enumerate(question_lines):
-
         answer_id = answer_ids[0] if len(answer_ids) == 1 else answer_ids[idx]
         answer_meta = answers_dict.get(answer_id)
-
         if not answer_meta:
             raise ValueError(
                 f"Unknown answer ID: {answer_id} for node {node.get('urn')}"
@@ -265,51 +402,32 @@ def inject_questions_into_node(qa_data: dict[str, Any], node: Dict[str, Any], an
         depends_on_question_answers = []
 
         if depends_on_lines:
-
+            
             dependency = depends_on_lines[0] if len(depends_on_lines) == 1 else depends_on_lines[idx]
 
-            # Skip if dependency is not defined [AND] 
+            # Skip if dependency is not defined
             if dependency is not None:
-                
-                condition = None
-                if len(condition_lines) == 1:
-                    condition = condition_lines[0]
-                else:
-                    condition = condition_lines[idx]
-                
+            
                 dep_split = dependency.split(":")
-                dependency_question = int(dep_split[0])
-                dependency_question_answers = [int(c) for c in dep_split[1].split(",")]
-                
-                # If the question DOESN'T want to depend on itself
-                if dependency_question != idx + 1:
+                dependency_line = int(dep_split[0])
+                dependency_question = int(dep_split[1])
+                dependency_question_answers = [int(c) for c in dep_split[2].split(",")]
 
-                    ##### Recreate correct URN for Question & Answers (Choices) #####
-                    # SOON: Checks for this will be processed in ./check_library_v2.py
+                ##### Recreate correct URN for Question & Answers (Choices) #####
+                # SOON: Checks for this will be processed in ./check_library_v2.py
 
-                    # Get URN of the line we refer to
-                    depends_on_urn = node.get('urn')
-                    # URN of the question
-                    depends_on_question_urn = depends_on_urn + f":question:{str(dependency_question)}"
-                    # URN of choices
-                    for choice in dependency_question_answers:
-                        depends_on_question_answers.append(depends_on_question_urn + f":choice:{str(choice)}")
+                # Get URN of the line we refer to
+                depends_on_urn = fw_urns[dependency_line]
+                # URN of the question
+                depends_on_question_urn = depends_on_urn + f":question:{str(dependency_question)}"
+                # URN of choices
+                for choice in dependency_question_answers:
+                    depends_on_question_answers.append(depends_on_question_urn + f":choice:{str(choice)}")
                     
-                    if not condition:
-                        raise ValueError(
-                            f"Missing 'condition' for question #{str(idx + 1)} for node {node.get('urn')}. Must be 'any'/'all' or 'undefined'"
-                        )
-                    
-                    if condition not in ["any", "all"]:
-                        raise ValueError(
-                            f"Invalid 'condition' for question #{str(idx + 1)} for node {node.get('urn')}. Must be 'any'/'all'/'undefined' or empty cell"
-                        )
-                    
-                    depends_on_block["condition"] = condition
-                    depends_on_block["question"] = depends_on_question_urn
-                    depends_on_block["answers"] = depends_on_question_answers
+                depends_on_block["question"] = depends_on_question_urn
+                depends_on_block["answers"] = depends_on_question_answers
 
-                    question_entry["depends_on"] = depends_on_block
+                question_entry["depends_on"] = depends_on_block
 
 
         if qtype in {"unique_choice", "multiple_choice"}:
@@ -1217,10 +1335,15 @@ def create_library(
                             node["reference_controls"] = rc
                     if "questions" in data and data["questions"]:
 
+                        fw_urns = None
+                        if "depends_on" in data and data["depends_on"]:
+                            fw_urns = _compute_urns(content_ws, base_urn, compat_mode)
+
                         inject_questions_into_node(
                             data,
                             node,
                             answers_dict,
+                            fw_urns
                         )
                     translations = extract_translations_from_row(header, row)
                     if translations:

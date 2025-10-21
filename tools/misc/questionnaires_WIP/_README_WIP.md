@@ -217,8 +217,7 @@ The `_content` tab for a `framework` object contains the following columns:
 - weight: Positive integer `>= 1`. Used for score weighting. The default weight (if undefined) is `1`.
 - questions: 1 or several (n) questions, separated by line breaks
 - answer: 1 (same for all questions) or n (one answer per question) answers, separated by line breaks
-- depends_on: Format: `question_line:choice_lines`. Set `undefined` or empty cell if the question depends on nothing. See the cell notes in `example_framework.xlsx`, at lines `41` and `43`, column `depends_on` for better understanding.
-- condition: One among `any`/`all`. Required if `depends_on` is defined for a question. Set to `undefined` if `depends_on` is undefined for a specific question. `any`: Any answer selected from the `depends_on` list will show the question. `all`: Selecting all answers from the `depends_on` list will show the question. 
+- depends_on: Format: `line_where_the_requirement_containing_the_question_is:question_line:choice_lines`. Set `undefined` or empty cell if the question depends on nothing. See the cell notes in `example_framework.xlsx`, at lines `41` and `43`, column `depends_on` for better understanding.
 - urn_id (+): this is reserved for specific compatibility issues to force the urn calculation
 - skip_count (+): trick to fix a referential without changing the URNs (subtract `1` from the counter) [Works with Compatibility mode `1` in `convert_library_v2.py`]
 - fix_count (+): negative or positive integer. Better version of `skip_count`  (adds the integer to the counter) [Works with Compatibility mode `3` in `convert_library_v2.py`]
