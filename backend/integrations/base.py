@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from django.apps import apps
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from core.base_models import AbstractBaseModel
@@ -336,7 +337,7 @@ class BaseSyncOrchestrator:
         model_name = local_object._meta.label
         mapping, created = SyncMapping.objects.get_or_create(
             configuration=self.configuration,
-            local_model=model_name,
+            content_type=ContentType.objects.get_for_model(local_object),
             local_object_id=local_object.pk,
             defaults={
                 "sync_status": SyncMapping.SyncStatus.PENDING,
@@ -351,7 +352,9 @@ class BaseSyncOrchestrator:
 
     def _get_local_object(self, mapping: SyncMapping) -> AbstractBaseModel:
         """Get local Django model instance from mapping"""
-        Model = apps.get_model(mapping.local_model)
+        Model = apps.get_model(
+            mapping.content_type.app_label, mapping.content_type.model
+        )
         return Model.objects.get(pk=mapping.local_object_id)
 
     def _update_local_object(

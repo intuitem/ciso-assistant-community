@@ -1,6 +1,7 @@
 from huey.contrib.djhuey import task
 from integrations.models import IntegrationConfiguration
 from .registry import IntegrationRegistry
+from django.contrib.contenttypes.models import ContentType
 
 from structlog import get_logger
 
@@ -9,12 +10,15 @@ logger = get_logger(__name__)
 
 @task()
 def sync_object_to_integrations(
-    model_name: str, object_id: int, config_ids: list[int], changed_fields: list[str]
+    content_type: ContentType,
+    object_id: int,
+    config_ids: list[int],
+    changed_fields: list[str],
 ):
     """Push local changes to all configured integrations"""
     from django.apps import apps
 
-    Model = apps.get_model("your_app", model_name)
+    Model = apps.get_model(content_type.app_label, content_type.model)
     obj = Model.objects.get(pk=object_id)
 
     for config_id in config_ids:

@@ -3725,8 +3725,8 @@ class AppliedControl(
     def save(self, *args, **kwargs):
         # Track what changed
         changed_fields = []
-        if self.pk:
-            old_instance = AppliedControl.objects.get(pk=self.pk)
+        old_instance = AppliedControl.objects.filter(pk=self.pk).first()
+        if old_instance:
             changed_fields = self._get_changed_fields(old_instance)
 
         if self.reference_control and self.category is None:
@@ -3770,6 +3770,7 @@ class AppliedControl(
     def _trigger_sync(self, is_new: bool, changed_fields: List[str]):
         """Queue sync tasks for all active integrations"""
         from integrations.tasks import sync_object_to_integrations
+        from integrations.models import IntegrationConfiguration
 
         # Find all active ITSM integrations for this folder
         configurations = IntegrationConfiguration.objects.filter(

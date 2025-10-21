@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from core.base_models import AbstractBaseModel
@@ -57,8 +58,9 @@ class SyncMapping(AbstractBaseModel):
     )
 
     # Local object reference
-    # NOTE: use ContentType?
-    local_model = models.CharField(max_length=100)  # e.g. 'AppliedControl'
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE
+    )  # e.g. core.AppliedControl
     local_object_id = models.UUIDField()
 
     # Remote object reference
@@ -77,7 +79,7 @@ class SyncMapping(AbstractBaseModel):
     error_message = models.TextField(blank=True)
 
     class Meta:
-        unique_together = ["configuration", "local_model", "local_object_id"]
+        unique_together = ["configuration", "content_type", "local_object_id"]
         indexes = [
             models.Index(fields=["configuration", "remote_id"]),
         ]
