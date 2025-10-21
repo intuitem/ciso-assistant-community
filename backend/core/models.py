@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Self, Union, List
 import statistics
 
+from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from icecream import ic
 from auditlog.registry import auditlog
@@ -3781,7 +3782,7 @@ class AppliedControl(
             # Dispatch async task
             sync_object_to_integrations.schedule(
                 args=(
-                    "AppliedControl",
+                    ContentType.objects.get_for_model(self),
                     self.pk,
                     list(configurations.values_list("id", flat=True)),
                     changed_fields,

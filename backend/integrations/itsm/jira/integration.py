@@ -5,7 +5,7 @@ This module registers the Jira integration with the IntegrationRegistry.
 It will be automatically discovered and loaded on Django startup.
 """
 
-from integrations.base import BaseITSMOrchestrator
+from integrations.base import BaseFieldMapper, BaseITSMOrchestrator
 from integrations.registry import IntegrationRegistry
 from typing import Dict, Any
 from structlog import get_logger
@@ -45,6 +45,12 @@ class JiraOrchestrator(BaseITSMOrchestrator):
     # Required class attributes for registry decorator
     client_class = JiraClient
     mapper_class = JiraFieldMapper
+
+    def _get_mapper(self) -> BaseFieldMapper:
+        return JiraFieldMapper(self.configuration)
+
+    def _get_client(self) -> JiraClient:
+        return JiraClient(self.configuration)
 
     def _extract_remote_id(self, payload: Dict[str, Any]) -> str:
         """Extract issue key from Jira webhook payload"""

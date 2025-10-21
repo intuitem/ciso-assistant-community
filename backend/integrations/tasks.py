@@ -2,6 +2,7 @@ from huey.contrib.djhuey import task
 from integrations.models import IntegrationConfiguration
 from .registry import IntegrationRegistry
 from django.contrib.contenttypes.models import ContentType
+from integrations.itsm.jira.integration import *
 
 from structlog import get_logger
 

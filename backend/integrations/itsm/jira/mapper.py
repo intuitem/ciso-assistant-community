@@ -58,7 +58,7 @@ class JiraFieldMapper(BaseFieldMapper):
         if field == "status":
             # Jira expects status as object with name
             jira_status = self.STATUS_MAP_TO_JIRA.get(value, "To Do")
-            return {"name": jira_status}
+            return jira_status
 
         elif field == "priority":
             # Jira expects priority as object with name
@@ -72,20 +72,6 @@ class JiraFieldMapper(BaseFieldMapper):
             elif hasattr(value, "isoformat"):
                 return value.isoformat()
             return str(value)
-
-        elif field == "description":
-            # Jira uses Atlassian Document Format (ADF) or Wiki markup
-            # For simplicity, we'll use plain text wrapped in ADF
-            return {
-                "type": "doc",
-                "version": 1,
-                "content": [
-                    {
-                        "type": "paragraph",
-                        "content": [{"type": "text", "text": value or ""}],
-                    }
-                ],
-            }
 
         return value
 

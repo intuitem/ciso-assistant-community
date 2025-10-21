@@ -27,15 +27,74 @@ class JiraClient(BaseIntegrationClient):
         logger.info(f"Created Jira issue {issue.key}")
         return issue.key
 
-    def update_remote_object(self, remote_id, changes):
+    def update_remote_object(self, remote_id: str, changes: dict[str, Any]) -> bool:
         try:
-            issue = self.jira.issue(remote_id)
-            issue.update(fields=changes)
-            logger.info(f"Updated Jira issue {remote_id}")
+            # Status must be handled as a transition, not an edit.
+            target_status_name = None
+            if "status" in changes:
+                # 1. Pop the status from the changes dict
+                target_status_name = changes.pop("status")
+
+            # Update all other fields (if any remain)
+            if changes:
+                issue = self.jira.issue(remote_id)
+                issue.update(fields=changes)
+                logger.info(
+                    f"Updated standard fields for Jira issue {remote_id}: {list(changes.keys())}"
+                )
+
+            # Handle the status transition separately
+            if target_status_name:
+                self._transition_issue_to_status(remote_id, target_status_name)
+
             return True
+
         except Exception as e:
             logger.error(f"Failed to update Jira issue {remote_id}: {e}")
-            raise
+            raise  # Re-raise the exception to be caught by the orchestrator
+
+    def _transition_issue_to_status(
+        self, remote_id: str, target_status_name: str
+    ) -> None:
+        """
+        Helper function to find and execute the correct workflow transition
+        to move an issue to a target status.
+        """
+        try:
+            # Get all available transitions for the issue
+            transitions = self.jira.transitions(remote_id)
+
+            # Find the transition ID that leads to the target status
+            transition_id = None
+            available_statuses = []
+            for t in transitions:
+                # t['to']['name'] is the name of the status this transition moves to
+                available_statuses.append(t["to"]["name"])
+                if t["to"]["name"].lower() == target_status_name.lower():
+                    transition_id = t["id"]
+                    break  # Found it
+
+            if transition_id:
+                # Execute the transition
+                self.jira.transition_issue(remote_id, transition_id)
+                logger.info(
+                    f"Transitioned Jira issue {remote_id} to status '{target_status_name}'"
+                )
+            else:
+                # No transition found
+                logger.error(
+                    f"No available transition for issue {remote_id} to status '{target_status_name}'. "
+                    f"Available transitions are for: {available_statuses}"
+                )
+                # Raise an exception so the sync fails and logs the error
+                raise Exception(
+                    f"Invalid status transition: No workflow path to '{target_status_name}'. "
+                    f"Available targets: {available_statuses}"
+                )
+
+        except Exception as e:
+            logger.error(f"Failed to transition Jira issue {remote_id}: {e}")
+            raise  # Re-raise the exception
 
     def get_remote_object(self, remote_id: str) -> Dict[str, Any]:
         try:
