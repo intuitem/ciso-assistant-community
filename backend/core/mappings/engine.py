@@ -207,8 +207,8 @@ class MappingEngine:
                 rel in ("subset", "intersect")
                 and src in source_audit["requirement_assessments"]
             ):
-                # TODO: Add applied controls
                 result = source_audit["requirement_assessments"][src]["result"]
+                target_audit[dst]["applied_controls"] = source_audit["requirement_assessments"][src]["applied_control"]
                 if result in ("not_assessed", "non_compliant"):
                     target_audit[dst]["result"] = result
                 elif result in ("compliant", "partially_compliant"):
