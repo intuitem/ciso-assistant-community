@@ -999,7 +999,7 @@ def create_library(
                                     except (TypeError, ValueError):
                                         raise ValueError(
                                             f"(answers_definition) Invalid add_score value '{val}' "
-                                            f"for answer ID '{answer_id}', choice #{i+1}. Must be an integer (0 or negative allowed)."
+                                            f"for answer ID '{answer_id}', choice #{i+1}. Must be an integer"
                                         )
 
                         # --- Optional: select_implementation_groups ---------------------------
