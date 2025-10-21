@@ -92,4 +92,3 @@ class JiraClient(BaseIntegrationClient):
         except Exception as e:
             logger.error(f"Jira connection test failed: {e}")
             return False
-

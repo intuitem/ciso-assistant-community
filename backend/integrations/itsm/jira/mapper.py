@@ -2,6 +2,7 @@ from typing import Any, Dict
 from datetime import datetime
 from integrations.base import BaseFieldMapper
 
+
 class JiraFieldMapper(BaseFieldMapper):
     """Maps fields between AppliedControl and Jira issues"""
 
@@ -81,7 +82,7 @@ class JiraFieldMapper(BaseFieldMapper):
                 "content": [
                     {
                         "type": "paragraph",
-                        "content": [{"type": "text", "text": value or ""}]
+                        "content": [{"type": "text", "text": value or ""}],
                     }
                 ],
             }
