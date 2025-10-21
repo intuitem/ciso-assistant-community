@@ -35,8 +35,18 @@ def sync_object_to_integrations(
 @task()
 def process_webhook_event(config_id: int, event_type: str, payload: dict):
     """Process incoming webhook from remote system"""
-    config = IntegrationConfiguration.objects.get(pk=config_id)
-    orchestrator = IntegrationRegistry.get_orchestrator(config)
+    try:
+        config = IntegrationConfiguration.objects.get(pk=config_id)
+        orchestrator = IntegrationRegistry.get_orchestrator(config)
 
-    # Let the specific orchestrator handle the event
-    orchestrator.handle_webhook_event(event_type, payload)
+        # Let the specific orchestrator handle the event
+        orchestrator.handle_webhook_event(event_type, payload)
+
+    except IntegrationConfiguration.DoesNotExist:
+        logger.error(
+            f"process_webhook_event failed: No IntegrationConfiguration found for ID {config_id}"
+        )
+    except Exception as e:
+        logger.error(
+            f"process_webhook_event failed for config {config_id}: {e}", exc_info=True
+        )
