@@ -4,6 +4,7 @@ from .mapper import JiraFieldMapper
 from jira import JIRA
 from typing import Dict, Any
 from structlog import get_logger
+from icecream import ic
 
 logger = get_logger(__name__)
 
@@ -12,7 +13,7 @@ class JiraClient(BaseIntegrationClient):
     def __init__(self, configuration):
         super().__init__(configuration)
         self.jira = JIRA(
-            server=self.credentials["server"],
+            server=self.credentials["server_url"],
             basic_auth=(self.credentials["email"], self.credentials["api_token"]),
         )
         self.mapper = JiraFieldMapper(configuration)
@@ -63,7 +64,8 @@ class JiraClient(BaseIntegrationClient):
         }
 
         response = self.jira._session.post(
-            f"{self.credentials['server']}/rest/webhooks/1.0/webhook", json=webhook_data
+            f"{self.credentials['server_url']}/rest/webhooks/1.0/webhook",
+            json=webhook_data,
         )
         response.raise_for_status()
 
@@ -74,7 +76,7 @@ class JiraClient(BaseIntegrationClient):
     def unregister_webhook(self, webhook_id: str) -> bool:
         try:
             response = self.jira._session.delete(
-                f"{self.credentials['server']}/rest/webhooks/1.0/webhook/{webhook_id}"
+                f"{self.credentials['server_url']}/rest/webhooks/1.0/webhook/{webhook_id}"
             )
             response.raise_for_status()
             logger.info(f"Unregistered Jira webhook: {webhook_id}")
@@ -90,3 +92,4 @@ class JiraClient(BaseIntegrationClient):
         except Exception as e:
             logger.error(f"Jira connection test failed: {e}")
             return False
+
