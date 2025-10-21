@@ -26,6 +26,7 @@ import datetime
 import argparse
 import unicodedata
 import openpyxl
+from typing import Any, List
 from pathlib import Path
 from collections import Counter
 
@@ -169,22 +170,46 @@ def expand_urns_from_prefixed_list(
 # --- question management ------------------------------------------------------------
 
 
-def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_dict):
+def inject_questions_into_node(qa_data: dict[str, Any], node, answers_dict, answer_sheet, framework_ws: openpyxl.Workbook = None):
     """
     Injects parsed questions and their metadata into a requirement node.
     Ensures that question type is valid and handles multiple questions/answers.
 
-    :param node: the requirement node (dict)
-    :param raw_question_str: the string from the "questions" column
-    :param raw_answer_str: the string from the "answer" column
-    :param answers_dict: dictionary of all available answers (from answer sheet)
+    :param qa_data: Allows to retrieve the string from the following columns: "questions", "answer" and "depends_on"
+    :param node: The requirement node (dict)
+    :param answers_dict: Dictionary of all available answers (from answer sheet)
+    :param answer_sheet
+    :param framework_rows: Useful for the "depends_on" parameter only
     """
+    
+    def _get_column_index_by_header(ws, header_name):
+        """
+        Return the column index (1-based) of a header in the first row of the worksheet.
+        Raises KeyError if the header is not found.
+        """
+        for cell in ws[1]:  # assuming headers are in the first row
+            if cell.value and str(cell.value).strip().lower() == header_name.strip().lower():
+                return cell.column  # 1-based index (A=1, B=2, etc.)
+        raise KeyError(f"Header '{header_name}' not found in the worksheet ('depends_on' compute error)")
+
+    
+    raw_question_str = qa_data.get("questions")
+    raw_answer_str = qa_data.get("answer")
+    raw_depends_on_str = qa_data.get("depends_on")
+    
     if not raw_question_str:
         return
 
     allowed_types = {"unique_choice", "multiple_choice", "text", "date"}
 
     question_lines = [q.strip() for q in str(raw_question_str).split("\n") if q.strip()]
+    
+    depends_on_lines = None
+    if raw_depends_on_str:
+        depends_on_lines = [dep.strip() for dep in str(raw_depends_on_str).split("\n") if dep.strip()]
+        depends_on_lines = [None if dep.lower() == "undefined" else dep for dep in depends_on_lines]
+
+    
     answer_ids = (
         [a.strip() for a in str(raw_answer_str).split("\n") if raw_answer_str]
         if raw_answer_str
@@ -194,6 +219,11 @@ def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_d
     if len(answer_ids) != 1 and len(answer_ids) != len(question_lines):
         raise ValueError(
             f"Mismatch between questions and answers for node {node.get('urn')}"
+        )
+        
+    if depends_on_lines and len(depends_on_lines) != 1 and len(depends_on_lines) != len(depends_on_lines):
+        raise ValueError(
+            f"Mismatch between questions and depends_on for node {node.get('urn')}"
         )
 
     question_block = {}
@@ -214,13 +244,44 @@ def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_d
         question_entry = {
             "type": qtype,
         }
+
+        question_entry["text"] = question_text
+        
+        depends_on_block = {}
+        depends_on_question_urn = ""
+        depends_on_question_answers = []
+        
+        if depends_on_lines:
+            for idx, dependency in enumerate(depends_on_lines):
+                
+                # Skip if dependency is not defined
+                if dependency is None: continue
+                
+                dep_split = dependency.split(":")
+                dependency_line = int(dep_split[0])
+                dependency_question = int(dep_split[1])
+                dependency_question_answers = dep_split[2].split(",")
+
+                #### !!! Get ref_id of this column to recreate the URN of the dependency question set them correctly !!! ###
+                # The line below is a bit useless
+                dependency_question_row = framework_ws.cell(column=_get_column_index_by_header(framework_ws, "questions"), row=dependency_line).value
+                print(framework_col)                
+                # dependency_row = framework_rows[dependency_line - 1]
+
+                # print(framework_col)
+            
+        
+
         if qtype in {"unique_choice", "multiple_choice"}:
             choices = []
             for j, choice in enumerate(answer_meta["choices"]):
-                choice_urn = f"{q_urn}:choice:{j + 1}"
-                choices.append({"urn": choice_urn, "value": choice["value"]})
+                # make a shallow copy so we don't mutate the original dict
+                entry = choice.copy()
+                # overwrite / add the per-question urn
+                entry["urn"] = f"{q_urn}:choice:{j + 1}"
+                choices.append(entry)
             question_entry["choices"] = choices
-        question_entry["text"] = question_text
+
         question_block[q_urn] = question_entry
     if question_block:
         node["questions"] = question_block
@@ -422,7 +483,7 @@ def parse_risk_matrix(meta, content_ws, wb):
     return risk_matrix
 
 
-# --- Mapping logic ---------------------------------------------------------------
+# --- Mapping logic ------------------------------------------------------------
 
 
 def revert_relationship(relation: str):
@@ -434,8 +495,47 @@ def revert_relationship(relation: str):
         return relation
 
 
-# --- Main logic ---------------------------------------------------------------
+# --- Extract optional columns for answers -------------------------------------
 
+def _per_choice_lines(data: dict, col: str, n_choices: int, answer_id: str):
+
+    raw = str(data.get(col, "") or "").strip()
+
+    if not raw:
+        return None
+
+    lines: List[str] = []
+
+    # If col == "description", take into consideration the multiline description logic
+    if col.lower() == "description":
+        for desc in raw.split("\n"):
+
+            desc = desc.strip()
+
+            if not desc:
+                continue
+
+            # if line starts with "|", concatenate the whole line with the previous description (without the "|")
+            if desc.startswith("|") and lines:
+                # Multi-line value, append to previous
+                lines[-1] += "\n" + desc[1:].strip()
+            else:
+                lines.append(desc)
+    else:
+        lines = [line.strip() for line in raw.split("\n")]
+
+    if len(lines) == 1:
+        lines *= n_choices
+
+    if len(lines) != n_choices:
+        raise ValueError(
+            f"(answers_definition) Invalid {col} count for answer ID '{answer_id}': "
+            f"{len(lines)} values for {n_choices} choices."
+        )
+
+    return lines
+
+# --- Main logic ---------------------------------------------------------------
 
 def create_library(
     input_file: str, output_file: str, compat_mode: int = 0, verbose: bool = False
@@ -682,6 +782,8 @@ def create_library(
             # --- Retrieve answers block if declared ---
             answers_dict = {}
             answers_block_name = meta.get("answers_definition")
+            answer_sheet = None
+            
             if answers_block_name:
                 if answers_block_name not in object_blocks:
                     raise ValueError(f"Missing answers sheet: '{answers_block_name}'")
@@ -716,6 +818,76 @@ def create_library(
                                 choices[-1]["value"] += "\n" + line[1:].strip()
                             else:
                                 choices.append({"urn": "", "value": line})
+
+                        # --- Optional: description ---------------------------
+                        description_lines = _per_choice_lines(data, "description", len(choices), answer_id)
+                        if description_lines:
+                            for i, desc in enumerate(description_lines):
+                                if desc:
+                                    choices[i]["description"] = desc
+
+                        # --- Optional: compute_result -----------------------------------------
+                        compute_lines = _per_choice_lines(data, "compute_result", len(choices), answer_id)
+                        if compute_lines:
+                            for i, val in enumerate(compute_lines):
+                                v = val.lower()
+                                if v not in ("true", "false", "undefined", ""):
+                                    raise ValueError(
+                                        f"(answers_definition) Invalid compute_result value '{val}' "
+                                        f"for answer ID '{answer_id}', choice #{i+1}. Must be 'true', 'false', 'undefined' or empty."
+                                    )
+                                
+                                # Use Boolean instead of string
+                                if v == "undefined" or v == "": v = None
+                                elif v == "true": v = True
+                                elif v == "false": v = False
+                                
+                                if v is not None:
+                                    choices[i]["compute_result"] = v
+
+                        # --- Optional: add_score ----------------------------------------------
+                        score_lines = _per_choice_lines(data, "add_score", len(choices), answer_id)
+                        if score_lines:
+                            for i, val in enumerate(score_lines):
+                                if val:
+                                    try:
+                                        score_to_add = int(val)
+                                        if score_to_add != 0:
+                                            choices[i]["add_score"] = score_to_add
+
+                                    except (TypeError, ValueError):
+                                        raise ValueError(
+                                            f"(answers_definition) Invalid add_score value '{val}' "
+                                            f"for answer ID '{answer_id}', choice #{i+1}. Must be an integer (0 or negative allowed)."
+                                        )
+
+                        # --- Optional: select_implementation_groups ---------------------------
+                        sig_lines = _per_choice_lines(data, "select_implementation_groups", len(choices), answer_id)
+                        if sig_lines:
+                            for i, val in enumerate(sig_lines):
+                                if val:
+                                    groups = [s.strip() for s in val.split(",") if s.strip()]
+                                    
+                                    # If IG for choice == "/undefined", continue
+                                    if len(groups) == 1 and groups[0].lower() == "/undefined":
+                                        continue
+                                    
+                                    if groups:
+                                        choices[i]["select_implementation_groups"] = groups
+
+                        # --- Optional: color ---------------------------------------------------
+                        color_lines = _per_choice_lines(data, "color", len(choices), answer_id)
+                        if color_lines:
+                            for i, val in enumerate(color_lines):
+                                if val:
+                                    if not re.fullmatch(r"#([0-9a-fA-F]{6})", val) and val.lower() != "undefined":
+                                        raise ValueError(
+                                            f"(answers_definition) Invalid color value '{val}' "
+                                            f"for answer ID '{answer_id}', choice #{i+1}. Must match #RRGGBB, be 'undefined' or the cell must be empty."
+                                        )
+                                        
+                                    if val.lower() != 'undefined':
+                                        choices[i]["color"] = val.upper()
 
                         answers_dict[answer_id] = {
                             "type": answer_type,
@@ -779,6 +951,8 @@ def create_library(
                 if verbose:
                     print(f'💬 ℹ️  No "Score Definition" found')
 
+
+            # [CONTENT] Implementation Groups
             ig_name = meta.get("implementation_groups_definition")
             if ig_name and ig_name in object_blocks:
                 ig_content = object_blocks[ig_name]["content_sheet"]
@@ -798,10 +972,12 @@ def create_library(
                     ig_entry = {
                         "ref_id": str(data.get("ref_id", "")).strip(),
                         "name": str(data.get("name", "")).strip(),
-                        "description": str(data.get("description", "")).strip()
-                        if data.get("description")
-                        else None,
+                        "description": str(data.get("description", "")).strip() if data.get("description") else None,
                     }
+
+                    if data.get("default_selected") is not None:
+                        ig_entry["default_selected"] = bool(data.get("default_selected"))
+                    
                     translations = extract_translations_from_row(ig_header, row)
                     if translations:
                         ig_entry["translations"] = translations
@@ -954,6 +1130,25 @@ def create_library(
                         node["annotation"] = str(data["annotation"]).strip()
                     if "typical_evidence" in data and data["typical_evidence"]:
                         node["typical_evidence"] = str(data["typical_evidence"]).strip()
+                    # Optional: importance: mandatory/recommended/nice to have/undefined or empty (= undefined)
+                    if "importance" in data and data["importance"]:
+                        
+                        importance = str(data["importance"]).strip().lower()
+                        
+                        if importance not in ["mandatory", "recommended", "nice to have", "undefined"]:
+                            raise ValueError(f'(framework_content) Invalid "importance" at row #{row[0].row}: "{data["importance"]}". Must be "mandatory"/"recommended"/"nice to have"/"undefined" or empty.')
+
+                        if importance != "undefined":
+                            node["importance"] = importance
+
+                    # Optional: weight (integer)
+                    if "weight" in data and data["weight"] is not None and str(data["weight"]).strip() != "":
+                        try:
+                            if (w := int(data["weight"])) <= 0:
+                                raise ValueError
+                            node["weight"] = w
+                        except (TypeError, ValueError):
+                            raise ValueError(f"(framework) Invalid weight at row #{row[0].row}: {data["weight"]} — must be a strictly positive integer.")
                     if (
                         "implementation_groups" in data
                         and data["implementation_groups"]
@@ -982,10 +1177,11 @@ def create_library(
                             node["reference_controls"] = rc
                     if "questions" in data and data["questions"]:
                         inject_questions_into_node(
+                            data,
                             node,
-                            data.get("questions"),
-                            data.get("answer"),
                             answers_dict,
+                            answer_sheet,
+                            content_ws
                         )
                     translations = extract_translations_from_row(header, row)
                     if translations:
