@@ -4,6 +4,7 @@ from core.models import (
     StoredLibrary,
     ComplianceAssessment,
 )
+from django.db.models.query import QuerySet
 from collections import defaultdict, deque
 from typing import Optional
 import json
@@ -32,7 +33,7 @@ class MappingEngine:
             "observation",
         ]
 
-        self.m2m_fields = ["applied_controls", "security_exceptions", "evidences"]
+        self.m2m_fields = ["applied_controls", "security_exceptions", "evidences", "mapping_inference"]
 
     # --- Compression helpers ---
     def _compress_rms(self, obj: dict) -> bytes:
@@ -205,7 +206,7 @@ class MappingEngine:
                 and src in source_audit["requirement_assessments"]
             ):
                 result = source_audit["requirement_assessments"][src]["result"]
-                target_audit[dst]["applied_controls"] = source_audit["requirement_assessments"][src]["applied_control"]
+                target_audit[dst]["applied_controls"] = source_audit["requirement_assessments"][src]["applied_controls"]
                 if result in ("not_assessed", "non_compliant"):
                     target_audit[dst]["result"] = result
                 elif result in ("compliant", "partially_compliant"):
@@ -264,9 +265,16 @@ class MappingEngine:
                 field: getattr(ra, field) for field in fields
             }
             for m2m_field in self.m2m_fields:
-                audit_results["requirement_assessments"][ra.requirement.urn][
-                    m2m_field
-                ] = getattr(ra, m2m_field).all().values_list("id", flat=True)
+                attr = getattr(ra, m2m_field)
+                if isinstance(attr, QuerySet) or hasattr(attr, "all"):
+                    audit_results["requirement_assessments"][ra.requirement.urn][
+                        m2m_field
+                    ] = attr.all().values_list("id", flat=True)
+                else:
+                    audit_results["requirement_assessments"][ra.requirement.urn][
+                        m2m_field
+                    ] = attr
+
         return audit_results
 
     def summary_results(
