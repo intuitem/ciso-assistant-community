@@ -26,7 +26,7 @@ import datetime
 import argparse
 import unicodedata
 import openpyxl
-from typing import List
+from typing import Any, List
 from pathlib import Path
 from collections import Counter
 
@@ -170,22 +170,46 @@ def expand_urns_from_prefixed_list(
 # --- question management ------------------------------------------------------------
 
 
-def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_dict):
+def inject_questions_into_node(qa_data: dict[str, Any], node, answers_dict, answer_sheet, framework_ws: openpyxl.Workbook = None):
     """
     Injects parsed questions and their metadata into a requirement node.
     Ensures that question type is valid and handles multiple questions/answers.
 
-    :param node: the requirement node (dict)
-    :param raw_question_str: the string from the "questions" column
-    :param raw_answer_str: the string from the "answer" column
-    :param answers_dict: dictionary of all available answers (from answer sheet)
+    :param qa_data: Allows to retrieve the string from the following columns: "questions", "answer" and "depends_on"
+    :param node: The requirement node (dict)
+    :param answers_dict: Dictionary of all available answers (from answer sheet)
+    :param answer_sheet
+    :param framework_rows: Useful for the "depends_on" parameter only
     """
+    
+    def _get_column_index_by_header(ws, header_name):
+        """
+        Return the column index (1-based) of a header in the first row of the worksheet.
+        Raises KeyError if the header is not found.
+        """
+        for cell in ws[1]:  # assuming headers are in the first row
+            if cell.value and str(cell.value).strip().lower() == header_name.strip().lower():
+                return cell.column  # 1-based index (A=1, B=2, etc.)
+        raise KeyError(f"Header '{header_name}' not found in the worksheet ('depends_on' compute error)")
+
+    
+    raw_question_str = qa_data.get("questions")
+    raw_answer_str = qa_data.get("answer")
+    raw_depends_on_str = qa_data.get("depends_on")
+    
     if not raw_question_str:
         return
 
     allowed_types = {"unique_choice", "multiple_choice", "text", "date"}
 
     question_lines = [q.strip() for q in str(raw_question_str).split("\n") if q.strip()]
+    
+    depends_on_lines = None
+    if raw_depends_on_str:
+        depends_on_lines = [dep.strip() for dep in str(raw_depends_on_str).split("\n") if dep.strip()]
+        depends_on_lines = [None if dep.lower() == "undefined" else dep for dep in depends_on_lines]
+
+    
     answer_ids = (
         [a.strip() for a in str(raw_answer_str).split("\n") if raw_answer_str]
         if raw_answer_str
@@ -195,6 +219,11 @@ def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_d
     if len(answer_ids) != 1 and len(answer_ids) != len(question_lines):
         raise ValueError(
             f"Mismatch between questions and answers for node {node.get('urn')}"
+        )
+        
+    if depends_on_lines and len(depends_on_lines) != 1 and len(depends_on_lines) != len(depends_on_lines):
+        raise ValueError(
+            f"Mismatch between questions and depends_on for node {node.get('urn')}"
         )
 
     question_block = {}
@@ -215,6 +244,34 @@ def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_d
         question_entry = {
             "type": qtype,
         }
+
+        question_entry["text"] = question_text
+        
+        depends_on_block = {}
+        depends_on_question_urn = ""
+        depends_on_question_answers = []
+        
+        if depends_on_lines:
+            for idx, dependency in enumerate(depends_on_lines):
+                
+                # Skip if dependency is not defined
+                if dependency is None: continue
+                
+                dep_split = dependency.split(":")
+                dependency_line = int(dep_split[0])
+                dependency_question = int(dep_split[1])
+                dependency_question_answers = dep_split[2].split(",")
+
+                #### !!! Get ref_id of this column to recreate the URN of the dependency question set them correctly !!! ###
+                # The line below is a bit useless
+                dependency_question_row = framework_ws.cell(column=_get_column_index_by_header(framework_ws, "questions"), row=dependency_line).value
+                print(framework_col)                
+                # dependency_row = framework_rows[dependency_line - 1]
+
+                # print(framework_col)
+            
+        
+
         if qtype in {"unique_choice", "multiple_choice"}:
             choices = []
             for j, choice in enumerate(answer_meta["choices"]):
@@ -224,7 +281,7 @@ def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_d
                 entry["urn"] = f"{q_urn}:choice:{j + 1}"
                 choices.append(entry)
             question_entry["choices"] = choices
-        question_entry["text"] = question_text
+
         question_block[q_urn] = question_entry
     if question_block:
         node["questions"] = question_block
@@ -725,6 +782,8 @@ def create_library(
             # --- Retrieve answers block if declared ---
             answers_dict = {}
             answers_block_name = meta.get("answers_definition")
+            answer_sheet = None
+            
             if answers_block_name:
                 if answers_block_name not in object_blocks:
                     raise ValueError(f"Missing answers sheet: '{answers_block_name}'")
@@ -1118,10 +1177,11 @@ def create_library(
                             node["reference_controls"] = rc
                     if "questions" in data and data["questions"]:
                         inject_questions_into_node(
+                            data,
                             node,
-                            data.get("questions"),
-                            data.get("answer"),
                             answers_dict,
+                            answer_sheet,
+                            content_ws
                         )
                     translations = extract_translations_from_row(header, row)
                     if translations:
