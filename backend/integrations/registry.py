@@ -190,7 +190,7 @@ class IntegrationRegistry:
 
     @classmethod
     def get_client(
-        cls, configuration: "IntegrationConfiguration"
+        cls, configuration: IntegrationConfiguration
     ) -> BaseIntegrationClient:
         """Get a client instance for a configuration"""
         if hasattr(configuration, "provider"):
@@ -205,7 +205,7 @@ class IntegrationRegistry:
         return provider.create_client(configuration)
 
     @classmethod
-    def get_mapper(cls, configuration: "IntegrationConfiguration") -> BaseFieldMapper:
+    def get_mapper(cls, configuration: IntegrationConfiguration) -> BaseFieldMapper:
         """Get a mapper instance for a configuration"""
         if hasattr(configuration, "provider"):
             provider_name = configuration.provider.name
