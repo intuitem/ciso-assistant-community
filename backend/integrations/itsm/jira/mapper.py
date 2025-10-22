@@ -1,10 +1,10 @@
+from datetime import date, datetime
 from typing import Any
-from datetime import datetime, date
-
-from django.db import models
-from integrations.base import BaseFieldMapper
 
 import structlog
+from django.db import models
+
+from integrations.base import BaseFieldMapper
 
 logger = structlog.get_logger(__name__)
 
@@ -184,26 +184,4 @@ class JiraFieldMapper(BaseFieldMapper):
                 )
                 return str(value) if value else ""  # Best effort string conversion
 
-        # Add mapping for owner if needed
-        # elif field == "owner":
-        #     # Value is the assignee object
-        #     if isinstance(value, dict) and value.get('emailAddress'):
-        #         from django.contrib.auth import get_user_model
-        #         User = get_user_model()
-        #         try:
-        #             # Find local user by email
-        #             user = User.objects.get(email=value['emailAddress'])
-        #             # AppliedControl.owner is ManyToMany, need to handle this
-        #             # Returning the user object might work if the orchestrator/model handles M2M assignment
-        #             # Or return a list [user.pk]? This needs careful handling in _update_local_object
-        #             # For now, let's just log it
-        #             logger.info(f"Assignee found: {value['emailAddress']}, maps to user {user.pk}")
-        #             # !! Need to decide how to handle M2M !!
-        #             return None # Placeholder - M2M needs specific logic
-        #         except User.DoesNotExist:
-        #             logger.warning(f"Jira assignee email {value['emailAddress']} not found in local users.")
-        #             return None
-        #     return None
-
-        # Default: return value as-is if no transformation needed
         return value

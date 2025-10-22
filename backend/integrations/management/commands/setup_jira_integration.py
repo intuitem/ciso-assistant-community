@@ -13,9 +13,9 @@ except ImportError:
     )
     Folder = None
 
-from integrations.models import IntegrationProvider, IntegrationConfiguration
-from integrations.registry import IntegrationRegistry
 from integrations.base import BaseIntegrationClient
+from integrations.models import IntegrationConfiguration, IntegrationProvider
+from integrations.registry import IntegrationRegistry, init_registry
 
 logger = structlog.get_logger(__name__)
 
@@ -87,7 +87,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # 1. Ensure registry is initialized
         self.stdout.write("Initializing integration registry...")
-        IntegrationRegistry.autodiscover()
+        init_registry()
 
         provider_name = "jira"
 

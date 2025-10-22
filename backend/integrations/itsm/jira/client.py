@@ -1,10 +1,12 @@
+from typing import Any, Dict
+
+from jira import JIRA
+from structlog import get_logger
+
 from core.models import AppliedControl
 from integrations.base import BaseIntegrationClient
+
 from .mapper import JiraFieldMapper
-from jira import JIRA
-from typing import Dict, Any
-from structlog import get_logger
-from icecream import ic
 
 logger = get_logger(__name__)
 

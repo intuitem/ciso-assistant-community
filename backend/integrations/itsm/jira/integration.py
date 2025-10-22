@@ -5,11 +5,12 @@ This module registers the Jira integration with the IntegrationRegistry.
 It will be automatically discovered and loaded on Django startup.
 """
 
-from icecream import ic
+from typing import Any, Dict
+
+from structlog import get_logger
+
 from integrations.base import BaseFieldMapper, BaseITSMOrchestrator
 from integrations.registry import IntegrationRegistry
-from typing import Dict, Any
-from structlog import get_logger
 
 from .client import JiraClient
 from .mapper import JiraFieldMapper

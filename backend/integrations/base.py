@@ -2,7 +2,6 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any
 
-from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 

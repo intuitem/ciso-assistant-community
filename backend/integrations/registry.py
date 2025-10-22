@@ -125,49 +125,6 @@ class IntegrationRegistry:
         logger.info(f"Registered integration provider: {name} ({provider_type})")
 
     @classmethod
-    def register_from_path(
-        cls,
-        name: str,
-        provider_type: str,
-        client_path: str,
-        mapper_path: str,
-        orchestrator_path: str,
-        display_name: str = None,
-        description: str = "",
-        config_schema: dict = None,
-    ) -> None:
-        """Register a provider using dotted import paths
-
-        Args:
-            name: Unique identifier
-            provider_type: Category
-            client_path: Dotted path to client class (e.g., 'integrations.itsm.jira.client.JiraClient')
-            mapper_path: Dotted path to mapper class
-            orchestrator_path: Dotted path to orchestrator class
-            display_name: Human-readable name
-            description: Provider description
-            config_schema: Configuration schema
-        """
-        try:
-            client_class = import_string(client_path)
-            mapper_class = import_string(mapper_path)
-            orchestrator_class = import_string(orchestrator_path)
-
-            cls.register(
-                name=name,
-                provider_type=provider_type,
-                client_class=client_class,
-                mapper_class=mapper_class,
-                orchestrator_class=orchestrator_class,
-                display_name=display_name,
-                description=description,
-                config_schema=config_schema,
-            )
-        except ImportError as e:
-            logger.error(f"Failed to register provider {name}: {e}")
-            raise
-
-    @classmethod
     def unregister(cls, name: str) -> bool:
         """Unregister an integration provider
 
@@ -346,63 +303,6 @@ class IntegrationRegistry:
         cls._providers.clear()
         cls._initialized = False
         logger.info("Integration registry cleared")
-
-
-# Decorator for easy registration
-def register_integration(
-    name: str,
-    provider_type: str,
-    display_name: str = "",
-    description: str = "",
-    config_schema: dict = {},
-):
-    """Decorator to register an integration orchestrator class
-
-    Usage:
-        @register_integration('jira', 'itsm', display_name='Jira')
-        class JiraOrchestrator(BaseITSMOrchestrator):
-            ...
-    """
-
-    def decorator(orchestrator_class: Type[BaseSyncOrchestrator]):
-        # The orchestrator class should have _get_client and _get_mapper methods
-        # that return the appropriate classes
-
-        # Create a temporary instance to get the client and mapper classes
-        # This is a bit hacky but allows the decorator to work
-        try:
-            # Try to get class references from the orchestrator
-            if hasattr(orchestrator_class, "client_class"):
-                client_class = orchestrator_class.client
-            else:
-                raise AttributeError(
-                    "Orchestrator must define 'client_class' class attribute"
-                )
-
-            if hasattr(orchestrator_class, "mapper_class"):
-                mapper_class = orchestrator_class.mapper
-            else:
-                raise AttributeError(
-                    "Orchestrator must define 'mapper_class' class attribute"
-                )
-
-            IntegrationRegistry.register(
-                name=name,
-                provider_type=provider_type,
-                client_class=client_class,
-                mapper_class=mapper_class,
-                orchestrator_class=orchestrator_class,
-                display_name=display_name,
-                description=description,
-                config_schema=config_schema,
-            )
-        except Exception as e:
-            logger.error(f"Failed to register integration {name}: {e}")
-            raise
-
-        return orchestrator_class
-
-    return decorator
 
 
 # Initialize registry when module is imported
