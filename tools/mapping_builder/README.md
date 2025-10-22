@@ -6,9 +6,11 @@ This directory contains tools for semantic comparison between security/complianc
 
 1. **semantic_mapper.py** - LLM-based mapping using Ollama (flexible, provides explanations)
 2. **sbert_mapper.py** - SBERT-based mapping using sentence transformers (fast, deterministic)
-3. **heatmap_builder.py** - Visualize mapping relationships as heatmaps
-4. **simplify_mapping.py** - Convert detailed mapping CSV to simplified 4-column format
-5. **compare_models.py** - Compare results from multiple LLM models
+3. **heatmap_builder.py** - Visualize mapping relationships as heatmaps (CLI)
+4. **heatmap_builder_notebook.py** - Interactive heatmap explorer (Marimo notebook)
+5. **simplify_mapping.py** - Convert detailed mapping CSV to simplified 4-column format
+6. **prepare_review.py** - Generate Excel and HTML review files for human validation
+7. **compare_models.py** - Compare results from multiple LLM models
 
 ## Features
 
@@ -741,6 +743,48 @@ Popular options:
 - `coolwarm`: Blue-Red (diverging)
 
 See [Matplotlib colormaps](https://matplotlib.org/stable/tutorials/colors/colormaps.html) for more options.
+
+## Interactive Heatmap Notebook (Marimo)
+
+For **interactive exploration** of mapping heatmaps, use the Marimo notebook version:
+
+### Installation
+```bash
+pip install marimo
+```
+
+### Running the Interactive Notebook
+```bash
+marimo edit tools/mapping_builder/heatmap_builder_notebook.py
+```
+
+This opens an interactive notebook in your browser with:
+- **Drag-and-drop file upload** for mapping CSV files
+- **Real-time interactive controls**:
+  - Score threshold slider
+  - Colormap selector
+  - Figure size adjusters
+  - Label toggle
+- **Automatic updates** - heatmap regenerates as you adjust parameters
+- **Statistics dashboard** - live metrics about your mappings
+- **Data preview table** - inspect your mapping data
+
+### Why Use the Notebook?
+
+**Best for:**
+- Exploratory data analysis
+- Trying different threshold values
+- Finding the right visualization settings
+- Interactive presentations
+- Quick prototyping
+
+**Advantages over CLI:**
+- No need to regenerate images for each parameter change
+- Visual parameter adjustment with sliders
+- Immediate feedback
+- Easier to share with non-technical stakeholders
+
+See [MARIMO_README.md](MARIMO_README.md) for detailed instructions.
 
 ---
 
