@@ -1,3 +1,6 @@
+/// <reference types="vitest" />
+/// <reference types="@testing-library/jest-dom" />
+import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/svelte';
 import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 import { describe, test, expect } from 'vitest';
@@ -14,17 +17,16 @@ describe('ModelTable', () => {
 	test('renders headers and rows', async () => {
 		render(ModelTable, { props: { source, URLModel: 'test-model' as any, displayActions: false } });
 
-		expect(screen.getByText('ID')).toBeTruthy();
-		expect(screen.getByText('Name')).toBeTruthy();
+		expect(screen.getByText('ID')).toBeInTheDocument();
+		expect(screen.getByText('Name')).toBeInTheDocument();
 
-		expect(screen.getByText('Jean')).toBeTruthy();
+		expect(screen.getByText('Jean')).toBeInTheDocument();
 		expect(screen.getByText('Patoche')).toBeTruthy();
 	});
 
-	test('renders actions column when displayActions=true', async () => {
+	test('renders actions column when displayActions=true', () => {
 		render(ModelTable, { props: { source, URLModel: 'test-model' as any, displayActions: true } });
 
-		const actionHeader = document.querySelector('th.text-end');
-		expect(actionHeader).toBeTruthy();
+		expect(screen.getByRole('columnheader', { name: /actions/i })).toBeInTheDocument();
 	});
 });
