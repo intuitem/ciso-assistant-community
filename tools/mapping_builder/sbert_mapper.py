@@ -43,11 +43,12 @@ class FrameworkItem:
 class FrameworkParser:
     """Parses framework YAML files and extracts assessable items"""
 
-    def __init__(self, yaml_path: str):
+    def __init__(self, yaml_path: str, skip_context: bool = False):
         self.yaml_path = Path(yaml_path)
         self.items: List[FrameworkItem] = []
         self.items_by_urn: Dict[str, FrameworkItem] = {}
         self.framework_name = ""
+        self.skip_context = skip_context
 
     def parse(self) -> List[FrameworkItem]:
         """Parse the YAML file and extract assessable items"""
@@ -92,6 +93,16 @@ class FrameworkParser:
         current_name = item.name.strip() if item.name else ""
         current_desc = item.description.strip() if item.description else ""
 
+        if self.skip_context:
+            # Skip context mode: use only description, no parent context
+            if current_desc:
+                return current_desc
+            elif current_name:
+                return current_name
+            else:
+                return "No description available"
+
+        # Normal mode: include name and parent context
         if current_name and current_desc:
             parts.append(f"{current_name}: {current_desc}")
         elif current_desc:
@@ -285,6 +296,7 @@ def build_mapping_table(
     intersect_threshold: float = 0.50,
     verbose: bool = False,
     device: Optional[str] = None,
+    skip_context: bool = False,
 ) -> pd.DataFrame:
     """
     Build a semantic mapping table between two frameworks using SBERT
@@ -300,17 +312,21 @@ def build_mapping_table(
         intersect_threshold: Similarity threshold for "intersect" relationships (default: 0.50)
         verbose: Enable verbose logging
         device: Device to run on ("cuda", "cpu", or None for auto)
+        skip_context: If True, use only item description without parent context (default: False)
 
     Returns:
         pandas DataFrame with mapping results
     """
+    context_mode = "description only" if skip_context else "with parent context"
+    print(f"Context mode: {context_mode}")
+
     print(f"Parsing source framework: {source_path}")
-    source_parser = FrameworkParser(source_path)
+    source_parser = FrameworkParser(source_path, skip_context=skip_context)
     source_items = source_parser.parse()
     print(f"Found {len(source_items)} assessable items in source")
 
     print(f"\nParsing target framework: {target_path}")
-    target_parser = FrameworkParser(target_path)
+    target_parser = FrameworkParser(target_path, skip_context=skip_context)
     target_items = target_parser.parse()
     print(f"Found {len(target_items)} assessable items in target")
 
@@ -475,6 +491,11 @@ def main():
         action="store_true",
         help="Enable verbose logging",
     )
+    parser.add_argument(
+        "--skip-context",
+        action="store_true",
+        help="Use only item description without parent context aggregation (default: include parent context)",
+    )
 
     args = parser.parse_args()
 
@@ -502,6 +523,7 @@ def main():
         intersect_threshold=args.intersect_threshold,
         verbose=args.verbose,
         device=args.device,
+        skip_context=args.skip_context,
     )
 
     # Print summary

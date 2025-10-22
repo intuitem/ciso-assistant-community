@@ -7,7 +7,8 @@ This directory contains tools for semantic comparison between security/complianc
 1. **semantic_mapper.py** - LLM-based mapping using Ollama (flexible, provides explanations)
 2. **sbert_mapper.py** - SBERT-based mapping using sentence transformers (fast, deterministic)
 3. **heatmap_builder.py** - Visualize mapping relationships as heatmaps
-4. **compare_models.py** - Compare results from multiple LLM models
+4. **simplify_mapping.py** - Convert detailed mapping CSV to simplified 4-column format
+5. **compare_models.py** - Compare results from multiple LLM models
 
 ## Features
 
@@ -740,3 +741,85 @@ Popular options:
 - `coolwarm`: Blue-Red (diverging)
 
 See [Matplotlib colormaps](https://matplotlib.org/stable/tutorials/colors/colormaps.html) for more options.
+
+---
+
+# Mapping Simplifier (simplify_mapping.py)
+
+Convert detailed mapping CSV files into a simplified 4-column format for easier analysis and integration.
+
+## Purpose
+
+The mapping tools generate detailed CSV files with many columns (source/target names, descriptions, explanations, etc.). This tool strips down to just the essentials:
+
+- `source_node_id` - Source requirement reference ID
+- `target_node_id` - Target requirement reference ID
+- `relationship` - Relationship type (equal/intersect/no_relationship)
+- `strength_of_relationship` - Confidence score (0.0-1.0)
+
+## Prerequisites
+
+```bash
+pip install pandas openpyxl
+```
+
+## Basic Usage
+
+```bash
+python simplify_mapping.py \
+  --input mapping_results.csv \
+  --output mapping_simple.csv
+```
+
+## Arguments
+
+- `--input` (required): Path to detailed mapping CSV file
+- `--output` (optional): Path to simplified output CSV (default: input_simplified.csv)
+- `--include-no-relationship` (optional): Keep "no_relationship" mappings (default: exclude them)
+
+## Examples
+
+### Default behavior (exclude no_relationship)
+```bash
+python simplify_mapping.py \
+  --input mapping_cyfun.csv \
+  --output mapping_simple.csv
+```
+
+This filters out all `no_relationship` mappings, keeping only meaningful connections.
+
+### Include all relationships
+```bash
+python simplify_mapping.py \
+  --input mapping_cyfun.csv \
+  --output mapping_complete.csv \
+  --include-no-relationship
+```
+
+### Auto-generate output filename
+```bash
+# Creates mapping_cyfun_simplified.csv automatically
+python simplify_mapping.py --input mapping_cyfun.csv
+```
+
+## Output Format
+
+The simplified CSV has exactly 4 columns:
+
+| source_node_id | target_node_id | relationship | strength_of_relationship |
+|----------------|----------------|--------------|--------------------------|
+| BASIC_ID.AM-1.1 | ID.AM-01.1 | equal | 1.0 |
+| BASIC_ID.AM-1.1 | ID.AM-01.2 | equal | 1.0 |
+| BASIC_ID.AM-1.1 | GV.RM-03.2 | intersect | 0.7 |
+
+Rows are sorted by `strength_of_relationship` (descending), showing strongest matches first.
+
+## Use Cases
+
+**Graph Analysis**: Import into network analysis tools (Neo4j, Gephi) to visualize framework relationships
+
+**Compliance Mapping**: Quickly see which requirements map between frameworks
+
+**Coverage Analysis**: Identify gaps where source requirements have no strong target matches
+
+**Integration**: Simple format for importing into other systems or databases
