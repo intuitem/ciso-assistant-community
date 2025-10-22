@@ -482,13 +482,21 @@ def main():
     if args.equal_threshold <= args.intersect_threshold:
         parser.error("equal-threshold must be greater than intersect-threshold")
 
+    # Set default top_n to 1 if neither top_n nor threshold is specified
+    # This ensures we get best match only by default
+    top_n = (
+        args.top_n
+        if args.top_n is not None
+        else (None if args.threshold is not None else 1)
+    )
+
     # Build mapping table
     df = build_mapping_table(
         source_path=args.source,
         target_path=args.target,
         model_name=args.model,
         output_path=args.output,
-        top_n=args.top_n,
+        top_n=top_n,
         threshold=args.threshold,
         equal_threshold=args.equal_threshold,
         intersect_threshold=args.intersect_threshold,
@@ -513,8 +521,8 @@ def main():
     print(f"Total mappings (source→target): {total_mappings}")
     print(f"Average matches per source: {avg_matches_per_source:.2f}")
 
-    if args.top_n:
-        print(f"Top-N setting: {args.top_n}")
+    if top_n:
+        print(f"Top-N setting: {top_n}")
     if args.threshold:
         print(f"Threshold setting: {args.threshold}")
 
