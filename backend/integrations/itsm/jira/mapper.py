@@ -1,6 +1,12 @@
-from typing import Any, Dict
-from datetime import datetime
+from typing import Any
+from datetime import datetime, date
+
+from django.db import models
 from integrations.base import BaseFieldMapper
+
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 class JiraFieldMapper(BaseFieldMapper):
@@ -8,31 +14,23 @@ class JiraFieldMapper(BaseFieldMapper):
 
     # Field mappings: local_field -> jira_field
     FIELD_MAPPINGS = {
-        "name": "summary",
-        "description": "description",
-        "status": "status",
-        "priority": "priority",
-        "eta": "duedate",
-        "start_date": "customfield_10015",  # Example: Sprint start date custom field
+        "name": "fields.summary",
+        "description": "fields.description",
+        "status": "fields.status",  # Used by to_local and identified by update_remote_object
+        "priority": "fields.priority",
+        "eta": "fields.duedate",
     }
 
     # Status mappings
-    STATUS_MAP_TO_JIRA = {
-        "to_do": "To Do",
-        "in_progress": "In Progress",
-        "on_hold": "On Hold",
-        "active": "Done",
-        "deprecated": "Closed",
-        "--": "To Do",
-    }
 
     STATUS_MAP_FROM_JIRA = {
         "To Do": "to_do",
         "In Progress": "in_progress",
         "On Hold": "on_hold",
-        "Done": "active",
+        "Active": "active",
         "Closed": "deprecated",
     }
+    STATUS_MAP_TO_JIRA = {v: k for k, v in STATUS_MAP_FROM_JIRA.items()}
 
     # Priority mappings (AppliedControl uses 1-4, Jira uses names)
     PRIORITY_MAP_TO_JIRA = {
@@ -49,6 +47,30 @@ class JiraFieldMapper(BaseFieldMapper):
         "Low": 4,
         "Lowest": 4,
     }
+
+    def to_remote(self, local_object: models.Model) -> dict[str, Any]:
+        """Convert local object to remote format, stripping 'fields.' prefix."""
+        remote_data_nested = super().to_remote(local_object)
+        return self._strip_fields_prefix(remote_data_nested)
+
+    def to_remote_partial(
+        self, local_object: models.Model, changed_fields: list[str]
+    ) -> dict[str, Any]:
+        """Convert changed fields to remote format, stripping 'fields.' prefix."""
+        remote_data_nested = super().to_remote_partial(local_object, changed_fields)
+        return self._strip_fields_prefix(remote_data_nested)
+
+    def _strip_fields_prefix(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Helper to remove 'fields.' prefix from keys for outgoing updates."""
+        stripped_data = {}
+        for remote_key, value in data.items():
+            if remote_key.startswith("fields."):
+                stripped_key = remote_key.split(".", 1)[1]
+                stripped_data[stripped_key] = value
+            else:
+                # Keep keys that don't start with 'fields.' (e.g., 'status' itself)
+                stripped_data[remote_key] = value
+        return stripped_data
 
     def _transform_value_to_remote(self, field: str, value: Any) -> Any:
         """Transform AppliedControl field values to Jira format"""
@@ -76,37 +98,73 @@ class JiraFieldMapper(BaseFieldMapper):
         return value
 
     def _transform_value_to_local(self, field: str, value: Any) -> Any:
-        """Transform Jira field values to AppliedControl format"""
+        """Transform incoming Jira field values to AppliedControl format"""
+        # Value is already extracted based on FIELD_MAPPINGS (e.g., value = remote_data['fields']['status'])
+
         if value is None:
-            return None
+            return None  # Skip if the field is null in Jira
 
         if field == "status":
-            # Extract status name from Jira object
+            # Value is the Jira status object: {'name': 'In Progress', ...}
             if isinstance(value, dict):
-                status_name = value.get("name", "")
+                status_name = value.get("name")
+                local_status = self.STATUS_MAP_FROM_JIRA.get(status_name)
+                if local_status:
+                    return local_status
+                else:
+                    logger.warning(f"Unmapped Jira status received: '{status_name}'")
+                    # Decide on fallback: return None, 'to_do', or keep original?
+                    return None  # Or maybe AppliedControl.Status.UNDEFINED?
             else:
-                status_name = str(value)
-            return self.STATUS_MAP_FROM_JIRA.get(status_name, "to_do")
+                logger.warning(f"Received non-dict value for status: {value}")
+                return None
 
         elif field == "priority":
-            # Extract priority name from Jira object
+            # Value is the Jira priority object: {'name': 'High', ...}
             if isinstance(value, dict):
-                priority_name = value.get("name", "Medium")
+                priority_name = value.get("name")
+                local_priority = self.PRIORITY_MAP_FROM_JIRA.get(priority_name)
+                if (
+                    local_priority is not None
+                ):  # Check explicitly for None, as 0 could be valid elsewhere
+                    return local_priority
+                else:
+                    logger.warning(
+                        f"Unmapped Jira priority received: '{priority_name}'"
+                    )
+                    return None  # Or a default like 3?
             else:
-                priority_name = str(value)
-            return self.PRIORITY_MAP_FROM_JIRA.get(priority_name, 3)
+                logger.warning(f"Received non-dict value for priority: {value}")
+                return None
 
         elif field in ["eta", "start_date"]:
-            # Parse date string to date object
+            # Value is a date string 'YYYY-MM-DD' or datetime string
             if isinstance(value, str):
                 try:
-                    return datetime.fromisoformat(value.replace("Z", "+00:00")).date()
-                except:
-                    return None
-            return value
+                    # Try parsing just the date part first
+                    return date.fromisoformat(value[:10])
+                except ValueError:
+                    try:  # Fallback to datetime parsing if needed
+                        # Handle timezone info if present
+                        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                        return dt.date()
+                    except ValueError:
+                        logger.warning(
+                            f"Could not parse date string from Jira: {value}"
+                        )
+                        return None
+            elif isinstance(
+                value, (datetime, date)
+            ):  # Should ideally be string, but handle just in case
+                return value.date() if isinstance(value, datetime) else value
+            else:
+                logger.warning(
+                    f"Received non-string/non-datetime value for date field {field}: {value}"
+                )
+                return None
 
         elif field == "description":
-            # Extract text from ADF format
+            # Handle both ADF and plain text from Jira
             if isinstance(value, dict) and value.get("type") == "doc":
                 # Simple text extraction from ADF
                 text_parts = []
@@ -115,7 +173,37 @@ class JiraFieldMapper(BaseFieldMapper):
                         for item in content.get("content", []):
                             if item.get("type") == "text":
                                 text_parts.append(item.get("text", ""))
-                return "\n".join(text_parts)
-            return str(value) if value else ""
+                return "\n".join(text_parts).strip()  # Join paragraphs
+            elif isinstance(value, str):
+                # It's already plain text
+                return value.strip()
+            else:
+                # Unexpected format
+                logger.warning(
+                    f"Received unexpected format for description: {type(value)}"
+                )
+                return str(value) if value else ""  # Best effort string conversion
 
+        # Add mapping for owner if needed
+        # elif field == "owner":
+        #     # Value is the assignee object
+        #     if isinstance(value, dict) and value.get('emailAddress'):
+        #         from django.contrib.auth import get_user_model
+        #         User = get_user_model()
+        #         try:
+        #             # Find local user by email
+        #             user = User.objects.get(email=value['emailAddress'])
+        #             # AppliedControl.owner is ManyToMany, need to handle this
+        #             # Returning the user object might work if the orchestrator/model handles M2M assignment
+        #             # Or return a list [user.pk]? This needs careful handling in _update_local_object
+        #             # For now, let's just log it
+        #             logger.info(f"Assignee found: {value['emailAddress']}, maps to user {user.pk}")
+        #             # !! Need to decide how to handle M2M !!
+        #             return None # Placeholder - M2M needs specific logic
+        #         except User.DoesNotExist:
+        #             logger.warning(f"Jira assignee email {value['emailAddress']} not found in local users.")
+        #             return None
+        #     return None
+
+        # Default: return value as-is if no transformation needed
         return value

@@ -1,17 +1,21 @@
+import hashlib
 import json
-import logging
+import structlog
 import uuid
+import hmac
 
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+from rest_framework import permissions
+from rest_framework.decorators import permission_classes
 
 from integrations.models import IntegrationConfiguration
 from integrations.tasks import process_webhook_event
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -24,10 +28,10 @@ class IntegrationWebhookView(View):
     for authentication.
     """
 
+    @permission_classes([permissions.AllowAny])
     def post(
         self, request: HttpRequest, config_id: uuid.UUID, *args, **kwargs
     ) -> HttpResponse:
-        # Find the configuration
         try:
             config = get_object_or_404(
                 IntegrationConfiguration, pk=config_id, is_active=True
@@ -36,24 +40,54 @@ class IntegrationWebhookView(View):
             logger.warning(
                 f"Webhook received for unknown or inactive config ID: {config_id}"
             )
+            return JsonResponse({"error": "Configuration not found"}, status=404)
+
+        # Authenticate the webhook using HMAC Signature
+
+        # Get the signature from the header (Jira uses X-Hub-Signature)
+        signature_header = request.headers.get("X-Hub-Signature")
+
+        if not signature_header:
+            logger.warning(
+                f"Webhook for config {config_id} missing X-Hub-Signature-256 header."
+            )
             return JsonResponse(
-                {"error": "Configuration not found or inactive"}, status=404
+                {"error": "Authentication required: Missing signature"}, status=401
             )
 
-        # Authenticate the webhook
-        # We use a shared secret token in a URL query parameter
-        # Jira Webhook URL: https://.../webhook/<uuid>/?token=<secret>
-        provided_token = request.GET.get("token")
-        if not provided_token or not config.webhook_secret:
-            logger.warning(f"Webhook for config {config_id} missing token or secret.")
-            return JsonResponse({"error": "Authentication required"}, status=401)
+        if not config.webhook_secret:
+            logger.error(f"Webhook secret not configured for config {config_id}.")
+            return JsonResponse({"error": "Internal configuration error"}, status=500)
 
-        # Use a constant-time comparison for security
-        import hmac
+        # Extract the signature hash
+        try:
+            method, provided_signature = signature_header.split("=", 1)
+            if method.lower() != "sha256":
+                logger.warning(
+                    "Unsupported signature method for config",
+                    method=method,
+                    config_id=config_id,
+                )
+                return JsonResponse(
+                    {"error": "Unsupported signature method"}, status=400
+                )
+        except ValueError:
+            logger.warning(f"Invalid signature header format for config {config_id}.")
+            return JsonResponse({"error": "Invalid signature format"}, status=400)
 
-        if not hmac.compare_digest(provided_token, config.webhook_secret):
-            logger.warning(f"Webhook for config {config_id} provided invalid token.")
-            return JsonResponse({"error": "Invalid token"}, status=403)
+        # Calculate the expected signature
+        expected_signature = hmac.new(
+            config.webhook_secret.encode("utf-8"),
+            request.body,  # request.body is bytes
+            hashlib.sha256,
+        ).hexdigest()
+
+        # Compare signatures using a constant-time comparison
+        if not hmac.compare_digest(provided_signature, expected_signature):
+            logger.warning(f"Webhook signature mismatch for config {config_id}.")
+            return JsonResponse({"error": "Invalid signature"}, status=403)
+
+        # --- Signature is valid ---
 
         # Parse the payload
         try:
@@ -63,7 +97,6 @@ class IntegrationWebhookView(View):
             return JsonResponse({"error": "Invalid JSON payload"}, status=400)
 
         # Extract provider-specific event type
-        # For Jira, this is in the 'webhookEvent' field
         event_type = payload.get("webhookEvent")
         if not event_type:
             logger.warning(
@@ -72,13 +105,9 @@ class IntegrationWebhookView(View):
             return JsonResponse({"error": "Missing event type"}, status=400)
 
         # Dispatch to async task
-        # We pass the config.id, not the object, as it's serializable.
-        process_webhook_event.schedule(
-            args=(config.id, event_type, payload),
-            delay=1,  # Small delay to ensure DB transaction commits
-        )
+        process_webhook_event.schedule(args=(config.id, event_type, payload), delay=1)
 
-        # Return 202 Accepted immediately
-        # This tells Jira we've received the event and it shouldn't retry.
-        logger.info(f"Webhook event '{event_type}' for config {config_id} accepted.")
+        logger.info(
+            f"Webhook event '{event_type}' for config {config_id} accepted (signature validated)."
+        )
         return HttpResponse(status=202)

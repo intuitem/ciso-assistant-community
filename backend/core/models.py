@@ -3739,10 +3739,11 @@ class AppliedControl(
 
         # Save first
         is_new = self.pk is None
+        skip_sync = kwargs.pop("skip_sync", False)
         super(AppliedControl, self).save(*args, **kwargs)
 
         # Then trigger sync (async, non-blocking)
-        if not kwargs.get("skip_sync", False):
+        if not skip_sync:
             self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
 
     def _get_changed_fields(self, old_instance):

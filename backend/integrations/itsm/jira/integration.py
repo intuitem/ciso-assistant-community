@@ -5,6 +5,7 @@ This module registers the Jira integration with the IntegrationRegistry.
 It will be automatically discovered and loaded on Django startup.
 """
 
+from icecream import ic
 from integrations.base import BaseFieldMapper, BaseITSMOrchestrator
 from integrations.registry import IntegrationRegistry
 from typing import Dict, Any
@@ -73,25 +74,29 @@ class JiraOrchestrator(BaseITSMOrchestrator):
     def handle_webhook_event(self, event_type: str, payload: Dict[str, Any]) -> bool:
         """Handle Jira-specific webhook events"""
         # Jira webhook event types
-        webhook_event = payload.get("webhookEvent", "")
 
-        if "issue_created" in webhook_event:
+        if "issue_created" in event_type:
             # For now, we don't create local objects from Jira
             # This could be implemented if needed
-            logger.info(f"Jira issue created: {payload.get('issue', {}).get('key')}")
+            logger.info("Jira issue created", key=payload.get("issue", {}).get("key"))
             return True
 
-        elif "issue_updated" in webhook_event:
+        elif "issue_updated" in event_type:
+            logger.info(
+                "Updating Jira issue from webhook event",
+                webhook_event=event_type,
+                id=payload.get("issue", {}).get("key"),
+            )
             remote_id = self._extract_remote_id(payload)
             remote_data = self._extract_remote_data(payload)
             return self.pull_changes(remote_id, remote_data)
 
-        elif "issue_deleted" in webhook_event:
+        elif "issue_deleted" in event_type:
             remote_id = self._extract_remote_id(payload)
             return self._handle_remote_deletion(remote_id)
 
         else:
-            logger.warning(f"Unknown Jira webhook event: {webhook_event}")
+            logger.warning(f"Unknown Jira webhook event: {event_type}")
             return False
 
 

@@ -1,3 +1,4 @@
+import uuid
 from huey.contrib.djhuey import task
 from integrations.models import IntegrationConfiguration
 from .registry import IntegrationRegistry
@@ -33,7 +34,7 @@ def sync_object_to_integrations(
 
 
 @task()
-def process_webhook_event(config_id: int, event_type: str, payload: dict):
+def process_webhook_event(config_id: uuid.UUID, event_type: str, payload: dict):
     """Process incoming webhook from remote system"""
     try:
         config = IntegrationConfiguration.objects.get(pk=config_id)
