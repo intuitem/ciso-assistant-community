@@ -2,16 +2,15 @@ import { render, screen } from '@testing-library/svelte';
 import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 import { describe, test, expect } from 'vitest';
 
-const source = {
-	head: { id: 'ID', name: 'Name', tags: 'Tags' },
-	body: [
-		{ id: '1', name: 'Jean', tags: ['a', 'b'], meta: { id: '1' } },
-		{ id: '2', name: 'Patoche', tags: ['c'], meta: { id: '2' } }
-	],
-	meta: { count: 2 }
-};
-
 describe('ModelTable', () => {
+	const source = {
+		head: { id: 'ID', name: 'Name', tags: 'Tags' },
+		body: [
+			{ id: '1', name: 'Jean', tags: ['a', 'b'], meta: { id: '1' } },
+			{ id: '2', name: 'Patoche', tags: ['c'], meta: { id: '2' } }
+		],
+		meta: { count: 2 }
+	};
 	test('renders headers and rows', async () => {
 		render(ModelTable, { props: { source, URLModel: 'test-model' as any, displayActions: false } });
 
