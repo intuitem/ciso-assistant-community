@@ -58,17 +58,46 @@ python semantic_mapper.py \
   --output nist-to-iso-mapping.xlsx
 ```
 
+### With Ollama Embeddings (Enhanced Context)
+
+You can enhance LLM analysis by generating embeddings first. The embedding similarity is passed as context to the LLM:
+
+```bash
+# First, pull an embedding model
+ollama pull nomic-embed-text
+
+# Run semantic mapper with embeddings
+python semantic_mapper.py \
+  --source source.yaml \
+  --target target.yaml \
+  --model mistral \
+  --embedding-model nomic-embed-text \
+  --output mapping_with_embeddings.csv
+```
+
+**Benefits of using embeddings:**
+- LLM gets semantic similarity context to make better decisions
+- Helps LLM validate its reasoning against numerical similarity
+- Output includes both embedding similarity and LLM scores for analysis
+
+**Available embedding models:**
+- `nomic-embed-text` - Good general purpose (768 dimensions)
+- `mxbai-embed-large` - High quality (1024 dimensions)
+- `snowflake-arctic-embed` - Optimized for retrieval
+
 ## Arguments
 
 - `--source` (required): Path to source framework YAML file
 - `--target` (required): Path to target framework YAML file
 - `--ollama-url` (optional): Ollama API endpoint URL (default: http://localhost:11434)
 - `--model` (optional): LLM model to use (default: mistral). Available models can be listed with `ollama list`
+- `--embedding-model` (optional): Ollama embedding model (e.g., nomic-embed-text, mxbai-embed-large). When specified, embeddings are generated and passed as context to the LLM
 - `--output` (optional): Output file path for results (CSV or XLSX format)
 - `--resume` (optional): Resume from existing output file if it exists
 - `--checkpoint-interval` (optional): Save checkpoint every N source items (default: 1 = after each item)
 - `--top-n` (optional): Return top N matches per source item (default: 1 = best match only)
 - `--threshold` (optional): Minimum score threshold for matches, 0.0-1.0 (default: None)
+- `--verbose` (optional): Enable verbose logging for debugging
 
 ## Output Format
 
@@ -76,6 +105,7 @@ The tool generates a table with the following columns:
 
 ### Model Information
 - `model`: Name of the LLM model used for this mapping
+- `embedding_model`: Name of the embedding model used (if applicable)
 
 ### Source Framework Columns
 - `source_ref_id`: Reference ID of source item
@@ -90,12 +120,13 @@ The tool generates a table with the following columns:
 - `target_full_sentence`: Full context sentence for target item
 
 ### Relationship Analysis
-- `relationship`: Type of relationship
+- `embedding_similarity`: Cosine similarity from embeddings (0.0 to 1.0, if embedding model was used)
+- `relationship`: Type of relationship (determined by LLM)
   - `equal`: Same topic/requirement with equivalent scope (score = 1.0)
   - `intersect`: Related but not entirely equivalent (0 < score < 1)
   - `no_relationship`: Different topics with no overlap (score = 0)
-- `score`: Confidence score (0.0 to 1.0)
-- `explanation`: Brief explanation of the relationship
+- `score`: LLM confidence score (0.0 to 1.0)
+- `explanation`: Brief explanation of the relationship from LLM
 
 ## How It Works
 

@@ -11,6 +11,7 @@ import yaml
 import requests
 import json
 import pandas as pd
+import numpy as np
 import re
 from typing import Dict, List, Optional
 from pathlib import Path
@@ -157,16 +158,20 @@ class SemanticMapper:
         self,
         ollama_url: str = "http://localhost:11434",
         model: str = "mistral",
+        embedding_model: Optional[str] = None,
         verbose: bool = False,
     ):
         self.ollama_url = ollama_url
         self.model = model
+        self.embedding_model = embedding_model
         self.verbose = verbose
         self.failed_responses = []  # Track failed responses for debugging
         # Create persistent HTTP session for connection pooling
         self.session = requests.Session()
         self.session.headers.update({"Connection": "keep-alive"})
         self._verify_model()
+        if self.embedding_model:
+            self._verify_embedding_model()
 
     def __del__(self):
         """Cleanup: close HTTP session"""
@@ -215,8 +220,98 @@ class SemanticMapper:
                 f"Error: {e}"
             )
 
+    def _verify_embedding_model(self):
+        """Verify that the specified embedding model is available in Ollama"""
+        try:
+            response = self.session.get(f"{self.ollama_url}/api/tags", timeout=5)
+            response.raise_for_status()
+            data = response.json()
+            available_models = [m["name"] for m in data.get("models", [])]
+
+            if self.embedding_model not in available_models:
+                # Try with :latest suffix
+                if f"{self.embedding_model}:latest" in available_models:
+                    self.embedding_model = f"{self.embedding_model}:latest"
+                else:
+                    raise ValueError(
+                        f"Embedding model '{self.embedding_model}' not found in Ollama.\n"
+                        f"Available models: {', '.join(available_models)}\n"
+                        f"Install with: ollama pull nomic-embed-text"
+                    )
+
+            print(f"Using embedding model: {self.embedding_model}")
+
+        except requests.exceptions.RequestException as e:
+            raise ConnectionError(
+                f"Cannot connect to Ollama at {self.ollama_url}.\nError: {e}"
+            )
+
+    def generate_embeddings(self, items: List[FrameworkItem]) -> np.ndarray:
+        """
+        Generate embeddings for framework items using Ollama
+
+        Args:
+            items: List of framework items to embed
+
+        Returns:
+            numpy array of shape (num_items, embedding_dim)
+        """
+        if not self.embedding_model:
+            return None
+
+        print(
+            f"Generating embeddings for {len(items)} items using {self.embedding_model}..."
+        )
+
+        embeddings = []
+        for i, item in enumerate(items):
+            if (i + 1) % 10 == 0 or i == 0:
+                print(f"  Embedding item {i + 1}/{len(items)}...")
+
+            try:
+                response = self.session.post(
+                    f"{self.ollama_url}/api/embeddings",
+                    json={
+                        "model": self.embedding_model,
+                        "prompt": item.full_sentence,
+                    },
+                    timeout=30,
+                )
+                response.raise_for_status()
+                result = response.json()
+                embedding = result.get("embedding", [])
+                embeddings.append(embedding)
+
+            except Exception as e:
+                print(f"Warning: Failed to generate embedding for {item.ref_id}: {e}")
+                # Use zero vector as fallback
+                if embeddings:
+                    embeddings.append([0.0] * len(embeddings[0]))
+                else:
+                    embeddings.append([])
+
+        return np.array(embeddings) if embeddings else None
+
+    @staticmethod
+    def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+        """Compute cosine similarity between two vectors"""
+        if a is None or b is None or len(a) == 0 or len(b) == 0:
+            return None
+
+        dot_product = np.dot(a, b)
+        norm_a = np.linalg.norm(a)
+        norm_b = np.linalg.norm(b)
+
+        if norm_a == 0 or norm_b == 0:
+            return 0.0
+
+        return float(dot_product / (norm_a * norm_b))
+
     def compare_items(
-        self, source_item: FrameworkItem, target_item: FrameworkItem
+        self,
+        source_item: FrameworkItem,
+        target_item: FrameworkItem,
+        embedding_similarity: Optional[float] = None,
     ) -> tuple[str, float, str]:
         """
         Compare two framework items using LLM
@@ -227,6 +322,11 @@ class SemanticMapper:
             - score: float between 0 and 1
             - explanation: text explanation
         """
+        # Build embedding context if available
+        embedding_context = ""
+        if embedding_similarity is not None:
+            embedding_context = f"\nEMBEDDING SIMILARITY: {embedding_similarity:.3f} (cosine similarity from semantic embeddings)\n"
+
         prompt = f"""Compare these two security/compliance framework requirements and determine their semantic relationship:
 
 SOURCE REQUIREMENT:
@@ -236,7 +336,7 @@ Content: {source_item.full_sentence}
 TARGET REQUIREMENT:
 Reference: {target_item.ref_id}
 Content: {target_item.full_sentence}
-
+{embedding_context}
 IMPORTANT: Be strict and avoid overfitting. Only identify relationships when there is clear, meaningful overlap.
 
 Analyze the semantic similarity and determine:
@@ -430,6 +530,7 @@ def build_mapping_table(
     target_path: str,
     ollama_url: str = "http://localhost:11434",
     model: str = "mistral",
+    embedding_model: Optional[str] = None,
     output_path: Optional[str] = None,
     resume: bool = False,
     checkpoint_interval: int = 1,
@@ -445,6 +546,7 @@ def build_mapping_table(
         target_path: Path to target framework YAML
         ollama_url: Ollama API endpoint
         model: LLM model to use
+        embedding_model: Optional Ollama embedding model (e.g., nomic-embed-text)
         output_path: Optional path to save output CSV/Excel
         resume: If True, resume from existing output file
         checkpoint_interval: Save progress every N source items (default: 1)
@@ -466,7 +568,21 @@ def build_mapping_table(
     print(f"Found {len(target_items)} assessable items in target")
 
     print(f"\nInitializing semantic mapper with model: {model}")
-    mapper = SemanticMapper(ollama_url=ollama_url, model=model, verbose=verbose)
+    if embedding_model:
+        print(f"Embedding model: {embedding_model}")
+    mapper = SemanticMapper(
+        ollama_url=ollama_url,
+        model=model,
+        embedding_model=embedding_model,
+        verbose=verbose,
+    )
+
+    # Generate embeddings if embedding model is specified
+    source_embeddings = None
+    target_embeddings = None
+    if embedding_model:
+        source_embeddings = mapper.generate_embeddings(source_items)
+        target_embeddings = mapper.generate_embeddings(target_items)
 
     # Check for existing results to resume from
     results = []
@@ -508,15 +624,22 @@ def build_mapping_table(
         # Collect all matches for this source item
         matches = []
 
-        for target_item in target_items:
+        for target_idx, target_item in enumerate(target_items):
             comparison_count += 1
             if comparison_count % 10 == 0:
                 print(
                     f"Progress: {comparison_count}/{total_comparisons} comparisons..."
                 )
 
+            # Calculate embedding similarity if embeddings are available
+            embedding_similarity = None
+            if source_embeddings is not None and target_embeddings is not None:
+                embedding_similarity = mapper.cosine_similarity(
+                    source_embeddings[idx], target_embeddings[target_idx]
+                )
+
             relationship, score, explanation = mapper.compare_items(
-                source_item, target_item
+                source_item, target_item, embedding_similarity
             )
 
             # Collect all matches with their scores
@@ -526,6 +649,7 @@ def build_mapping_table(
                     "relationship": relationship,
                     "score": score,
                     "explanation": explanation,
+                    "embedding_similarity": embedding_similarity,
                 }
             )
 
@@ -554,6 +678,7 @@ def build_mapping_table(
             target_item = match["target_item"]
             result = {
                 "model": model,
+                "embedding_model": embedding_model if embedding_model else None,
                 "source_ref_id": source_item.ref_id,
                 "source_urn": source_item.urn,
                 "source_name": source_item.name,
@@ -562,6 +687,7 @@ def build_mapping_table(
                 "target_urn": target_item.urn,
                 "target_name": target_item.name,
                 "target_full_sentence": target_item.full_sentence,
+                "embedding_similarity": match.get("embedding_similarity"),
                 "relationship": match["relationship"],
                 "score": match["score"],
                 "explanation": match["explanation"],
@@ -624,6 +750,12 @@ def main():
     parser.add_argument(
         "--model", default="mistral", help="LLM model to use (default: mistral)"
     )
+    parser.add_argument(
+        "--embedding-model",
+        default=None,
+        help="Ollama embedding model to use (e.g., nomic-embed-text, mxbai-embed-large). "
+        "If specified, embeddings will be generated and passed as context to the LLM.",
+    )
     parser.add_argument("--output", help="Output file path for results (CSV or XLSX)")
     parser.add_argument(
         "--resume",
@@ -669,6 +801,7 @@ def main():
         target_path=args.target,
         ollama_url=args.ollama_url,
         model=args.model,
+        embedding_model=args.embedding_model,
         output_path=args.output,
         resume=args.resume,
         checkpoint_interval=args.checkpoint_interval,
@@ -681,7 +814,9 @@ def main():
     print("\n" + "=" * 80)
     print("MAPPING SUMMARY")
     print("=" * 80)
-    print(f"Model used: {args.model}")
+    print(f"LLM model: {args.model}")
+    if args.embedding_model:
+        print(f"Embedding model: {args.embedding_model}")
 
     # Count unique source items
     unique_sources = df["source_ref_id"].nunique()
@@ -701,17 +836,22 @@ def main():
 
     print(f"\nRelationship distribution:")
     print(df["relationship"].value_counts())
-    print(f"\nScore statistics:")
+    print(f"\nLLM score statistics:")
     print(df["score"].describe())
+
+    if args.embedding_model and "embedding_similarity" in df.columns:
+        print(f"\nEmbedding similarity statistics:")
+        print(df["embedding_similarity"].describe())
+
     print("\n" + "=" * 80)
 
     # Show sample of best matches
-    print("\nTop 5 mappings (by score):")
-    print(
-        df.nlargest(5, "score")[
-            ["source_ref_id", "target_ref_id", "relationship", "score", "explanation"]
-        ]
-    )
+    print("\nTop 5 mappings (by LLM score):")
+    cols = ["source_ref_id", "target_ref_id", "relationship", "score"]
+    if args.embedding_model and "embedding_similarity" in df.columns:
+        cols.append("embedding_similarity")
+    cols.append("explanation")
+    print(df.nlargest(5, "score")[cols])
 
 
 if __name__ == "__main__":
