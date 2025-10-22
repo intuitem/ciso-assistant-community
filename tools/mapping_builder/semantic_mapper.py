@@ -237,18 +237,36 @@ TARGET REQUIREMENT:
 Reference: {target_item.ref_id}
 Content: {target_item.full_sentence}
 
+IMPORTANT: Be strict and avoid overfitting. Only identify relationships when there is clear, meaningful overlap.
+
 Analyze the semantic similarity and determine:
 1. Relationship type:
-   - "equal": They address the same topic/requirement with equivalent scope
-   - "intersect": They are related but not entirely equivalent (partial overlap)
-   - "no_relationship": They address different topics with no meaningful overlap
+   - "equal": They address the SAME specific topic/requirement with equivalent scope and intent
+     * Must have substantive overlap in both subject matter AND implementation
+     * Minor wording differences are acceptable if core meaning is identical
+
+   - "intersect": They share some meaningful overlap but differ in scope, depth, or focus
+     * Use this ONLY when there is significant shared subject matter (>30% overlap)
+     * Weak/superficial connections (e.g., both mention "security" or "data") do NOT qualify
+     * The overlap must be specific and actionable, not just thematic
+
+   - "no_relationship": They address different topics OR have only superficial/tangential connections
+     * Default to this when in doubt
+     * Sharing common security terms without substantive overlap = no_relationship
+     * Related domain areas without specific control overlap = no_relationship
 
 2. Confidence score (0.0 to 1.0):
-   - equal: score = 1.0
-   - intersect: score between 0.1 and 0.9 based on strength of relation
+   - equal: score = 1.0 (only when truly equivalent)
+   - intersect: score between 0.3 and 0.9 based on strength of relation
+     * 0.7-0.9: Strong overlap (>60% shared scope)
+     * 0.5-0.7: Moderate overlap (40-60% shared scope)
+     * 0.3-0.5: Weak but meaningful overlap (30-40% shared scope)
+     * Below 0.3: Use "no_relationship" instead
    - no_relationship: score = 0.0
 
 3. Brief explanation (1-2 sentences)
+   - For "intersect" or "equal": Explain the SPECIFIC overlapping elements
+   - For "no_relationship": Briefly note why they differ
 
 Respond in JSON format:
 {{"relationship": "equal|intersect|no_relationship", "score": 0.0, "explanation": "..."}}"""
@@ -314,6 +332,32 @@ Respond in JSON format:
 
             # Ensure score is in valid range
             score = max(0.0, min(1.0, score))
+
+            # Enforce minimum thresholds to prevent overfitting
+            if relationship == "intersect" and score < 0.3:
+                # Weak intersect relationships should be downgraded to no_relationship
+                original_score = score
+                if self.verbose:
+                    print(
+                        f"Downgrading weak intersect (score={original_score:.2f}) to no_relationship: "
+                        f"{source_item.ref_id} -> {target_item.ref_id}"
+                    )
+                relationship = "no_relationship"
+                explanation = f"Weak overlap (original score {original_score:.2f}) - {explanation}"
+                score = 0.0
+
+            # Validate score consistency with relationship type
+            if relationship == "equal" and score < 0.95:
+                # Equal relationships should have very high scores
+                if self.verbose:
+                    print(
+                        f"Warning: 'equal' relationship with low score ({score:.2f}): "
+                        f"{source_item.ref_id} -> {target_item.ref_id}"
+                    )
+
+            if relationship == "no_relationship" and score > 0.0:
+                # Ensure no_relationship always has score 0.0
+                score = 0.0
 
             return relationship, score, explanation
 

@@ -1,6 +1,13 @@
-# Semantic Framework Mapping Tool
+# Semantic Framework Mapping Tools
 
-This tool performs semantic comparison between two security/compliance framework YAML files using LLM-powered analysis via Ollama.
+This directory contains tools for semantic comparison between security/compliance framework YAML files.
+
+## Available Tools
+
+1. **semantic_mapper.py** - LLM-based mapping using Ollama (flexible, provides explanations)
+2. **sbert_mapper.py** - SBERT-based mapping using sentence transformers (fast, deterministic)
+3. **heatmap_builder.py** - Visualize mapping relationships as heatmaps
+4. **compare_models.py** - Compare results from multiple LLM models
 
 ## Features
 
@@ -357,3 +364,348 @@ print(comparison)
 - Check disagreement cases - they often indicate edge cases or nuanced requirements
 - With multiple matches: review all matches per source to understand coverage
 - Low-scoring matches (0.2-0.4) might reveal tangential relationships worth documenting
+
+---
+
+# SBERT-Based Mapping (sbert_mapper.py)
+
+For a **faster, more deterministic** alternative to LLM-based mapping, use the SBERT-based mapper.
+
+## Why SBERT?
+
+**Advantages over LLM-based mapping:**
+- ⚡ **10-100x faster** - processes entire frameworks in seconds/minutes instead of hours
+- 🎯 **Deterministic** - same inputs always produce identical results
+- 🔄 **No external services** - runs completely offline, no Ollama required
+- 📊 **Cosine similarity scores** - mathematically grounded semantic similarity
+- 🚫 **No JSON parsing issues** - direct numerical computation
+
+**Trade-offs:**
+- No natural language explanations (only similarity scores)
+- Less flexibility in interpretation
+- Purely similarity-based (no reasoning about relationships)
+
+## Prerequisites
+
+```bash
+pip install sentence-transformers torch
+```
+
+## Basic Usage
+
+```bash
+python sbert_mapper.py \
+  --source path/to/source-framework.yaml \
+  --target path/to/target-framework.yaml \
+  --output mapping_results.csv
+```
+
+## Model Selection
+
+The tool supports different SBERT models with varying trade-offs:
+
+### Fast & Lightweight (Recommended)
+```bash
+python sbert_mapper.py \
+  --source source.yaml \
+  --target target.yaml \
+  --model all-MiniLM-L6-v2 \
+  --output mapping.csv
+```
+- Speed: **Very Fast** (~1000 sentences/sec on CPU)
+- Quality: Good
+- Dimensions: 384
+
+### High Quality
+```bash
+python sbert_mapper.py \
+  --source source.yaml \
+  --target target.yaml \
+  --model all-mpnet-base-v2 \
+  --output mapping.csv
+```
+- Speed: Moderate (~200 sentences/sec on CPU)
+- Quality: **Excellent**
+- Dimensions: 768
+
+### Multilingual
+```bash
+python sbert_mapper.py \
+  --source source.yaml \
+  --target target.yaml \
+  --model paraphrase-multilingual-MiniLM-L12-v2 \
+  --output mapping.csv
+```
+- Speed: Fast
+- Quality: Good
+- Languages: **50+ languages**
+
+## Arguments
+
+- `--source` (required): Path to source framework YAML
+- `--target` (required): Path to target framework YAML
+- `--model` (optional): SBERT model name (default: all-MiniLM-L6-v2)
+- `--output` (optional): Output file path (CSV or XLSX)
+- `--top-n` (optional): Return top N matches per source item
+- `--threshold` (optional): Minimum similarity threshold (0.0-1.0)
+- `--equal-threshold` (optional): Similarity for "equal" relationships (default: 0.85)
+- `--intersect-threshold` (optional): Similarity for "intersect" relationships (default: 0.50)
+- `--device` (optional): Device to use (cuda/cpu/mps, default: auto)
+- `--verbose` (optional): Enable verbose logging
+
+## Threshold Configuration
+
+SBERT uses **cosine similarity** (0-1) to determine relationship types:
+
+### Default Thresholds
+- **≥ 0.85**: "equal" relationship (score = 1.0)
+- **0.50 - 0.85**: "intersect" relationship (score = 0.3-0.9, normalized)
+- **< 0.50**: "no_relationship" (score = 0.0)
+
+### Custom Thresholds
+```bash
+# Stricter matching (higher quality, fewer matches)
+python sbert_mapper.py \
+  --source source.yaml \
+  --target target.yaml \
+  --equal-threshold 0.90 \
+  --intersect-threshold 0.60 \
+  --output strict_mapping.csv
+
+# Looser matching (more matches, lower precision)
+python sbert_mapper.py \
+  --source source.yaml \
+  --target target.yaml \
+  --equal-threshold 0.80 \
+  --intersect-threshold 0.40 \
+  --output loose_mapping.csv
+```
+
+## Multiple Matches (Top-N & Thresholds)
+
+By default, SBERT returns only the best match per source item. You can get multiple matches:
+
+### Top-N Matches
+Get the top N most similar items for each source requirement:
+
+```bash
+# Get top 3 matches for each source item
+python sbert_mapper.py \
+  --source source.yaml \
+  --target target.yaml \
+  --top-n 3 \
+  --output mapping_top3.csv
+```
+
+### Threshold-Based Filtering
+Get all matches above a similarity threshold:
+
+```bash
+# Get all matches with similarity >= 0.6
+python sbert_mapper.py \
+  --source source.yaml \
+  --target target.yaml \
+  --threshold 0.6 \
+  --output mapping_threshold.csv
+```
+
+### Combined: Top-N + Threshold
+Combine both for controlled matching:
+
+```bash
+# Get top 5 matches, but only if similarity >= 0.5
+python sbert_mapper.py \
+  --source source.yaml \
+  --target target.yaml \
+  --top-n 5 \
+  --threshold 0.5 \
+  --output mapping_combined.csv
+```
+
+**Note:** With multiple matches, you'll get multiple rows per source item (one row per matching target). Results are sorted by similarity (best first).
+
+## Output Format
+
+The output includes:
+- All standard mapping columns (source/target ref_id, urn, name, full_sentence)
+- `relationship`: equal/intersect/no_relationship
+- `score`: Normalized score (0-1) based on relationship type
+- `similarity`: Raw cosine similarity (0-1) from SBERT
+
+## Performance Examples
+
+Typical processing times on modern hardware:
+
+| Framework Size | Model | Device | Time |
+|---------------|-------|--------|------|
+| 50 x 50 items | MiniLM | CPU | ~2 seconds |
+| 100 x 100 items | MiniLM | CPU | ~5 seconds |
+| 500 x 500 items | MiniLM | CPU | ~30 seconds |
+| 100 x 100 items | mpnet | CPU | ~15 seconds |
+| 100 x 100 items | MiniLM | GPU | <1 second |
+
+## GPU Acceleration
+
+For large frameworks, use GPU acceleration:
+
+```bash
+# Auto-detect GPU (CUDA/MPS)
+python sbert_mapper.py \
+  --source large-source.yaml \
+  --target large-target.yaml \
+  --output mapping.csv
+
+# Force specific device
+python sbert_mapper.py \
+  --source large-source.yaml \
+  --target large-target.yaml \
+  --device cuda \
+  --output mapping.csv
+```
+
+## Complete Example
+
+```bash
+# High-quality mapping with custom thresholds
+python sbert_mapper.py \
+  --source ../../backend/library/libraries/nist-csf-2.0.yaml \
+  --target ../../backend/library/libraries/iso27001-2022.yaml \
+  --model all-mpnet-base-v2 \
+  --equal-threshold 0.88 \
+  --intersect-threshold 0.55 \
+  --top-n 5 \
+  --threshold 0.50 \
+  --output nist-to-iso-mapping.xlsx \
+  --verbose
+```
+
+## Comparing SBERT vs LLM Results
+
+You can run both and compare:
+
+```bash
+# Run SBERT mapping
+python sbert_mapper.py \
+  --source source.yaml \
+  --target target.yaml \
+  --output mapping_sbert.csv
+
+# Run LLM mapping
+python semantic_mapper.py \
+  --source source.yaml \
+  --target target.yaml \
+  --model mistral \
+  --output mapping_llm.csv
+
+# Compare results in Python
+import pandas as pd
+
+sbert = pd.read_csv('mapping_sbert.csv')
+llm = pd.read_csv('mapping_llm.csv')
+
+# Merge on source/target pairs
+merged = sbert.merge(
+    llm,
+    on=['source_ref_id', 'target_ref_id'],
+    suffixes=('_sbert', '_llm')
+)
+
+# Compare scores
+print(merged[['source_ref_id', 'target_ref_id', 'score_sbert', 'score_llm', 'similarity']])
+```
+
+## When to Use SBERT vs LLM
+
+**Use SBERT when:**
+- Speed is important
+- You need deterministic/reproducible results
+- You're doing exploratory analysis
+- You want to process large frameworks quickly
+- You don't need explanations
+
+**Use LLM when:**
+- You need natural language explanations
+- You want nuanced reasoning about relationships
+- Quality is more important than speed
+- You need to justify mappings to stakeholders
+- You're working with complex, context-dependent requirements
+
+**Best Practice:** Start with SBERT for rapid exploration, then use LLM for detailed analysis of important mappings.
+
+---
+
+# Heatmap Visualization (heatmap_builder.py)
+
+Visualize mapping relationships as heatmaps showing the score matrix between source and target items.
+
+## Prerequisites
+
+```bash
+pip install matplotlib seaborn numpy pandas
+```
+
+## Basic Usage
+
+```bash
+python heatmap_builder.py \
+  --input mapping_results.csv \
+  --output heatmap.png
+```
+
+## Arguments
+
+- `--input` (required): Path to mapping CSV file
+- `--output` (optional): Output path for heatmap image (PNG, PDF, SVG)
+- `--use-labels` (optional): Use ref_ids as axis labels instead of indices
+- `--threshold` (optional): Show only relationships with score >= threshold
+- `--width` (optional): Figure width in inches (default: 20)
+- `--height` (optional): Figure height in inches (default: 16)
+- `--cmap` (optional): Matplotlib colormap (default: YlOrRd)
+- `--title` (optional): Custom title for heatmap
+
+## Examples
+
+### Basic heatmap with indices
+```bash
+python heatmap_builder.py \
+  --input mapping_cyfun.csv \
+  --output heatmap.png
+```
+
+### With ref_id labels
+```bash
+python heatmap_builder.py \
+  --input mapping_cyfun.csv \
+  --output heatmap_labeled.png \
+  --use-labels
+```
+
+### Filtered heatmap (high-quality matches only)
+```bash
+python heatmap_builder.py \
+  --input mapping_cyfun.csv \
+  --output heatmap_filtered.png \
+  --threshold 0.7
+```
+
+### Custom styling
+```bash
+python heatmap_builder.py \
+  --input mapping_cyfun.csv \
+  --output heatmap_custom.png \
+  --cmap viridis \
+  --width 24 \
+  --height 20 \
+  --title "Framework Mapping: NIST CSF 2.0 → ISO 27001"
+```
+
+## Available Colormaps
+
+Popular options:
+- `YlOrRd` (default): Yellow-Orange-Red, good for highlighting strong relationships
+- `viridis`: Perceptually uniform, colorblind-friendly
+- `plasma`: Purple-pink-yellow gradient
+- `RdYlGn`: Red-Yellow-Green (diverging)
+- `coolwarm`: Blue-Red (diverging)
+
+See [Matplotlib colormaps](https://matplotlib.org/stable/tutorials/colors/colormaps.html) for more options.
