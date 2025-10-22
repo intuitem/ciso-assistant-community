@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/svelte';
 import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+import { describe, test, expect } from 'vitest';
 
 const source = {
 	head: { id: 'ID', name: 'Name', tags: 'Tags' },
@@ -11,8 +12,8 @@ const source = {
 };
 
 describe('ModelTable', () => {
-	it('renders headers and rows', async () => {
-		render(ModelTable, { props: { source, URLModel: 'test-model', displayActions: false } });
+	test('renders headers and rows', async () => {
+		render(ModelTable, { props: { source, URLModel: 'test-model' as any, displayActions: false } });
 
 		expect(screen.getByText('ID')).toBeTruthy();
 		expect(screen.getByText('Name')).toBeTruthy();
@@ -21,8 +22,8 @@ describe('ModelTable', () => {
 		expect(screen.getByText('Patoche')).toBeTruthy();
 	});
 
-	it('renders actions column when displayActions=true', async () => {
-		render(ModelTable, { props: { source, URLModel: 'test-model', displayActions: true } });
+	test('renders actions column when displayActions=true', async () => {
+		render(ModelTable, { props: { source, URLModel: 'test-model' as any, displayActions: true } });
 
 		const actionHeader = document.querySelector('th.text-end');
 		expect(actionHeader).toBeTruthy();
