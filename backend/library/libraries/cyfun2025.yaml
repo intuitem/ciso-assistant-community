@@ -14,7 +14,7 @@ description: "The CyberFundamentals Framework is a framework owned by the Centre
   \ 103305-1).\nhttps://cyfun.eu/sites/default/files/2025-10/CyFun2025_Booklet-ESSENTIAL.pdf\n\
   Version 2025-10-01"
 copyright: "\u24B8 Centre for Cybersecurity Belgium (CCB)"
-version: 1
+version: 2
 publication_date: null
 provider: CCB
 packager: intuitem
@@ -32,6 +32,59 @@ objects:
       \ the NIST Cybersecurity Framework1, ISO 27001/ISO 27002, IEC 62443 and the\
       \ CIS Critical security Controls (ETSI TR 103305-1).\nhttps://cyfun.eu/sites/default/files/2025-10/CyFun2025_Booklet-ESSENTIAL.pdf\n\
       Version 2025-10-01"
+    min_score: 1
+    max_score: 5
+    scores_definition:
+    - score: 1
+      name: Initial
+      description: Standard process does not exist.
+      description_doc: No Process documentation or not formally approved by management.
+    - score: 2
+      name: Repeatable
+      description: Ad-hoc process exists and is done informally.
+      description_doc: Formally approved Process documentation exists but not reviewed
+        in the previous 2 years.
+    - score: 3
+      name: Defined
+      description: 'Formal process exists and is implemented.
+
+        Evidence available for most activities.
+
+        Less than 10% process exceptions.'
+      description_doc: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved.
+
+        Documented & approved exceptions < 5% of the time.'
+    - score: 4
+      name: Managed
+      description: 'Formal process exists and is implemented.
+
+        Evidence available for all activities.
+
+        Detailed metrics of the process are captured and reported.
+
+        Minimal target for metrics has been established.
+
+        Less than 5% of process exceptions.'
+      description_doc: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved.
+
+        Documented & approved exceptions < 3% of the time.'
+    - score: 5
+      name: Optimizing
+      description: 'Formal process exists and is implemented.
+
+        Evidence available for all activities.
+
+        Detailed metrics of the process are captured and reported.
+
+        Minimal target for metrics has been established and continually improving.
+
+        Less than 1% of process exceptions.'
+      description_doc: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved.
+
+        Documented & approved exceptions < 0,5% of the time.'
     implementation_groups_definition:
     - ref_id: B
       name: basic
