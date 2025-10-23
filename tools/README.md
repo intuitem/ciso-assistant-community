@@ -213,12 +213,12 @@ The `_content` tab for a `framework` object contains the following columns:
 - reference_controls: blank/comma/LF separated list of references to `reference` controls
 - typical_evidence
 - annotation
-- importance: one among `mandatory`/`recommended`/`nice to have` or empty cell (= `undefined`). Default value is `undefined`.
+- importance: one among `mandatory`/`recommended`/`nice to have` or empty cell (= undefined). Default value is `undefined`.
 - weight: Positive integer `>= 1`. Used for score weighting. The default weight (if undefined) is `1`.
 - questions: 1 or several (n) questions, separated by line breaks
 - answer: 1 (same for all questions) or n (one answer per question) answers, separated by line breaks
-- depends_on: Format: `question_line:choice_lines`. Set `undefined` or empty cell if the question depends on nothing. See the cell notes in `example_framework.xlsx`, at lines `41` and `43`, column `depends_on` for better understanding.
-- condition: One among `any`/`all`. Required if `depends_on` is defined for a question. Set to `undefined` if `depends_on` is undefined for a specific question. `any`: Any answer selected from the `depends_on` list will show the question. `all`: Selecting all answers from the `depends_on` list will show the question. 
+- depends_on: Format: `question_line:choice_lines`. Set `/` (= undefined) or empty cell if the question depends on nothing. See the cell notes in `example_framework.xlsx`, at lines `41` and `43`, column `depends_on` for better understanding.
+- condition: One among `any`/`all`. Required if `depends_on` is defined for a question. Set to `/` (= undefined) if `depends_on` is undefined for a specific question. `any`: Any answer selected from the `depends_on` list will show the question. `all`: Selecting all answers from the `depends_on` list will show the question. 
 - urn_id (+): this is reserved for specific compatibility issues to force the urn calculation
 - skip_count (+): trick to fix a referential without changing the URNs (subtract `1` from the counter) [Works with Compatibility mode `1` in `convert_library_v2.py`]
 - fix_count (+): negative or positive integer. Better version of `skip_count`  (adds the integer to the counter) [Works with Compatibility mode `3` in `convert_library_v2.py`]
@@ -322,11 +322,11 @@ The `_content` tab for a "answers" object contains the following columns:
 - question_type (*): one among `unique_choice`/`multiple_choice`/`text`/`date`
 - question_choices: necessary if "question_type" is `unique_choice` or `multiple_choice`. Each choice is separated by line breaks. To make a choice written on several lines, start the next line with a `|`.
 * The following columns only works if the `question_type` of the answer is `unique_choice` or `multiple_choice`. In the cells of these columns, you can set one value that will apply to all the choices, or N values (one value per choice) that will apply to each choice. The N values must be separated by line breaks. 
-  - description: Each description is separated by line breaks. To make a description written on several lines, start the next line with a `|`.
-  - select_implementation_groups: A choice provokes the selection of the indicated Implementation Groups (IG). For the same choice, separate IGs with commas. To define IGs for each choice, separate IG groups with line breaks. Set `/undefined` or an empty cell for no IG.
-  - add_score: Positive or negative integer. The score is calculated based on this choice. All values selected within a requirement assessment are summed, and the sum is clipped by the scale. Each choice is separated by line breaks.
-  - compute_result: Boolean/None. True = `true` ; False = `false` ; None = `undefined` or empty cell. If true, this choice contributes to compliance. If false, this choice contributes to non-compliance. If empty, the choice contributes to nothing. Each boolean is separated by line breaks.
-  - color: Hexadecimal value. Format = `#xxxxxx` ; None = `undefined` or empty cell. Each choice color is separated by line breaks.
+  - description: Each description is separated by line breaks. To make a description written on several lines, start the next line with a `|`. Set `/` to indicate that there is no comment for a specific choice.
+  - select_implementation_groups: A choice provokes the selection of the indicated Implementation Groups (IG). For the same choice, separate IGs with commas. To define IGs for each choice, separate IG groups with line breaks. Set `/` or an empty cell for no IG.
+  - add_score: Positive or negative integer. The score is calculated based on this choice. All values selected within a requirement assessment are summed, and the sum is clipped by the scale. Each choice is separated by line breaks. NOTE: If you start with a minus sign `-` in Excel, it may not work correctly because Excel considers it to be a function. To avoid this problem, add an apostrophe `'` in front of the minus sign (i.e. `'-`).
+  - compute_result: Boolean/None. True = `true` ; False = `false` ; None = `/` or empty cell. If true, this choice contributes to compliance. If false, this choice contributes to non-compliance. If empty, the choice contributes to nothing. Each boolean is separated by line breaks.
+  - color: Hexadecimal value. Format = `#xxxxxx` ; None = `/` or empty cell. Each choice color is separated by line breaks.
 
 Note: Unsupported values should be rejected.
 

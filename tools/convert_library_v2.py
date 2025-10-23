@@ -197,7 +197,7 @@ def inject_questions_into_node(qa_data: dict[str, Any], node: Dict[str, Any], an
     depends_on_lines = None
     if raw_depends_on_str:
         depends_on_lines = [dep.strip() for dep in str(raw_depends_on_str).split("\n") if dep.strip()]
-        depends_on_lines = [None if dep.lower() == "undefined" else dep for dep in depends_on_lines]
+        depends_on_lines = [None if dep.lower() == "/" else dep for dep in depends_on_lines]
         
         if not node.get('urn'):
             raise ValueError(
@@ -207,7 +207,7 @@ def inject_questions_into_node(qa_data: dict[str, Any], node: Dict[str, Any], an
     condition_lines = None
     if raw_condition_str:
         condition_lines = [cond.strip() for cond in str(raw_condition_str).split("\n") if cond.strip()]
-        condition_lines = [None if cond.lower() == "undefined" else cond for cond in condition_lines]
+        condition_lines = [None if cond.lower() == "/" else cond for cond in condition_lines]
     # If NO condition [AND]  
     elif not raw_condition_str and depends_on_lines:
         raise ValueError(
@@ -277,6 +277,10 @@ def inject_questions_into_node(qa_data: dict[str, Any], node: Dict[str, Any], an
                 else:
                     condition = condition_lines[idx]
                 
+                # Check string format (Format == "x:y,z,a,b,c,..." with x,y,a,b,c,... >= 1)
+                if not re.fullmatch(r"[1-9]\d*:(?:[1-9]\d*)(?:,[1-9]\d*)*", dependency):
+                    raise ValueError(f"Invalid 'depends_on' format for question #{str(idx + 1)} for node {node.get('urn')}: '{dependency}'. Expected 'x:y[,z,...]' with x,y,z >= 1")
+                
                 dep_split = dependency.split(":")
                 dependency_question = int(dep_split[0])
                 dependency_question_answers = [int(c) for c in dep_split[1].split(",")]
@@ -297,12 +301,12 @@ def inject_questions_into_node(qa_data: dict[str, Any], node: Dict[str, Any], an
                     
                     if not condition:
                         raise ValueError(
-                            f"Missing 'condition' for question #{str(idx + 1)} for node {node.get('urn')}. Must be 'any'/'all' or 'undefined'"
+                            f"Missing 'condition' for question #{str(idx + 1)} for node {node.get('urn')}. Must be 'any' or 'all' "
                         )
                     
                     if condition not in ["any", "all"]:
                         raise ValueError(
-                            f"Invalid 'condition' for question #{str(idx + 1)} for node {node.get('urn')}. Must be 'any'/'all'/'undefined' or empty cell"
+                            f"Invalid 'condition' for question #{str(idx + 1)} for node {node.get('urn')}: '{condition}'. Must be 'any' or 'all', '/' (= 'undefined') or empty cell"
                         )
                     
                     depends_on_block["condition"] = condition
@@ -863,7 +867,7 @@ def create_library(
                         description_lines = _per_choice_lines(data, "description", len(choices), answer_id)
                         if description_lines:
                             for i, desc in enumerate(description_lines):
-                                if desc:
+                                if desc and desc != "/":
                                     choices[i]["description"] = desc
 
                         # --- Optional: compute_result -----------------------------------------
@@ -871,14 +875,14 @@ def create_library(
                         if compute_lines:
                             for i, val in enumerate(compute_lines):
                                 v = val.lower()
-                                if v not in ("true", "false", "undefined", ""):
+                                if v not in ("true", "false", "/", ""):
                                     raise ValueError(
                                         f"(answers_definition) Invalid compute_result value '{val}' "
-                                        f"for answer ID '{answer_id}', choice #{i+1}. Must be 'true', 'false', 'undefined' or empty."
+                                        f"for answer ID '{answer_id}', choice #{i+1}. Must be 'true', 'false', '/' (= 'undefined') or empty."
                                     )
                                 
                                 # Use Boolean instead of string
-                                if v == "undefined" or v == "": v = None
+                                if v == "/" or v == "": v = None
                                 elif v == "true": v = True
                                 elif v == "false": v = False
                                 
@@ -909,7 +913,7 @@ def create_library(
                                     groups = [s.strip() for s in val.split(",") if s.strip()]
                                     
                                     # If IG for choice == "/undefined", continue
-                                    if len(groups) == 1 and groups[0].lower() == "/undefined":
+                                    if len(groups) == 1 and groups[0].lower() == "/":
                                         continue
                                     
                                     if groups:
@@ -920,13 +924,13 @@ def create_library(
                         if color_lines:
                             for i, val in enumerate(color_lines):
                                 if val:
-                                    if not re.fullmatch(r"#([0-9a-fA-F]{6})", val) and val.lower() != "undefined":
+                                    if not re.fullmatch(r"#([0-9a-fA-F]{6})", val) and val.lower() != "/":
                                         raise ValueError(
                                             f"(answers_definition) Invalid color value '{val}' "
-                                            f"for answer ID '{answer_id}', choice #{i+1}. Must match #RRGGBB, be 'undefined' or the cell must be empty."
+                                            f"for answer ID '{answer_id}', choice #{i+1}. Must match #RRGGBB, be '/' (= 'undefined') or the cell must be empty."
                                         )
                                         
-                                    if val.lower() != 'undefined':
+                                    if val.lower() != '/':
                                         choices[i]["color"] = val.upper()
 
                         answers_dict[answer_id] = {
@@ -1188,7 +1192,7 @@ def create_library(
                                 raise ValueError
                             node["weight"] = w
                         except (TypeError, ValueError):
-                            raise ValueError(f"(framework) Invalid weight at row #{row[0].row}: {data["weight"]} — must be a strictly positive integer.")
+                            raise ValueError(f"(framework) Invalid weight at row #{row[0].row}: {data["weight"]}. Must be a strictly positive integer.")
                     if (
                         "implementation_groups" in data
                         and data["implementation_groups"]
