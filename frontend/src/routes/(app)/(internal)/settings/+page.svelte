@@ -22,6 +22,9 @@
 		<Tabs.Control value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Control
 		>
+		<Tabs.Control value="integrations"
+			><i class="fa-solid fa-plug"></i> {m.integrations()}</Tabs.Control
+		>
 	{/snippet}
 	{#snippet content()}
 		<Tabs.Panel value="instance">
@@ -58,6 +61,11 @@
 					cancelButton={false}
 					action="?/featureFlags"
 				/>
+			</div>
+		</Tabs.Panel>
+		<Tabs.Panel value="integrations">
+			<div>
+				<span class="text-gray-500">{m.configureIntegrations()}</span>
 			</div>
 		</Tabs.Panel>
 	{/snippet}
