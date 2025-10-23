@@ -138,6 +138,8 @@ class MappingEngine:
         for neighbor in self.get_framework_neighbors(source_urn):
             index = (source_urn, neighbor)
             rms = self.get_rms(index)
+            if not rms:
+                continue
             full_cov = 0
             partial_cov = 0
             for requirement in rms["requirement_mappings"]:
