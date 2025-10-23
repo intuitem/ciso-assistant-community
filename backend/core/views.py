@@ -68,7 +68,7 @@ from django.apps import apps
 from django.contrib.auth.models import Permission
 from django.conf import settings
 from django.core.files.storage import default_storage
-from core.mappings.engine import engine
+
 from django.db import models, transaction
 from django.forms import ValidationError
 from django.http import FileResponse, HttpResponse, StreamingHttpResponse
@@ -5579,6 +5579,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     )
     def frameworks(self, request, pk):
         audit = ComplianceAssessment.objects.get(id=pk)
+        from core.mappings.engine import engine
         audit_from_results = engine.load_audit_fields(audit)
         frameworks_in_mappings = set()
         data = []
@@ -6078,7 +6079,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         create_applied_controls = serializer.validated_data.pop(
             "create_applied_controls_from_suggestions", False
         )
-
+        from core.mappings.engine import engine
         with transaction.atomic():
             instance: ComplianceAssessment = serializer.save()
             instance.create_requirement_assessments(baseline)
@@ -6607,6 +6608,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         # create the new requirement mapping set and reload the engine.
         instance = serializer.save()
+        from core.mappings.engine import engine
         engine.load_rms_data()
         return instance
 
