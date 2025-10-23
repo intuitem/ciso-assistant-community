@@ -960,6 +960,8 @@ def startup(sender: AppConfig, **kwargs):
     from tprm.models import Entity
     from privacy.models import ProcessingNature
     from global_settings.models import GlobalSettings
+
+    # first load in memory of the frameworks and mappings
     from core.mappings.engine import engine
 
     print("startup handler: initialize database")
