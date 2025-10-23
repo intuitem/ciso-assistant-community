@@ -84,6 +84,7 @@
 
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import CompareAuditModal from '$lib/components/Modals/CompareAuditModal.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -270,6 +271,20 @@
 			component: modalComponent,
 			// Data
 			title: m.cloneAudit()
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalCompareAudit(): void {
+		const modalComponent: ModalComponent = {
+			ref: CompareAuditModal,
+			props: {
+				currentAudit: data.compliance_assessment
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
 		};
 		modalStore.trigger(modal);
 	}
@@ -616,6 +631,12 @@
 					onclick={() => modalCreateCloneForm()}
 					data-testid="clone-audit-button"
 					><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
+				</button>
+				<button
+					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-red-500 h-fit"
+					onclick={() => modalCompareAudit()}
+					data-testid="compare-audit-button"
+					><i class="fa-solid fa-code-compare mr-2"></i> Compare to
 				</button>
 			{/if}
 

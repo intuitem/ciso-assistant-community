@@ -6311,6 +6311,161 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
         return Response(compliance_assessment.donut_render())
 
+    @action(detail=True, methods=["get"])
+    def comparable_audits(self, request, pk):
+        """
+        Get list of compliance assessments that can be compared with this one
+        (same framework, user has view permission, excludes current audit)
+        """
+        try:
+            base_audit = self.get_object()
+        except ComplianceAssessment.DoesNotExist:
+            return Response(
+                {"error": "Base audit not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Get viewable objects for permission checking
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        # Filter audits: same framework, viewable, exclude current
+        comparable_audits = (
+            ComplianceAssessment.objects.filter(
+                framework=base_audit.framework, id__in=viewable_objects
+            )
+            .exclude(id=UUID(pk))
+            .select_related("folder", "framework", "perimeter")
+            .order_by("-created_at")
+        )
+
+        # Build response with prioritization for same perimeter
+        results = []
+        for audit in comparable_audits:
+            result = {
+                "id": str(audit.id),
+                "name": audit.name,
+                "ref_id": audit.ref_id,
+                "version": audit.version,
+                "status": audit.status,
+                "perimeter": {
+                    "id": str(audit.perimeter.id),
+                    "str": audit.perimeter.name,
+                }
+                if audit.perimeter
+                else None,
+                "folder": {"id": str(audit.folder.id), "str": audit.folder.name},
+                "created_at": audit.created_at,
+                # Flag for prioritization in frontend
+                "same_perimeter": (
+                    base_audit.perimeter
+                    and audit.perimeter
+                    and audit.perimeter.id == base_audit.perimeter.id
+                ),
+            }
+            results.append(result)
+
+        # Sort: same perimeter first, then by creation date
+        results.sort(
+            key=lambda x: (not x["same_perimeter"], x["created_at"]), reverse=True
+        )
+
+        return Response({"results": results})
+
+    @action(detail=True, methods=["get"])
+    def compare(self, request, pk):
+        """
+        Compare two compliance assessments that use the same framework
+        """
+        compare_id = request.query_params.get("compare_id")
+
+        if not compare_id:
+            return Response(
+                {"error": "compare_id parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Get viewable objects for permission checking
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        # Check permissions for base audit
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied for base audit"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Check permissions for comparison audit
+        if UUID(compare_id) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied for comparison audit"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            base_audit = ComplianceAssessment.objects.get(id=pk)
+            compare_audit = ComplianceAssessment.objects.get(id=compare_id)
+        except ComplianceAssessment.DoesNotExist:
+            return Response(
+                {"error": "One or both audits not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Validate same framework
+        if base_audit.framework.id != compare_audit.framework.id:
+            return Response(
+                {"error": "Audits must use the same framework for comparison"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Build comparison data
+        comparison_data = {
+            "base": {
+                "id": str(base_audit.id),
+                "name": base_audit.name,
+                "version": base_audit.version,
+                "status": base_audit.status,
+                "perimeter": {
+                    "id": str(base_audit.perimeter.id),
+                    "str": base_audit.perimeter.name,
+                }
+                if base_audit.perimeter
+                else None,
+                "framework": {
+                    "id": str(base_audit.framework.id),
+                    "str": base_audit.framework.name,
+                },
+                "created_at": base_audit.created_at,
+                "global_score": base_audit.get_global_score(),
+                "max_score": base_audit.max_score,
+                "donut_data": base_audit.donut_render(),
+            },
+            "compare": {
+                "id": str(compare_audit.id),
+                "name": compare_audit.name,
+                "version": compare_audit.version,
+                "status": compare_audit.status,
+                "perimeter": {
+                    "id": str(compare_audit.perimeter.id),
+                    "str": compare_audit.perimeter.name,
+                }
+                if compare_audit.perimeter
+                else None,
+                "framework": {
+                    "id": str(compare_audit.framework.id),
+                    "str": compare_audit.framework.name,
+                },
+                "created_at": compare_audit.created_at,
+                "global_score": compare_audit.get_global_score(),
+                "max_score": compare_audit.max_score,
+                "donut_data": compare_audit.donut_render(),
+            },
+        }
+
+        return Response(comparison_data)
+
     @staticmethod
     @api_view(["POST"])
     @renderer_classes([JSONRenderer])
