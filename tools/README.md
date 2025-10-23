@@ -213,7 +213,7 @@ The `_content` tab for a `framework` object contains the following columns:
 - reference_controls: blank/comma/LF separated list of references to `reference` controls
 - typical_evidence
 - annotation
-- importance: one among `mandatory`/`recommended`/`nice to have`/`undefined` or empty (= `undefined`). Default value is `undefined`.
+- importance: one among `mandatory`/`recommended`/`nice to have` or empty cell (= `undefined`). Default value is `undefined`.
 - weight: Positive integer `>= 1`. Used for score weighting. The default weight (if undefined) is `1`.
 - questions: 1 or several (n) questions, separated by line breaks
 - answer: 1 (same for all questions) or n (one answer per question) answers, separated by line breaks
@@ -297,7 +297,7 @@ The `_content` tab for a `implementation_groups` object contains the following c
 - ref_id (*)
 - name (*)
 - description
-- default_selected : Must be `x` or empty. If `x`, the implementation group is selected by default when creating an audit with the framework.
+- default_selected : Must be `x` or empty. If `x`, the Implementation Group (IG) is selected by default when creating an audit with the framework. If you're creating a questionnaire, we *STRONGLY* recommend selecting at least 1 IG, and assigning the selected IG to the main questions in your Framework Content sheet.
 
 ### Scores
 

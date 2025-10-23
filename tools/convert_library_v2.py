@@ -1175,8 +1175,8 @@ def create_library(
                         
                         importance = str(data["importance"]).strip().lower()
                         
-                        if importance not in ["mandatory", "recommended", "nice to have", "undefined"]:
-                            raise ValueError(f'(framework_content) Invalid "importance" at row #{row[0].row}: "{data["importance"]}". Must be "mandatory"/"recommended"/"nice to have"/"undefined" or empty.')
+                        if importance not in ["mandatory", "recommended", "nice to have"]:
+                            raise ValueError(f'(framework_content) Invalid "importance" at row #{row[0].row}: "{data["importance"]}". Must be "mandatory"/"recommended"/"nice to have" or empty cell (= "undefined").')
 
                         if importance != "undefined":
                             node["importance"] = importance
