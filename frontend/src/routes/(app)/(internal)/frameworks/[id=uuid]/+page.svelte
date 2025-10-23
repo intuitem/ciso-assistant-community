@@ -8,6 +8,7 @@
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import FrameworlEquivalence from '$lib/components/FrameworkEquivalence/FrameworlEquivalence.svelte';
 
 	interface Props {
 		data: PageData;
@@ -140,4 +141,14 @@
 		</h4>
 		<RecursiveTreeView nodes={treeViewNodes} hover="hover:bg-initial" />
 	</div>
+		<!-- EQUIVALENCE WITH OTHER FRAMEWORKS -->
+	 <div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
+		<span class="h4">
+			Equivalences
+		</span>
+		<FrameworlEquivalence
+		coverages={data.coverages}
+		>
+		</FrameworlEquivalence>
+	 </div>
 </div>

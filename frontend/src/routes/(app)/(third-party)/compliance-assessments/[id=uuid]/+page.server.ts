@@ -38,6 +38,13 @@ export const load = (async ({ fetch, params }) => {
 		errors: false
 	});
 
+	const coverages = await fetch(`${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/mapping_stats`, {
+		credentials: 'include',
+		headers: {
+			'content-type': 'application/json'
+		}
+	}).then((res) => res.json());
+
 	const auditModel = getModelInfo('compliance-assessments');
 
 	const selectOptions: Record<string, any> = {};
@@ -74,6 +81,7 @@ export const load = (async ({ fetch, params }) => {
 		global_score,
 		threats,
 		form,
+		coverages,
 		title: compliance_assessment.name
 	};
 }) satisfies PageServerLoad;

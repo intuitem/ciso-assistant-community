@@ -23,6 +23,7 @@
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
+	import FrameworkEquivalence from '$lib/components/FrameworkEquivalence/FrameworlEquivalence.svelte'
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import type { Node } from './types';
 
@@ -84,6 +85,7 @@
 
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import FrameworlEquivalence from '$lib/components/FrameworkEquivalence/FrameworlEquivalence.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -661,6 +663,16 @@
 			{/if}
 		</div>
 	</div>
+	<!-- EQUIVALENCE WITH OTHER FRAMEWORKS -->
+	 <div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
+		<span class="h4">
+			Equivalences
+		</span>
+		<FrameworlEquivalence
+		coverages={data.coverages}
+		>
+		</FrameworlEquivalence>
+	 </div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
 		<div class="flex flex-row items-center font-semibold justify-between">
 			<div>
