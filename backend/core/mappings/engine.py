@@ -1,3 +1,4 @@
+from ctypes import sizeof
 from icecream import ic
 from core.models import (
     Framework,
@@ -75,7 +76,7 @@ class MappingEngine:
 
         for src, tgt in self.all_rms:
             # NOTE: Only allowing direct mappings for now
-            # self.framework_mappings[src].append(tgt)
+            self.framework_mappings[src].append(tgt)
             self.direct_mappings.add((src, tgt))
 
     def load_frameworks(self) -> None:
@@ -85,6 +86,7 @@ class MappingEngine:
                 for f in Framework.objects.all()
             ]
         )
+
 
     def all_paths_between(
         self, source_urn: str, dest_urn: str, max_depth: Optional[int] = None
@@ -119,6 +121,35 @@ class MappingEngine:
                 queue.append((path + [neighbor], visited | {neighbor}))
 
         return shortest_paths
+
+    def get_framework_neighbors(self, source_urn:str) -> list[str]:
+        # retruns the second element of the tuple in the direct mapping set if the first one is equal to source_urn
+        neighbors = []
+        for couple in self.direct_mappings:
+            if couple[0] == source_urn:
+                neighbors.append(couple[1])
+        return neighbors
+
+    def paths_and_coverages(self, source_urn:str) -> dict[str,(int,int)]:
+        # Base algo is the same as all_paths_from except than we also add the count of covered / partially-covered requirements
+        # the coverage variable is a dict with key = destination and value = (number of partial coverage, number of total coverage)
+        # as we are in direct mapping only for the moment, the "current" variable is always the destination
+        coverage = {}
+        for neighbor in self.get_framework_neighbors(source_urn):
+            index = (source_urn, neighbor)
+            rms = self.get_rms(index)
+            full_cov = 0
+            partial_cov = 0
+            for requirement in rms["requirement_mappings"]:
+                if requirement["relationship"] in ('subset', 'intersect'):
+                    partial_cov += 1
+                else:
+                    full_cov += 1
+            coverage[neighbor] = (partial_cov, full_cov)
+
+        return coverage
+
+
 
     def all_paths_from(self, source_urn, max_depth=None):
         """
