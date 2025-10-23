@@ -4963,6 +4963,15 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         return Response({"results": used_frameworks})
 
+    @action(detail=True, methods=["get"], name="Get framework coverage data from mappings")
+    def mapping_stats(self, request, pk):
+        from core.mappings.engine import engine
+        framework_urn = Framework.objects.filter(id=pk).values_list("urn")[0][0]
+        res = engine.paths_and_coverages(framework_urn)
+        return Response({"response": res})
+
+
+
     @action(detail=True, methods=["get"], name="Get target frameworks from mappings")
     def mappings(self, request, pk):
         framework = self.get_object()

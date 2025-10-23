@@ -145,8 +145,10 @@ class MappingEngine:
             for requirement in rms["requirement_mappings"]:
                 if requirement["relationship"] in ('subset', 'intersect'):
                     partial_cov += 1
-                else:
+                elif requirement["relationship"] in ('equal', 'superset'):
                     full_cov += 1
+                else:
+                    continue
             coverage[neighbor] = (partial_cov, full_cov)
 
         return coverage
