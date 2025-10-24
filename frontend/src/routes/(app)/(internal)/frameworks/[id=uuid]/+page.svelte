@@ -141,8 +141,8 @@
 		</h4>
 		<RecursiveTreeView nodes={treeViewNodes} hover="hover:bg-initial" />
 	</div>
-		<!-- EQUIVALENCE WITH OTHER FRAMEWORKS -->
-	 <!-- <div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
+	<!-- EQUIVALENCE WITH OTHER FRAMEWORKS -->
+	<!-- <div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
 		<span class="h4">
 			Equivalences
 		</span>

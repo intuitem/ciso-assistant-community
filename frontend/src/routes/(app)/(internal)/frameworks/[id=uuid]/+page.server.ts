@@ -16,7 +16,7 @@ export const load = (async ({ fetch, params }) => {
 	// 		'content-type': 'application/json'
 	// 	}
 	// }).then((res) => res.json());
-	// ADD COVERAGES TO RETURN 
+	// ADD COVERAGES TO RETURN
 
 	return { URLModel, framework, tree, title: framework.name };
 }) satisfies PageServerLoad;

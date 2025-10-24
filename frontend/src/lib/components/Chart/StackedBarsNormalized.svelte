@@ -21,14 +21,14 @@
 		names,
 		uuids,
 		title = '',
-		colors= ['#d7dfea', '#74C0DE', '#E66', '#91CC75', '#EAE2D7'],
+		colors = ['#d7dfea', '#74C0DE', '#E66', '#91CC75', '#EAE2D7'],
 		seriesNames = [
 			'not assessed',
 			'partially compliant',
 			'non compliant',
 			'compliant',
 			'not applicable'
-		],
+		]
 	}: Props = $props();
 
 	function truncateString(maxLength: number) {

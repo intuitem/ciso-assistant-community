@@ -44,9 +44,9 @@ export const load = (async ({ fetch, params }) => {
 
 	const frameworksMappings = await fetch(`/compliance-assessments/${params.id}/frameworks`).then(
 		(res) => res.json()
-	)
+	);
 
-	console.log("frameworksMappings", frameworksMappings)
+	console.log('frameworksMappings', frameworksMappings);
 
 	if (auditModel.selectFields) {
 		for (const selectField of auditModel.selectFields) {
