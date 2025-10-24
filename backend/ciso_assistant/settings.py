@@ -473,6 +473,9 @@ HEADLESS_FRONTEND_URLS = {
     "socialaccount_login_error": CISO_ASSISTANT_URL + "/login",
 }
 
+SESSION_COOKIE_AGE = AUTH_TOKEN_TTL  # Match Knox token lifetime (1 hour default)
+SESSION_SAVE_EVERY_REQUEST = True  # Refresh session expiration on each request
+
 SOCIALACCOUNT_PROVIDERS = {
     "saml": {
         "EMAIL_AUTHENTICATION": True,
