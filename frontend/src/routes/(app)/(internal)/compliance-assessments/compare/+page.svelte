@@ -136,25 +136,27 @@
 						</div>
 					{/if}
 
-					<div class="w-full grid grid-cols-2 gap-4 mt-4">
-						<div class="w-full">
+					<div class="w-full flex flex-col gap-4 mt-4">
+						<div class="w-full h-64">
 							<DonutChart
 								s_label="Result"
 								name="base_compliance_result"
 								title={m.compliance()}
 								orientation="horizontal"
+								height="h-full"
 								values={data.baseAudit.donut_data.result.values}
 								colors={data.baseAudit.donut_data.result.values.map(
 									(object) => object.itemStyle.color
 								)}
 							/>
 						</div>
-						<div class="w-full">
+						<div class="w-full h-64">
 							<DonutChart
 								s_label="Status"
 								name="base_compliance_status"
 								title={m.progress()}
 								orientation="horizontal"
+								height="h-full"
 								values={data.baseAudit.donut_data.status.values}
 								colors={data.baseAudit.donut_data.status.values.map(
 									(object) => object.itemStyle.color
@@ -185,25 +187,27 @@
 						</div>
 					{/if}
 
-					<div class="w-full grid grid-cols-2 gap-4 mt-4">
-						<div class="w-full">
+					<div class="w-full flex flex-col gap-4 mt-4">
+						<div class="w-full h-64">
 							<DonutChart
 								s_label="Result"
 								name="compare_compliance_result"
 								title={m.compliance()}
 								orientation="horizontal"
+								height="h-full"
 								values={data.compareAudit.donut_data.result.values}
 								colors={data.compareAudit.donut_data.result.values.map(
 									(object) => object.itemStyle.color
 								)}
 							/>
 						</div>
-						<div class="w-full">
+						<div class="w-full h-64">
 							<DonutChart
 								s_label="Status"
 								name="compare_compliance_status"
 								title={m.progress()}
 								orientation="horizontal"
+								height="h-full"
 								values={data.compareAudit.donut_data.status.values}
 								colors={data.compareAudit.donut_data.status.values.map(
 									(object) => object.itemStyle.color

@@ -760,6 +760,7 @@
 	"baseline": "Baseline",
 	"createAuditFromBaseline": "Apply a mapping",
 	"cloneAudit": "Clone audit",
+	"compareToAudit": "Compare to",
 	"coverageColon": "Coverage:",
 	"full": "Full",
 	"partial": "Partial",

@@ -416,7 +416,7 @@
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
 		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
 			{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
-				const fieldsToShow = ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'];
+				const fieldsToShow = ['ref_id', 'name', 'description', 'version', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'];
 				if (!fieldsToShow.includes(key)) return false;
 				// Hide selected_implementation_groups if framework doesn't support implementation groups
 				if (key === 'selected_implementation_groups' && (!data.compliance_assessment.framework.implementation_groups_definition || !Array.isArray(data.compliance_assessment.framework.implementation_groups_definition) || data.compliance_assessment.framework.implementation_groups_definition.length === 0)) return false;
@@ -636,7 +636,7 @@
 					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-red-500 h-fit"
 					onclick={() => modalCompareAudit()}
 					data-testid="compare-audit-button"
-					><i class="fa-solid fa-code-compare mr-2"></i> Compare to
+					><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
 				</button>
 			{/if}
 

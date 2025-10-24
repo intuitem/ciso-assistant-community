@@ -4,6 +4,7 @@
 	import { getModalStore, type ModalStore } from './stores';
 	import { superForm } from 'sveltekit-superforms';
 	import { z } from 'zod';
+	import { m } from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 
 	const modalStore: ModalStore = getModalStore();
@@ -54,7 +55,7 @@
 {#if $modalStore[0]}
 	<div class="modal-compare-audit {cBase}">
 		<div class="flex items-center justify-between">
-			<header class={cHeader}>Compare to</header>
+			<header class={cHeader}>{m.compareToAudit()}</header>
 			<div
 				role="button"
 				tabindex="0"
@@ -74,6 +75,7 @@
 				optionsLabelField="auto"
 				optionsInfoFields={{
 					fields: [
+						{ field: 'version', translate: true },
 						{ field: 'perimeter', path: 'str', translate: false },
 						{ field: 'status', translate: true }
 					],
