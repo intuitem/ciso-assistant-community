@@ -4963,14 +4963,15 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         return Response({"results": used_frameworks})
 
-    @action(detail=True, methods=["get"], name="Get framework coverage data from mappings")
+    @action(
+        detail=True, methods=["get"], name="Get framework coverage data from mappings"
+    )
     def mapping_stats(self, request, pk):
         from core.mappings.engine import engine
+
         framework_urn = Framework.objects.filter(id=pk).values_list("urn")[0][0]
         res = engine.paths_and_coverages(framework_urn)
         return Response({"response": res})
-
-
 
     @action(detail=True, methods=["get"], name="Get target frameworks from mappings")
     def mappings(self, request, pk):
@@ -5589,6 +5590,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def frameworks(self, request, pk):
         audit = ComplianceAssessment.objects.get(id=pk)
         from core.mappings.engine import engine
+
         audit_from_results = engine.load_audit_fields(audit)
         frameworks_in_mappings = set()
         data = []
@@ -5597,7 +5599,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             frameworks_in_mappings.add(tgt)
         for dest_urn in sorted(frameworks_in_mappings):
             best_results, _ = engine.best_mapping_inferrences(
-                audit_from_results, audit.framework.urn, dest_urn, max_depth=MAPPING_MAX_DETPH
+                audit_from_results,
+                audit.framework.urn,
+                dest_urn,
+                max_depth=MAPPING_MAX_DETPH,
             )
             if best_results:
                 framework = Framework.objects.filter(urn=dest_urn).first()
@@ -6089,6 +6094,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             "create_applied_controls_from_suggestions", False
         )
         from core.mappings.engine import engine
+
         with transaction.atomic():
             instance: ComplianceAssessment = serializer.save()
             instance.create_requirement_assessments(baseline)
@@ -6618,6 +6624,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         # create the new requirement mapping set and reload the engine.
         instance = serializer.save()
         from core.mappings.engine import engine
+
         engine.load_rms_data()
         return instance
 

@@ -34,7 +34,12 @@ class MappingEngine:
             "observation",
         ]
 
-        self.m2m_fields = ["applied_controls", "security_exceptions", "evidences", "mapping_inference"]
+        self.m2m_fields = [
+            "applied_controls",
+            "security_exceptions",
+            "evidences",
+            "mapping_inference",
+        ]
 
     # --- Compression helpers ---
     def _compress_rms(self, obj: dict) -> bytes:
@@ -75,7 +80,6 @@ class MappingEngine:
                         self.all_rms[index] = self._compress_rms(obj)
 
         for src, tgt in self.all_rms:
-            # NOTE: Only allowing direct mappings for now
             self.framework_mappings[src].append(tgt)
             self.direct_mappings.add((src, tgt))
 
@@ -86,7 +90,6 @@ class MappingEngine:
                 for f in Framework.objects.all()
             ]
         )
-
 
     def all_paths_between(
         self, source_urn: str, dest_urn: str, max_depth: Optional[int] = None
@@ -122,7 +125,7 @@ class MappingEngine:
 
         return shortest_paths
 
-    def get_framework_neighbors(self, source_urn:str) -> list[str]:
+    def get_framework_neighbors(self, source_urn: str) -> list[str]:
         # retruns the second element of the tuple in the direct mapping set if the first one is equal to source_urn
         neighbors = []
         for couple in self.direct_mappings:
@@ -130,7 +133,7 @@ class MappingEngine:
                 neighbors.append(couple[1])
         return neighbors
 
-    def paths_and_coverages(self, source_urn:str) -> dict[str,(int,int)]:
+    def paths_and_coverages(self, source_urn: str) -> dict[str, (int, int)]:
         # Base algo is the same as all_paths_from except than we also add the count of covered / partially-covered requirements
         # the coverage variable is a dict with key = destination and value = (number of partial coverage, number of total coverage)
         # as we are in direct mapping only for the moment, the "current" variable is always the destination
@@ -143,17 +146,15 @@ class MappingEngine:
             full_cov = 0
             partial_cov = 0
             for requirement in rms["requirement_mappings"]:
-                if requirement["relationship"] in ('subset', 'intersect'):
+                if requirement["relationship"] in ("subset", "intersect"):
                     partial_cov += 1
-                elif requirement["relationship"] in ('equal', 'superset'):
+                elif requirement["relationship"] in ("equal", "superset"):
                     full_cov += 1
                 else:
                     continue
             coverage[neighbor] = (partial_cov, full_cov)
 
         return coverage
-
-
 
     def all_paths_from(self, source_urn, max_depth=None):
         """
@@ -241,7 +242,9 @@ class MappingEngine:
                 and src in source_audit["requirement_assessments"]
             ):
                 result = source_audit["requirement_assessments"][src]["result"]
-                target_audit[dst]["applied_controls"] = source_audit["requirement_assessments"][src]["applied_controls"]
+                target_audit[dst]["applied_controls"] = source_audit[
+                    "requirement_assessments"
+                ][src]["applied_controls"]
                 if result in ("not_assessed", "non_compliant"):
                     target_audit[dst]["result"] = result
                 elif result in ("compliant", "partially_compliant"):
