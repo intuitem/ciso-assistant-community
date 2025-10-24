@@ -9,9 +9,13 @@
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
+	import { enhance } from '$app/forms';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { invalidateAll } from '$app/navigation';
+
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -37,6 +41,27 @@
 
 	let openAccordionItems = $state(['saml', 'idp', 'sp']);
 	let showSecretField = $state(!page.data?.ssoSettings.oidc_has_secret);
+	let showPrivateKeyField = $state(!page.data?.ssoSettings.saml_has_sp_private_key);
+
+	const handleGenerateKeys = ({ cancel }) => {
+		if (!data.is_enabled || !data.authn_request_signed) {
+			cancel();
+			return;
+		}
+
+		// NOTE: This is a kludge to avoid backend throwing if SSOSettings have not been saved yet.
+		if (!page.data?.ssoSettings?.settings?.idp?.entity_id) {
+			form.submit();
+			invalidateAll();
+		}
+
+		return async ({ result, update }) => {
+			if (result.type === 'success' && result.data?.generatedKeys?.cert) {
+				$formStore.sp_x509cert = result.data.generatedKeys.cert;
+			}
+			await update({ invalidateAll: false });
+		};
+	};
 </script>
 
 <Accordion
@@ -256,13 +281,6 @@
 					label={m.allowSingleLabelDomains()}
 					disabled={!data.is_enabled}
 				/>
-				<Checkbox
-					{form}
-					field="authn_request_signed"
-					hidden
-					label={m.authnRequestSigned()}
-					disabled={!data.is_enabled}
-				/>
 				<TextField
 					{form}
 					field="digest_algorithm"
@@ -355,6 +373,68 @@
 					label={m.wantNameIDEncrypted()}
 					disabled={!data.is_enabled}
 				/>
+				<Checkbox
+					{form}
+					field="authn_request_signed"
+					helpText={m.samlAuthnRequestSignedHelpText()}
+					label={m.authnRequestSigned()}
+					disabled={!data.is_enabled}
+				/>
+				<div class="w-full p-4 flex flex-col gap-4 border rounded-md mt-1">
+					<div class="flex flex-row gap-4 items-center">
+						<form method="post" action="?/generateSamlKeys" use:enhance={handleGenerateKeys}>
+							<button
+								type="submit"
+								disabled={!data.is_enabled || !data.authn_request_signed}
+								class="btn preset-filled-secondary-500">{m.generate()}</button
+							>
+						</form>
+						{#if data.is_enabled && data.authn_request_signed}
+							<Anchor
+								href="settings/saml/download-cert"
+								class="anchor text-secondary-500"
+								disabled={!data.is_enabled || !data.authn_request_signed}
+							>
+								{m.downloadCertificate()}
+							</Anchor>
+						{/if}
+					</div>
+					<div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+						<TextArea
+							{form}
+							field="sp_x509cert"
+							label={m.x509Cert()}
+							helpText={m.samlCertificateHelpText()}
+							disabled={!data.is_enabled || !data.authn_request_signed}
+							cacheLock={cacheLocks['sp_x509cert']}
+							bind:cachedValue={formDataCache['sp_x509cert']}
+						/>
+						{#if showPrivateKeyField}
+							<TextArea
+								{form}
+								field="sp_private_key"
+								label={m.privateKey()}
+								helpText={m.samlPrivateKeyHelpText()}
+								disabled={!data.is_enabled || !data.authn_request_signed}
+								cacheLock={cacheLocks['sp_private_key']}
+								bind:cachedValue={formDataCache['sp_private_key']}
+							/>
+						{:else}
+							<div
+								class="w-full p-4 flex flex-col text-center items-center justify-center preset-tonal-secondary gap-2"
+							>
+								<p>{m.spPrivateKeyAlreadySetHelpText()}</p>
+								<button
+									class="btn preset-filled"
+									onclick={() => {
+										showPrivateKeyField = true;
+										$formStore.sp_private_key = '';
+									}}>{m.resetSpPrivateKey()}</button
+								>
+							</div>
+						{/if}
+					</div>
+				</div>
 			{/snippet}
 		</Accordion.Item>
 	{/if}

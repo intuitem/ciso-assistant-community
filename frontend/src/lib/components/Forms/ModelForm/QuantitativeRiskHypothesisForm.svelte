@@ -7,11 +7,11 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import { onMount } from 'svelte';
 
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import { page } from '$app/state';
 
-	let displayCurrency = $state('€'); // Default to Euro
+	let displayCurrency = $derived(page.data?.settings?.currency ?? '€'); // Default to Euro
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -37,24 +37,6 @@
 
 	// Declare form store at top level
 	const formStore = form.form;
-
-	// Fetch currency from global settings
-	onMount(async () => {
-		try {
-			const response = await fetch('/global-settings');
-			if (response.ok) {
-				const globalSettings = await response.json();
-				const generalSetting = globalSettings.results?.find(
-					(setting: any) => setting.name === 'general'
-				);
-				if (generalSetting?.value?.currency) {
-					displayCurrency = generalSetting.value.currency;
-				}
-			}
-		} catch (error) {
-			console.warn('Could not fetch global settings for currency:', error);
-		}
-	});
 </script>
 
 <TextField
