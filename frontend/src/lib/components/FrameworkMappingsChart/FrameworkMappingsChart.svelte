@@ -11,13 +11,6 @@
 			f.results.compliant || 0,
 			f.results.not_applicable || 0
 		]),
-		data: frameworksMappings.map((f) => [
-			f.results.compliant || 0,
-			f.results.partially_compliant || 0,
-			f.results.non_compliant || 0,
-			f.results.not_applicable || 0,
-			f.results.not_assessed || 0
-		]),
 		uuids: frameworksMappings.map((f) => f.id)
 	};
 
