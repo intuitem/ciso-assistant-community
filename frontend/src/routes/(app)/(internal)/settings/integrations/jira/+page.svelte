@@ -1,0 +1,180 @@
+<script lang="ts">
+	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import { superForm } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import type { ActionData, PageData } from './$types';
+	import TextField from '$lib/components/Forms/TextField.svelte';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import { z } from 'zod';
+	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
+	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
+
+	interface Props {
+		data: PageData;
+		form: ActionData;
+		[key: string]: any;
+	}
+
+	let { data, form }: Props = $props();
+
+	const invalidateAll = true;
+	const formAction = '?/save';
+
+	const schema = z.object({
+		id: z.string(),
+		provider_id: z.string(),
+		folder_id: z.string(),
+		is_active: z.boolean().default(true),
+		credentials: z.object({
+			server_url: z.string().url(),
+			email: z.string().email(),
+			api_token: z.string().optional()
+		}),
+		settings: z.object({
+			project_key: z.string(),
+			issue_type: z.string().default('Task')
+		})
+	});
+
+	const _form = superForm(data.form, {
+		dataType: 'json',
+		invalidateAll,
+		applyAction: true,
+		resetForm: true,
+		validators: zod(schema),
+		taintedMessage: true,
+		validationMethod: 'auto'
+	});
+
+	const formStore = _form.form;
+
+	let showApiTokenField = $state(!data?.config?.has_api_token);
+	let showWebhookSecretField = $state(!data?.config?.has_webhook_secret);
+	let testConnectionState: { loading: boolean; success?: boolean } = $state({
+		loading: false,
+		success: undefined
+	});
+</script>
+
+{#key form}
+	<div class="flex flex-col">
+		<SuperForm
+			class="flex flex-col space-y-3"
+			action={formAction}
+			dataType={'json'}
+			enctype={'application/x-www-form-urlencoded'}
+			data={data.form}
+			{_form}
+			{invalidateAll}
+			validators={zod(schema)}
+		>
+			{#snippet children({ form })}
+				<Checkbox {form} field="is_active" label={m.active()} />
+				<TextField
+					{form}
+					field="server_url"
+					valuePath="credentials.server_url"
+					label={m.serverUrl()}
+					helpText={m.jiraServerUrlHelpText()}
+				/>
+				<TextField
+					{form}
+					field="email"
+					valuePath="credentials.email"
+					autocomplete="new-password"
+					label={m.email()}
+					helpText={m.jiraEmailHelpText()}
+				/>
+				{#if showApiTokenField}
+					<TextField
+						{form}
+						field="api_token"
+						type="password"
+						valuePath="credentials.api_token"
+						autocomplete="new-password"
+						label={m.apiToken()}
+					/>
+				{:else}
+					<div class="w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary">
+						<p>{m.apiTokenAlreadySetHelpText()}</p>
+						<button
+							class="btn preset-filled"
+							onclick={() => {
+								showApiTokenField = true;
+								$formStore.api_token = '';
+							}}>{m.resetApiToken()}</button
+						>
+					</div>
+				{/if}
+				<span class="flex flex-row justify-between gap-4">
+					<button
+						type="button"
+						class="btn preset-filled-secondary-500"
+						onclick={async () => {
+							testConnectionState = { loading: true, success: false };
+							const response = await fetch('/settings/integrations/test-connection', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({
+									credentials: {
+										server_url: $formStore.credentials.server_url,
+										email: $formStore.credentials.email,
+										api_token: $formStore.credentials.api_token
+									},
+									provider_id: page.data.config.provider_id,
+									configuration_id: page.data.config.id
+								})
+							});
+							testConnectionState = { loading: false, success: response.ok };
+						}}>{m.testConnection()}</button
+					>
+					<div class="flex items-center">
+						{#if testConnectionState.loading}
+							<LoadingSpinner />
+						{:else if testConnectionState.success === true}
+							<span class="text-success-700 font-semibold">{m.connectionSuccessful()}</span>
+						{:else if testConnectionState.success === false}
+							<span class="text-error-500 font-semibold">{m.connectionFailed()}</span>
+						{/if}
+					</div>
+				</span>
+				<TextField
+					{form}
+					field="project_key"
+					valuePath="settings.project_key"
+					label={m.projectKey()}
+					helpText={m.jiraProjectKeyHelpText()}
+				/>
+				<TextField
+					{form}
+					field="issue_type"
+					valuePath="settings.issue_type"
+					label={m.issueType()}
+				/>
+				{#if showWebhookSecretField}
+					<TextField {form} field="webhook_secret" type="password" label={m.webhookSecret()} />
+				{:else}
+					<div
+						class="text-center w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary"
+					>
+						<p>{m.webhookSecretAlreadySetHelpText()}</p>
+						<button
+							class="btn preset-filled"
+							onclick={() => {
+								showWebhookSecretField = true;
+								$formStore.webhook_secret = '';
+							}}>{m.resetWebhookSecret()}</button
+						>
+					</div>
+				{/if}
+				<button
+					class="text-center btn preset-filled-primary-500 font-semibold w-full"
+					data-testid="save-button">{m.save()}</button
+				>
+			{/snippet}
+		</SuperForm>
+	</div>
+{/key}
