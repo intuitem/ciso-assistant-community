@@ -152,7 +152,7 @@ SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
-MAPPING_MAX_DETPH = 5
+MAPPING_MAX_DETPH = 2
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
@@ -5597,7 +5597,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             frameworks_in_mappings.add(tgt)
         for dest_urn in sorted(frameworks_in_mappings):
             best_results, _ = engine.best_mapping_inferrences(
-                audit_from_results, audit.framework.urn, dest_urn
+                audit_from_results, audit.framework.urn, dest_urn, max_depth=MAPPING_MAX_DETPH
             )
             if best_results:
                 framework = Framework.objects.filter(urn=dest_urn).first()
