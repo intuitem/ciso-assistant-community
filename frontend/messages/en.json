@@ -2509,5 +2509,7 @@
 	"viewThreat": "View threat",
 	"viewTimelineEntry": "View timeline entry",
 	"viewVulnerability": "View vulnerability",
-	"dataFlowOverview": "Data flow overview"
+	"dataFlowOverview": "Data flow overview",
+	"overlapWithOtherFrameworks": "Overlap with other frameworks",
+	"showOverlapWithOtherFrameworks": "Show overlap with other frameworks"
 }

@@ -701,7 +701,7 @@
 		<div class="m-5 bg-gray-100 rounded-md hover:shadow-md transition-all">
 			<Dropdown
 				open={false}
-				header="Show equivalences with other frameworks"
+				header={m.showOverlapWithOtherFrameworks()}
 				class="bg-gray-100 hover:bg-gray-200 shadow-sm hover:shadow-md transition-all"
 			>
 				<div class="h-80">
