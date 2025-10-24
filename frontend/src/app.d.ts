@@ -12,6 +12,7 @@ declare global {
 			user: User;
 			featureFlags: FeatureFlags;
 			globalSettings: GlobalSettings;
+			generalSettings: Record<string, any>;
 		}
 		interface PageData {
 			flash?: { type: 'success' | 'error' | 'warning' | 'info'; message: string };
