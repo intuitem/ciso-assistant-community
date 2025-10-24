@@ -84,6 +84,9 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
     # A generated, read-only field to show the full webhook URL
     webhook_url_full = serializers.SerializerMethodField()
 
+    has_api_token = serializers.SerializerMethodField()
+    has_webhook_secret = serializers.SerializerMethodField()
+
     class Meta:
         model = IntegrationConfiguration
         fields = [
@@ -96,7 +99,9 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
             "settings",
             "is_active",
             "last_sync_at",
-            "webhook_url_full",  # Our generated field
+            "webhook_url_full",
+            "has_api_token",
+            "has_webhook_secret",
         ]
         read_only_fields = ["id", "last_sync_at", "webhook_url_full"]
 
@@ -113,6 +118,12 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
         path = reverse("integrations:webhook-receiver", kwargs={"config_id": obj.id})
 
         return request.build_absolute_uri(path)
+
+    def get_has_api_token(self, obj: IntegrationConfiguration) -> bool:
+        return bool(obj.credentials and obj.credentials.get("api_token"))
+
+    def get_has_webhook_secret(self, obj: IntegrationConfiguration) -> bool:
+        return bool(obj.webhook_secret)
 
     def to_representation(self, instance):
         """

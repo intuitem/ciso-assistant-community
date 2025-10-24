@@ -22,9 +22,9 @@ logger = get_logger(__name__)
 JIRA_CONFIG_SCHEMA = {
     "required": ["credentials", "settings"],
     "credentials": {
-        "required": ["server", "email", "api_token"],
+        "required": ["server_url", "email", "api_token"],
         "properties": {
-            "server": {"type": "string", "description": "Jira server URL"},
+            "server_url": {"type": "string", "description": "Jira server URL"},
             "email": {"type": "string", "description": "Jira user email"},
             "api_token": {"type": "string", "description": "Jira API token"},
         },

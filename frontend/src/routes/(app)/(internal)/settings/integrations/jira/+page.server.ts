@@ -2,17 +2,18 @@ import { z } from 'zod';
 import { superValidate } from 'sveltekit-superforms/server';
 import type { Actions, PageServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
-import { redirect } from '@sveltejs/kit';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { m } from '$paraglide/messages';
 
 const schema = z.object({
+	id: z.string(),
 	provider_id: z.string(),
 	folder_id: z.string(),
 	is_active: z.boolean().default(true),
 	credentials: z.object({
 		server_url: z.string().url(),
 		email: z.string().email(),
-		api_token: z.string()
+		api_token: z.string().optional()
 	}),
 	settings: z.object({
 		project_key: z.string(),
@@ -27,7 +28,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		config = await response.json().then((res) => res.results[0]);
 	}
 	const form = await superValidate(config, zod(schema));
-	return { form, config, schema: JSON.stringify(schema) };
+	return { form, config, schema: JSON.stringify(schema), title: m.jiraIntegrationConfig() };
 };
 
 export const actions: Actions = {

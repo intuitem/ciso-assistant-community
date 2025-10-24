@@ -2518,5 +2518,12 @@
 	"webhookSecret": "Webhook Secret",
 	"jiraServerUrlHelpText": "The URL of your Jira server (e.g., https://example.atlassian.net/).",
 	"jiraEmailHelpText": "The email address associated with your Jira service account.",
-	"jiraProjectKeyHelpText": "The key of the Jira project where issues will be created (e.g., 'SEC')."
+	"jiraProjectKeyHelpText": "The key of the Jira project where issues will be created (e.g., 'SEC').",
+	"jiraIntegrationConfig": "Jira Integration Configuration",
+	"apiTokenAlreadySetHelpText": "The API Token is already set.",
+	"webhookSecretAlreadySetHelpText": "The Webhook Secret is already set.",
+	"resetApiToken": "Reset API Token",
+	"resetWebhookSecret": "Reset Webhook Secret",
+	"jira": "Jira",
+	"itsm": "ITSM"
 }

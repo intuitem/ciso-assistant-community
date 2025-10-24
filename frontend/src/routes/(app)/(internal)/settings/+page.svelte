@@ -4,7 +4,7 @@
 	import { m } from '$paraglide/messages';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
-	let group = $state('instance');
+	let group = $state('integrations');
 
 	let { data } = $props();
 </script>
@@ -66,7 +66,36 @@
 		<Tabs.Panel value="integrations">
 			<div>
 				<span class="text-gray-500">{m.configureIntegrations()}</span>
-			</div>
-		</Tabs.Panel>
+				<div class="flow-root">
+					<dl class="divide-y divide-surface-100 text-sm">
+						<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+							<dt class="font-medium">{m.itsm()}</dt>
+							<dd class="text-surface-900 sm:col-span-2">
+								<div class="card p-4 bg-inherit flex flex-col space-y-3">
+									<a class="unstyled" href="/settings/integrations/jira">
+										<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
+											<span class="flex flex-row justify-between text-xl">
+												<i class="text-blue-700 fab fa-jira"></i>
+												<i class="fa-solid fa-circle-check text-success-600-400"></i>
+											</span>
+											<span class="flex flex-row space-x-2">
+												<h6 class="h6 base-font-color">{m.jira()}</h6>
+											</span>
+											<!-- <p class="text-sm text-surface-800 max-w-[50ch]"> -->
+											<!-- 	{m.authenticatorAppDescription()} -->
+											<!-- </p> -->
+										</div>
+									</a>
+									<!-- <div class="flex flex-wrap justify-between gap-2"> -->
+									<!-- 	<button class="btn preset-outlined-surface-500 w-fit">{m.disableTOTP()}</button> -->
+									<!-- </div> -->
+								</div>
+								<hr />
+							</dd>
+						</div>
+					</dl>
+				</div>
+			</div></Tabs.Panel
+		>
 	{/snippet}
 </Tabs>
