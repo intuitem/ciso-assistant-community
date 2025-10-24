@@ -213,7 +213,7 @@ The `_content` tab for a `framework` object contains the following columns:
 - reference_controls: blank/comma/LF separated list of references to `reference` controls
 - typical_evidence
 - annotation
-- importance: one among `mandatory`/`recommended`/`nice to have` or empty cell (= undefined). Default value is `undefined`.
+- importance: one among `mandatory`/`recommended`/`nice_to_have` or empty cell (= undefined). Default value is `undefined`.
 - weight: Positive integer `>= 1`. Used for score weighting. The default weight (if undefined) is `1`.
 - questions: 1 or several (n) questions, separated by line breaks
 - answer: 1 (same for all questions) or n (one answer per question) answers, separated by line breaks
