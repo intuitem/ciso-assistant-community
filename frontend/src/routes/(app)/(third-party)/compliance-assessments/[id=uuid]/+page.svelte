@@ -258,6 +258,25 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	function modalCreateCloneForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.auditCloneForm,
+				context: 'clone',
+				model: data.auditModel,
+				debug: false
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.cloneAudit()
+		};
+		modalStore.trigger(modal);
+	}
 	let syncingToActionsIsLoading = $state(false);
 	async function modalConfirmSyncToActions(
 		id: string,
@@ -603,6 +622,12 @@
 						onclick={() => modalCreateForm()}
 						data-testid="apply-mapping-button"
 						><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
+					</button>
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-pink-500 h-fit"
+						onclick={() => modalCreateCloneForm()}
+						data-testid="clone-audit-button"
+						><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
 					</button>
 				{/if}
 

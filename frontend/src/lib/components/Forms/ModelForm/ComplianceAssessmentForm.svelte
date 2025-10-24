@@ -54,7 +54,7 @@
 	}
 </script>
 
-{#if context === 'fromBaseline' && initialData.baseline}
+{#if (context === 'fromBaseline' || context === 'clone') && initialData.baseline}
 	<AutocompleteSelect
 		{form}
 		field="baseline"
@@ -62,7 +62,7 @@
 		bind:cachedValue={formDataCache['baseline']}
 		label={m.baseline()}
 		optionsEndpoint="compliance-assessments"
-		disabled="true"
+		hidden
 	/>
 {/if}
 {#if initialData.ebios_rm_studies}
@@ -84,7 +84,7 @@
 	cacheLock={cacheLocks['perimeter']}
 	bind:cachedValue={formDataCache['perimeter']}
 	label={m.perimeter()}
-	hidden={initialData.perimeter}
+	hidden={initialData.perimeter && context !== 'clone'}
 />
 {#if context === 'fromBaseline' && initialData.baseline}
 	<AutocompleteSelect
@@ -111,13 +111,15 @@
 {:else}
 	<AutocompleteSelect
 		{form}
-		disabled={object.id}
+		disabled={object.id || context === 'clone'}
 		optionsEndpoint="frameworks"
-		optionsDetailedUrlParameters={[['baseline', initialData.baseline]]}
+		optionsDetailedUrlParameters={context === 'fromBaseline'
+			? [['baseline', initialData.baseline]]
+			: []}
 		field="framework"
 		cacheLock={cacheLocks['framework']}
 		bind:cachedValue={formDataCache['framework']}
-		label={m.targetFramework()}
+		label={context === 'clone' ? m.framework() : m.targetFramework()}
 		onChange={async (e) => handleFrameworkChange(e)}
 		mount={async (e) => handleFrameworkChange(e)}
 	/>
@@ -143,6 +145,14 @@
 	cacheLock={cacheLocks['authors']}
 	bind:cachedValue={formDataCache['authors']}
 	label={m.authors()}
+/>
+<TextField
+	{form}
+	field="version"
+	label={m.version()}
+	helpText={m.versionHelpText()}
+	cacheLock={cacheLocks['version']}
+	bind:cachedValue={formDataCache['version']}
 />
 <TextField
 	type="date"
@@ -204,13 +214,6 @@
 		optionsExtraFields={[['folder', 'str']]}
 		field="evidences"
 		label={m.evidences()}
-	/>
-	<TextField
-		{form}
-		field="version"
-		label={m.version()}
-		cacheLock={cacheLocks['version']}
-		bind:cachedValue={formDataCache['version']}
 	/>
 	<Select
 		{form}

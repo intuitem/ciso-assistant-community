@@ -764,7 +764,7 @@ def create_library(
                     score_entry = {
                         "score": int(data.get("score")),
                         "name": str(data.get("name", "")).strip(),
-                        "description": str(data.get("description", "")).strip(),
+                        "description": (str(data.get("description", "")).strip() if data.get("description", "") is not None else None),
                     }
                     if "description_doc" in data and data["description_doc"]:
                         score_entry["description_doc"] = str(

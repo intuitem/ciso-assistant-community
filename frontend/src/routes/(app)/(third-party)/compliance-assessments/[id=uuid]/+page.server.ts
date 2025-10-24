@@ -38,6 +38,15 @@ export const load = (async ({ fetch, params }) => {
 		errors: false
 	});
 
+	const cloneInitialData = {
+		baseline: compliance_assessment.id,
+		framework: compliance_assessment.framework.id,
+		perimeter: compliance_assessment.perimeter?.id
+	};
+	const auditCloneForm = await superValidate(cloneInitialData, zod(ComplianceAssessmentSchema), {
+		errors: false
+	});
+
 	const auditModel = getModelInfo('compliance-assessments');
 
 	const selectOptions: Record<string, any> = {};
@@ -73,6 +82,7 @@ export const load = (async ({ fetch, params }) => {
 		URLModel,
 		compliance_assessment,
 		auditCreateForm,
+		auditCloneForm,
 		auditModel,
 		object,
 		tree,
