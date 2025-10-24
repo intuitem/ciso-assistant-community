@@ -23,7 +23,6 @@
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import FrameworkEquivalence from '$lib/components/FrameworkEquivalence/FrameworlEquivalence.svelte';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import type { Node } from './types';
 
@@ -86,7 +85,6 @@
 
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import FrameworlEquivalence from '$lib/components/FrameworkEquivalence/FrameworlEquivalence.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
