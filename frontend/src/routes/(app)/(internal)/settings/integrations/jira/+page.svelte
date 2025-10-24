@@ -7,6 +7,8 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { z } from 'zod';
 	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
+	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 
 	interface Props {
 		data: PageData;
@@ -49,6 +51,10 @@
 
 	let showApiTokenField = $state(!data?.config?.has_api_token);
 	let showWebhookSecretField = $state(!data?.config?.has_webhook_secret);
+	let testConnectionState: { loading: boolean; success?: boolean } = $state({
+		loading: false,
+		success: undefined
+	});
 </script>
 
 {#key form}
@@ -63,7 +69,7 @@
 			{invalidateAll}
 			validators={zod(schema)}
 		>
-			{#snippet children({ form, data, initialData })}
+			{#snippet children({ form })}
 				<Checkbox {form} field="is_active" label={m.active()} />
 				<TextField
 					{form}
@@ -101,6 +107,40 @@
 						>
 					</div>
 				{/if}
+				<span class="flex flex-row justify-between gap-4">
+					<button
+						type="button"
+						class="btn preset-filled-secondary-500"
+						onclick={async () => {
+							testConnectionState = { loading: true, success: false };
+							const response = await fetch('/settings/integrations/test-connection', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({
+									credentials: {
+										server_url: $formStore.credentials.server_url,
+										email: $formStore.credentials.email,
+										api_token: $formStore.credentials.api_token
+									},
+									provider_id: page.data.config.provider_id,
+									configuration_id: page.data.config.id
+								})
+							});
+							testConnectionState = { loading: false, success: response.ok };
+						}}>{m.testConnection()}</button
+					>
+					<div class="flex items-center">
+						{#if testConnectionState.loading}
+							<LoadingSpinner />
+						{:else if testConnectionState.success === true}
+							<span class="text-success-700 font-semibold">{m.connectionSuccessful()}</span>
+						{:else if testConnectionState.success === false}
+							<span class="text-error-500 font-semibold">{m.connectionFailed()}</span>
+						{/if}
+					</div>
+				</span>
 				<TextField
 					{form}
 					field="project_key"

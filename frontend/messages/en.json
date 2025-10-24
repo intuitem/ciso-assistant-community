@@ -2525,5 +2525,8 @@
 	"resetApiToken": "Reset API Token",
 	"resetWebhookSecret": "Reset Webhook Secret",
 	"jira": "Jira",
-	"itsm": "ITSM"
+	"itsm": "ITSM",
+	"testConnection": "Test Connection",
+	"connectionSuccessful": "Connection Successful",
+	"connectionFailed": "Connection Failed"
 }
