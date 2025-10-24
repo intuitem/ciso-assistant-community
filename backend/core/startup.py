@@ -929,6 +929,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_role",
     "delete_role",
     "view_permission",
+    # integrations
+    "add_integrationconfiguration",
+    "view_integrationconfiguration",
+    "change_integrationconfiguration",
+    "delete_integrationconfiguration",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
