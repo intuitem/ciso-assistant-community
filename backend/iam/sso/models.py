@@ -121,4 +121,6 @@ class SSOSettings(GlobalSettings):
 
     def get_provider(self, request):
         provider_class = providers.registry.get_class(self.provider)
+        if provider_class is None:
+            raise ValueError(f"Provider '{self.provider}' is not registered.")
         return provider_class(request=request, app=self)
