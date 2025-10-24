@@ -145,6 +145,9 @@ class TestRequirementAssessmentsAuthenticated:
                     "associated_threats": RequirementNode.objects.all()[
                         0
                     ].associated_threats,
+                    "implementation_groups": RequirementNode.objects.all()[
+                        0
+                    ].implementation_groups,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"
@@ -279,6 +282,9 @@ class TestRequirementAssessmentsAuthenticated:
                     "associated_threats": RequirementNode.objects.all()[
                         0
                     ].associated_threats,
+                    "implementation_groups": RequirementNode.objects.all()[
+                        0
+                    ].implementation_groups,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"

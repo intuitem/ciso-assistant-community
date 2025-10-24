@@ -1750,6 +1750,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "associated_threats",
                 "parent_requirement",
                 "questions",
+                "implementation_groups",
             ]
 
     name = serializers.CharField(source="__str__")
@@ -1764,6 +1765,9 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     requirement = FilteredNodeSerializer()
     security_exceptions = FieldsRelatedField(many=True)
     is_locked = serializers.BooleanField()
+    implementation_groups = serializers.ReadOnlyField(
+        source="get_selected_implementation_groups"
+    )
 
     class Meta:
         model = RequirementAssessment
