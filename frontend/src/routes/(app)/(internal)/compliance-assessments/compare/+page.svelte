@@ -9,6 +9,8 @@
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor } from '$lib/utils/helpers';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import ComparisonRadarChart from '$lib/components/Chart/ComparisonRadarChart.svelte';
 
 	interface Props {
 		data: PageData;
@@ -22,7 +24,8 @@
 		{ key: 'perimeter', label: 'Perimeter' },
 		{ key: 'status', label: 'Status' },
 		{ key: 'created_at', label: 'Created At', format: 'date' },
-		{ key: 'framework', label: 'Framework' }
+		{ key: 'updated_at', label: 'Last Update', format: 'date' },
+		{ key: 'observation', label: 'Observation', format: 'markdown' }
 	];
 
 	function getFieldValue(audit: any, field: any) {
@@ -43,16 +46,22 @@
 <div class="flex flex-col space-y-4">
 	<div class="card p-4 bg-white shadow-lg">
 		<div class="flex items-center justify-between mb-4">
-			<h1 class="h2 font-bold">
-				<i class="fa-solid fa-code-compare mr-2"></i>
-				Compliance Assessment Comparison
-			</h1>
+			<div class="flex flex-col">
+				<h1 class="h2 font-bold">
+					<i class="fa-solid fa-code-compare mr-2"></i>
+					{m.complianceAssessmentComparison()}
+				</h1>
+				<div class="text-sm text-gray-600 mt-1">
+					<span class="font-medium">{m.framework()}:</span>
+					{data.framework.str}
+				</div>
+			</div>
 			<Anchor
 				href="/compliance-assessments/{data.baseAudit.id}"
 				class="btn preset-filled-surface-500"
 			>
 				<i class="fa-solid fa-arrow-left mr-2"></i>
-				Back to Base Audit
+				{m.backToBaseAudit()}
 			</Anchor>
 		</div>
 	</div>
@@ -62,22 +71,32 @@
 			<!-- Left side: Base Audit -->
 			<div class="p-6 space-y-4">
 				<div class="flex items-center justify-between mb-4">
-					<h2 class="h3 font-bold text-primary-500">Base Audit</h2>
+					<h2 class="h3 font-bold text-primary-500">{m.baseAudit()}</h2>
 					<Anchor
 						href="/compliance-assessments/{data.baseAudit.id}"
 						class="btn btn-sm preset-filled-primary-500"
 					>
 						<i class="fa-solid fa-external-link-alt mr-2"></i>
-						View
+						{m.view()}
 					</Anchor>
 				</div>
 
 				{#each fieldsToCompare as field}
 					<div class="flex flex-col">
 						<div class="text-sm font-medium text-gray-600">{safeTranslate(field.key)}</div>
-						<div class="text-base font-semibold text-gray-900">
-							{getFieldValue(data.baseAudit, field)}
-						</div>
+						{#if field.format === 'markdown'}
+							<div class="text-base text-gray-900">
+								{#if data.baseAudit[field.key]}
+									<MarkdownRenderer content={data.baseAudit[field.key]} />
+								{:else}
+									--
+								{/if}
+							</div>
+						{:else}
+							<div class="text-base font-semibold text-gray-900">
+								{getFieldValue(data.baseAudit, field)}
+							</div>
+						{/if}
 					</div>
 				{/each}
 			</div>
@@ -85,22 +104,32 @@
 			<!-- Right side: Comparison Audit -->
 			<div class="p-6 space-y-4">
 				<div class="flex items-center justify-between mb-4">
-					<h2 class="h3 font-bold text-secondary-500">Comparison Audit</h2>
+					<h2 class="h3 font-bold text-secondary-500">{m.comparisonAudit()}</h2>
 					<Anchor
 						href="/compliance-assessments/{data.compareAudit.id}"
 						class="btn btn-sm preset-filled-secondary-500"
 					>
 						<i class="fa-solid fa-external-link-alt mr-2"></i>
-						View
+						{m.view()}
 					</Anchor>
 				</div>
 
 				{#each fieldsToCompare as field}
 					<div class="flex flex-col">
 						<div class="text-sm font-medium text-gray-600">{safeTranslate(field.key)}</div>
-						<div class="text-base font-semibold text-gray-900">
-							{getFieldValue(data.compareAudit, field)}
-						</div>
+						{#if field.format === 'markdown'}
+							<div class="text-base text-gray-900">
+								{#if data.compareAudit[field.key]}
+									<MarkdownRenderer content={data.compareAudit[field.key]} />
+								{:else}
+									--
+								{/if}
+							</div>
+						{:else}
+							<div class="text-base font-semibold text-gray-900">
+								{getFieldValue(data.compareAudit, field)}
+							</div>
+						{/if}
 					</div>
 				{/each}
 			</div>
@@ -112,7 +141,7 @@
 		<div class="px-6 py-4 border-b border-gray-200">
 			<h2 class="h3 font-bold">
 				<i class="fa-solid fa-chart-line mr-2"></i>
-				Scores & Metrics
+				{m.scoresAndMetrics()}
 			</h2>
 		</div>
 		<div class="grid grid-cols-2 divide-x divide-gray-200">
@@ -139,7 +168,7 @@
 					<div class="w-full flex flex-col gap-4 mt-4">
 						<div class="w-full h-64">
 							<DonutChart
-								s_label="Result"
+								s_label={m.result()}
 								name="base_compliance_result"
 								title={m.compliance()}
 								orientation="horizontal"
@@ -152,7 +181,7 @@
 						</div>
 						<div class="w-full h-64">
 							<DonutChart
-								s_label="Status"
+								s_label={m.status()}
 								name="base_compliance_status"
 								title={m.progress()}
 								orientation="horizontal"
@@ -190,7 +219,7 @@
 					<div class="w-full flex flex-col gap-4 mt-4">
 						<div class="w-full h-64">
 							<DonutChart
-								s_label="Result"
+								s_label={m.result()}
 								name="compare_compliance_result"
 								title={m.compliance()}
 								orientation="horizontal"
@@ -203,7 +232,7 @@
 						</div>
 						<div class="w-full h-64">
 							<DonutChart
-								s_label="Status"
+								s_label={m.status()}
 								name="compare_compliance_status"
 								title={m.progress()}
 								orientation="horizontal"
@@ -220,13 +249,52 @@
 		</div>
 	</div>
 
+	<!-- Radar Charts Comparison -->
+	<div class="card bg-white shadow-lg">
+		<div class="px-6 py-4 border-b border-gray-200">
+			<h2 class="h3 font-bold">
+				<i class="fa-solid fa-chart-radar mr-2"></i>
+				{m.radarComparisonByTopLevel()}
+			</h2>
+		</div>
+		<div class="grid grid-cols-2 gap-6 p-6">
+			<!-- Compliance Radar -->
+			<div class="h-96">
+				<ComparisonRadarChart
+					name="compliance_radar"
+					title={m.compliance()}
+					labels={data.baseAudit.radar_data.labels}
+					baseData={data.baseAudit.radar_data.compliance_percentages}
+					compareData={data.compareAudit.radar_data.compliance_percentages}
+					baseName={data.baseAudit.name}
+					compareName={data.compareAudit.name}
+					height="h-full"
+				/>
+			</div>
+
+			<!-- Maturity Radar -->
+			<div class="h-96">
+				<ComparisonRadarChart
+					name="maturity_radar"
+					title={m.maturity()}
+					labels={data.baseAudit.radar_data.labels}
+					baseData={data.baseAudit.radar_data.maturity_scores}
+					compareData={data.compareAudit.radar_data.maturity_scores}
+					baseName={data.baseAudit.name}
+					compareName={data.compareAudit.name}
+					height="h-full"
+				/>
+			</div>
+		</div>
+	</div>
+
 	<div class="card p-6 bg-white shadow-lg">
 		<div class="flex items-center justify-center text-gray-500 py-8">
 			<div class="text-center space-y-2">
 				<i class="fa-solid fa-tools text-4xl"></i>
-				<p class="text-lg font-medium">More comparison features coming soon</p>
+				<p class="text-lg font-medium">{m.moreComparisonFeaturesComingSoon()}</p>
 				<p class="text-sm">
-					Future updates will include detailed requirement-by-requirement comparisons and more.
+					{m.futureComparisonFeatures()}
 				</p>
 			</div>
 		</div>

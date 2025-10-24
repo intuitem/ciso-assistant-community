@@ -6420,8 +6420,120 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Helper function to aggregate data by top-level requirements
+        def aggregate_by_top_level(audit):
+            from core.helpers import get_referential_translation
+
+            requirement_nodes = list(
+                RequirementNode.objects.filter(framework=audit.framework).all()
+            )
+            requirement_assessments = list(
+                audit.requirement_assessments.select_related("requirement").all()
+            )
+
+            # Build mapping of requirement_id to assessment
+            req_assessment_map = {
+                str(ra.requirement_id): ra for ra in requirement_assessments
+            }
+
+            # Build children dictionary for quick lookup
+            children_dict = {}
+            for rn in requirement_nodes:
+                parent = rn.parent_urn or "root"
+                if parent not in children_dict:
+                    children_dict[parent] = []
+                children_dict[parent].append(rn)
+
+            # Get top-level nodes (no parent)
+            top_level_nodes = children_dict.get("root", [])
+
+            # Sort by order_id if available
+            for node in top_level_nodes:
+                if node.order_id is None:
+                    node.order_id = node.created_at.timestamp()
+            top_level_nodes.sort(key=lambda x: x.order_id)
+
+            radar_data = {
+                "labels": [],
+                "compliance_percentages": [],
+                "maturity_scores": [],
+            }
+
+            # Collect all assessable descendants recursively
+            def collect_assessable_descendants(node_urn):
+                assessable = []
+                node_children = children_dict.get(node_urn, [])
+
+                for child in node_children:
+                    # If this child is assessable, add its assessment
+                    if child.assessable:
+                        ra = req_assessment_map.get(str(child.id))
+                        if ra:
+                            assessable.append(ra)
+
+                    # Recursively collect from this child's descendants
+                    assessable.extend(collect_assessable_descendants(child.urn))
+
+                return assessable
+
+            for node in top_level_nodes:
+                # Try multiple ways to get a meaningful name
+                node_name = (
+                    get_referential_translation(node, "name")
+                    or node.name
+                    or node.ref_id
+                    or f"Node {node.id}"
+                )
+                radar_data["labels"].append(node_name)
+
+                # Check if the node itself is assessable
+                assessable_list = []
+                if node.assessable:
+                    ra = req_assessment_map.get(str(node.id))
+                    if ra:
+                        assessable_list.append(ra)
+
+                # Add all assessable descendants
+                assessable_list.extend(collect_assessable_descendants(node.urn))
+
+                # Calculate compliance percentage (compliant assessments)
+                if assessable_list:
+                    compliant = sum(
+                        1
+                        for ra in assessable_list
+                        if ra.result
+                        and ra.result not in ["non_compliant", "not_applicable"]
+                    )
+                    compliance_percentage = (compliant / len(assessable_list)) * 100
+                else:
+                    compliance_percentage = 0
+
+                # Calculate maturity score percentage
+                scored_list = [
+                    ra
+                    for ra in assessable_list
+                    if ra.is_scored and ra.result != "not_applicable"
+                ]
+                if scored_list and audit.max_score:
+                    total_score = sum(ra.score or 0 for ra in scored_list)
+                    max_possible = len(scored_list) * audit.max_score
+                    maturity_percentage = (total_score / max_possible) * 100
+                else:
+                    maturity_percentage = 0
+
+                radar_data["compliance_percentages"].append(
+                    round(compliance_percentage, 1)
+                )
+                radar_data["maturity_scores"].append(round(maturity_percentage, 1))
+
+            return radar_data
+
         # Build comparison data
         comparison_data = {
+            "framework": {
+                "id": str(base_audit.framework.id),
+                "str": base_audit.framework.name,
+            },
             "base": {
                 "id": str(base_audit.id),
                 "name": base_audit.name,
@@ -6433,14 +6545,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 }
                 if base_audit.perimeter
                 else None,
-                "framework": {
-                    "id": str(base_audit.framework.id),
-                    "str": base_audit.framework.name,
-                },
                 "created_at": base_audit.created_at,
+                "updated_at": base_audit.updated_at,
+                "observation": base_audit.observation,
                 "global_score": base_audit.get_global_score(),
                 "max_score": base_audit.max_score,
                 "donut_data": base_audit.donut_render(),
+                "radar_data": aggregate_by_top_level(base_audit),
             },
             "compare": {
                 "id": str(compare_audit.id),
@@ -6453,14 +6564,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 }
                 if compare_audit.perimeter
                 else None,
-                "framework": {
-                    "id": str(compare_audit.framework.id),
-                    "str": compare_audit.framework.name,
-                },
                 "created_at": compare_audit.created_at,
+                "updated_at": compare_audit.updated_at,
+                "observation": compare_audit.observation,
                 "global_score": compare_audit.get_global_score(),
                 "max_score": compare_audit.max_score,
                 "donut_data": compare_audit.donut_render(),
+                "radar_data": aggregate_by_top_level(compare_audit),
             },
         }
 

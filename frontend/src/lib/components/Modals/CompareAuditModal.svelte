@@ -70,7 +70,7 @@
 			<AutocompleteSelect
 				{form}
 				field="comparison_audit"
-				label="Select audit to compare with"
+				label={m.selectAuditToCompare()}
 				optionsEndpoint={comparableAuditsEndpoint}
 				optionsLabelField="auto"
 				optionsInfoFields={{
@@ -83,12 +83,12 @@
 					separator: ' • ',
 					classes: 'text-surface-500'
 				}}
-				helpText="Audits with the same framework and perimeter are prioritized at the top."
+				helpText={m.auditsWithSameFrameworkPrioritized()}
 				onChange={() => {}}
 			/>
 			<div class="flex justify-end space-x-2">
 				<button type="button" class="btn preset-filled-surface-500" onclick={parent.onClose}>
-					Cancel
+					{m.cancel()}
 				</button>
 				<button
 					type="submit"
@@ -96,7 +96,7 @@
 					disabled={!$formData.comparison_audit}
 				>
 					<i class="fa-solid fa-code-compare mr-2"></i>
-					Compare
+					{m.compareToAudit()}
 				</button>
 			</div>
 		</form>

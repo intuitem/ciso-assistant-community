@@ -26,6 +26,7 @@ export const load = (async ({ fetch, url }) => {
 	});
 
 	return {
+		framework: comparisonData.framework,
 		baseAudit: comparisonData.base,
 		compareAudit: comparisonData.compare,
 		title: `Compare: ${comparisonData.base.name} vs ${comparisonData.compare.name}`
