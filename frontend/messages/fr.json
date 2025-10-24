@@ -727,6 +727,7 @@
 	"baseline": "Référence de base",
 	"createAuditFromBaseline": "Appliquer un mapping",
 	"cloneAudit": "Cloner l'audit",
+	"compareToAudit": "Comparer à",
 	"coverageColon": "Couverture :",
 	"full": "Complète",
 	"partial": "Partielle",
