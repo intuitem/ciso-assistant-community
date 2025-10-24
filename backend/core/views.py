@@ -5598,7 +5598,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             frameworks_in_mappings.add(src)
             frameworks_in_mappings.add(tgt)
         for dest_urn in sorted(frameworks_in_mappings):
-            best_results, _ = engine.best_mapping_inferrences(
+            best_results, _ = engine.best_mapping_inferences(
                 audit_from_results,
                 audit.framework.urn,
                 dest_urn,
@@ -6108,7 +6108,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 audit_from_results = engine.load_audit_fields(baseline)
                 dest_urn = serializer.validated_data["framework"].urn
 
-                best_results, _ = engine.best_mapping_inferrences(
+                best_results, _ = engine.best_mapping_inferences(
                     audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
                 )
                 ic(best_results)

@@ -251,7 +251,7 @@ class MappingEngine:
                     target_audit[dst]["result"] = "partially_compliant"
         return target_audit
 
-    def best_mapping_inferrences(
+    def best_mapping_inferences(
         self,
         source_audit: dict[str, str | dict[str, str]],
         source_urn: str,
@@ -259,25 +259,25 @@ class MappingEngine:
         max_depth: Optional[int] = None,
     ) -> tuple[dict, list[str]]:
         paths = self.all_paths_between(source_urn, dest_urn, max_depth)
-        inferrences = {}
+        inferences = {}
         best_path = []
 
         for path in paths:
-            tmp_inferrences = source_audit.copy()
+            tmp_inferences = source_audit.copy()
             tmp_urn = source_urn
 
             for urn in path[1:]:
                 rms = self.get_rms((tmp_urn, urn))
                 if not rms:
                     break
-                tmp_inferrences = self.map_audit_results(tmp_inferrences, rms)
+                tmp_inferences = self.map_audit_results(tmp_inferences, rms)
                 tmp_urn = urn
 
-            if len(tmp_inferrences) > len(inferrences):
-                inferrences = tmp_inferrences
+            if len(tmp_inferences) > len(inferences):
+                inferences = tmp_inferences
                 best_path = path
 
-        return inferrences, best_path
+        return inferences, best_path
 
     def load_audit_fields(
         self,

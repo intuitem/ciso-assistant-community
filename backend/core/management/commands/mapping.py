@@ -173,7 +173,7 @@ class Command(BaseCommand):
                         continue  # skip same framework
 
                     start_time = time.time()
-                    best_results, best_path = engine.best_mapping_inferrences(
+                    best_results, best_path = engine.best_mapping_inferences(
                         audit_from_results, source_urn, dest_urn, max_depth
                     )
                     elapsed_ms = (time.time() - start_time) * 1000
