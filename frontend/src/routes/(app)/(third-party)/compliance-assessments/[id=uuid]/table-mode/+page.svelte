@@ -21,7 +21,7 @@
 		complianceResultTailwindColorMap,
 		complianceStatusTailwindColorMap
 	} from '$lib/utils/constants';
-	import { displayScoreColor } from '$lib/utils/helpers';
+	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { Accordion, ProgressRing, Switch } from '@skeletonlabs/skeleton-svelte';
@@ -30,6 +30,8 @@
 	import TableOfContents from '$lib/components/TableOfContents/TableOfContents.svelte';
 	import { generateTocFromElements, type TocItem } from '$lib/utils/toc';
 	import { onMount } from 'svelte';
+	import { invalidateAll } from '$app/navigation';
+
 	interface Props {
 		data: PageData;
 		form: Actions;
@@ -37,7 +39,7 @@
 		shallow?: boolean;
 		actionPath?: string;
 		questionnaireOnly?: boolean;
-		invalidateAll?: boolean;
+		invalidateAllBool?: boolean;
 		[key: string]: any;
 	}
 
@@ -47,7 +49,7 @@
 		shallow = false,
 		actionPath = '',
 		questionnaireOnly = false,
-		invalidateAll = true
+		invalidateAllBool = true
 	}: Props = $props();
 
 	const result_options = [
@@ -70,8 +72,9 @@
 
 	// Initialize hide suggestion state
 	let hideSuggestionHashmap: Record<string, boolean> = $state({});
-	const requirementAssessments = $state(data.requirement_assessments);
-	const complianceAssessment = $state(data.compliance_assessment);
+	let requirementAssessments = $derived(data.requirement_assessments);
+	let complianceAssessment = $derived(data.compliance_assessment);
+
 	const hasQuestions = $derived(
 		requirementAssessments.some(
 			(requirementAssessment) => requirementAssessment.requirement.questions
@@ -82,8 +85,6 @@
 	requirementAssessments.forEach((ra) => {
 		hideSuggestionHashmap[ra.id] = false;
 	});
-
-	let createdEvidence = $derived(form?.createdEvidence);
 
 	// Memoized title function
 	const titleMap = new Map();
@@ -130,23 +131,14 @@
 			[field]: value
 		});
 
+		if (invalidateAll) {
+			await invalidateAll();
+		}
+
 		// Update requirementAssessment.updateForm.data with the specified field and value
 		if (requirementAssessment.updateForm && requirementAssessment.updateForm.data) {
 			requirementAssessment.updateForm.data[field] = value;
 		}
-	}
-
-	// Memoized color function
-	const colorCache = new Map();
-
-	function addColor(result: string, map: Record<string, string>) {
-		const cacheKey = `${result}-${JSON.stringify(map)}`;
-		if (colorCache.has(cacheKey)) {
-			return colorCache.get(cacheKey);
-		}
-		const color = map[result];
-		colorCache.set(cacheKey, color);
-		return color;
 	}
 
 	let questionnaireMode = $state(
@@ -161,7 +153,7 @@
 			props: {
 				form: createform,
 				formAction: `${actionPath}?/createEvidence`,
-				invalidateAll: invalidateAll,
+				invalidateAll: invalidateAllBool,
 				model: data.evidenceModel,
 				debug: false
 			}
@@ -175,20 +167,6 @@
 	}
 
 	let addedEvidence = $state(0);
-
-	run(() => {
-		if (createdEvidence && shallow) {
-			const requirement = data.requirements.find((ra) => ra.id === createdEvidence.requirements[0]);
-			if (requirement) {
-				requirement.evidences.push({
-					str: createdEvidence.name,
-					id: createdEvidence.id
-				});
-				createdEvidence = undefined;
-				addedEvidence += 1;
-			}
-		}
-	});
 
 	const requirementAssessmentScores = Object.fromEntries(
 		// svelte-ignore state_referenced_locally
@@ -559,20 +537,31 @@
 									<p class="flex items-center font-semibold text-purple-600 italic">
 										{m.result()}
 									</p>
-									<RadioGroup
-										possibleOptions={result_options}
-										key="id"
-										labelKey="label"
-										field="result"
-										colorMap={complianceResultTailwindColorMap}
-										initialValue={requirementAssessment.result}
-										onChange={(newValue) => {
-											const newResult =
-												requirementAssessment.result === newValue ? 'to_do' : newValue;
-											requirementAssessment.result = newResult;
-											update(requirementAssessment, 'result');
-										}}
-									/>
+									{#if complianceAssessment.framework.is_dynamic}
+										<span
+											class="badge text-sm font-semibold"
+											style="background-color: {complianceResultColorMap[
+												requirementAssessment.result
+											] || '#ddd'}"
+										>
+											{safeTranslate(requirementAssessment.result)}
+										</span>
+									{:else}
+										<RadioGroup
+											possibleOptions={result_options}
+											key="id"
+											labelKey="label"
+											field="result"
+											colorMap={complianceResultTailwindColorMap}
+											initialValue={requirementAssessment.result}
+											onChange={(newValue) => {
+												const newResult =
+													requirementAssessment.result === newValue ? 'to_do' : newValue;
+												requirementAssessment.result = newResult;
+												update(requirementAssessment, 'result');
+											}}
+										/>
+									{/if}
 								</div>
 							</div>
 						{/if}
@@ -592,58 +581,77 @@
 						{/if}
 						<div class="flex flex-col w-full place-items-center">
 							{#if !shallow}
-								<Score
-									form={scoreForms[requirementAssessment.id]}
-									min_score={complianceAssessment.min_score}
-									max_score={complianceAssessment.max_score}
-									scores_definition={data.scores.scores_definition}
-									field="score"
-									label={complianceAssessment.show_documentation_score
-										? m.implementationScore()
-										: m.score()}
-									styles="w-full p-1"
-									onChange={(newScore) => {
-										requirementAssessment.score = newScore;
-										updateScore(requirementAssessment);
-									}}
-									disabled={!requirementAssessment.is_scored ||
-										requirementAssessment.result === 'not_applicable'}
-								>
-									{#snippet left()}
-										<div>
-											<Checkbox
-												form={isScoredForms[requirementAssessment.id]}
-												field="is_scored"
-												label={''}
-												helpText={m.scoringHelpText()}
-												checkboxComponent="switch"
-												classes="h-full flex flex-row items-center justify-center my-1"
-												classesContainer="h-full flex flex-row items-center space-x-4"
-												onChange={async () => {
-													requirementAssessment.is_scored = !requirementAssessment.is_scored;
-													await update(requirementAssessment, 'is_scored');
-												}}
-											/>
-										</div>
-									{/snippet}
-								</Score>
-								{#if complianceAssessment.show_documentation_score}
+								{#if complianceAssessment.framework.is_dynamic}
+									<div class="flex flex-row items-center space-x-4">
+										<span class="font-medium">{m.score()}</span>
+										<ProgressRing
+											strokeWidth="20px"
+											meterStroke={displayScoreColor(
+												requirementAssessment.score,
+												complianceAssessment.max_score
+											)}
+											value={formatScoreValue(
+												requirementAssessment.score,
+												complianceAssessment.max_score
+											)}
+											classes="shrink-0"
+											size="size-10">{requirementAssessment.score}</ProgressRing
+										>
+									</div>
+								{:else}
 									<Score
-										form={docScoreForms[requirementAssessment.id]}
+										form={scoreForms[requirementAssessment.id]}
 										min_score={complianceAssessment.min_score}
 										max_score={complianceAssessment.max_score}
 										scores_definition={data.scores.scores_definition}
-										field="documentation_score"
-										label={m.documentationScore()}
-										isDoc={true}
+										field="score"
+										label={complianceAssessment.show_documentation_score
+											? m.implementationScore()
+											: m.score()}
 										styles="w-full p-1"
 										onChange={(newScore) => {
-											requirementAssessment.documentation_score = newScore;
+											requirementAssessment.score = newScore;
 											updateScore(requirementAssessment);
 										}}
 										disabled={!requirementAssessment.is_scored ||
 											requirementAssessment.result === 'not_applicable'}
-									/>
+									>
+										{#snippet left()}
+											<div>
+												<Checkbox
+													form={isScoredForms[requirementAssessment.id]}
+													field="is_scored"
+													label={''}
+													helpText={m.scoringHelpText()}
+													checkboxComponent="switch"
+													classes="h-full flex flex-row items-center justify-center my-1"
+													classesContainer="h-full flex flex-row items-center space-x-4"
+													onChange={async () => {
+														requirementAssessment.is_scored = !requirementAssessment.is_scored;
+														await update(requirementAssessment, 'is_scored');
+													}}
+												/>
+											</div>
+										{/snippet}
+									</Score>
+									{#if complianceAssessment.show_documentation_score}
+										<Score
+											form={docScoreForms[requirementAssessment.id]}
+											min_score={complianceAssessment.min_score}
+											max_score={complianceAssessment.max_score}
+											scores_definition={data.scores.scores_definition}
+											field="documentation_score"
+											label={m.documentationScore()}
+											isDoc={true}
+											styles="w-full p-1"
+											onChange={(newScore) => {
+												requirementAssessment.documentation_score = newScore;
+												updateScore(requirementAssessment);
+											}}
+											disabled={!requirementAssessment.is_scored ||
+												requirementAssessment.result === 'not_applicable'}
+										/>
+									{/if}
 								{/if}
 							{:else if complianceAssessment.show_documentation_score && requirementAssessment.is_scored}
 								<div class="flex flex-row items-center space-x-2 w-full">
