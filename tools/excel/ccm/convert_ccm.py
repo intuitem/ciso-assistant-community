@@ -3,11 +3,10 @@ simple script to transform the official CCM Excel file to another Excel file for
 """
 
 import openpyxl
-import sys
 import re
+import sys
 import argparse
-from openpyxl.styles import numbers
-
+from openpyxl.utils.exceptions import InvalidFileException
 
 def pretify_content(content):
     res = None
@@ -34,14 +33,32 @@ input_file_name = args.filename
 packager = args.packager
 output_file_name = "ccm-controls-v4.xlsx"
 
-print("parsing", input_file_name)
+print(f'⌛ Parsing "{input_file_name}"...')
 
 # Define variable to load the dataframe
-dataframe = openpyxl.load_workbook(input_file_name)
+try:
+    dataframe = openpyxl.load_workbook(input_file_name)
+    print(f'✅ Excel file loaded successfully: "{input_file_name}"')
+
+except FileNotFoundError:
+    print(f'❌ [ERROR] File not found: "{input_file_name}"')
+    sys.exit(1)
+except PermissionError:
+    print(f'❌ [ERROR] Permission denied while accessing "{input_file_name}"')
+    sys.exit(1)
+except InvalidFileException:
+    print(f'❌ [ERROR] The file is not a valid Excel file: "{input_file_name}"')
+    sys.exit(1)
+except Exception as e:
+    print(f'❌ [ERROR] Unexpected error while loading Excel file: {e}')
+    sys.exit(1)
+
+
+
 output_table = []
 
 for tab in dataframe:
-    print("parsing tab", tab.title)
+    print("⌛ Parsing tab", tab.title)
     title = tab.title
     if title == "CCM":
         line = 0
@@ -89,10 +106,10 @@ for tab in dataframe:
                         c = b if a == "" else a + "\n" + b
                         output_table[i] = output_table[i][0:6] + (c,) + ("A1",)
     else:
-        print(f"Ignored tab: {title}")
+        print(f"⏩ Ignored tab: {title}")
 
 
-print("generating", output_file_name)
+print(f'⌛ Generating "{output_file_name}"...')
 wb_output = openpyxl.Workbook()
 ws = wb_output.active
 ws.title = "library_content"
@@ -147,5 +164,20 @@ ws3.append(
         "Yes\nNo\nNA",
     ]
 )
-print("generate ", output_file_name)
-wb_output.save(output_file_name)
+
+try:
+    wb_output.save(output_file_name)
+    print(f'✅ Excel file saved successfully: "{output_file_name}"')
+    sys.exit(0)
+except PermissionError:
+    print(f'❌ [ERROR] Permission denied. The file may be open or locked: "{output_file_name}"')
+    sys.exit(1)
+except FileNotFoundError:
+    print(f'❌ [ERROR] Invalid path. Cannot save to: "{output_file_name}"')
+    sys.exit(1)
+except OSError as e:
+    print(f'❌ [ERROR] OS error while saving the file: "{e}"')
+    sys.exit(1)
+except Exception as e:
+    print(f'❌ [ERROR] Unexpected error while saving Excel file: "{e}"')
+    sys.exit(1)
