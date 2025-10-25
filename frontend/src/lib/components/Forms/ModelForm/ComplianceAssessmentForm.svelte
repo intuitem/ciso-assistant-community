@@ -58,9 +58,12 @@
 						.filter((group) => group.default_selected)
 						.map((group) => group.ref_id);
 
-					form.form.update((currentData) => {
-						return { ...currentData, selected_implementation_groups: defaultImplementationGroups };
-					});
+					// Only apply defaults when creating a new assessment, not when editing
+					if (!object.id) {
+						form.form.update((currentData) => {
+							return { ...currentData, selected_implementation_groups: defaultImplementationGroups };
+						});
+					}
 				});
 		}
 	}
