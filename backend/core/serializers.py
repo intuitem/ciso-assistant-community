@@ -1643,7 +1643,11 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 assessment, [user.id for user in authors_data]
             )
 
-        if assessment.framework.implementation_groups_definition:
+        # Only apply default implementation groups if none were provided by the user
+        if (
+            assessment.framework.implementation_groups_definition
+            and not assessment.selected_implementation_groups
+        ):
             default_implementation_groups = []
             for ig in assessment.framework.implementation_groups_definition:
                 if ig.get("default_selected", False):
