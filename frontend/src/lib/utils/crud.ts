@@ -1739,7 +1739,17 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'role',
 		localNamePlural: 'roles',
 		verboseName: 'Role',
-		verboseNamePlural: 'Roles'
+		verboseNamePlural: 'Roles',
+		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'builtin' },
+			{ field: 'permissions' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		]
 	},
 	permissions: {
 		endpointUrl: 'permissions',

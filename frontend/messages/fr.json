@@ -2298,7 +2298,7 @@
 	"errorLoadingVulnerabilityData": "Erreur lors du chargement des données de vulnérabilité",
 	"findingsAssessmentDistribution": "Distribution des suivis de constats",
 	"addAssetClass": "Ajouter une classe d'actifs",
-	"addEbiosRMStudy": "Ajouter une étude EBIOS RM",
+	"addEbiosRmStudy": "Ajouter une étude EBIOS RM",
 	"addFilteringLabel": "Ajouter un label de filtrage",
 	"addFramework": "Ajouter un cadre",
 	"addHistoricalMetric": "Ajouter une métrique historique",
