@@ -2873,42 +2873,34 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
         return context
 
     def get_queryset(self):
-        compliance_assessment_pk = self.kwargs["pk"]
+        """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
+        compliance_id = self.kwargs["pk"]
 
-        # Check permissions for compliance assessment
-        (viewable_compliance_assessments, _, _) = (
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), self.request.user, ComplianceAssessment
-            )
-        )
-        if compliance_assessment_pk not in viewable_compliance_assessments:
-            return Evidence.objects.none()
+        if not RoleAssignment.is_object_readable(
+            self.request.user,
+            ComplianceAssessment,
+            compliance_id,
+        ):
+            raise PermissionDenied()
 
-        # Check permissions for evidences
-        (viewable_evidences, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, Evidence
-        )
-
-        compliance_assessment = ComplianceAssessment.objects.get(
-            id=compliance_assessment_pk
-        )
+        compliance_assessment = ComplianceAssessment.objects.get(id=compliance_id)
 
         # Get all requirement assessments for this compliance assessment
         requirement_assessments = RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment
         ).prefetch_related("evidences", "applied_controls__evidences")
 
+        # Get visible evidences to filter result
+        viewable_evidences, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, Evidence
+        )
+
         # Collect evidence IDs from both direct and indirect relationships
         evidence_ids = set()
-
-        # Direct evidences from requirement assessments
         for req_assessment in requirement_assessments:
             for evidence in req_assessment.evidences.all():
                 if evidence.id in viewable_evidences:
                     evidence_ids.add(evidence.id)
-
-        # Indirect evidences through applied controls
-        for req_assessment in requirement_assessments:
             for applied_control in req_assessment.applied_controls.all():
                 for evidence in applied_control.evidences.all():
                     if evidence.id in viewable_evidences:
