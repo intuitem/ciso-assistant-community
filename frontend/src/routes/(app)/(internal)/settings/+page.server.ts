@@ -142,14 +142,16 @@ export const actions: Actions = {
 		const form = await superValidate(formData, zod(schema));
 		const endpoint = `${BASE_API_URL}/settings/general/`;
 
-		// Prepare request body with conversion_rate if it exists
+		// Prepare request body with optional numeric conversion_rate
 		const requestBody: any = {
 			value: form.data
 		};
 
-		if (conversionRate && conversionRate !== '1.0') {
-			const parsedRate = parseFloat(conversionRate.toString());
-			requestBody.conversion_rate = parsedRate;
+		if (conversionRate) {
+			const n = Number(conversionRate);
+			if (Number.isFinite(n) && n > 0 && n !== 1) {
+				requestBody.conversion_rate = n;
+			}
 		}
 
 		const requestInitOptions: RequestInit = {

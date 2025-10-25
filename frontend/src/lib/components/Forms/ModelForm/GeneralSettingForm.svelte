@@ -56,9 +56,11 @@
 				response: (rate: string | false) => {
 					if (rate !== false && rate !== null && rate !== '') {
 						// Validate it's a valid number
-						const parsed = parseFloat(rate);
-						if (!isNaN(parsed) && parsed > 0) {
+						const n = Number(rate);
+						if (Number.isFinite(n) && n > 0) {
 							conversionRateValue = rate.toString();
+							// Accept change
+							originalCurrency = newCurrency;
 						} else {
 							// Revert currency change
 							$formStore.currency = originalCurrency;
@@ -76,8 +78,6 @@
 			// No currency change, reset conversion rate
 			conversionRateValue = '1.0';
 		}
-		// Update original currency after change
-		originalCurrency = newCurrency;
 	}
 </script>
 
