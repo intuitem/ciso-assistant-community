@@ -2142,6 +2142,13 @@
 	"evidenceRevisions": "Revisions",
 	"addEvidenceRevision": "Add Revision",
 	"associatedEvidenceRevisions": "Associated versions",
+	"privateKey": "Private Key",
+	"generate": "Generate",
+	"samlKeysGenerated": "Saml keys successfully generated",
+	"samlPrivateKeyHelpText": "Write-only: use this field only if you need to supply your own private key/certificate. Otherwise, the application will generate it.",
+	"samlCertificateHelpText": "You can specify your own certificate or let the application generate it.",
+	"samlAuthnRequestSignedHelpText": "When enabled, the SAML authentication request is signed with the private key below. The corresponding public certificate is sent to the Identity Provider so it can verify the signature.",
+	"downloadCertificate": "Download certificate",
 	"userExpiryHelpText": "User will be disabled after this date. Super users are not affected.",
 	"isSuperuser": "Is superuser",
 	"tableOfContents": "Table of Contents",
@@ -2511,5 +2518,7 @@
 	"viewVulnerability": "View vulnerability",
 	"dataFlowOverview": "Data flow overview",
 	"overlapWithOtherFrameworks": "Overlap with other frameworks",
-	"showOverlapWithOtherFrameworks": "Show overlap with other frameworks"
+	"showOverlapWithOtherFrameworks": "Show overlap with other frameworks",
+	"spPrivateKeyAlreadySetHelpText": "A private key has already been set. For security reasons, you cannot view it again. You can only replace it with a new one.",
+	"resetSpPrivateKey": "Reset private key"
 }

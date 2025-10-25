@@ -177,5 +177,18 @@ export const actions: Actions = {
 		setFlash({ type: 'success', message: m.featureFlagSettingsUpdated() }, event);
 
 		return { form };
+	},
+	generateSamlKeys: async (event) => {
+		const response = await event.fetch(`${BASE_API_URL}/accounts/saml/0/generate-keys/`, {
+			method: 'POST'
+		});
+
+		if (!response.ok) return fail(500, { error: 'Generation failed' });
+
+		const { cert } = await response.json();
+
+		setFlash({ type: 'success', message: m.samlKeysGenerated() }, event);
+
+		return { generatedKeys: { cert } };
 	}
 };

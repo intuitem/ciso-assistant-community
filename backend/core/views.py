@@ -28,6 +28,7 @@ from django.db.models import (
     OuterRef,
     When,
     Case,
+    Exists,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -4914,6 +4915,21 @@ class FrameworkViewSet(BaseModelViewSet):
     model = Framework
     filterset_class = FrameworkFilter
     search_fields = ["name", "description"]
+
+    def get_queryset(self):
+        qs = super().get_queryset().prefetch_related("requirement_nodes")
+
+        # Annotate if the framework is dynamic (any question uses implementation groups)
+        qs = qs.annotate(
+            is_dynamic=Exists(
+                RequirementNode.objects.filter(
+                    framework=OuterRef("pk"),
+                    questions__icontains="select_implementation_groups",
+                )
+            )
+        )
+
+        return qs
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @method_decorator(vary_on_cookie)
