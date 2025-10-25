@@ -9,5 +9,14 @@ export const load = (async ({ fetch, params }) => {
 		fetch(endpoint).then((res) => res.json()),
 		fetch(`${BASE_API_URL}/${URLModel}/${params.id}/tree`).then((res) => res.json())
 	]);
+
+	// const coverages = await fetch(`${BASE_API_URL}/${URLModel}/${params.id}/mapping_stats`, {
+	// 	credentials: 'include',
+	// 	headers: {
+	// 		'content-type': 'application/json'
+	// 	}
+	// }).then((res) => res.json());
+	// ADD COVERAGES TO RETURN
+
 	return { URLModel, framework, tree, title: framework.name };
 }) satisfies PageServerLoad;

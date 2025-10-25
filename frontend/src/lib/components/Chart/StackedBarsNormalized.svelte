@@ -9,6 +9,8 @@
 		names: any;
 		uuids: any;
 		title?: string;
+		colors?: string[];
+		seriesNames?: string[];
 	}
 
 	let {
@@ -18,7 +20,15 @@
 		data,
 		names,
 		uuids,
-		title = ''
+		title = '',
+		colors = ['#d7dfea', '#74C0DE', '#E66', '#91CC75', '#EAE2D7'],
+		seriesNames = [
+			'not assessed',
+			'partially compliant',
+			'non compliant',
+			'compliant',
+			'not applicable'
+		]
 	}: Props = $props();
 
 	function truncateString(maxLength: number) {
@@ -45,13 +55,6 @@
 			top: 80,
 			bottom: 50
 		};
-		const seriesNames = [
-			'not assessed',
-			'partially compliant',
-			'non compliant',
-			'compliant',
-			'not applicable'
-		];
 
 		// Map the internal names to translated labels
 		const getSeriesLabel = (name: string) => {
@@ -91,7 +94,7 @@
 		});
 
 		var option = {
-			color: ['#d7dfea', '#74C0DE', '#E66', '#91CC75', '#EAE2D7'],
+			color: colors,
 			title: { text: title },
 			legend: {
 				selectedMode: false,
