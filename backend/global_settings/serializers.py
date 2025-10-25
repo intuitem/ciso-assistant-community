@@ -51,6 +51,8 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         conversion_rate = 1.0
         if "value" in validated_data and "conversion_rate" in validated_data["value"]:
             conversion_rate = validated_data["value"].pop("conversion_rate")
+        elif "conversion_rate" in validated_data:
+            conversion_rate = validated_data.pop("conversion_rate")
 
         for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
