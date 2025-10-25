@@ -231,25 +231,126 @@ class MappingEngine:
                     and target_framework.get("max_score")
                     == source_audit.get("max_score")
                 ):
-                    target_audit[dst] = src_assessment
+                    # Handle collision: merge m2m fields if target already exists
+                    if dst in target_audit:
+                        for m2m_field in self.m2m_fields:
+                            if m2m_field in src_assessment:
+                                existing = set(target_audit[dst].get(m2m_field, []))
+                                new_values = set(src_assessment.get(m2m_field, []))
+                                target_audit[dst][m2m_field] = list(
+                                    existing | new_values
+                                )
+                        # Keep the most restrictive result
+                        if "result" in src_assessment:
+                            existing_result = target_audit[dst].get("result")
+                            new_result = src_assessment["result"]
+                            target_audit[dst]["result"] = self._most_restrictive_result(
+                                existing_result, new_result
+                            )
+                    else:
+                        target_audit[dst] = src_assessment.copy()
                 else:
                     for field in self.fields_to_map:
                         if field not in ["score", "is_scored"]:
-                            target_audit[dst][field] = src_assessment.get(field)
+                            if field == "result" and dst in target_audit:
+                                # Keep the most restrictive result
+                                existing_result = target_audit[dst].get("result")
+                                new_result = src_assessment.get(field)
+                                target_audit[dst][field] = (
+                                    self._most_restrictive_result(
+                                        existing_result, new_result
+                                    )
+                                )
+                            else:
+                                target_audit[dst][field] = src_assessment.get(field)
+
+                    # Merge m2m fields for collisions
+                    for m2m_field in self.m2m_fields:
+                        if m2m_field in src_assessment:
+                            if dst in target_audit and m2m_field in target_audit[dst]:
+                                existing = set(target_audit[dst].get(m2m_field, []))
+                                new_values = set(src_assessment.get(m2m_field, []))
+                                target_audit[dst][m2m_field] = list(
+                                    existing | new_values
+                                )
+                            else:
+                                target_audit[dst][m2m_field] = src_assessment.get(
+                                    m2m_field
+                                )
 
             elif (
                 rel in ("subset", "intersect")
                 and src in source_audit["requirement_assessments"]
             ):
                 result = source_audit["requirement_assessments"][src]["result"]
-                target_audit[dst]["applied_controls"] = source_audit[
-                    "requirement_assessments"
-                ][src]["applied_controls"]
-                if result in ("not_assessed", "non_compliant"):
-                    target_audit[dst]["result"] = result
-                elif result in ("compliant", "partially_compliant"):
-                    target_audit[dst]["result"] = "partially_compliant"
+
+                # Merge applied_controls for collisions
+                src_applied_controls = source_audit["requirement_assessments"][src].get(
+                    "applied_controls", []
+                )
+                if dst in target_audit and "applied_controls" in target_audit[dst]:
+                    existing = set(target_audit[dst]["applied_controls"])
+                    new_values = set(src_applied_controls)
+                    target_audit[dst]["applied_controls"] = list(existing | new_values)
+                else:
+                    target_audit[dst]["applied_controls"] = src_applied_controls
+
+                # Merge other m2m fields
+                for m2m_field in self.m2m_fields:
+                    if (
+                        m2m_field != "applied_controls"
+                        and m2m_field in source_audit["requirement_assessments"][src]
+                    ):
+                        src_values = source_audit["requirement_assessments"][src].get(
+                            m2m_field, []
+                        )
+                        if dst in target_audit and m2m_field in target_audit[dst]:
+                            existing = set(target_audit[dst][m2m_field])
+                            new_values = set(src_values)
+                            target_audit[dst][m2m_field] = list(existing | new_values)
+                        else:
+                            target_audit[dst][m2m_field] = src_values
+
+                # Handle result: keep the most restrictive
+                if dst in target_audit and "result" in target_audit[dst]:
+                    existing_result = target_audit[dst]["result"]
+                    target_audit[dst]["result"] = self._most_restrictive_result(
+                        existing_result, result
+                    )
+                else:
+                    if result in ("not_assessed", "non_compliant"):
+                        target_audit[dst]["result"] = result
+                    elif result in ("compliant", "partially_compliant"):
+                        target_audit[dst]["result"] = "partially_compliant"
         return target_audit
+
+    def _most_restrictive_result(self, result1, result2):
+        """Returns the most restrictive result between two results."""
+        if result1 is None:
+            return result2
+        if result2 is None:
+            return result1
+
+        # Order from most to least restrictive
+        result_order = [
+            "non_compliant",
+            "partially_compliant",
+            "not_assessed",
+            "compliant",
+            "not_applicable",
+        ]
+
+        try:
+            idx1 = result_order.index(result1)
+        except ValueError:
+            idx1 = len(result_order)
+
+        try:
+            idx2 = result_order.index(result2)
+        except ValueError:
+            idx2 = len(result_order)
+
+        return result1 if idx1 < idx2 else result2
 
     def best_mapping_inferences(
         self,

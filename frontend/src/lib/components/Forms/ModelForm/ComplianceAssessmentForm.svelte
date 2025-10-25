@@ -61,7 +61,10 @@
 					// Only apply defaults when creating a new assessment, not when editing
 					if (!object.id) {
 						form.form.update((currentData) => {
-							return { ...currentData, selected_implementation_groups: defaultImplementationGroups };
+							return {
+								...currentData,
+								selected_implementation_groups: defaultImplementationGroups
+							};
 						});
 					}
 				});
