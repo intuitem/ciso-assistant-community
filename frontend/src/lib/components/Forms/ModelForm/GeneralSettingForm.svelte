@@ -8,6 +8,8 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+
 	interface Props {
 		form: SuperForm<any>;
 		model: ModelInfo;
@@ -19,6 +21,7 @@
 	let formDataCache = $state({});
 
 	const formStore = form.form;
+	const modalStore = getModalStore();
 
 	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
 
@@ -31,6 +34,37 @@
 	let horizontalLabelPos = $derived(flipVertically ? 'top-2' : 'bottom-2');
 
 	let openAccordionItems = $state(['notifications', 'financial']);
+
+	// Track original currency for change detection
+	let originalCurrency = $state($formStore.currency);
+	let conversionRate = $state(1.0);
+
+	function handleCurrencyChange(newCurrency: string) {
+		if (originalCurrency && originalCurrency !== newCurrency) {
+			// Show modal to ask for conversion rate
+			const modal: ModalSettings = {
+				type: 'prompt',
+				title: m.currencyConversionRate?.() || 'Currency Conversion Rate',
+				body: `Converting from ${originalCurrency} to ${newCurrency}. Enter conversion rate (default: 1.0):`,
+				value: '1.0',
+				valueAttr: { type: 'number', min: 0.0001, step: 0.0001, required: true },
+				response: (rate: string | false) => {
+					if (rate !== false) {
+						// Store the conversion rate
+						conversionRate = parseFloat(rate) || 1.0;
+						// Temporarily add it to form data (will be removed by backend validation)
+						($formStore as any).conversion_rate = conversionRate;
+					} else {
+						// User cancelled - revert currency
+						$formStore.currency = originalCurrency;
+					}
+				}
+			};
+			modalStore.trigger(modal);
+		}
+		// Update original currency after change
+		originalCurrency = newCurrency;
+	}
 </script>
 
 <Accordion
@@ -184,10 +218,12 @@
 						{ label: 'British Pound (£)', value: '£' },
 						{ label: 'Japanese Yen (¥)', value: '¥' },
 						{ label: 'Canadian Dollar (C$)', value: 'C$' },
-						{ label: 'Australian Dollar (A$)', value: 'A$' }
+						{ label: 'Australian Dollar (A$)', value: 'A$' },
+						{ label: 'New Zealand Dollar (NZ$)', value: 'NZ$' }
 					]}
 					label={m.currency()}
 					helpText={m.currencyHelpText()}
+					onchange={(e) => handleCurrencyChange(e.target.value)}
 				/>
 				<NumberField
 					{form}
