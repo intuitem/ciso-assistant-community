@@ -135,15 +135,28 @@ export const actions: Actions = {
 			return fail(400, { form: null });
 		}
 
+		// Extract conversion_rate before validation (it's not in the schema)
+		const conversionRate = formData.get('conversion_rate');
+
 		const schema = GeneralSettingsSchema;
 		const form = await superValidate(formData, zod(schema));
 		const endpoint = `${BASE_API_URL}/settings/general/`;
 
+		// Prepare request body with optional numeric conversion_rate
+		const requestBody: any = {
+			value: form.data
+		};
+
+		if (conversionRate) {
+			const n = Number(conversionRate);
+			if (Number.isFinite(n) && n > 0 && n !== 1) {
+				requestBody.conversion_rate = n;
+			}
+		}
+
 		const requestInitOptions: RequestInit = {
 			method: 'PUT',
-			body: JSON.stringify({
-				value: form.data
-			})
+			body: JSON.stringify(requestBody)
 		};
 
 		const response = await event.fetch(endpoint, requestInitOptions);
