@@ -9,6 +9,7 @@
 	import Checkbox from '../Checkbox.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
+	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -57,9 +58,15 @@
 						.filter((group) => group.default_selected)
 						.map((group) => group.ref_id);
 
-					form.form.update((currentData) => {
-						return { ...currentData, selected_implementation_groups: defaultImplementationGroups };
-					});
+					// Only apply defaults when creating a new assessment, not when editing
+					if (!object.id) {
+						form.form.update((currentData) => {
+							return {
+								...currentData,
+								selected_implementation_groups: defaultImplementationGroups
+							};
+						});
+					}
 				});
 		}
 	}
@@ -97,20 +104,44 @@
 	label={m.perimeter()}
 	hidden={initialData.perimeter && context !== 'clone'}
 />
-<AutocompleteSelect
-	{form}
-	disabled={object.id || context === 'clone'}
-	optionsEndpoint="frameworks"
-	optionsDetailedUrlParameters={context === 'fromBaseline'
-		? [['baseline', initialData.baseline]]
-		: []}
-	field="framework"
-	cacheLock={cacheLocks['framework']}
-	bind:cachedValue={formDataCache['framework']}
-	label={context === 'clone' ? m.framework() : m.targetFramework()}
-	onChange={async (e) => handleFrameworkChange(e)}
-	mount={async (e) => handleFrameworkChange(e)}
-/>
+{#if context === 'fromBaseline' && initialData.baseline}
+	<AutocompleteSelect
+		{form}
+		disabled={object.id}
+		optionsEndpoint="compliance-assessments/{page.params.id}/frameworks"
+		field="framework"
+		cacheLock={cacheLocks['framework']}
+		optionsLabelField="str"
+		optionsValueField="id"
+		bind:cachedValue={formDataCache['framework']}
+		label={m.targetFramework()}
+		onChange={async (e) => handleFrameworkChange(e)}
+		mount={async (e) => handleFrameworkChange(e)}
+		additionalMultiselectOptions={{
+			liOptionClass: 'flex items-center w-full border-t-8 border-b-8 border-transparent'
+		}}
+		includeAllOptionFields
+	>
+		{#snippet optionSnippet(option: Record<string, any>)}
+			<FrameworkResultSnippet {option} />
+		{/snippet}
+	</AutocompleteSelect>
+{:else}
+	<AutocompleteSelect
+		{form}
+		disabled={object.id || context === 'clone'}
+		optionsEndpoint="frameworks"
+		optionsDetailedUrlParameters={context === 'fromBaseline'
+			? [['baseline', initialData.baseline]]
+			: []}
+		field="framework"
+		cacheLock={cacheLocks['framework']}
+		bind:cachedValue={formDataCache['framework']}
+		label={context === 'clone' ? m.framework() : m.targetFramework()}
+		onChange={async (e) => handleFrameworkChange(e)}
+		mount={async (e) => handleFrameworkChange(e)}
+	/>
+{/if}
 {#if implementationGroupsChoices.length > 0 && !is_dynamic}
 	{#key implementationGroupsChoices}
 		<AutocompleteSelect
