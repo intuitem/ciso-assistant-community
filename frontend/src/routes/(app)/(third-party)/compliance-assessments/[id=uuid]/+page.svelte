@@ -38,7 +38,6 @@
 	import { derived } from 'svelte/store';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import FrameworkMappingsChart from '$lib/components/FrameworkMappingsChart/FrameworkMappingsChart.svelte';
 
 	interface Props {
 		data: PageData;
@@ -696,18 +695,6 @@
 				{/if}
 			</div>
 		</div>
-		<div class="m-5 bg-gray-100 rounded-md hover:shadow-md transition-all">
-			<Dropdown
-				open={false}
-				header={m.showOverlapWithOtherFrameworks()}
-				class="bg-gray-100 hover:bg-gray-200 shadow-sm hover:shadow-md transition-all"
-			>
-				<div class="h-80">
-					<FrameworkMappingsChart frameworksMappings={data.frameworksMappings}
-					></FrameworkMappingsChart>
-				</div>
-			</Dropdown>
-		</div>
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
 		<div class="flex flex-row items-center font-semibold justify-between">
@@ -817,13 +804,6 @@
 			{/key}
 		{/key}
 	</div>
-</div>
-<div>
-	<Dropdown open={false}>
-		<div class="h-80 w-100">
-			<FrameworkMappingsChart frameworksMappings={data.frameworksMappings}></FrameworkMappingsChart>
-		</div>
-	</Dropdown>
 </div>
 {#if threatDialogOpen}
 	<dialog
