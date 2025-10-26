@@ -41,7 +41,6 @@
 	function addTranslation() {
 		const used = Object.keys(translations);
 		const available = locales.find((l) => !used.includes(l));
-		console.log({ used, available });
 		const newCode = available || 'en';
 		translations = { ...translations, [newCode]: '' };
 	}

@@ -104,9 +104,6 @@
 		// Verify our calculation by checking if the percentiles match
 		const calculated5th = Math.exp(mu + sigma * -1.64485362695147);
 		const calculated95th = Math.exp(mu + sigma * 1.64485362695147);
-		console.log(
-			`Verification - Input: ${lowerBound}-${upperBound}, Calculated: ${calculated5th.toFixed(0)}-${calculated95th.toFixed(0)}`
-		);
 
 		// Call the callback with calculated parameters
 		if (onParametersCalculated) {

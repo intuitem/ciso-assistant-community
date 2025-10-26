@@ -23,8 +23,6 @@
 		formDataCache = $bindable({}),
 		initialData = {}
 	}: Props = $props();
-
-	console.log(model);
 </script>
 
 <TextField

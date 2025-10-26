@@ -35,7 +35,6 @@
 
 	function modalMeasureCreateForm(): void {
 		const measureModel = page.data.measureModel;
-		console.log('measureModel', measureModel);
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
