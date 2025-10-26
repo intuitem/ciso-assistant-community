@@ -15,6 +15,7 @@ import tempfile
 from datetime import date, datetime, timedelta
 from typing import Dict, Any, List, Tuple
 import time
+from django_cte import with_cte, CTE
 from django.db.models import (
     F,
     Count,
@@ -22,6 +23,8 @@ from django.db.models import (
     ExpressionWrapper,
     FloatField,
     IntegerField,
+    CharField,
+    TextField,
     Value,
     Min,
     Subquery,
@@ -30,7 +33,7 @@ from django.db.models import (
     Case,
     Exists,
 )
-from django.db.models.functions import Greatest, Coalesce
+from django.db.models.functions import Greatest, Coalesce, Concat
 
 from collections import defaultdict
 import pytz
@@ -115,6 +118,7 @@ from core.utils import (
     compare_schema_versions,
     _generate_occurrences,
     _create_task_dict,
+    BUILTIN_USERGROUP_CODENAMES,
 )
 from dateutil import relativedelta as rd
 
@@ -3470,8 +3474,8 @@ class UserViewSet(BaseModelViewSet):
 class UserGroupOrderingFilter(filters.OrderingFilter):
     """
     Custom ordering filter:
-    - Performs in-memory (Python) sorting only for `localization_dict`.
-    - The sort key is a tuple: (folder full_path OR folder.name, object.name).
+    - Performs sorting only for `localization_dict`.
+    - Use CTE to recursively build folder paths and apply ordering.
     - Supports `-localization_dict` for descending order.
     - For all other fields, it falls back to standard SQL ordering.
     """
@@ -3481,49 +3485,57 @@ class UserGroupOrderingFilter(filters.OrderingFilter):
         if not ordering:
             return queryset
 
-        # Special case: in-memory sorting for `localization_dict`
         if len(ordering) == 1 and ordering[0].lstrip("-") == "localization_dict":
-            desc = ordering[0].startswith("-")
+            is_desc = ordering[0].startswith("-")
 
-            # Optimize DB access: fetch the related folder in one query
-            queryset = queryset.select_related("folder")
+            def make_folder_path_cte(cte):
+                return (
+                    Folder.objects.filter(id=Folder.get_root_folder_id())
+                    .values(
+                        "id",
+                        "name",
+                        path=F("name"),
+                        depth=Value(0, output_field=IntegerField()),
+                    )
+                    .union(
+                        # recursive union: get descendants
+                        cte.join(Folder, parent_folder=cte.col.id).values(
+                            "id",
+                            "name",
+                            path=Case(
+                                When(
+                                    parent_folder=Folder.get_root_folder_id(),
+                                    then=F("name"),
+                                ),
+                                default=Concat(cte.col.path, Value("/"), F("name")),
+                                output_field=TextField(),
+                            ),
+                            depth=cte.col.depth + Value(1, output_field=IntegerField()),
+                        ),
+                        all=True,
+                    )
+                )
 
-            # Materialize queryset into a list to sort in Python
-            data = list(queryset)
+            cte = CTE.recursive(make_folder_path_cte)
 
-            def full_path_or_name(folder):
-                """
-                Build a string key from the folder:
-                - Prefer the full path (names of all parent folders + current).
-                - Fall back to the folder's name if no path is available.
-                """
-                if folder is None:
-                    return ""
-
-                path_list = getattr(folder, "get_folder_full_path", None)
-                if callable(path_list):
-                    items = folder.get_folder_full_path(include_root=False)
-                    names = [getattr(f, "name", "") or "" for f in items]
-                    if names:
-                        return "/".join(names)
-
-                # Fallback: just the folder name
-                return getattr(folder, "name", "") or ""
-
-            def key_func(obj):
-                # Get the folder from the object
-                folder = getattr(obj, "folder", None)
-                # If you want to be more robust, you could use:
-                # from yourapp.models import Folder
-                # folder = Folder.get_folder(obj)
-
-                path_key = full_path_or_name(folder).casefold()
-                name_key = (getattr(obj, "name", "") or "").casefold()
-                return (path_key, name_key)
-
-            # Perform stable sort, reverse if `-localization_dict`
-            data.sort(key=key_func, reverse=desc)
-            return data
+            return with_cte(
+                cte,
+                select=cte.join(UserGroup, folder=cte.col.id)
+                .annotate(
+                    path=cte.col.path,
+                    depth=cte.col.depth,
+                    codename=Case(
+                        *[
+                            When(name=key, then=Value(str(val)))
+                            for key, val in BUILTIN_USERGROUP_CODENAMES.items()
+                        ],
+                        default=F("name"),
+                        output_field=CharField(),
+                    ),
+                    order_string=Concat(F("path"), Value(" - "), F("codename")),
+                )
+                .filter(depth__lt=256),  # Hardcoded folder depth limit
+            ).order_by("order_string" if not is_desc else "-order_string")
 
         # Default case: fall back to SQL ordering
         return super().filter_queryset(request, queryset, view)
