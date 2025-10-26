@@ -43,9 +43,10 @@
 			compareName
 		});
 
-		// Prepare indicators with max value of 100 (percentage)
+		// Prepare indicators with max value of 100 (percentage) and min -1 to avoid distortions with 0-values
 		const indicators = labels.map((label) => ({
 			name: label,
+			min: -1,
 			max: 100
 		}));
 

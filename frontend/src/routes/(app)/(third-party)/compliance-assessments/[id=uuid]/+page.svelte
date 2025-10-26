@@ -85,6 +85,7 @@
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import CompareAuditModal from '$lib/components/Modals/CompareAuditModal.svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -413,298 +414,307 @@
 			</div>
 		</div>
 	{/if}
-	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
-		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
-			{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
-				const fieldsToShow = ['ref_id', 'name', 'description', 'version', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'];
-				if (!fieldsToShow.includes(key)) return false;
-				// Hide selected_implementation_groups if framework doesn't support implementation groups
-				if (key === 'selected_implementation_groups' && (!data.compliance_assessment.framework.implementation_groups_definition || !Array.isArray(data.compliance_assessment.framework.implementation_groups_definition) || data.compliance_assessment.framework.implementation_groups_definition.length === 0)) return false;
-				return true;
-			}) as [key, value]}
-				<div class="flex flex-col">
-					<div
-						class="text-sm font-medium text-gray-800 capitalize-first"
-						data-testid={key.replaceAll('_', '-') + '-field-title'}
-					>
-						{safeTranslate(key)}
-					</div>
-					<ul class="text-sm">
-						<li
-							class="text-gray-600 list-none"
-							data-testid={key.replaceAll('_', '-') + '-field-value'}
+	<div class="flex flex-col card px-6 py-4 bg-white shadow-lg w-full">
+		<div class="flex flex-row justify-between">
+			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
+				{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
+					const fieldsToShow = ['ref_id', 'name', 'description', 'version', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'];
+					if (!fieldsToShow.includes(key)) return false;
+					// Hide selected_implementation_groups if framework doesn't support implementation groups
+					if (key === 'selected_implementation_groups' && (!data.compliance_assessment.framework.implementation_groups_definition || !Array.isArray(data.compliance_assessment.framework.implementation_groups_definition) || data.compliance_assessment.framework.implementation_groups_definition.length === 0)) return false;
+					return true;
+				}) as [key, value]}
+					<div class="flex flex-col">
+						<div
+							class="text-sm font-medium text-gray-800 capitalize-first"
+							data-testid={key.replaceAll('_', '-') + '-field-title'}
 						>
-							{#if value}
-								{#if Array.isArray(value)}
-									<ul>
-										{#each value as val}
-											<li>
-												{#if val.str && val.id}
-													{@const itemHref = `/${
-														URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
-															(item) => item.field === key
-														)?.urlModel
-													}/${val.id}`}
-													{#if !page.data.user.is_third_party}
-														<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
-													{:else}
-														{val.str}
-													{/if}
-												{:else}
-													{val}
-												{/if}
-											</li>
-										{/each}
-									</ul>
-								{:else if value.str && value.id}
-									{@const itemHref = `/${
-										URL_MODEL_MAP['compliance-assessments']['foreignKeyFields']?.find(
-											(item) => item.field === key
-										)?.urlModel
-									}/${value.id}`}
-									{#if !page.data.user.is_third_party}
-										<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
-									{:else}
-										{value.str}
-									{/if}
-								{:else if key === 'description'}
-									<MarkdownRenderer content={value} />
-								{:else}
-									{safeTranslate(value.str ?? value)}
-								{/if}
-							{:else}
-								--
-							{/if}
-						</li>
-					</ul>
-				</div>
-			{/each}
-			<div>
-				<div class="font-medium">{m.createdAt()}</div>
-				{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
-			</div>
-		</div>
-		{#key compliance_assessment_donut_values}
-			<div class="flex w-1/3 relative">
-				{#if data.global_score.score >= 0}
-					<div class="absolute font-bold text-sm">{m.maturity()}</div>
-					<div class="flex justify-center items-center w-full">
-						<ProgressRing
-							strokeWidth="20px"
-							meterStroke={displayScoreColor(data.global_score.score, data.global_score.max_score)}
-							value={(data.global_score.score * 100) / data.global_score.max_score}
-							size="size-52"
-						>
-							<p class="font-semibold text-4xl">{data.global_score.score}</p>
-						</ProgressRing>
-					</div>
-				{/if}
-			</div>
-			<div class="w-1/3">
-				<DonutChart
-					s_label="Result"
-					name="compliance_result"
-					title={m.compliance()}
-					orientation="horizontal"
-					values={compliance_assessment_donut_values.result.values}
-					colors={compliance_assessment_donut_values.result.values.map(
-						(object) => object.itemStyle.color
-					)}
-				/>
-			</div>
-			<div class="w-1/3">
-				<DonutChart
-					s_label="Status"
-					name="compliance_status"
-					title={m.progress()}
-					orientation="horizontal"
-					values={compliance_assessment_donut_values.status.values}
-					colors={compliance_assessment_donut_values.status.values.map(
-						(object) => object.itemStyle.color
-					)}
-				/>
-			</div>
-		{/key}
-		<div class="flex flex-col space-y-2 ml-4">
-			<div class="flex flex-row space-x-2">
-				<Popover
-					open={exportPopupOpen}
-					onOpenChange={(e) => (exportPopupOpen = e.open)}
-					positioning={{ placement: 'bottom' }}
-					triggerBase="btn preset-filled-primary-500 w-full"
-					contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-					zIndex="1000"
-				>
-					{#snippet trigger()}
-						<span data-testid="export-button">
-							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-						</span>
-					{/snippet}
-					{#snippet content()}
-						<div>
-							<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
-							{#if !page.data.user.is_third_party}
-								<a
-									href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
-								>
-								<a
-									href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-									>... {m.asXLSX()}</a
-								>
-								<a
-									href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-									>... {m.asWord()}</a
-								>
-							{/if}
-							<a
-								href="/compliance-assessments/{data.compliance_assessment.id}/export"
-								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
-							>
-							{#if !page.data.user.is_third_party}
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
-								<a
-									href="/compliance-assessments/{data.compliance_assessment
-										.id}/action-plan/export/csv"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
-								>
-								<a
-									href="/compliance-assessments/{data.compliance_assessment
-										.id}/action-plan/export/pdf"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-								>
-							{/if}
+							{safeTranslate(key)}
 						</div>
-					{/snippet}
-				</Popover>
-				{#if canEditObject}
+						<ul class="text-sm">
+							<li
+								class="text-gray-600 list-none"
+								data-testid={key.replaceAll('_', '-') + '-field-value'}
+							>
+								{#if value}
+									{#if Array.isArray(value)}
+										<ul>
+											{#each value as val}
+												<li>
+													{#if val.str && val.id}
+														{@const itemHref = `/${
+															URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
+																(item) => item.field === key
+															)?.urlModel
+														}/${val.id}`}
+														{#if !page.data.user.is_third_party}
+															<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
+														{:else}
+															{val.str}
+														{/if}
+													{:else}
+														{val}
+													{/if}
+												</li>
+											{/each}
+										</ul>
+									{:else if value.str && value.id}
+										{@const itemHref = `/${
+											URL_MODEL_MAP['compliance-assessments']['foreignKeyFields']?.find(
+												(item) => item.field === key
+											)?.urlModel
+										}/${value.id}`}
+										{#if !page.data.user.is_third_party}
+											<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
+										{:else}
+											{value.str}
+										{/if}
+									{:else if key === 'description'}
+										<MarkdownRenderer content={value} />
+									{:else}
+										{safeTranslate(value.str ?? value)}
+									{/if}
+								{:else}
+									--
+								{/if}
+							</li>
+						</ul>
+					</div>
+				{/each}
+				<div>
+					<div class="font-medium">{m.createdAt()}</div>
+					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
+				</div>
+			</div>
+			{#key compliance_assessment_donut_values}
+				<div class="flex w-1/3 relative">
+					{#if data.global_score.score >= 0}
+						<div class="absolute font-bold text-sm">{m.maturity()}</div>
+						<div class="flex justify-center items-center w-full">
+							<ProgressRing
+								strokeWidth="20px"
+								meterStroke={displayScoreColor(
+									data.global_score.score,
+									data.global_score.max_score
+								)}
+								value={(data.global_score.score * 100) / data.global_score.max_score}
+								size="size-52"
+							>
+								<p class="font-semibold text-4xl">{data.global_score.score}</p>
+							</ProgressRing>
+						</div>
+					{/if}
+				</div>
+				<div class="w-1/3">
+					<DonutChart
+						s_label="Result"
+						name="compliance_result"
+						title={m.compliance()}
+						orientation="horizontal"
+						values={compliance_assessment_donut_values.result.values}
+						colors={compliance_assessment_donut_values.result.values.map(
+							(object) => object.itemStyle.color
+						)}
+					/>
+				</div>
+				<div class="w-1/3">
+					<DonutChart
+						s_label="Status"
+						name="compliance_status"
+						title={m.progress()}
+						orientation="horizontal"
+						values={compliance_assessment_donut_values.status.values}
+						colors={compliance_assessment_donut_values.status.values.map(
+							(object) => object.itemStyle.color
+						)}
+					/>
+				</div>
+			{/key}
+			<div class="flex flex-col space-y-2 ml-4">
+				<div class="flex flex-row space-x-2">
+					<Popover
+						open={exportPopupOpen}
+						onOpenChange={(e) => (exportPopupOpen = e.open)}
+						positioning={{ placement: 'bottom' }}
+						triggerBase="btn preset-filled-primary-500 w-full"
+						contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+						zIndex="1000"
+					>
+						{#snippet trigger()}
+							<span data-testid="export-button">
+								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+							</span>
+						{/snippet}
+						{#snippet content()}
+							<div>
+								<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
+								{#if !page.data.user.is_third_party}
+									<a
+										href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asCSV()}</a
+									>
+									<a
+										href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asXLSX()}</a
+									>
+									<a
+										href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asWord()}</a
+									>
+								{/if}
+								<a
+									href="/compliance-assessments/{data.compliance_assessment.id}/export"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
+								>
+								{#if !page.data.user.is_third_party}
+									<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
+									<a
+										href="/compliance-assessments/{data.compliance_assessment
+											.id}/action-plan/export/csv"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asCSV()}</a
+									>
+									<a
+										href="/compliance-assessments/{data.compliance_assessment
+											.id}/action-plan/export/pdf"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asPDF()}</a
+									>
+								{/if}
+							</div>
+						{/snippet}
+					</Popover>
+					{#if canEditObject}
+						<Anchor
+							breadcrumbAction="push"
+							href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
+							class="btn preset-filled-primary-500 h-fit"
+							data-testid="edit-button"
+							><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
+						>
+					{/if}
+				</div>
+				{#if !page.data.user.is_third_party}
+					<Anchor
+						href={`${page.url.pathname}/action-plan`}
+						class="btn preset-filled-primary-500 h-fit"
+						breadcrumbAction="push"
+						><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
+					>
+					<Anchor
+						href={`${page.url.pathname}/evidences-list`}
+						class="btn preset-filled-secondary-500 h-fit"
+						breadcrumbAction="push"
+						><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
+					>
+				{/if}
+				<span class="pt-4 text-sm">{m.powerUps()}</span>
+				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
 					<Anchor
 						breadcrumbAction="push"
-						href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
-						class="btn preset-filled-primary-500 h-fit"
-						data-testid="edit-button"
-						><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
+						href={`${page.url.pathname}/flash-mode`}
+						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+						><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 					>
 				{/if}
+				{#if !data.compliance_assessment.is_locked}
+					<Anchor
+						breadcrumbAction="push"
+						href={`${page.url.pathname}/table-mode`}
+						class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
+						><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
+					>
+				{/if}
+				{#if !page.data.user.is_third_party}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
+						onclick={() => modalCreateForm()}
+						data-testid="apply-mapping-button"
+						><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
+					</button>
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-pink-500 h-fit"
+						onclick={() => modalCreateCloneForm()}
+						data-testid="clone-audit-button"
+						><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
+					</button>
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-orange-500 to-red-500 h-fit"
+						onclick={() => modalCompareAudit()}
+						data-testid="compare-audit-button"
+						><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
+					</button>
+				{/if}
+
+				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						onclick={async () => {
+							await modalConfirmSyncToActions(
+								data.compliance_assessment.id,
+								data.compliance_assessment.name,
+								'?/syncToActions'
+							);
+						}}
+					>
+						<span class="mr-2">
+							{#if syncingToActionsIsLoading}
+								<ProgressRing
+									strokeWidth="16px"
+									meterStroke="stroke-white"
+									size="size-6"
+									classes="-ml-2"
+								/>
+							{:else}
+								<i class="fa-solid fa-arrows-rotate mr-2"></i>
+							{/if}
+						</span>
+						{m.syncToAppliedControls()}
+					</button>
+				{/if}
+
+				{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0 && !data.compliance_assessment.is_locked}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
+						onclick={() => {
+							modalConfirmCreateSuggestedControls(
+								data.compliance_assessment.id,
+								data.compliance_assessment.name,
+								'?/createSuggestedControls'
+							);
+						}}
+					>
+						<span class="mr-2">
+							{#if createAppliedControlsLoading}
+								<ProgressRing
+									strokeWidth="16px"
+									meterStroke="stroke-white"
+									classes="-ml-2"
+									size="size-6"
+								/>
+							{:else}
+								<i class="fa-solid fa-wand-magic-sparkles"></i>
+							{/if}
+						</span>
+						{m.suggestControls()}
+					</button>
+				{/if}
+				{#if has_threats && !page.data.user.is_third_party}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-amber-500 to-orange-500 h-fit"
+						onclick={openThreatsDialog}
+					>
+						<div class="flex items-center space-x-2">
+							<i class="fa-solid fa-triangle-exclamation text-red-700"></i>
+							<span class="text-red-700 font-bold">{data.threats.total_unique_threats}</span>
+							<span>{m.potentialThreats()}</span>
+						</div>
+					</button>
+				{/if}
 			</div>
-			{#if !page.data.user.is_third_party}
-				<Anchor
-					href={`${page.url.pathname}/action-plan`}
-					class="btn preset-filled-primary-500 h-fit"
-					breadcrumbAction="push"
-					><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
-				>
-				<Anchor
-					href={`${page.url.pathname}/evidences-list`}
-					class="btn preset-filled-secondary-500 h-fit"
-					breadcrumbAction="push"><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
-				>
-			{/if}
-			<span class="pt-4 text-sm">{m.powerUps()}</span>
-			{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
-				<Anchor
-					breadcrumbAction="push"
-					href={`${page.url.pathname}/flash-mode`}
-					class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
-					><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
-				>
-			{/if}
-			{#if !data.compliance_assessment.is_locked}
-				<Anchor
-					breadcrumbAction="push"
-					href={`${page.url.pathname}/table-mode`}
-					class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
-					><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
-				>
-			{/if}
-			{#if !page.data.user.is_third_party}
-				<button
-					class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
-					onclick={() => modalCreateForm()}
-					data-testid="apply-mapping-button"
-					><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
-				</button>
-				<button
-					class="btn text-gray-100 bg-linear-to-r from-purple-500 to-pink-500 h-fit"
-					onclick={() => modalCreateCloneForm()}
-					data-testid="clone-audit-button"
-					><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
-				</button>
-				<button
-					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-red-500 h-fit"
-					onclick={() => modalCompareAudit()}
-					data-testid="compare-audit-button"
-					><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
-				</button>
-			{/if}
-
-			{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
-				<button
-					class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
-					onclick={async () => {
-						await modalConfirmSyncToActions(
-							data.compliance_assessment.id,
-							data.compliance_assessment.name,
-							'?/syncToActions'
-						);
-					}}
-				>
-					<span class="mr-2">
-						{#if syncingToActionsIsLoading}
-							<ProgressRing
-								strokeWidth="16px"
-								meterStroke="stroke-white"
-								size="size-6"
-								classes="-ml-2"
-							/>
-						{:else}
-							<i class="fa-solid fa-arrows-rotate mr-2"></i>
-						{/if}
-					</span>
-					{m.syncToAppliedControls()}
-				</button>
-			{/if}
-
-			{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0 && !data.compliance_assessment.is_locked}
-				<button
-					class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
-					onclick={() => {
-						modalConfirmCreateSuggestedControls(
-							data.compliance_assessment.id,
-							data.compliance_assessment.name,
-							'?/createSuggestedControls'
-						);
-					}}
-				>
-					<span class="mr-2">
-						{#if createAppliedControlsLoading}
-							<ProgressRing
-								strokeWidth="16px"
-								meterStroke="stroke-white"
-								classes="-ml-2"
-								size="size-6"
-							/>
-						{:else}
-							<i class="fa-solid fa-wand-magic-sparkles"></i>
-						{/if}
-					</span>
-					{m.suggestControls()}
-				</button>
-			{/if}
-			{#if has_threats && !page.data.user.is_third_party}
-				<button
-					class="btn text-gray-100 bg-linear-to-r from-amber-500 to-orange-500 h-fit"
-					onclick={openThreatsDialog}
-				>
-					<div class="flex items-center space-x-2">
-						<i class="fa-solid fa-triangle-exclamation text-red-700"></i>
-						<span class="text-red-700 font-bold">{data.threats.total_unique_threats}</span>
-						<span>{m.potentialThreats()}</span>
-					</div>
-				</button>
-			{/if}
 		</div>
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">

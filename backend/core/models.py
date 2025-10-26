@@ -36,10 +36,16 @@ from library.helpers import (
     update_translations_as_string,
     update_translations_in_object,
 )
+
 from global_settings.models import GlobalSettings
 
 from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
-from .utils import camel_case, sha256
+from .utils import (
+    camel_case,
+    sha256,
+    update_selected_implementation_groups,
+    _is_question_visible,
+)
 from .validators import (
     validate_file_name,
     validate_file_size,
@@ -1617,11 +1623,23 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             ]
         return node_dict
 
+    def is_dynamic(self) -> bool:
+        return RequirementNode.objects.filter(
+            framework=self,
+            questions__icontains="select_implementation_groups",
+        ).exists()
+
     def __str__(self) -> str:
         return f"{self.provider} - {self.name}"
 
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
+    class Importance(models.TextChoices):
+        MANDATORY = "mandatory", _("Mandatory")
+        RECOMMENDED = "recommended", _("Recommended")
+        NICE_TO_HAVE = "nice_to_have", _("Nice to have")
+        UNDEFINED = "undefined", _("Undefined")
+
     threats = models.ManyToManyField(
         "Threat",
         blank=True,
@@ -1654,6 +1672,13 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         null=True, blank=True, verbose_name=_("Typical evidence")
     )
     questions = models.JSONField(blank=True, null=True, verbose_name=_("Questions"))
+    weight = models.IntegerField(default=1, verbose_name=_("Weight"))
+    importance = models.CharField(
+        max_length=20,
+        choices=Importance.choices,
+        default=Importance.UNDEFINED,
+        verbose_name=_("Importance"),
+    )
 
     @property
     def associated_reference_controls(self):
@@ -5995,6 +6020,100 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         self.compliance_assessment.save(update_fields=["updated_at"])
 
         self.compliance_assessment.upsert_daily_metrics()
+
+        # Recalculate selected IGs only when answers were updated
+        # Use transaction.on_commit to avoid nested save conflicts
+        update_fields = kwargs.get("update_fields")
+        answers_changed = (
+            update_fields is None  # full save
+            or "answers" in set(update_fields or [])
+        )
+        if answers_changed and self.compliance_assessment.framework.is_dynamic():
+            transaction.on_commit(
+                lambda: update_selected_implementation_groups(
+                    self.compliance_assessment
+                )
+            )
+
+    def compute_score_and_result(self):
+        questions = self.requirement.questions or {}
+        answers = self.answers or {}
+
+        total_score = 0
+        min_score = self.compliance_assessment.min_score or 0
+        max_score = self.compliance_assessment.max_score or 100
+        results = []
+        visible_questions = 0
+        answered_visible_questions = 0
+        is_score_computed = False
+        is_result_computed = False
+
+        for q_urn, question in questions.items():
+            if _is_question_visible(question, answers) is False:
+                continue
+
+            visible_questions += 1
+            selected_choice_urn = answers.get(q_urn)
+
+            if not selected_choice_urn:
+                continue
+
+            answered_visible_questions += 1
+
+            # Handle both single and multiple choice questions
+            choice_urns = (
+                selected_choice_urn
+                if isinstance(selected_choice_urn, list)
+                else [selected_choice_urn]
+            )
+
+            for choice in question.get("choices", []):
+                if choice.get("urn") in choice_urns:
+                    add_score = choice.get("add_score")
+                    compute_result = choice.get("compute_result")
+
+                    if add_score is not None:
+                        is_score_computed = True
+                        self.is_scored = True
+                        total_score += add_score
+
+                    if compute_result is not None:
+                        is_result_computed = True
+                        results.append(bool(compute_result))
+
+        self.score = max(min(total_score, max_score), min_score)
+
+        # No visible questions → not applicable
+        if visible_questions == 0:
+            self.result = "not_applicable"
+            self.save(update_fields=["score", "result", "is_scored"])
+            return
+
+        # Not all visible questions are answered → not assessed
+        if answered_visible_questions < visible_questions:
+            self.result = "not_assessed"
+            self.save(update_fields=["score", "result", "is_scored"])
+            return
+
+        # Compute overall result
+        if not results:
+            # All answered but no compliance checks defined
+            self.result = (
+                "not_assessed"  # or "compliant" depending on your business logic
+            )
+        elif all(results):
+            self.result = "compliant"
+        elif any(results):
+            self.result = "partially_compliant"
+        else:
+            self.result = "non_compliant"
+
+        if is_score_computed and is_result_computed:
+            self.save(update_fields=["score", "result", "is_scored"])
+        elif is_score_computed:
+            self.save(update_fields=["score", "is_scored"])
+        elif is_result_computed:
+            self.save(update_fields=["result"])
 
 
 class FindingsAssessment(Assessment):

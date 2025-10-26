@@ -148,8 +148,8 @@
 			<!-- Left: Base Audit Scores -->
 			<div class="p-6">
 				<div class="flex flex-col items-center space-y-4">
-					{#if data.baseAudit.global_score >= 0}
-						<div class="flex flex-col items-center">
+					<div class="flex flex-col items-center h-48">
+						{#if data.baseAudit.global_score >= 0}
 							<span class="text-sm font-medium text-gray-600 mb-2">{m.maturity()}</span>
 							<ProgressRing
 								strokeWidth="20px"
@@ -162,8 +162,13 @@
 							>
 								<p class="font-semibold text-3xl">{data.baseAudit.global_score}</p>
 							</ProgressRing>
-						</div>
-					{/if}
+						{:else}
+							<span class="text-sm font-medium text-gray-400 mb-2">{m.maturity()}</span>
+							<div class="flex items-center justify-center size-40">
+								<p class="text-gray-400 text-sm text-center">--</p>
+							</div>
+						{/if}
+					</div>
 
 					<div class="w-full flex flex-col gap-4 mt-4">
 						<div class="w-full h-64">
@@ -199,8 +204,8 @@
 			<!-- Right: Comparison Audit Scores -->
 			<div class="p-6">
 				<div class="flex flex-col items-center space-y-4">
-					{#if data.compareAudit.global_score >= 0}
-						<div class="flex flex-col items-center">
+					<div class="flex flex-col items-center h-48">
+						{#if data.compareAudit.global_score >= 0}
 							<span class="text-sm font-medium text-gray-600 mb-2">{m.maturity()}</span>
 							<ProgressRing
 								strokeWidth="20px"
@@ -213,8 +218,13 @@
 							>
 								<p class="font-semibold text-3xl">{data.compareAudit.global_score}</p>
 							</ProgressRing>
-						</div>
-					{/if}
+						{:else}
+							<span class="text-sm font-medium text-gray-400 mb-2">{m.maturity()}</span>
+							<div class="flex items-center justify-center size-40">
+								<p class="text-gray-400 text-sm text-center">--</p>
+							</div>
+						{/if}
+					</div>
 
 					<div class="w-full flex flex-col gap-4 mt-4">
 						<div class="w-full h-64">
