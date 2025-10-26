@@ -12,19 +12,19 @@ IF "%~2"=="" (
 
 REM Run the Python scripts
 echo ==^> [STEP 1] Extract Excel file data...
-python prep_cis.py %1 %2
+call python prep_cis.py %1 %2
 if %errorlevel% neq 0 (
     echo ==^> [ERROR] Step 1 failed
     exit /b 1
 )
 echo ==^> [STEP 2] Convert extracted Excel file to v2...
-python ..\..\convert_v1_to_v2.py cis-controls-v8.xlsx
+call python ..\..\convert_v1_to_v2.py cis-controls-v8.xlsx
 if %errorlevel% neq 0 (
     echo ==^> [ERROR] Step 2 failed
     exit /b 1
 )
 echo ==^> [STEP 3] Convert Excel v2 file to YAML...
-python ..\..\convert_library_v2.py cis-controls-v8_new.xlsx
+call python ..\..\convert_library_v2.py cis-controls-v8_new.xlsx
 if %errorlevel% neq 0 (
     echo ==^> [ERROR] Step 3 failed
     exit /b 1

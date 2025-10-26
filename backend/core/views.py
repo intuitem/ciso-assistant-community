@@ -10,7 +10,6 @@ from django_filters.utils import try_dbfield
 import regex
 import os
 import uuid
-import itertools
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
@@ -29,6 +28,7 @@ from django.db.models import (
     OuterRef,
     When,
     Case,
+    Exists,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -69,6 +69,7 @@ from django.apps import apps
 from django.contrib.auth.models import Permission
 from django.conf import settings
 from django.core.files.storage import default_storage
+
 from django.db import models, transaction
 from django.forms import ValidationError
 from django.http import FileResponse, HttpResponse, StreamingHttpResponse
@@ -151,6 +152,8 @@ logger = structlog.get_logger(__name__)
 SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
+
+MAPPING_MAX_DETPH = 2
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
@@ -2854,8 +2857,6 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
         return context
 
     def get_queryset(self):
-        from django.db.models import Q
-
         compliance_assessment_pk = self.kwargs["pk"]
 
         # Check permissions for compliance assessment
@@ -4984,6 +4985,21 @@ class FrameworkViewSet(BaseModelViewSet):
     filterset_class = FrameworkFilter
     search_fields = ["name", "description"]
 
+    def get_queryset(self):
+        qs = super().get_queryset().prefetch_related("requirement_nodes")
+
+        # Annotate if the framework is dynamic (any question uses implementation groups)
+        qs = qs.annotate(
+            is_dynamic=Exists(
+                RequirementNode.objects.filter(
+                    framework=OuterRef("pk"),
+                    questions__icontains="select_implementation_groups",
+                )
+            )
+        )
+
+        return qs
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @method_decorator(vary_on_cookie)
     @action(detail=False, methods=["get"])
@@ -5031,6 +5047,16 @@ class FrameworkViewSet(BaseModelViewSet):
                 .count()
             )
         return Response({"results": used_frameworks})
+
+    @action(
+        detail=True, methods=["get"], name="Get framework coverage data from mappings"
+    )
+    def mapping_stats(self, request, pk):
+        from core.mappings.engine import engine
+
+        framework_urn = Framework.objects.filter(id=pk).values_list("urn")[0][0]
+        res = engine.paths_and_coverages(framework_urn)
+        return Response({"response": res})
 
     @action(detail=True, methods=["get"], name="Get target frameworks from mappings")
     def mappings(self, request, pk):
@@ -5642,6 +5668,43 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
+    @action(
+        detail=True,
+        name="Get target frameworks mapping options with compliance distribution",
+    )
+    def frameworks(self, request, pk):
+        audit = ComplianceAssessment.objects.get(id=pk)
+        from core.mappings.engine import engine
+
+        audit_from_results = engine.load_audit_fields(audit)
+        frameworks_in_mappings = set()
+        data = []
+        for src, tgt in engine.all_rms.keys():
+            frameworks_in_mappings.add(src)
+            frameworks_in_mappings.add(tgt)
+        for dest_urn in sorted(frameworks_in_mappings):
+            best_results, _ = engine.best_mapping_inferences(
+                audit_from_results,
+                audit.framework.urn,
+                dest_urn,
+                max_depth=MAPPING_MAX_DETPH,
+            )
+            if best_results:
+                framework = Framework.objects.filter(urn=dest_urn).first()
+                if framework:
+                    assessable_requirements_count = framework.requirement_nodes.filter(
+                        assessable=True
+                    ).count()
+                    data.append(
+                        {
+                            "id": framework.id,
+                            "str": str(framework),
+                            "results": engine.summary_results(best_results),
+                            "assessable_requirements_count": assessable_requirements_count,
+                        }
+                    )
+        return Response(data, status=status.HTTP_200_OK)
+
     @action(detail=True, name="Get compliance assessment (audit) CSV")
     def compliance_assessment_csv(self, request, pk):
         response = HttpResponse(content_type="text/csv")
@@ -6115,6 +6178,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         create_applied_controls = serializer.validated_data.pop(
             "create_applied_controls_from_suggestions", False
         )
+        from core.mappings.engine import engine
 
         with transaction.atomic():
             instance: ComplianceAssessment = serializer.save()
@@ -6124,77 +6188,65 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 instance.show_documentation_score = baseline.show_documentation_score
                 instance.save()
 
-            # Handle different framework case
             elif baseline and baseline.framework != instance.framework:
-                # Fetch mapping set and prefetch related data
-                mapping_set = RequirementMappingSet.objects.select_related(
-                    "source_framework", "target_framework"
-                ).get(
-                    target_framework=serializer.validated_data["framework"],
-                    source_framework=baseline.framework,
+                source_urn = baseline.framework.urn
+                audit_from_results = engine.load_audit_fields(baseline)
+                dest_urn = serializer.validated_data["framework"].urn
+
+                best_results, _ = engine.best_mapping_inferences(
+                    audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
+                )
+                ic(best_results)
+
+                requirement_assessments_to_update: list[RequirementAssessment] = []
+
+                target_requirement_assessments = RequirementAssessment.objects.filter(
+                    compliance_assessment=instance,
+                    requirement__urn__in=best_results,
                 )
 
-                # Compute results and get all affected requirement assessments
-                computed_assessments, assessment_source_dict = (
-                    instance.compute_requirement_assessments_results(
-                        mapping_set, baseline
-                    )
+                for req in target_requirement_assessments:
+                    for field in ["result", "status", "observation"]:
+                        if best_results[req.requirement.urn].get(field):
+                            req.__setattr__(
+                                field, best_results[req.requirement.urn][field]
+                            )
+                    requirement_assessments_to_update.append(req)
+
+                RequirementAssessment.objects.bulk_update(
+                    requirement_assessments_to_update,
+                    ["result", "status", "observation"],
+                    batch_size=500,
                 )
 
-                # Collect all source requirement assessment IDs
-                source_assessment_ids = itertools.chain.from_iterable(
-                    assessment_source_dict.values()
-                )
-
-                # Fetch all baseline requirement assessments in one query
-                baseline_assessments = {
-                    str(ra.id): ra
-                    for ra in RequirementAssessment.objects.filter(
-                        id__in=source_assessment_ids
-                    ).prefetch_related("evidences", "applied_controls")
-                }
-
-                # Prepare bulk updates
-                updates = []
-                m2m_operations = []
-
-                for requirement_assessment in computed_assessments:
-                    selected_source_id = requirement_assessment.mapping_inference[
-                        "source_requirement_assessment"
-                    ]["id"]
-                    selected_baseline_ra = baseline_assessments[selected_source_id]
-
-                    # Update observation
-                    requirement_assessment.observation = (
-                        selected_baseline_ra.observation
-                    )
-                    updates.append(requirement_assessment)
-
-                    source_ids = assessment_source_dict[requirement_assessment]
-                    baseline_requirement_assessments = [
-                        baseline_assessments[source_id] for source_id in source_ids
-                    ]
-
-                    # Store M2M operations for later
-                    m2m_operations.append(
-                        (
-                            requirement_assessment,
-                            selected_baseline_ra.evidences.all(),
-                            itertools.chain.from_iterable(
-                                requirement_assessment.applied_controls.all()
-                                for requirement_assessment in baseline_requirement_assessments
-                            ),
+                for ra in requirement_assessments_to_update:
+                    if best_results[ra.requirement.urn].get("applied_controls"):
+                        ra.applied_controls.add(
+                            *[
+                                control
+                                for control in best_results[ra.requirement.urn][
+                                    "applied_controls"
+                                ]
+                            ]
                         )
-                    )
-
-                # Bulk update observations
-                if updates:
-                    RequirementAssessment.objects.bulk_update(updates, ["observation"])
-
-                # Handle M2M relationships in bulk
-                for assessment, evidences, controls in m2m_operations:
-                    assessment.evidences.add(*[ev.id for ev in evidences])
-                    assessment.applied_controls.add(*[ac.id for ac in controls])
+                    if best_results[ra.requirement.urn].get("evidences"):
+                        ra.evidences.add(
+                            *[
+                                evidence
+                                for evidence in best_results[ra.requirement.urn][
+                                    "evidences"
+                                ]
+                            ]
+                        )
+                    if best_results[ra.requirement.urn].get("security_exceptions"):
+                        ra.security_exceptions.add(
+                            *[
+                                exception
+                                for exception in best_results[ra.requirement.urn][
+                                    "security_exceptions"
+                                ]
+                            ]
+                        )
 
             # Handle applied controls creation
             if create_applied_controls:
@@ -6379,6 +6431,323 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def donut_data(self, request, pk):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
         return Response(compliance_assessment.donut_render())
+
+    @action(detail=True, methods=["get"])
+    def comparable_audits(self, request, pk):
+        """
+        Get list of compliance assessments that can be compared with this one
+        (same framework, user has view permission, excludes current audit)
+        """
+        try:
+            base_audit = self.get_object()
+        except ComplianceAssessment.DoesNotExist:
+            return Response(
+                {"error": "Base audit not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Get viewable objects for permission checking
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        # Filter audits: same framework, viewable, exclude current
+        comparable_audits = (
+            ComplianceAssessment.objects.filter(
+                framework=base_audit.framework, id__in=viewable_objects
+            )
+            .exclude(id=UUID(pk))
+            .select_related("folder", "framework", "perimeter")
+            .order_by("-created_at")
+        )
+
+        # Build response with prioritization for same perimeter
+        results = []
+        for audit in comparable_audits:
+            result = {
+                "id": str(audit.id),
+                "name": audit.name,
+                "ref_id": audit.ref_id,
+                "version": audit.version,
+                "status": audit.status,
+                "perimeter": {
+                    "id": str(audit.perimeter.id),
+                    "str": audit.perimeter.name,
+                }
+                if audit.perimeter
+                else None,
+                "folder": {"id": str(audit.folder.id), "str": audit.folder.name},
+                "created_at": audit.created_at,
+                # Flag for prioritization in frontend
+                "same_perimeter": (
+                    base_audit.perimeter
+                    and audit.perimeter
+                    and audit.perimeter.id == base_audit.perimeter.id
+                ),
+            }
+            results.append(result)
+
+        # Sort: same perimeter first, then by creation date
+        results.sort(
+            key=lambda x: (not x["same_perimeter"], x["created_at"]), reverse=True
+        )
+
+        return Response({"results": results})
+
+    @action(detail=True, methods=["get"])
+    def compare(self, request, pk):
+        """
+        Compare two compliance assessments that use the same framework
+        """
+        compare_id = request.query_params.get("compare_id")
+
+        if not compare_id:
+            return Response(
+                {"error": "compare_id parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Get viewable objects for permission checking
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        # Check permissions for base audit
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied for base audit"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Check permissions for comparison audit
+        if UUID(compare_id) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied for comparison audit"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            base_audit = ComplianceAssessment.objects.get(id=pk)
+            compare_audit = ComplianceAssessment.objects.get(id=compare_id)
+        except ComplianceAssessment.DoesNotExist:
+            return Response(
+                {"error": "One or both audits not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Validate same framework
+        if base_audit.framework.id != compare_audit.framework.id:
+            return Response(
+                {"error": "Audits must use the same framework for comparison"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Helper function to aggregate data by top-level requirements
+        def aggregate_by_top_level(audit):
+            from core.helpers import get_referential_translation
+
+            requirement_nodes = list(
+                RequirementNode.objects.filter(framework=audit.framework).all()
+            )
+            requirement_assessments = list(
+                audit.requirement_assessments.select_related("requirement").all()
+            )
+
+            # Build mapping of requirement_id to assessment
+            req_assessment_map = {
+                str(ra.requirement_id): ra for ra in requirement_assessments
+            }
+
+            # Build children dictionary for quick lookup
+            children_dict = {}
+            for rn in requirement_nodes:
+                parent = rn.parent_urn or "root"
+                if parent not in children_dict:
+                    children_dict[parent] = []
+                children_dict[parent].append(rn)
+
+            # Get top-level nodes (no parent)
+            top_level_nodes = children_dict.get("root", [])
+
+            # Sort by order_id if available
+            for node in top_level_nodes:
+                if node.order_id is None:
+                    node.order_id = node.created_at.timestamp()
+            top_level_nodes.sort(key=lambda x: x.order_id)
+
+            radar_data = {
+                "labels": [],
+                "compliance_percentages": [],
+                "maturity_scores": [],
+            }
+
+            # Collect all assessable descendants recursively
+            def collect_assessable_descendants(node_urn):
+                assessable = []
+                node_children = children_dict.get(node_urn, [])
+
+                for child in node_children:
+                    # If this child is assessable, add its assessment
+                    if child.assessable:
+                        ra = req_assessment_map.get(str(child.id))
+                        if ra:
+                            assessable.append(ra)
+
+                    # Recursively collect from this child's descendants
+                    assessable.extend(collect_assessable_descendants(child.urn))
+
+                return assessable
+
+            for node in top_level_nodes:
+                # Try multiple ways to get a meaningful name
+                node_name = (
+                    get_referential_translation(node, "name")
+                    or node.name
+                    or node.ref_id
+                    or f"Node {node.id}"
+                )
+                radar_data["labels"].append(node_name)
+
+                # Check if the node itself is assessable
+                assessable_list = []
+                if node.assessable:
+                    ra = req_assessment_map.get(str(node.id))
+                    if ra:
+                        assessable_list.append(ra)
+
+                # Add all assessable descendants
+                assessable_list.extend(collect_assessable_descendants(node.urn))
+
+                # Calculate compliance percentage (compliant or partially_compliant assessments)
+                if assessable_list:
+                    compliant = sum(
+                        1
+                        for ra in assessable_list
+                        if ra.result in ["compliant", "partially_compliant"]
+                    )
+                    compliance_percentage = (compliant / len(assessable_list)) * 100
+                else:
+                    compliance_percentage = 0
+
+                # Calculate maturity score (average score, not percentage)
+                scored_list = [
+                    ra
+                    for ra in assessable_list
+                    if ra.is_scored and ra.result != "not_applicable"
+                ]
+                if scored_list:
+                    total_score = sum(ra.score or 0 for ra in scored_list)
+                    # Calculate mean score (same as frontend nodeScore function)
+                    maturity_score = total_score / len(scored_list)
+                else:
+                    maturity_score = 0
+
+                radar_data["compliance_percentages"].append(
+                    round(compliance_percentage, 1)
+                )
+                radar_data["maturity_scores"].append(round(maturity_score, 1))
+
+            return radar_data
+
+        # Build comparison data
+        comparison_data = {
+            "framework": {
+                "id": str(base_audit.framework.id),
+                "str": base_audit.framework.name,
+            },
+            "base": {
+                "id": str(base_audit.id),
+                "name": base_audit.name,
+                "version": base_audit.version,
+                "status": base_audit.status,
+                "perimeter": {
+                    "id": str(base_audit.perimeter.id),
+                    "str": base_audit.perimeter.name,
+                }
+                if base_audit.perimeter
+                else None,
+                "selected_implementation_groups": base_audit.get_selected_implementation_groups(),
+                "created_at": base_audit.created_at,
+                "updated_at": base_audit.updated_at,
+                "observation": base_audit.observation,
+                "global_score": base_audit.get_global_score(),
+                "max_score": base_audit.max_score,
+                "donut_data": base_audit.donut_render(),
+                "radar_data": aggregate_by_top_level(base_audit),
+            },
+            "compare": {
+                "id": str(compare_audit.id),
+                "name": compare_audit.name,
+                "version": compare_audit.version,
+                "status": compare_audit.status,
+                "perimeter": {
+                    "id": str(compare_audit.perimeter.id),
+                    "str": compare_audit.perimeter.name,
+                }
+                if compare_audit.perimeter
+                else None,
+                "selected_implementation_groups": compare_audit.get_selected_implementation_groups(),
+                "created_at": compare_audit.created_at,
+                "updated_at": compare_audit.updated_at,
+                "observation": compare_audit.observation,
+                "global_score": compare_audit.get_global_score(),
+                "max_score": compare_audit.max_score,
+                "donut_data": compare_audit.donut_render(),
+                "radar_data": aggregate_by_top_level(compare_audit),
+            },
+        }
+
+        # Build differences list
+        differences = []
+
+        # Get all requirement assessments from both audits
+        base_ras = base_audit.requirement_assessments.select_related(
+            "requirement"
+        ).all()
+        compare_ras_dict = {
+            ra.requirement_id: ra
+            for ra in compare_audit.requirement_assessments.select_related(
+                "requirement"
+            ).all()
+        }
+
+        for base_ra in base_ras:
+            compare_ra = compare_ras_dict.get(base_ra.requirement_id)
+
+            # Skip if no matching requirement in compare audit
+            if not compare_ra:
+                continue
+
+            # Check if result or score is different
+            result_different = base_ra.result != compare_ra.result
+            score_different = base_ra.score != compare_ra.score
+
+            if result_different or score_different:
+                differences.append(
+                    {
+                        "requirement": {
+                            "id": str(base_ra.requirement.id),
+                            "ref_id": base_ra.requirement.ref_id,
+                            "name": base_ra.requirement.name,
+                            "description": base_ra.requirement.description,
+                        },
+                        "base": {
+                            "id": str(base_ra.id),
+                            "result": base_ra.result,
+                            "status": base_ra.status,
+                            "score": base_ra.score,
+                        },
+                        "compare": {
+                            "id": str(compare_ra.id),
+                            "result": compare_ra.result,
+                            "status": compare_ra.status,
+                            "score": compare_ra.score,
+                        },
+                    }
+                )
+
+        comparison_data["differences"] = differences
+
+        return Response(comparison_data)
 
     @staticmethod
     @api_view(["POST"])
@@ -6652,6 +7021,14 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             ).values_list("provider", flat=True)
         )
         return Response({p: p for p in providers})
+
+    def perform_create(self, serializer):
+        # create the new requirement mapping set and reload the engine.
+        instance = serializer.save()
+        from core.mappings.engine import engine
+
+        engine.load_rms_data()
+        return instance
 
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
@@ -7639,7 +8016,6 @@ class FindingViewSet(BaseModelViewSet):
             queryset = queryset.filter(folder=folder)
 
         # Build Sankey data structure
-        from django.db.models import Count
 
         # Get category -> severity -> status combinations
         nodes = []
@@ -8093,7 +8469,7 @@ class IncidentViewSet(BaseModelViewSet):
         total_incidents = queryset.count()
 
         # Incidents this month
-        from datetime import datetime, date
+        from datetime import date
         import calendar
 
         today = date.today()

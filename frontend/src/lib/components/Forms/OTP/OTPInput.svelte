@@ -69,7 +69,6 @@
 
 	run(() => {
 		if ($errors && clearOnError) {
-			console.log('clearing');
 			reset();
 		}
 	});

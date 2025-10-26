@@ -975,6 +975,9 @@ def startup(sender: AppConfig, **kwargs):
     from privacy.models import ProcessingNature
     from global_settings.models import GlobalSettings
 
+    # first load in memory of the frameworks and mappings
+    from core.mappings.engine import engine
+
     print("startup handler: initialize database")
 
     reader_permissions = Permission.objects.filter(codename__in=READER_PERMISSIONS_LIST)
