@@ -32,7 +32,6 @@
 			},
 			body: JSON.stringify({ is_selected: !row.is_selected })
 		};
-		console.log(row);
 		const model = getModelInfo(URLModel);
 		const objectTypeName = safeTranslate(model.localName);
 
