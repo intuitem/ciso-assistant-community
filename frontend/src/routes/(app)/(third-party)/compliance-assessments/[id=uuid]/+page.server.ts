@@ -55,8 +55,6 @@ export const load = (async ({ fetch, params }) => {
 		(res) => res.json()
 	);
 
-	console.log('frameworksMappings', frameworksMappings);
-
 	if (auditModel.selectFields) {
 		for (const selectField of auditModel.selectFields) {
 			const url = `${BASE_API_URL}/compliance-assessments/${selectField.field}/`;

@@ -6363,6 +6363,323 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
         return Response(compliance_assessment.donut_render())
 
+    @action(detail=True, methods=["get"])
+    def comparable_audits(self, request, pk):
+        """
+        Get list of compliance assessments that can be compared with this one
+        (same framework, user has view permission, excludes current audit)
+        """
+        try:
+            base_audit = self.get_object()
+        except ComplianceAssessment.DoesNotExist:
+            return Response(
+                {"error": "Base audit not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Get viewable objects for permission checking
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        # Filter audits: same framework, viewable, exclude current
+        comparable_audits = (
+            ComplianceAssessment.objects.filter(
+                framework=base_audit.framework, id__in=viewable_objects
+            )
+            .exclude(id=UUID(pk))
+            .select_related("folder", "framework", "perimeter")
+            .order_by("-created_at")
+        )
+
+        # Build response with prioritization for same perimeter
+        results = []
+        for audit in comparable_audits:
+            result = {
+                "id": str(audit.id),
+                "name": audit.name,
+                "ref_id": audit.ref_id,
+                "version": audit.version,
+                "status": audit.status,
+                "perimeter": {
+                    "id": str(audit.perimeter.id),
+                    "str": audit.perimeter.name,
+                }
+                if audit.perimeter
+                else None,
+                "folder": {"id": str(audit.folder.id), "str": audit.folder.name},
+                "created_at": audit.created_at,
+                # Flag for prioritization in frontend
+                "same_perimeter": (
+                    base_audit.perimeter
+                    and audit.perimeter
+                    and audit.perimeter.id == base_audit.perimeter.id
+                ),
+            }
+            results.append(result)
+
+        # Sort: same perimeter first, then by creation date
+        results.sort(
+            key=lambda x: (not x["same_perimeter"], x["created_at"]), reverse=True
+        )
+
+        return Response({"results": results})
+
+    @action(detail=True, methods=["get"])
+    def compare(self, request, pk):
+        """
+        Compare two compliance assessments that use the same framework
+        """
+        compare_id = request.query_params.get("compare_id")
+
+        if not compare_id:
+            return Response(
+                {"error": "compare_id parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Get viewable objects for permission checking
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        # Check permissions for base audit
+        if UUID(pk) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied for base audit"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Check permissions for comparison audit
+        if UUID(compare_id) not in viewable_objects:
+            return Response(
+                {"error": "Permission denied for comparison audit"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            base_audit = ComplianceAssessment.objects.get(id=pk)
+            compare_audit = ComplianceAssessment.objects.get(id=compare_id)
+        except ComplianceAssessment.DoesNotExist:
+            return Response(
+                {"error": "One or both audits not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Validate same framework
+        if base_audit.framework.id != compare_audit.framework.id:
+            return Response(
+                {"error": "Audits must use the same framework for comparison"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Helper function to aggregate data by top-level requirements
+        def aggregate_by_top_level(audit):
+            from core.helpers import get_referential_translation
+
+            requirement_nodes = list(
+                RequirementNode.objects.filter(framework=audit.framework).all()
+            )
+            requirement_assessments = list(
+                audit.requirement_assessments.select_related("requirement").all()
+            )
+
+            # Build mapping of requirement_id to assessment
+            req_assessment_map = {
+                str(ra.requirement_id): ra for ra in requirement_assessments
+            }
+
+            # Build children dictionary for quick lookup
+            children_dict = {}
+            for rn in requirement_nodes:
+                parent = rn.parent_urn or "root"
+                if parent not in children_dict:
+                    children_dict[parent] = []
+                children_dict[parent].append(rn)
+
+            # Get top-level nodes (no parent)
+            top_level_nodes = children_dict.get("root", [])
+
+            # Sort by order_id if available
+            for node in top_level_nodes:
+                if node.order_id is None:
+                    node.order_id = node.created_at.timestamp()
+            top_level_nodes.sort(key=lambda x: x.order_id)
+
+            radar_data = {
+                "labels": [],
+                "compliance_percentages": [],
+                "maturity_scores": [],
+            }
+
+            # Collect all assessable descendants recursively
+            def collect_assessable_descendants(node_urn):
+                assessable = []
+                node_children = children_dict.get(node_urn, [])
+
+                for child in node_children:
+                    # If this child is assessable, add its assessment
+                    if child.assessable:
+                        ra = req_assessment_map.get(str(child.id))
+                        if ra:
+                            assessable.append(ra)
+
+                    # Recursively collect from this child's descendants
+                    assessable.extend(collect_assessable_descendants(child.urn))
+
+                return assessable
+
+            for node in top_level_nodes:
+                # Try multiple ways to get a meaningful name
+                node_name = (
+                    get_referential_translation(node, "name")
+                    or node.name
+                    or node.ref_id
+                    or f"Node {node.id}"
+                )
+                radar_data["labels"].append(node_name)
+
+                # Check if the node itself is assessable
+                assessable_list = []
+                if node.assessable:
+                    ra = req_assessment_map.get(str(node.id))
+                    if ra:
+                        assessable_list.append(ra)
+
+                # Add all assessable descendants
+                assessable_list.extend(collect_assessable_descendants(node.urn))
+
+                # Calculate compliance percentage (compliant or partially_compliant assessments)
+                if assessable_list:
+                    compliant = sum(
+                        1
+                        for ra in assessable_list
+                        if ra.result in ["compliant", "partially_compliant"]
+                    )
+                    compliance_percentage = (compliant / len(assessable_list)) * 100
+                else:
+                    compliance_percentage = 0
+
+                # Calculate maturity score (average score, not percentage)
+                scored_list = [
+                    ra
+                    for ra in assessable_list
+                    if ra.is_scored and ra.result != "not_applicable"
+                ]
+                if scored_list:
+                    total_score = sum(ra.score or 0 for ra in scored_list)
+                    # Calculate mean score (same as frontend nodeScore function)
+                    maturity_score = total_score / len(scored_list)
+                else:
+                    maturity_score = 0
+
+                radar_data["compliance_percentages"].append(
+                    round(compliance_percentage, 1)
+                )
+                radar_data["maturity_scores"].append(round(maturity_score, 1))
+
+            return radar_data
+
+        # Build comparison data
+        comparison_data = {
+            "framework": {
+                "id": str(base_audit.framework.id),
+                "str": base_audit.framework.name,
+            },
+            "base": {
+                "id": str(base_audit.id),
+                "name": base_audit.name,
+                "version": base_audit.version,
+                "status": base_audit.status,
+                "perimeter": {
+                    "id": str(base_audit.perimeter.id),
+                    "str": base_audit.perimeter.name,
+                }
+                if base_audit.perimeter
+                else None,
+                "selected_implementation_groups": base_audit.get_selected_implementation_groups(),
+                "created_at": base_audit.created_at,
+                "updated_at": base_audit.updated_at,
+                "observation": base_audit.observation,
+                "global_score": base_audit.get_global_score(),
+                "max_score": base_audit.max_score,
+                "donut_data": base_audit.donut_render(),
+                "radar_data": aggregate_by_top_level(base_audit),
+            },
+            "compare": {
+                "id": str(compare_audit.id),
+                "name": compare_audit.name,
+                "version": compare_audit.version,
+                "status": compare_audit.status,
+                "perimeter": {
+                    "id": str(compare_audit.perimeter.id),
+                    "str": compare_audit.perimeter.name,
+                }
+                if compare_audit.perimeter
+                else None,
+                "selected_implementation_groups": compare_audit.get_selected_implementation_groups(),
+                "created_at": compare_audit.created_at,
+                "updated_at": compare_audit.updated_at,
+                "observation": compare_audit.observation,
+                "global_score": compare_audit.get_global_score(),
+                "max_score": compare_audit.max_score,
+                "donut_data": compare_audit.donut_render(),
+                "radar_data": aggregate_by_top_level(compare_audit),
+            },
+        }
+
+        # Build differences list
+        differences = []
+
+        # Get all requirement assessments from both audits
+        base_ras = base_audit.requirement_assessments.select_related(
+            "requirement"
+        ).all()
+        compare_ras_dict = {
+            ra.requirement_id: ra
+            for ra in compare_audit.requirement_assessments.select_related(
+                "requirement"
+            ).all()
+        }
+
+        for base_ra in base_ras:
+            compare_ra = compare_ras_dict.get(base_ra.requirement_id)
+
+            # Skip if no matching requirement in compare audit
+            if not compare_ra:
+                continue
+
+            # Check if result or score is different
+            result_different = base_ra.result != compare_ra.result
+            score_different = base_ra.score != compare_ra.score
+
+            if result_different or score_different:
+                differences.append(
+                    {
+                        "requirement": {
+                            "id": str(base_ra.requirement.id),
+                            "ref_id": base_ra.requirement.ref_id,
+                            "name": base_ra.requirement.name,
+                            "description": base_ra.requirement.description,
+                        },
+                        "base": {
+                            "id": str(base_ra.id),
+                            "result": base_ra.result,
+                            "status": base_ra.status,
+                            "score": base_ra.score,
+                        },
+                        "compare": {
+                            "id": str(compare_ra.id),
+                            "result": compare_ra.result,
+                            "status": compare_ra.status,
+                            "score": compare_ra.score,
+                        },
+                    }
+                )
+
+        comparison_data["differences"] = differences
+
+        return Response(comparison_data)
+
     @staticmethod
     @api_view(["POST"])
     @renderer_classes([JSONRenderer])

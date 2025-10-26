@@ -155,8 +155,6 @@
 		...additionalMultiselectOptions
 	};
 
-	$inspect(field, multiSelectOptions);
-
 	let isLoading = $state(false);
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
 	async function fetchOptions() {
