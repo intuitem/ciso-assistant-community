@@ -29,6 +29,7 @@ export const load = (async ({ fetch, url }) => {
 		framework: comparisonData.framework,
 		baseAudit: comparisonData.base,
 		compareAudit: comparisonData.compare,
+		differences: comparisonData.differences,
 		title: `Compare: ${comparisonData.base.name} vs ${comparisonData.compare.name}`
 	};
 }) satisfies PageServerLoad;

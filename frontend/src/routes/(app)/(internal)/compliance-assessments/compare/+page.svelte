@@ -23,6 +23,7 @@
 		{ key: 'version', label: 'Version' },
 		{ key: 'perimeter', label: 'Perimeter' },
 		{ key: 'status', label: 'Status' },
+		{ key: 'selected_implementation_groups', label: 'Implementation Groups' },
 		{ key: 'created_at', label: 'Created At', format: 'date' },
 		{ key: 'updated_at', label: 'Last Update', format: 'date' },
 		{ key: 'observation', label: 'Observation', format: 'markdown' }
@@ -35,6 +36,11 @@
 
 		if (field.format === 'date') {
 			return formatDateOrDateTime(value, getLocale());
+		}
+
+		if (Array.isArray(value)) {
+			if (value.length === 0) return '--';
+			return value.map((v) => (v.str ? v.str : v)).join(', ');
 		}
 
 		if (value.str) return value.str;
@@ -269,17 +275,23 @@
 		</div>
 		<div class="grid grid-cols-2 gap-6 p-6">
 			<!-- Compliance Radar -->
-			<div class="h-96">
-				<ComparisonRadarChart
-					name="compliance_radar"
-					title={m.compliance()}
-					labels={data.baseAudit.radar_data.labels}
-					baseData={data.baseAudit.radar_data.compliance_percentages}
-					compareData={data.compareAudit.radar_data.compliance_percentages}
-					baseName={data.baseAudit.name}
-					compareName={data.compareAudit.name}
-					height="h-full"
-				/>
+			<div class="flex flex-col">
+				<div class="h-96">
+					<ComparisonRadarChart
+						name="compliance_radar"
+						title={m.compliance()}
+						labels={data.baseAudit.radar_data.labels}
+						baseData={data.baseAudit.radar_data.compliance_percentages}
+						compareData={data.compareAudit.radar_data.compliance_percentages}
+						baseName={data.baseAudit.name}
+						compareName={data.compareAudit.name}
+						height="h-full"
+					/>
+				</div>
+				<p class="text-xs text-gray-500 text-center mt-2">
+					<i class="fa-solid fa-info-circle mr-1"></i>
+					{m.complianceIncludesCompliantAndPartiallyCompliant()}
+				</p>
 			</div>
 
 			<!-- Maturity Radar -->
@@ -292,11 +304,128 @@
 					compareData={data.compareAudit.radar_data.maturity_scores}
 					baseName={data.baseAudit.name}
 					compareName={data.compareAudit.name}
+					maxValue={data.baseAudit.max_score || 100}
 					height="h-full"
 				/>
 			</div>
 		</div>
 	</div>
+
+	<!-- Differences Table -->
+	{#if data.differences && data.differences.length > 0}
+		<div class="card bg-white shadow-lg">
+			<div class="px-6 py-4 border-b border-gray-200">
+				<h2 class="h3 font-bold">
+					<i class="fa-solid fa-code-compare mr-2"></i>
+					{m.requirementDifferences()}
+				</h2>
+				<p class="text-sm text-gray-600 mt-1">
+					{data.differences.length}
+					{data.differences.length === 1 ? m.requirement() : m.requirements()}
+					{m.withDifferences()}
+				</p>
+			</div>
+			<div class="overflow-x-auto">
+				<table class="table-auto w-full">
+					<thead>
+						<tr class="bg-gray-50">
+							<th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+								{m.requirement()}
+							</th>
+							<th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+								{m.baseAudit()}
+							</th>
+							<th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+								{m.comparisonAudit()}
+							</th>
+						</tr>
+					</thead>
+					<tbody class="divide-y divide-gray-200">
+						{#each data.differences as diff}
+							<tr class="hover:bg-gray-50">
+								<td class="px-6 py-4">
+									<div class="flex flex-col">
+										{#if diff.requirement.ref_id}
+											<span class="font-semibold text-sm">{diff.requirement.ref_id}</span>
+										{/if}
+										{#if diff.requirement.name}
+											<span class="text-sm text-gray-900">{diff.requirement.name}</span>
+										{/if}
+									</div>
+								</td>
+								<td class="px-6 py-4">
+									<div class="flex flex-col space-y-1">
+										<div class="flex items-center space-x-2">
+											<span class="text-xs text-gray-500">{m.result()}:</span>
+											<span
+												class="badge text-xs"
+												style="background-color: {diff.base.result === 'compliant'
+													? '#86efac'
+													: diff.base.result === 'partially_compliant'
+														? '#fde047'
+														: diff.base.result === 'non_compliant'
+															? '#f87171'
+															: diff.base.result === 'not_applicable'
+																? '#000000'
+																: '#d1d5db'}; color: {diff.base.result === 'not_applicable'
+													? 'white'
+													: 'black'};"
+											>
+												{safeTranslate(diff.base.result)}
+											</span>
+										</div>
+										<div class="flex items-center space-x-2">
+											<span class="text-xs text-gray-500">{m.status()}:</span>
+											<span class="text-xs">{safeTranslate(diff.base.status)}</span>
+										</div>
+										{#if diff.base.score !== null && diff.base.score !== undefined}
+											<div class="flex items-center space-x-2">
+												<span class="text-xs text-gray-500">{m.score()}:</span>
+												<span class="text-xs font-medium">{diff.base.score}</span>
+											</div>
+										{/if}
+									</div>
+								</td>
+								<td class="px-6 py-4">
+									<div class="flex flex-col space-y-1">
+										<div class="flex items-center space-x-2">
+											<span class="text-xs text-gray-500">{m.result()}:</span>
+											<span
+												class="badge text-xs"
+												style="background-color: {diff.compare.result === 'compliant'
+													? '#86efac'
+													: diff.compare.result === 'partially_compliant'
+														? '#fde047'
+														: diff.compare.result === 'non_compliant'
+															? '#f87171'
+															: diff.compare.result === 'not_applicable'
+																? '#000000'
+																: '#d1d5db'}; color: {diff.compare.result === 'not_applicable'
+													? 'white'
+													: 'black'};"
+											>
+												{safeTranslate(diff.compare.result)}
+											</span>
+										</div>
+										<div class="flex items-center space-x-2">
+											<span class="text-xs text-gray-500">{m.status()}:</span>
+											<span class="text-xs">{safeTranslate(diff.compare.status)}</span>
+										</div>
+										{#if diff.compare.score !== null && diff.compare.score !== undefined}
+											<div class="flex items-center space-x-2">
+												<span class="text-xs text-gray-500">{m.score()}:</span>
+												<span class="text-xs font-medium">{diff.compare.score}</span>
+											</div>
+										{/if}
+									</div>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	{/if}
 
 	<div class="card p-6 bg-white shadow-lg">
 		<div class="flex items-center justify-center text-gray-500 py-8">

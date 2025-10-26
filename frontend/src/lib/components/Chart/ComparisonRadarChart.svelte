@@ -12,6 +12,7 @@
 		compareData: number[];
 		baseName: string;
 		compareName: string;
+		maxValue?: number;
 	}
 
 	let {
@@ -24,7 +25,8 @@
 		baseData,
 		compareData,
 		baseName,
-		compareName
+		compareName,
+		maxValue = 100
 	}: Props = $props();
 
 	const chart_id = `${name}_div`;
@@ -33,21 +35,11 @@
 		const echarts = await import('echarts');
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 
-		// Debug: Log the data
-		console.log('Radar Chart Data:', {
-			name,
-			labels,
-			baseData,
-			compareData,
-			baseName,
-			compareName
-		});
-
-		// Prepare indicators with max value of 100 (percentage) and min -1 to avoid distortions with 0-values
+		// Prepare indicators with configurable max value and min -1 to avoid distortions with 0-values
 		const indicators = labels.map((label) => ({
 			name: label,
 			min: -1,
-			max: 100
+			max: maxValue
 		}));
 
 		const option = {
@@ -62,7 +54,8 @@
 				trigger: 'item',
 				formatter: function (params: any) {
 					const dimensionName = indicators[params.dataIndex]?.name || '';
-					return `${params.name}<br/>${dimensionName}: ${params.value[params.dataIndex]}%`;
+					const suffix = maxValue === 100 ? '%' : '';
+					return `${params.name}<br/>${dimensionName}: ${params.value[params.dataIndex]}${suffix}`;
 				}
 			},
 			legend: {
@@ -159,7 +152,6 @@
 			]
 		};
 
-		console.log('ECharts Option:', JSON.stringify(option, null, 2));
 		chart.setOption(option);
 
 		window.addEventListener('resize', function () {

@@ -6548,35 +6548,34 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 # Add all assessable descendants
                 assessable_list.extend(collect_assessable_descendants(node.urn))
 
-                # Calculate compliance percentage (compliant assessments)
+                # Calculate compliance percentage (compliant or partially_compliant assessments)
                 if assessable_list:
                     compliant = sum(
                         1
                         for ra in assessable_list
-                        if ra.result
-                        and ra.result not in ["non_compliant", "not_applicable"]
+                        if ra.result in ["compliant", "partially_compliant"]
                     )
                     compliance_percentage = (compliant / len(assessable_list)) * 100
                 else:
                     compliance_percentage = 0
 
-                # Calculate maturity score percentage
+                # Calculate maturity score (average score, not percentage)
                 scored_list = [
                     ra
                     for ra in assessable_list
                     if ra.is_scored and ra.result != "not_applicable"
                 ]
-                if scored_list and audit.max_score:
+                if scored_list:
                     total_score = sum(ra.score or 0 for ra in scored_list)
-                    max_possible = len(scored_list) * audit.max_score
-                    maturity_percentage = (total_score / max_possible) * 100
+                    # Calculate mean score (same as frontend nodeScore function)
+                    maturity_score = total_score / len(scored_list)
                 else:
-                    maturity_percentage = 0
+                    maturity_score = 0
 
                 radar_data["compliance_percentages"].append(
                     round(compliance_percentage, 1)
                 )
-                radar_data["maturity_scores"].append(round(maturity_percentage, 1))
+                radar_data["maturity_scores"].append(round(maturity_score, 1))
 
             return radar_data
 
@@ -6597,6 +6596,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 }
                 if base_audit.perimeter
                 else None,
+                "selected_implementation_groups": base_audit.get_selected_implementation_groups(),
                 "created_at": base_audit.created_at,
                 "updated_at": base_audit.updated_at,
                 "observation": base_audit.observation,
@@ -6616,6 +6616,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 }
                 if compare_audit.perimeter
                 else None,
+                "selected_implementation_groups": compare_audit.get_selected_implementation_groups(),
                 "created_at": compare_audit.created_at,
                 "updated_at": compare_audit.updated_at,
                 "observation": compare_audit.observation,
@@ -6625,6 +6626,57 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "radar_data": aggregate_by_top_level(compare_audit),
             },
         }
+
+        # Build differences list
+        differences = []
+
+        # Get all requirement assessments from both audits
+        base_ras = base_audit.requirement_assessments.select_related(
+            "requirement"
+        ).all()
+        compare_ras_dict = {
+            ra.requirement_id: ra
+            for ra in compare_audit.requirement_assessments.select_related(
+                "requirement"
+            ).all()
+        }
+
+        for base_ra in base_ras:
+            compare_ra = compare_ras_dict.get(base_ra.requirement_id)
+
+            # Skip if no matching requirement in compare audit
+            if not compare_ra:
+                continue
+
+            # Check if result or score is different
+            result_different = base_ra.result != compare_ra.result
+            score_different = base_ra.score != compare_ra.score
+
+            if result_different or score_different:
+                differences.append(
+                    {
+                        "requirement": {
+                            "id": str(base_ra.requirement.id),
+                            "ref_id": base_ra.requirement.ref_id,
+                            "name": base_ra.requirement.name,
+                            "description": base_ra.requirement.description,
+                        },
+                        "base": {
+                            "id": str(base_ra.id),
+                            "result": base_ra.result,
+                            "status": base_ra.status,
+                            "score": base_ra.score,
+                        },
+                        "compare": {
+                            "id": str(compare_ra.id),
+                            "result": compare_ra.result,
+                            "status": compare_ra.status,
+                            "score": compare_ra.score,
+                        },
+                    }
+                )
+
+        comparison_data["differences"] = differences
 
         return Response(comparison_data)
 
