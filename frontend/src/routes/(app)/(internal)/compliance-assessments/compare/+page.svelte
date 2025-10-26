@@ -53,10 +53,10 @@
 	<div class="card p-4 bg-white shadow-lg">
 		<div class="flex items-center justify-between mb-4">
 			<div class="flex flex-col">
-				<h1 class="h2 font-bold">
+				<div class="h4 font-bold">
 					<i class="fa-solid fa-code-compare mr-2"></i>
 					{m.complianceAssessmentComparison()}
-				</h1>
+				</div>
 				<div class="text-sm text-gray-600 mt-1">
 					<span class="font-medium">{m.framework()}:</span>
 					{data.framework.str}
@@ -64,7 +64,7 @@
 			</div>
 			<Anchor
 				href="/compliance-assessments/{data.baseAudit.id}"
-				class="btn preset-filled-surface-500"
+				class="btn preset-filled-primary-500"
 			>
 				<i class="fa-solid fa-arrow-left mr-2"></i>
 				{m.backToBaseAudit()}
@@ -77,10 +77,10 @@
 			<!-- Left side: Base Audit -->
 			<div class="p-6 space-y-4">
 				<div class="flex items-center justify-between mb-4">
-					<h2 class="h3 font-bold text-primary-500">{m.baseAudit()}</h2>
+					<h2 class="h4 font-bold text-primary-500">{m.baseAudit()}</h2>
 					<Anchor
 						href="/compliance-assessments/{data.baseAudit.id}"
-						class="btn btn-sm preset-filled-primary-500"
+						class="btn btn-sm preset-filled-secondary-500"
 					>
 						<i class="fa-solid fa-external-link-alt mr-2"></i>
 						{m.view()}
@@ -110,7 +110,7 @@
 			<!-- Right side: Comparison Audit -->
 			<div class="p-6 space-y-4">
 				<div class="flex items-center justify-between mb-4">
-					<h2 class="h3 font-bold text-secondary-500">{m.comparisonAudit()}</h2>
+					<h2 class="h4 font-bold text-secondary-500">{m.comparisonAudit()}</h2>
 					<Anchor
 						href="/compliance-assessments/{data.compareAudit.id}"
 						class="btn btn-sm preset-filled-secondary-500"
@@ -145,7 +145,7 @@
 	<!-- Maturity & Compliance Scores Comparison -->
 	<div class="card bg-white shadow-lg">
 		<div class="px-6 py-4 border-b border-gray-200">
-			<h2 class="h3 font-bold">
+			<h2 class="h4 font-bold">
 				<i class="fa-solid fa-chart-line mr-2"></i>
 				{m.scoresAndMetrics()}
 			</h2>
@@ -268,7 +268,7 @@
 	<!-- Radar Charts Comparison -->
 	<div class="card bg-white shadow-lg">
 		<div class="px-6 py-4 border-b border-gray-200">
-			<h2 class="h3 font-bold">
+			<h2 class="h4 font-bold">
 				<i class="fa-solid fa-chart-radar mr-2"></i>
 				{m.radarComparisonByTopLevel()}
 			</h2>
@@ -315,7 +315,7 @@
 	{#if data.differences && data.differences.length > 0}
 		<div class="card bg-white shadow-lg">
 			<div class="px-6 py-4 border-b border-gray-200">
-				<h2 class="h3 font-bold">
+				<h2 class="h4 font-bold">
 					<i class="fa-solid fa-code-compare mr-2"></i>
 					{m.requirementDifferences()}
 				</h2>
@@ -374,10 +374,6 @@
 												{safeTranslate(diff.base.result)}
 											</span>
 										</div>
-										<div class="flex items-center space-x-2">
-											<span class="text-xs text-gray-500">{m.status()}:</span>
-											<span class="text-xs">{safeTranslate(diff.base.status)}</span>
-										</div>
 										{#if diff.base.score !== null && diff.base.score !== undefined}
 											<div class="flex items-center space-x-2">
 												<span class="text-xs text-gray-500">{m.score()}:</span>
@@ -407,10 +403,6 @@
 												{safeTranslate(diff.compare.result)}
 											</span>
 										</div>
-										<div class="flex items-center space-x-2">
-											<span class="text-xs text-gray-500">{m.status()}:</span>
-											<span class="text-xs">{safeTranslate(diff.compare.status)}</span>
-										</div>
 										{#if diff.compare.score !== null && diff.compare.score !== undefined}
 											<div class="flex items-center space-x-2">
 												<span class="text-xs text-gray-500">{m.score()}:</span>
@@ -427,15 +419,4 @@
 		</div>
 	{/if}
 
-	<div class="card p-6 bg-white shadow-lg">
-		<div class="flex items-center justify-center text-gray-500 py-8">
-			<div class="text-center space-y-2">
-				<i class="fa-solid fa-tools text-4xl"></i>
-				<p class="text-lg font-medium">{m.moreComparisonFeaturesComingSoon()}</p>
-				<p class="text-sm">
-					{m.futureComparisonFeatures()}
-				</p>
-			</div>
-		</div>
-	</div>
 </div>

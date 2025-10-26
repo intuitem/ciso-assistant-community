@@ -391,9 +391,6 @@
 		if (createAppliedControlsLoading === true && (form || form?.error))
 			createAppliedControlsLoading = false;
 	});
-	run(() => {
-		if (form?.message?.requirementAssessmentsSync) console.log(form);
-	});
 
 	let filterCount = $derived(
 		(selectedStatus.length > 0 ? 1 : 0) +
