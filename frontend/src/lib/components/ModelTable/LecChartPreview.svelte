@@ -50,7 +50,6 @@
 		const nonZeroData = chartData.filter(([x, _]: [number, number]) => x > 0);
 
 		if (nonZeroData.length === 0) {
-			console.log('No non-zero data points for logarithmic chart');
 			return;
 		}
 
