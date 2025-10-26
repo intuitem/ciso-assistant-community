@@ -224,7 +224,7 @@ def auditlog_retention_cleanup():
 def auditlog_prune():
     try:
         call_command("prune_auditlog")
-        logger.info("Successfully pruned audit logs")
+        logger.debug("Successfully pruned audit logs")
     except Exception as e:
         logger.error(f"Failed to prune the audit logs: {str(e)}")
 
