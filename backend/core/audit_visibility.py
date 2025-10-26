@@ -51,12 +51,11 @@ def _allowed_folder_ids(folder: Folder) -> set:
     allowed.update(f.id for f in folder.get_sub_folders())
     return allowed
 
+
 def _accessible_ids(folder: Folder, admin, model: type):
     """Return the set of IDs accessible to the admin for a given model, from folder."""
     try:
-        view_ids, _, _ = RoleAssignment.get_accessible_object_ids(
-            folder, admin, model
-        )
+        view_ids, _, _ = RoleAssignment.get_accessible_object_ids(folder, admin, model)
     except NotImplementedError:
         return None
     return set(view_ids)
@@ -71,11 +70,13 @@ def audit_visibility_leaks(user) -> list[dict]:
 
     for scope_folder in Folder.objects.all():
         print("parsing", scope_folder)
- 
+
         for model, relations in REFERENCE_MODEL_RELATIONS.items():
             for relation in relations:
                 field = model._meta.get_field(relation)
-                related_model = getattr(field, "related_model", None) or getattr(field.remote_field, "model", None)
+                related_model = getattr(field, "related_model", None) or getattr(
+                    field.remote_field, "model", None
+                )
                 accessible_refs = _accessible_ids(scope_folder, user, related_model)
                 for instance in model.objects.all():
                     if Folder.get_folder(instance) != scope_folder:
@@ -97,7 +98,9 @@ def audit_visibility_leaks(user) -> list[dict]:
                                 "scope_folder_name": scope_folder.name,
                                 "reference_model": model.__name__,
                                 "reference_id": instance.id,
-                                "reference_name": getattr(instance, "name", str(instance)),
+                                "reference_name": getattr(
+                                    instance, "name", str(instance)
+                                ),
                                 "reference_folder": instance.folder_id,
                                 "reference_folder_name": getattr(
                                     getattr(instance, "folder", None), "name", None
@@ -105,7 +108,9 @@ def audit_visibility_leaks(user) -> list[dict]:
                                 "relation": relation,
                                 "secondary_model": related.__class__.__name__,
                                 "secondary_id": related.id,
-                                "secondary_name": getattr(related, "name", str(related)),
+                                "secondary_name": getattr(
+                                    related, "name", str(related)
+                                ),
                                 "secondary_folder": getattr(related_folder, "id", None),
                                 "secondary_folder_name": getattr(
                                     related_folder, "name", None

@@ -17,7 +17,6 @@ class Command(BaseCommand):
         "Audit RBAC visibility across the whole folder tree (starting from the root)."
     )
 
-
     def handle(self, *args, **options):
         root = Folder.get_root_folder()
         if not root:
@@ -31,18 +30,10 @@ class Command(BaseCommand):
         leaks = audit_visibility_leaks(admin)
 
         if not leaks:
-            self.stdout.write(
-                self.style.SUCCESS(
-                    "No visibility leaks detected."
-                )
-            )
+            self.stdout.write(self.style.SUCCESS("No visibility leaks detected."))
             return
 
-        self.stdout.write(
-            self.style.WARNING(
-                f"{len(leaks)} leak(s) detected:"
-            )
-        )
+        self.stdout.write(self.style.WARNING(f"{len(leaks)} leak(s) detected:"))
         for leak in leaks:
             reference_name = leak.get("reference_name") or f"#{leak['reference_id']}"
             secondary_name = leak.get("secondary_name") or f"#{leak['secondary_id']}"
@@ -54,8 +45,8 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 f"Scope={leak['scope_folder_name']}  -  "
-                f"{leak['reference_model']}=\"{reference_name}\""
-                f" -> {leak['relation']} -> {leak['secondary_model']} \"{secondary_name}\" "
+                f'{leak["reference_model"]}="{reference_name}"'
+                f' -> {leak["relation"]} -> {leak["secondary_model"]} "{secondary_name}" '
                 f"[reference folder={reference_folder_label}, secondary folder={secondary_folder_label}]"
             )
 
