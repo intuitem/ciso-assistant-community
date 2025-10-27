@@ -2555,5 +2555,7 @@
 	"overlapWithOtherFrameworks": "Overlap with other frameworks",
 	"showOverlapWithOtherFrameworks": "Show overlap with other frameworks",
 	"spPrivateKeyAlreadySetHelpText": "A private key has already been set. For security reasons, you cannot view it again. You can only replace it with a new one.",
-	"resetSpPrivateKey": "Reset private key"
+	"resetSpPrivateKey": "Reset private key",
+	"outgoingSync": "Outgoing sync",
+	"incomingSync": "Incoming sync"
 }

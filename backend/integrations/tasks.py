@@ -28,6 +28,11 @@ def sync_object_to_integrations(
     for config_id in config_ids:
         try:
             config = IntegrationConfiguration.objects.get(pk=config_id)
+
+            # Skip if outgoing sync is disabled
+            if not config.settings.get("enable_outgoing_sync", False):
+                continue
+
             orchestrator = IntegrationRegistry.get_orchestrator(config)
             orchestrator.push_changes(obj, changed_fields)
         except Exception as e:
@@ -40,6 +45,11 @@ def process_webhook_event(config_id: uuid.UUID, event_type: str, payload: dict):
     """Process incoming webhook from remote system"""
     try:
         config = IntegrationConfiguration.objects.get(pk=config_id)
+
+        # Skip if incoming sync is disabled
+        if not config.settings.get("enable_incoming_sync", False):
+            return
+
         orchestrator = IntegrationRegistry.get_orchestrator(config)
 
         # Let the specific orchestrator handle the event

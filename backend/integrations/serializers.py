@@ -158,13 +158,9 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """
-        Use the IntegrationRegistry to validate provider-specific settings and credentials.
+        Use the IntegrationRegistry to validate provider-specific schema requirements.
         """
-        if not data.get("is_active"):
-            return data
-        provider = data.get("provider")  # This is the IntegrationProvider instance
-        if not provider:
-            raise serializers.ValidationError("Provider is required.")
+        config: IntegrationConfiguration = self.instance
 
         # The full configuration dictionary to be validated
         config_data = {
@@ -172,9 +168,14 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
             "settings": data.get("settings", {}),
         }
 
-        # Use the logic from your registry
+        if not config_data["credentials"].get("api_token") and config:
+            config_data["credentials"]["api_token"] = config.credentials.get(
+                "api_token"
+            )
+
+        # Use the validation logic from your registry
         is_valid, errors = IntegrationRegistry.validate_configuration(
-            provider.name, config_data
+            config.provider.name, config_data
         )
 
         if not is_valid:
@@ -182,14 +183,3 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"provider_specific_errors": errors})
 
         return data
-
-    # def create(self, validated_data):
-    #     """
-    #     Generate a webhook secret on creation.
-    #     """
-    #     # Generate a secure, random string for the webhook secret
-    #     validated_data["webhook_secret"] = get_random_string(50)
-    #
-    #     instance = super().create(validated_data)
-    #
-    #     return instance

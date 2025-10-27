@@ -32,6 +32,8 @@
 			api_token: z.string().optional()
 		}),
 		settings: z.object({
+			enable_outgoing_sync: z.boolean().default(false),
+			enable_incoming_sync: z.boolean().default(false),
 			project_key: z.string(),
 			issue_type: z.string().default('Task')
 		})
@@ -72,14 +74,23 @@
 			{#snippet children({ form })}
 				<Checkbox {form} field="is_active" label={m.active()} />
 				<div class="flex flex-col gap-4 card preset-outlined-surface-200-800 p-2">
-					<h4 class="h4">m.outgoingSync()</h4>
+					<span class="flex flex-row justify-between items-center">
+						<h4 class="h4">{m.outgoingSync()}</h4>
+						<Checkbox
+							{form}
+							field="enable_outgoing_sync"
+							valuePath="settings.enable_outgoing_sync"
+							label=""
+							disabled={!$formStore.is_active}
+						/>
+					</span>
 					<TextField
 						{form}
 						field="server_url"
 						valuePath="credentials.server_url"
 						label={m.serverUrl()}
 						helpText={m.jiraServerUrlHelpText()}
-						disabled={!$formStore.is_active}
+						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
 					/>
 					<TextField
 						{form}
@@ -88,7 +99,7 @@
 						autocomplete="new-password"
 						label={m.email()}
 						helpText={m.jiraEmailHelpText()}
-						disabled={!$formStore.is_active}
+						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
 					/>
 					{#if showApiTokenField}
 						<TextField
@@ -98,7 +109,7 @@
 							valuePath="credentials.api_token"
 							autocomplete="new-password"
 							label={m.apiToken()}
-							disabled={!$formStore.is_active}
+							disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
 						/>
 					{:else}
 						<div
@@ -106,7 +117,7 @@
 						>
 							<p>{m.apiTokenAlreadySetHelpText()}</p>
 							<button
-								disabled={!$formStore.is_active}
+								disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
 								class="btn preset-filled"
 								onclick={() => {
 									showApiTokenField = true;
@@ -118,7 +129,7 @@
 					{/if}
 					<span class="flex flex-row justify-between gap-4">
 						<button
-							disabled={!$formStore.is_active}
+							disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
 							type="button"
 							class="btn preset-filled-secondary-500"
 							onclick={async () => {
@@ -157,17 +168,26 @@
 						valuePath="settings.project_key"
 						label={m.projectKey()}
 						helpText={m.jiraProjectKeyHelpText()}
-						disabled={!$formStore.is_active}
+						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
 					/>
 				</div>
 				<div class="flex flex-col gap-4 card preset-outlined-surface-200-800 p-2">
-					<h4 class="h4">m.incomingSync()</h4>
+					<span class="flex flex-row justify-between items-center">
+						<h4 class="h4">{m.incomingSync()}</h4>
+						<Checkbox
+							{form}
+							field="enable_incoming_sync"
+							valuePath="settings.enable_incoming_sync"
+							label=""
+							disabled={!$formStore.is_active}
+						/>
+					</span>
 					<TextField
 						{form}
 						field="issue_type"
 						valuePath="settings.issue_type"
 						label={m.issueType()}
-						disabled={!$formStore.is_active}
+						disabled={!$formStore.is_active || !$formStore.settings.enable_incoming_sync}
 					/>
 					{#if showWebhookSecretField}
 						<TextField
@@ -183,7 +203,7 @@
 						>
 							<p>{m.webhookSecretAlreadySetHelpText()}</p>
 							<button
-								disabled={!$formStore.is_active}
+								disabled={!$formStore.is_active || !$formStore.settings.enable_incoming_sync}
 								class="btn preset-filled"
 								onclick={() => {
 									showWebhookSecretField = true;

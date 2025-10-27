@@ -26,7 +26,10 @@ JIRA_CONFIG_SCHEMA = {
         "properties": {
             "server_url": {"type": "string", "description": "Jira server URL"},
             "email": {"type": "string", "description": "Jira user email"},
-            "api_token": {"type": "string", "description": "Jira API token"},
+            "api_token": {
+                "type": "string",
+                "description": "Jira API token",
+            },
         },
     },
     "settings": {
@@ -34,6 +37,8 @@ JIRA_CONFIG_SCHEMA = {
         "properties": {
             "project_key": {"type": "string", "description": "Jira project key"},
             "issue_type": {"type": "string", "default": "Task"},
+            "enable_incoming_sync": {"type": "boolean", "default": True},
+            "enable_outgoing_sync": {"type": "boolean", "default": True},
             "sync_comments": {"type": "boolean", "default": True},
             "sync_attachments": {"type": "boolean", "default": False},
         },

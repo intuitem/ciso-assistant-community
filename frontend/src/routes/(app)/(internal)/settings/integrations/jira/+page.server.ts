@@ -16,6 +16,8 @@ const schema = z.object({
 		api_token: z.string().optional()
 	}),
 	settings: z.object({
+		enable_outgoing_sync: z.boolean().default(false),
+		enable_incoming_sync: z.boolean().default(false),
 		project_key: z.string(),
 		issue_type: z.string().default('Task')
 	})
