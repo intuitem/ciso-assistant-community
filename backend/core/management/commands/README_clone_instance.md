@@ -12,7 +12,7 @@ The `clone_instance` Django management command creates a complete copy of a CISO
 ## Prerequisites
 
 - The command works with **SQLite databases only**
-- For PostgreSQL databases, you must explicitly specify the source database file path
+- For PostgreSQL databases, use `pg_dump` instead (see Limitations section)
 - The Django application must be properly configured
 
 ## Usage

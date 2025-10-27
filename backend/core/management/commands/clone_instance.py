@@ -69,12 +69,11 @@ class Command(BaseCommand):
     def validate_sqlite_db(self, db_path):
         """Validate that a file is a valid SQLite database."""
         try:
-            conn = sqlite3.connect(db_path)
-            cursor = conn.cursor()
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-            tables = cursor.fetchall()
-            conn.close()
-            return len(tables) > 0
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+                tables = cursor.fetchall()
+                return len(tables) > 0
         except sqlite3.Error:
             return False
 
@@ -137,9 +136,14 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.WARNING(f"Destination database already exists: {dest_db}")
             )
-            confirm = input("Do you want to overwrite it? [y/N]: ")
-            if confirm.lower() != "y":
-                raise CommandError("Operation cancelled.")
+            try:
+                confirm = input("Do you want to overwrite it? [y/N]: ")
+                if confirm.lower() != "y":
+                    raise CommandError("Operation cancelled.")
+            except EOFError:
+                raise CommandError(
+                    "Operation cancelled (no input available). Use --force to skip prompts."
+                )
 
         # Check if destination attachments directory already exists
         if (
@@ -227,25 +231,9 @@ class Command(BaseCommand):
                 )
 
                 if file_count > 0:
-                    if os.path.exists(dest_attachments):
-                        # If destination exists, copy contents
-                        for item in os.listdir(source_attachments):
-                            source_item = os.path.join(source_attachments, item)
-                            dest_item = os.path.join(dest_attachments, item)
-                            if os.path.isdir(source_item):
-                                if os.path.exists(dest_item):
-                                    shutil.rmtree(dest_item)
-                                shutil.copytree(source_item, dest_item)
-                            else:
-                                shutil.copy2(source_item, dest_item)
-                    else:
-                        # If destination doesn't exist, copy entire directory
-                        shutil.copytree(source_attachments, dest_attachments)
-
-                    self.stdout.write(
-                        self.style.SUCCESS(
-                            f"✓ Attachments copied successfully ({file_count} files, {self.format_size(attachments_size)})"
-                        )
+                    # Copy directory tree, merging with existing files
+                    shutil.copytree(
+                        source_attachments, dest_attachments, dirs_exist_ok=True
                     )
                 else:
                     self.stdout.write(
