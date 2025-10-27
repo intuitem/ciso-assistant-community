@@ -452,7 +452,7 @@ class PerimeterFilter(GenericFilterSet):
 
     class Meta:
         model = Perimeter
-        fields = ["folder", "lc_status", "campaigns"]
+        fields = ["name", "folder", "lc_status", "campaigns"]
 
 
 class PerimeterViewSet(BaseModelViewSet):
@@ -1379,6 +1379,8 @@ class RiskAssessmentFilterSet(GenericFilterSet):
     class Meta:
         model = RiskAssessment
         fields = {
+            "name": ["exact"],
+            "ref_id": ["exact"],
             "perimeter": ["exact"],
             "folder": ["exact"],
             "authors": ["exact"],
@@ -1977,6 +1979,7 @@ class AppliedControlFilterSet(GenericFilterSet):
     class Meta:
         model = AppliedControl
         fields = {
+            "name": ["exact"],
             "folder": ["exact"],
             "category": ["exact"],
             "csf_function": ["exact"],
@@ -7301,6 +7304,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
 
     model = SecurityException
     filterset_fields = [
+        "name",
         "requirement_assessments",
         "risk_scenarios",
         "owners",
@@ -7460,6 +7464,8 @@ class SecurityExceptionViewSet(BaseModelViewSet):
 class FindingsAssessmentViewSet(BaseModelViewSet):
     model = FindingsAssessment
     filterset_fields = [
+        "name",
+        "ref_id",
         "owner",
         "category",
         "perimeter",
@@ -7922,6 +7928,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 class FindingViewSet(BaseModelViewSet):
     model = Finding
     filterset_fields = [
+        "name",
         "owner",
         "folder",
         "status",
@@ -8578,6 +8585,7 @@ class TaskTemplateFilter(GenericFilterSet):
     class Meta:
         model = TaskTemplate
         fields = [
+            "name",
             "assigned_to",
             "is_recurrent",
             "folder",

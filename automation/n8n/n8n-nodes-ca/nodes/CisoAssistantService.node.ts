@@ -68,6 +68,34 @@ export class CisoAssistantService implements INodeType {
             value: "vulnerability",
           },
           {
+            name: "Applied Control",
+            value: "appliedControl",
+          },
+          {
+            name: "Task Occurrence",
+            value: "taskOccurrence",
+          },
+          {
+            name: "Task Definition",
+            value: "taskDefinition",
+          },
+          {
+            name: "Findings Tracking",
+            value: "findingsAssessment",
+          },
+          {
+            name: "Finding",
+            value: "finding",
+          },
+          {
+            name: "Security Exception",
+            value: "securityException",
+          },
+          {
+            name: "Evidence",
+            value: "evidence",
+          },
+          {
             name: "Framework",
             value: "framework",
           },
@@ -156,6 +184,12 @@ export class CisoAssistantService implements INodeType {
             description: "Get a perimeter by its name",
             action: "Get perimeter by name",
           },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all perimeters",
+            action: "List perimeters",
+          },
         ],
         default: "create",
       },
@@ -222,6 +256,18 @@ export class CisoAssistantService implements INodeType {
             description: "Update a requirement assessment by requirement ref_id",
             action: "Update requirement assessment",
           },
+          {
+            name: "List Requirement Assessments",
+            value: "listRequirementAssessments",
+            description: "Get all requirement assessments for a compliance assessment",
+            action: "List requirement assessments",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all audits",
+            action: "List audits",
+          },
         ],
         default: "initiate",
       },
@@ -242,6 +288,24 @@ export class CisoAssistantService implements INodeType {
             value: "initiate",
             description: "Initiate a risk assessment for a perimeter with a risk matrix",
             action: "Initiate a risk assessment",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get a risk assessment by its name (case-sensitive)",
+            action: "Get risk assessment by name",
+          },
+          {
+            name: "Get by Ref ID",
+            value: "getByRefId",
+            description: "Get a risk assessment by its reference ID",
+            action: "Get risk assessment by ref ID",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all risk assessments",
+            action: "List risk assessments",
           },
         ],
         default: "initiate",
@@ -284,6 +348,279 @@ export class CisoAssistantService implements INodeType {
             value: "create",
             description: "Create a new vulnerability",
             action: "Create a vulnerability",
+          },
+        ],
+        default: "create",
+      },
+      // Applied Control operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["appliedControl"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new applied control",
+            action: "Create an applied control",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get an applied control by its name",
+            action: "Get applied control by name",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all applied controls",
+            action: "List applied controls",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update an applied control by UUID",
+            action: "Update applied control",
+          },
+        ],
+        default: "create",
+      },
+      // Task Occurrence operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["taskOccurrence"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new task occurrence",
+            action: "Create a task occurrence",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all task occurrences",
+            action: "List task occurrences",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update a task occurrence by UUID",
+            action: "Update task occurrence",
+          },
+        ],
+        default: "create",
+      },
+      // Task Definition operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["taskDefinition"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new task definition",
+            action: "Create a task definition",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get a task definition by its name",
+            action: "Get task definition by name",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all task definitions",
+            action: "List task definitions",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update a task definition by UUID",
+            action: "Update task definition",
+          },
+        ],
+        default: "create",
+      },
+      // Findings Assessment operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["findingsAssessment"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new findings tracking assessment",
+            action: "Create findings tracking",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get a findings tracking by its name (case-sensitive)",
+            action: "Get findings tracking by name",
+          },
+          {
+            name: "Get by Ref ID",
+            value: "getByRefId",
+            description: "Get a findings tracking by its reference ID",
+            action: "Get findings tracking by ref ID",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all findings tracking assessments",
+            action: "List findings tracking",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update a findings tracking by UUID",
+            action: "Update findings tracking",
+          },
+        ],
+        default: "create",
+      },
+      // Finding operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["finding"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new finding",
+            action: "Create finding",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get a finding by its name (case-sensitive)",
+            action: "Get finding by name",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all findings",
+            action: "List findings",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update a finding by UUID",
+            action: "Update finding",
+          },
+        ],
+        default: "create",
+      },
+      // Security Exception operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["securityException"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new security exception",
+            action: "Create security exception",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get a security exception by its name (case-sensitive)",
+            action: "Get security exception by name",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all security exceptions",
+            action: "List security exceptions",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update a security exception by UUID",
+            action: "Update security exception",
+          },
+        ],
+        default: "create",
+      },
+      // Evidence operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new evidence",
+            action: "Create evidence",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get an evidence by its name (case-sensitive)",
+            action: "Get evidence by name",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all evidences",
+            action: "List evidences",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update an evidence by UUID",
+            action: "Update evidence",
           },
         ],
         default: "create",
@@ -344,6 +681,21 @@ export class CisoAssistantService implements INodeType {
         default: "",
         placeholder: "My Security Perimeter",
         description: "The name of the perimeter (case sensitive for getByName)",
+        required: true,
+      },
+      {
+        displayName: "Folder ID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["perimeter"],
+            operation: ["getByName"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain) to search within",
         required: true,
       },
       {
@@ -543,6 +895,34 @@ export class CisoAssistantService implements INodeType {
         description: "The reference ID of the audit (case sensitive)",
         required: true,
       },
+      {
+        displayName: "Folder UUID (Optional)",
+        name: "folderIdFilter",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["audit"],
+            operation: ["getByName", "getByRefId"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "Filter by folder (domain) UUID",
+      },
+      {
+        displayName: "Perimeter UUID (Optional)",
+        name: "perimeterIdFilter",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["audit"],
+            operation: ["getByName", "getByRefId"],
+          },
+        },
+        default: "",
+        placeholder: "perimeter-uuid-here",
+        description: "Filter by perimeter UUID",
+      },
       // Requirement Assessment fields
       {
         displayName: "Requirement Ref ID",
@@ -566,7 +946,7 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["audit"],
-            operation: ["getRequirementAssessment", "updateRequirementAssessment"],
+            operation: ["getRequirementAssessment", "updateRequirementAssessment", "listRequirementAssessments"],
           },
         },
         default: "",
@@ -674,6 +1054,64 @@ export class CisoAssistantService implements INodeType {
         placeholder: "Risk Assessment 2025",
         description: "The name of the risk assessment",
         required: true,
+      },
+      {
+        displayName: "Risk Assessment Name",
+        name: "riskAssessmentNameGet",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["riskAssessment"],
+            operation: ["getByName"],
+          },
+        },
+        default: "",
+        placeholder: "Risk Assessment 2025",
+        description: "The name of the risk assessment (case-sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Risk Assessment Ref ID",
+        name: "riskAssessmentRefId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["riskAssessment"],
+            operation: ["getByRefId"],
+          },
+        },
+        default: "",
+        placeholder: "RA-2025-001",
+        description: "The reference ID of the risk assessment",
+        required: true,
+      },
+      {
+        displayName: "Folder UUID (Optional)",
+        name: "folderIdFilter",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["riskAssessment"],
+            operation: ["getByName", "getByRefId"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "Filter by folder (domain) UUID",
+      },
+      {
+        displayName: "Perimeter UUID (Optional)",
+        name: "perimeterIdFilter",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["riskAssessment"],
+            operation: ["getByName", "getByRefId"],
+          },
+        },
+        default: "",
+        placeholder: "perimeter-uuid-here",
+        description: "Filter by perimeter UUID",
       },
       // Incident fields
       {
@@ -900,6 +1338,934 @@ export class CisoAssistantService implements INodeType {
         placeholder: "VULN-2025-001",
         description: "Reference ID for the vulnerability",
       },
+      // Applied Control fields
+      {
+        displayName: "Applied Control Name",
+        name: "appliedControlName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["appliedControl"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "Access Control Implementation",
+        description: "The name of the applied control (case sensitive for getByName)",
+        required: true,
+      },
+      {
+        displayName: "Folder ID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["appliedControl"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain)",
+        required: true,
+      },
+      {
+        displayName: "Applied Control Description",
+        name: "appliedControlDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["appliedControl"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the applied control",
+        description: "The description of the applied control",
+      },
+      {
+        displayName: "Status",
+        name: "appliedControlStatus",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["appliedControl"],
+            operation: ["create", "update"],
+          },
+        },
+        options: [
+          { name: "To Do", value: "to_do" },
+          { name: "In Progress", value: "in_progress" },
+          { name: "On Hold", value: "on_hold" },
+          { name: "Active", value: "active" },
+          { name: "Deprecated", value: "deprecated" },
+          { name: "Undefined", value: "--" },
+        ],
+        default: "to_do",
+        description: "The status of the applied control",
+      },
+      {
+        displayName: "Applied Control UUID",
+        name: "appliedControlId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["appliedControl"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "applied-control-uuid-here",
+        description: "The UUID of the applied control to update",
+        required: true,
+      },
+      // Task fields
+      {
+        displayName: "Folder ID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["taskOccurrence"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain)",
+        required: true,
+      },
+      {
+        displayName: "Due Date",
+        name: "taskDueDate",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["taskOccurrence"],
+            operation: ["create", "update"],
+          },
+        },
+        default: "",
+        placeholder: "2025-12-31",
+        description: "Due date for the task (YYYY-MM-DD format)",
+      },
+      {
+        displayName: "Status",
+        name: "taskStatus",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["taskOccurrence"],
+            operation: ["create", "update"],
+          },
+        },
+        options: [
+          { name: "Pending", value: "pending" },
+          { name: "In Progress", value: "in_progress" },
+          { name: "Completed", value: "completed" },
+          { name: "Cancelled", value: "cancelled" },
+        ],
+        default: "pending",
+        description: "The status of the task",
+      },
+      {
+        displayName: "Observation",
+        name: "taskObservation",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["taskOccurrence"],
+            operation: ["create", "update"],
+          },
+        },
+        default: "",
+        placeholder: "Task observations and notes",
+        description: "Observation notes for the task",
+      },
+      {
+        displayName: "Task UUID",
+        name: "taskId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["taskOccurrence"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "task-uuid-here",
+        description: "The UUID of the task to update",
+        required: true,
+      },
+      // Task Definition fields
+      {
+        displayName: "Task Definition Name",
+        name: "taskDefinitionName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["taskDefinition"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "Weekly Security Review",
+        description: "Name of the task definition (case-sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Folder UUID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["taskDefinition"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain)",
+        required: true,
+      },
+      {
+        displayName: "Description",
+        name: "taskDefinitionDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["taskDefinition"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the task definition",
+        description: "Task definition description",
+      },
+      {
+        displayName: "Task Date",
+        name: "taskDefinitionTaskDate",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["taskDefinition"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "2025-12-31",
+        description: "Task date for non-recurrent tasks (YYYY-MM-DD format)",
+      },
+      {
+        displayName: "Is Recurrent",
+        name: "taskDefinitionIsRecurrent",
+        type: "boolean",
+        displayOptions: {
+          show: {
+            resource: ["taskDefinition"],
+            operation: ["create"],
+          },
+        },
+        default: false,
+        description: "Whether this task definition is recurrent",
+      },
+      {
+        displayName: "Enabled",
+        name: "taskDefinitionEnabled",
+        type: "boolean",
+        displayOptions: {
+          show: {
+            resource: ["taskDefinition"],
+            operation: ["create"],
+          },
+        },
+        default: true,
+        description: "Whether this task definition is enabled",
+      },
+      {
+        displayName: "Task Definition UUID",
+        name: "taskDefinitionId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["taskDefinition"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "task-definition-uuid-here",
+        description: "The UUID of the task definition to update",
+        required: true,
+      },
+      {
+        displayName: "Task Date",
+        name: "taskDefinitionTaskDateUpdate",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["taskDefinition"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "2025-12-31",
+        description: "Task date (YYYY-MM-DD format)",
+      },
+      {
+        displayName: "Enabled",
+        name: "taskDefinitionEnabledUpdate",
+        type: "boolean",
+        displayOptions: {
+          show: {
+            resource: ["taskDefinition"],
+            operation: ["update"],
+          },
+        },
+        default: true,
+        description: "Whether this task definition is enabled",
+      },
+      // Findings Assessment fields
+      {
+        displayName: "Findings Tracking Name",
+        name: "findingsAssessmentName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["findingsAssessment"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "Pentest 2025-Q1",
+        description: "Name of the findings tracking (case-sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Folder UUID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["findingsAssessment"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain)",
+        required: true,
+      },
+      {
+        displayName: "Folder UUID (Optional)",
+        name: "folderIdFilter",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["findingsAssessment"],
+            operation: ["getByName", "getByRefId"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "Filter by folder (domain) UUID",
+      },
+      {
+        displayName: "Ref ID",
+        name: "findingsAssessmentRefId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["findingsAssessment"],
+            operation: ["getByRefId"],
+          },
+        },
+        default: "",
+        placeholder: "PENT-2025-01",
+        description: "Reference ID of the findings tracking",
+        required: true,
+      },
+      {
+        displayName: "Perimeter UUID (Optional)",
+        name: "perimeterIdFilter",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["findingsAssessment"],
+            operation: ["getByName", "getByRefId"],
+          },
+        },
+        default: "",
+        placeholder: "perimeter-uuid-here",
+        description: "Filter by perimeter UUID",
+      },
+      {
+        displayName: "Perimeter UUID",
+        name: "perimeterId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["findingsAssessment"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "perimeter-uuid-here",
+        description: "The UUID of the perimeter",
+        required: true,
+      },
+      {
+        displayName: "Description",
+        name: "findingsAssessmentDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["findingsAssessment"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the findings tracking",
+        description: "Findings tracking description",
+      },
+      {
+        displayName: "Category",
+        name: "findingsAssessmentCategory",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["findingsAssessment"],
+            operation: ["create"],
+          },
+        },
+        options: [
+          { name: "Undefined", value: "--" },
+          { name: "Pentest", value: "pentest" },
+          { name: "Audit", value: "audit" },
+          { name: "Self-identified", value: "self_identified" },
+        ],
+        default: "--",
+        description: "Category of findings tracking",
+      },
+      {
+        displayName: "Findings Tracking UUID",
+        name: "findingsAssessmentId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["findingsAssessment"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "findings-tracking-uuid-here",
+        description: "The UUID of the findings tracking to update",
+        required: true,
+      },
+      {
+        displayName: "Status",
+        name: "findingsAssessmentStatus",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["findingsAssessment"],
+            operation: ["update"],
+          },
+        },
+        options: [
+          { name: "Planned", value: "planned" },
+          { name: "In progress", value: "in_progress" },
+          { name: "In review", value: "in_review" },
+          { name: "Done", value: "done" },
+          { name: "Deprecated", value: "deprecated" },
+        ],
+        default: "planned",
+        description: "Status of the findings tracking",
+      },
+      // Finding fields
+      {
+        displayName: "Finding Name",
+        name: "findingName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["finding"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "SQL Injection vulnerability",
+        description: "Name of the finding (case-sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Findings Tracking UUID",
+        name: "findingsAssessmentId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["finding"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "findings-tracking-uuid-here",
+        description: "The UUID of the parent findings tracking",
+        required: true,
+      },
+      {
+        displayName: "Folder UUID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["finding"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain)",
+        required: true,
+      },
+      {
+        displayName: "Description",
+        name: "findingDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["finding"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the finding",
+        description: "Finding description",
+      },
+      {
+        displayName: "Severity",
+        name: "findingSeverity",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["finding"],
+            operation: ["create"],
+          },
+        },
+        options: [
+          { name: "Undefined", value: -1 },
+          { name: "Info", value: 0 },
+          { name: "Low", value: 1 },
+          { name: "Medium", value: 2 },
+          { name: "High", value: 3 },
+          { name: "Critical", value: 4 },
+        ],
+        default: -1,
+        description: "Severity of the finding",
+      },
+      {
+        displayName: "Status",
+        name: "findingStatus",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["finding"],
+            operation: ["create"],
+          },
+        },
+        options: [
+          { name: "Undefined", value: "--" },
+          { name: "Identified", value: "identified" },
+          { name: "Confirmed", value: "confirmed" },
+          { name: "Dismissed", value: "dismissed" },
+          { name: "Assigned", value: "assigned" },
+          { name: "In Progress", value: "in_progress" },
+          { name: "Mitigated", value: "mitigated" },
+          { name: "Resolved", value: "resolved" },
+          { name: "Closed", value: "closed" },
+          { name: "Deprecated", value: "deprecated" },
+        ],
+        default: "identified",
+        description: "Status of the finding",
+      },
+      {
+        displayName: "Finding UUID",
+        name: "findingId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["finding"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "finding-uuid-here",
+        description: "The UUID of the finding to update",
+        required: true,
+      },
+      {
+        displayName: "Status",
+        name: "findingStatusUpdate",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["finding"],
+            operation: ["update"],
+          },
+        },
+        options: [
+          { name: "Undefined", value: "--" },
+          { name: "Identified", value: "identified" },
+          { name: "Confirmed", value: "confirmed" },
+          { name: "Dismissed", value: "dismissed" },
+          { name: "Assigned", value: "assigned" },
+          { name: "In Progress", value: "in_progress" },
+          { name: "Mitigated", value: "mitigated" },
+          { name: "Resolved", value: "resolved" },
+          { name: "Closed", value: "closed" },
+          { name: "Deprecated", value: "deprecated" },
+        ],
+        default: "identified",
+        description: "Status of the finding",
+      },
+      {
+        displayName: "Severity",
+        name: "findingSeverityUpdate",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["finding"],
+            operation: ["update"],
+          },
+        },
+        options: [
+          { name: "Undefined", value: -1 },
+          { name: "Info", value: 0 },
+          { name: "Low", value: 1 },
+          { name: "Medium", value: 2 },
+          { name: "High", value: 3 },
+          { name: "Critical", value: 4 },
+        ],
+        default: -1,
+        description: "Severity of the finding",
+      },
+      // Security Exception fields
+      {
+        displayName: "Security Exception Name",
+        name: "securityExceptionName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["securityException"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "Legacy System Exception",
+        description: "Name of the security exception (case-sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Folder UUID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["securityException"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain)",
+        required: true,
+      },
+      {
+        displayName: "Description",
+        name: "securityExceptionDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["securityException"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the security exception",
+        description: "Security exception description",
+      },
+      {
+        displayName: "Severity",
+        name: "securityExceptionSeverity",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["securityException"],
+            operation: ["create"],
+          },
+        },
+        options: [
+          { name: "Undefined", value: -1 },
+          { name: "Info", value: 0 },
+          { name: "Low", value: 1 },
+          { name: "Medium", value: 2 },
+          { name: "High", value: 3 },
+          { name: "Critical", value: 4 },
+        ],
+        default: -1,
+        description: "Severity of the security exception",
+      },
+      {
+        displayName: "Status",
+        name: "securityExceptionStatus",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["securityException"],
+            operation: ["create"],
+          },
+        },
+        options: [
+          { name: "Draft", value: "draft" },
+          { name: "In Review", value: "in_review" },
+          { name: "Approved", value: "approved" },
+          { name: "Resolved", value: "resolved" },
+          { name: "Expired", value: "expired" },
+          { name: "Deprecated", value: "deprecated" },
+        ],
+        default: "draft",
+        description: "Status of the security exception",
+      },
+      {
+        displayName: "Expiration Date",
+        name: "securityExceptionExpirationDate",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["securityException"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "2025-12-31",
+        description: "Expiration date (YYYY-MM-DD format)",
+      },
+      {
+        displayName: "Security Exception UUID",
+        name: "securityExceptionId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["securityException"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "security-exception-uuid-here",
+        description: "The UUID of the security exception to update",
+        required: true,
+      },
+      {
+        displayName: "Status",
+        name: "securityExceptionStatusUpdate",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["securityException"],
+            operation: ["update"],
+          },
+        },
+        options: [
+          { name: "Draft", value: "draft" },
+          { name: "In Review", value: "in_review" },
+          { name: "Approved", value: "approved" },
+          { name: "Resolved", value: "resolved" },
+          { name: "Expired", value: "expired" },
+          { name: "Deprecated", value: "deprecated" },
+        ],
+        default: "draft",
+        description: "Status of the security exception",
+      },
+      // Evidence fields
+      {
+        displayName: "Evidence Name",
+        name: "evidenceName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "Compliance Report 2025",
+        description: "Name of the evidence (case-sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Folder UUID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain)",
+        required: true,
+      },
+      {
+        displayName: "Description",
+        name: "evidenceDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the evidence",
+        description: "Evidence description",
+      },
+      {
+        displayName: "Status",
+        name: "evidenceStatus",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+            operation: ["create"],
+          },
+        },
+        options: [
+          { name: "Draft", value: "draft" },
+          { name: "Missing", value: "missing" },
+          { name: "In Review", value: "in_review" },
+          { name: "Approved", value: "approved" },
+          { name: "Rejected", value: "rejected" },
+          { name: "Expired", value: "expired" },
+        ],
+        default: "draft",
+        description: "Status of the evidence",
+      },
+      {
+        displayName: "Expiry Date",
+        name: "evidenceExpiryDate",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "2025-12-31",
+        description: "Expiry date (YYYY-MM-DD format)",
+      },
+      {
+        displayName: "Evidence UUID",
+        name: "evidenceId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "evidence-uuid-here",
+        description: "The UUID of the evidence to update",
+        required: true,
+      },
+      {
+        displayName: "Status",
+        name: "evidenceStatusUpdate",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+            operation: ["update"],
+          },
+        },
+        options: [
+          { name: "Draft", value: "draft" },
+          { name: "Missing", value: "missing" },
+          { name: "In Review", value: "in_review" },
+          { name: "Approved", value: "approved" },
+          { name: "Rejected", value: "rejected" },
+          { name: "Expired", value: "expired" },
+        ],
+        default: "draft",
+        description: "Status of the evidence",
+      },
+      // Optional Folder UUID for list operations
+      {
+        displayName: "Folder UUID (Optional)",
+        name: "folderIdFilter",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: [
+              "domain",
+              "perimeter",
+              "asset",
+              "audit",
+              "riskAssessment",
+              "incident",
+              "vulnerability",
+              "appliedControl",
+              "taskOccurrence",
+              "taskDefinition",
+              "findingsAssessment",
+              "finding",
+              "securityException",
+              "evidence",
+            ],
+            operation: ["list"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "Filter results by folder (domain) UUID",
+      },
+      {
+        displayName: "Perimeter UUID (Optional)",
+        name: "perimeterIdFilter",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["audit", "riskAssessment", "findingsAssessment"],
+            operation: ["list"],
+          },
+        },
+        default: "",
+        placeholder: "perimeter-uuid-here",
+        description: "Filter results by perimeter UUID",
+      },
       // Additional fields
       {
         displayName: "Additional Fields",
@@ -1030,10 +2396,22 @@ export class CisoAssistantService implements INodeType {
           });
         } else if (resource === "perimeter" && operation === "getByName") {
           const perimeterName = this.getNodeParameter("perimeterName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
           response = await this.helpers.httpRequest({
             ...baseConfig,
             method: "GET",
-            url: `${credentials.baseUrl}/perimeters/?name=${encodeURIComponent(perimeterName)}`,
+            url: `${credentials.baseUrl}/perimeters/?name=${encodeURIComponent(perimeterName)}&folder=${encodeURIComponent(folderId)}`,
+          });
+        } else if (resource === "perimeter" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/perimeters/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
           });
         } else if (resource === "domain" && operation === "create") {
           const domainName = this.getNodeParameter("domainName", i) as string;
@@ -1076,10 +2454,15 @@ export class CisoAssistantService implements INodeType {
             url: `${credentials.baseUrl}/folders/?name=${encodeURIComponent(domainName)}`,
           });
         } else if (resource === "domain" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/folders/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
           response = await this.helpers.httpRequest({
             ...baseConfig,
             method: "GET",
-            url: `${credentials.baseUrl}/folders/`,
+            url,
           });
         } else if (resource === "asset" && operation === "create") {
           const assetName = this.getNodeParameter("assetName", i) as string;
@@ -1140,22 +2523,44 @@ export class CisoAssistantService implements INodeType {
           response = await this.helpers.httpRequest({
             ...baseConfig,
             method: "POST",
-            url: `${credentials.baseUrl}/audits/`,
+            url: `${credentials.baseUrl}/compliance-assessments/`,
             body: auditData,
           });
         } else if (resource === "audit" && operation === "getByName") {
           const auditName = this.getNodeParameter("auditName", i) as string;
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
+
+          let url = `${credentials.baseUrl}/compliance-assessments/?name=${encodeURIComponent(auditName)}`;
+          if (folderIdFilter) {
+            url += `&folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          if (perimeterIdFilter) {
+            url += `&perimeter=${encodeURIComponent(perimeterIdFilter)}`;
+          }
+
           response = await this.helpers.httpRequest({
             ...baseConfig,
             method: "GET",
-            url: `${credentials.baseUrl}/audits/?name=${encodeURIComponent(auditName)}`,
+            url,
           });
         } else if (resource === "audit" && operation === "getByRefId") {
           const auditRefId = this.getNodeParameter("auditRefId", i) as string;
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
+
+          let url = `${credentials.baseUrl}/compliance-assessments/?ref_id=${encodeURIComponent(auditRefId)}`;
+          if (folderIdFilter) {
+            url += `&folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          if (perimeterIdFilter) {
+            url += `&perimeter=${encodeURIComponent(perimeterIdFilter)}`;
+          }
+
           response = await this.helpers.httpRequest({
             ...baseConfig,
             method: "GET",
-            url: `${credentials.baseUrl}/audits/?ref_id=${encodeURIComponent(auditRefId)}`,
+            url,
           });
         } else if (resource === "audit" && operation === "getRequirementAssessment") {
           const requirementRefId = this.getNodeParameter("requirementRefId", i) as string;
@@ -1203,6 +2608,35 @@ export class CisoAssistantService implements INodeType {
             url: `${credentials.baseUrl}/requirement-assessments/${requirementAssessmentId}/`,
             body: updateData,
           });
+        } else if (resource === "audit" && operation === "listRequirementAssessments") {
+          const complianceAssessmentId = this.getNodeParameter("complianceAssessmentId", i) as string;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/requirement-assessments/?compliance_assessment=${encodeURIComponent(complianceAssessmentId)}`,
+          });
+        } else if (resource === "audit" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
+
+          let url = `${credentials.baseUrl}/compliance-assessments/`;
+          const params = [];
+          if (folderIdFilter) {
+            params.push(`folder=${encodeURIComponent(folderIdFilter)}`);
+          }
+          if (perimeterIdFilter) {
+            params.push(`perimeter=${encodeURIComponent(perimeterIdFilter)}`);
+          }
+          if (params.length > 0) {
+            url += `?${params.join("&")}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
         } else if (resource === "riskAssessment" && operation === "initiate") {
           const raPerimeterId = this.getNodeParameter(
             "perimeterId",
@@ -1228,6 +2662,63 @@ export class CisoAssistantService implements INodeType {
             method: "POST",
             url: `${credentials.baseUrl}/risk-assessments/`,
             body: riskAssessmentData,
+          });
+        } else if (resource === "riskAssessment" && operation === "getByName") {
+          const riskAssessmentNameGet = this.getNodeParameter("riskAssessmentNameGet", i) as string;
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
+
+          let url = `${credentials.baseUrl}/risk-assessments/?name=${encodeURIComponent(riskAssessmentNameGet)}`;
+          if (folderIdFilter) {
+            url += `&folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          if (perimeterIdFilter) {
+            url += `&perimeter=${encodeURIComponent(perimeterIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "riskAssessment" && operation === "getByRefId") {
+          const riskAssessmentRefId = this.getNodeParameter("riskAssessmentRefId", i) as string;
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
+
+          let url = `${credentials.baseUrl}/risk-assessments/?ref_id=${encodeURIComponent(riskAssessmentRefId)}`;
+          if (folderIdFilter) {
+            url += `&folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          if (perimeterIdFilter) {
+            url += `&perimeter=${encodeURIComponent(perimeterIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "riskAssessment" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
+
+          let url = `${credentials.baseUrl}/risk-assessments/`;
+          const params = [];
+          if (folderIdFilter) {
+            params.push(`folder=${encodeURIComponent(folderIdFilter)}`);
+          }
+          if (perimeterIdFilter) {
+            params.push(`perimeter=${encodeURIComponent(perimeterIdFilter)}`);
+          }
+          if (params.length > 0) {
+            url += `?${params.join("&")}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
           });
         } else if (resource === "incident" && operation === "create") {
           const incidentName = this.getNodeParameter("incidentName", i) as string;
@@ -1318,6 +2809,494 @@ export class CisoAssistantService implements INodeType {
             method: "POST",
             url: `${credentials.baseUrl}/vulnerabilities/`,
             body: vulnerabilityData,
+          });
+        } else if (resource === "appliedControl" && operation === "create") {
+          const appliedControlName = this.getNodeParameter("appliedControlName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const appliedControlDescription = this.getNodeParameter(
+            "appliedControlDescription",
+            i,
+            "",
+          ) as string;
+          const appliedControlStatus = this.getNodeParameter(
+            "appliedControlStatus",
+            i,
+            "to_do",
+          ) as string;
+
+          const appliedControlData: any = {
+            name: appliedControlName,
+            folder: folderId,
+            description: appliedControlDescription,
+            status: appliedControlStatus,
+          };
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/applied-controls/`,
+            body: appliedControlData,
+          });
+        } else if (resource === "appliedControl" && operation === "getByName") {
+          const appliedControlName = this.getNodeParameter("appliedControlName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/applied-controls/?name=${encodeURIComponent(appliedControlName)}&folder=${encodeURIComponent(folderId)}`,
+          });
+        } else if (resource === "appliedControl" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/applied-controls/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "appliedControl" && operation === "update") {
+          const appliedControlId = this.getNodeParameter("appliedControlId", i) as string;
+          const appliedControlStatus = this.getNodeParameter(
+            "appliedControlStatus",
+            i,
+            "",
+          ) as string;
+
+          const updateData: any = {};
+          if (appliedControlStatus) updateData.status = appliedControlStatus;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/applied-controls/${appliedControlId}/`,
+            body: updateData,
+          });
+        } else if (resource === "taskOccurrence" && operation === "create") {
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const taskDueDate = this.getNodeParameter("taskDueDate", i, "") as string;
+          const taskStatus = this.getNodeParameter("taskStatus", i, "pending") as string;
+          const taskObservation = this.getNodeParameter("taskObservation", i, "") as string;
+
+          const taskData: any = {
+            folder: folderId,
+            status: taskStatus,
+          };
+
+          if (taskDueDate) taskData.due_date = taskDueDate;
+          if (taskObservation) taskData.observation = taskObservation;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/task-nodes/`,
+            body: taskData,
+          });
+        } else if (resource === "taskOccurrence" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/task-nodes/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "taskOccurrence" && operation === "update") {
+          const taskId = this.getNodeParameter("taskId", i) as string;
+          const taskDueDate = this.getNodeParameter("taskDueDate", i, "") as string;
+          const taskStatus = this.getNodeParameter("taskStatus", i, "") as string;
+          const taskObservation = this.getNodeParameter("taskObservation", i, "") as string;
+
+          const updateData: any = {};
+          if (taskDueDate) updateData.due_date = taskDueDate;
+          if (taskStatus) updateData.status = taskStatus;
+          if (taskObservation) updateData.observation = taskObservation;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/task-nodes/${taskId}/`,
+            body: updateData,
+          });
+        } else if (resource === "taskDefinition" && operation === "create") {
+          const taskDefinitionName = this.getNodeParameter("taskDefinitionName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const taskDefinitionDescription = this.getNodeParameter(
+            "taskDefinitionDescription",
+            i,
+            "",
+          ) as string;
+          const taskDefinitionTaskDate = this.getNodeParameter(
+            "taskDefinitionTaskDate",
+            i,
+            "",
+          ) as string;
+          const taskDefinitionIsRecurrent = this.getNodeParameter(
+            "taskDefinitionIsRecurrent",
+            i,
+            false,
+          ) as boolean;
+          const taskDefinitionEnabled = this.getNodeParameter(
+            "taskDefinitionEnabled",
+            i,
+            true,
+          ) as boolean;
+
+          const taskDefinitionData: any = {
+            name: taskDefinitionName,
+            folder: folderId,
+            is_recurrent: taskDefinitionIsRecurrent,
+            enabled: taskDefinitionEnabled,
+          };
+
+          if (taskDefinitionDescription) taskDefinitionData.description = taskDefinitionDescription;
+          if (taskDefinitionTaskDate) taskDefinitionData.task_date = taskDefinitionTaskDate;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/task-templates/`,
+            body: taskDefinitionData,
+          });
+        } else if (resource === "taskDefinition" && operation === "getByName") {
+          const taskDefinitionName = this.getNodeParameter("taskDefinitionName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/task-templates/?name=${encodeURIComponent(taskDefinitionName)}&folder=${encodeURIComponent(folderId)}`,
+          });
+        } else if (resource === "taskDefinition" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/task-templates/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "taskDefinition" && operation === "update") {
+          const taskDefinitionId = this.getNodeParameter("taskDefinitionId", i) as string;
+          const taskDefinitionTaskDateUpdate = this.getNodeParameter(
+            "taskDefinitionTaskDateUpdate",
+            i,
+            "",
+          ) as string;
+          const taskDefinitionEnabledUpdate = this.getNodeParameter(
+            "taskDefinitionEnabledUpdate",
+            i,
+            true,
+          ) as boolean;
+
+          const updateData: any = {};
+          if (taskDefinitionTaskDateUpdate) updateData.task_date = taskDefinitionTaskDateUpdate;
+          if (taskDefinitionEnabledUpdate !== undefined) updateData.enabled = taskDefinitionEnabledUpdate;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/task-templates/${taskDefinitionId}/`,
+            body: updateData,
+          });
+        } else if (resource === "findingsAssessment" && operation === "create") {
+          const findingsAssessmentName = this.getNodeParameter("findingsAssessmentName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const perimeterId = this.getNodeParameter("perimeterId", i) as string;
+          const findingsAssessmentDescription = this.getNodeParameter(
+            "findingsAssessmentDescription",
+            i,
+            "",
+          ) as string;
+          const findingsAssessmentCategory = this.getNodeParameter(
+            "findingsAssessmentCategory",
+            i,
+            "--",
+          ) as string;
+
+          const findingsAssessmentData: any = {
+            name: findingsAssessmentName,
+            folder: folderId,
+            perimeter: perimeterId,
+            category: findingsAssessmentCategory,
+          };
+
+          if (findingsAssessmentDescription)
+            findingsAssessmentData.description = findingsAssessmentDescription;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/findings-assessments/`,
+            body: findingsAssessmentData,
+          });
+        } else if (resource === "findingsAssessment" && operation === "getByName") {
+          const findingsAssessmentName = this.getNodeParameter("findingsAssessmentName", i) as string;
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
+
+          let url = `${credentials.baseUrl}/findings-assessments/?name=${encodeURIComponent(findingsAssessmentName)}`;
+          if (folderIdFilter) {
+            url += `&folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          if (perimeterIdFilter) {
+            url += `&perimeter=${encodeURIComponent(perimeterIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "findingsAssessment" && operation === "getByRefId") {
+          const findingsAssessmentRefId = this.getNodeParameter("findingsAssessmentRefId", i) as string;
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
+
+          let url = `${credentials.baseUrl}/findings-assessments/?ref_id=${encodeURIComponent(findingsAssessmentRefId)}`;
+          if (folderIdFilter) {
+            url += `&folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          if (perimeterIdFilter) {
+            url += `&perimeter=${encodeURIComponent(perimeterIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "findingsAssessment" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
+
+          let url = `${credentials.baseUrl}/findings-assessments/`;
+          const params = [];
+          if (folderIdFilter) {
+            params.push(`folder=${encodeURIComponent(folderIdFilter)}`);
+          }
+          if (perimeterIdFilter) {
+            params.push(`perimeter=${encodeURIComponent(perimeterIdFilter)}`);
+          }
+          if (params.length > 0) {
+            url += `?${params.join("&")}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "findingsAssessment" && operation === "update") {
+          const findingsAssessmentId = this.getNodeParameter("findingsAssessmentId", i) as string;
+          const findingsAssessmentStatus = this.getNodeParameter(
+            "findingsAssessmentStatus",
+            i,
+            "",
+          ) as string;
+
+          const updateData: any = {};
+          if (findingsAssessmentStatus) updateData.status = findingsAssessmentStatus;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/findings-assessments/${findingsAssessmentId}/`,
+            body: updateData,
+          });
+        } else if (resource === "finding" && operation === "create") {
+          const findingName = this.getNodeParameter("findingName", i) as string;
+          const findingsAssessmentId = this.getNodeParameter("findingsAssessmentId", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const findingDescription = this.getNodeParameter("findingDescription", i, "") as string;
+          const findingSeverity = this.getNodeParameter("findingSeverity", i, -1) as number;
+          const findingStatus = this.getNodeParameter("findingStatus", i, "identified") as string;
+
+          const findingData: any = {
+            name: findingName,
+            findings_assessment: findingsAssessmentId,
+            folder: folderId,
+            severity: findingSeverity,
+            status: findingStatus,
+          };
+
+          if (findingDescription) findingData.description = findingDescription;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/findings/`,
+            body: findingData,
+          });
+        } else if (resource === "finding" && operation === "getByName") {
+          const findingName = this.getNodeParameter("findingName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/findings/?name=${encodeURIComponent(findingName)}&folder=${encodeURIComponent(folderId)}`,
+          });
+        } else if (resource === "finding" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/findings/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "finding" && operation === "update") {
+          const findingId = this.getNodeParameter("findingId", i) as string;
+          const findingStatusUpdate = this.getNodeParameter("findingStatusUpdate", i, "") as string;
+          const findingSeverityUpdate = this.getNodeParameter("findingSeverityUpdate", i, -1) as number;
+
+          const updateData: any = {};
+          if (findingStatusUpdate) updateData.status = findingStatusUpdate;
+          if (findingSeverityUpdate !== -1) updateData.severity = findingSeverityUpdate;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/findings/${findingId}/`,
+            body: updateData,
+          });
+        } else if (resource === "securityException" && operation === "create") {
+          const securityExceptionName = this.getNodeParameter("securityExceptionName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const securityExceptionDescription = this.getNodeParameter(
+            "securityExceptionDescription",
+            i,
+            "",
+          ) as string;
+          const securityExceptionSeverity = this.getNodeParameter(
+            "securityExceptionSeverity",
+            i,
+            -1,
+          ) as number;
+          const securityExceptionStatus = this.getNodeParameter(
+            "securityExceptionStatus",
+            i,
+            "draft",
+          ) as string;
+          const securityExceptionExpirationDate = this.getNodeParameter(
+            "securityExceptionExpirationDate",
+            i,
+            "",
+          ) as string;
+
+          const securityExceptionData: any = {
+            name: securityExceptionName,
+            folder: folderId,
+            severity: securityExceptionSeverity,
+            status: securityExceptionStatus,
+          };
+
+          if (securityExceptionDescription)
+            securityExceptionData.description = securityExceptionDescription;
+          if (securityExceptionExpirationDate)
+            securityExceptionData.expiration_date = securityExceptionExpirationDate;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/security-exceptions/`,
+            body: securityExceptionData,
+          });
+        } else if (resource === "securityException" && operation === "getByName") {
+          const securityExceptionName = this.getNodeParameter("securityExceptionName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/security-exceptions/?name=${encodeURIComponent(securityExceptionName)}&folder=${encodeURIComponent(folderId)}`,
+          });
+        } else if (resource === "securityException" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/security-exceptions/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "securityException" && operation === "update") {
+          const securityExceptionId = this.getNodeParameter("securityExceptionId", i) as string;
+          const securityExceptionStatusUpdate = this.getNodeParameter(
+            "securityExceptionStatusUpdate",
+            i,
+            "",
+          ) as string;
+
+          const updateData: any = {};
+          if (securityExceptionStatusUpdate) updateData.status = securityExceptionStatusUpdate;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/security-exceptions/${securityExceptionId}/`,
+            body: updateData,
+          });
+        } else if (resource === "evidence" && operation === "create") {
+          const evidenceName = this.getNodeParameter("evidenceName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const evidenceDescription = this.getNodeParameter("evidenceDescription", i, "") as string;
+          const evidenceStatus = this.getNodeParameter("evidenceStatus", i, "draft") as string;
+          const evidenceExpiryDate = this.getNodeParameter("evidenceExpiryDate", i, "") as string;
+
+          const evidenceData: any = {
+            name: evidenceName,
+            folder: folderId,
+            status: evidenceStatus,
+          };
+
+          if (evidenceDescription) evidenceData.description = evidenceDescription;
+          if (evidenceExpiryDate) evidenceData.expiry_date = evidenceExpiryDate;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/evidences/`,
+            body: evidenceData,
+          });
+        } else if (resource === "evidence" && operation === "getByName") {
+          const evidenceName = this.getNodeParameter("evidenceName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/evidences/?name=${encodeURIComponent(evidenceName)}&folder=${encodeURIComponent(folderId)}`,
+          });
+        } else if (resource === "evidence" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/evidences/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "evidence" && operation === "update") {
+          const evidenceId = this.getNodeParameter("evidenceId", i) as string;
+          const evidenceStatusUpdate = this.getNodeParameter("evidenceStatusUpdate", i, "") as string;
+
+          const updateData: any = {};
+          if (evidenceStatusUpdate) updateData.status = evidenceStatusUpdate;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/evidences/${evidenceId}/`,
+            body: updateData,
           });
         } else if (resource === "riskMatrix" && operation === "list") {
           response = await this.helpers.httpRequest({
