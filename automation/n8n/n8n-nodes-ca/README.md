@@ -40,6 +40,48 @@ n8n start
 
 Open your browser at `http://localhost:5678`
 
+## Running with Docker/Container
+
+If you're running n8n in a Docker container, you need to mount the custom node directory and set the environment variable.
+
+### Option 1: Docker Run
+
+```bash
+docker run -it --rm \
+  --name n8n \
+  -p 5678:5678 \
+  -e N8N_CUSTOM_EXTENSIONS=/custom-nodes \
+  -v /path/to/ciso-assistant-community/automation/n8n/n8n-nodes-ca:/custom-nodes \
+  n8nio/n8n
+```
+
+### Option 2: Docker Compose
+
+Add to your `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_CUSTOM_EXTENSIONS=/custom-nodes
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - /path/to/ciso-assistant-community/automation/n8n/n8n-nodes-ca:/custom-nodes:ro
+
+volumes:
+  n8n_data:
+```
+
+**Important**:
+- Replace `/path/to/ciso-assistant-community/automation/n8n/n8n-nodes-ca` with the actual path on your host
+- The node must be **built** before mounting (run `npm run build` in the node directory first)
+- Restart the container after rebuilding the node
+
 ## Development
 
 After making changes to the node:
