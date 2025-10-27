@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { m } from '$paraglide/messages';
+	import { attachmentCache, generateAttachmentCacheKey } from '$lib/stores/attachmentCache';
 
 	interface Props {
 		cell: any;
@@ -18,30 +19,92 @@
 	}
 
 	let attachment: Attachment | undefined = $state();
+	let containerElement: HTMLElement | undefined = $state();
+	let isVisible = $state(false);
+	let observer: IntersectionObserver | undefined;
+	let cacheKey = $state('');
 
 	const fetchAttachment = async () => {
+		// Generate cache key
+		cacheKey = generateAttachmentCacheKey(meta.id, meta.attachment);
+
+		// Check cache first
+		if (attachmentCache.has(cacheKey)) {
+			const cached = attachmentCache.get(cacheKey);
+			if (cached) {
+				return cached;
+			}
+		}
+
+		// Fetch from server if not in cache
 		const res = await fetch(
 			`/${meta.evidence ? 'evidence-revisions' : 'evidences'}/${meta.id}/attachment`
 		);
 		const blob = await res.blob();
-		return {
+		const result = {
 			type: blob.type,
 			url: URL.createObjectURL(blob),
 			fileExists: res.ok
 		};
+
+		// Store in cache
+		attachmentCache.set(cacheKey, result);
+		return result;
 	};
 
 	let mounted = $state(false);
-	onMount(async () => {
-		attachment = meta.attachment ? await fetchAttachment() : undefined;
+	onMount(() => {
 		mounted = true;
+
+		// Set up Intersection Observer for lazy loading
+		if (containerElement && meta.attachment) {
+			observer = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						if (entry.isIntersecting && !isVisible) {
+							isVisible = true;
+							// Fetch attachment when element becomes visible
+							fetchAttachment().then((_attachment) => {
+								attachment = _attachment;
+							});
+							// Disconnect after first load
+							observer?.disconnect();
+						}
+					});
+				},
+				{
+					rootMargin: '50px' // Start loading slightly before element is visible
+				}
+			);
+			observer.observe(containerElement);
+		}
+	});
+
+	onDestroy(() => {
+		// Clean up observer
+		if (observer) {
+			observer.disconnect();
+		}
 	});
 
 	run(() => {
 		if (mounted && meta.attachment) {
-			fetchAttachment().then((_attachment) => {
-				attachment = _attachment;
-			});
+			// Check cache first when meta changes
+			const key = generateAttachmentCacheKey(meta.id, meta.attachment);
+			if (attachmentCache.has(key)) {
+				const cached = attachmentCache.get(key);
+				if (cached) {
+					attachment = cached;
+					return;
+				}
+			}
+
+			// If visible, fetch immediately
+			if (isVisible) {
+				fetchAttachment().then((_attachment) => {
+					attachment = _attachment;
+				});
+			}
 		} else {
 			attachment = undefined;
 		}
@@ -54,7 +117,7 @@
 	const embedElementClasses = 'w-[50%] h-[90%]';
 </script>
 
-{#snippet displayPreview()}
+{#snippet displayPreview(att: Attachment)}
 	<div
 		role="button"
 		tabindex="0"
@@ -69,19 +132,19 @@
 			}
 		}}
 	>
-		{#if attachment.type.startsWith('image')}
+		{#if att.type.startsWith('image')}
 			<img
-				src={attachment.url}
+				src={att.url}
 				alt="attachment"
 				class="h-24 object-contain {display ? imageElementClasses : ''}"
 			/>
-		{:else if attachment.type === 'application/pdf'}
+		{:else if att.type === 'application/pdf'}
 			{#if !display}
 				<!-- This div prevents the <embed> element from stopping the click event propagation. -->
 				<div class="absolute w-full h-full top-0 left-0"></div>
 			{/if}
 			<embed
-				src={attachment.url}
+				src={att.url}
 				type="application/pdf"
 				class="h-24 object-contain {display ? embedElementClasses : ''}"
 			/>
@@ -89,18 +152,20 @@
 	</div>
 {/snippet}
 
-{#if cell}
-	{#if attachment}
-		{#if attachment.type.startsWith('image') || attachment.type === 'application/pdf'}
-			{@render displayPreview(attachment)}
-		{:else if !attachment.fileExists}
-			<p class="text-error-500 font-bold">{m.couldNotFindAttachmentMessage()}</p>
+<div bind:this={containerElement}>
+	{#if cell}
+		{#if attachment}
+			{#if attachment.type.startsWith('image') || attachment.type === 'application/pdf'}
+				{@render displayPreview(attachment)}
+			{:else if !attachment.fileExists}
+				<p class="text-error-500 font-bold">{m.couldNotFindAttachmentMessage()}</p>
+			{:else}
+				<p>{m.NoPreviewMessage()}</p>
+			{/if}
 		{:else}
-			<p>{m.NoPreviewMessage()}</p>
+			<span data-testid="loading-field">
+				{m.loading()}...
+			</span>
 		{/if}
-	{:else}
-		<span data-testid="loading-field">
-			{m.loading()}...
-		</span>
 	{/if}
-{/if}
+</div>
