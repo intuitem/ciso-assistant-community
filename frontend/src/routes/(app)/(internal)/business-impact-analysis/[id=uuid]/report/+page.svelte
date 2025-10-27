@@ -7,6 +7,8 @@
 	import TimelineTable from '$lib/components/BIA/TimelineTable.svelte';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
+	import { page } from '$app/state';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -34,8 +36,20 @@
 
 	const { bia, timelineData, metrics, assets, appliedControls } = data;
 
+	const scale = page.data.settings?.security_objective_scale || '1-4';
+	const scaleMap = SECURITY_OBJECTIVE_SCALE_MAP[scale];
+
 	function exportPDF() {
 		window.print();
+	}
+
+	// Helper function to apply scale transformation
+	function getDisplayValue(rawValue: number | null | undefined): string {
+		if (rawValue === null || rawValue === undefined) return '--';
+		if (typeof rawValue === 'number' && rawValue >= 0 && rawValue <= 4) {
+			return scaleMap[rawValue];
+		}
+		return String(rawValue);
 	}
 
 	// Helper functions for objectives vs capabilities table
@@ -44,7 +58,7 @@
 			.map((c: any) => {
 				const value = c[field];
 				if (value === null || value === undefined) return null;
-				return `${safeTranslate(c.objective)}: ${value}`;
+				return `${safeTranslate(c.objective)}: ${getDisplayValue(value)}`;
 			})
 			.filter((item: any) => item !== null);
 		return items.length > 0 ? items.join('\n') : '';
