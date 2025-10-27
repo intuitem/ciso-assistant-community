@@ -14,7 +14,7 @@ export class CisoAssistantService implements INodeType {
     icon: "fa:robot",
     group: ["transform"],
     version: 1,
-    subtitle: '={{$parameter["operation"]}}',
+    subtitle: '={{$parameter["resource"] + ": " + $parameter["operation"]}}',
     description: "Interact with CISO Assistant API",
     defaults: {
       name: "CA node ",
@@ -28,11 +28,67 @@ export class CisoAssistantService implements INodeType {
       },
     ],
     properties: [
+      // Resource selector
+      {
+        displayName: "Resource",
+        name: "resource",
+        type: "options",
+        noDataExpression: true,
+        options: [
+          {
+            name: "System",
+            value: "system",
+          },
+          {
+            name: "Domain",
+            value: "domain",
+          },
+          {
+            name: "Perimeter",
+            value: "perimeter",
+          },
+          {
+            name: "Asset",
+            value: "asset",
+          },
+          {
+            name: "Audit",
+            value: "audit",
+          },
+          {
+            name: "Risk Assessment",
+            value: "riskAssessment",
+          },
+          {
+            name: "Incident",
+            value: "incident",
+          },
+          {
+            name: "Vulnerability",
+            value: "vulnerability",
+          },
+          {
+            name: "Framework",
+            value: "framework",
+          },
+          {
+            name: "Risk Matrix",
+            value: "riskMatrix",
+          },
+        ],
+        default: "system",
+      },
+      // System operations
       {
         displayName: "Operation",
         name: "operation",
         type: "options",
         noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["system"],
+          },
+        },
         options: [
           {
             name: "Get Build Info",
@@ -40,103 +96,239 @@ export class CisoAssistantService implements INodeType {
             description: "Get build information from CISO Assistant",
             action: "Get build information",
           },
-          {
-            name: "Create Perimeter",
-            value: "createPerimeter",
-            description: "Create a new perimeter and return its UUID",
-            action: "Create a perimeter",
+        ],
+        default: "getBuild",
+      },
+      // Domain operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["domain"],
           },
+        },
+        options: [
           {
-            name: "Update evidence",
-            value: "updateEvidence",
-            description: "Update an evidence by its domain and ref_id",
-            action: "Update an evidence",
-          },
-          {
-            name: "Update control status",
-            value: "updateAppliedControl",
-            description: "Update an applied control by ref_id",
-            action: "Update an applied control",
-          },
-          {
-            name: "Sync Audit to scan",
-            value: "syncAuditToScan",
-            description: "Update an audit",
-            action: "Sync Audit to scan results",
-          },
-          {
-            name: "Create Domain",
-            value: "createDomain",
-            description: "Create a new domain and return its UUID",
+            name: "Create",
+            value: "create",
+            description: "Create a new domain",
             action: "Create a domain",
           },
           {
-            name: "Create Asset",
-            value: "createAsset",
-            description: "Create a new asset and return its UUID",
-            action: "Create an asset",
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get a domain by its name",
+            action: "Get domain by name",
           },
           {
-            name: "Initiate Audit",
-            value: "initiateAudit",
+            name: "List",
+            value: "list",
+            description: "Get all domains",
+            action: "List domains",
+          },
+        ],
+        default: "create",
+      },
+      // Perimeter operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["perimeter"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new perimeter",
+            action: "Create a perimeter",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get a perimeter by its name",
+            action: "Get perimeter by name",
+          },
+        ],
+        default: "create",
+      },
+      // Asset operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["asset"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new asset",
+            action: "Create an asset",
+          },
+        ],
+        default: "create",
+      },
+      // Audit operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["audit"],
+          },
+        },
+        options: [
+          {
+            name: "Initiate",
+            value: "initiate",
             description: "Initiate an audit for a perimeter with a framework",
             action: "Initiate an audit",
           },
           {
-            name: "Initiate Risk Assessment",
-            value: "initiateRiskAssessment",
-            description:
-              "Initiate a risk assessment for a perimeter with a risk matrix",
-            action: "Initiate a risk assessment",
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get an audit by its name",
+            action: "Get audit by name",
           },
           {
-            name: "Get Domains",
-            value: "getDomains",
-            description: "Pull all domains",
-            action: "Get domains",
+            name: "Get by Ref ID",
+            value: "getByRefId",
+            description: "Get an audit by its reference ID",
+            action: "Get audit by ref_id",
           },
           {
-            name: "Get Risk Matrices",
-            value: "getRiskMatrices",
-            description: "Pull all loaded risk matrices",
-            action: "Get risk matrices",
+            name: "Get Requirement Assessment",
+            value: "getRequirementAssessment",
+            description: "Get a requirement assessment by requirement ref_id",
+            action: "Get requirement assessment by ref_id",
           },
           {
-            name: "Get Frameworks",
-            value: "getFrameworks",
-            description: "Pull all loaded frameworks",
-            action: "Get frameworks",
+            name: "Update Requirement Assessment",
+            value: "updateRequirementAssessment",
+            description: "Update a requirement assessment by requirement ref_id",
+            action: "Update requirement assessment",
           },
         ],
-        default: "getBuild",
+        default: "initiate",
       },
+      // Risk Assessment operations
       {
-        displayName: "Attachment",
-        name: "attachment",
-        type: "string",
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
         displayOptions: {
           show: {
-            operation: ["updateEvidence"],
+            resource: ["riskAssessment"],
           },
         },
-        default: "",
-        placeholder: "",
-        description: "Attachment to use as evidence",
-        required: true,
+        options: [
+          {
+            name: "Initiate",
+            value: "initiate",
+            description: "Initiate a risk assessment for a perimeter with a risk matrix",
+            action: "Initiate a risk assessment",
+          },
+        ],
+        default: "initiate",
       },
+      // Incident operations
       {
-        displayName: "Ref ID",
-        name: "refId",
-        type: "string",
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
         displayOptions: {
           show: {
-            operation: ["updateEvidence"],
+            resource: ["incident"],
           },
         },
-        default: "",
-        placeholder: "",
-        description: "ref_id to use as a selector",
-        required: true,
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new incident",
+            action: "Create an incident",
+          },
+        ],
+        default: "create",
+      },
+      // Vulnerability operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["vulnerability"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new vulnerability",
+            action: "Create a vulnerability",
+          },
+        ],
+        default: "create",
+      },
+      // Framework operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["framework"],
+          },
+        },
+        options: [
+          {
+            name: "List",
+            value: "list",
+            description: "Get all loaded frameworks",
+            action: "List frameworks",
+          },
+        ],
+        default: "list",
+      },
+      // Risk Matrix operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["riskMatrix"],
+          },
+        },
+        options: [
+          {
+            name: "List",
+            value: "list",
+            description: "Get all risk matrices",
+            action: "List risk matrices",
+          },
+        ],
+        default: "list",
       },
       // Perimeter fields
       {
@@ -145,12 +337,13 @@ export class CisoAssistantService implements INodeType {
         type: "string",
         displayOptions: {
           show: {
-            operation: ["createPerimeter"],
+            resource: ["perimeter"],
+            operation: ["create", "getByName"],
           },
         },
         default: "",
         placeholder: "My Security Perimeter",
-        description: "The name of the perimeter",
+        description: "The name of the perimeter (case sensitive for getByName)",
         required: true,
       },
       {
@@ -162,12 +355,28 @@ export class CisoAssistantService implements INodeType {
         },
         displayOptions: {
           show: {
-            operation: ["createPerimeter"],
+            resource: ["perimeter"],
+            operation: ["create"],
           },
         },
         default: "",
         placeholder: "Description of the security perimeter",
         description: "The description of the perimeter",
+      },
+      {
+        displayName: "Folder ID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["perimeter"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain) this perimeter belongs to",
+        required: true,
       },
       // Domain fields
       {
@@ -176,12 +385,13 @@ export class CisoAssistantService implements INodeType {
         type: "string",
         displayOptions: {
           show: {
-            operation: ["createDomain"],
+            resource: ["domain"],
+            operation: ["create", "getByName"],
           },
         },
         default: "",
         placeholder: "IT Infrastructure",
-        description: "The name of the domain",
+        description: "The name of the domain (case sensitive for getByName)",
         required: true,
       },
       {
@@ -193,7 +403,8 @@ export class CisoAssistantService implements INodeType {
         },
         displayOptions: {
           show: {
-            operation: ["createDomain"],
+            resource: ["domain"],
+            operation: ["create"],
           },
         },
         default: "",
@@ -207,12 +418,28 @@ export class CisoAssistantService implements INodeType {
         type: "string",
         displayOptions: {
           show: {
-            operation: ["createAsset"],
+            resource: ["asset"],
+            operation: ["create"],
           },
         },
         default: "",
         placeholder: "Web Server",
         description: "The name of the asset",
+        required: true,
+      },
+      {
+        displayName: "Folder ID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["asset"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain) this asset belongs to",
         required: true,
       },
       {
@@ -224,7 +451,8 @@ export class CisoAssistantService implements INodeType {
         },
         displayOptions: {
           show: {
-            operation: ["createAsset"],
+            resource: ["asset"],
+            operation: ["create"],
           },
         },
         default: "",
@@ -237,24 +465,21 @@ export class CisoAssistantService implements INodeType {
         type: "options",
         displayOptions: {
           show: {
-            operation: ["createAsset"],
+            resource: ["asset"],
+            operation: ["create"],
           },
         },
         options: [
           {
             name: "Primary",
-            value: "primary",
+            value: "PR",
           },
           {
             name: "Support",
-            value: "support",
-          },
-          {
-            name: "System",
-            value: "system",
+            value: "SP",
           },
         ],
-        default: "primary",
+        default: "PR",
         description: "The type of the asset",
       },
       // Audit fields
@@ -264,7 +489,8 @@ export class CisoAssistantService implements INodeType {
         type: "string",
         displayOptions: {
           show: {
-            operation: ["initiateAudit", "initiateRiskAssessment"],
+            resource: ["audit", "riskAssessment"],
+            operation: ["initiate"],
           },
         },
         default: "",
@@ -278,7 +504,8 @@ export class CisoAssistantService implements INodeType {
         type: "string",
         displayOptions: {
           show: {
-            operation: ["initiateAudit"],
+            resource: ["audit"],
+            operation: ["initiate"],
           },
         },
         default: "",
@@ -292,13 +519,130 @@ export class CisoAssistantService implements INodeType {
         type: "string",
         displayOptions: {
           show: {
-            operation: ["initiateAudit"],
+            resource: ["audit"],
+            operation: ["initiate", "getByName"],
           },
         },
         default: "",
         placeholder: "Security Audit 2025",
-        description: "The name of the audit",
+        description: "The name of the audit (case sensitive for getByName)",
         required: true,
+      },
+      {
+        displayName: "Audit Ref ID",
+        name: "auditRefId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["audit"],
+            operation: ["getByRefId"],
+          },
+        },
+        default: "",
+        placeholder: "AUDIT-2025-001",
+        description: "The reference ID of the audit (case sensitive)",
+        required: true,
+      },
+      // Requirement Assessment fields
+      {
+        displayName: "Requirement Ref ID",
+        name: "requirementRefId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["audit"],
+            operation: ["getRequirementAssessment", "updateRequirementAssessment"],
+          },
+        },
+        default: "",
+        placeholder: "REQ-001",
+        description: "The reference ID of the requirement (case sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Compliance Assessment ID",
+        name: "complianceAssessmentId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["audit"],
+            operation: ["getRequirementAssessment", "updateRequirementAssessment"],
+          },
+        },
+        default: "",
+        placeholder: "audit-uuid-here",
+        description: "The UUID of the compliance assessment (audit)",
+        required: true,
+      },
+      {
+        displayName: "Status",
+        name: "requirementAssessmentStatus",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["audit"],
+            operation: ["updateRequirementAssessment"],
+          },
+        },
+        options: [
+          { name: "To Do", value: "to_do" },
+          { name: "In Progress", value: "in_progress" },
+          { name: "In Review", value: "in_review" },
+          { name: "Done", value: "done" },
+        ],
+        default: "to_do",
+        description: "The status of the requirement assessment",
+      },
+      {
+        displayName: "Result",
+        name: "requirementAssessmentResult",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["audit"],
+            operation: ["updateRequirementAssessment"],
+          },
+        },
+        options: [
+          { name: "Not Assessed", value: "not_assessed" },
+          { name: "Compliant", value: "compliant" },
+          { name: "Partially Compliant", value: "partially_compliant" },
+          { name: "Non-Compliant", value: "non_compliant" },
+          { name: "Not Applicable", value: "not_applicable" },
+        ],
+        default: "not_assessed",
+        description: "The compliance result",
+      },
+      {
+        displayName: "Observation",
+        name: "requirementAssessmentObservation",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["audit"],
+            operation: ["updateRequirementAssessment"],
+          },
+        },
+        default: "",
+        placeholder: "Assessment observations and notes",
+        description: "Observation notes for the requirement assessment",
+      },
+      {
+        displayName: "Score",
+        name: "requirementAssessmentScore",
+        type: "number",
+        displayOptions: {
+          show: {
+            resource: ["audit"],
+            operation: ["updateRequirementAssessment"],
+          },
+        },
+        default: 0,
+        placeholder: "0",
+        description: "Score for the requirement assessment",
       },
       // Risk Assessment fields
       {
@@ -307,7 +651,8 @@ export class CisoAssistantService implements INodeType {
         type: "string",
         displayOptions: {
           show: {
-            operation: ["initiateRiskAssessment"],
+            resource: ["riskAssessment"],
+            operation: ["initiate"],
           },
         },
         default: "",
@@ -321,7 +666,8 @@ export class CisoAssistantService implements INodeType {
         type: "string",
         displayOptions: {
           show: {
-            operation: ["initiateRiskAssessment"],
+            resource: ["riskAssessment"],
+            operation: ["initiate"],
           },
         },
         default: "",
@@ -329,7 +675,232 @@ export class CisoAssistantService implements INodeType {
         description: "The name of the risk assessment",
         required: true,
       },
-      // Additional fields for assets
+      // Incident fields
+      {
+        displayName: "Incident Name",
+        name: "incidentName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["incident"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Security Incident",
+        description: "The name of the incident",
+        required: true,
+      },
+      {
+        displayName: "Folder ID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["incident"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain) this incident belongs to",
+        required: true,
+      },
+      {
+        displayName: "Incident Description",
+        name: "incidentDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["incident"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the incident",
+        description: "The description of the incident",
+      },
+      {
+        displayName: "Status",
+        name: "incidentStatus",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["incident"],
+            operation: ["create"],
+          },
+        },
+        options: [
+          { name: "New", value: "new" },
+          { name: "Ongoing", value: "ongoing" },
+          { name: "Resolved", value: "resolved" },
+          { name: "Closed", value: "closed" },
+          { name: "Dismissed", value: "dismissed" },
+        ],
+        default: "new",
+        description: "The status of the incident",
+      },
+      {
+        displayName: "Severity",
+        name: "incidentSeverity",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["incident"],
+            operation: ["create"],
+          },
+        },
+        options: [
+          { name: "Critical", value: 1 },
+          { name: "Major", value: 2 },
+          { name: "Moderate", value: 3 },
+          { name: "Minor", value: 4 },
+          { name: "Low", value: 5 },
+          { name: "Unknown", value: 6 },
+        ],
+        default: 3,
+        description: "The severity of the incident",
+      },
+      {
+        displayName: "Detection",
+        name: "incidentDetection",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["incident"],
+            operation: ["create"],
+          },
+        },
+        options: [
+          { name: "Internal", value: "internally_detected" },
+          { name: "External", value: "externally_detected" },
+        ],
+        default: "internally_detected",
+        description: "How the incident was detected",
+      },
+      {
+        displayName: "Reference ID",
+        name: "incidentRefId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["incident"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "INC-2025-001",
+        description: "Reference ID for the incident",
+      },
+      // Vulnerability fields
+      {
+        displayName: "Vulnerability Name",
+        name: "vulnerabilityName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["vulnerability"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "CVE-2025-0001",
+        description: "The name of the vulnerability",
+        required: true,
+      },
+      {
+        displayName: "Folder ID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["vulnerability"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain) this vulnerability belongs to",
+        required: true,
+      },
+      {
+        displayName: "Vulnerability Description",
+        name: "vulnerabilityDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["vulnerability"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the vulnerability",
+        description: "The description of the vulnerability",
+      },
+      {
+        displayName: "Status",
+        name: "vulnerabilityStatus",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["vulnerability"],
+            operation: ["create"],
+          },
+        },
+        options: [
+          { name: "Undefined", value: "--" },
+          { name: "Potential", value: "potential" },
+          { name: "Exploitable", value: "exploitable" },
+          { name: "Mitigated", value: "mitigated" },
+          { name: "Fixed", value: "fixed" },
+          { name: "Not Exploitable", value: "not_exploitable" },
+          { name: "Unaffected", value: "unaffected" },
+        ],
+        default: "--",
+        description: "The status of the vulnerability",
+      },
+      {
+        displayName: "Severity",
+        name: "vulnerabilitySeverity",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["vulnerability"],
+            operation: ["create"],
+          },
+        },
+        options: [
+          { name: "Undefined", value: -1 },
+          { name: "Info", value: 0 },
+          { name: "Low", value: 1 },
+          { name: "Medium", value: 2 },
+          { name: "High", value: 3 },
+          { name: "Critical", value: 4 },
+        ],
+        default: -1,
+        description: "The severity of the vulnerability",
+      },
+      {
+        displayName: "Reference ID",
+        name: "vulnerabilityRefId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["vulnerability"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "VULN-2025-001",
+        description: "Reference ID for the vulnerability",
+      },
+      // Additional fields
       {
         displayName: "Additional Fields",
         name: "additionalFields",
@@ -338,7 +909,8 @@ export class CisoAssistantService implements INodeType {
         placeholder: "Add Field",
         displayOptions: {
           show: {
-            operation: ["createAsset", "createDomain", "createPerimeter", "updateEvidence"],
+            resource: ["asset", "domain", "perimeter"],
+            operation: ["create"],
           },
         },
         options: [
@@ -348,7 +920,7 @@ export class CisoAssistantService implements INodeType {
             type: "options",
             displayOptions: {
               show: {
-                "/operation": ["createAsset"],
+                "/resource": ["asset"],
               },
             },
             options: [
@@ -389,6 +961,7 @@ export class CisoAssistantService implements INodeType {
 
     for (let i = 0; i < items.length; i++) {
       try {
+        const resource = this.getNodeParameter("resource", i) as string;
         const operation = this.getNodeParameter("operation", i) as string;
 
         // Base options for all requests (without url)
@@ -410,206 +983,356 @@ export class CisoAssistantService implements INodeType {
 
         let response;
 
-        switch (operation) {
-          case "getBuild":
-            response = await this.helpers.httpRequest({
-              ...baseConfig,
-              method: "GET",
-              url: `${credentials.baseUrl}/build`,
-            });
-            break;
+        // Handle operations based on resource and operation
+        if (resource === "system" && operation === "getBuild") {
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/build`,
+          });
+        } else if (resource === "perimeter" && operation === "create") {
+          const perimeterName = this.getNodeParameter(
+            "perimeterName",
+            i,
+          ) as string;
+          const perimeterDescription = this.getNodeParameter(
+            "perimeterDescription",
+            i,
+            "",
+          ) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const perimeterAdditionalFields = this.getNodeParameter(
+            "additionalFields",
+            i,
+            {},
+          ) as any;
 
-          case "createPerimeter":
-            const perimeterName = this.getNodeParameter(
-              "perimeterName",
-              i,
-            ) as string;
-            const perimeterDescription = this.getNodeParameter(
-              "perimeterDescription",
-              i,
-              "",
-            ) as string;
-            const perimeterAdditionalFields = this.getNodeParameter(
-              "additionalFields",
-              i,
-              {},
-            ) as any;
+          const perimeterData: any = {
+            name: perimeterName,
+            description: perimeterDescription,
+            folder: folderId,
+          };
 
-            const perimeterData: any = {
-              name: perimeterName,
-              description: perimeterDescription,
-            };
+          // Add additional fields
+          if (perimeterAdditionalFields.owner)
+            perimeterData.owner = perimeterAdditionalFields.owner;
+          if (perimeterAdditionalFields.tags) {
+            perimeterData.tags = perimeterAdditionalFields.tags
+              .split(",")
+              .map((tag: string) => tag.trim());
+          }
 
-            // Add additional fields
-            if (perimeterAdditionalFields.owner)
-              perimeterData.owner = perimeterAdditionalFields.owner;
-            if (perimeterAdditionalFields.tags) {
-              perimeterData.tags = perimeterAdditionalFields.tags
-                .split(",")
-                .map((tag: string) => tag.trim());
-            }
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/perimeters/`,
+            body: perimeterData,
+          });
+        } else if (resource === "perimeter" && operation === "getByName") {
+          const perimeterName = this.getNodeParameter("perimeterName", i) as string;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/perimeters/?name=${encodeURIComponent(perimeterName)}`,
+          });
+        } else if (resource === "domain" && operation === "create") {
+          const domainName = this.getNodeParameter("domainName", i) as string;
+          const domainDescription = this.getNodeParameter(
+            "domainDescription",
+            i,
+            "",
+          ) as string;
+          const domainAdditionalFields = this.getNodeParameter(
+            "additionalFields",
+            i,
+            {},
+          ) as any;
 
-            response = await this.helpers.httpRequest({
-              ...baseConfig,
-              method: "POST",
-              url: `${credentials.baseUrl}/perimeters/`,
-              body: perimeterData,
-            });
-            break;
+          const domainData: any = {
+            name: domainName,
+            description: domainDescription,
+          };
 
-          case "createDomain":
-            const domainName = this.getNodeParameter("domainName", i) as string;
-            const domainDescription = this.getNodeParameter(
-              "domainDescription",
-              i,
-              "",
-            ) as string;
-            const domainAdditionalFields = this.getNodeParameter(
-              "additionalFields",
-              i,
-              {},
-            ) as any;
+          // Add additional fields
+          if (domainAdditionalFields.owner)
+            domainData.owner = domainAdditionalFields.owner;
+          if (domainAdditionalFields.tags) {
+            domainData.tags = domainAdditionalFields.tags
+              .split(",")
+              .map((tag: string) => tag.trim());
+          }
 
-            const domainData: any = {
-              name: domainName,
-              description: domainDescription,
-            };
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/folders/`,
+            body: domainData,
+          });
+        } else if (resource === "domain" && operation === "getByName") {
+          const domainName = this.getNodeParameter("domainName", i) as string;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/folders/?name=${encodeURIComponent(domainName)}`,
+          });
+        } else if (resource === "domain" && operation === "list") {
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/folders/`,
+          });
+        } else if (resource === "asset" && operation === "create") {
+          const assetName = this.getNodeParameter("assetName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const assetDescription = this.getNodeParameter(
+            "assetDescription",
+            i,
+            "",
+          ) as string;
+          const assetType = this.getNodeParameter("assetType", i) as string;
+          const assetAdditionalFields = this.getNodeParameter(
+            "additionalFields",
+            i,
+            {},
+          ) as any;
 
-            // Add additional fields
-            if (domainAdditionalFields.owner)
-              domainData.owner = domainAdditionalFields.owner;
-            if (domainAdditionalFields.tags) {
-              domainData.tags = domainAdditionalFields.tags
-                .split(",")
-                .map((tag: string) => tag.trim());
-            }
+          const assetData: any = {
+            name: assetName,
+            folder: folderId,
+            description: assetDescription,
+            type: assetType,
+          };
 
-            response = await this.helpers.httpRequest({
-              ...baseConfig,
-              method: "POST",
-              url: `${credentials.baseUrl}/domains/`,
-              body: domainData,
-            });
-            break;
+          // Add additional fields
+          if (assetAdditionalFields.businessValue)
+            assetData.business_value = assetAdditionalFields.businessValue;
+          if (assetAdditionalFields.owner)
+            assetData.owner = assetAdditionalFields.owner;
+          if (assetAdditionalFields.tags) {
+            assetData.tags = assetAdditionalFields.tags
+              .split(",")
+              .map((tag: string) => tag.trim());
+          }
 
-          case "createAsset":
-            const assetName = this.getNodeParameter("assetName", i) as string;
-            const assetDescription = this.getNodeParameter(
-              "assetDescription",
-              i,
-              "",
-            ) as string;
-            const assetType = this.getNodeParameter("assetType", i) as string;
-            const assetAdditionalFields = this.getNodeParameter(
-              "additionalFields",
-              i,
-              {},
-            ) as any;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/assets/`,
+            body: assetData,
+          });
+        } else if (resource === "audit" && operation === "initiate") {
+          const auditPerimeterId = this.getNodeParameter(
+            "perimeterId",
+            i,
+          ) as string;
+          const frameworkId = this.getNodeParameter(
+            "frameworkId",
+            i,
+          ) as string;
+          const auditName = this.getNodeParameter("auditName", i) as string;
 
-            const assetData: any = {
-              name: assetName,
-              description: assetDescription,
-              type: assetType,
-            };
+          const auditData = {
+            name: auditName,
+            perimeter: auditPerimeterId,
+            framework: frameworkId,
+          };
 
-            // Add additional fields
-            if (assetAdditionalFields.businessValue)
-              assetData.business_value = assetAdditionalFields.businessValue;
-            if (assetAdditionalFields.owner)
-              assetData.owner = assetAdditionalFields.owner;
-            if (assetAdditionalFields.tags) {
-              assetData.tags = assetAdditionalFields.tags
-                .split(",")
-                .map((tag: string) => tag.trim());
-            }
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/audits/`,
+            body: auditData,
+          });
+        } else if (resource === "audit" && operation === "getByName") {
+          const auditName = this.getNodeParameter("auditName", i) as string;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/audits/?name=${encodeURIComponent(auditName)}`,
+          });
+        } else if (resource === "audit" && operation === "getByRefId") {
+          const auditRefId = this.getNodeParameter("auditRefId", i) as string;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/audits/?ref_id=${encodeURIComponent(auditRefId)}`,
+          });
+        } else if (resource === "audit" && operation === "getRequirementAssessment") {
+          const requirementRefId = this.getNodeParameter("requirementRefId", i) as string;
+          const complianceAssessmentId = this.getNodeParameter("complianceAssessmentId", i) as string;
 
-            response = await this.helpers.httpRequest({
-              ...baseConfig,
-              method: "POST",
-              url: `${credentials.baseUrl}/assets/`,
-              body: assetData,
-            });
-            break;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/requirement-assessments/?requirement__ref_id=${encodeURIComponent(requirementRefId)}&compliance_assessment=${encodeURIComponent(complianceAssessmentId)}`,
+          });
+        } else if (resource === "audit" && operation === "updateRequirementAssessment") {
+          const requirementRefId = this.getNodeParameter("requirementRefId", i) as string;
+          const complianceAssessmentId = this.getNodeParameter("complianceAssessmentId", i) as string;
 
-          case "initiateAudit":
-            const auditPerimeterId = this.getNodeParameter(
-              "perimeterId",
-              i,
-            ) as string;
-            const frameworkId = this.getNodeParameter(
-              "frameworkId",
-              i,
-            ) as string;
-            const auditName = this.getNodeParameter("auditName", i) as string;
+          // First, get the requirement assessment to find its ID
+          const getResponse = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/requirement-assessments/?requirement__ref_id=${encodeURIComponent(requirementRefId)}&compliance_assessment=${encodeURIComponent(complianceAssessmentId)}`,
+          });
 
-            const auditData = {
-              name: auditName,
-              perimeter: auditPerimeterId,
-              framework: frameworkId,
-            };
+          // Check if we found the requirement assessment
+          if (!getResponse.results || getResponse.results.length === 0) {
+            throw new Error(`No requirement assessment found for ref_id: ${requirementRefId} in compliance assessment: ${complianceAssessmentId}`);
+          }
 
-            response = await this.helpers.httpRequest({
-              ...baseConfig,
-              method: "POST",
-              url: `${credentials.baseUrl}/audits/`,
-              body: auditData,
-            });
-            break;
+          const requirementAssessmentId = getResponse.results[0].id;
 
-          case "initiateRiskAssessment":
-            const raPerimeterId = this.getNodeParameter(
-              "perimeterId",
-              i,
-            ) as string;
-            const riskMatrixId = this.getNodeParameter(
-              "riskMatrixId",
-              i,
-            ) as string;
-            const riskAssessmentName = this.getNodeParameter(
-              "riskAssessmentName",
-              i,
-            ) as string;
+          // Build update data
+          const updateData: any = {};
 
-            const riskAssessmentData = {
-              name: riskAssessmentName,
-              perimeter: raPerimeterId,
-              risk_matrix: riskMatrixId,
-            };
+          const status = this.getNodeParameter("requirementAssessmentStatus", i, "") as string;
+          const result = this.getNodeParameter("requirementAssessmentResult", i, "") as string;
+          const observation = this.getNodeParameter("requirementAssessmentObservation", i, "") as string;
+          const score = this.getNodeParameter("requirementAssessmentScore", i, null) as number | null;
 
-            response = await this.helpers.httpRequest({
-              ...baseConfig,
-              method: "POST",
-              url: `${credentials.baseUrl}/risk-assessments/`,
-              body: riskAssessmentData,
-            });
-            break;
+          if (status) updateData.status = status;
+          if (result) updateData.result = result;
+          if (observation) updateData.observation = observation;
+          if (score !== null && score !== undefined) updateData.score = score;
 
-          case "getRiskMatrices":
-            response = await this.helpers.httpRequest({
-              ...baseConfig,
-              method: "GET",
-              url: `${credentials.baseUrl}/risk-matrices/`,
-            });
-            break;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/requirement-assessments/${requirementAssessmentId}/`,
+            body: updateData,
+          });
+        } else if (resource === "riskAssessment" && operation === "initiate") {
+          const raPerimeterId = this.getNodeParameter(
+            "perimeterId",
+            i,
+          ) as string;
+          const riskMatrixId = this.getNodeParameter(
+            "riskMatrixId",
+            i,
+          ) as string;
+          const riskAssessmentName = this.getNodeParameter(
+            "riskAssessmentName",
+            i,
+          ) as string;
 
-          case "getDomains":
-            response = await this.helpers.httpRequest({
-              ...baseConfig,
-              method: "GET",
-              url: `${credentials.baseUrl}/folders/`,
-            });
-            break;
+          const riskAssessmentData = {
+            name: riskAssessmentName,
+            perimeter: raPerimeterId,
+            risk_matrix: riskMatrixId,
+          };
 
-          case "getFrameworks":
-            response = await this.helpers.httpRequest({
-              ...baseConfig,
-              method: "GET",
-              url: `${credentials.baseUrl}/frameworks/`,
-            });
-            break;
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/risk-assessments/`,
+            body: riskAssessmentData,
+          });
+        } else if (resource === "incident" && operation === "create") {
+          const incidentName = this.getNodeParameter("incidentName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const incidentDescription = this.getNodeParameter(
+            "incidentDescription",
+            i,
+            "",
+          ) as string;
+          const incidentStatus = this.getNodeParameter(
+            "incidentStatus",
+            i,
+            "new",
+          ) as string;
+          const incidentSeverity = this.getNodeParameter(
+            "incidentSeverity",
+            i,
+            3,
+          ) as number;
+          const incidentDetection = this.getNodeParameter(
+            "incidentDetection",
+            i,
+            "internally_detected",
+          ) as string;
+          const incidentRefId = this.getNodeParameter(
+            "incidentRefId",
+            i,
+            "",
+          ) as string;
 
-          default:
-            throw new Error(`Unknown operation: ${operation}`);
+          const incidentData: any = {
+            name: incidentName,
+            folder: folderId,
+            description: incidentDescription,
+            status: incidentStatus,
+            severity: incidentSeverity,
+            detection: incidentDetection,
+          };
+
+          if (incidentRefId) {
+            incidentData.ref_id = incidentRefId;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/incidents/`,
+            body: incidentData,
+          });
+        } else if (resource === "vulnerability" && operation === "create") {
+          const vulnerabilityName = this.getNodeParameter("vulnerabilityName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const vulnerabilityDescription = this.getNodeParameter(
+            "vulnerabilityDescription",
+            i,
+            "",
+          ) as string;
+          const vulnerabilityStatus = this.getNodeParameter(
+            "vulnerabilityStatus",
+            i,
+            "--",
+          ) as string;
+          const vulnerabilitySeverity = this.getNodeParameter(
+            "vulnerabilitySeverity",
+            i,
+            -1,
+          ) as number;
+          const vulnerabilityRefId = this.getNodeParameter(
+            "vulnerabilityRefId",
+            i,
+            "",
+          ) as string;
+
+          const vulnerabilityData: any = {
+            name: vulnerabilityName,
+            folder: folderId,
+            description: vulnerabilityDescription,
+            status: vulnerabilityStatus,
+            severity: vulnerabilitySeverity,
+          };
+
+          if (vulnerabilityRefId) {
+            vulnerabilityData.ref_id = vulnerabilityRefId;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/vulnerabilities/`,
+            body: vulnerabilityData,
+          });
+        } else if (resource === "riskMatrix" && operation === "list") {
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/risk-matrices/`,
+          });
+        } else if (resource === "framework" && operation === "list") {
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/frameworks/`,
+          });
+        } else {
+          throw new Error(`Unknown resource/operation: ${resource}/${operation}`);
         }
 
         returnData.push({

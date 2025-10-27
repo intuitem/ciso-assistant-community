@@ -463,7 +463,7 @@ class PerimeterViewSet(BaseModelViewSet):
     model = Perimeter
     filterset_class = PerimeterFilter
     search_fields = ["name", "ref_id", "description"]
-    filterset_fields = ["folder", "campaigns"]
+    filterset_fields = ["name", "folder", "campaigns"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -3598,7 +3598,14 @@ class FolderFilter(GenericFilterSet):
 
     class Meta:
         model = Folder
-        fields = ["parent_folder", "content_type", "owner", "owned", "filtering_labels"]
+        fields = [
+            "name",
+            "parent_folder",
+            "content_type",
+            "owner",
+            "owned",
+            "filtering_labels",
+        ]
 
 
 class FolderViewSet(BaseModelViewSet):
@@ -5556,6 +5563,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     model = ComplianceAssessment
     filterset_fields = [
+        "name",
+        "ref_id",
         "folder",
         "framework",
         "perimeter",
