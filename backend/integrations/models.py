@@ -22,7 +22,9 @@ class IntegrationProvider(AbstractBaseModel):
 class IntegrationConfiguration(AbstractBaseModel, FolderMixin):
     """Instance of an integration for a specific folder"""
 
-    provider = models.ForeignKey(IntegrationProvider, on_delete=models.CASCADE)
+    provider = models.ForeignKey(
+        IntegrationProvider, related_name="configurations", on_delete=models.CASCADE
+    )
 
     credentials = models.JSONField(default=dict)
 
@@ -54,12 +56,12 @@ class SyncMapping(AbstractBaseModel):
         PULL = "pull"
 
     configuration = models.ForeignKey(
-        IntegrationConfiguration, on_delete=models.CASCADE
+        IntegrationConfiguration, related_name="sync_mappings", on_delete=models.CASCADE
     )
 
     # Local object reference
     content_type = models.ForeignKey(
-        ContentType, on_delete=models.CASCADE
+        ContentType, related_name="sync_mappings", on_delete=models.CASCADE
     )  # e.g. core.AppliedControl
     local_object_id = models.UUIDField()
 
@@ -93,7 +95,9 @@ class SyncEvent(models.Model):
         WEBHOOK = "webhook"
         SCHEDULED = "scheduled"
 
-    mapping = models.ForeignKey(SyncMapping, on_delete=models.CASCADE)
+    mapping = models.ForeignKey(
+        SyncMapping, related_name="sync_events", on_delete=models.CASCADE
+    )
     direction = models.CharField(
         max_length=10, choices=SyncMapping.SyncDirection.choices
     )
