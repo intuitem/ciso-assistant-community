@@ -112,6 +112,14 @@ export class CisoAssistantService implements INodeType {
             value: "entityAssessment",
           },
           {
+            name: "Right Request",
+            value: "rightRequest",
+          },
+          {
+            name: "Data Breach",
+            value: "dataBreach",
+          },
+          {
             name: "Framework",
             value: "framework",
           },
@@ -805,6 +813,84 @@ export class CisoAssistantService implements INodeType {
             value: "list",
             description: "Get all entity assessments",
             action: "List entity assessments",
+          },
+        ],
+        default: "create",
+      },
+      // Right Request operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["rightRequest"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new right request",
+            action: "Create right request",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get a right request by its name (case-sensitive)",
+            action: "Get right request by name",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all right requests",
+            action: "List right requests",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update an existing right request",
+            action: "Update right request",
+          },
+        ],
+        default: "create",
+      },
+      // Data Breach operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["dataBreach"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new data breach",
+            action: "Create data breach",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get a data breach by its name (case-sensitive)",
+            action: "Get data breach by name",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all data breaches",
+            action: "List data breaches",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update an existing data breach",
+            action: "Update data breach",
           },
         ],
         default: "create",
@@ -2908,6 +2994,323 @@ export class CisoAssistantService implements INodeType {
         default: "",
         description: "Conclusion of the entity assessment",
       },
+      // Right Request fields
+      {
+        displayName: "Right Request Name",
+        name: "rightRequestName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["rightRequest"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "GDPR Access Request",
+        description: "Name of the right request (case-sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Folder UUID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["rightRequest"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain)",
+        required: true,
+      },
+      {
+        displayName: "Right Request UUID",
+        name: "rightRequestId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["rightRequest"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "right-request-uuid-here",
+        description: "The UUID of the right request to update",
+        required: true,
+      },
+      {
+        displayName: "Requested On",
+        name: "rightRequestRequestedOn",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["rightRequest"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "2025-01-15",
+        description: "Date when the request was made (YYYY-MM-DD format)",
+        required: true,
+      },
+      {
+        displayName: "Request Type",
+        name: "rightRequestType",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["rightRequest"],
+            operation: ["create", "update"],
+          },
+        },
+        options: [
+          { name: "Deletion / Erasure", value: "deletion" },
+          { name: "Rectification", value: "rectification" },
+          { name: "Access / Extract", value: "access" },
+          { name: "Portability", value: "portability" },
+          { name: "Restriction", value: "restriction" },
+          { name: "Objection", value: "objection" },
+          { name: "Other", value: "other" },
+        ],
+        default: "other",
+        description: "Type of the right request",
+      },
+      {
+        displayName: "Status",
+        name: "rightRequestStatus",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["rightRequest"],
+            operation: ["create", "update"],
+          },
+        },
+        options: [
+          { name: "New", value: "new" },
+          { name: "In Progress", value: "in_progress" },
+          { name: "On Hold", value: "on_hold" },
+          { name: "Done", value: "done" },
+        ],
+        default: "new",
+        description: "Status of the right request",
+      },
+      {
+        displayName: "Description",
+        name: "rightRequestDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["rightRequest"],
+            operation: ["create", "update"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the right request",
+        description: "Right request description",
+      },
+      {
+        displayName: "Due Date",
+        name: "rightRequestDueDate",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["rightRequest"],
+            operation: ["create", "update"],
+          },
+        },
+        default: "",
+        placeholder: "2025-02-15",
+        description: "Due date for the request (YYYY-MM-DD format)",
+      },
+      {
+        displayName: "Observation",
+        name: "rightRequestObservation",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["rightRequest"],
+            operation: ["create", "update"],
+          },
+        },
+        default: "",
+        placeholder: "Additional observations",
+        description: "Observation notes",
+      },
+      // Data Breach fields
+      {
+        displayName: "Data Breach Name",
+        name: "dataBreachName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["dataBreach"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "Q1 2025 Data Breach",
+        description: "Name of the data breach (case-sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Folder UUID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["dataBreach"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain)",
+        required: true,
+      },
+      {
+        displayName: "Data Breach UUID",
+        name: "dataBreachId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["dataBreach"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "data-breach-uuid-here",
+        description: "The UUID of the data breach to update",
+        required: true,
+      },
+      {
+        displayName: "Discovered On",
+        name: "dataBreachDiscoveredOn",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["dataBreach"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "2025-01-15T14:30:00Z",
+        description: "Date and time when the breach was discovered (ISO 8601 format)",
+        required: true,
+      },
+      {
+        displayName: "Breach Type",
+        name: "dataBreachType",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["dataBreach"],
+            operation: ["create", "update"],
+          },
+        },
+        options: [
+          { name: "Destruction", value: "privacy_destruction" },
+          { name: "Loss", value: "privacy_loss" },
+          { name: "Alteration", value: "privacy_alteration" },
+          { name: "Unauthorized Disclosure", value: "privacy_unauthorized_disclosure" },
+          { name: "Unauthorized Access", value: "privacy_unauthorized_access" },
+          { name: "Other", value: "privacy_other" },
+        ],
+        default: "privacy_other",
+        description: "Type of the data breach",
+      },
+      {
+        displayName: "Risk Level",
+        name: "dataBreachRiskLevel",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["dataBreach"],
+            operation: ["create", "update"],
+          },
+        },
+        options: [
+          { name: "No Risk", value: "privacy_no_risk" },
+          { name: "Risk", value: "privacy_risk" },
+          { name: "High Risk", value: "privacy_high_risk" },
+        ],
+        default: "privacy_risk",
+        description: "Risk level of the breach",
+      },
+      {
+        displayName: "Status",
+        name: "dataBreachStatus",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["dataBreach"],
+            operation: ["create", "update"],
+          },
+        },
+        options: [
+          { name: "Discovered", value: "privacy_discovered" },
+          { name: "Under Investigation", value: "privacy_under_investigation" },
+          { name: "Authority Notified", value: "privacy_authority_notified" },
+          { name: "Data Subjects Notified", value: "privacy_subjects_notified" },
+          { name: "Closed", value: "privacy_closed" },
+        ],
+        default: "privacy_discovered",
+        description: "Status of the data breach",
+      },
+      {
+        displayName: "Description",
+        name: "dataBreachDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["dataBreach"],
+            operation: ["create", "update"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the data breach",
+        description: "Data breach description",
+      },
+      {
+        displayName: "Affected Subjects Count",
+        name: "dataBreachAffectedSubjectsCount",
+        type: "number",
+        displayOptions: {
+          show: {
+            resource: ["dataBreach"],
+            operation: ["create", "update"],
+          },
+        },
+        default: 0,
+        description: "Approximate number of affected data subjects",
+      },
+      {
+        displayName: "Observation",
+        name: "dataBreachObservation",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["dataBreach"],
+            operation: ["create", "update"],
+          },
+        },
+        default: "",
+        placeholder: "Additional observations",
+        description: "Observation notes",
+      },
       // Optional Folder UUID for list operations
       {
         displayName: "Folder UUID (Optional)",
@@ -2934,6 +3337,8 @@ export class CisoAssistantService implements INodeType {
               "solution",
               "representative",
               "entityAssessment",
+              "rightRequest",
+              "dataBreach",
             ],
             operation: ["list"],
           },
@@ -4247,6 +4652,152 @@ export class CisoAssistantService implements INodeType {
             ...baseConfig,
             method: "GET",
             url,
+          });
+        } else if (resource === "rightRequest" && operation === "create") {
+          const rightRequestName = this.getNodeParameter("rightRequestName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const rightRequestRequestedOn = this.getNodeParameter("rightRequestRequestedOn", i) as string;
+          const rightRequestType = this.getNodeParameter("rightRequestType", i, "other") as string;
+          const rightRequestStatus = this.getNodeParameter("rightRequestStatus", i, "new") as string;
+          const rightRequestDescription = this.getNodeParameter("rightRequestDescription", i, "") as string;
+          const rightRequestDueDate = this.getNodeParameter("rightRequestDueDate", i, "") as string;
+          const rightRequestObservation = this.getNodeParameter("rightRequestObservation", i, "") as string;
+
+          const rightRequestData: any = {
+            name: rightRequestName,
+            folder: folderId,
+            requested_on: rightRequestRequestedOn,
+            request_type: rightRequestType,
+            status: rightRequestStatus,
+          };
+
+          if (rightRequestDescription) rightRequestData.description = rightRequestDescription;
+          if (rightRequestDueDate) rightRequestData.due_date = rightRequestDueDate;
+          if (rightRequestObservation) rightRequestData.observation = rightRequestObservation;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/right-requests/`,
+            body: rightRequestData,
+          });
+        } else if (resource === "rightRequest" && operation === "getByName") {
+          const rightRequestName = this.getNodeParameter("rightRequestName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/right-requests/?name=${encodeURIComponent(rightRequestName)}&folder=${encodeURIComponent(folderId)}`,
+          });
+        } else if (resource === "rightRequest" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/right-requests/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "rightRequest" && operation === "update") {
+          const rightRequestId = this.getNodeParameter("rightRequestId", i) as string;
+          const rightRequestType = this.getNodeParameter("rightRequestType", i, "") as string;
+          const rightRequestStatus = this.getNodeParameter("rightRequestStatus", i, "") as string;
+          const rightRequestDescription = this.getNodeParameter("rightRequestDescription", i, "") as string;
+          const rightRequestDueDate = this.getNodeParameter("rightRequestDueDate", i, "") as string;
+          const rightRequestObservation = this.getNodeParameter("rightRequestObservation", i, "") as string;
+
+          const rightRequestData: any = {};
+
+          if (rightRequestType) rightRequestData.request_type = rightRequestType;
+          if (rightRequestStatus) rightRequestData.status = rightRequestStatus;
+          if (rightRequestDescription) rightRequestData.description = rightRequestDescription;
+          if (rightRequestDueDate) rightRequestData.due_date = rightRequestDueDate;
+          if (rightRequestObservation) rightRequestData.observation = rightRequestObservation;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/right-requests/${rightRequestId}/`,
+            body: rightRequestData,
+          });
+        } else if (resource === "dataBreach" && operation === "create") {
+          const dataBreachName = this.getNodeParameter("dataBreachName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const dataBreachDiscoveredOn = this.getNodeParameter("dataBreachDiscoveredOn", i) as string;
+          const dataBreachType = this.getNodeParameter("dataBreachType", i, "privacy_other") as string;
+          const dataBreachRiskLevel = this.getNodeParameter("dataBreachRiskLevel", i, "privacy_risk") as string;
+          const dataBreachStatus = this.getNodeParameter("dataBreachStatus", i, "privacy_discovered") as string;
+          const dataBreachDescription = this.getNodeParameter("dataBreachDescription", i, "") as string;
+          const dataBreachAffectedSubjectsCount = this.getNodeParameter("dataBreachAffectedSubjectsCount", i, 0) as number;
+          const dataBreachObservation = this.getNodeParameter("dataBreachObservation", i, "") as string;
+
+          const dataBreachData: any = {
+            name: dataBreachName,
+            folder: folderId,
+            discovered_on: dataBreachDiscoveredOn,
+            breach_type: dataBreachType,
+            risk_level: dataBreachRiskLevel,
+            status: dataBreachStatus,
+            affected_subjects_count: dataBreachAffectedSubjectsCount,
+          };
+
+          if (dataBreachDescription) dataBreachData.description = dataBreachDescription;
+          if (dataBreachObservation) dataBreachData.observation = dataBreachObservation;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/data-breaches/`,
+            body: dataBreachData,
+          });
+        } else if (resource === "dataBreach" && operation === "getByName") {
+          const dataBreachName = this.getNodeParameter("dataBreachName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/data-breaches/?name=${encodeURIComponent(dataBreachName)}&folder=${encodeURIComponent(folderId)}`,
+          });
+        } else if (resource === "dataBreach" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/data-breaches/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "dataBreach" && operation === "update") {
+          const dataBreachId = this.getNodeParameter("dataBreachId", i) as string;
+          const dataBreachType = this.getNodeParameter("dataBreachType", i, "") as string;
+          const dataBreachRiskLevel = this.getNodeParameter("dataBreachRiskLevel", i, "") as string;
+          const dataBreachStatus = this.getNodeParameter("dataBreachStatus", i, "") as string;
+          const dataBreachDescription = this.getNodeParameter("dataBreachDescription", i, "") as string;
+          const dataBreachAffectedSubjectsCount = this.getNodeParameter("dataBreachAffectedSubjectsCount", i, -1) as number;
+          const dataBreachObservation = this.getNodeParameter("dataBreachObservation", i, "") as string;
+
+          const dataBreachData: any = {};
+
+          if (dataBreachType) dataBreachData.breach_type = dataBreachType;
+          if (dataBreachRiskLevel) dataBreachData.risk_level = dataBreachRiskLevel;
+          if (dataBreachStatus) dataBreachData.status = dataBreachStatus;
+          if (dataBreachDescription) dataBreachData.description = dataBreachDescription;
+          if (dataBreachAffectedSubjectsCount >= 0) dataBreachData.affected_subjects_count = dataBreachAffectedSubjectsCount;
+          if (dataBreachObservation) dataBreachData.observation = dataBreachObservation;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/data-breaches/${dataBreachId}/`,
+            body: dataBreachData,
           });
         } else if (resource === "riskMatrix" && operation === "list") {
           response = await this.helpers.httpRequest({
