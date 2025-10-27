@@ -58,7 +58,7 @@
 </script>
 
 {#key form}
-	<div class="flex flex-col">
+	<div class="flex flex-col gap-8">
 		<SuperForm
 			class="flex flex-col space-y-3"
 			action={formAction}
@@ -71,105 +71,128 @@
 		>
 			{#snippet children({ form })}
 				<Checkbox {form} field="is_active" label={m.active()} />
-				<TextField
-					{form}
-					field="server_url"
-					valuePath="credentials.server_url"
-					label={m.serverUrl()}
-					helpText={m.jiraServerUrlHelpText()}
-				/>
-				<TextField
-					{form}
-					field="email"
-					valuePath="credentials.email"
-					autocomplete="new-password"
-					label={m.email()}
-					helpText={m.jiraEmailHelpText()}
-				/>
-				{#if showApiTokenField}
+				<div class="flex flex-col gap-4 card preset-outlined-surface-200-800 p-2">
+					<h4 class="h4">m.outgoingSync()</h4>
 					<TextField
 						{form}
-						field="api_token"
-						type="password"
-						valuePath="credentials.api_token"
-						autocomplete="new-password"
-						label={m.apiToken()}
+						field="server_url"
+						valuePath="credentials.server_url"
+						label={m.serverUrl()}
+						helpText={m.jiraServerUrlHelpText()}
+						disabled={!$formStore.is_active}
 					/>
-				{:else}
-					<div class="w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary">
-						<p>{m.apiTokenAlreadySetHelpText()}</p>
-						<button
-							class="btn preset-filled"
-							onclick={() => {
-								showApiTokenField = true;
-								$formStore.api_token = '';
-							}}>{m.resetApiToken()}</button
+					<TextField
+						{form}
+						field="email"
+						valuePath="credentials.email"
+						autocomplete="new-password"
+						label={m.email()}
+						helpText={m.jiraEmailHelpText()}
+						disabled={!$formStore.is_active}
+					/>
+					{#if showApiTokenField}
+						<TextField
+							{form}
+							field="api_token"
+							type="password"
+							valuePath="credentials.api_token"
+							autocomplete="new-password"
+							label={m.apiToken()}
+							disabled={!$formStore.is_active}
+						/>
+					{:else}
+						<div
+							class="w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary"
 						>
-					</div>
-				{/if}
-				<span class="flex flex-row justify-between gap-4">
-					<button
-						type="button"
-						class="btn preset-filled-secondary-500"
-						onclick={async () => {
-							testConnectionState = { loading: true, success: false };
-							const response = await fetch('/settings/integrations/test-connection', {
-								method: 'POST',
-								headers: {
-									'Content-Type': 'application/json'
-								},
-								body: JSON.stringify({
-									credentials: {
-										server_url: $formStore.credentials.server_url,
-										email: $formStore.credentials.email,
-										api_token: $formStore.credentials.api_token
+							<p>{m.apiTokenAlreadySetHelpText()}</p>
+							<button
+								disabled={!$formStore.is_active}
+								class="btn preset-filled"
+								onclick={() => {
+									showApiTokenField = true;
+									$formStore.api_token = '';
+								}}
+								>{m.resetApiToken()}
+							</button>
+						</div>
+					{/if}
+					<span class="flex flex-row justify-between gap-4">
+						<button
+							disabled={!$formStore.is_active}
+							type="button"
+							class="btn preset-filled-secondary-500"
+							onclick={async () => {
+								testConnectionState = { loading: true, success: false };
+								const response = await fetch('/settings/integrations/test-connection', {
+									method: 'POST',
+									headers: {
+										'Content-Type': 'application/json'
 									},
-									provider_id: page.data.config.provider_id,
-									configuration_id: page.data.config.id
-								})
-							});
-							testConnectionState = { loading: false, success: response.ok };
-						}}>{m.testConnection()}</button
-					>
-					<div class="flex items-center">
-						{#if testConnectionState.loading}
-							<LoadingSpinner />
-						{:else if testConnectionState.success === true}
-							<span class="text-success-700 font-semibold">{m.connectionSuccessful()}</span>
-						{:else if testConnectionState.success === false}
-							<span class="text-error-500 font-semibold">{m.connectionFailed()}</span>
-						{/if}
-					</div>
-				</span>
-				<TextField
-					{form}
-					field="project_key"
-					valuePath="settings.project_key"
-					label={m.projectKey()}
-					helpText={m.jiraProjectKeyHelpText()}
-				/>
-				<TextField
-					{form}
-					field="issue_type"
-					valuePath="settings.issue_type"
-					label={m.issueType()}
-				/>
-				{#if showWebhookSecretField}
-					<TextField {form} field="webhook_secret" type="password" label={m.webhookSecret()} />
-				{:else}
-					<div
-						class="text-center w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary"
-					>
-						<p>{m.webhookSecretAlreadySetHelpText()}</p>
-						<button
-							class="btn preset-filled"
-							onclick={() => {
-								showWebhookSecretField = true;
-								$formStore.webhook_secret = '';
-							}}>{m.resetWebhookSecret()}</button
+									body: JSON.stringify({
+										credentials: {
+											server_url: $formStore.credentials.server_url,
+											email: $formStore.credentials.email,
+											api_token: $formStore.credentials.api_token
+										},
+										provider_id: page.data.config.provider_id,
+										configuration_id: page.data.config.id
+									})
+								});
+								testConnectionState = { loading: false, success: response.ok };
+							}}>{m.testConnection()}</button
 						>
-					</div>
-				{/if}
+						<div class="flex items-center">
+							{#if testConnectionState.loading}
+								<LoadingSpinner />
+							{:else if testConnectionState.success === true}
+								<span class="text-success-700 font-semibold">{m.connectionSuccessful()}</span>
+							{:else if testConnectionState.success === false}
+								<span class="text-error-500 font-semibold">{m.connectionFailed()}</span>
+							{/if}
+						</div>
+					</span>
+					<TextField
+						{form}
+						field="project_key"
+						valuePath="settings.project_key"
+						label={m.projectKey()}
+						helpText={m.jiraProjectKeyHelpText()}
+						disabled={!$formStore.is_active}
+					/>
+				</div>
+				<div class="flex flex-col gap-4 card preset-outlined-surface-200-800 p-2">
+					<h4 class="h4">m.incomingSync()</h4>
+					<TextField
+						{form}
+						field="issue_type"
+						valuePath="settings.issue_type"
+						label={m.issueType()}
+						disabled={!$formStore.is_active}
+					/>
+					{#if showWebhookSecretField}
+						<TextField
+							{form}
+							field="webhook_secret"
+							type="password"
+							label={m.webhookSecret()}
+							disabled={!$formStore.is_active}
+						/>
+					{:else}
+						<div
+							class="text-center w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary"
+						>
+							<p>{m.webhookSecretAlreadySetHelpText()}</p>
+							<button
+								disabled={!$formStore.is_active}
+								class="btn preset-filled"
+								onclick={() => {
+									showWebhookSecretField = true;
+									$formStore.webhook_secret = '';
+								}}>{m.resetWebhookSecret()}</button
+							>
+						</div>
+					{/if}
+				</div>
 				<button
 					class="text-center btn preset-filled-primary-500 font-semibold w-full"
 					data-testid="save-button">{m.save()}</button

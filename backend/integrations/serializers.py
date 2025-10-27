@@ -160,6 +160,8 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
         """
         Use the IntegrationRegistry to validate provider-specific settings and credentials.
         """
+        if not data.get("is_active"):
+            return data
         provider = data.get("provider")  # This is the IntegrationProvider instance
         if not provider:
             raise serializers.ValidationError("Provider is required.")
