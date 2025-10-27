@@ -53,7 +53,9 @@
 							<td class="px-4 py-2 text-sm text-gray-900" class:uppercase={uppercaseLabels}
 								>{safeTranslate(comparison.objective)}</td
 							>
-							<td class="px-4 py-2 text-sm text-gray-700">{getDisplayValue(comparison.expectation)}</td>
+							<td class="px-4 py-2 text-sm text-gray-700"
+								>{getDisplayValue(comparison.expectation)}</td
+							>
 							<td class="px-4 py-2 text-sm text-gray-700">{getDisplayValue(comparison.reality)}</td>
 							<td class="px-4 py-2 text-center">
 								<span
