@@ -2819,15 +2819,31 @@ class ComplianceAssessmentActionPlanList(ActionPlanList):
     serializer_class = ComplianceAssessmentActionPlanSerializer
 
     def get_queryset(self):
-        compliance_assessment: ComplianceAssessment = ComplianceAssessment.objects.get(
-            id=self.kwargs["pk"]
-        )
-        requirement_assessments = compliance_assessment.get_requirement_assessments(
+        """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
+        compliance_id = self.kwargs["pk"]
+
+        if not RoleAssignment.is_object_readable(
+            self.request.user,
+            ComplianceAssessment,
+            compliance_id,
+        ):
+            raise PermissionDenied()
+
+        assessment = ComplianceAssessment.objects.get(id=compliance_id)
+        requirement_assessments = assessment.get_requirement_assessments(
             include_non_assessable=True
         )
-        return AppliedControl.objects.filter(
+
+        qs = AppliedControl.objects.filter(
             requirement_assessments__in=requirement_assessments
         ).distinct()
+
+        viewable_controls, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(),
+            self.request.user,
+            AppliedControl,
+        )
+        return qs.filter(id__in=viewable_controls)
 
 
 class ComplianceAssessmentEvidenceList(generics.ListAPIView):
@@ -2857,42 +2873,34 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
         return context
 
     def get_queryset(self):
-        compliance_assessment_pk = self.kwargs["pk"]
+        """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
+        compliance_id = self.kwargs["pk"]
 
-        # Check permissions for compliance assessment
-        (viewable_compliance_assessments, _, _) = (
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), self.request.user, ComplianceAssessment
-            )
-        )
-        if compliance_assessment_pk not in viewable_compliance_assessments:
-            return Evidence.objects.none()
+        if not RoleAssignment.is_object_readable(
+            self.request.user,
+            ComplianceAssessment,
+            compliance_id,
+        ):
+            raise PermissionDenied()
 
-        # Check permissions for evidences
-        (viewable_evidences, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), self.request.user, Evidence
-        )
-
-        compliance_assessment = ComplianceAssessment.objects.get(
-            id=compliance_assessment_pk
-        )
+        compliance_assessment = ComplianceAssessment.objects.get(id=compliance_id)
 
         # Get all requirement assessments for this compliance assessment
         requirement_assessments = RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment
         ).prefetch_related("evidences", "applied_controls__evidences")
 
+        # Get visible evidences to filter result
+        viewable_evidences, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, Evidence
+        )
+
         # Collect evidence IDs from both direct and indirect relationships
         evidence_ids = set()
-
-        # Direct evidences from requirement assessments
         for req_assessment in requirement_assessments:
             for evidence in req_assessment.evidences.all():
                 if evidence.id in viewable_evidences:
                     evidence_ids.add(evidence.id)
-
-        # Indirect evidences through applied controls
-        for req_assessment in requirement_assessments:
             for applied_control in req_assessment.applied_controls.all():
                 for evidence in applied_control.evidences.all():
                     if evidence.id in viewable_evidences:
@@ -2905,15 +2913,30 @@ class RiskAssessmentActionPlanList(ActionPlanList):
     serializer_class = RiskAssessmentActionPlanSerializer
 
     def get_queryset(self):
-        risk_assessment: RiskAssessment = RiskAssessment.objects.get(
-            id=self.kwargs["pk"]
-        )
-        risk_scenarios = risk_assessment.risk_scenarios.all()
-        # Include both extra controls (applied_controls) and existing controls (existing_applied_controls)
-        return AppliedControl.objects.filter(
+        """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
+        risk_id = self.kwargs["pk"]
+
+        if not RoleAssignment.is_object_readable(
+            self.request.user,
+            RiskAssessment,
+            risk_id,
+        ):
+            raise PermissionDenied()
+
+        assessment = RiskAssessment.objects.get(id=risk_id)
+        risk_scenarios = assessment.risk_scenarios.all()
+
+        qs = AppliedControl.objects.filter(
             Q(risk_scenarios__in=risk_scenarios)
             | Q(risk_scenarios_e__in=risk_scenarios)
         ).distinct()
+
+        viewable_controls, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(),
+            self.request.user,
+            AppliedControl,
+        )
+        return qs.filter(id__in=viewable_controls)
 
 
 class PolicyViewSet(AppliedControlViewSet):
