@@ -1,0 +1,59 @@
+{
+  "name": "n8n-nodes-ciso-assistant",
+  "version": "1.0.0",
+  "description": "Custom n8n node to interact with CISO Assistant API",
+  "license": "AGPL",
+  "homepage": "https://github.com/intuitem/ciso-assistant-community",
+  "author": {
+    "name": "intuitem",
+    "email": "contact@intuitem.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/intuitem/ciso-assistant-community.git"
+  },
+  "keywords": [
+    "n8n",
+    "ciso-assistant",
+    "cybersecurity",
+    "security",
+    "compliance"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "format": "prettier nodes credentials --write",
+    "lint": "eslint nodes credentials package.json",
+    "lintfix": "eslint nodes credentials package.json --fix",
+    "prepublishOnly": "npm run build && npm run lint -s"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/CisoAssistantApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/CisoAssistantService/CisoAssistantService.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^22.16.5",
+    "@typescript-eslint/parser": "^8.37.0",
+    "eslint": "^9.31.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.3",
+    "gulp": "^5.0.1",
+    "n8n-workflow": "^1.114.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "overrides": {
+    "form-data": "^4.0.4"
+  }
+}
