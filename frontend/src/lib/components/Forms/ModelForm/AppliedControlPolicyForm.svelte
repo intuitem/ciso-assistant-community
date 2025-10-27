@@ -12,8 +12,9 @@
 	import { m } from '$paraglide/messages';
 	import { onMount } from 'svelte';
 	import { run } from 'svelte/legacy';
+	import { page } from '$app/state';
 
-	let displayCurrency = $state('€'); // Default to Euro
+	let displayCurrency = $state(page.data?.settings?.currency ?? '€'); // Default to Euro
 
 	interface Props {
 		form: SuperValidated<any>;
