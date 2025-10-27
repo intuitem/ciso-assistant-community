@@ -332,6 +332,41 @@
 	</Dropdown>
 {/if}
 
+{#if page.data.settings?.enabled_integrations.filter((integration: Record<string, string>) => integration.provider_type === 'itsm')}
+	<Dropdown
+		open={false}
+		style="hover:text-primary-700"
+		icon="fa-solid fa-plug"
+		header={m.integrations()}
+	>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="settings/integrations/configs?provider__provider_type=itsm"
+			optionsLabelField="provider"
+			field="integration_config"
+			helpText="m.integrationHelpText()"
+			label="m.integration()"
+		/>
+		{#if $formStore.integration_config}
+			{#key $formStore.integration_config}
+				<AutocompleteSelect
+					{form}
+					optionsEndpoint="settings/integrations/configs/{$formStore.integration_config}/remote-objects"
+					optionsLabelField="summary"
+					optionsValueField="key"
+					optionsInfoFields={{
+						fields: [{ field: 'key' }],
+						position: 'prefix'
+					}}
+					field="remote_object_id"
+					helpText="m.remoteObjectHelpText()"
+					label="m.remoteObject()"
+				/>
+			{/key}
+		{/if}
+	</Dropdown>
+{/if}
+
 {#if duplicate}
 	<Checkbox
 		{form}

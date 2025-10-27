@@ -75,7 +75,7 @@ class SyncMapping(AbstractBaseModel):
     )
     last_synced_at = models.DateTimeField(auto_now=True)
     last_sync_direction = models.CharField(
-        max_length=10, choices=SyncDirection.choices
+        max_length=10, choices=SyncDirection.choices, blank=True
     )  # 'push', 'pull'
     version = models.IntegerField(default=1)  # For optimistic locking
     error_message = models.TextField(blank=True)

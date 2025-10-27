@@ -21,6 +21,8 @@ from django.contrib.auth.models import Permission
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
+from integrations.models import IntegrationConfiguration
+
 logger = structlog.get_logger(__name__)
 
 
@@ -772,6 +774,15 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
         many=True, required=False, queryset=Stakeholder.objects.all()
     )
     cost = serializers.JSONField(required=False, allow_null=True)
+    integration_config = serializers.PrimaryKeyRelatedField(
+        required=False,
+        allow_null=True,
+        queryset=IntegrationConfiguration.objects.all(),
+        write_only=True,
+    )
+    remote_object_id = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True, write_only=True
+    )
 
     def create(self, validated_data: Any):
         owner_data = validated_data.get("owner", [])

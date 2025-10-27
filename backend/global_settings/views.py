@@ -5,6 +5,7 @@ from ciso_assistant.settings import CISO_ASSISTANT_URL
 from rest_framework.decorators import action
 
 from iam.sso.models import SSOSettings
+from integrations.models import IntegrationProvider
 
 from .serializers import (
     GlobalSettingsSerializer,
@@ -109,6 +110,15 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             updated_value = {**default_settings, **existing_value}
             settings.value = updated_value
             settings.save()
+
+        enabled_integrations = (
+            IntegrationProvider.objects.filter(
+                is_active=True, configurations__isnull=False
+            )
+            .distinct()
+            .values("provider_type", "name")
+        )
+        settings.value["enabled_integrations"] = list(enabled_integrations)
 
         return Response(GeneralSettingsSerializer(settings).data.get("value"))
 

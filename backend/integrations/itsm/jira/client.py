@@ -1,5 +1,7 @@
 from typing import Any, Dict
+from icecream import ic
 
+from integrations.models import SyncMapping
 from jira import JIRA
 from structlog import get_logger
 
@@ -153,3 +155,58 @@ class JiraClient(BaseIntegrationClient):
         except Exception as e:
             logger.error(f"Jira connection test failed: {e}")
             return False
+
+    def list_remote_objects(
+        self, query_params: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
+        """
+        List issues from the configured Jira project using jira.project_issues.
+        """
+        if not self.jira:
+            raise ConnectionError("Jira client not initialized.")
+        if query_params is None:
+            query_params = {}
+
+        # Base JQL: Always filter by the project key from settings
+        project_key = self.settings.get("project_key")
+        if not project_key:
+            raise ValueError("Jira project_key is not configured in settings.")
+
+        jql_query = f"project = {project_key}"
+
+        start_at = query_params.get("start_at", 0)
+        max_results = query_params.get("max_results", 10000)
+
+        logger.info(
+            f"Searching Jira with JQL: {jql_query}, startAt: {start_at}, maxResults: {max_results}"
+        )
+
+        try:
+            used_issues = SyncMapping.objects.filter(
+                configuration=self.configuration
+            ).values_list("remote_id", flat=True)
+            issues = self.jira.search_issues(
+                jql_query,
+                # startAt=start_at,
+                # maxResults=max_results,
+                expand="fields",  # Important to get field data
+            )
+
+            # Format the results as a list of dictionaries (using the raw data)
+            results_list = [
+                {
+                    "key": issue.raw["key"],
+                    "id": issue.raw["id"],
+                    "summary": issue.raw["fields"]["summary"],
+                }
+                for issue in issues
+                if issue.raw["key"] not in used_issues  # Filter out already used issues
+            ]
+            logger.info(
+                f"Fetched {len(results_list)} Jira issues for project {project_key} (batch starting at {start_at})."
+            )
+            return results_list
+
+        except Exception as e:
+            logger.error(f"Failed to search Jira issues: JQL='{jql_query}', Error={e}")
+            raise

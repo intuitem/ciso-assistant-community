@@ -98,6 +98,8 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
     ).all()
     serializer_class = IntegrationConfigurationSerializer
 
+    filterset_fields = ["provider", "provider__name", "provider__provider_type"]
+
     def get_queryset(self):
         """
         **PLACEHOLDER FOR PERMISSIONS**:
@@ -140,6 +142,23 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(
                 f"Test connection for config {pk} raised an exception: {e}",
+                exc_info=True,
+            )
+            return Response(
+                {"status": "error", "message": f"An unexpected error occurred: {e}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    @action(detail=True, methods=["get"], url_path="remote-objects")
+    def list_remote_objects(self, request, pk=None):
+        instance = IntegrationConfiguration.objects.get(pk=pk)
+        try:
+            client = IntegrationRegistry.get_client(instance)
+            remote_objects = client.list_remote_objects()
+            return Response(remote_objects, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(
+                f"Listing remote objects for config {pk} raised an exception: {e}",
                 exc_info=True,
             )
             return Response(

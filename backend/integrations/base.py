@@ -40,6 +40,13 @@ class BaseIntegrationClient(ABC):
         pass
 
     @abstractmethod
+    def list_remote_objects(
+        self, query_params: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
+        """List objects from remote system based on query parameters"""
+        pass
+
+    @abstractmethod
     def register_webhook(self, callback_url: str) -> dict[str, Any]:
         """Register webhook with remote system"""
         pass
