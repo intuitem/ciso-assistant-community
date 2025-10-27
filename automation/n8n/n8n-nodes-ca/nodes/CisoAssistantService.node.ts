@@ -96,6 +96,22 @@ export class CisoAssistantService implements INodeType {
             value: "evidence",
           },
           {
+            name: "Entity",
+            value: "entity",
+          },
+          {
+            name: "Solution",
+            value: "solution",
+          },
+          {
+            name: "Representative",
+            value: "representative",
+          },
+          {
+            name: "Entity Assessment",
+            value: "entityAssessment",
+          },
+          {
             name: "Framework",
             value: "framework",
           },
@@ -123,6 +139,18 @@ export class CisoAssistantService implements INodeType {
             value: "getBuild",
             description: "Get build information from CISO Assistant",
             action: "Get build information",
+          },
+          {
+            name: "Get User by Email",
+            value: "getUserByEmail",
+            description: "Get a user by their email address",
+            action: "Get user by email",
+          },
+          {
+            name: "List Users",
+            value: "listUsers",
+            description: "Get all users in the system",
+            action: "List users",
           },
         ],
         default: "getBuild",
@@ -210,6 +238,24 @@ export class CisoAssistantService implements INodeType {
             value: "create",
             description: "Create a new asset",
             action: "Create an asset",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get an asset by its name (case-sensitive)",
+            action: "Get asset by name",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all assets",
+            action: "List assets",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update an existing asset",
+            action: "Update asset",
           },
         ],
         default: "create",
@@ -617,10 +663,148 @@ export class CisoAssistantService implements INodeType {
             action: "List evidences",
           },
           {
-            name: "Update",
+            name: "Update Envelope",
             value: "update",
-            description: "Update an evidence by UUID",
-            action: "Update evidence",
+            description: "Update evidence envelope data (name, description, status, etc.)",
+            action: "Update evidence envelope",
+          },
+          {
+            name: "Submit Revision",
+            value: "submitRevision",
+            description: "Submit a new revision of the evidence (link or attachment)",
+            action: "Submit evidence revision",
+          },
+          {
+            name: "List Revisions",
+            value: "listRevisions",
+            description: "List all revisions of an evidence",
+            action: "List evidence revisions",
+          },
+        ],
+        default: "create",
+      },
+      // Entity operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["entity"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new entity",
+            action: "Create entity",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get an entity by its name (case-sensitive)",
+            action: "Get entity by name",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all entities",
+            action: "List entities",
+          },
+        ],
+        default: "create",
+      },
+      // Solution operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["solution"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new solution from an entity",
+            action: "Create solution",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get a solution by its name (case-sensitive)",
+            action: "Get solution by name",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all solutions",
+            action: "List solutions",
+          },
+        ],
+        default: "create",
+      },
+      // Representative operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["representative"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new representative for an entity",
+            action: "Create representative",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all representatives",
+            action: "List representatives",
+          },
+        ],
+        default: "create",
+      },
+      // Entity Assessment operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["entityAssessment"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new entity assessment with optional compliance assessment",
+            action: "Create entity assessment",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get an entity assessment by its name (case-sensitive)",
+            action: "Get entity assessment by name",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all entity assessments",
+            action: "List entity assessments",
           },
         ],
         default: "create",
@@ -666,6 +850,22 @@ export class CisoAssistantService implements INodeType {
           },
         ],
         default: "list",
+      },
+      // System fields
+      {
+        displayName: "User Email",
+        name: "userEmail",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["system"],
+            operation: ["getUserByEmail"],
+          },
+        },
+        default: "",
+        placeholder: "user@example.com",
+        description: "Email address of the user",
+        required: true,
       },
       // Perimeter fields
       {
@@ -771,16 +971,16 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["asset"],
-            operation: ["create"],
+            operation: ["create", "getByName"],
           },
         },
         default: "",
         placeholder: "Web Server",
-        description: "The name of the asset",
+        description: "The name of the asset (case-sensitive)",
         required: true,
       },
       {
-        displayName: "Folder ID",
+        displayName: "Folder UUID",
         name: "folderId",
         type: "string",
         displayOptions: {
@@ -795,6 +995,35 @@ export class CisoAssistantService implements INodeType {
         required: true,
       },
       {
+        displayName: "Folder UUID (Optional)",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["asset"],
+            operation: ["getByName"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain) to filter by",
+      },
+      {
+        displayName: "Asset UUID",
+        name: "assetId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["asset"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "asset-uuid-here",
+        description: "The UUID of the asset to update",
+        required: true,
+      },
+      {
         displayName: "Asset Description",
         name: "assetDescription",
         type: "string",
@@ -804,7 +1033,7 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["asset"],
-            operation: ["create"],
+            operation: ["create", "update"],
           },
         },
         default: "",
@@ -818,7 +1047,7 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["asset"],
-            operation: ["create"],
+            operation: ["create", "update"],
           },
         },
         options: [
@@ -833,6 +1062,20 @@ export class CisoAssistantService implements INodeType {
         ],
         default: "PR",
         description: "The type of the asset",
+      },
+      {
+        displayName: "Asset Name (Update)",
+        name: "assetNameUpdate",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["asset"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "New Asset Name",
+        description: "New name for the asset (optional)",
       },
       // Audit fields
       {
@@ -2222,6 +2465,449 @@ export class CisoAssistantService implements INodeType {
         default: "draft",
         description: "Status of the evidence",
       },
+      // Evidence Revision fields
+      {
+        displayName: "Evidence UUID",
+        name: "evidenceIdForRevision",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+            operation: ["submitRevision", "listRevisions"],
+          },
+        },
+        default: "",
+        placeholder: "evidence-uuid-here",
+        description: "The UUID of the evidence",
+        required: true,
+      },
+      {
+        displayName: "Link",
+        name: "evidenceRevisionLink",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+            operation: ["submitRevision"],
+          },
+        },
+        default: "",
+        placeholder: "https://example.com/document.pdf",
+        description: "URL link to the evidence (optional if using attachment)",
+      },
+      {
+        displayName: "Observation",
+        name: "evidenceRevisionObservation",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+            operation: ["submitRevision"],
+          },
+        },
+        default: "",
+        placeholder: "Revision notes or observations",
+        description: "Observation notes for this revision",
+      },
+      // Entity fields
+      {
+        displayName: "Entity Name",
+        name: "entityName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["entity"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "Cloud Provider Inc.",
+        description: "Name of the entity (case-sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Folder UUID",
+        name: "folderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["entity"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "The UUID of the folder (domain)",
+        required: true,
+      },
+      {
+        displayName: "Description",
+        name: "entityDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["entity"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the entity",
+        description: "Entity description",
+      },
+      {
+        displayName: "Mission",
+        name: "entityMission",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["entity"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Mission statement of the entity",
+        description: "Entity mission statement",
+      },
+      {
+        displayName: "Reference Link",
+        name: "entityReferenceLink",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["entity"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "https://example.com",
+        description: "Reference URL for the entity",
+      },
+      // Solution fields
+      {
+        displayName: "Solution Name",
+        name: "solutionName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["solution"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "AWS Cloud Services",
+        description: "Name of the solution (case-sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Provider Entity UUID",
+        name: "providerEntityId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["solution"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "entity-uuid-here",
+        description: "UUID of the provider entity",
+        required: true,
+      },
+      {
+        displayName: "Recipient Entity UUID",
+        name: "recipientEntityId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["solution"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "entity-uuid-here",
+        description: "UUID of the recipient entity (optional)",
+      },
+      {
+        displayName: "Description",
+        name: "solutionDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["solution"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the solution",
+        description: "Solution description",
+      },
+      {
+        displayName: "Reference ID",
+        name: "solutionRefId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["solution"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "SOL-001",
+        description: "Reference identifier for the solution",
+      },
+      {
+        displayName: "Criticality",
+        name: "solutionCriticality",
+        type: "number",
+        displayOptions: {
+          show: {
+            resource: ["solution"],
+            operation: ["create"],
+          },
+        },
+        default: 0,
+        description: "Criticality level of the solution (0-4)",
+      },
+      // Representative fields
+      {
+        displayName: "Entity UUID",
+        name: "representativeEntityId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["representative"],
+            operation: ["create", "list"],
+          },
+        },
+        default: "",
+        placeholder: "entity-uuid-here",
+        description: "UUID of the entity",
+        required: true,
+      },
+      {
+        displayName: "Email",
+        name: "representativeEmail",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["representative"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "contact@example.com",
+        description: "Email address of the representative (unique)",
+        required: true,
+      },
+      {
+        displayName: "First Name",
+        name: "representativeFirstName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["representative"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "John",
+        description: "First name of the representative",
+      },
+      {
+        displayName: "Last Name",
+        name: "representativeLastName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["representative"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Doe",
+        description: "Last name of the representative",
+      },
+      {
+        displayName: "Phone",
+        name: "representativePhone",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["representative"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "+1234567890",
+        description: "Phone number of the representative",
+      },
+      {
+        displayName: "Role",
+        name: "representativeRole",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["representative"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Account Manager",
+        description: "Role or position of the representative",
+      },
+      {
+        displayName: "Description",
+        name: "representativeDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["representative"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Additional details about the representative",
+        description: "Representative description",
+      },
+      // Entity Assessment fields
+      {
+        displayName: "Entity Assessment Name",
+        name: "entityAssessmentName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["entityAssessment"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "Q1 2025 Entity Assessment",
+        description: "Name of the entity assessment (case-sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Entity UUID",
+        name: "entityAssessmentEntityId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["entityAssessment"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "entity-uuid-here",
+        description: "UUID of the entity being assessed",
+        required: true,
+      },
+      {
+        displayName: "Perimeter UUID",
+        name: "entityAssessmentPerimeterId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["entityAssessment"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "perimeter-uuid-here",
+        description: "UUID of the perimeter for this assessment",
+        required: true,
+      },
+      {
+        displayName: "Perimeter UUID (Optional)",
+        name: "entityAssessmentPerimeterId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["entityAssessment"],
+            operation: ["getByName"],
+          },
+        },
+        default: "",
+        placeholder: "perimeter-uuid-here",
+        description: "UUID of the perimeter to filter by",
+      },
+      {
+        displayName: "Folder UUID (Optional)",
+        name: "entityAssessmentFolderId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["entityAssessment"],
+            operation: ["getByName"],
+          },
+        },
+        default: "",
+        placeholder: "domain-uuid-here",
+        description: "UUID of the folder to filter by",
+      },
+      {
+        displayName: "Description",
+        name: "entityAssessmentDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["entityAssessment"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the entity assessment",
+        description: "Entity assessment description",
+      },
+      {
+        displayName: "Compliance Assessment UUID",
+        name: "entityAssessmentComplianceAssessmentId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["entityAssessment"],
+            operation: ["create"],
+          },
+        },
+        default: "",
+        placeholder: "compliance-assessment-uuid-here",
+        description: "UUID of compliance assessment to link (optional - triggers compliance assessment)",
+      },
+      {
+        displayName: "Conclusion",
+        name: "entityAssessmentConclusion",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["entityAssessment"],
+            operation: ["create"],
+          },
+        },
+        options: [
+          { name: "Blocker", value: "blocker" },
+          { name: "Warning", value: "warning" },
+          { name: "Ok", value: "ok" },
+          { name: "Not Applicable", value: "not_applicable" },
+        ],
+        default: "",
+        description: "Conclusion of the entity assessment",
+      },
       // Optional Folder UUID for list operations
       {
         displayName: "Folder UUID (Optional)",
@@ -2244,6 +2930,10 @@ export class CisoAssistantService implements INodeType {
               "finding",
               "securityException",
               "evidence",
+              "entity",
+              "solution",
+              "representative",
+              "entityAssessment",
             ],
             operation: ["list"],
           },
@@ -2355,6 +3045,20 @@ export class CisoAssistantService implements INodeType {
             ...baseConfig,
             method: "GET",
             url: `${credentials.baseUrl}/build`,
+          });
+        } else if (resource === "system" && operation === "getUserByEmail") {
+          const userEmail = this.getNodeParameter("userEmail", i) as string;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/users/?email=${encodeURIComponent(userEmail)}`,
+          });
+        } else if (resource === "system" && operation === "listUsers") {
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/users/`,
           });
         } else if (resource === "perimeter" && operation === "create") {
           const perimeterName = this.getNodeParameter(
@@ -2501,6 +3205,50 @@ export class CisoAssistantService implements INodeType {
             ...baseConfig,
             method: "POST",
             url: `${credentials.baseUrl}/assets/`,
+            body: assetData,
+          });
+        } else if (resource === "asset" && operation === "getByName") {
+          const assetName = this.getNodeParameter("assetName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i, "") as string;
+
+          let url = `${credentials.baseUrl}/assets/?name=${encodeURIComponent(assetName)}`;
+          if (folderId) {
+            url += `&folder=${encodeURIComponent(folderId)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "asset" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/assets/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "asset" && operation === "update") {
+          const assetId = this.getNodeParameter("assetId", i) as string;
+          const assetDescription = this.getNodeParameter("assetDescription", i, "") as string;
+          const assetType = this.getNodeParameter("assetType", i, "") as string;
+          const assetNameUpdate = this.getNodeParameter("assetNameUpdate", i, "") as string;
+
+          const assetData: any = {};
+
+          if (assetNameUpdate) assetData.name = assetNameUpdate;
+          if (assetDescription) assetData.description = assetDescription;
+          if (assetType) assetData.type = assetType;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/assets/${assetId}/`,
             body: assetData,
           });
         } else if (resource === "audit" && operation === "initiate") {
@@ -3297,6 +4045,208 @@ export class CisoAssistantService implements INodeType {
             method: "PATCH",
             url: `${credentials.baseUrl}/evidences/${evidenceId}/`,
             body: updateData,
+          });
+        } else if (resource === "evidence" && operation === "submitRevision") {
+          const evidenceIdForRevision = this.getNodeParameter("evidenceIdForRevision", i) as string;
+          const evidenceRevisionLink = this.getNodeParameter("evidenceRevisionLink", i, "") as string;
+          const evidenceRevisionObservation = this.getNodeParameter("evidenceRevisionObservation", i, "") as string;
+
+          const revisionData: any = {
+            evidence: evidenceIdForRevision,
+          };
+
+          if (evidenceRevisionLink) revisionData.link = evidenceRevisionLink;
+          if (evidenceRevisionObservation) revisionData.observation = evidenceRevisionObservation;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/evidence-revisions/`,
+            body: revisionData,
+          });
+        } else if (resource === "evidence" && operation === "listRevisions") {
+          const evidenceIdForRevision = this.getNodeParameter("evidenceIdForRevision", i) as string;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/evidence-revisions/?evidence=${encodeURIComponent(evidenceIdForRevision)}`,
+          });
+        } else if (resource === "entity" && operation === "create") {
+          const entityName = this.getNodeParameter("entityName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+          const entityDescription = this.getNodeParameter("entityDescription", i, "") as string;
+          const entityMission = this.getNodeParameter("entityMission", i, "") as string;
+          const entityReferenceLink = this.getNodeParameter("entityReferenceLink", i, "") as string;
+
+          const entityData: any = {
+            name: entityName,
+            folder: folderId,
+          };
+
+          if (entityDescription) entityData.description = entityDescription;
+          if (entityMission) entityData.mission = entityMission;
+          if (entityReferenceLink) entityData.reference_link = entityReferenceLink;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/entities/`,
+            body: entityData,
+          });
+        } else if (resource === "entity" && operation === "getByName") {
+          const entityName = this.getNodeParameter("entityName", i) as string;
+          const folderId = this.getNodeParameter("folderId", i) as string;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/entities/?name=${encodeURIComponent(entityName)}&folder=${encodeURIComponent(folderId)}`,
+          });
+        } else if (resource === "entity" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/entities/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "solution" && operation === "create") {
+          const solutionName = this.getNodeParameter("solutionName", i) as string;
+          const providerEntityId = this.getNodeParameter("providerEntityId", i) as string;
+          const recipientEntityId = this.getNodeParameter("recipientEntityId", i, "") as string;
+          const solutionDescription = this.getNodeParameter("solutionDescription", i, "") as string;
+          const solutionRefId = this.getNodeParameter("solutionRefId", i, "") as string;
+          const solutionCriticality = this.getNodeParameter("solutionCriticality", i, 0) as number;
+
+          const solutionData: any = {
+            name: solutionName,
+            provider_entity: providerEntityId,
+          };
+
+          if (recipientEntityId) solutionData.recipient_entity = recipientEntityId;
+          if (solutionDescription) solutionData.description = solutionDescription;
+          if (solutionRefId) solutionData.ref_id = solutionRefId;
+          if (solutionCriticality !== 0) solutionData.criticality = solutionCriticality;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/solutions/`,
+            body: solutionData,
+          });
+        } else if (resource === "solution" && operation === "getByName") {
+          const solutionName = this.getNodeParameter("solutionName", i) as string;
+          const providerEntityId = this.getNodeParameter("providerEntityId", i) as string;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/solutions/?name=${encodeURIComponent(solutionName)}&provider_entity=${encodeURIComponent(providerEntityId)}`,
+          });
+        } else if (resource === "solution" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/solutions/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "representative" && operation === "create") {
+          const representativeEntityId = this.getNodeParameter("representativeEntityId", i) as string;
+          const representativeEmail = this.getNodeParameter("representativeEmail", i) as string;
+          const representativeFirstName = this.getNodeParameter("representativeFirstName", i, "") as string;
+          const representativeLastName = this.getNodeParameter("representativeLastName", i, "") as string;
+          const representativePhone = this.getNodeParameter("representativePhone", i, "") as string;
+          const representativeRole = this.getNodeParameter("representativeRole", i, "") as string;
+          const representativeDescription = this.getNodeParameter("representativeDescription", i, "") as string;
+
+          const representativeData: any = {
+            entity: representativeEntityId,
+            email: representativeEmail,
+          };
+
+          if (representativeFirstName) representativeData.first_name = representativeFirstName;
+          if (representativeLastName) representativeData.last_name = representativeLastName;
+          if (representativePhone) representativeData.phone = representativePhone;
+          if (representativeRole) representativeData.role = representativeRole;
+          if (representativeDescription) representativeData.description = representativeDescription;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/representatives/`,
+            body: representativeData,
+          });
+        } else if (resource === "representative" && operation === "list") {
+          const representativeEntityId = this.getNodeParameter("representativeEntityId", i) as string;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/representatives/?entity=${encodeURIComponent(representativeEntityId)}`,
+          });
+        } else if (resource === "entityAssessment" && operation === "create") {
+          const entityAssessmentName = this.getNodeParameter("entityAssessmentName", i) as string;
+          const entityAssessmentEntityId = this.getNodeParameter("entityAssessmentEntityId", i) as string;
+          const entityAssessmentPerimeterId = this.getNodeParameter("entityAssessmentPerimeterId", i) as string;
+          const entityAssessmentDescription = this.getNodeParameter("entityAssessmentDescription", i, "") as string;
+          const entityAssessmentComplianceAssessmentId = this.getNodeParameter("entityAssessmentComplianceAssessmentId", i, "") as string;
+          const entityAssessmentConclusion = this.getNodeParameter("entityAssessmentConclusion", i, "") as string;
+
+          const entityAssessmentData: any = {
+            name: entityAssessmentName,
+            entity: entityAssessmentEntityId,
+            perimeter: entityAssessmentPerimeterId,
+          };
+
+          if (entityAssessmentDescription) entityAssessmentData.description = entityAssessmentDescription;
+          if (entityAssessmentComplianceAssessmentId) entityAssessmentData.compliance_assessment = entityAssessmentComplianceAssessmentId;
+          if (entityAssessmentConclusion) entityAssessmentData.conclusion = entityAssessmentConclusion;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/entity-assessments/`,
+            body: entityAssessmentData,
+          });
+        } else if (resource === "entityAssessment" && operation === "getByName") {
+          const entityAssessmentName = this.getNodeParameter("entityAssessmentName", i) as string;
+          const entityAssessmentPerimeterId = this.getNodeParameter("entityAssessmentPerimeterId", i, "") as string;
+          const entityAssessmentFolderId = this.getNodeParameter("entityAssessmentFolderId", i, "") as string;
+
+          let url = `${credentials.baseUrl}/entity-assessments/?name=${encodeURIComponent(entityAssessmentName)}`;
+          if (entityAssessmentPerimeterId) {
+            url += `&perimeter=${encodeURIComponent(entityAssessmentPerimeterId)}`;
+          }
+          if (entityAssessmentFolderId) {
+            url += `&folder=${encodeURIComponent(entityAssessmentFolderId)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "entityAssessment" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/entity-assessments/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
           });
         } else if (resource === "riskMatrix" && operation === "list") {
           response = await this.helpers.httpRequest({

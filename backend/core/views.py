@@ -648,6 +648,7 @@ class AssetFilter(GenericFilterSet):
     class Meta:
         model = Asset
         fields = [
+            "name",
             "folder",
             "type",
             "parent_assets",
