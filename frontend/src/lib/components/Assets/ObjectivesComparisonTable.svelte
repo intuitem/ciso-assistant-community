@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { SECURITY_OBJECTIVE_SCALE_MAP } from '$lib/utils/constants';
+	import { page } from '$app/state';
 
 	interface Props {
 		comparisons: any[];
@@ -10,6 +12,17 @@
 	}
 
 	let { comparisons, title, icon, uppercaseLabels = false }: Props = $props();
+
+	const scale = page.data.settings?.security_objective_scale || '1-4';
+	const scaleMap = SECURITY_OBJECTIVE_SCALE_MAP[scale];
+
+	const getDisplayValue = (rawValue: number | null | undefined): string => {
+		if (rawValue === null || rawValue === undefined) return '--';
+		if (typeof rawValue === 'number' && rawValue >= 0 && rawValue <= 4) {
+			return scaleMap[rawValue];
+		}
+		return String(rawValue);
+	};
 </script>
 
 <div class="mb-6">
@@ -40,8 +53,8 @@
 							<td class="px-4 py-2 text-sm text-gray-900" class:uppercase={uppercaseLabels}
 								>{safeTranslate(comparison.objective)}</td
 							>
-							<td class="px-4 py-2 text-sm text-gray-700">{comparison.expectation || '--'}</td>
-							<td class="px-4 py-2 text-sm text-gray-700">{comparison.reality || '--'}</td>
+							<td class="px-4 py-2 text-sm text-gray-700">{getDisplayValue(comparison.expectation)}</td>
+							<td class="px-4 py-2 text-sm text-gray-700">{getDisplayValue(comparison.reality)}</td>
 							<td class="px-4 py-2 text-center">
 								<span
 									class="inline-flex items-center justify-center w-6 h-6 rounded-full"
