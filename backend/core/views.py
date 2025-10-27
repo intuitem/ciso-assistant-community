@@ -452,7 +452,7 @@ class PerimeterFilter(GenericFilterSet):
 
     class Meta:
         model = Perimeter
-        fields = ["folder", "lc_status", "campaigns"]
+        fields = ["name", "folder", "lc_status", "campaigns"]
 
 
 class PerimeterViewSet(BaseModelViewSet):
@@ -463,7 +463,7 @@ class PerimeterViewSet(BaseModelViewSet):
     model = Perimeter
     filterset_class = PerimeterFilter
     search_fields = ["name", "ref_id", "description"]
-    filterset_fields = ["folder", "campaigns"]
+    filterset_fields = ["name", "folder", "campaigns"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -648,6 +648,7 @@ class AssetFilter(GenericFilterSet):
     class Meta:
         model = Asset
         fields = [
+            "name",
             "folder",
             "type",
             "parent_assets",
@@ -1379,6 +1380,8 @@ class RiskAssessmentFilterSet(GenericFilterSet):
     class Meta:
         model = RiskAssessment
         fields = {
+            "name": ["exact"],
+            "ref_id": ["exact"],
             "perimeter": ["exact"],
             "folder": ["exact"],
             "authors": ["exact"],
@@ -1977,6 +1980,7 @@ class AppliedControlFilterSet(GenericFilterSet):
     class Meta:
         model = AppliedControl
         fields = {
+            "name": ["exact"],
             "folder": ["exact"],
             "category": ["exact"],
             "csf_function": ["exact"],
@@ -3004,6 +3008,7 @@ class RiskScenarioFilter(GenericFilterSet):
         model = RiskScenario
         # Only include actual model fields here
         fields = {
+            "name": ["exact"],
             "risk_assessment": ["exact"],
             "current_impact": ["exact"],
             "current_proba": ["exact"],
@@ -3598,7 +3603,14 @@ class FolderFilter(GenericFilterSet):
 
     class Meta:
         model = Folder
-        fields = ["parent_folder", "content_type", "owner", "owned", "filtering_labels"]
+        fields = [
+            "name",
+            "parent_folder",
+            "content_type",
+            "owner",
+            "owned",
+            "filtering_labels",
+        ]
 
 
 class FolderViewSet(BaseModelViewSet):
@@ -5556,6 +5568,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     model = ComplianceAssessment
     filterset_fields = [
+        "name",
+        "ref_id",
         "folder",
         "framework",
         "perimeter",
@@ -7292,6 +7306,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
 
     model = SecurityException
     filterset_fields = [
+        "name",
         "requirement_assessments",
         "risk_scenarios",
         "owners",
@@ -7451,6 +7466,8 @@ class SecurityExceptionViewSet(BaseModelViewSet):
 class FindingsAssessmentViewSet(BaseModelViewSet):
     model = FindingsAssessment
     filterset_fields = [
+        "name",
+        "ref_id",
         "owner",
         "category",
         "perimeter",
@@ -7913,6 +7930,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 class FindingViewSet(BaseModelViewSet):
     model = Finding
     filterset_fields = [
+        "name",
         "owner",
         "folder",
         "status",
@@ -8569,6 +8587,7 @@ class TaskTemplateFilter(GenericFilterSet):
     class Meta:
         model = TaskTemplate
         fields = [
+            "name",
             "assigned_to",
             "is_recurrent",
             "folder",
