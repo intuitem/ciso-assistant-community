@@ -1,5 +1,5 @@
 {
-  "name": "n8n-nodes-cisoAssistantService",
+  "name": "n8n-nodes-ciso-assistant",
   "version": "1.0.0",
   "description": "Custom n8n node to interact with CISO Assistant API",
   "license": "AGPL",

@@ -120,6 +120,10 @@ export class CisoAssistantService implements INodeType {
             value: "dataBreach",
           },
           {
+            name: "Risk Scenario",
+            value: "riskScenario",
+          },
+          {
             name: "Framework",
             value: "framework",
           },
@@ -382,6 +386,18 @@ export class CisoAssistantService implements INodeType {
             description: "Create a new incident",
             action: "Create an incident",
           },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all incidents",
+            action: "List incidents",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update an existing incident",
+            action: "Update incident",
+          },
         ],
         default: "create",
       },
@@ -402,6 +418,18 @@ export class CisoAssistantService implements INodeType {
             value: "create",
             description: "Create a new vulnerability",
             action: "Create a vulnerability",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all vulnerabilities",
+            action: "List vulnerabilities",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update an existing vulnerability",
+            action: "Update vulnerability",
           },
         ],
         default: "create",
@@ -891,6 +919,45 @@ export class CisoAssistantService implements INodeType {
             value: "update",
             description: "Update an existing data breach",
             action: "Update data breach",
+          },
+        ],
+        default: "create",
+      },
+      // Risk Scenario operations
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        noDataExpression: true,
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create a new risk scenario",
+            action: "Create risk scenario",
+          },
+          {
+            name: "Get by Name",
+            value: "getByName",
+            description: "Get a risk scenario by its name (case-sensitive)",
+            action: "Get risk scenario by name",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Get all risk scenarios",
+            action: "List risk scenarios",
+          },
+          {
+            name: "Update",
+            value: "update",
+            description: "Update an existing risk scenario",
+            action: "Update risk scenario",
           },
         ],
         default: "create",
@@ -1459,6 +1526,21 @@ export class CisoAssistantService implements INodeType {
         required: true,
       },
       {
+        displayName: "Incident UUID",
+        name: "incidentId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["incident"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "incident-uuid-here",
+        description: "The UUID of the incident to update",
+        required: true,
+      },
+      {
         displayName: "Folder ID",
         name: "folderId",
         type: "string",
@@ -1483,7 +1565,7 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["incident"],
-            operation: ["create"],
+            operation: ["create", "update"],
           },
         },
         default: "",
@@ -1497,7 +1579,7 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["incident"],
-            operation: ["create"],
+            operation: ["create", "update"],
           },
         },
         options: [
@@ -1517,7 +1599,7 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["incident"],
-            operation: ["create"],
+            operation: ["create", "update"],
           },
         },
         options: [
@@ -1538,7 +1620,7 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["incident"],
-            operation: ["create"],
+            operation: ["create", "update"],
           },
         },
         options: [
@@ -1555,7 +1637,7 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["incident"],
-            operation: ["create"],
+            operation: ["create", "update"],
           },
         },
         default: "",
@@ -1576,6 +1658,21 @@ export class CisoAssistantService implements INodeType {
         default: "",
         placeholder: "CVE-2025-0001",
         description: "The name of the vulnerability",
+        required: true,
+      },
+      {
+        displayName: "Vulnerability UUID",
+        name: "vulnerabilityId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["vulnerability"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "vulnerability-uuid-here",
+        description: "The UUID of the vulnerability to update",
         required: true,
       },
       {
@@ -1603,7 +1700,7 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["vulnerability"],
-            operation: ["create"],
+            operation: ["create", "update"],
           },
         },
         default: "",
@@ -1617,7 +1714,7 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["vulnerability"],
-            operation: ["create"],
+            operation: ["create", "update"],
           },
         },
         options: [
@@ -1639,7 +1736,7 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["vulnerability"],
-            operation: ["create"],
+            operation: ["create", "update"],
           },
         },
         options: [
@@ -1660,7 +1757,7 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["vulnerability"],
-            operation: ["create"],
+            operation: ["create", "update"],
           },
         },
         default: "",
@@ -3311,6 +3408,211 @@ export class CisoAssistantService implements INodeType {
         placeholder: "Additional observations",
         description: "Observation notes",
       },
+      // Risk Scenario fields
+      {
+        displayName: "Risk Scenario Name",
+        name: "riskScenarioName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "Data Loss via Ransomware",
+        description: "Name of the risk scenario (case-sensitive)",
+        required: true,
+      },
+      {
+        displayName: "Risk Assessment UUID",
+        name: "riskScenarioRiskAssessmentId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "getByName"],
+          },
+        },
+        default: "",
+        placeholder: "risk-assessment-uuid-here",
+        description: "UUID of the risk assessment this scenario belongs to",
+        required: true,
+      },
+      {
+        displayName: "Risk Scenario UUID",
+        name: "riskScenarioId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["update"],
+          },
+        },
+        default: "",
+        placeholder: "risk-scenario-uuid-here",
+        description: "The UUID of the risk scenario to update",
+        required: true,
+      },
+      {
+        displayName: "Description",
+        name: "riskScenarioDescription",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "update"],
+          },
+        },
+        default: "",
+        placeholder: "Description of the risk scenario",
+        description: "Risk scenario description",
+      },
+      {
+        displayName: "Reference ID",
+        name: "riskScenarioRefId",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "update"],
+          },
+        },
+        default: "",
+        placeholder: "RISK-001",
+        description: "Reference identifier for the risk scenario",
+      },
+      {
+        displayName: "Treatment",
+        name: "riskScenarioTreatment",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "update"],
+          },
+        },
+        options: [
+          { name: "Open", value: "open" },
+          { name: "Mitigate", value: "mitigate" },
+          { name: "Accept", value: "accept" },
+          { name: "Avoid", value: "avoid" },
+          { name: "Transfer", value: "transfer" },
+        ],
+        default: "open",
+        description: "Treatment status for the risk",
+      },
+      {
+        displayName: "Existing Controls",
+        name: "riskScenarioExistingControls",
+        type: "string",
+        typeOptions: {
+          rows: 3,
+        },
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "update"],
+          },
+        },
+        default: "",
+        placeholder: "Description of existing controls",
+        description: "The existing controls to manage this risk",
+      },
+      {
+        displayName: "Inherent Probability",
+        name: "riskScenarioInherentProba",
+        type: "number",
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "update"],
+          },
+        },
+        default: -1,
+        description: "Inherent probability level (-1 for undefined)",
+      },
+      {
+        displayName: "Inherent Impact",
+        name: "riskScenarioInherentImpact",
+        type: "number",
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "update"],
+          },
+        },
+        default: -1,
+        description: "Inherent impact level (-1 for undefined)",
+      },
+      {
+        displayName: "Current Probability",
+        name: "riskScenarioCurrentProba",
+        type: "number",
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "update"],
+          },
+        },
+        default: -1,
+        description: "Current probability level (-1 for undefined)",
+      },
+      {
+        displayName: "Current Impact",
+        name: "riskScenarioCurrentImpact",
+        type: "number",
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "update"],
+          },
+        },
+        default: -1,
+        description: "Current impact level (-1 for undefined)",
+      },
+      {
+        displayName: "Residual Probability",
+        name: "riskScenarioResidualProba",
+        type: "number",
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "update"],
+          },
+        },
+        default: -1,
+        description: "Residual probability level (-1 for undefined)",
+      },
+      {
+        displayName: "Residual Impact",
+        name: "riskScenarioResidualImpact",
+        type: "number",
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "update"],
+          },
+        },
+        default: -1,
+        description: "Residual impact level (-1 for undefined)",
+      },
+      {
+        displayName: "Strength of Knowledge",
+        name: "riskScenarioStrengthOfKnowledge",
+        type: "number",
+        displayOptions: {
+          show: {
+            resource: ["riskScenario"],
+            operation: ["create", "update"],
+          },
+        },
+        default: -1,
+        description: "Strength of knowledge supporting the assessment (-1 for undefined, 0=Low, 1=Medium, 2=High)",
+      },
       // Optional Folder UUID for list operations
       {
         displayName: "Folder UUID (Optional)",
@@ -3339,6 +3641,7 @@ export class CisoAssistantService implements INodeType {
               "entityAssessment",
               "rightRequest",
               "dataBreach",
+              "riskScenario",
             ],
             operation: ["list"],
           },
@@ -3921,6 +4224,41 @@ export class CisoAssistantService implements INodeType {
             url: `${credentials.baseUrl}/incidents/`,
             body: incidentData,
           });
+        } else if (resource === "incident" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/incidents/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "incident" && operation === "update") {
+          const incidentId = this.getNodeParameter("incidentId", i) as string;
+          const incidentDescription = this.getNodeParameter("incidentDescription", i, "") as string;
+          const incidentStatus = this.getNodeParameter("incidentStatus", i, "new") as string;
+          const incidentSeverity = this.getNodeParameter("incidentSeverity", i, 3) as number;
+          const incidentDetection = this.getNodeParameter("incidentDetection", i, "internally_detected") as string;
+          const incidentRefId = this.getNodeParameter("incidentRefId", i, "") as string;
+
+          const incidentData: any = {
+            description: incidentDescription,
+            status: incidentStatus,
+            severity: incidentSeverity,
+            detection: incidentDetection,
+          };
+
+          if (incidentRefId) incidentData.ref_id = incidentRefId;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/incidents/${incidentId}/`,
+            body: incidentData,
+          });
         } else if (resource === "vulnerability" && operation === "create") {
           const vulnerabilityName = this.getNodeParameter("vulnerabilityName", i) as string;
           const folderId = this.getNodeParameter("folderId", i) as string;
@@ -3961,6 +4299,39 @@ export class CisoAssistantService implements INodeType {
             ...baseConfig,
             method: "POST",
             url: `${credentials.baseUrl}/vulnerabilities/`,
+            body: vulnerabilityData,
+          });
+        } else if (resource === "vulnerability" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/vulnerabilities/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "vulnerability" && operation === "update") {
+          const vulnerabilityId = this.getNodeParameter("vulnerabilityId", i) as string;
+          const vulnerabilityDescription = this.getNodeParameter("vulnerabilityDescription", i, "") as string;
+          const vulnerabilityStatus = this.getNodeParameter("vulnerabilityStatus", i, "--") as string;
+          const vulnerabilitySeverity = this.getNodeParameter("vulnerabilitySeverity", i, -1) as number;
+          const vulnerabilityRefId = this.getNodeParameter("vulnerabilityRefId", i, "") as string;
+
+          const vulnerabilityData: any = {
+            description: vulnerabilityDescription,
+            status: vulnerabilityStatus,
+            severity: vulnerabilitySeverity,
+          };
+
+          if (vulnerabilityRefId) vulnerabilityData.ref_id = vulnerabilityRefId;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/vulnerabilities/${vulnerabilityId}/`,
             body: vulnerabilityData,
           });
         } else if (resource === "appliedControl" && operation === "create") {
@@ -4798,6 +5169,100 @@ export class CisoAssistantService implements INodeType {
             method: "PATCH",
             url: `${credentials.baseUrl}/data-breaches/${dataBreachId}/`,
             body: dataBreachData,
+          });
+        } else if (resource === "riskScenario" && operation === "create") {
+          const riskScenarioName = this.getNodeParameter("riskScenarioName", i) as string;
+          const riskScenarioRiskAssessmentId = this.getNodeParameter("riskScenarioRiskAssessmentId", i) as string;
+          const riskScenarioDescription = this.getNodeParameter("riskScenarioDescription", i, "") as string;
+          const riskScenarioRefId = this.getNodeParameter("riskScenarioRefId", i, "") as string;
+          const riskScenarioTreatment = this.getNodeParameter("riskScenarioTreatment", i, "open") as string;
+          const riskScenarioExistingControls = this.getNodeParameter("riskScenarioExistingControls", i, "") as string;
+          const riskScenarioInherentProba = this.getNodeParameter("riskScenarioInherentProba", i, -1) as number;
+          const riskScenarioInherentImpact = this.getNodeParameter("riskScenarioInherentImpact", i, -1) as number;
+          const riskScenarioCurrentProba = this.getNodeParameter("riskScenarioCurrentProba", i, -1) as number;
+          const riskScenarioCurrentImpact = this.getNodeParameter("riskScenarioCurrentImpact", i, -1) as number;
+          const riskScenarioResidualProba = this.getNodeParameter("riskScenarioResidualProba", i, -1) as number;
+          const riskScenarioResidualImpact = this.getNodeParameter("riskScenarioResidualImpact", i, -1) as number;
+          const riskScenarioStrengthOfKnowledge = this.getNodeParameter("riskScenarioStrengthOfKnowledge", i, -1) as number;
+
+          const riskScenarioData: any = {
+            name: riskScenarioName,
+            risk_assessment: riskScenarioRiskAssessmentId,
+            treatment: riskScenarioTreatment,
+            inherent_proba: riskScenarioInherentProba,
+            inherent_impact: riskScenarioInherentImpact,
+            current_proba: riskScenarioCurrentProba,
+            current_impact: riskScenarioCurrentImpact,
+            residual_proba: riskScenarioResidualProba,
+            residual_impact: riskScenarioResidualImpact,
+            strength_of_knowledge: riskScenarioStrengthOfKnowledge,
+          };
+
+          if (riskScenarioDescription) riskScenarioData.description = riskScenarioDescription;
+          if (riskScenarioRefId) riskScenarioData.ref_id = riskScenarioRefId;
+          if (riskScenarioExistingControls) riskScenarioData.existing_controls = riskScenarioExistingControls;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "POST",
+            url: `${credentials.baseUrl}/risk-scenarios/`,
+            body: riskScenarioData,
+          });
+        } else if (resource === "riskScenario" && operation === "getByName") {
+          const riskScenarioName = this.getNodeParameter("riskScenarioName", i) as string;
+          const riskScenarioRiskAssessmentId = this.getNodeParameter("riskScenarioRiskAssessmentId", i) as string;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url: `${credentials.baseUrl}/risk-scenarios/?name=${encodeURIComponent(riskScenarioName)}&risk_assessment=${encodeURIComponent(riskScenarioRiskAssessmentId)}`,
+          });
+        } else if (resource === "riskScenario" && operation === "list") {
+          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
+          let url = `${credentials.baseUrl}/risk-scenarios/`;
+          if (folderIdFilter) {
+            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
+          }
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "GET",
+            url,
+          });
+        } else if (resource === "riskScenario" && operation === "update") {
+          const riskScenarioId = this.getNodeParameter("riskScenarioId", i) as string;
+          const riskScenarioDescription = this.getNodeParameter("riskScenarioDescription", i, "") as string;
+          const riskScenarioRefId = this.getNodeParameter("riskScenarioRefId", i, "") as string;
+          const riskScenarioTreatment = this.getNodeParameter("riskScenarioTreatment", i, "") as string;
+          const riskScenarioExistingControls = this.getNodeParameter("riskScenarioExistingControls", i, "") as string;
+          const riskScenarioInherentProba = this.getNodeParameter("riskScenarioInherentProba", i, -1) as number;
+          const riskScenarioInherentImpact = this.getNodeParameter("riskScenarioInherentImpact", i, -1) as number;
+          const riskScenarioCurrentProba = this.getNodeParameter("riskScenarioCurrentProba", i, -1) as number;
+          const riskScenarioCurrentImpact = this.getNodeParameter("riskScenarioCurrentImpact", i, -1) as number;
+          const riskScenarioResidualProba = this.getNodeParameter("riskScenarioResidualProba", i, -1) as number;
+          const riskScenarioResidualImpact = this.getNodeParameter("riskScenarioResidualImpact", i, -1) as number;
+          const riskScenarioStrengthOfKnowledge = this.getNodeParameter("riskScenarioStrengthOfKnowledge", i, -1) as number;
+
+          const riskScenarioData: any = {
+            inherent_proba: riskScenarioInherentProba,
+            inherent_impact: riskScenarioInherentImpact,
+            current_proba: riskScenarioCurrentProba,
+            current_impact: riskScenarioCurrentImpact,
+            residual_proba: riskScenarioResidualProba,
+            residual_impact: riskScenarioResidualImpact,
+            strength_of_knowledge: riskScenarioStrengthOfKnowledge,
+          };
+
+          if (riskScenarioDescription) riskScenarioData.description = riskScenarioDescription;
+          if (riskScenarioRefId) riskScenarioData.ref_id = riskScenarioRefId;
+          if (riskScenarioTreatment) riskScenarioData.treatment = riskScenarioTreatment;
+          if (riskScenarioExistingControls) riskScenarioData.existing_controls = riskScenarioExistingControls;
+
+          response = await this.helpers.httpRequest({
+            ...baseConfig,
+            method: "PATCH",
+            url: `${credentials.baseUrl}/risk-scenarios/${riskScenarioId}/`,
+            body: riskScenarioData,
           });
         } else if (resource === "riskMatrix" && operation === "list") {
           response = await this.helpers.httpRequest({

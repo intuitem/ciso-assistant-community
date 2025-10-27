@@ -3008,6 +3008,7 @@ class RiskScenarioFilter(GenericFilterSet):
         model = RiskScenario
         # Only include actual model fields here
         fields = {
+            "name": ["exact"],
             "risk_assessment": ["exact"],
             "current_impact": ["exact"],
             "current_proba": ["exact"],

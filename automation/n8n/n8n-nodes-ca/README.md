@@ -68,6 +68,7 @@ In n8n, create a new credential for "CISO Assistant API":
 - Assets
 - Audits (compliance assessments)
 - Risk Assessments
+- Risk Scenarios
 - Incidents
 - Vulnerabilities
 - Applied Controls
