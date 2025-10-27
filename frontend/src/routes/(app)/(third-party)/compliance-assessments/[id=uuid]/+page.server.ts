@@ -51,6 +51,10 @@ export const load = (async ({ fetch, params }) => {
 
 	const selectOptions: Record<string, any> = {};
 
+	const frameworksMappings = await fetch(`/compliance-assessments/${params.id}/frameworks`).then(
+		(res) => res.json()
+	);
+
 	if (auditModel.selectFields) {
 		for (const selectField of auditModel.selectFields) {
 			const url = `${BASE_API_URL}/compliance-assessments/${selectField.field}/`;
@@ -84,6 +88,7 @@ export const load = (async ({ fetch, params }) => {
 		global_score,
 		threats,
 		form,
+		frameworksMappings,
 		title: compliance_assessment.name
 	};
 }) satisfies PageServerLoad;

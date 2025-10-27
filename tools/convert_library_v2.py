@@ -26,6 +26,7 @@ import datetime
 import argparse
 import unicodedata
 import openpyxl
+from typing import Any, Dict, List
 from pathlib import Path
 from collections import Counter
 
@@ -169,22 +170,51 @@ def expand_urns_from_prefixed_list(
 # --- question management ------------------------------------------------------------
 
 
-def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_dict):
+
+def inject_questions_into_node(qa_data: dict[str, Any], node: Dict[str, Any], answers_dict: dict) -> None:
     """
     Injects parsed questions and their metadata into a requirement node.
     Ensures that question type is valid and handles multiple questions/answers.
 
-    :param node: the requirement node (dict)
-    :param raw_question_str: the string from the "questions" column
-    :param raw_answer_str: the string from the "answer" column
-    :param answers_dict: dictionary of all available answers (from answer sheet)
+    :param qa_data: Allows to retrieve the string from the following columns: "questions", "answer" and "depends_on"
+    :param node: The requirement node (dict)
+    :param answers_dict: Dictionary of all available answers (from answer sheet)
     """
+
+
+    raw_question_str = qa_data.get("questions")
+    raw_answer_str = qa_data.get("answer")
+    raw_depends_on_str = qa_data.get("depends_on")
+    raw_condition_str = qa_data.get("condition")
+
     if not raw_question_str:
         return
 
     allowed_types = {"unique_choice", "multiple_choice", "text", "date"}
 
     question_lines = [q.strip() for q in str(raw_question_str).split("\n") if q.strip()]
+    
+    depends_on_lines = None
+    if raw_depends_on_str:
+        depends_on_lines = [dep.strip() for dep in str(raw_depends_on_str).split("\n") if dep.strip()]
+        depends_on_lines = [None if dep.lower() == "/" else dep for dep in depends_on_lines]
+        
+        if not node.get('urn'):
+            raise ValueError(
+                f"(inject_questions_into_node) Missing Framework URNs to compute the 'depends_on' column"
+            )
+            
+    condition_lines = None
+    if raw_condition_str:
+        condition_lines = [cond.strip() for cond in str(raw_condition_str).split("\n") if cond.strip()]
+        condition_lines = [None if cond.lower() == "/" else cond for cond in condition_lines]
+    # If NO condition [AND]  
+    elif not raw_condition_str and depends_on_lines:
+        raise ValueError(
+            f"(inject_questions_into_node) Missing value 'condition' to compute 'depends_on' column"
+        )
+        
+
     answer_ids = (
         [a.strip() for a in str(raw_answer_str).split("\n") if raw_answer_str]
         if raw_answer_str
@@ -193,14 +223,26 @@ def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_d
 
     if len(answer_ids) != 1 and len(answer_ids) != len(question_lines):
         raise ValueError(
-            f"Mismatch between questions and answers for node {node.get('urn')}"
+            f"Mismatch between questions and 'answers' for node {node.get('urn')}"
+        )
+        
+    if depends_on_lines and len(depends_on_lines) != 1 and len(depends_on_lines) != len(question_lines):
+        raise ValueError(
+            f"Mismatch between questions and 'depends_on' for node {node.get('urn')}"
+        )
+    
+    if condition_lines and len(condition_lines) != 1 and len(condition_lines) != len(question_lines):
+        raise ValueError(
+            f"Mismatch between questions and 'condition' for node {node.get('urn')}"
         )
 
     question_block = {}
 
     for idx, question_text in enumerate(question_lines):
+
         answer_id = answer_ids[0] if len(answer_ids) == 1 else answer_ids[idx]
         answer_meta = answers_dict.get(answer_id)
+
         if not answer_meta:
             raise ValueError(
                 f"Unknown answer ID: {answer_id} for node {node.get('urn')}"
@@ -214,13 +256,76 @@ def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_d
         question_entry = {
             "type": qtype,
         }
+
+        question_entry["text"] = question_text
+
+        # Optional: depends_on
+        depends_on_block = {}
+        depends_on_question_urn = ""
+        depends_on_question_answers = []
+
+        if depends_on_lines:
+
+            dependency = depends_on_lines[0] if len(depends_on_lines) == 1 else depends_on_lines[idx]
+
+            # Skip if dependency is not defined [AND] 
+            if dependency is not None:
+                
+                condition = None
+                if len(condition_lines) == 1:
+                    condition = condition_lines[0]
+                else:
+                    condition = condition_lines[idx]
+                
+                # Check string format (Format == "x:y,z,a,b,c,..." with x,y,a,b,c,... >= 1)
+                if not re.fullmatch(r"[1-9]\d*:(?:[1-9]\d*)(?:,[1-9]\d*)*", dependency):
+                    raise ValueError(f"Invalid 'depends_on' format for question #{str(idx + 1)} for node {node.get('urn')}: '{dependency}'. Expected 'x:y[,z,...]' with x,y,z >= 1")
+                
+                dep_split = dependency.split(":")
+                dependency_question = int(dep_split[0])
+                dependency_question_answers = [int(c) for c in dep_split[1].split(",")]
+                
+                # If the question DOESN'T want to depend on itself
+                if dependency_question != idx + 1:
+
+                    ##### Recreate correct URN for Question & Answers (Choices) #####
+                    # SOON: Checks for this will be processed in ./check_library_v2.py
+
+                    # Get URN of the line we refer to
+                    depends_on_urn = node.get('urn')
+                    # URN of the question
+                    depends_on_question_urn = depends_on_urn + f":question:{str(dependency_question)}"
+                    # URN of choices
+                    for choice in dependency_question_answers:
+                        depends_on_question_answers.append(depends_on_question_urn + f":choice:{str(choice)}")
+                    
+                    if not condition:
+                        raise ValueError(
+                            f"Missing 'condition' for question #{str(idx + 1)} for node {node.get('urn')}. Must be 'any' or 'all' "
+                        )
+                    
+                    if condition not in ["any", "all"]:
+                        raise ValueError(
+                            f"Invalid 'condition' for question #{str(idx + 1)} for node {node.get('urn')}: '{condition}'. Must be 'any' or 'all', '/' (= 'undefined') or empty cell"
+                        )
+                    
+                    depends_on_block["condition"] = condition
+                    depends_on_block["question"] = depends_on_question_urn
+                    depends_on_block["answers"] = depends_on_question_answers
+
+                    question_entry["depends_on"] = depends_on_block
+
+
         if qtype in {"unique_choice", "multiple_choice"}:
             choices = []
             for j, choice in enumerate(answer_meta["choices"]):
-                choice_urn = f"{q_urn}:choice:{j + 1}"
-                choices.append({"urn": choice_urn, "value": choice["value"]})
+                # make a shallow copy so we don't mutate the original dict
+                entry = choice.copy()
+                # overwrite / add the per-question urn
+                entry["urn"] = f"{q_urn}:choice:{j + 1}"
+                choices.append(entry)
             question_entry["choices"] = choices
-        question_entry["text"] = question_text
+
         question_block[q_urn] = question_entry
     if question_block:
         node["questions"] = question_block
@@ -422,7 +527,7 @@ def parse_risk_matrix(meta, content_ws, wb):
     return risk_matrix
 
 
-# --- Mapping logic ---------------------------------------------------------------
+# --- Mapping logic ------------------------------------------------------------
 
 
 def revert_relationship(relation: str):
@@ -434,8 +539,47 @@ def revert_relationship(relation: str):
         return relation
 
 
-# --- Main logic ---------------------------------------------------------------
+# --- Extract optional columns for answers -------------------------------------
 
+def _per_choice_lines(data: dict, col: str, n_choices: int, answer_id: str):
+
+    raw = str(data.get(col, "") or "").strip()
+
+    if not raw:
+        return None
+
+    lines: List[str] = []
+
+    # If col == "description", take into consideration the multiline description logic
+    if col.lower() == "description":
+        for desc in raw.split("\n"):
+
+            desc = desc.strip()
+
+            if not desc:
+                continue
+
+            # if line starts with "|", concatenate the whole line with the previous description (without the "|")
+            if desc.startswith("|") and lines:
+                # Multi-line value, append to previous
+                lines[-1] += "\n" + desc[1:].strip()
+            else:
+                lines.append(desc)
+    else:
+        lines = [line.strip() for line in raw.split("\n")]
+
+    if len(lines) == 1:
+        lines *= n_choices
+
+    if len(lines) != n_choices:
+        raise ValueError(
+            f"(answers_definition) Invalid {col} count for answer ID '{answer_id}': "
+            f"{len(lines)} values for {n_choices} choices."
+        )
+
+    return lines
+
+# --- Main logic ---------------------------------------------------------------
 
 def create_library(
     input_file: str, output_file: str, compat_mode: int = 0, verbose: bool = False
@@ -682,6 +826,8 @@ def create_library(
             # --- Retrieve answers block if declared ---
             answers_dict = {}
             answers_block_name = meta.get("answers_definition")
+            answer_sheet = None
+            
             if answers_block_name:
                 if answers_block_name not in object_blocks:
                     raise ValueError(f"Missing answers sheet: '{answers_block_name}'")
@@ -716,6 +862,76 @@ def create_library(
                                 choices[-1]["value"] += "\n" + line[1:].strip()
                             else:
                                 choices.append({"urn": "", "value": line})
+
+                        # --- Optional: description ---------------------------
+                        description_lines = _per_choice_lines(data, "description", len(choices), answer_id)
+                        if description_lines:
+                            for i, desc in enumerate(description_lines):
+                                if desc and desc != "/":
+                                    choices[i]["description"] = desc
+
+                        # --- Optional: compute_result -----------------------------------------
+                        compute_lines = _per_choice_lines(data, "compute_result", len(choices), answer_id)
+                        if compute_lines:
+                            for i, val in enumerate(compute_lines):
+                                v = val.lower()
+                                if v not in ("true", "false", "/", ""):
+                                    raise ValueError(
+                                        f"(answers_definition) Invalid compute_result value '{val}' "
+                                        f"for answer ID '{answer_id}', choice #{i+1}. Must be 'true', 'false', '/' (= 'undefined') or empty."
+                                    )
+                                
+                                # Use Boolean instead of string
+                                if v == "/" or v == "": v = None
+                                elif v == "true": v = True
+                                elif v == "false": v = False
+                                
+                                if v is not None:
+                                    choices[i]["compute_result"] = v
+
+                        # --- Optional: add_score ----------------------------------------------
+                        score_lines = _per_choice_lines(data, "add_score", len(choices), answer_id)
+                        if score_lines:
+                            for i, val in enumerate(score_lines):
+                                if val:
+                                    try:
+                                        score_to_add = int(val)
+                                        if score_to_add != 0:
+                                            choices[i]["add_score"] = score_to_add
+
+                                    except (TypeError, ValueError):
+                                        raise ValueError(
+                                            f"(answers_definition) Invalid add_score value '{val}' "
+                                            f"for answer ID '{answer_id}', choice #{i+1}. Must be an integer"
+                                        )
+
+                        # --- Optional: select_implementation_groups ---------------------------
+                        sig_lines = _per_choice_lines(data, "select_implementation_groups", len(choices), answer_id)
+                        if sig_lines:
+                            for i, val in enumerate(sig_lines):
+                                if val:
+                                    groups = [s.strip() for s in val.split(",") if s.strip()]
+                                    
+                                    # If IG for choice == "/undefined", continue
+                                    if len(groups) == 1 and groups[0].lower() == "/":
+                                        continue
+                                    
+                                    if groups:
+                                        choices[i]["select_implementation_groups"] = groups
+
+                        # --- Optional: color ---------------------------------------------------
+                        color_lines = _per_choice_lines(data, "color", len(choices), answer_id)
+                        if color_lines:
+                            for i, val in enumerate(color_lines):
+                                if val:
+                                    if not re.fullmatch(r"#([0-9a-fA-F]{6})", val) and val.lower() != "/":
+                                        raise ValueError(
+                                            f"(answers_definition) Invalid color value '{val}' "
+                                            f"for answer ID '{answer_id}', choice #{i+1}. Must match #RRGGBB, be '/' (= 'undefined') or the cell must be empty."
+                                        )
+                                        
+                                    if val.lower() != '/':
+                                        choices[i]["color"] = val.upper()
 
                         answers_dict[answer_id] = {
                             "type": answer_type,
@@ -779,6 +995,8 @@ def create_library(
                 if verbose:
                     print(f'💬 ℹ️  No "Score Definition" found')
 
+
+            # [CONTENT] Implementation Groups
             ig_name = meta.get("implementation_groups_definition")
             if ig_name and ig_name in object_blocks:
                 ig_content = object_blocks[ig_name]["content_sheet"]
@@ -798,10 +1016,12 @@ def create_library(
                     ig_entry = {
                         "ref_id": str(data.get("ref_id", "")).strip(),
                         "name": str(data.get("name", "")).strip(),
-                        "description": str(data.get("description", "")).strip()
-                        if data.get("description")
-                        else None,
+                        "description": str(data.get("description", "")).strip() if data.get("description") else None,
                     }
+
+                    if data.get("default_selected") is not None:
+                        ig_entry["default_selected"] = bool(data.get("default_selected"))
+                    
                     translations = extract_translations_from_row(ig_header, row)
                     if translations:
                         ig_entry["translations"] = translations
@@ -954,6 +1174,25 @@ def create_library(
                         node["annotation"] = str(data["annotation"]).strip()
                     if "typical_evidence" in data and data["typical_evidence"]:
                         node["typical_evidence"] = str(data["typical_evidence"]).strip()
+                    # Optional: importance: mandatory/recommended/nice_to_have or empty (= undefined)
+                    if "importance" in data and data["importance"]:
+                        
+                        importance = str(data["importance"]).strip().lower()
+                        
+                        if importance not in ["mandatory", "recommended", "nice_to_have"]:
+                            raise ValueError(f'(framework_content) Invalid "importance" at row #{row[0].row}: "{data["importance"]}". Must be "mandatory"/"recommended"/"nice_to_have" or empty cell (= "undefined").')
+
+                        if importance != "undefined":
+                            node["importance"] = importance
+
+                    # Optional: weight (integer)
+                    if "weight" in data and data["weight"] is not None and str(data["weight"]).strip() != "":
+                        try:
+                            if (w := int(data["weight"])) <= 0:
+                                raise ValueError
+                            node["weight"] = w
+                        except (TypeError, ValueError):
+                            raise ValueError(f"(framework) Invalid weight at row #{row[0].row}: {data["weight"]}. Must be a strictly positive integer.")
                     if (
                         "implementation_groups" in data
                         and data["implementation_groups"]
@@ -981,10 +1220,10 @@ def create_library(
                         if rc:
                             node["reference_controls"] = rc
                     if "questions" in data and data["questions"]:
+
                         inject_questions_into_node(
+                            data,
                             node,
-                            data.get("questions"),
-                            data.get("answer"),
                             answers_dict,
                         )
                     translations = extract_translations_from_row(header, row)
