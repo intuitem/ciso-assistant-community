@@ -2664,6 +2664,29 @@ export class CisoAssistantService implements INodeType {
         required: true,
       },
       {
+        displayName: "Revision Type",
+        name: "evidenceRevisionType",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+            operation: ["submitRevision"],
+          },
+        },
+        options: [
+          {
+            name: "Link",
+            value: "link",
+          },
+          {
+            name: "File Upload",
+            value: "file",
+          },
+        ],
+        default: "link",
+        description: "Whether to submit a link or upload a file attachment",
+      },
+      {
         displayName: "Link",
         name: "evidenceRevisionLink",
         type: "string",
@@ -2671,11 +2694,28 @@ export class CisoAssistantService implements INodeType {
           show: {
             resource: ["evidence"],
             operation: ["submitRevision"],
+            evidenceRevisionType: ["link"],
           },
         },
         default: "",
         placeholder: "https://example.com/document.pdf",
-        description: "URL link to the evidence (optional if using attachment)",
+        description: "URL link to the evidence",
+      },
+      {
+        displayName: "Binary Property",
+        name: "binaryPropertyName",
+        type: "string",
+        displayOptions: {
+          show: {
+            resource: ["evidence"],
+            operation: ["submitRevision"],
+            evidenceRevisionType: ["file"],
+          },
+        },
+        default: "data",
+        placeholder: "data",
+        description: "Name of the binary property containing the file to upload",
+        required: true,
       },
       {
         displayName: "Observation",
@@ -4823,22 +4863,66 @@ export class CisoAssistantService implements INodeType {
           });
         } else if (resource === "evidence" && operation === "submitRevision") {
           const evidenceIdForRevision = this.getNodeParameter("evidenceIdForRevision", i) as string;
-          const evidenceRevisionLink = this.getNodeParameter("evidenceRevisionLink", i, "") as string;
+          const evidenceRevisionType = this.getNodeParameter("evidenceRevisionType", i) as string;
           const evidenceRevisionObservation = this.getNodeParameter("evidenceRevisionObservation", i, "") as string;
 
-          const revisionData: any = {
-            evidence: evidenceIdForRevision,
-          };
+          if (evidenceRevisionType === "file") {
+            // Handle file upload - creates a new revision then uploads the file
+            const binaryPropertyName = this.getNodeParameter("binaryPropertyName", i) as string;
+            const binaryData = this.helpers.assertBinaryData(i, binaryPropertyName);
+            const dataBuffer = await this.helpers.getBinaryDataBuffer(i, binaryPropertyName);
 
-          if (evidenceRevisionLink) revisionData.link = evidenceRevisionLink;
-          if (evidenceRevisionObservation) revisionData.observation = evidenceRevisionObservation;
+            // Get filename from binary data or use a default
+            const filename = binaryData.fileName || "evidence-file";
 
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/evidence-revisions/`,
-            body: revisionData,
-          });
+            // Step 1: Create a new evidence revision
+            const revisionData: any = {
+              evidence: evidenceIdForRevision,
+            };
+            if (evidenceRevisionObservation) revisionData.observation = evidenceRevisionObservation;
+
+            const revisionResponse = await this.helpers.httpRequest({
+              ...baseConfig,
+              method: "POST",
+              url: `${credentials.baseUrl}/evidence-revisions/`,
+              body: revisionData,
+            });
+
+            const newRevisionId = revisionResponse.id;
+
+            // Step 2: Upload the file to the new revision
+            await this.helpers.httpRequest({
+              ...baseConfig,
+              method: "POST",
+              url: `${credentials.baseUrl}/evidence-revisions/${newRevisionId}/upload/`,
+              headers: {
+                ...baseConfig.headers,
+                "Content-Disposition": `attachment; filename=${encodeURIComponent(filename)}`,
+              },
+              body: dataBuffer,
+              json: false,
+            });
+
+            // Return the created revision info
+            response = revisionResponse;
+          } else {
+            // Handle link submission
+            const evidenceRevisionLink = this.getNodeParameter("evidenceRevisionLink", i, "") as string;
+
+            const revisionData: any = {
+              evidence: evidenceIdForRevision,
+            };
+
+            if (evidenceRevisionLink) revisionData.link = evidenceRevisionLink;
+            if (evidenceRevisionObservation) revisionData.observation = evidenceRevisionObservation;
+
+            response = await this.helpers.httpRequest({
+              ...baseConfig,
+              method: "POST",
+              url: `${credentials.baseUrl}/evidence-revisions/`,
+              body: revisionData,
+            });
+          }
         } else if (resource === "evidence" && operation === "listRevisions") {
           const evidenceIdForRevision = this.getNodeParameter("evidenceIdForRevision", i) as string;
 
