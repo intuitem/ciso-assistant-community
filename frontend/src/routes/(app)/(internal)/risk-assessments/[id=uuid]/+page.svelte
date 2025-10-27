@@ -84,6 +84,29 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalRequestValidation(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.validationFlowForm,
+				model: data.validationFlowModel,
+				debug: false,
+				invalidateAll: false,
+				additionalInitialData: {
+					folder: risk_assessment.folder.id,
+					risk_assessments: [risk_assessment.id]
+				}
+			}
+		};
+
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.requestValidation()
+		};
+		modalStore.trigger(modal);
+	}
+
 	let syncingToActionsIsLoading = $state(false);
 
 	async function modalConfirmSyncToActions(id: string, action: string): Promise<void> {
@@ -344,6 +367,14 @@
 							{/if}
 						</span>
 						{m.syncToAppliedControls()}
+					</button>
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-pink-500"
+						onclick={() => modalRequestValidation()}
+						data-testid="request-validation-button"
+					>
+						<i class="fa-solid fa-check-circle mr-2"></i>
+						{m.requestValidation()}
 					</button>
 				{/if}
 			</div>

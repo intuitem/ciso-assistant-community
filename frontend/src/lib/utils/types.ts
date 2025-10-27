@@ -43,6 +43,7 @@ export const URL_MODEL = [
 	'applied-controls',
 	'policies',
 	'risk-acceptances',
+	'validation-flows',
 	'reference-controls',
 	'assets',
 	'users',

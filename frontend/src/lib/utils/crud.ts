@@ -442,6 +442,28 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: [{ field: 'risk_scenarios' }, { field: 'folder' }, { field: 'approver' }]
 	},
+	'validation-flows': {
+		name: 'validationflow',
+		localName: 'validationFlow',
+		localNamePlural: 'validationFlows',
+		verboseName: 'Validation flow',
+		verboseNamePlural: 'Validation flows',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
+			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
+			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
+			{ field: 'crq_studies', urlModel: 'quantitative-risk-studies' },
+			{ field: 'ebios_studies', urlModel: 'ebios-rm' },
+			{ field: 'entity_assessments', urlModel: 'entity-assessments' },
+			{ field: 'findings_assessments', urlModel: 'findings-assessments' },
+			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
+			{ field: 'policies', urlModel: 'policies' }
+		],
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'folder' }, { field: 'status' }, { field: 'approver' }]
+	},
 	'reference-controls': {
 		name: 'referencecontrol',
 		localName: 'referenceControl',
