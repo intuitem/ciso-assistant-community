@@ -156,11 +156,16 @@ class Command(BaseCommand):
                     f"Destination attachments directory is not empty: {dest_attachments}"
                 )
             )
-            confirm = input(
-                "Do you want to continue? (existing files may be overwritten) [y/N]: "
-            )
-            if confirm.lower() != "y":
-                raise CommandError("Operation cancelled.")
+            try:
+                confirm = input(
+                    "Do you want to continue? (existing files may be overwritten) [y/N]: "
+                )
+                if confirm.lower() != "y":
+                    raise CommandError("Operation cancelled.")
+            except EOFError:
+                raise CommandError(
+                    "Operation cancelled (no input available). Use --force to skip prompts."
+                )
 
         # Calculate sizes
         db_size = os.path.getsize(source_db)
