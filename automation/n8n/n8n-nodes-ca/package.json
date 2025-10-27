@@ -46,11 +46,14 @@
     "eslint": "^9.31.0",
     "eslint-plugin-n8n-nodes-base": "^1.16.3",
     "gulp": "^5.0.1",
-    "n8n-workflow": "^1.82.0",
+    "n8n-workflow": "^1.114.0",
     "prettier": "^3.6.2",
     "typescript": "^5.8.3"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
+  },
+  "overrides": {
+    "form-data": "^4.0.4"
   }
 }

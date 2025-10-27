@@ -1,10 +1,9 @@
-import {
+import type {
   INodeType,
   INodeTypeDescription,
   IExecuteFunctions,
   INodeExecutionData,
   IHttpRequestOptions,
-  NodeConnectionType,
 } from "n8n-workflow";
 
 export class CisoAssistantService implements INodeType {
@@ -19,8 +18,8 @@ export class CisoAssistantService implements INodeType {
     defaults: {
       name: "CA node ",
     },
-    inputs: [NodeConnectionType.Main],
-    outputs: [NodeConnectionType.Main],
+    inputs: ['main'],
+    outputs: ['main'],
     credentials: [
       {
         name: "cisoAssistantApi",
