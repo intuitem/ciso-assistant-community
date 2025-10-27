@@ -29,11 +29,7 @@ npm run build
 
 ### 4. Start n8n with the custom node
 
-```bash
-N8N_CUSTOM_EXTENSIONS=/Users/abder/mydev/intuitem/staging/ciso-assistant-community/automation/n8n/n8n-nodes-ca n8n start
-```
-
-Or set it as an environment variable:
+Set the custom extensions path as an environment variable:
 
 ```bash
 export N8N_CUSTOM_EXTENSIONS=/path/to/ciso-assistant-community/automation/n8n/n8n-nodes-ca
@@ -57,8 +53,9 @@ Then restart n8n with the custom extensions path.
 ## Configuration
 
 In n8n, create a new credential for "CISO Assistant API":
-- **Base URL**: Your CISO Assistant instance URL (e.g., `http://localhost:8000/api`)
-- **API Token**: Your authentication token from CISO Assistant
+- **API URL**: Your CISO Assistant instance URL (e.g., `http://localhost:8000/api`)
+- **Personal Access Token (PAT)**: Your authentication token from CISO Assistant
+- **Skip TLS verification**: Enable if using self-signed certificates (optional)
 
 ## Available Resources
 
