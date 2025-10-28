@@ -27,7 +27,14 @@ class JiraClient(BaseIntegrationClient):
         issue_dict["project"] = {"key": self.settings["project_key"]}
         issue_dict["issuetype"] = {"name": self.settings.get("issue_type", "Task")}
 
+        target_status_name = issue_dict.pop("status")
+
         issue = self.jira.create_issue(fields=issue_dict)
+
+        # Handle the status transition separately
+        if target_status_name:
+            self._transition_issue_to_status(issue.key, target_status_name)
+
         logger.info(f"Created Jira issue {issue.key}")
         return issue.key
 

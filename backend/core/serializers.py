@@ -783,6 +783,9 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     remote_object_id = serializers.CharField(
         required=False, allow_blank=True, allow_null=True, write_only=True
     )
+    create_remote_object = serializers.BooleanField(
+        required=False, default=False, write_only=True
+    )
 
     def create(self, validated_data: Any):
         owner_data = validated_data.get("owner", [])

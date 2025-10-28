@@ -24,6 +24,8 @@
 		formDataCache?: Record<string, any>;
 		schema?: any;
 		initialData?: Record<string, any>;
+		context?: string;
+		rest?: Record<string, any>;
 	}
 
 	let {
@@ -33,7 +35,8 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		schema = {},
-		initialData = {}
+		initialData = {},
+		context = 'default'
 	}: Props = $props();
 
 	// Declare form store at top level
@@ -67,6 +70,8 @@
 			});
 		}
 	});
+
+	$inspect(context);
 </script>
 
 {#if !duplicate}
@@ -348,21 +353,31 @@
 			label="m.integration()"
 		/>
 		{#if $formStore.integration_config}
-			{#key $formStore.integration_config}
-				<AutocompleteSelect
+			{#if context === 'edit'}
+				{#key $formStore.integration_config}
+					<AutocompleteSelect
+						{form}
+						optionsEndpoint="settings/integrations/configs/{$formStore.integration_config}/remote-objects"
+						optionsLabelField="summary"
+						optionsValueField="key"
+						optionsInfoFields={{
+							fields: [{ field: 'key' }],
+							position: 'prefix'
+						}}
+						field="remote_object_id"
+						helpText="m.remoteObjectHelpText()"
+						label="m.remoteObject()"
+					/>
+				{/key}
+			{/if}
+			{#if context === 'create'}
+				<Checkbox
 					{form}
-					optionsEndpoint="settings/integrations/configs/{$formStore.integration_config}/remote-objects"
-					optionsLabelField="summary"
-					optionsValueField="key"
-					optionsInfoFields={{
-						fields: [{ field: 'key' }],
-						position: 'prefix'
-					}}
-					field="remote_object_id"
-					helpText="m.remoteObjectHelpText()"
-					label="m.remoteObject()"
+					field="create_remote_object"
+					label="m.createRemoteObject()"
+					helpText="m.createRemoteObjectHelpText()"
 				/>
-			{/key}
+			{/if}
 		{/if}
 	</Dropdown>
 {/if}

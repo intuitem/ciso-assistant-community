@@ -1,4 +1,4 @@
-import logging
+import structlog
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -8,7 +8,7 @@ from django.db import models
 from core.base_models import AbstractBaseModel
 from integrations.models import IntegrationConfiguration, SyncMapping
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class BaseIntegrationClient(ABC):
@@ -216,10 +216,9 @@ class BaseSyncOrchestrator:
                     )
             else:
                 # Create new remote object
-                remote_data = self.mapper.to_remote(local_object)
                 remote_id = self.client.create_remote_object(local_object)
                 mapping.remote_id = remote_id
-                logger.info(f"Created remote object {remote_id}")
+                logger.info("Created remote object", remote_id=remote_id)
 
             # Update mapping status
             mapping.sync_status = SyncMapping.SyncStatus.SYNCED
@@ -274,7 +273,7 @@ class BaseSyncOrchestrator:
         try:
             # Check for conflicts
             if self._has_conflict(mapping, remote_data):
-                logger.warning(f"Conflict detected for mapping {mapping.id}")
+                logger.warning("Conflict detected for mapping", mapping_id=mapping.id)
                 mapping.sync_status = "conflict"
                 mapping.save()
                 # Handle conflict based on resolution strategy
@@ -397,7 +396,6 @@ class BaseSyncOrchestrator:
             setattr(local_object, field, value)
 
         # Save with skip_sync flag to prevent infinite loop
-        # This assumes your AppliedControl.save() method checks for 'skip_sync'
         local_object.save(skip_sync=True)
         logger.debug(
             f"Updated local object {local_object.pk} with fields: {list(local_data.keys())}"

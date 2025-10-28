@@ -203,7 +203,8 @@ export const AppliedControlSchema = z.object({
 	findings: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	integration_config: z.string().optional().nullable(),
-	remote_object_id: z.string().optional().nullable()
+	remote_object_id: z.string().optional().nullable(),
+	create_remote_object: z.boolean().optional().default(false)
 });
 
 export const AppliedControlDuplicateSchema = z.object({

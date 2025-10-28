@@ -57,6 +57,7 @@ from django.db.models.functions import Lower
 from docxtpl import DocxTemplate
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
+from integrations.registry import IntegrationRegistry
 from .generators import gen_audit_context
 
 from django.utils import timezone
@@ -2035,34 +2036,72 @@ class AppliedControlViewSet(BaseModelViewSet):
             )
         )
 
+    def perform_create(self, serializer):
+        create_remote_object = serializer.validated_data.pop(
+            "create_remote_object", False
+        )
+        integration_config = serializer.validated_data.pop("integration_config", None)
+        serializer.validated_data.pop("remote_object_id")  # Remove if present
+
+        # Create the local object first
+        super().perform_create(serializer)
+        instance = serializer.instance
+
+        if create_remote_object and integration_config:
+            try:
+                logger.info(
+                    "Creating remote object for Applied Control",
+                    applied_control_id=instance.id,
+                    integration_config_id=integration_config.id,
+                )
+                sync_object_to_integrations.schedule(
+                    args=(
+                        ContentType.objects.get_for_model(self.model),
+                        serializer.instance.id,
+                        [integration_config.id],
+                        ["name", "description", "status", "priority"],
+                    ),
+                    delay=1,  # Small delay to ensure transaction is committed
+                )
+
+            except Exception:
+                logger.error(
+                    "Error creating remote object for Applied Control",
+                    applied_control_id=instance.id,
+                    exc_info=True,
+                )
+
     def perform_update(self, serializer):
-        ic(serializer.validated_data)
         integration_config = serializer.validated_data.pop("integration_config", None)
         remote_object_id = serializer.validated_data.pop("remote_object_id", None)
+        serializer.validated_data.pop("create_remote_object")  # Remove if present
+
+        super().perform_update(serializer)
         if not integration_config or not remote_object_id:
-            return super().perform_update(serializer)
+            return
         try:
-            logger.info(
-                "Attaching applied control to external object",
-                applied_control_id=serializer.instance.id,
-                remote_id=remote_object_id,
-            )
-            sync_mapping = SyncMapping.objects.create(
-                configuration=integration_config,
-                content_type=ContentType.objects.get_for_model(self.model),
-                local_object_id=serializer.instance.id,
-                remote_id=remote_object_id,
-                sync_status=SyncMapping.SyncStatus.PENDING,
-            )
-            sync_object_to_integrations.schedule(
-                args=(
-                    sync_mapping.content_type,
-                    serializer.instance.id,
-                    [integration_config.id],
-                    ["status"],
-                ),
-                delay=1,  # Small delay to ensure transaction is committed
-            )
+            if remote_object_id:
+                logger.info(
+                    "Attaching applied control to external object",
+                    applied_control_id=serializer.instance.id,
+                    remote_id=remote_object_id,
+                )
+                sync_mapping = SyncMapping.objects.create(
+                    configuration=integration_config,
+                    content_type=ContentType.objects.get_for_model(self.model),
+                    local_object_id=serializer.instance.id,
+                    remote_id=remote_object_id,
+                    sync_status=SyncMapping.SyncStatus.PENDING,
+                )
+                sync_object_to_integrations.schedule(
+                    args=(
+                        sync_mapping.content_type,
+                        serializer.instance.id,
+                        [integration_config.id],
+                        ["status"],
+                    ),
+                    delay=1,  # Small delay to ensure transaction is committed
+                )
 
         except Exception:
             logger.error("Error creating SyncMapping", exc_info=True)

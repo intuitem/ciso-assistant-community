@@ -82,7 +82,7 @@ class JiraOrchestrator(BaseITSMOrchestrator):
         # Jira webhook event types
 
         if "issue_created" in event_type:
-            # For now, we don't create local objects from Jira
+            # NOTE: For now, we don't create local objects from Jira
             # This could be implemented if needed
             logger.info("Jira issue created", key=payload.get("issue", {}).get("key"))
             return True
