@@ -55,7 +55,10 @@
 			attachmentCache.set(cacheKey, result);
 			return result;
 		} catch (err) {
-			if ((err as any)?.name === 'AbortError') return attachment!;
+			if ((err as any)?.name === 'AbortError') {
+				const miss = { type: '', url: '', fileExists: false } satisfies Attachment;
+				return miss;
+			}
 			const miss = { type: '', url: '', fileExists: false } satisfies Attachment;
 			attachmentCache.set(cacheKey, miss);
 			return miss;
@@ -95,6 +98,10 @@
 		if (observer) {
 			observer.disconnect();
 		}
+		// Note: We do NOT revoke blob URLs here because the attachmentCache
+		// is shared across multiple components. The cache itself handles
+		// URL revocation when URLs are replaced or when cache.clear() is called.
+		// Revoking URLs here would break other components using the same attachment.
 	});
 
 	run(() => {
