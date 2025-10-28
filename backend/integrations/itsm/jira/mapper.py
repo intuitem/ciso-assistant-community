@@ -21,6 +21,18 @@ class JiraFieldMapper(BaseFieldMapper):
         "eta": "fields.duedate",
     }
 
+    # Field thats can be pulled/pushed and their associated operations
+    # E.g. an applied control's name will be pulled from Jira on create only,
+    # for update operations, the applied control will retail its name.
+    # However, its status will be pulled on both create and update operations.
+    FIELD_MAPPINGS_OPERATIONS = {
+        "name": {"pull": {"create"}, "push": {"create", "update"}},
+        "description": {"pull": {"create"}, "push": {"create", "update"}},
+        "status": {"pull": {"create", "update"}, "push": {"create", "update"}},
+        "priority": {"pull": {"create", "update"}, "push": {"create", "update"}},
+        "eta": {"pull": {"create", "update"}, "push": {"create", "update"}},
+    }
+
     # Status mappings
 
     STATUS_MAP_FROM_JIRA = {
@@ -48,17 +60,41 @@ class JiraFieldMapper(BaseFieldMapper):
         "Lowest": 4,
     }
 
+    def get_allowed_fields(self, direction: str, operation: str) -> set[str]:
+        """Get allowed fields for a given sync direction and operation."""
+        allowed = set()
+        for field, ops in self.FIELD_MAPPINGS_OPERATIONS.items():
+            if operation in ops.get(direction, set()):
+                allowed.add(field)
+        return allowed
+
     def to_remote(self, local_object: models.Model) -> dict[str, Any]:
         """Convert local object to remote format, stripping 'fields.' prefix."""
-        remote_data_nested = super().to_remote(local_object)
-        return self._strip_fields_prefix(remote_data_nested)
+        allowed_fields = self.get_allowed_fields("push", "create")
+        remote_data = {}
+        for local_field, remote_field in self._get_mappings().items():
+            if local_field in allowed_fields:
+                value = self._get_local_value(local_object, local_field)
+                if value is not None:
+                    transformed = self._transform_value_to_remote(local_field, value)
+                    if transformed is not None:
+                        remote_data[remote_field] = transformed
+        return self._strip_fields_prefix(remote_data)
 
     def to_remote_partial(
         self, local_object: models.Model, changed_fields: list[str]
     ) -> dict[str, Any]:
         """Convert changed fields to remote format, stripping 'fields.' prefix."""
-        remote_data_nested = super().to_remote_partial(local_object, changed_fields)
+        allowed_fields = self.get_allowed_fields("push", "update")
+        fields_to_convert = [f for f in changed_fields if f in allowed_fields]
+        remote_data_nested = super().to_remote_partial(local_object, fields_to_convert)
         return self._strip_fields_prefix(remote_data_nested)
+
+    def to_local(self, remote_data: dict[str, Any]) -> dict[str, Any]:
+        """Convert remote data to local format"""
+        allowed_fields = self.get_allowed_fields("pull", "update")
+        local_data = super().to_local(remote_data)
+        return {k: v for k, v in local_data.items() if k in allowed_fields}
 
     def _strip_fields_prefix(self, data: dict[str, Any]) -> dict[str, Any]:
         """Helper to remove 'fields.' prefix from keys for outgoing updates."""
@@ -94,6 +130,24 @@ class JiraFieldMapper(BaseFieldMapper):
             elif hasattr(value, "isoformat"):
                 return value.isoformat()
             return str(value)
+
+        elif field == "description":
+            # Convert to Atlassian Document Format (ADF)
+            return {
+                "type": "doc",
+                "version": 1,
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": str(value),
+                            }
+                        ],
+                    }
+                ],
+            }
 
         return value
 
