@@ -6676,10 +6676,6 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 auditlog.register(
-    Folder,
-    exclude_fields=common_exclude,
-)
-auditlog.register(
     Perimeter,
     exclude_fields=common_exclude,
 )
@@ -6706,6 +6702,34 @@ auditlog.register(
 )
 auditlog.register(
     TimelineEntry,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Terminology,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    EvidenceRevision,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OrganisationIssue,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OrganisationObjective,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Campaign,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TaskNode,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TaskTemplate,
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete
