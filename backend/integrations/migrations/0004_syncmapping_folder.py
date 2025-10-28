@@ -6,16 +6,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('iam', '0016_folder_filtering_labels'),
-        ('integrations', '0003_alter_syncmapping_last_sync_direction'),
+        ("iam", "0016_folder_filtering_labels"),
+        ("integrations", "0003_alter_syncmapping_last_sync_direction"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='syncmapping',
-            name='folder',
-            field=models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder'),
+            model_name="syncmapping",
+            name="folder",
+            field=models.ForeignKey(
+                default=iam.models.Folder.get_root_folder_id,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="%(class)s_folder",
+                to="iam.folder",
+            ),
         ),
     ]
