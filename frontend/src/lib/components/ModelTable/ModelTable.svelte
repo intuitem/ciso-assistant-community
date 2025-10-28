@@ -728,7 +728,7 @@
 							>
 								<Anchor
 									href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
-									class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
+									class="flex items-center w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
 									>{m.edit()}</Anchor
 								>
 							</ContextMenu.Item>
@@ -737,7 +737,7 @@
 							>
 								<Anchor
 									href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`}
-									class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
+									class="flex items-center w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
 									>{m.view()}</Anchor
 								>
 							</ContextMenu.Item>
