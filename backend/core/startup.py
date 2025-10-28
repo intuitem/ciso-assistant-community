@@ -934,6 +934,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_integrationconfiguration",
     "change_integrationconfiguration",
     "delete_integrationconfiguration",
+    "add_syncmapping",
+    "view_syncmapping",
+    "change_syncmapping",
+    "delete_syncmapping",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
