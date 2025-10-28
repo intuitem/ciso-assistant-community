@@ -13,9 +13,7 @@ export const DELETE: RequestHandler = async ({ fetch, params }) => {
 	if (!res.ok) {
 		error(res.status as NumericRange<400, 599>, await res.text());
 	}
-	const data = await res.json();
-
-	return new Response(JSON.stringify(data), {
+	return new Response(null, {
 		status: res.status,
 		headers: {
 			'Content-Type': 'application/json'

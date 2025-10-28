@@ -44,6 +44,8 @@
 	// Declare form store at top level
 	const formStore = form.form;
 
+	let syncMappings: Record<string, any>[] = $state(page.data?.object?.sync_mappings ?? []);
+
 	// Update currency when form data changes
 	$effect(() => {
 		const costData = $formStore.cost;
@@ -72,8 +74,6 @@
 			});
 		}
 	});
-
-	$inspect(page.data);
 </script>
 
 {#if !duplicate}
@@ -346,14 +346,14 @@
 		icon="fa-solid fa-plug"
 		header={m.integrations()}
 	>
-		{#if !page.data.object?.sync_mappings}
+		{#if !syncMappings.length}
 			<AutocompleteSelect
 				{form}
 				optionsEndpoint="settings/integrations/configs?provider__provider_type=itsm"
 				optionsLabelField="provider"
 				field="integration_config"
-				helpText="m.integrationHelpText()"
-				label="m.integration()"
+				helpText={m.integrationProviderHelpText()}
+				label={m.integrationProvider()}
 			/>
 			{#if $formStore.integration_config}
 				{#if context === 'edit'}
@@ -368,8 +368,8 @@
 								position: 'prefix'
 							}}
 							field="remote_object_id"
-							helpText="m.remoteObjectHelpText()"
-							label="m.remoteObject()"
+							helpText={m.remoteObjectHelpText()}
+							label={m.remoteObject()}
 						/>
 					{/key}
 				{/if}
@@ -383,7 +383,7 @@
 				{/if}
 			{/if}
 		{:else}
-			{#each page.data.object?.sync_mappings as syncMapping}
+			{#each syncMappings as syncMapping}
 				<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
 					<span class="flex flex-row justify-between items-center">
 						<h3 class="font-semibold text-secondary-800 mb-2">
@@ -398,7 +398,7 @@
 									method: 'DELETE'
 								});
 								if (response.ok) {
-									page.data.object.sync_mappings = page.data.object.sync_mappings.filter(
+									syncMappings = syncMappings.filter(
 										(mapping: Record<string, any>) => mapping.id !== syncMapping.id
 									);
 								} else {

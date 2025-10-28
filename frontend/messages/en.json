@@ -2564,5 +2564,9 @@
 	"syncedWith": "Synced with {integrationName}",
 	"remoteId": "Remote ID",
 	"lastSynced": "Last synced",
-	"deleteSyncMapping": "Delete sync mapping"
+	"deleteSyncMapping": "Delete sync mapping",
+	"integrationProvider": "Integration provider",
+	"integrationProviderHelpText": "Select the integration provider to configure object-level sync",
+	"remoteObject": "Remote object",
+	"remoteObjectHelpText": "Select the remote object to sync with"
 }
