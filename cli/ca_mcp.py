@@ -41,7 +41,9 @@ async def get_risk_scenarios():
     }
     # Get evidence ID by name
     url = f"{API_URL}/risk-scenarios/"
-    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    res = requests.get(
+        url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+    )
     data = res.json()
     if res.status_code != 200:
         rprint(f"Error: check credentials or filename.", file=sys.stderr)
@@ -70,7 +72,9 @@ async def get_applied_controls():
     }
     # Get evidence ID by name
     url = f"{API_URL}/applied-controls/"
-    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    res = requests.get(
+        url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+    )
     data = res.json()
     if res.status_code != 200:
         rprint(f"Error: check credentials or filename.", file=sys.stderr)
@@ -153,7 +157,9 @@ async def get_audits_progress():
     }
     # Get evidence ID by name
     url = f"{API_URL}/compliance-assessments/"
-    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    res = requests.get(
+        url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+    )
     data = res.json()
     if res.status_code != 200:
         rprint(f"Error: check credentials or filename.", file=sys.stderr)
@@ -188,7 +194,9 @@ async def get_all_audits_with_metrics():
 
         # Get all compliance assessments
         url = f"{API_URL}/compliance-assessments/"
-        res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+        res = requests.get(
+            url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+        )
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
 
@@ -207,7 +215,9 @@ async def get_all_audits_with_metrics():
 
         # Fetch requirement assessments for all audits
         url = f"{API_URL}/requirement-assessments/"
-        res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+        res = requests.get(
+            url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+        )
         if res.status_code != 200:
             return f"Error fetching requirements: HTTP {res.status_code} - {res.text}"
 
@@ -224,11 +234,19 @@ async def get_all_audits_with_metrics():
         # Group requirements by compliance assessment
         req_by_audit = {}
         for req in all_requirements:
-            audit_id = req.get("compliance_assessment")
-            if audit_id:
-                if audit_id not in req_by_audit:
-                    req_by_audit[audit_id] = []
-                req_by_audit[audit_id].append(req)
+            # compliance_assessment is returned as an object with id, name, etc.
+            compliance_assessment = req.get("compliance_assessment")
+            if compliance_assessment:
+                # Extract the ID from the compliance_assessment object
+                audit_id = (
+                    compliance_assessment.get("id")
+                    if isinstance(compliance_assessment, dict)
+                    else compliance_assessment
+                )
+                if audit_id:
+                    if audit_id not in req_by_audit:
+                        req_by_audit[audit_id] = []
+                    req_by_audit[audit_id].append(req)
 
         # Build summary for each audit
         result = "# All Compliance Assessments - Summary\n\n"
@@ -318,7 +336,9 @@ async def get_audit_gap_analysis(audit_name: str):
 
     # First, find the compliance assessment by name
     url = f"{API_URL}/compliance-assessments/"
-    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    res = requests.get(
+        url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+    )
     if res.status_code != 200:
         rprint(f"Error: check credentials.", file=sys.stderr)
         return "Error: Unable to fetch audits"
@@ -336,7 +356,13 @@ async def get_audit_gap_analysis(audit_name: str):
     # Get requirement assessments for this compliance assessment
     url = f"{API_URL}/requirement-assessments/"
     params = {"compliance_assessment": audit["id"]}
-    res = requests.get(url, headers=headers, params=params, verify=VERIFY_CERTIFICATE)
+    res = requests.get(
+        url,
+        headers=headers,
+        params=params,
+        verify=VERIFY_CERTIFICATE,
+        timeout=HTTP_TIMEOUT,
+    )
 
     if res.status_code != 200:
         rprint(f"Error: Unable to fetch requirement assessments.", file=sys.stderr)
@@ -848,7 +874,9 @@ async def get_folders():
         }
 
         url = f"{API_URL}/folders/"
-        res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+        res = requests.get(
+            url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+        )
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -897,7 +925,9 @@ async def get_perimeters():
         }
 
         url = f"{API_URL}/perimeters/"
-        res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+        res = requests.get(
+            url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+        )
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -943,7 +973,9 @@ async def get_risk_matrices():
         }
 
         url = f"{API_URL}/risk-matrices/"
-        res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+        res = requests.get(
+            url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+        )
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -990,7 +1022,9 @@ async def get_risk_assessments():
         }
 
         url = f"{API_URL}/risk-assessments/"
-        res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+        res = requests.get(
+            url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+        )
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -1027,6 +1061,56 @@ async def get_risk_assessments():
 
 
 @mcp.tool()
+async def get_threats():
+    """Get all threats in CISO Assistant
+    Returns a list of threats with their IDs, names, providers, and descriptions
+    """
+    try:
+        headers = {
+            "Authorization": f"Token {TOKEN}",
+        }
+
+        url = f"{API_URL}/threats/"
+        res = requests.get(
+            url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+        )
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        data = res.json()
+
+        # Handle both paginated and non-paginated responses
+        if isinstance(data, dict) and "results" in data:
+            threats = data["results"]
+        elif isinstance(data, list):
+            threats = data
+        else:
+            return f"Error: Unexpected response format: {type(data)}"
+
+        if not threats:
+            return "No threats found"
+
+        result = "# Threats\n\n"
+        result += f"Total: {len(threats)}\n\n"
+        result += "|ID|Name|Provider|Description|Folder|\n"
+        result += "|---|---|---|---|---|\n"
+
+        for threat in threats:
+            threat_id = threat.get("id", "N/A")
+            name = threat.get("name", "N/A")
+            provider = threat.get("provider", "N/A")
+            description = threat.get("description") or ""
+            folder = (threat.get("folder") or {}).get("str", "N/A")
+
+            result += f"|{threat_id}|{name}|{provider}|{description}|{folder}|\n"
+
+        return result
+    except Exception as e:
+        return f"Error in get_threats: {str(e)}"
+
+
+@mcp.tool()
 async def get_assets():
     """Get all assets in CISO Assistant
     Returns a list of assets with their IDs, names, types, and other details
@@ -1037,7 +1121,9 @@ async def get_assets():
         }
 
         url = f"{API_URL}/assets/"
-        res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+        res = requests.get(
+            url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+        )
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -1084,7 +1170,9 @@ async def get_incidents():
         }
 
         url = f"{API_URL}/incidents/"
-        res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+        res = requests.get(
+            url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+        )
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -1131,7 +1219,9 @@ async def get_security_exceptions():
         }
 
         url = f"{API_URL}/security-exceptions/"
-        res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+        res = requests.get(
+            url, headers=headers, verify=VERIFY_CERTIFICATE, timeout=HTTP_TIMEOUT
+        )
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -1306,7 +1396,11 @@ async def create_asset(
 
         url = f"{API_URL}/assets/"
         res = requests.post(
-            url, headers=headers, json=payload, verify=VERIFY_CERTIFICATE
+            url,
+            headers=headers,
+            json=payload,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
         )
 
         if res.status_code == 201:
@@ -1316,6 +1410,69 @@ async def create_asset(
             return f"Error creating asset: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_asset: {str(e)}"
+
+
+@mcp.tool()
+async def create_threat(
+    name: str,
+    description: str = "",
+    provider: str = "",
+    ref_id: str = "",
+    folder_id: str = None,
+) -> str:
+    """Create a new threat in CISO Assistant
+
+    Args:
+        name: Name of the threat
+        description: Optional description of the threat
+        provider: Optional provider/source of the threat (e.g., "MITRE ATT&CK", "Custom")
+        ref_id: Optional reference ID for the threat
+        folder_id: Optional folder/domain ID or name where to create the threat (can use folder name instead of UUID)
+    """
+    try:
+        headers = {
+            "Authorization": f"Token {TOKEN}",
+            "Content-Type": "application/json",
+        }
+
+        # If no folder specified, try to get the default folder
+        if not folder_id and GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        # Resolve folder name to ID if needed
+        if folder_id:
+            folder_id = resolve_folder_id(folder_id)
+
+        payload = {
+            "name": name,
+            "description": description,
+        }
+
+        if provider:
+            payload["provider"] = provider
+
+        if ref_id:
+            payload["ref_id"] = ref_id
+
+        if folder_id:
+            payload["folder"] = folder_id
+
+        url = f"{API_URL}/threats/"
+        res = requests.post(
+            url,
+            headers=headers,
+            json=payload,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+        )
+
+        if res.status_code == 201:
+            threat = res.json()
+            return f"✅ Threat created successfully: {threat.get('name')} (ID: {threat.get('id')})"
+        else:
+            return f"Error creating threat: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_threat: {str(e)}"
 
 
 @mcp.tool()
@@ -1417,7 +1574,11 @@ async def update_asset(
 
         url = f"{API_URL}/assets/{resolved_asset_id}/"
         res = requests.patch(
-            url, headers=headers, json=payload, verify=VERIFY_CERTIFICATE
+            url,
+            headers=headers,
+            json=payload,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
         )
 
         if res.status_code == 200:
