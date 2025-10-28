@@ -283,6 +283,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         queryset = self.model.objects.filter(id__in=object_ids_view)
         return queryset
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["action"] = self.action
+        return context
+
     def get_serializer_class(self, **kwargs):
         serializer_factory = SerializerFactory(
             self.serializers_module, MODULE_PATHS.get("serializers", [])

@@ -21,7 +21,7 @@ from django.contrib.auth.models import Permission
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
-from integrations.models import IntegrationConfiguration
+from integrations.models import IntegrationConfiguration, SyncMapping
 
 logger = structlog.get_logger(__name__)
 
@@ -894,6 +894,33 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
             return ""
         currency = self.get_currency(obj)
         return f"{annual_cost:,.2f} {currency}"
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if self.context["action"] == "retrieve":
+            sync_mappings = [
+                {
+                    "remote_id": mapping.remote_id,
+                    "sync_status": mapping.sync_status,
+                    "last_synced_at": mapping.last_synced_at,
+                    "last_sync_direction": mapping.last_sync_direction,
+                    "error_message": mapping.error_message,
+                    "provider": mapping.configuration.provider.name,
+                }
+                for mapping in SyncMapping.objects.filter(
+                    local_object_id=instance.id
+                ).only(
+                    "remote_id",
+                    "sync_status",
+                    "last_synced_at",
+                    "last_sync_direction",
+                    "error_message",
+                    "configuration__provider__name",
+                )
+            ]
+            if sync_mappings:
+                ret["sync_mappings"] = sync_mappings
+        return ret
 
 
 class ActionPlanSerializer(BaseModelSerializer):

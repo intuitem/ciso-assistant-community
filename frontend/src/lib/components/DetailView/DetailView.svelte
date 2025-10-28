@@ -276,6 +276,8 @@
 
 	let expandedTable = $state(false);
 	const MAX_ROWS = 10;
+
+	$inspect(data);
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -338,6 +340,24 @@
 
 	<!-- Main content area - modified to use conditional flex layout -->
 	<div class="card shadow-lg bg-white p-4">
+		{#each data.data?.sync_mappings as syncMapping}
+			<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
+				<h3 class="font-semibold text-secondary-800 mb-2">
+					{m.syncedWith({ integrationName: syncMapping.provider.toUpperCase() })}
+				</h3>
+
+				<dl class="grid grid-cols-1 gap-1 sm:grid-cols-2 text-secondary-700">
+					<dt class="font-medium">{m.remoteId()}</dt>
+					<dd>{syncMapping.remote_id}</dd>
+
+					<dt class="font-medium">{m.lastSynced()}</dt>
+					<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
+
+					<dt class="font-medium">{m.status()}</dt>
+					<dd>{safeTranslate(syncMapping.sync_status)}</dd>
+				</dl>
+			</div>
+		{/each}
 		<div class={hasWidgets ? 'flex flex-row flex-wrap gap-4' : 'w-full'}>
 			<!-- Left side - Details (conditional width) -->
 			<div
