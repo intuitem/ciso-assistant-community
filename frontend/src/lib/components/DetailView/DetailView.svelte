@@ -266,7 +266,24 @@
 		})
 	);
 
-	let group = $derived(relatedModels.length > 0 ? relatedModels[0][0] : undefined);
+	// Check URL hash for selected tab, otherwise use first tab
+	function getInitialTab(): string | undefined {
+		if (typeof window === 'undefined') return undefined;
+		const hash = window.location.hash.slice(1); // Remove the '#'
+		if (hash && relatedModels.some(([urlmodel]) => urlmodel === hash)) {
+			return hash;
+		}
+		return relatedModels.length > 0 ? relatedModels[0][0] : undefined;
+	}
+
+	let group = $state(getInitialTab());
+
+	// Update group when relatedModels change
+	$effect(() => {
+		if (!group && relatedModels.length > 0) {
+			group = getInitialTab();
+		}
+	});
 
 	function truncateString(str: string, maxLength: number = 50): string {
 		return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
@@ -649,7 +666,13 @@
 	<div class="card shadow-lg mt-8 bg-white">
 		<Tabs
 			value={group}
-			onValueChange={(e) => (group = e.value)}
+			onValueChange={(e) => {
+				group = e.value;
+				// Update URL hash to persist tab selection
+				if (typeof window !== 'undefined') {
+					window.location.hash = e.value;
+				}
+			}}
 			listJustify="justify-center"
 			listClasses="flex flex-wrap"
 		>
