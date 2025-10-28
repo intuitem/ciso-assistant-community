@@ -28,6 +28,7 @@ VERIFY_CERTIFICATE = os.getenv("VERIFY_CERTIFICATE", "true").lower() in (
     "yes",
     "on",
 )
+HTTP_TIMEOUT = 30  # seconds
 
 
 @mcp.tool()
@@ -86,6 +87,60 @@ async def get_applied_controls():
         + "\n|---|---|---|---|---|\n"
         + "\n".join(items)
     )
+
+
+@mcp.tool()
+async def get_business_impact_analyses():
+    """Get all Business Impact Analyses (BIAs) in CISO Assistant
+    Returns a list of BIAs with their status and basic information
+    """
+    try:
+        headers = {
+            "Authorization": f"Token {TOKEN}",
+        }
+
+        res = requests.get(
+            f"{API_URL}/resilience/business-impact-analysis/",
+            headers=headers,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+        )
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        data = res.json()
+
+        # Handle both paginated and non-paginated responses
+        if isinstance(data, dict) and "results" in data:
+            bias = data["results"]
+        elif isinstance(data, list):
+            bias = data
+        else:
+            return f"Error: Unexpected response format: {type(data)}"
+
+        if not bias:
+            return "No Business Impact Analyses found"
+
+        result = "# Business Impact Analyses\n\n"
+        result += f"Total: {len(bias)}\n\n"
+        result += "|ID|Name|Status|Version|Risk Matrix|Perimeter|Folder|\n"
+        result += "|---|---|---|---|---|---|---|\n"
+
+        for bia in bias:
+            bia_id = bia.get("id", "N/A")
+            name = bia.get("name", "N/A")
+            status = bia.get("status", "N/A")
+            version = bia.get("version", "N/A")
+            risk_matrix = (bia.get("risk_matrix") or {}).get("str", "N/A")
+            perimeter = (bia.get("perimeter") or {}).get("str", "N/A")
+            folder = (bia.get("folder") or {}).get("str", "N/A")
+
+            result += f"|{bia_id}|{name}|{status}|{version}|{risk_matrix}|{perimeter}|{folder}|\n"
+
+        return result
+    except Exception as e:
+        return f"Error in get_business_impact_analyses: {str(e)}"
 
 
 @mcp.tool()
@@ -371,8 +426,13 @@ def resolve_folder_id(folder_name_or_id: str) -> str:
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
-    url = f"{API_URL}/folders/?name={folder_name_or_id}"
-    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    res = requests.get(
+        f"{API_URL}/folders/",
+        headers=headers,
+        params={"name": folder_name_or_id},
+        verify=VERIFY_CERTIFICATE,
+        timeout=HTTP_TIMEOUT,
+    )
 
     if res.status_code != 200:
         raise ValueError(
@@ -405,8 +465,13 @@ def resolve_perimeter_id(perimeter_name_or_id: str) -> str:
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
-    url = f"{API_URL}/perimeters/?name={perimeter_name_or_id}"
-    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    res = requests.get(
+        f"{API_URL}/perimeters/",
+        headers=headers,
+        params={"name": perimeter_name_or_id},
+        verify=VERIFY_CERTIFICATE,
+        timeout=HTTP_TIMEOUT,
+    )
 
     if res.status_code != 200:
         raise ValueError(
@@ -439,8 +504,13 @@ def resolve_risk_matrix_id(matrix_name_or_id: str) -> str:
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
-    url = f"{API_URL}/risk-matrices/?name={matrix_name_or_id}"
-    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    res = requests.get(
+        f"{API_URL}/risk-matrices/",
+        headers=headers,
+        params={"name": matrix_name_or_id},
+        verify=VERIFY_CERTIFICATE,
+        timeout=HTTP_TIMEOUT,
+    )
 
     if res.status_code != 200:
         raise ValueError(
@@ -461,6 +531,57 @@ def resolve_risk_matrix_id(matrix_name_or_id: str) -> str:
     return matrices[0]["id"]
 
 
+def resolve_framework_id(framework_name_or_urn_or_id: str) -> str:
+    """Helper function to resolve framework name/URN to UUID
+    If already a UUID, returns it. If a name or URN, looks it up via API.
+    """
+    # Check if it's already a UUID
+    if "-" in framework_name_or_urn_or_id and len(framework_name_or_urn_or_id) == 36:
+        return framework_name_or_urn_or_id
+
+    # Otherwise, look up by name or URN
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+    }
+
+    # Try URN search first if it looks like a URN
+    if framework_name_or_urn_or_id.startswith("urn:"):
+        res = requests.get(
+            f"{API_URL}/frameworks/",
+            headers=headers,
+            params={"urn": framework_name_or_urn_or_id},
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+        )
+    else:
+        # Search by name
+        res = requests.get(
+            f"{API_URL}/frameworks/",
+            headers=headers,
+            params={"name": framework_name_or_urn_or_id},
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+        )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Failed to look up framework '{framework_name_or_urn_or_id}': HTTP {res.status_code}"
+        )
+
+    data = res.json()
+    frameworks = data.get("results", []) if isinstance(data, dict) else data
+
+    if not frameworks:
+        raise ValueError(f"Framework '{framework_name_or_urn_or_id}' not found")
+
+    if len(frameworks) > 1:
+        raise ValueError(
+            f"Multiple frameworks found with name '{framework_name_or_urn_or_id}'. Please use UUID or URN instead."
+        )
+
+    return frameworks[0]["id"]
+
+
 def resolve_risk_assessment_id(assessment_name_or_id: str) -> str:
     """Helper function to resolve risk assessment name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
@@ -473,8 +594,13 @@ def resolve_risk_assessment_id(assessment_name_or_id: str) -> str:
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
-    url = f"{API_URL}/risk-assessments/?name={assessment_name_or_id}"
-    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+    res = requests.get(
+        f"{API_URL}/risk-assessments/",
+        headers=headers,
+        params={"name": assessment_name_or_id},
+        verify=VERIFY_CERTIFICATE,
+        timeout=HTTP_TIMEOUT,
+    )
 
     if res.status_code != 200:
         raise ValueError(
@@ -493,6 +619,222 @@ def resolve_risk_assessment_id(assessment_name_or_id: str) -> str:
         )
 
     return assessments[0]["id"]
+
+
+@mcp.tool()
+async def get_stored_libraries(
+    object_type: str = None,
+    provider: str = None,
+):
+    """Get available libraries (frameworks) that can be imported into CISO Assistant
+
+    Args:
+        object_type: Optional filter by object type (e.g., "framework", "risk_matrix", "requirement_mapping_set")
+        provider: Optional filter by provider name
+
+    Returns a list of stored libraries with their URNs, names, versions, and descriptions.
+    Use the URN or ID to import a library with import_stored_library().
+    """
+    try:
+        headers = {
+            "Authorization": f"Token {TOKEN}",
+        }
+
+        params = {}
+        if object_type:
+            params["object_type"] = object_type
+        if provider:
+            params["provider"] = provider
+
+        res = requests.get(
+            f"{API_URL}/stored-libraries/",
+            headers=headers,
+            params=params,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+        )
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        data = res.json()
+
+        # Handle both paginated and non-paginated responses
+        if isinstance(data, dict) and "results" in data:
+            libraries = data["results"]
+        elif isinstance(data, list):
+            libraries = data
+        else:
+            return f"Error: Unexpected response format: {type(data)}"
+
+        if not libraries:
+            return "No stored libraries found"
+
+        result = "# Available Libraries (Not Yet Imported)\n\n"
+        result += f"Total: {len(libraries)}\n\n"
+        result += "|URN|Name|Version|Provider|Description|\n"
+        result += "|---|---|---|---|---|\n"
+
+        for lib in libraries:
+            urn = lib.get("urn", "N/A")
+            name = lib.get("name", "N/A")
+            version = lib.get("version", "N/A")
+            provider = lib.get("provider", "N/A")
+            description = lib.get("description") or ""
+
+            result += f"|{urn}|{name}|{version}|{provider}|{description}|\n"
+
+        result += f"\n**To import a library, use `import_stored_library(urn_or_id)`**"
+        return result
+    except Exception as e:
+        return f"Error in get_stored_libraries: {str(e)}"
+
+
+@mcp.tool()
+async def get_loaded_libraries():
+    """Get loaded/imported libraries (frameworks) in CISO Assistant
+
+    Returns a list of libraries that have already been imported and are available for use.
+    These are frameworks/libraries that have been activated in the system.
+    """
+    try:
+        headers = {
+            "Authorization": f"Token {TOKEN}",
+        }
+
+        res = requests.get(
+            f"{API_URL}/loaded-libraries/",
+            headers=headers,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+        )
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        data = res.json()
+
+        # Handle both paginated and non-paginated responses
+        if isinstance(data, dict) and "results" in data:
+            libraries = data["results"]
+        elif isinstance(data, list):
+            libraries = data
+        else:
+            return f"Error: Unexpected response format: {type(data)}"
+
+        if not libraries:
+            return "No loaded libraries found"
+
+        result = "# Loaded Libraries (Already Imported)\n\n"
+        result += f"Total: {len(libraries)}\n\n"
+        result += "|URN|Name|Version|Provider|Description|\n"
+        result += "|---|---|---|---|---|\n"
+
+        for lib in libraries:
+            urn = lib.get("urn", "N/A")
+            name = lib.get("name", "N/A")
+            version = lib.get("version", "N/A")
+            provider = lib.get("provider", "N/A")
+            description = lib.get("description") or ""
+
+            result += f"|{urn}|{name}|{version}|{provider}|{description}|\n"
+
+        return result
+    except Exception as e:
+        return f"Error in get_loaded_libraries: {str(e)}"
+
+
+@mcp.tool()
+async def import_stored_library(urn_or_id: str) -> str:
+    """Import a stored library (framework) into CISO Assistant
+
+    Args:
+        urn_or_id: URN or ID of the stored library to import (e.g., "urn:intuitem:risk:library:nist-csf-2.0")
+
+    This makes the library available for use (e.g., creating compliance assessments with the framework).
+    Use get_stored_libraries() to see available libraries.
+    """
+    try:
+        headers = {
+            "Authorization": f"Token {TOKEN}",
+            "Content-Type": "application/json",
+        }
+
+        res = requests.post(
+            f"{API_URL}/stored-libraries/{urn_or_id}/import/",
+            headers=headers,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+        )
+
+        if res.status_code == 200:
+            result = res.json()
+            if result.get("status") == "success":
+                return f"✅ Library imported successfully: {urn_or_id}"
+            else:
+                error = result.get("error", "Unknown error")
+                return f"Error importing library: {error}"
+        else:
+            return f"Error importing library: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in import_stored_library: {str(e)}"
+
+
+@mcp.tool()
+async def get_frameworks():
+    """Get all frameworks available in CISO Assistant
+
+    Returns a list of frameworks that have been imported/loaded and are available for creating compliance assessments.
+    Use this to find framework IDs/URNs/names for creating audits.
+    """
+    try:
+        headers = {
+            "Authorization": f"Token {TOKEN}",
+        }
+
+        res = requests.get(
+            f"{API_URL}/frameworks/",
+            headers=headers,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+        )
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        data = res.json()
+
+        # Handle both paginated and non-paginated responses
+        if isinstance(data, dict) and "results" in data:
+            frameworks = data["results"]
+        elif isinstance(data, list):
+            frameworks = data
+        else:
+            return f"Error: Unexpected response format: {type(data)}"
+
+        if not frameworks:
+            return "No frameworks found"
+
+        result = "# Frameworks\n\n"
+        result += f"Total: {len(frameworks)}\n\n"
+        result += "|ID|URN|Name|Description|Provider|Folder|\n"
+        result += "|---|---|---|---|---|---|\n"
+
+        for framework in frameworks:
+            framework_id = framework.get("id", "N/A")
+            urn = framework.get("urn", "N/A")
+            name = framework.get("name", "N/A")
+            description = framework.get("description") or ""
+            provider = framework.get("provider", "N/A")
+            folder = (framework.get("folder") or {}).get("str", "N/A")
+
+            result += (
+                f"|{framework_id}|{urn}|{name}|{description}|{provider}|{folder}|\n"
+            )
+
+        return result
+    except Exception as e:
+        return f"Error in get_frameworks: {str(e)}"
 
 
 @mcp.tool()
@@ -826,6 +1168,105 @@ async def get_security_exceptions():
 
 
 @mcp.tool()
+async def create_folder(
+    name: str,
+    description: str = "",
+    parent_folder_id: str = None,
+) -> str:
+    """Create a new folder (domain) in CISO Assistant
+
+    Args:
+        name: Name of the folder
+        description: Optional description of the folder
+        parent_folder_id: Optional parent folder ID or name (can use folder name instead of UUID)
+    """
+    try:
+        headers = {
+            "Authorization": f"Token {TOKEN}",
+            "Content-Type": "application/json",
+        }
+
+        payload = {
+            "name": name,
+            "description": description,
+        }
+
+        # Resolve parent folder name to ID if needed
+        if parent_folder_id:
+            parent_folder_id = resolve_folder_id(parent_folder_id)
+            payload["parent_folder"] = parent_folder_id
+
+        url = f"{API_URL}/folders/"
+        res = requests.post(
+            url,
+            headers=headers,
+            json=payload,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+        )
+
+        if res.status_code == 201:
+            folder = res.json()
+            return f"✅ Folder created successfully: {folder.get('name')} (ID: {folder.get('id')})"
+        else:
+            return f"Error creating folder: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_folder: {str(e)}"
+
+
+@mcp.tool()
+async def create_perimeter(
+    name: str,
+    description: str = "",
+    folder_id: str = None,
+) -> str:
+    """Create a new perimeter in CISO Assistant
+
+    Args:
+        name: Name of the perimeter
+        description: Optional description of the perimeter
+        folder_id: Optional folder/domain ID or name where to create the perimeter (can use folder name instead of UUID)
+    """
+    try:
+        headers = {
+            "Authorization": f"Token {TOKEN}",
+            "Content-Type": "application/json",
+        }
+
+        if not folder_id and GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        # Resolve folder name to ID if needed
+        if folder_id:
+            folder_id = resolve_folder_id(folder_id)
+
+        payload = {
+            "name": name,
+            "description": description,
+        }
+
+        if folder_id:
+            payload["folder"] = folder_id
+
+        url = f"{API_URL}/perimeters/"
+        res = requests.post(
+            url,
+            headers=headers,
+            json=payload,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+        )
+
+        if res.status_code == 201:
+            perimeter = res.json()
+            return f"✅ Perimeter created successfully: {perimeter.get('name')} (ID: {perimeter.get('id')})"
+        else:
+            return f"Error creating perimeter: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_perimeter: {str(e)}"
+
+
+@mcp.tool()
 async def create_asset(
     name: str,
     description: str = "",
@@ -906,8 +1347,13 @@ async def update_asset(
         resolved_asset_id = asset_id
         if not ("-" in asset_id and len(asset_id) == 36):
             # Look up by name
-            url = f"{API_URL}/assets/?name={asset_id}"
-            res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+            res = requests.get(
+                f"{API_URL}/assets/",
+                headers=headers,
+                params={"name": asset_id},
+                verify=VERIFY_CERTIFICATE,
+                timeout=HTTP_TIMEOUT,
+            )
             if res.status_code != 200:
                 return f"Error: Failed to look up asset '{asset_id}': HTTP {res.status_code}"
 
@@ -942,8 +1388,13 @@ async def update_asset(
                     resolved_parents.append(parent)
                 else:
                     # Look up by name
-                    url = f"{API_URL}/assets/?name={parent}"
-                    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+                    res = requests.get(
+                        f"{API_URL}/assets/",
+                        headers=headers,
+                        params={"name": parent},
+                        verify=VERIFY_CERTIFICATE,
+                        timeout=HTTP_TIMEOUT,
+                    )
                     if res.status_code != 200:
                         return f"Error: Failed to look up parent asset '{parent}': HTTP {res.status_code}"
 
@@ -1025,7 +1476,11 @@ async def create_applied_control(
 
         url = f"{API_URL}/applied-controls/"
         res = requests.post(
-            url, headers=headers, json=payload, verify=VERIFY_CERTIFICATE
+            url,
+            headers=headers,
+            json=payload,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
         )
 
         if res.status_code == 201:
@@ -1040,17 +1495,23 @@ async def create_applied_control(
 @mcp.tool()
 async def create_risk_assessment(
     name: str,
+    risk_matrix_id: str,
+    perimeter_id: str,
     description: str = "",
-    risk_matrix_id: str = None,
+    version: str = "1.0",
+    status: str = "planned",
     folder_id: str = None,
 ) -> str:
     """Create a new risk assessment in CISO Assistant
 
     Args:
         name: Name of the risk assessment
+        risk_matrix_id: ID or name of the risk matrix to use (can use risk matrix name instead of UUID; required)
+        perimeter_id: ID or name of the perimeter (scope) for this assessment (can use perimeter name instead of UUID; required)
         description: Optional description
-        risk_matrix_id: Optional ID or name of the risk matrix to use (can use risk matrix name instead of UUID)
-        folder_id: Optional folder/domain ID or name where to create the assessment (can use folder name instead of UUID)
+        version: Optional version string (defaults to "1.0")
+        status: Optional status - "planned", "in_progress", "in_review", "done", or "deprecated" (defaults to "planned")
+        folder_id: Optional folder/domain ID or name where to create the assessment (can use folder name instead of UUID; if not provided, inherits from perimeter)
     """
     try:
         headers = {
@@ -1058,31 +1519,38 @@ async def create_risk_assessment(
             "Content-Type": "application/json",
         }
 
-        if not folder_id and GLOBAL_FOLDER_ID:
-            folder_id = GLOBAL_FOLDER_ID
+        # Resolve risk matrix name to ID if needed
+        risk_matrix_id = resolve_risk_matrix_id(risk_matrix_id)
 
-        # Resolve folder name to ID if needed
+        # Resolve perimeter name to ID if needed
+        perimeter_id = resolve_perimeter_id(perimeter_id)
+
+        # Resolve folder name to ID if needed (optional)
         if folder_id:
             folder_id = resolve_folder_id(folder_id)
-
-        # Resolve risk matrix name to ID if needed
-        if risk_matrix_id:
-            risk_matrix_id = resolve_risk_matrix_id(risk_matrix_id)
+        elif GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
 
         payload = {
             "name": name,
+            "risk_matrix": risk_matrix_id,
+            "perimeter": perimeter_id,
             "description": description,
+            "version": version,
+            "status": status,
         }
 
+        # Folder is optional - if not provided, it inherits from perimeter
         if folder_id:
             payload["folder"] = folder_id
 
-        if risk_matrix_id:
-            payload["risk_matrix"] = risk_matrix_id
-
         url = f"{API_URL}/risk-assessments/"
         res = requests.post(
-            url, headers=headers, json=payload, verify=VERIFY_CERTIFICATE
+            url,
+            headers=headers,
+            json=payload,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
         )
 
         if res.status_code == 201:
@@ -1154,7 +1622,11 @@ async def create_risk_scenario(
 
         url = f"{API_URL}/risk-scenarios/"
         res = requests.post(
-            url, headers=headers, json=payload, verify=VERIFY_CERTIFICATE
+            url,
+            headers=headers,
+            json=payload,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
         )
 
         if res.status_code == 201:
@@ -1164,6 +1636,148 @@ async def create_risk_scenario(
             return f"Error creating risk scenario: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_risk_scenario: {str(e)}"
+
+
+@mcp.tool()
+async def create_business_impact_analysis(
+    name: str,
+    risk_matrix_id: str,
+    perimeter_id: str,
+    description: str = "",
+    version: str = "1.0",
+    status: str = "planned",
+    folder_id: str = None,
+) -> str:
+    """Create a new Business Impact Analysis (BIA) in CISO Assistant
+
+    Args:
+        name: Name of the BIA
+        risk_matrix_id: ID or name of the risk matrix to use (can use risk matrix name instead of UUID; required)
+        perimeter_id: ID or name of the perimeter (scope) for this BIA (can use perimeter name instead of UUID; required)
+        description: Optional description
+        version: Optional version string (defaults to "1.0")
+        status: Optional status - "planned", "in_progress", "in_review", "done", or "deprecated" (defaults to "planned")
+        folder_id: Optional folder/domain ID or name where to create the BIA (can use folder name instead of UUID; if not provided, inherits from perimeter)
+    """
+    try:
+        headers = {
+            "Authorization": f"Token {TOKEN}",
+            "Content-Type": "application/json",
+        }
+
+        # Resolve risk matrix name to ID if needed
+        risk_matrix_id = resolve_risk_matrix_id(risk_matrix_id)
+
+        # Resolve perimeter name to ID if needed
+        perimeter_id = resolve_perimeter_id(perimeter_id)
+
+        # Resolve folder name to ID if needed (optional)
+        if folder_id:
+            folder_id = resolve_folder_id(folder_id)
+        elif GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        payload = {
+            "name": name,
+            "risk_matrix": risk_matrix_id,
+            "perimeter": perimeter_id,
+            "description": description,
+            "version": version,
+            "status": status,
+        }
+
+        # Folder is optional - if not provided, it inherits from perimeter
+        if folder_id:
+            payload["folder"] = folder_id
+
+        url = f"{API_URL}/resilience/business-impact-analysis/"
+        res = requests.post(
+            url,
+            headers=headers,
+            json=payload,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+        )
+
+        if res.status_code == 201:
+            bia = res.json()
+            return f"✅ Business Impact Analysis created successfully: {bia.get('name')} (ID: {bia.get('id')})"
+        else:
+            return f"Error creating Business Impact Analysis: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_business_impact_analysis: {str(e)}"
+
+
+@mcp.tool()
+async def create_compliance_assessment(
+    name: str,
+    framework_id: str,
+    perimeter_id: str,
+    description: str = "",
+    version: str = "1.0",
+    status: str = "planned",
+    folder_id: str = None,
+) -> str:
+    """Create a new compliance assessment (audit) in CISO Assistant
+
+    Args:
+        name: Name of the compliance assessment
+        framework_id: ID, URN, or name of the framework to use (e.g., "ISO 27001" or "urn:intuitem:risk:library:iso27001-2022")
+        perimeter_id: ID or name of the perimeter (scope) for this assessment
+        description: Optional description of the assessment
+        version: Optional version string (defaults to "1.0")
+        status: Optional status - "planned", "in_progress", "in_review", "done", or "deprecated" (defaults to "planned")
+        folder_id: Optional folder/domain ID or name where to create the assessment (can use folder name instead of UUID; if not provided, inherits from perimeter)
+    """
+    try:
+        headers = {
+            "Authorization": f"Token {TOKEN}",
+            "Content-Type": "application/json",
+        }
+
+        # Resolve framework name/URN to ID if needed
+        framework_id = resolve_framework_id(framework_id)
+
+        # Resolve perimeter name to ID if needed
+        perimeter_id = resolve_perimeter_id(perimeter_id)
+
+        # Resolve folder name to ID if needed (optional)
+        if folder_id:
+            folder_id = resolve_folder_id(folder_id)
+        elif GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        payload = {
+            "name": name,
+            "framework": framework_id,
+            "perimeter": perimeter_id,
+            "description": description,
+            "version": version,
+            "status": status,
+        }
+
+        # Folder is optional - if not provided, it inherits from perimeter
+        if folder_id:
+            payload["folder"] = folder_id
+
+        url = f"{API_URL}/compliance-assessments/"
+        res = requests.post(
+            url,
+            headers=headers,
+            json=payload,
+            verify=VERIFY_CERTIFICATE,
+            timeout=HTTP_TIMEOUT,
+        )
+
+        if res.status_code == 201:
+            assessment = res.json()
+            return f"✅ Compliance assessment created successfully: {assessment.get('name')} (ID: {assessment.get('id')})"
+        else:
+            return (
+                f"Error creating compliance assessment: {res.status_code} - {res.text}"
+            )
+    except Exception as e:
+        return f"Error in create_compliance_assessment: {str(e)}"
 
 
 if __name__ == "__main__":
