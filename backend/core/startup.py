@@ -969,6 +969,7 @@ def startup(sender: AppConfig, **kwargs):
     from tprm.models import Entity
     from privacy.models import ProcessingNature
     from global_settings.models import GlobalSettings
+    from integrations.models import IntegrationProvider
 
     # first load in memory of the frameworks and mappings
     from core.mappings.engine import engine
@@ -1093,49 +1094,59 @@ def startup(sender: AppConfig, **kwargs):
     try:
         Terminology.create_default_qualifications()
     except Exception as e:
-        logger.error("Error creating default qualifications", exc_info=e)
+        logger.error("Error creating default qualifications", exc_info=True)
 
     # Create default accreditation status
     try:
         Terminology.create_default_accreditations_status()
     except Exception as e:
-        logger.error("Error creating default accreditation status", exc_info=e)
+        logger.error("Error creating default accreditation status", exc_info=True)
 
     # Create default accreditation category
     try:
         Terminology.create_default_accreditations_category()
     except Exception as e:
-        logger.error("Error creating default accreditation category", exc_info=e)
+        logger.error("Error creating default accreditation category", exc_info=True)
 
     # Create default Processing natures
     try:
         ProcessingNature.create_default_values()
     except Exception as e:
-        logger.error("Error creating default ProcessingNature", exc_info=e)
+        logger.error("Error creating default ProcessingNature", exc_info=True)
 
     # Create default AssetClass
     try:
         AssetClass.create_default_values()
     except Exception as e:
-        logger.error("Error creating default AssetClass", exc_info=e)
+        logger.error("Error creating default AssetClass", exc_info=True)
 
     # Create default AssetCapability
     try:
         AssetCapability.create_default_values()
     except Exception as e:
-        logger.error("Error creating default AssetCapability", exc_info=e)
+        logger.error("Error creating default AssetCapability", exc_info=True)
 
     # Create default Terminologies
     try:
         Terminology.create_default_roto_risk_origins()
     except Exception as e:
-        logger.error("Error creating default ROTO Risk Origins", exc_info=e)
+        logger.error("Error creating default ROTO Risk Origins", exc_info=True)
 
     # Create default Entity Relationships
     try:
         Terminology.create_default_entity_relationships()
     except Exception as e:
-        logger.error("Error creating default Entity Relationships", exc_info=e)
+        logger.error("Error creating default Entity Relationships", exc_info=True)
+
+    # Init integration providers
+
+    try:
+        IntegrationProvider.objects.get_or_create(
+            name="jira",
+            defaults={"provider_type": IntegrationProvider.ProviderType.ITSM},
+        )
+    except Exception as e:
+        logger.error("Error creating Jira IntegrationProvider", exc_info=True)
 
     call_command("storelibraries")
 
@@ -1149,7 +1160,7 @@ def startup(sender: AppConfig, **kwargs):
                 email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
             )
         except Exception as e:
-            logger.error("Error creating superuser", exc_info=e)
+            logger.error("Error creating superuser", exc_info=True)
 
     # add administrators group to superusers (for resiliency)
     administrators = UserGroup.objects.get(
