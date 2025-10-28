@@ -28,5 +28,10 @@ urlpatterns = [
         views.IntegrationWebhookView.as_view(),
         name="webhook-receiver",
     ),
+    path(
+        "sync-mappings/<uuid:pk>/",
+        views.SyncMappingDeleteView.as_view(),
+        name="sync-mapping-delete",
+    ),
     path("", include(router.urls)),
 ]

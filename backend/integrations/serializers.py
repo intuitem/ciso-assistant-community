@@ -5,7 +5,7 @@ from django.utils.crypto import get_random_string
 from rest_framework import serializers
 
 from iam.models import Folder
-from .models import IntegrationProvider, IntegrationConfiguration
+from .models import IntegrationProvider, IntegrationConfiguration, SyncMapping
 from .registry import IntegrationRegistry
 
 logger = structlog.get_logger(__name__)
@@ -174,12 +174,19 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
             )
 
         # Use the validation logic from your registry
-        is_valid, errors = IntegrationRegistry.validate_configuration(
-            config.provider.name, config_data
-        )
-
         if not is_valid:
             # Raise a validation error that DRF can render nicely
             raise serializers.ValidationError({"provider_specific_errors": errors})
 
         return data
+
+
+class SyncMappingSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the SyncMapping model, used for deletion.
+    """
+
+    class Meta:
+        model = SyncMapping
+        fields = ["id", "local_object_id", "remote_id", "sync_status"]
+        read_only_fields = fields

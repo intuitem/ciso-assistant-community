@@ -14,15 +14,19 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from integrations.models import IntegrationConfiguration, IntegrationProvider
-from integrations.tasks import process_webhook_event
-
-from .registry import IntegrationRegistry
-from .serializers import (
+from integrations.models import (
+    IntegrationConfiguration,
+    IntegrationProvider,
+    SyncMapping,
+)
+from integrations.registry import IntegrationRegistry
+from integrations.serializers import (
     ConnectionTestSerializer,
     IntegrationConfigurationSerializer,
     IntegrationProviderSerializer,
+    SyncMappingSerializer,
 )
+from integrations.tasks import process_webhook_event
 
 logger = structlog.get_logger(__name__)
 
@@ -260,3 +264,19 @@ class IntegrationWebhookView(View):
             f"Webhook event '{event_type}' for config {config_id} accepted (signature validated)."
         )
         return HttpResponse(status=202)
+
+
+class SyncMappingDeleteView(generics.DestroyAPIView):
+    """
+    An API endpoint to delete a SyncMapping.
+    """
+
+    serializer_class = SyncMappingSerializer
+
+    def get_queryset(self):
+        """
+        **PLACEHOLDER FOR PERMISSIONS**:
+        This is where you would filter the mappings based on the
+        requesting user's access.
+        """
+        return SyncMapping.objects.all()
