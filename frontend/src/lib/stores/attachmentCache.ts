@@ -32,8 +32,11 @@ function createAttachmentCache() {
 		 */
 		set: (key: string, value: CachedAttachment) => {
 			update((cache) => {
-				cache[key] = value;
-				return cache;
+				const prev = cache[key];
+				if (prev?.url && prev.url !== value.url) {
+					URL.revokeObjectURL(prev.url);
+				}
+				return { ...cache, [key]: value };
 			});
 		},
 		/**

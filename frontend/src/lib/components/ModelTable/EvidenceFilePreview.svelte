@@ -37,19 +37,29 @@
 		}
 
 		// Fetch from server if not in cache
-		const res = await fetch(
-			`/${meta.evidence ? 'evidence-revisions' : 'evidences'}/${meta.id}/attachment`
-		);
-		const blob = await res.blob();
-		const result = {
-			type: blob.type,
-			url: URL.createObjectURL(blob),
-			fileExists: res.ok
-		};
-
-		// Store in cache
-		attachmentCache.set(cacheKey, result);
-		return result;
+		try {
+			const res = await fetch(
+				`/${meta.evidence ? 'evidence-revisions' : 'evidences'}/${meta.id}/attachment`
+			);
+			if (!res.ok) {
+				const miss = { type: '', url: '', fileExists: false } satisfies Attachment;
+				attachmentCache.set(cacheKey, miss);
+				return miss;
+			}
+			const blob = await res.blob();
+			const result = {
+				type: blob.type,
+				url: URL.createObjectURL(blob),
+				fileExists: true
+			} satisfies Attachment;
+			attachmentCache.set(cacheKey, result);
+			return result;
+		} catch (err) {
+			if ((err as any)?.name === 'AbortError') return attachment!;
+			const miss = { type: '', url: '', fileExists: false } satisfies Attachment;
+			attachmentCache.set(cacheKey, miss);
+			return miss;
+		}
 	};
 
 	let mounted = $state(false);
