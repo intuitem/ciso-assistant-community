@@ -5,7 +5,7 @@ from core.base_models import AbstractBaseModel
 from iam.models import FolderMixin
 
 
-class IntegrationProvider(AbstractBaseModel):
+class IntegrationProvider(AbstractBaseModel, FolderMixin):
     """Registry of available integration types"""
 
     class ProviderType(models.TextChoices):
@@ -42,7 +42,7 @@ class IntegrationConfiguration(AbstractBaseModel, FolderMixin):
         unique_together = ["provider", "folder"]
 
 
-class SyncMapping(AbstractBaseModel):
+class SyncMapping(AbstractBaseModel, FolderMixin):
     """Maps local objects to remote objects"""
 
     class SyncStatus(models.TextChoices):
