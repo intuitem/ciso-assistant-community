@@ -13,6 +13,8 @@
 	import { onMount } from 'svelte';
 	import { run } from 'svelte/legacy';
 	import { page } from '$app/state';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { getLocale } from '$paraglide/runtime';
 
 	let displayCurrency = $state(page.data?.settings?.currency ?? '€'); // Default to Euro
 
@@ -71,7 +73,7 @@
 		}
 	});
 
-	$inspect(context);
+	$inspect(page.data);
 </script>
 
 {#if !duplicate}
@@ -344,40 +346,82 @@
 		icon="fa-solid fa-plug"
 		header={m.integrations()}
 	>
-		<AutocompleteSelect
-			{form}
-			optionsEndpoint="settings/integrations/configs?provider__provider_type=itsm"
-			optionsLabelField="provider"
-			field="integration_config"
-			helpText="m.integrationHelpText()"
-			label="m.integration()"
-		/>
-		{#if $formStore.integration_config}
-			{#if context === 'edit'}
-				{#key $formStore.integration_config}
-					<AutocompleteSelect
+		{#if !page.data.object?.sync_mappings}
+			<AutocompleteSelect
+				{form}
+				optionsEndpoint="settings/integrations/configs?provider__provider_type=itsm"
+				optionsLabelField="provider"
+				field="integration_config"
+				helpText="m.integrationHelpText()"
+				label="m.integration()"
+			/>
+			{#if $formStore.integration_config}
+				{#if context === 'edit'}
+					{#key $formStore.integration_config}
+						<AutocompleteSelect
+							{form}
+							optionsEndpoint="settings/integrations/configs/{$formStore.integration_config}/remote-objects"
+							optionsLabelField="summary"
+							optionsValueField="key"
+							optionsInfoFields={{
+								fields: [{ field: 'key' }],
+								position: 'prefix'
+							}}
+							field="remote_object_id"
+							helpText="m.remoteObjectHelpText()"
+							label="m.remoteObject()"
+						/>
+					{/key}
+				{/if}
+				{#if context === 'create'}
+					<Checkbox
 						{form}
-						optionsEndpoint="settings/integrations/configs/{$formStore.integration_config}/remote-objects"
-						optionsLabelField="summary"
-						optionsValueField="key"
-						optionsInfoFields={{
-							fields: [{ field: 'key' }],
-							position: 'prefix'
-						}}
-						field="remote_object_id"
-						helpText="m.remoteObjectHelpText()"
-						label="m.remoteObject()"
+						field="create_remote_object"
+						label="m.createRemoteObject()"
+						helpText="m.createRemoteObjectHelpText()"
 					/>
-				{/key}
+				{/if}
 			{/if}
-			{#if context === 'create'}
-				<Checkbox
-					{form}
-					field="create_remote_object"
-					label="m.createRemoteObject()"
-					helpText="m.createRemoteObjectHelpText()"
-				/>
-			{/if}
+		{:else}
+			{#each page.data.object?.sync_mappings as syncMapping}
+				<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
+					<span class="flex flex-row justify-between items-center">
+						<h3 class="font-semibold text-secondary-800 mb-2">
+							{m.syncedWith({ integrationName: syncMapping.provider.toUpperCase() })}
+						</h3>
+						<button
+							class="text-secondary-500 hover:text-secondary-700"
+							type="button"
+							aria-label={m.deleteSyncMapping()}
+							onclick={async () => {
+								const response = await fetch(`/sync-mappings/${syncMapping.id}`, {
+									method: 'DELETE'
+								});
+								if (response.ok) {
+									page.data.object.sync_mappings = page.data.object.sync_mappings.filter(
+										(mapping: Record<string, any>) => mapping.id !== syncMapping.id
+									);
+								} else {
+									console.error('Failed to delete sync mapping');
+								}
+							}}
+						>
+							<i class="fa-solid fa-trash-can"></i>
+						</button></span
+					>
+
+					<dl class="grid grid-cols-1 gap-1 sm:grid-cols-2 text-secondary-700">
+						<dt class="font-medium">{m.remoteId()}</dt>
+						<dd>{syncMapping.remote_id}</dd>
+
+						<dt class="font-medium">{m.lastSynced()}</dt>
+						<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
+
+						<dt class="font-medium">{m.status()}</dt>
+						<dd>{safeTranslate(syncMapping.sync_status)}</dd>
+					</dl>
+				</div>
+			{/each}
 		{/if}
 	</Dropdown>
 {/if}

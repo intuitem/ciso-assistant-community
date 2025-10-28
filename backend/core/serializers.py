@@ -820,6 +820,32 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
 
         return updated_instance
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        sync_mappings = [
+            {
+                "id": mapping.id,
+                "remote_id": mapping.remote_id,
+                "sync_status": mapping.sync_status,
+                "last_synced_at": mapping.last_synced_at,
+                "last_sync_direction": mapping.last_sync_direction,
+                "error_message": mapping.error_message,
+                "provider": mapping.configuration.provider.name,
+            }
+            for mapping in SyncMapping.objects.filter(local_object_id=instance.id).only(
+                "id",
+                "remote_id",
+                "sync_status",
+                "last_synced_at",
+                "last_sync_direction",
+                "error_message",
+                "configuration__provider__name",
+            )
+        ]
+        if sync_mappings:
+            ret["sync_mappings"] = sync_mappings
+        return ret
+
     def _send_assignment_notifications(self, applied_control, owner_ids):
         """Send assignment notifications to the specified owners"""
         if not owner_ids:
@@ -900,6 +926,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         if self.context["action"] == "retrieve":
             sync_mappings = [
                 {
+                    "id": mapping.id,
                     "remote_id": mapping.remote_id,
                     "sync_status": mapping.sync_status,
                     "last_synced_at": mapping.last_synced_at,
@@ -910,6 +937,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
                 for mapping in SyncMapping.objects.filter(
                     local_object_id=instance.id
                 ).only(
+                    "id",
                     "remote_id",
                     "sync_status",
                     "last_synced_at",

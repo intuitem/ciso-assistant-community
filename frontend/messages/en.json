@@ -2563,5 +2563,6 @@
 	"conflict": "Conflict",
 	"syncedWith": "Synced with {integrationName}",
 	"remoteId": "Remote ID",
-	"lastSynced": "Last synced"
+	"lastSynced": "Last synced",
+	"deleteSyncMapping": "Delete sync mapping"
 }
