@@ -43,7 +43,7 @@
 		dataType: 'json',
 		invalidateAll,
 		applyAction: true,
-		resetForm: true,
+		resetForm: false,
 		validators: zod(schema),
 		taintedMessage: true,
 		validationMethod: 'auto'
@@ -57,6 +57,8 @@
 		loading: false,
 		success: undefined
 	});
+
+	$inspect(page.data);
 </script>
 
 {#key form}
@@ -145,8 +147,8 @@
 											email: $formStore.credentials.email,
 											api_token: $formStore.credentials.api_token
 										},
-										provider_id: page.data.config.provider_id,
-										configuration_id: page.data.config.id
+										provider: page.data.provider,
+										configuration_id: page.data?.config?.id
 									})
 								});
 								testConnectionState = { loading: false, success: response.ok };

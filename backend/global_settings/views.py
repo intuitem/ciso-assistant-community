@@ -112,11 +112,9 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             settings.save()
 
         enabled_integrations = (
-            IntegrationProvider.objects.filter(
-                is_active=True, configurations__isnull=False
-            )
+            IntegrationProvider.objects.filter(is_active=True)
             .distinct()
-            .values("provider_type", "name")
+            .values("id", "provider_type", "name", "configurations")
         )
         settings.value["enabled_integrations"] = list(enabled_integrations)
 

@@ -23,14 +23,32 @@ const schema = z.object({
 	})
 });
 
-export const load: PageServerLoad = async ({ fetch }) => {
+export const load: PageServerLoad = async ({ fetch, locals }) => {
 	const response = await fetch(`${BASE_API_URL}/integrations/configs/`);
 	let config = {};
 	if (response.ok) {
 		config = await response.json().then((res) => res.results[0]);
 	}
-	const form = await superValidate(config, zod(schema));
-	return { form, config, schema: JSON.stringify(schema), title: m.jiraIntegrationConfig() };
+	if (!config) {
+		const providerResponse = await fetch(`${BASE_API_URL}/integrations/providers/?name=jira`);
+		if (!providerResponse.ok) {
+			throw new Error('Failed to fetch Jira provider information');
+		}
+		const providerData = await providerResponse.json();
+		const provider = providerData.results[0];
+		config = {
+			folder_id: locals.user.root_folder_id,
+			provider_id: provider.id
+		};
+	}
+	const form = await superValidate(config, zod(schema), { errors: false });
+	return {
+		form,
+		config,
+		provider: 'jira',
+		schema: JSON.stringify(schema),
+		title: m.jiraIntegrationConfig()
+	};
 };
 
 export const actions: Actions = {

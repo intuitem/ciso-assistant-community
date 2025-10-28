@@ -28,9 +28,7 @@ class ConnectionTestSerializer(serializers.Serializer):
     This is not a ModelSerializer, so it doesn't save anything.
     """
 
-    provider_id = serializers.PrimaryKeyRelatedField(
-        queryset=IntegrationProvider.objects.filter(is_active=True), label="Provider ID"
-    )
+    provider = serializers.CharField(write_only=True)
     configuration_id = serializers.PrimaryKeyRelatedField(
         queryset=IntegrationConfiguration.objects.filter(is_active=True),
         label="Configuration ID",
@@ -44,29 +42,16 @@ class ConnectionTestSerializer(serializers.Serializer):
         """
         Use the IntegrationRegistry to validate provider-specific schema requirements.
         """
-        provider: IntegrationProvider = data.get(
-            "provider_id"
-        )  # This is the IntegrationProvider instance
-        config: IntegrationConfiguration = data.get(
-            "configuration_id"
-        )  # This is the IntegrationProvider instance
-
+        provider = data.get("provider")  # This is the IntegrationProvider instance
         # The full configuration dictionary to be validated
         config_data = {
             "credentials": data.get("credentials", {}),
             "settings": data.get("settings", {}),
         }
 
-        if not config_data["credentials"].get("api_token") and config:
-            config_data["credentials"]["api_token"] = config.credentials.get(
-                "api_token"
-            )
-
-        ic(config_data, config)
-
         # Use the validation logic from your registry
         is_valid, errors = IntegrationRegistry.validate_configuration(
-            provider.name, config_data
+            provider, config_data
         )
 
         if not is_valid:
@@ -161,6 +146,9 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
         Use the IntegrationRegistry to validate provider-specific schema requirements.
         """
         config: IntegrationConfiguration = self.instance
+        provider: IntegrationProvider = data.get(
+            "provider", config.provider if config else None
+        )
 
         # The full configuration dictionary to be validated
         config_data = {
@@ -172,6 +160,10 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
             config_data["credentials"]["api_token"] = config.credentials.get(
                 "api_token"
             )
+
+        is_valid, errors = IntegrationRegistry.validate_configuration(
+            provider.name, config_data
+        )
 
         # Use the validation logic from your registry
         if not is_valid:

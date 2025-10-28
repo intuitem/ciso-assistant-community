@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import { SSOSettingsSchema, GeneralSettingsSchema, FeatureFlagsSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
@@ -76,19 +77,15 @@
 										<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
 											<span class="flex flex-row justify-between text-xl">
 												<i class="text-blue-700 fab fa-jira"></i>
-												<i class="fa-solid fa-circle-check text-success-600-400"></i>
+												{#if page.data.settings?.enabled_integrations.filter((integration: Record<string, any>) => integration.name === 'jira' && integration.configurations)}
+													<i class="fa-solid fa-circle-check text-success-600-400"></i>
+												{/if}
 											</span>
 											<span class="flex flex-row space-x-2">
 												<h6 class="h6 base-font-color">{m.jira()}</h6>
 											</span>
-											<!-- <p class="text-sm text-surface-800 max-w-[50ch]"> -->
-											<!-- 	{m.authenticatorAppDescription()} -->
-											<!-- </p> -->
 										</div>
 									</a>
-									<!-- <div class="flex flex-wrap justify-between gap-2"> -->
-									<!-- 	<button class="btn preset-outlined-surface-500 w-fit">{m.disableTOTP()}</button> -->
-									<!-- </div> -->
 								</div>
 								<hr />
 							</dd>

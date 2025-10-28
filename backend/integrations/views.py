@@ -3,13 +3,14 @@ import hmac
 import json
 import uuid
 
+from django_filters.rest_framework import DjangoFilterBackend
 import structlog
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import generics, permissions, status, viewsets
+from rest_framework import filters, generics, permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -43,11 +44,11 @@ class ConnectionTestView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         validated_data = serializer.validated_data
-        provider = validated_data.get("provider_id")
+        provider = validated_data.get("provider")
 
         # Create a temporary, unsaved IntegrationConfiguration instance for the client
         temp_config = IntegrationConfiguration(
-            provider=provider,
+            provider=IntegrationProvider.objects.filter(name=provider).first(),
             credentials=validated_data.get("credentials"),
             settings=validated_data.get("settings", {}),
         )
@@ -74,7 +75,7 @@ class ConnectionTestView(APIView):
         except Exception as e:
             # An exception occurred, e.g., network error, invalid URL
             logger.error(
-                f"Test connection for provider {provider.name} raised an exception: {e}",
+                f"Test connection for provider {provider} raised an exception: {e}",
                 exc_info=True,
             )
             return Response(
@@ -90,6 +91,13 @@ class IntegrationProviderListView(generics.ListAPIView):
 
     queryset = IntegrationProvider.objects.filter(is_active=True)
     serializer_class = IntegrationProviderSerializer
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+
+    filterset_fields = ["provider_type", "name"]
 
 
 class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
