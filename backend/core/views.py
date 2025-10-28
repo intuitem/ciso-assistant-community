@@ -841,6 +841,10 @@ class AssetViewSet(BaseModelViewSet):
         nodes_idx = dict()
         categories = []
         N = 0
+        hide_domains = (
+            request.query_params.get("hide_domains", "false").lower() == "true"
+        )
+
         (viewable_folders, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
@@ -851,19 +855,24 @@ class AssetViewSet(BaseModelViewSet):
             user=request.user,
             object_type=Asset,
         )
+        # Build category index mapping first (key by UUID to avoid name collisions)
+        domain_to_category = {}
         for domain in Folder.objects.filter(id__in=viewable_folders):
             categories.append({"name": domain.name})
-            nodes_idx[domain.name] = N
-            nodes.append(
-                {
-                    "name": domain.name,
-                    "category": N,
-                    "symbol": "roundRect",
-                    "symbolSize": 30,
-                    "value": "Domain",
-                }
-            )
-            N += 1
+            domain_to_category[domain.id] = len(categories) - 1
+
+            if not hide_domains:
+                nodes_idx[domain.id] = N
+                nodes.append(
+                    {
+                        "name": domain.name,
+                        "category": domain_to_category[domain.id],
+                        "symbol": "roundRect",
+                        "symbolSize": 30,
+                        "value": "Domain",
+                    }
+                )
+                N += 1
         for asset in Asset.objects.filter(id__in=viewable_assets):
             # Only include assets whose folders are also viewable to avoid KeyError
             if asset.folder.id not in viewable_folders:
@@ -879,7 +888,7 @@ class AssetViewSet(BaseModelViewSet):
                     "name": asset.name,
                     "symbol": symbol,
                     "symbolSize": 25,
-                    "category": nodes_idx[asset.folder.name],
+                    "category": domain_to_category[asset.folder.id],
                     "value": "Primary" if asset.type == "PR" else "Support",
                 }
             )
@@ -887,30 +896,32 @@ class AssetViewSet(BaseModelViewSet):
             N += 1
 
         # Add links between domains (folders) based on parent-child relationships
-        for domain in Folder.objects.filter(id__in=viewable_folders):
-            if domain.parent_folder and domain.parent_folder.id in viewable_folders:
+        if not hide_domains:
+            for domain in Folder.objects.filter(id__in=viewable_folders):
+                if domain.parent_folder and domain.parent_folder.id in viewable_folders:
+                    links.append(
+                        {
+                            "source": nodes_idx[domain.parent_folder.id],
+                            "target": nodes_idx[domain.id],
+                            "value": "contains",
+                        }
+                    )
+
+        # Add links between assets and their domains
+        if not hide_domains:
+            for asset in Asset.objects.filter(id__in=viewable_assets):
+                # Only include assets whose folders are also viewable to avoid KeyError
+                if asset.folder.id not in viewable_folders:
+                    continue
+
+                asset_key = f"{asset.folder.name}/{asset.name}"
                 links.append(
                     {
-                        "source": nodes_idx[domain.parent_folder.name],
-                        "target": nodes_idx[domain.name],
+                        "source": nodes_idx[asset.folder.id],
+                        "target": nodes_idx[asset_key],
                         "value": "contains",
                     }
                 )
-
-        # Add links between assets and their domains
-        for asset in Asset.objects.filter(id__in=viewable_assets):
-            # Only include assets whose folders are also viewable to avoid KeyError
-            if asset.folder.id not in viewable_folders:
-                continue
-
-            asset_key = f"{asset.folder.name}/{asset.name}"
-            links.append(
-                {
-                    "source": nodes_idx[asset.folder.name],
-                    "target": nodes_idx[asset_key],
-                    "value": "contains",
-                }
-            )
 
         # Add links between assets (existing relationships)
         for asset in Asset.objects.filter(id__in=viewable_assets):
