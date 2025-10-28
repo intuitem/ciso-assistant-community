@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('integrations', '0002_alter_integrationconfiguration_provider_and_more'),
+        ("integrations", "0002_alter_integrationconfiguration_provider_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='syncmapping',
-            name='last_sync_direction',
-            field=models.CharField(blank=True, choices=[('push', 'Push'), ('pull', 'Pull')], max_length=10),
+            model_name="syncmapping",
+            name="last_sync_direction",
+            field=models.CharField(
+                blank=True, choices=[("push", "Push"), ("pull", "Pull")], max_length=10
+            ),
         ),
     ]

@@ -85,210 +85,86 @@ def test_get_remote_object(mock_jira, configuration):
 
 
 @patch("integrations.itsm.jira.client.JIRA")
-
-
 def test_test_connection(mock_jira, configuration):
-
-
     mock_jira.return_value.myself.return_value = True
 
-
-
-
-
     client = JiraClient(configuration)
-
 
     assert client.test_connection() is True
 
 
-
-
-
-
-
-
 def test_to_remote_create_respects_operations(mapper):
-
-
     """Ensure `to_remote` for creation only includes fields for push-create."""
 
-
     applied_control = AppliedControl(
-
-
         name="New Control",
-
-
         description="Full description",
-
-
         status="to_do",
-
-
         priority=1,
-
-
         eta="2025-12-31",
-
-
     )
-
-
-
-
 
     # Modify operations to exclude description on create
 
-
     mapper.FIELD_MAPPINGS_OPERATIONS["description"]["push"].remove("create")
-
-
-
-
 
     remote_data = mapper.to_remote(applied_control)
 
-
-
-
-
     assert "summary" in remote_data  # Name is allowed
-
 
     assert "description" not in remote_data  # Description is disallowed
 
-
     assert "status" in remote_data
-
 
     assert "priority" in remote_data
 
-
     assert "duedate" in remote_data
 
-
-
-
-
     # Restore for other tests
-
 
     mapper.FIELD_MAPPINGS_OPERATIONS["description"]["push"].add("create")
 
 
-
-
-
-
-
-
 def test_to_remote_partial_update_respects_operations(mapper):
-
-
     """Ensure `to_remote_partial` for updates only includes allowed fields."""
-
 
     applied_control = AppliedControl(name="Original Name", status="in_progress")
 
-
     changed_fields = ["name", "status"]
-
-
-
-
 
     # Disallow updating name via push
 
-
     mapper.FIELD_MAPPINGS_OPERATIONS["name"]["push"].remove("update")
-
-
-
-
 
     remote_data = mapper.to_remote_partial(applied_control, changed_fields)
 
-
-
-
-
     assert "summary" not in remote_data  # Name update should be excluded
-
 
     assert "status" in remote_data  # Status update is allowed
 
-
-
-
-
     # Restore for other tests
-
 
     mapper.FIELD_MAPPINGS_OPERATIONS["name"]["push"].add("update")
 
 
-
-
-
 def test_to_local_pull_update_respects_operations(mapper):
-
-
     """Ensure `to_local` for pull updates only includes allowed fields."""
 
-
     remote_data = {
-
-
         "fields": {
-
-
             "summary": "Remote Name",
-
-
             "description": "Remote Description",
-
-
             "status": {"name": "In Progress"},
-
-
             "priority": {"name": "High"},
-
-
         }
-
-
     }
-
-
-
-
 
     local_data = mapper.to_local(remote_data)
 
-
-
-
-
     assert "name" not in local_data
-
 
     assert "description" not in local_data
 
-
     assert "status" in local_data  # Status is allowed
 
-
     assert "priority" in local_data  # Priority is allowed
-
-
-
-
-
-
-
-
-
-
-
-

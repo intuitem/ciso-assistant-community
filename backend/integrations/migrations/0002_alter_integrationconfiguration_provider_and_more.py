@@ -5,31 +5,46 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
-        ('integrations', '0001_initial'),
+        ("contenttypes", "0002_remove_content_type_name"),
+        ("integrations", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='integrationconfiguration',
-            name='provider',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='configurations', to='integrations.integrationprovider'),
+            model_name="integrationconfiguration",
+            name="provider",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="configurations",
+                to="integrations.integrationprovider",
+            ),
         ),
         migrations.AlterField(
-            model_name='syncevent',
-            name='mapping',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sync_events', to='integrations.syncmapping'),
+            model_name="syncevent",
+            name="mapping",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="sync_events",
+                to="integrations.syncmapping",
+            ),
         ),
         migrations.AlterField(
-            model_name='syncmapping',
-            name='configuration',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sync_mappings', to='integrations.integrationconfiguration'),
+            model_name="syncmapping",
+            name="configuration",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="sync_mappings",
+                to="integrations.integrationconfiguration",
+            ),
         ),
         migrations.AlterField(
-            model_name='syncmapping',
-            name='content_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sync_mappings', to='contenttypes.contenttype'),
+            model_name="syncmapping",
+            name="content_type",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="sync_mappings",
+                to="contenttypes.contenttype",
+            ),
         ),
     ]
