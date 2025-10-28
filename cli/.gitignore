@@ -4,3 +4,11 @@ config.yaml
 .clica_config.yaml
 __pycache__
 *.pyc
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+.eggs/
+*.egg
+*.whl
