@@ -855,18 +855,18 @@ class AssetViewSet(BaseModelViewSet):
             user=request.user,
             object_type=Asset,
         )
-        # Build category index mapping first
+        # Build category index mapping first (key by UUID to avoid name collisions)
         domain_to_category = {}
         for domain in Folder.objects.filter(id__in=viewable_folders):
             categories.append({"name": domain.name})
-            domain_to_category[domain.name] = len(categories) - 1
+            domain_to_category[domain.id] = len(categories) - 1
 
             if not hide_domains:
-                nodes_idx[domain.name] = N
+                nodes_idx[domain.id] = N
                 nodes.append(
                     {
                         "name": domain.name,
-                        "category": len(categories) - 1,
+                        "category": domain_to_category[domain.id],
                         "symbol": "roundRect",
                         "symbolSize": 30,
                         "value": "Domain",
@@ -888,7 +888,7 @@ class AssetViewSet(BaseModelViewSet):
                     "name": asset.name,
                     "symbol": symbol,
                     "symbolSize": 25,
-                    "category": domain_to_category[asset.folder.name],
+                    "category": domain_to_category[asset.folder.id],
                     "value": "Primary" if asset.type == "PR" else "Support",
                 }
             )
@@ -901,8 +901,8 @@ class AssetViewSet(BaseModelViewSet):
                 if domain.parent_folder and domain.parent_folder.id in viewable_folders:
                     links.append(
                         {
-                            "source": nodes_idx[domain.parent_folder.name],
-                            "target": nodes_idx[domain.name],
+                            "source": nodes_idx[domain.parent_folder.id],
+                            "target": nodes_idx[domain.id],
                             "value": "contains",
                         }
                     )
@@ -917,7 +917,7 @@ class AssetViewSet(BaseModelViewSet):
                 asset_key = f"{asset.folder.name}/{asset.name}"
                 links.append(
                     {
-                        "source": nodes_idx[asset.folder.name],
+                        "source": nodes_idx[asset.folder.id],
                         "target": nodes_idx[asset_key],
                         "value": "contains",
                     }
