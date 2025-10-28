@@ -427,8 +427,8 @@
 	let openState = $state(false);
 </script>
 
-<div class="table-wrap {classesBase}">
-	<header class="flex justify-between items-center space-x-8 p-2">
+<div class="table-wrap {classesBase} flex flex-col max-h-screen">
+	<header class="flex justify-between items-center space-x-8 p-2 flex-shrink-0">
 		{#if !hideFilters}
 			<Popover
 				open={openState}
@@ -489,277 +489,284 @@
 		</div>
 	</header>
 	<!-- Table -->
-	<table
-		class="table caption-bottom {classesTable}"
-		class:table-interactive={interactive}
-		role="grid"
-		use:tableA11y
-	>
-		<thead class="table-head {regionHead}">
-			<tr>
-				{#each Object.entries(tableSource.head) as [key, heading]}
-					{#if fields.length === 0 || fields.includes(key)}
-						<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
-							>{safeTranslate(heading)}</Th
-						>
-					{/if}
-				{/each}
-				{#if displayActions}
-					<th class="{regionHeadCell} select-none text-end"></th>
-				{/if}
-			</tr>
-			{#if thFilter}
+	<div class="flex-1 overflow-auto">
+		<table
+			class="table caption-bottom {classesTable}"
+			class:table-interactive={interactive}
+			role="grid"
+			use:tableA11y
+		>
+			<thead class="table-head {regionHead}">
 				<tr>
-					{#each Object.entries(tableSource.head) as [key, _]}
-						{#if thFilterFields.includes(key)}
-							<ThFilter {handler} filterBy={key} />
-						{:else}
-							<th></th>
+					{#each Object.entries(tableSource.head) as [key, heading]}
+						{#if fields.length === 0 || fields.includes(key)}
+							<Th
+								{handler}
+								orderBy={isMultiValueColumn(key) ? undefined : key}
+								class={regionHeadCell}>{safeTranslate(heading)}</Th
+							>
 						{/if}
 					{/each}
+					{#if displayActions}
+						<th class="{regionHeadCell} select-none text-end"></th>
+					{/if}
 				</tr>
-			{/if}
-		</thead>
-		<ContextMenu.Root>
-			<tbody class="w-full border-b border-b-surface-100-900 {regionBody}">
-				{#each $rows as row, rowIndex}
-					{@const meta = row?.meta ?? row}
-					<ContextMenu.Trigger asChild>
-						{#snippet children({ builder })}
-							<tr
-								use:builder.action
-								{...builder}
-								onclick={(e) => {
-									onRowClick(e, rowIndex);
-								}}
-								onkeydown={(e) => {
-									onRowKeydown(e, rowIndex);
-								}}
-								oncontextmenu={() => (contextMenuOpenRow = row)}
-								aria-rowindex={rowIndex + 1}
-								class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
-							>
-								{#each Object.entries(row) as [key, value]}
-									{#if key !== 'meta'}
-										{@const component = fieldComponentMap[key]}
-										<td role="gridcell">
-											<div class={regionCell}>
-												{#if component && browser}
-													{@const CellComponent = component}
-													{#if CellComponent === LecChartPreview}
-														{#key `${meta?.id || rowIndex}-${key}`}
-															<CellComponent {meta} cell={value} />
-														{/key}
-													{:else}
-														<CellComponent {meta} cell={value} />
-													{/if}
-												{:else}
-													<div
-														data-testid="model-table-td-array-elem"
-														class="base-font-family whitespace-pre-line break-words"
-													>
-														{#if Array.isArray(value)}
-															<ul class="list-disc pl-4 whitespace-normal">
-																{#each [...value].sort((a, b) => {
-																	if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
-																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
-																}) as val}
-																	<li>
-																		{#if key === 'security_objectives' || key === 'security_capabilities'}
-																			{@const [securityObjectiveName, securityObjectiveValue] =
-																				Object.entries(val)[0]}
-																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
-																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
-																			<Anchor href={itemHref} class="anchor" stopPropagation
-																				>{val.str}</Anchor
-																			>
-																		{:else if val.str}
-																			{safeTranslate(val.str)}
-																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
-																			<span class="text"
-																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																				{val.split(':')[1]}</span
-																			>
-																		{:else}
-																			{val ?? '-'}
-																		{/if}
-																	</li>
-																{/each}
-															</ul>
-														{:else if value && value.str}
-															{#if value.id}
-																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
-																{#if key === 'ro_to_couple'}
-																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																		>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
-																			'-'
-																		)[1]}</Anchor
-																	>
-																{:else}
-																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																		>{value.str}</Anchor
-																	>
-																{/if}
-															{:else}
-																{value.str ?? '-'}
-															{/if}
-														{:else if value && value.hexcolor}
-															<p
-																class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
-																	value.hexcolor
-																)}"
-																style="background-color: {value.hexcolor}"
-															>
-																{safeTranslate(value.name ?? value.str) ?? '-'}
-															</p>
-														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
-															{formatDateOrDateTime(value, getLocale())}
-														{:else if [true, false].includes(value)}
-															<span class="ml-4">{safeTranslate(value ?? '-')}</span>
-														{:else if key === 'progress'}
-															<span class="ml-9"
-																>{safeTranslate('percentageDisplay', { number: value })}</span
-															>
-														{:else if key === 'translations'}
-															{#if Object.keys(value).length > 0}
-																<div class="flex flex-col gap-2">
-																	{#each Object.entries(value) as [lang, translation]}
-																		<div class="flex flex-row gap-2">
-																			<strong>{lang}:</strong>
-																			<span>{safeTranslate(translation)}</span>
-																		</div>
-																	{/each}
-																</div>
-															{:else}
-																--
-															{/if}
-														{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
-															<div class="flex items-center space-x-2">
-																<span>{safeTranslate(value ?? '-')}</span>
-																<span
-																	class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
-																>
-																	{m.accept()}
-																</span>
-															</div>
-														{:else if key === 'icon_fa_class'}
-															<i class="text-lg fa {value}"></i>
+				{#if thFilter}
+					<tr>
+						{#each Object.entries(tableSource.head) as [key, _]}
+							{#if thFilterFields.includes(key)}
+								<ThFilter {handler} filterBy={key} />
+							{:else}
+								<th></th>
+							{/if}
+						{/each}
+					</tr>
+				{/if}
+			</thead>
+			<ContextMenu.Root>
+				<tbody class="w-full border-b border-b-surface-100-900 {regionBody}">
+					{#each $rows as row, rowIndex}
+						{@const meta = row?.meta ?? row}
+						<ContextMenu.Trigger asChild>
+							{#snippet children({ builder })}
+								<tr
+									use:builder.action
+									{...builder}
+									onclick={(e) => {
+										onRowClick(e, rowIndex);
+									}}
+									onkeydown={(e) => {
+										onRowKeydown(e, rowIndex);
+									}}
+									oncontextmenu={() => (contextMenuOpenRow = row)}
+									aria-rowindex={rowIndex + 1}
+									class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
+								>
+									{#each Object.entries(row) as [key, value]}
+										{#if key !== 'meta'}
+											{@const component = fieldComponentMap[key]}
+											<td role="gridcell">
+												<div class={regionCell}>
+													{#if component && browser}
+														{@const CellComponent = component}
+														{#if CellComponent === LecChartPreview}
+															{#key `${meta?.id || rowIndex}-${key}`}
+																<CellComponent {meta} cell={value} />
+															{/key}
 														{:else}
-															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-															{#if value?.length > 300}
-																{safeTranslate(value ?? '-').slice(0, 300)}...
-															{:else}
-																{safeTranslate(value ?? '-')}
-															{/if}
+															<CellComponent {meta} cell={value} />
 														{/if}
-														{@render badge?.(key, row)}
-													</div>
-												{/if}
-											</div>
+													{:else}
+														<div
+															data-testid="model-table-td-array-elem"
+															class="base-font-family whitespace-pre-line break-words"
+														>
+															{#if Array.isArray(value)}
+																<ul class="list-disc pl-4 whitespace-normal">
+																	{#each [...value].sort((a, b) => {
+																		if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+																		return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+																	}) as val}
+																		<li>
+																			{#if key === 'security_objectives' || key === 'security_capabilities'}
+																				{@const [securityObjectiveName, securityObjectiveValue] =
+																					Object.entries(val)[0]}
+																				{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
+																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
+																				<Anchor href={itemHref} class="anchor" stopPropagation
+																					>{val.str}</Anchor
+																				>
+																			{:else if val.str}
+																				{safeTranslate(val.str)}
+																			{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
+																				<span class="text"
+																					>{unsafeTranslate(val.split(':')[0] + 'Colon')}
+																					{val.split(':')[1]}</span
+																				>
+																			{:else}
+																				{val ?? '-'}
+																			{/if}
+																		</li>
+																	{/each}
+																</ul>
+															{:else if value && value.str}
+																{#if value.id}
+																	{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+																	{#if key === 'ro_to_couple'}
+																		<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																			>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
+																				'-'
+																			)[1]}</Anchor
+																		>
+																	{:else}
+																		<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																			>{value.str}</Anchor
+																		>
+																	{/if}
+																{:else}
+																	{value.str ?? '-'}
+																{/if}
+															{:else if value && value.hexcolor}
+																<p
+																	class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
+																		value.hexcolor
+																	)}"
+																	style="background-color: {value.hexcolor}"
+																>
+																	{safeTranslate(value.name ?? value.str) ?? '-'}
+																</p>
+															{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
+																{formatDateOrDateTime(value, getLocale())}
+															{:else if [true, false].includes(value)}
+																<span class="ml-4">{safeTranslate(value ?? '-')}</span>
+															{:else if key === 'progress'}
+																<span class="ml-9"
+																	>{safeTranslate('percentageDisplay', { number: value })}</span
+																>
+															{:else if key === 'translations'}
+																{#if Object.keys(value).length > 0}
+																	<div class="flex flex-col gap-2">
+																		{#each Object.entries(value) as [lang, translation]}
+																			<div class="flex flex-row gap-2">
+																				<strong>{lang}:</strong>
+																				<span>{safeTranslate(translation)}</span>
+																			</div>
+																		{/each}
+																	</div>
+																{:else}
+																	--
+																{/if}
+															{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.accepted_at && row.meta?.revoked_at == null}
+																<div class="flex items-center space-x-2">
+																	<span>{safeTranslate(value ?? '-')}</span>
+																	<span
+																		class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
+																	>
+																		{m.accept()}
+																	</span>
+																</div>
+															{:else if key === 'icon_fa_class'}
+																<i class="text-lg fa {value}"></i>
+															{:else}
+																<!-- NOTE: We will have to handle the ellipses for RTL languages-->
+																{#if value?.length > 300}
+																	{safeTranslate(value ?? '-').slice(0, 300)}...
+																{:else}
+																	{safeTranslate(value ?? '-')}
+																{/if}
+															{/if}
+															{@render badge?.(key, row)}
+														</div>
+													{/if}
+												</div>
+											</td>
+										{/if}
+									{/each}
+									{#if displayActions}
+										<td class="text-end {regionCell}" role="gridcell">
+											{#if actions}{@render actions({
+													meta: row.meta
+												})}{:else if row.meta[identifierField]}
+												{@const actionsComponent = fieldComponentMap[CUSTOM_ACTIONS_COMPONENT]}
+												{@const actionsURLModel = URLModel}
+												<TableRowActions
+													deleteForm={disableDelete ? null : deleteForm}
+													{model}
+													URLModel={actionsURLModel}
+													detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
+													editURL={!(row.meta.builtin || row.meta.urn) ||
+													URLModel === 'terminologies'
+														? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
+														: undefined}
+													{row}
+													hasBody={actionsBody}
+													{identifierField}
+													{disableEdit}
+													{disableView}
+													preventDelete={preventDelete(row)}
+													preventEdit={preventEdit(row)}
+												>
+													{#snippet head()}
+														{#if actionsHead}
+															{@render actionsHead?.()}
+														{/if}
+													{/snippet}
+													{#snippet body()}
+														{#if actionsBody}
+															{@render actionsBody?.()}
+														{/if}
+													{/snippet}
+													{#snippet tail()}
+														{@const ActionsComponent = actionsComponent}
+														{#if tail_render}{@render tail_render()}{:else if ActionsComponent}
+															<ActionsComponent meta={row.meta ?? {}} {actionsURLModel} {handler} />
+														{/if}
+													{/snippet}
+												</TableRowActions>
+											{/if}
 										</td>
 									{/if}
-								{/each}
-								{#if displayActions}
-									<td class="text-end {regionCell}" role="gridcell">
-										{#if actions}{@render actions({
-												meta: row.meta
-											})}{:else if row.meta[identifierField]}
-											{@const actionsComponent = fieldComponentMap[CUSTOM_ACTIONS_COMPONENT]}
-											{@const actionsURLModel = URLModel}
-											<TableRowActions
-												deleteForm={disableDelete ? null : deleteForm}
-												{model}
-												URLModel={actionsURLModel}
-												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
-												editURL={!(row.meta.builtin || row.meta.urn) || URLModel === 'terminologies'
-													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
-													: undefined}
-												{row}
-												hasBody={actionsBody}
-												{identifierField}
-												{disableEdit}
-												{disableView}
-												preventDelete={preventDelete(row)}
-												preventEdit={preventEdit(row)}
-											>
-												{#snippet head()}
-													{#if actionsHead}
-														{@render actionsHead?.()}
-													{/if}
-												{/snippet}
-												{#snippet body()}
-													{#if actionsBody}
-														{@render actionsBody?.()}
-													{/if}
-												{/snippet}
-												{#snippet tail()}
-													{@const ActionsComponent = actionsComponent}
-													{#if tail_render}{@render tail_render()}{:else if ActionsComponent}
-														<ActionsComponent meta={row.meta ?? {}} {actionsURLModel} {handler} />
-													{/if}
-												{/snippet}
-											</TableRowActions>
-										{/if}
-									</td>
-								{/if}
-							</tr>
-						{/snippet}
-					</ContextMenu.Trigger>
-				{/each}
-			</tbody>
-			{#if contextMenuDisplayEdit || Object.hasOwn(contextMenuActions, URLModel)}
-				<ContextMenu.Content
-					class="z-50 w-full max-w-[229px] outline-hidden card bg-white px-1 py-1.5 shadow-md cursor-default"
-				>
-					{#if Object.hasOwn(contextMenuActions, URLModel)}
-						{#each contextMenuActions[URLModel] as action}
-							<action.component row={contextMenuOpenRow} {handler} {URLModel} {action} />
-						{/each}
-						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
-					{/if}
-					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)}
-						<ContextMenu.Item
-							class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
-						>
-							<Anchor
-								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
-								class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
-								>{m.edit()}</Anchor
-							>
-						</ContextMenu.Item>
-						<ContextMenu.Item
-							class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
-						>
-							<Anchor
-								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`}
-								class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
-								>{m.view()}</Anchor
-							>
-						</ContextMenu.Item>
-					{/if}
-					<!-- {#if !preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] })} -->
-					<!-- 	<ContextMenu.Item -->
-					<!-- 		class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50" -->
-					<!-- 	> -->
-					<!-- 		<div class="flex items-center w-full h-full">{m.delete()}</div> -->
-					<!-- 	</ContextMenu.Item> -->
-					<!-- {/if} -->
-				</ContextMenu.Content>
-			{/if}
-		</ContextMenu.Root>
-		{#if tableSource.foot}
-			<tfoot class="table-foot {regionFoot}">
-				<tr>
-					{#each tableSource.foot as cell}
-						<td class={regionFootCell}>{cell}</td>
+								</tr>
+							{/snippet}
+						</ContextMenu.Trigger>
 					{/each}
-				</tr>
-			</tfoot>
-		{/if}
-	</table>
+				</tbody>
+				{#if contextMenuDisplayEdit || Object.hasOwn(contextMenuActions, URLModel)}
+					<ContextMenu.Content
+						class="z-50 w-full max-w-[229px] outline-hidden card bg-white px-1 py-1.5 shadow-md cursor-default"
+					>
+						{#if Object.hasOwn(contextMenuActions, URLModel)}
+							{#each contextMenuActions[URLModel] as action}
+								<action.component row={contextMenuOpenRow} {handler} {URLModel} {action} />
+							{/each}
+							<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
+						{/if}
+						{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)}
+							<ContextMenu.Item
+								class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
+							>
+								<Anchor
+									href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
+									class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
+									>{m.edit()}</Anchor
+								>
+							</ContextMenu.Item>
+							<ContextMenu.Item
+								class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
+							>
+								<Anchor
+									href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`}
+									class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
+									>{m.view()}</Anchor
+								>
+							</ContextMenu.Item>
+						{/if}
+						<!-- {#if !preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] })} -->
+						<!-- 	<ContextMenu.Item -->
+						<!-- 		class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50" -->
+						<!-- 	> -->
+						<!-- 		<div class="flex items-center w-full h-full">{m.delete()}</div> -->
+						<!-- 	</ContextMenu.Item> -->
+						<!-- {/if} -->
+					</ContextMenu.Content>
+				{/if}
+			</ContextMenu.Root>
+			{#if tableSource.foot}
+				<tfoot class="table-foot {regionFoot}">
+					<tr>
+						{#each tableSource.foot as cell}
+							<td class={regionFootCell}>{cell}</td>
+						{/each}
+					</tr>
+				</tfoot>
+			{/if}
+		</table>
+	</div>
 
-	<footer class="flex justify-between items-center space-x-8 p-2">
+	<footer
+		class="flex-shrink-0 flex justify-between items-center space-x-8 p-2 bg-white border-t border-gray-200"
+	>
 		{#if rowCount && pagination}
 			<RowCount {handler} />
 		{/if}
