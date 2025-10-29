@@ -28,7 +28,7 @@ class JiraClient(BaseIntegrationClient):
         issue_dict["project"] = {"key": self.settings["project_key"]}
         issue_dict["issuetype"] = {"name": self.settings.get("issue_type", "Task")}
 
-        target_status_name = issue_dict.pop("status")
+        target_status_name = issue_dict.pop("status", None)
 
         issue = self.jira.create_issue(fields=issue_dict)
 
@@ -45,7 +45,7 @@ class JiraClient(BaseIntegrationClient):
             target_status_name = None
             if "status" in changes:
                 # 1. Pop the status from the changes dict
-                target_status_name = changes.pop("status")
+                target_status_name = changes.pop("status", None)
 
             # Update all other fields (if any remain)
             if changes:
