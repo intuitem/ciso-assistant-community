@@ -105,8 +105,10 @@
 										<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
 											<span class="flex flex-row justify-between text-xl">
 												<i class="text-blue-700 fab fa-jira"></i>
-												{#if page.data.settings?.enabled_integrations.filter((integration: Record<string, any>) => integration.name === 'jira' && integration.configurations).length}
-													<i class="fa-solid fa-circle-check text-success-600-400"></i>
+                        {#if page.data.settings?.enabled_integrations?.some(
+													(integration: Record<string, any>) => integration.name === 'jira' && integration.configurations?.length
+												)}
+                          <i class="fa-solid fa-circle-check text-success-600-400"></i>
 												{/if}
 											</span>
 											<span class="flex flex-row space-x-2">
