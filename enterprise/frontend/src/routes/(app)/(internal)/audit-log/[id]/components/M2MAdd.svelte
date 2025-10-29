@@ -17,11 +17,13 @@
 	<dd class="text-gray-700 whitespace-pre-line grid grid-cols-4">
 		<i class="fa-solid fa-plus col-span-1 pt-1" aria-hidden="true"></i>
 		<span class="col-span-2">
-			{#each objects as object}
-				<li>
-					{object}
-				</li>
-			{/each}
+			<ul>
+				{#each objects as object}
+					<li>
+						{object}
+					</li>
+				{/each}
+			</ul>
 		</span>
 	</dd>
 </div>
