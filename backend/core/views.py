@@ -2046,7 +2046,7 @@ class AppliedControlViewSet(BaseModelViewSet):
             "create_remote_object", False
         )
         integration_config = serializer.validated_data.pop("integration_config", None)
-        serializer.validated_data.pop("remote_object_id")  # Remove if present
+        serializer.validated_data.pop("remote_object_id", None)  # Remove if present
 
         # Create the local object first
         super().perform_create(serializer)
@@ -2079,7 +2079,7 @@ class AppliedControlViewSet(BaseModelViewSet):
     def perform_update(self, serializer):
         integration_config = serializer.validated_data.pop("integration_config", None)
         remote_object_id = serializer.validated_data.pop("remote_object_id", None)
-        serializer.validated_data.pop("create_remote_object")  # Remove if present
+        serializer.validated_data.pop("create_remote_object", None)  # Remove if present
 
         super().perform_update(serializer)
         if not integration_config or not remote_object_id:
