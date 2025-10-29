@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { copy } from '@svelte-put/copy';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -26,6 +27,7 @@
 		provider_id: z.string(),
 		folder_id: z.string(),
 		is_active: z.boolean().default(true),
+    webhook_secret: z.string().optional(),
 		credentials: z.object({
 			server_url: z.string().url(),
 			email: z.string().email(),
@@ -57,8 +59,6 @@
 		loading: false,
 		success: undefined
 	});
-
-	$inspect(page.data);
 </script>
 
 {#key form}
@@ -114,6 +114,7 @@
 							disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
 						/>
 					{:else}
+            <p class="font-semibold text-sm -mb-4">{m.apiToken()}</p>
 						<div
 							class="w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary"
 						>
@@ -172,6 +173,13 @@
 						helpText={m.jiraProjectKeyHelpText()}
 						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
 					/>
+					<TextField
+						{form}
+						field="issue_type"
+						valuePath="settings.issue_type"
+						label={m.issueType()}
+						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+					/>
 				</div>
 				<div class="flex flex-col gap-4 card preset-outlined-surface-200-800 p-2">
 					<span class="flex flex-row justify-between items-center">
@@ -184,22 +192,16 @@
 							disabled={!$formStore.is_active}
 						/>
 					</span>
-					<TextField
-						{form}
-						field="issue_type"
-						valuePath="settings.issue_type"
-						label={m.issueType()}
-						disabled={!$formStore.is_active || !$formStore.settings.enable_incoming_sync}
-					/>
 					{#if showWebhookSecretField}
 						<TextField
 							{form}
 							field="webhook_secret"
 							type="password"
 							label={m.webhookSecret()}
-							disabled={!$formStore.is_active}
+              disabled={!$formStore.is_active || !$formStore.settings.enable_incoming_sync}
 						/>
 					{:else}
+            <p class="font-semibold text-sm -mb-4">{m.webhookSecret()}</p>
 						<div
 							class="text-center w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary"
 						>
@@ -215,6 +217,19 @@
 						</div>
 					{/if}
 				</div>
+        {#if page.data?.config?.webhook_url_full}
+        <p class="font-semibold text-sm -mb-1">{m.webhookEndpointUrl()}</p>
+        <span class="flex flex-row justify-between gap-2 preset-tonal-secondary items-center card pl-2 text-xs">
+          <pre>&lt;API_URL&gt;{page.data?.config?.webhook_url_full}</pre>
+          <button
+            type="button"
+            class="btn px-2 py-1 preset-tonal-secondary rounded-l-none"
+            use:copy={{ text: page.data?.config?.webhook_url_full }}
+            ><i class="fa-solid fa-copy mr-2"></i>{m.copy()}</button
+          >
+        </span>
+        <p class="text-sm text-surface-500 -mt-3">{m.webhookEndpointUrlHelpText()}</p>
+        {/if}
 				<button
 					class="text-center btn preset-filled-primary-500 font-semibold w-full"
 					data-testid="save-button">{m.save()}</button

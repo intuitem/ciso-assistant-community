@@ -10,6 +10,7 @@ const schema = z.object({
 	provider_id: z.string(),
 	folder_id: z.string(),
 	is_active: z.boolean().default(true),
+  webhook_secret: z.string().optional(),
 	credentials: z.object({
 		server_url: z.string().url(),
 		email: z.string().email(),
