@@ -1,5 +1,4 @@
 from typing import Any, Dict
-from icecream import ic
 
 from integrations.models import SyncMapping
 from jira import JIRA

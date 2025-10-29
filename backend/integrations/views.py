@@ -114,15 +114,6 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
     filterset_fields = ["provider", "provider__name", "provider__provider_type"]
 
     def get_queryset(self):
-        """
-        **PLACEHOLDER FOR PERMISSIONS**:
-        This is where you would filter the configurations based on the
-        requesting user's access to the associated Folder.
-
-        For example:
-        user_folders = Folder.objects.filter(owner=self.request.user)
-        return super().get_queryset().filter(folder__in=user_folders)
-        """
         return super().get_queryset()
 
     @action(detail=True, methods=["post"], url_path="test-connection")
@@ -285,9 +276,4 @@ class SyncMappingDeleteView(generics.DestroyAPIView):
     serializer_class = SyncMappingSerializer
 
     def get_queryset(self):
-        """
-        **PLACEHOLDER FOR PERMISSIONS**:
-        This is where you would filter the mappings based on the
-        requesting user's access.
-        """
         return SyncMapping.objects.all()
