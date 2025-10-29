@@ -212,6 +212,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 79. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
 80. Post-Quantum Cryptography (PQC) Migration Roadmap (May 2025) 🔐
 81. Cloud Sovereignty Framework - 1.2 - Sept 2025 🇪🇺
+82. ISO 22301:2019 outline - Business continuity management systems 🌐
 
 ### Community contributions
 
@@ -537,9 +538,9 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 ## API and Swagger
 
-- The interactive API documentation (Swagger UI) is available only in development mode.  
-  To enable it, set `export DJANGO_DEBUG=True` before starting the backend.  
-- Once the server is running, the documentation will be accessible at `<backend_endpoint>/api/schema/swagger/`,  
+- The interactive API documentation (Swagger UI) is available only in development mode.
+  To enable it, set `export DJANGO_DEBUG=True` before starting the backend.
+- Once the server is running, the documentation will be accessible at `<backend_endpoint>/api/schema/swagger/`,
   for example: <http://127.0.0.1:8000/api/schema/swagger/>.
 
 To interact with the API via Swagger or directly with HTTP calls:
