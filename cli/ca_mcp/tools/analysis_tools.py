@@ -2,7 +2,7 @@
 
 import sys
 from rich import print as rprint
-from ..client import make_get_request, get_paginated_results
+from ..client import make_get_request, fetch_all_results
 
 
 async def get_all_audits_with_metrics():
@@ -14,24 +14,18 @@ async def get_all_audits_with_metrics():
     The 'status' field (not used here) represents the auditor's review workflow state.
     """
     try:
-        # Get all compliance assessments
-        res = make_get_request("/compliance-assessments/")
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        audits = get_paginated_results(data)
+        # Get all compliance assessments (with pagination)
+        audits, error = fetch_all_results("/compliance-assessments/")
+        if error:
+            return error
 
         if not audits:
             return "No audits found"
 
-        # Fetch requirement assessments for all audits
-        res = make_get_request("/requirement-assessments/")
-        if res.status_code != 200:
-            return f"Error fetching requirements: HTTP {res.status_code} - {res.text}"
-
-        req_data = res.json()
-        all_requirements = get_paginated_results(req_data)
+        # Fetch all requirement assessments (with pagination)
+        all_requirements, error = fetch_all_results("/requirement-assessments/")
+        if error:
+            return f"Error fetching requirements: {error}"
 
         # Group requirements by compliance assessment
         req_by_audit = {}
@@ -131,15 +125,14 @@ async def get_audit_gap_analysis(audit_name: str):
     Args:
         audit_name: Name of the audit/compliance assessment to analyze
     """
-    # First, find the compliance assessment by name
-    res = make_get_request("/compliance-assessments/")
-    if res.status_code != 200:
+    # First, find the compliance assessment by name (with pagination)
+    audits, error = fetch_all_results("/compliance-assessments/")
+    if error:
         rprint(f"Error: check credentials.", file=sys.stderr)
         return "Error: Unable to fetch audits"
 
-    data = res.json()
     audit = None
-    for item in data.get("results", []):
+    for item in audits:
         if item.get("name") == audit_name:
             audit = item
             break
@@ -147,16 +140,13 @@ async def get_audit_gap_analysis(audit_name: str):
     if not audit:
         return f"Error: Audit '{audit_name}' not found"
 
-    # Get requirement assessments for this compliance assessment
+    # Get all requirement assessments for this compliance assessment (with pagination)
     params = {"compliance_assessment": audit["id"]}
-    res = make_get_request("/requirement-assessments/", params=params)
+    requirements, error = fetch_all_results("/requirement-assessments/", params=params)
 
-    if res.status_code != 200:
+    if error:
         rprint(f"Error: Unable to fetch requirement assessments.", file=sys.stderr)
         return "Error: Unable to fetch requirements"
-
-    req_data = res.json()
-    requirements = req_data.get("results", [])
 
     if not requirements:
         return f"No requirements found for audit '{audit_name}'"

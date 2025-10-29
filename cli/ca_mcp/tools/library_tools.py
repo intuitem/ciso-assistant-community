@@ -1,6 +1,6 @@
 """Library management MCP tools for CISO Assistant"""
 
-from ..client import make_get_request, make_post_request, get_paginated_results
+from ..client import make_get_request, make_post_request, fetch_all_results
 
 
 async def get_stored_libraries(
@@ -23,13 +23,10 @@ async def get_stored_libraries(
         if provider:
             params["provider"] = provider
 
-        res = make_get_request("/stored-libraries/", params=params)
-
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        libraries = get_paginated_results(data)
+        # Fetch all stored libraries (with pagination)
+        libraries, error = fetch_all_results("/stored-libraries/", params=params)
+        if error:
+            return error
 
         if not libraries:
             return "No stored libraries found"
@@ -61,13 +58,10 @@ async def get_loaded_libraries():
     These are frameworks/libraries that have been activated in the system.
     """
     try:
-        res = make_get_request("/loaded-libraries/")
-
-        if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
-
-        data = res.json()
-        libraries = get_paginated_results(data)
+        # Fetch all loaded libraries (with pagination)
+        libraries, error = fetch_all_results("/loaded-libraries/")
+        if error:
+            return error
 
         if not libraries:
             return "No loaded libraries found"

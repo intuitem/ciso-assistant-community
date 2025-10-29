@@ -116,3 +116,69 @@ def get_paginated_results(data):
     elif isinstance(data, list):
         return data
     return []
+
+
+def fetch_all_results(endpoint, params=None):
+    """
+    Fetch all paginated results from an API endpoint by following 'next' links.
+
+    This function handles Django REST Framework's LimitOffsetPagination by following
+    the 'next' URL in the response until all pages are retrieved.
+
+    Args:
+        endpoint: API endpoint (e.g., "/compliance-assessments/")
+        params: Optional query parameters (only applied to first request)
+
+    Returns:
+        Tuple of (list of all results, error_message or None)
+
+    Example:
+        results, error = fetch_all_results("/compliance-assessments/")
+        if error:
+            return error
+        # process results...
+    """
+    results_list = []
+    next_url = endpoint
+
+    # Only apply params to the first request
+    current_params = params
+
+    while next_url:
+        # Make request - if next_url is a full URL from pagination, extract just the path
+        if next_url.startswith("http://") or next_url.startswith("https://"):
+            # Parse the full URL to extract path and query params
+            from urllib.parse import urlparse, parse_qs
+
+            parsed = urlparse(next_url)
+            next_url = parsed.path
+            # Convert query string to params dict for subsequent requests
+            current_params = {
+                k: v[0] if len(v) == 1 else v for k, v in parse_qs(parsed.query).items()
+            }
+
+        res = make_get_request(next_url, params=current_params)
+
+        if res.status_code != 200:
+            error_msg = f"Error: HTTP {res.status_code} - {res.text}"
+            return results_list, error_msg
+
+        data = res.json()
+
+        # Handle paginated response
+        if isinstance(data, dict) and "results" in data:
+            results = data.get("results", [])
+            results_list.extend(results)
+            next_url = data.get("next")  # Get next page URL
+            current_params = (
+                None  # Clear params for subsequent requests (included in next_url)
+            )
+        # Handle non-paginated response (list)
+        elif isinstance(data, list):
+            results_list.extend(data)
+            next_url = None  # No pagination for list responses
+        else:
+            error_msg = f"Unexpected API response format: {type(data)}"
+            return results_list, error_msg
+
+    return results_list, None
