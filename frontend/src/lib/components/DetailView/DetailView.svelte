@@ -260,13 +260,29 @@
 		);
 	});
 
-	let relatedModels = $derived(
-		Object.entries(data?.relatedModels ?? {}).sort((a: [string, any], b: [string, any]) => {
+	function getSortedRelatedModels() {
+		return Object.entries(data?.relatedModels ?? {}).sort((a: [string, any], b: [string, any]) => {
 			return getRelatedModelIndex(data.model, a[1]) - getRelatedModelIndex(data.model, b[1]);
-		})
-	);
+		});
+	}
 
-	let group = $derived(relatedModels.length > 0 ? relatedModels[0][0] : undefined);
+	let relatedModels = $derived(getSortedRelatedModels());
+	let relatedModelsNames: Set<string> = $state(new Set());
+
+	let group = $state(
+		Object.keys(data?.relatedModels ?? {}).length > 0 ? getSortedRelatedModels()[0][0] : undefined
+	);
+	$effect(() => {
+		const newRelatedModelsNames = new Set(relatedModels.map((model) => model[0]));
+		const hasModelCountChanged = relatedModelsNames.size !== newRelatedModelsNames.size;
+		const hasModelNamesChanged = [...newRelatedModelsNames].every((modelName) => {
+			relatedModelsNames.has(modelName);
+		});
+		if (hasModelCountChanged || hasModelNamesChanged) {
+			relatedModelsNames = newRelatedModelsNames;
+			group = relatedModelsNames.size > 0 ? relatedModels[0][0] : undefined;
+		}
+	});
 
 	function truncateString(str: string, maxLength: number = 50): string {
 		return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
