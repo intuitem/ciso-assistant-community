@@ -57,7 +57,8 @@
 
 	// Map implementation group ref_ids to their display names
 	const implementationGroupsDefinition =
-		data.requirementAssessment.compliance_assessment.framework?.implementation_groups_definition ?? [];
+		data.requirementAssessment.compliance_assessment.framework?.implementation_groups_definition ??
+		[];
 
 	function getImplementationGroupName(refId: string): string {
 		return implementationGroupsDefinition.find((g) => g.ref_id === refId)?.name ?? refId;
@@ -296,7 +297,7 @@
 	{#if data.requirement?.implementation_groups?.length > 0}
 		<div class="mb-2">
 			{#each data.requirement.implementation_groups as ig}
-				<span class="badge bg-blue-100 mr-2 ">
+				<span class="badge bg-blue-100 mr-2">
 					{getImplementationGroupName(ig)}
 				</span>
 			{/each}
