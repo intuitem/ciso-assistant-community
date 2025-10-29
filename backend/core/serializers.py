@@ -1691,7 +1691,9 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     description = serializers.CharField(source="get_requirement_description")
     evidences = FieldsRelatedField(many=True)
-    compliance_assessment = FieldsRelatedField(["id", "name", "is_locked"])
+    compliance_assessment = FieldsRelatedField(
+        ["id", "name", "is_locked", {"framework": ["implementation_groups_definition"]}]
+    )
     folder = FieldsRelatedField()
     perimeter = FieldsRelatedField(source="compliance_assessment.perimeter")
     assessable = serializers.BooleanField(source="requirement.assessable")

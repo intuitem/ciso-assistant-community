@@ -51,6 +51,14 @@
 	const has_threats = threats.length > 0;
 	const has_reference_controls = reference_controls.length > 0;
 
+	// Map implementation group ref_ids to their display names
+	const implementationGroupsDefinition =
+		data.requirementAssessment.compliance_assessment.framework?.implementation_groups_definition ?? [];
+
+	function getImplementationGroupName(refId: string): string {
+		return implementationGroupsDefinition.find((g) => g.ref_id === refId)?.name ?? refId;
+	}
+
 	function cancel(): void {
 		var currentUrl = window.location.href;
 		var url = new URL(currentUrl);
@@ -267,16 +275,6 @@
 	<div class="flex justify-between">
 		<div class="flex">
 			<span class="code left h-min">{data.requirement.urn}</span>
-			{#if data.requirement.implementation_groups.length > 0}
-				<div class="ml-3">
-					<b class="mr-2">Implemetation Groups :</b>
-					{#each data.requirement.implementation_groups as ig}
-						<span class="badge bg-blue-100">
-							{ig}
-						</span>
-					{/each}
-				</div>
-			{/if}
 		</div>
 		<a
 			class="text-pink-500 hover:text-pink-400"
@@ -284,6 +282,15 @@
 			aria-label="Go to compliance assessment"><i class="fa-solid fa-turn-up"></i></a
 		>
 	</div>
+	{#if data.requirement?.implementation_groups?.length > 0}
+		<div class="mb-2">
+			{#each data.requirement.implementation_groups as ig}
+				<span class="badge bg-blue-100 mr-2 ">
+					{getImplementationGroupName(ig)}
+				</span>
+			{/each}
+		</div>
+	{/if}
 	{#if data.requirement.description}
 		<div class="font-light text-lg card p-4 preset-tonal-primary">
 			<h2 class="font-semibold text-base flex flex-row justify-between">
