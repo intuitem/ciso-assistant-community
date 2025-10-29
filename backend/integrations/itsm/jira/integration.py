@@ -64,7 +64,7 @@ class JiraOrchestrator(BaseITSMOrchestrator):
         # Jira webhook structure: { "issue": { "key": "PROJ-123", ... } }
         if "issue" in payload:
             return payload["issue"].get("key")
-        return payload.get("key")
+        return payload.get("key", "")
 
     def _extract_remote_data(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Extract issue data from Jira webhook payload"""
