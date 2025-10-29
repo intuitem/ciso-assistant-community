@@ -1,0 +1,532 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:iso22301-2019
+locale: en
+ref_id: iso22301-2019
+name: "ISO 22301:2019 \u2014 Business continuity management systems \u2014 Requirements\
+  \ outline"
+description: "Outline of ISO 22301:2019 -  Security and resilience \u2014 Business\
+  \ continuity management systems \u2014 Requirements.\nYou can purchase the standard\
+  \ for full details."
+copyright: ISO - You can purchase the standard for full details.
+version: 1
+publication_date: 2025-10-29
+provider: ISO
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:iso22301-2019
+    ref_id: iso22301-2019
+    name: "ISO 22301:2019 \u2014 Business continuity management systems \u2014 Requirements\
+      \ outline"
+    description: "Outline of ISO 22301:2019 -  Security and resilience \u2014 Business\
+      \ continuity management systems \u2014 Requirements.\nYou can purchase the standard\
+      \ for full details."
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Context of the organization
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:4
+      ref_id: '4.1'
+      name: Understanding the organization and its context
+      description: Determine internal and external issues relevant to BCMS purpose
+        and outcomes.
+      annotation: Use a PESTLE or SWOT analysis to document internal/external factors
+        affecting continuity.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:4
+      ref_id: '4.2'
+      name: Understanding the needs and expectations of interested parties
+      description: Identify needs and expectations of interested parties relevant
+        to BCMS.
+      annotation: List stakeholders and categorize them by influence or regulatory
+        impact.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:4.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:4.2
+      ref_id: 4.2.1
+      name: General
+      description: Determine interested parties that are relevant to the BCMS and
+        their requirements.
+      annotation: Maintain a stakeholder register; review annually for updates.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:4.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:4.2
+      ref_id: 4.2.2
+      name: Legal and regulatory requirements
+      description: Determine applicable legal, regulatory and other requirements related
+        to BCMS.
+      annotation: Track compliance obligations with a simple legal register.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:4.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:4
+      ref_id: '4.3'
+      name: Determining the scope of the business continuity management system
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:4.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:4.3
+      ref_id: 4.3.1
+      name: General
+      description: Determine BCMS boundaries and applicability considering context
+        and requirements.
+      annotation: Create a scope document defining sites, services, and exclusions.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:4.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:4.3
+      ref_id: 4.3.2
+      name: Scope of the business continuity management system
+      description: Maintain documented information defining the BCMS scope.
+      annotation: Keep the scope statement available to interested parties.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:4.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:4
+      ref_id: '4.4'
+      name: Business continuity management system
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Leadership
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:5
+      ref_id: '5.1'
+      name: Leadership and commitment
+      description: Top management shall demonstrate leadership and commitment to BCMS
+        effectiveness.
+      annotation: Form a BC steering committee and assign executive sponsorship.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:5
+      ref_id: '5.2'
+      name: Policy
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:5.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:5.2
+      ref_id: 5.2.1
+      name: Establishing the business continuity policy
+      description: Establish a business continuity policy aligned with strategic direction.
+      annotation: Draft a concise policy linking continuity to corporate strategy.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:5.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:5.2
+      ref_id: 5.2.2
+      name: Communicating the business continuity policy
+      description: Communicate the policy within the organization and make it available
+        externally.
+      annotation: Publish the policy internally; share externally if relevant.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:5
+      ref_id: '5.3'
+      name: Roles, responsibilities and authorities
+      description: Assign and communicate BCMS roles, responsibilities and authorities.
+      annotation: Use RACI charts to document roles and authorities.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Planning
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:6
+      ref_id: '6.1'
+      name: Actions to address risks and opportunities
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:6.1
+      ref_id: 6.1.1
+      name: Determining risks and opportunities
+      description: Determine risks and opportunities that need to be addressed to
+        ensure BCMS achieves outcomes.
+      annotation: Integrate BCMS risks into enterprise risk management processes.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:6.1
+      ref_id: 6.1.2
+      name: Addressing risks and opportunities
+      description: Plan actions to address risks and integrate them into BCMS processes.
+      annotation: Develop an action log and track completion status.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:6
+      ref_id: '6.2'
+      name: Business continuity objectives and planning to achieve them
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:6.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:6.2
+      ref_id: 6.2.1
+      name: Establishing business continuity objectives
+      description: Establish measurable business continuity objectives consistent
+        with the policy.
+      annotation: "Define 3\u20135 measurable BC objectives tied to recovery and testing."
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:6.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:6.2
+      ref_id: 6.2.2
+      name: Determining business continuity objectives
+      description: Plan how objectives will be achieved and monitored.
+      annotation: Set clear KPIs and review them at management review.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:6
+      ref_id: '6.3'
+      name: Planning changes to the business continuity management system
+      description: Carry out BCMS changes in a planned and controlled manner.
+      annotation: Use a controlled change log with impact assessments.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Support
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:7
+      ref_id: '7.1'
+      name: Resources
+      description: Determine and provide resources needed for the BCMS.
+      annotation: List resource categories (people, tech, sites) in continuity plans.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:7
+      ref_id: '7.2'
+      name: Competence
+      description: Ensure personnel are competent on the basis of education, training,
+        or experience.
+      annotation: Keep training records and verify competence annually.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:7
+      ref_id: '7.3'
+      name: Awareness
+      description: Ensure awareness of BCMS policy, roles and potential impact of
+        nonconformity.
+      annotation: Deliver awareness sessions with practical scenarios.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:7
+      ref_id: '7.4'
+      name: Communication
+      description: Determine internal and external communications relevant to BCMS.
+      annotation: Maintain contact lists and escalation procedures.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:7.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:7
+      ref_id: '7.5'
+      name: Documented information
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:7.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:7.5
+      ref_id: 7.5.1
+      name: General
+      description: Ensure BCMS documentation includes required information for effectiveness.
+      annotation: Ensure BC plans, policies, and records are easily accessible.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:7.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:7.5
+      ref_id: 7.5.2
+      name: Creating and updating
+      description: Ensure documented information is properly created and updated.
+      annotation: Version control all BCMS documents with approval dates.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:7.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:7.5
+      ref_id: 7.5.3
+      name: Control of documented information
+      description: Control BCMS documents to ensure availability, integrity and confidentiality.
+      annotation: Protect sensitive BC data and ensure backups exist.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Operation
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8
+      ref_id: '8.1'
+      name: Operational planning and control
+      description: Plan, implement, and control processes to meet BCMS requirements.
+      annotation: Create workflow diagrams and control plans for critical processes.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8
+      ref_id: '8.2'
+      name: Business impact analysis and risk assessment
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.2
+      ref_id: 8.2.1
+      name: General
+      description: Establish and maintain processes for BIA and risk assessment.
+      annotation: Define methodology for BIA and risk assessment alignment.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.2
+      ref_id: 8.2.2
+      name: Business impact analysis
+      description: Conduct a Business Impact Analysis to determine priorities and
+        impacts.
+      annotation: Use a standard BIA template capturing MTPD, RTO, RPO.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.2
+      ref_id: 8.2.3
+      name: Risk assessment
+      description: Conduct risk assessment to identify and evaluate threats to continuity.
+      annotation: Document and rank risks using impact-likelihood matrix.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8
+      ref_id: '8.3'
+      name: Business continuity strategies and solutions
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.3
+      ref_id: 8.3.1
+      name: General
+      description: Determine strategies and solutions to ensure continuity and recovery.
+      annotation: Hold strategy workshops linking BIA outcomes to recovery methods.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.3
+      ref_id: 8.3.2
+      name: Identification of strategies and solutions
+      description: Identify potential continuity strategies and solutions.
+      annotation: Brainstorm multiple recovery approaches before selection.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.3
+      ref_id: 8.3.3
+      name: Selection of strategies and solutions
+      description: Select appropriate strategies and solutions for implementation.
+      annotation: Evaluate solutions based on cost, time, and feasibility.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.3
+      ref_id: 8.3.4
+      name: Resource requirements
+      description: Identify and document resource requirements for continuity solutions.
+      annotation: Link resource requirements to supplier and HR capability plans.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.3
+      ref_id: 8.3.5
+      name: Implementation of solutions
+      description: Implement chosen continuity and recovery solutions.
+      annotation: Implement and verify continuity solutions through testing.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8
+      ref_id: '8.4'
+      name: Business continuity plans and procedures
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.4
+      ref_id: 8.4.1
+      name: General
+      description: Establish and implement business continuity procedures and plans.
+      annotation: Consolidate all BC plans into one coordinated response structure.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.4
+      ref_id: 8.4.2
+      name: Response structure
+      description: Define structure and responsibilities for response management.
+      annotation: Define crisis team structure with alternates and contact details.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.4
+      ref_id: 8.4.3
+      name: Warning and communication
+      description: Establish warning and communication procedures during disruptions.
+      annotation: Test alert and communication tools periodically.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.4
+      ref_id: 8.4.4
+      name: Business continuity plans
+      description: Maintain documented business continuity plans addressing recovery
+        steps.
+      annotation: Ensure each critical process has a tested recovery plan.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8.4
+      ref_id: 8.4.5
+      name: Recovery
+      description: Define recovery activities and ensure post-disruption resumption
+        of operations.
+      annotation: Document step-by-step restoration and verification procedures.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8
+      ref_id: '8.5'
+      name: Exercise programme
+      description: Develop, implement and maintain an exercise programme to test capabilities.
+      annotation: Perform annual tabletop and functional exercises.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:8.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:8
+      ref_id: '8.6'
+      name: Evaluation of business continuity documentation and capabilities
+      description: Evaluate BC documentation and capabilities to ensure effectiveness.
+      annotation: Conduct lessons-learned reviews after exercises and incidents.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Performance evaluation
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:9
+      ref_id: '9.1'
+      name: Monitoring, measurement, analysis and evaluation
+      description: Monitor, measure, analyze and evaluate BCMS performance and effectiveness.
+      annotation: Track metrics such as test results, incident response times, KPI
+        trends.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:9.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:9
+      ref_id: '9.2'
+      name: Internal audit
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:9.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:9.2
+      ref_id: 9.2.1
+      name: General
+      description: Plan and conduct internal audits at planned intervals.
+      annotation: Use trained auditors independent from operational areas.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:9.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:9.2
+      ref_id: 9.2.2
+      name: Audit programme(s)
+      description: Establish, implement and maintain an internal audit programme.
+      annotation: Base audit frequency on risk and past performance.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:9.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:9
+      ref_id: '9.3'
+      name: Management review
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:9.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:9.3
+      ref_id: 9.3.1
+      name: General
+      description: Top management shall review BCMS at planned intervals.
+      annotation: Hold management reviews at least annually.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:9.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:9.3
+      ref_id: 9.3.2
+      name: Management review input
+      description: Management review shall include required input elements.
+      annotation: 'Prepare review inputs: audit results, KPIs, incident summaries.'
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:9.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:9.3
+      ref_id: 9.3.3
+      name: Management review outputs
+      description: Management review shall produce outputs for improvement and change.
+      annotation: 'Document outputs: decisions, actions, and improvement plans.'
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: Improvement
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:10
+      ref_id: '10.1'
+      name: Nonconformity and corrective action
+      description: Address nonconformities through corrective actions and review effectiveness.
+      annotation: Maintain a CAPA register; verify closure effectiveness.
+    - urn: urn:intuitem:risk:req_node:iso22301-2019:10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso22301-2019:10
+      ref_id: '10.2'
+      name: Continual improvement
+      description: Continually improve the BCMS for suitability, adequacy and effectiveness.
+      annotation: Benchmark maturity yearly; embed improvements into plans.
