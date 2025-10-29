@@ -59,6 +59,7 @@ READER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "view_escalationthreshold",
     "view_assetclass",
+    "view_assetcapability",
     # privacy,
     "view_processing",
     "view_processingnature",
@@ -131,6 +132,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "view_escalationthreshold",
     "view_assetclass",
+    "view_assetcapability",
     # campaigns,
     "view_campaign",
     # privacy,
@@ -303,6 +305,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    "view_assetcapability",
     # campaigns,
     "view_campaign",
     # privacy,
@@ -541,6 +544,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    "view_assetcapability",
     # campaigns,
     "add_campaign",
     "view_campaign",
@@ -655,6 +659,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_assetclass",
     "change_assetclass",
     "delete_assetclass",
+    "view_assetcapability",
     "add_threat",
     "view_threat",
     "change_threat",
@@ -950,11 +955,14 @@ def startup(sender: AppConfig, **kwargs):
     """
     from django.contrib.auth.models import Permission
 
-    from core.models import AssetClass, Terminology
+    from core.models import AssetCapability, AssetClass, Terminology
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import ProcessingNature
     from global_settings.models import GlobalSettings
+
+    # first load in memory of the frameworks and mappings
+    from core.mappings.engine import engine
 
     print("startup handler: initialize database")
 
@@ -1101,6 +1109,12 @@ def startup(sender: AppConfig, **kwargs):
         AssetClass.create_default_values()
     except Exception as e:
         logger.error("Error creating default AssetClass", exc_info=e)
+
+    # Create default AssetCapability
+    try:
+        AssetCapability.create_default_values()
+    except Exception as e:
+        logger.error("Error creating default AssetCapability", exc_info=e)
 
     # Create default Terminologies
     try:

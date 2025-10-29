@@ -24,7 +24,7 @@ class EntityViewSet(BaseModelViewSet):
     """
 
     model = Entity
-    filterset_fields = ["folder", "relationship", "relationship__name"]
+    filterset_fields = ["name", "folder", "relationship", "relationship__name"]
 
 
 class EntityAssessmentViewSet(BaseModelViewSet):
@@ -34,9 +34,11 @@ class EntityAssessmentViewSet(BaseModelViewSet):
 
     model = EntityAssessment
     filterset_fields = [
+        "name",
         "status",
         "perimeter",
         "perimeter__folder",
+        "folder",
         "authors",
         "entity",
         "criticality",
@@ -142,7 +144,7 @@ class SolutionViewSet(BaseModelViewSet):
     """
 
     model = Solution
-    filterset_fields = ["provider_entity", "assets", "criticality"]
+    filterset_fields = ["name", "provider_entity", "assets", "criticality"]
 
     def perform_create(self, serializer):
         serializer.save()

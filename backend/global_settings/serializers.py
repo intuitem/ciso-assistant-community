@@ -35,13 +35,24 @@ class GlobalSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GlobalSettings
-        fields = "__all__"
+        fields = ["id", "name", "created_at", "updated_at"]
 
 
 class GeneralSettingsSerializer(serializers.ModelSerializer):
+    conversion_rate = serializers.FloatField(
+        write_only=True, required=False, default=1.0
+    )
+
     def update(self, instance, validated_data):
         # Track old currency value for potential propagation
         old_currency = instance.value.get("currency") if instance.value else None
+
+        # Extract conversion_rate before validation (it's not stored in settings, just used for conversion)
+        conversion_rate = 1.0
+        if "value" in validated_data and "conversion_rate" in validated_data["value"]:
+            conversion_rate = validated_data["value"].pop("conversion_rate")
+        elif "conversion_rate" in validated_data:
+            conversion_rate = validated_data.pop("conversion_rate")
 
         for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
@@ -55,13 +66,18 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
 
         # If currency has changed, propagate to AppliedControl records
         if old_currency != new_currency and new_currency:
-            self._update_applied_control_currencies(old_currency, new_currency)
+            self._update_applied_control_currencies(
+                old_currency, new_currency, conversion_rate
+            )
 
         return instance
 
-    def _update_applied_control_currencies(self, old_currency, new_currency):
-        """Update currency in all AppliedControl cost structures"""
+    def _update_applied_control_currencies(
+        self, old_currency, new_currency, conversion_rate=1.0
+    ):
+        """Update currency in all AppliedControl cost structures and apply conversion rate"""
         from core.models import AppliedControl
+        from decimal import Decimal
 
         updated_count = 0
 
@@ -81,13 +97,33 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 )
 
                 if should_update:
+                    # Update currency
                     control.cost["currency"] = new_currency
+
+                    # Apply conversion rate to cost amounts
+                    if conversion_rate != 1.0:
+                        # Convert build costs
+                        if "build" in control.cost:
+                            if "fixed_cost" in control.cost["build"]:
+                                control.cost["build"]["fixed_cost"] = float(
+                                    Decimal(str(control.cost["build"]["fixed_cost"]))
+                                    * Decimal(str(conversion_rate))
+                                )
+
+                        # Convert run costs
+                        if "run" in control.cost:
+                            if "fixed_cost" in control.cost["run"]:
+                                control.cost["run"]["fixed_cost"] = float(
+                                    Decimal(str(control.cost["run"]["fixed_cost"]))
+                                    * Decimal(str(conversion_rate))
+                                )
+
                     control.save(update_fields=["cost"])
                     updated_count += 1
 
         print(
             f"Updated currency from '{old_currency}' to '{new_currency}' "
-            f"in {updated_count} AppliedControl records"
+            f"with conversion rate {conversion_rate} in {updated_count} AppliedControl records"
         )
 
     class Meta:

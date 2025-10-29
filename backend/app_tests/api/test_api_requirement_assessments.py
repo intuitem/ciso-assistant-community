@@ -124,6 +124,8 @@ class TestRequirementAssessmentsAuthenticated:
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
                     "is_locked": False,
+                    "min_score": compliance_assessment.min_score,
+                    "max_score": compliance_assessment.max_score,
                     "name": compliance_assessment.name,
                 },
                 "requirement": {
@@ -206,6 +208,8 @@ class TestRequirementAssessmentsAuthenticated:
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
                     "is_locked": False,
+                    "min_score": compliance_assessment.min_score,
+                    "max_score": compliance_assessment.max_score,
                     "name": compliance_assessment.name,
                 }
             },
@@ -257,6 +261,8 @@ class TestRequirementAssessmentsAuthenticated:
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
                     "is_locked": False,
+                    "min_score": compliance_assessment.min_score,
+                    "max_score": compliance_assessment.max_score,
                     "name": compliance_assessment.name,
                 },
                 "requirement": {

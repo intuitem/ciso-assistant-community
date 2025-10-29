@@ -1314,8 +1314,26 @@ export const listViewFields = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['ref_id', 'name', 'framework', 'perimeter', 'reviewProgress', 'createdAt', 'updatedAt'],
-		body: ['ref_id', 'name', 'framework', 'perimeter', 'progress', 'created_at', 'updated_at'],
+		head: [
+			'ref_id',
+			'name',
+			'version',
+			'framework',
+			'perimeter',
+			'reviewProgress',
+			'createdAt',
+			'updatedAt'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'version',
+			'framework',
+			'perimeter',
+			'progress',
+			'created_at',
+			'updated_at'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1453,7 +1471,8 @@ export const listViewFields = {
 			'asset',
 			'folder',
 			'bia',
-			'dependencies',
+			'childrenAssets',
+			'extraDependencies',
 			'associatedControls',
 			'recoveryDocumented',
 			'recoveryTested',
@@ -1463,6 +1482,7 @@ export const listViewFields = {
 			'asset',
 			'asset_folder',
 			'bia',
+			'children_assets',
 			'dependencies',
 			'associated_controls',
 			'recovery_documented',
@@ -1475,8 +1495,8 @@ export const listViewFields = {
 		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
 	processings: {
-		head: ['name', 'description', 'status', 'processingNature', 'labels', 'folder'],
-		body: ['name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
+		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: PROCESSING_STATUS_FILTER,
