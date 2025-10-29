@@ -21,10 +21,12 @@ CLICA_CONFG_PATH = ".clica_config.yaml"
 
 load_dotenv(".clica.env")
 
+
 @click.group()
 def cli():
     """CLICA is the CLI tool to interact with CISO Assistant REST API."""
     pass
+
 
 # Read TOKEN, API_URL and VERIFY_CERTIFICATE from environment variables
 API_URL = os.getenv("API_URL", "")
@@ -36,11 +38,15 @@ VERIFY_CERTIFICATE = os.getenv("VERIFY_CERTIFICATE", "true").lower() in (
     "on",
 )
 
+
 def ids_map(model, folder=None):
     if not TOKEN:
-        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
         sys.exit(1)
-        
+
     my_map = dict()
     url = f"{API_URL}/{model}/ids/"
     headers = {"Authorization": f"Token {TOKEN}"}
@@ -57,9 +63,12 @@ def ids_map(model, folder=None):
 
 def _get_folders():
     if not TOKEN:
-        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
         sys.exit(1)
-        
+
     url = f"{API_URL}/folders/"
     headers = {"Authorization": f"Token {TOKEN}"}
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
@@ -103,9 +112,12 @@ def get_unique_parsed_values(df, column_name):
 
 def batch_create(model, items, folder_id):
     if not TOKEN:
-        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
         sys.exit(1)
-        
+
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
@@ -141,9 +153,12 @@ def batch_create(model, items, folder_id):
 def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
     """crawl a risk assessment (see template) and create the assoicated objects"""
     if not TOKEN:
-        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
         sys.exit(1)
-        
+
     df = pd.read_csv(file, delimiter=";")
     headers = {
         "Authorization": f"Token {TOKEN}",
@@ -269,9 +284,12 @@ def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
 def import_assets(file):
     """import assets from a csv. Check the samples for format."""
     if not TOKEN:
-        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
         sys.exit(1)
-        
+
     GLOBAL_FOLDER_ID, _ = _get_folders()
     df = pd.read_csv(file)
     url = f"{API_URL}/assets/"
@@ -309,9 +327,12 @@ def import_assets(file):
 def import_controls(file):
     """import applied controls. Check the samples for format."""
     if not TOKEN:
-        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
         sys.exit(1)
-        
+
     df = pd.read_csv(file)
     GLOBAL_FOLDER_ID, _ = _get_folders()
     url = f"{API_URL}/applied-controls/"
@@ -349,9 +370,12 @@ def import_controls(file):
 def import_evidences(file):
     """Import evidences. Check the samples for format."""
     if not TOKEN:
-        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
         sys.exit(1)
-        
+
     df = pd.read_csv(file)
     GLOBAL_FOLDER_ID, _ = _get_folders()
 
@@ -384,7 +408,10 @@ def import_evidences(file):
 def upload_attachment(file, name):
     """Upload attachment as evidence"""
     if not TOKEN:
-        print("No authentication token available. Please set PAT token in .clica.env.", file=sys.stderr)
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     headers = {
