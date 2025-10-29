@@ -72,14 +72,15 @@ class ConnectionTestView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        except Exception as e:
+        except Exception:
             # An exception occurred, e.g., network error, invalid URL
             logger.error(
-                f"Test connection for provider {provider} raised an exception: {e}",
+                "Test connection for provider raised an exception",
+                provider=provider,
                 exc_info=True,
             )
             return Response(
-                {"status": "error", "message": f"An unexpected error occurred: {e}"},
+                {"status": "error", "message": "An unexpected error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -151,13 +152,14 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        except Exception as e:
+        except Exception:
             logger.error(
-                f"Test connection for config {pk} raised an exception: {e}",
+                "Test connection for config raised an exception",
+                config_id=pk,
                 exc_info=True,
             )
             return Response(
-                {"status": "error", "message": f"An unexpected error occurred: {e}"},
+                {"status": "error", "message": "An unexpected error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -168,13 +170,14 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
             client = IntegrationRegistry.get_client(instance)
             remote_objects = client.list_remote_objects()
             return Response(remote_objects, status=status.HTTP_200_OK)
-        except Exception as e:
+        except Exception:
             logger.error(
-                f"Listing remote objects for config {pk} raised an exception: {e}",
+                "Listing remote objects for config raised an exception",
+                config_id=pk,
                 exc_info=True,
             )
             return Response(
-                {"status": "error", "message": f"An unexpected error occurred: {e}"},
+                {"status": "error", "message": "An unexpected error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
