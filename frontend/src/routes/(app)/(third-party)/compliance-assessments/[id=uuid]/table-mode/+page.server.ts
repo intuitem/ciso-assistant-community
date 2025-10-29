@@ -24,6 +24,35 @@ export const load = (async ({ fetch, params }) => {
 	const framework = await fetch(frameworkEndpoint).then((res) => res.json());
 	compliance_assessment.framework = framework;
 
+	// const measureCreateSchema = modelSchema('applied-controls');
+	// const measureCreateForm = await superValidate(
+	// 	{ folder: requirementAssessment.folder.id }, //TODO: fix here
+	// 	zod(measureCreateSchema),
+	// 	{ errors: false }
+	// );
+
+	// const measureModel = getModelInfo('applied-controls');
+	// const measureSelectOptions: Record<string, any> = {};
+	// //TODO: fix here
+	// if (measureModel.selectFields) {
+	// 	await Promise.all(
+	// 		measureModel.selectFields.map(async (selectField) => {
+	// 			const url = `${baseUrl}/applied-controls/${selectField.field}/`;
+	// 			const data = await fetchJson(url);
+	// 			if (data) {
+	// 				measureSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
+	// 					label: value,
+	// 					value: selectField.valueType === 'number' ? parseInt(key) : key
+	// 				}));
+	// 			} else {
+	// 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
+	// 			}
+	// 		})
+	// 	);
+	// }
+
+	// measureModel['selectOptions'] = measureSelectOptions;
+
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
 	const scoreSchema = z.object({
@@ -96,6 +125,8 @@ export const load = (async ({ fetch, params }) => {
 		scores,
 		requirement_assessments,
 		requirements,
+		// measureCreateForm,
+		// measureModel,
 		evidenceModel,
 		title: m.tableMode()
 	};
