@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List
+from typing import Self, Union, List, Optional
 import statistics
 
 from django.utils import timezone
@@ -5910,6 +5910,23 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             },
             "description",
         )
+
+    @property
+    def get_next_requirement_id(self) -> Optional[str]:
+        order_id = self.requirement.order_id
+        if order_id is None:
+            return
+
+        next_requirement_assessment: RequirementAssessment = (
+            self.compliance_assessment.requirement_assessments.filter(
+                requirement__order_id=order_id + 1
+            ).first()
+        )
+
+        if next_requirement_assessment is None:
+            return
+
+        return str(next_requirement_assessment.id)
 
     @property
     def is_locked(self) -> bool:

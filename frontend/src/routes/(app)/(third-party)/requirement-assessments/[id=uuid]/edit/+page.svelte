@@ -687,15 +687,17 @@
 							type="button"
 							onclick={cancel}>{m.cancel()}</button
 						>
-						<button
-							class="btn preset-filled-secondary-500 font-semibold w-full"
-							data-testid="save-no-continue-button"
-							type="submit"
-							onclick={() =>
-								form.form.update((data) => {
-									return { ...data, noRedirect: true };
-								})}>{m.saveAndContinue()}</button
-						>
+						{#if page.data.requirementAssessment.next_requirement !== null}
+							<button
+								class="btn preset-filled-secondary-500 font-semibold w-full"
+								data-testid="save-no-continue-button"
+								type="submit"
+								onclick={() =>
+									form.form.update((data) => {
+										return { ...data, gotoNextRequirement: true };
+									})}>{m.saveAndContinue()}</button
+							>
+						{/if}
 						<button
 							class="btn preset-filled-primary-500 font-semibold w-full"
 							data-testid="save-button"
