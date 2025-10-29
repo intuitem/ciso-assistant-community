@@ -234,78 +234,8 @@ class IntegrationRegistry:
         return provider.validate_configuration(config)
 
     @classmethod
-    def autodiscover(cls) -> None:
-        """Auto-discover and register all integrations
-
-        Looks for integration modules following the convention:
-        integrations/<type>/<provider>/integration.py
-
-        Each integration.py should call IntegrationRegistry.register()
-        """
-        if cls._initialized:
-            return
-
-        from django.apps import apps
-        import importlib
-
-        # Look for integration modules in installed apps
-        for app_config in apps.get_app_configs():
-            # Try to import integrations module from each app
-            try:
-                module_name = f"{app_config.name}.integrations"
-                importlib.import_module(module_name)
-                logger.debug(f"Loaded integrations from {module_name}")
-            except ImportError:
-                # No integrations module in this app
-                pass
-
-        # Also try to import from integrations package directly
-        try:
-            # Import all integration modules
-            from pathlib import Path
-
-            integrations_path = Path(__file__).parent
-
-            # Walk through integration directories
-            for provider_type_dir in integrations_path.iterdir():
-                if not provider_type_dir.is_dir() or provider_type_dir.name.startswith(
-                    "_"
-                ):
-                    continue
-
-                # Look for provider directories
-                for provider_dir in provider_type_dir.iterdir():
-                    if not provider_dir.is_dir() or provider_dir.name.startswith("_"):
-                        continue
-
-                    # Try to import integration.py
-                    integration_file = provider_dir / "integration.py"
-                    if integration_file.exists():
-                        module_path = f"integrations.{provider_type_dir.name}.{provider_dir.name}.integration"
-                        try:
-                            importlib.import_module(module_path)
-                            logger.debug(f"Loaded integration from {module_path}")
-                        except ImportError as e:
-                            logger.warning(
-                                f"Failed to load integration {module_path}: {e}"
-                            )
-        except Exception as e:
-            logger.warning(f"Error during integration autodiscovery: {e}")
-
-        cls._initialized = True
-        logger.info(
-            f"Integration registry initialized with {len(cls._providers)} providers"
-        )
-
-    @classmethod
     def clear(cls) -> None:
         """Clear all registered providers (mainly for testing)"""
         cls._providers.clear()
         cls._initialized = False
         logger.info("Integration registry cleared")
-
-
-# Initialize registry when module is imported
-def init_registry():
-    """Initialize the integration registry"""
-    IntegrationRegistry.autodiscover()
