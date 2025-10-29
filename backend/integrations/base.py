@@ -520,7 +520,7 @@ class BaseSyncOrchestrator(ABC):
             changes={"fields": changed_fields},
             triggered_by=SyncEvent.TriggeredBy.WEBHOOK
             if direction == SyncMapping.SyncDirection.PULL
-            else "system",
+            else SyncEvent.TriggeredBy.USER,
             success=success,
             error_details=error,
         )
