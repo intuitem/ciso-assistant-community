@@ -923,7 +923,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        if self.context["action"] == "retrieve":
+        if self.context.get("action") == "retrieve":
             sync_mappings = [
                 {
                     "id": mapping.id,
@@ -934,9 +934,9 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
                     "error_message": mapping.error_message,
                     "provider": mapping.configuration.provider.name,
                 }
-                for mapping in SyncMapping.objects.filter(
-                    local_object_id=instance.id
-                ).only(
+                for mapping in SyncMapping.objects.filter(local_object_id=instance.id)
+                .select_related("configuration__provider")
+                .only(
                     "id",
                     "remote_id",
                     "sync_status",
