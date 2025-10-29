@@ -2570,5 +2570,7 @@
 	"remoteObject": "Remote object",
 	"remoteObjectHelpText": "Select the remote object to sync with",
 	"webhookEndpointUrl": "Webhook Endpoint URL",
-	"webhookEndpointUrlHelpText": "The URL where the application will receive incoming webhooks from the third-party service."
+	"webhookEndpointUrlHelpText": "The URL where the application will receive incoming webhooks from the third-party service.",
+	"createRemoteObject": "Create remote object",
+	"createRemoteObjectHelpText": "When enabled, a corresponding object will be created in the third-party service when this item is created."
 }

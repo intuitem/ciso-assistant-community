@@ -377,8 +377,8 @@
 					<Checkbox
 						{form}
 						field="create_remote_object"
-						label="m.createRemoteObject()"
-						helpText="m.createRemoteObjectHelpText()"
+						label={m.createRemoteObject()}
+						helpText={m.createRemoteObjectHelpText()}
 					/>
 				{/if}
 			{/if}
