@@ -1495,8 +1495,8 @@ export const listViewFields = {
 		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
 	processings: {
-		head: ['name', 'description', 'status', 'processingNature', 'labels', 'folder'],
-		body: ['name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
+		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: PROCESSING_STATUS_FILTER,
