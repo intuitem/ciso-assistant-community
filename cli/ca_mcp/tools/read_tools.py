@@ -176,6 +176,120 @@ async def get_risk_matrices():
         return f"Error in get_risk_matrices: {str(e)}"
 
 
+async def get_risk_matrix_details(matrix_id_or_name: str):
+    """Get detailed information about a specific risk matrix including probability and impact scales
+
+    Args:
+        matrix_id_or_name: ID or name of the risk matrix
+
+    Returns detailed matrix information including:
+    - Probability scale with indices and values
+    - Impact scale with indices and values
+    - Risk level grid
+
+    Use this to determine valid values for inherent_proba, current_proba, etc. when updating risk scenarios
+    """
+    try:
+        from ..resolvers import resolve_risk_matrix_id
+
+        # Resolve matrix name to ID if needed
+        matrix_id = resolve_risk_matrix_id(matrix_id_or_name)
+
+        res = make_get_request(f"/risk-matrices/{matrix_id}/")
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        matrix = res.json()
+
+        result = f"# Risk Matrix: {matrix.get('name', 'N/A')}\n\n"
+        result += f"**ID:** {matrix.get('id', 'N/A')}\n"
+        result += f"**Description:** {matrix.get('description', 'N/A')}\n\n"
+
+        # Extract JSON definition
+        json_def = matrix.get("json_definition", {})
+
+        # Probability scale
+        if "probability" in json_def:
+            prob = json_def["probability"]
+            result += "## Probability Scale\n\n"
+            result += "|Index|Abbreviation|Name|Description|\n"
+            result += "|---|---|---|---|\n"
+            for idx, prob_item in enumerate(prob):
+                abbr = prob_item.get("abbreviation", "N/A")
+                name = prob_item.get("name", "N/A")
+                desc = prob_item.get("description", "")
+                result += f"|{idx}|{abbr}|{name}|{desc}|\n"
+            result += "\n"
+
+        # Impact scale
+        if "impact" in json_def:
+            impact = json_def["impact"]
+            result += "## Impact Scale\n\n"
+            result += "|Index|Abbreviation|Name|Description|\n"
+            result += "|---|---|---|---|\n"
+            for idx, impact_item in enumerate(impact):
+                abbr = impact_item.get("abbreviation", "N/A")
+                name = impact_item.get("name", "N/A")
+                desc = impact_item.get("description", "")
+                result += f"|{idx}|{abbr}|{name}|{desc}|\n"
+            result += "\n"
+
+        # Risk levels grid
+        if "risk" in json_def:
+            risk_levels = json_def["risk"]
+            result += "## Risk Levels\n\n"
+            result += "|Index|Abbreviation|Name|Description|Hexcolor|\n"
+            result += "|---|---|---|---|---|\n"
+            for idx, risk_item in enumerate(risk_levels):
+                abbr = risk_item.get("abbreviation", "N/A")
+                name = risk_item.get("name", "N/A")
+                desc = risk_item.get("description", "")
+                color = risk_item.get("hexcolor", "N/A")
+                result += f"|{idx}|{abbr}|{name}|{desc}|{color}|\n"
+            result += "\n"
+
+        # Grid (matrix of probability x impact = risk level)
+        if "grid" in json_def:
+            grid = json_def["grid"]
+            result += "## Risk Assessment Grid\n\n"
+            result += "Grid shows risk level index for each probability/impact combination:\n\n"
+
+            # Build grid table
+            prob_count = len(json_def.get("probability", []))
+            impact_count = len(json_def.get("impact", []))
+
+            # Header row
+            result += "| P\\I |"
+            for i in range(impact_count):
+                result += f" {i} |"
+            result += "\n"
+
+            # Separator
+            result += "|---|"
+            for _ in range(impact_count):
+                result += "---|"
+            result += "\n"
+
+            # Data rows
+            for p_idx in range(prob_count):
+                result += f"| {p_idx} |"
+                for i_idx in range(impact_count):
+                    if p_idx < len(grid) and i_idx < len(grid[p_idx]):
+                        result += f" {grid[p_idx][i_idx]} |"
+                    else:
+                        result += " - |"
+                result += "\n"
+            result += "\n"
+
+        result += "**Usage:** When updating risk scenarios, use the index values from the Probability and Impact scales.\n"
+        result += "Example: `current_proba=2` sets probability to index 2, `current_impact=3` sets impact to index 3.\n"
+
+        return result
+    except Exception as e:
+        return f"Error in get_risk_matrix_details: {str(e)}"
+
+
 async def get_risk_assessments():
     """Get all risk assessments in CISO Assistant
     Returns a list of risk assessments with their IDs, names, and status
@@ -423,3 +537,84 @@ async def get_business_impact_analyses():
         return result
     except Exception as e:
         return f"Error in get_business_impact_analyses: {str(e)}"
+
+
+async def get_requirement_assessments(
+    compliance_assessment_id_or_name: str = None,
+    ref_id: str = None,
+):
+    """Get requirement assessments (individual requirements within audits)
+
+    Args:
+        compliance_assessment_id_or_name: Optional ID or name of compliance assessment to filter by
+        ref_id: Optional reference ID to filter by (e.g., "ISO 27001:2022 A.5.1")
+
+    Returns a list of requirement assessments with their IDs, statuses, and results.
+    Use the IDs to update specific requirements with update_requirement_assessment().
+    """
+    try:
+        from ..resolvers import resolve_framework_id
+
+        params = {}
+
+        # If compliance assessment specified, resolve it
+        if compliance_assessment_id_or_name:
+            # Try to resolve as compliance assessment name/ID
+            if (
+                "-" in compliance_assessment_id_or_name
+                and len(compliance_assessment_id_or_name) == 36
+            ):
+                params["compliance_assessment"] = compliance_assessment_id_or_name
+            else:
+                # Look up compliance assessment by name
+                ca_res = make_get_request(
+                    "/compliance-assessments/",
+                    params={"name": compliance_assessment_id_or_name},
+                )
+                if ca_res.status_code == 200:
+                    ca_data = ca_res.json()
+                    ca_results = get_paginated_results(ca_data)
+                    if ca_results:
+                        params["compliance_assessment"] = ca_results[0]["id"]
+                    else:
+                        return f"Compliance assessment '{compliance_assessment_id_or_name}' not found"
+
+        # Add ref_id filter if provided
+        if ref_id:
+            params["ref_id"] = ref_id
+
+        res = make_get_request("/requirement-assessments/", params=params)
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        data = res.json()
+        req_assessments = get_paginated_results(data)
+
+        if not req_assessments:
+            return "No requirement assessments found"
+
+        result = "# Requirement Assessments\n\n"
+        result += f"Total: {len(req_assessments)}\n\n"
+        result += "|ID|Ref ID|Requirement|Compliance Assessment|Status|Result|Score|Observation|\n"
+        result += "|---|---|---|---|---|---|---|---|\n"
+
+        for req in req_assessments:
+            req_id = req.get("id", "N/A")
+            req_ref_id = req.get("ref_id", "N/A")
+            requirement = req.get("name", "N/A")
+            comp_assessment = (req.get("compliance_assessment") or {}).get(
+                "name", "N/A"
+            )
+            status = req.get("status", "N/A")
+            result_val = req.get("result", "N/A")
+            score = req.get("score", "N/A") if req.get("is_scored") else "N/A"
+            observation = (req.get("observation") or "")[:50]  # Truncate
+
+            result += f"|{req_id}|{req_ref_id}|{requirement}|{comp_assessment}|{status}|{result_val}|{score}|{observation}|\n"
+
+        result += "\n**Use these IDs with update_requirement_assessment() to update individual requirements.**\n"
+
+        return result
+    except Exception as e:
+        return f"Error in get_requirement_assessments: {str(e)}"

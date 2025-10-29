@@ -189,3 +189,79 @@ def resolve_asset_id(asset_name_or_id: str) -> str:
         )
 
     return assets[0]["id"]
+
+
+def resolve_risk_scenario_id(scenario_name_or_id: str) -> str:
+    """Helper function to resolve risk scenario name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    # Check if it's already a UUID
+    if "-" in scenario_name_or_id and len(scenario_name_or_id) == 36:
+        return scenario_name_or_id
+
+    # Otherwise, look up by name
+    res = make_get_request("/risk-scenarios/", params={"name": scenario_name_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Failed to look up risk scenario '{scenario_name_or_id}': HTTP {res.status_code}"
+        )
+
+    data = res.json()
+    scenarios = get_paginated_results(data)
+
+    if not scenarios:
+        raise ValueError(f"Risk scenario '{scenario_name_or_id}' not found")
+
+    if len(scenarios) > 1:
+        raise ValueError(
+            f"Multiple risk scenarios found with name '{scenario_name_or_id}'. Please use UUID instead."
+        )
+
+    return scenarios[0]["id"]
+
+
+def resolve_applied_control_id(control_name_or_id: str) -> str:
+    """Helper function to resolve applied control name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    # Check if it's already a UUID
+    if "-" in control_name_or_id and len(control_name_or_id) == 36:
+        return control_name_or_id
+
+    # Otherwise, look up by name
+    res = make_get_request("/applied-controls/", params={"name": control_name_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Failed to look up applied control '{control_name_or_id}': HTTP {res.status_code}"
+        )
+
+    data = res.json()
+    controls = get_paginated_results(data)
+
+    if not controls:
+        raise ValueError(f"Applied control '{control_name_or_id}' not found")
+
+    if len(controls) > 1:
+        raise ValueError(
+            f"Multiple applied controls found with name '{control_name_or_id}'. Please use UUID instead."
+        )
+
+    return controls[0]["id"]
+
+
+def resolve_requirement_assessment_id(requirement_assessment_id: str) -> str:
+    """Helper function to validate requirement assessment UUID
+    Requirement assessments don't have names, only UUIDs.
+    Use get_audit_gap_analysis() to find requirement assessment IDs.
+    """
+    # Check if it's a UUID
+    if "-" in requirement_assessment_id and len(requirement_assessment_id) == 36:
+        return requirement_assessment_id
+
+    raise ValueError(
+        f"Requirement assessments can only be identified by UUID. "
+        f"Use get_audit_gap_analysis() to find requirement assessment IDs. "
+        f"Provided value '{requirement_assessment_id}' is not a valid UUID."
+    )

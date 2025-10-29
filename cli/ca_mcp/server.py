@@ -13,6 +13,7 @@ from .tools.read_tools import (
     get_folders,
     get_perimeters,
     get_risk_matrices,
+    get_risk_matrix_details,
     get_risk_assessments,
     get_threats,
     get_assets,
@@ -20,6 +21,7 @@ from .tools.read_tools import (
     get_security_exceptions,
     get_frameworks,
     get_business_impact_analyses,
+    get_requirement_assessments,
 )
 
 from .tools.analysis_tools import (
@@ -47,6 +49,9 @@ from .tools.write_tools import (
 
 from .tools.update_tools import (
     update_asset,
+    update_risk_scenario,
+    update_applied_control,
+    update_requirement_assessment,
 )
 
 # Register all tools with MCP decorators
@@ -56,6 +61,7 @@ mcp.tool()(get_audits_progress)
 mcp.tool()(get_folders)
 mcp.tool()(get_perimeters)
 mcp.tool()(get_risk_matrices)
+mcp.tool()(get_risk_matrix_details)
 mcp.tool()(get_risk_assessments)
 mcp.tool()(get_threats)
 mcp.tool()(get_assets)
@@ -63,6 +69,7 @@ mcp.tool()(get_incidents)
 mcp.tool()(get_security_exceptions)
 mcp.tool()(get_frameworks)
 mcp.tool()(get_business_impact_analyses)
+mcp.tool()(get_requirement_assessments)
 
 mcp.tool()(get_all_audits_with_metrics)
 mcp.tool()(get_audit_gap_analysis)
@@ -82,6 +89,9 @@ mcp.tool()(create_business_impact_analysis)
 mcp.tool()(create_compliance_assessment)
 
 mcp.tool()(update_asset)
+mcp.tool()(update_risk_scenario)
+mcp.tool()(update_applied_control)
+mcp.tool()(update_requirement_assessment)
 
 
 def run_server():
