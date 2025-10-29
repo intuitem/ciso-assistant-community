@@ -2568,5 +2568,7 @@
 	"integrationProvider": "Integration provider",
 	"integrationProviderHelpText": "Select the integration provider to configure object-level sync",
 	"remoteObject": "Remote object",
-	"remoteObjectHelpText": "Select the remote object to sync with"
+	"remoteObjectHelpText": "Select the remote object to sync with",
+	"webhookEndpointUrl": "Webhook Endpoint URL",
+	"webhookEndpointUrlHelpText": "The URL where the application will receive incoming webhooks from the third-party service."
 }
