@@ -122,8 +122,13 @@ class Folder(NameDescriptionMixin):
     def __str__(self) -> str:
         return self.name.__str__()
 
-    def get_sub_folders(self) -> Generator[Self, None, None]:
+    def get_sub_folders(
+        self, *, include_self: bool = False
+    ) -> Generator[Self, None, None]:
         """Return the list of subfolders"""
+
+        if include_self:
+            yield self
 
         def sub_folders_in(folder):
             for sub_folder in folder.folder_set.all():
@@ -139,7 +144,7 @@ class Folder(NameDescriptionMixin):
         while (current_folder := current_folder.parent_folder) is not None:
             yield current_folder
 
-    def get_folder_full_path(self, include_root: bool = False) -> list[Self]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Self]:
         """
         Get the full path of the folder including its parents.
         If include_root is True, the root folder is included in the path.
@@ -328,7 +333,7 @@ class FolderMixin(models.Model):
         default=Folder.get_root_folder_id,
     )
 
-    def get_folder_full_path(self, include_root: bool = False) -> list[Folder]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
         folders = ([self.folder] + [f for f in self.folder.get_parent_folders()])[::-1]
         if include_root:
             return folders

@@ -343,11 +343,10 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	optionsEndpoint={`folders/${initialData.folder}/subdomains/`}
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
