@@ -32,6 +32,17 @@ class Command(BaseCommand):
     help = "Manually links a local AppliedControl to a remote Jira issue key."
 
     def add_arguments(self, parser):
+        """
+        Register command-line arguments required by the management command.
+        
+        Parameters:
+            parser (argparse.ArgumentParser): The argument parser to which the command-line options are added.
+        
+        Adds the following CLI options:
+            --control-id (UUID): The UUID of the local AppliedControl object to link.
+            --jira-key (str): The remote Jira issue key to associate (e.g., "PROJ-123").
+            --update (flag): If present, update an existing mapping's remote_id to the provided Jira key.
+        """
         parser.add_argument(
             "--control-id",
             type=uuid.UUID,  # Use UUID type for built-in validation
@@ -51,6 +62,26 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """
+        Create or update a SyncMapping that links a local AppliedControl to a remote Jira issue.
+        
+        This command:
+        - Looks up the AppliedControl by the provided `control_id`.
+        - Finds the Jira IntegrationConfiguration for the control's folder.
+        - If no SyncMapping exists for that control+configuration, creates one pointing to `jira_key`.
+        - If a SyncMapping exists and `update` is true, updates the mapping's `remote_id` to `jira_key`, clears any error message, and marks it synced.
+        - If a SyncMapping exists and `update` is false, raises a CommandError.
+        
+        Parameters:
+            control_id (uuid.UUID): The UUID of the local AppliedControl to link.
+            jira_key (str): The Jira issue key to associate with the local object.
+            update (bool): When true, overwrite an existing mapping to point to `jira_key`.
+        
+        Raises:
+            CommandError: If the core AppliedControl model cannot be imported, the specified AppliedControl does not exist,
+                          no Jira IntegrationConfiguration exists for the control's folder, or a mapping already exists and
+                          `update` was not provided.
+        """
         if AppliedControl is None:
             raise CommandError(
                 "Could not import 'core.models.AppliedControl'. "

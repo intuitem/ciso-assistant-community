@@ -27,6 +27,19 @@ class IntegrationProvider:
         description: str = "",
         config_schema: dict = {},
     ):
+        """
+        Create a registry entry describing an integration provider and its component classes.
+        
+        Parameters:
+            name (str): Unique provider identifier used for lookup and registration.
+            provider_type (str): Category or type of the provider (e.g., "crm", "email").
+            client_class (Type[BaseIntegrationClient]): Client implementation used to communicate with the external service.
+            mapper_class (Type[BaseFieldMapper]): Field mapper implementation for mapping external to internal fields.
+            orchestrator_class (Type[BaseSyncOrchestrator]): Orchestrator implementation that coordinates sync operations.
+            display_name (str): Human-facing name shown in UIs; defaults to a title-cased `name` when empty.
+            description (str): Short description of the provider.
+            config_schema (dict): Configuration schema describing required fields and credential structure (may include keys like `"required"` and `"credentials"`).
+        """
         self.name = name
         self.provider_type = provider_type
         self.client_class = client_class
@@ -39,24 +52,54 @@ class IntegrationProvider:
     def create_orchestrator(
         self, configuration: IntegrationConfiguration
     ) -> BaseSyncOrchestrator:
-        """Create an orchestrator instance for this provider"""
+        """
+        Create an orchestrator for this provider using the given configuration.
+        
+        Parameters:
+            configuration (IntegrationConfiguration): Configuration used to initialize the orchestrator.
+        
+        Returns:
+            BaseSyncOrchestrator: An instance of the provider's orchestrator initialized with `configuration`.
+        """
         return self.orchestrator_class(configuration)
 
     def create_client(
         self, configuration: IntegrationConfiguration
     ) -> BaseIntegrationClient:
-        """Create a client instance for this provider"""
+        """
+        Create a client instance for this provider using the given integration configuration.
+        
+        Parameters:
+            configuration (IntegrationConfiguration): Configuration for the integration, including provider identification and credentials used to initialize the client.
+        
+        Returns:
+            BaseIntegrationClient: An instance of the provider's client class initialized with the provided configuration.
+        """
         return self.client_class(configuration)
 
     def create_mapper(self, configuration: IntegrationConfiguration) -> BaseFieldMapper:
-        """Create a mapper instance for this provider"""
+        """
+        Create a mapper instance for the provider using the given configuration.
+        
+        Parameters:
+            configuration (IntegrationConfiguration): Configuration used to initialize the mapper.
+        
+        Returns:
+            BaseFieldMapper: An instance of the provider's field mapper initialized with the configuration.
+        """
         return self.mapper_class(configuration)
 
     def validate_configuration(self, config: dict) -> tuple[bool, list[str]]:
-        """Validate configuration against schema
-
+        """
+        Validate a provider configuration against this provider's config schema.
+        
+        Checks for required top-level fields declared in the provider's `config_schema` and for required credential fields under `config_schema["credentials"]` when present.
+        
+        Parameters:
+            config (dict): The configuration to validate.
+        
         Returns:
-            (is_valid, list_of_errors)
+            tuple[bool, list[str]]: `True` if the configuration satisfies the schema, `False` otherwise; a list of human-readable error messages for any missing fields.
         """
         errors = []
 
@@ -95,17 +138,18 @@ class IntegrationRegistry:
         description: str = "",
         config_schema: dict = {},
     ) -> None:
-        """Register a new integration provider
-
-        Args:
-            name: Unique identifier (e.g., 'jira', 'servicenow')
-            provider_type: Category (e.g., 'itsm', 'directory', 'hr')
-            client_class: Client implementation class
-            mapper_class: Field mapper implementation class
-            orchestrator_class: Orchestrator implementation class
-            display_name: Human-readable name
-            description: Provider description
-            config_schema: JSON schema for configuration validation
+        """
+        Register a new integration provider in the central registry.
+        
+        Parameters:
+            name (str): Unique provider identifier (e.g., "jira", "servicenow").
+            provider_type (str): Category of provider (e.g., "itsm", "directory", "hr").
+            client_class (Type[BaseIntegrationClient]): Implementation class for the integration client.
+            mapper_class (Type[BaseFieldMapper]): Implementation class for field mapping.
+            orchestrator_class (Type[BaseSyncOrchestrator]): Implementation class for sync orchestration.
+            display_name (str): Optional human-readable name; if empty, a default display name will be used.
+            description (str): Optional provider description.
+            config_schema (dict): Optional configuration schema used to validate provider configurations (may include required fields and credential structure).
         """
         if name in cls._providers:
             logger.warning(f"Provider {name} is already registered. Overwriting.")
@@ -126,10 +170,11 @@ class IntegrationRegistry:
 
     @classmethod
     def unregister(cls, name: str) -> bool:
-        """Unregister an integration provider
-
+        """
+        Remove a registered integration provider by name.
+        
         Returns:
-            True if provider was unregistered, False if not found
+            `True` if the provider was unregistered, `False` otherwise.
         """
         if name in cls._providers:
             del cls._providers[name]
@@ -139,12 +184,22 @@ class IntegrationRegistry:
 
     @classmethod
     def get_provider(cls, name: str) -> Optional[IntegrationProvider]:
-        """Get a registered provider by name"""
+        """
+        Retrieve the registered integration provider with the given name.
+        
+        Returns:
+            IntegrationProvider | None: The provider instance if registered, `None` otherwise.
+        """
         return cls._providers.get(name)
 
     @classmethod
     def get_providers_by_type(cls, provider_type: str) -> list[IntegrationProvider]:
-        """Get all providers of a specific type"""
+        """
+        Retrieve all registered IntegrationProvider instances with the specified provider type.
+        
+        Returns:
+            list[IntegrationProvider]: Matching providers; empty list if none.
+        """
         return [
             provider
             for provider in cls._providers.values()
@@ -153,28 +208,39 @@ class IntegrationRegistry:
 
     @classmethod
     def list_providers(cls) -> list[IntegrationProvider]:
-        """Get all registered providers"""
+        """
+        Return a list of all registered integration providers.
+        
+        Returns:
+            providers (list[IntegrationProvider]): A list of registered IntegrationProvider instances.
+        """
         return list(cls._providers.values())
 
     @classmethod
     def list_provider_names(cls) -> list[str]:
-        """Get all registered provider names"""
+        """
+        Return the names of all registered integration providers.
+        
+        Returns:
+            list[str]: A list of provider names currently registered in the registry.
+        """
         return list(cls._providers.keys())
 
     @classmethod
     def get_orchestrator(
         cls, configuration: "IntegrationConfiguration"
     ) -> BaseSyncOrchestrator:
-        """Get an orchestrator instance for a configuration
-
-        Args:
-            configuration: IntegrationConfiguration instance
-
+        """
+        Return an orchestrator instance for the given integration configuration.
+        
+        Parameters:
+            configuration (IntegrationConfiguration): Configuration whose provider determines which orchestrator to create; must have a `provider` attribute with a `name`.
+        
         Returns:
-            Orchestrator instance
-
+            BaseSyncOrchestrator: Orchestrator instance created for the provided configuration.
+        
         Raises:
-            ValueError: If provider not found
+            ValueError: If the configuration has no provider or the provider is not registered.
         """
         # Get provider name from configuration
         if hasattr(configuration, "provider"):
@@ -192,7 +258,18 @@ class IntegrationRegistry:
     def get_client(
         cls, configuration: IntegrationConfiguration
     ) -> BaseIntegrationClient:
-        """Get a client instance for a configuration"""
+        """
+        Obtain a client instance for the integration specified by the configuration.
+        
+        Parameters:
+            configuration (IntegrationConfiguration): Configuration object that must include a `provider` attribute with a `name` identifying the registered provider.
+        
+        Returns:
+            BaseIntegrationClient: A client instance created for the provider in the configuration.
+        
+        Raises:
+            ValueError: If `configuration` has no `provider` attribute or if the referenced provider is not registered.
+        """
         if hasattr(configuration, "provider"):
             provider_name = configuration.provider.name
         else:
@@ -206,7 +283,18 @@ class IntegrationRegistry:
 
     @classmethod
     def get_mapper(cls, configuration: IntegrationConfiguration) -> BaseFieldMapper:
-        """Get a mapper instance for a configuration"""
+        """
+        Retrieve a field mapper instance appropriate for the configuration's provider.
+        
+        Parameters:
+        	configuration (IntegrationConfiguration): Integration configuration object that must have a `provider` attribute with a `name` matching a registered provider.
+        
+        Returns:
+        	BaseFieldMapper: A mapper instance created for the configuration's provider.
+        
+        Raises:
+        	ValueError: If the configuration lacks a `provider` attribute or if the specified provider is not registered.
+        """
         if hasattr(configuration, "provider"):
             provider_name = configuration.provider.name
         else:
@@ -222,10 +310,15 @@ class IntegrationRegistry:
     def validate_configuration(
         cls, provider_name: str, config: dict
     ) -> tuple[bool, list[str]]:
-        """Validate a configuration for a specific provider
-
+        """
+        Validate a configuration dictionary for the named provider.
+        
+        Parameters:
+            provider_name (str): Name of the registered provider to validate against.
+            config (dict): Configuration data to validate.
+        
         Returns:
-            (is_valid, list_of_errors)
+            tuple[bool, list[str]]: First element is `True` if the configuration satisfies the provider's config schema, `False` otherwise. Second element is a list of human-readable error messages describing validation failures (empty if valid).
         """
         provider = cls.get_provider(provider_name)
         if not provider:
@@ -235,12 +328,10 @@ class IntegrationRegistry:
 
     @classmethod
     def autodiscover(cls) -> None:
-        """Auto-discover and register all integrations
-
-        Looks for integration modules following the convention:
-        integrations/<type>/<provider>/integration.py
-
-        Each integration.py should call IntegrationRegistry.register()
+        """
+        Discover and register available integration modules and mark the registry initialized.
+        
+        Scans installed Django apps for an `integrations` module and traverses the local `integrations/<type>/<provider>/integration.py` directory structure; imports any found integration modules (which are expected to register themselves with the IntegrationRegistry), records import failures as warnings, and sets the registry's `_initialized` flag to True.
         """
         if cls._initialized:
             return
@@ -307,5 +398,9 @@ class IntegrationRegistry:
 
 # Initialize registry when module is imported
 def init_registry():
-    """Initialize the integration registry"""
+    """
+    Trigger integration provider autodiscovery and registration.
+    
+    Calls IntegrationRegistry.autodiscover() to import and register available integration providers. Safe to call multiple times.
+    """
     IntegrationRegistry.autodiscover()

@@ -90,6 +90,17 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get write data")
     def object(self, request, pk=None):
+        """
+        Return the general settings value merged with default settings and the list of currently enabled integrations.
+        
+        If a GlobalSettings record named "general" does not exist or is missing any default keys, it is created or updated (and saved) so the stored value contains all defaults merged with existing values. The returned mapping will include an "enabled_integrations" key containing a list of active IntegrationProvider summaries.
+        
+        Parameters:
+            pk (str|None): Ignored; present for URL/route compatibility.
+        
+        Returns:
+            dict: The `value` mapping for the "general" GlobalSettings record, after defaults and enabled integrations have been applied.
+        """
         default_settings = {
             "security_objective_scale": "1-4",
             "ebios_radar_max": 6,

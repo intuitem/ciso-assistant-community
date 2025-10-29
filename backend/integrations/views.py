@@ -39,6 +39,19 @@ class ConnectionTestView(APIView):
     """
 
     def post(self, request, *args, **kwargs):
+        """
+        Validate input and test provider credentials using a temporary, non-persisted IntegrationConfiguration.
+        
+        Validates the incoming request data with ConnectionTestSerializer, constructs an unsaved IntegrationConfiguration
+        for the specified provider, and uses the IntegrationRegistry client to perform a connection test without saving
+        any configuration.
+        
+        Returns:
+            Response: 200 with a success message when the connection test succeeds;
+                      400 with serializer errors when validation fails;
+                      400 with a credential-failure message when the test indicates invalid credentials;
+                      500 with an error message when an unexpected exception occurs.
+        """
         serializer = ConnectionTestSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -115,21 +128,26 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        **PLACEHOLDER FOR PERMISSIONS**:
-        This is where you would filter the configurations based on the
-        requesting user's access to the associated Folder.
-
-        For example:
-        user_folders = Folder.objects.filter(owner=self.request.user)
-        return super().get_queryset().filter(folder__in=user_folders)
+        Return the viewset's base queryset; intended as an extension point to restrict IntegrationConfiguration objects by requester permissions (for example, limiting to folders the user can access).
+        
+        Returns:
+            QuerySet: The queryset of IntegrationConfiguration objects for this view (base implementation returns the unfiltered superclass queryset).
         """
         return super().get_queryset()
 
     @action(detail=True, methods=["post"], url_path="test-connection")
     def test_connection(self, request, pk=None):
         """
-        Custom action to test the connection for a saved integration configuration.
-        URL: /api/integrations/configs/{id}/test-connection/
+        Test the connection of a saved IntegrationConfiguration and return a response indicating success, credential failure, or internal error.
+        
+        Parameters:
+        	pk (str | uuid.UUID): Primary key of the IntegrationConfiguration to test.
+        
+        Returns:
+        	Response: JSON object with `status` and `message`. Possible outcomes:
+        		- HTTP 200: `{"status": "success", "message": "Connection successful."}`
+        		- HTTP 400: `{"status": "failure", "message": "Connection failed. Please check credentials."}`
+        		- HTTP 500: `{"status": "error", "message": "An unexpected error occurred"}`
         """
         logger.info(f"Testing connection for integration config: {pk}")
         instance = IntegrationConfiguration.objects.get(pk=pk)
@@ -165,6 +183,18 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="remote-objects")
     def list_remote_objects(self, request, pk=None):
+        """
+        Return the list of remote objects available for the specified IntegrationConfiguration.
+        
+        Retrieves the IntegrationConfiguration identified by `pk`, obtains a provider client from the IntegrationRegistry, and returns the provider's remote objects. If an unexpected error occurs, logs the exception and returns an error response.
+        
+        Parameters:
+            request: The HTTP request (unused beyond DRF dispatch).
+            pk (str | uuid.UUID): Primary key of the IntegrationConfiguration to query.
+        
+        Returns:
+            Response: On success, a 200 response containing the provider's remote objects (typically a list/iterable). On failure, a 500 response with an error object: `{"status": "error", "message": "An unexpected error occurred"}`.
+        """
         instance = IntegrationConfiguration.objects.get(pk=pk)
         try:
             client = IntegrationRegistry.get_client(instance)
@@ -196,6 +226,26 @@ class IntegrationWebhookView(View):
     def post(
         self, request: HttpRequest, config_id: uuid.UUID, *args, **kwargs
     ) -> HttpResponse:
+        """
+        Handle an incoming webhook POST: authenticate using HMAC-SHA256, validate the JSON payload, and enqueue the event for asynchronous processing.
+        
+        Expects:
+        - An HMAC signature in the `X-Hub-Signature` request header in the form `sha256=<hex>`.
+        - A JSON body containing a `webhookEvent` field that identifies the event type.
+        
+        Parameters:
+            request (HttpRequest): The incoming HTTP request containing headers and raw body bytes.
+            config_id (uuid.UUID): The ID of an active IntegrationConfiguration whose `webhook_secret` is used to validate the signature.
+        
+        Returns:
+            HttpResponse: One of:
+              - 202 Accepted when the signature is valid, payload parsed, and event scheduled.
+              - 400 Bad Request for invalid signature format, unsupported signature method, invalid JSON, or missing `webhookEvent`.
+              - 401 Unauthorized if the signature header is missing.
+              - 403 Forbidden if the signature does not match.
+              - 404 Not Found if the configuration does not exist or is inactive.
+              - 500 Internal Server Error if the configuration lacks a webhook secret.
+        """
         try:
             config = get_object_or_404(
                 IntegrationConfiguration, pk=config_id, is_active=True
@@ -286,8 +336,9 @@ class SyncMappingDeleteView(generics.DestroyAPIView):
 
     def get_queryset(self):
         """
-        **PLACEHOLDER FOR PERMISSIONS**:
-        This is where you would filter the mappings based on the
-        requesting user's access.
+        Return the queryset of SyncMapping objects available to this view.
+        
+        Returns:
+            QuerySet: A Django QuerySet of SyncMapping instances exposed by the view.
         """
         return SyncMapping.objects.all()

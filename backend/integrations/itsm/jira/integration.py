@@ -54,20 +54,45 @@ class JiraOrchestrator(BaseITSMOrchestrator):
     mapper_class = JiraFieldMapper
 
     def _get_mapper(self) -> BaseFieldMapper:
+        """
+        Create a JiraFieldMapper instance configured for this orchestrator.
+        
+        Returns:
+            BaseFieldMapper: A `JiraFieldMapper` initialized with the orchestrator's configuration.
+        """
         return JiraFieldMapper(self.configuration)
 
     def _get_client(self) -> JiraClient:
+        """
+        Create a JiraClient configured with the orchestrator's current configuration.
+        
+        Returns:
+            JiraClient: A Jira client instance initialized with this orchestrator's configuration.
+        """
         return JiraClient(self.configuration)
 
     def _extract_remote_id(self, payload: Dict[str, Any]) -> str:
-        """Extract issue key from Jira webhook payload"""
+        """
+        Extract the Jira issue key from a webhook payload.
+        
+        Parameters:
+            payload (Dict[str, Any]): Webhook payload from Jira; may contain an "issue" object with a "key" field.
+        
+        Returns:
+            str | None: The Jira issue key (e.g., "PROJ-123") if present in the payload, otherwise `None`.
+        """
         # Jira webhook structure: { "issue": { "key": "PROJ-123", ... } }
         if "issue" in payload:
             return payload["issue"].get("key")
         return payload.get("key")
 
     def _extract_remote_data(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract issue data from Jira webhook payload"""
+        """
+        Extracts Jira issue data from a webhook payload.
+        
+        Returns:
+            A dictionary with keys `key`, `fields`, and `updated` when the payload contains an `issue` entry; otherwise returns the original `payload`.
+        """
         if "issue" in payload:
             issue = payload["issue"]
             return {
@@ -78,7 +103,18 @@ class JiraOrchestrator(BaseITSMOrchestrator):
         return payload
 
     def handle_webhook_event(self, event_type: str, payload: Dict[str, Any]) -> bool:
-        """Handle Jira-specific webhook events"""
+        """
+        Process a Jira webhook event and perform the corresponding synchronization action.
+        
+        Handles Jira issue lifecycle events: logs and acknowledges created issues, pulls and applies changes for updated issues, and handles remote deletions for deleted issues. Unrecognized event types are not handled.
+        
+        Parameters:
+            event_type (str): The webhook event identifier (e.g., contains "issue_created", "issue_updated", or "issue_deleted").
+            payload (Dict[str, Any]): The webhook payload. The issue key is expected at payload["issue"]["key"] or at payload["key"] for some event shapes.
+        
+        Returns:
+            bool: `True` if the event was recognized and handled, `False` otherwise.
+        """
         # Jira webhook event types
 
         if "issue_created" in event_type:

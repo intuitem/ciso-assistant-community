@@ -3750,6 +3750,14 @@ class AppliedControl(
 
     def save(self, *args, **kwargs):
         # Track what changed
+        """
+        Override of Model.save that ensures derived fields are populated and optionally queues integration synchronization.
+        
+        If a `reference_control` is set and `category` or `csf_function` are empty, those fields are filled from the referenced control. If `status` equals "active", `progress_field` is set to 100. After persisting the instance, an asynchronous synchronization job is queued for active ITSM integrations associated with the instance's folder unless synchronization is suppressed.
+        
+        Parameters:
+            skip_sync (bool, optional): When True, suppress queuing the asynchronous sync job. Defaults to False.
+        """
         changed_fields = []
         old_instance = AppliedControl.objects.filter(pk=self.pk).first()
         if old_instance:
@@ -3772,7 +3780,16 @@ class AppliedControl(
             self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
 
     def _get_changed_fields(self, old_instance):
-        """Detect which fields changed"""
+        """
+        Return the names of syncable fields whose values differ from those on a previous instance.
+        
+        Parameters:
+            old_instance: AppliedControl
+                The prior instance to compare against.
+        
+        Returns:
+            changed (list[str]): List of field names that have changed.
+        """
         changed = []
         # Check syncable fields only
         syncable_fields = [
@@ -3795,7 +3812,15 @@ class AppliedControl(
         return changed
 
     def _trigger_sync(self, is_new: bool, changed_fields: List[str]):
-        """Queue sync tasks for all active integrations"""
+        """
+        Schedule an asynchronous synchronization of this object with active ITSM integrations for its folder.
+        
+        Schedules a sync task for all active ITSM IntegrationConfiguration entries associated with this object's folder when the object is newly created or when specified fields have changed.
+        
+        Parameters:
+            is_new (bool): Whether the object instance was just created.
+            changed_fields (List[str]): List of field names that changed on the instance; empty list if none.
+        """
         from integrations.tasks import sync_object_to_integrations
         from integrations.models import IntegrationConfiguration
 
@@ -3818,6 +3843,12 @@ class AppliedControl(
 
     @property
     def risk_scenarios(self):
+        """
+        Return all risk scenarios associated with this applied control.
+        
+        Returns:
+            QuerySet: A Django QuerySet of RiskScenario objects linked to this AppliedControl.
+        """
         return self.risk_scenarios.all()
 
     @property

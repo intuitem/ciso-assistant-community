@@ -958,9 +958,12 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
 
 def startup(sender: AppConfig, **kwargs):
     """
-    Implement CISO Assistant 1.0 default Roles and User Groups during migrate
-    This makes sure root folder and global groups are defined before any other object is created
-    Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined
+    Initialize application-wide default roles, user groups, permissions, core entities, and global settings after migrations.
+    
+    Performs idempotent creation and configuration of the system bootstrap state: ensures the root folder and main entity exist, creates or updates builtin roles and their permissions, creates global user groups and associated role assignments (administrators, readers, analysts, approvers, third‑party respondent), creates default terminologies and domain values, initializes the Jira integration provider, runs the "storelibraries" management command, optionally creates a configured superuser, adds the administrators user group to all superusers, and resets global settings to sane defaults when required.
+    
+    Parameters:
+        sender (AppConfig): The application configuration object that triggered the post-migrate signal.
     """
     from django.contrib.auth.models import Permission
 

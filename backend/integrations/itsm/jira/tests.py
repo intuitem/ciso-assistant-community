@@ -8,6 +8,14 @@ from .mapper import JiraFieldMapper
 
 @pytest.fixture
 def configuration():
+    """
+    Create a MagicMock IntegrationConfiguration populated with test credentials and settings.
+    
+    Returns:
+        mock_config (MagicMock): A MagicMock configured like an IntegrationConfiguration with:
+            - credentials: dict containing `server_url`, `email`, and `api_token`.
+            - settings: dict containing `project_key` and `issue_type`.
+    """
     mock_config = MagicMock(spec=IntegrationConfiguration)
     mock_config.credentials = {
         "server_url": "https://your-jira-instance.atlassian.net",
@@ -20,6 +28,15 @@ def configuration():
 
 @pytest.fixture
 def mapper(configuration):
+    """
+    Provide a JiraFieldMapper instance configured for tests.
+    
+    Parameters:
+        configuration (IntegrationConfiguration | MagicMock): Configuration or mocked configuration supplying server, credentials, and mapping settings.
+    
+    Returns:
+        JiraFieldMapper: An instance initialized with the provided configuration.
+    """
     return JiraFieldMapper(configuration)
 
 

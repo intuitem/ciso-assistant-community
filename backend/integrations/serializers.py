@@ -40,7 +40,20 @@ class ConnectionTestSerializer(serializers.Serializer):
 
     def validate(self, data):
         """
-        Use the IntegrationRegistry to validate provider-specific schema requirements.
+        Validate provider-specific credentials and settings using the IntegrationRegistry.
+        
+        Parameters:
+            data (dict): Input data containing at least:
+                - provider: IntegrationProvider instance
+                - credentials: dict of provider credentials
+                - settings: dict of provider-specific settings
+        
+        Returns:
+            dict: The validated input `data`.
+        
+        Raises:
+            serializers.ValidationError: If provider-specific validation fails. The error detail is provided under the
+            "provider_specific_errors" key.
         """
         provider = data.get("provider")  # This is the IntegrationProvider instance
         # The full configuration dictionary to be validated
@@ -109,7 +122,17 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "last_sync_at", "webhook_url_full"]
 
     def get_webhook_url_full(self, obj: IntegrationConfiguration) -> str:
-        """Construct the full, absolute webhook URL"""
+        """
+        Return the full absolute webhook URL for the given integration configuration.
+        
+        If the configuration has not been persisted or lacks a webhook secret, returns an empty string. If the serializer context has no request, returns the message "Webhook URL requires request context." Otherwise returns the absolute URL pointing to the webhook-receiver endpoint for this configuration.
+         
+        Parameters:
+            obj (IntegrationConfiguration): The integration configuration instance to build the webhook URL for.
+        
+        Returns:
+            str: The webhook URL string, an empty string, or an informational message if the request context is missing.
+        """
         if not obj.pk or not obj.webhook_secret:
             return ""
 
@@ -123,14 +146,37 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
         return request.build_absolute_uri(path)
 
     def get_has_api_token(self, obj: IntegrationConfiguration) -> bool:
+        """
+        Indicates whether the integration configuration contains an API token.
+        
+        Parameters:
+            obj (IntegrationConfiguration): The configuration instance to inspect.
+        
+        Returns:
+            bool: `True` if `obj.credentials` contains an `api_token`, `False` otherwise.
+        """
         return bool(obj.credentials and obj.credentials.get("api_token"))
 
     def get_has_webhook_secret(self, obj: IntegrationConfiguration) -> bool:
+        """
+        Indicates whether the given integration configuration contains a webhook secret.
+        
+        Parameters:
+            obj (IntegrationConfiguration): The integration configuration to inspect.
+        
+        Returns:
+            `true` if the configuration has a webhook secret, `false` otherwise.
+        """
         return bool(obj.webhook_secret)
 
     def to_representation(self, instance):
         """
-        Modify the output representation to protect sensitive credentials.
+        Remove sensitive credential fields from the serialized representation.
+        
+        This method returns the instance's serialized representation with sensitive fields (for example, the `api_token` key inside the `credentials` mapping) removed so they are not exposed in API responses.
+        
+        Returns:
+            dict: The serialized representation of `instance` with sensitive credential fields removed.
         """
         # Get the default representation
         ret = super().to_representation(instance)
@@ -143,7 +189,18 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """
-        Use the IntegrationRegistry to validate provider-specific schema requirements.
+        Validate integration configuration data against the provider's schema using IntegrationRegistry.
+        
+        If the incoming credentials omit an `api_token` and the serializer is bound to an existing configuration, the existing `api_token` will be preserved for validation. If the provider-specific validation fails, a `serializers.ValidationError` is raised with a `provider_specific_errors` key containing the registry's errors.
+        
+        Parameters:
+            data (dict): Incoming serializer data containing `credentials` and optional `settings` and `provider`.
+        
+        Returns:
+            dict: The validated input `data`.
+        
+        Raises:
+            serializers.ValidationError: When provider-specific validation reports errors (attached under `provider_specific_errors`).
         """
         config: IntegrationConfiguration = self.instance
         provider: IntegrationProvider = data.get(

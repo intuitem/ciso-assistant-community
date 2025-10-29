@@ -42,6 +42,21 @@ class Command(BaseCommand):
     )
 
     def add_arguments(self, parser):
+        """
+        Add command-line arguments required to create or update a Jira integration for a folder.
+        
+        Defines the following options:
+          --folder-id    UUID of the Folder to associate the integration with.
+          --server-url   Base URL of the Jira server (e.g., https://my-company.atlassian.net).
+          --email        Email address used for Jira authentication.
+          --api-token    Jira API token for the service account.
+          --project-key  Default Jira Project Key (e.g., "PROJ").
+          --issue-type   Default Jira Issue Type (defaults to "Task").
+          --update       Flag that, when present, updates an existing configuration for the folder instead of creating a new one.
+        
+        Parameters:
+            parser (argparse.ArgumentParser): The argument parser to which the options will be added.
+        """
         parser.add_argument(
             "--folder-id",
             type=str,
@@ -86,6 +101,21 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # 1. Ensure registry is initialized
+        """
+        Set up (create or update) a Jira IntegrationConfiguration for a specified Folder and verify the connection.
+        
+        Creates or updates the IntegrationProvider and IntegrationConfiguration records for the Jira provider using provided credentials and settings, then attempts to test the configured integration client connection. Raises CommandError on missing provider registration, missing Folder, or failures during create/update.
+        
+        Parameters:
+            folder_id (str): UUID of the Folder to associate with the integration.
+            server_url (str): Base URL of the Jira server.
+            email (str): Email address used for Jira authentication.
+            api_token (str): API token for Jira authentication.
+            project_key (str): Default Jira project key to configure.
+            issue_type (str): Default Jira issue type to configure.
+            update (bool): If True, update an existing IntegrationConfiguration; otherwise create a new one.
+        
+        """
         self.stdout.write("Initializing integration registry...")
         init_registry()
 

@@ -788,6 +788,17 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     )
 
     def create(self, validated_data: Any):
+        """
+        Create an AppliedControl from validated serializer data, attach related findings, and send assignment notifications to any provided owners.
+        
+        Parameters:
+            validated_data (dict): Serializer-validated data. May include:
+                - "owner": iterable of User instances to be assigned as owners (optional).
+                - "findings": iterable of Finding instances or primary keys to associate with the created AppliedControl (optional).
+        
+        Returns:
+            AppliedControl: The newly created AppliedControl instance.
+        """
         owner_data = validated_data.get("owner", [])
         applied_control = super().create(validated_data)
         findings = validated_data.pop("findings", [])
@@ -804,6 +815,14 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
 
     def update(self, instance, validated_data):
         # Track old owners before update
+        """
+        Update an instance and notify any owners newly assigned by the update.
+        
+        If the set of owners on the instance increases as a result of this update, assignment notifications will be sent to the newly added owners.
+        
+        Returns:
+            The updated instance.
+        """
         old_owner_ids = set(instance.owner.values_list("id", flat=True))
 
         updated_instance = super().update(instance, validated_data)
@@ -821,6 +840,14 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
         return updated_instance
 
     def to_representation(self, instance):
+        """
+        Include synchronization mappings in the serialized representation when present.
+        
+        Augments the base serializer output with a `sync_mappings` key containing a list of synchronization records for the given instance.
+        
+        Returns:
+            dict: The serializer representation of `instance`, with an added `sync_mappings` list when mappings exist.
+        """
         ret = super().to_representation(instance)
         sync_mappings = [
             {
@@ -847,7 +874,16 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
         return ret
 
     def _send_assignment_notifications(self, applied_control, owner_ids):
-        """Send assignment notifications to the specified owners"""
+        """
+        Queue email notifications for the given applied control to the users identified by owner_ids.
+        
+        If owner_ids is empty the method returns immediately. The method resolves user emails for the provided IDs,
+        queues a background task to send the assignment notification to those emails, and logs any exceptions without raising.
+        
+        Parameters:
+            applied_control (AppliedControl): The applied control instance for which assignments were made.
+            owner_ids (Iterable[int]): Iterable of user primary keys whose email addresses should receive the notification.
+        """
         if not owner_ids:
             return
 
@@ -915,6 +951,15 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         return obj.cost.get("currency", "€")
 
     def get_annual_cost_display(self, obj):
+        """
+        Format an object's annual cost for display.
+        
+        Parameters:
+        	obj: Model instance with an `annual_cost` attribute and compatible with `get_currency`.
+        
+        Returns:
+        	str: Formatted monetary amount with two decimal places and currency (e.g. "1,234.56 €"), or an empty string if `annual_cost` is 0.
+        """
         annual_cost = obj.annual_cost
         if annual_cost == 0:
             return ""
@@ -922,6 +967,12 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         return f"{annual_cost:,.2f} {currency}"
 
     def to_representation(self, instance):
+        """
+        Augments the serialized representation with remote synchronization mappings when the serializer is used for a retrieve action.
+        
+        Returns:
+            dict: The serialized representation of `instance`, optionally extended with a `sync_mappings` key containing a list of mapping objects. Each mapping object includes `id`, `remote_id`, `sync_status`, `last_synced_at`, `last_sync_direction`, `error_message`, and `provider`.
+        """
         ret = super().to_representation(instance)
         if self.context["action"] == "retrieve":
             sync_mappings = [

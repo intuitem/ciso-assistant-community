@@ -256,7 +256,14 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return None
 
     def get_queryset(self) -> models.query.QuerySet:
-        """the scope_folder_id query_param allows scoping the objects to retrieve"""
+        """
+        Return the queryset of model instances scoped to objects the requesting user can access.
+        
+        When present, the `scope_folder_id` query parameter limits the scope to that folder; otherwise the root folder is used. For GET requests that target a single object via a UUID in the request path, the queryset will be restricted to that single object if the user has read access to it. If the view has no `model` attribute configured, `None` is returned.
+        
+        Returns:
+            QuerySet or None: A queryset of the view's model filtered to accessible object IDs, or `None` if no model is set.
+        """
         if not self.model:
             return None
         object_ids_view = None
@@ -284,11 +291,26 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return queryset
 
     def get_serializer_context(self):
+        """
+        Include the current view action in the serializer context.
+        
+        Returns:
+            dict: The serializer context dictionary with an `"action"` key set to the current view action.
+        """
         context = super().get_serializer_context()
         context["action"] = self.action
         return context
 
     def get_serializer_class(self, **kwargs):
+        """
+        Resolve and return the serializer class for this viewset's model and action.
+        
+        Parameters:
+            action (str, optional): Name of the action to select a specific serializer (defaults to the viewset's current `action`).
+        
+        Returns:
+            serializer_class (type): The serializer class corresponding to the model and action.
+        """
         serializer_factory = SerializerFactory(
             self.serializers_module, MODULE_PATHS.get("serializers", [])
         )
@@ -2021,7 +2043,14 @@ class AppliedControlViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "ref_id"]
 
     def get_queryset(self):
-        """Optimize queries by prefetching related objects used in the table view and serializer"""
+        """
+        Return a queryset with related objects preloaded for the table view and serializer.
+        
+        Returns:
+            QuerySet: Model queryset with related fields (e.g., folder, folder.parent_folder, reference_control,
+            owner, filtering_labels.folder, findings, evidences, objectives, assets, security_exceptions)
+            selected/prefetched to reduce query count when rendering table rows and serializing objects.
+        """
         return (
             super()
             .get_queryset()
@@ -2042,6 +2071,14 @@ class AppliedControlViewSet(BaseModelViewSet):
         )
 
     def perform_create(self, serializer):
+        """
+        Create the local AppliedControl instance from the serializer and, when requested, schedule creation of a corresponding remote object in configured integrations.
+        
+        If the validated serializer data includes a truthy `create_remote_object` flag and an `integration_config` object, a background synchronization task is scheduled after the local instance is created. Errors during scheduling are logged.
+        
+        Parameters:
+            serializer: A DRF serializer whose `validated_data` may include optional keys `create_remote_object` (bool) and `integration_config` (integration config instance) that control remote synchronization.
+        """
         create_remote_object = serializer.validated_data.pop(
             "create_remote_object", False
         )
@@ -2077,6 +2114,14 @@ class AppliedControlViewSet(BaseModelViewSet):
                 )
 
     def perform_update(self, serializer):
+        """
+        Attach or update a remote integration mapping for the updated object and schedule a follow-up sync when integration data is provided.
+        
+        When the validated serializer data contains `integration_config` and `remote_object_id`, this method creates a SyncMapping linking the local object to the external remote object and schedules a status sync task; otherwise it performs a normal update without integration side effects. Errors during mapping creation are logged.
+        
+        Parameters:
+            serializer: The serializer instance containing validated data and the object to be updated.
+        """
         integration_config = serializer.validated_data.pop("integration_config", None)
         remote_object_id = serializer.validated_data.pop("remote_object_id", None)
         serializer.validated_data.pop("create_remote_object", None)  # Remove if present
@@ -2114,6 +2159,12 @@ class AppliedControlViewSet(BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
+        """
+        Provide the available AppliedControl status choices.
+        
+        Returns:
+            dict: Mapping of status keys to their human-readable labels.
+        """
         return Response(dict(AppliedControl.Status.choices))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))

@@ -19,7 +19,15 @@ def sync_object_to_integrations(
     config_ids: list[int],
     changed_fields: list[str],
 ):
-    """Push local changes to all configured integrations"""
+    """
+    Push a local model instance's changed fields to multiple integration configurations.
+    
+    Parameters:
+    	content_type (ContentType): Django ContentType identifying the model of the object to sync.
+    	object_id (int): Primary key of the model instance to fetch and sync.
+    	config_ids (list[int]): Iterable of IntegrationConfiguration primary keys to which changes should be pushed.
+    	changed_fields (list[str]): Names of the fields on the instance that have changed; passed to each orchestrator.
+    """
     from django.apps import apps
 
     Model = apps.get_model(content_type.app_label, content_type.model)
@@ -42,7 +50,18 @@ def sync_object_to_integrations(
 
 @task()
 def process_webhook_event(config_id: uuid.UUID, event_type: str, payload: dict):
-    """Process incoming webhook from remote system"""
+    """
+    Handle a webhook event for the specified integration configuration.
+    
+    Parameters:
+        config_id (uuid.UUID): Primary key of the IntegrationConfiguration to route the event to.
+        event_type (str): The remote system's event type identifier.
+        payload (dict): Parsed webhook payload provided by the remote system.
+    
+    Notes:
+        If the configuration's `enable_incoming_sync` setting is false, the event is ignored.
+        Errors (including missing configuration) are logged; exceptions are not raised to callers.
+    """
     try:
         config = IntegrationConfiguration.objects.get(pk=config_id)
 

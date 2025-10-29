@@ -61,7 +61,16 @@ class JiraFieldMapper(BaseFieldMapper):
     }
 
     def get_allowed_fields(self, direction: str, operation: str) -> set[str]:
-        """Get allowed fields for a given sync direction and operation."""
+        """
+        Return the set of local field names allowed for the given synchronization direction and operation.
+        
+        Parameters:
+            direction (str): Sync direction, either "pull" or "push".
+            operation (str): Operation type, typically "create" or "update".
+        
+        Returns:
+            allowed_fields (set[str]): Set of local field keys permitted for the specified direction and operation.
+        """
         allowed = set()
         for field, ops in self.FIELD_MAPPINGS_OPERATIONS.items():
             if operation in ops.get(direction, set()):
@@ -69,7 +78,15 @@ class JiraFieldMapper(BaseFieldMapper):
         return allowed
 
     def to_remote(self, local_object: models.Model) -> dict[str, Any]:
-        """Convert local object to remote format, stripping 'fields.' prefix."""
+        """
+        Map a local model instance into a Jira-compatible payload for creating an issue.
+        
+        Parameters:
+        	local_object (models.Model): Local model instance to convert.
+        
+        Returns:
+        	remote_data (dict[str, Any]): Mapping of Jira field keys (with the "fields." prefix removed) to transformed values ready for a create request.
+        """
         allowed_fields = self.get_allowed_fields("push", "create")
         remote_data = {}
         for local_field, remote_field in self._get_mappings().items():
@@ -84,20 +101,45 @@ class JiraFieldMapper(BaseFieldMapper):
     def to_remote_partial(
         self, local_object: models.Model, changed_fields: list[str]
     ) -> dict[str, Any]:
-        """Convert changed fields to remote format, stripping 'fields.' prefix."""
+        """
+        Convert a subset of a local object's changed fields into a Jira-compatible remote payload.
+        
+        Parameters:
+            local_object (models.Model): The local model instance containing current values.
+            changed_fields (list[str]): Local field names that have changed and should be considered for conversion.
+        
+        Returns:
+            dict[str, Any]: A mapping of remote field keys (with the "fields." prefix removed) to converted values for update.
+        """
         allowed_fields = self.get_allowed_fields("push", "update")
         fields_to_convert = [f for f in changed_fields if f in allowed_fields]
         remote_data_nested = super().to_remote_partial(local_object, fields_to_convert)
         return self._strip_fields_prefix(remote_data_nested)
 
     def to_local(self, remote_data: dict[str, Any]) -> dict[str, Any]:
-        """Convert remote data to local format"""
+        """
+        Map Jira remote data into local field values for update operations.
+        
+        Parameters:
+            remote_data (dict[str, Any]): Raw Jira issue payload.
+        
+        Returns:
+            dict[str, Any]: A mapping of local field names to transformed values containing only fields allowed for pull/update.
+        """
         allowed_fields = self.get_allowed_fields("pull", "update")
         local_data = super().to_local(remote_data)
         return {k: v for k, v in local_data.items() if k in allowed_fields}
 
     def _strip_fields_prefix(self, data: dict[str, Any]) -> dict[str, Any]:
-        """Helper to remove 'fields.' prefix from keys for outgoing updates."""
+        """
+        Remove the "fields." prefix from dictionary keys.
+        
+        Parameters:
+            data (dict[str, Any]): Mapping of remote keys that may include the "fields." prefix.
+        
+        Returns:
+            dict[str, Any]: A new dictionary where keys that started with "fields." have that prefix removed; all other keys are preserved unchanged.
+        """
         stripped_data = {}
         for remote_key, value in data.items():
             if remote_key.startswith("fields."):
@@ -109,7 +151,23 @@ class JiraFieldMapper(BaseFieldMapper):
         return stripped_data
 
     def _transform_value_to_remote(self, field: str, value: Any) -> Any:
-        """Transform AppliedControl field values to Jira format"""
+        """
+        Convert a local field value into the representation Jira expects for that field.
+        
+        Behavior:
+        - `status`: maps a local status key to a Jira status name (string).
+        - `priority`: maps a local numeric priority to `{"name": "<JiraPriority>"}`.
+        - `eta` / `start_date`: returns a date string in YYYY-MM-DD format when possible.
+        - `description`: returns an Atlassian Document Format (ADF) document dict with the value as a single paragraph.
+        - other fields: returned unchanged.
+        
+        Parameters:
+            field (str): Local field name.
+            value (Any): Local field value to convert.
+        
+        Returns:
+            Any: The value converted to the Jira-expected representation for `field`.
+        """
         if value is None:
             return None
 
@@ -152,7 +210,17 @@ class JiraFieldMapper(BaseFieldMapper):
         return value
 
     def _transform_value_to_local(self, field: str, value: Any) -> Any:
-        """Transform incoming Jira field values to AppliedControl format"""
+        """
+        Convert a Jira field value into the corresponding AppliedControl representation.
+        
+        Parameters:
+            field (str): The local field name being populated (e.g., "status", "priority", "eta", "start_date", "description").
+            value (Any): The raw value extracted from Jira (already keyed from `fields.*`), which may be a dict, string, date/datetime, or None.
+        
+        Returns:
+            Any: The value converted to the AppliedControl format for the given field (e.g., local status key, numeric priority, Python date, plain-text description),
+            or `None` when the Jira value is absent or cannot be mapped/parsed.
+        """
         # Value is already extracted based on FIELD_MAPPINGS (e.g., value = remote_data['fields']['status'])
 
         if value is None:
