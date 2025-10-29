@@ -171,7 +171,7 @@ class BaseFieldMapper(ABC):
         pass
 
 
-class BaseSyncOrchestrator:
+class BaseSyncOrchestrator(ABC):
     """Orchestrates sync operations between local and remote systems"""
 
     def __init__(self, configuration: IntegrationConfiguration):
