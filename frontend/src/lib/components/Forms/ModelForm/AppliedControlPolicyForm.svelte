@@ -339,7 +339,7 @@
 	</Dropdown>
 {/if}
 
-{#if page.data.settings?.enabled_integrations.filter((integration: Record<string, any>) => integration.provider_type === 'itsm' && integration.configurations)}
+{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.provider_type === 'itsm' && integration.configurations?.length)}
 	<Dropdown
 		open={false}
 		style="hover:text-primary-700"
