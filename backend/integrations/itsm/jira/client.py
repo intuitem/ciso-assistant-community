@@ -18,6 +18,8 @@ class JiraClient(BaseIntegrationClient):
         self.jira = JIRA(
             server=self.credentials["server_url"],
             basic_auth=(self.credentials["email"], self.credentials["api_token"]),
+            timeout=30,
+            max_retries=3,
         )
         self.mapper = JiraFieldMapper(configuration)
 
