@@ -43,11 +43,17 @@ class ConnectionTestSerializer(serializers.Serializer):
         Use the IntegrationRegistry to validate provider-specific schema requirements.
         """
         provider = data.get("provider")  # This is the IntegrationProvider instance
+        config: IntegrationConfiguration = data.get("configuration_id", None)
         # The full configuration dictionary to be validated
         config_data = {
             "credentials": data.get("credentials", {}),
             "settings": data.get("settings", {}),
         }
+
+        if not config_data["credentials"].get("api_token") and config:
+            config_data["credentials"]["api_token"] = config.credentials.get(
+                "api_token"
+            )
 
         # Use the validation logic from your registry
         is_valid, errors = IntegrationRegistry.validate_configuration(
@@ -84,6 +90,8 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
         label="Folder ID",
     )
 
+    webhook_secret = serializers.CharField(write_only=True, required=False)
+
     # A generated, read-only field to show the full webhook URL
     webhook_url_full = serializers.SerializerMethodField()
 
@@ -105,12 +113,13 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
             "webhook_url_full",
             "has_api_token",
             "has_webhook_secret",
+            "webhook_secret",
         ]
         read_only_fields = ["id", "last_sync_at", "webhook_url_full"]
 
     def get_webhook_url_full(self, obj: IntegrationConfiguration) -> str:
         """Construct the full, absolute webhook URL"""
-        if not obj.pk or not obj.webhook_secret:
+        if not obj.pk:
             return ""
 
         request = self.context.get("request")
@@ -120,7 +129,7 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
         # Build the path to the webhook receiver view
         path = reverse("integrations:webhook-receiver", kwargs={"config_id": obj.id})
 
-        return request.build_absolute_uri(path)
+        return path
 
     def get_has_api_token(self, obj: IntegrationConfiguration) -> bool:
         return bool(obj.credentials and obj.credentials.get("api_token"))
