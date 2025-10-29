@@ -1,0 +1,1233 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:mapping-cis-controls-v8-and-iso27001-2022
+locale: en
+ref_id: mapping-cis-controls-v8-and-iso27001-2022
+name: CIS-Controls-v8 <-> ISO/IEC 27001:2022
+description: Mapping between CIS Controls v8 and International standard ISO/IEC 27001:2022
+copyright: intuitem
+version: 1
+publication_date: 2025-10-29
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:cis-controls-v8
+- urn:intuitem:risk:library:iso27001-2022
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cis-controls-v8-and-iso27001-2022
+    ref_id: mapping-cis-controls-v8-and-iso27001-2022
+    name: CIS-Controls-v8 <-> ISO/IEC 27001:2022
+    description: Mapping between CIS Controls v8 and International standard ISO/IEC
+      27001:2022
+    source_framework_urn: urn:intuitem:risk:framework:cis-controls-v8
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:9.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:11.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:11.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:11.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:11.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:11.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:11.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.30
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.6
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.6
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.8
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:18.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:18.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:18.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:18.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      relationship: subset
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-cis-controls-v8-and-iso27001-2022-revert
+    ref_id: mapping-cis-controls-v8-and-iso27001-2022-revert
+    name: CIS-Controls-v8 <-> ISO/IEC 27001:2022
+    description: Mapping between CIS Controls v8 and International standard ISO/IEC
+      27001:2022
+    target_framework_urn: urn:intuitem:risk:framework:cis-controls-v8
+    source_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:1.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:1.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:2.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:2.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:2.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:2.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.8
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.9
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.11
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.12
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.12
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.13
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.13
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:3.14
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.8
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.11
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.11
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.12
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:4.12
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:5.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.8
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.8
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.8
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:6.8
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:7.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.1
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.4
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.8
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:8.11
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:9.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:9.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:9.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:9.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:9.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:10.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:11.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:11.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:11.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:11.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:11.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:11.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.8
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:12.8
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.8
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.9
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:13.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.8
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:14.9
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:15.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.30
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.8
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.9
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.11
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.11
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.12
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.12
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.12
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.13
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.13
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:16.14
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.2
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.6
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.3
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.6
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.7
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.8
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.8
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.9
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:17.9
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:18.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:18.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:18.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:18.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
+      target_requirement_urn: urn:intuitem:risk:req_node:cis-controls-v8:18.5
+      relationship: superset
