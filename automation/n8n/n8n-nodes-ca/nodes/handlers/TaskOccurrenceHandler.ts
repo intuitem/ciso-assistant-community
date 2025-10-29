@@ -63,14 +63,11 @@ export class TaskOccurrenceHandler extends BaseResourceHandler {
     const taskStatus = this.getParameter<string>("taskStatus", "");
     const taskObservation = this.getParameter<string>("taskObservation", "");
 
-    const body = this.buildBody(
-      {},
-      {
-        due_date: taskDueDate,
-        status: taskStatus,
-        observation: taskObservation,
-      },
-    );
+    const body = this.buildUpdateBody({
+      due_date: taskDueDate,
+      status: taskStatus,
+      observation: taskObservation,
+    });
 
     return this.updateResource(taskId, body);
   }

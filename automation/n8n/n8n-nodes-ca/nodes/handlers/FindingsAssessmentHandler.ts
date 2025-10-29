@@ -119,7 +119,7 @@ export class FindingsAssessmentHandler extends BaseResourceHandler {
       "",
     );
 
-    const body = this.buildBody({}, { status: findingsAssessmentStatus });
+    const body = this.buildUpdateBody({ status: findingsAssessmentStatus });
 
     return this.updateResource(findingsAssessmentId, body);
   }

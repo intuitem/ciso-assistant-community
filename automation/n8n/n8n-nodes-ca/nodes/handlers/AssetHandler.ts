@@ -87,14 +87,11 @@ export class AssetHandler extends BaseResourceHandler {
     const assetType = this.getParameter<string>("assetType", "");
     const assetNameUpdate = this.getParameter<string>("assetNameUpdate", "");
 
-    const body = this.buildBody(
-      {},
-      {
-        name: assetNameUpdate,
-        description: assetDescription,
-        type: assetType,
-      },
-    );
+    const body = this.buildUpdateBody({
+      name: assetNameUpdate,
+      description: assetDescription,
+      type: assetType,
+    });
 
     return this.updateResource(assetId, body);
   }

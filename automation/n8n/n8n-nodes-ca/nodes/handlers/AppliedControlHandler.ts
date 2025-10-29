@@ -75,7 +75,7 @@ export class AppliedControlHandler extends BaseResourceHandler {
       "",
     );
 
-    const body = this.buildBody({}, { status: appliedControlStatus });
+    const body = this.buildUpdateBody({ status: appliedControlStatus });
 
     return this.updateResource(appliedControlId, body);
   }

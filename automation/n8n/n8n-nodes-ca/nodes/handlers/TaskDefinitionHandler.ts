@@ -93,13 +93,10 @@ export class TaskDefinitionHandler extends BaseResourceHandler {
       true,
     );
 
-    const body = this.buildBody(
-      {},
-      {
-        task_date: taskDefinitionTaskDateUpdate,
-        enabled: taskDefinitionEnabledUpdate,
-      },
-    );
+    const body = this.buildUpdateBody({
+      task_date: taskDefinitionTaskDateUpdate,
+      enabled: taskDefinitionEnabledUpdate,
+    });
 
     return this.updateResource(taskDefinitionId, body);
   }

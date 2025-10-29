@@ -86,7 +86,7 @@ export class EvidenceHandler extends BaseResourceHandler {
       "",
     );
 
-    const body = this.buildBody({}, { status: evidenceStatusUpdate });
+    const body = this.buildUpdateBody({ status: evidenceStatusUpdate });
 
     return this.updateResource(evidenceId, body);
   }

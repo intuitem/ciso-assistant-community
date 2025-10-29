@@ -148,15 +148,12 @@ export class AuditHandler extends BaseResourceHandler {
       null,
     );
 
-    const updateData = this.buildBody(
-      {},
-      {
-        status,
-        result,
-        observation,
-        score,
-      },
-    );
+    const updateData = this.buildUpdateBody({
+      status,
+      result,
+      observation,
+      score,
+    });
 
     return this.request(
       "PATCH",

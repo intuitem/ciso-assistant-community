@@ -1,7 +1,7 @@
 import type { IDataObject } from "n8n-workflow";
 import type { IResourceHandler, IResourceContext } from "../types";
 import { makeRequest, buildUrl, buildFilterParams } from "../utils/http";
-import { buildRequestBody } from "../utils/validation";
+import { buildRequestBody, buildUpdateBody } from "../utils/validation";
 import { handleOperationError } from "../utils/errors";
 
 /**
@@ -162,6 +162,14 @@ export abstract class BaseResourceHandler implements IResourceHandler {
     optionalFields: IDataObject = {},
   ): IDataObject {
     return buildRequestBody(requiredFields, optionalFields);
+  }
+
+  /**
+   * Build request body for update operations, filtering out sentinel values
+   * Use this for PATCH operations to avoid unintended field resets
+   */
+  protected buildUpdateBody(fields: IDataObject = {}): IDataObject {
+    return buildUpdateBody(fields);
   }
 
   /**

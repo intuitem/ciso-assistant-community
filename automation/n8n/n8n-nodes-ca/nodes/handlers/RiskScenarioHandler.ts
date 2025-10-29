@@ -170,23 +170,19 @@ export class RiskScenarioHandler extends BaseResourceHandler {
       -1,
     );
 
-    const body = this.buildBody(
-      {
-        inherent_proba: riskScenarioInherentProba,
-        inherent_impact: riskScenarioInherentImpact,
-        current_proba: riskScenarioCurrentProba,
-        current_impact: riskScenarioCurrentImpact,
-        residual_proba: riskScenarioResidualProba,
-        residual_impact: riskScenarioResidualImpact,
-        strength_of_knowledge: riskScenarioStrengthOfKnowledge,
-      },
-      {
-        description: riskScenarioDescription,
-        ref_id: riskScenarioRefId,
-        treatment: riskScenarioTreatment,
-        existing_controls: riskScenarioExistingControls,
-      },
-    );
+    const body = this.buildUpdateBody({
+      description: riskScenarioDescription,
+      ref_id: riskScenarioRefId,
+      treatment: riskScenarioTreatment,
+      existing_controls: riskScenarioExistingControls,
+      inherent_proba: riskScenarioInherentProba,
+      inherent_impact: riskScenarioInherentImpact,
+      current_proba: riskScenarioCurrentProba,
+      current_impact: riskScenarioCurrentImpact,
+      residual_proba: riskScenarioResidualProba,
+      residual_impact: riskScenarioResidualImpact,
+      strength_of_knowledge: riskScenarioStrengthOfKnowledge,
+    });
 
     return this.updateResource(riskScenarioId, body);
   }

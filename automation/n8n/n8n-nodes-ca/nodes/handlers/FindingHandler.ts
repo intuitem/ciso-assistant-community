@@ -89,13 +89,10 @@ export class FindingHandler extends BaseResourceHandler {
       -1,
     );
 
-    const body = this.buildBody(
-      {},
-      {
-        status: findingStatusUpdate,
-        severity: findingSeverityUpdate,
-      },
-    );
+    const body = this.buildUpdateBody({
+      status: findingStatusUpdate,
+      severity: findingSeverityUpdate,
+    });
 
     return this.updateResource(findingId, body);
   }

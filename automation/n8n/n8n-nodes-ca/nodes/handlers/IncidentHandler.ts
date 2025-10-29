@@ -75,25 +75,21 @@ export class IncidentHandler extends BaseResourceHandler {
       "incidentDescription",
       "",
     );
-    const incidentStatus = this.getParameter<string>("incidentStatus", "new");
-    const incidentSeverity = this.getParameter<number>("incidentSeverity", 3);
+    const incidentStatus = this.getParameter<string>("incidentStatus", "--");
+    const incidentSeverity = this.getParameter<number>("incidentSeverity", -1);
     const incidentDetection = this.getParameter<string>(
       "incidentDetection",
-      "internally_detected",
+      "--",
     );
     const incidentRefId = this.getParameter<string>("incidentRefId", "");
 
-    const body = this.buildBody(
-      {
-        description: incidentDescription,
-        status: incidentStatus,
-        severity: incidentSeverity,
-        detection: incidentDetection,
-      },
-      {
-        ref_id: incidentRefId,
-      },
-    );
+    const body = this.buildUpdateBody({
+      description: incidentDescription,
+      status: incidentStatus,
+      severity: incidentSeverity,
+      detection: incidentDetection,
+      ref_id: incidentRefId,
+    });
 
     return this.updateResource(incidentId, body);
   }

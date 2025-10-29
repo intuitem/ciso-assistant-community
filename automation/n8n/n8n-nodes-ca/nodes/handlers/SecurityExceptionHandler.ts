@@ -95,7 +95,9 @@ export class SecurityExceptionHandler extends BaseResourceHandler {
       "",
     );
 
-    const body = this.buildBody({}, { status: securityExceptionStatusUpdate });
+    const body = this.buildUpdateBody({
+      status: securityExceptionStatusUpdate,
+    });
 
     return this.updateResource(securityExceptionId, body);
   }
