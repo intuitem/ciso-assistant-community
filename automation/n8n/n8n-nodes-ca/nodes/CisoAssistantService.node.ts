@@ -1605,14 +1605,16 @@ export class CisoAssistantService implements INodeType {
           },
         },
         options: [
+          { name: "No Change", value: "" },
           { name: "New", value: "new" },
           { name: "Ongoing", value: "ongoing" },
           { name: "Resolved", value: "resolved" },
           { name: "Closed", value: "closed" },
           { name: "Dismissed", value: "dismissed" },
         ],
-        default: "new",
-        description: "The status of the incident",
+        default: "",
+        description:
+          'The status of the incident (use "No Change" for updates to keep existing value)',
       },
       {
         displayName: "Severity",
@@ -1625,6 +1627,7 @@ export class CisoAssistantService implements INodeType {
           },
         },
         options: [
+          { name: "No Change", value: -1 },
           { name: "Critical", value: 1 },
           { name: "Major", value: 2 },
           { name: "Moderate", value: 3 },
@@ -1632,8 +1635,9 @@ export class CisoAssistantService implements INodeType {
           { name: "Low", value: 5 },
           { name: "Unknown", value: 6 },
         ],
-        default: 3,
-        description: "The severity of the incident",
+        default: -1,
+        description:
+          'The severity of the incident (use "No Change" for updates to keep existing value)',
       },
       {
         displayName: "Detection",
@@ -1646,11 +1650,13 @@ export class CisoAssistantService implements INodeType {
           },
         },
         options: [
+          { name: "No Change", value: "" },
           { name: "Internal", value: "internally_detected" },
           { name: "External", value: "externally_detected" },
         ],
-        default: "internally_detected",
-        description: "How the incident was detected",
+        default: "",
+        description:
+          'How the incident was detected (use "No Change" for updates to keep existing value)',
       },
       {
         displayName: "Reference ID",

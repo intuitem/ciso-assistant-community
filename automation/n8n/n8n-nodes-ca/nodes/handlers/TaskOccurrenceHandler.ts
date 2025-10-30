@@ -59,9 +59,9 @@ export class TaskOccurrenceHandler extends BaseResourceHandler {
 
   private async update(): Promise<IDataObject> {
     const taskId = this.getParameter<string>("taskId");
-    const taskDueDate = this.getParameter<string>("taskDueDate", "");
-    const taskStatus = this.getParameter<string>("taskStatus", "");
-    const taskObservation = this.getParameter<string>("taskObservation", "");
+    const taskDueDate = this.getParameter<string>("taskDueDate");
+    const taskStatus = this.getParameter<string>("taskStatus");
+    const taskObservation = this.getParameter<string>("taskObservation");
 
     const body = this.buildUpdateBody({
       due_date: taskDueDate,

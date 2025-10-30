@@ -86,11 +86,9 @@ export class TaskDefinitionHandler extends BaseResourceHandler {
     const taskDefinitionId = this.getParameter<string>("taskDefinitionId");
     const taskDefinitionTaskDateUpdate = this.getParameter<string>(
       "taskDefinitionTaskDateUpdate",
-      "",
     );
     const taskDefinitionEnabledUpdate = this.getParameter<boolean>(
       "taskDefinitionEnabledUpdate",
-      true,
     );
 
     const body = this.buildUpdateBody({

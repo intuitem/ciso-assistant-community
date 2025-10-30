@@ -83,9 +83,9 @@ export class AssetHandler extends BaseResourceHandler {
 
   private async update(): Promise<IDataObject> {
     const assetId = this.getParameter<string>("assetId");
-    const assetDescription = this.getParameter<string>("assetDescription", "");
-    const assetType = this.getParameter<string>("assetType", "");
-    const assetNameUpdate = this.getParameter<string>("assetNameUpdate", "");
+    const assetDescription = this.getParameter<string>("assetDescription");
+    const assetType = this.getParameter<string>("assetType");
+    const assetNameUpdate = this.getParameter<string>("assetNameUpdate");
 
     const body = this.buildUpdateBody({
       name: assetNameUpdate,

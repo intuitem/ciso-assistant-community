@@ -73,15 +73,13 @@ export class IncidentHandler extends BaseResourceHandler {
     const incidentId = this.getParameter<string>("incidentId");
     const incidentDescription = this.getParameter<string>(
       "incidentDescription",
-      "",
     );
-    const incidentStatus = this.getParameter<string>("incidentStatus", "--");
-    const incidentSeverity = this.getParameter<number>("incidentSeverity", -1);
+    const incidentStatus = this.getParameter<string>("incidentStatus");
+    const incidentSeverity = this.getParameter<number>("incidentSeverity");
     const incidentDetection = this.getParameter<string>(
       "incidentDetection",
-      "--",
     );
-    const incidentRefId = this.getParameter<string>("incidentRefId", "");
+    const incidentRefId = this.getParameter<string>("incidentRefId");
 
     const body = this.buildUpdateBody({
       description: incidentDescription,

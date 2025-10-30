@@ -116,7 +116,6 @@ export class FindingsAssessmentHandler extends BaseResourceHandler {
     );
     const findingsAssessmentStatus = this.getParameter<string>(
       "findingsAssessmentStatus",
-      "",
     );
 
     const body = this.buildUpdateBody({ status: findingsAssessmentStatus });

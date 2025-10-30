@@ -82,11 +82,9 @@ export class FindingHandler extends BaseResourceHandler {
     const findingId = this.getParameter<string>("findingId");
     const findingStatusUpdate = this.getParameter<string>(
       "findingStatusUpdate",
-      "",
     );
     const findingSeverityUpdate = this.getParameter<number>(
       "findingSeverityUpdate",
-      -1,
     );
 
     const body = this.buildUpdateBody({

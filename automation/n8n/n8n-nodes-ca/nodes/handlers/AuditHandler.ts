@@ -137,15 +137,13 @@ export class AuditHandler extends BaseResourceHandler {
     const requirementAssessmentId = getResponse.results[0].id;
 
     // Build update data
-    const status = this.getParameter<string>("requirementAssessmentStatus", "");
-    const result = this.getParameter<string>("requirementAssessmentResult", "");
+    const status = this.getParameter<string>("requirementAssessmentStatus");
+    const result = this.getParameter<string>("requirementAssessmentResult");
     const observation = this.getParameter<string>(
       "requirementAssessmentObservation",
-      "",
     );
     const score = this.getParameter<number | null>(
       "requirementAssessmentScore",
-      null,
     );
 
     const updateData = this.buildUpdateBody({

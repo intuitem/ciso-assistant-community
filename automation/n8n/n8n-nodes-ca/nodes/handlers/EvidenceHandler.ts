@@ -83,7 +83,6 @@ export class EvidenceHandler extends BaseResourceHandler {
     const evidenceId = this.getParameter<string>("evidenceId");
     const evidenceStatusUpdate = this.getParameter<string>(
       "evidenceStatusUpdate",
-      "",
     );
 
     const body = this.buildUpdateBody({ status: evidenceStatusUpdate });

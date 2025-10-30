@@ -72,7 +72,6 @@ export class AppliedControlHandler extends BaseResourceHandler {
     const appliedControlId = this.getParameter<string>("appliedControlId");
     const appliedControlStatus = this.getParameter<string>(
       "appliedControlStatus",
-      "",
     );
 
     const body = this.buildUpdateBody({ status: appliedControlStatus });

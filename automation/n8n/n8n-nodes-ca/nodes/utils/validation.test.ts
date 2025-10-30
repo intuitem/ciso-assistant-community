@@ -59,8 +59,21 @@ describe("buildUpdateBody", () => {
     expect(result).toEqual({ enabled: true, archived: false });
   });
 
-  it("should handle complex VulnerabilityHandler update scenario", () => {
-    // Simulates leaving all fields at their defaults in the n8n UI
+  it("should handle VulnerabilityHandler update with undefined fields", () => {
+    // Simulates user not setting any optional fields (getParameter returns undefined)
+    const result = buildUpdateBody({
+      description: undefined,
+      status: undefined,
+      severity: undefined,
+      ref_id: undefined,
+    });
+
+    // Should result in empty body - no unintended field resets!
+    expect(result).toEqual({});
+  });
+
+  it("should handle VulnerabilityHandler update with sentinel values", () => {
+    // Simulates old behavior where defaults were provided
     const result = buildUpdateBody({
       description: "",
       status: "--",
@@ -68,7 +81,7 @@ describe("buildUpdateBody", () => {
       ref_id: "",
     });
 
-    // Should result in empty body - no unintended field resets!
+    // Should still filter these out
     expect(result).toEqual({});
   });
 

@@ -92,7 +92,6 @@ export class SecurityExceptionHandler extends BaseResourceHandler {
     );
     const securityExceptionStatusUpdate = this.getParameter<string>(
       "securityExceptionStatusUpdate",
-      "",
     );
 
     const body = this.buildUpdateBody({

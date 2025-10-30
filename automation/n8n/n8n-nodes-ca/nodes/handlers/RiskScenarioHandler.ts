@@ -127,47 +127,36 @@ export class RiskScenarioHandler extends BaseResourceHandler {
     const riskScenarioId = this.getParameter<string>("riskScenarioId");
     const riskScenarioDescription = this.getParameter<string>(
       "riskScenarioDescription",
-      "",
     );
     const riskScenarioRefId = this.getParameter<string>(
       "riskScenarioRefId",
-      "",
     );
     const riskScenarioTreatment = this.getParameter<string>(
       "riskScenarioTreatment",
-      "",
     );
     const riskScenarioExistingControls = this.getParameter<string>(
       "riskScenarioExistingControls",
-      "",
     );
     const riskScenarioInherentProba = this.getParameter<number>(
       "riskScenarioInherentProba",
-      -1,
     );
     const riskScenarioInherentImpact = this.getParameter<number>(
       "riskScenarioInherentImpact",
-      -1,
     );
     const riskScenarioCurrentProba = this.getParameter<number>(
       "riskScenarioCurrentProba",
-      -1,
     );
     const riskScenarioCurrentImpact = this.getParameter<number>(
       "riskScenarioCurrentImpact",
-      -1,
     );
     const riskScenarioResidualProba = this.getParameter<number>(
       "riskScenarioResidualProba",
-      -1,
     );
     const riskScenarioResidualImpact = this.getParameter<number>(
       "riskScenarioResidualImpact",
-      -1,
     );
     const riskScenarioStrengthOfKnowledge = this.getParameter<number>(
       "riskScenarioStrengthOfKnowledge",
-      -1,
     );
 
     const body = this.buildUpdateBody({
