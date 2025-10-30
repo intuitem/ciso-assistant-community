@@ -3,8 +3,15 @@ import type {
   INodeTypeDescription,
   IExecuteFunctions,
   INodeExecutionData,
-  IHttpRequestOptions,
 } from "n8n-workflow";
+
+import type {
+  ICisoAssistantCredentials,
+  IResourceContext,
+  ResourceType,
+} from "./types";
+
+import { resourceRegistry } from "./registry/ResourceRegistry";
 
 export class CisoAssistantService implements INodeType {
   description: INodeTypeDescription = {
@@ -18,8 +25,8 @@ export class CisoAssistantService implements INodeType {
     defaults: {
       name: "CA node ",
     },
-    inputs: ['main'],
-    outputs: ['main'],
+    inputs: ["main"],
+    outputs: ["main"],
     credentials: [
       {
         name: "cisoAssistantApi",
@@ -310,13 +317,15 @@ export class CisoAssistantService implements INodeType {
           {
             name: "Update Requirement Assessment",
             value: "updateRequirementAssessment",
-            description: "Update a requirement assessment by requirement ref_id",
+            description:
+              "Update a requirement assessment by requirement ref_id",
             action: "Update requirement assessment",
           },
           {
             name: "List Requirement Assessments",
             value: "listRequirementAssessments",
-            description: "Get all requirement assessments for a compliance assessment",
+            description:
+              "Get all requirement assessments for a compliance assessment",
             action: "List requirement assessments",
           },
           {
@@ -343,7 +352,8 @@ export class CisoAssistantService implements INodeType {
           {
             name: "Initiate",
             value: "initiate",
-            description: "Initiate a risk assessment for a perimeter with a risk matrix",
+            description:
+              "Initiate a risk assessment for a perimeter with a risk matrix",
             action: "Initiate a risk assessment",
           },
           {
@@ -649,7 +659,8 @@ export class CisoAssistantService implements INodeType {
           {
             name: "Get by Name",
             value: "getByName",
-            description: "Get a security exception by its name (case-sensitive)",
+            description:
+              "Get a security exception by its name (case-sensitive)",
             action: "Get security exception by name",
           },
           {
@@ -700,13 +711,15 @@ export class CisoAssistantService implements INodeType {
           {
             name: "Update Envelope",
             value: "update",
-            description: "Update evidence envelope data (name, description, status, etc.)",
+            description:
+              "Update evidence envelope data (name, description, status, etc.)",
             action: "Update evidence envelope",
           },
           {
             name: "Submit Revision",
             value: "submitRevision",
-            description: "Submit a new revision of the evidence (link or attachment)",
+            description:
+              "Submit a new revision of the evidence (link or attachment)",
             action: "Submit evidence revision",
           },
           {
@@ -826,13 +839,15 @@ export class CisoAssistantService implements INodeType {
           {
             name: "Create",
             value: "create",
-            description: "Create a new entity assessment with optional compliance assessment",
+            description:
+              "Create a new entity assessment with optional compliance assessment",
             action: "Create entity assessment",
           },
           {
             name: "Get by Name",
             value: "getByName",
-            description: "Get an entity assessment by its name (case-sensitive)",
+            description:
+              "Get an entity assessment by its name (case-sensitive)",
             action: "Get entity assessment by name",
           },
           {
@@ -1079,7 +1094,8 @@ export class CisoAssistantService implements INodeType {
         },
         default: "",
         placeholder: "domain-uuid-here",
-        description: "The UUID of the folder (domain) this perimeter belongs to",
+        description:
+          "The UUID of the folder (domain) this perimeter belongs to",
         required: true,
       },
       // Domain fields
@@ -1326,7 +1342,10 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["audit"],
-            operation: ["getRequirementAssessment", "updateRequirementAssessment"],
+            operation: [
+              "getRequirementAssessment",
+              "updateRequirementAssessment",
+            ],
           },
         },
         default: "",
@@ -1341,7 +1360,11 @@ export class CisoAssistantService implements INodeType {
         displayOptions: {
           show: {
             resource: ["audit"],
-            operation: ["getRequirementAssessment", "updateRequirementAssessment", "listRequirementAssessments"],
+            operation: [
+              "getRequirementAssessment",
+              "updateRequirementAssessment",
+              "listRequirementAssessments",
+            ],
           },
         },
         default: "",
@@ -1582,14 +1605,16 @@ export class CisoAssistantService implements INodeType {
           },
         },
         options: [
+          { name: "No Change", value: "" },
           { name: "New", value: "new" },
           { name: "Ongoing", value: "ongoing" },
           { name: "Resolved", value: "resolved" },
           { name: "Closed", value: "closed" },
           { name: "Dismissed", value: "dismissed" },
         ],
-        default: "new",
-        description: "The status of the incident",
+        default: "",
+        description:
+          'The status of the incident (use "No Change" for updates to keep existing value)',
       },
       {
         displayName: "Severity",
@@ -1602,6 +1627,7 @@ export class CisoAssistantService implements INodeType {
           },
         },
         options: [
+          { name: "No Change", value: -1 },
           { name: "Critical", value: 1 },
           { name: "Major", value: 2 },
           { name: "Moderate", value: 3 },
@@ -1609,8 +1635,9 @@ export class CisoAssistantService implements INodeType {
           { name: "Low", value: 5 },
           { name: "Unknown", value: 6 },
         ],
-        default: 3,
-        description: "The severity of the incident",
+        default: -1,
+        description:
+          'The severity of the incident (use "No Change" for updates to keep existing value)',
       },
       {
         displayName: "Detection",
@@ -1623,11 +1650,13 @@ export class CisoAssistantService implements INodeType {
           },
         },
         options: [
+          { name: "No Change", value: "" },
           { name: "Internal", value: "internally_detected" },
           { name: "External", value: "externally_detected" },
         ],
-        default: "internally_detected",
-        description: "How the incident was detected",
+        default: "",
+        description:
+          'How the incident was detected (use "No Change" for updates to keep existing value)',
       },
       {
         displayName: "Reference ID",
@@ -1686,7 +1715,8 @@ export class CisoAssistantService implements INodeType {
         },
         default: "",
         placeholder: "domain-uuid-here",
-        description: "The UUID of the folder (domain) this vulnerability belongs to",
+        description:
+          "The UUID of the folder (domain) this vulnerability belongs to",
         required: true,
       },
       {
@@ -1776,7 +1806,8 @@ export class CisoAssistantService implements INodeType {
         },
         default: "",
         placeholder: "Access Control Implementation",
-        description: "The name of the applied control (case sensitive for getByName)",
+        description:
+          "The name of the applied control (case sensitive for getByName)",
         required: true,
       },
       {
@@ -2714,7 +2745,8 @@ export class CisoAssistantService implements INodeType {
         },
         default: "data",
         placeholder: "data",
-        description: "Name of the binary property containing the file to upload",
+        description:
+          "Name of the binary property containing the file to upload",
         required: true,
       },
       {
@@ -3109,7 +3141,8 @@ export class CisoAssistantService implements INodeType {
         },
         default: "",
         placeholder: "compliance-assessment-uuid-here",
-        description: "UUID of compliance assessment to link (optional - triggers compliance assessment)",
+        description:
+          "UUID of compliance assessment to link (optional - triggers compliance assessment)",
       },
       {
         displayName: "Conclusion",
@@ -3338,7 +3371,8 @@ export class CisoAssistantService implements INodeType {
         },
         default: "",
         placeholder: "2025-01-15T14:30:00Z",
-        description: "Date and time when the breach was discovered (ISO 8601 format)",
+        description:
+          "Date and time when the breach was discovered (ISO 8601 format)",
         required: true,
       },
       {
@@ -3355,7 +3389,10 @@ export class CisoAssistantService implements INodeType {
           { name: "Destruction", value: "privacy_destruction" },
           { name: "Loss", value: "privacy_loss" },
           { name: "Alteration", value: "privacy_alteration" },
-          { name: "Unauthorized Disclosure", value: "privacy_unauthorized_disclosure" },
+          {
+            name: "Unauthorized Disclosure",
+            value: "privacy_unauthorized_disclosure",
+          },
           { name: "Unauthorized Access", value: "privacy_unauthorized_access" },
           { name: "Other", value: "privacy_other" },
         ],
@@ -3394,7 +3431,10 @@ export class CisoAssistantService implements INodeType {
           { name: "Discovered", value: "privacy_discovered" },
           { name: "Under Investigation", value: "privacy_under_investigation" },
           { name: "Authority Notified", value: "privacy_authority_notified" },
-          { name: "Data Subjects Notified", value: "privacy_subjects_notified" },
+          {
+            name: "Data Subjects Notified",
+            value: "privacy_subjects_notified",
+          },
           { name: "Closed", value: "privacy_closed" },
         ],
         default: "privacy_discovered",
@@ -3650,7 +3690,8 @@ export class CisoAssistantService implements INodeType {
           },
         },
         default: -1,
-        description: "Strength of knowledge supporting the assessment (-1 for undefined, 0=Low, 1=Medium, 2=High)",
+        description:
+          "Strength of knowledge supporting the assessment (-1 for undefined, 0=Low, 1=Medium, 2=High)",
       },
       // Optional Folder UUID for list operations
       {
@@ -3759,1615 +3800,38 @@ export class CisoAssistantService implements INodeType {
     const items = this.getInputData();
     const returnData: INodeExecutionData[] = [];
 
-    // Get credentials
-    const credentials = await this.getCredentials("cisoAssistantApi");
+    // Get credentials once
+    const credentials = (await this.getCredentials(
+      "cisoAssistantApi",
+    )) as ICisoAssistantCredentials;
 
+    // Process each input item
     for (let i = 0; i < items.length; i++) {
       try {
-        const resource = this.getNodeParameter("resource", i) as string;
+        // Get resource and operation from node parameters
+        const resource = this.getNodeParameter("resource", i) as ResourceType;
         const operation = this.getNodeParameter("operation", i) as string;
 
-        // Base options for all requests (without url)
-        const baseHeaders = {
-          Authorization: `Token ${credentials.patKey}`,
-          Accept: "application/json",
-          "Content-Type": "application/json",
+        // Create context for the handler
+        const context: IResourceContext = {
+          executeFunctions: this,
+          credentials,
+          itemIndex: i,
         };
 
-        const baseConfig: Partial<IHttpRequestOptions> = {
-          headers: baseHeaders,
-          json: true,
-        };
+        // Get the appropriate handler from the registry
+        const handler = resourceRegistry.getHandler(resource);
 
-        // Skip TLS verification if specified in credentials
-        if (credentials.skipTLS === true) {
-          baseConfig.skipSslCertificateValidation = true;
-        }
+        // Execute the operation
+        const response = await handler.execute(operation, context);
 
-        let response;
-
-        // Handle operations based on resource and operation
-        if (resource === "system" && operation === "getBuild") {
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/build`,
-          });
-        } else if (resource === "system" && operation === "getUserByEmail") {
-          const userEmail = this.getNodeParameter("userEmail", i) as string;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/users/?email=${encodeURIComponent(userEmail)}`,
-          });
-        } else if (resource === "system" && operation === "listUsers") {
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/users/`,
-          });
-        } else if (resource === "perimeter" && operation === "create") {
-          const perimeterName = this.getNodeParameter(
-            "perimeterName",
-            i,
-          ) as string;
-          const perimeterDescription = this.getNodeParameter(
-            "perimeterDescription",
-            i,
-            "",
-          ) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const perimeterAdditionalFields = this.getNodeParameter(
-            "additionalFields",
-            i,
-            {},
-          ) as any;
-
-          const perimeterData: any = {
-            name: perimeterName,
-            description: perimeterDescription,
-            folder: folderId,
-          };
-
-          // Add additional fields
-          if (perimeterAdditionalFields.owner)
-            perimeterData.owner = perimeterAdditionalFields.owner;
-          if (perimeterAdditionalFields.tags) {
-            perimeterData.tags = perimeterAdditionalFields.tags
-              .split(",")
-              .map((tag: string) => tag.trim());
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/perimeters/`,
-            body: perimeterData,
-          });
-        } else if (resource === "perimeter" && operation === "getByName") {
-          const perimeterName = this.getNodeParameter("perimeterName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/perimeters/?name=${encodeURIComponent(perimeterName)}&folder=${encodeURIComponent(folderId)}`,
-          });
-        } else if (resource === "perimeter" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/perimeters/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "domain" && operation === "create") {
-          const domainName = this.getNodeParameter("domainName", i) as string;
-          const domainDescription = this.getNodeParameter(
-            "domainDescription",
-            i,
-            "",
-          ) as string;
-          const domainAdditionalFields = this.getNodeParameter(
-            "additionalFields",
-            i,
-            {},
-          ) as any;
-
-          const domainData: any = {
-            name: domainName,
-            description: domainDescription,
-          };
-
-          // Add additional fields
-          if (domainAdditionalFields.owner)
-            domainData.owner = domainAdditionalFields.owner;
-          if (domainAdditionalFields.tags) {
-            domainData.tags = domainAdditionalFields.tags
-              .split(",")
-              .map((tag: string) => tag.trim());
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/folders/`,
-            body: domainData,
-          });
-        } else if (resource === "domain" && operation === "getByName") {
-          const domainName = this.getNodeParameter("domainName", i) as string;
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/folders/?name=${encodeURIComponent(domainName)}`,
-          });
-        } else if (resource === "domain" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/folders/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "asset" && operation === "create") {
-          const assetName = this.getNodeParameter("assetName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const assetDescription = this.getNodeParameter(
-            "assetDescription",
-            i,
-            "",
-          ) as string;
-          const assetType = this.getNodeParameter("assetType", i) as string;
-          const assetAdditionalFields = this.getNodeParameter(
-            "additionalFields",
-            i,
-            {},
-          ) as any;
-
-          const assetData: any = {
-            name: assetName,
-            folder: folderId,
-            description: assetDescription,
-            type: assetType,
-          };
-
-          // Add additional fields
-          if (assetAdditionalFields.businessValue)
-            assetData.business_value = assetAdditionalFields.businessValue;
-          if (assetAdditionalFields.owner)
-            assetData.owner = assetAdditionalFields.owner;
-          if (assetAdditionalFields.tags) {
-            assetData.tags = assetAdditionalFields.tags
-              .split(",")
-              .map((tag: string) => tag.trim());
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/assets/`,
-            body: assetData,
-          });
-        } else if (resource === "asset" && operation === "getByName") {
-          const assetName = this.getNodeParameter("assetName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i, "") as string;
-
-          let url = `${credentials.baseUrl}/assets/?name=${encodeURIComponent(assetName)}`;
-          if (folderId) {
-            url += `&folder=${encodeURIComponent(folderId)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "asset" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/assets/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "asset" && operation === "update") {
-          const assetId = this.getNodeParameter("assetId", i) as string;
-          const assetDescription = this.getNodeParameter("assetDescription", i, "") as string;
-          const assetType = this.getNodeParameter("assetType", i, "") as string;
-          const assetNameUpdate = this.getNodeParameter("assetNameUpdate", i, "") as string;
-
-          const assetData: any = {};
-
-          if (assetNameUpdate) assetData.name = assetNameUpdate;
-          if (assetDescription) assetData.description = assetDescription;
-          if (assetType) assetData.type = assetType;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/assets/${assetId}/`,
-            body: assetData,
-          });
-        } else if (resource === "audit" && operation === "initiate") {
-          const auditPerimeterId = this.getNodeParameter(
-            "perimeterId",
-            i,
-          ) as string;
-          const frameworkId = this.getNodeParameter(
-            "frameworkId",
-            i,
-          ) as string;
-          const auditName = this.getNodeParameter("auditName", i) as string;
-
-          const auditData = {
-            name: auditName,
-            perimeter: auditPerimeterId,
-            framework: frameworkId,
-          };
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/compliance-assessments/`,
-            body: auditData,
-          });
-        } else if (resource === "audit" && operation === "getByName") {
-          const auditName = this.getNodeParameter("auditName", i) as string;
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
-
-          let url = `${credentials.baseUrl}/compliance-assessments/?name=${encodeURIComponent(auditName)}`;
-          if (folderIdFilter) {
-            url += `&folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          if (perimeterIdFilter) {
-            url += `&perimeter=${encodeURIComponent(perimeterIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "audit" && operation === "getByRefId") {
-          const auditRefId = this.getNodeParameter("auditRefId", i) as string;
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
-
-          let url = `${credentials.baseUrl}/compliance-assessments/?ref_id=${encodeURIComponent(auditRefId)}`;
-          if (folderIdFilter) {
-            url += `&folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          if (perimeterIdFilter) {
-            url += `&perimeter=${encodeURIComponent(perimeterIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "audit" && operation === "getRequirementAssessment") {
-          const requirementRefId = this.getNodeParameter("requirementRefId", i) as string;
-          const complianceAssessmentId = this.getNodeParameter("complianceAssessmentId", i) as string;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/requirement-assessments/?requirement__ref_id=${encodeURIComponent(requirementRefId)}&compliance_assessment=${encodeURIComponent(complianceAssessmentId)}`,
-          });
-        } else if (resource === "audit" && operation === "updateRequirementAssessment") {
-          const requirementRefId = this.getNodeParameter("requirementRefId", i) as string;
-          const complianceAssessmentId = this.getNodeParameter("complianceAssessmentId", i) as string;
-
-          // First, get the requirement assessment to find its ID
-          const getResponse = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/requirement-assessments/?requirement__ref_id=${encodeURIComponent(requirementRefId)}&compliance_assessment=${encodeURIComponent(complianceAssessmentId)}`,
-          });
-
-          // Check if we found the requirement assessment
-          if (!getResponse.results || getResponse.results.length === 0) {
-            throw new Error(`No requirement assessment found for ref_id: ${requirementRefId} in compliance assessment: ${complianceAssessmentId}`);
-          }
-
-          const requirementAssessmentId = getResponse.results[0].id;
-
-          // Build update data
-          const updateData: any = {};
-
-          const status = this.getNodeParameter("requirementAssessmentStatus", i, "") as string;
-          const result = this.getNodeParameter("requirementAssessmentResult", i, "") as string;
-          const observation = this.getNodeParameter("requirementAssessmentObservation", i, "") as string;
-          const score = this.getNodeParameter("requirementAssessmentScore", i, null) as number | null;
-
-          if (status) updateData.status = status;
-          if (result) updateData.result = result;
-          if (observation) updateData.observation = observation;
-          if (score !== null && score !== undefined) updateData.score = score;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/requirement-assessments/${requirementAssessmentId}/`,
-            body: updateData,
-          });
-        } else if (resource === "audit" && operation === "listRequirementAssessments") {
-          const complianceAssessmentId = this.getNodeParameter("complianceAssessmentId", i) as string;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/requirement-assessments/?compliance_assessment=${encodeURIComponent(complianceAssessmentId)}`,
-          });
-        } else if (resource === "audit" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
-
-          let url = `${credentials.baseUrl}/compliance-assessments/`;
-          const params = [];
-          if (folderIdFilter) {
-            params.push(`folder=${encodeURIComponent(folderIdFilter)}`);
-          }
-          if (perimeterIdFilter) {
-            params.push(`perimeter=${encodeURIComponent(perimeterIdFilter)}`);
-          }
-          if (params.length > 0) {
-            url += `?${params.join("&")}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "riskAssessment" && operation === "initiate") {
-          const raPerimeterId = this.getNodeParameter(
-            "perimeterId",
-            i,
-          ) as string;
-          const riskMatrixId = this.getNodeParameter(
-            "riskMatrixId",
-            i,
-          ) as string;
-          const riskAssessmentName = this.getNodeParameter(
-            "riskAssessmentName",
-            i,
-          ) as string;
-
-          const riskAssessmentData = {
-            name: riskAssessmentName,
-            perimeter: raPerimeterId,
-            risk_matrix: riskMatrixId,
-          };
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/risk-assessments/`,
-            body: riskAssessmentData,
-          });
-        } else if (resource === "riskAssessment" && operation === "getByName") {
-          const riskAssessmentNameGet = this.getNodeParameter("riskAssessmentNameGet", i) as string;
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
-
-          let url = `${credentials.baseUrl}/risk-assessments/?name=${encodeURIComponent(riskAssessmentNameGet)}`;
-          if (folderIdFilter) {
-            url += `&folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          if (perimeterIdFilter) {
-            url += `&perimeter=${encodeURIComponent(perimeterIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "riskAssessment" && operation === "getByRefId") {
-          const riskAssessmentRefId = this.getNodeParameter("riskAssessmentRefId", i) as string;
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
-
-          let url = `${credentials.baseUrl}/risk-assessments/?ref_id=${encodeURIComponent(riskAssessmentRefId)}`;
-          if (folderIdFilter) {
-            url += `&folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          if (perimeterIdFilter) {
-            url += `&perimeter=${encodeURIComponent(perimeterIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "riskAssessment" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
-
-          let url = `${credentials.baseUrl}/risk-assessments/`;
-          const params = [];
-          if (folderIdFilter) {
-            params.push(`folder=${encodeURIComponent(folderIdFilter)}`);
-          }
-          if (perimeterIdFilter) {
-            params.push(`perimeter=${encodeURIComponent(perimeterIdFilter)}`);
-          }
-          if (params.length > 0) {
-            url += `?${params.join("&")}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "incident" && operation === "create") {
-          const incidentName = this.getNodeParameter("incidentName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const incidentDescription = this.getNodeParameter(
-            "incidentDescription",
-            i,
-            "",
-          ) as string;
-          const incidentStatus = this.getNodeParameter(
-            "incidentStatus",
-            i,
-            "new",
-          ) as string;
-          const incidentSeverity = this.getNodeParameter(
-            "incidentSeverity",
-            i,
-            3,
-          ) as number;
-          const incidentDetection = this.getNodeParameter(
-            "incidentDetection",
-            i,
-            "internally_detected",
-          ) as string;
-          const incidentRefId = this.getNodeParameter(
-            "incidentRefId",
-            i,
-            "",
-          ) as string;
-
-          const incidentData: any = {
-            name: incidentName,
-            folder: folderId,
-            description: incidentDescription,
-            status: incidentStatus,
-            severity: incidentSeverity,
-            detection: incidentDetection,
-          };
-
-          if (incidentRefId) {
-            incidentData.ref_id = incidentRefId;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/incidents/`,
-            body: incidentData,
-          });
-        } else if (resource === "incident" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/incidents/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "incident" && operation === "update") {
-          const incidentId = this.getNodeParameter("incidentId", i) as string;
-          const incidentDescription = this.getNodeParameter("incidentDescription", i, "") as string;
-          const incidentStatus = this.getNodeParameter("incidentStatus", i, "new") as string;
-          const incidentSeverity = this.getNodeParameter("incidentSeverity", i, 3) as number;
-          const incidentDetection = this.getNodeParameter("incidentDetection", i, "internally_detected") as string;
-          const incidentRefId = this.getNodeParameter("incidentRefId", i, "") as string;
-
-          const incidentData: any = {
-            description: incidentDescription,
-            status: incidentStatus,
-            severity: incidentSeverity,
-            detection: incidentDetection,
-          };
-
-          if (incidentRefId) incidentData.ref_id = incidentRefId;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/incidents/${incidentId}/`,
-            body: incidentData,
-          });
-        } else if (resource === "vulnerability" && operation === "create") {
-          const vulnerabilityName = this.getNodeParameter("vulnerabilityName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const vulnerabilityDescription = this.getNodeParameter(
-            "vulnerabilityDescription",
-            i,
-            "",
-          ) as string;
-          const vulnerabilityStatus = this.getNodeParameter(
-            "vulnerabilityStatus",
-            i,
-            "--",
-          ) as string;
-          const vulnerabilitySeverity = this.getNodeParameter(
-            "vulnerabilitySeverity",
-            i,
-            -1,
-          ) as number;
-          const vulnerabilityRefId = this.getNodeParameter(
-            "vulnerabilityRefId",
-            i,
-            "",
-          ) as string;
-
-          const vulnerabilityData: any = {
-            name: vulnerabilityName,
-            folder: folderId,
-            description: vulnerabilityDescription,
-            status: vulnerabilityStatus,
-            severity: vulnerabilitySeverity,
-          };
-
-          if (vulnerabilityRefId) {
-            vulnerabilityData.ref_id = vulnerabilityRefId;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/vulnerabilities/`,
-            body: vulnerabilityData,
-          });
-        } else if (resource === "vulnerability" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/vulnerabilities/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "vulnerability" && operation === "update") {
-          const vulnerabilityId = this.getNodeParameter("vulnerabilityId", i) as string;
-          const vulnerabilityDescription = this.getNodeParameter("vulnerabilityDescription", i, "") as string;
-          const vulnerabilityStatus = this.getNodeParameter("vulnerabilityStatus", i, "--") as string;
-          const vulnerabilitySeverity = this.getNodeParameter("vulnerabilitySeverity", i, -1) as number;
-          const vulnerabilityRefId = this.getNodeParameter("vulnerabilityRefId", i, "") as string;
-
-          const vulnerabilityData: any = {
-            description: vulnerabilityDescription,
-            status: vulnerabilityStatus,
-            severity: vulnerabilitySeverity,
-          };
-
-          if (vulnerabilityRefId) vulnerabilityData.ref_id = vulnerabilityRefId;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/vulnerabilities/${vulnerabilityId}/`,
-            body: vulnerabilityData,
-          });
-        } else if (resource === "appliedControl" && operation === "create") {
-          const appliedControlName = this.getNodeParameter("appliedControlName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const appliedControlDescription = this.getNodeParameter(
-            "appliedControlDescription",
-            i,
-            "",
-          ) as string;
-          const appliedControlStatus = this.getNodeParameter(
-            "appliedControlStatus",
-            i,
-            "to_do",
-          ) as string;
-
-          const appliedControlData: any = {
-            name: appliedControlName,
-            folder: folderId,
-            description: appliedControlDescription,
-            status: appliedControlStatus,
-          };
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/applied-controls/`,
-            body: appliedControlData,
-          });
-        } else if (resource === "appliedControl" && operation === "getByName") {
-          const appliedControlName = this.getNodeParameter("appliedControlName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/applied-controls/?name=${encodeURIComponent(appliedControlName)}&folder=${encodeURIComponent(folderId)}`,
-          });
-        } else if (resource === "appliedControl" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/applied-controls/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "appliedControl" && operation === "update") {
-          const appliedControlId = this.getNodeParameter("appliedControlId", i) as string;
-          const appliedControlStatus = this.getNodeParameter(
-            "appliedControlStatus",
-            i,
-            "",
-          ) as string;
-
-          const updateData: any = {};
-          if (appliedControlStatus) updateData.status = appliedControlStatus;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/applied-controls/${appliedControlId}/`,
-            body: updateData,
-          });
-        } else if (resource === "taskOccurrence" && operation === "create") {
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const taskDueDate = this.getNodeParameter("taskDueDate", i, "") as string;
-          const taskStatus = this.getNodeParameter("taskStatus", i, "pending") as string;
-          const taskObservation = this.getNodeParameter("taskObservation", i, "") as string;
-
-          const taskData: any = {
-            folder: folderId,
-            status: taskStatus,
-          };
-
-          if (taskDueDate) taskData.due_date = taskDueDate;
-          if (taskObservation) taskData.observation = taskObservation;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/task-nodes/`,
-            body: taskData,
-          });
-        } else if (resource === "taskOccurrence" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/task-nodes/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "taskOccurrence" && operation === "update") {
-          const taskId = this.getNodeParameter("taskId", i) as string;
-          const taskDueDate = this.getNodeParameter("taskDueDate", i, "") as string;
-          const taskStatus = this.getNodeParameter("taskStatus", i, "") as string;
-          const taskObservation = this.getNodeParameter("taskObservation", i, "") as string;
-
-          const updateData: any = {};
-          if (taskDueDate) updateData.due_date = taskDueDate;
-          if (taskStatus) updateData.status = taskStatus;
-          if (taskObservation) updateData.observation = taskObservation;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/task-nodes/${taskId}/`,
-            body: updateData,
-          });
-        } else if (resource === "taskDefinition" && operation === "create") {
-          const taskDefinitionName = this.getNodeParameter("taskDefinitionName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const taskDefinitionDescription = this.getNodeParameter(
-            "taskDefinitionDescription",
-            i,
-            "",
-          ) as string;
-          const taskDefinitionTaskDate = this.getNodeParameter(
-            "taskDefinitionTaskDate",
-            i,
-            "",
-          ) as string;
-          const taskDefinitionIsRecurrent = this.getNodeParameter(
-            "taskDefinitionIsRecurrent",
-            i,
-            false,
-          ) as boolean;
-          const taskDefinitionEnabled = this.getNodeParameter(
-            "taskDefinitionEnabled",
-            i,
-            true,
-          ) as boolean;
-
-          const taskDefinitionData: any = {
-            name: taskDefinitionName,
-            folder: folderId,
-            is_recurrent: taskDefinitionIsRecurrent,
-            enabled: taskDefinitionEnabled,
-          };
-
-          if (taskDefinitionDescription) taskDefinitionData.description = taskDefinitionDescription;
-          if (taskDefinitionTaskDate) taskDefinitionData.task_date = taskDefinitionTaskDate;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/task-templates/`,
-            body: taskDefinitionData,
-          });
-        } else if (resource === "taskDefinition" && operation === "getByName") {
-          const taskDefinitionName = this.getNodeParameter("taskDefinitionName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/task-templates/?name=${encodeURIComponent(taskDefinitionName)}&folder=${encodeURIComponent(folderId)}`,
-          });
-        } else if (resource === "taskDefinition" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/task-templates/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "taskDefinition" && operation === "update") {
-          const taskDefinitionId = this.getNodeParameter("taskDefinitionId", i) as string;
-          const taskDefinitionTaskDateUpdate = this.getNodeParameter(
-            "taskDefinitionTaskDateUpdate",
-            i,
-            "",
-          ) as string;
-          const taskDefinitionEnabledUpdate = this.getNodeParameter(
-            "taskDefinitionEnabledUpdate",
-            i,
-            true,
-          ) as boolean;
-
-          const updateData: any = {};
-          if (taskDefinitionTaskDateUpdate) updateData.task_date = taskDefinitionTaskDateUpdate;
-          if (taskDefinitionEnabledUpdate !== undefined) updateData.enabled = taskDefinitionEnabledUpdate;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/task-templates/${taskDefinitionId}/`,
-            body: updateData,
-          });
-        } else if (resource === "findingsAssessment" && operation === "create") {
-          const findingsAssessmentName = this.getNodeParameter("findingsAssessmentName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const perimeterId = this.getNodeParameter("perimeterId", i) as string;
-          const findingsAssessmentDescription = this.getNodeParameter(
-            "findingsAssessmentDescription",
-            i,
-            "",
-          ) as string;
-          const findingsAssessmentCategory = this.getNodeParameter(
-            "findingsAssessmentCategory",
-            i,
-            "--",
-          ) as string;
-
-          const findingsAssessmentData: any = {
-            name: findingsAssessmentName,
-            folder: folderId,
-            perimeter: perimeterId,
-            category: findingsAssessmentCategory,
-          };
-
-          if (findingsAssessmentDescription)
-            findingsAssessmentData.description = findingsAssessmentDescription;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/findings-assessments/`,
-            body: findingsAssessmentData,
-          });
-        } else if (resource === "findingsAssessment" && operation === "getByName") {
-          const findingsAssessmentName = this.getNodeParameter("findingsAssessmentName", i) as string;
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
-
-          let url = `${credentials.baseUrl}/findings-assessments/?name=${encodeURIComponent(findingsAssessmentName)}`;
-          if (folderIdFilter) {
-            url += `&folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          if (perimeterIdFilter) {
-            url += `&perimeter=${encodeURIComponent(perimeterIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "findingsAssessment" && operation === "getByRefId") {
-          const findingsAssessmentRefId = this.getNodeParameter("findingsAssessmentRefId", i) as string;
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
-
-          let url = `${credentials.baseUrl}/findings-assessments/?ref_id=${encodeURIComponent(findingsAssessmentRefId)}`;
-          if (folderIdFilter) {
-            url += `&folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          if (perimeterIdFilter) {
-            url += `&perimeter=${encodeURIComponent(perimeterIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "findingsAssessment" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          const perimeterIdFilter = this.getNodeParameter("perimeterIdFilter", i, "") as string;
-
-          let url = `${credentials.baseUrl}/findings-assessments/`;
-          const params = [];
-          if (folderIdFilter) {
-            params.push(`folder=${encodeURIComponent(folderIdFilter)}`);
-          }
-          if (perimeterIdFilter) {
-            params.push(`perimeter=${encodeURIComponent(perimeterIdFilter)}`);
-          }
-          if (params.length > 0) {
-            url += `?${params.join("&")}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "findingsAssessment" && operation === "update") {
-          const findingsAssessmentId = this.getNodeParameter("findingsAssessmentId", i) as string;
-          const findingsAssessmentStatus = this.getNodeParameter(
-            "findingsAssessmentStatus",
-            i,
-            "",
-          ) as string;
-
-          const updateData: any = {};
-          if (findingsAssessmentStatus) updateData.status = findingsAssessmentStatus;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/findings-assessments/${findingsAssessmentId}/`,
-            body: updateData,
-          });
-        } else if (resource === "finding" && operation === "create") {
-          const findingName = this.getNodeParameter("findingName", i) as string;
-          const findingsAssessmentId = this.getNodeParameter("findingsAssessmentId", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const findingDescription = this.getNodeParameter("findingDescription", i, "") as string;
-          const findingSeverity = this.getNodeParameter("findingSeverity", i, -1) as number;
-          const findingStatus = this.getNodeParameter("findingStatus", i, "identified") as string;
-
-          const findingData: any = {
-            name: findingName,
-            findings_assessment: findingsAssessmentId,
-            folder: folderId,
-            severity: findingSeverity,
-            status: findingStatus,
-          };
-
-          if (findingDescription) findingData.description = findingDescription;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/findings/`,
-            body: findingData,
-          });
-        } else if (resource === "finding" && operation === "getByName") {
-          const findingName = this.getNodeParameter("findingName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/findings/?name=${encodeURIComponent(findingName)}&folder=${encodeURIComponent(folderId)}`,
-          });
-        } else if (resource === "finding" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/findings/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "finding" && operation === "update") {
-          const findingId = this.getNodeParameter("findingId", i) as string;
-          const findingStatusUpdate = this.getNodeParameter("findingStatusUpdate", i, "") as string;
-          const findingSeverityUpdate = this.getNodeParameter("findingSeverityUpdate", i, -1) as number;
-
-          const updateData: any = {};
-          if (findingStatusUpdate) updateData.status = findingStatusUpdate;
-          if (findingSeverityUpdate !== -1) updateData.severity = findingSeverityUpdate;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/findings/${findingId}/`,
-            body: updateData,
-          });
-        } else if (resource === "securityException" && operation === "create") {
-          const securityExceptionName = this.getNodeParameter("securityExceptionName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const securityExceptionDescription = this.getNodeParameter(
-            "securityExceptionDescription",
-            i,
-            "",
-          ) as string;
-          const securityExceptionSeverity = this.getNodeParameter(
-            "securityExceptionSeverity",
-            i,
-            -1,
-          ) as number;
-          const securityExceptionStatus = this.getNodeParameter(
-            "securityExceptionStatus",
-            i,
-            "draft",
-          ) as string;
-          const securityExceptionExpirationDate = this.getNodeParameter(
-            "securityExceptionExpirationDate",
-            i,
-            "",
-          ) as string;
-
-          const securityExceptionData: any = {
-            name: securityExceptionName,
-            folder: folderId,
-            severity: securityExceptionSeverity,
-            status: securityExceptionStatus,
-          };
-
-          if (securityExceptionDescription)
-            securityExceptionData.description = securityExceptionDescription;
-          if (securityExceptionExpirationDate)
-            securityExceptionData.expiration_date = securityExceptionExpirationDate;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/security-exceptions/`,
-            body: securityExceptionData,
-          });
-        } else if (resource === "securityException" && operation === "getByName") {
-          const securityExceptionName = this.getNodeParameter("securityExceptionName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/security-exceptions/?name=${encodeURIComponent(securityExceptionName)}&folder=${encodeURIComponent(folderId)}`,
-          });
-        } else if (resource === "securityException" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/security-exceptions/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "securityException" && operation === "update") {
-          const securityExceptionId = this.getNodeParameter("securityExceptionId", i) as string;
-          const securityExceptionStatusUpdate = this.getNodeParameter(
-            "securityExceptionStatusUpdate",
-            i,
-            "",
-          ) as string;
-
-          const updateData: any = {};
-          if (securityExceptionStatusUpdate) updateData.status = securityExceptionStatusUpdate;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/security-exceptions/${securityExceptionId}/`,
-            body: updateData,
-          });
-        } else if (resource === "evidence" && operation === "create") {
-          const evidenceName = this.getNodeParameter("evidenceName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const evidenceDescription = this.getNodeParameter("evidenceDescription", i, "") as string;
-          const evidenceStatus = this.getNodeParameter("evidenceStatus", i, "draft") as string;
-          const evidenceExpiryDate = this.getNodeParameter("evidenceExpiryDate", i, "") as string;
-
-          const evidenceData: any = {
-            name: evidenceName,
-            folder: folderId,
-            status: evidenceStatus,
-          };
-
-          if (evidenceDescription) evidenceData.description = evidenceDescription;
-          if (evidenceExpiryDate) evidenceData.expiry_date = evidenceExpiryDate;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/evidences/`,
-            body: evidenceData,
-          });
-        } else if (resource === "evidence" && operation === "getByName") {
-          const evidenceName = this.getNodeParameter("evidenceName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/evidences/?name=${encodeURIComponent(evidenceName)}&folder=${encodeURIComponent(folderId)}`,
-          });
-        } else if (resource === "evidence" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/evidences/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "evidence" && operation === "update") {
-          const evidenceId = this.getNodeParameter("evidenceId", i) as string;
-          const evidenceStatusUpdate = this.getNodeParameter("evidenceStatusUpdate", i, "") as string;
-
-          const updateData: any = {};
-          if (evidenceStatusUpdate) updateData.status = evidenceStatusUpdate;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/evidences/${evidenceId}/`,
-            body: updateData,
-          });
-        } else if (resource === "evidence" && operation === "submitRevision") {
-          const evidenceIdForRevision = this.getNodeParameter("evidenceIdForRevision", i) as string;
-          const evidenceRevisionType = this.getNodeParameter("evidenceRevisionType", i) as string;
-          const evidenceRevisionObservation = this.getNodeParameter("evidenceRevisionObservation", i, "") as string;
-
-          if (evidenceRevisionType === "file") {
-            // Handle file upload - creates a new revision then uploads the file
-            const binaryPropertyName = this.getNodeParameter("binaryPropertyName", i) as string;
-            const binaryData = this.helpers.assertBinaryData(i, binaryPropertyName);
-            const dataBuffer = await this.helpers.getBinaryDataBuffer(i, binaryPropertyName);
-
-            // Get filename from binary data or use a default
-            const filename = binaryData.fileName || "evidence-file";
-
-            // Step 1: Create a new evidence revision
-            const revisionData: any = {
-              evidence: evidenceIdForRevision,
-            };
-            if (evidenceRevisionObservation) revisionData.observation = evidenceRevisionObservation;
-
-            const revisionResponse = await this.helpers.httpRequest({
-              ...baseConfig,
-              method: "POST",
-              url: `${credentials.baseUrl}/evidence-revisions/`,
-              body: revisionData,
-            });
-
-            const newRevisionId = revisionResponse.id;
-
-            // Step 2: Upload the file to the new revision
-            await this.helpers.httpRequest({
-              ...baseConfig,
-              method: "POST",
-              url: `${credentials.baseUrl}/evidence-revisions/${newRevisionId}/upload/`,
-              headers: {
-                ...baseConfig.headers,
-                "Content-Disposition": `attachment; filename=${encodeURIComponent(filename)}`,
-              },
-              body: dataBuffer,
-              json: false,
-            });
-
-            // Return the created revision info
-            response = revisionResponse;
-          } else {
-            // Handle link submission
-            const evidenceRevisionLink = this.getNodeParameter("evidenceRevisionLink", i, "") as string;
-
-            const revisionData: any = {
-              evidence: evidenceIdForRevision,
-            };
-
-            if (evidenceRevisionLink) revisionData.link = evidenceRevisionLink;
-            if (evidenceRevisionObservation) revisionData.observation = evidenceRevisionObservation;
-
-            response = await this.helpers.httpRequest({
-              ...baseConfig,
-              method: "POST",
-              url: `${credentials.baseUrl}/evidence-revisions/`,
-              body: revisionData,
-            });
-          }
-        } else if (resource === "evidence" && operation === "listRevisions") {
-          const evidenceIdForRevision = this.getNodeParameter("evidenceIdForRevision", i) as string;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/evidence-revisions/?evidence=${encodeURIComponent(evidenceIdForRevision)}`,
-          });
-        } else if (resource === "entity" && operation === "create") {
-          const entityName = this.getNodeParameter("entityName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const entityDescription = this.getNodeParameter("entityDescription", i, "") as string;
-          const entityMission = this.getNodeParameter("entityMission", i, "") as string;
-          const entityReferenceLink = this.getNodeParameter("entityReferenceLink", i, "") as string;
-
-          const entityData: any = {
-            name: entityName,
-            folder: folderId,
-          };
-
-          if (entityDescription) entityData.description = entityDescription;
-          if (entityMission) entityData.mission = entityMission;
-          if (entityReferenceLink) entityData.reference_link = entityReferenceLink;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/entities/`,
-            body: entityData,
-          });
-        } else if (resource === "entity" && operation === "getByName") {
-          const entityName = this.getNodeParameter("entityName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/entities/?name=${encodeURIComponent(entityName)}&folder=${encodeURIComponent(folderId)}`,
-          });
-        } else if (resource === "entity" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/entities/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "solution" && operation === "create") {
-          const solutionName = this.getNodeParameter("solutionName", i) as string;
-          const providerEntityId = this.getNodeParameter("providerEntityId", i) as string;
-          const recipientEntityId = this.getNodeParameter("recipientEntityId", i, "") as string;
-          const solutionDescription = this.getNodeParameter("solutionDescription", i, "") as string;
-          const solutionRefId = this.getNodeParameter("solutionRefId", i, "") as string;
-          const solutionCriticality = this.getNodeParameter("solutionCriticality", i, 0) as number;
-
-          const solutionData: any = {
-            name: solutionName,
-            provider_entity: providerEntityId,
-          };
-
-          if (recipientEntityId) solutionData.recipient_entity = recipientEntityId;
-          if (solutionDescription) solutionData.description = solutionDescription;
-          if (solutionRefId) solutionData.ref_id = solutionRefId;
-          if (solutionCriticality !== 0) solutionData.criticality = solutionCriticality;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/solutions/`,
-            body: solutionData,
-          });
-        } else if (resource === "solution" && operation === "getByName") {
-          const solutionName = this.getNodeParameter("solutionName", i) as string;
-          const providerEntityId = this.getNodeParameter("providerEntityId", i) as string;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/solutions/?name=${encodeURIComponent(solutionName)}&provider_entity=${encodeURIComponent(providerEntityId)}`,
-          });
-        } else if (resource === "solution" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/solutions/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "representative" && operation === "create") {
-          const representativeEntityId = this.getNodeParameter("representativeEntityId", i) as string;
-          const representativeEmail = this.getNodeParameter("representativeEmail", i) as string;
-          const representativeFirstName = this.getNodeParameter("representativeFirstName", i, "") as string;
-          const representativeLastName = this.getNodeParameter("representativeLastName", i, "") as string;
-          const representativePhone = this.getNodeParameter("representativePhone", i, "") as string;
-          const representativeRole = this.getNodeParameter("representativeRole", i, "") as string;
-          const representativeDescription = this.getNodeParameter("representativeDescription", i, "") as string;
-
-          const representativeData: any = {
-            entity: representativeEntityId,
-            email: representativeEmail,
-          };
-
-          if (representativeFirstName) representativeData.first_name = representativeFirstName;
-          if (representativeLastName) representativeData.last_name = representativeLastName;
-          if (representativePhone) representativeData.phone = representativePhone;
-          if (representativeRole) representativeData.role = representativeRole;
-          if (representativeDescription) representativeData.description = representativeDescription;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/representatives/`,
-            body: representativeData,
-          });
-        } else if (resource === "representative" && operation === "list") {
-          const representativeEntityId = this.getNodeParameter("representativeEntityId", i) as string;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/representatives/?entity=${encodeURIComponent(representativeEntityId)}`,
-          });
-        } else if (resource === "entityAssessment" && operation === "create") {
-          const entityAssessmentName = this.getNodeParameter("entityAssessmentName", i) as string;
-          const entityAssessmentEntityId = this.getNodeParameter("entityAssessmentEntityId", i) as string;
-          const entityAssessmentPerimeterId = this.getNodeParameter("entityAssessmentPerimeterId", i) as string;
-          const entityAssessmentDescription = this.getNodeParameter("entityAssessmentDescription", i, "") as string;
-          const entityAssessmentComplianceAssessmentId = this.getNodeParameter("entityAssessmentComplianceAssessmentId", i, "") as string;
-          const entityAssessmentConclusion = this.getNodeParameter("entityAssessmentConclusion", i, "") as string;
-
-          const entityAssessmentData: any = {
-            name: entityAssessmentName,
-            entity: entityAssessmentEntityId,
-            perimeter: entityAssessmentPerimeterId,
-          };
-
-          if (entityAssessmentDescription) entityAssessmentData.description = entityAssessmentDescription;
-          if (entityAssessmentComplianceAssessmentId) entityAssessmentData.compliance_assessment = entityAssessmentComplianceAssessmentId;
-          if (entityAssessmentConclusion) entityAssessmentData.conclusion = entityAssessmentConclusion;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/entity-assessments/`,
-            body: entityAssessmentData,
-          });
-        } else if (resource === "entityAssessment" && operation === "getByName") {
-          const entityAssessmentName = this.getNodeParameter("entityAssessmentName", i) as string;
-          const entityAssessmentPerimeterId = this.getNodeParameter("entityAssessmentPerimeterId", i, "") as string;
-          const entityAssessmentFolderId = this.getNodeParameter("entityAssessmentFolderId", i, "") as string;
-
-          let url = `${credentials.baseUrl}/entity-assessments/?name=${encodeURIComponent(entityAssessmentName)}`;
-          if (entityAssessmentPerimeterId) {
-            url += `&perimeter=${encodeURIComponent(entityAssessmentPerimeterId)}`;
-          }
-          if (entityAssessmentFolderId) {
-            url += `&folder=${encodeURIComponent(entityAssessmentFolderId)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "entityAssessment" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/entity-assessments/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "rightRequest" && operation === "create") {
-          const rightRequestName = this.getNodeParameter("rightRequestName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const rightRequestRequestedOn = this.getNodeParameter("rightRequestRequestedOn", i) as string;
-          const rightRequestType = this.getNodeParameter("rightRequestType", i, "other") as string;
-          const rightRequestStatus = this.getNodeParameter("rightRequestStatus", i, "new") as string;
-          const rightRequestDescription = this.getNodeParameter("rightRequestDescription", i, "") as string;
-          const rightRequestDueDate = this.getNodeParameter("rightRequestDueDate", i, "") as string;
-          const rightRequestObservation = this.getNodeParameter("rightRequestObservation", i, "") as string;
-
-          const rightRequestData: any = {
-            name: rightRequestName,
-            folder: folderId,
-            requested_on: rightRequestRequestedOn,
-            request_type: rightRequestType,
-            status: rightRequestStatus,
-          };
-
-          if (rightRequestDescription) rightRequestData.description = rightRequestDescription;
-          if (rightRequestDueDate) rightRequestData.due_date = rightRequestDueDate;
-          if (rightRequestObservation) rightRequestData.observation = rightRequestObservation;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/right-requests/`,
-            body: rightRequestData,
-          });
-        } else if (resource === "rightRequest" && operation === "getByName") {
-          const rightRequestName = this.getNodeParameter("rightRequestName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/right-requests/?name=${encodeURIComponent(rightRequestName)}&folder=${encodeURIComponent(folderId)}`,
-          });
-        } else if (resource === "rightRequest" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/right-requests/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "rightRequest" && operation === "update") {
-          const rightRequestId = this.getNodeParameter("rightRequestId", i) as string;
-          const rightRequestType = this.getNodeParameter("rightRequestType", i, "") as string;
-          const rightRequestStatus = this.getNodeParameter("rightRequestStatus", i, "") as string;
-          const rightRequestDescription = this.getNodeParameter("rightRequestDescription", i, "") as string;
-          const rightRequestDueDate = this.getNodeParameter("rightRequestDueDate", i, "") as string;
-          const rightRequestObservation = this.getNodeParameter("rightRequestObservation", i, "") as string;
-
-          const rightRequestData: any = {};
-
-          if (rightRequestType) rightRequestData.request_type = rightRequestType;
-          if (rightRequestStatus) rightRequestData.status = rightRequestStatus;
-          if (rightRequestDescription) rightRequestData.description = rightRequestDescription;
-          if (rightRequestDueDate) rightRequestData.due_date = rightRequestDueDate;
-          if (rightRequestObservation) rightRequestData.observation = rightRequestObservation;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/right-requests/${rightRequestId}/`,
-            body: rightRequestData,
-          });
-        } else if (resource === "dataBreach" && operation === "create") {
-          const dataBreachName = this.getNodeParameter("dataBreachName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-          const dataBreachDiscoveredOn = this.getNodeParameter("dataBreachDiscoveredOn", i) as string;
-          const dataBreachType = this.getNodeParameter("dataBreachType", i, "privacy_other") as string;
-          const dataBreachRiskLevel = this.getNodeParameter("dataBreachRiskLevel", i, "privacy_risk") as string;
-          const dataBreachStatus = this.getNodeParameter("dataBreachStatus", i, "privacy_discovered") as string;
-          const dataBreachDescription = this.getNodeParameter("dataBreachDescription", i, "") as string;
-          const dataBreachAffectedSubjectsCount = this.getNodeParameter("dataBreachAffectedSubjectsCount", i, 0) as number;
-          const dataBreachObservation = this.getNodeParameter("dataBreachObservation", i, "") as string;
-
-          const dataBreachData: any = {
-            name: dataBreachName,
-            folder: folderId,
-            discovered_on: dataBreachDiscoveredOn,
-            breach_type: dataBreachType,
-            risk_level: dataBreachRiskLevel,
-            status: dataBreachStatus,
-            affected_subjects_count: dataBreachAffectedSubjectsCount,
-          };
-
-          if (dataBreachDescription) dataBreachData.description = dataBreachDescription;
-          if (dataBreachObservation) dataBreachData.observation = dataBreachObservation;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/data-breaches/`,
-            body: dataBreachData,
-          });
-        } else if (resource === "dataBreach" && operation === "getByName") {
-          const dataBreachName = this.getNodeParameter("dataBreachName", i) as string;
-          const folderId = this.getNodeParameter("folderId", i) as string;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/data-breaches/?name=${encodeURIComponent(dataBreachName)}&folder=${encodeURIComponent(folderId)}`,
-          });
-        } else if (resource === "dataBreach" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/data-breaches/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "dataBreach" && operation === "update") {
-          const dataBreachId = this.getNodeParameter("dataBreachId", i) as string;
-          const dataBreachType = this.getNodeParameter("dataBreachType", i, "") as string;
-          const dataBreachRiskLevel = this.getNodeParameter("dataBreachRiskLevel", i, "") as string;
-          const dataBreachStatus = this.getNodeParameter("dataBreachStatus", i, "") as string;
-          const dataBreachDescription = this.getNodeParameter("dataBreachDescription", i, "") as string;
-          const dataBreachAffectedSubjectsCount = this.getNodeParameter("dataBreachAffectedSubjectsCount", i, -1) as number;
-          const dataBreachObservation = this.getNodeParameter("dataBreachObservation", i, "") as string;
-
-          const dataBreachData: any = {};
-
-          if (dataBreachType) dataBreachData.breach_type = dataBreachType;
-          if (dataBreachRiskLevel) dataBreachData.risk_level = dataBreachRiskLevel;
-          if (dataBreachStatus) dataBreachData.status = dataBreachStatus;
-          if (dataBreachDescription) dataBreachData.description = dataBreachDescription;
-          if (dataBreachAffectedSubjectsCount >= 0) dataBreachData.affected_subjects_count = dataBreachAffectedSubjectsCount;
-          if (dataBreachObservation) dataBreachData.observation = dataBreachObservation;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/data-breaches/${dataBreachId}/`,
-            body: dataBreachData,
-          });
-        } else if (resource === "riskScenario" && operation === "create") {
-          const riskScenarioName = this.getNodeParameter("riskScenarioName", i) as string;
-          const riskScenarioRiskAssessmentId = this.getNodeParameter("riskScenarioRiskAssessmentId", i) as string;
-          const riskScenarioDescription = this.getNodeParameter("riskScenarioDescription", i, "") as string;
-          const riskScenarioRefId = this.getNodeParameter("riskScenarioRefId", i, "") as string;
-          const riskScenarioTreatment = this.getNodeParameter("riskScenarioTreatment", i, "open") as string;
-          const riskScenarioExistingControls = this.getNodeParameter("riskScenarioExistingControls", i, "") as string;
-          const riskScenarioInherentProba = this.getNodeParameter("riskScenarioInherentProba", i, -1) as number;
-          const riskScenarioInherentImpact = this.getNodeParameter("riskScenarioInherentImpact", i, -1) as number;
-          const riskScenarioCurrentProba = this.getNodeParameter("riskScenarioCurrentProba", i, -1) as number;
-          const riskScenarioCurrentImpact = this.getNodeParameter("riskScenarioCurrentImpact", i, -1) as number;
-          const riskScenarioResidualProba = this.getNodeParameter("riskScenarioResidualProba", i, -1) as number;
-          const riskScenarioResidualImpact = this.getNodeParameter("riskScenarioResidualImpact", i, -1) as number;
-          const riskScenarioStrengthOfKnowledge = this.getNodeParameter("riskScenarioStrengthOfKnowledge", i, -1) as number;
-
-          const riskScenarioData: any = {
-            name: riskScenarioName,
-            risk_assessment: riskScenarioRiskAssessmentId,
-            treatment: riskScenarioTreatment,
-            inherent_proba: riskScenarioInherentProba,
-            inherent_impact: riskScenarioInherentImpact,
-            current_proba: riskScenarioCurrentProba,
-            current_impact: riskScenarioCurrentImpact,
-            residual_proba: riskScenarioResidualProba,
-            residual_impact: riskScenarioResidualImpact,
-            strength_of_knowledge: riskScenarioStrengthOfKnowledge,
-          };
-
-          if (riskScenarioDescription) riskScenarioData.description = riskScenarioDescription;
-          if (riskScenarioRefId) riskScenarioData.ref_id = riskScenarioRefId;
-          if (riskScenarioExistingControls) riskScenarioData.existing_controls = riskScenarioExistingControls;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "POST",
-            url: `${credentials.baseUrl}/risk-scenarios/`,
-            body: riskScenarioData,
-          });
-        } else if (resource === "riskScenario" && operation === "getByName") {
-          const riskScenarioName = this.getNodeParameter("riskScenarioName", i) as string;
-          const riskScenarioRiskAssessmentId = this.getNodeParameter("riskScenarioRiskAssessmentId", i) as string;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/risk-scenarios/?name=${encodeURIComponent(riskScenarioName)}&risk_assessment=${encodeURIComponent(riskScenarioRiskAssessmentId)}`,
-          });
-        } else if (resource === "riskScenario" && operation === "list") {
-          const folderIdFilter = this.getNodeParameter("folderIdFilter", i, "") as string;
-          let url = `${credentials.baseUrl}/risk-scenarios/`;
-          if (folderIdFilter) {
-            url += `?folder=${encodeURIComponent(folderIdFilter)}`;
-          }
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url,
-          });
-        } else if (resource === "riskScenario" && operation === "update") {
-          const riskScenarioId = this.getNodeParameter("riskScenarioId", i) as string;
-          const riskScenarioDescription = this.getNodeParameter("riskScenarioDescription", i, "") as string;
-          const riskScenarioRefId = this.getNodeParameter("riskScenarioRefId", i, "") as string;
-          const riskScenarioTreatment = this.getNodeParameter("riskScenarioTreatment", i, "") as string;
-          const riskScenarioExistingControls = this.getNodeParameter("riskScenarioExistingControls", i, "") as string;
-          const riskScenarioInherentProba = this.getNodeParameter("riskScenarioInherentProba", i, -1) as number;
-          const riskScenarioInherentImpact = this.getNodeParameter("riskScenarioInherentImpact", i, -1) as number;
-          const riskScenarioCurrentProba = this.getNodeParameter("riskScenarioCurrentProba", i, -1) as number;
-          const riskScenarioCurrentImpact = this.getNodeParameter("riskScenarioCurrentImpact", i, -1) as number;
-          const riskScenarioResidualProba = this.getNodeParameter("riskScenarioResidualProba", i, -1) as number;
-          const riskScenarioResidualImpact = this.getNodeParameter("riskScenarioResidualImpact", i, -1) as number;
-          const riskScenarioStrengthOfKnowledge = this.getNodeParameter("riskScenarioStrengthOfKnowledge", i, -1) as number;
-
-          const riskScenarioData: any = {
-            inherent_proba: riskScenarioInherentProba,
-            inherent_impact: riskScenarioInherentImpact,
-            current_proba: riskScenarioCurrentProba,
-            current_impact: riskScenarioCurrentImpact,
-            residual_proba: riskScenarioResidualProba,
-            residual_impact: riskScenarioResidualImpact,
-            strength_of_knowledge: riskScenarioStrengthOfKnowledge,
-          };
-
-          if (riskScenarioDescription) riskScenarioData.description = riskScenarioDescription;
-          if (riskScenarioRefId) riskScenarioData.ref_id = riskScenarioRefId;
-          if (riskScenarioTreatment) riskScenarioData.treatment = riskScenarioTreatment;
-          if (riskScenarioExistingControls) riskScenarioData.existing_controls = riskScenarioExistingControls;
-
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "PATCH",
-            url: `${credentials.baseUrl}/risk-scenarios/${riskScenarioId}/`,
-            body: riskScenarioData,
-          });
-        } else if (resource === "riskMatrix" && operation === "list") {
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/risk-matrices/`,
-          });
-        } else if (resource === "framework" && operation === "list") {
-          response = await this.helpers.httpRequest({
-            ...baseConfig,
-            method: "GET",
-            url: `${credentials.baseUrl}/frameworks/`,
-          });
-        } else {
-          throw new Error(`Unknown resource/operation: ${resource}/${operation}`);
-        }
-
+        // Add result to return data
         returnData.push({
           json: response,
           pairedItem: { item: i },
         });
       } catch (err: unknown) {
+        // Handle errors based on continueOnFail setting
         if (this.continueOnFail()) {
           const errorMessage = err instanceof Error ? err.message : String(err);
           returnData.push({
