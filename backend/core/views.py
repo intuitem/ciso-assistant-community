@@ -153,7 +153,7 @@ SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
-MAPPING_MAX_DETPH = 2
+MAPPING_MAX_DETPH = 3
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
@@ -5656,12 +5656,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         from core.mappings.engine import engine
 
         audit_from_results = engine.load_audit_fields(audit)
-        frameworks_in_mappings = set()
         data = []
-        for src, tgt in engine.all_rms.keys():
-            frameworks_in_mappings.add(src)
-            frameworks_in_mappings.add(tgt)
-        for dest_urn in sorted(frameworks_in_mappings):
+        for dest_urn in sorted(
+            [
+                p[-1]
+                for p in engine.all_paths_from(
+                    source_urn=audit.framework.urn, max_depth=MAPPING_MAX_DETPH
+                )
+            ]
+        ):
             best_results, _ = engine.best_mapping_inferences(
                 audit_from_results,
                 audit.framework.urn,
@@ -5670,7 +5673,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
             if best_results:
                 framework = Framework.objects.filter(urn=dest_urn).first()
-                if framework:
+                if framework and str(framework) not in str(data):
                     assessable_requirements_count = framework.requirement_nodes.filter(
                         assessable=True
                     ).count()
@@ -6175,20 +6178,24 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 best_results, _ = engine.best_mapping_inferences(
                     audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
                 )
-                ic(best_results)
 
                 requirement_assessments_to_update: list[RequirementAssessment] = []
 
                 target_requirement_assessments = RequirementAssessment.objects.filter(
                     compliance_assessment=instance,
-                    requirement__urn__in=best_results,
+                    requirement__urn__in=best_results["requirement_assessments"],
                 )
 
                 for req in target_requirement_assessments:
                     for field in ["result", "status", "observation"]:
-                        if best_results[req.requirement.urn].get(field):
+                        if best_results["requirement_assessments"][
+                            req.requirement.urn
+                        ].get(field):
                             req.__setattr__(
-                                field, best_results[req.requirement.urn][field]
+                                field,
+                                best_results["requirement_assessments"][
+                                    req.requirement.urn
+                                ][field],
                             )
                     requirement_assessments_to_update.append(req)
 
@@ -6199,31 +6206,37 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for ra in requirement_assessments_to_update:
-                    if best_results[ra.requirement.urn].get("applied_controls"):
+                    if best_results["requirement_assessments"][ra.requirement.urn].get(
+                        "applied_controls"
+                    ):
                         ra.applied_controls.add(
                             *[
                                 control
-                                for control in best_results[ra.requirement.urn][
-                                    "applied_controls"
-                                ]
+                                for control in best_results["requirement_assessments"][
+                                    ra.requirement.urn
+                                ]["applied_controls"]
                             ]
                         )
-                    if best_results[ra.requirement.urn].get("evidences"):
+                    if best_results["requirement_assessments"][ra.requirement.urn].get(
+                        "evidences"
+                    ):
                         ra.evidences.add(
                             *[
                                 evidence
-                                for evidence in best_results[ra.requirement.urn][
-                                    "evidences"
-                                ]
+                                for evidence in best_results["requirement_assessments"][
+                                    ra.requirement.urn
+                                ]["evidences"]
                             ]
                         )
-                    if best_results[ra.requirement.urn].get("security_exceptions"):
+                    if best_results["requirement_assessments"][ra.requirement.urn].get(
+                        "security_exceptions"
+                    ):
                         ra.security_exceptions.add(
                             *[
                                 exception
-                                for exception in best_results[ra.requirement.urn][
-                                    "security_exceptions"
-                                ]
+                                for exception in best_results[
+                                    "requirement_assessments"
+                                ][ra.requirement.urn]["security_exceptions"]
                             ]
                         )
 
