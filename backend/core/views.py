@@ -2227,7 +2227,7 @@ class AppliedControlViewSet(BaseModelViewSet):
                 )
 
             # Get labels
-            labels = ",".join([label.name for label in control.filtering_labels.all()])
+            labels = ",".join([lbl.label for lbl in control.filtering_labels.all()])
 
             # Get owners
             owners = (
