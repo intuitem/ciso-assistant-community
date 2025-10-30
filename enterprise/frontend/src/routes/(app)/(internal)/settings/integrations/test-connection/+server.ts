@@ -3,7 +3,6 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async (event) => {
 	const body = await event.request.text();
-	console.log(JSON.parse(body));
 	const requestInitOptions: RequestInit = {
 		method: 'POST',
 		body

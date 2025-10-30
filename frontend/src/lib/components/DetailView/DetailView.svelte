@@ -276,8 +276,6 @@
 
 	let expandedTable = $state(false);
 	const MAX_ROWS = 10;
-
-	$inspect(data);
 </script>
 
 <div class="flex flex-col space-y-2">
