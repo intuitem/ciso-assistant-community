@@ -46,16 +46,6 @@ class BaseIntegrationClient(ABC):
         """List objects from remote system based on query parameters"""
         pass
 
-    @abstractmethod
-    def register_webhook(self, callback_url: str) -> dict[str, Any]:
-        """Register webhook with remote system"""
-        pass
-
-    @abstractmethod
-    def unregister_webhook(self, webhook_id: str) -> bool:
-        """Unregister webhook from remote system"""
-        pass
-
 
 class BaseFieldMapper(ABC):
     """Maps fields between local and remote systems"""
