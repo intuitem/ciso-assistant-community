@@ -79,9 +79,9 @@ export const actions: Actions = {
 
 		if (!response.ok) {
 			console.error('Failed to save Jira integration config:', await response.text());
-      setFlash({ type: 'error', message: 'Failed to save Jira integration config' }, event);
+			setFlash({ type: 'error', message: 'Failed to save Jira integration config' }, event);
 		}
-    setFlash({type: 'success', message: 'Successfully savec Jira integration config'}, event);
+		setFlash({ type: 'success', message: 'Successfully savec Jira integration config' }, event);
 		return { form };
 	}
 };
