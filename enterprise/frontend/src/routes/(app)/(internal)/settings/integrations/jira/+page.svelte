@@ -61,7 +61,7 @@
 	});
 </script>
 
-{#key form}
+{#key page.data}
 	<div class="flex flex-col gap-8">
 		<SuperForm
 			class="flex flex-col space-y-3"

@@ -1,5 +1,7 @@
 import { z } from 'zod';
+import { safeTranslate } from '$lib/utils/i18n';
 import { superValidate } from 'sveltekit-superforms/server';
+import { setFlash } from 'sveltekit-flash-message/server';
 import type { Actions, PageServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
 import { BASE_API_URL } from '$lib/utils/constants';
@@ -53,8 +55,8 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 };
 
 export const actions: Actions = {
-	save: async ({ request, fetch }) => {
-		const form = await superValidate(request, zod(schema));
+	save: async (event) => {
+		const form = await superValidate(event.request, zod(schema));
 		if (!form.valid) {
 			return { form };
 		}
@@ -66,18 +68,20 @@ export const actions: Actions = {
 		};
 
 		const response = id
-			? await fetch(`${BASE_API_URL}/integrations/configs/${id}/`, {
+			? await event.fetch(`${BASE_API_URL}/integrations/configs/${id}/`, {
 					method: 'PATCH',
 					body: JSON.stringify(body)
 				})
-			: await fetch(`${BASE_API_URL}/integrations/configs/`, {
+			: await event.fetch(`${BASE_API_URL}/integrations/configs/`, {
 					method: 'POST',
 					body: JSON.stringify(body)
 				});
 
 		if (!response.ok) {
 			console.error('Failed to save Jira integration config:', await response.text());
+      setFlash({ type: 'error', message: 'Failed to save Jira integration config' }, event);
 		}
+    setFlash({type: 'success', message: 'Successfully savec Jira integration config'}, event);
 		return { form };
 	}
 };
