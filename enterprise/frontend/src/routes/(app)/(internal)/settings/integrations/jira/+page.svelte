@@ -222,7 +222,7 @@
 					<span
 						class="flex flex-row justify-between gap-2 preset-tonal-secondary items-center card pl-2 text-xs"
 					>
-						<pre>&lt;API_URL&gt;{page.data?.config?.webhook_url_full}</pre>
+						<pre>&lt;API_HOST&gt;{page.data?.config?.webhook_url_full}</pre>
 						<button
 							type="button"
 							class="btn px-2 py-1 preset-tonal-secondary rounded-l-none"
