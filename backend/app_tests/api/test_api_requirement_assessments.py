@@ -127,6 +127,10 @@ class TestRequirementAssessmentsAuthenticated:
                     "min_score": compliance_assessment.min_score,
                     "max_score": compliance_assessment.max_score,
                     "name": compliance_assessment.name,
+                    "framework": {
+                        "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
+                        "str": str(compliance_assessment.framework),
+                    },
                 },
                 "requirement": {
                     "id": str(RequirementNode.objects.all()[0].id),
@@ -145,6 +149,9 @@ class TestRequirementAssessmentsAuthenticated:
                     "associated_threats": RequirementNode.objects.all()[
                         0
                     ].associated_threats,
+                    "implementation_groups": RequirementNode.objects.all()[
+                        0
+                    ].implementation_groups,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"
@@ -208,6 +215,10 @@ class TestRequirementAssessmentsAuthenticated:
                     "min_score": compliance_assessment.min_score,
                     "max_score": compliance_assessment.max_score,
                     "name": compliance_assessment.name,
+                    "framework": {
+                        "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
+                        "str": str(compliance_assessment.framework),
+                    },
                 }
             },
             base_count=-1,
@@ -261,6 +272,10 @@ class TestRequirementAssessmentsAuthenticated:
                     "min_score": compliance_assessment.min_score,
                     "max_score": compliance_assessment.max_score,
                     "name": compliance_assessment.name,
+                    "framework": {
+                        "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
+                        "str": str(compliance_assessment.framework),
+                    },
                 },
                 "requirement": {
                     "id": str(RequirementNode.objects.all()[0].id),
@@ -279,6 +294,9 @@ class TestRequirementAssessmentsAuthenticated:
                     "associated_threats": RequirementNode.objects.all()[
                         0
                     ].associated_threats,
+                    "implementation_groups": RequirementNode.objects.all()[
+                        0
+                    ].implementation_groups,
                     "parent_requirement": {
                         "str": RequirementNode.objects.all()[0].parent_requirement.get(
                             "str"
