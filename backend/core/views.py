@@ -2155,33 +2155,113 @@ class AppliedControlViewSet(BaseModelViewSet):
         writer = csv.writer(response, delimiter=";")
         columns = [
             "internal_id",
+            "ref_id",
             "name",
             "description",
+            "reference_control_name",
+            "reference_control_ref_id",
             "category",
             "csf_function",
             "folder",
             "status",
+            "start_date",
             "eta",
+            "expiry_date",
             "priority",
+            "effort",
+            "impact",
+            "cost_currency",
+            "cost_build_fixed",
+            "cost_build_people_days",
+            "cost_run_fixed",
+            "cost_run_people_days",
+            "cost_amortization_period",
             "owner",
+            "labels",
         ]
         writer.writerow(columns)
 
-        for control in AppliedControl.objects.filter(id__in=viewable_controls_ids):
+        for control in (
+            AppliedControl.objects.filter(id__in=viewable_controls_ids)
+            .select_related("reference_control", "folder")
+            .prefetch_related("owner", "filtering_labels")
+        ):
+            # Get reference control name and ref_id
+            ref_control_name = (
+                control.reference_control.name if control.reference_control else ""
+            )
+            ref_control_ref_id = (
+                control.reference_control.ref_id if control.reference_control else ""
+            )
+
+            # Get effort display value (translated)
+            effort_display = control.get_effort_display() if control.effort else ""
+
+            # Get impact display value (translated)
+            impact_display = (
+                control.get_control_impact_display() if control.control_impact else ""
+            )
+
+            # Extract cost details
+            cost_currency = ""
+            cost_build_fixed = ""
+            cost_build_people_days = ""
+            cost_run_fixed = ""
+            cost_run_people_days = ""
+            cost_amortization = ""
+
+            if control.cost:
+                cost_currency = control.cost.get("currency", "")
+                cost_amortization = control.cost.get("amortization_period", "")
+                build_costs = control.cost.get("build", {})
+                run_costs = control.cost.get("run", {})
+                cost_build_fixed = (
+                    build_costs.get("fixed_cost", "") if build_costs else ""
+                )
+                cost_build_people_days = (
+                    build_costs.get("people_days", "") if build_costs else ""
+                )
+                cost_run_fixed = run_costs.get("fixed_cost", "") if run_costs else ""
+                cost_run_people_days = (
+                    run_costs.get("people_days", "") if run_costs else ""
+                )
+
+            # Get labels
+            labels = ",".join([label.name for label in control.filtering_labels.all()])
+
+            # Get owners
+            owners = (
+                ",".join([o.email for o in control.owner.all()])
+                if control.owner.exists()
+                else ""
+            )
+
             row = [
                 control.id,
+                control.ref_id or "",
                 control.name,
                 control.description,
-                control.category,
-                control.csf_function,
+                ref_control_name,
+                ref_control_ref_id,
+                control.category or "",
+                control.csf_function or "",
                 control.folder.name,
                 control.status,
-                control.eta,
-                control.priority,
+                control.start_date or "",
+                control.eta or "",
+                control.expiry_date or "",
+                control.priority or "",
+                effort_display,
+                impact_display,
+                cost_currency,
+                cost_build_fixed,
+                cost_build_people_days,
+                cost_run_fixed,
+                cost_run_people_days,
+                cost_amortization,
+                owners,
+                labels,
             ]
-            if len(control.owner.all()) > 0:
-                owners = ",".join([o.email for o in control.owner.all()])
-                row += [owners]
             writer.writerow(row)
         return response
 
