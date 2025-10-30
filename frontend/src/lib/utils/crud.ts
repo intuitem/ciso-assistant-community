@@ -925,6 +925,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		detailViewFields: [
 			{ field: 'id' },
+			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'folder' },

@@ -5294,18 +5294,20 @@ class ComplianceAssessment(Assessment):
             if self.selected_implementation_groups
             else None
         )
-        score = 0
-        n = 0
+        weighted_score = 0
+        total_weight = 0
 
         for ras in requirement_assessments_scored:
             if not (ig) or (ig & set(ras.requirement.implementation_groups or [])):
-                score += ras.score or 0
-                n += 1
+                weight = ras.requirement.weight if ras.requirement.weight else 1
+                weighted_score += (ras.score or 0) * weight
+                total_weight += weight
                 if self.show_documentation_score:
-                    score += ras.documentation_score or 0
-                    n += 1
-        if n > 0:
-            global_score = score / n
+                    weighted_score += (ras.documentation_score or 0) * weight
+                    total_weight += weight
+
+        if total_weight > 0:
+            global_score = weighted_score / total_weight
             # We use this instead of using the python round function so that the python backend outputs the same result as the javascript frontend.
             return int(global_score * 10) / 10
         else:
@@ -6022,9 +6024,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                     defaults={
                         "name": reference_control.get_name_translated
                         or reference_control.ref_id,
-                        "ref_id": reference_control.ref_id
-                        if not reference_control.get_name_translated
-                        else None,
+                        "ref_id": reference_control.ref_id,
                     },
                 )
 

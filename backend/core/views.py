@@ -460,7 +460,7 @@ class PerimeterFilter(GenericFilterSet):
 
     class Meta:
         model = Perimeter
-        fields = ["folder", "lc_status", "campaigns"]
+        fields = ["name", "folder", "lc_status", "campaigns"]
 
 
 class PerimeterViewSet(BaseModelViewSet):
@@ -471,7 +471,7 @@ class PerimeterViewSet(BaseModelViewSet):
     model = Perimeter
     filterset_class = PerimeterFilter
     search_fields = ["name", "ref_id", "description"]
-    filterset_fields = ["folder", "campaigns"]
+    filterset_fields = ["name", "folder", "campaigns"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -656,6 +656,7 @@ class AssetFilter(GenericFilterSet):
     class Meta:
         model = Asset
         fields = [
+            "name",
             "folder",
             "type",
             "parent_assets",
@@ -848,6 +849,10 @@ class AssetViewSet(BaseModelViewSet):
         nodes_idx = dict()
         categories = []
         N = 0
+        hide_domains = (
+            request.query_params.get("hide_domains", "false").lower() == "true"
+        )
+
         (viewable_folders, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
@@ -858,19 +863,24 @@ class AssetViewSet(BaseModelViewSet):
             user=request.user,
             object_type=Asset,
         )
+        # Build category index mapping first (key by UUID to avoid name collisions)
+        domain_to_category = {}
         for domain in Folder.objects.filter(id__in=viewable_folders):
             categories.append({"name": domain.name})
-            nodes_idx[domain.name] = N
-            nodes.append(
-                {
-                    "name": domain.name,
-                    "category": N,
-                    "symbol": "roundRect",
-                    "symbolSize": 30,
-                    "value": "Domain",
-                }
-            )
-            N += 1
+            domain_to_category[domain.id] = len(categories) - 1
+
+            if not hide_domains:
+                nodes_idx[domain.id] = N
+                nodes.append(
+                    {
+                        "name": domain.name,
+                        "category": domain_to_category[domain.id],
+                        "symbol": "roundRect",
+                        "symbolSize": 30,
+                        "value": "Domain",
+                    }
+                )
+                N += 1
         for asset in Asset.objects.filter(id__in=viewable_assets):
             # Only include assets whose folders are also viewable to avoid KeyError
             if asset.folder.id not in viewable_folders:
@@ -886,7 +896,7 @@ class AssetViewSet(BaseModelViewSet):
                     "name": asset.name,
                     "symbol": symbol,
                     "symbolSize": 25,
-                    "category": nodes_idx[asset.folder.name],
+                    "category": domain_to_category[asset.folder.id],
                     "value": "Primary" if asset.type == "PR" else "Support",
                 }
             )
@@ -894,30 +904,32 @@ class AssetViewSet(BaseModelViewSet):
             N += 1
 
         # Add links between domains (folders) based on parent-child relationships
-        for domain in Folder.objects.filter(id__in=viewable_folders):
-            if domain.parent_folder and domain.parent_folder.id in viewable_folders:
+        if not hide_domains:
+            for domain in Folder.objects.filter(id__in=viewable_folders):
+                if domain.parent_folder and domain.parent_folder.id in viewable_folders:
+                    links.append(
+                        {
+                            "source": nodes_idx[domain.parent_folder.id],
+                            "target": nodes_idx[domain.id],
+                            "value": "contains",
+                        }
+                    )
+
+        # Add links between assets and their domains
+        if not hide_domains:
+            for asset in Asset.objects.filter(id__in=viewable_assets):
+                # Only include assets whose folders are also viewable to avoid KeyError
+                if asset.folder.id not in viewable_folders:
+                    continue
+
+                asset_key = f"{asset.folder.name}/{asset.name}"
                 links.append(
                     {
-                        "source": nodes_idx[domain.parent_folder.name],
-                        "target": nodes_idx[domain.name],
+                        "source": nodes_idx[asset.folder.id],
+                        "target": nodes_idx[asset_key],
                         "value": "contains",
                     }
                 )
-
-        # Add links between assets and their domains
-        for asset in Asset.objects.filter(id__in=viewable_assets):
-            # Only include assets whose folders are also viewable to avoid KeyError
-            if asset.folder.id not in viewable_folders:
-                continue
-
-            asset_key = f"{asset.folder.name}/{asset.name}"
-            links.append(
-                {
-                    "source": nodes_idx[asset.folder.name],
-                    "target": nodes_idx[asset_key],
-                    "value": "contains",
-                }
-            )
 
         # Add links between assets (existing relationships)
         for asset in Asset.objects.filter(id__in=viewable_assets):
@@ -1387,6 +1399,8 @@ class RiskAssessmentFilterSet(GenericFilterSet):
     class Meta:
         model = RiskAssessment
         fields = {
+            "name": ["exact"],
+            "ref_id": ["exact"],
             "perimeter": ["exact"],
             "folder": ["exact"],
             "authors": ["exact"],
@@ -1985,6 +1999,7 @@ class AppliedControlFilterSet(GenericFilterSet):
     class Meta:
         model = AppliedControl
         fields = {
+            "name": ["exact"],
             "folder": ["exact"],
             "category": ["exact"],
             "csf_function": ["exact"],
@@ -3082,6 +3097,7 @@ class RiskScenarioFilter(GenericFilterSet):
         model = RiskScenario
         # Only include actual model fields here
         fields = {
+            "name": ["exact"],
             "risk_assessment": ["exact"],
             "current_impact": ["exact"],
             "current_proba": ["exact"],
@@ -3676,7 +3692,14 @@ class FolderFilter(GenericFilterSet):
 
     class Meta:
         model = Folder
-        fields = ["parent_folder", "content_type", "owner", "owned", "filtering_labels"]
+        fields = [
+            "name",
+            "parent_folder",
+            "content_type",
+            "owner",
+            "owned",
+            "filtering_labels",
+        ]
 
 
 class FolderViewSet(BaseModelViewSet):
@@ -5634,6 +5657,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     model = ComplianceAssessment
     filterset_fields = [
+        "name",
+        "ref_id",
         "folder",
         "framework",
         "perimeter",
@@ -7370,6 +7395,7 @@ class SecurityExceptionViewSet(BaseModelViewSet):
 
     model = SecurityException
     filterset_fields = [
+        "name",
         "requirement_assessments",
         "risk_scenarios",
         "owners",
@@ -7529,6 +7555,8 @@ class SecurityExceptionViewSet(BaseModelViewSet):
 class FindingsAssessmentViewSet(BaseModelViewSet):
     model = FindingsAssessment
     filterset_fields = [
+        "name",
+        "ref_id",
         "owner",
         "category",
         "perimeter",
@@ -7991,6 +8019,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 class FindingViewSet(BaseModelViewSet):
     model = Finding
     filterset_fields = [
+        "name",
         "owner",
         "folder",
         "status",
@@ -8647,6 +8676,7 @@ class TaskTemplateFilter(GenericFilterSet):
     class Meta:
         model = TaskTemplate
         fields = [
+            "name",
             "assigned_to",
             "is_recurrent",
             "folder",
