@@ -1,4 +1,5 @@
 import random
+from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from privacy.models import (
@@ -10,6 +11,8 @@ from privacy.models import (
     DataContractor,
     DataTransfer,
     ProcessingNature,
+    RightRequest,
+    DataBreach,
     LEGAL_BASIS_CHOICES,
 )
 from iam.models import Folder, User
@@ -51,11 +54,23 @@ class Command(BaseCommand):
             deleted_processings = Processing.objects.filter(
                 name__startswith="TEST-"
             ).count()
+            deleted_right_requests = RightRequest.objects.filter(
+                name__startswith="TEST-"
+            ).count()
+            deleted_breaches = DataBreach.objects.filter(
+                name__startswith="TEST-"
+            ).count()
+
             Processing.objects.filter(name__startswith="TEST-").delete()
+            RightRequest.objects.filter(name__startswith="TEST-").delete()
+            DataBreach.objects.filter(name__startswith="TEST-").delete()
 
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"Cleaned {deleted_processings} processing records and all associated data"
+                    f"Cleaned {deleted_processings} processing records, "
+                    f"{deleted_right_requests} right requests, "
+                    f"{deleted_breaches} data breaches, "
+                    f"and all associated data"
                 )
             )
 
@@ -129,18 +144,30 @@ class Command(BaseCommand):
         ]
         status_weights = [0.2, 0.25, 0.5, 0.05]
 
-        # Country choices (select common ones)
+        # Country choices
         common_countries = [
-            "USA",
-            "GBR",
-            "DEU",
-            "FRA",
-            "CAN",
-            "JPN",
-            "AUS",
-            "IND",
-            "CHN",
-            "BRA",
+            "US",
+            "GB",
+            "DE",
+            "FR",
+            "CA",
+            "JP",
+            "AU",
+            "IN",
+            "CN",
+            "BR",
+            "AR",
+            "ID",
+            "IT",
+            "KR",
+            "MX",
+            "RU",
+            "SA",
+            "ZA",
+            "TR",
+            "BE",
+            "MA",
+            "DZ",
         ]
 
         # Legal basis choices (common ones)
@@ -351,6 +378,148 @@ class Command(BaseCommand):
             )
         )
 
+        # Create right requests (about 30% of processings)
+        num_right_requests = max(1, int(num_processings * 0.3))
+        self.stdout.write(f"\nCreating {num_right_requests} right requests...")
+
+        for i in range(num_right_requests):
+            requested_on = timezone.now().date() - timedelta(
+                days=random.randint(1, 180)
+            )
+            due_date_offset = random.randint(15, 45)
+            due_date = requested_on + timedelta(days=due_date_offset)
+
+            right_request = RightRequest.objects.create(
+                name=f"TEST-Right Request #{i + 1}",
+                description=f"Test right request for {random.choice(['access', 'deletion', 'rectification'])} of personal data",
+                folder=root_folder,
+                ref_id=f"TEST-RR-{i + 1:04d}",
+                requested_on=requested_on,
+                due_date=due_date,
+                request_type=random.choice(
+                    [choice[0] for choice in RightRequest.REQUEST_TYPE_CHOICES]
+                ),
+                status=random.choice(
+                    [choice[0] for choice in RightRequest.STATUS_CHOICES]
+                ),
+                observation=f"Test observation for right request #{i + 1}",
+            )
+
+            # Assign owners (0-2 users)
+            if users:
+                num_owners = random.randint(0, min(2, len(users)))
+                if num_owners > 0:
+                    right_request.owner.set(random.sample(users, num_owners))
+
+            # Associate with 1-3 processings
+            num_proc = random.randint(1, min(3, len(processings_created)))
+            right_request.processings.set(random.sample(processings_created, num_proc))
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Successfully created {num_right_requests} right requests"
+            )
+        )
+
+        # Create data breaches (about 10-15% of processings)
+        num_breaches = max(1, int(num_processings * random.uniform(0.1, 0.15)))
+        self.stdout.write(f"\nCreating {num_breaches} data breaches...")
+
+        breach_descriptions = [
+            "Unauthorized access to database containing personal data",
+            "Accidental disclosure of personal information via email",
+            "Lost laptop containing unencrypted personal data",
+            "Ransomware attack affecting personal data systems",
+            "Third-party vendor data exposure incident",
+            "Misconfigured cloud storage bucket exposing data",
+            "Phishing attack leading to credential compromise",
+            "Insider threat resulting in data exfiltration",
+            "Physical document theft from office premises",
+            "Improper disposal of documents containing personal data",
+        ]
+
+        for i in range(num_breaches):
+            discovered_on = timezone.now() - timedelta(
+                days=random.randint(1, 120), hours=random.randint(0, 23)
+            )
+
+            # Determine risk level and whether notifications were made
+            risk_level = random.choice(
+                [choice[0] for choice in DataBreach.RISK_LEVEL_CHOICES]
+            )
+            status = random.choice([choice[0] for choice in DataBreach.STATUS_CHOICES])
+
+            # High risk breaches are more likely to require notifications
+            authority_notified = (
+                risk_level == "privacy_high_risk" and random.random() < 0.8
+            )
+            subjects_notified = (
+                risk_level
+                in [
+                    "privacy_high_risk",
+                    "privacy_risk",
+                ]
+                and random.random() < 0.6
+            )
+
+            data_breach = DataBreach.objects.create(
+                name=f"TEST-Data Breach #{i + 1}",
+                description=random.choice(breach_descriptions),
+                folder=root_folder,
+                ref_id=f"TEST-DB-{i + 1:04d}",
+                discovered_on=discovered_on,
+                breach_type=random.choice(
+                    [choice[0] for choice in DataBreach.BREACH_TYPE_CHOICES]
+                ),
+                risk_level=risk_level,
+                status=status,
+                affected_subjects_count=random.randint(10, 10000),
+                affected_personal_data_count=random.randint(5, 100),
+                authority_notified_on=discovered_on
+                + timedelta(hours=random.randint(24, 72))
+                if authority_notified
+                else None,
+                authority_notification_ref=f"AUTH-REF-{i + 1:06d}"
+                if authority_notified
+                else "",
+                subjects_notified_on=discovered_on
+                + timedelta(days=random.randint(3, 14))
+                if subjects_notified
+                else None,
+                potential_consequences="Potential identity theft, financial fraud, privacy violations, and reputational damage to affected individuals.",
+                observation=f"Test data breach record #{i + 1} for demonstration purposes.",
+            )
+
+            # Assign to users (1-3)
+            if users:
+                num_assigned = random.randint(1, min(3, len(users)))
+                data_breach.assigned_to.set(random.sample(users, num_assigned))
+
+            # Associate with 1-2 processings
+            num_proc = random.randint(1, min(2, len(processings_created)))
+            affected_processings = random.sample(processings_created, num_proc)
+            data_breach.affected_processings.set(affected_processings)
+
+            # Associate with personal data from the affected processings
+            personal_data_pool = []
+            for proc in affected_processings:
+                personal_data_pool.extend(list(proc.personal_data.all()))
+
+            if personal_data_pool:
+                num_pd = random.randint(1, min(5, len(personal_data_pool)))
+                data_breach.affected_personal_data.set(
+                    random.sample(personal_data_pool, num_pd)
+                )
+
+            # Add authorities if notified
+            if authority_notified and entities:
+                num_authorities = random.randint(1, min(2, len(entities)))
+                data_breach.authorities.set(random.sample(entities, num_authorities))
+
+        self.stdout.write(
+            self.style.SUCCESS(f"Successfully created {num_breaches} data breaches")
+        )
+
         # Print summary statistics
         self.stdout.write("\n" + "=" * 60)
         self.stdout.write("SUMMARY:")
@@ -404,6 +573,60 @@ class Command(BaseCommand):
         self.stdout.write(f"  Data Recipients: {recipient_count}")
         self.stdout.write(f"  Data Contractors: {contractor_count}")
         self.stdout.write(f"  Data Transfers: {transfer_count}")
+
+        # Right Requests statistics
+        right_request_count = RightRequest.objects.filter(
+            name__startswith="TEST-"
+        ).count()
+        self.stdout.write(f"\nRight Requests Created: {right_request_count}")
+
+        if right_request_count > 0:
+            self.stdout.write(f"\nRight Requests by Type:")
+            for req_type, req_label in RightRequest.REQUEST_TYPE_CHOICES:
+                count = RightRequest.objects.filter(
+                    name__startswith="TEST-", request_type=req_type
+                ).count()
+                if count > 0:
+                    self.stdout.write(f"  {req_label}: {count}")
+
+            self.stdout.write(f"\nRight Requests by Status:")
+            for status_val, status_label in RightRequest.STATUS_CHOICES:
+                count = RightRequest.objects.filter(
+                    name__startswith="TEST-", status=status_val
+                ).count()
+                if count > 0:
+                    self.stdout.write(f"  {status_label}: {count}")
+
+        # Data Breaches statistics
+        breach_count = DataBreach.objects.filter(name__startswith="TEST-").count()
+        self.stdout.write(f"\nData Breaches Created: {breach_count}")
+
+        if breach_count > 0:
+            self.stdout.write(f"\nData Breaches by Risk Level:")
+            for risk_val, risk_label in DataBreach.RISK_LEVEL_CHOICES:
+                count = DataBreach.objects.filter(
+                    name__startswith="TEST-", risk_level=risk_val
+                ).count()
+                if count > 0:
+                    self.stdout.write(f"  {risk_label}: {count}")
+
+            self.stdout.write(f"\nData Breaches by Status:")
+            for status_val, status_label in DataBreach.STATUS_CHOICES:
+                count = DataBreach.objects.filter(
+                    name__startswith="TEST-", status=status_val
+                ).count()
+                if count > 0:
+                    self.stdout.write(f"  {status_label}: {count}")
+
+            authority_notified_count = DataBreach.objects.filter(
+                name__startswith="TEST-", authority_notified_on__isnull=False
+            ).count()
+            subjects_notified_count = DataBreach.objects.filter(
+                name__startswith="TEST-", subjects_notified_on__isnull=False
+            ).count()
+            self.stdout.write(f"\nNotifications:")
+            self.stdout.write(f"  Authority Notified: {authority_notified_count}")
+            self.stdout.write(f"  Data Subjects Notified: {subjects_notified_count}")
 
         # Show top personal data categories
         self.stdout.write(f"\nTop Personal Data Categories:")
