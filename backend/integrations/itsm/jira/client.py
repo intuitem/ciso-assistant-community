@@ -120,42 +120,6 @@ class JiraClient(BaseIntegrationClient):
             logger.error(f"Failed to fetch Jira issue {remote_id}: {e}")
             raise
 
-    def register_webhook(self, callback_url: str) -> Dict[str, Any]:
-        webhook_data = {
-            "name": "Django Integration Webhook",
-            "url": callback_url,
-            "events": [
-                "jira:issue_created",
-                "jira:issue_updated",
-                "jira:issue_deleted",
-            ],
-            "filters": {
-                "issue-related-events-section": f"project = {self.settings['project_key']}"
-            },
-        }
-
-        response = self.jira._session.post(
-            f"{self.credentials['server_url']}/rest/webhooks/1.0/webhook",
-            json=webhook_data,
-        )
-        response.raise_for_status()
-
-        webhook = response.json()
-        logger.info(f"Registered Jira webhook: {webhook.get('self')}")
-        return webhook
-
-    def unregister_webhook(self, webhook_id: str) -> bool:
-        try:
-            response = self.jira._session.delete(
-                f"{self.credentials['server_url']}/rest/webhooks/1.0/webhook/{webhook_id}"
-            )
-            response.raise_for_status()
-            logger.info(f"Unregistered Jira webhook: {webhook_id}")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to unregister Jira webhook {webhook_id}: {e}")
-            return False
-
     def test_connection(self) -> bool:
         try:
             self.jira.myself()
