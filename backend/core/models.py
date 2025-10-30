@@ -1632,6 +1632,14 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
     def __str__(self) -> str:
         return f"{self.provider} - {self.name}"
 
+    def save(self, *args, **kwargs):
+        from core.mappings.engine import engine
+
+        if self.urn not in engine.frameworks:
+            engine.load_frameworks()
+
+        return super().save(*args, **kwargs)
+
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     class Importance(models.TextChoices):
