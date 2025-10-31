@@ -5,10 +5,7 @@ import { superValidate, message } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { modelSchema } from '$lib/utils/schemas';
 import type { Actions } from '@sveltejs/kit';
-import {
-	nestedDeleteFormAction,
-	defaultWriteFormAction
-} from '$lib/utils/actions';
+import { nestedDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 
 export const load: PageServerLoad = async (event) => {
@@ -108,9 +105,9 @@ export const actions: Actions = {
 				'ebios-rm': 'ebios_studies',
 				'entity-assessments': 'entity_assessments',
 				'findings-assessments': 'findings_assessments',
-				'evidences': 'documents',
+				evidences: 'documents',
 				'security-exceptions': 'security_exceptions',
-				'policies': 'policies',
+				policies: 'policies',
 				'generic-collections': 'dependencies'
 			};
 
