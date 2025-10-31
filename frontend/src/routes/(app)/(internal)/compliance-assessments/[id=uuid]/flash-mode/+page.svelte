@@ -1,9 +1,19 @@
 <script lang="ts">
-	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
+	import {
+		complianceResultTailwindColorMap,
+		complianceResultColorMap,
+		complianceStatusColorMap
+	} from '$lib/utils/constants';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { darkenColor } from '$lib/utils/helpers';
+	import { auditFiltersStore } from '$lib/utils/stores';
+	import { page } from '$app/state';
+	import { derived } from 'svelte/store';
 
 	interface Props {
 		data: PageData;
@@ -19,12 +29,68 @@
 		{ id: 'not_applicable', label: m.notApplicable() }
 	];
 
+	let selectedResults: string[] = $state([]);
+	let selectedStatus: string[] = $state([]);
+
 	// Reactive variable to keep track of the current item index
 	const requirementAssessments = data.requirement_assessments.filter(
 		(requirement) => requirement.name || requirement.description
 	);
+	const requirementIdToIndex: { [key: string]: number } = Object.fromEntries(
+		requirementAssessments.map((requirementAssessment, index) => [requirementAssessment.id, index])
+	);
+
+	let filteredRequirementAssessments = $derived(
+		requirementAssessments.filter((requirementAssessment) => {
+			const isResultSelected =
+				selectedResults.length === 0 || selectedResults.includes(requirementAssessment.result);
+			const isStatusSelected =
+				selectedStatus.length === 0 || selectedStatus.includes(requirementAssessment.status);
+			return isResultSelected && isStatusSelected;
+		})
+	);
+	let requirementIdToFilteredIndex: { [key: string]: number } = $derived(
+		Object.fromEntries(
+			filteredRequirementAssessments.map((requirementAssessment, index) => [
+				requirementAssessment.id,
+				index
+			])
+		)
+	);
 	let currentIndex = $state(0);
+	let currentFilteredIndex = $state(0);
 	let currentRequirementAssessment = $derived(requirementAssessments[currentIndex]);
+	let isRequirementValid = $derived(
+		requirementIdToFilteredIndex.hasOwnProperty(currentRequirementAssessment.id)
+	);
+
+	function findLastFilteredIndex(): number | null {
+		/** Return the closest previous filtered index relative to the currently selected requirement assessment. */
+		for (let i = currentIndex - 1; i >= 0; i--) {
+			const requirementAssessment = requirementAssessments[i];
+			const filteredIndex = requirementIdToFilteredIndex[requirementAssessment.id];
+			if (filteredIndex !== undefined) return filteredIndex;
+		}
+		for (let i = requirementAssessments.length - 1; i > currentIndex; i--) {
+			const requirementAssessment = requirementAssessments[i];
+			const filteredIndex = requirementIdToFilteredIndex[requirementAssessment.id];
+			if (filteredIndex !== undefined) return filteredIndex;
+		}
+		return null;
+	}
+
+	$effect(() => {
+		if (filterCount > 0) {
+			if (isRequirementValid) {
+				currentFilteredIndex = requirementIdToFilteredIndex[currentRequirementAssessment.id];
+			} else {
+				const lastFilteredIndex = findLastFilteredIndex();
+				if (lastFilteredIndex !== null) currentFilteredIndex = lastFilteredIndex;
+			}
+		} else {
+			currentFilteredIndex = currentIndex;
+		}
+	});
 
 	let color = $derived(complianceResultTailwindColorMap[currentRequirementAssessment.result]);
 
@@ -44,19 +110,26 @@
 
 	// Function to handle the "Next" button click
 	function nextItem() {
-		if (currentIndex < requirementAssessments.length - 1) {
-			currentIndex += 1;
+		if (filterCount === 0) {
+			currentIndex = (currentIndex + 1) % requirementAssessments.length;
 		} else {
-			currentIndex = 0;
+			currentFilteredIndex = (currentFilteredIndex + 1) % filteredRequirementAssessments.length;
+			const newRequirementAssessment = filteredRequirementAssessments[currentFilteredIndex];
+			currentIndex = requirementIdToIndex[newRequirementAssessment.id];
 		}
 	}
 
 	// Function to handle the "Back" button click
 	function previousItem() {
-		if (currentIndex > 0) {
-			currentIndex -= 1;
+		if (filterCount === 0) {
+			currentIndex = currentIndex > 0 ? currentIndex - 1 : requirementAssessments.length - 1;
 		} else {
-			currentIndex = requirementAssessments.length - 1;
+			currentFilteredIndex =
+				currentFilteredIndex > 0
+					? currentFilteredIndex - 1
+					: filteredRequirementAssessments.length - 1;
+			const newRequirementAssessment = filteredRequirementAssessments[currentFilteredIndex];
+			currentIndex = requirementIdToIndex[newRequirementAssessment.id];
 		}
 	}
 
@@ -127,6 +200,33 @@
 			jumpToInput = '';
 		}
 	}
+
+	let filterPopupOpen = $state(false);
+
+	const currentFilters = derived(auditFiltersStore, ($f) => $f[page.params.id] ?? {});
+	let filterCount = $derived(
+		(selectedStatus.length > 0 ? 1 : 0) + (selectedResults.length > 0 ? 1 : 0)
+	);
+
+	$effect(() => ({ selectedStatus = [], selectedResults = [] } = $currentFilters));
+
+	function toggleItem(item, selectedItems) {
+		if (selectedItems.includes(item)) {
+			return selectedItems.filter((s) => s !== item);
+		} else {
+			return [...selectedItems, item];
+		}
+	}
+
+	function toggleStatus(status) {
+		selectedStatus = toggleItem(status, selectedStatus);
+		auditFiltersStore.setStatus(page.params.id, selectedStatus);
+	}
+
+	function toggleResult(result) {
+		selectedResults = toggleItem(result, selectedResults);
+		auditFiltersStore.setResults(page.params.id, selectedResults);
+	}
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -147,17 +247,20 @@
 						<p class="">{m.goBackToAudit()}</p>
 					</a>
 				</div>
-				<div class="relative">
+				<div class="relative flex">
 					<button
 						class="font-semibold hover:bg-gray-100 px-2 py-1 rounded cursor-pointer border border-transparent hover:border-gray-300 transition-colors flex items-center space-x-1"
 						onclick={() => (showNavigation = !showNavigation)}
 						title="Click to jump to specific item (or press G)"
 					>
-						<span>{currentIndex + 1}/{requirementAssessments.length}</span>
+						<span class:text-red-500={!isRequirementValid}
+							>{filteredRequirementAssessments.length > 0
+								? currentFilteredIndex + 1
+								: 0}/{filteredRequirementAssessments.length}</span
+						>
 						<i class="fa-solid fa-chevron-down text-xs opacity-60"></i>
 						<span class="text-xs opacity-60">(G)</span>
 					</button>
-
 					{#if showNavigation}
 						<div
 							class="absolute top-full right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-10 min-w-64"
@@ -193,71 +296,139 @@
 							</div>
 						</div>
 					{/if}
+					<Popover
+						open={filterPopupOpen}
+						onOpenChange={(e) => (filterPopupOpen = e.open)}
+						positioning={{ placement: 'bottom-start' }}
+						triggerBase="btn preset-filled-primary-500 w-fit"
+						contentBase="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
+						zIndex="1000"
+						autoFocus={false}
+						onPointerDownOutside={() => (filterPopupOpen = false)}
+						closeOnInteractOutside={false}
+					>
+						{#snippet trigger()}
+							<i class="fa-solid fa-filter mr-2"></i>
+							{m.filters()}
+							{#if filterCount}
+								<span class="text-xs">{filterCount}</span>
+							{/if}
+						{/snippet}
+						{#snippet content()}
+							<div>
+								<span class="text-sm font-bold">{m.result()}</span>
+								<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+									{#each Object.entries(complianceResultColorMap) as [result, color]}
+										<button
+											type="button"
+											onclick={() => toggleResult(result)}
+											class="px-2 py-1 rounded-md font-bold"
+											style="background-color: {selectedResults.includes(result)
+												? color
+												: 'grey'}; color: {selectedResults.includes(result)
+												? result === 'not_applicable'
+													? 'white'
+													: 'black'
+												: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
+										>
+											{safeTranslate(result)}
+										</button>
+									{/each}
+								</div>
+							</div>
+							<div>
+								<span class="text-sm font-bold">{m.status()}</span>
+								<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+									{#each Object.entries(complianceStatusColorMap) as [status, color]}
+										<button
+											type="button"
+											onclick={() => toggleStatus(status)}
+											class="px-2 py-1 rounded-md font-bold"
+											style="background-color: {selectedStatus.includes(status)
+												? color + '44'
+												: 'grey'}; color: {selectedStatus.includes(status)
+												? darkenColor(color, 0.3)
+												: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+										>
+											{safeTranslate(status)}
+										</button>
+									{/each}
+								</div>
+							</div>
+						{/snippet}
+					</Popover>
 				</div>
 			</div>
 
-			<!-- Main content area -->
-			<div class="flex flex-col flex-1 justify-center overflow-hidden">
-				<div class="flex flex-col items-center text-center space-y-6 h-full">
-					<p class="font-semibold text-xl flex-shrink-0">{title}</p>
-					<div class="flex flex-col space-y-4 overflow-y-auto flex-1 w-full max-w-4xl px-4">
-						{#if currentRequirementAssessment.description}
-							<div class="whitespace-pre-wrap leading-relaxed text-gray-700">
-								<MarkdownRenderer content={currentRequirementAssessment.description} />
-							</div>
-						{/if}
-						{#if requirement.annotation}
-							<div
-								class="whitespace-pre-wrap leading-relaxed text-gray-600 italic bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200 text-justify"
-							>
-								<MarkdownRenderer content={requirement.annotation} />
-							</div>
-						{/if}
+			{#if filteredRequirementAssessments.length > 0}
+				<!-- Main content area -->
+				<div class="flex flex-col flex-1 justify-center overflow-hidden">
+					<div class="flex flex-col items-center text-center space-y-6 h-full">
+						<p class="font-semibold text-xl flex-shrink-0">{title}</p>
+						<div class="flex flex-col space-y-4 overflow-y-auto flex-1 w-full max-w-4xl px-4">
+							{#if currentRequirementAssessment.description}
+								<div class="whitespace-pre-wrap leading-relaxed text-gray-700">
+									<MarkdownRenderer content={currentRequirementAssessment.description} />
+								</div>
+							{/if}
+							{#if requirement.annotation}
+								<div
+									class="whitespace-pre-wrap leading-relaxed text-gray-600 italic bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200 text-justify"
+								>
+									<MarkdownRenderer content={requirement.annotation} />
+								</div>
+							{/if}
+						</div>
 					</div>
 				</div>
-			</div>
 
-			<!-- Options and Navigation -->
-			<div class="flex flex-col space-y-6">
-				<div class="flex justify-center">
-					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
-						<ul
-							class="items-center w-full text-sm font-medium text-gray-900 bg-white rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+				<!-- Options and Navigation -->
+				<div class="flex flex-col space-y-6">
+					<div class="flex justify-center">
+						<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
+							<ul
+								class="items-center w-full text-sm font-medium text-gray-900 bg-white rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+							>
+								<RadioGroup
+									possibleOptions={possible_options}
+									initialValue={currentRequirementAssessment.result}
+									classes="w-full"
+									colorMap={complianceResultTailwindColorMap}
+									field="result"
+									onChange={(newValue) => {
+										const newResult = result === newValue ? 'not_assessed' : newValue;
+										updateResult(newResult);
+									}}
+									key="id"
+									labelKey="label"
+								/>
+							</ul>
+						</form>
+					</div>
+
+					<div class="flex justify-between">
+						<button
+							class="bg-gray-400 text-white px-4 py-2 rounded-sm flex items-center space-x-2"
+							onclick={previousItem}
 						>
-							<RadioGroup
-								possibleOptions={possible_options}
-								initialValue={currentRequirementAssessment.result}
-								classes="w-full"
-								colorMap={complianceResultTailwindColorMap}
-								field="result"
-								onChange={(newValue) => {
-									const newResult = result === newValue ? 'not_assessed' : newValue;
-									updateResult(newResult);
-								}}
-								key="id"
-								labelKey="label"
-							/>
-						</ul>
-					</form>
+							<span>{m.previous()}</span>
+							<span class="text-xs opacity-75">(H)</span>
+						</button>
+						<button
+							class="preset-filled-primary-500 px-4 py-2 rounded-sm flex items-center space-x-2"
+							onclick={nextItem}
+						>
+							<span>{m.next()}</span>
+							<span class="text-xs opacity-75">(L)</span>
+						</button>
+					</div>
 				</div>
-
-				<div class="flex justify-between">
-					<button
-						class="bg-gray-400 text-white px-4 py-2 rounded-sm flex items-center space-x-2"
-						onclick={previousItem}
-					>
-						<span>{m.previous()}</span>
-						<span class="text-xs opacity-75">(H)</span>
-					</button>
-					<button
-						class="preset-filled-primary-500 px-4 py-2 rounded-sm flex items-center space-x-2"
-						onclick={nextItem}
-					>
-						<span>{m.next()}</span>
-						<span class="text-xs opacity-75">(L)</span>
-					</button>
+			{:else}
+				<div class="h-full grow-1 flex justify-center items-center text-2xl">
+					<!-- Add this translation. -->
+					<strong>No requirement assessments remained after filtering.</strong>
 				</div>
-			</div>
+			{/if}
 		{/if}
 	</div>
 </div>

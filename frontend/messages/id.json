@@ -449,7 +449,7 @@
 	"attachmentHelpText": "File untuk bukti (contoh: tangkapan layar, file log, dll.). Setelah dipilih, Anda dapat menempelkan tangkapan layar langsung dari clipboard Anda.",
 	"attachmentWarningText": "PERINGATAN: Mengunggah file baru akan menimpa file yang ada",
 	"isActiveHelpText": "Menandakan apakah pengguna ini harus dianggap aktif",
-	"helloThere": "Halo 👋",
+	"helloThere": "Halo \ud83d\udc4b",
 	"thisIsCisoAssistant": "Ini adalah CISO Assistant.",
 	"yourStreamlined": "Alat yang terintegrasi",
 	"oneStopShop": "satu atap",
@@ -1164,5 +1164,6 @@
 	"samlAuthnRequestSignedHelpText": "Ketika diaktifkan, permintaan autentikasi SAML ditandatangani dengan kunci privat di bawah ini. Sertifikat publik yang sesuai dikirimkan ke Penyedia Identitas sehingga dapat memverifikasi tanda tangan.",
 	"downloadCertificate": "Unduh sertifikat",
 	"viewMore": "Lihat lebih banyak",
-	"viewLess": "Lihat lebih sedikit"
+	"viewLess": "Lihat lebih sedikit",
+	"noRequirementAssessmentsAfterFiltering": "Tidak ada penilaian persyaratan yang tersisa setelah penyaringan."
 }
