@@ -451,10 +451,36 @@ class RoToViewSet(BaseModelViewSet):
         return Response(dict(RoTo.Pertinence.choices))
 
 
+class NumberInFilter(df.BaseInFilter, df.NumberFilter):
+    pass
+
+
+class StakeholderFilter(df.FilterSet):
+    current_criticality = NumberInFilter(method="filter_current_criticality")
+    residual_criticality = NumberInFilter(method="filter_residual_criticality")
+
+    class Meta:
+        model = Stakeholder
+        fields = [
+            "ebios_rm_study",
+            "is_selected",
+            "applied_controls",
+            "category",
+            "entity",
+        ]
+
+    def filter_current_criticality(self, queryset, name, values):
+        ids = [obj.id for obj in queryset if obj.current_criticality in values]
+        return queryset.filter(id__in=ids)
+
+    def filter_residual_criticality(self, queryset, name, values):
+        ids = [obj.id for obj in queryset if obj.residual_criticality in values]
+        return queryset.filter(id__in=ids)
+
+
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
-
-    filterset_fields = ["ebios_rm_study", "is_selected", "applied_controls", "category"]
+    filterset_class = StakeholderFilter
 
     @action(detail=False, name="Get category choices")
     def category(self, request):

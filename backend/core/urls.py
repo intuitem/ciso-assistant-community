@@ -35,6 +35,9 @@ router.register(r"risk-acceptances", RiskAcceptanceViewSet, basename="risk-accep
 router.register(
     r"reference-controls", ReferenceControlViewSet, basename="reference-controls"
 )
+router.register(
+    r"asset-capabilities", AssetCapabilityViewSet, basename="asset-capabilities"
+)
 router.register(r"assets", AssetViewSet, basename="assets")
 router.register(r"asset-class", AssetClassViewSet, basename="asset-class")
 
@@ -181,7 +184,7 @@ urlpatterns = [
     ),
     path(
         "folders/<uuid:pk>/users/",
-        UserPermsOnFolderList.as_view(),
+        UserRolesOnFolderList.as_view(),
         name="user-perms-on-folder-list",
     ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),

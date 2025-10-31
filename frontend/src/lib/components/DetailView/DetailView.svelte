@@ -91,6 +91,24 @@
 			: data.data
 	);
 
+	// Get ordered entries based on detailViewFields configuration
+	let orderedEntries = $derived(() => {
+		if (data.model?.detailViewFields) {
+			// Return entries in the order specified by detailViewFields
+			return data.model.detailViewFields
+				.map((fieldConfig) => [fieldConfig.field, data.data[fieldConfig.field]])
+				.filter(([key, value]) => value !== undefined);
+		} else {
+			// Fall back to original order from data object
+			return Object.entries(filteredData);
+		}
+	});
+
+	// Helper to get field configuration including tooltip
+	const getFieldConfig = (fieldName: string) => {
+		return data.model?.detailViewFields?.find((field) => field.field === fieldName);
+	};
+
 	let hasWidgets = $derived(!!widgets);
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -242,13 +260,29 @@
 		);
 	});
 
-	let relatedModels = $derived(
-		Object.entries(data?.relatedModels ?? {}).sort((a: [string, any], b: [string, any]) => {
+	function getSortedRelatedModels() {
+		return Object.entries(data?.relatedModels ?? {}).sort((a: [string, any], b: [string, any]) => {
 			return getRelatedModelIndex(data.model, a[1]) - getRelatedModelIndex(data.model, b[1]);
-		})
-	);
+		});
+	}
 
-	let group = $derived(relatedModels.length > 0 ? relatedModels[0][0] : undefined);
+	let relatedModels = $derived(getSortedRelatedModels());
+	let relatedModelsNames: Set<string> = $state(new Set());
+
+	let group = $state(
+		Object.keys(data?.relatedModels ?? {}).length > 0 ? getSortedRelatedModels()[0][0] : undefined
+	);
+	$effect(() => {
+		const newRelatedModelsNames = new Set(relatedModels.map((model) => model[0]));
+		const hasModelCountChanged = relatedModelsNames.size !== newRelatedModelsNames.size;
+		const hasModelNamesChanged = [...newRelatedModelsNames].every((modelName) => {
+			relatedModelsNames.has(modelName);
+		});
+		if (hasModelCountChanged || hasModelNamesChanged) {
+			relatedModelsNames = newRelatedModelsNames;
+			group = relatedModelsNames.size > 0 ? relatedModels[0][0] : undefined;
+		}
+	});
 
 	function truncateString(str: string, maxLength: number = 50): string {
 		return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
@@ -328,7 +362,7 @@
 					: 'w-full'}"
 			>
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
-					{#each Object.entries(filteredData).filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
+					{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
 						<div
 							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4 {index >=
 								MAX_ROWS && !expandedTable
@@ -336,10 +370,31 @@
 								: ''}"
 						>
 							<dt
-								class="font-medium text-gray-900"
+								class="font-medium text-gray-900 flex items-center gap-2"
 								data-testid="{key.replace('_', '-')}-field-title"
 							>
-								{safeTranslate(key)}
+								<span>{safeTranslate(key)}</span>
+								{#if getFieldConfig(key)?.tooltip}
+									{@const tooltipKey = getFieldConfig(key)?.tooltip}
+									{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
+									<Tooltip
+										positioning={{ placement: 'right' }}
+										contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
+										openDelay={200}
+										closeDelay={100}
+										arrow
+										arrowBase="arrow bg-gray-800 border border-gray-700"
+									>
+										{#snippet trigger()}
+											<i
+												class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
+											></i>
+										{/snippet}
+										{#snippet content()}
+											<p class="text-sm">{tooltipText}</p>
+										{/snippet}
+									</Tooltip>
+								{/if}
 							</dt>
 							<dd class="text-gray-700 sm:col-span-2">
 								<ul class="">
@@ -414,7 +469,7 @@
 															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if key === 'security_objectives'}
+																{#if key === 'security_objectives' || key === 'security_capabilities'}
 																	{@const [securityObjectiveName, securityObjectiveValue] =
 																		Object.entries(val)[0]}
 																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
@@ -501,7 +556,7 @@
 				</div>
 			{/if}
 		</div>
-		{#if Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
+		{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
 			<button
 				onclick={() => (expandedTable = !expandedTable)}
 				class="m-5 text-blue-800"

@@ -2,7 +2,6 @@ import importlib
 from typing import Any
 
 import structlog
-from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import F
 
@@ -23,8 +22,6 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
 logger = structlog.get_logger(__name__)
-
-User = get_user_model()
 
 
 class SerializerFactory:
@@ -367,6 +364,16 @@ class RiskAssessmentImportExportSerializer(BaseModelSerializer):
         ]
 
 
+class AssetCapabilityReadSerializer(ReferentialSerializer):
+    class Meta:
+        model = AssetCapability
+        exclude = ["translations"]
+
+
+class AssetCapabilityWriteSerializer(AssetCapabilityReadSerializer):
+    pass
+
+
 class AssetWriteSerializer(BaseModelSerializer):
     ebios_rm_studies = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -375,40 +382,84 @@ class AssetWriteSerializer(BaseModelSerializer):
         allow_null=True,
         write_only=True,
     )
+    support_assets = serializers.PrimaryKeyRelatedField(
+        source="child_assets",
+        many=True,
+        queryset=Asset.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = Asset
         exclude = ["business_value"]
 
-    def validate_parent_assets(self, parent_assets):
+    def validate(self, data):
+        parent_assets = data.get("parent_assets", [])
+        support_assets = data.get("child_assets", [])
         """
         Check that the assets graph will not contain cycles
         """
-        if not self.instance:
-            return parent_assets
+        myset = set()
+        if self.instance:
+            myset = set([self.instance])
         if parent_assets:
+            myset = myset | set(support_assets)
+
             for asset in parent_assets:
-                if self.instance in asset.ancestors_plus_self():
+                if myset & set(asset.ancestors_plus_self()):
                     raise serializers.ValidationError(
                         "errorAssetGraphMustNotContainCycles"
                     )
-        return parent_assets
+        return data
+
+    def create(self, validated_data):
+        child_assets = validated_data.pop("child_assets", None)
+        asset = super().create(validated_data)
+
+        if child_assets is not None:
+            asset.child_assets.set(child_assets)
+
+        return asset
+
+    def update(self, instance, validated_data):
+        child_assets = validated_data.pop("child_assets", None)
+        old_type = instance.type
+        new_type = validated_data.get("type", old_type)
+
+        # If switching to PRIMARY type, clear parent_assets and prevent reapplication
+        if old_type != new_type and new_type == Asset.Type.PRIMARY:
+            validated_data.pop("parent_assets", None)
+            instance.parent_assets.clear()
+
+        instance = super().update(instance, validated_data)
+
+        # Set support_assets (child_assets) if provided (both PRIMARY and SUPPORT can have children)
+        if child_assets is not None:
+            instance.child_assets.set(child_assets)
+
+        return instance
 
 
 class AssetReadSerializer(AssetWriteSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     parent_assets = FieldsRelatedField(many=True)
+    support_assets = FieldsRelatedField(source="child_assets", many=True)
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     type = serializers.CharField(source="get_type_display")
     security_exceptions = FieldsRelatedField(many=True)
     personal_data = FieldsRelatedField(many=True)
     asset_class = FieldsRelatedField(["name"])
+    overridden_children_capabilities = FieldsRelatedField(many=True)
 
     children_assets = serializers.SerializerMethodField()
     security_objectives = serializers.SerializerMethodField()
     disaster_recovery_objectives = serializers.SerializerMethodField()
+    security_capabilities = serializers.SerializerMethodField()
+    recovery_capabilities = serializers.SerializerMethodField()
+    security_objectives_comparison = serializers.SerializerMethodField()
+    recovery_objectives_comparison = serializers.SerializerMethodField()
 
     def get_children_assets(self, obj):
         """
@@ -445,6 +496,40 @@ class AssetReadSerializer(AssetWriteSerializer):
 
         # Fallback for single object serialization
         return obj.get_disaster_recovery_objectives_display()
+
+    def get_security_capabilities(self, obj):
+        """
+        Gets pre-calculated security capabilities for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            return optimized_data.get("security_capabilities", {}).get(obj.id, [])
+
+        # Fallback for single object serialization
+        return obj.get_security_capabilities_display()
+
+    def get_recovery_capabilities(self, obj):
+        """
+        Gets pre-calculated recovery capabilities for list views, with a fallback.
+        """
+        optimized_data = self.context.get("optimized_data")
+        if optimized_data:
+            return optimized_data.get("recovery_capabilities", {}).get(obj.id, [])
+
+        # Fallback for single object serialization
+        return obj.get_recovery_capabilities_display()
+
+    def get_security_objectives_comparison(self, obj):
+        """
+        Gets comparison of security objectives vs capabilities with verdict.
+        """
+        return obj.get_security_objectives_comparison()
+
+    def get_recovery_objectives_comparison(self, obj):
+        """
+        Gets comparison of recovery objectives vs capabilities with verdict.
+        """
+        return obj.get_recovery_objectives_comparison()
 
 
 class AssetImportExportSerializer(BaseModelSerializer):
@@ -991,7 +1076,7 @@ class UserReadSerializer(BaseModelSerializer):
         ]
 
 
-class UserPermsOnFolderSerializer(BaseModelSerializer):
+class UserRolesOnFolderSerializer(BaseModelSerializer):
     roles = serializers.SerializerMethodField()
 
     class Meta:
@@ -999,7 +1084,10 @@ class UserPermsOnFolderSerializer(BaseModelSerializer):
         fields = ["id", "email", "first_name", "last_name", "is_active", "roles"]
 
     def get_roles(self, obj):
-        return [{"str": str(role)} for role in self.context["roles"].get(obj.id, [])]
+        return [
+            {"str": str(role)}
+            for role in self.context["user_roles_map"].get(obj.id, [])
+        ]
 
 
 class UserWriteSerializer(BaseModelSerializer):
@@ -1107,10 +1195,17 @@ class PermissionReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
     def get_normalized_model(self, obj):
-        return obj.content_type.model_class().__name__
+        model_class = obj.content_type.model_class()
+        return (
+            model_class.__name__ if model_class else obj.content_type.model.capitalize()
+        )
 
     def get_normalized_codename(self, obj):
-        return f"{obj.codename.split('_')[0]}{obj.content_type.model_class().__name__}"
+        model_class = obj.content_type.model_class()
+        model_name = (
+            model_class.__name__ if model_class else obj.content_type.model.capitalize()
+        )
+        return f"{obj.codename.split('_')[0]}{model_name}"
 
 
 class PermissionWriteSerializer(BaseModelSerializer):
@@ -1158,6 +1253,7 @@ class FolderWriteSerializer(BaseModelSerializer):
 class FolderReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     parent_folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(many=True)
 
     content_type = serializers.CharField(source="get_content_type_display")
 
@@ -1188,6 +1284,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
     reference_controls = FieldsRelatedField(many=True)
+    is_dynamic = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Framework
@@ -1546,6 +1643,18 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 assessment, [user.id for user in authors_data]
             )
 
+        # Only apply default implementation groups if none were provided by the user
+        if (
+            assessment.framework.implementation_groups_definition
+            and not assessment.selected_implementation_groups
+        ):
+            default_implementation_groups = []
+            for ig in assessment.framework.implementation_groups_definition:
+                if ig.get("default_selected", False):
+                    default_implementation_groups += [ig["ref_id"]]
+            assessment.selected_implementation_groups = default_implementation_groups
+            assessment.save()
+
         return assessment
 
     def update(self, instance, validated_data):
@@ -1645,12 +1754,22 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "associated_threats",
                 "parent_requirement",
                 "questions",
+                "implementation_groups",
             ]
 
     name = serializers.CharField(source="__str__")
     description = serializers.CharField(source="get_requirement_description")
     evidences = FieldsRelatedField(many=True)
-    compliance_assessment = FieldsRelatedField(["id", "name", "is_locked"])
+    compliance_assessment = FieldsRelatedField(
+        [
+            "id",
+            "name",
+            "is_locked",
+            "min_score",
+            "max_score",
+            {"framework": ["implementation_groups_definition"]},
+        ]
+    )
     folder = FieldsRelatedField()
     perimeter = FieldsRelatedField(source="compliance_assessment.perimeter")
     assessable = serializers.BooleanField(source="requirement.assessable")
@@ -1680,15 +1799,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         compliance_assessment = self.get_compliance_assessment()
 
         if value is not None:
-            if (
-                value < compliance_assessment.min_score
-                or value > compliance_assessment.max_score
-            ):
-                raise serializers.ValidationError(
-                    {
-                        "score": f"Score must be between {compliance_assessment.min_score} and {compliance_assessment.max_score}"
-                    }
+            value = max(
+                (
+                    compliance_assessment.min_score,
+                    min(value, compliance_assessment.max_score),
                 )
+            )
         return value
 
     def get_compliance_assessment(self):
@@ -1706,6 +1822,31 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 "The specified Compliance Assessment does not exist."
             )
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+
+        requirement = instance.requirement
+
+        # Safely get all choices across all questions
+        choices = []
+        for _, question in (
+            requirement.questions.items() if requirement.questions else []
+        ):
+            for choice in question.get("choices", []):
+                choices.append(choice)
+
+        # Check if any choice has scoring or result logic
+        has_score_or_result = any(
+            choice.get("add_score") is not None
+            or choice.get("compute_result") is not None
+            for choice in choices
+        )
+
+        if has_score_or_result:
+            instance.compute_score_and_result()
+
+        return instance
 
     class Meta:
         model = RequirementAssessment
