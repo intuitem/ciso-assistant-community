@@ -4,10 +4,10 @@ urn: urn:intuitem:risk:library:cloud-sovereignty-framework
 locale: en
 ref_id: cloud-sovereignty-framework
 name: Cloud Sovereignty Framework
-description: Cloud Sovereignty Framework - version 1.2 - Sep 2025
+description: Cloud Sovereignty Framework - version 1.2.1 - Oct 2025
 copyright: EUROPEAN COMMISSION
-version: 1
-publication_date: 2025-09-30
+version: 2
+publication_date: 2025-10-30
 provider: EUROPEAN COMMISSION
 packager: intuitem
 objects:
@@ -15,7 +15,7 @@ objects:
     urn: urn:intuitem:risk:framework:cloud-sovereignty-framework
     ref_id: cloud-sovereignty-framework
     name: Cloud Sovereignty Framework
-    description: Cloud Sovereignty Framework - version 1.2 - Sep 2025
+    description: Cloud Sovereignty Framework - version 1.2.1 - Oct 2025
     min_score: 0
     max_score: 4
     scores_definition:
@@ -153,7 +153,7 @@ objects:
 
         - Location and legal control of critical suppliers or subcontractors involved
         in service delivery.'
-      weight: 20
+      weight: 15
     - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework:sov-5
       assessable: true
       depth: 1
@@ -163,9 +163,8 @@ objects:
 
         transparency, and resilience of the technology supply chain, focusing
 
-        on the extent to which critical components and processes remain under
-
-        EU control or exposed to non-EU dependencies.'
+        on the extent to which critical components and processes remain under EU control
+        or exposed to non-EU dependencies.'
       annotation: '- Geographic source of key physical parts, manufacturing location
         - countries where hardware is manufactured or assembled
 
@@ -219,9 +218,7 @@ objects:
 
         jurisdictions and long-term operational assurance.'
       annotation: '- Attainment of EU and internationally recognized certifications
-        (e.g.,
-
-        ISO, ENISA schemes)
+        (e.g., ISO, ENISA schemes)
 
         - Adherence to GDPR, NIS2, DORA, and other EU frameworks
 
@@ -243,12 +240,9 @@ objects:
       depth: 1
       ref_id: SOV-8
       name: Environmental Sustainability
-      description: 'Environmental sustainability assesses autonomy and resilience
-        of cloud
-
-        services over the long term in relation to energy usage, dependency and
-
-        raw material scarcity.'
+      description: Environmental sustainability assesses autonomy and resilience of
+        cloud services over the long term in relation to energy usage, dependency
+        and raw material scarcity.
       annotation: '- Adoption of energy-efficient infrastructure (e.g., low PUE) and
         measurable improvement targets.
 
