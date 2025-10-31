@@ -1754,13 +1754,21 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "associated_threats",
                 "parent_requirement",
                 "questions",
+                "implementation_groups",
             ]
 
     name = serializers.CharField(source="__str__")
     description = serializers.CharField(source="get_requirement_description")
     evidences = FieldsRelatedField(many=True)
     compliance_assessment = FieldsRelatedField(
-        ["id", "name", "is_locked", "min_score", "max_score"]
+        [
+            "id",
+            "name",
+            "is_locked",
+            "min_score",
+            "max_score",
+            {"framework": ["implementation_groups_definition"]},
+        ]
     )
     folder = FieldsRelatedField()
     perimeter = FieldsRelatedField(source="compliance_assessment.perimeter")
@@ -2170,10 +2178,11 @@ class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
     author = FieldsRelatedField()
     folder = FieldsRelatedField()
     incident = FieldsRelatedField()
+    evidences = FieldsRelatedField(many=True)
 
     class Meta:
         model = TimelineEntry
-        exclude = ["evidences"]
+        exclude = []
 
 
 class IncidentWriteSerializer(BaseModelSerializer):

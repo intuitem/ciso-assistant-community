@@ -46,6 +46,7 @@ def ids_map(model, folder=None):
             file=sys.stderr,
         )
         sys.exit(1)
+
     my_map = dict()
     url = f"{API_URL}/{model}/ids/"
     headers = {"Authorization": f"Token {TOKEN}"}
@@ -67,6 +68,7 @@ def _get_folders():
             file=sys.stderr,
         )
         sys.exit(1)
+
     url = f"{API_URL}/folders/"
     headers = {"Authorization": f"Token {TOKEN}"}
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
@@ -115,6 +117,7 @@ def batch_create(model, items, folder_id):
             file=sys.stderr,
         )
         sys.exit(1)
+
     headers = {
         "Authorization": f"Token {TOKEN}",
     }
@@ -155,6 +158,7 @@ def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
             file=sys.stderr,
         )
         sys.exit(1)
+
     df = pd.read_csv(file, delimiter=";")
     headers = {
         "Authorization": f"Token {TOKEN}",
@@ -285,6 +289,7 @@ def import_assets(file):
             file=sys.stderr,
         )
         sys.exit(1)
+
     GLOBAL_FOLDER_ID, _ = _get_folders()
     df = pd.read_csv(file)
     url = f"{API_URL}/assets/"
@@ -327,6 +332,7 @@ def import_controls(file):
             file=sys.stderr,
         )
         sys.exit(1)
+
     df = pd.read_csv(file)
     GLOBAL_FOLDER_ID, _ = _get_folders()
     url = f"{API_URL}/applied-controls/"
@@ -369,6 +375,7 @@ def import_evidences(file):
             file=sys.stderr,
         )
         sys.exit(1)
+
     df = pd.read_csv(file)
     GLOBAL_FOLDER_ID, _ = _get_folders()
 
