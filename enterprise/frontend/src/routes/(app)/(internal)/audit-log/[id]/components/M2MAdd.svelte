@@ -14,15 +14,19 @@
 	<dt class="font-medium text-gray-900" data-testid="{field.replace('_', '-')}-field-title">
 		{safeTranslate(field)}
 	</dt>
-	<dd class="text-gray-700 whitespace-pre-line grid grid-cols-4">
-		<i class="fa-solid fa-plus col-span-1 pt-1" aria-hidden="true"></i>
-		<span class="col-span-2">
+	<dd class="text-gray-700 whitespace-pre-line flex gap-2">
+		<i class="fa-solid fa-plus pt-1" aria-hidden="true"></i>
+		<span class="flex-1">
 			<ul>
-				{#each objects as object}
-					<li>
-						{object}
-					</li>
-				{/each}
+				{#if objects.length === 0}
+					<li class="text-gray-500 italic">No items added</li>
+				{:else}
+					{#each objects as object, index (index)}
+						<li>
+							{object}
+						</li>
+					{/each}
+				{/if}
 			</ul>
 		</span>
 	</dd>

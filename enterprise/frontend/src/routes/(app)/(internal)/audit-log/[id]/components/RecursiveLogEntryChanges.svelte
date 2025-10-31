@@ -139,8 +139,14 @@
 						before: normalizeEmptyValue(processedBefore),
 						after: normalizeEmptyValue(processedAfter)
 					};
-				} else if (value.type === 'm2m' && value.operation === 'add') {
-					// objects
+				} else if (
+					typeof value === 'object' &&
+					value !== null &&
+					value.type === 'm2m' &&
+					value.operation === 'add' &&
+					Array.isArray(value.objects)
+				) {
+					// Many-to-many add operation
 					acc[key] = {
 						type: 'm2m_add',
 						objects: value.objects
