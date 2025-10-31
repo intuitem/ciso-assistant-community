@@ -1,14 +1,23 @@
 <script lang="ts">
 	import { safeTranslate } from '$lib/utils/i18n';
 	import LogEntryChange from './LogEntryChange.svelte';
+	import M2MAdd from './M2MAdd.svelte';
 
 	type ProcessedValue = string | number | boolean | null | Record<string, any> | Array<any>;
 
 	// Define the structure for a single processed change
 	interface ProcessedChange {
+		type: 'change';
 		before: ProcessedValue;
 		after: ProcessedValue;
 	}
+
+	interface ProcessedM2MAdd {
+		type: 'm2m_add';
+		objects: { [key: string]: any }[];
+	}
+
+	type LogEntry = ProcessedChange | ProcessedM2MAdd;
 
 	interface Props {
 		log: { action: string; changes: Record<string, any> };
@@ -25,17 +34,18 @@
 	}
 
 	/**
-	 * Determines if a change involves nested objects.
-	 * @param change The change object with before and after values.
+	 * Determines if a logEntry involves nested objects.
+	 * @param logEntry The logEntry object with before and after values.
 	 * @returns True if either before or after is an object (and not null/array), false otherwise.
 	 */
-	function isNestedObjectChange(change: { before: any; after: any }): boolean {
-		const isBeforeObjectLike = isObjectLike(change.before);
-		const isAfterObjectLike = isObjectLike(change.after);
+	function isNestedObjectChange(logEntry: LogEntry): boolean {
+		if (logEntry.type !== 'change') return false;
+		const isBeforeObjectLike = isObjectLike(logEntry.before);
+		const isAfterObjectLike = isObjectLike(logEntry.after);
 		return (
 			(isBeforeObjectLike && isAfterObjectLike) ||
-			(isBeforeObjectLike && change.after === 'None') ||
-			(change.before === 'None' && isAfterObjectLike)
+			(isBeforeObjectLike && logEntry.after === 'None') ||
+			(logEntry.before === 'None' && isAfterObjectLike)
 		);
 	}
 
@@ -103,7 +113,7 @@
 	}
 
 	// Calculate the changes, filtering out non-changes
-	const changes: Record<string, ProcessedChange> = Object.entries(log.changes || {}) // Handle case where log.changes might be undefined
+	const changes: Record<string, LogEntry> = Object.entries(log.changes || {}) // Handle case where log.changes might be undefined
 		.reduce(
 			(acc, [key, value]) => {
 				key = key === 'id' ? 'UUID' : key;
@@ -125,8 +135,21 @@
 						// Normalize empty values happens after trying to parse JSON so it won't skip created entries that have an empty value
 						// (on creation logs, the before will always be set to 'None'. If the after is 'None' too and you normalize first, it will skip)
 						// (same for deletion logs, where the after will always be 'None')
+						type: 'change',
 						before: normalizeEmptyValue(processedBefore),
 						after: normalizeEmptyValue(processedAfter)
+					};
+				} else if (
+					typeof value === 'object' &&
+					value !== null &&
+					value.type === 'm2m' &&
+					value.operation === 'add' &&
+					Array.isArray(value.objects)
+				) {
+					// Many-to-many add operation
+					acc[key] = {
+						type: 'm2m_add',
+						objects: value.objects
 					};
 				} else {
 					console.warn(
@@ -137,7 +160,7 @@
 
 				return acc;
 			},
-			{} as Record<string, ProcessedChange>
+			{} as Record<string, LogEntry>
 		);
 </script>
 
@@ -169,6 +192,8 @@
 						</div>
 					</span>
 				</div>
+			{:else if change.type === 'm2m_add'}
+				<M2MAdd action={log.action} {field} objects={change.objects} />
 			{:else}
 				<LogEntryChange action={log.action} {field} before={change.before} after={change.after} />
 			{/if}
