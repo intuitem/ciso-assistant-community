@@ -76,7 +76,7 @@
 				model: data.measureModel,
 				debug: false,
 				invalidateAll: false,
-				origin: 'requirement-assessments'
+				origin: 'requirement-assessments',
 				suggestions: { reference_control: reference_controls }
 			}
 		};
