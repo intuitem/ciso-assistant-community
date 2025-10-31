@@ -90,6 +90,7 @@ class RequirementNodeImporter:
             name=self.requirement_data.get("name"),
             description=self.requirement_data.get("description"),
             implementation_groups=self.requirement_data.get("implementation_groups"),
+            weight=self.requirement_data.get("weight", 1),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),

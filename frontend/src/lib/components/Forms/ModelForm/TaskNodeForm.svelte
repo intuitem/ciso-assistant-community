@@ -6,6 +6,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -35,7 +36,7 @@
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
 />
-<TextArea
+<MarkdownField
 	{form}
 	field="observation"
 	label={m.observation()}

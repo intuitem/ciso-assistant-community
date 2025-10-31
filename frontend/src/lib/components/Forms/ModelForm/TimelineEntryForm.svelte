@@ -5,7 +5,7 @@
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
-	import TextArea from '../TextArea.svelte';
+	import MarkdownField from '../MarkdownField.svelte';
 	import TextField from '../TextField.svelte';
 	import HiddenInput from '../HiddenInput.svelte';
 
@@ -71,7 +71,7 @@
 	cacheLock={cacheLocks['timestamp']}
 	bind:cachedValue={formDataCache['timestamp']}
 />
-<TextArea
+<MarkdownField
 	{form}
 	field="observation"
 	label={m.observation()}

@@ -742,8 +742,14 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 		label: 'current_criticality',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
-		options: [1, 2, 3, 4],
-		multiple: true
+		options: [
+			{ label: '1', value: 1 },
+			{ label: '2', value: 2 },
+			{ label: '3', value: 3 },
+			{ label: '4', value: 4 }
+		],
+		multiple: true,
+		translateOptions: false
 	}
 };
 
@@ -799,6 +805,15 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ASSET_CLASS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'asset_class',
+		optionsEndpoint: 'assets/asset_class',
+		multiple: true
+	}
+};
+
 const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -826,12 +841,11 @@ const FINDINGS_ASSESSMENTS_CATEGORY_FILTER: ListViewFilterConfig = {
 const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		optionsEndpoint: 'terminologies?field_path=entity.relationship',
+		optionsLabelField: 'name',
 		label: 'category',
-		optionsEndpoint: 'stakeholders/category',
-		multiple: true,
-		optionsLabelField: 'label',
 		browserCache: 'force-cache',
-		optionsValueField: 'value'
+		multiple: true
 	}
 };
 
@@ -1010,8 +1024,11 @@ const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'parentDomain'],
-		body: ['name', 'description', 'parent_folder']
+		head: ['name', 'description', 'parentDomain', 'labels'],
+		body: ['name', 'description', 'parent_folder', 'filtering_labels'],
+		filters: {
+			filtering_labels: LABELS_FILTER
+		}
 	},
 	perimeters: {
 		head: ['ref_id', 'name', 'description', 'defaultAssignee', 'domain'],
@@ -1247,7 +1264,8 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			type: ASSET_TYPE_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			asset_class: ASSET_CLASS_FILTER
 		}
 	},
 	'asset-class': {
@@ -1306,8 +1324,26 @@ export const listViewFields = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['ref_id', 'name', 'framework', 'perimeter', 'reviewProgress', 'createdAt', 'updatedAt'],
-		body: ['ref_id', 'name', 'framework', 'perimeter', 'progress', 'created_at', 'updated_at'],
+		head: [
+			'ref_id',
+			'name',
+			'version',
+			'framework',
+			'perimeter',
+			'reviewProgress',
+			'createdAt',
+			'updatedAt'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'version',
+			'framework',
+			'perimeter',
+			'progress',
+			'created_at',
+			'updated_at'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1327,8 +1363,8 @@ export const listViewFields = {
 		}
 	},
 	evidences: {
-		head: ['name', 'file', 'size', 'folder', 'status', 'updatedAt', 'labels'],
-		body: ['name', 'attachment', 'size', 'folder', 'status', 'updated_at', 'filtering_labels'],
+		head: ['name', 'file', 'folder', 'owner', 'status', 'updatedAt', 'labels'],
+		body: ['name', 'attachment', 'folder', 'owner', 'status', 'updated_at', 'filtering_labels'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
@@ -1445,7 +1481,8 @@ export const listViewFields = {
 			'asset',
 			'folder',
 			'bia',
-			'dependencies',
+			'childrenAssets',
+			'extraDependencies',
 			'associatedControls',
 			'recoveryDocumented',
 			'recoveryTested',
@@ -1455,6 +1492,7 @@ export const listViewFields = {
 			'asset',
 			'asset_folder',
 			'bia',
+			'children_assets',
 			'dependencies',
 			'associated_controls',
 			'recovery_documented',
@@ -1467,8 +1505,8 @@ export const listViewFields = {
 		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
 	processings: {
-		head: ['name', 'description', 'status', 'processingNature', 'labels', 'folder'],
-		body: ['name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
+		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: PROCESSING_STATUS_FILTER,
@@ -1662,9 +1700,7 @@ export const listViewFields = {
 		filters: {
 			is_selected: IS_SELECTED_FILTER,
 			entity: ENTITY_FILTER,
-			category: STAKEHOLDER_CATEGORY_FILTER,
-			current_criticality: CURRENT_CRITICALITY_FILTER,
-			residual_criticality: RESIDUAL_CRITICALITY_FILTER
+			category: STAKEHOLDER_CATEGORY_FILTER
 		}
 	},
 	'strategic-scenarios': {
@@ -2007,7 +2043,8 @@ export const listViewFields = {
 			impact: undefined,
 			likelihood: undefined,
 			gravity: undefined
-		}
+		},
+		body: ['users']
 	}
 } as const satisfies ListViewFieldsConfig;
 

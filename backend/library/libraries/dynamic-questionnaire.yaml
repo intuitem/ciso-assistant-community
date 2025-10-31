@@ -1,0 +1,245 @@
+urn: urn:intuitem:risk:library:example-dynamic-questionnaire
+locale: fr
+ref_id: "example-dynamic-questionnaire"
+name: "Exemple de questionnaire dynamique avec score, résultat et dépendances"
+description: >
+  Ce formulaire illustre l'utilisation des champs add_score, compute_result,
+  select_implementation_groups, description et color, ainsi que la logique depends_on.
+copyright: Intuitem
+version: 1
+publication_date: 2025-10-13
+provider: Intuitem
+packager: Intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:example-dynamic-questionnaire
+    ref_id: "example-dynamic-questionnaire"
+    name: "Exemple de questionnaire dynamique"
+    description: >
+      Exemple simplifié d'un framework illustrant toutes les fonctions récentes des questionnaires dynamiques,
+      y compris le calcul automatique des scores, la logique de dépendance, et la sélection dynamique
+      des Implementation Groups.
+    implementation_groups_definition:
+      - name: "Groupe Fondamental"
+        ref_id: "base"
+        description: "Regroupe les exigences de base à mettre en œuvre."
+        default_selected: true
+      - name: "Groupe Avancé"
+        ref_id: "avance"
+        description: "Contient les exigences additionnelles pour les organisations plus matures."
+    requirement_nodes:
+      # === CATEGORY 1: Fondamentaux ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_fondamentaux
+        assessable: false
+        depth: 1
+        ref_id: 0_Fondamentaux
+        name: Exigences fondamentales
+        description: >
+          Ce chapitre regroupe les exigences de base applicables à toutes les organisations.
+        annotation: >
+          Ces exigences constituent le socle minimal de conformité.
+        implementation_groups:
+          - "base"
+
+      # === REQUIREMENT 1 ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_fondamentaux
+        ref_id: 1_Gouvernance-1
+        name: Politique d'accès et gouvernance
+        description: >
+          L'entreprise met en œuvre une politique de contrôle d'accès et de gouvernance adaptée à ses besoins.
+        annotation: >
+          Une politique d'accès bien définie permet d'assurer la protection des systèmes et données sensibles.
+        typical_evidence: >
+          Copie de la politique de gestion des accès, description des rôles et responsabilités.
+        implementation_groups:
+          - "base"
+        questions:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:
+            type: unique_choice
+            text: "Disposez-vous d'une politique de contrôle d'accès formalisée ?"
+            choices:
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:choice:1
+                value: "Oui, documentée et appliquée."
+                add_score: 20
+                compute_result: true
+                select_implementation_groups:
+                  - "avance"
+                description: "Indique que la politique d'accès est documentée et mise en œuvre."
+                color: "#28a745"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:choice:2
+                value: "Oui, mais non formalisée."
+                add_score: 10
+                compute_result: true
+                color: "#ffc107"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:choice:3
+                value: "Non, pas de politique spécifique."
+                add_score: -50
+                compute_result: false
+                color: "#dc3545"
+
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:2:
+            type: unique_choice
+            text: "La politique est-elle revue annuellement ?"
+            depends_on:
+              question: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1
+              answers:
+                - urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:choice:1
+                - urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:choice:2
+              condition: any
+            choices:
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:2:choice:1
+                value: "Oui, une revue annuelle est effectuée."
+                add_score: 10
+                compute_result: true
+                color: "#28a745"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:2:choice:2
+                value: "Non, la politique n'est pas revue régulièrement."
+                add_score: 0
+                compute_result: false
+                color: "#dc3545"
+
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:3:
+            type: multiple_choice
+            text: "Quels mécanismes de contrôle d'accès sont en place ?"
+            depends_on:
+              question: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1
+              answers:
+                - urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:1:choice:1
+              condition: any
+            choices:
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:3:choice:1
+                value: "Authentification multi-facteurs (MFA)"
+                add_score: 5
+                compute_result: true
+                description: "Améliore significativement la sécurité d'accès."
+                color: "#17a2b8"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:3:choice:2
+                value: "Contrôle basé sur les rôles (RBAC)"
+                add_score: 5
+                compute_result: true
+                color: "#007bff"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:1_gouvernance-1:question:3:choice:3
+                value: "Aucune mesure spécifique"
+                add_score: 0
+                compute_result: false
+                color: "#dc3545"
+
+      # === REQUIREMENT 2 ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_gouvernance-2
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:0_fondamentaux
+        ref_id: 2_Gouvernance-2
+        name: Sensibilisation à la cybersécurité
+        description: >
+          L'organisation sensibilise ses employés aux bonnes pratiques de cybersécurité.
+        annotation: >
+          La formation du personnel est un facteur clé de réussite dans la protection de l'information.
+        implementation_groups:
+          - "base"
+        questions:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_gouvernance-2:question:1:
+            type: unique_choice
+            text: "Les employés reçoivent-ils une formation cybersécurité ?"
+            choices:
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_gouvernance-2:question:1:choice:1
+                value: "Oui, tous les employés sont formés régulièrement."
+                add_score: 20
+                compute_result: true
+                color: "#28a745"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_gouvernance-2:question:1:choice:2
+                value: "Seulement certains employés."
+                add_score: 10
+                compute_result: true
+                color: "#ffc107"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:2_gouvernance-2:question:1:choice:3
+                value: "Aucune formation prévue."
+                add_score: 0
+                compute_result: false
+                color: "#dc3545"
+
+      # === CATEGORY 2: Avancés ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avances
+        assessable: false
+        depth: 1
+        ref_id: 3_Avancés
+        name: Exigences avancées
+        description: >
+          Ce chapitre regroupe les exigences destinées aux organisations plus matures.
+        annotation: >
+          Ces exigences visent à renforcer le niveau de sécurité au-delà du socle fondamental.
+        implementation_groups:
+          - "avance"
+
+      # === REQUIREMENT 3 ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avance-1
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avances
+        ref_id: 3_Avancé-1
+        name: Supervision et journalisation
+        description: >
+          L'organisation met en place une supervision continue et une journalisation centralisée
+          des événements de sécurité.
+        annotation: >
+          Cette exigence s'applique principalement aux organisations plus matures.
+        implementation_groups:
+          - "avance"
+        questions:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avance-1:question:1:
+            type: multiple_choice
+            text: "Quels types de supervision sont en place ?"
+            choices:
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avance-1:question:1:choice:1
+                value: "SIEM (Security Information and Event Management)"
+                add_score: 10
+                compute_result: true
+                description: "Collecte et corrélation centralisée des logs."
+                color: "#007bff"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avance-1:question:1:choice:2
+                value: "Surveillance manuelle ponctuelle"
+                add_score: 5
+                compute_result: true
+                color: "#ffc107"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avance-1:question:1:choice:3
+                value: "Aucune supervision mise en place"
+                add_score: 0
+                compute_result: false
+                color: "#dc3545"
+
+      # === REQUIREMENT 4 ===
+      - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_avance-2
+        assessable: true
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:3_avances
+        ref_id: 4_Avancé-2
+        name: Protection des données et sauvegardes
+        description: >
+          L'organisation met en place des mécanismes de sauvegarde et de restauration des données critiques.
+        annotation: >
+          Les sauvegardes régulières permettent de garantir la résilience de l'organisation face aux incidents.
+        implementation_groups:
+          - "avance"
+        questions:
+          urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_avance-2:question:1:
+            type: unique_choice
+            text: "Des sauvegardes régulières sont-elles effectuées ?"
+            choices:
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_avance-2:question:1:choice:1
+                value: "Oui, sauvegardes quotidiennes et testées."
+                add_score: 15
+                compute_result: true
+                color: "#28a745"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_avance-2:question:1:choice:2
+                value: "Oui, mais non testées."
+                add_score: 8
+                compute_result: true
+                color: "#ffc107"
+              - urn: urn:intuitem:risk:req_node:example-dynamic-questionnaire:4_avance-2:question:1:choice:3
+                value: "Non, pas de sauvegarde formalisée."
+                add_score: 0
+                compute_result: false
+                color: "#dc3545"
