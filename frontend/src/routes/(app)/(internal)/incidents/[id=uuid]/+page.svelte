@@ -372,7 +372,7 @@
 							{:else}
 								<p class="italic text-gray-500 dark:text-gray-400">{m.noObservation()}</p>
 							{/if}
-            </div>
+						</div>
 						{#if meta.evidences && meta.evidences.length > 0}
 							<div class="mb-2">
 								<p class="text-xs font-medium text-gray-700 mb-1">{m.associatedEvidences()}:</p>
