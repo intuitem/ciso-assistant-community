@@ -373,6 +373,23 @@
 								<p class="italic text-gray-500 dark:text-gray-400">{m.noObservation()}</p>
 							{/if}
 						</div>
+						{#if meta.evidences && meta.evidences.length > 0}
+							<div class="mb-2">
+								<p class="text-xs font-medium text-gray-700 mb-1">{m.associatedEvidences()}:</p>
+								<div class="flex flex-wrap gap-1">
+									{#each meta.evidences as evidence}
+										<a
+											href={`/evidences/${evidence.id}`}
+											class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hover:bg-blue-200 transition-colors max-w-50"
+											title={evidence.str}
+										>
+											<i class="fa-solid fa-paperclip mr-1 flex-shrink-0"></i>
+											<span class="truncate">{evidence.str}</span>
+										</a>
+									{/each}
+								</div>
+							</div>
+						{/if}
 					</div>
 				</li>
 			{/each}
