@@ -14,7 +14,7 @@ description: "The CyberFundamentals Framework is a framework owned by the Centre
   \ 103305-1).\nhttps://cyfun.eu/sites/default/files/2025-10/CyFun2025_Booklet-ESSENTIAL.pdf\n\
   Version 2025-10-01"
 copyright: "\u24B8 Centre for Cybersecurity Belgium (CCB)"
-version: 2
+version: 3
 publication_date: null
 provider: CCB
 packager: intuitem
@@ -3064,6 +3064,7 @@ objects:
         \ Improve Tools and Capabilities\n    Where applicable, technologies and response\
         \ tools should be adapted or upgraded based on insights from the incident."
       implementation_groups:
+      - B
       - I
       - E
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.im-03.2
