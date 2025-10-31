@@ -21,6 +21,8 @@ from django.contrib.auth.models import Permission
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
+from integrations.models import IntegrationConfiguration, SyncMapping
+
 logger = structlog.get_logger(__name__)
 
 
@@ -772,6 +774,18 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
         many=True, required=False, queryset=Stakeholder.objects.all()
     )
     cost = serializers.JSONField(required=False, allow_null=True)
+    integration_config = serializers.PrimaryKeyRelatedField(
+        required=False,
+        allow_null=True,
+        queryset=IntegrationConfiguration.objects.all(),
+        write_only=True,
+    )
+    remote_object_id = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True, write_only=True
+    )
+    create_remote_object = serializers.BooleanField(
+        required=False, default=False, write_only=True
+    )
 
     def create(self, validated_data: Any):
         owner_data = validated_data.get("owner", [])
@@ -805,6 +819,32 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
             )
 
         return updated_instance
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        sync_mappings = [
+            {
+                "id": mapping.id,
+                "remote_id": mapping.remote_id,
+                "sync_status": mapping.sync_status,
+                "last_synced_at": mapping.last_synced_at,
+                "last_sync_direction": mapping.last_sync_direction,
+                "error_message": mapping.error_message,
+                "provider": mapping.configuration.provider.name,
+            }
+            for mapping in SyncMapping.objects.filter(local_object_id=instance.id).only(
+                "id",
+                "remote_id",
+                "sync_status",
+                "last_synced_at",
+                "last_sync_direction",
+                "error_message",
+                "configuration__provider__name",
+            )
+        ]
+        if sync_mappings:
+            ret["sync_mappings"] = sync_mappings
+        return ret
 
     def _send_assignment_notifications(self, applied_control, owner_ids):
         """Send assignment notifications to the specified owners"""
@@ -880,6 +920,35 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
             return ""
         currency = self.get_currency(obj)
         return f"{annual_cost:,.2f} {currency}"
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if self.context.get("action") == "retrieve":
+            sync_mappings = [
+                {
+                    "id": mapping.id,
+                    "remote_id": mapping.remote_id,
+                    "sync_status": mapping.sync_status,
+                    "last_synced_at": mapping.last_synced_at,
+                    "last_sync_direction": mapping.last_sync_direction,
+                    "error_message": mapping.error_message,
+                    "provider": mapping.configuration.provider.name,
+                }
+                for mapping in SyncMapping.objects.filter(local_object_id=instance.id)
+                .select_related("configuration__provider")
+                .only(
+                    "id",
+                    "remote_id",
+                    "sync_status",
+                    "last_synced_at",
+                    "last_sync_direction",
+                    "error_message",
+                    "configuration__provider__name",
+                )
+            ]
+            if sync_mappings:
+                ret["sync_mappings"] = sync_mappings
+        return ret
 
 
 class ActionPlanSerializer(BaseModelSerializer):
@@ -2178,10 +2247,11 @@ class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
     author = FieldsRelatedField()
     folder = FieldsRelatedField()
     incident = FieldsRelatedField()
+    evidences = FieldsRelatedField(many=True)
 
     class Meta:
         model = TimelineEntry
-        exclude = ["evidences"]
+        exclude = []
 
 
 class IncidentWriteSerializer(BaseModelSerializer):

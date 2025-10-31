@@ -71,7 +71,7 @@
 									label={m.expiry()}
 									helpText={m.personalAccessTokenExpiryHelpText()}
 								/>
-								<footer class="modal-footer {parent.regionFooter}">
+								<footer class="modal-footer {parent?.regionFooter ?? ''}">
 									<button
 										class="btn preset-filled-primary-500 w-full"
 										data-testid="activate-totp-confirm-button"
@@ -87,17 +87,17 @@
 									<pre>{page?.form?.form?.message?.data?.token}</pre>
 									<button
 										type="button"
-										class="btn px-2 py-1 {parent.buttonNeutral} rounded-l-none"
+										class="btn px-2 py-1 {parent?.buttonNeutral ?? ''} rounded-l-none"
 										use:copy={{ text: page?.form?.form?.message?.data?.token }}
 										><i class="fa-solid fa-copy mr-2"></i>{m.copy()}</button
 									></span
 								>
-								<footer class="modal-footer {parent.regionFooter}">
+								<footer class="modal-footer {parent?.regionFooter ?? ''}">
 									<button
 										class="btn preset-filled-primary-500 w-full"
 										data-testid="activate-totp-confirm-button"
 										type="button"
-										onclick={parent.onConfirm}>{m.done()}</button
+										onclick={parent?.onConfirm}>{m.done()}</button
 									>
 								</footer>
 							{/if}
