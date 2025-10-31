@@ -322,7 +322,7 @@ export const RequirementAssessmentSchema = z.object({
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
-	noRedirect: z.boolean().default(false)
+	gotoNextRequirement: z.boolean().default(false)
 });
 
 export const UserEditSchema = z.object({

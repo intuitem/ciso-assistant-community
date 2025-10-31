@@ -205,12 +205,15 @@ export const actions: Actions = {
 		const object = await response.json();
 		const model: string = urlParamModelVerboseName(URLModel);
 		setFlash({ type: 'success', message: m.successfullySavedObject({ object: model }) }, event);
-		if (formData.noRedirect) return;
-		redirect(
-			302,
-			getSecureRedirect(event.url.searchParams.get('next')) ||
-				`/compliance-assessments/${object.compliance_assessment}/`
-		);
+		if (formData.gotoNextRequirement) {
+			redirect(302, `/requirement-assessments/${object.next_requirement}/edit`);
+		} else {
+			redirect(
+				302,
+				getSecureRedirect(event.url.searchParams.get('next')) ||
+					`/compliance-assessments/${object.compliance_assessment}/`
+			);
+		}
 	},
 	createAppliedControl: async (event) => {
 		const URLModel = 'applied-controls';
