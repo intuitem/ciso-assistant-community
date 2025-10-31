@@ -281,11 +281,13 @@
 	);
 	$effect(() => {
 		const newRelatedModelsNames = new Set(relatedModels.map((model) => model[0]));
-		const hasModelCountChanged = relatedModelsNames.size !== newRelatedModelsNames.size;
-		const hasModelNamesChanged = [...newRelatedModelsNames].every((modelName) => {
-			relatedModelsNames.has(modelName);
-		});
-		if (hasModelCountChanged || hasModelNamesChanged) {
+
+		// Check if the sets are actually different
+		const setsAreDifferent =
+			relatedModelsNames.size !== newRelatedModelsNames.size ||
+			[...newRelatedModelsNames].some((name) => !relatedModelsNames.has(name));
+
+		if (setsAreDifferent) {
 			relatedModelsNames = newRelatedModelsNames;
 			group = relatedModelsNames.size > 0 ? relatedModels[0][0] : undefined;
 		}
