@@ -84,6 +84,8 @@ READER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    # integrations
+    "view_syncmapping",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -156,6 +158,8 @@ APPROVER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    # integrations
+    "view_syncmapping",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -385,6 +389,12 @@ ANALYST_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # integrations
+    "view_integrationconfiguration",
+    "add_syncmapping",
+    "view_syncmapping",
+    "change_syncmapping",
+    "delete_syncmapping",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -637,6 +647,15 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # integrations
+    "add_integrationconfiguration",
+    "view_integrationconfiguration",
+    "change_integrationconfiguration",
+    "delete_integrationconfiguration",
+    "add_syncmapping",
+    "view_syncmapping",
+    "change_syncmapping",
+    "delete_syncmapping",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
