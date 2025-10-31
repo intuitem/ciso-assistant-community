@@ -375,6 +375,7 @@
 				{formDataCache}
 				{schema}
 				{initialData}
+				{context}
 				{...rest}
 			/>
 		{:else if URLModel === 'vulnerabilities'}
