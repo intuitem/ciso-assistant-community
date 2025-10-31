@@ -650,7 +650,6 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     # integrations
     "add_integrationconfiguration",
     "view_integrationconfiguration",
-    "change_integrationconfiguration",
     "delete_integrationconfiguration",
     "add_syncmapping",
     "view_syncmapping",
