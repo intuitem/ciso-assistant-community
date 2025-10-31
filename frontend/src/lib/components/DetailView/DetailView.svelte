@@ -357,7 +357,7 @@
 		{#each data.data?.sync_mappings as syncMapping}
 			<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
 				<h3 class="font-semibold text-secondary-800 mb-2">
-					{m.syncedWith({ integrationName: syncMapping.provider.toUpperCase() })}
+					{m.syncedWith({ integrationName: syncMapping.provider?.toUpperCase() ?? 'UNKNOWN' })}
 				</h3>
 
 				<dl class="grid grid-cols-1 gap-1 sm:grid-cols-2 text-secondary-700">

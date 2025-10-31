@@ -387,7 +387,7 @@
 				<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
 					<span class="flex flex-row justify-between items-center">
 						<h3 class="font-semibold text-secondary-800 mb-2">
-							{m.syncedWith({ integrationName: syncMapping.provider.toUpperCase() })}
+							{m.syncedWith({ integrationName: syncMapping.provider?.toUpperCase() ?? 'UNKNOWN' })}
 						</h3>
 						<button
 							class="text-secondary-500 hover:text-secondary-700"
