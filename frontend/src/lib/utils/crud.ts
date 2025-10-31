@@ -303,7 +303,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'progress_field' },
 			{ field: 'observation' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'sync_mappings' }
 		],
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import { SSOSettingsSchema, GeneralSettingsSchema, FeatureFlagsSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages';
@@ -20,14 +20,14 @@
 		// Preserve the special data-loading logic for the Client Settings tab.
 		// This now triggers when the tab with value 'clientSettings' is selected.
 		// We also check if data already exists to prevent redundant network requests.
-		if (newValue === 'clientSettings' && !$page.state.clientSettings) {
+		if (newValue === 'clientSettings' && !page.state.clientSettings) {
 			const href = '/settings/client-settings';
 			const result = await preloadData(href);
 
 			if (result.type === 'loaded' && result.status === 200) {
-				// Use pushState to update the $page store without a full navigation.
+				// Use pushState to update the page store without a full navigation.
 				// This keeps the UI fast and responsive.
-				pushState(href, { ...$page.state, clientSettings: result.data });
+				pushState(href, { ...page.state, clientSettings: result.data });
 			} else {
 				// Fallback to a full navigation if preloading fails for any reason.
 				goto(href);
@@ -46,6 +46,9 @@
 		<Tabs.Control value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Control>
 		<Tabs.Control value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Control
+		>
+		<Tabs.Control value="integrations"
+			><i class="fa-solid fa-plug"></i> {m.integrations()}</Tabs.Control
 		>
 		<Tabs.Control value="clientSettings"
 			><i class="fa-solid fa-key"></i> {m.clientSettings()}</Tabs.Control
@@ -89,9 +92,39 @@
 				/>
 			</div>
 		</Tabs.Panel>
+		<Tabs.Panel value="integrations">
+			<div>
+				<span class="text-gray-500">{m.configureIntegrations()}</span>
+				<div class="flow-root">
+					<dl class="divide-y divide-surface-100 text-sm">
+						<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
+							<dt class="font-medium">{m.itsm()}</dt>
+							<dd class="text-surface-900 sm:col-span-2">
+								<div class="card p-4 bg-inherit flex flex-col space-y-3">
+									<a class="unstyled" href="/settings/integrations/jira">
+										<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
+											<span class="flex flex-row justify-between text-xl">
+												<i class="text-blue-700 fab fa-jira"></i>
+												{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.name === 'jira' && integration.configurations?.length)}
+													<i class="fa-solid fa-circle-check text-success-600-400"></i>
+												{/if}
+											</span>
+											<span class="flex flex-row space-x-2">
+												<h6 class="h6 base-font-color">{m.jira()}</h6>
+											</span>
+										</div>
+									</a>
+								</div>
+								<hr />
+							</dd>
+						</div>
+					</dl>
+				</div>
+			</div></Tabs.Panel
+		>
 		<Tabs.Panel value="clientSettings" class="p-4">
-			{#if $page.state.clientSettings}
-				<ClientSettings data={$page.state.clientSettings} />
+			{#if page.state.clientSettings}
+				<ClientSettings data={page.state.clientSettings} />
 			{:else}
 				<p>Loading client settings...</p>
 			{/if}
