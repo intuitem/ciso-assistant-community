@@ -3783,6 +3783,9 @@ class AppliedControl(
 
         # Then trigger sync (async, non-blocking)
         if not skip_sync:
+            logger.info(
+                "Triggering sync for AppliedControl", applied_control_id=self.pk
+            )
             self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
 
     def _get_changed_fields(self, old_instance):
@@ -3815,19 +3818,26 @@ class AppliedControl(
 
         # Find all active ITSM integrations for this folder
         configurations = IntegrationConfiguration.objects.filter(
-            folder=self.folder, provider__provider_type="itsm", is_active=True
+            folder=Folder.get_root_folder(),
+            provider__provider_type="itsm",
+            is_active=True,
         )
 
         if configurations.exists() and (is_new or changed_fields):
             # Dispatch async task
-            sync_object_to_integrations.schedule(
-                args=(
-                    ContentType.objects.get_for_model(self),
-                    self.pk,
-                    list(configurations.values_list("id", flat=True)),
-                    changed_fields,
-                ),
-                delay=1,  # Small delay to ensure transaction is committed
+            logger.debug(
+                "Dispatching remote object sync task", applied_control_id=self.pk
+            )
+            transaction.on_commit(
+                lambda: sync_object_to_integrations.schedule(
+                    args=(
+                        ContentType.objects.get_for_model(self),
+                        self.pk,
+                        list(configurations.values_list("id", flat=True)),
+                        changed_fields,
+                    ),
+                    delay=1,
+                )
             )
 
     @property
