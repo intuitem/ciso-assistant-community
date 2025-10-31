@@ -35,6 +35,9 @@ router.register(r"risk-acceptances", RiskAcceptanceViewSet, basename="risk-accep
 router.register(
     r"reference-controls", ReferenceControlViewSet, basename="reference-controls"
 )
+router.register(
+    r"asset-capabilities", AssetCapabilityViewSet, basename="asset-capabilities"
+)
 router.register(r"assets", AssetViewSet, basename="assets")
 router.register(r"asset-class", AssetClassViewSet, basename="asset-class")
 
@@ -178,6 +181,11 @@ urlpatterns = [
     path(
         "risk-assessments/<uuid:pk>/action-plan/",
         RiskAssessmentActionPlanList.as_view(),
+    ),
+    path(
+        "folders/<uuid:pk>/users/",
+        UserRolesOnFolderList.as_view(),
+        name="user-perms-on-folder-list",
     ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
     path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),

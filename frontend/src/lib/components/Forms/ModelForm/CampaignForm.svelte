@@ -78,9 +78,12 @@
 	multiple
 	{form}
 	optionsEndpoint="perimeters"
-	field="perimeters"
-	label="Perimeters in scope"
-	hidden={initialData.perimeters}
+	optionsExtraFields={[['folder', 'str']]}
+	field="perimeter"
+	cacheLock={cacheLocks['perimeter']}
+	bind:cachedValue={formDataCache['perimeter']}
+	label={m.perimeter()}
+	hidden={initialData.perimeter}
 />
 <TextField
 	type="date"

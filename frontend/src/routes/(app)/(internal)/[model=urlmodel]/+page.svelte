@@ -112,7 +112,13 @@
 {#if data?.table}
 	<div class="shadow-lg">
 		{#key URLModel}
-			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
+			<ModelTable
+				source={data.table}
+				deleteForm={data.deleteForm}
+				{URLModel}
+				disableEdit={['user-groups'].includes(URLModel)}
+				disableDelete={['user-groups'].includes(URLModel)}
+			>
 				{#snippet addButton()}
 					<div>
 						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
