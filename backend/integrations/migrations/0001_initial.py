@@ -7,90 +7,240 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
-        ('iam', '0016_folder_filtering_labels'),
+        ("contenttypes", "0002_remove_content_type_name"),
+        ("iam", "0016_folder_filtering_labels"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='IntegrationProvider',
+            name="IntegrationProvider",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated at')),
-                ('is_published', models.BooleanField(default=False, verbose_name='published')),
-                ('name', models.CharField(max_length=100)),
-                ('provider_type', models.CharField(choices=[('itsm', 'Itsm')], max_length=20)),
-                ('is_active', models.BooleanField(default=True)),
-                ('folder', models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Created at"),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Updated at"),
+                ),
+                (
+                    "is_published",
+                    models.BooleanField(default=False, verbose_name="published"),
+                ),
+                ("name", models.CharField(max_length=100)),
+                (
+                    "provider_type",
+                    models.CharField(choices=[("itsm", "Itsm")], max_length=20),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "folder",
+                    models.ForeignKey(
+                        default=iam.models.Folder.get_root_folder_id,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_folder",
+                        to="iam.folder",
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('name', 'folder')},
+                "unique_together": {("name", "folder")},
             },
         ),
         migrations.CreateModel(
-            name='IntegrationConfiguration',
+            name="IntegrationConfiguration",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated at')),
-                ('is_published', models.BooleanField(default=False, verbose_name='published')),
-                ('credentials', models.JSONField(default=dict)),
-                ('settings', models.JSONField(default=dict)),
-                ('webhook_secret', models.CharField(max_length=255)),
-                ('webhook_url', models.URLField(blank=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('last_sync_at', models.DateTimeField(blank=True, null=True)),
-                ('folder', models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder')),
-                ('provider', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='configurations', to='integrations.integrationprovider')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Created at"),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Updated at"),
+                ),
+                (
+                    "is_published",
+                    models.BooleanField(default=False, verbose_name="published"),
+                ),
+                ("credentials", models.JSONField(default=dict)),
+                ("settings", models.JSONField(default=dict)),
+                ("webhook_secret", models.CharField(max_length=255)),
+                ("webhook_url", models.URLField(blank=True)),
+                ("is_active", models.BooleanField(default=True)),
+                ("last_sync_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "folder",
+                    models.ForeignKey(
+                        default=iam.models.Folder.get_root_folder_id,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_folder",
+                        to="iam.folder",
+                    ),
+                ),
+                (
+                    "provider",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="configurations",
+                        to="integrations.integrationprovider",
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('provider', 'folder')},
+                "unique_together": {("provider", "folder")},
             },
         ),
         migrations.CreateModel(
-            name='SyncMapping',
+            name="SyncMapping",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated at')),
-                ('is_published', models.BooleanField(default=False, verbose_name='published')),
-                ('local_object_id', models.UUIDField()),
-                ('remote_id', models.CharField(max_length=255)),
-                ('remote_data', models.JSONField(default=dict)),
-                ('sync_status', models.CharField(choices=[('synced', 'Synced'), ('pending', 'Pending'), ('failed', 'Failed'), ('conflict', 'Conflict')], default='synced', max_length=20)),
-                ('last_synced_at', models.DateTimeField(auto_now=True)),
-                ('last_sync_direction', models.CharField(blank=True, choices=[('push', 'Push'), ('pull', 'Pull')], max_length=10)),
-                ('version', models.IntegerField(default=1)),
-                ('error_message', models.TextField(blank=True)),
-                ('configuration', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sync_mappings', to='integrations.integrationconfiguration')),
-                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sync_mappings', to='contenttypes.contenttype')),
-                ('folder', models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Created at"),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Updated at"),
+                ),
+                (
+                    "is_published",
+                    models.BooleanField(default=False, verbose_name="published"),
+                ),
+                ("local_object_id", models.UUIDField()),
+                ("remote_id", models.CharField(max_length=255)),
+                ("remote_data", models.JSONField(default=dict)),
+                (
+                    "sync_status",
+                    models.CharField(
+                        choices=[
+                            ("synced", "Synced"),
+                            ("pending", "Pending"),
+                            ("failed", "Failed"),
+                            ("conflict", "Conflict"),
+                        ],
+                        default="synced",
+                        max_length=20,
+                    ),
+                ),
+                ("last_synced_at", models.DateTimeField(auto_now=True)),
+                (
+                    "last_sync_direction",
+                    models.CharField(
+                        blank=True,
+                        choices=[("push", "Push"), ("pull", "Pull")],
+                        max_length=10,
+                    ),
+                ),
+                ("version", models.IntegerField(default=1)),
+                ("error_message", models.TextField(blank=True)),
+                (
+                    "configuration",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sync_mappings",
+                        to="integrations.integrationconfiguration",
+                    ),
+                ),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sync_mappings",
+                        to="contenttypes.contenttype",
+                    ),
+                ),
+                (
+                    "folder",
+                    models.ForeignKey(
+                        default=iam.models.Folder.get_root_folder_id,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_folder",
+                        to="iam.folder",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='SyncEvent',
+            name="SyncEvent",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('direction', models.CharField(choices=[('push', 'Push'), ('pull', 'Pull')], max_length=10)),
-                ('changes', models.JSONField()),
-                ('triggered_by', models.CharField(choices=[('user', 'User'), ('webhook', 'Webhook'), ('scheduled', 'Scheduled')], max_length=50)),
-                ('success', models.BooleanField(default=True)),
-                ('error_details', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('mapping', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sync_events', to='integrations.syncmapping')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "direction",
+                    models.CharField(
+                        choices=[("push", "Push"), ("pull", "Pull")], max_length=10
+                    ),
+                ),
+                ("changes", models.JSONField()),
+                (
+                    "triggered_by",
+                    models.CharField(
+                        choices=[
+                            ("user", "User"),
+                            ("webhook", "Webhook"),
+                            ("scheduled", "Scheduled"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("success", models.BooleanField(default=True)),
+                ("error_details", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "mapping",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sync_events",
+                        to="integrations.syncmapping",
+                    ),
+                ),
             ],
         ),
         migrations.AddIndex(
-            model_name='syncmapping',
-            index=models.Index(fields=['configuration', 'remote_id'], name='integration_configu_dd3858_idx'),
+            model_name="syncmapping",
+            index=models.Index(
+                fields=["configuration", "remote_id"],
+                name="integration_configu_dd3858_idx",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='syncmapping',
-            unique_together={('configuration', 'content_type', 'local_object_id')},
+            name="syncmapping",
+            unique_together={("configuration", "content_type", "local_object_id")},
         ),
     ]
