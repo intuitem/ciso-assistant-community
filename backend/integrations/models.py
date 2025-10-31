@@ -1,4 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 
 from core.base_models import AbstractBaseModel
@@ -64,6 +65,7 @@ class SyncMapping(AbstractBaseModel, FolderMixin):
         ContentType, related_name="sync_mappings", on_delete=models.CASCADE
     )  # e.g. core.AppliedControl
     local_object_id = models.UUIDField()
+    local_object = GenericForeignKey("content_type", "local_object_id")
 
     # Remote object reference
     remote_id = models.CharField(max_length=255)  # Jira issue key, etc.
