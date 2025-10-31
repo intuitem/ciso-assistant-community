@@ -23,6 +23,7 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		schema?: any;
+		origin?: string | null;
 		initialData?: Record<string, any>;
 	}
 
@@ -33,6 +34,7 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		schema = {},
+		origin = null,
 		initialData = {}
 	}: Props = $props();
 
@@ -67,6 +69,12 @@
 			});
 		}
 	});
+
+	let domainOptionEndpoint = $derived(
+		origin === 'requirement-assessments'
+			? `folders/${initialData.folder}/subdomains/`
+			: 'folders?content_type=DO&content_type=GL'
+	);
 </script>
 
 {#if !duplicate}
@@ -343,7 +351,7 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint={`folders/${initialData.folder}/subdomains/`}
+	optionsEndpoint={domainOptionEndpoint}
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}
