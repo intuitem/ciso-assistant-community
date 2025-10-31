@@ -177,7 +177,7 @@ export const AppliedControlSchema = z.object({
 	control_impact: z.number().optional().nullable(),
 	cost: z
 		.object({
-			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$']).default('€'),
+			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
 			amortization_period: z.number().min(1).max(50).default(1),
 			build: z
 				.object({
@@ -201,7 +201,10 @@ export const AppliedControlSchema = z.object({
 	progress_field: z.number().optional().default(0),
 	filtering_labels: z.string().optional().array().optional(),
 	findings: z.string().uuid().optional().array().optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	integration_config: z.string().optional().nullable(),
+	remote_object_id: z.string().optional().nullable(),
+	create_remote_object: z.boolean().optional().default(false)
 });
 
 export const AppliedControlDuplicateSchema = z.object({
@@ -237,6 +240,7 @@ export const AssetSchema = z.object({
 	folder: z.string(),
 	asset_class: z.string().optional(),
 	parent_assets: z.string().optional().array().optional(),
+	support_assets: z.string().optional().array().optional(),
 	security_objectives: z
 		.object({
 			objectives: z
@@ -262,6 +266,31 @@ export const AssetSchema = z.object({
 				.optional()
 		})
 		.optional(),
+	security_capabilities: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional(),
+						is_enabled: z.boolean().default(false)
+					})
+				)
+				.optional()
+		})
+		.optional(),
+	recovery_capabilities: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional()
+					})
+				)
+				.optional()
+		})
+		.optional(),
 	reference_link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
@@ -274,7 +303,8 @@ export const AssetSchema = z.object({
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	ref_id: z.string().max(100).optional(),
-	observation: z.string().optional().nullable()
+	observation: z.string().optional().nullable(),
+	overridden_children_capabilities: z.string().uuid().optional().array().optional()
 });
 
 export const FilteringLabelSchema = z.object({
@@ -443,7 +473,7 @@ export const GeneralSettingsSchema = z.object({
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
 	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
-	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$']).default('€'),
+	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
 	daily_rate: z.number().default(500).optional()
 });
 
@@ -512,6 +542,8 @@ export const SSOSettingsSchema = z.object({
 	want_message_signed: z.boolean().optional().nullable(),
 	want_name_id: z.boolean().optional().nullable(),
 	want_name_id_encrypted: z.boolean().optional().nullable(),
+	sp_x509cert: z.string().optional(),
+	sp_private_key: z.string().optional(),
 	server_url: z.string().optional().nullable(),
 	token_auth_method: z
 		.enum([

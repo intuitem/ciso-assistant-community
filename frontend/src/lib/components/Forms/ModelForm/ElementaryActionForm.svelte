@@ -53,6 +53,7 @@
 	{form}
 	optionsEndpoint="threats"
 	field="threat"
+	optionsLabelField="auto"
 	cacheLock={cacheLocks['threat']}
 	bind:cachedValue={formDataCache['threat']}
 	label={m.threat()}

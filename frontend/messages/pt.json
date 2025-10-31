@@ -743,6 +743,8 @@
 	"waitingRiskAcceptances": "Olá! No momento, você tem {number} aceitação de risco{s} pendente. Você pode encontrá-los no menu de governança.",
 	"licenseSeats": "Assentos de licença",
 	"licenseExpiration": "Expiração da licença",
+	"diskSpace": "Espaço em disco",
+	"diskUsed": "Disco usado",
 	"answer": "Responder",
 	"questionnaireMode": "Modo questionário",
 	"assessmentMode": "Modo de avaliação",
@@ -969,6 +971,13 @@
 	"securityObjectiveScaleHelpText": "Escolha sua escala para propriedades de segurança (1 a 4 por padrão)",
 	"actor": "Ator",
 	"action": "Ação",
+	"privateKey": "Chave Privada",
+	"generate": "Gerar",
+	"samlKeysGenerated": "Chaves SAML geradas com sucesso",
+	"samlPrivateKeyHelpText": "Somente escrita: use este campo apenas se precisar fornecer sua própria chave/certificado privada. Caso contrário, o aplicativo irá gerá-lo.",
+	"samlCertificateHelpText": "Você pode especificar seu próprio certificado ou deixar que o aplicativo o gere.",
+	"samlAuthnRequestSignedHelpText": "Quando ativado, a solicitação de autenticação SAML é assinada com a chave privada abaixo. O certificado público correspondente é enviado ao Provedor de Identidade para que ele possa verificar a assinatura.",
+	"downloadCertificate": "Baixar certificado",
 	"viewMore": "Ver mais",
 	"viewLess": "Ver menos"
 }

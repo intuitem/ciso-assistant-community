@@ -104,6 +104,7 @@ export const URL_MODEL = [
 	'escalation-thresholds',
 	'asset-assessments',
 	'asset-class',
+	'asset-capabilities',
 	// campaigns,
 	'campaigns',
 	// iso,
