@@ -32,7 +32,14 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str', 'path'];
+	const defaultExcludes = [
+		'id',
+		'is_published',
+		'localization_dict',
+		'str',
+		'path',
+		'sync_mappings'
+	];
 
 	interface Props {
 		data: any;
