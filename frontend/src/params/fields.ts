@@ -12,7 +12,9 @@ import type { ParamMatcher } from '@sveltejs/kit';
  */
 
 export const match = ((param) => {
-	const fields = new Set<string>();
+	const fields = new Set<string>([
+		'subdomains' // For the /folders/{uuid}/subdomains/ endpoint.
+	]);
 
 	Object.values(listViewFields).forEach((field) => {
 		if ('body' in field && field.body) {
