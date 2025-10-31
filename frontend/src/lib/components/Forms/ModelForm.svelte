@@ -262,6 +262,9 @@
 >
 	{#snippet children({ form, data, initialData })}
 		<input type="hidden" name="urlmodel" value={model.urlModel} />
+		{#if additionalInitialData?.genericcollection}
+			<input type="hidden" name="genericcollection" value={additionalInitialData.genericcollection} />
+		{/if}
 		<!--NOTE: Not the cleanest pattern, will refactor-->
 		<!--TODO: Refactor-->
 		{#if shape.reference_control && !duplicate}
