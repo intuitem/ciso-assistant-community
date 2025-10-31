@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { safeTranslate } from '$lib/utils/i18n';
+import { fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms/server';
 import { setFlash } from 'sveltekit-flash-message/server';
 import type { Actions, PageServerLoad } from './$types';
@@ -80,6 +80,7 @@ export const actions: Actions = {
 		if (!response.ok) {
 			console.error('Failed to save Jira integration config:', await response.text());
 			setFlash({ type: 'error', message: 'Failed to save Jira integration config' }, event);
+			return fail(400, { form: form });
 		}
 		setFlash({ type: 'success', message: 'Successfully savec Jira integration config' }, event);
 		return { form };
