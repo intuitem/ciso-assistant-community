@@ -17,7 +17,7 @@ class IntegrationProvider(AbstractBaseModel, FolderMixin):
     is_active = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = ["name", "provider_type"]
+        unique_together = ["name", "folder"]
 
 
 class IntegrationConfiguration(AbstractBaseModel, FolderMixin):
