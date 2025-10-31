@@ -8,6 +8,20 @@ import type { Actions } from '@sveltejs/kit';
 import { nestedDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 
+// Mapping of URL model types to their many-to-many field names in generic collections
+const FIELD_MAP: Record<string, string> = {
+	'compliance-assessments': 'compliance_assessments',
+	'risk-assessments': 'risk_assessments',
+	'quantitative-risk-studies': 'crq_studies',
+	'ebios-rm': 'ebios_studies',
+	'entity-assessments': 'entity_assessments',
+	'findings-assessments': 'findings_assessments',
+	evidences: 'documents',
+	'security-exceptions': 'security_exceptions',
+	policies: 'policies',
+	'generic-collections': 'dependencies'
+} as const;
+
 export const load: PageServerLoad = async (event) => {
 	const URLModel = 'generic-collections';
 	const modelInfo = getModelInfo(URLModel);
@@ -23,25 +37,11 @@ export const load: PageServerLoad = async (event) => {
 	const objectResponse = await event.fetch(objectEndpoint);
 	const object = await objectResponse.json();
 
-	// Mapping of field names for update forms
-	const fieldMap: Record<string, string> = {
-		'compliance-assessments': 'compliance_assessments',
-		'risk-assessments': 'risk_assessments',
-		'quantitative-risk-studies': 'crq_studies',
-		'ebios-rm': 'ebios_studies',
-		'entity-assessments': 'entity_assessments',
-		'findings-assessments': 'findings_assessments',
-		evidences: 'documents',
-		'security-exceptions': 'security_exceptions',
-		policies: 'policies',
-		'generic-collections': 'dependencies'
-	};
-
 	// Create update forms for each many-to-many relationship
 	const updateForms = {};
 	const updateSchema = modelSchema(URLModel);
 
-	for (const [urlModel, fieldName] of Object.entries(fieldMap)) {
+	for (const [urlModel, fieldName] of Object.entries(FIELD_MAP)) {
 		// Include all required fields from object to pass validation
 		const formData = {
 			name: object.name,
@@ -98,20 +98,7 @@ export const actions: Actions = {
 
 		// Link the created object to the generic collection
 		if (createdObject?.id && genericCollectionId) {
-			const fieldMap: Record<string, string> = {
-				'compliance-assessments': 'compliance_assessments',
-				'risk-assessments': 'risk_assessments',
-				'quantitative-risk-studies': 'crq_studies',
-				'ebios-rm': 'ebios_studies',
-				'entity-assessments': 'entity_assessments',
-				'findings-assessments': 'findings_assessments',
-				evidences: 'documents',
-				'security-exceptions': 'security_exceptions',
-				policies: 'policies',
-				'generic-collections': 'dependencies'
-			};
-
-			const fieldName = fieldMap[urlModel];
+			const fieldName = FIELD_MAP[urlModel];
 			if (fieldName) {
 				const gcEndpoint = `${BASE_API_URL}/pmbok/generic-collections/${genericCollectionId}/object/`;
 				const gcResponse = await event.fetch(gcEndpoint);
