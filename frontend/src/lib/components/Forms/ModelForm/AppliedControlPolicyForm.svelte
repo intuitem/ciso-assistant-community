@@ -15,9 +15,7 @@
 	import { page } from '$app/state';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { getLocale } from '$paraglide/runtime';
-	import { getFlash } from 'sveltekit-flash-message';
 
-	const flash = getFlash(page);
 	let displayCurrency = $state(page.data?.settings?.currency ?? '€'); // Default to Euro
 
 	interface Props {
@@ -405,7 +403,6 @@
 									);
 								} else {
 									console.error('Failed to delete sync mapping');
-									$flash = { type: 'error', message: m.failedToDeleteSyncMapping() };
 								}
 							}}
 						>
