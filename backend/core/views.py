@@ -829,9 +829,12 @@ class AssetViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get asset class choices")
     def asset_class(self, request):
-        # this is for filters
+        # This endpoint is exclusively for filters.
         return Response(
-            [{"id": ac.id, "name": ac.full_path} for ac in AssetClass.objects.all()]
+            [
+                {"id": ac.id, "name": ac.full_path}
+                for ac in AssetClass.objects.filter(assets__isnull=False).distinct()
+            ]
         )
 
     @action(detail=False, name="Get assets graph")
