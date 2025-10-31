@@ -1639,7 +1639,7 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         obj = super().save(*args, **kwargs)
 
         if self.urn not in engine.frameworks:
-            engine.load_frameworks()
+            transaction.on_commit(lambda: engine.load_frameworks())
 
         return obj
 
@@ -2140,7 +2140,11 @@ class Asset(
         related_name="assets",
     )
     asset_class = models.ForeignKey(
-        "AssetClass", on_delete=models.SET_NULL, blank=True, null=True
+        "AssetClass",
+        related_name="assets",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
     )
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
