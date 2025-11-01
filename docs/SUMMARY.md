@@ -87,6 +87,8 @@
 
 * [Generating a PAT](integration/generating-a-pat.md)
 * [API usage](integration/api-documentation.md)
+* [Third-party integrations](integration/third-party-integrations/README.md)
+  * [Jira](integration/third-party-integrations/jira.md)
 
 ## Presentations
 

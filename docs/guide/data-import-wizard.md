@@ -285,3 +285,38 @@ Elementary actions are useful to model a killchain during the 4th workshop of an
 * domain
 
 {% file src="../.gitbook/assets/sample007.xlsx" %}
+
+
+
+
+
+### Reference controls
+
+\
+Reference controls are templates of the controls to apply. The supported  fields are:
+
+
+
+* ref\_id
+* name
+* description&#x20;
+* category
+* function
+* domain
+
+{% file src="../.gitbook/assets/sample_reference_controls.xlsx" %}
+
+Reference controls can be bundled also as a library.
+
+
+
+### Threats
+
+
+
+* ref\_id
+* name
+* description&#x20;
+* domain
+
+{% file src="../.gitbook/assets/sample_threats.xlsx" %}
