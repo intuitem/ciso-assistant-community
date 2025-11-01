@@ -1,5 +1,6 @@
 """Read-only MCP tools for querying CISO Assistant data"""
 
+import json
 import sys
 from rich import print as rprint
 from ..client import make_get_request, get_paginated_results
@@ -207,7 +208,12 @@ async def get_risk_matrix_details(matrix_id_or_name: str):
         result += f"**Description:** {matrix.get('description', 'N/A')}\n\n"
 
         # Extract JSON definition
-        json_def = matrix.get("json_definition", {})
+        json_def_raw = matrix.get("json_definition", {})
+        # Parse JSON string if needed (backend returns it as a string via get_json_translated)
+        if isinstance(json_def_raw, str):
+            json_def = json.loads(json_def_raw)
+        else:
+            json_def = json_def_raw
 
         # Probability scale
         if "probability" in json_def:
@@ -325,12 +331,23 @@ async def get_risk_assessments():
         return f"Error in get_risk_assessments: {str(e)}"
 
 
-async def get_threats():
-    """Get all threats in CISO Assistant
+async def get_threats(provider: str = None, limit: int = 25):
+    """Get threats in CISO Assistant
+
+    Args:
+        provider: Optional provider name to filter by (e.g., "MITRE ATT&CK", "Custom")
+        limit: Maximum number of threats to return (default: 25, set to 0 for no limit)
+
     Returns a list of threats with their IDs, names, providers, and descriptions
     """
     try:
-        res = make_get_request("/threats/")
+        params = {}
+
+        # Add provider filter if specified
+        if provider:
+            params["provider"] = provider
+
+        res = make_get_request("/threats/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -341,19 +358,34 @@ async def get_threats():
         if not threats:
             return "No threats found"
 
+        # Apply limit if specified (0 means no limit)
+        total_count = len(threats)
+        if limit > 0:
+            threats = threats[:limit]
+
         result = "# Threats\n\n"
-        result += f"Total: {len(threats)}\n\n"
+        if provider:
+            result += f"**Provider Filter:** {provider}\n"
+        result += f"**Showing:** {len(threats)} of {total_count} total threats"
+        if limit > 0 and total_count > limit:
+            result += f" (limited to {limit})"
+        result += "\n\n"
         result += "|ID|Name|Provider|Description|Folder|\n"
         result += "|---|---|---|---|---|\n"
 
         for threat in threats:
             threat_id = threat.get("id", "N/A")
             name = threat.get("name", "N/A")
-            provider = threat.get("provider", "N/A")
-            description = threat.get("description") or ""
+            provider_name = threat.get("provider", "N/A")
+            description = (threat.get("description") or "")[
+                :100
+            ]  # Truncate long descriptions
             folder = (threat.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{threat_id}|{name}|{provider}|{description}|{folder}|\n"
+            result += f"|{threat_id}|{name}|{provider_name}|{description}|{folder}|\n"
+
+        if limit > 0 and total_count > limit:
+            result += f"\n**Note:** Only showing first {limit} threats. Use `limit=0` to see all {total_count} threats or filter by `provider` to narrow results.\n"
 
         return result
     except Exception as e:
@@ -618,3 +650,168 @@ async def get_requirement_assessments(
         return result
     except Exception as e:
         return f"Error in get_requirement_assessments: {str(e)}"
+
+
+async def get_quantitative_risk_studies():
+    """Get all quantitative risk studies in CISO Assistant
+    Returns a list of quantitative risk studies with their IDs, names, status, and basic information
+    """
+    try:
+        res = make_get_request("/crq/quantitative-risk-studies/")
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        data = res.json()
+        studies = get_paginated_results(data)
+
+        if not studies:
+            return "No quantitative risk studies found"
+
+        result = "# Quantitative Risk Studies\n\n"
+        result += f"Total: {len(studies)}\n\n"
+        result += "|ID|Name|Status|Distribution Model|Loss Threshold|Folder|\n"
+        result += "|---|---|---|---|---|---|\n"
+
+        for study in studies:
+            study_id = study.get("id", "N/A")
+            name = study.get("name", "N/A")
+            status = study.get("status", "N/A")
+            distribution_model = study.get("distribution_model", "N/A")
+            loss_threshold = study.get("loss_threshold_display", "N/A")
+            folder = (study.get("folder") or {}).get("str", "N/A")
+
+            result += f"|{study_id}|{name}|{status}|{distribution_model}|{loss_threshold}|{folder}|\n"
+
+        return result
+    except Exception as e:
+        return f"Error in get_quantitative_risk_studies: {str(e)}"
+
+
+async def get_quantitative_risk_scenarios(study_id_or_name: str = None):
+    """Get quantitative risk scenarios in CISO Assistant
+
+    Args:
+        study_id_or_name: Optional ID or name of quantitative risk study to filter by
+
+    Returns a list of quantitative risk scenarios with their IDs, names, status, and ALE information
+    """
+    try:
+        params = {}
+
+        # If study specified, resolve it
+        if study_id_or_name:
+            if "-" in study_id_or_name and len(study_id_or_name) == 36:
+                params["quantitative_risk_study"] = study_id_or_name
+            else:
+                # Look up study by name
+                study_res = make_get_request(
+                    "/crq/quantitative-risk-studies/",
+                    params={"name": study_id_or_name},
+                )
+                if study_res.status_code == 200:
+                    study_data = study_res.json()
+                    study_results = get_paginated_results(study_data)
+                    if study_results:
+                        params["quantitative_risk_study"] = study_results[0]["id"]
+                    else:
+                        return f"Quantitative risk study '{study_id_or_name}' not found"
+
+        res = make_get_request("/crq/quantitative-risk-scenarios/", params=params)
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        data = res.json()
+        scenarios = get_paginated_results(data)
+
+        if not scenarios:
+            return "No quantitative risk scenarios found"
+
+        result = "# Quantitative Risk Scenarios\n\n"
+        result += f"Total: {len(scenarios)}\n\n"
+        result += (
+            "|ID|Ref ID|Name|Status|Priority|Current ALE|Residual ALE|Study|Folder|\n"
+        )
+        result += "|---|---|---|---|---|---|---|---|---|\n"
+
+        for scenario in scenarios:
+            scenario_id = scenario.get("id", "N/A")
+            ref_id = scenario.get("ref_id", "N/A")
+            name = scenario.get("name", "N/A")
+            status = scenario.get("status", "N/A")
+            priority = scenario.get("priority", "N/A")
+            current_ale = scenario.get("current_ale_display", "N/A")
+            residual_ale = scenario.get("residual_ale_display", "N/A")
+            study = (scenario.get("quantitative_risk_study") or {}).get("name", "N/A")
+            folder = (scenario.get("folder") or {}).get("str", "N/A")
+
+            result += f"|{scenario_id}|{ref_id}|{name}|{status}|{priority}|{current_ale}|{residual_ale}|{study}|{folder}|\n"
+
+        return result
+    except Exception as e:
+        return f"Error in get_quantitative_risk_scenarios: {str(e)}"
+
+
+async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
+    """Get quantitative risk hypotheses in CISO Assistant
+
+    Args:
+        scenario_id_or_name: Optional ID or name of quantitative risk scenario to filter by
+
+    Returns a list of quantitative risk hypotheses with their IDs, names, risk stage, and metrics
+    """
+    try:
+        params = {}
+
+        # If scenario specified, resolve it
+        if scenario_id_or_name:
+            if "-" in scenario_id_or_name and len(scenario_id_or_name) == 36:
+                params["quantitative_risk_scenario"] = scenario_id_or_name
+            else:
+                # Look up scenario by name
+                scenario_res = make_get_request(
+                    "/crq/quantitative-risk-scenarios/",
+                    params={"name": scenario_id_or_name},
+                )
+                if scenario_res.status_code == 200:
+                    scenario_data = scenario_res.json()
+                    scenario_results = get_paginated_results(scenario_data)
+                    if scenario_results:
+                        params["quantitative_risk_scenario"] = scenario_results[0]["id"]
+                    else:
+                        return f"Quantitative risk scenario '{scenario_id_or_name}' not found"
+
+        res = make_get_request("/crq/quantitative-risk-hypotheses/", params=params)
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        data = res.json()
+        hypotheses = get_paginated_results(data)
+
+        if not hypotheses:
+            return "No quantitative risk hypotheses found"
+
+        result = "# Quantitative Risk Hypotheses\n\n"
+        result += f"Total: {len(hypotheses)}\n\n"
+        result += "|ID|Ref ID|Name|Risk Stage|Selected|ALE|ROC|Simulation Fresh|Scenario|Folder|\n"
+        result += "|---|---|---|---|---|---|---|---|---|---|\n"
+
+        for hyp in hypotheses:
+            hyp_id = hyp.get("id", "N/A")
+            ref_id = hyp.get("ref_id", "N/A")
+            name = hyp.get("name", "N/A")
+            risk_stage = hyp.get("risk_stage", "N/A")
+            is_selected = "Yes" if hyp.get("is_selected") else "No"
+            ale = hyp.get("ale_display", "N/A")
+            roc = hyp.get("roc_display", "N/A")
+            is_fresh = "Yes" if hyp.get("is_simulation_fresh") else "No"
+            scenario = (hyp.get("quantitative_risk_scenario") or {}).get("name", "N/A")
+            folder = (hyp.get("folder") or {}).get("str", "N/A")
+
+            result += f"|{hyp_id}|{ref_id}|{name}|{risk_stage}|{is_selected}|{ale}|{roc}|{is_fresh}|{scenario}|{folder}|\n"
+
+        return result
+    except Exception as e:
+        return f"Error in get_quantitative_risk_hypotheses: {str(e)}"
