@@ -17,7 +17,7 @@ You can enable one or both of these modes.
 
 * A CISO Assistant instance.
 * A Jira Cloud service account with administrative privileges to create API tokens, outgoing webhooks and manage projects.
-* Alignement between the jira status options and CISO Assistant options.
+* Alignement between the jira status options (on your board) and CISO Assistant options for status. They are case-sensitive for now.
 
 
 
@@ -138,4 +138,5 @@ There are several ways to link an applied control to a Jira issue:
 #### Notes:
 
 * The default sync period on SaaS is at 60 seconds.
+* The API needs to be enabled and the instance reachable.
 * For on-premises deployments, you might want to adapt `scheduler-interval` value on Huey
