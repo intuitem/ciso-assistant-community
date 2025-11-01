@@ -138,5 +138,5 @@ There are several ways to link an applied control to a Jira issue:
 #### Notes:
 
 * The default sync period on SaaS is at 60 seconds.
-* The API needs to be enabled and the instance reachable.
+* The API needs to be enabled and the instance reachable. If you're on SaaS plan, you can reach the support to do so.
 * For on-premises deployments, you might want to adapt `scheduler-interval` value on Huey
