@@ -265,3 +265,40 @@ def resolve_requirement_assessment_id(requirement_assessment_id: str) -> str:
         f"Use get_audit_gap_analysis() to find requirement assessment IDs. "
         f"Provided value '{requirement_assessment_id}' is not a valid UUID."
     )
+
+
+def resolve_id_or_name(name_or_id: str, endpoint: str) -> str:
+    """Generic helper function to resolve name to UUID for any endpoint
+    If already a UUID, returns it. If a name, looks it up via API.
+
+    Args:
+        name_or_id: Name or UUID to resolve
+        endpoint: API endpoint to query (e.g., "/crq/quantitative-risk-studies/")
+
+    Returns:
+        UUID of the object
+    """
+    # Check if it's already a UUID
+    if "-" in name_or_id and len(name_or_id) == 36:
+        return name_or_id
+
+    # Otherwise, look up by name
+    res = make_get_request(endpoint, params={"name": name_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Failed to look up '{name_or_id}' at {endpoint}: HTTP {res.status_code}"
+        )
+
+    data = res.json()
+    results = get_paginated_results(data)
+
+    if not results:
+        raise ValueError(f"'{name_or_id}' not found at {endpoint}")
+
+    if len(results) > 1:
+        raise ValueError(
+            f"Multiple objects found with name '{name_or_id}' at {endpoint}. Please use UUID instead."
+        )
+
+    return results[0]["id"]
