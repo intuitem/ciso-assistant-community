@@ -61,6 +61,7 @@ This is only useful if you wish to enable incoming sync on CISO Assistant. Incom
 * Log in to your Jira account
 * Go to **System settings > WebHooks**
 * Click the **+ Create WebHook** button on the top-right corner
+* You might need to filter the associated JQL to only send events on you specific project.
 
 #### 2. Configure CISO Assistant
 
