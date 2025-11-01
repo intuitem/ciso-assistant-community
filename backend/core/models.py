@@ -4854,7 +4854,7 @@ class RiskScenario(NameDescriptionMixin):
         help_text=_("The strength of the knowledge supporting the assessment"),
     )
     justification = models.CharField(
-        max_length=500, blank=True, null=True, verbose_name=_("Justification")
+        max_length=2000, blank=True, null=True, verbose_name=_("Justification")
     )
     security_exceptions = models.ManyToManyField(
         SecurityException,
