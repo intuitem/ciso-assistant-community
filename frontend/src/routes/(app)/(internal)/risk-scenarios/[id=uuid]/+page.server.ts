@@ -38,7 +38,7 @@ export const load = (async ({ fetch, params }) => {
 	await Promise.all(
 		['risk_scenarios', 'risk_scenarios_e'].map(async (key) => {
 			const table: TableSource = {
-				head: ['name', 'owner', 'eta'],
+				head: ['name', 'owner', 'status', 'eta'],
 				body: [],
 				meta: []
 			};
