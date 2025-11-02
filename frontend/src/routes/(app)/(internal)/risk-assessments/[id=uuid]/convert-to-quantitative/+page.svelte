@@ -185,7 +185,7 @@
 				/>
 				<h3 class="text-xl font-bold">{m.converting()}</h3>
 				<p class="text-gray-600">
-					Running Monte Carlo simulations for quantitative risk analysis. This may take a moment...
+					{m.runningMonteCarloSimulations()}
 				</p>
 			</div>
 		</div>
@@ -226,8 +226,8 @@
 				>
 					<i class="fa-solid fa-info-circle mt-0.5"></i>
 					<div>
-						<strong>Requirements:</strong> All values must be provided and between 0 and 1 (e.g., 0.05,
-						0.2, 0.5, 0.9). Values must increase from top to bottom.
+						<strong>{m.requirements()}</strong>
+						{m.probabilityRequirements()}
 					</div>
 				</div>
 				<div class="space-y-3 max-w-2xl">
@@ -271,8 +271,8 @@
 				>
 					<i class="fa-solid fa-info-circle mt-0.5"></i>
 					<div>
-						<strong>Requirements:</strong> All values must be provided and greater than 0. Values must
-						increase from top to bottom (e.g., Minor: 5,000 → Major: 50,000 → Critical: 500,000).
+						<strong>{m.requirements()}</strong>
+						{m.impactRequirements()}
 					</div>
 				</div>
 				<div class="space-y-3 max-w-2xl">
