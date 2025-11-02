@@ -2582,7 +2582,7 @@
 	"probabilityAnchoring": "Probability Anchoring",
 	"probabilityAnchoringDescription": "Map each probability level to a numeric value between 0 and 1 (e.g., 0.05 for 5% probability).",
 	"impactAnchoring": "Impact Anchoring",
-	"impactAnchoringDescription": "For each impact level, provide a typical financial loss value. The system will calculate a 90% confidence interval (±3x spread) for Monte Carlo simulations.",
+	"impactAnchoringDescription": "For each impact level, provide a typical financial loss value. The system will calculate bounds (±30% spread) for Monte Carlo simulations.",
 	"lowerBound": "Lower Bound",
 	"upperBound": "Upper Bound",
 	"lossThreshold": "Loss Threshold",

@@ -1956,15 +1956,15 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         probability_map = {item["index"]: item["value"] for item in probability_anchors}
 
         # Calculate LB and UB from central value for each impact level
-        # Using a 90% CI lognormal distribution assumption:
-        # LB = central_value / 3, UB = central_value * 3
-        # This gives a spread factor of 9x which is reasonable for CI90
+        # Using a narrow fixed ratio: roughly ±30% around central value
+        # LB = central_value * 0.7, UB = central_value * 1.43
+        # This gives a spread factor of ~2x which minimizes overlap between adjacent levels
         impact_map = {}
         for item in impact_anchors:
             central_value = item["central_value"]
             impact_map[item["index"]] = {
-                "lb": central_value / 3,
-                "ub": central_value * 3,
+                "lb": central_value * 0.7,
+                "ub": central_value * 1.43,
             }
 
         # Generate ref_id for the quantitative study
