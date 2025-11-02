@@ -398,7 +398,7 @@
 	// Clean up inactive users
 	function cleanupInactiveUsers() {
 		const now = Date.now();
-		const timeout = 60000; // 60 seconds (1 minute)
+		const timeout = 900000; // 15 minutes
 
 		const before = users.length;
 		users = users.filter(user => now - user.lastActive <= timeout);
