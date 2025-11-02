@@ -541,7 +541,7 @@
 	});
 </script>
 
-<div class="container mx-auto p-8 max-w-6xl">
+<div class="container mx-auto p-8 max-w-7xl">
 	<div class="mb-6">
 		<div class="flex items-center justify-between mb-2">
 			<h1 class="text-3xl font-bold">Collaborative Text Editor (Experimental)</h1>
@@ -598,7 +598,7 @@
 						onselect={handleSelectionChange}
 						onkeyup={handleSelectionChange}
 						onclick={handleSelectionChange}
-						class="w-full h-96 p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500"
+						class="w-full h-[600px] p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500"
 						placeholder="Start typing... Open this page in multiple tabs to collaborate!"
 					></textarea>
 

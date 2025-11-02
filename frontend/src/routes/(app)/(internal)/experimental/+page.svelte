@@ -8,6 +8,12 @@
 
 <div class="bg-white grid grid-cols-2 p-4 gap-4">
 	<Article
+		title="Collaborative Text Editor"
+		desc="Real-time collaborative editing with cursor tracking and user presence"
+		link="/experimental/collab-editor"
+		tags={['collaboration', 'experimental']}
+	/>
+	<Article
 		title={m.frameworksMapping()}
 		desc={m.visualizeAppliedMapping()}
 		link="/experimental/mapping"
