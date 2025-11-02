@@ -407,26 +407,70 @@
 		}
 	}
 
-	// Calculate cursor position in pixels
+	// Mirror element for accurate cursor positioning with text wrapping
+	let mirrorDiv: HTMLDivElement | null = null;
+
+	function initMirrorDiv() {
+		if (!mirrorDiv && browser && textarea) {
+			mirrorDiv = document.createElement('div');
+			mirrorDiv.style.position = 'absolute';
+			mirrorDiv.style.visibility = 'hidden';
+			mirrorDiv.style.pointerEvents = 'none';
+			mirrorDiv.style.whiteSpace = 'pre-wrap';
+			mirrorDiv.style.wordWrap = 'break-word';
+			mirrorDiv.style.overflow = 'hidden';
+			document.body.appendChild(mirrorDiv);
+		}
+	}
+
+	// Calculate cursor position in pixels with accurate text measurement and wrapping
 	function getCursorCoordinates(position: number) {
 		if (!textarea) return { top: 0, left: 0 };
 
-		// Simple approximation: calculate line and column
+		// Initialize mirror div
+		initMirrorDiv();
+		if (!mirrorDiv) return { top: 0, left: 0 };
+
+		// Copy textarea styles to mirror div
+		const computedStyle = window.getComputedStyle(textarea);
+		mirrorDiv.style.font = computedStyle.font;
+		mirrorDiv.style.fontSize = computedStyle.fontSize;
+		mirrorDiv.style.fontFamily = computedStyle.fontFamily;
+		mirrorDiv.style.fontWeight = computedStyle.fontWeight;
+		mirrorDiv.style.lineHeight = computedStyle.lineHeight;
+		mirrorDiv.style.letterSpacing = computedStyle.letterSpacing;
+		mirrorDiv.style.padding = computedStyle.padding;
+		mirrorDiv.style.border = computedStyle.border;
+		mirrorDiv.style.boxSizing = computedStyle.boxSizing;
+
+		// Set width to match textarea
+		mirrorDiv.style.width = `${textarea.clientWidth}px`;
+
 		const text = textarea.value;
 		const beforeCursor = text.substring(0, position);
-		const lines = beforeCursor.split('\n');
-		const lineNumber = lines.length - 1;
-		const columnNumber = lines[lines.length - 1].length;
 
-		// Get line height and character width (approximate)
-		const computedStyle = window.getComputedStyle(textarea);
-		const lineHeight = parseInt(computedStyle.lineHeight) || 20;
-		const fontSize = parseInt(computedStyle.fontSize) || 14;
-		const charWidth = fontSize * 0.6; // Monospace approximation
+		// Create text content with a cursor marker
+		const textNode = document.createTextNode(beforeCursor);
+		const cursorSpan = document.createElement('span');
+		cursorSpan.textContent = '|';
+		cursorSpan.style.position = 'relative';
 
+		// Clear and populate mirror div
+		mirrorDiv.innerHTML = '';
+		mirrorDiv.appendChild(textNode);
+		mirrorDiv.appendChild(cursorSpan);
+
+		// Get cursor span position
+		const cursorRect = cursorSpan.getBoundingClientRect();
+		const mirrorRect = mirrorDiv.getBoundingClientRect();
+
+		const paddingLeft = parseInt(computedStyle.paddingLeft) || 0;
+		const paddingTop = parseInt(computedStyle.paddingTop) || 0;
+
+		// Calculate relative position
 		const coordinates = {
-			top: lineNumber * lineHeight,
-			left: columnNumber * charWidth
+			top: cursorRect.top - mirrorRect.top,
+			left: cursorRect.left - mirrorRect.left
 		};
 
 		return coordinates;
@@ -458,6 +502,12 @@
 			}
 			if (reconnectInterval) {
 				clearInterval(reconnectInterval);
+			}
+
+			// Clean up mirror div
+			if (mirrorDiv && mirrorDiv.parentNode) {
+				mirrorDiv.parentNode.removeChild(mirrorDiv);
+				mirrorDiv = null;
 			}
 		}
 	});
