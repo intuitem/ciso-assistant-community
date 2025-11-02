@@ -1892,8 +1892,8 @@ export const listViewFields = {
 		}
 	},
 	'quantitative-risk-studies': {
-		head: ['name', 'description', 'status', 'domain'],
-		body: ['name', 'description', 'status', 'folder'],
+		head: ['name', 'description', 'status', 'updatedAt', 'domain'],
+		body: ['name', 'description', 'status', 'updated_at', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER
