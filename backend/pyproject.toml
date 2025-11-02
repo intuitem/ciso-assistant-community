@@ -50,6 +50,7 @@ prometheus-client = "^0.22.1"
 jira = "^3.10.5"
 channels = "^4.2.0"
 channels-redis = "^4.2.1"
+daphne = "^4.1.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.8.0"
