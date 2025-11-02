@@ -48,6 +48,8 @@ icecream = "^2.1.4"
 regex = "^2024.11.6"
 prometheus-client = "^0.22.1"
 jira = "^3.10.5"
+channels = "^4.2.0"
+channels-redis = "^4.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.8.0"

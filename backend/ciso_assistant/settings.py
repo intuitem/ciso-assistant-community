@@ -177,6 +177,7 @@ PAGINATE_BY = int(os.environ.get("PAGINATE_BY", default=5000))
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",  # Must be first for Channels to work
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -211,6 +212,7 @@ INSTALLED_APPS = [
     "allauth.mfa",
     "huey.contrib.djhuey",
     "storages",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -332,6 +334,10 @@ TEMPLATES = [
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 WSGI_APPLICATION = "ciso_assistant.wsgi.application"
+ASGI_APPLICATION = "ciso_assistant.asgi.application"
+
+# Channels configuration
+CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 
 AUTH_USER_MODEL = "iam.User"
 
