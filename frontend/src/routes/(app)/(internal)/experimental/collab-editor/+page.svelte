@@ -52,7 +52,6 @@
 	let reconnectInterval: number | null = null;
 	let connectionStatus = $state<'connecting' | 'connected' | 'disconnected'>('disconnected');
 	const STORAGE_KEY = 'collab-editor-content';
-	let hasAnnouncedPresence = false; // Track if we've already announced our presence
 
 	// Get backend WebSocket URL
 	// Note: Authentication token is httpOnly and automatically sent by browser
@@ -138,10 +137,25 @@
 	function clearContent() {
 		textContent = '';
 		saveContent();
+
+		// Reset current user's cursor position
+		if (currentUser) {
+			currentUser.cursorPosition = 0;
+			currentUser.selectionStart = 0;
+			currentUser.selectionEnd = 0;
+		}
+
+		// Broadcast text clear
 		broadcast({
 			type: 'text',
-			session_id: currentUser!.id,
 			text: '',
+			timestamp: Date.now()
+		});
+
+		// Broadcast cursor reset
+		broadcast({
+			type: 'cursor',
+			cursor_position: 0,
 			timestamp: Date.now()
 		});
 	}
@@ -179,7 +193,6 @@
 				}
 
 				// Announce presence on connect
-				hasAnnouncedPresence = true;
 				broadcast({
 					type: 'join',
 					user_color: currentUser!.color,
@@ -248,6 +261,7 @@
 
 					if (existingIndex >= 0) {
 						// User already exists - just update color if it changed, but preserve cursor position
+						// Don't send join reply - they already know about us
 						users[existingIndex] = {
 							...users[existingIndex],
 							color: message.user_color,
@@ -268,15 +282,13 @@
 						users = [...users, newUser];
 						console.log('✅ User joined:', message.user_name);
 
-						// Only send presence back once when a NEW user joins (not on every join message)
-						if (!hasAnnouncedPresence) {
-							hasAnnouncedPresence = true;
-							broadcast({
-								type: 'join',
-								user_color: currentUser!.color,
-								timestamp: Date.now()
-							});
-						}
+						// Always send our presence back to new users so they know about us
+						// The backend prevents echo, so this won't cause infinite loops
+						broadcast({
+							type: 'join',
+							user_color: currentUser!.color,
+							timestamp: Date.now()
+						});
 					}
 				}
 				break;
@@ -324,14 +336,25 @@
 					textContent = message.text;
 					saveContent();
 
-					// Update lastActive for this user
-					const userIndex = users.findIndex(u => u.id === userId);
-					if (userIndex >= 0) {
-						users[userIndex] = {
-							...users[userIndex],
+					// If text is cleared, reset all cursor positions
+					if (message.text === '') {
+						users = users.map(u => ({
+							...u,
+							cursorPosition: 0,
+							selectionStart: 0,
+							selectionEnd: 0,
 							lastActive: message.timestamp || Date.now()
-						};
-						users = [...users];
+						}));
+					} else {
+						// Update lastActive for this user
+						const userIndex = users.findIndex(u => u.id === userId);
+						if (userIndex >= 0) {
+							users[userIndex] = {
+								...users[userIndex],
+								lastActive: message.timestamp || Date.now()
+							};
+							users = [...users];
+						}
 					}
 				}
 				break;
