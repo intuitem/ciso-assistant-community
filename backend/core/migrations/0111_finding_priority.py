@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0110_alter_riskscenario_justification'),
+        ("core", "0110_alter_riskscenario_justification"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='finding',
-            name='priority',
-            field=models.PositiveSmallIntegerField(blank=True, choices=[(1, 'P1'), (2, 'P2'), (3, 'P3'), (4, 'P4')], null=True, verbose_name='Priority'),
+            model_name="finding",
+            name="priority",
+            field=models.PositiveSmallIntegerField(
+                blank=True,
+                choices=[(1, "P1"), (2, "P2"), (3, "P3"), (4, "P4")],
+                null=True,
+                verbose_name="Priority",
+            ),
         ),
     ]
