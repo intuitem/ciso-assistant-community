@@ -1557,10 +1557,6 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         return RiskAssessment.objects.filter(risk_matrix=self).exists()
 
     @property
-    def risk_assessments(self) -> list:
-        return RiskAssessment.objects.filter(risk_matrix=self)
-
-    @property
     def perimeters(self) -> list:
         return Perimeter.objects.filter(riskassessment__risk_matrix=self).distinct()
 
