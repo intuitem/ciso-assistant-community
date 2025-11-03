@@ -484,10 +484,9 @@ class LoadedLibraryViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="related-objects")
     def related_objects(self, request, pk):
-        try:
-            key = "urn" if pk.startswith("urn:") else "id"
-            lib = LoadedLibrary.objects.get(**{key: pk})
-        except:
+        key = "urn" if pk.startswith("urn:") else "id"
+        lib = LoadedLibrary.objects.filter(**{key: pk}).first()
+        if lib is None:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
 
         related_objects = lib.get_related_objects()

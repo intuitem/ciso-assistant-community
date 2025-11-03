@@ -5,25 +5,42 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0109_alter_asset_asset_class'),
+        ("core", "0109_alter_asset_asset_class"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='appliedcontrol',
-            name='reference_control',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='applied_controls', to='core.referencecontrol', verbose_name='Reference Control'),
+            model_name="appliedcontrol",
+            name="reference_control",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="applied_controls",
+                to="core.referencecontrol",
+                verbose_name="Reference Control",
+            ),
         ),
         migrations.AlterField(
-            model_name='complianceassessment',
-            name='framework',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='compliance_assessments', to='core.framework', verbose_name='Framework'),
+            model_name="complianceassessment",
+            name="framework",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="compliance_assessments",
+                to="core.framework",
+                verbose_name="Framework",
+            ),
         ),
         migrations.AlterField(
-            model_name='riskassessment',
-            name='risk_matrix',
-            field=models.ForeignKey(help_text='WARNING! After choosing it, you will not be able to change it', on_delete=django.db.models.deletion.PROTECT, related_name='risk_assessments', to='core.riskmatrix', verbose_name='Risk matrix'),
+            model_name="riskassessment",
+            name="risk_matrix",
+            field=models.ForeignKey(
+                help_text="WARNING! After choosing it, you will not be able to change it",
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="risk_assessments",
+                to="core.riskmatrix",
+                verbose_name="Risk matrix",
+            ),
         ),
     ]
