@@ -484,6 +484,15 @@ class LoadedLibraryViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="related-objects")
     def related_objects(self, request, pk):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(
+                codename="view_loadedlibrary"
+            ),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
+
         key = "urn" if pk.startswith("urn:") else "id"
         lib = LoadedLibrary.objects.filter(**{key: pk}).first()
         if lib is None:
