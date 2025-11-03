@@ -952,24 +952,24 @@ class LoadedLibrary(LibraryMixin):
 
         libraries = LoadedLibrary.objects.filter(dependencies=self)
 
-        related_objects = []
+        related_objects = set()
         for threat in threats:
-            related_objects.extend(threat.risk_scenarios.all())
+            related_objects.update(threat.risk_scenarios.all())
 
         for risk_matrix in risk_matrices:
-            related_objects.extend(risk_matrix.risk_assessments.all())
+            related_objects.update(risk_matrix.risk_assessments.all())
 
         for reference_control in risk_assessment_reference_controls:
-            related_objects.extend(reference_control.applied_controls.all())
+            related_objects.update(reference_control.applied_controls.all())
 
         for framework in frameworks:
-            related_objects.extend(framework.compliance_assessments.all())
+            related_objects.update(framework.compliance_assessments.all())
 
         for reference_control in compliance_assessment_reference_controls:
-            related_objects.extend(reference_control.applied_controls.all())
+            related_objects.update(reference_control.applied_controls.all())
 
-        related_objects.extend(libraries)
-        return related_objects
+        related_objects.update(libraries)
+        return list(related_objects)
 
     @property
     def reference_count(self) -> int:
