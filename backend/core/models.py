@@ -1758,9 +1758,16 @@ class RequirementMappingSet(ReferentialObjectMixin):
     )
 
     def save(self, *args, **kwargs) -> None:
+        from core.mappings.engine import engine
+
         if self.source_framework == self.target_framework:
             raise ValidationError(_("Source and related frameworks must be different"))
-        return super().save(*args, **kwargs)
+
+        obj = super().save(*args, **kwargs)
+
+        transaction.on_commit(lambda: engine.load_rms_data())
+
+        return obj
 
 
 class RequirementMapping(models.Model):
