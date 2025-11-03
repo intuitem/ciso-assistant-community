@@ -20,7 +20,6 @@
 		type ModalComponent,
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
-	import { run } from 'svelte/legacy';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -56,15 +55,6 @@
 				severity: await fetch('/findings/severity').then((r) => r.json())
 			};
 			model.selectOptions = selectOptions;
-		}
-	});
-
-	// Convert priority values from strings to integers for proper schema validation
-	run(() => {
-		if (model?.selectOptions?.priority) {
-			model.selectOptions.priority.forEach((element) => {
-				element.value = parseInt(element.value);
-			});
 		}
 	});
 
