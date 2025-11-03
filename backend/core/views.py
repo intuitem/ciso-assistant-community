@@ -7181,6 +7181,144 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         )
         return Response({p: p for p in providers})
 
+    @action(detail=False, methods=["get"], url_path="graph-data")
+    def graph_data_list(self, request):
+        from core.mappings.engine import engine
+
+        max_depth = MAPPING_MAX_DETPH
+
+        all_paths = engine.get_mapping_graph(max_depth=max_depth)
+
+        all_framework_urns = set()
+        for path in all_paths:
+            all_framework_urns.update(path)
+
+        framework_details = {}
+
+        framework_libs_qs = StoredLibrary.objects.filter(
+            content__framework__urn__in=all_framework_urns,
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        )
+
+        for lib in framework_libs_qs:
+            try:
+                fw_content = lib.content["framework"]
+                urn = fw_content.get("urn")
+
+                if not urn:
+                    continue
+
+                display_name = fw_content.get("name", urn)
+
+                display_value = fw_content.get("description", display_name)
+
+                framework_details[urn] = {
+                    "name": display_name,
+                    "value": display_value,
+                }
+            except (KeyError, TypeError):
+                # Skip this library if content is malformed
+                continue
+
+        nodes = []
+        urn_to_index = {}  # Map URNs to their index in the `nodes` list
+
+        # Sort for a consistent node order
+        sorted_urns = sorted(list(all_framework_urns))
+
+        for i, urn in enumerate(sorted_urns):
+            urn_to_index[urn] = i
+
+            details = framework_details.get(urn, {"name": urn, "value": urn})
+
+            nodes.append(
+                {
+                    "name": details["name"],  # Display name for the node
+                    "category": 0,  # All nodes are in the "Frameworks" category
+                    "value": details["value"],  # Tooltip content
+                    "urn": urn,  # Pass URN as extra data
+                    # `symbolSize` will be added below after degrees are calculated
+                }
+            )
+
+        links = []
+        link_set = set()  # Use a set to prevent duplicate links
+
+        node_degrees = [0] * len(nodes)
+
+        for path in all_paths:
+            # A path [A, B, C] creates links (A, B) and (B, C)
+            for i in range(len(path) - 1):
+                source_urn = path[i]
+                target_urn = path[i + 1]
+                link_tuple = (source_urn, target_urn)
+
+                if link_tuple not in link_set:
+                    link_set.add(link_tuple)
+
+                    # Get the integer index for source and target
+                    source_index = urn_to_index.get(source_urn)
+                    target_index = urn_to_index.get(target_urn)
+
+                    if source_index is not None and target_index is not None:
+                        links.append(
+                            {
+                                "source": source_index,
+                                "target": target_index,
+                                "value": "maps to",
+                            }
+                        )
+
+                        node_degrees[source_index] += 1
+                        node_degrees[target_index] += 1
+
+        min_size = 10
+        max_size = 30
+
+        non_zero_degrees = [d for d in node_degrees if d > 0]
+
+        if not non_zero_degrees:
+            min_degree = 0
+            max_degree = 0
+        else:
+            min_degree = min(non_zero_degrees)
+            max_degree = max(node_degrees)
+
+        degree_range = max_degree - min_degree
+        size_range = max_size - min_size
+
+        for i, node in enumerate(nodes):
+            degree = node_degrees[i]
+
+            if degree == 0:
+                # Assign min size for nodes with no connections (if any)
+                node["symbolSize"] = min_size
+            elif degree_range == 0:
+                # All nodes have the same degree, assign min_size
+                node["symbolSize"] = min_size
+            else:
+                # Scale the size proportionally
+                normalized_degree = (degree - min_degree) / degree_range
+                scaled_size = min_size + (normalized_degree * size_range)
+                node["symbolSize"] = int(round(scaled_size))
+
+        categories = [
+            {"name": "Frameworks"},
+        ]
+
+        meta = {
+            "display_name": "Framework Mapping Graph",
+            "total_frameworks": len(nodes),
+            "total_mappings": len(links),
+            "max_depth_explored": max_depth,
+        }
+
+        return Response(
+            {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
+        )
+
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
         mapping_set_id = pk
