@@ -24,34 +24,8 @@ export const load = (async ({ fetch, params }) => {
 	const framework = await fetch(frameworkEndpoint).then((res) => res.json());
 	compliance_assessment.framework = framework;
 
-	// const measureCreateSchema = modelSchema('applied-controls');
-	// const measureCreateForm = await superValidate(
-	// 	{ folder: requirementAssessment.folder.id }, //TODO: fix here
-	// 	zod(measureCreateSchema),
-	// 	{ errors: false }
-	// );
-
-	// const measureModel = getModelInfo('applied-controls');
-	// const measureSelectOptions: Record<string, any> = {};
-	// //TODO: fix here
-	// if (measureModel.selectFields) {
-	// 	await Promise.all(
-	// 		measureModel.selectFields.map(async (selectField) => {
-	// 			const url = `${baseUrl}/applied-controls/${selectField.field}/`;
-	// 			const data = await fetchJson(url);
-	// 			if (data) {
-	// 				measureSelectOptions[selectField.field] = Object.entries(data).map(([key, value]) => ({
-	// 					label: value,
-	// 					value: selectField.valueType === 'number' ? parseInt(key) : key
-	// 				}));
-	// 			} else {
-	// 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
-	// 			}
-	// 		})
-	// 	);
-	// }
-
-	// measureModel['selectOptions'] = measureSelectOptions;
+	const measureModel = getModelInfo('applied-controls');
+	const measureCreateSchema = modelSchema('applied-controls');
 
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
@@ -62,6 +36,14 @@ export const load = (async ({ fetch, params }) => {
 	});
 	const requirement_assessments = await Promise.all(
 		tableMode.requirement_assessments.map(async (requirementAssessment) => {
+			// TODO: merge initial data ?
+			const measureInitialData = {
+				requirement_assessments: [requirementAssessment.id],
+				folder: requirementAssessment.folder.id
+			};
+			const measureCreateForm = await superValidate(measureInitialData, zod(measureCreateSchema), {
+				errors: false
+			});
 			const evidenceInitialData = {
 				requirement_assessments: [requirementAssessment.id],
 				folder: requirementAssessment.folder.id
@@ -94,6 +76,7 @@ export const load = (async ({ fetch, params }) => {
 			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 			return {
 				...requirementAssessment,
+				measureCreateForm,
 				evidenceCreateForm,
 				observationBuffer,
 				scoreForm,
@@ -125,8 +108,7 @@ export const load = (async ({ fetch, params }) => {
 		scores,
 		requirement_assessments,
 		requirements,
-		// measureCreateForm,
-		// measureModel,
+		measureModel,
 		evidenceModel,
 		title: m.tableMode()
 	};
@@ -148,6 +130,9 @@ export const actions: Actions = {
 		return { status: res.status, body: await res.json() };
 	},
 	createEvidence: async (event) => {
+		return nestedWriteFormAction({ event, action: 'create' });
+	},
+	createAppliedControl: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create' });
 	},
 	update: async (event) => {

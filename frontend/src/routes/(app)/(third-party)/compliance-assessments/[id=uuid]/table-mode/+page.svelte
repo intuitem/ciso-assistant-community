@@ -4,12 +4,9 @@
 	import { page } from '$app/state';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
-	import List from '$lib/components/List/List.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
@@ -144,72 +141,31 @@
 		}
 	}
 
-	console.log(data);
-	function modalConfirmCreateSuggestedControls(
-		id: string,
-		name: string,
-		action: string,
-		referenceControls
-	): void {
-		const modalComponent: ModalComponent = {
-			ref: ConfirmModal,
-			props: {
-				_form: data.form,
-				id: id,
-				debug: false,
-				URLModel: 'requirement-assessments',
-				formAction: action,
-				bodyComponent: List,
-				bodyProps: {
-					items: referenceControls,
-					message: m.theFollowingControlsWillBeAddedColon()
-				}
-			}
-		};
-		const modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			// Data
-			title: m.suggestControls(),
-			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
-				count: referenceControls.length,
-				message: m.theFollowingControlsWillBeAddedColon()
-			}),
-			response: (r: boolean) => {
-				createAppliedControlsLoading = r;
-			}
-		};
-		modalStore.trigger(modal);
-	}
-
-	function modalMeasureCreateForm(referenceControls): void {
-		const modalComponent: ModalComponent = {
-			ref: CreateModal,
-			props: {
-				form: data.measureCreateForm,
-				formAction: '?/createAppliedControl',
-				model: data.measureModel,
-				debug: false,
-				invalidateAll: false,
-				suggestions: { reference_control: referenceControls }
-			}
-		};
-		const modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			// Data
-			title: safeTranslate('add-' + data.measureModel.localName)
-		};
-		modalStore.trigger(modal);
-	}
-
-	let createAppliedControlsLoading = $state(false);
-
 	let questionnaireMode = $state(
 		questionnaireOnly ? true : !hasQuestions ? false : page.data.user.is_third_party ? true : false
 	);
 
 	const modalStore: ModalStore = getModalStore();
+
+	function modalMeasureCreateForm(createform: SuperForm<any>): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: createform,
+				formAction: `${actionPath}?/createAppliedControl`,
+				invalidateAll: invalidateAllBool,
+				model: data.measureModel,
+				debug: false
+				// suggestions: { reference_control: referenceControls }
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('add-' + data.measureModel.localName)
+		};
+		modalStore.trigger(modal);
+	}
 
 	function modalEvidenceCreateForm(createform: SuperForm<any>): void {
 		const modalComponent: ModalComponent = {
@@ -230,6 +186,7 @@
 		modalStore.trigger(modal);
 	}
 
+	let addedMeasure = $state(0);
 	let addedEvidence = $state(0);
 
 	const requirementAssessmentScores = Object.fromEntries(
@@ -260,7 +217,7 @@
 		}, 500); // There must be 500ms without a score change for a request to be sent and modify the score of the RequirementAsessment in the backend
 	}
 
-	function modalUpdateForm(requirementAssessment: Record<string, any>): void {
+	function modalUpdateForm(requirementAssessment: Record<string, any>, context: string): void {
 		const modalComponent: ModalComponent = {
 			ref: UpdateModal,
 			props: {
@@ -268,7 +225,7 @@
 				model: requirementAssessment.updatedModel,
 				object: requirementAssessment.object,
 				formAction: '?/update&id=' + requirementAssessment.id,
-				context: 'selectEvidences'
+				context
 			}
 		};
 		const modal: ModalSettings = {
@@ -793,73 +750,51 @@
 								{#if requirementAssessment.applied_controls.length === 0 && shallow}
 									<p class="text-gray-400 italic">{m.noAppliedControlYet()}</p>
 								{:else}
-									<!-- {console.log(requirementAssessment)} -->
 									<Accordion.Item value="appliedControl">
 										{#snippet control()}
 											<p class="flex items-center space-x-2">
 												<span>{m.appliedControl()}</span>
-												<!-- {#key addedEvidence} -->
-												{#if requirementAssessment.evidences != null}
-													<span class="badge preset-tonal-primary"
-														>{requirementAssessment.applied_controls.length}</span
-													>
-												{/if}
-												<!-- {/key} -->
+												{#key addedMeasure}
+													{#if requirementAssessment.evidences != null}
+														<span class="badge preset-tonal-primary"
+															>{requirementAssessment.applied_controls.length}</span
+														>
+													{/if}
+												{/key}
 											</p>
 										{/snippet}
 										{#snippet panel()}
 											<div class="flex flex-row space-x-2 items-center">
 												{#if !shallow}
-													<!-- {#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && requirementAssessment.requirement.associated_reference_controls.length > 0}
-														<button
-															class="btn text-gray-100 bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
-															type="button"
-															onclick={() => {
-																modalConfirmCreateSuggestedControls(
-																	requirementAssessment.id,
-																	requirementAssessment.name,
-																	'?/createSuggestedControls',
-																	requirementAssessment.requirement.associated_reference_controls
-																);
-															}}
-														>
-															<span class="mr-2">
-																{#if createAppliedControlsLoading}
-																	<ProgressRing
-																		strokeWidth="16px"
-																		meterStroke="stroke-white"
-																		classes="-ml-2"
-																		size="size-6"
-																	/>
-																{:else}
-																	<i class="fa-solid fa-fire-extinguisher"></i>
-																{/if}
-															</span>
-															{m.suggestControls()}
-														</button>
-													{/if} -->
-													<!-- <button
-														class="btn preset-filled-primary-500 self-end"
-														onclick={modalMeasureCreateForm(
-															requirementAssessment.requirement.associated_reference_controls
-														)}
+													<button
+														class="btn preset-filled-primary-500 self-start"
+														onclick={() =>
+															modalMeasureCreateForm(requirementAssessment.measureCreateForm)}
 														type="button"
 														><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
-													> -->
+													>
+													<button
+														class="btn preset-filled-secondary-500 self-start"
+														type="button"
+														onclick={() =>
+															modalUpdateForm(requirementAssessment, 'selectAppliedControls')}
+														><i class="fa-solid fa-hand-pointer mr-2"
+														></i>{m.selectAppliedControls()}
+													</button>
 												{/if}
-												<!-- {#key refreshKey} -->
-												{console.log(requirementAssessment.updateForm)}
-												<AutocompleteSelect
-													multiple
-													form={requirementAssessment.updateForm}
-													optionsEndpoint="applied-controls"
-													optionsDetailedUrlParameters={[
-														['scope_folder_id', requirementAssessment.folder.id]
-													]}
-													optionsExtraFields={[['folder', 'str']]}
-													field="applied_controls"
-												/>
-												<!-- {/key} -->
+											</div>
+											<div class="flex flex-wrap space-x-2 items-center">
+												{#key addedMeasure}
+													{#each requirementAssessment.applied_controls as control}
+														<p class="p-2">
+															<a
+																class="text-primary-700 hover:text-primary-500"
+																href="/applied-controls/{control}"
+																><i class="fa-solid fa-file mr-2"></i>{control}</a
+															>
+														</p>
+													{/each}
+												{/key}
 											</div>
 										{/snippet}
 									</Accordion.Item>
@@ -893,7 +828,8 @@
 													<button
 														class="btn preset-filled-secondary-500 self-start"
 														type="button"
-														onclick={() => modalUpdateForm(requirementAssessment)}
+														onclick={() =>
+															modalUpdateForm(requirementAssessment, 'selectEvidences')}
 														><i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
 													</button>
 												{/if}
