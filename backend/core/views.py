@@ -7165,8 +7165,6 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
     model = StoredLibrary
 
     filterset_fields = [
-        # "objects_meta__target_framework",
-        # "objects_meta__source_framework",
         "provider",
     ]
 

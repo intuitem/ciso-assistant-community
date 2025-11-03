@@ -1432,7 +1432,7 @@ export const listViewFields = {
 		head: ['sourceFramework', 'targetFramework'],
 		body: ['source_framework', 'target_framework'],
 		filters: {
-			library__provider: {
+			provider: {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'requirement-mapping-sets/provider' }
 			}
