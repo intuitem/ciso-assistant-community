@@ -1508,7 +1508,7 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         """
         Returns True if the framework can be deleted
         """
-        if self.requirements.exists() or self.appliedcontrol_set.exists():
+        if self.requirements.exists() or self.applied_controls.exists():
             return False
         return True
 
