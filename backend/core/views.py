@@ -7231,6 +7231,13 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         source_framework = source_framework_lib.content["framework"]
         target_framework = target_framework_lib.content["framework"]
 
+        source_nodes_dict = {
+            n.get("urn"): n for n in source_framework["requirement_nodes"]
+        }
+        target_nodes_dict = {
+            n.get("urn"): n for n in target_framework["requirement_nodes"]
+        }
+
         nodes = []
         links = []
         snodes_idx = dict()
@@ -7244,21 +7251,21 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             },
         ]
         N = 0
-        for req in source_framework_lib.content["framework"]["requirement_nodes"]:
+        for req in source_framework["requirement_nodes"]:
             nodes.append(
                 {
-                    "name": req.get("urn"),
+                    "name": req.get("ref_id"),
                     "category": 0,
                     "value": req.get("name", req.get("description")),
                 }
             )
-            snodes_idx[req["urn"]] = N
+            snodes_idx[req.get("urn")] = N
             N += 1
 
-        for req in target_framework_lib.content["framework"]["requirement_nodes"]:
+        for req in target_framework["requirement_nodes"]:
             nodes.append(
                 {
-                    "name": req.get("urn"),
+                    "name": req.get("ref_id"),
                     "category": 1,
                     "value": req.get("name", req.get("description")),
                 }
@@ -7267,15 +7274,23 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             N += 1
         req_mappings = mapping_set.get("requirement_mappings", [])
         for mapping in req_mappings:
+            source_urn = mapping.get("source_requirement_urn")
+            target_urn = mapping.get("target_requirement_urn")
+            source_node = source_nodes_dict.get(source_urn)
+            target_node = target_nodes_dict.get(target_urn)
+
             if (
                 mapping.get("source_requirement_urn") not in snodes_idx
                 or mapping.get("target_requirement_urn") not in tnodes_idx
+                or not source_node
+                or not target_node
             ):
                 continue
+
             links.append(
                 {
-                    "source": snodes_idx[mapping["source_requirement_urn"]],
-                    "target": tnodes_idx[mapping["target_requirement_urn"]],
+                    "source": snodes_idx[source_node.get("urn")],
+                    "target": tnodes_idx[target_node.get("urn")],
                     "value": mapping.get("relationship"),
                 }
             )

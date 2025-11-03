@@ -1949,13 +1949,11 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
         ]
 
     def get_source_framework(self, obj):
-        mapping_sets = obj.content.get(
+        mapping_set = obj.content.get(
             "requirement_mapping_sets", [obj.content.get("requirement_mapping_set", {})]
-        )
+        )[0]
         framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn__in=[
-                r["source_framework_urn"] for r in mapping_sets
-            ],
+            content__framework__urn=mapping_set["source_framework_urn"],
             content__framework__isnull=False,
             content__requirement_mapping_set__isnull=True,
             content__requirement_mapping_sets__isnull=True,
@@ -1967,13 +1965,11 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
         }
 
     def get_target_framework(self, obj):
-        mapping_sets = obj.content.get(
+        mapping_set = obj.content.get(
             "requirement_mapping_sets", [obj.content.get("requirement_mapping_set", {})]
-        )
+        )[0]
         framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn__in=[
-                r["target_framework_urn"] for r in mapping_sets
-            ],
+            content__framework__urn=mapping_set["target_framework_urn"],
             content__framework__isnull=False,
             content__requirement_mapping_set__isnull=True,
             content__requirement_mapping_sets__isnull=True,
