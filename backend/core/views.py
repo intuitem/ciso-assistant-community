@@ -1171,12 +1171,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
         viewable_assessments = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskAssessment
         )[0]
-        _used_matrices = (
-            RiskMatrix.objects.filter(riskassessment__isnull=False)
-            .filter(id__in=viewable_matrices)
-            .filter(riskassessment__id__in=viewable_assessments)
-            .distinct()
-        )
+        _used_matrices = RiskMatrix.objects.filter(
+            id__in=viewable_matrices, risk_assessments__in=viewable_assessments
+        ).distinct()
         used_matrices = _used_matrices.values("id", "name")
         for i in range(len(used_matrices)):
             used_matrices[i]["risk_assessments_count"] = (
@@ -5172,9 +5169,9 @@ class FrameworkViewSet(BaseModelViewSet):
             Folder.get_root_folder(), request.user, ComplianceAssessment
         )[0]
         _used_frameworks = (
-            Framework.objects.filter(complianceassessment__isnull=False)
+            Framework.objects.filter(compliance_assessments__isnull=False)
             .filter(id__in=viewable_framework)
-            .filter(complianceassessment__id__in=viewable_assessments)
+            .filter(compliance_assessments__in=viewable_assessments)
             .distinct()
         )
         used_frameworks = _used_frameworks.values("id", "name")
