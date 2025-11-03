@@ -785,12 +785,12 @@
 											</div>
 											<div class="flex flex-wrap space-x-2 items-center">
 												{#key addedMeasure}
-													{#each requirementAssessment.applied_controls as control}
+													{#each requirementAssessment.applied_controls as ac}
 														<p class="p-2">
 															<a
 																class="text-primary-700 hover:text-primary-500"
-																href="/applied-controls/{control}"
-																><i class="fa-solid fa-file mr-2"></i>{control}</a
+																href="/applied-controls/{ac}"
+																><i class="fa-solid fa-fire-extinguisher mr-2"></i>{ac}</a
 															>
 														</p>
 													{/each}
@@ -841,7 +841,7 @@
 															<a
 																class="text-primary-700 hover:text-primary-500"
 																href="/evidences/{evidence.id}"
-																><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
+																><i class="fa-solid fa-file-lines mr-2"></i>{evidence.str}</a
 															>
 														</p>
 													{/each}
