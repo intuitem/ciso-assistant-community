@@ -20,7 +20,7 @@ from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.db import models, transaction
-from django.db.models import F, Q, OuterRef, Subquery
+from django.db.models import F, Q, OuterRef, Subquery, Count
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -901,6 +901,75 @@ class LoadedLibrary(LibraryMixin):
             res["strength_of_knowledge"] = matrix.strength_of_knowledge
             res["risk_matrix"] = [res["risk_matrix"]]
         return res
+
+    def get_related_objects(
+        self,
+    ) -> list[
+        Union["Threat", "ReferenceControl", "RiskMatrix", "Framework", "LoadedLibrary"]
+    ]:
+        threats = (
+            Threat.objects.filter(library=self)
+            .annotate(risk_scenarios_count=Count("risk_scenarios"))
+            .filter(risk_scenarios_count__gt=0)
+            .prefetch_related("risk_scenarios")
+        )
+
+        risk_matrices = (
+            RiskMatrix.objects.filter(library=self)
+            .annotate(risk_assessment_count=Count("risk_assessments"))
+            .filter(risk_assessment_count__gt=0)
+            .prefetch_related("risk_assessments")
+        )
+
+        risk_assessment_reference_controls = (
+            ReferenceControl.objects.filter(library=self)
+            .annotate(
+                risk_assessment_count=Count(
+                    "applied_controls__risk_scenarios__risk_assessment"
+                )
+            )
+            .filter(risk_assessment_count__gt=0)
+            .prefetch_related("applied_controls")
+        )
+
+        frameworks = (
+            Framework.objects.filter(library=self)
+            .annotate(compliance_assessment_count=Count("compliance_assessments"))
+            .filter(compliance_assessment_count__gt=0)
+            .prefetch_related("compliance_assessments")
+        )
+
+        compliance_assessment_reference_controls = (
+            ReferenceControl.objects.filter(library=self)
+            .annotate(
+                compliance_assessment_count=Count(
+                    "applied_controls__requirement_assessments__compliance_assessment"
+                )
+            )
+            .filter(compliance_assessment_count=0)
+            .prefetch_related("applied_controls")
+        )
+
+        libraries = LoadedLibrary.objects.filter(dependencies=self)
+
+        related_objects = []
+        for threat in threats:
+            related_objects.extend(threat.risk_scenarios.all())
+
+        for risk_matrix in risk_matrices:
+            related_objects.extend(risk_matrix.risk_assessments.all())
+
+        for reference_control in risk_assessment_reference_controls:
+            related_objects.extend(reference_control.applied_controls.all())
+
+        for framework in frameworks:
+            related_objects.extend(framework.compliance_assessments.all())
+
+        for reference_control in compliance_assessment_reference_controls:
+            related_objects.extend(reference_control.applied_controls.all())
+
+        related_objects.extend(libraries)
+        return related_objects
 
     @property
     def reference_count(self) -> int:
@@ -3609,6 +3678,7 @@ class AppliedControl(
         null=True,
         blank=True,
         verbose_name=_("Reference Control"),
+        related_name="applied_controls",
     )
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
@@ -4282,6 +4352,7 @@ class RiskAssessment(Assessment):
         on_delete=models.PROTECT,
         help_text=_("WARNING! After choosing it, you will not be able to change it"),
         verbose_name=_("Risk matrix"),
+        related_name="risk_assessments",
     )
     risk_tolerance = models.SmallIntegerField(
         default=-1, verbose_name=_("Risk tolerance")
@@ -5084,7 +5155,10 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
 class ComplianceAssessment(Assessment):
     framework = models.ForeignKey(
-        Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
+        Framework,
+        on_delete=models.CASCADE,
+        related_name="compliance_assessments",
+        verbose_name=_("Framework"),
     )
     selected_implementation_groups = models.JSONField(
         blank=True, null=True, verbose_name=_("Selected implementation groups")

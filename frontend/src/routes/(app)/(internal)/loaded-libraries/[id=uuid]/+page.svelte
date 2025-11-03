@@ -18,6 +18,22 @@
 		[key: string]: any;
 	}
 
+	interface RelatedObject {
+		type:
+			| 'RiskScenario'
+			| 'RiskAssessment'
+			| 'AppliedControl'
+			| 'ComplianceAssessment'
+			| 'LoadedLibrary';
+		id: string;
+		name: string;
+	}
+	interface RelatedObjectResponse {
+		count: number;
+		objects: RelatedObject[];
+	}
+
+	const libraryRelatedObjects: RelatedObjectResponse = data?.library?.relatedObjects ?? [];
 	const libraryObjects: LibraryObjects = data?.library?.objects ?? [];
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
 	const referenceControls = libraryObjects['reference_controls'] ?? [];
@@ -39,6 +55,33 @@
 		head: { name: 'name', description: 'description' },
 		body: tableSourceMapper(riskMatrices, ['name', 'description']),
 		meta: { count: riskMatrices.length }
+	};
+
+	function getObjectHref(obj: RelatedObject): string | null {
+		switch (obj.type) {
+			case 'RiskAssessment':
+				return `/risk-assessments/${obj.id}`;
+			case 'RiskScenario':
+				return `/risk-scenarios/${obj.id}`;
+			case 'AppliedControl':
+				return `/applied-controls/${obj.id}`;
+			case 'LoadedLibrary':
+				return `/loaded-libraries/${obj.id}?loaded`;
+			case 'ComplianceAssessment':
+				return `/compliance-assessments/${obj.id}`;
+		}
+		return null;
+	}
+
+	const relatedObjectsTable: TableSource = {
+		head: {
+			type: 'type',
+			name: 'name'
+		},
+		body: tableSourceMapper(libraryRelatedObjects.objects, ['type', 'name']),
+		meta: libraryRelatedObjects.objects.map((obj) => {
+			return { href: getObjectHref(obj) };
+		})
 	};
 
 	const referenceControlsTable: TableSource = {
@@ -140,6 +183,24 @@
 			{#each riskMatricesPreview(riskMatrices) as riskMatrix}
 				<RiskMatrix {riskMatrix} showLegend={showRisks} wrapperClass="mt-8" />
 			{/each}
+		</Dropdown>
+	{/if}
+
+	{#if libraryRelatedObjects.count > 0}
+		<Dropdown
+			style="hover:text-indigo-700"
+			icon="fa-solid fa-link"
+			header="{libraryRelatedObjects.count} {m.associatedObjects()}"
+		>
+			<ModelTable
+				source={relatedObjectsTable}
+				hrefKey="href"
+				displayActions={false}
+				pagination={false}
+				rowCount={false}
+				rowsPerPage={false}
+				search={false}
+			/>
 		</Dropdown>
 	{/if}
 

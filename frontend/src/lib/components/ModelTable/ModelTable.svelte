@@ -75,6 +75,7 @@
 		baseEndpoint?: string;
 		detailQueryParameter?: string;
 		fields?: string[];
+		hrefKey?: string | null;
 		canSelectObject?: boolean;
 		overrideFilters?: { [key: string]: any[] };
 		hideFilters?: boolean;
@@ -123,6 +124,7 @@
 		baseEndpoint = `/${URLModel}`,
 		detailQueryParameter = $bindable(),
 		fields = [],
+		hrefKey = null,
 		canSelectObject = false,
 		overrideFilters = {},
 		hideFilters = $bindable(false),
@@ -168,6 +170,14 @@
 		event.preventDefault();
 		event.stopPropagation();
 		const rowMetaData = $rows[rowIndex].meta;
+
+		if (hrefKey) {
+			console.log(rowMetaData);
+			const href = rowMetaData.href;
+			if (href) goto(href);
+			return;
+		}
+
 		if (!rowMetaData[identifierField] || !URLModel) return;
 
 		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {

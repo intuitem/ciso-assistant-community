@@ -1,7 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { safeTranslate } from '$lib/utils/i18n';
 import { m } from '$paraglide/messages';
-import { fail, type Actions } from '@sveltejs/kit';
+import { type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 
 export const actions: Actions = {
