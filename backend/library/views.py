@@ -486,9 +486,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
     def related_objects(self, request, pk):
         if not RoleAssignment.is_access_allowed(
             user=request.user,
-            perm=Permission.objects.get(
-                codename="view_loadedlibrary"
-            ),
+            perm=Permission.objects.get(codename="view_loadedlibrary"),
             folder=Folder.get_root_folder(),
         ):
             return Response(status=HTTP_403_FORBIDDEN)
