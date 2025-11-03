@@ -946,7 +946,7 @@ class LoadedLibrary(LibraryMixin):
                     "applied_controls__requirement_assessments__compliance_assessment"
                 )
             )
-            .filter(compliance_assessment_count=0)
+            .filter(compliance_assessment_count__gt=0)
             .prefetch_related("applied_controls")
         )
 
