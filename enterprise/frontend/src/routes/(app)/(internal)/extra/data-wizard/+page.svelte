@@ -62,7 +62,9 @@
 		selectedModel === 'Asset' ||
 			selectedModel === 'AppliedControl' ||
 			selectedModel === 'Perimeter' ||
-			selectedModel === 'ElementaryAction'
+			selectedModel === 'ElementaryAction' ||
+			selectedModel === 'ReferenceControl' ||
+			selectedModel === 'Threat'
 	);
 
 	// Fixed: Check files correctly
@@ -301,6 +303,46 @@
 								name="model"
 								value="ElementaryAction"
 								id="ElementaryAction"
+								class="size-5 border-gray-300 text-blue-500"
+								bind:group={selectedModel}
+							/>
+						</label>
+					</div>
+
+					<div>
+						<label
+							for="ReferenceControl"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
+						>
+							<div>
+								<p class="text-gray-700">{m.referenceControls()}</p>
+							</div>
+
+							<input
+								type="radio"
+								name="model"
+								value="ReferenceControl"
+								id="ReferenceControl"
+								class="size-5 border-gray-300 text-blue-500"
+								bind:group={selectedModel}
+							/>
+						</label>
+					</div>
+
+					<div>
+						<label
+							for="Threat"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
+						>
+							<div>
+								<p class="text-gray-700">{m.threats()}</p>
+							</div>
+
+							<input
+								type="radio"
+								name="model"
+								value="Threat"
+								id="Threat"
 								class="size-5 border-gray-300 text-blue-500"
 								bind:group={selectedModel}
 							/>

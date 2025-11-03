@@ -62,7 +62,11 @@
 			props: {
 				form: model.createForm,
 				model: model,
-				debug: false
+				debug: false,
+				additionalInitialData: {
+					...model.initialData,
+					genericcollection: page.params.id
+				}
 			}
 		};
 		let modal: ModalSettings = {

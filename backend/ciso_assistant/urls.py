@@ -34,6 +34,7 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
+    path("api/integrations/", include("integrations.urls", namespace="integrations")),
     path("api/", include("core.urls")),
     path("serdes/", include("serdes.urls")),
     path("i18n/", include("django.conf.urls.i18n")),

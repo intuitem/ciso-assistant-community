@@ -1,7 +1,7 @@
 [project]
-name = "cli"
+name = "ciso-assistant-cli"
 version = "0.1.0"
-description = "Add your description here"
+description = "CISO Assistant CLI tools"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -9,19 +9,13 @@ dependencies = [
     "mcp[cli]>=1.6.0",
     "pyyaml>=6.0.2",
     "requests>=2.32.3",
+    "python-dotenv>=1.0.0",
+    "rich>=13.0.0",
 ]
 
-[tool.poetry]
-name = "cli"
-version = "0.1.0"
-description = "CLI env"
-authors = ["Your Name <you@example.com>"]
-readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.12"
-
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["ca_mcp", "clica"]
