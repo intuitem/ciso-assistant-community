@@ -11,6 +11,8 @@
 	import { isDark } from '$lib/utils/helpers';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+
 	import { goto } from '$app/navigation';
 
 	import { onMount } from 'svelte';
@@ -164,7 +166,9 @@
 			<div>
 				<p class="text-sm font-semibold text-gray-400">{m.description()}</p>
 				{#if data.scenario.description}
-					<p class="whitespace-pre-line">{data.scenario.description}</p>
+					<p class="whitespace-pre-line">
+						<MarkdownRenderer content={data.scenario.description} />
+					</p>
 				{:else}
 					<p class="text-gray-400 italic text-sm">{m.noDescription()}</p>
 				{/if}
@@ -473,7 +477,7 @@
 			<p class="text-sm font-semibold text-gray-400">{m.justification()}</p>
 			<p class="">
 				{#if data.scenario.justification}
-					<p>{data.scenario.justification}</p>
+					<p><MarkdownRenderer content={data.scenario.justification} /></p>
 				{:else}
 					<p class="text-gray-400 italic text-sm">{m.noJustification()}</p>
 				{/if}

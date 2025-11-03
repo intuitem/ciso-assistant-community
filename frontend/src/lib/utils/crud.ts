@@ -1432,7 +1432,22 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings', urlModel: 'applied-controls' },
 			{ field: 'findings', urlModel: 'evidences' }
 		],
-		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
+		selectFields: [
+			{ field: 'severity', valueType: 'number' },
+			{ field: 'status' },
+			{ field: 'priority', valueType: 'number' }
+		],
+		filters: [
+			{ field: 'owner' },
+			{ field: 'folder' },
+			{ field: 'status' },
+			{ field: 'severity' },
+			{ field: 'priority' },
+			{ field: 'findings_assessment' },
+			{ field: 'filtering_labels' },
+			{ field: 'applied_controls' },
+			{ field: 'evidences' }
+		]
 	},
 	incidents: {
 		name: 'incident',

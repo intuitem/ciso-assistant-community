@@ -84,6 +84,10 @@ async def update_risk_scenario(
     strength_of_knowledge: int = None,
     justification: str = None,
     ref_id: str = None,
+    assets: list = None,
+    threats: list = None,
+    applied_controls: list = None,
+    existing_applied_controls: list = None,
 ) -> str:
     """Update an existing risk scenario in CISO Assistant
 
@@ -92,7 +96,7 @@ async def update_risk_scenario(
         name: Optional new name for the risk scenario
         description: Optional new description
         risk_assessment_id: Optional ID or name of the risk assessment (can use risk assessment name instead of UUID)
-        existing_controls: Optional description of existing controls
+        existing_controls: Optional description of existing controls (text field)
         inherent_proba: Optional inherent probability (integer index from risk matrix)
         inherent_impact: Optional inherent impact (integer index from risk matrix)
         current_proba: Optional current probability (integer index from risk matrix)
@@ -103,6 +107,10 @@ async def update_risk_scenario(
         strength_of_knowledge: Optional strength of knowledge (-1 to 2)
         justification: Optional justification text
         ref_id: Optional reference ID
+        assets: Optional list of asset IDs or names to update (replaces existing, can use asset names)
+        threats: Optional list of threat IDs or names to update (replaces existing, can use threat names)
+        applied_controls: Optional list of new/planned applied control IDs or names (replaces existing, can use control names)
+        existing_applied_controls: Optional list of existing applied control IDs or names (replaces existing, can use control names)
     """
     try:
         # Resolve risk scenario name to ID if needed
@@ -142,6 +150,51 @@ async def update_risk_scenario(
         if risk_assessment_id is not None:
             resolved_assessment_id = resolve_risk_assessment_id(risk_assessment_id)
             payload["risk_assessment"] = resolved_assessment_id
+
+        # Resolve asset names to IDs if provided
+        if assets is not None:
+            resolved_assets = []
+            for asset in assets:
+                resolved_asset_id = resolve_asset_id(asset)
+                resolved_assets.append(resolved_asset_id)
+            payload["assets"] = resolved_assets
+
+        # Resolve threat names to IDs if provided
+        if threats is not None:
+            from ..client import make_get_request, get_paginated_results
+
+            resolved_threats = []
+            for threat in threats:
+                if "-" in threat and len(threat) == 36:
+                    resolved_threats.append(threat)
+                else:
+                    threat_res = make_get_request("/threats/", params={"name": threat})
+                    if threat_res.status_code == 200:
+                        threat_data = threat_res.json()
+                        threat_results = get_paginated_results(threat_data)
+                        if threat_results:
+                            resolved_threats.append(threat_results[0]["id"])
+                        else:
+                            raise ValueError(f"Threat '{threat}' not found")
+                    else:
+                        raise ValueError(f"Failed to look up threat '{threat}'")
+            payload["threats"] = resolved_threats
+
+        # Resolve applied control names to IDs if provided
+        if applied_controls is not None:
+            resolved_controls = []
+            for control in applied_controls:
+                resolved_control_id = resolve_applied_control_id(control)
+                resolved_controls.append(resolved_control_id)
+            payload["applied_controls"] = resolved_controls
+
+        # Resolve existing applied control names to IDs if provided
+        if existing_applied_controls is not None:
+            resolved_existing_controls = []
+            for control in existing_applied_controls:
+                resolved_control_id = resolve_applied_control_id(control)
+                resolved_existing_controls.append(resolved_control_id)
+            payload["existing_applied_controls"] = resolved_existing_controls
 
         if not payload:
             return "Error: No fields provided to update"
@@ -304,3 +357,357 @@ async def update_requirement_assessment(
             )
     except Exception as e:
         return f"Error in update_requirement_assessment: {str(e)}"
+
+
+async def update_quantitative_risk_study(
+    study_id: str,
+    name: str = None,
+    description: str = None,
+    status: str = None,
+    loss_threshold: float = None,
+    risk_tolerance_point1_probability: float = None,
+    risk_tolerance_point1_acceptable_loss: float = None,
+    risk_tolerance_point2_probability: float = None,
+    risk_tolerance_point2_acceptable_loss: float = None,
+    observation: str = None,
+) -> str:
+    """Update an existing quantitative risk study in CISO Assistant
+
+    Args:
+        study_id: ID or name of the quantitative risk study to update
+        name: Optional new name for the study
+        description: Optional new description
+        status: Optional status - "planned", "in_progress", "in_review", "done", or "deprecated"
+        loss_threshold: Optional new loss threshold value (monetary amount)
+        risk_tolerance_point1_probability: Optional probability for first risk tolerance point (0.0-1.0, e.g., 0.01 for 1%)
+        risk_tolerance_point1_acceptable_loss: Optional acceptable loss for first point (monetary amount)
+        risk_tolerance_point2_probability: Optional probability for second risk tolerance point (0.0-1.0, e.g., 0.001 for 0.1%)
+        risk_tolerance_point2_acceptable_loss: Optional acceptable loss for second point (monetary amount)
+        observation: Optional observation text
+
+    Note: When updating risk tolerance points, you can update individual point values.
+    The risk tolerance curve will be automatically regenerated when points are modified.
+    """
+    try:
+        from ..resolvers import resolve_id_or_name
+
+        # Resolve study name to ID if needed
+        resolved_study_id = resolve_id_or_name(
+            study_id, "/crq/quantitative-risk-studies/"
+        )
+
+        # First, get current study to preserve existing risk tolerance if partially updating
+        get_res = make_get_request(
+            f"/crq/quantitative-risk-studies/{resolved_study_id}/"
+        )
+        if get_res.status_code != 200:
+            return f"Error fetching study: {get_res.status_code} - {get_res.text}"
+
+        current_study = get_res.json()
+        current_risk_tolerance = current_study.get("risk_tolerance") or {"points": {}}
+
+        # Build update payload with only provided fields
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if status is not None:
+            payload["status"] = status
+        if loss_threshold is not None:
+            payload["loss_threshold"] = loss_threshold
+        if observation is not None:
+            payload["observation"] = observation
+
+        # Handle risk_tolerance updates
+        risk_tolerance_updated = False
+        if any(
+            [
+                risk_tolerance_point1_probability is not None,
+                risk_tolerance_point1_acceptable_loss is not None,
+                risk_tolerance_point2_probability is not None,
+                risk_tolerance_point2_acceptable_loss is not None,
+            ]
+        ):
+            # Start with current risk_tolerance
+            updated_risk_tolerance = current_risk_tolerance.copy()
+            if "points" not in updated_risk_tolerance:
+                updated_risk_tolerance["points"] = {}
+
+            # Update point1 values if provided
+            if (
+                risk_tolerance_point1_probability is not None
+                or risk_tolerance_point1_acceptable_loss is not None
+            ):
+                if "point1" not in updated_risk_tolerance["points"]:
+                    updated_risk_tolerance["points"]["point1"] = {}
+
+                if risk_tolerance_point1_probability is not None:
+                    updated_risk_tolerance["points"]["point1"]["probability"] = (
+                        risk_tolerance_point1_probability
+                    )
+                    risk_tolerance_updated = True
+                if risk_tolerance_point1_acceptable_loss is not None:
+                    updated_risk_tolerance["points"]["point1"]["acceptable_loss"] = (
+                        risk_tolerance_point1_acceptable_loss
+                    )
+                    risk_tolerance_updated = True
+
+            # Update point2 values if provided
+            if (
+                risk_tolerance_point2_probability is not None
+                or risk_tolerance_point2_acceptable_loss is not None
+            ):
+                if "point2" not in updated_risk_tolerance["points"]:
+                    updated_risk_tolerance["points"]["point2"] = {}
+
+                if risk_tolerance_point2_probability is not None:
+                    updated_risk_tolerance["points"]["point2"]["probability"] = (
+                        risk_tolerance_point2_probability
+                    )
+                    risk_tolerance_updated = True
+                if risk_tolerance_point2_acceptable_loss is not None:
+                    updated_risk_tolerance["points"]["point2"]["acceptable_loss"] = (
+                        risk_tolerance_point2_acceptable_loss
+                    )
+                    risk_tolerance_updated = True
+
+            if risk_tolerance_updated:
+                # Remove curve_data to force regeneration
+                if "curve_data" in updated_risk_tolerance:
+                    del updated_risk_tolerance["curve_data"]
+                payload["risk_tolerance"] = updated_risk_tolerance
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(
+            f"/crq/quantitative-risk-studies/{resolved_study_id}/", payload
+        )
+
+        if res.status_code == 200:
+            study = res.json()
+            message = f"✅ Quantitative risk study updated successfully: {study.get('name')} (ID: {study.get('id')})"
+            if risk_tolerance_updated:
+                message += "\n\nℹ️  Risk tolerance curve will be automatically regenerated with the new points."
+            return message
+        else:
+            return f"Error updating quantitative risk study: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_quantitative_risk_study: {str(e)}"
+
+
+async def update_quantitative_risk_scenario(
+    scenario_id: str,
+    name: str = None,
+    description: str = None,
+    status: str = None,
+    priority: int = None,
+    observation: str = None,
+    assets: list = None,
+    threats: list = None,
+) -> str:
+    """Update an existing quantitative risk scenario in CISO Assistant
+
+    Args:
+        scenario_id: ID or name of the quantitative risk scenario to update
+        name: Optional new name for the scenario
+        description: Optional new description
+        status: Optional status - "draft", "open", "mitigate", "accept", or "transfer"
+        priority: Optional priority (1=P1, 2=P2, 3=P3, 4=P4)
+        observation: Optional observation text
+        assets: Optional list of asset IDs or names to update (replaces existing, can use asset names)
+        threats: Optional list of threat IDs or names to update (replaces existing, can use threat names)
+    """
+    try:
+        from ..resolvers import resolve_id_or_name, resolve_asset_id
+
+        # Resolve scenario name to ID if needed
+        resolved_scenario_id = resolve_id_or_name(
+            scenario_id, "/crq/quantitative-risk-scenarios/"
+        )
+
+        # Build update payload with only provided fields
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if status is not None:
+            payload["status"] = status
+        if priority is not None:
+            payload["priority"] = priority
+        if observation is not None:
+            payload["observation"] = observation
+
+        # Resolve asset names to IDs if provided
+        if assets is not None:
+            resolved_assets = []
+            for asset in assets:
+                resolved_asset_id = resolve_asset_id(asset)
+                resolved_assets.append(resolved_asset_id)
+            payload["assets"] = resolved_assets
+
+        # Resolve threat names to IDs if provided
+        if threats is not None:
+            from ..client import make_get_request, get_paginated_results
+
+            resolved_threats = []
+            for threat in threats:
+                if "-" in threat and len(threat) == 36:
+                    resolved_threats.append(threat)
+                else:
+                    threat_res = make_get_request("/threats/", params={"name": threat})
+                    if threat_res.status_code == 200:
+                        threat_data = threat_res.json()
+                        threat_results = get_paginated_results(threat_data)
+                        if threat_results:
+                            resolved_threats.append(threat_results[0]["id"])
+                        else:
+                            raise ValueError(f"Threat '{threat}' not found")
+                    else:
+                        raise ValueError(f"Failed to look up threat '{threat}'")
+            payload["threats"] = resolved_threats
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(
+            f"/crq/quantitative-risk-scenarios/{resolved_scenario_id}/", payload
+        )
+
+        if res.status_code == 200:
+            scenario = res.json()
+            return f"✅ Quantitative risk scenario updated successfully: {scenario.get('name')} (ID: {scenario.get('id')})"
+        else:
+            return f"Error updating quantitative risk scenario: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_quantitative_risk_scenario: {str(e)}"
+
+
+async def update_quantitative_risk_hypothesis(
+    hypothesis_id: str,
+    name: str = None,
+    description: str = None,
+    probability: float = None,
+    impact_lb: float = None,
+    impact_ub: float = None,
+    impact_distribution: str = None,
+    is_selected: bool = None,
+    observation: str = None,
+    existing_applied_controls: list = None,
+    added_applied_controls: list = None,
+) -> str:
+    """Update an existing quantitative risk hypothesis in CISO Assistant
+
+    Args:
+        hypothesis_id: ID or name of the quantitative risk hypothesis to update
+        name: Optional new name for the hypothesis
+        description: Optional new description
+        probability: Optional new probability value (0.0 to 1.0)
+        impact_lb: Optional new impact lower bound value
+        impact_ub: Optional new impact upper bound value
+        impact_distribution: Optional new impact distribution model (e.g., "LOGNORMAL-CI90")
+        is_selected: Optional flag to mark this hypothesis as selected (for residual scenarios)
+        observation: Optional observation text
+        existing_applied_controls: Optional list of existing applied control IDs or names (replaces existing, can use control names)
+        added_applied_controls: Optional list of added applied control IDs or names (replaces existing, can use control names)
+    """
+    try:
+        from ..resolvers import resolve_id_or_name
+
+        # Resolve hypothesis name to ID if needed
+        resolved_hypothesis_id = resolve_id_or_name(
+            hypothesis_id, "/crq/quantitative-risk-hypotheses/"
+        )
+
+        # First, get current hypothesis to preserve existing parameters
+        get_res = make_get_request(
+            f"/crq/quantitative-risk-hypotheses/{resolved_hypothesis_id}/"
+        )
+        if get_res.status_code != 200:
+            return f"Error fetching hypothesis: {get_res.status_code} - {get_res.text}"
+
+        current_hypothesis = get_res.json()
+        current_parameters = current_hypothesis.get("parameters") or {}
+
+        # Build update payload with only provided fields
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if is_selected is not None:
+            payload["is_selected"] = is_selected
+        if observation is not None:
+            payload["observation"] = observation
+
+        # Handle parameters update
+        parameters_updated = False
+        updated_parameters = current_parameters.copy()
+
+        if probability is not None:
+            updated_parameters["probability"] = probability
+            parameters_updated = True
+
+        # Update impact if any impact field is provided
+        if (
+            impact_lb is not None
+            or impact_ub is not None
+            or impact_distribution is not None
+        ):
+            # Get current impact or initialize
+            current_impact = updated_parameters.get("impact", {})
+
+            if impact_lb is not None:
+                current_impact["lb"] = impact_lb
+                parameters_updated = True
+            if impact_ub is not None:
+                current_impact["ub"] = impact_ub
+                parameters_updated = True
+            if impact_distribution is not None:
+                current_impact["distribution"] = impact_distribution
+                parameters_updated = True
+
+            updated_parameters["impact"] = current_impact
+
+        if parameters_updated:
+            payload["parameters"] = updated_parameters
+
+        # Resolve existing applied control names to IDs if provided
+        if existing_applied_controls is not None:
+            from ..resolvers import resolve_applied_control_id
+
+            resolved_existing = []
+            for control in existing_applied_controls:
+                resolved_control_id = resolve_applied_control_id(control)
+                resolved_existing.append(resolved_control_id)
+            payload["existing_applied_controls"] = resolved_existing
+
+        # Resolve added applied control names to IDs if provided
+        if added_applied_controls is not None:
+            from ..resolvers import resolve_applied_control_id
+
+            resolved_added = []
+            for control in added_applied_controls:
+                resolved_control_id = resolve_applied_control_id(control)
+                resolved_added.append(resolved_control_id)
+            payload["added_applied_controls"] = resolved_added
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(
+            f"/crq/quantitative-risk-hypotheses/{resolved_hypothesis_id}/", payload
+        )
+
+        if res.status_code == 200:
+            hypothesis = res.json()
+            return f"✅ Quantitative risk hypothesis updated successfully: {hypothesis.get('name')} (ID: {hypothesis.get('id')})"
+        else:
+            return f"Error updating quantitative risk hypothesis: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_quantitative_risk_hypothesis: {str(e)}"
