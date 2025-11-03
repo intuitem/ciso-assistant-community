@@ -33,7 +33,10 @@
 		objects: RelatedObject[];
 	}
 
-	const libraryRelatedObjects: RelatedObjectResponse = data?.library?.relatedObjects ?? [];
+	const libraryRelatedObjects: RelatedObjectResponse = data?.library?.relatedObjects ?? {
+		count: 0,
+		objects: []
+	};
 	const libraryObjects: LibraryObjects = data?.library?.objects ?? [];
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
 	const referenceControls = libraryObjects['reference_controls'] ?? [];
