@@ -205,6 +205,8 @@ class RequirementMappingSetImporter:
         self,
         library_object: LoadedLibrary,
     ):
+        from core.mappings.engine import engine
+
         _target_framework = Framework.objects.get(
             urn=self.data["target_framework_urn"].lower(), default_locale=True
         )
@@ -220,6 +222,7 @@ class RequirementMappingSetImporter:
         )
         for mapping in self._requirement_mappings:
             mapping.load(mapping_set)
+        transaction.on_commit(lambda: engine.load_rms_data())
         return mapping_set
 
     def init(self) -> Union[str, None]:
