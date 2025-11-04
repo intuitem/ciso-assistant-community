@@ -7181,14 +7181,6 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         )
         return Response({p: p for p in providers})
 
-    def perform_create(self, serializer):
-        # create the new requirement mapping set and reload the engine.
-        instance = serializer.save()
-        from core.mappings.engine import engine
-
-        engine.load_rms_data()
-        return instance
-
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
         mapping_set_id = pk
