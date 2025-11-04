@@ -58,6 +58,7 @@ from docxtpl import DocxTemplate
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from integrations.registry import IntegrationRegistry
+from library.serializers import StoredLibrarySerializer
 from .generators import gen_audit_context
 
 from django.utils import timezone

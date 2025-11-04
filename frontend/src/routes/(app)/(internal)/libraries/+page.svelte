@@ -79,7 +79,6 @@
 				<ModelTable
 					source={data.storedLibrariesTable}
 					URLModel="stored-libraries"
-					baseEndpoint="stored-libraries?{excludeMappingsUrlParams}"
 					deleteForm={data.deleteForm}
 					server={false}
 				/>
@@ -88,7 +87,6 @@
 				<ModelTable
 					source={data.loadedLibrariesTable}
 					URLModel="loaded-libraries"
-					baseEndpoint="loaded-libraries?{excludeMappingsUrlParams}"
 					deleteForm={data.deleteForm}
 					detailQueryParameter="loaded"
 					server={false}
@@ -98,7 +96,7 @@
 				<ModelTable
 					source={data.mappingLibrariesTable}
 					URLModel="stored-libraries"
-					baseEndpoint="stored-libraries?object_type=requirement_mapping_sets&object_type=requirement_mapping_set"
+					baseEndpoint="mapping-libraries"
 					deleteForm={data.deleteForm}
 					displayActions={false}
 					server={false}
