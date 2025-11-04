@@ -378,7 +378,7 @@ def get_domain_export_objects(domain: Folder):
         Q(perimeter__in=perimeters) | Q(folder__in=folders)
     ).distinct()
     risk_scenarios = RiskScenario.objects.filter(
-        risk_assessments__in=risk_assessments
+        risk_assessment__in=risk_assessments
     ).distinct()
 
     ebios_rm_studies = EbiosRMStudy.objects.filter(folder__in=folders).distinct()
