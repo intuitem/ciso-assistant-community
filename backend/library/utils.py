@@ -1,14 +1,9 @@
 import time
-from icecream import ic
 
 from .helpers import get_referential_translation
-from pathlib import Path
 from typing import List, Union
-from django.core.exceptions import SuspiciousFileOperation, ValidationError
-from django.http import Http404
 
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
-from ciso_assistant import settings
 from core.models import (
     Framework,
     RequirementMapping,

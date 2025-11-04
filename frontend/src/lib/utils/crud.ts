@@ -244,6 +244,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Threats',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		]
 	},

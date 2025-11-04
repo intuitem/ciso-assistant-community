@@ -60,6 +60,10 @@ class MappingEngine:
         Loads requirement mapping sets (RMS) from libraries.
         Builds internal structures: all_rms and framework_mappings.
         """
+        self.framework_mappings = defaultdict(list)
+        self.direct_mappings = set()
+        self.all_rms = {}
+
         for lib in StoredLibrary.objects.filter(
             Q(content__requirement_mapping_set__isnull=False)
             | Q(content__requirement_mapping_sets__isnull=False),

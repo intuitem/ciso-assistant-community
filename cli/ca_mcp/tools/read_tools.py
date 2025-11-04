@@ -6,81 +6,184 @@ from rich import print as rprint
 from ..client import make_get_request, get_paginated_results
 
 
-async def get_risk_scenarios():
-    """Get risks scenarios
+async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
+    """Get risk scenarios
+
+    Args:
+        folder: Optional folder ID or name to filter by (filters by risk assessment's perimeter folder)
+        risk_assessment: Optional risk assessment ID or name to filter by
+
     Query CISO Assistant Risk Registry
     """
-    res = make_get_request("/risk-scenarios/")
-    data = res.json()
-    if res.status_code != 200:
-        rprint(f"Error: check credentials or filename.", file=sys.stderr)
-        return
-    if not data["results"]:
-        rprint(f"Error: No risk scenarios found", file=sys.stderr)
-        return
-    scenarios = [
-        f"|{rs.get('name')}|{rs.get('description') or ''}|{rs.get('current_level')}|{rs.get('residual_level')}|{(rs.get('folder') or {}).get('str', 'N/A')}|"
-        for rs in data["results"]
-    ]
-    return (
-        "|name|description|current_level|residual_level|domain|"
-        + "\n|---|---|---|---|---|\n"
-        + "\n".join(scenarios)
-    )
+    try:
+        from ..resolvers import resolve_folder_id, resolve_risk_assessment_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        # Note: Risk scenarios filter by risk_assessment__perimeter__folder
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        # Add risk assessment filter if specified - resolve name to ID if needed
+        if risk_assessment:
+            params["risk_assessment"] = resolve_risk_assessment_id(risk_assessment)
+
+        res = make_get_request("/risk-scenarios/", params=params)
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        data = res.json()
+        scenarios = get_paginated_results(data)
+
+        if not scenarios:
+            return "No risk scenarios found"
+
+        result = f"Found {len(scenarios)} risk scenarios"
+        if folder:
+            result += f" (folder: {folder})"
+        if risk_assessment:
+            result += f" (assessment: {risk_assessment})"
+        result += "\n\n"
+        result += "|Ref|Name|Current|Residual|Domain|\n"
+        result += "|---|---|---|---|---|\n"
+
+        for rs in scenarios:
+            ref_id = rs.get("ref_id") or "N/A"
+            name = rs.get("name", "N/A")
+            current_level = rs.get("current_level", "N/A")
+            residual_level = rs.get("residual_level", "N/A")
+            domain = (rs.get("folder") or {}).get("str", "N/A")
+
+            result += f"|{ref_id}|{name}|{current_level}|{residual_level}|{domain}|\n"
+
+        return result
+    except Exception as e:
+        return f"Error in get_risk_scenarios: {str(e)}"
 
 
-async def get_applied_controls():
+async def get_applied_controls(folder: str = None):
     """Get applied controls
+
+    Args:
+        folder: Optional folder ID or name to filter by (domain/folder to filter applied controls)
+
     Query CISO Assistant combined action plan
     """
-    res = make_get_request("/applied-controls/")
-    data = res.json()
-    if res.status_code != 200:
-        rprint(f"Error: check credentials or filename.", file=sys.stderr)
-        return
-    if not data["results"]:
-        rprint(f"Error: No applied controls found", file=sys.stderr)
-        return
-    items = [
-        f"|{item.get('name')}|{item.get('description') or ''}|{item.get('status')}|{item.get('eta') or ''}|{(item.get('folder') or {}).get('str', 'N/A')}|"
-        for item in data["results"]
-    ]
-    return (
-        "|name|description|status|eta|domain|"
-        + "\n|---|---|---|---|---|\n"
-        + "\n".join(items)
-    )
+    try:
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        res = make_get_request("/applied-controls/", params=params)
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        data = res.json()
+        controls = get_paginated_results(data)
+
+        if not controls:
+            return "No applied controls found"
+
+        result = f"Found {len(controls)} applied controls"
+        if folder:
+            result += f" (folder: {folder})"
+        result += "\n\n"
+        result += "|Ref|Name|Status|ETA|Domain|\n"
+        result += "|---|---|---|---|---|\n"
+
+        for item in controls:
+            ref_id = item.get("ref_id") or "N/A"
+            name = item.get("name", "N/A")
+            status = item.get("status", "N/A")
+            eta = item.get("eta") or "N/A"
+            domain = (item.get("folder") or {}).get("str", "N/A")
+
+            result += f"|{ref_id}|{name}|{status}|{eta}|{domain}|\n"
+
+        return result
+    except Exception as e:
+        return f"Error in get_applied_controls: {str(e)}"
 
 
-async def get_audits_progress():
+async def get_audits_progress(folder: str = None, perimeter: str = None):
     """Get the audits progress
+
+    Args:
+        folder: Optional folder ID or name to filter by (domain/folder to filter audits)
+        perimeter: Optional perimeter ID or name to filter by
+
     Query CISO Assistant compliance engine for audits progress
     """
-    res = make_get_request("/compliance-assessments/")
-    data = res.json()
-    if res.status_code != 200:
-        rprint(f"Error: check credentials or filename.", file=sys.stderr)
-        return
-    if not data["results"]:
-        rprint(f"Error: No audits found", file=sys.stderr)
-        return
-    items = [
-        f"|{item.get('name')}|{(item.get('framework') or {}).get('str', 'N/A')}|{item.get('status')}|{item.get('progress')}|{(item.get('folder') or {}).get('str', 'N/A')}|"
-        for item in data["results"]
-    ]
-    return (
-        "|name|framework|status|progress|domain|"
-        + "\n|---|---|---|---|---|\n"
-        + "\n".join(items)
-    )
+    try:
+        from ..resolvers import resolve_folder_id, resolve_perimeter_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        # Add perimeter filter if specified - resolve name to ID if needed
+        if perimeter:
+            params["perimeter"] = resolve_perimeter_id(perimeter)
+
+        res = make_get_request("/compliance-assessments/", params=params)
+
+        if res.status_code != 200:
+            return f"Error: HTTP {res.status_code} - {res.text}"
+
+        data = res.json()
+        audits = get_paginated_results(data)
+
+        if not audits:
+            return "No audits found"
+
+        result = f"Found {len(audits)} audits"
+        if folder:
+            result += f" (folder: {folder})"
+        if perimeter:
+            result += f" (perimeter: {perimeter})"
+        result += "\n\n"
+        result += "|Name|Framework|Status|Progress|Domain|\n"
+        result += "|---|---|---|---|---|\n"
+
+        for item in audits:
+            name = item.get("name", "N/A")
+            framework = (item.get("framework") or {}).get("str", "N/A")
+            status = item.get("status", "N/A")
+            progress = item.get("progress", "N/A")
+            domain = (item.get("folder") or {}).get("str", "N/A")
+
+            result += f"|{name}|{framework}|{status}|{progress}|{domain}|\n"
+
+        return result
+    except Exception as e:
+        return f"Error in get_audits_progress: {str(e)}"
 
 
-async def get_folders():
-    """Get all folders (domains) in CISO Assistant
-    Returns a list of folders with their IDs and names for reference when creating objects
+async def get_folders(name: str = None):
+    """Get folders (domains) in CISO Assistant
+
+    Args:
+        name: Optional name filter
+
+    Folders (aka domains) are organizational units containing perimeters, assets, and risk assessments.
     """
     try:
-        res = make_get_request("/folders/")
+        params = {}
+
+        # Add name filter if specified
+        if name:
+            params["name"] = name
+
+        res = make_get_request("/folders/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -89,34 +192,53 @@ async def get_folders():
         folders = get_paginated_results(data)
 
         if not folders:
+            if name:
+                return f"No folders found matching '{name}'"
             return "No folders found"
 
-        result = "# Folders (Domains)\n\n"
-        result += "|ID|Name|Description|Parent Folder|\n"
-        result += "|---|---|---|---|\n"
+        result = f"Found {len(folders)} folders"
+        if name:
+            result += f" (name: {name})"
+        result += "\n\n"
+        result += "|ID|Name|Parent|\n"
+        result += "|---|---|---|\n"
 
         for folder in folders:
             folder_id = folder.get("id", "N/A")
-            name = folder.get("name", "N/A")
-            description = (folder.get("description") or "")[
-                :50
-            ]  # Truncate long descriptions
+            folder_name = folder.get("name", "N/A")
             parent = folder.get("parent_folder") or {}
             parent_name = parent.get("str", "Root") if parent else "Root"
 
-            result += f"|{folder_id}|{name}|{description}|{parent_name}|\n"
+            result += f"|{folder_id}|{folder_name}|{parent_name}|\n"
 
         return result
     except Exception as e:
         return f"Error in get_folders: {str(e)}"
 
 
-async def get_perimeters():
-    """Get all perimeters in CISO Assistant
-    Returns a list of perimeters with their IDs and names for reference when creating assessments
+async def get_perimeters(folder: str = None, name: str = None):
+    """Get perimeters in CISO Assistant
+
+    Args:
+        folder: Optional folder ID or name filter
+        name: Optional name filter
+
+    Perimeters define the scope of risk assessments and audits within folders.
     """
     try:
-        res = make_get_request("/perimeters/")
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        # Add name filter if specified
+        if name:
+            params["name"] = name
+
+        res = make_get_request("/perimeters/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -127,29 +249,45 @@ async def get_perimeters():
         if not perimeters:
             return "No perimeters found"
 
-        result = "# Perimeters\n\n"
-        result += "|ID|Name|Description|Folder|\n"
-        result += "|---|---|---|---|\n"
+        result = f"Found {len(perimeters)} perimeters"
+        if folder:
+            result += f" (folder: {folder})"
+        if name:
+            result += f" (name: {name})"
+        result += "\n\n"
+        result += "|ID|Name|Folder|\n"
+        result += "|---|---|---|\n"
 
         for perimeter in perimeters:
             perimeter_id = perimeter.get("id", "N/A")
-            name = perimeter.get("name", "N/A")
-            description = (perimeter.get("description") or "")[:50]
-            folder = (perimeter.get("folder") or {}).get("str", "N/A")
+            perimeter_name = perimeter.get("name", "N/A")
+            folder_name = (perimeter.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{perimeter_id}|{name}|{description}|{folder}|\n"
+            result += f"|{perimeter_id}|{perimeter_name}|{folder_name}|\n"
 
         return result
     except Exception as e:
         return f"Error in get_perimeters: {str(e)}"
 
 
-async def get_risk_matrices():
+async def get_risk_matrices(folder: str = None):
     """Get all risk matrices in CISO Assistant
+
+    Args:
+        folder: Optional folder ID or name to filter by (domain/folder to filter risk matrices)
+
     Returns a list of risk matrices with their IDs and names for reference when creating risk assessments
     """
     try:
-        res = make_get_request("/risk-matrices/")
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        res = make_get_request("/risk-matrices/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -160,17 +298,18 @@ async def get_risk_matrices():
         if not matrices:
             return "No risk matrices found"
 
-        result = "# Risk Matrices\n\n"
-        result += "|ID|Name|Description|Folder|\n"
-        result += "|---|---|---|---|\n"
+        result = f"Found {len(matrices)} risk matrices"
+        if folder:
+            result += f" (folder: {folder})"
+        result += "\n\n"
+        result += "|ID|Name|\n"
+        result += "|---|---|\n"
 
         for matrix in matrices:
             matrix_id = matrix.get("id", "N/A")
             name = matrix.get("name", "N/A")
-            description = (matrix.get("description") or "")[:50]
-            folder = (matrix.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{matrix_id}|{name}|{description}|{folder}|\n"
+            result += f"|{matrix_id}|{name}|\n"
 
         return result
     except Exception as e:
@@ -296,13 +435,30 @@ async def get_risk_matrix_details(matrix_id_or_name: str):
         return f"Error in get_risk_matrix_details: {str(e)}"
 
 
-async def get_risk_assessments():
+async def get_risk_assessments(folder: str = None, perimeter: str = None):
     """Get all risk assessments in CISO Assistant
+
+    Args:
+        folder: Optional folder ID or name to filter by (domain/folder to filter risk assessments)
+        perimeter: Optional perimeter ID or name to filter by
+
     Returns a list of risk assessments with their IDs, names, and status
     Use this to find the risk_assessment_id when creating risk scenarios
     """
     try:
-        res = make_get_request("/risk-assessments/")
+        from ..resolvers import resolve_folder_id, resolve_perimeter_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        # Add perimeter filter if specified - resolve name to ID if needed
+        if perimeter:
+            params["perimeter"] = resolve_perimeter_id(perimeter)
+
+        res = make_get_request("/risk-assessments/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -313,7 +469,12 @@ async def get_risk_assessments():
         if not assessments:
             return "No risk assessments found"
 
-        result = "# Risk Assessments\n\n"
+        result = f"Found {len(assessments)} risk assessments"
+        if folder:
+            result += f" (folder: {folder})"
+        if perimeter:
+            result += f" (perimeter: {perimeter})"
+        result += "\n\n"
         result += "|ID|Name|Status|Risk Matrix|Folder|\n"
         result += "|---|---|---|---|---|\n"
 
@@ -331,21 +492,35 @@ async def get_risk_assessments():
         return f"Error in get_risk_assessments: {str(e)}"
 
 
-async def get_threats(provider: str = None, limit: int = 25):
+async def get_threats(
+    provider: str = None, folder: str = None, library: str = None, limit: int = 25
+):
     """Get threats in CISO Assistant
 
     Args:
         provider: Optional provider name to filter by (e.g., "MITRE ATT&CK", "Custom")
+        folder: Optional folder ID or name to filter by (domain/folder to filter threats)
+        library: Optional library URN or ID to filter by (e.g., "urn:intuitem:risk:library:mitre-attack-enterprise-v15.1")
         limit: Maximum number of threats to return (default: 25, set to 0 for no limit)
 
     Returns a list of threats with their IDs, names, providers, and descriptions
     """
     try:
+        from ..resolvers import resolve_folder_id, resolve_library_id
+
         params = {}
 
         # Add provider filter if specified
         if provider:
             params["provider"] = provider
+
+        # Add folder filter if specified - resolve name to ID if needed
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        # Add library filter if specified - resolve URN to ID if needed
+        if library:
+            params["library"] = resolve_library_id(library)
 
         res = make_get_request("/threats/", params=params)
 
@@ -363,41 +538,47 @@ async def get_threats(provider: str = None, limit: int = 25):
         if limit > 0:
             threats = threats[:limit]
 
-        result = "# Threats\n\n"
+        result = f"Found {len(threats)} of {total_count} threats"
         if provider:
-            result += f"**Provider Filter:** {provider}\n"
-        result += f"**Showing:** {len(threats)} of {total_count} total threats"
-        if limit > 0 and total_count > limit:
-            result += f" (limited to {limit})"
+            result += f" (provider: {provider})"
+        if folder:
+            result += f" (folder: {folder})"
+        if library:
+            result += f" (library: {library})"
         result += "\n\n"
-        result += "|ID|Name|Provider|Description|Folder|\n"
-        result += "|---|---|---|---|---|\n"
+        result += "|ID|Name|Provider|\n"
+        result += "|---|---|---|\n"
 
         for threat in threats:
             threat_id = threat.get("id", "N/A")
             name = threat.get("name", "N/A")
             provider_name = threat.get("provider", "N/A")
-            description = (threat.get("description") or "")[
-                :100
-            ]  # Truncate long descriptions
-            folder = (threat.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{threat_id}|{name}|{provider_name}|{description}|{folder}|\n"
-
-        if limit > 0 and total_count > limit:
-            result += f"\n**Note:** Only showing first {limit} threats. Use `limit=0` to see all {total_count} threats or filter by `provider` to narrow results.\n"
+            result += f"|{threat_id}|{name}|{provider_name}|\n"
 
         return result
     except Exception as e:
         return f"Error in get_threats: {str(e)}"
 
 
-async def get_assets():
+async def get_assets(folder: str = None):
     """Get all assets in CISO Assistant
+
+    Args:
+        folder: Optional folder ID or name to filter by (domain/folder to filter assets)
+
     Returns a list of assets with their IDs, names, types, and other details
     """
     try:
-        res = make_get_request("/assets/")
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        res = make_get_request("/assets/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -408,30 +589,44 @@ async def get_assets():
         if not assets:
             return "No assets found"
 
-        result = "# Assets\n\n"
-        result += "|ID|Name|Type|Business Value|Folder|\n"
-        result += "|---|---|---|---|---|\n"
+        result = f"Found {len(assets)} assets"
+        if folder:
+            result += f" (folder: {folder})"
+        result += "\n\n"
+        result += "|ID|Name|Type|Folder|\n"
+        result += "|---|---|---|---|\n"
 
         for asset in assets:
             asset_id = asset.get("id", "N/A")
             name = asset.get("name", "N/A")
             asset_type = asset.get("type", "N/A")
-            business_value = asset.get("business_value", "N/A")
-            folder = (asset.get("folder") or {}).get("str", "N/A")
+            folder_name = (asset.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{asset_id}|{name}|{asset_type}|{business_value}|{folder}|\n"
+            result += f"|{asset_id}|{name}|{asset_type}|{folder_name}|\n"
 
         return result
     except Exception as e:
         return f"Error in get_assets: {str(e)}"
 
 
-async def get_incidents():
+async def get_incidents(folder: str = None):
     """Get all incidents in CISO Assistant
+
+    Args:
+        folder: Optional folder ID or name to filter by (domain/folder to filter incidents)
+
     Returns a list of incidents with their IDs, names, severity, and status
     """
     try:
-        res = make_get_request("/incidents/")
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        res = make_get_request("/incidents/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -442,7 +637,10 @@ async def get_incidents():
         if not incidents:
             return "No incidents found"
 
-        result = "# Incidents\n\n"
+        result = f"Found {len(incidents)} incidents"
+        if folder:
+            result += f" (folder: {folder})"
+        result += "\n\n"
         result += "|ID|Name|Severity|Status|Folder|\n"
         result += "|---|---|---|---|---|\n"
 
@@ -460,12 +658,24 @@ async def get_incidents():
         return f"Error in get_incidents: {str(e)}"
 
 
-async def get_security_exceptions():
+async def get_security_exceptions(folder: str = None):
     """Get all security exceptions in CISO Assistant
+
+    Args:
+        folder: Optional folder ID or name to filter by (domain/folder to filter security exceptions)
+
     Returns a list of security exceptions with their IDs, names, approval status, and expiry dates
     """
     try:
-        res = make_get_request("/security-exceptions/")
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        res = make_get_request("/security-exceptions/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -476,7 +686,10 @@ async def get_security_exceptions():
         if not exceptions:
             return "No security exceptions found"
 
-        result = "# Security Exceptions\n\n"
+        result = f"Found {len(exceptions)} security exceptions"
+        if folder:
+            result += f" (folder: {folder})"
+        result += "\n\n"
         result += "|ID|Name|State|Expiry Date|Folder|\n"
         result += "|---|---|---|---|---|\n"
 
@@ -494,14 +707,25 @@ async def get_security_exceptions():
         return f"Error in get_security_exceptions: {str(e)}"
 
 
-async def get_frameworks():
+async def get_frameworks(folder: str = None):
     """Get all frameworks available in CISO Assistant
+
+    Args:
+        folder: Optional folder ID or name to filter by (domain/folder to filter frameworks)
 
     Returns a list of frameworks that have been imported/loaded and are available for creating compliance assessments.
     Use this to find framework IDs/URNs/names for creating audits.
     """
     try:
-        res = make_get_request("/frameworks/")
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        res = make_get_request("/frameworks/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -512,34 +736,46 @@ async def get_frameworks():
         if not frameworks:
             return "No frameworks found"
 
-        result = "# Frameworks\n\n"
-        result += f"Total: {len(frameworks)}\n\n"
-        result += "|ID|URN|Name|Description|Provider|Folder|\n"
-        result += "|---|---|---|---|---|---|\n"
+        result = f"Found {len(frameworks)} frameworks"
+        if folder:
+            result += f" (folder: {folder})"
+        result += "\n\n"
+        result += "|ID|URN|Name|Provider|Folder|\n"
+        result += "|---|---|---|---|---|\n"
 
         for framework in frameworks:
             framework_id = framework.get("id", "N/A")
             urn = framework.get("urn", "N/A")
             name = framework.get("name", "N/A")
-            description = framework.get("description") or ""
             provider = framework.get("provider", "N/A")
             folder = (framework.get("folder") or {}).get("str", "N/A")
 
-            result += (
-                f"|{framework_id}|{urn}|{name}|{description}|{provider}|{folder}|\n"
-            )
+            result += f"|{framework_id}|{urn}|{name}|{provider}|{folder}|\n"
 
         return result
     except Exception as e:
         return f"Error in get_frameworks: {str(e)}"
 
 
-async def get_business_impact_analyses():
+async def get_business_impact_analyses(folder: str = None):
     """Get all Business Impact Analyses (BIAs) in CISO Assistant
+
+    Args:
+        folder: Optional folder ID or name to filter by (domain/folder to filter BIAs by their perimeter's folder)
+
     Returns a list of BIAs with their status and basic information
     """
     try:
-        res = make_get_request("/resilience/business-impact-analysis/")
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        # Note: BIA filters by perimeter__folder, not folder directly
+        if folder:
+            params["perimeter__folder"] = resolve_folder_id(folder)
+
+        res = make_get_request("/resilience/business-impact-analysis/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -550,8 +786,10 @@ async def get_business_impact_analyses():
         if not bias:
             return "No Business Impact Analyses found"
 
-        result = "# Business Impact Analyses\n\n"
-        result += f"Total: {len(bias)}\n\n"
+        result = f"Found {len(bias)} Business Impact Analyses"
+        if folder:
+            result += f" (folder: {folder})"
+        result += "\n\n"
         result += "|ID|Name|Status|Version|Risk Matrix|Perimeter|Folder|\n"
         result += "|---|---|---|---|---|---|---|\n"
 
@@ -626,26 +864,21 @@ async def get_requirement_assessments(
         if not req_assessments:
             return "No requirement assessments found"
 
-        result = "# Requirement Assessments\n\n"
-        result += f"Total: {len(req_assessments)}\n\n"
-        result += "|ID|Ref ID|Requirement|Compliance Assessment|Status|Result|Score|Observation|\n"
-        result += "|---|---|---|---|---|---|---|---|\n"
+        result = f"Found {len(req_assessments)} requirement assessments\n\n"
+        result += "|ID|Ref|Requirement|Assessment|Status|Result|\n"
+        result += "|---|---|---|---|---|---|\n"
 
         for req in req_assessments:
             req_id = req.get("id", "N/A")
             req_ref_id = req.get("ref_id", "N/A")
-            requirement = req.get("name", "N/A")
+            requirement = req.get("name", "N/A")[:30]  # Truncate
             comp_assessment = (req.get("compliance_assessment") or {}).get(
                 "name", "N/A"
-            )
+            )[:20]
             status = req.get("status", "N/A")
             result_val = req.get("result", "N/A")
-            score = req.get("score", "N/A") if req.get("is_scored") else "N/A"
-            observation = (req.get("observation") or "")[:50]  # Truncate
 
-            result += f"|{req_id}|{req_ref_id}|{requirement}|{comp_assessment}|{status}|{result_val}|{score}|{observation}|\n"
-
-        result += "\n**Use these IDs with update_requirement_assessment() to update individual requirements.**\n"
+            result += f"|{req_id}|{req_ref_id}|{requirement}|{comp_assessment}|{status}|{result_val}|\n"
 
         return result
     except Exception as e:
@@ -668,8 +901,7 @@ async def get_quantitative_risk_studies():
         if not studies:
             return "No quantitative risk studies found"
 
-        result = "# Quantitative Risk Studies\n\n"
-        result += f"Total: {len(studies)}\n\n"
+        result = f"Found {len(studies)} quantitative risk studies\n\n"
         result += "|ID|Name|Status|Distribution Model|Loss Threshold|Folder|\n"
         result += "|---|---|---|---|---|---|\n"
 
@@ -728,10 +960,9 @@ async def get_quantitative_risk_scenarios(study_id_or_name: str = None):
         if not scenarios:
             return "No quantitative risk scenarios found"
 
-        result = "# Quantitative Risk Scenarios\n\n"
-        result += f"Total: {len(scenarios)}\n\n"
+        result = f"Found {len(scenarios)} quantitative risk scenarios\n\n"
         result += (
-            "|ID|Ref ID|Name|Status|Priority|Current ALE|Residual ALE|Study|Folder|\n"
+            "|ID|Ref|Name|Status|Priority|Current ALE|Residual ALE|Study|Folder|\n"
         )
         result += "|---|---|---|---|---|---|---|---|---|\n"
 
@@ -793,9 +1024,8 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
         if not hypotheses:
             return "No quantitative risk hypotheses found"
 
-        result = "# Quantitative Risk Hypotheses\n\n"
-        result += f"Total: {len(hypotheses)}\n\n"
-        result += "|ID|Ref ID|Name|Risk Stage|Selected|ALE|ROC|Simulation Fresh|Scenario|Folder|\n"
+        result = f"Found {len(hypotheses)} quantitative risk hypotheses\n\n"
+        result += "|ID|Ref|Name|Risk Stage|Selected|ALE|ROC|Fresh|Scenario|Folder|\n"
         result += "|---|---|---|---|---|---|---|---|---|---|\n"
 
         for hyp in hypotheses:

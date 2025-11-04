@@ -61,7 +61,7 @@ async def update_asset(
 
         if res.status_code == 200:
             asset = res.json()
-            return f"✅ Asset updated successfully: {asset.get('name')} (ID: {asset.get('id')})"
+            return f"Updated Asset: {asset.get('name')} (ID: {asset.get('id')})"
         else:
             return f"Error updating asset: {res.status_code} - {res.text}"
     except Exception as e:
@@ -203,7 +203,7 @@ async def update_risk_scenario(
 
         if res.status_code == 200:
             scenario = res.json()
-            return f"✅ Risk scenario updated successfully: {scenario.get('name')} (ID: {scenario.get('id')})"
+            return f"Updated Risk scenario: {scenario.get('name')} (ID: {scenario.get('id')})"
         else:
             return f"Error updating risk scenario: {res.status_code} - {res.text}"
     except Exception as e:
@@ -285,7 +285,7 @@ async def update_applied_control(
 
         if res.status_code == 200:
             control = res.json()
-            return f"✅ Applied control updated successfully: {control.get('name')} (ID: {control.get('id')})"
+            return f"Updated Applied control: {control.get('name')} (ID: {control.get('id')})"
         else:
             return f"Error updating applied control: {res.status_code} - {res.text}"
     except Exception as e:
@@ -350,7 +350,7 @@ async def update_requirement_assessment(
         if res.status_code == 200:
             req_assessment = res.json()
             req_name = req_assessment.get("name", "N/A")
-            return f"✅ Requirement assessment updated successfully: {req_name} (ID: {req_assessment.get('id')})"
+            return f"Updated Requirement assessment: {req_name} (ID: {req_assessment.get('id')})"
         else:
             return (
                 f"Error updating requirement assessment: {res.status_code} - {res.text}"
@@ -488,10 +488,7 @@ async def update_quantitative_risk_study(
 
         if res.status_code == 200:
             study = res.json()
-            message = f"✅ Quantitative risk study updated successfully: {study.get('name')} (ID: {study.get('id')})"
-            if risk_tolerance_updated:
-                message += "\n\nℹ️  Risk tolerance curve will be automatically regenerated with the new points."
-            return message
+            return f"Updated Quantitative risk study: {study.get('name')} (ID: {study.get('id')})"
         else:
             return f"Error updating quantitative risk study: {res.status_code} - {res.text}"
     except Exception as e:
@@ -580,7 +577,7 @@ async def update_quantitative_risk_scenario(
 
         if res.status_code == 200:
             scenario = res.json()
-            return f"✅ Quantitative risk scenario updated successfully: {scenario.get('name')} (ID: {scenario.get('id')})"
+            return f"Updated Quantitative risk scenario: {scenario.get('name')} (ID: {scenario.get('id')})"
         else:
             return f"Error updating quantitative risk scenario: {res.status_code} - {res.text}"
     except Exception as e:
@@ -706,7 +703,7 @@ async def update_quantitative_risk_hypothesis(
 
         if res.status_code == 200:
             hypothesis = res.json()
-            return f"✅ Quantitative risk hypothesis updated successfully: {hypothesis.get('name')} (ID: {hypothesis.get('id')})"
+            return f"Updated Quantitative risk hypothesis: {hypothesis.get('name')} (ID: {hypothesis.get('id')})"
         else:
             return f"Error updating quantitative risk hypothesis: {res.status_code} - {res.text}"
     except Exception as e:
