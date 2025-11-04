@@ -16,12 +16,12 @@ async def create_folder(
     description: str = "",
     parent_folder_id: str = None,
 ) -> str:
-    """Create a new folder (domain) in CISO Assistant
+    """Create folder (domain)
 
     Args:
-        name: Name of the folder
-        description: Optional description of the folder
-        parent_folder_id: Optional parent folder ID or name (can use folder name instead of UUID)
+        name: Folder name
+        description: Optional description
+        parent_folder_id: Optional parent folder ID or name
     """
     try:
         payload = {
@@ -29,7 +29,6 @@ async def create_folder(
             "description": description,
         }
 
-        # Resolve parent folder name to ID if needed
         if parent_folder_id:
             parent_folder_id = resolve_folder_id(parent_folder_id)
             payload["parent_folder"] = parent_folder_id
@@ -38,7 +37,7 @@ async def create_folder(
 
         if res.status_code == 201:
             folder = res.json()
-            return f"✅ Folder created successfully: {folder.get('name')} (ID: {folder.get('id')})"
+            return f"Created folder: {folder.get('name')} (ID: {folder.get('id')})"
         else:
             return f"Error creating folder: {res.status_code} - {res.text}"
     except Exception as e:
@@ -50,18 +49,17 @@ async def create_perimeter(
     description: str = "",
     folder_id: str = None,
 ) -> str:
-    """Create a new perimeter in CISO Assistant
+    """Create perimeter (assessment scope)
 
     Args:
-        name: Name of the perimeter
-        description: Optional description of the perimeter
-        folder_id: Optional folder/domain ID or name where to create the perimeter (can use folder name instead of UUID)
+        name: Perimeter name
+        description: Optional description
+        folder_id: Optional folder ID or name
     """
     try:
         if not folder_id and GLOBAL_FOLDER_ID:
             folder_id = GLOBAL_FOLDER_ID
 
-        # Resolve folder name to ID if needed
         if folder_id:
             folder_id = resolve_folder_id(folder_id)
 
@@ -77,7 +75,7 @@ async def create_perimeter(
 
         if res.status_code == 201:
             perimeter = res.json()
-            return f"✅ Perimeter created successfully: {perimeter.get('name')} (ID: {perimeter.get('id')})"
+            return f"Created perimeter: {perimeter.get('name')} (ID: {perimeter.get('id')})"
         else:
             return f"Error creating perimeter: {res.status_code} - {res.text}"
     except Exception as e:
@@ -120,7 +118,7 @@ async def create_asset(
 
         if res.status_code == 201:
             asset = res.json()
-            return f"✅ Asset created successfully: {asset.get('name')} (ID: {asset.get('id')})"
+            return f"Created asset: {asset.get('name')} (ID: {asset.get('id')})"
         else:
             return f"Error creating asset: {res.status_code} - {res.text}"
     except Exception as e:
@@ -170,7 +168,7 @@ async def create_threat(
 
         if res.status_code == 201:
             threat = res.json()
-            return f"✅ Threat created successfully: {threat.get('name')} (ID: {threat.get('id')})"
+            return f"Created threat: {threat.get('name')} (ID: {threat.get('id')})"
         else:
             return f"Error creating threat: {res.status_code} - {res.text}"
     except Exception as e:
@@ -220,7 +218,7 @@ async def create_applied_control(
 
         if res.status_code == 201:
             control = res.json()
-            return f"✅ Applied control created successfully: {control.get('name')} (ID: {control.get('id')})"
+            return f"Created applied control: {control.get('name')} (ID: {control.get('id')})"
         else:
             return f"Error creating applied control: {res.status_code} - {res.text}"
     except Exception as e:
@@ -277,7 +275,7 @@ async def create_risk_assessment(
 
         if res.status_code == 201:
             assessment = res.json()
-            return f"✅ Risk assessment created successfully: {assessment.get('name')} (ID: {assessment.get('id')})"
+            return f"Created risk assessment: {assessment.get('name')} (ID: {assessment.get('id')})"
         else:
             return f"Error creating risk assessment: {res.status_code} - {res.text}"
     except Exception as e:
@@ -399,7 +397,7 @@ async def create_risk_scenario(
 
         if res.status_code == 201:
             scenario = res.json()
-            message = f"✅ Risk scenario created successfully: {scenario.get('name')} (ID: {scenario.get('id')})"
+            message = f"Created Risk scenario: {scenario.get('name')} (ID: {scenario.get('id')})"
             if assets:
                 message += f"\n   Linked to {len(assets)} asset(s)"
             if threats:
@@ -467,7 +465,7 @@ async def create_business_impact_analysis(
 
         if res.status_code == 201:
             bia = res.json()
-            return f"✅ Business Impact Analysis created successfully: {bia.get('name')} (ID: {bia.get('id')})"
+            return f"Created Business Impact Analysis: {bia.get('name')} (ID: {bia.get('id')})"
         else:
             return f"Error creating Business Impact Analysis: {res.status_code} - {res.text}"
     except Exception as e:
@@ -524,7 +522,7 @@ async def create_compliance_assessment(
 
         if res.status_code == 201:
             assessment = res.json()
-            return f"✅ Compliance assessment created successfully: {assessment.get('name')} (ID: {assessment.get('id')})"
+            return f"Created Compliance assessment: {assessment.get('name')} (ID: {assessment.get('id')})"
         else:
             return (
                 f"Error creating compliance assessment: {res.status_code} - {res.text}"
@@ -631,7 +629,7 @@ async def create_quantitative_risk_study(
 
         if res.status_code == 201:
             study = res.json()
-            return f"✅ Quantitative risk study created successfully: {study.get('name')} (ID: {study.get('id')})"
+            return f"Created Quantitative risk study: {study.get('name')} (ID: {study.get('id')})"
         else:
             return f"Error creating quantitative risk study: {res.status_code} - {res.text}"
     except Exception as e:
@@ -723,7 +721,7 @@ async def create_quantitative_risk_scenario(
 
         if res.status_code == 201:
             scenario = res.json()
-            message = f"✅ Quantitative risk scenario created successfully: {scenario.get('name')} (ID: {scenario.get('id')})"
+            message = f"Created Quantitative risk scenario: {scenario.get('name')} (ID: {scenario.get('id')})"
             if assets:
                 message += f"\n   Linked to {len(assets)} asset(s)"
             if threats:
@@ -824,7 +822,7 @@ async def create_quantitative_risk_hypothesis(
 
         if res.status_code == 201:
             hypothesis = res.json()
-            message = f"✅ Quantitative risk hypothesis created successfully: {hypothesis.get('name')} (ID: {hypothesis.get('id')})"
+            message = f"Created Quantitative risk hypothesis: {hypothesis.get('name')} (ID: {hypothesis.get('id')})"
             if existing_applied_controls:
                 message += f"\n   Linked to {len(existing_applied_controls)} existing control(s)"
             if added_applied_controls:
@@ -879,25 +877,12 @@ async def refresh_quantitative_risk_study_simulations(study_id: str) -> str:
             )
             failed_sims = sim_results.get("failed_simulations", [])
 
-            # Build response message
-            response = f"✅ Simulation refresh completed for study {study_id}\n\n"
-            response += f"**Summary:**\n"
-            response += f"- Hypothesis simulations: {successful_count} successful"
-
+            response = f"Simulation refresh completed for study {study_id}\n"
+            response += f"Hypothesis simulations: {successful_count} successful"
             if failed_sims:
                 response += f", {len(failed_sims)} failed"
-
-            response += f"\n- Portfolio simulation: {'✓' if sim_results.get('portfolio_generated') else '✗'}\n"
-            response += f"- Risk tolerance curve: {'✓' if sim_results.get('risk_tolerance_generated') else '✗'}\n"
-
-            if failed_sims:
-                response += f"\n**Failed simulations:**\n"
-                for fail in failed_sims[:5]:  # Show first 5 failures
-                    scenario = fail.get("scenario", "Unknown")
-                    hypothesis = fail.get("hypothesis", "Unknown")
-                    reason = fail.get("reason", "Unknown error")
-                    response += f"- {scenario} / {hypothesis}: {reason}\n"
-
+            response += f"\nPortfolio: {'yes' if sim_results.get('portfolio_generated') else 'no'}"
+            response += f"\nRisk tolerance: {'yes' if sim_results.get('risk_tolerance_generated') else 'no'}"
             return response
         else:
             return f"Error refreshing simulations: {res.status_code} - {res.text}"
