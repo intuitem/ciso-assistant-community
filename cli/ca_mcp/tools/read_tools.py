@@ -40,28 +40,23 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
         if not scenarios:
             return "No risk scenarios found"
 
-        result = "# Risk Scenarios\n\n"
+        result = f"Found {len(scenarios)} risk scenarios"
         if folder:
-            result += f"**Folder Filter:** {folder}\n"
+            result += f" (folder: {folder})"
         if risk_assessment:
-            result += f"**Risk Assessment Filter:** {risk_assessment}\n"
-        if folder or risk_assessment:
-            result += "\n"
-
-        result += "|Ref ID|Name|Description|Current Level|Residual Level|Domain|\n"
-        result += "|---|---|---|---|---|---|\n"
+            result += f" (assessment: {risk_assessment})"
+        result += "\n\n"
+        result += "|Ref|Name|Current|Residual|Domain|\n"
+        result += "|---|---|---|---|---|\n"
 
         for rs in scenarios:
             ref_id = rs.get("ref_id") or "N/A"
             name = rs.get("name", "N/A")
-            description = (rs.get("description") or "")[
-                :50
-            ]  # Truncate long descriptions
             current_level = rs.get("current_level", "N/A")
             residual_level = rs.get("residual_level", "N/A")
             domain = (rs.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{ref_id}|{name}|{description}|{current_level}|{residual_level}|{domain}|\n"
+            result += f"|{ref_id}|{name}|{current_level}|{residual_level}|{domain}|\n"
 
         return result
     except Exception as e:
@@ -96,24 +91,21 @@ async def get_applied_controls(folder: str = None):
         if not controls:
             return "No applied controls found"
 
-        result = "# Applied Controls\n\n"
+        result = f"Found {len(controls)} applied controls"
         if folder:
-            result += f"**Folder Filter:** {folder}\n\n"
-
-        result += "|Ref ID|Name|Description|Status|ETA|Domain|\n"
-        result += "|---|---|---|---|---|---|\n"
+            result += f" (folder: {folder})"
+        result += "\n\n"
+        result += "|Ref|Name|Status|ETA|Domain|\n"
+        result += "|---|---|---|---|---|\n"
 
         for item in controls:
             ref_id = item.get("ref_id") or "N/A"
             name = item.get("name", "N/A")
-            description = (item.get("description") or "")[
-                :50
-            ]  # Truncate long descriptions
             status = item.get("status", "N/A")
             eta = item.get("eta") or "N/A"
             domain = (item.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{ref_id}|{name}|{description}|{status}|{eta}|{domain}|\n"
+            result += f"|{ref_id}|{name}|{status}|{eta}|{domain}|\n"
 
         return result
     except Exception as e:
@@ -153,14 +145,12 @@ async def get_audits_progress(folder: str = None, perimeter: str = None):
         if not audits:
             return "No audits found"
 
-        result = "# Audits Progress\n\n"
+        result = f"Found {len(audits)} audits"
         if folder:
-            result += f"**Folder Filter:** {folder}\n"
+            result += f" (folder: {folder})"
         if perimeter:
-            result += f"**Perimeter Filter:** {perimeter}\n"
-        if folder or perimeter:
-            result += "\n"
-
+            result += f" (perimeter: {perimeter})"
+        result += "\n\n"
         result += "|Name|Framework|Status|Progress|Domain|\n"
         result += "|---|---|---|---|---|\n"
 
@@ -178,12 +168,22 @@ async def get_audits_progress(folder: str = None, perimeter: str = None):
         return f"Error in get_audits_progress: {str(e)}"
 
 
-async def get_folders():
-    """Get all folders (domains) in CISO Assistant
-    Returns a list of folders with their IDs and names for reference when creating objects
+async def get_folders(name: str = None):
+    """Get folders (domains) in CISO Assistant
+
+    Args:
+        name: Optional name filter
+
+    Folders (aka domains) are organizational units containing perimeters, assets, and risk assessments.
     """
     try:
-        res = make_get_request("/folders/")
+        params = {}
+
+        # Add name filter if specified
+        if name:
+            params["name"] = name
+
+        res = make_get_request("/folders/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -192,35 +192,38 @@ async def get_folders():
         folders = get_paginated_results(data)
 
         if not folders:
+            if name:
+                return f"No folders found matching '{name}'"
             return "No folders found"
 
-        result = "# Folders (Domains)\n\n"
-        result += "|ID|Name|Description|Parent Folder|\n"
-        result += "|---|---|---|---|\n"
+        result = f"Found {len(folders)} folders"
+        if name:
+            result += f" (name: {name})"
+        result += "\n\n"
+        result += "|ID|Name|Parent|\n"
+        result += "|---|---|---|\n"
 
         for folder in folders:
             folder_id = folder.get("id", "N/A")
-            name = folder.get("name", "N/A")
-            description = (folder.get("description") or "")[
-                :50
-            ]  # Truncate long descriptions
+            folder_name = folder.get("name", "N/A")
             parent = folder.get("parent_folder") or {}
             parent_name = parent.get("str", "Root") if parent else "Root"
 
-            result += f"|{folder_id}|{name}|{description}|{parent_name}|\n"
+            result += f"|{folder_id}|{folder_name}|{parent_name}|\n"
 
         return result
     except Exception as e:
         return f"Error in get_folders: {str(e)}"
 
 
-async def get_perimeters(folder: str = None):
-    """Get all perimeters in CISO Assistant
+async def get_perimeters(folder: str = None, name: str = None):
+    """Get perimeters in CISO Assistant
 
     Args:
-        folder: Optional folder ID or name to filter by (domain/folder to filter perimeters)
+        folder: Optional folder ID or name filter
+        name: Optional name filter
 
-    Returns a list of perimeters with their IDs and names for reference when creating assessments
+    Perimeters define the scope of risk assessments and audits within folders.
     """
     try:
         from ..resolvers import resolve_folder_id
@@ -230,6 +233,10 @@ async def get_perimeters(folder: str = None):
         # Add folder filter if specified - resolve name to ID if needed
         if folder:
             params["folder"] = resolve_folder_id(folder)
+
+        # Add name filter if specified
+        if name:
+            params["name"] = name
 
         res = make_get_request("/perimeters/", params=params)
 
@@ -242,19 +249,21 @@ async def get_perimeters(folder: str = None):
         if not perimeters:
             return "No perimeters found"
 
-        result = "# Perimeters\n\n"
+        result = f"Found {len(perimeters)} perimeters"
         if folder:
-            result += f"**Folder Filter:** {folder}\n\n"
-        result += "|ID|Name|Description|Folder|\n"
-        result += "|---|---|---|---|\n"
+            result += f" (folder: {folder})"
+        if name:
+            result += f" (name: {name})"
+        result += "\n\n"
+        result += "|ID|Name|Folder|\n"
+        result += "|---|---|---|\n"
 
         for perimeter in perimeters:
             perimeter_id = perimeter.get("id", "N/A")
-            name = perimeter.get("name", "N/A")
-            description = (perimeter.get("description") or "")[:50]
+            perimeter_name = perimeter.get("name", "N/A")
             folder_name = (perimeter.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{perimeter_id}|{name}|{description}|{folder_name}|\n"
+            result += f"|{perimeter_id}|{perimeter_name}|{folder_name}|\n"
 
         return result
     except Exception as e:
@@ -289,19 +298,19 @@ async def get_risk_matrices(folder: str = None):
         if not matrices:
             return "No risk matrices found"
 
-        result = "# Risk Matrices\n\n"
+        result = f"Found {len(matrices)} risk matrices"
         if folder:
-            result += f"**Folder Filter:** {folder}\n\n"
-        result += "|ID|Name|Description|Folder|\n"
-        result += "|---|---|---|---|\n"
+            result += f" (folder: {folder})"
+        result += "\n\n"
+        result += "|ID|Name|Folder|\n"
+        result += "|---|---|---|\n"
 
         for matrix in matrices:
             matrix_id = matrix.get("id", "N/A")
             name = matrix.get("name", "N/A")
-            description = (matrix.get("description") or "")[:50]
             folder = (matrix.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{matrix_id}|{name}|{description}|{folder}|\n"
+            result += f"|{matrix_id}|{name}|{folder}|\n"
 
         return result
     except Exception as e:
@@ -461,13 +470,12 @@ async def get_risk_assessments(folder: str = None, perimeter: str = None):
         if not assessments:
             return "No risk assessments found"
 
-        result = "# Risk Assessments\n\n"
+        result = f"Found {len(assessments)} risk assessments"
         if folder:
-            result += f"**Folder Filter:** {folder}\n"
+            result += f" (folder: {folder})"
         if perimeter:
-            result += f"**Perimeter Filter:** {perimeter}\n"
-        if folder or perimeter:
-            result += "\n"
+            result += f" (perimeter: {perimeter})"
+        result += "\n\n"
         result += "|ID|Name|Status|Risk Matrix|Folder|\n"
         result += "|---|---|---|---|---|\n"
 
@@ -531,33 +539,24 @@ async def get_threats(
         if limit > 0:
             threats = threats[:limit]
 
-        result = "# Threats\n\n"
+        result = f"Found {len(threats)} of {total_count} threats"
         if provider:
-            result += f"**Provider Filter:** {provider}\n"
+            result += f" (provider: {provider})"
         if folder:
-            result += f"**Folder Filter:** {folder}\n"
+            result += f" (folder: {folder})"
         if library:
-            result += f"**Library Filter:** {library}\n"
-        result += f"**Showing:** {len(threats)} of {total_count} total threats"
-        if limit > 0 and total_count > limit:
-            result += f" (limited to {limit})"
+            result += f" (library: {library})"
         result += "\n\n"
-        result += "|ID|Name|Provider|Description|Folder|\n"
-        result += "|---|---|---|---|---|\n"
+        result += "|ID|Name|Provider|Folder|\n"
+        result += "|---|---|---|---|\n"
 
         for threat in threats:
             threat_id = threat.get("id", "N/A")
             name = threat.get("name", "N/A")
             provider_name = threat.get("provider", "N/A")
-            description = (threat.get("description") or "")[
-                :100
-            ]  # Truncate long descriptions
             folder = (threat.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{threat_id}|{name}|{provider_name}|{description}|{folder}|\n"
-
-        if limit > 0 and total_count > limit:
-            result += f"\n**Note:** Only showing first {limit} threats. Use `limit=0` to see all {total_count} threats or filter by `provider` to narrow results.\n"
+            result += f"|{threat_id}|{name}|{provider_name}|{folder}|\n"
 
         return result
     except Exception as e:
@@ -592,9 +591,10 @@ async def get_assets(folder: str = None):
         if not assets:
             return "No assets found"
 
-        result = "# Assets\n\n"
+        result = f"Found {len(assets)} assets"
         if folder:
-            result += f"**Folder Filter:** {folder}\n\n"
+            result += f" (folder: {folder})"
+        result += "\n\n"
         result += "|ID|Name|Type|Business Value|Folder|\n"
         result += "|---|---|---|---|---|\n"
 
@@ -642,9 +642,10 @@ async def get_incidents(folder: str = None):
         if not incidents:
             return "No incidents found"
 
-        result = "# Incidents\n\n"
+        result = f"Found {len(incidents)} incidents"
         if folder:
-            result += f"**Folder Filter:** {folder}\n\n"
+            result += f" (folder: {folder})"
+        result += "\n\n"
         result += "|ID|Name|Severity|Status|Folder|\n"
         result += "|---|---|---|---|---|\n"
 
@@ -690,9 +691,10 @@ async def get_security_exceptions(folder: str = None):
         if not exceptions:
             return "No security exceptions found"
 
-        result = "# Security Exceptions\n\n"
+        result = f"Found {len(exceptions)} security exceptions"
         if folder:
-            result += f"**Folder Filter:** {folder}\n\n"
+            result += f" (folder: {folder})"
+        result += "\n\n"
         result += "|ID|Name|State|Expiry Date|Folder|\n"
         result += "|---|---|---|---|---|\n"
 
@@ -739,24 +741,21 @@ async def get_frameworks(folder: str = None):
         if not frameworks:
             return "No frameworks found"
 
-        result = "# Frameworks\n\n"
+        result = f"Found {len(frameworks)} frameworks"
         if folder:
-            result += f"**Folder Filter:** {folder}\n"
-        result += f"Total: {len(frameworks)}\n\n"
-        result += "|ID|URN|Name|Description|Provider|Folder|\n"
-        result += "|---|---|---|---|---|---|\n"
+            result += f" (folder: {folder})"
+        result += "\n\n"
+        result += "|ID|URN|Name|Provider|Folder|\n"
+        result += "|---|---|---|---|---|\n"
 
         for framework in frameworks:
             framework_id = framework.get("id", "N/A")
             urn = framework.get("urn", "N/A")
             name = framework.get("name", "N/A")
-            description = framework.get("description") or ""
             provider = framework.get("provider", "N/A")
             folder = (framework.get("folder") or {}).get("str", "N/A")
 
-            result += (
-                f"|{framework_id}|{urn}|{name}|{description}|{provider}|{folder}|\n"
-            )
+            result += f"|{framework_id}|{urn}|{name}|{provider}|{folder}|\n"
 
         return result
     except Exception as e:
@@ -792,10 +791,10 @@ async def get_business_impact_analyses(folder: str = None):
         if not bias:
             return "No Business Impact Analyses found"
 
-        result = "# Business Impact Analyses\n\n"
+        result = f"Found {len(bias)} Business Impact Analyses"
         if folder:
-            result += f"**Folder Filter:** {folder}\n"
-        result += f"Total: {len(bias)}\n\n"
+            result += f" (folder: {folder})"
+        result += "\n\n"
         result += "|ID|Name|Status|Version|Risk Matrix|Perimeter|Folder|\n"
         result += "|---|---|---|---|---|---|---|\n"
 
@@ -870,26 +869,21 @@ async def get_requirement_assessments(
         if not req_assessments:
             return "No requirement assessments found"
 
-        result = "# Requirement Assessments\n\n"
-        result += f"Total: {len(req_assessments)}\n\n"
-        result += "|ID|Ref ID|Requirement|Compliance Assessment|Status|Result|Score|Observation|\n"
-        result += "|---|---|---|---|---|---|---|---|\n"
+        result = f"Found {len(req_assessments)} requirement assessments\n\n"
+        result += "|ID|Ref|Requirement|Assessment|Status|Result|\n"
+        result += "|---|---|---|---|---|---|\n"
 
         for req in req_assessments:
             req_id = req.get("id", "N/A")
             req_ref_id = req.get("ref_id", "N/A")
-            requirement = req.get("name", "N/A")
+            requirement = req.get("name", "N/A")[:30]  # Truncate
             comp_assessment = (req.get("compliance_assessment") or {}).get(
                 "name", "N/A"
-            )
+            )[:20]
             status = req.get("status", "N/A")
             result_val = req.get("result", "N/A")
-            score = req.get("score", "N/A") if req.get("is_scored") else "N/A"
-            observation = (req.get("observation") or "")[:50]  # Truncate
 
-            result += f"|{req_id}|{req_ref_id}|{requirement}|{comp_assessment}|{status}|{result_val}|{score}|{observation}|\n"
-
-        result += "\n**Use these IDs with update_requirement_assessment() to update individual requirements.**\n"
+            result += f"|{req_id}|{req_ref_id}|{requirement}|{comp_assessment}|{status}|{result_val}|\n"
 
         return result
     except Exception as e:
@@ -912,8 +906,7 @@ async def get_quantitative_risk_studies():
         if not studies:
             return "No quantitative risk studies found"
 
-        result = "# Quantitative Risk Studies\n\n"
-        result += f"Total: {len(studies)}\n\n"
+        result = f"Found {len(studies)} quantitative risk studies\n\n"
         result += "|ID|Name|Status|Distribution Model|Loss Threshold|Folder|\n"
         result += "|---|---|---|---|---|---|\n"
 
@@ -972,10 +965,9 @@ async def get_quantitative_risk_scenarios(study_id_or_name: str = None):
         if not scenarios:
             return "No quantitative risk scenarios found"
 
-        result = "# Quantitative Risk Scenarios\n\n"
-        result += f"Total: {len(scenarios)}\n\n"
+        result = f"Found {len(scenarios)} quantitative risk scenarios\n\n"
         result += (
-            "|ID|Ref ID|Name|Status|Priority|Current ALE|Residual ALE|Study|Folder|\n"
+            "|ID|Ref|Name|Status|Priority|Current ALE|Residual ALE|Study|Folder|\n"
         )
         result += "|---|---|---|---|---|---|---|---|---|\n"
 
@@ -1037,9 +1029,8 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
         if not hypotheses:
             return "No quantitative risk hypotheses found"
 
-        result = "# Quantitative Risk Hypotheses\n\n"
-        result += f"Total: {len(hypotheses)}\n\n"
-        result += "|ID|Ref ID|Name|Risk Stage|Selected|ALE|ROC|Simulation Fresh|Scenario|Folder|\n"
+        result = f"Found {len(hypotheses)} quantitative risk hypotheses\n\n"
+        result += "|ID|Ref|Name|Risk Stage|Selected|ALE|ROC|Fresh|Scenario|Folder|\n"
         result += "|---|---|---|---|---|---|---|---|---|---|\n"
 
         for hyp in hypotheses:
