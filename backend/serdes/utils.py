@@ -401,7 +401,7 @@ def get_domain_export_objects(domain: Folder):
 
     risk_matrices = RiskMatrix.objects.filter(
         Q(folder__in=folders)
-        | Q(riskassessment__in=risk_assessments)
+        | Q(risk_assessments__in=risk_assessments)
         | Q(ebios_rm_studies__in=ebios_rm_studies)
     ).distinct()
 
