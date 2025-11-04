@@ -243,6 +243,10 @@ class StoredLibrary(LibraryMixin):
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
     content = models.JSONField()
+    autoload = models.BooleanField(
+        default=False,
+        help_text="If set to true, the library will be automatically loaded on migrate.",
+    )
 
     REQUIRED_FIELDS = {"urn", "name", "version", "objects"}
     FIELDS_VERIFIERS = {}
@@ -340,6 +344,12 @@ class StoredLibrary(LibraryMixin):
             builtin=builtin,
             hash_checksum=hash_checksum,
             content=library_objects,
+            autoload=bool(
+                library_objects.get(
+                    "requirement_mapping_set",
+                    library_objects.get("requirement_mapping_sets"),
+                )
+            ),
         )
 
     @classmethod
