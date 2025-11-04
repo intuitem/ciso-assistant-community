@@ -4,15 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0111_finding_priority'),
+        ("core", "0111_finding_priority"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='storedlibrary',
-            name='autoload',
-            field=models.BooleanField(default=False, help_text='If set to true, the library will be automatically loaded on migrate.'),
+            model_name="storedlibrary",
+            name="autoload",
+            field=models.BooleanField(
+                default=False,
+                help_text="If set to true, the library will be automatically loaded on migrate.",
+            ),
         ),
     ]
