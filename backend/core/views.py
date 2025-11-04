@@ -580,7 +580,13 @@ class ThreatViewSet(BaseModelViewSet):
     """
 
     model = Threat
-    filterset_fields = ["folder", "provider", "risk_scenarios", "filtering_labels"]
+    filterset_fields = [
+        "folder",
+        "provider",
+        "library",
+        "risk_scenarios",
+        "filtering_labels",
+    ]
     search_fields = ["name", "provider", "description"]
 
     def get_queryset(self):
