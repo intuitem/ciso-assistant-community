@@ -1,5 +1,4 @@
 import signal
-from pathlib import Path
 
 import structlog
 from django.core.management.base import BaseCommand
