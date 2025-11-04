@@ -12,6 +12,6 @@
 
 <div class="bg-white shadow-sm flex overflow-x-auto">
 	<div class="w-full h-screen">
-		<GraphExplorer title="Mapping Explorer" data={data.data} />
+		<GraphExplorer title="Mapping Explorer" data={data.data} showNodeLabels />
 	</div>
 </div>

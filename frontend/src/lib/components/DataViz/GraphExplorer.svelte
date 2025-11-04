@@ -20,6 +20,7 @@
 		zoom?: number;
 		color?: any;
 		maxLegendItems?: number; // New prop to control legend items
+		showNodeLabels?: boolean;
 		legendPosition?: 'top' | 'bottom' | 'left' | 'right'; // New prop for legend position
 	}
 
@@ -46,6 +47,7 @@
 			'#ea7ccc'
 		],
 		maxLegendItems = 20, // Default max legend items
+		showNodeLabels = false,
 		legendPosition = 'left' // Default legend position
 	}: Props = $props();
 
@@ -233,7 +235,7 @@
 					label: {
 						position: 'right',
 						formatter: '{b}',
-						show: false
+						show: showNodeLabels
 					},
 					draggable: true,
 					roam: true,
