@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List
+from typing import Self, Union, List, Optional
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -3787,6 +3787,35 @@ class AppliedControl(
                 "Triggering sync for AppliedControl", applied_control_id=self.pk
             )
             self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
+
+    @property
+    def stringified_cost(self) -> Optional[str]:
+        if self.cost is None:
+            return None
+
+        build_cost = self.cost["build"]["fixed_cost"]
+        if build_cost == 0:
+            return None
+
+        currency = self.cost["currency"]
+        match currency:
+            case "$":
+                return f"${build_cost}"
+            case "€":
+                return f"{build_cost}€"
+            case "£":
+                return f"£{build_cost}"
+            case "A$":
+                return f"A${build_cost}"
+            case "NZ$":
+                return f"NZ${build_cost}"
+            case "C$":
+                return f"C${build_cost}"
+            case "¥":
+                return f"¥{build_cost}"
+
+        logger.error("Unknown currency detected", currency=currency)
+        return f"{build_cost} *"
 
     def _get_changed_fields(self, old_instance):
         """Detect which fields changed"""
