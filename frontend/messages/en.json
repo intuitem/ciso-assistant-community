@@ -2574,5 +2574,21 @@
 	"webhookEndpointUrl": "Webhook Endpoint URL",
 	"webhookEndpointUrlHelpText": "The URL where the application will receive incoming webhooks from the third-party service.",
 	"createRemoteObject": "Create remote object",
-	"createRemoteObjectHelpText": "When enabled, a corresponding object will be created in the third-party service when this item is created."
+	"createRemoteObjectHelpText": "When enabled, a corresponding object will be created in the third-party service when this item is created.",
+	"metricDefinition": "Metric definition",
+	"metricDefinitions": "Metric definitions",
+	"addMetricDefinition": "Add metric definition",
+	"metricInstance": "Metric instance",
+	"metricInstances": "Metric instances",
+	"addMetricInstance": "Add metric instance",
+	"metricSample": "Metric sample",
+	"metricSamples": "Metric samples",
+	"associatedMetricSamples": "Associated metric samples",
+	"addMetricSample": "Add metric sample",
+	"collectionFrequency": "Collection frequency",
+	"targetValue": "Target value",
+	"minValue": "Minimum value",
+	"maxValue": "Maximum value",
+	"unit": "Unit",
+	"choicesDefinition": "Choices definition"
 }

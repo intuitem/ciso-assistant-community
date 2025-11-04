@@ -1832,6 +1832,57 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'checklist' },
 			{ field: 'filtering_labels' }
 		]
+	},
+	'metric-definitions': {
+		name: 'metricdefinition',
+		localName: 'metricDefinition',
+		localNamePlural: 'metricDefinitions',
+		verboseName: 'Metric definition',
+		verboseNamePlural: 'Metric definitions',
+		endpointUrl: 'metrology/metric-definitions',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'libraries' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		selectFields: [{ field: 'category' }],
+		filters: [{ field: 'folder' }, { field: 'category' }, { field: 'library' }, { field: 'provider' }]
+	},
+	'metric-instances': {
+		name: 'metricinstance',
+		localName: 'metricInstance',
+		localNamePlural: 'metricInstances',
+		verboseName: 'Metric instance',
+		verboseNamePlural: 'Metric instances',
+		endpointUrl: 'metrology/metric-instances',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'metric_definition', urlModel: 'metric-definitions' },
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		selectFields: [{ field: 'status' }, { field: 'collection_frequency' }],
+		reverseForeignKeyFields: [{ field: 'metric_instance', urlModel: 'metric-samples' }],
+		filters: [
+			{ field: 'folder' },
+			{ field: 'metric_definition' },
+			{ field: 'status' },
+			{ field: 'collection_frequency' },
+			{ field: 'owner' }
+		]
+	},
+	'metric-samples': {
+		name: 'metricsample',
+		localName: 'metricSample',
+		localNamePlural: 'metricSamples',
+		verboseName: 'Metric sample',
+		verboseNamePlural: 'Metric samples',
+		endpointUrl: 'metrology/metric-samples',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'metric_instance', urlModel: 'metric-instances' }
+		],
+		filters: [{ field: 'folder' }, { field: 'metric_instance' }]
 	}
 };
 

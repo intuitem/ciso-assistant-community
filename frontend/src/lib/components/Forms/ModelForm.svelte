@@ -68,6 +68,9 @@
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 	import GenericCollectionForm from './ModelForm/GenericCollectionForm.svelte';
 	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
+	import MetricDefinitionForm from './ModelForm/MetricDefinitionForm.svelte';
+	import MetricInstanceForm from './ModelForm/MetricInstanceForm.svelte';
+	import MetricSampleForm from './ModelForm/MetricSampleForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -752,6 +755,12 @@
 			/>
 		{:else if URLModel === 'accreditations'}
 			<AccreditationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'metric-definitions'}
+			<MetricDefinitionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {data} {...rest} />
+		{:else if URLModel === 'metric-instances'}
+			<MetricInstanceForm {form} {model} {cacheLocks} {formDataCache} {initialData} {data} {...rest} />
+		{:else if URLModel === 'metric-samples'}
+			<MetricSampleForm {form} {model} {cacheLocks} {formDataCache} {initialData} {data} {object} {...rest} />
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

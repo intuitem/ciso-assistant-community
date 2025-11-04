@@ -98,6 +98,12 @@ export const navData = {
 					name: 'riskMatrices',
 					fa_icon: 'fa-solid fa-table-cells-large',
 					href: '/risk-matrices'
+				},
+				{
+					name: 'metricDefinitions',
+					fa_icon: 'fa-solid fa-ruler',
+					href: '/metric-definitions',
+					permissions: ['view_metricdefinition']
 				}
 			]
 		},
@@ -194,6 +200,12 @@ export const navData = {
 					name: 'followUp',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/findings-assessments'
+				},
+				{
+					name: 'metricInstances',
+					fa_icon: 'fa-solid fa-chart-line',
+					href: '/metric-instances',
+					permissions: ['view_metricinstance']
 				}
 			]
 		},

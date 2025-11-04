@@ -49,13 +49,12 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         verbose_name=_("Maximum value"),
         help_text=_("Maximum acceptable value for this metric"),
     )
-    options_definition = models.JSONField(
+    choices_definition = models.JSONField(
         blank=True,
         null=True,
-        verbose_name=_("Options definition"),
         help_text=_(
             "For qualitative metrics: ordered list of options with translations. "
-            "Format: [{'value': 0, 'name': 'Low', 'description': '', 'translations': {'fr': {'name': 'Faible'}}}]"
+            "Format: [{'name': 'Low', 'description': '', 'translations': {'fr': {'name': 'Faible', 'description': ''}}}]"
         ),
     )
     is_published = models.BooleanField(default=True, verbose_name=_("Published"))

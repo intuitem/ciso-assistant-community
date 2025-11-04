@@ -2036,6 +2036,99 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
+	'metric-definitions': {
+		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'folder'],
+		body: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			category: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/metric-definitions/category',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'category',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			library: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'loaded-libraries',
+					label: 'library',
+					multiple: true
+				}
+			},
+			provider: {
+				...PROVIDER_FILTER,
+				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'metrology/metric-definitions/provider' }
+			},
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'metric-instances': {
+		head: ['ref_id', 'name', 'metric_definition', 'status', 'collection_frequency', 'target_value', 'folder'],
+		body: ['ref_id', 'name', 'metric_definition', 'status', 'collection_frequency', 'target_value', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			metric_definition: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/metric-definitions',
+					label: 'metricDefinition',
+					multiple: true
+				}
+			},
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/metric-instances/status',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'status',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			collection_frequency: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/metric-instances/collection_frequency',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'collectionFrequency',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			owner: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'users',
+					optionsLabelField: 'email',
+					label: 'owner',
+					multiple: true
+				}
+			},
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'metric-samples': {
+		head: ['metric_instance', 'timestamp', 'value'],
+		body: ['metric_instance', 'timestamp', 'value'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			metric_instance: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/metric-instances',
+					label: 'metricInstance',
+					multiple: true
+				}
+			}
+		}
+	},
 	extra: {
 		filters: {
 			risk: undefined,
