@@ -104,7 +104,7 @@ export const SECURITY_OBJECTIVE_SCALE_MAP = {
 	'FIPS-199': ['low', 'moderate', 'moderate', 'high', 'high']
 };
 
-export const storedLibrariesObjectTypes = [
+export const excludeMappingsObjectTypes = [
 	'risk_matrix',
 	'risk_matrices',
 	'threats',
@@ -113,7 +113,7 @@ export const storedLibrariesObjectTypes = [
 	'frameworks'
 ];
 
-export const storedLibrariesObjectTypesUrlParams = new URLSearchParams();
-storedLibrariesObjectTypes.forEach((type) => {
-	storedLibrariesObjectTypesUrlParams.append('object_type', type);
+export const excludeMappingsUrlParams = new URLSearchParams();
+excludeMappingsObjectTypes.forEach((type) => {
+	excludeMappingsUrlParams.append('object_type', type);
 });

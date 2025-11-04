@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { storedLibrariesObjectTypesUrlParams } from '$lib/utils/constants';
+	import { excludeMappingsUrlParams } from '$lib/utils/constants';
 	import { LibraryUploadSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
 
@@ -79,7 +79,7 @@
 				<ModelTable
 					source={data.storedLibrariesTable}
 					URLModel="stored-libraries"
-					baseEndpoint="stored-libraries?{storedLibrariesObjectTypesUrlParams}"
+					baseEndpoint="stored-libraries?{excludeMappingsUrlParams}"
 					deleteForm={data.deleteForm}
 					server={false}
 				/>
@@ -88,6 +88,7 @@
 				<ModelTable
 					source={data.loadedLibrariesTable}
 					URLModel="loaded-libraries"
+					baseEndpoint="loaded-libraries?{excludeMappingsUrlParams}"
 					deleteForm={data.deleteForm}
 					detailQueryParameter="loaded"
 					server={false}

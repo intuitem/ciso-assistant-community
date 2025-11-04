@@ -1,4 +1,4 @@
-import { BASE_API_URL, storedLibrariesObjectTypesUrlParams } from '$lib/utils/constants';
+import { BASE_API_URL, excludeMappingsUrlParams } from '$lib/utils/constants';
 
 import { nestedDeleteFormAction } from '$lib/utils/actions';
 import { safeTranslate } from '$lib/utils/i18n';
@@ -14,9 +14,9 @@ import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
 	const baseStoredLibrariesEndpoint = `${BASE_API_URL}/stored-libraries/`;
-	const storedLibrariesEndpoint = `${baseStoredLibrariesEndpoint}?${storedLibrariesObjectTypesUrlParams}`;
+	const storedLibrariesEndpoint = `${baseStoredLibrariesEndpoint}?${excludeMappingsUrlParams}`;
 	const mappingLibrariesEndpoint = `${baseStoredLibrariesEndpoint}?object_type=requirement_mapping_sets&object_type=requirement_mapping_set`;
-	const loadedLibrariesEndpoint = `${BASE_API_URL}/loaded-libraries/`;
+	const loadedLibrariesEndpoint = `${BASE_API_URL}/loaded-libraries/?${excludeMappingsUrlParams}`;
 	const updatableLibrariesEndpoint = `${loadedLibrariesEndpoint}available-updates/`;
 	const mappingSuggestedEndpoint = `${baseStoredLibrariesEndpoint}?mapping_suggested=true`;
 
