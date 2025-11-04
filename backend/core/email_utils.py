@@ -148,6 +148,35 @@ def format_assessment_list(assessments) -> str:
     return "\n".join(assessment_lines)
 
 
+def format_evidence_list(evidences) -> str:
+    """
+    Format a list of evidences for email templates
+
+    Args:
+        evidences: List of Evidence objects
+
+    Returns:
+        Formatted string with evidence information
+    """
+    evidence_lines = []
+    for evidence in evidences:
+        expiry_date = (
+            evidence.expiry_date.strftime("%Y-%m-%d")
+            if evidence.expiry_date
+            else "Not set"
+        )
+        status = (
+            evidence.get_status_display()
+            if hasattr(evidence, "get_status_display")
+            else evidence.status
+        )
+        evidence_lines.append(
+            f"- {evidence.name} (Status: {status}, Expiry: {expiry_date})"
+        )
+
+    return "\n".join(evidence_lines)
+
+
 def get_default_context() -> Dict[str, str]:
     """
     Get default context variables for email templates

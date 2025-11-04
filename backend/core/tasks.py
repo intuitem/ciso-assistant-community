@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
-from core.models import AppliedControl, ComplianceAssessment
+from core.models import AppliedControl, ComplianceAssessment, Evidence
 from tprm.models import EntityAssessment
 from iam.models import User
 from django.core.mail import send_mail
@@ -138,6 +138,54 @@ def check_applied_controls_expiring_tomorrow():
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
         send_applied_control_expiring_soon_notification(owner_email, controls, days=1)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="30"))
+def check_evidences_expiring_in_week():
+    """Check for Evidences expiring in 7 days"""
+    target_date = date.today() + timedelta(days=7)
+    evidences_expiring_soon = (
+        Evidence.objects.filter(expiry_date=target_date)
+        .exclude(status__in=["expired"])
+        .prefetch_related("owner")
+    )
+
+    # Group by individual owner
+    owner_evidences = {}
+    for evidence in evidences_expiring_soon:
+        for owner in evidence.owner.all():
+            if owner.email not in owner_evidences:
+                owner_evidences[owner.email] = []
+            owner_evidences[owner.email].append(evidence)
+
+    # Send personalized email to each owner
+    for owner_email, evidences in owner_evidences.items():
+        send_evidence_expiring_soon_notification(owner_email, evidences, days=7)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="35"))
+def check_evidences_expiring_tomorrow():
+    """Check for Evidences expiring in 1 day"""
+    target_date = date.today() + timedelta(days=1)
+    evidences_expiring_tomorrow = (
+        Evidence.objects.filter(expiry_date=target_date)
+        .exclude(status__in=["expired"])
+        .prefetch_related("owner")
+    )
+
+    # Group by individual owner
+    owner_evidences = {}
+    for evidence in evidences_expiring_tomorrow:
+        for owner in evidence.owner.all():
+            if owner.email not in owner_evidences:
+                owner_evidences[owner.email] = []
+            owner_evidences[owner.email].append(evidence)
+
+    # Send personalized email to each owner
+    for owner_email, evidences in owner_evidences.items():
+        send_evidence_expiring_soon_notification(owner_email, evidences, days=1)
 
 
 @task()
@@ -391,6 +439,31 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
         )
 
 
+@task()
+def send_evidence_expiring_soon_notification(owner_email, evidences, days):
+    """Send notification when Evidence is expiring soon"""
+    if not check_email_configuration(owner_email, evidences):
+        return
+
+    from .email_utils import render_email_template, format_evidence_list
+
+    context = {
+        "evidence_count": len(evidences),
+        "evidence_list": format_evidence_list(evidences),
+        "days_remaining": days,
+        "days_text": "day" if days == 1 else "days",
+    }
+
+    template_name = "evidence_expiring_soon"
+    rendered = render_email_template(template_name, context)
+    if rendered:
+        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+    else:
+        logger.error(
+            f"Failed to render {template_name} email template for {owner_email}"
+        )
+
+
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="2", minute="30"))
 def lock_overdue_compliance_assessments():
@@ -450,3 +523,28 @@ def deactivate_expired_users():
         logger.info(f"Successfully deactivated {count} expired users")
     else:
         logger.debug("No expired users found to deactivate")
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="3", minute="35"))
+def mark_expired_evidences():
+    """Mark evidences as expired when their expiry_date has passed"""
+    today = date.today()
+    expired_evidences = Evidence.objects.filter(
+        expiry_date__lt=today,
+        expiry_date__isnull=False,
+    ).exclude(status="expired")
+
+    count = 0
+    for evidence in expired_evidences:
+        evidence.status = "expired"
+        evidence.save()
+        count += 1
+        logger.info(
+            f"Marked evidence as expired: {evidence.name} (ID: {evidence.id}), expiry date: {evidence.expiry_date}"
+        )
+
+    if count > 0:
+        logger.info(f"Successfully marked {count} evidences as expired")
+    else:
+        logger.debug("No expired evidences found to mark")
