@@ -111,12 +111,24 @@ async def get_folders():
         return f"Error in get_folders: {str(e)}"
 
 
-async def get_perimeters():
+async def get_perimeters(folder: str = None):
     """Get all perimeters in CISO Assistant
+
+    Args:
+        folder: Optional folder ID or name to filter by (domain/folder to filter perimeters)
+
     Returns a list of perimeters with their IDs and names for reference when creating assessments
     """
     try:
-        res = make_get_request("/perimeters/")
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        res = make_get_request("/perimeters/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -128,6 +140,8 @@ async def get_perimeters():
             return "No perimeters found"
 
         result = "# Perimeters\n\n"
+        if folder:
+            result += f"**Folder Filter:** {folder}\n\n"
         result += "|ID|Name|Description|Folder|\n"
         result += "|---|---|---|---|\n"
 
@@ -135,9 +149,9 @@ async def get_perimeters():
             perimeter_id = perimeter.get("id", "N/A")
             name = perimeter.get("name", "N/A")
             description = (perimeter.get("description") or "")[:50]
-            folder = (perimeter.get("folder") or {}).get("str", "N/A")
+            folder_name = (perimeter.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{perimeter_id}|{name}|{description}|{folder}|\n"
+            result += f"|{perimeter_id}|{name}|{description}|{folder_name}|\n"
 
         return result
     except Exception as e:
@@ -392,12 +406,24 @@ async def get_threats(provider: str = None, limit: int = 25):
         return f"Error in get_threats: {str(e)}"
 
 
-async def get_assets():
+async def get_assets(folder: str = None):
     """Get all assets in CISO Assistant
+
+    Args:
+        folder: Optional folder ID or name to filter by (domain/folder to filter assets)
+
     Returns a list of assets with their IDs, names, types, and other details
     """
     try:
-        res = make_get_request("/assets/")
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+
+        # Add folder filter if specified - resolve name to ID if needed
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+
+        res = make_get_request("/assets/", params=params)
 
         if res.status_code != 200:
             return f"Error: HTTP {res.status_code} - {res.text}"
@@ -409,6 +435,8 @@ async def get_assets():
             return "No assets found"
 
         result = "# Assets\n\n"
+        if folder:
+            result += f"**Folder Filter:** {folder}\n\n"
         result += "|ID|Name|Type|Business Value|Folder|\n"
         result += "|---|---|---|---|---|\n"
 
@@ -417,9 +445,11 @@ async def get_assets():
             name = asset.get("name", "N/A")
             asset_type = asset.get("type", "N/A")
             business_value = asset.get("business_value", "N/A")
-            folder = (asset.get("folder") or {}).get("str", "N/A")
+            folder_name = (asset.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{asset_id}|{name}|{asset_type}|{business_value}|{folder}|\n"
+            result += (
+                f"|{asset_id}|{name}|{asset_type}|{business_value}|{folder_name}|\n"
+            )
 
         return result
     except Exception as e:
