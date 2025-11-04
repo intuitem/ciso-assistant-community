@@ -302,3 +302,33 @@ def resolve_id_or_name(name_or_id: str, endpoint: str) -> str:
         )
 
     return results[0]["id"]
+
+
+def resolve_library_id(library_urn_or_id: str) -> str:
+    """Helper function to resolve library URN to UUID
+    If already a UUID, returns it. If a URN, looks it up via API.
+    """
+    # Check if it's already a UUID
+    if "-" in library_urn_or_id and len(library_urn_or_id) == 36:
+        return library_urn_or_id
+
+    # Otherwise, look up by URN
+    res = make_get_request("/loaded-libraries/", params={"urn": library_urn_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Failed to look up library '{library_urn_or_id}': HTTP {res.status_code}"
+        )
+
+    data = res.json()
+    libraries = get_paginated_results(data)
+
+    if not libraries:
+        raise ValueError(f"Library '{library_urn_or_id}' not found")
+
+    if len(libraries) > 1:
+        raise ValueError(
+            f"Multiple libraries found with URN '{library_urn_or_id}'. Please use UUID instead."
+        )
+
+    return libraries[0]["id"]
