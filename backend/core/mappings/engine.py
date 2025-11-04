@@ -1,4 +1,5 @@
 from ctypes import sizeof
+from django.db.models import Q
 from icecream import ic
 from core.models import (
     Framework,
@@ -59,7 +60,11 @@ class MappingEngine:
         Loads requirement mapping sets (RMS) from libraries.
         Builds internal structures: all_rms and framework_mappings.
         """
-        for lib in StoredLibrary.objects.all():
+        for lib in StoredLibrary.objects.filter(
+            Q(content__requirement_mapping_set__isnull=False)
+            | Q(content__requirement_mapping_sets__isnull=False),
+            is_loaded=True,
+        ):
             library_urn = lib.urn
             content = lib.content
 
