@@ -240,6 +240,13 @@
 							>
 								{index + 1}
 							</div>
+							{#if prob.hexcolor}
+								<div
+									class="w-6 h-6 rounded border border-gray-300"
+									style="background-color: {prob.hexcolor};"
+									title="{prob.name} color"
+								></div>
+							{/if}
 							<label class="flex-1 font-medium text-sm" for="prob-{index}">
 								{prob.name}
 								{#if prob.description}
@@ -285,6 +292,13 @@
 							>
 								{index + 1}
 							</div>
+							{#if impact.hexcolor}
+								<div
+									class="w-6 h-6 rounded border border-gray-300"
+									style="background-color: {impact.hexcolor};"
+									title="{impact.name} color"
+								></div>
+							{/if}
 							<label class="flex-1 font-medium text-sm" for="impact-{index}">
 								{impact.name}
 								{#if impact.description}
