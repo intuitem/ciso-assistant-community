@@ -7236,7 +7236,9 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             nodes.append(
                 {
                     "name": details["name"],  # Display name for the node
-                    "category": 0,  # All nodes are in the "Frameworks" category
+                    "category": 0
+                    if urn in engine.frameworks
+                    else 1,  # All nodes are in the "Frameworks" category
                     "value": details["value"],  # Tooltip content
                     "urn": urn,  # Pass URN as extra data
                     # `symbolSize` will be added below after degrees are calculated
@@ -7304,9 +7306,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
                 scaled_size = min_size + (normalized_degree * size_range)
                 node["symbolSize"] = int(round(scaled_size))
 
-        categories = [
-            {"name": "Frameworks"},
-        ]
+        categories = [{"name": "importedFrameworks"}, {"name": "notImportedFrameworks"}]
 
         meta = {
             "display_name": "Framework Mapping Graph",
