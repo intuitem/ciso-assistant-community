@@ -414,7 +414,7 @@ def get_domain_export_objects(domain: Folder):
         compliance_assessment__in=compliance_assessments
     ).distinct()
     frameworks = Framework.objects.filter(
-        Q(folder__in=folders) | Q(compliance_assessment__in=compliance_assessments)
+        Q(folder__in=folders) | Q(compliance_assessments__in=compliance_assessments)
     ).distinct()
 
     entities = Entity.objects.filter(
