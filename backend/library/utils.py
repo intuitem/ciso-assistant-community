@@ -205,22 +205,7 @@ class RequirementMappingSetImporter:
         self,
         library_object: LoadedLibrary,
     ):
-        _target_framework = Framework.objects.get(
-            urn=self.data["target_framework_urn"].lower(), default_locale=True
-        )
-        _source_framework = Framework.objects.get(
-            urn=self.data["source_framework_urn"].lower(), default_locale=True
-        )
-        mapping_set = RequirementMappingSet.objects.create(
-            name=self.data["name"],
-            urn=self.data["urn"].lower(),
-            target_framework=_target_framework,
-            source_framework=_source_framework,
-            library=library_object,
-        )
-        for mapping in self._requirement_mappings:
-            mapping.load(mapping_set)
-        return mapping_set
+        pass
 
     def init(self) -> Union[str, None]:
         if missing_fields := self.REQUIRED_FIELDS - set(self.data.keys()):
@@ -705,9 +690,9 @@ class LibraryImporter:
         """Check and import library dependencies."""
         if (
             not self._library.dependencies
-            or self._library.objects.get(
+            or self._library.content.get(
                 "requirement_mapping_set",
-                self._library.objects.get("requirement_mapping_sets"),
+                self._library.content.get("requirement_mapping_sets"),
             )
             is not None
         ):
