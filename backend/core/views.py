@@ -1987,8 +1987,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     )
                 probability_map[idx] = value
         except (KeyError, TypeError, ValueError) as e:
+            logger.warning(f"Invalid probability anchor format: {e}")
             return Response(
-                {"detail": f"Invalid probability anchor format: {str(e)}"},
+                {
+                    "detail": "Invalid probability anchor format. Each anchor must have 'index' and 'value' fields, with value between 0 and 1."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -2013,8 +2016,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     "ub": central_value * 1.43,
                 }
         except (KeyError, TypeError, ValueError) as e:
+            logger.warning(f"Invalid impact anchor format: {e}")
             return Response(
-                {"detail": f"Invalid impact anchor format: {str(e)}"},
+                {
+                    "detail": "Invalid impact anchor format. Each anchor must have 'index' and 'central_value' fields, with central_value greater than 0."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
