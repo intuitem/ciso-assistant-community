@@ -302,15 +302,14 @@ async def get_risk_matrices(folder: str = None):
         if folder:
             result += f" (folder: {folder})"
         result += "\n\n"
-        result += "|ID|Name|Folder|\n"
-        result += "|---|---|---|\n"
+        result += "|ID|Name|\n"
+        result += "|---|---|\n"
 
         for matrix in matrices:
             matrix_id = matrix.get("id", "N/A")
             name = matrix.get("name", "N/A")
-            folder = (matrix.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{matrix_id}|{name}|{folder}|\n"
+            result += f"|{matrix_id}|{name}|\n"
 
         return result
     except Exception as e:
@@ -547,16 +546,15 @@ async def get_threats(
         if library:
             result += f" (library: {library})"
         result += "\n\n"
-        result += "|ID|Name|Provider|Folder|\n"
-        result += "|---|---|---|---|\n"
+        result += "|ID|Name|Provider|\n"
+        result += "|---|---|---|\n"
 
         for threat in threats:
             threat_id = threat.get("id", "N/A")
             name = threat.get("name", "N/A")
             provider_name = threat.get("provider", "N/A")
-            folder = (threat.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{threat_id}|{name}|{provider_name}|{folder}|\n"
+            result += f"|{threat_id}|{name}|{provider_name}|\n"
 
         return result
     except Exception as e:
@@ -595,19 +593,16 @@ async def get_assets(folder: str = None):
         if folder:
             result += f" (folder: {folder})"
         result += "\n\n"
-        result += "|ID|Name|Type|Business Value|Folder|\n"
-        result += "|---|---|---|---|---|\n"
+        result += "|ID|Name|Type|Folder|\n"
+        result += "|---|---|---|---|\n"
 
         for asset in assets:
             asset_id = asset.get("id", "N/A")
             name = asset.get("name", "N/A")
             asset_type = asset.get("type", "N/A")
-            business_value = asset.get("business_value", "N/A")
             folder_name = (asset.get("folder") or {}).get("str", "N/A")
 
-            result += (
-                f"|{asset_id}|{name}|{asset_type}|{business_value}|{folder_name}|\n"
-            )
+            result += f"|{asset_id}|{name}|{asset_type}|{folder_name}|\n"
 
         return result
     except Exception as e:
