@@ -1921,7 +1921,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         {
             "probability_anchors": [{"index": 0, "value": 0.05}, ...],
             "impact_anchors": [{"index": 0, "central_value": 25000}, ...],
-            "loss_threshold": 100000 (optional)
+            "loss_threshold": 100000
         }
         """
         from crq.models import (
@@ -1930,7 +1930,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             QuantitativeRiskHypothesis,
         )
 
-        risk_assessment = RiskAssessment.objects.get(id=pk)
+        risk_assessment: RiskAssessment = self.get_object()
 
         # Check permissions
         if not RoleAssignment.is_access_allowed(
@@ -1950,28 +1950,73 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         impact_anchors = request.data.get("impact_anchors", [])
         loss_threshold = request.data.get("loss_threshold")
 
-        if not probability_anchors or not impact_anchors or not loss_threshold:
+        if not probability_anchors or not impact_anchors or loss_threshold is None:
             return Response(
                 {
-                    "detail": "Missing required fields: probability_anchors, impact_anchors, or loss_threshold"
+                    "detail": "Missing required fields: probability_anchors, impact_anchors, and loss_threshold"
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Create mapping dictionaries for probability and impact
-        probability_map = {item["index"]: item["value"] for item in probability_anchors}
+        # Validate loss_threshold is a positive number
+        try:
+            loss_threshold = float(loss_threshold)
+            if loss_threshold <= 0:
+                return Response(
+                    {"detail": "loss_threshold must be greater than 0"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "loss_threshold must be a valid number"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        # Calculate LB and UB from central value for each impact level
+        # Validate and build probability mapping
+        probability_map = {}
+        try:
+            for item in probability_anchors:
+                idx = item["index"]
+                value = float(item["value"])
+                if not (0 <= value <= 1):
+                    return Response(
+                        {
+                            "detail": f"Probability value must be between 0 and 1, got {value} for index {idx}"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                probability_map[idx] = value
+        except (KeyError, TypeError, ValueError) as e:
+            return Response(
+                {"detail": f"Invalid probability anchor format: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate and build impact mapping
         # Using a narrow fixed ratio: roughly ±30% around central value
         # LB = central_value * 0.7, UB = central_value * 1.43
         # This gives a spread factor of ~2x which minimizes overlap between adjacent levels
         impact_map = {}
-        for item in impact_anchors:
-            central_value = item["central_value"]
-            impact_map[item["index"]] = {
-                "lb": central_value * 0.7,
-                "ub": central_value * 1.43,
-            }
+        try:
+            for item in impact_anchors:
+                idx = item["index"]
+                central_value = float(item["central_value"])
+                if central_value <= 0:
+                    return Response(
+                        {
+                            "detail": f"Impact central value must be positive, got {central_value} for index {idx}"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                impact_map[idx] = {
+                    "lb": central_value * 0.7,
+                    "ub": central_value * 1.43,
+                }
+        except (KeyError, TypeError, ValueError) as e:
+            return Response(
+                {"detail": f"Invalid impact anchor format: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Generate ref_id for the quantitative study
         # If source has ref_id, append _QUANT, otherwise leave blank

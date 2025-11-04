@@ -2587,7 +2587,6 @@
 	"impactAnchoringDescription": "For each impact level, provide a typical financial loss value. The system will calculate bounds (±30% spread) for Monte Carlo simulations.",
 	"lowerBound": "Lower Bound",
 	"upperBound": "Upper Bound",
-	"lossThreshold": "Loss Threshold",
 	"lossThresholdDescription": "The maximum acceptable loss value for the quantitative risk study. This helps define your organization's risk tolerance.",
 	"converting": "Converting...",
 	"conversionSuccessful": "Conversion successful! Redirecting to the new quantitative risk study...",
@@ -2604,6 +2603,5 @@
 	"impactValuesMustBeIncreasing": "Impact for '{current}' must be greater than '{previous}'. Values should increase across levels.",
 	"runningMonteCarloSimulations": "Running Monte Carlo simulations for quantitative risk analysis. This may take a moment...",
 	"probabilityRequirements": "All values must be provided and between 0 and 100 (e.g., 5, 20, 50, 90). Values must increase from top to bottom.",
-	"impactRequirements": "All values must be provided and greater than 0. Values must increase from top to bottom (e.g., Minor: 5,000 → Major: 50,000 → Critical: 500,000).",
-	"requirements": "Requirements:"
+	"impactRequirements": "All values must be provided and greater than 0. Values must increase from top to bottom (e.g., Minor: 5,000 → Major: 50,000 → Critical: 500,000)."
 }

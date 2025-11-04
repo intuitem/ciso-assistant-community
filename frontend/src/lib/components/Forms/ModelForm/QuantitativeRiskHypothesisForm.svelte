@@ -44,17 +44,26 @@
 
 	// One-time initialization: convert probability to percentage when form loads
 	$effect(() => {
-		if (!initialized && $formStore.probability !== undefined && $formStore.probability !== null) {
-			probabilityPercent = Math.round($formStore.probability * 10000) / 100; // Round to 2 decimals
-			initialized = true;
+		if (initialized) return;
+
+		const prob = $formStore.probability;
+		if (prob !== undefined && prob !== null && typeof prob === 'number') {
+			probabilityPercent = Math.round(prob * 10000) / 100; // Convert 0-1 to 0-100 with 2 decimals
 		}
+		initialized = true; // Always mark as initialized, even for new forms
 	});
 
 	// Only sync percentage → probability (one direction)
 	$effect(() => {
-		if (initialized && probabilityPercent !== undefined && probabilityPercent !== null) {
-			$formStore.probability = Math.round(probabilityPercent * 100) / 10000; // Avoid floating point issues
-		} else if (initialized && (probabilityPercent === undefined || probabilityPercent === null)) {
+		if (!initialized) return;
+
+		if (
+			probabilityPercent !== undefined &&
+			probabilityPercent !== null &&
+			typeof probabilityPercent === 'number'
+		) {
+			$formStore.probability = Math.round(probabilityPercent * 100) / 10000; // Convert 0-100 to 0-1
+		} else {
 			$formStore.probability = undefined;
 		}
 	});
