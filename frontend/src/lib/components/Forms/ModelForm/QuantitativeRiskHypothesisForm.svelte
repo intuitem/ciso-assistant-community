@@ -144,7 +144,7 @@
 	<!-- Display field for percentage (0-100) -->
 	<div class="form-control">
 		<label class="label" for="probability_percent">
-			<span class="label-text">Probability (%)</span>
+			<span class="label-text">{m.probabilityPercent()}</span>
 		</label>
 		<input
 			type="number"
@@ -155,9 +155,9 @@
 			min="0"
 			max="100"
 		/>
-		{#if m.probabilityHelpText()}
+		{#if m.probabilityPercentHelpText()}
 			<label class="label" for="probability_percent">
-				<span class="label-text-alt text-surface-500">{m.probabilityHelpText()}</span>
+				<span class="label-text-alt text-surface-500">{m.probabilityPercentHelpText()}</span>
 			</label>
 		{/if}
 	</div>

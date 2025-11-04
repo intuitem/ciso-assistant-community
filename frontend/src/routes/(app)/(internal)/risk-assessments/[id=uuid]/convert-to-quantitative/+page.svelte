@@ -79,12 +79,12 @@
 			return null;
 		}
 
-		// Validate probability values (not 0 or 1, and must be between 0 and 1)
+		// Validate probability values (must be between 0 and 100, exclusive)
 		for (let index = 0; index < probabilityOptions.length; index++) {
 			const value = parseFloat(probabilityAnchors[index]);
-			if (isNaN(value) || value <= 0 || value >= 1) {
+			if (isNaN(value) || value <= 0 || value >= 100) {
 				toastStore.trigger({
-					message: m.probabilityMustBeBetweenZeroAndOne({
+					message: m.probabilityMustBeBetweenZeroAndHundred({
 						level: probabilityOptions[index].name
 					}),
 					background: 'variant-filled-error'
@@ -156,7 +156,7 @@
 				.filter(([_, value]) => value !== '')
 				.map(([index, value]) => ({
 					index: parseInt(index),
-					value: parseFloat(value)
+					value: parseFloat(value) / 100 // Convert percentage to probability (0-1)
 				})),
 			impact_anchors: Object.entries(impactAnchors)
 				.filter(([_, value]) => value !== '')
@@ -249,12 +249,12 @@
 							<input
 								id="prob-{index}"
 								type="number"
-								step="0.01"
-								min="0.001"
-								max="0.999"
+								step="0.1"
+								min="0.1"
+								max="99.9"
 								bind:value={probabilityAnchors[index]}
 								class="input w-32"
-								placeholder="0.00 - 1.00"
+								placeholder="0 - 100 %"
 								required
 							/>
 						</div>
