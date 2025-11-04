@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { excludeMappingsUrlParams } from '$lib/utils/constants';
 	import { LibraryUploadSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
 
@@ -11,6 +10,7 @@
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { tableHandlers } from '$lib/utils/stores';
+	import { LANGUAGE_FILTER, PROVIDER_FILTER } from '$lib/utils/table.js';
 
 	let { data, ...rest } = $props();
 
@@ -97,6 +97,10 @@
 					source={data.mappingLibrariesTable}
 					URLModel="stored-libraries"
 					baseEndpoint="mapping-libraries"
+					tableFilters={{
+						locale: LANGUAGE_FILTER,
+						provider: PROVIDER_FILTER
+					}}
 					deleteForm={data.deleteForm}
 					displayActions={false}
 					server={false}
