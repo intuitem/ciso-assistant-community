@@ -703,7 +703,14 @@ class LibraryImporter:
 
     def check_and_import_dependencies(self) -> Union[str, None]:
         """Check and import library dependencies."""
-        if not self._library.dependencies:
+        if (
+            not self._library.dependencies
+            or self._library.objects.get(
+                "requirement_mapping_set",
+                self._library.objects.get("requirement_mapping_sets"),
+            )
+            is not None
+        ):
             return None
         for dependency_urn in self._library.dependencies:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
