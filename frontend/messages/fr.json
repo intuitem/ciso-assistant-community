@@ -2533,5 +2533,6 @@
 	"selectAuditToCompare": "Choisir un audit valide pour la comparaison",
 	"showOverlapWithOtherFrameworks": "Afficher les superpositions avec d'autres référentiels",
 	"tests": "Tests",
-	"withDifferences": "avec des différences"
+	"withDifferences": "avec des différences",
+	"mappingLibraries": "Bibliothèques de mappings"
 }
