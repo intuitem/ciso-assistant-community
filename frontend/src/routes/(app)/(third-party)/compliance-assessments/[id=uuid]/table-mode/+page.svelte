@@ -755,7 +755,7 @@
 											<p class="flex items-center space-x-2">
 												<span>{m.appliedControl()}</span>
 												{#key addedMeasure}
-													{#if requirementAssessment.evidences != null}
+													{#if requirementAssessment.applied_controls != null}
 														<span class="badge preset-tonal-primary"
 															>{requirementAssessment.applied_controls.length}</span
 														>
@@ -789,8 +789,8 @@
 														<p class="p-2">
 															<a
 																class="text-primary-700 hover:text-primary-500"
-																href="/applied-controls/{ac}"
-																><i class="fa-solid fa-fire-extinguisher mr-2"></i>{ac}</a
+																href="/applied-controls/{ac.id}"
+																><i class="fa-solid fa-fire-extinguisher mr-2"></i>{ac.str}</a
 															>
 														</p>
 													{/each}
