@@ -349,7 +349,7 @@ class StoredLibrary(LibraryMixin):
                     "requirement_mapping_set",
                     library_objects.get("requirement_mapping_sets"),
                 )
-            ),
+            ),  # autoload is true if the library contains requirement mapping sets
         )
 
     @classmethod
