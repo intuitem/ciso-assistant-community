@@ -514,6 +514,15 @@ const PROVIDER_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const LIBRARY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'library',
+		optionsEndpoint: 'loaded-libraries',
+		multiple: true
+	}
+};
+
 const THREAT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1093,8 +1102,8 @@ export const listViewFields = {
 		}
 	},
 	threats: {
-		head: ['ref_id', 'name', 'description', 'provider', 'domain', 'labels'],
-		body: ['ref_id', 'name', 'description', 'provider', 'folder', 'filtering_labels'],
+		head: ['ref_id', 'name', 'description', 'library', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1102,6 +1111,7 @@ export const listViewFields = {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'threats/provider' }
 			},
+			library: LIBRARY_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
