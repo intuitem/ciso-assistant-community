@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { storedLibrariesObjectTypesUrlParams } from '$lib/utils/constants';
 	import { LibraryUploadSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
 
@@ -48,6 +49,10 @@
 					>
 				{/if}
 			</Tabs.Control>
+			<Tabs.Control value="mappings" labelBase="inert"
+				>{m.mappingLibraries()}
+				<span class="badge preset-tonal-primary">{data.mappingLibrariesTable.meta.count}</span>
+			</Tabs.Control>
 		{/snippet}
 		{#if data.loadedLibrariesTable.meta.count < 0}
 			<div class="card p-4 preset-tonal-secondary w-full m-4">
@@ -74,6 +79,7 @@
 				<ModelTable
 					source={data.storedLibrariesTable}
 					URLModel="stored-libraries"
+					baseEndpoint="stored-libraries?{storedLibrariesObjectTypesUrlParams}"
 					deleteForm={data.deleteForm}
 					server={false}
 				/>
@@ -84,6 +90,16 @@
 					URLModel="loaded-libraries"
 					deleteForm={data.deleteForm}
 					detailQueryParameter="loaded"
+					server={false}
+				/>
+			</Tabs.Panel>
+			<Tabs.Panel value="mappings">
+				<ModelTable
+					source={data.mappingLibrariesTable}
+					URLModel="stored-libraries"
+					baseEndpoint="stored-libraries?object_type=requirement_mapping_sets&object_type=requirement_mapping_set"
+					deleteForm={data.deleteForm}
+					displayActions={false}
 					server={false}
 				/>
 			</Tabs.Panel>
