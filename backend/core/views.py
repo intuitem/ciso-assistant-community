@@ -580,7 +580,13 @@ class ThreatViewSet(BaseModelViewSet):
     """
 
     model = Threat
-    filterset_fields = ["folder", "provider", "risk_scenarios", "filtering_labels"]
+    filterset_fields = [
+        "folder",
+        "provider",
+        "library",
+        "risk_scenarios",
+        "filtering_labels",
+    ]
     search_fields = ["name", "provider", "description"]
 
     def get_queryset(self):
@@ -7422,14 +7428,6 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         )
         return Response({p: p for p in providers})
 
-    def perform_create(self, serializer):
-        # create the new requirement mapping set and reload the engine.
-        instance = serializer.save()
-        from core.mappings.engine import engine
-
-        engine.load_rms_data()
-        return instance
-
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
         mapping_set_id = pk
@@ -8367,6 +8365,7 @@ class FindingViewSet(BaseModelViewSet):
         "folder",
         "status",
         "severity",
+        "priority",
         "findings_assessment",
         "filtering_labels",
         "applied_controls",
@@ -8391,6 +8390,11 @@ class FindingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Severity.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get priority choices")
+    def priority(self, request):
+        return Response(dict(Finding.PRIORITY))
 
     @action(detail=False, name="Get all findings owners")
     def owner(self, request):

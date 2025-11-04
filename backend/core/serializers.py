@@ -2123,6 +2123,7 @@ class FindingReadSerializer(FindingWriteSerializer):
     )
     folder = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")
+    priority = serializers.CharField(source="get_priority_display")
 
     class Meta:
         model = Finding

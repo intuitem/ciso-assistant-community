@@ -31,21 +31,18 @@ async def get_stored_libraries(
         if not libraries:
             return "No stored libraries found"
 
-        result = "# Available Libraries (Not Yet Imported)\n\n"
-        result += f"Total: {len(libraries)}\n\n"
-        result += "|URN|Name|Version|Provider|Description|\n"
-        result += "|---|---|---|---|---|\n"
+        result = f"Found {len(libraries)} stored libraries\n\n"
+        result += "|URN|Name|Version|Provider|\n"
+        result += "|---|---|---|---|\n"
 
         for lib in libraries:
             urn = lib.get("urn", "N/A")
             name = lib.get("name", "N/A")
             version = lib.get("version", "N/A")
             provider = lib.get("provider", "N/A")
-            description = lib.get("description") or ""
 
-            result += f"|{urn}|{name}|{version}|{provider}|{description}|\n"
+            result += f"|{urn}|{name}|{version}|{provider}|\n"
 
-        result += f"\n**To import a library, use `import_stored_library(urn_or_id)`**"
         return result
     except Exception as e:
         return f"Error in get_stored_libraries: {str(e)}"
@@ -66,19 +63,17 @@ async def get_loaded_libraries():
         if not libraries:
             return "No loaded libraries found"
 
-        result = "# Loaded Libraries (Already Imported)\n\n"
-        result += f"Total: {len(libraries)}\n\n"
-        result += "|URN|Name|Version|Provider|Description|\n"
-        result += "|---|---|---|---|---|\n"
+        result = f"Found {len(libraries)} loaded libraries\n\n"
+        result += "|URN|Name|Version|Provider|\n"
+        result += "|---|---|---|---|\n"
 
         for lib in libraries:
             urn = lib.get("urn", "N/A")
             name = lib.get("name", "N/A")
             version = lib.get("version", "N/A")
             provider = lib.get("provider", "N/A")
-            description = lib.get("description") or ""
 
-            result += f"|{urn}|{name}|{version}|{provider}|{description}|\n"
+            result += f"|{urn}|{name}|{version}|{provider}|\n"
 
         return result
     except Exception as e:
@@ -100,7 +95,7 @@ async def import_stored_library(urn_or_id: str) -> str:
         if res.status_code == 200:
             result = res.json()
             if result.get("status") == "success":
-                return f"✅ Library imported successfully: {urn_or_id}"
+                return f"Imported library: {urn_or_id}"
             else:
                 error = result.get("error", "Unknown error")
                 return f"Error importing library: {error}"
