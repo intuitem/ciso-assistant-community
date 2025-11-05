@@ -7237,7 +7237,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
                 {
                     "name": details["name"],  # Display name for the node
                     "category": 0
-                    if urn in engine.frameworks
+                    if urn in engine.frameworks.keys()
                     else 1,  # All nodes are in the "Frameworks" category
                     "value": details["value"],  # Tooltip content
                     "urn": urn,  # Pass URN as extra data
