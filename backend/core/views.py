@@ -7217,6 +7217,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
                 framework_details[urn] = {
                     "name": display_name,
                     "value": display_value,
+                    "pk": lib.pk,
                 }
             except (KeyError, TypeError):
                 # Skip this library if content is malformed
@@ -7241,6 +7242,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
                     else 1,  # All nodes are in the "Frameworks" category
                     "value": details["value"],  # Tooltip content
                     "urn": urn,  # Pass URN as extra data
+                    "pk": details.get("pk"),
                     # `symbolSize` will be added below after degrees are calculated
                 }
             )
