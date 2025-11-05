@@ -768,9 +768,9 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
-    # requirement_assessments = serializers.PrimaryKeyRelatedField(
-    #     many=True, queryset=RequirementAssessment.objects.all(), required=False
-    # )
+    requirement_assessments = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=RequirementAssessment.objects.all(), required=False
+    )
     stakeholders = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Stakeholder.objects.all()
     )
