@@ -55,6 +55,9 @@ import random
 from django.db.models.functions import Lower
 
 from docxtpl import DocxTemplate
+from integrations.models import SyncMapping
+from integrations.tasks import sync_object_to_integrations
+from integrations.registry import IntegrationRegistry
 from .generators import gen_audit_context
 
 from django.utils import timezone
@@ -153,7 +156,7 @@ SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
-MAPPING_MAX_DETPH = 2
+MAPPING_MAX_DETPH = 3
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
@@ -279,6 +282,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             )[0]
         queryset = self.model.objects.filter(id__in=object_ids_view)
         return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["action"] = self.action
+        return context
 
     def get_serializer_class(self, **kwargs):
         serializer_factory = SerializerFactory(
@@ -572,7 +580,13 @@ class ThreatViewSet(BaseModelViewSet):
     """
 
     model = Threat
-    filterset_fields = ["folder", "provider", "risk_scenarios", "filtering_labels"]
+    filterset_fields = [
+        "folder",
+        "provider",
+        "library",
+        "risk_scenarios",
+        "filtering_labels",
+    ]
     search_fields = ["name", "provider", "description"]
 
     def get_queryset(self):
@@ -829,9 +843,12 @@ class AssetViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get asset class choices")
     def asset_class(self, request):
-        # this is for filters
+        # This endpoint is exclusively for filters.
         return Response(
-            [{"id": ac.id, "name": ac.full_path} for ac in AssetClass.objects.all()]
+            [
+                {"id": ac.id, "name": ac.full_path}
+                for ac in AssetClass.objects.filter(assets__isnull=False).distinct()
+            ]
         )
 
     @action(detail=False, name="Get assets graph")
@@ -841,6 +858,10 @@ class AssetViewSet(BaseModelViewSet):
         nodes_idx = dict()
         categories = []
         N = 0
+        hide_domains = (
+            request.query_params.get("hide_domains", "false").lower() == "true"
+        )
+
         (viewable_folders, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
@@ -851,19 +872,24 @@ class AssetViewSet(BaseModelViewSet):
             user=request.user,
             object_type=Asset,
         )
+        # Build category index mapping first (key by UUID to avoid name collisions)
+        domain_to_category = {}
         for domain in Folder.objects.filter(id__in=viewable_folders):
             categories.append({"name": domain.name})
-            nodes_idx[domain.name] = N
-            nodes.append(
-                {
-                    "name": domain.name,
-                    "category": N,
-                    "symbol": "roundRect",
-                    "symbolSize": 30,
-                    "value": "Domain",
-                }
-            )
-            N += 1
+            domain_to_category[domain.id] = len(categories) - 1
+
+            if not hide_domains:
+                nodes_idx[domain.id] = N
+                nodes.append(
+                    {
+                        "name": domain.name,
+                        "category": domain_to_category[domain.id],
+                        "symbol": "roundRect",
+                        "symbolSize": 30,
+                        "value": "Domain",
+                    }
+                )
+                N += 1
         for asset in Asset.objects.filter(id__in=viewable_assets):
             # Only include assets whose folders are also viewable to avoid KeyError
             if asset.folder.id not in viewable_folders:
@@ -879,7 +905,7 @@ class AssetViewSet(BaseModelViewSet):
                     "name": asset.name,
                     "symbol": symbol,
                     "symbolSize": 25,
-                    "category": nodes_idx[asset.folder.name],
+                    "category": domain_to_category[asset.folder.id],
                     "value": "Primary" if asset.type == "PR" else "Support",
                 }
             )
@@ -887,30 +913,32 @@ class AssetViewSet(BaseModelViewSet):
             N += 1
 
         # Add links between domains (folders) based on parent-child relationships
-        for domain in Folder.objects.filter(id__in=viewable_folders):
-            if domain.parent_folder and domain.parent_folder.id in viewable_folders:
+        if not hide_domains:
+            for domain in Folder.objects.filter(id__in=viewable_folders):
+                if domain.parent_folder and domain.parent_folder.id in viewable_folders:
+                    links.append(
+                        {
+                            "source": nodes_idx[domain.parent_folder.id],
+                            "target": nodes_idx[domain.id],
+                            "value": "contains",
+                        }
+                    )
+
+        # Add links between assets and their domains
+        if not hide_domains:
+            for asset in Asset.objects.filter(id__in=viewable_assets):
+                # Only include assets whose folders are also viewable to avoid KeyError
+                if asset.folder.id not in viewable_folders:
+                    continue
+
+                asset_key = f"{asset.folder.name}/{asset.name}"
                 links.append(
                     {
-                        "source": nodes_idx[domain.parent_folder.name],
-                        "target": nodes_idx[domain.name],
+                        "source": nodes_idx[asset.folder.id],
+                        "target": nodes_idx[asset_key],
                         "value": "contains",
                     }
                 )
-
-        # Add links between assets and their domains
-        for asset in Asset.objects.filter(id__in=viewable_assets):
-            # Only include assets whose folders are also viewable to avoid KeyError
-            if asset.folder.id not in viewable_folders:
-                continue
-
-            asset_key = f"{asset.folder.name}/{asset.name}"
-            links.append(
-                {
-                    "source": nodes_idx[asset.folder.name],
-                    "target": nodes_idx[asset_key],
-                    "value": "contains",
-                }
-            )
 
         # Add links between assets (existing relationships)
         for asset in Asset.objects.filter(id__in=viewable_assets):
@@ -2037,6 +2065,76 @@ class AppliedControlViewSet(BaseModelViewSet):
             )
         )
 
+    def perform_create(self, serializer):
+        create_remote_object = serializer.validated_data.pop(
+            "create_remote_object", False
+        )
+        integration_config = serializer.validated_data.pop("integration_config", None)
+        serializer.validated_data.pop("remote_object_id", None)  # Remove if present
+
+        # Create the local object first
+        super().perform_create(serializer)
+        instance = serializer.instance
+
+        if create_remote_object and integration_config:
+            try:
+                logger.info(
+                    "Creating remote object for Applied Control",
+                    applied_control_id=instance.id,
+                    integration_config_id=integration_config.id,
+                )
+                sync_object_to_integrations.schedule(
+                    args=(
+                        ContentType.objects.get_for_model(self.model),
+                        serializer.instance.id,
+                        [integration_config.id],
+                        ["name", "description", "status", "priority"],
+                    ),
+                    delay=1,  # Small delay to ensure transaction is committed
+                )
+
+            except Exception:
+                logger.error(
+                    "Error creating remote object for Applied Control",
+                    applied_control_id=instance.id,
+                    exc_info=True,
+                )
+
+    def perform_update(self, serializer):
+        integration_config = serializer.validated_data.pop("integration_config", None)
+        remote_object_id = serializer.validated_data.pop("remote_object_id", None)
+        serializer.validated_data.pop("create_remote_object", None)  # Remove if present
+
+        super().perform_update(serializer)
+        if not integration_config or not remote_object_id:
+            return
+        try:
+            if remote_object_id:
+                logger.info(
+                    "Attaching applied control to external object",
+                    applied_control_id=serializer.instance.id,
+                    remote_id=remote_object_id,
+                )
+                sync_mapping = SyncMapping.objects.create(
+                    configuration=integration_config,
+                    content_type=ContentType.objects.get_for_model(self.model),
+                    local_object_id=serializer.instance.id,
+                    remote_id=remote_object_id,
+                    sync_status=SyncMapping.SyncStatus.PENDING,
+                )
+                sync_object_to_integrations.schedule(
+                    args=(
+                        sync_mapping.content_type,
+                        serializer.instance.id,
+                        [integration_config.id],
+                        ["status"],
+                    ),
+                    delay=1,  # Small delay to ensure transaction is committed
+                )
+
+        except Exception:
+            logger.error("Error creating SyncMapping", exc_info=True)
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -2144,33 +2242,113 @@ class AppliedControlViewSet(BaseModelViewSet):
         writer = csv.writer(response, delimiter=";")
         columns = [
             "internal_id",
+            "ref_id",
             "name",
             "description",
+            "reference_control_name",
+            "reference_control_ref_id",
             "category",
             "csf_function",
             "folder",
             "status",
+            "start_date",
             "eta",
+            "expiry_date",
             "priority",
+            "effort",
+            "impact",
+            "cost_currency",
+            "cost_build_fixed",
+            "cost_build_people_days",
+            "cost_run_fixed",
+            "cost_run_people_days",
+            "cost_amortization_period",
             "owner",
+            "labels",
         ]
         writer.writerow(columns)
 
-        for control in AppliedControl.objects.filter(id__in=viewable_controls_ids):
+        for control in (
+            AppliedControl.objects.filter(id__in=viewable_controls_ids)
+            .select_related("reference_control", "folder")
+            .prefetch_related("owner", "filtering_labels")
+        ):
+            # Get reference control name and ref_id
+            ref_control_name = (
+                control.reference_control.name if control.reference_control else ""
+            )
+            ref_control_ref_id = (
+                control.reference_control.ref_id if control.reference_control else ""
+            )
+
+            # Get effort display value (translated)
+            effort_display = control.get_effort_display() if control.effort else ""
+
+            # Get impact display value (translated)
+            impact_display = (
+                control.get_control_impact_display() if control.control_impact else ""
+            )
+
+            # Extract cost details
+            cost_currency = ""
+            cost_build_fixed = ""
+            cost_build_people_days = ""
+            cost_run_fixed = ""
+            cost_run_people_days = ""
+            cost_amortization = ""
+
+            if control.cost:
+                cost_currency = control.cost.get("currency", "")
+                cost_amortization = control.cost.get("amortization_period", "")
+                build_costs = control.cost.get("build", {})
+                run_costs = control.cost.get("run", {})
+                cost_build_fixed = (
+                    build_costs.get("fixed_cost", "") if build_costs else ""
+                )
+                cost_build_people_days = (
+                    build_costs.get("people_days", "") if build_costs else ""
+                )
+                cost_run_fixed = run_costs.get("fixed_cost", "") if run_costs else ""
+                cost_run_people_days = (
+                    run_costs.get("people_days", "") if run_costs else ""
+                )
+
+            # Get labels
+            labels = ",".join([lbl.label for lbl in control.filtering_labels.all()])
+
+            # Get owners
+            owners = (
+                ",".join([o.email for o in control.owner.all()])
+                if control.owner.exists()
+                else ""
+            )
+
             row = [
                 control.id,
+                control.ref_id or "",
                 control.name,
                 control.description,
-                control.category,
-                control.csf_function,
+                ref_control_name,
+                ref_control_ref_id,
+                control.category or "",
+                control.csf_function or "",
                 control.folder.name,
                 control.status,
-                control.eta,
-                control.priority,
+                control.start_date or "",
+                control.eta or "",
+                control.expiry_date or "",
+                control.priority or "",
+                effort_display,
+                impact_display,
+                cost_currency,
+                cost_build_fixed,
+                cost_build_people_days,
+                cost_run_fixed,
+                cost_run_people_days,
+                cost_amortization,
+                owners,
+                labels,
             ]
-            if len(control.owner.all()) > 0:
-                owners = ",".join([o.email for o in control.owner.all()])
-                row += [owners]
             writer.writerow(row)
         return response
 
@@ -5645,12 +5823,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         from core.mappings.engine import engine
 
         audit_from_results = engine.load_audit_fields(audit)
-        frameworks_in_mappings = set()
         data = []
-        for src, tgt in engine.all_rms.keys():
-            frameworks_in_mappings.add(src)
-            frameworks_in_mappings.add(tgt)
-        for dest_urn in sorted(frameworks_in_mappings):
+        for dest_urn in sorted(
+            [
+                p[-1]
+                for p in engine.all_paths_from(
+                    source_urn=audit.framework.urn, max_depth=MAPPING_MAX_DETPH
+                )
+            ]
+        ):
             best_results, _ = engine.best_mapping_inferences(
                 audit_from_results,
                 audit.framework.urn,
@@ -5659,7 +5840,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
             if best_results:
                 framework = Framework.objects.filter(urn=dest_urn).first()
-                if framework:
+                if framework and str(framework) not in str(data):
                     assessable_requirements_count = framework.requirement_nodes.filter(
                         assessable=True
                     ).count()
@@ -6164,20 +6345,24 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 best_results, _ = engine.best_mapping_inferences(
                     audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
                 )
-                ic(best_results)
 
                 requirement_assessments_to_update: list[RequirementAssessment] = []
 
                 target_requirement_assessments = RequirementAssessment.objects.filter(
                     compliance_assessment=instance,
-                    requirement__urn__in=best_results,
+                    requirement__urn__in=best_results["requirement_assessments"],
                 )
 
                 for req in target_requirement_assessments:
                     for field in ["result", "status", "observation"]:
-                        if best_results[req.requirement.urn].get(field):
+                        if best_results["requirement_assessments"][
+                            req.requirement.urn
+                        ].get(field):
                             req.__setattr__(
-                                field, best_results[req.requirement.urn][field]
+                                field,
+                                best_results["requirement_assessments"][
+                                    req.requirement.urn
+                                ][field],
                             )
                     requirement_assessments_to_update.append(req)
 
@@ -6188,31 +6373,37 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for ra in requirement_assessments_to_update:
-                    if best_results[ra.requirement.urn].get("applied_controls"):
+                    if best_results["requirement_assessments"][ra.requirement.urn].get(
+                        "applied_controls"
+                    ):
                         ra.applied_controls.add(
                             *[
                                 control
-                                for control in best_results[ra.requirement.urn][
-                                    "applied_controls"
-                                ]
+                                for control in best_results["requirement_assessments"][
+                                    ra.requirement.urn
+                                ]["applied_controls"]
                             ]
                         )
-                    if best_results[ra.requirement.urn].get("evidences"):
+                    if best_results["requirement_assessments"][ra.requirement.urn].get(
+                        "evidences"
+                    ):
                         ra.evidences.add(
                             *[
                                 evidence
-                                for evidence in best_results[ra.requirement.urn][
-                                    "evidences"
-                                ]
+                                for evidence in best_results["requirement_assessments"][
+                                    ra.requirement.urn
+                                ]["evidences"]
                             ]
                         )
-                    if best_results[ra.requirement.urn].get("security_exceptions"):
+                    if best_results["requirement_assessments"][ra.requirement.urn].get(
+                        "security_exceptions"
+                    ):
                         ra.security_exceptions.add(
                             *[
                                 exception
-                                for exception in best_results[ra.requirement.urn][
-                                    "security_exceptions"
-                                ]
+                                for exception in best_results[
+                                    "requirement_assessments"
+                                ][ra.requirement.urn]["security_exceptions"]
                             ]
                         )
 
@@ -6989,14 +7180,6 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             ).values_list("provider", flat=True)
         )
         return Response({p: p for p in providers})
-
-    def perform_create(self, serializer):
-        # create the new requirement mapping set and reload the engine.
-        instance = serializer.save()
-        from core.mappings.engine import engine
-
-        engine.load_rms_data()
-        return instance
 
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
@@ -7935,6 +8118,7 @@ class FindingViewSet(BaseModelViewSet):
         "folder",
         "status",
         "severity",
+        "priority",
         "findings_assessment",
         "filtering_labels",
         "applied_controls",
@@ -7959,6 +8143,11 @@ class FindingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Severity.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get priority choices")
+    def priority(self, request):
+        return Response(dict(Finding.PRIORITY))
 
     @action(detail=False, name="Get all findings owners")
     def owner(self, request):

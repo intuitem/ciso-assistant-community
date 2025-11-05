@@ -60,7 +60,7 @@ docker run -it --rm \
 Add to your `docker-compose.yml`:
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   n8n:
@@ -78,6 +78,7 @@ volumes:
 ```
 
 **Important**:
+
 - Replace `/path/to/ciso-assistant-community/automation/n8n/n8n-nodes-ca` with the actual path on your host
 - The node must be **built** before mounting (run `npm run build` in the node directory first)
 - Restart the container after rebuilding the node
@@ -95,6 +96,7 @@ Then restart n8n with the custom extensions path.
 ## Configuration
 
 In n8n, create a new credential for "CISO Assistant API":
+
 - **API URL**: Your CISO Assistant instance URL (e.g., `http://localhost:8000/api`)
 - **Personal Access Token (PAT)**: Your authentication token from CISO Assistant
 - **Skip TLS verification**: Enable if using self-signed certificates (optional)
