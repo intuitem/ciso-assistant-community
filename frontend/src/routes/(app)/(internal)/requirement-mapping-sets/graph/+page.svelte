@@ -12,6 +12,11 @@
 
 <div class="bg-white shadow-sm flex overflow-x-auto">
 	<div class="w-full h-screen">
-		<GraphExplorer title="Mapping Explorer" data={data.data} showNodeLabels />
+		<GraphExplorer
+			title="Mapping Explorer"
+			data={data.data}
+			color={['#5470c6', '#9ca3af']}
+			showNodeLabels
+		/>
 	</div>
 </div>
