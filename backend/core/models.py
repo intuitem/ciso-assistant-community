@@ -972,7 +972,7 @@ class LoadedLibrary(LibraryMixin):
             )
         super(LoadedLibrary, self).delete(*args, **kwargs)
         StoredLibrary.objects.filter(urn=self.urn, locale=self.locale).update(
-            is_loaded=False
+            is_loaded=False, autoload=False
         )
 
 

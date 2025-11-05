@@ -445,8 +445,13 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             lib = LoadedLibrary.objects.get(
                 **{key: pk}
             )  # There is no "locale" value involved in the fetch + we have to handle the exception if the pk urn doesn't exist
-        except:
+        except LoadedLibrary.DoesNotExist:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+        except Exception:
+            logger.error("Error retrieving library", pk=pk, exc_info=True)
+            return Response(
+                data="Error retrieving library.", status=HTTP_400_BAD_REQUEST
+            )
         data = LoadedLibraryDetailedSerializer(lib).data
         data["objects"] = lib._objects
         return Response(data)
@@ -462,8 +467,13 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(**{key: pk})
-        except:
+        except LoadedLibrary.DoesNotExist:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+        except Exception:
+            logger.error("Error unloading library", pk=pk, exc_info=True)
+            return Response(
+                data="Error unloading library.", status=HTTP_400_BAD_REQUEST
+            )
 
         if lib.reference_count != 0:
             return Response(
