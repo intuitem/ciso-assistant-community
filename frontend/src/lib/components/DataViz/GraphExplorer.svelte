@@ -4,6 +4,7 @@
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	const flash = getFlash(page);
 
@@ -57,6 +58,11 @@
 	let currentEmphasisNodeIds: number[] = []; // Track multiple emphasized nodes
 	const chart_id = `${name}_div`;
 	let resizeTimeout: ReturnType<typeof setTimeout>;
+	let categories = $state(
+		data.categories.map((c) => {
+			return { ...c, name: safeTranslate(c.name) };
+		})
+	);
 
 	// Add custom formatter for tooltip to show custom edge label format
 	// Rename to reflect that it now handles both edges and nodes
@@ -103,14 +109,11 @@
 
 	// Function to get legend configuration based on number of categories
 	const getLegendConfig = () => {
-		const categories = data.categories || [];
 		const hasMany = categories.length > maxLegendItems;
 
 		// Base legend configuration
 		const legendConfig = {
-			data: categories.map(function (a) {
-				return a.name;
-			}),
+			data: categories.map((a) => a.name),
 			type: hasMany ? 'scroll' : 'plain', // Use scroll type for many items
 			orient: legendPosition === 'left' || legendPosition === 'right' ? 'vertical' : 'horizontal',
 			...getLegendPositioning()
@@ -265,7 +268,7 @@
 							show: true
 						}
 					},
-					categories: data.categories,
+					categories: categories,
 					force: {
 						edgeLength: edgeLength,
 						repulsion: 200,
