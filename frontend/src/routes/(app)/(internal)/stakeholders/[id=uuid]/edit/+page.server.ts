@@ -144,7 +144,9 @@ export const actions: Actions = {
 		const measure = await res.json();
 
 		const stakeholderEndpoint = `${BASE_API_URL}/ebios-rm/stakeholders/${event.params.id}/`;
-		const stakeholder = await event.fetch(`${stakeholderEndpoint}object`).then((res) => res.json());
+		const stakeholder = await event
+			.fetch(`${stakeholderEndpoint}object/`)
+			.then((res) => res.json());
 
 		const measures = [...stakeholder.applied_controls, measure.id];
 
