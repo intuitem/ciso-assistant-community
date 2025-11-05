@@ -80,7 +80,6 @@
 					source={data.storedLibrariesTable}
 					URLModel="stored-libraries"
 					deleteForm={data.deleteForm}
-					server={false}
 				/>
 			</Tabs.Panel>
 			<Tabs.Panel value="loaded">
@@ -89,7 +88,6 @@
 					URLModel="loaded-libraries"
 					deleteForm={data.deleteForm}
 					detailQueryParameter="loaded"
-					server={false}
 				/>
 			</Tabs.Panel>
 			<Tabs.Panel value="mappings">
@@ -102,8 +100,6 @@
 						provider: PROVIDER_FILTER
 					}}
 					deleteForm={data.deleteForm}
-					displayActions={false}
-					server={false}
 				/>
 			</Tabs.Panel>
 		{/snippet}
