@@ -25,21 +25,6 @@ export const load = (async ({ fetch, params }) => {
 	compliance_assessment.framework = framework;
 
 	const evidenceModel = getModelInfo('evidences');
-	const url = `${BASE_API_URL}/${evidenceModel.urlModel}/status/`;
-	const response = await fetch(url);
-	const selectOptions: Record<string, any> = {};
-	if (response.ok) {
-		selectOptions['status'] = await response.json().then((data) =>
-			Object.entries(data).map(([key, value]) => ({
-				label: value,
-				value: key
-			}))
-		);
-	} else {
-		console.error(`Failed to fetch data for status: ${response.statusText}`);
-	}
-	evidenceModel['selectOptions'] = selectOptions;
-
 	const evidenceCreateSchema = modelSchema('evidences');
 	const scoreSchema = z.object({
 		is_scored: z.boolean().optional(),
