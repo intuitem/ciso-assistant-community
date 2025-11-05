@@ -7308,16 +7308,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
         categories = [{"name": "importedFrameworks"}, {"name": "notImportedFrameworks"}]
 
-        meta = {
-            "display_name": "Framework Mapping Graph",
-            "total_frameworks": len(nodes),
-            "total_mappings": len(links),
-            "max_depth_explored": max_depth,
-        }
-
-        return Response(
-            {"nodes": nodes, "links": links, "categories": categories, "meta": meta}
-        )
+        return Response({"nodes": nodes, "links": links, "categories": categories})
 
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
