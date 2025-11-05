@@ -444,7 +444,7 @@ def get_domain_export_objects(domain: Folder):
     ).distinct()
 
     reference_controls = ReferenceControl.objects.filter(
-        Q(folder__in=folders) | Q(appliedcontrol__in=applied_controls)
+        Q(folder__in=folders) | Q(applied_controls__in=applied_controls)
     ).distinct()
 
     threats = Threat.objects.filter(
