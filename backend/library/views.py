@@ -425,13 +425,6 @@ class LoadedLibraryViewSet(BaseModelViewSet):
 
     search_fields = ["name", "description", "urn", "ref_id"]
 
-    def get_queryset(self):
-        qs = super().get_queryset()
-        return qs.filter(
-            objects_meta__requirement_mapping_set__isnull=True,
-            objects_meta__requirement_mapping_sets__isnull=True,
-        )
-
     def get_serializer_class(self):
         if self.action == "list":
             return LoadedLibrarySerializer
