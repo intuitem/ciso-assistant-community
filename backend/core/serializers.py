@@ -788,6 +788,10 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     )
 
     def create(self, validated_data: Any):
+        validated_data.pop("create_remote_object", None)
+        validated_data.pop("remote_object_id", None)
+        validated_data.pop("integration_config", None)
+
         owner_data = validated_data.get("owner", [])
         applied_control = super().create(validated_data)
         findings = validated_data.pop("findings", [])
