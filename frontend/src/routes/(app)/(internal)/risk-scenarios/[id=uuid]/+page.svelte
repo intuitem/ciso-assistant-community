@@ -354,7 +354,6 @@
 			<p class="text-sm font-semibold text-gray-400">{m.existingControls()}</p>
 			<ModelTable
 				source={data.tables['risk_scenarios_e']}
-				hideFilters={true}
 				URLModel="applied-controls"
 				baseEndpoint="/applied-controls?risk_scenarios_e={page.params.id}"
 			/>
@@ -405,7 +404,6 @@
 			<p class="text-sm font-semibold text-gray-400">{m.extraAppliedControls()}</p>
 			<ModelTable
 				source={data.tables['risk_scenarios']}
-				hideFilters={true}
 				URLModel="applied-controls"
 				baseEndpoint="/applied-controls?risk_scenarios={page.params.id}"
 			/>
