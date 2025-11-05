@@ -23,6 +23,7 @@
 		maxLegendItems?: number; // New prop to control legend items
 		showNodeLabels?: boolean;
 		legendPosition?: 'top' | 'bottom' | 'left' | 'right'; // New prop for legend position
+		onNodeDoubleClick?: (params: any) => void;
 	}
 
 	let {
@@ -49,7 +50,8 @@
 		],
 		maxLegendItems = 20, // Default max legend items
 		showNodeLabels = false,
-		legendPosition = 'left' // Default legend position
+		legendPosition = 'left', // Default legend position
+		onNodeDoubleClick = () => {}
 	}: Props = $props();
 
 	let errorMessage = $state('');
@@ -380,6 +382,8 @@
 				handleNodesEmphasis(null);
 			}
 		});
+
+		chart.on('dblclick', onNodeDoubleClick);
 
 		const handleResize = () => {
 			clearTimeout(resizeTimeout);
