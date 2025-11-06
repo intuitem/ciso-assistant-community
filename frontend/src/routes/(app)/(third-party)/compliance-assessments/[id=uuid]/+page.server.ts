@@ -13,7 +13,7 @@ import { m } from '$paraglide/messages';
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
-	const objectEndpoint = `${endpoint}object`;
+	const objectEndpoint = `${endpoint}object/`;
 
 	const res = await fetch(endpoint);
 	const compliance_assessment = await res.json();

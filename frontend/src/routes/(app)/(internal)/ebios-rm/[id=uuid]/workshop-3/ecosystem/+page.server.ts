@@ -36,8 +36,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		await Promise.all(
 			model.selectFields.map(async (selectField) => {
 				const url = model.endpointUrl
-					? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}`
-					: `${BASE_API_URL}/${model.urlModel}/${selectField.field}`;
+					? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
+					: `${BASE_API_URL}/${model.urlModel}/${selectField.field}/`;
 				const response = await fetch(url);
 				if (!response.ok) {
 					console.error(`Failed to fetch data from ${url}: ${response.statusText}`);

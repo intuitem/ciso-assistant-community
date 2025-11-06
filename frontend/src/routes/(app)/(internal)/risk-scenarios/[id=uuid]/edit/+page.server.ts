@@ -199,7 +199,7 @@ export const actions: Actions = {
 		const measure = await res.json();
 
 		const scenarioEndpoint = `${BASE_API_URL}/risk-scenarios/${event.params.id}/`;
-		const scenario = await event.fetch(`${scenarioEndpoint}object`).then((res) => res.json());
+		const scenario = await event.fetch(`${scenarioEndpoint}object/`).then((res) => res.json());
 
 		const field: string = event.url.searchParams.get('field') || 'applied_controls';
 
