@@ -70,7 +70,7 @@ export const breadcrumbs = createBreadcrumbs([homeCrumb]);
 
 export function goto(
 	url: string,
-	_opts: { crumbs: typeof breadcrumbs; label: string; breadcrumbAction: 'push' | 'replace' } = {}
+	_opts: { crumbs?: typeof breadcrumbs; label: string; breadcrumbAction: 'push' | 'replace' } = {}
 ) {
 	const opts = {
 		crumbs: breadcrumbs,
