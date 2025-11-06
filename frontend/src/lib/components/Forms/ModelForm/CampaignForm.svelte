@@ -79,11 +79,11 @@
 	{form}
 	optionsEndpoint="perimeters"
 	optionsExtraFields={[['folder', 'str']]}
-	field="perimeter"
-	cacheLock={cacheLocks['perimeter']}
-	bind:cachedValue={formDataCache['perimeter']}
-	label={m.perimeter()}
-	hidden={initialData.perimeter}
+	field="perimeters"
+	cacheLock={cacheLocks['perimeters']}
+	bind:cachedValue={formDataCache['perimeters']}
+	label={m.perimeters()}
+	hidden={initialData.perimeters}
 />
 <TextField
 	type="date"
