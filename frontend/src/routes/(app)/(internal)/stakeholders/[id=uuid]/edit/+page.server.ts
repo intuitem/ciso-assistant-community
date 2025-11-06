@@ -18,7 +18,7 @@ export const load: LayoutServerLoad = async (event) => {
 	const model = getModelInfo(URLModel);
 	const stakeholderEndpoint = `${BASE_API_URL}/ebios-rm/stakeholders/${event.params.id}/`;
 	const stakeholder = await event.fetch(stakeholderEndpoint).then((res) => res.json());
-	const object = await event.fetch(`${stakeholderEndpoint}object`).then((res) => res.json());
+	const object = await event.fetch(`${stakeholderEndpoint}object/`).then((res) => res.json());
 
 	const form = await superValidate(object, zod(schema), { errors: false });
 	const selectFields = model.selectFields;
@@ -144,7 +144,9 @@ export const actions: Actions = {
 		const measure = await res.json();
 
 		const stakeholderEndpoint = `${BASE_API_URL}/ebios-rm/stakeholders/${event.params.id}/`;
-		const stakeholder = await event.fetch(`${stakeholderEndpoint}object`).then((res) => res.json());
+		const stakeholder = await event
+			.fetch(`${stakeholderEndpoint}object/`)
+			.then((res) => res.json());
 
 		const measures = [...stakeholder.applied_controls, measure.id];
 

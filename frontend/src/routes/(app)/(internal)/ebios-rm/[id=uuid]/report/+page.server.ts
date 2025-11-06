@@ -7,7 +7,7 @@ export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 	const res = await fetch(endpoint);
 	const data = await res.json();
 
-	const interface_settings = await fetch(`${BASE_API_URL}/settings/general/object`).then((res) =>
+	const interface_settings = await fetch(`${BASE_API_URL}/settings/general/object/`).then((res) =>
 		res.json()
 	);
 
