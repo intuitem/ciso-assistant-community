@@ -7,13 +7,11 @@ from ..client import make_get_request, get_paginated_results
 
 
 async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
-    """Get risk scenarios
+    """List risk scenarios from Risk Registry; filter by folder or assessment
 
     Args:
-        folder: Optional folder ID or name to filter by (filters by risk assessment's perimeter folder)
-        risk_assessment: Optional risk assessment ID or name to filter by
-
-    Query CISO Assistant Risk Registry
+        folder: Folder ID/name
+        risk_assessment: Risk assessment ID/name
     """
     try:
         from ..resolvers import resolve_folder_id, resolve_risk_assessment_id
@@ -64,12 +62,10 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
 
 
 async def get_applied_controls(folder: str = None):
-    """Get applied controls
+    """List applied controls from action plan; filter by folder
 
     Args:
-        folder: Optional folder ID or name to filter by (domain/folder to filter applied controls)
-
-    Query CISO Assistant combined action plan
+        folder: Folder ID/name
     """
     try:
         from ..resolvers import resolve_folder_id
@@ -113,13 +109,11 @@ async def get_applied_controls(folder: str = None):
 
 
 async def get_audits_progress(folder: str = None, perimeter: str = None):
-    """Get the audits progress
+    """List compliance assessments (audits) with progress metrics
 
     Args:
-        folder: Optional folder ID or name to filter by (domain/folder to filter audits)
-        perimeter: Optional perimeter ID or name to filter by
-
-    Query CISO Assistant compliance engine for audits progress
+        folder: Folder ID/name
+        perimeter: Perimeter ID/name
     """
     try:
         from ..resolvers import resolve_folder_id, resolve_perimeter_id
@@ -169,12 +163,10 @@ async def get_audits_progress(folder: str = None, perimeter: str = None):
 
 
 async def get_folders(name: str = None):
-    """Get folders (domains) in CISO Assistant
+    """List folders (domains) - organizational units containing perimeters, assets, and assessments
 
     Args:
-        name: Optional name filter
-
-    Folders (aka domains) are organizational units containing perimeters, assets, and risk assessments.
+        name: Name filter
     """
     try:
         params = {}
@@ -217,13 +209,11 @@ async def get_folders(name: str = None):
 
 
 async def get_perimeters(folder: str = None, name: str = None):
-    """Get perimeters in CISO Assistant
+    """List perimeters - scope definitions for risk assessments and audits
 
     Args:
-        folder: Optional folder ID or name filter
-        name: Optional name filter
-
-    Perimeters define the scope of risk assessments and audits within folders.
+        folder: Folder ID/name
+        name: Name filter
     """
     try:
         from ..resolvers import resolve_folder_id
@@ -271,12 +261,10 @@ async def get_perimeters(folder: str = None, name: str = None):
 
 
 async def get_risk_matrices(folder: str = None):
-    """Get all risk matrices in CISO Assistant
+    """List risk matrices with IDs and names for creating risk assessments
 
     Args:
-        folder: Optional folder ID or name to filter by (domain/folder to filter risk matrices)
-
-    Returns a list of risk matrices with their IDs and names for reference when creating risk assessments
+        folder: Folder ID/name
     """
     try:
         from ..resolvers import resolve_folder_id
@@ -317,17 +305,10 @@ async def get_risk_matrices(folder: str = None):
 
 
 async def get_risk_matrix_details(matrix_id_or_name: str):
-    """Get detailed information about a specific risk matrix including probability and impact scales
+    """Get risk matrix details: probability/impact scales and risk grid. Use to find valid indices for updating scenarios
 
     Args:
-        matrix_id_or_name: ID or name of the risk matrix
-
-    Returns detailed matrix information including:
-    - Probability scale with indices and values
-    - Impact scale with indices and values
-    - Risk level grid
-
-    Use this to determine valid values for inherent_proba, current_proba, etc. when updating risk scenarios
+        matrix_id_or_name: Matrix ID/name
     """
     try:
         from ..resolvers import resolve_risk_matrix_id
@@ -436,14 +417,11 @@ async def get_risk_matrix_details(matrix_id_or_name: str):
 
 
 async def get_risk_assessments(folder: str = None, perimeter: str = None):
-    """Get all risk assessments in CISO Assistant
+    """List risk assessments with IDs and status. Use to find risk_assessment_id for creating scenarios
 
     Args:
-        folder: Optional folder ID or name to filter by (domain/folder to filter risk assessments)
-        perimeter: Optional perimeter ID or name to filter by
-
-    Returns a list of risk assessments with their IDs, names, and status
-    Use this to find the risk_assessment_id when creating risk scenarios
+        folder: Folder ID/name
+        perimeter: Perimeter ID/name
     """
     try:
         from ..resolvers import resolve_folder_id, resolve_perimeter_id
@@ -495,15 +473,13 @@ async def get_risk_assessments(folder: str = None, perimeter: str = None):
 async def get_threats(
     provider: str = None, folder: str = None, library: str = None, limit: int = 25
 ):
-    """Get threats in CISO Assistant
+    """List threats with IDs, names, and providers
 
     Args:
-        provider: Optional provider name to filter by (e.g., "MITRE ATT&CK", "Custom")
-        folder: Optional folder ID or name to filter by (domain/folder to filter threats)
-        library: Optional library URN or ID to filter by (e.g., "urn:intuitem:risk:library:mitre-attack-enterprise-v15.1")
-        limit: Maximum number of threats to return (default: 25, set to 0 for no limit)
-
-    Returns a list of threats with their IDs, names, providers, and descriptions
+        provider: Provider name (e.g. "MITRE ATT&CK")
+        folder: Folder ID/name
+        library: Library URN/ID
+        limit: Max results (default 25, 0=unlimited)
     """
     try:
         from ..resolvers import resolve_folder_id, resolve_library_id
@@ -562,12 +538,10 @@ async def get_threats(
 
 
 async def get_assets(folder: str = None):
-    """Get all assets in CISO Assistant
+    """List assets with IDs, names, and types
 
     Args:
-        folder: Optional folder ID or name to filter by (domain/folder to filter assets)
-
-    Returns a list of assets with their IDs, names, types, and other details
+        folder: Folder ID/name
     """
     try:
         from ..resolvers import resolve_folder_id
@@ -610,12 +584,10 @@ async def get_assets(folder: str = None):
 
 
 async def get_incidents(folder: str = None):
-    """Get all incidents in CISO Assistant
+    """List incidents with IDs, severity, and status
 
     Args:
-        folder: Optional folder ID or name to filter by (domain/folder to filter incidents)
-
-    Returns a list of incidents with their IDs, names, severity, and status
+        folder: Folder ID/name
     """
     try:
         from ..resolvers import resolve_folder_id
@@ -659,12 +631,10 @@ async def get_incidents(folder: str = None):
 
 
 async def get_security_exceptions(folder: str = None):
-    """Get all security exceptions in CISO Assistant
+    """List security exceptions with IDs, approval status, and expiry dates
 
     Args:
-        folder: Optional folder ID or name to filter by (domain/folder to filter security exceptions)
-
-    Returns a list of security exceptions with their IDs, names, approval status, and expiry dates
+        folder: Folder ID/name
     """
     try:
         from ..resolvers import resolve_folder_id
@@ -708,13 +678,10 @@ async def get_security_exceptions(folder: str = None):
 
 
 async def get_frameworks(folder: str = None):
-    """Get all frameworks available in CISO Assistant
+    """List imported frameworks available for compliance assessments. Use to find framework IDs/URNs for audits
 
     Args:
-        folder: Optional folder ID or name to filter by (domain/folder to filter frameworks)
-
-    Returns a list of frameworks that have been imported/loaded and are available for creating compliance assessments.
-    Use this to find framework IDs/URNs/names for creating audits.
+        folder: Folder ID/name
     """
     try:
         from ..resolvers import resolve_folder_id
@@ -758,12 +725,10 @@ async def get_frameworks(folder: str = None):
 
 
 async def get_business_impact_analyses(folder: str = None):
-    """Get all Business Impact Analyses (BIAs) in CISO Assistant
+    """List Business Impact Analyses (BIAs) with status and details
 
     Args:
-        folder: Optional folder ID or name to filter by (domain/folder to filter BIAs by their perimeter's folder)
-
-    Returns a list of BIAs with their status and basic information
+        folder: Folder ID/name
     """
     try:
         from ..resolvers import resolve_folder_id
@@ -813,14 +778,11 @@ async def get_requirement_assessments(
     compliance_assessment_id_or_name: str = None,
     ref_id: str = None,
 ):
-    """Get requirement assessments (individual requirements within audits)
+    """List requirement assessments (audit requirements) with IDs and results. Use IDs with update_requirement_assessment()
 
     Args:
-        compliance_assessment_id_or_name: Optional ID or name of compliance assessment to filter by
-        ref_id: Optional reference ID to filter by (e.g., "ISO 27001:2022 A.5.1")
-
-    Returns a list of requirement assessments with their IDs, statuses, and results.
-    Use the IDs to update specific requirements with update_requirement_assessment().
+        compliance_assessment_id_or_name: Compliance assessment ID/name
+        ref_id: Reference ID (e.g. "ISO 27001:2022 A.5.1")
     """
     try:
         from ..resolvers import resolve_framework_id
@@ -886,9 +848,7 @@ async def get_requirement_assessments(
 
 
 async def get_quantitative_risk_studies():
-    """Get all quantitative risk studies in CISO Assistant
-    Returns a list of quantitative risk studies with their IDs, names, status, and basic information
-    """
+    """List quantitative risk studies with IDs, names, and status"""
     try:
         res = make_get_request("/crq/quantitative-risk-studies/")
 
@@ -921,12 +881,10 @@ async def get_quantitative_risk_studies():
 
 
 async def get_quantitative_risk_scenarios(study_id_or_name: str = None):
-    """Get quantitative risk scenarios in CISO Assistant
+    """List quantitative risk scenarios with IDs, status, and ALE
 
     Args:
-        study_id_or_name: Optional ID or name of quantitative risk study to filter by
-
-    Returns a list of quantitative risk scenarios with their IDs, names, status, and ALE information
+        study_id_or_name: Study ID/name
     """
     try:
         params = {}
@@ -985,12 +943,10 @@ async def get_quantitative_risk_scenarios(study_id_or_name: str = None):
 
 
 async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
-    """Get quantitative risk hypotheses in CISO Assistant
+    """List quantitative risk hypotheses with IDs, risk stage, and metrics
 
     Args:
-        scenario_id_or_name: Optional ID or name of quantitative risk scenario to filter by
-
-    Returns a list of quantitative risk hypotheses with their IDs, names, risk stage, and metrics
+        scenario_id_or_name: Scenario ID/name
     """
     try:
         params = {}
