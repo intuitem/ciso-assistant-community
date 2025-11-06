@@ -236,7 +236,7 @@ export const actions: Actions = {
 
 		const requirementAssessmentEndpoint = `${BASE_API_URL}/requirement-assessments/${event.params.id}/`;
 		const requirementAssessment = await event
-			.fetch(`${requirementAssessmentEndpoint}object`)
+			.fetch(`${requirementAssessmentEndpoint}object/`)
 			.then((res) => res.json());
 
 		const measures = [...requirementAssessment.applied_controls, measure.id];
