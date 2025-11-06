@@ -569,8 +569,18 @@ class LibraryUpdater:
                             )
                         )
 
-                # update anwsers for each ra for the current requirement_node, when relevant
+                # update anwsers or score for each ra for the current requirement_node, when relevant
                 for ra in existing_requirement_assessment_objects.get(urn, []):
+                    if ra.is_scored and ra.score is not None:
+                        if ra.score < new_framework.min_score:
+                            ra.score = new_framework.min_score
+                            if ra not in requirement_assessment_objects_to_update:
+                                requirement_assessment_objects_to_update.append(ra)
+                        elif ra.score > new_framework.max_score:
+                            ra.score = new_framework.max_score
+                            if ra not in requirement_assessment_objects_to_update:
+                                requirement_assessment_objects_to_update.append(ra)
+
                     if not questions:
                         requirement_assessment_objects_to_update.append(ra)
                         continue
@@ -683,13 +693,33 @@ class LibraryUpdater:
             if requirement_assessment_objects_to_update:
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessment_objects_to_update,
-                    ["answers"],
+                    ["answers", "score"],
                     batch_size=100,
                 )
 
             if requirement_assessment_objects_to_create:
                 RequirementAssessment.objects.bulk_create(
                     requirement_assessment_objects_to_create, batch_size=100
+                )
+
+            # Update compliance assessments score boundaries
+            compliance_assessments_to_update = []
+            for ca in compliance_assessments:
+                if (
+                    ca.min_score != new_framework.min_score
+                    or ca.max_score != new_framework.max_score
+                    or ca.scores_definition != new_framework.scores_definition
+                ):
+                    ca.min_score = new_framework.min_score
+                    ca.max_score = new_framework.max_score
+                    ca.scores_definition = new_framework.scores_definition
+                    compliance_assessments_to_update.append(ca)
+
+            if compliance_assessments_to_update:
+                ComplianceAssessment.objects.bulk_update(
+                    compliance_assessments_to_update,
+                    ["min_score", "max_score", "scores_definition"],
+                    batch_size=100,
                 )
 
     def update_risk_matrices(self):
