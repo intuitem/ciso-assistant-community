@@ -466,6 +466,10 @@ class LibraryUpdater:
             requirement_nodes = new_framework["requirement_nodes"]
             framework_dict = {**new_framework}
             del framework_dict["requirement_nodes"]
+            prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
+            prev_min = getattr(prev_fw, "min_score", None)
+            prev_max = getattr(prev_fw, "max_score", None)
+            prev_def = getattr(prev_fw, "scores_definition", None)
 
             new_framework, _ = Framework.objects.update_or_create(
                 urn=new_framework["urn"],
@@ -520,7 +524,7 @@ class LibraryUpdater:
             existing_requirement_assessment_objects = defaultdict(list)
             for ra in RequirementAssessment.objects.filter(
                 requirement__framework=new_framework
-            ):
+            ).select_related("compliance_assessment"):
                 existing_requirement_assessment_objects[
                     ra.requirement.urn.lower()
                 ].append(ra)
@@ -530,6 +534,32 @@ class LibraryUpdater:
             requirement_node_objects_to_update = []
             order_id = 0
             all_fields_to_update = set()
+
+            # Update compliance assessments score boundaries
+            compliance_assessments_to_update = []
+            for ca in compliance_assessments:
+                # preserve user overrides: update only if CA still equals previous framework defaults
+                still_on_prev_defaults = (
+                    ca.min_score == prev_min
+                    and ca.max_score == prev_max
+                    and ca.scores_definition == prev_def
+                )
+                if still_on_prev_defaults and (
+                    ca.min_score != new_framework.min_score
+                    or ca.max_score != new_framework.max_score
+                    or ca.scores_definition != new_framework.scores_definition
+                ):
+                    ca.min_score = new_framework.min_score
+                    ca.max_score = new_framework.max_score
+                    ca.scores_definition = new_framework.scores_definition
+                    compliance_assessments_to_update.append(ca)
+
+            if compliance_assessments_to_update:
+                ComplianceAssessment.objects.bulk_update(
+                    compliance_assessments_to_update,
+                    ["min_score", "max_score", "scores_definition"],
+                    batch_size=100,
+                )
 
             # main loop by requirement_node
             for requirement_node in requirement_nodes:
@@ -572,14 +602,20 @@ class LibraryUpdater:
                 # update anwsers or score for each ra for the current requirement_node, when relevant
                 for ra in existing_requirement_assessment_objects.get(urn, []):
                     if ra.is_scored and ra.score is not None:
-                        if ra.score < new_framework.min_score:
-                            ra.score = new_framework.min_score
-                            if ra not in requirement_assessment_objects_to_update:
-                                requirement_assessment_objects_to_update.append(ra)
-                        elif ra.score > new_framework.max_score:
-                            ra.score = new_framework.max_score
-                            if ra not in requirement_assessment_objects_to_update:
-                                requirement_assessment_objects_to_update.append(ra)
+                        ca_min = (
+                            ra.compliance_assessment.min_score
+                            if ra.compliance_assessment.min_score is not None
+                            else new_framework.min_score
+                        )
+                        ca_max = (
+                            ra.compliance_assessment.max_score
+                            if ra.compliance_assessment.max_score is not None
+                            else new_framework.max_score
+                        )
+                        clamped = min(max(ra.score, ca_min), ca_max)
+                        if clamped != ra.score:
+                            ra.score = clamped
+                            requirement_assessment_objects_to_update.append(ra)
 
                     if not questions:
                         requirement_assessment_objects_to_update.append(ra)
@@ -700,26 +736,6 @@ class LibraryUpdater:
             if requirement_assessment_objects_to_create:
                 RequirementAssessment.objects.bulk_create(
                     requirement_assessment_objects_to_create, batch_size=100
-                )
-
-            # Update compliance assessments score boundaries
-            compliance_assessments_to_update = []
-            for ca in compliance_assessments:
-                if (
-                    ca.min_score != new_framework.min_score
-                    or ca.max_score != new_framework.max_score
-                    or ca.scores_definition != new_framework.scores_definition
-                ):
-                    ca.min_score = new_framework.min_score
-                    ca.max_score = new_framework.max_score
-                    ca.scores_definition = new_framework.scores_definition
-                    compliance_assessments_to_update.append(ca)
-
-            if compliance_assessments_to_update:
-                ComplianceAssessment.objects.bulk_update(
-                    compliance_assessments_to_update,
-                    ["min_score", "max_score", "scores_definition"],
-                    batch_size=100,
                 )
 
     def update_risk_matrices(self):
