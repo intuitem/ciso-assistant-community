@@ -49,8 +49,6 @@
 		legendPosition = 'left' // Default legend position
 	}: Props = $props();
 
-	data.categories.sort((a, b) => a.name > b.name);
-
 	let errorMessage = $state('');
 	let searchQuery = $state('');
 	let chart: echarts.ECharts;
