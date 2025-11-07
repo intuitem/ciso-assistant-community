@@ -570,7 +570,8 @@ export const EntitiesSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	relationship: z.string().optional().array().optional()
+	relationship: z.string().optional().array().optional(),
+	legal_identifiers: z.record(z.string()).optional()
 });
 
 export const EntityAssessmentSchema = z.object({

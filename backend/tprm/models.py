@@ -33,6 +33,12 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         verbose_name=_("Relationship"),
         help_text=_("Type of relationship with this entity"),
     )
+    legal_identifiers = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Legal identifiers"),
+        help_text=_("Legal identifiers (LEI, EUID, VAT, DUNS, etc.)"),
+    )
 
     fields_to_check = ["name"]
 

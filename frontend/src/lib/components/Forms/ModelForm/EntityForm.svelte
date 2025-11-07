@@ -2,6 +2,7 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import LegalIdentifierField from '../LegalIdentifierField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -56,4 +57,10 @@
 	bind:cachedValue={formDataCache['relationship']}
 	label={m.relationship()}
 	multiple
+/>
+<LegalIdentifierField
+	{form}
+	field="legal_identifiers"
+	cacheLock={cacheLocks['legal_identifiers']}
+	bind:cachedValue={formDataCache['legal_identifiers']}
 />
