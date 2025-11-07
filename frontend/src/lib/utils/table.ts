@@ -834,6 +834,15 @@ const ASSET_CLASS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ASSET_IS_CRITICAL_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_critical',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
 const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1286,7 +1295,8 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			type: ASSET_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER,
-			asset_class: ASSET_CLASS_FILTER
+			asset_class: ASSET_CLASS_FILTER,
+			is_critical: ASSET_IS_CRITICAL_FILTER
 		}
 	},
 	'asset-class': {

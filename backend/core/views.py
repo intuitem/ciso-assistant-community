@@ -675,6 +675,7 @@ class AssetFilter(GenericFilterSet):
             "filtering_labels",
             "asset_class",
             "personal_data",
+            "is_critical",
         ]
 
 
