@@ -441,7 +441,7 @@
 		{:else if URLModel === 'requirement-assessments'}
 			<RequirementAssessmentsForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
 		{:else if URLModel === 'entities'}
-			<EntitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<EntitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {...rest} />
 		{:else if URLModel === 'entity-assessments'}
 			<EntityAssessmentForm
 				{form}

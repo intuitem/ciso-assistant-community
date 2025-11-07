@@ -1482,8 +1482,8 @@ export const listViewFields = {
 		}
 	},
 	entities: {
-		head: ['name', 'description', 'domain', 'relationship', 'ownedFolders'],
-		body: ['name', 'description', 'folder', 'relationship', 'owned_folders'],
+		head: ['refId', 'name', 'description', 'domain', 'relationship'],
+		body: ['ref_id', 'name', 'description', 'folder', 'relationship'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER

@@ -13,6 +13,7 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
+		object?: any;
 	}
 
 	let {
@@ -20,7 +21,8 @@
 		model,
 		cacheLocks = {},
 		formDataCache = $bindable({}),
-		initialData = {}
+		initialData = {},
+		object = {}
 	}: Props = $props();
 </script>
 
@@ -49,15 +51,17 @@
 	label={m.domain()}
 	hidden={initialData.folder}
 />
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="terminologies?field_path=entity.relationship"
-	field="relationship"
-	cacheLock={cacheLocks['relationship']}
-	bind:cachedValue={formDataCache['relationship']}
-	label={m.relationship()}
-	multiple
-/>
+{#if !object.builtin}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="terminologies?field_path=entity.relationship"
+		field="relationship"
+		cacheLock={cacheLocks['relationship']}
+		bind:cachedValue={formDataCache['relationship']}
+		label={m.relationship()}
+		multiple
+	/>
+{/if}
 <LegalIdentifierField
 	{form}
 	field="legal_identifiers"
