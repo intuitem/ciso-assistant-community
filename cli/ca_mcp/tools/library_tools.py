@@ -7,14 +7,11 @@ async def get_stored_libraries(
     object_type: str = None,
     provider: str = None,
 ):
-    """Get available libraries (frameworks) that can be imported into CISO Assistant
+    """List available libraries (frameworks) for import. Use URN/ID with import_stored_library()
 
     Args:
-        object_type: Optional filter by object type (e.g., "framework", "risk_matrix", "requirement_mapping_set")
-        provider: Optional filter by provider name
-
-    Returns a list of stored libraries with their URNs, names, versions, and descriptions.
-    Use the URN or ID to import a library with import_stored_library().
+        object_type: Object type (e.g. "framework", "risk_matrix")
+        provider: Provider name
     """
     try:
         params = {}
@@ -49,11 +46,7 @@ async def get_stored_libraries(
 
 
 async def get_loaded_libraries():
-    """Get loaded/imported libraries (frameworks) in CISO Assistant
-
-    Returns a list of libraries that have already been imported and are available for use.
-    These are frameworks/libraries that have been activated in the system.
-    """
+    """List loaded/imported libraries (frameworks) activated in the system"""
     try:
         # Fetch all loaded libraries (with pagination)
         libraries, error = fetch_all_results("/loaded-libraries/")
@@ -81,13 +74,10 @@ async def get_loaded_libraries():
 
 
 async def import_stored_library(urn_or_id: str) -> str:
-    """Import a stored library (framework) into CISO Assistant
+    """Import library (framework) to make it available for compliance assessments. Use get_stored_libraries() to find URNs
 
     Args:
-        urn_or_id: URN or ID of the stored library to import (e.g., "urn:intuitem:risk:library:nist-csf-2.0")
-
-    This makes the library available for use (e.g., creating compliance assessments with the framework).
-    Use get_stored_libraries() to see available libraries.
+        urn_or_id: Library URN/ID (e.g. "urn:intuitem:risk:library:nist-csf-2.0")
     """
     try:
         res = make_post_request(f"/stored-libraries/{urn_or_id}/import/", {})
