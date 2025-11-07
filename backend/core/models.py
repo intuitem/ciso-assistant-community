@@ -6727,6 +6727,10 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     def risk_assessments(self):
         return self.task_template.risk_assessments.all()
 
+    @property
+    def findings_assessment(self):
+        return self.task_template.findings_assessment.all()
+
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"
