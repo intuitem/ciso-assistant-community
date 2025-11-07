@@ -1125,3 +1125,15 @@ auditlog.register(
     OperationalScenario,
     exclude_fields=common_exclude,
 )
+auditlog.register(
+    ElementaryAction,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    KillChain,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OperatingMode,
+    exclude_fields=common_exclude,
+)

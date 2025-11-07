@@ -7,6 +7,8 @@ from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
 from django.db.models import Count
 
+from auditlog.registry import auditlog
+
 
 class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
     class Meta:
@@ -534,3 +536,42 @@ class DataBreach(NameDescriptionFolderMixin):
         ordering = ["-discovered_on"]
         verbose_name = "Data Breach"
         verbose_name_plural = "Data Breaches"
+
+
+common_exclude = ["created_at", "updated_at"]
+auditlog.register(
+    Processing,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Purpose,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    PersonalData,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    DataSubject,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    DataRecipient,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    DataContractor,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    DataTransfer,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    RightRequest,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    DataBreach,
+    exclude_fields=common_exclude,
+)
