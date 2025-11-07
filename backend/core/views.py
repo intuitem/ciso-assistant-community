@@ -242,13 +242,10 @@ class CustomOrderingFilter(filters.OrderingFilter):
 
     ordering_mapping: dict[str, str]
 
-    def __init_subclass__(cls):
-        assert hasattr(cls, "ordering_mapping"), (
-            f"Subclasses of {cls.__name__} must define the ordering_mapping attribute."
-        )
-
     def get_ordering(self, request, queryset, view) -> Optional[list[str]]:
-        if (ordering_list := super().get_ordering(request, queryset, view)) is None:
+        if (
+            ordering_list := super().get_ordering(request, queryset, view)
+        ) is None or hasattr(self, "ordering_mapping") is False:
             return ordering_list
 
         new_ordering_list = []
@@ -270,7 +267,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        CustomOrderingFilter,
     ]
     ordering = ["created_at"]
     ordering_fields = "__all__"
