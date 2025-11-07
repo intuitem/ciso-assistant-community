@@ -1121,5 +1121,5 @@ class PersonalAccessToken(models.Model):
 auditlog.register(
     User,
     m2m_fields={"user_groups"},
-    exclude_fields=["created_at", "updated_at", "password"],
+    exclude_fields=["created_at", "updated_at"],
 )
