@@ -482,12 +482,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'support_assets' },
 			{ field: 'children_assets' },
 			{ field: 'owner' },
+			{ field: 'is_critical' },
 			{ field: 'filtering_labels' },
 			{ field: 'security_objectives', tooltip: 'securityObjectivesTooltip' },
 			{ field: 'disaster_recovery_objectives', tooltip: 'disasterRecoveryObjectivesTooltip' },
 			{ field: 'security_capabilities', tooltip: 'securityCapabilitiesTooltip' },
 			{ field: 'recovery_capabilities', tooltip: 'recoveryCapabilitiesTooltip' },
 			{ field: 'reference_link' },
+			{ field: 'solutions' },
 			{ field: 'observation' }
 		],
 		reverseForeignKeyFields: [
@@ -511,7 +513,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
-			{ field: 'overridden_children_capabilities', urlModel: 'asset-capabilities' }
+			{ field: 'overridden_children_capabilities', urlModel: 'asset-capabilities' },
+			{ field: 'solutions', urlModel: 'solutions' }
 		],
 		selectFields: [{ field: 'type' }, { field: 'asset_class' }],
 		filters: [

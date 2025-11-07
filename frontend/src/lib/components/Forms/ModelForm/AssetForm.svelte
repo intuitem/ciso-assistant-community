@@ -130,6 +130,13 @@
 	bind:cachedValue={formDataCache['owner']}
 	label={m.owner()}
 />
+<Checkbox
+	{form}
+	field="is_critical"
+	label={m.isCritical()}
+	cacheLock={cacheLocks['is_critical']}
+	bind:cachedValue={formDataCache['is_critical']}
+/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
@@ -286,6 +293,18 @@
 		helpText={m.observationHelpText()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="solutions"
+		optionsLabelField="auto"
+		optionsExtraFields={[['provider_entity', 'str']]}
+		field="solutions"
+		cacheLock={cacheLocks['solutions']}
+		bind:cachedValue={formDataCache['solutions']}
+		label={m.solutions()}
+		helpText={m.solutionsLinkedToAssetHelpText()}
 	/>
 </Dropdown>
 {#if initialData.ebios_rm_studies}
