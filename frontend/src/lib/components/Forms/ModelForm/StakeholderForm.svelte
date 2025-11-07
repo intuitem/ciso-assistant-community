@@ -2,7 +2,6 @@
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '../Checkbox.svelte';
@@ -36,7 +35,6 @@
 
 	function modalMeasureCreateForm(): void {
 		const measureModel = page.data.measureModel;
-		console.log('measureModel', measureModel);
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
@@ -110,15 +108,6 @@
 	<div class="flex flex-wrap items-center gap-4">
 		<div>
 			<span class="flex flex-row space-x-4">
-				<Select
-					{form}
-					options={model.selectOptions['category']}
-					field="category"
-					label={m.category()}
-					cacheLock={cacheLocks['category']}
-					bind:cachedValue={formDataCache['category']}
-					helpText={m.stakeholderCategoryHelpText()}
-				/>
 				<AutocompleteSelect
 					{form}
 					optionsEndpoint="entities"
@@ -128,6 +117,33 @@
 					label={m.entity()}
 					hidden={initialData.entity}
 					helpText={m.stakeholderEntityHelpText()}
+					optionsInfoFields={{
+						fields: [
+							{
+								field: 'relationship',
+								display: (relationships) => {
+									if (!relationships || relationships.length === 0) return '';
+									return relationships.map((r) => safeTranslate(r.str || r.name || r)).join(' | ');
+								}
+							}
+						],
+						position: 'suffix',
+						separator: ' | ',
+						classes: 'text-xs text-surface-500'
+					}}
+				/>
+				<AutocompleteSelect
+					{form}
+					optionsEndpoint="terminologies"
+					optionsDetailedUrlParameters={[
+						['field_path', 'entity.relationship'],
+						['is_visible', 'true']
+					]}
+					field="category"
+					label={m.category()}
+					cacheLock={cacheLocks['category']}
+					bind:cachedValue={formDataCache['category']}
+					helpText={m.stakeholderCategoryHelpText()}
 				/>
 			</span>
 

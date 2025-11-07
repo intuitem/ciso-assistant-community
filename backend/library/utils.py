@@ -1,14 +1,9 @@
 import time
-from icecream import ic
 
 from .helpers import get_referential_translation
-from pathlib import Path
 from typing import List, Union
-from django.core.exceptions import SuspiciousFileOperation, ValidationError
-from django.http import Http404
 
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
-from ciso_assistant import settings
 from core.models import (
     Framework,
     RequirementMapping,
@@ -90,6 +85,7 @@ class RequirementNodeImporter:
             name=self.requirement_data.get("name"),
             description=self.requirement_data.get("description"),
             implementation_groups=self.requirement_data.get("implementation_groups"),
+            weight=self.requirement_data.get("weight", 1),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),
@@ -204,6 +200,8 @@ class RequirementMappingSetImporter:
         self,
         library_object: LoadedLibrary,
     ):
+        from core.mappings.engine import engine
+
         _target_framework = Framework.objects.get(
             urn=self.data["target_framework_urn"].lower(), default_locale=True
         )
@@ -219,6 +217,7 @@ class RequirementMappingSetImporter:
         )
         for mapping in self._requirement_mappings:
             mapping.load(mapping_set)
+        transaction.on_commit(lambda: engine.load_rms_data())
         return mapping_set
 
     def init(self) -> Union[str, None]:

@@ -565,18 +565,18 @@
 																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 																}) as val}
 																	<li>
-																		{#if key === 'security_objectives'}
+																		{#if key === 'security_objectives' || key === 'security_capabilities'}
 																			{@const [securityObjectiveName, securityObjectiveValue] =
 																				Object.entries(val)[0]}
 																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
 																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
-																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
+																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
 																			<Anchor href={itemHref} class="anchor" stopPropagation
 																				>{val.str}</Anchor
 																			>
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
-																		{:else if unsafeTranslate(val.split(':')[0])}
+																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
 																			<span class="text"
 																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
 																				{val.split(':')[1]}</span

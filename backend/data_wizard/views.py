@@ -16,6 +16,8 @@ from core.models import (
     RiskScenario,
     RiskMatrix,
     AppliedControl,
+    ReferenceControl,
+    Threat,
 )
 from core.serializers import (
     AssetWriteSerializer,
@@ -28,6 +30,8 @@ from core.serializers import (
     UserWriteSerializer,
     RiskAssessmentWriteSerializer,
     RiskScenarioWriteSerializer,
+    ReferenceControlWriteSerializer,
+    ThreatWriteSerializer,
 )
 from ebios_rm.serializers import ElementaryActionWriteSerializer
 from iam.models import RoleAssignment
@@ -94,7 +98,7 @@ class LoadFileView(APIView):
             )
 
         return Response(
-            {"message": "File loaded successfully", "results": []},
+            {"message": "File loaded successfully", "results": res},
             status=status.HTTP_200_OK,
         )
 
@@ -109,7 +113,6 @@ class LoadFileView(APIView):
         matrix_id=None,
     ):
         records = dataframe.to_dict(orient="records")
-        logger.warning("I am here")
         folders_map = get_accessible_objects(request.user)
 
         # Dispatch to appropriate handler
@@ -142,6 +145,12 @@ class LoadFileView(APIView):
             return self._process_elementary_actions(
                 request, records, folders_map, folder_id
             )
+        elif model_type == "ReferenceControl":
+            return self._process_reference_controls(
+                request, records, folders_map, folder_id
+            )
+        elif model_type == "Threat":
+            return self._process_threats(request, records, folders_map, folder_id)
         else:
             return {
                 "successful": 0,
@@ -461,6 +470,147 @@ class LoadFileView(APIView):
 
         logger.info(
             f"Elementary Action import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
+    def _process_reference_controls(self, request, records, folders_map, folder_id):
+        """Process reference controls import from Excel"""
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        # Define category mapping
+        CATEGORY_MAP = {
+            # English
+            "policy": "policy",
+            "process": "process",
+            "technical": "technical",
+            "physical": "physical",
+            "procedure": "procedure",
+        }
+
+        # Define CSF function mapping
+        FUNCTION_MAP = {
+            # English
+            "govern": "govern",
+            "identify": "identify",
+            "protect": "protect",
+            "detect": "detect",
+            "respond": "respond",
+            "recover": "recover",
+            # Variations
+            "governance": "govern",
+        }
+
+        for record in records:
+            # Get domain from record or use fallback
+            domain = folder_id
+            if record.get("domain") != "":
+                domain = folders_map.get(record.get("domain"), folder_id)
+
+            # Check if name is provided as it's mandatory
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
+                )
+                continue
+
+            # Map category
+            category = None
+            if record.get("category", ""):
+                category_value = str(record.get("category")).strip().lower()
+                category = CATEGORY_MAP.get(category_value)
+
+            # Map function (csf_function)
+            csf_function = None
+            if record.get("function", ""):
+                function_value = str(record.get("function")).strip().lower()
+                csf_function = FUNCTION_MAP.get(function_value)
+
+            # Prepare data for serializer
+            reference_control_data = {
+                "ref_id": record.get("ref_id", ""),
+                "name": record.get("name"),  # Name is mandatory
+                "description": record.get("description", ""),
+                "folder": domain,
+            }
+
+            # Add optional fields if valid
+            if category:
+                reference_control_data["category"] = category
+            if csf_function:
+                reference_control_data["csf_function"] = csf_function
+
+            # Use the serializer for validation and saving
+            serializer = ReferenceControlWriteSerializer(
+                data=reference_control_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Error creating reference control {record.get('name')}: {str(e)}"
+                )
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        logger.info(
+            f"Reference Control import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
+    def _process_threats(self, request, records, folders_map, folder_id):
+        """Process threats import from Excel"""
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        for record in records:
+            # Get domain from record or use fallback
+            domain = folder_id
+            if record.get("domain") != "":
+                domain = folders_map.get(record.get("domain"), folder_id)
+
+            # Check if name is provided as it's mandatory
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
+                )
+                continue
+
+            # Prepare data for serializer
+            threat_data = {
+                "ref_id": record.get("ref_id", ""),
+                "name": record.get("name"),  # Name is mandatory
+                "description": record.get("description", ""),
+                "folder": domain,
+            }
+
+            # Use the serializer for validation and saving
+            serializer = ThreatWriteSerializer(
+                data=threat_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(f"Error creating threat {record.get('name')}: {str(e)}")
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        logger.info(
+            f"Threat import complete. Success: {results['successful']}, Failed: {results['failed']}"
         )
         return results
 

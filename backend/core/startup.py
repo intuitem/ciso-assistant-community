@@ -59,6 +59,7 @@ READER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "view_escalationthreshold",
     "view_assetclass",
+    "view_assetcapability",
     # privacy,
     "view_processing",
     "view_processingnature",
@@ -83,6 +84,8 @@ READER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    # integrations
+    "view_syncmapping",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -131,6 +134,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "view_escalationthreshold",
     "view_assetclass",
+    "view_assetcapability",
     # campaigns,
     "view_campaign",
     # privacy,
@@ -154,6 +158,8 @@ APPROVER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    # integrations
+    "view_syncmapping",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -303,6 +309,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    "view_assetcapability",
     # campaigns,
     "view_campaign",
     # privacy,
@@ -382,6 +389,12 @@ ANALYST_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # integrations
+    "view_integrationconfiguration",
+    "add_syncmapping",
+    "view_syncmapping",
+    "change_syncmapping",
+    "delete_syncmapping",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -467,6 +480,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_threat",
     "view_user",
     "view_usergroup",
+    "change_usergroup",
+    "delete_usergroup",
     "add_ebiosrmstudy",
     "view_ebiosrmstudy",
     "change_ebiosrmstudy",
@@ -539,6 +554,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    "view_assetcapability",
     # campaigns,
     "add_campaign",
     "view_campaign",
@@ -631,6 +647,14 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # integrations
+    "add_integrationconfiguration",
+    "view_integrationconfiguration",
+    "delete_integrationconfiguration",
+    "add_syncmapping",
+    "view_syncmapping",
+    "change_syncmapping",
+    "delete_syncmapping",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -639,6 +663,8 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_user",
     "delete_user",
     "view_usergroup",
+    "change_usergroup",
+    "delete_usergroup",
     "add_event",
     "view_event",
     "change_event",
@@ -651,6 +677,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_assetclass",
     "change_assetclass",
     "delete_assetclass",
+    "view_assetcapability",
     "add_threat",
     "view_threat",
     "change_threat",
@@ -920,6 +947,15 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_role",
     "delete_role",
     "view_permission",
+    # integrations
+    "add_integrationconfiguration",
+    "view_integrationconfiguration",
+    "change_integrationconfiguration",
+    "delete_integrationconfiguration",
+    "add_syncmapping",
+    "view_syncmapping",
+    "change_syncmapping",
+    "delete_syncmapping",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -946,11 +982,15 @@ def startup(sender: AppConfig, **kwargs):
     """
     from django.contrib.auth.models import Permission
 
-    from core.models import AssetClass, Terminology
+    from core.models import AssetCapability, AssetClass, Terminology
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import ProcessingNature
     from global_settings.models import GlobalSettings
+    from integrations.models import IntegrationProvider
+
+    # first load in memory of the frameworks and mappings
+    from core.mappings.engine import engine
 
     print("startup handler: initialize database")
 
@@ -1072,43 +1112,59 @@ def startup(sender: AppConfig, **kwargs):
     try:
         Terminology.create_default_qualifications()
     except Exception as e:
-        logger.error("Error creating default qualifications", exc_info=e)
+        logger.error("Error creating default qualifications", exc_info=True)
 
     # Create default accreditation status
     try:
         Terminology.create_default_accreditations_status()
     except Exception as e:
-        logger.error("Error creating default accreditation status", exc_info=e)
+        logger.error("Error creating default accreditation status", exc_info=True)
 
     # Create default accreditation category
     try:
         Terminology.create_default_accreditations_category()
     except Exception as e:
-        logger.error("Error creating default accreditation category", exc_info=e)
+        logger.error("Error creating default accreditation category", exc_info=True)
 
     # Create default Processing natures
     try:
         ProcessingNature.create_default_values()
     except Exception as e:
-        logger.error("Error creating default ProcessingNature", exc_info=e)
+        logger.error("Error creating default ProcessingNature", exc_info=True)
 
     # Create default AssetClass
     try:
         AssetClass.create_default_values()
     except Exception as e:
-        logger.error("Error creating default AssetClass", exc_info=e)
+        logger.error("Error creating default AssetClass", exc_info=True)
+
+    # Create default AssetCapability
+    try:
+        AssetCapability.create_default_values()
+    except Exception as e:
+        logger.error("Error creating default AssetCapability", exc_info=True)
 
     # Create default Terminologies
     try:
         Terminology.create_default_roto_risk_origins()
     except Exception as e:
-        logger.error("Error creating default ROTO Risk Origins", exc_info=e)
+        logger.error("Error creating default ROTO Risk Origins", exc_info=True)
 
     # Create default Entity Relationships
     try:
         Terminology.create_default_entity_relationships()
     except Exception as e:
-        logger.error("Error creating default Entity Relationships", exc_info=e)
+        logger.error("Error creating default Entity Relationships", exc_info=True)
+
+    # Init integration providers
+
+    try:
+        IntegrationProvider.objects.get_or_create(
+            name="jira",
+            defaults={"provider_type": IntegrationProvider.ProviderType.ITSM},
+        )
+    except Exception as e:
+        logger.error("Error creating Jira IntegrationProvider", exc_info=True)
 
     call_command("storelibraries")
 
@@ -1122,7 +1178,7 @@ def startup(sender: AppConfig, **kwargs):
                 email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
             )
         except Exception as e:
-            logger.error("Error creating superuser", exc_info=e)
+            logger.error("Error creating superuser", exc_info=True)
 
     # add administrators group to superusers (for resiliency)
     administrators = UserGroup.objects.get(

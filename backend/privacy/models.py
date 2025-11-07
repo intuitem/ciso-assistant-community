@@ -256,15 +256,12 @@ class PersonalData(NameDescriptionFolderMixin):
             .order_by("-count")
         )
 
-        # Convert to list of dictionaries with readable category names
+        # Convert to list of dictionaries with category codes for frontend translation
         result = []
         for item in categories:
             category_code = item["category"]
-            category_name = dict(cls.PERSONAL_DATA_CHOICES).get(
-                category_code, category_code
-            )
             result.append(
-                {"id": category_code, "name": category_name, "value": item["count"]}
+                {"id": category_code, "name": category_code, "value": item["count"]}
             )
 
         return result
