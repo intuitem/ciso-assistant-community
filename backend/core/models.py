@@ -732,6 +732,17 @@ class LibraryUpdater:
                     ["answers", "score"],
                     batch_size=100,
                 )
+                # Keep selected_implementation_groups consistent for dynamic frameworks
+                if new_framework.is_dynamic():
+                    impacted_ca_ids = {
+                        ra.compliance_assessment_id
+                        for ra in requirement_assessment_objects_to_update
+                        if ra.answers is not None  # answers potentially changed
+                    }
+                    for ca in ComplianceAssessment.objects.filter(
+                        id__in=impacted_ca_ids
+                    ):
+                        update_selected_implementation_groups(ca)
 
             if requirement_assessment_objects_to_create:
                 RequirementAssessment.objects.bulk_create(
