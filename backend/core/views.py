@@ -243,6 +243,9 @@ class CustomOrderingFilter(filters.OrderingFilter):
     ordering_mapping: dict[str, str]
 
     def get_ordering(self, request, queryset, view) -> Optional[list[str]]:
+        """Override to map ordering terms based on the ordering_mapping attribute.
+        If ordering_mapping is not defined on the subclass, base implementation is used.
+        """
         if (
             ordering_list := super().get_ordering(request, queryset, view)
         ) is None or hasattr(self, "ordering_mapping") is False:
