@@ -19,6 +19,8 @@ from .utils import (
     risk_tolerance_curve,
 )
 
+from auditlog.registry import auditlog
+
 
 class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     class Status(models.TextChoices):
@@ -938,3 +940,18 @@ class QuantitativeRiskHypothesis(
                 pass
 
         super().save(*args, **kwargs)
+
+
+common_exclude = ["created_at", "updated_at"]
+auditlog.register(
+    QuantitativeRiskStudy,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    QuantitativeRiskScenario,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    QuantitativeRiskHypothesis,
+    exclude_fields=common_exclude,
+)
