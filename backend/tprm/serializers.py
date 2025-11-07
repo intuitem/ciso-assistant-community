@@ -22,6 +22,15 @@ class EntityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     owned_folders = FieldsRelatedField(many=True)
     relationship = FieldsRelatedField(many=True)
+    legal_identifiers = serializers.SerializerMethodField()
+
+    def get_legal_identifiers(self, obj):
+        """Format legal identifiers as a readable string for display"""
+        if not obj.legal_identifiers:
+            return ""
+        return "\n".join(
+            [f"{key}: {value}" for key, value in obj.legal_identifiers.items()]
+        )
 
     class Meta:
         model = Entity

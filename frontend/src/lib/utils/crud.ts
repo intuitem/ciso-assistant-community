@@ -760,6 +760,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'entities',
 		verboseName: 'Entity',
 		verboseNamePlural: 'Entities',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'mission' },
+			{ field: 'relationship' },
+			{ field: 'legal_identifiers' },
+			{ field: 'reference_link' }
+		],
 		reverseForeignKeyFields: [
 			{ field: 'entity', urlModel: 'entity-assessments' },
 			{ field: 'entity', urlModel: 'representatives' },

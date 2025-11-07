@@ -33,13 +33,9 @@
 
 	const identifierTypes = [
 		{ value: 'LEI', label: 'LEI (Legal Entity Identifier)' },
-		{ value: 'VAT', label: 'VAT Number' },
-		{ value: 'DUNS', label: 'DUNS Number' },
 		{ value: 'EUID', label: 'EUID (European Unique Identifier)' },
-		{ value: 'SIRET', label: 'SIRET' },
-		{ value: 'SIREN', label: 'SIREN' },
-		{ value: 'TAX_ID', label: 'Tax ID' },
-		{ value: 'COMPANY_REG', label: 'Company Registration Number' },
+		{ value: 'DUNS', label: 'DUNS Number' },
+		{ value: 'VAT', label: 'VAT Number' },
 		{ value: 'OTHER', label: 'Other' }
 	];
 
