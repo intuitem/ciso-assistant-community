@@ -770,6 +770,9 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
+    requirement_assessments = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=RequirementAssessment.objects.all(), required=False
+    )
     stakeholders = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Stakeholder.objects.all()
     )
@@ -1849,6 +1852,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     requirement = FilteredNodeSerializer()
     security_exceptions = FieldsRelatedField(many=True)
     is_locked = serializers.BooleanField()
+    applied_controls = FieldsRelatedField(many=True)
 
     class Meta:
         model = RequirementAssessment
