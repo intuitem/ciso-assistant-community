@@ -11,4 +11,4 @@
 	let { data }: Props = $props();
 </script>
 
-<DetailView {data}></DetailView>
+<DetailView {data} />

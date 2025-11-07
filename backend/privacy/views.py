@@ -348,7 +348,14 @@ class RightRequestViewSet(BaseModelViewSet):
     """
 
     model = RightRequest
-    filterset_fields = ["owner", "request_type", "status", "processings", "folder"]
+    filterset_fields = [
+        "name",
+        "owner",
+        "request_type",
+        "status",
+        "processings",
+        "folder",
+    ]
 
     @action(detail=False, name="Get request type choices")
     def request_type(self, request):
@@ -366,6 +373,7 @@ class DataBreachViewSet(BaseModelViewSet):
 
     model = DataBreach
     filterset_fields = [
+        "name",
         "folder",
         "breach_type",
         "risk_level",
