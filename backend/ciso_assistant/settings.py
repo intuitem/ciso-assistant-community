@@ -198,6 +198,7 @@ INSTALLED_APPS = [
     "django_filters",
     "library",
     "serdes",
+    "integrations",
     "rest_framework",
     "knox",
     "drf_spectacular",
