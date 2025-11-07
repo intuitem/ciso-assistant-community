@@ -402,7 +402,7 @@
 						</div>
 					{/if}
 					{#if requirementAssessment.assessable}
-						{#if data.requirements[i].annotation || data.requirements[i].typical_evidence || requirementAssessment.mapping_inference.result}
+						{#if data.requirements[i].annotation || data.requirements[i].typical_evidence || requirementAssessment.mapping_inference?.result}
 							<div
 								class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto w-full"
 							>
@@ -441,7 +441,7 @@
 											</div>
 										</div>
 									{/if}
-									{#if requirementAssessment.mapping_inference.result}
+									{#if requirementAssessment.mapping_inference?.result}
 										<div class="my-2">
 											<p class="font-medium">
 												<i class="fa-solid fa-link"></i>
@@ -558,7 +558,7 @@
 												initialValue={requirementAssessment.result}
 												onChange={(newValue) => {
 													const newResult =
-														requirementAssessment.result === newValue ? 'to_do' : newValue;
+														requirementAssessment.result === newValue ? 'not_assessed' : newValue;
 													requirementAssessment.result = newResult;
 													update(requirementAssessment, 'result');
 												}}
