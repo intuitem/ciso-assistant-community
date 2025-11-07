@@ -14,6 +14,7 @@ from core.serializer_fields import (
 )
 from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
+from tprm.models import Solution
 from global_settings.utils import ff_is_enabled
 from iam.models import *
 from django.contrib.auth.models import Permission
@@ -390,6 +391,11 @@ class AssetWriteSerializer(BaseModelSerializer):
         queryset=Asset.objects.all(),
         required=False,
     )
+    solutions = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Solution.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = Asset
@@ -454,6 +460,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     personal_data = FieldsRelatedField(many=True)
     asset_class = FieldsRelatedField(["name"])
     overridden_children_capabilities = FieldsRelatedField(many=True)
+    solutions = FieldsRelatedField(many=True)
 
     children_assets = serializers.SerializerMethodField()
     security_objectives = serializers.SerializerMethodField()

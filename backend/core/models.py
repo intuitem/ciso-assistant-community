@@ -2149,6 +2149,8 @@ class Asset(
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
+    is_critical = models.BooleanField("is_critical", default=False)
+
     fields_to_check = ["name"]
 
     class Meta:
