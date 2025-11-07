@@ -1118,8 +1118,13 @@ class PersonalAccessToken(models.Model):
         return f"{self.auth_token.user.email} : {self.name} : {self.auth_token.digest}"
 
 
+common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     User,
     m2m_fields={"user_groups"},
-    exclude_fields=["created_at", "updated_at", "password"],
+    exclude_fields=common_exclude + ["password"],
+)
+auditlog.register(
+    Folder,
+    exclude_fields=common_exclude,
 )
