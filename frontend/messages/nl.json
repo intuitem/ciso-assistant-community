@@ -745,6 +745,8 @@
 	"waitingRiskAcceptances": "Hallo! U hebt momenteel {number} risico{s} acceptatie in behandeling. U kunt ze vinden in het bestuursmenu.",
 	"licenseSeats": "Licentieplaatsen",
 	"licenseExpiration": "Licentie verloopt",
+	"diskSpace": "Schijfruimte",
+	"diskUsed": "Schijf gebruikt",
 	"answer": "Antwoord",
 	"questionnaireMode": "Vragenlijstmodus",
 	"assessmentMode": "Beoordelingsmodus",
@@ -972,6 +974,13 @@
 	"securityObjectiveScaleHelpText": "Kies uw schaal voor beveiligingskenmerken (standaard 1 tot 4)",
 	"actor": "Actor",
 	"action": "Actie",
+	"privateKey": "Privésleutel",
+	"generate": "Genereren",
+	"samlKeysGenerated": "Saml-sleutels succesvol gegenereerd",
+	"samlPrivateKeyHelpText": "Alleen-schrijven: gebruik dit veld alleen als u uw eigen privésleutel/certificaat moet opgeven. Anders genereert de applicatie het.",
+	"samlCertificateHelpText": "U kunt uw eigen certificaat opgeven of de applicatie laten genereren.",
+	"samlAuthnRequestSignedHelpText": "Wanneer ingeschakeld, wordt het SAML-authenticatieverzoek ondertekend met de privésleutel hieronder. Het bijbehorende openbare certificaat wordt naar de identiteitsprovider verzonden, zodat deze de handtekening kan verifiëren.",
+	"downloadCertificate": "Certificaat downloaden",
 	"viewMore": "Afficher plus",
 	"viewLess": "Afficher moins"
 }

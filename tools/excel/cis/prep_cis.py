@@ -2,10 +2,9 @@
 simple script to transform the official CIS Excel file to another Excel file for CISO assistant framework conversion tool
 """
 
-import openpyxl
 import sys
-import os
 import re
+import openpyxl
 import argparse
 from openpyxl.utils.exceptions import InvalidFileException
 
@@ -42,6 +41,7 @@ except Exception as e:
     sys.exit(1)
     
 output_table = []
+output_table_ref_ctrl = []
 
 for tab in dataframe:
     print(f'⌛ Parsing tab "{tab.title}"...')
@@ -67,16 +67,24 @@ for tab in dataframe:
                     implementation_groups = (
                         "IG1,IG2,IG3" if ig1 else "IG2,IG3" if ig2 else "IG3"
                     )
+                    
+                    # "," replace by "." because "," is used as a separator in the "reference_controls" column
                     output_table.append(
-                        ("x", 2, safeguard, title, description, implementation_groups)
+                        ("x", 2, safeguard.replace(",", "."), title, description, implementation_groups, "1:"+safeguard.replace(",", "."))
+                    )
+                    output_table_ref_ctrl.append(
+                        (safeguard.replace(",", "."), title, sf.strip().lower(), description)
                     )
     else:
         print(f'⏩ Ignored tab: "{title}"')
 
 
 print(f'⌛ Generating "{output_file_name}"...')
+
 wb_output = openpyxl.Workbook()
 ws = wb_output.active
+
+# Library & Framework Metadata
 ws.title = "library_content"
 ws.append(["library_urn", f"urn:{packager.lower()}:risk:library:cis-controls-v8"])
 ws.append(["library_version", "1"])
@@ -91,17 +99,21 @@ ws.append(["framework_urn", f"urn:{packager.lower()}:risk:framework:cis-controls
 ws.append(["framework_ref_id", "CIS-Controls-v8"])
 ws.append(["framework_name", "CIS Controls v8"])
 ws.append(["framework_description", "CIS Controls v8"])
+ws.append(["reference_control_base_urn", "urn:intuitem:risk:function:cis-controls-v8", "1"])
 ws.append(["tab", "controls", "requirements"])
-ws.append(["tab", "implementation_groups", "implementation_groups"])
+ws.append(["tab", "imp_grp", "implementation_groups"])
+ws.append(["tab", "ref_ctrl", "reference_controls"])
 
+# Framework
 ws1 = wb_output.create_sheet("controls")
 ws1.append(
-    ["assessable", "depth", "ref_id", "name", "description", "implementation_groups"]
+    ["assessable", "depth", "ref_id", "name", "description", "implementation_groups", "reference_controls"]
 )
 for row in output_table:
     ws1.append(row)
 
-ws2 = wb_output.create_sheet("implementation_groups")
+# Implementation Groups
+ws2 = wb_output.create_sheet("imp_grp")
 ws2.append(["ref_id", "name", "description"])
 ws2.append(
     [
@@ -118,6 +130,16 @@ ws2.append(
     ]
 )
 ws2.append(["IG3", "IG3", "To secure sensitive and confidential data."])
+
+
+# Reference Controls
+ws3 = wb_output.create_sheet("ref_ctrl")
+ws3.append(
+    ["ref_id", "name", "csf_function", "description"]
+)
+for row in output_table_ref_ctrl:
+    ws3.append(row)
+
 
 try:
     wb_output.save(output_file_name)

@@ -356,6 +356,17 @@ const FINDINGS_STATUS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+const FINDINGS_PRIORITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'findings/priority',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'priority',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const EXCEPTION_SEVERITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -499,6 +510,15 @@ const PROVIDER_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'stored-libraries/provider',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
+		multiple: true
+	}
+};
+
+const LIBRARY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'library',
+		optionsEndpoint: 'loaded-libraries',
 		multiple: true
 	}
 };
@@ -742,8 +762,14 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 		label: 'current_criticality',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
-		options: [1, 2, 3, 4],
-		multiple: true
+		options: [
+			{ label: '1', value: 1 },
+			{ label: '2', value: 2 },
+			{ label: '3', value: 3 },
+			{ label: '4', value: 4 }
+		],
+		multiple: true,
+		translateOptions: false
 	}
 };
 
@@ -799,6 +825,15 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const ASSET_CLASS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'asset_class',
+		optionsEndpoint: 'assets/asset_class',
+		multiple: true
+	}
+};
+
 const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -826,12 +861,11 @@ const FINDINGS_ASSESSMENTS_CATEGORY_FILTER: ListViewFilterConfig = {
 const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		optionsEndpoint: 'terminologies?field_path=entity.relationship',
+		optionsLabelField: 'name',
 		label: 'category',
-		optionsEndpoint: 'stakeholders/category',
-		multiple: true,
-		optionsLabelField: 'label',
 		browserCache: 'force-cache',
-		optionsValueField: 'value'
+		multiple: true
 	}
 };
 
@@ -1010,8 +1044,11 @@ const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'parentDomain'],
-		body: ['name', 'description', 'parent_folder']
+		head: ['name', 'description', 'parentDomain', 'labels'],
+		body: ['name', 'description', 'parent_folder', 'filtering_labels'],
+		filters: {
+			filtering_labels: LABELS_FILTER
+		}
 	},
 	perimeters: {
 		head: ['ref_id', 'name', 'description', 'defaultAssignee', 'domain'],
@@ -1065,8 +1102,8 @@ export const listViewFields = {
 		}
 	},
 	threats: {
-		head: ['ref_id', 'name', 'description', 'provider', 'domain', 'labels'],
-		body: ['ref_id', 'name', 'description', 'provider', 'folder', 'filtering_labels'],
+		head: ['ref_id', 'name', 'description', 'library', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1074,6 +1111,7 @@ export const listViewFields = {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'threats/provider' }
 			},
+			library: LIBRARY_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -1247,7 +1285,8 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			type: ASSET_TYPE_FILTER,
-			filtering_labels: LABELS_FILTER
+			filtering_labels: LABELS_FILTER,
+			asset_class: ASSET_CLASS_FILTER
 		}
 	},
 	'asset-class': {
@@ -1306,8 +1345,26 @@ export const listViewFields = {
 		}
 	},
 	'compliance-assessments': {
-		head: ['ref_id', 'name', 'framework', 'perimeter', 'reviewProgress', 'createdAt', 'updatedAt'],
-		body: ['ref_id', 'name', 'framework', 'perimeter', 'progress', 'created_at', 'updated_at'],
+		head: [
+			'ref_id',
+			'name',
+			'version',
+			'framework',
+			'perimeter',
+			'reviewProgress',
+			'createdAt',
+			'updatedAt'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'version',
+			'framework',
+			'perimeter',
+			'progress',
+			'created_at',
+			'updated_at'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1327,8 +1384,8 @@ export const listViewFields = {
 		}
 	},
 	evidences: {
-		head: ['name', 'file', 'size', 'folder', 'status', 'updatedAt', 'labels'],
-		body: ['name', 'attachment', 'size', 'folder', 'status', 'updated_at', 'filtering_labels'],
+		head: ['name', 'file', 'folder', 'owner', 'status', 'updatedAt', 'labels'],
+		body: ['name', 'attachment', 'folder', 'owner', 'status', 'updated_at', 'filtering_labels'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
@@ -1445,7 +1502,8 @@ export const listViewFields = {
 			'asset',
 			'folder',
 			'bia',
-			'dependencies',
+			'childrenAssets',
+			'extraDependencies',
 			'associatedControls',
 			'recoveryDocumented',
 			'recoveryTested',
@@ -1455,6 +1513,7 @@ export const listViewFields = {
 			'asset',
 			'asset_folder',
 			'bia',
+			'children_assets',
 			'dependencies',
 			'associated_controls',
 			'recovery_documented',
@@ -1467,8 +1526,8 @@ export const listViewFields = {
 		body: ['get_human_pit', 'asset_assessment', 'quali_impact', 'qualifications', 'justification']
 	},
 	processings: {
-		head: ['name', 'description', 'status', 'processingNature', 'labels', 'folder'],
-		body: ['name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
+		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: PROCESSING_STATUS_FILTER,
@@ -1662,9 +1721,7 @@ export const listViewFields = {
 		filters: {
 			is_selected: IS_SELECTED_FILTER,
 			entity: ENTITY_FILTER,
-			category: STAKEHOLDER_CATEGORY_FILTER,
-			current_criticality: CURRENT_CRITICALITY_FILTER,
-			residual_criticality: RESIDUAL_CRITICALITY_FILTER
+			category: STAKEHOLDER_CATEGORY_FILTER
 		}
 	},
 	'strategic-scenarios': {
@@ -1699,8 +1756,20 @@ export const listViewFields = {
 		}
 	},
 	'operational-scenarios': {
-		head: ['is_selected', 'attackPath', 'operatingModesDescription', 'threats', 'likelihood'],
-		body: ['is_selected', 'attack_path', 'operating_modes_description', 'threats', 'likelihood'],
+		head: [
+			'is_selected',
+			'attackPath',
+			'operatingModes',
+			'operatingModesDescription',
+			'likelihood'
+		],
+		body: [
+			'is_selected',
+			'attack_path',
+			'operating_modes',
+			'operating_modes_description',
+			'likelihood'
+		],
 		filters: {
 			threats: THREAT_FILTER,
 			likelihood: RISK_PROBABILITY_FILTER,
@@ -1759,6 +1828,7 @@ export const listViewFields = {
 			'name',
 			'findings_assessment',
 			'severity',
+			'priority',
 			'owner',
 			'status',
 			'applied_controls',
@@ -1769,6 +1839,7 @@ export const listViewFields = {
 			'name',
 			'findings_assessment',
 			'severity',
+			'priority',
 			'owner',
 			'status',
 			'applied_controls',
@@ -1778,6 +1849,7 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
 			status: FINDINGS_STATUS_FILTER,
+			priority: FINDINGS_PRIORITY_FILTER,
 			owner: FINDINGS_OWNER_FILTER
 		}
 	},
@@ -1844,8 +1916,8 @@ export const listViewFields = {
 		}
 	},
 	'quantitative-risk-studies': {
-		head: ['name', 'description', 'status', 'domain'],
-		body: ['name', 'description', 'status', 'folder'],
+		head: ['name', 'description', 'status', 'updatedAt', 'domain'],
+		body: ['name', 'description', 'status', 'updated_at', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER
@@ -1995,7 +2067,8 @@ export const listViewFields = {
 			impact: undefined,
 			likelihood: undefined,
 			gravity: undefined
-		}
+		},
+		body: ['users']
 	}
 } as const satisfies ListViewFieldsConfig;
 
