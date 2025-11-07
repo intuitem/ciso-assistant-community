@@ -34,6 +34,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
         "status",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
@@ -406,13 +407,13 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 # Format risk reduction display
                 def format_currency(value):
                     if value >= 1000000000:
-                        return f"{currency}{value / 1000000000:.1f}B"
+                        return f"{value / 1000000000:.1f}B {currency}"
                     elif value >= 1000000:
-                        return f"{currency}{value / 1000000:.1f}M"
+                        return f"{value / 1000000:.1f}M {currency}"
                     elif value >= 1000:
-                        return f"{currency}{value / 1000:.0f}K"
+                        return f"{value / 1000:.0f}K {currency}"
                     else:
-                        return f"{currency}{value:,.0f}"
+                        return f"{value:,.0f} {currency}"
 
                 scenario_info["risk_reduction_display"] = (
                     format_currency(risk_reduction)
@@ -589,13 +590,13 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         # Format study total treatment cost
         def format_currency(value):
             if value >= 1000000000:
-                return f"{currency}{value / 1000000000:.1f}B"
+                return f"{value / 1000000000:.1f}B {currency}"
             elif value >= 1000000:
-                return f"{currency}{value / 1000000:.1f}M"
+                return f"{value / 1000000:.1f}M {currency}"
             elif value >= 1000:
-                return f"{currency}{value / 1000:.0f}K"
+                return f"{value / 1000:.0f}K {currency}"
             else:
-                return f"{currency}{value:,.0f}"
+                return f"{value:,.0f} {currency}"
 
         study_total_treatment_cost_display = (
             format_currency(study_total_treatment_cost)

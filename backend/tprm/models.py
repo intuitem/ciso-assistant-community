@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
-from core.models import Assessment, ComplianceAssessment, Evidence, Asset
+from core.models import Assessment, ComplianceAssessment, Evidence, Asset, Terminology
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from iam.views import User
 
@@ -22,6 +22,17 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         verbose_name=_("Owned folders"),
     )
     builtin = models.BooleanField(default=False)
+    relationship = models.ManyToManyField(
+        Terminology,
+        blank=True,
+        related_name="entities",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
+        verbose_name=_("Relationship"),
+        help_text=_("Type of relationship with this entity"),
+    )
 
     fields_to_check = ["name"]
 

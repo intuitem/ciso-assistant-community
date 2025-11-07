@@ -1155,5 +1155,14 @@
 	"securityObjectiveScale": "Skala properti keamanan",
 	"securityObjectiveScaleHelpText": "Pilih skala untuk properti keamanan Anda (1 hingga 4 secara default)",
 	"actor": "Pelaku",
-	"action": "Aksi"
+	"action": "Aksi",
+	"privateKey": "Kunci privat",
+	"generate": "Membuat",
+	"samlKeysGenerated": "Kunci SAML berhasil dibuat",
+	"samlPrivateKeyHelpText": "Hanya tulis: gunakan bidang ini hanya jika Anda perlu menyediakan kunci/sertifikat privat Anda sendiri. Jika tidak, aplikasi akan membuatnya.",
+	"samlCertificateHelpText": "Anda dapat menentukan sertifikat Anda sendiri atau biarkan aplikasi membuatnya.",
+	"samlAuthnRequestSignedHelpText": "Ketika diaktifkan, permintaan autentikasi SAML ditandatangani dengan kunci privat di bawah ini. Sertifikat publik yang sesuai dikirimkan ke Penyedia Identitas sehingga dapat memverifikasi tanda tangan.",
+	"downloadCertificate": "Unduh sertifikat",
+	"viewMore": "Lihat lebih banyak",
+	"viewLess": "Lihat lebih sedikit"
 }

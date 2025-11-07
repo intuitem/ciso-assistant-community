@@ -13,7 +13,7 @@ import { m } from '$paraglide/messages';
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
-	const objectEndpoint = `${endpoint}object`;
+	const objectEndpoint = `${endpoint}object/`;
 
 	const res = await fetch(endpoint);
 	const compliance_assessment = await res.json();
@@ -38,9 +38,22 @@ export const load = (async ({ fetch, params }) => {
 		errors: false
 	});
 
+	const cloneInitialData = {
+		baseline: compliance_assessment.id,
+		framework: compliance_assessment.framework.id,
+		perimeter: compliance_assessment.perimeter?.id
+	};
+	const auditCloneForm = await superValidate(cloneInitialData, zod(ComplianceAssessmentSchema), {
+		errors: false
+	});
+
 	const auditModel = getModelInfo('compliance-assessments');
 
 	const selectOptions: Record<string, any> = {};
+
+	const frameworksMappings = await fetch(`/compliance-assessments/${params.id}/frameworks`).then(
+		(res) => res.json()
+	);
 
 	if (auditModel.selectFields) {
 		for (const selectField of auditModel.selectFields) {
@@ -67,6 +80,7 @@ export const load = (async ({ fetch, params }) => {
 		URLModel,
 		compliance_assessment,
 		auditCreateForm,
+		auditCloneForm,
 		auditModel,
 		object,
 		tree,
@@ -74,6 +88,7 @@ export const load = (async ({ fetch, params }) => {
 		global_score,
 		threats,
 		form,
+		frameworksMappings,
 		title: compliance_assessment.name
 	};
 }) satisfies PageServerLoad;

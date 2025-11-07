@@ -32,7 +32,14 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const defaultExcludes = ['id', 'is_published', 'localization_dict', 'str', 'path'];
+	const defaultExcludes = [
+		'id',
+		'is_published',
+		'localization_dict',
+		'str',
+		'path',
+		'sync_mappings'
+	];
 
 	interface Props {
 		data: any;
@@ -90,6 +97,24 @@
 				)
 			: data.data
 	);
+
+	// Get ordered entries based on detailViewFields configuration
+	let orderedEntries = $derived(() => {
+		if (data.model?.detailViewFields) {
+			// Return entries in the order specified by detailViewFields
+			return data.model.detailViewFields
+				.map((fieldConfig) => [fieldConfig.field, data.data[fieldConfig.field]])
+				.filter(([key, value]) => value !== undefined);
+		} else {
+			// Fall back to original order from data object
+			return Object.entries(filteredData);
+		}
+	});
+
+	// Helper to get field configuration including tooltip
+	const getFieldConfig = (fieldName: string) => {
+		return data.model?.detailViewFields?.find((field) => field.field === fieldName);
+	};
 
 	let hasWidgets = $derived(!!widgets);
 
@@ -202,6 +227,25 @@
 		modalStore.trigger(modal);
 	}
 
+	function getReverseForeignKeyEndpoint({
+		parentModel,
+		targetUrlModel,
+		field,
+		id,
+		endpointUrl
+	}: {
+		parentModel: ModelMapEntry;
+		targetUrlModel: string;
+		field: string;
+		id: string;
+		endpointUrl?: string;
+	}) {
+		if (endpointUrl?.startsWith('./')) {
+			return `/${parentModel.urlModel}/${id}/${endpointUrl.slice(2)}`;
+		}
+		return `/${targetUrlModel}?${field}=${id}`;
+	}
+
 	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -223,23 +267,50 @@
 		);
 	});
 
-	let relatedModels = $derived(
-		Object.entries(data?.relatedModels ?? {}).sort((a: [string, any], b: [string, any]) => {
+	function getSortedRelatedModels() {
+		return Object.entries(data?.relatedModels ?? {}).sort((a: [string, any], b: [string, any]) => {
 			return getRelatedModelIndex(data.model, a[1]) - getRelatedModelIndex(data.model, b[1]);
-		})
-	);
+		});
+	}
 
-	let group = $derived(relatedModels.length > 0 ? relatedModels[0][0] : undefined);
+	let relatedModels = $derived(getSortedRelatedModels());
+	let relatedModelsNames: Set<string> = $state(new Set());
+
+	let group = $state(
+		Object.keys(data?.relatedModels ?? {}).length > 0 ? getSortedRelatedModels()[0][0] : undefined
+	);
+	$effect(() => {
+		const newRelatedModelsNames = new Set(relatedModels.map((model) => model[0]));
+
+		// Check if the sets are actually different
+		const setsAreDifferent =
+			relatedModelsNames.size !== newRelatedModelsNames.size ||
+			[...newRelatedModelsNames].some((name) => !relatedModelsNames.has(name));
+
+		if (setsAreDifferent) {
+			relatedModelsNames = newRelatedModelsNames;
+			group = relatedModelsNames.size > 0 ? relatedModels[0][0] : undefined;
+		}
+	});
 
 	function truncateString(str: string, maxLength: number = 50): string {
 		return str.length > maxLength ? str.slice(0, maxLength) + '...' : str;
 	}
 
 	let openStateRA = $state(false);
+
+	let expandedTable = $state(false);
+	const MAX_ROWS = 10;
 </script>
 
 <div class="flex flex-col space-y-2">
-	{#if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
+	{#if data.urlModel === 'risk-acceptances' && data.data.state === 'Created'}
+		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
+			<div class="text-yelloW-900">
+				{m.riskAcceptanceNotYetSubmittedMessage()}
+			</div>
+		</div>
+	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
 		>
@@ -292,6 +363,24 @@
 
 	<!-- Main content area - modified to use conditional flex layout -->
 	<div class="card shadow-lg bg-white p-4">
+		{#each data.data?.sync_mappings as syncMapping}
+			<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
+				<h3 class="font-semibold text-secondary-800 mb-2">
+					{m.syncedWith({ integrationName: syncMapping.provider?.toUpperCase() ?? 'UNKNOWN' })}
+				</h3>
+
+				<dl class="grid grid-cols-1 gap-1 sm:grid-cols-2 text-secondary-700">
+					<dt class="font-medium">{m.remoteId()}</dt>
+					<dd>{syncMapping.remote_id}</dd>
+
+					<dt class="font-medium">{m.lastSynced()}</dt>
+					<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
+
+					<dt class="font-medium">{m.status()}</dt>
+					<dd>{safeTranslate(syncMapping.sync_status)}</dd>
+				</dl>
+			</div>
+		{/each}
 		<div class={hasWidgets ? 'flex flex-row flex-wrap gap-4' : 'w-full'}>
 			<!-- Left side - Details (conditional width) -->
 			<div
@@ -300,15 +389,39 @@
 					: 'w-full'}"
 			>
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
-					{#each Object.entries(filteredData).filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ) as [key, value]}
+					{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
 						<div
-							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4"
+							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4 {index >=
+								MAX_ROWS && !expandedTable
+								? 'hidden'
+								: ''}"
 						>
 							<dt
-								class="font-medium text-gray-900"
+								class="font-medium text-gray-900 flex items-center gap-2"
 								data-testid="{key.replace('_', '-')}-field-title"
 							>
-								{safeTranslate(key)}
+								<span>{safeTranslate(key)}</span>
+								{#if getFieldConfig(key)?.tooltip}
+									{@const tooltipKey = getFieldConfig(key)?.tooltip}
+									{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
+									<Tooltip
+										positioning={{ placement: 'right' }}
+										contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
+										openDelay={200}
+										closeDelay={100}
+										arrow
+										arrowBase="arrow bg-gray-800 border border-gray-700"
+									>
+										{#snippet trigger()}
+											<i
+												class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
+											></i>
+										{/snippet}
+										{#snippet content()}
+											<p class="text-sm">{tooltipText}</p>
+										{/snippet}
+									</Tooltip>
+								{/if}
 							</dt>
 							<dd class="text-gray-700 sm:col-span-2">
 								<ul class="">
@@ -378,9 +491,16 @@
 											{:else if Array.isArray(value)}
 												{#if Object.keys(value).length > 0}
 													<ul>
-														{#each value.sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
+														{#each value.sort((a, b) => {
+															if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if val.str && val.id && key !== 'qualifications'}
+																{#if key === 'security_objectives' || key === 'security_capabilities'}
+																	{@const [securityObjectiveName, securityObjectiveValue] =
+																		Object.entries(val)[0]}
+																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel
@@ -453,7 +573,6 @@
 					{/each}
 				</dl>
 			</div>
-
 			<!-- Right side - Widgets area (only if widgets exist) -->
 			{#if hasWidgets}
 				<div class="flex-1 min-w-[300px] flex flex-col">
@@ -464,6 +583,16 @@
 				</div>
 			{/if}
 		</div>
+		{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
+			<button
+				onclick={() => (expandedTable = !expandedTable)}
+				class="m-5 text-blue-800"
+				aria-expanded={expandedTable}
+			>
+				<i class="{expandedTable ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"></i>
+				{expandedTable ? m.viewLess() : m.viewMore()}
+			</button>
+		{/if}
 
 		<!-- Bottom row for action buttons -->
 		<div class="flex flex-row justify-end mt-4 gap-2">
@@ -561,7 +690,12 @@
 
 {#if relatedModels.length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-white">
-		<Tabs value={group} onValueChange={(e) => (group = e.value)} listJustify="justify-center">
+		<Tabs
+			value={group}
+			onValueChange={(e) => (group = e.value)}
+			listJustify="justify-center"
+			listClasses="flex flex-wrap"
+		>
 			{#snippet list()}
 				{#each relatedModels as [urlmodel, model]}
 					<Tabs.Control value={urlmodel}>
@@ -584,13 +718,21 @@
 							{@const field = data.model.reverseForeignKeyFields.find(
 								(item) => item.urlModel === urlmodel
 							)}
-							{@const fieldsToUse = getListViewFields({
-								key: urlmodel,
-								featureFlags: page.data?.featureflags
-							}).body.filter((v) => v !== field.field)}
+							{@const fieldsToUse =
+								field?.tableFields ||
+								getListViewFields({
+									key: urlmodel,
+									featureFlags: page.data?.featureflags
+								}).body.filter((v) => v !== field.field)}
 							{#if model.table}
 								<ModelTable
-									baseEndpoint="/{model.urlModel}?{field.field}={data.data.id}"
+									baseEndpoint={getReverseForeignKeyEndpoint({
+										parentModel: data.model,
+										targetUrlModel: urlmodel,
+										field: field.field,
+										id: data.data.id,
+										endpointUrl: field.endpointUrl
+									})}
 									source={model.table}
 									disableCreate={disableCreate || model.disableCreate}
 									disableDelete={disableDelete || model.disableDelete}

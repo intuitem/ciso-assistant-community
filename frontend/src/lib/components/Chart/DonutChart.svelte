@@ -27,6 +27,15 @@
 	for (const index in values) {
 		if (values[index].localName) {
 			values[index].name = safeTranslate(values[index].localName);
+		} else {
+			// Auto-translate common severity, detection, and status values
+			const nameToTranslate = values[index].name?.toLowerCase();
+			if (nameToTranslate) {
+				const translatedName = safeTranslate(nameToTranslate);
+				if (translatedName !== nameToTranslate) {
+					values[index].name = translatedName;
+				}
+			}
 		}
 	}
 	const chart_id = `${name}_div`;

@@ -266,11 +266,12 @@
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
 
 	const filters =
-		tableURLModel &&
+		source?.filters ??
+		(tableURLModel &&
 		listViewFields[tableURLModel] &&
 		Object.hasOwn(listViewFields[tableURLModel], 'filters')
 			? listViewFields[tableURLModel].filters
-			: (source?.filters ?? {});
+			: {});
 
 	const filteredFields = Object.keys(filters);
 	const filterValues: { [key: string]: any } = $state(
@@ -526,6 +527,8 @@
 					<ContextMenu.Trigger asChild>
 						{#snippet children({ builder })}
 							<tr
+								use:builder.action
+								{...builder}
 								onclick={(e) => {
 									onRowClick(e, rowIndex);
 								}}
@@ -557,16 +560,23 @@
 													>
 														{#if Array.isArray(value)}
 															<ul class="list-disc pl-4 whitespace-normal">
-																{#each [...value].sort( (a, b) => safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b)) ) as val}
+																{#each [...value].sort((a, b) => {
+																	if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+																}) as val}
 																	<li>
-																		{#if val.str && val.id && key !== 'qualifications'}
-																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
+																		{#if key === 'security_objectives' || key === 'security_capabilities'}
+																			{@const [securityObjectiveName, securityObjectiveValue] =
+																				Object.entries(val)[0]}
+																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
+																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
 																			<Anchor href={itemHref} class="anchor" stopPropagation
 																				>{val.str}</Anchor
 																			>
 																		{:else if val.str}
 																			{safeTranslate(val.str)}
-																		{:else if unsafeTranslate(val.split(':')[0])}
+																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
 																			<span class="text"
 																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
 																				{val.split(':')[1]}</span
@@ -603,7 +613,7 @@
 															>
 																{safeTranslate(value.name ?? value.str) ?? '-'}
 															</p>
-														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp')}
+														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
 															{formatDateOrDateTime(value, getLocale())}
 														{:else if [true, false].includes(value)}
 															<span class="ml-4">{safeTranslate(value ?? '-')}</span>

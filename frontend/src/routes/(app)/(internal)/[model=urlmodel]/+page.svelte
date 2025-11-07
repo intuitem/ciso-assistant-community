@@ -112,7 +112,13 @@
 {#if data?.table}
 	<div class="shadow-lg">
 		{#key URLModel}
-			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
+			<ModelTable
+				source={data.table}
+				deleteForm={data.deleteForm}
+				{URLModel}
+				disableEdit={['user-groups'].includes(URLModel)}
+				disableDelete={['user-groups'].includes(URLModel)}
+			>
 				{#snippet addButton()}
 					<div>
 						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
@@ -125,12 +131,20 @@
 									onclick={handlers(modalCreateForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
-								{#if ['applied-controls', 'assets'].includes(URLModel)}
+								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios'].includes(URLModel)}
 									<a
 										href="{URLModel}/export/"
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 										title={m.exportButton()}
 										data-testid="export-button"><i class="fa-solid fa-download mr-2"></i></a
+									>
+								{/if}
+								{#if URLModel === 'applied-controls'}
+									<a
+										href="{URLModel}/flash-mode/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.flashMode()}
+										data-testid="flash-mode-button"><i class="fa-solid fa-bolt mr-2"></i></a
 									>
 								{/if}
 								{#if ['threats', 'reference-controls'].includes(URLModel)}
@@ -170,6 +184,15 @@
 										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
 									>
 								{/if}
+								{#if URLModel === 'vulnerabilities'}
+									<Anchor
+										href="vulnerabilities/treemap/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.visualizeButton()}
+										label={m.visualize()}
+										data-testid="viz-button"><i class="fa-solid fa-chart-pie"></i></Anchor
+									>
+								{/if}
 							{:else if ['risk-matrices', 'frameworks', 'requirement-mapping-sets'].includes(URLModel)}
 								{@const href = `/libraries?object_type=${URLModel.replace(/-/g, '_')}`}
 								{@const title =
@@ -187,6 +210,15 @@
 									id="add-button"
 									{title}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
+								{#if URLModel === 'requirement-mapping-sets'}
+									<Anchor
+										href="requirement-mapping-sets/graph/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.exploreButton()}
+										label={m.inspect()}
+										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
+									>
+								{/if}
 							{/if}
 						</span>
 					</div>

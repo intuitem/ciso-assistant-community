@@ -1,0 +1,18 @@
+{
+  "node": "n8n-nodes-base.cisoAssistantService",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["security"],
+  "resources": {
+    "credentialDocumentation": [
+      {
+        "url": "https://docs.myservice.com/authentication"
+      }
+    ],
+    "primaryDocumentation": [
+      {
+        "url": "https://docs.myservice.com/api"
+      }
+    ]
+  }
+}

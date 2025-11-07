@@ -16,6 +16,8 @@ from core.models import (
     RiskScenario,
     RiskMatrix,
     AppliedControl,
+    ReferenceControl,
+    Threat,
 )
 from core.serializers import (
     AssetWriteSerializer,
@@ -28,7 +30,10 @@ from core.serializers import (
     UserWriteSerializer,
     RiskAssessmentWriteSerializer,
     RiskScenarioWriteSerializer,
+    ReferenceControlWriteSerializer,
+    ThreatWriteSerializer,
 )
+from ebios_rm.serializers import ElementaryActionWriteSerializer
 from iam.models import RoleAssignment
 
 logger = logging.getLogger(__name__)
@@ -93,7 +98,7 @@ class LoadFileView(APIView):
             )
 
         return Response(
-            {"message": "File loaded successfully", "results": []},
+            {"message": "File loaded successfully", "results": res},
             status=status.HTTP_200_OK,
         )
 
@@ -108,7 +113,6 @@ class LoadFileView(APIView):
         matrix_id=None,
     ):
         records = dataframe.to_dict(orient="records")
-        logger.warning("I am here")
         folders_map = get_accessible_objects(request.user)
 
         # Dispatch to appropriate handler
@@ -137,6 +141,16 @@ class LoadFileView(APIView):
             return self._process_risk_assessment(
                 request, records, folder_id, perimeter_id, matrix_id
             )
+        elif model_type == "ElementaryAction":
+            return self._process_elementary_actions(
+                request, records, folders_map, folder_id
+            )
+        elif model_type == "ReferenceControl":
+            return self._process_reference_controls(
+                request, records, folders_map, folder_id
+            )
+        elif model_type == "Threat":
+            return self._process_threats(request, records, folders_map, folder_id)
         else:
             return {
                 "successful": 0,
@@ -339,6 +353,267 @@ class LoadFileView(APIView):
         )
         return results
 
+    def _process_elementary_actions(self, request, records, folders_map, folder_id):
+        """Process elementary actions import from Excel"""
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        # Define attack stage mapping (supports English and French)
+        ATTACK_STAGE_MAP = {
+            # English
+            "know": 0,
+            "reconnaissance": 0,
+            "ebiosreconnaissance": 0,
+            "enter": 1,
+            "initial access": 1,
+            "ebiosinitialaccess": 1,
+            "discover": 2,
+            "discovery": 2,
+            "ebiosdiscovery": 2,
+            "exploit": 3,
+            "exploitation": 3,
+            "ebiosexploitation": 3,
+            # French
+            "connaitre": 0,
+            "connaître": 0,
+            "pénétrer": 1,
+            "penetrer": 1,
+            "entrer": 1,
+            "trouver": 2,
+            "découvrir": 2,
+            "decouvrir": 2,
+            "exploiter": 3,
+        }
+
+        # Define icon mapping
+        ICON_MAP = {
+            icon.lower(): icon
+            for icon in [
+                "server",
+                "computer",
+                "cloud",
+                "file",
+                "diamond",
+                "phone",
+                "cube",
+                "blocks",
+                "shapes",
+                "network",
+                "database",
+                "key",
+                "search",
+                "carrot",
+                "money",
+                "skull",
+                "globe",
+                "usb",
+            ]
+        }
+
+        for record in records:
+            # Get domain from record or use fallback
+            domain = folder_id
+            if record.get("domain") != "":
+                domain = folders_map.get(record.get("domain"), folder_id)
+
+            # Check if name is provided as it's mandatory
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
+                )
+                continue
+
+            # Map attack stage
+            attack_stage = 0  # Default to "Know"
+            if record.get("attack_stage", ""):
+                attack_stage_value = str(record.get("attack_stage")).strip().lower()
+                attack_stage = ATTACK_STAGE_MAP.get(attack_stage_value, 0)
+
+            # Map icon
+            icon = None
+            if record.get("icon", ""):
+                icon_value = str(record.get("icon")).strip().lower()
+                icon = ICON_MAP.get(icon_value)
+
+            # Prepare data for serializer
+            elementary_action_data = {
+                "ref_id": record.get("ref_id", ""),
+                "name": record.get("name"),  # Name is mandatory
+                "description": record.get("description", ""),
+                "folder": domain,
+                "attack_stage": attack_stage,
+            }
+
+            # Add icon if valid
+            if icon:
+                elementary_action_data["icon"] = icon
+
+            # Use the serializer for validation and saving
+            serializer = ElementaryActionWriteSerializer(
+                data=elementary_action_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Error creating elementary action {record.get('name')}: {str(e)}"
+                )
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        logger.info(
+            f"Elementary Action import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
+    def _process_reference_controls(self, request, records, folders_map, folder_id):
+        """Process reference controls import from Excel"""
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        # Define category mapping
+        CATEGORY_MAP = {
+            # English
+            "policy": "policy",
+            "process": "process",
+            "technical": "technical",
+            "physical": "physical",
+            "procedure": "procedure",
+        }
+
+        # Define CSF function mapping
+        FUNCTION_MAP = {
+            # English
+            "govern": "govern",
+            "identify": "identify",
+            "protect": "protect",
+            "detect": "detect",
+            "respond": "respond",
+            "recover": "recover",
+            # Variations
+            "governance": "govern",
+        }
+
+        for record in records:
+            # Get domain from record or use fallback
+            domain = folder_id
+            if record.get("domain") != "":
+                domain = folders_map.get(record.get("domain"), folder_id)
+
+            # Check if name is provided as it's mandatory
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
+                )
+                continue
+
+            # Map category
+            category = None
+            if record.get("category", ""):
+                category_value = str(record.get("category")).strip().lower()
+                category = CATEGORY_MAP.get(category_value)
+
+            # Map function (csf_function)
+            csf_function = None
+            if record.get("function", ""):
+                function_value = str(record.get("function")).strip().lower()
+                csf_function = FUNCTION_MAP.get(function_value)
+
+            # Prepare data for serializer
+            reference_control_data = {
+                "ref_id": record.get("ref_id", ""),
+                "name": record.get("name"),  # Name is mandatory
+                "description": record.get("description", ""),
+                "folder": domain,
+            }
+
+            # Add optional fields if valid
+            if category:
+                reference_control_data["category"] = category
+            if csf_function:
+                reference_control_data["csf_function"] = csf_function
+
+            # Use the serializer for validation and saving
+            serializer = ReferenceControlWriteSerializer(
+                data=reference_control_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Error creating reference control {record.get('name')}: {str(e)}"
+                )
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        logger.info(
+            f"Reference Control import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
+    def _process_threats(self, request, records, folders_map, folder_id):
+        """Process threats import from Excel"""
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        for record in records:
+            # Get domain from record or use fallback
+            domain = folder_id
+            if record.get("domain") != "":
+                domain = folders_map.get(record.get("domain"), folder_id)
+
+            # Check if name is provided as it's mandatory
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
+                )
+                continue
+
+            # Prepare data for serializer
+            threat_data = {
+                "ref_id": record.get("ref_id", ""),
+                "name": record.get("name"),  # Name is mandatory
+                "description": record.get("description", ""),
+                "folder": domain,
+            }
+
+            # Use the serializer for validation and saving
+            serializer = ThreatWriteSerializer(
+                data=threat_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(f"Error creating threat {record.get('name')}: {str(e)}")
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        logger.info(
+            f"Threat import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
     def _process_findings_assessment(self, request, records, folder_id, perimeter_id):
         results = {"successful": 0, "failed": 0, "errors": []}
         try:
@@ -368,10 +643,11 @@ class LoadFileView(APIView):
                 )
 
                 SEVERITY_MAP = {
-                    "low": 0,
-                    "medium": 1,
-                    "high": 2,
-                    "critical": 3,
+                    "info": 0,
+                    "low": 1,
+                    "medium": 2,
+                    "high": 3,
+                    "critical": 4,
                 }
 
                 for record in records:
