@@ -9333,7 +9333,9 @@ class TaskTemplateViewSet(BaseModelViewSet):
         processed_tasks_identifiers = set()  # Track tasks we've already processed
 
         # Sort tasks by due date
-        sorted_tasks = sorted(tasks_list, key=lambda x: x["due_date"])
+        sorted_tasks = sorted(
+            [t for t in tasks_list if t.get("due_date")], key=lambda x: x["due_date"]
+        )
 
         # Process all past tasks and next 10 upcoming tasks
         current_date = datetime.now().date()
