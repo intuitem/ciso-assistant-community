@@ -19,15 +19,15 @@ async def update_asset(
     business_value: str = None,
     parent_assets: list = None,
 ) -> str:
-    """Update an existing asset in CISO Assistant
+    """Update asset properties
 
     Args:
-        asset_id: ID or name of the asset to update
-        name: Optional new name for the asset
-        description: Optional new description
-        asset_type: Optional new type - "PR" for Primary or "SP" for Supporting
-        business_value: Optional business value (e.g., "low", "medium", "high", "very_high")
-        parent_assets: Optional list of parent asset IDs or names (can use asset names instead of UUIDs)
+        asset_id: Asset ID/name
+        name: New name
+        description: New description
+        asset_type: PR | SP
+        business_value: low | medium | high | very_high
+        parent_assets: List of parent asset IDs/names
     """
     try:
         # Resolve asset name to ID if needed
@@ -89,28 +89,28 @@ async def update_risk_scenario(
     applied_controls: list = None,
     existing_applied_controls: list = None,
 ) -> str:
-    """Update an existing risk scenario in CISO Assistant
+    """Update risk scenario properties and ratings
 
     Args:
-        risk_scenario_id: ID or name of the risk scenario to update
-        name: Optional new name for the risk scenario
-        description: Optional new description
-        risk_assessment_id: Optional ID or name of the risk assessment (can use risk assessment name instead of UUID)
-        existing_controls: Optional description of existing controls (text field)
-        inherent_proba: Optional inherent probability (integer index from risk matrix)
-        inherent_impact: Optional inherent impact (integer index from risk matrix)
-        current_proba: Optional current probability (integer index from risk matrix)
-        current_impact: Optional current impact (integer index from risk matrix)
-        residual_proba: Optional residual probability (integer index from risk matrix)
-        residual_impact: Optional residual impact (integer index from risk matrix)
-        treatment: Optional treatment decision (open, mitigate, accept, avoid, transfer)
-        strength_of_knowledge: Optional strength of knowledge (-1 to 2)
-        justification: Optional justification text
-        ref_id: Optional reference ID
-        assets: Optional list of asset IDs or names to update (replaces existing, can use asset names)
-        threats: Optional list of threat IDs or names to update (replaces existing, can use threat names)
-        applied_controls: Optional list of new/planned applied control IDs or names (replaces existing, can use control names)
-        existing_applied_controls: Optional list of existing applied control IDs or names (replaces existing, can use control names)
+        risk_scenario_id: Scenario ID/name
+        name: New name
+        description: New description
+        risk_assessment_id: Risk assessment ID/name
+        existing_controls: Existing controls description
+        inherent_proba: Inherent probability index (from risk matrix)
+        inherent_impact: Inherent impact index (from risk matrix)
+        current_proba: Current probability index (from risk matrix)
+        current_impact: Current impact index (from risk matrix)
+        residual_proba: Residual probability index (from risk matrix)
+        residual_impact: Residual impact index (from risk matrix)
+        treatment: open | mitigate | accept | avoid | transfer
+        strength_of_knowledge: -1 to 2
+        justification: Justification text
+        ref_id: Reference ID
+        assets: List of asset IDs/names (replaces existing)
+        threats: List of threat IDs/names (replaces existing)
+        applied_controls: List of planned control IDs/names (replaces existing)
+        existing_applied_controls: List of existing control IDs/names (replaces existing)
     """
     try:
         # Resolve risk scenario name to ID if needed
@@ -226,23 +226,23 @@ async def update_applied_control(
     link: str = None,
     ref_id: str = None,
 ) -> str:
-    """Update an existing applied control in CISO Assistant
+    """Update applied control properties
 
     Args:
-        control_id: ID or name of the applied control to update
-        name: Optional new name for the control
-        description: Optional new description
-        status: Optional status (to_do, in_progress, on_hold, active, deprecated, --)
-        priority: Optional priority (1=P1, 2=P2, 3=P3, 4=P4)
-        category: Optional category (policy, process, technical, physical)
-        csf_function: Optional CSF function (identify, protect, detect, respond, recover, govern)
-        effort: Optional effort estimation (XS, S, M, L, XL)
-        control_impact: Optional impact rating (1=Very Low, 2=Low, 3=Medium, 4=High, 5=Very High)
-        eta: Optional ETA date (format: YYYY-MM-DD)
-        start_date: Optional start date (format: YYYY-MM-DD)
-        expiry_date: Optional expiry date (format: YYYY-MM-DD)
-        link: Optional external link (e.g., Jira ticket URL)
-        ref_id: Optional reference ID
+        control_id: Control ID/name
+        name: New name
+        description: New description
+        status: to_do | in_progress | on_hold | active | deprecated | --
+        priority: 1-4 (1=P1, 4=P4)
+        category: policy | process | technical | physical
+        csf_function: identify | protect | detect | respond | recover | govern
+        effort: XS | S | M | L | XL
+        control_impact: 1-5 (1=Very Low, 5=Very High)
+        eta: ETA date YYYY-MM-DD
+        start_date: Start date YYYY-MM-DD
+        expiry_date: Expiry date YYYY-MM-DD
+        link: External link (e.g. Jira URL)
+        ref_id: Reference ID
     """
     try:
         # Resolve control name to ID if needed
@@ -303,20 +303,18 @@ async def update_requirement_assessment(
     due_date: str = None,
     selected: bool = None,
 ) -> str:
-    """Update a requirement assessment within a compliance assessment (audit)
+    """Update requirement assessment in audit. Use get_requirement_assessments() to find IDs
 
     Args:
-        requirement_assessment_id: UUID of the requirement assessment to update
-        status: Optional workflow status (to_do, in_progress, in_review, done)
-        result: Optional compliance result (not_assessed, partially_compliant, non_compliant, compliant, not_applicable)
-        observation: Optional observation text
-        score: Optional score value (if using scored assessment)
-        is_scored: Optional flag to indicate if this is a scored assessment
-        eta: Optional ETA date (format: YYYY-MM-DD)
-        due_date: Optional due date (format: YYYY-MM-DD)
-        selected: Optional selection flag (whether requirement is applicable)
-
-    Note: Use get_requirement_assessments() to find requirement assessment IDs
+        requirement_assessment_id: Requirement assessment UUID
+        status: to_do | in_progress | in_review | done
+        result: not_assessed | partially_compliant | non_compliant | compliant | not_applicable
+        observation: Observation text
+        score: Score value
+        is_scored: Scored assessment flag
+        eta: ETA date YYYY-MM-DD
+        due_date: Due date YYYY-MM-DD
+        selected: Applicability flag
     """
     try:
         # Validate UUID
@@ -371,22 +369,19 @@ async def update_quantitative_risk_study(
     risk_tolerance_point2_acceptable_loss: float = None,
     observation: str = None,
 ) -> str:
-    """Update an existing quantitative risk study in CISO Assistant
+    """Update quantitative risk study. Risk tolerance curve auto-regenerates when points modified
 
     Args:
-        study_id: ID or name of the quantitative risk study to update
-        name: Optional new name for the study
-        description: Optional new description
-        status: Optional status - "planned", "in_progress", "in_review", "done", or "deprecated"
-        loss_threshold: Optional new loss threshold value (monetary amount)
-        risk_tolerance_point1_probability: Optional probability for first risk tolerance point (0.0-1.0, e.g., 0.01 for 1%)
-        risk_tolerance_point1_acceptable_loss: Optional acceptable loss for first point (monetary amount)
-        risk_tolerance_point2_probability: Optional probability for second risk tolerance point (0.0-1.0, e.g., 0.001 for 0.1%)
-        risk_tolerance_point2_acceptable_loss: Optional acceptable loss for second point (monetary amount)
-        observation: Optional observation text
-
-    Note: When updating risk tolerance points, you can update individual point values.
-    The risk tolerance curve will be automatically regenerated when points are modified.
+        study_id: Study ID/name
+        name: New name
+        description: New description
+        status: planned | in_progress | in_review | done | deprecated
+        loss_threshold: Loss threshold (monetary)
+        risk_tolerance_point1_probability: Point1 probability (0.0-1.0, e.g. 0.01=1%)
+        risk_tolerance_point1_acceptable_loss: Point1 acceptable loss (monetary)
+        risk_tolerance_point2_probability: Point2 probability (0.0-1.0, e.g. 0.001=0.1%)
+        risk_tolerance_point2_acceptable_loss: Point2 acceptable loss (monetary)
+        observation: Observation text
     """
     try:
         from ..resolvers import resolve_id_or_name
@@ -505,17 +500,17 @@ async def update_quantitative_risk_scenario(
     assets: list = None,
     threats: list = None,
 ) -> str:
-    """Update an existing quantitative risk scenario in CISO Assistant
+    """Update quantitative risk scenario
 
     Args:
-        scenario_id: ID or name of the quantitative risk scenario to update
-        name: Optional new name for the scenario
-        description: Optional new description
-        status: Optional status - "draft", "open", "mitigate", "accept", or "transfer"
-        priority: Optional priority (1=P1, 2=P2, 3=P3, 4=P4)
-        observation: Optional observation text
-        assets: Optional list of asset IDs or names to update (replaces existing, can use asset names)
-        threats: Optional list of threat IDs or names to update (replaces existing, can use threat names)
+        scenario_id: Scenario ID/name
+        name: New name
+        description: New description
+        status: draft | open | mitigate | accept | transfer
+        priority: 1-4 (1=P1, 4=P4)
+        observation: Observation text
+        assets: List of asset IDs/names (replaces existing)
+        threats: List of threat IDs/names (replaces existing)
     """
     try:
         from ..resolvers import resolve_id_or_name, resolve_asset_id
@@ -597,20 +592,20 @@ async def update_quantitative_risk_hypothesis(
     existing_applied_controls: list = None,
     added_applied_controls: list = None,
 ) -> str:
-    """Update an existing quantitative risk hypothesis in CISO Assistant
+    """Update quantitative risk hypothesis
 
     Args:
-        hypothesis_id: ID or name of the quantitative risk hypothesis to update
-        name: Optional new name for the hypothesis
-        description: Optional new description
-        probability: Optional new probability value (0.0 to 1.0)
-        impact_lb: Optional new impact lower bound value
-        impact_ub: Optional new impact upper bound value
-        impact_distribution: Optional new impact distribution model (e.g., "LOGNORMAL-CI90")
-        is_selected: Optional flag to mark this hypothesis as selected (for residual scenarios)
-        observation: Optional observation text
-        existing_applied_controls: Optional list of existing applied control IDs or names (replaces existing, can use control names)
-        added_applied_controls: Optional list of added applied control IDs or names (replaces existing, can use control names)
+        hypothesis_id: Hypothesis ID/name
+        name: New name
+        description: New description
+        probability: Probability 0.0-1.0
+        impact_lb: Impact lower bound
+        impact_ub: Impact upper bound
+        impact_distribution: Distribution model (e.g. LOGNORMAL-CI90)
+        is_selected: Selected flag (for residual scenarios)
+        observation: Observation text
+        existing_applied_controls: List of existing control IDs/names (replaces existing)
+        added_applied_controls: List of added control IDs/names (replaces existing)
     """
     try:
         from ..resolvers import resolve_id_or_name
