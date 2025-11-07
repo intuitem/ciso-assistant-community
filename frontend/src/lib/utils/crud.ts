@@ -773,7 +773,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{ field: 'entity', urlModel: 'entity-assessments' },
 			{ field: 'entity', urlModel: 'representatives' },
-			{ field: 'provider_entity', urlModel: 'solutions' }
+			{ field: 'provider_entity', urlModel: 'solutions' },
+			{ field: 'entities', urlModel: 'contracts' }
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
@@ -811,10 +812,30 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'solutions',
 		verboseName: 'Solution',
 		verboseNamePlural: 'Solutions',
+		reverseForeignKeyFields: [{ field: 'solutions', urlModel: 'contracts' }],
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
 			{ field: 'assets', urlModel: 'assets' }
+		]
+	},
+	contracts: {
+		name: 'contract',
+		localName: 'contract',
+		localNamePlural: 'contracts',
+		verboseName: 'Contract',
+		verboseNamePlural: 'Contracts',
+		reverseForeignKeyFields: [
+			{ field: 'contracts', urlModel: 'evidences', disableDelete: true },
+			{ field: 'contracts', urlModel: 'entities', disableDelete: true, disableCreate: true },
+			{ field: 'contracts', urlModel: 'solutions', disableDelete: true, disableCreate: true }
+		],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'entities', urlModel: 'entities' },
+			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'solutions', urlModel: 'solutions' }
 		]
 	},
 	representatives: {

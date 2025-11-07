@@ -619,6 +619,20 @@ export const representativeSchema = z.object({
 	description: z.string().optional()
 });
 
+export const contractSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	filtering_labels: z.array(z.string()).optional(),
+	owner: z.array(z.string().optional()).optional(),
+	entities: z.array(z.string().optional()).optional(),
+	evidences: z.array(z.string().optional()).optional(),
+	solutions: z.array(z.string().optional()).optional(),
+	status: z.string().optional().default('draft'),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	end_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	ref_id: z.string().optional()
+});
+
 export const vulnerabilitySchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -1263,6 +1277,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
 	solutions: solutionSchema,
+	contracts: contractSchema,
 	vulnerabilities: vulnerabilitySchema,
 	'filtering-labels': FilteringLabelSchema,
 	'business-impact-analysis': BusinessImpactAnalysisSchema,

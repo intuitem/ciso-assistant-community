@@ -1,7 +1,14 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
-from core.models import Assessment, ComplianceAssessment, Evidence, Asset, Terminology
+from core.models import (
+    Assessment,
+    ComplianceAssessment,
+    Evidence,
+    Asset,
+    Terminology,
+    FilteringLabelMixin,
+)
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from iam.views import User
 
@@ -163,6 +170,74 @@ class Solution(NameDescriptionMixin):
         verbose_name_plural = _("Solutions")
 
 
+class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+    """
+    A contract represents an agreement between multiple entities
+    """
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        ACTIVE = "active", _("Active")
+        EXPIRED = "expired", _("Expired")
+        TERMINATED = "terminated", _("Terminated")
+
+    owner = models.ManyToManyField(
+        User,
+        verbose_name=_("Owner"),
+        related_name="contracts",
+        blank=True,
+    )
+    entities = models.ManyToManyField(
+        Entity,
+        related_name="contracts",
+        blank=True,
+        verbose_name=_("Entities"),
+        help_text=_("Entities involved in this contract"),
+    )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        related_name="contracts",
+        verbose_name=_("Evidences"),
+        help_text=_("Supporting evidence for this contract"),
+    )
+    solutions = models.ManyToManyField(
+        "tprm.Solution",
+        blank=True,
+        related_name="contracts",
+        verbose_name=_("Solutions"),
+        help_text=_("Solutions covered by this contract"),
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+    )
+    start_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Start date"),
+    )
+    end_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("End date"),
+    )
+    ref_id = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Reference ID"),
+        help_text=_("Contract reference number or identifier"),
+    )
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name = _("Contract")
+        verbose_name_plural = _("Contracts")
+
+
 common_exclude = ["created_at", "updated_at"]
 
 auditlog.register(
@@ -179,5 +254,9 @@ auditlog.register(
 )
 auditlog.register(
     Solution,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Contract,
     exclude_fields=common_exclude,
 )

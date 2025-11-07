@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from iam.models import Folder, RoleAssignment, UserGroup
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
-from tprm.models import Entity, Representative, Solution, EntityAssessment
+from tprm.models import Entity, Representative, Solution, EntityAssessment, Contract
 from rest_framework.decorators import action
 import structlog
 
@@ -24,7 +24,13 @@ class EntityViewSet(BaseModelViewSet):
     """
 
     model = Entity
-    filterset_fields = ["name", "folder", "relationship", "relationship__name"]
+    filterset_fields = [
+        "name",
+        "folder",
+        "relationship",
+        "relationship__name",
+        "contracts",
+    ]
 
 
 class EntityAssessmentViewSet(BaseModelViewSet):
@@ -144,10 +150,23 @@ class SolutionViewSet(BaseModelViewSet):
     """
 
     model = Solution
-    filterset_fields = ["name", "provider_entity", "assets", "criticality"]
+    filterset_fields = ["name", "provider_entity", "assets", "criticality", "contracts"]
 
     def perform_create(self, serializer):
         serializer.save()
         solution = serializer.instance
         solution.recipient_entity = Entity.objects.get(builtin=True)
         solution.save()
+
+
+class ContractViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows contracts to be viewed or edited.
+    """
+
+    model = Contract
+    filterset_fields = ["name", "folder", "entities", "status", "owner"]
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Contract.Status.choices))

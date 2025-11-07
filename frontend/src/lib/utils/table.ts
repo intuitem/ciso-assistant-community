@@ -1016,6 +1016,18 @@ const EVIDENCE_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const CONTRACT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'status',
+		optionsEndpoint: 'contracts/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1494,6 +1506,14 @@ export const listViewFields = {
 		filters: {
 			provider_entity: ENTITY_FILTER,
 			criticality: SOLUTION_CRITICALITY_FILTER
+		}
+	},
+	contracts: {
+		head: ['refId', 'name', 'description', 'status', 'startDate', 'endDate', 'entities'],
+		body: ['ref_id', 'name', 'description', 'status', 'start_date', 'end_date', 'entities'],
+		filters: {
+			status: CONTRACT_STATUS_FILTER,
+			entities: ENTITY_FILTER
 		}
 	},
 	representatives: {

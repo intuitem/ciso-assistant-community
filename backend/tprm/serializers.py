@@ -8,7 +8,7 @@ from core.serializers import BaseModelSerializer
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import Folder, Role, RoleAssignment, UserGroup
 from django.contrib.auth import get_user_model
-from tprm.models import Entity, EntityAssessment, Representative, Solution
+from tprm.models import Entity, EntityAssessment, Representative, Solution, Contract
 from django.utils.translation import gettext_lazy as _
 
 import structlog
@@ -22,6 +22,7 @@ class EntityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     owned_folders = FieldsRelatedField(many=True)
     relationship = FieldsRelatedField(many=True)
+    contracts = FieldsRelatedField(many=True)
     legal_identifiers = serializers.SerializerMethodField()
 
     def get_legal_identifiers(self, obj):
@@ -276,6 +277,7 @@ class SolutionReadSerializer(BaseModelSerializer):
     provider_entity = FieldsRelatedField()
     recipient_entity = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
+    contracts = FieldsRelatedField(many=True)
 
     class Meta:
         model = Solution
@@ -286,3 +288,21 @@ class SolutionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Solution
         exclude = ["recipient_entity"]
+
+
+class ContractReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    owner = FieldsRelatedField(many=True)
+    entities = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(many=True)
+    solutions = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = Contract
+        exclude = []
+
+
+class ContractWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Contract
+        exclude = []

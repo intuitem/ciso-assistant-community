@@ -23,6 +23,7 @@
 	import EntitiesForm from './ModelForm/EntityForm.svelte';
 	import EntityAssessmentForm from './ModelForm/EntityAssessmentForm.svelte';
 	import SolutionsForm from './ModelForm/SolutionForm.svelte';
+	import ContractsForm from './ModelForm/ContractForm.svelte';
 	import RepresentativesForm from './ModelForm/RepresentativeForm.svelte';
 	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
 	import UsersForm from './ModelForm/UserForm.svelte';
@@ -453,6 +454,8 @@
 			/>
 		{:else if URLModel === 'solutions'}
 			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+		{:else if URLModel === 'contracts'}
+			<ContractsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'representatives'}
 			<RepresentativesForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
 		{:else if URLModel === 'frameworks'}
