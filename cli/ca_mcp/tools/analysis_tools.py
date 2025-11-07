@@ -3,6 +3,11 @@
 import sys
 from rich import print as rprint
 from ..client import make_get_request, fetch_all_results
+from ..utils.response_formatter import (
+    success_response,
+    error_response,
+    http_error_response,
+)
 
 
 async def get_all_audits_with_metrics():
@@ -117,8 +122,12 @@ async def get_audit_gap_analysis(audit_name: str):
     # First, find the compliance assessment by name (with pagination)
     audits, error = fetch_all_results("/compliance-assessments/")
     if error:
-        rprint(f"Error: check credentials.", file=sys.stderr)
-        return "Error: Unable to fetch audits"
+        return error_response(
+            "API Error",
+            "Unable to fetch audits. Check credentials.",
+            "Verify API token configuration",
+            retry_allowed=False,
+        )
 
     audit = None
     for item in audits:
@@ -127,18 +136,31 @@ async def get_audit_gap_analysis(audit_name: str):
             break
 
     if not audit:
-        return f"Error: Audit '{audit_name}' not found"
+        return error_response(
+            "Not Found",
+            f"Audit '{audit_name}' does not exist",
+            "Use get_audits_progress() to see available audits",
+            retry_allowed=True,
+        )
 
     # Get all requirement assessments for this compliance assessment (with pagination)
     params = {"compliance_assessment": audit["id"]}
     requirements, error = fetch_all_results("/requirement-assessments/", params=params)
 
     if error:
-        rprint(f"Error: Unable to fetch requirement assessments.", file=sys.stderr)
-        return "Error: Unable to fetch requirements"
+        return error_response(
+            "API Error",
+            "Unable to fetch requirement assessments",
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
     if not requirements:
-        return f"No requirements found for audit '{audit_name}'"
+        return success_response(
+            f"Audit '{audit_name}' has no requirements.",
+            "get_audit_gap_analysis",
+            "Inform the user this audit has no requirements to assess",
+        )
 
     # Categorize requirements by compliance result (not status)
     # result = compliance outcome, status = auditor review workflow
@@ -201,6 +223,10 @@ async def get_audit_gap_analysis(audit_name: str):
                 result += f"- ... and {len(not_assessed) - 10} more\n"
             result += "\n"
     else:
-        result += f"## ✅ No Gaps Found\n\nAll requirements are either compliant or not applicable.\n"
+        result += f"## No Gaps Found\n\n[SUCCESS] All requirements are either compliant or not applicable.\n"
 
-    return result
+    return success_response(
+        result,
+        "get_audit_gap_analysis",
+        "Use this gap analysis to answer the user's question about audit compliance",
+    )

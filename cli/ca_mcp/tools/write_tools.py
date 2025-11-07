@@ -9,6 +9,11 @@ from ..resolvers import (
     resolve_risk_assessment_id,
 )
 from ..config import GLOBAL_FOLDER_ID
+from ..utils.response_formatter import (
+    success_response,
+    error_response,
+    http_error_response,
+)
 
 
 async def create_folder(
@@ -275,11 +280,21 @@ async def create_risk_assessment(
 
         if res.status_code == 201:
             assessment = res.json()
-            return f"Created risk assessment: {assessment.get('name')} (ID: {assessment.get('id')})"
+            result = f"Created risk assessment: {assessment.get('name')} (ID: {assessment.get('id')})"
+            return success_response(
+                result,
+                "create_risk_assessment",
+                "Risk assessment created successfully. You can now create risk scenarios for this assessment",
+            )
         else:
-            return f"Error creating risk assessment: {res.status_code} - {res.text}"
+            return http_error_response(res.status_code, res.text)
     except Exception as e:
-        return f"Error in create_risk_assessment: {str(e)}"
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
 async def create_risk_scenario(
@@ -408,11 +423,20 @@ async def create_risk_scenario(
                 )
             if existing_applied_controls:
                 message += f"\n   Linked to {len(existing_applied_controls)} existing control(s)"
-            return message
+            return success_response(
+                message,
+                "create_risk_scenario",
+                "Risk scenario created successfully. You can now update risk ratings or add more scenarios",
+            )
         else:
-            return f"Error creating risk scenario: {res.status_code} - {res.text}"
+            return http_error_response(res.status_code, res.text)
     except Exception as e:
-        return f"Error in create_risk_scenario: {str(e)}"
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
 async def create_business_impact_analysis(

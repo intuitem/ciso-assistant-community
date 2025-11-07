@@ -4,6 +4,12 @@ import json
 import sys
 from rich import print as rprint
 from ..client import make_get_request, get_paginated_results
+from ..utils.response_formatter import (
+    success_response,
+    error_response,
+    empty_response,
+    http_error_response,
+)
 
 
 async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
@@ -17,32 +23,32 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
         from ..resolvers import resolve_folder_id, resolve_risk_assessment_id
 
         params = {}
+        filters = {}
 
         # Add folder filter if specified - resolve name to ID if needed
-        # Note: Risk scenarios filter by risk_assessment__perimeter__folder
         if folder:
             params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
 
         # Add risk assessment filter if specified - resolve name to ID if needed
         if risk_assessment:
             params["risk_assessment"] = resolve_risk_assessment_id(risk_assessment)
+            filters["risk_assessment"] = risk_assessment
 
         res = make_get_request("/risk-scenarios/", params=params)
 
         if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
+            return http_error_response(res.status_code, res.text)
 
         data = res.json()
         scenarios = get_paginated_results(data)
 
         if not scenarios:
-            return "No risk scenarios found"
+            return empty_response("risk scenarios", filters)
 
         result = f"Found {len(scenarios)} risk scenarios"
-        if folder:
-            result += f" (folder: {folder})"
-        if risk_assessment:
-            result += f" (assessment: {risk_assessment})"
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
         result += "|Ref|Name|Current|Residual|Domain|\n"
         result += "|---|---|---|---|---|\n"
@@ -56,9 +62,18 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
 
             result += f"|{ref_id}|{name}|{current_level}|{residual_level}|{domain}|\n"
 
-        return result
+        return success_response(
+            result,
+            "get_risk_scenarios",
+            "Use this table to answer the user's question about risk scenarios",
+        )
     except Exception as e:
-        return f"Error in get_risk_scenarios: {str(e)}"
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
 async def get_applied_controls(folder: str = None):
@@ -71,25 +86,27 @@ async def get_applied_controls(folder: str = None):
         from ..resolvers import resolve_folder_id
 
         params = {}
+        filters = {}
 
         # Add folder filter if specified - resolve name to ID if needed
         if folder:
             params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
 
         res = make_get_request("/applied-controls/", params=params)
 
         if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
+            return http_error_response(res.status_code, res.text)
 
         data = res.json()
         controls = get_paginated_results(data)
 
         if not controls:
-            return "No applied controls found"
+            return empty_response("applied controls", filters)
 
         result = f"Found {len(controls)} applied controls"
-        if folder:
-            result += f" (folder: {folder})"
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
         result += "|Ref|Name|Status|ETA|Domain|\n"
         result += "|---|---|---|---|---|\n"
@@ -103,9 +120,18 @@ async def get_applied_controls(folder: str = None):
 
             result += f"|{ref_id}|{name}|{status}|{eta}|{domain}|\n"
 
-        return result
+        return success_response(
+            result,
+            "get_applied_controls",
+            "Use this table to answer the user's question about applied controls",
+        )
     except Exception as e:
-        return f"Error in get_applied_controls: {str(e)}"
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
 async def get_audits_progress(folder: str = None, perimeter: str = None):
@@ -119,31 +145,32 @@ async def get_audits_progress(folder: str = None, perimeter: str = None):
         from ..resolvers import resolve_folder_id, resolve_perimeter_id
 
         params = {}
+        filters = {}
 
         # Add folder filter if specified - resolve name to ID if needed
         if folder:
             params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
 
         # Add perimeter filter if specified - resolve name to ID if needed
         if perimeter:
             params["perimeter"] = resolve_perimeter_id(perimeter)
+            filters["perimeter"] = perimeter
 
         res = make_get_request("/compliance-assessments/", params=params)
 
         if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
+            return http_error_response(res.status_code, res.text)
 
         data = res.json()
         audits = get_paginated_results(data)
 
         if not audits:
-            return "No audits found"
+            return empty_response("audits", filters)
 
         result = f"Found {len(audits)} audits"
-        if folder:
-            result += f" (folder: {folder})"
-        if perimeter:
-            result += f" (perimeter: {perimeter})"
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
         result += "|Name|Framework|Status|Progress|Domain|\n"
         result += "|---|---|---|---|---|\n"
@@ -157,9 +184,18 @@ async def get_audits_progress(folder: str = None, perimeter: str = None):
 
             result += f"|{name}|{framework}|{status}|{progress}|{domain}|\n"
 
-        return result
+        return success_response(
+            result,
+            "get_audits_progress",
+            "Use this table to answer the user's question about audit progress",
+        )
     except Exception as e:
-        return f"Error in get_audits_progress: {str(e)}"
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
 async def get_folders(name: str = None):
@@ -170,27 +206,27 @@ async def get_folders(name: str = None):
     """
     try:
         params = {}
+        filters = {}
 
         # Add name filter if specified
         if name:
             params["name"] = name
+            filters["name"] = name
 
         res = make_get_request("/folders/", params=params)
 
         if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
+            return http_error_response(res.status_code, res.text)
 
         data = res.json()
         folders = get_paginated_results(data)
 
         if not folders:
-            if name:
-                return f"No folders found matching '{name}'"
-            return "No folders found"
+            return empty_response("folders", filters)
 
         result = f"Found {len(folders)} folders"
-        if name:
-            result += f" (name: {name})"
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
         result += "|ID|Name|Parent|\n"
         result += "|---|---|---|\n"
@@ -203,9 +239,18 @@ async def get_folders(name: str = None):
 
             result += f"|{folder_id}|{folder_name}|{parent_name}|\n"
 
-        return result
+        return success_response(
+            result,
+            "get_folders",
+            "Use this table to identify folder IDs/names for filtering other resources",
+        )
     except Exception as e:
-        return f"Error in get_folders: {str(e)}"
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
 async def get_perimeters(folder: str = None, name: str = None):
@@ -219,31 +264,32 @@ async def get_perimeters(folder: str = None, name: str = None):
         from ..resolvers import resolve_folder_id
 
         params = {}
+        filters = {}
 
         # Add folder filter if specified - resolve name to ID if needed
         if folder:
             params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
 
         # Add name filter if specified
         if name:
             params["name"] = name
+            filters["name"] = name
 
         res = make_get_request("/perimeters/", params=params)
 
         if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
+            return http_error_response(res.status_code, res.text)
 
         data = res.json()
         perimeters = get_paginated_results(data)
 
         if not perimeters:
-            return "No perimeters found"
+            return empty_response("perimeters", filters)
 
         result = f"Found {len(perimeters)} perimeters"
-        if folder:
-            result += f" (folder: {folder})"
-        if name:
-            result += f" (name: {name})"
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
         result += "|ID|Name|Folder|\n"
         result += "|---|---|---|\n"
@@ -255,41 +301,35 @@ async def get_perimeters(folder: str = None, name: str = None):
 
             result += f"|{perimeter_id}|{perimeter_name}|{folder_name}|\n"
 
-        return result
+        return success_response(
+            result,
+            "get_perimeters",
+            "Use this table to identify perimeter IDs for creating risk assessments or audits",
+        )
     except Exception as e:
-        return f"Error in get_perimeters: {str(e)}"
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
-async def get_risk_matrices(folder: str = None):
-    """List risk matrices with IDs and names for creating risk assessments
-
-    Args:
-        folder: Folder ID/name
-    """
+async def get_risk_matrices():
+    """List risk matrices with IDs and names for creating risk assessments"""
     try:
-        from ..resolvers import resolve_folder_id
-
-        params = {}
-
-        # Add folder filter if specified - resolve name to ID if needed
-        if folder:
-            params["folder"] = resolve_folder_id(folder)
-
-        res = make_get_request("/risk-matrices/", params=params)
+        res = make_get_request("/risk-matrices/")
 
         if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
+            return http_error_response(res.status_code, res.text)
 
         data = res.json()
         matrices = get_paginated_results(data)
 
         if not matrices:
-            return "No risk matrices found"
+            return empty_response("risk matrices", None)
 
-        result = f"Found {len(matrices)} risk matrices"
-        if folder:
-            result += f" (folder: {folder})"
-        result += "\n\n"
+        result = f"Found {len(matrices)} risk matrices\n\n"
         result += "|ID|Name|\n"
         result += "|---|---|\n"
 
@@ -299,9 +339,18 @@ async def get_risk_matrices(folder: str = None):
 
             result += f"|{matrix_id}|{name}|\n"
 
-        return result
+        return success_response(
+            result,
+            "get_risk_matrices",
+            "Use these matrix IDs when creating risk assessments",
+        )
     except Exception as e:
-        return f"Error in get_risk_matrices: {str(e)}"
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
 async def get_risk_matrix_details(matrix_id_or_name: str):
@@ -319,7 +368,7 @@ async def get_risk_matrix_details(matrix_id_or_name: str):
         res = make_get_request(f"/risk-matrices/{matrix_id}/")
 
         if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
+            return http_error_response(res.status_code, res.text)
 
         matrix = res.json()
 
@@ -411,9 +460,18 @@ async def get_risk_matrix_details(matrix_id_or_name: str):
         result += "**Usage:** When updating risk scenarios, use the index values from the Probability and Impact scales.\n"
         result += "Example: `current_proba=2` sets probability to index 2, `current_impact=3` sets impact to index 3.\n"
 
-        return result
+        return success_response(
+            result,
+            "get_risk_matrix_details",
+            "Use these probability/impact indices when creating or updating risk scenarios",
+        )
     except Exception as e:
-        return f"Error in get_risk_matrix_details: {str(e)}"
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
 async def get_risk_assessments(folder: str = None, perimeter: str = None):
@@ -547,25 +605,27 @@ async def get_assets(folder: str = None):
         from ..resolvers import resolve_folder_id
 
         params = {}
+        filters = {}
 
         # Add folder filter if specified - resolve name to ID if needed
         if folder:
             params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
 
         res = make_get_request("/assets/", params=params)
 
         if res.status_code != 200:
-            return f"Error: HTTP {res.status_code} - {res.text}"
+            return http_error_response(res.status_code, res.text)
 
         data = res.json()
         assets = get_paginated_results(data)
 
         if not assets:
-            return "No assets found"
+            return empty_response("assets", filters)
 
         result = f"Found {len(assets)} assets"
-        if folder:
-            result += f" (folder: {folder})"
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
         result += "|ID|Name|Type|Folder|\n"
         result += "|---|---|---|---|\n"
@@ -578,9 +638,18 @@ async def get_assets(folder: str = None):
 
             result += f"|{asset_id}|{name}|{asset_type}|{folder_name}|\n"
 
-        return result
+        return success_response(
+            result,
+            "get_assets",
+            "Use this table to identify asset IDs for linking to risk scenarios",
+        )
     except Exception as e:
-        return f"Error in get_assets: {str(e)}"
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
 async def get_incidents(folder: str = None):
