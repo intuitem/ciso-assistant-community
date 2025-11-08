@@ -17,6 +17,7 @@
 		category: string;
 		onClick?: () => void;
 		href?: string;
+		tags?: string[];
 	}
 
 	// Available report tiles
@@ -27,28 +28,32 @@
 			description: 'Generate DORA-compliant Register of Information (ROI) containing entity data required by the Digital Operational Resilience Act',
 			icon: 'fa-solid fa-building-shield',
 			category: 'compliance',
-			href: '/reports/dora-roi'
+			href: '/reports/dora-roi',
+			tags: ['DORA', 'Regulation', 'Entities']
 		},
 		{
 			id: 'compliance-summary',
 			title: m.complianceSummaryReport ? m.complianceSummaryReport() : 'Compliance Summary Report',
 			description: m.complianceSummaryReportDesc ? m.complianceSummaryReportDesc() : 'Generate comprehensive compliance status across all frameworks',
 			icon: 'fa-solid fa-clipboard-check',
-			category: 'compliance'
+			category: 'compliance',
+			tags: ['Compliance', 'Frameworks', 'Audits']
 		},
 		{
 			id: 'incident-analysis',
 			title: m.incidentAnalysisReport ? m.incidentAnalysisReport() : 'Incident Analysis Report',
 			description: m.incidentAnalysisReportDesc ? m.incidentAnalysisReportDesc() : 'Comprehensive analysis of security incidents and trends',
 			icon: 'fa-solid fa-bug',
-			category: 'operations'
+			category: 'operations',
+			tags: ['Incidents', 'Operations', 'Security']
 		},
 		{
 			id: 'asset-inventory',
 			title: m.assetInventoryReport ? m.assetInventoryReport() : 'Asset Inventory Report',
 			description: m.assetInventoryReportDesc ? m.assetInventoryReportDesc() : 'Complete inventory of assets and their risk profiles',
 			icon: 'fa-solid fa-gem',
-			category: 'assets'
+			category: 'assets',
+			tags: ['Assets', 'Inventory', 'Risk']
 		}
 	];
 
@@ -76,6 +81,7 @@
 					icon={tile.icon}
 					category={tile.category}
 					href={tile.href}
+					tags={tile.tags}
 					onclick={tile.href ? undefined : () => handleTileClick(tile)}
 				/>
 			{/each}

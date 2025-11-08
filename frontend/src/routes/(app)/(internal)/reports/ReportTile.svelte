@@ -8,9 +8,10 @@
 		category: string;
 		onclick?: () => void;
 		href?: string;
+		tags?: string[];
 	}
 
-	let { title, description, icon, category, onclick, href }: Props = $props();
+	let { title, description, icon, category, onclick, href, tags = [] }: Props = $props();
 
 	function getCategoryColor(category: string): string {
 		const colors: Record<string, string> = {
@@ -48,16 +49,29 @@
 					<i class="{icon} text-2xl {getCategoryIconColor(category)}"></i>
 				</div>
 			</div>
-			<div class="flex-1 min-w-0">
+			<div class="flex-1 min-w-0 flex flex-col">
 				<h3 class="text-lg font-semibold text-gray-900 mb-2">
 					{title}
 				</h3>
-				<p class="text-sm text-gray-600 leading-relaxed">
+				<p class="text-sm text-gray-600 leading-relaxed mb-auto">
 					{description}
 				</p>
-				<div class="mt-4 flex items-center text-sm font-medium {getCategoryIconColor(category)}">
-					{m.generateReport ? m.generateReport() : 'Generate Report'}
-					<i class="fas fa-arrow-right ml-2 text-xs"></i>
+				<div class="mt-4">
+					<div class="flex items-center justify-between">
+						<div class="flex items-center text-sm font-medium {getCategoryIconColor(category)}">
+							{m.generateReport ? m.generateReport() : 'Generate Report'}
+							<i class="fas fa-arrow-right ml-2 text-xs"></i>
+						</div>
+					</div>
+					{#if tags.length > 0}
+						<div class="flex flex-wrap gap-1 mt-3">
+							{#each tags as tag}
+								<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+									{tag}
+								</span>
+							{/each}
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -74,16 +88,29 @@
 					<i class="{icon} text-2xl {getCategoryIconColor(category)}"></i>
 				</div>
 			</div>
-			<div class="flex-1 min-w-0">
+			<div class="flex-1 min-w-0 flex flex-col">
 				<h3 class="text-lg font-semibold text-gray-900 mb-2">
 					{title}
 				</h3>
-				<p class="text-sm text-gray-600 leading-relaxed">
+				<p class="text-sm text-gray-600 leading-relaxed mb-auto">
 					{description}
 				</p>
-				<div class="mt-4 flex items-center text-sm font-medium {getCategoryIconColor(category)}">
-					{m.generateReport ? m.generateReport() : 'Generate Report'}
-					<i class="fas fa-arrow-right ml-2 text-xs"></i>
+				<div class="mt-4">
+					<div class="flex items-center justify-between">
+						<div class="flex items-center text-sm font-medium {getCategoryIconColor(category)}">
+							{m.generateReport ? m.generateReport() : 'Generate Report'}
+							<i class="fas fa-arrow-right ml-2 text-xs"></i>
+						</div>
+					</div>
+					{#if tags.length > 0}
+						<div class="flex flex-wrap gap-1 mt-3">
+							{#each tags as tag}
+								<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+									{tag}
+								</span>
+							{/each}
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
