@@ -27,6 +27,17 @@ export const navData = {
 					]
 				},
 				{
+					name: 'reports',
+					fa_icon: 'fa-solid fa-file-chart-column',
+					href: '/reports',
+					permissions: [
+						'view_perimeter',
+						'view_riskscenario',
+						'view_referencecontrol',
+						'view_riskassessment'
+					]
+				},
+				{
 					name: 'myAssignments',
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',

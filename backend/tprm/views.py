@@ -9,6 +9,12 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from django.utils.formats import date_format
+from django.http import HttpResponse
+
+import csv
+import io
+import zipfile
+from datetime import datetime
 
 logger = structlog.get_logger(__name__)
 
@@ -31,6 +37,85 @@ class EntityViewSet(BaseModelViewSet):
         "relationship__name",
         "contracts",
     ]
+
+    @action(detail=False, methods=["get"], name="Generate DORA ROI")
+    def generate_dora_roi(self, request):
+        """
+        Generate DORA Register of Information (ROI) as a zip file containing CSV data.
+        """
+        # Get viewable entities for the current user
+        (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Entity,
+        )
+
+        # Create CSV in memory
+        csv_buffer = io.StringIO()
+        csv_writer = csv.writer(csv_buffer)
+
+        # Write CSV headers
+        csv_writer.writerow(
+            [
+                "Entity ID",
+                "Name",
+                "Description",
+                "Mission",
+                "Reference Link",
+                "Relationship Types",
+                "Legal Identifiers",
+                "Folder",
+                "Created At",
+                "Updated At",
+            ]
+        )
+
+        # Write entity data
+        for entity in Entity.objects.filter(id__in=viewable_items).select_related(
+            "folder"
+        ):
+            # Get relationship types as comma-separated string
+            relationships = ", ".join([str(rel) for rel in entity.relationship.all()])
+
+            # Format legal identifiers as string
+            legal_ids = (
+                ", ".join([f"{k}: {v}" for k, v in entity.legal_identifiers.items()])
+                if entity.legal_identifiers
+                else ""
+            )
+
+            csv_writer.writerow(
+                [
+                    str(entity.id),
+                    entity.name,
+                    entity.description or "",
+                    entity.mission or "",
+                    entity.reference_link or "",
+                    relationships,
+                    legal_ids,
+                    entity.folder.name if entity.folder else "",
+                    entity.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    entity.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+                ]
+            )
+
+        # Create zip file in memory
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            # Add CSV to zip
+            zip_file.writestr(
+                "entities_register.csv", csv_buffer.getvalue().encode("utf-8")
+            )
+
+        # Prepare response
+        zip_buffer.seek(0)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"DORA_ROI_{timestamp}.zip"
+
+        response = HttpResponse(zip_buffer.getvalue(), content_type="application/zip")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+        return response
 
 
 class EntityAssessmentViewSet(BaseModelViewSet):
