@@ -28,7 +28,7 @@ export const navData = {
 				},
 				{
 					name: 'reports',
-					fa_icon: 'fa-solid fa-file-chart-column',
+					fa_icon: 'fas fa-file-invoice',
 					href: '/reports',
 					permissions: [
 						'view_perimeter',
