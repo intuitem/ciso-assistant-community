@@ -35,6 +35,7 @@ class MappingEngine:
         ]
 
         self.m2m_fields = [
+            "id",
             "applied_controls",
             "security_exceptions",
             "evidences",
@@ -272,6 +273,8 @@ class MappingEngine:
             dst = mapping["target_requirement_urn"]
             rel = mapping["relationship"]
 
+            
+
             if (
                 rel in ("equal", "superset")
                 and src in source_audit["requirement_assessments"]
@@ -311,6 +314,8 @@ class MappingEngine:
                                     existing_result, new_result
                                 )
                             )
+
+                        
                     else:
                         target_audit["requirement_assessments"][dst] = (
                             src_assessment.copy()
@@ -427,6 +432,15 @@ class MappingEngine:
                         target_audit["requirement_assessments"][dst]["result"] = (
                             "partially_compliant"
                         )
+
+            # Add the mapping inference
+            src_id = source_audit["requirement_assessments"][src].get("id", "noid")
+            if src_id != "noid":
+                target_audit["requirement_assessments"][dst]["mapping_inference"] = {
+                    "result": target_audit["requirement_assessments"][dst].get("result", ""),
+                    "source_requirement_assessment": str(src_id),
+                    "annotation": source_audit["requirement_assessments"][src].get("mapping_inference", {}).get("annotation", "")
+                }
         return target_audit
 
     def _most_restrictive_result(self, result1, result2):
