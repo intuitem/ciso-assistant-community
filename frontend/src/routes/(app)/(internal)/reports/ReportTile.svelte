@@ -35,14 +35,12 @@
 		return colors[category] || 'text-gray-600';
 	}
 
-	const baseClasses = "block text-left p-6 rounded-lg border-2 transition-all duration-200 hover:shadow-lg transform hover:-translate-y-1 cursor-pointer";
+	const baseClasses =
+		'block text-left p-6 rounded-lg border-2 transition-all duration-200 hover:shadow-lg transform hover:-translate-y-1 cursor-pointer';
 </script>
 
 {#if href}
-	<a
-		{href}
-		class="{baseClasses} {getCategoryColor(category)}"
-	>
+	<a {href} class="{baseClasses} {getCategoryColor(category)}">
 		<div class="flex items-start gap-4">
 			<div class="flex-shrink-0">
 				<div class="w-12 h-12 rounded-lg bg-white flex items-center justify-center shadow-sm">
@@ -66,7 +64,9 @@
 					{#if tags.length > 0}
 						<div class="flex flex-wrap gap-1 mt-3">
 							{#each tags as tag}
-								<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+								<span
+									class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200"
+								>
 									{tag}
 								</span>
 							{/each}
@@ -77,11 +77,7 @@
 		</div>
 	</a>
 {:else}
-	<button
-		type="button"
-		class="{baseClasses} {getCategoryColor(category)}"
-		{onclick}
-	>
+	<button type="button" class="{baseClasses} {getCategoryColor(category)}" {onclick}>
 		<div class="flex items-start gap-4">
 			<div class="flex-shrink-0">
 				<div class="w-12 h-12 rounded-lg bg-white flex items-center justify-center shadow-sm">
@@ -105,7 +101,9 @@
 					{#if tags.length > 0}
 						<div class="flex flex-wrap gap-1 mt-3">
 							{#each tags as tag}
-								<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+								<span
+									class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200"
+								>
 									{tag}
 								</span>
 							{/each}

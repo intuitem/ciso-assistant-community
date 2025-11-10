@@ -63,12 +63,7 @@
 	bind:cachedValue={formDataCache['legal_identifiers']}
 />
 
-<Dropdown
-	open={false}
-	style="hover:text-primary-700"
-	icon="fa-solid fa-ellipsis"
-	header={m.more()}
->
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-ellipsis" header={m.more()}>
 	<TextField
 		{form}
 		field="reference_link"

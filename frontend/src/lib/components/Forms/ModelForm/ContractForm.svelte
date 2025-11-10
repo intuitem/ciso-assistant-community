@@ -115,12 +115,7 @@
 	label={m.filteringLabels()}
 />
 
-<Dropdown
-	open={false}
-	style="hover:text-primary-700"
-	icon="fa-solid fa-ellipsis"
-	header={m.more()}
->
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-ellipsis" header={m.more()}>
 	<AutocompleteSelect
 		{form}
 		field="dora_contractual_arrangement"

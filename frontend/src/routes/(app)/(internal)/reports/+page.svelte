@@ -25,7 +25,8 @@
 		{
 			id: 'dora-roi',
 			title: 'DORA Register of Information',
-			description: 'Generate DORA-compliant Register of Information (ROI) containing entity data required by the Digital Operational Resilience Act',
+			description:
+				'Generate DORA-compliant Register of Information (ROI) containing entity data required by the Digital Operational Resilience Act',
 			icon: 'fa-solid fa-building-shield',
 			category: 'compliance',
 			href: '/reports/dora-roi',
@@ -34,7 +35,9 @@
 		{
 			id: 'compliance-summary',
 			title: m.complianceSummaryReport ? m.complianceSummaryReport() : 'Compliance Summary Report',
-			description: m.complianceSummaryReportDesc ? m.complianceSummaryReportDesc() : 'Generate comprehensive compliance status across all frameworks',
+			description: m.complianceSummaryReportDesc
+				? m.complianceSummaryReportDesc()
+				: 'Generate comprehensive compliance status across all frameworks',
 			icon: 'fa-solid fa-clipboard-check',
 			category: 'compliance',
 			tags: ['Compliance', 'Frameworks', 'Audits']
@@ -42,7 +45,9 @@
 		{
 			id: 'incident-analysis',
 			title: m.incidentAnalysisReport ? m.incidentAnalysisReport() : 'Incident Analysis Report',
-			description: m.incidentAnalysisReportDesc ? m.incidentAnalysisReportDesc() : 'Comprehensive analysis of security incidents and trends',
+			description: m.incidentAnalysisReportDesc
+				? m.incidentAnalysisReportDesc()
+				: 'Comprehensive analysis of security incidents and trends',
 			icon: 'fa-solid fa-bug',
 			category: 'operations',
 			tags: ['Incidents', 'Operations', 'Security']
@@ -50,7 +55,9 @@
 		{
 			id: 'asset-inventory',
 			title: m.assetInventoryReport ? m.assetInventoryReport() : 'Asset Inventory Report',
-			description: m.assetInventoryReportDesc ? m.assetInventoryReportDesc() : 'Complete inventory of assets and their risk profiles',
+			description: m.assetInventoryReportDesc
+				? m.assetInventoryReportDesc()
+				: 'Complete inventory of assets and their risk profiles',
 			icon: 'fa-solid fa-gem',
 			category: 'assets',
 			tags: ['Assets', 'Inventory', 'Risk']
@@ -99,7 +106,9 @@
 					{m.aboutReports ? m.aboutReports() : 'About Reports'}
 				</h3>
 				<p class="text-gray-700">
-					{m.aboutReportsDescription ? m.aboutReportsDescription() : 'Reports provide a simple tools to generate specialized reports useful for key insights or required by authorities for specific standards.\nMore specialized capabilities will be added as we identify specific cases.'}
+					{m.aboutReportsDescription
+						? m.aboutReportsDescription()
+						: 'Reports provide a simple tools to generate specialized reports useful for key insights or required by authorities for specific standards.\nMore specialized capabilities will be added as we identify specific cases.'}
 				</p>
 			</div>
 		</div>
