@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -66,3 +67,19 @@
 	bind:cachedValue={formDataCache['assets']}
 	label={m.assets()}
 />
+
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-scale-balanced"
+	header={m.doraSpecific()}
+>
+	<AutocompleteSelect
+		{form}
+		field="dora_ict_service_type"
+		options={model.selectOptions?.dora_ict_service_type}
+		label={m.doraIctServiceType()}
+		cacheLock={cacheLocks['dora_ict_service_type']}
+		bind:cachedValue={formDataCache['dora_ict_service_type']}
+	/>
+</Dropdown>

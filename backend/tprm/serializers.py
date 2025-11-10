@@ -57,6 +57,12 @@ class EntityImportExportSerializer(BaseModelSerializer):
             "mission",
             "reference_link",
             "owned_folders",
+            "country",
+            "currency",
+            "dora_entity_type",
+            "dora_entity_hierarchy",
+            "dora_assets_value",
+            "dora_competent_authority",
             "created_at",
             "updated_at",
         ]
@@ -296,6 +302,7 @@ class ContractReadSerializer(BaseModelSerializer):
     entities = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     solutions = FieldsRelatedField(many=True)
+    overarching_contract = FieldsRelatedField()
 
     class Meta:
         model = Contract

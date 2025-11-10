@@ -1,7 +1,10 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import Select from '../Select.svelte';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -100,7 +103,7 @@
 	field="evidences"
 	cacheLock={cacheLocks['evidences']}
 	bind:cachedValue={formDataCache['evidences']}
-	label={m.evidences()}
+	label={m.documents()}
 />
 <AutocompleteSelect
 	{form}
@@ -111,3 +114,66 @@
 	bind:cachedValue={formDataCache['filtering_labels']}
 	label={m.filteringLabels()}
 />
+
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-ellipsis"
+	header={m.more()}
+>
+	<AutocompleteSelect
+		{form}
+		field="dora_contractual_arrangement"
+		options={model.selectOptions?.dora_contractual_arrangement}
+		label={m.doraContractualArrangement()}
+		cacheLock={cacheLocks['dora_contractual_arrangement']}
+		bind:cachedValue={formDataCache['dora_contractual_arrangement']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="overarching_contract"
+		optionsEndpoint="contracts?dora_contractual_arrangement=eba_CO:x2"
+		label={m.overarchingContract()}
+		helpText={m.overarchingContractHelpText()}
+		cacheLock={cacheLocks['overarching_contract']}
+		bind:cachedValue={formDataCache['overarching_contract']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="currency"
+		options={model.selectOptions?.currency}
+		label={m.currency()}
+		cacheLock={cacheLocks['currency']}
+		bind:cachedValue={formDataCache['currency']}
+	/>
+	<NumberField
+		{form}
+		field="annual_expense"
+		label={m.annualExpense()}
+		cacheLock={cacheLocks['annual_expense']}
+		bind:cachedValue={formDataCache['annual_expense']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="termination_reason"
+		options={model.selectOptions?.termination_reason}
+		label={m.terminationReason()}
+		cacheLock={cacheLocks['termination_reason']}
+		bind:cachedValue={formDataCache['termination_reason']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="governing_law_country"
+		options={model.selectOptions?.governing_law_country}
+		label={m.governingLawCountry()}
+		cacheLock={cacheLocks['governing_law_country']}
+		bind:cachedValue={formDataCache['governing_law_country']}
+	/>
+	<Checkbox
+		{form}
+		field="is_intragroup"
+		label={m.isIntragroup()}
+		cacheLock={cacheLocks['is_intragroup']}
+		bind:cachedValue={formDataCache['is_intragroup']}
+	/>
+</Dropdown>

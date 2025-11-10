@@ -571,7 +571,13 @@ export const EntitiesSchema = z.object({
 		})
 		.optional(),
 	relationship: z.string().optional().array().optional(),
-	legal_identifiers: z.record(z.string()).optional()
+	legal_identifiers: z.record(z.string()).optional(),
+	country: z.string().optional(),
+	currency: z.string().optional(),
+	dora_entity_type: z.string().optional(),
+	dora_entity_hierarchy: z.string().optional(),
+	dora_assets_value: z.number().optional().nullable(),
+	dora_competent_authority: z.string().optional()
 });
 
 export const EntityAssessmentSchema = z.object({
@@ -605,7 +611,8 @@ export const solutionSchema = z.object({
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
 	criticality: z.number().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	assets: z.string().uuid().optional().array().optional(),
+	dora_ict_service_type: z.string().optional()
 });
 
 export const representativeSchema = z.object({
@@ -630,7 +637,14 @@ export const contractSchema = z.object({
 	status: z.string().optional().default('draft'),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	end_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	ref_id: z.string().optional()
+	ref_id: z.string().optional(),
+	dora_contractual_arrangement: z.string().optional(),
+	currency: z.string().optional(),
+	annual_expense: z.number().optional().nullable(),
+	termination_reason: z.string().optional(),
+	is_intragroup: z.boolean().optional().default(false),
+	overarching_contract: z.string().optional(),
+	governing_law_country: z.string().optional()
 });
 
 export const vulnerabilitySchema = z.object({

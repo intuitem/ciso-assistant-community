@@ -2,7 +2,9 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import LegalIdentifierField from '../LegalIdentifierField.svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -33,14 +35,6 @@
 	cacheLock={cacheLocks['mission']}
 	bind:cachedValue={formDataCache['mission']}
 />
-<TextField
-	{form}
-	field="reference_link"
-	label={m.referenceLink()}
-	helpText={m.linkHelpText()}
-	cacheLock={cacheLocks['reference_link']}
-	bind:cachedValue={formDataCache['reference_link']}
-/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
@@ -68,3 +62,73 @@
 	cacheLock={cacheLocks['legal_identifiers']}
 	bind:cachedValue={formDataCache['legal_identifiers']}
 />
+
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-ellipsis"
+	header={m.more()}
+>
+	<TextField
+		{form}
+		field="reference_link"
+		label={m.referenceLink()}
+		helpText={m.linkHelpText()}
+		cacheLock={cacheLocks['reference_link']}
+		bind:cachedValue={formDataCache['reference_link']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="country"
+		options={model.selectOptions?.country}
+		label={m.country()}
+		cacheLock={cacheLocks['country']}
+		bind:cachedValue={formDataCache['country']}
+	/>
+</Dropdown>
+
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-scale-balanced"
+	header={m.doraSpecific()}
+>
+	<AutocompleteSelect
+		{form}
+		field="currency"
+		options={model.selectOptions?.currency}
+		label={m.currency()}
+		cacheLock={cacheLocks['currency']}
+		bind:cachedValue={formDataCache['currency']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="dora_entity_type"
+		options={model.selectOptions?.dora_entity_type}
+		label={m.doraEntityType()}
+		cacheLock={cacheLocks['dora_entity_type']}
+		bind:cachedValue={formDataCache['dora_entity_type']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="dora_entity_hierarchy"
+		options={model.selectOptions?.dora_entity_hierarchy}
+		label={m.doraEntityHierarchy()}
+		cacheLock={cacheLocks['dora_entity_hierarchy']}
+		bind:cachedValue={formDataCache['dora_entity_hierarchy']}
+	/>
+	<NumberField
+		{form}
+		field="dora_assets_value"
+		label={m.doraAssetsValue()}
+		cacheLock={cacheLocks['dora_assets_value']}
+		bind:cachedValue={formDataCache['dora_assets_value']}
+	/>
+	<TextField
+		{form}
+		field="dora_competent_authority"
+		label={m.doraCompetentAuthority()}
+		cacheLock={cacheLocks['dora_competent_authority']}
+		bind:cachedValue={formDataCache['dora_competent_authority']}
+	/>
+</Dropdown>

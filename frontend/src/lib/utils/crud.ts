@@ -784,6 +784,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'terminologies',
 				urlParams: 'field_path=entity.relationship'
 			}
+		],
+		selectFields: [
+			{ field: 'country' },
+			{ field: 'currency' },
+			{ field: 'dora_entity_type' },
+			{ field: 'dora_entity_hierarchy' }
 		]
 	},
 	'entity-assessments': {
@@ -817,7 +823,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
 			{ field: 'assets', urlModel: 'assets' }
-		]
+		],
+		selectFields: [{ field: 'dora_ict_service_type' }]
 	},
 	contracts: {
 		name: 'contract',
@@ -835,7 +842,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'entities', urlModel: 'entities' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'solutions', urlModel: 'solutions' }
+			{ field: 'solutions', urlModel: 'solutions' },
+			{ field: 'overarching_contract', urlModel: 'contracts' }
+		],
+		selectFields: [
+			{ field: 'status' },
+			{ field: 'currency' },
+			{ field: 'dora_contractual_arrangement' },
+			{ field: 'termination_reason' },
+			{ field: 'governing_law_country' }
 		]
 	},
 	representatives: {

@@ -9,6 +9,14 @@ from core.models import (
     Terminology,
     FilteringLabelMixin,
 )
+from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES
+from core.dora import (
+    DORA_ENTITY_TYPE_CHOICES,
+    DORA_ENTITY_HIERARCHY_CHOICES,
+    DORA_CONTRACTUAL_ARRANGEMENT_CHOICES,
+    TERMINATION_REASON_CHOICES,
+    DORA_ICT_SERVICE_CHOICES,
+)
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from iam.views import User
 
@@ -45,6 +53,46 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         blank=True,
         verbose_name=_("Legal identifiers"),
         help_text=_("Legal identifiers (LEI, EUID, VAT, DUNS, etc.)"),
+    )
+    country = models.CharField(
+        max_length=3,
+        choices=COUNTRY_CHOICES,
+        blank=True,
+        verbose_name=_("Country"),
+        help_text=_("Country where the entity is located"),
+    )
+    currency = models.CharField(
+        max_length=3,
+        choices=CURRENCY_CHOICES,
+        blank=True,
+        verbose_name=_("Currency"),
+        help_text=_("Default currency for the entity"),
+    )
+    dora_entity_type = models.CharField(
+        max_length=20,
+        choices=DORA_ENTITY_TYPE_CHOICES,
+        blank=True,
+        verbose_name=_("DORA entity type"),
+        help_text=_("DORA entity type classification"),
+    )
+    dora_entity_hierarchy = models.CharField(
+        max_length=20,
+        choices=DORA_ENTITY_HIERARCHY_CHOICES,
+        blank=True,
+        verbose_name=_("DORA entity hierarchy"),
+        help_text=_("DORA entity hierarchy classification"),
+    )
+    dora_assets_value = models.FloatField(
+        blank=True,
+        null=True,
+        verbose_name=_("DORA assets value"),
+        help_text=_("Total assets value for DORA reporting"),
+    )
+    dora_competent_authority = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("DORA competent authority"),
+        help_text=_("Competent authority overseeing this entity for DORA compliance"),
     )
 
     fields_to_check = ["name"]
@@ -162,6 +210,13 @@ class Solution(NameDescriptionMixin):
         help_text=_("Assets related to the solution"),
         related_name="solutions",
     )
+    dora_ict_service_type = models.CharField(
+        max_length=20,
+        choices=DORA_ICT_SERVICE_CHOICES,
+        blank=True,
+        verbose_name=_("DORA ICT service type"),
+        help_text=_("DORA ICT service type classification"),
+    )
 
     fields_to_check = ["name"]
 
@@ -229,6 +284,54 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         blank=True,
         verbose_name=_("Reference ID"),
         help_text=_("Contract reference number or identifier"),
+    )
+    dora_contractual_arrangement = models.CharField(
+        max_length=20,
+        choices=DORA_CONTRACTUAL_ARRANGEMENT_CHOICES,
+        blank=True,
+        verbose_name=_("DORA contractual arrangement"),
+        help_text=_("DORA contractual arrangement type"),
+    )
+    currency = models.CharField(
+        max_length=3,
+        choices=CURRENCY_CHOICES,
+        blank=True,
+        verbose_name=_("Currency"),
+        help_text=_("Currency for contract expenses"),
+    )
+    annual_expense = models.FloatField(
+        blank=True,
+        null=True,
+        verbose_name=_("Annual expense"),
+        help_text=_("Annual expense amount for this contract"),
+    )
+    termination_reason = models.CharField(
+        max_length=20,
+        choices=TERMINATION_REASON_CHOICES,
+        blank=True,
+        verbose_name=_("Termination reason"),
+        help_text=_("Reason for contract termination"),
+    )
+    is_intragroup = models.BooleanField(
+        default=False,
+        verbose_name=_("Is intragroup"),
+        help_text=_("Whether this is an intragroup contract"),
+    )
+    overarching_contract = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="subordinate_contracts",
+        verbose_name=_("Overarching contract"),
+        help_text=_("Parent/overarching contract if this is a subordinate arrangement"),
+    )
+    governing_law_country = models.CharField(
+        max_length=3,
+        choices=COUNTRY_CHOICES,
+        blank=True,
+        verbose_name=_("Governing law country"),
+        help_text=_("Country whose law governs this contract"),
     )
 
     fields_to_check = ["name"]

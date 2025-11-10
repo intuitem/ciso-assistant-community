@@ -11,6 +11,15 @@ from rest_framework.response import Response
 from django.utils.formats import date_format
 from django.http import HttpResponse
 
+from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES
+from core.dora import (
+    DORA_ENTITY_TYPE_CHOICES,
+    DORA_ENTITY_HIERARCHY_CHOICES,
+    DORA_CONTRACTUAL_ARRANGEMENT_CHOICES,
+    TERMINATION_REASON_CHOICES,
+    DORA_ICT_SERVICE_CHOICES,
+)
+
 import csv
 import io
 import zipfile
@@ -36,6 +45,11 @@ class EntityViewSet(BaseModelViewSet):
         "relationship",
         "relationship__name",
         "contracts",
+        "country",
+        "currency",
+        "dora_entity_type",
+        "dora_entity_hierarchy",
+        "dora_competent_authority",
     ]
 
     @action(detail=False, methods=["get"], name="Generate DORA ROI")
@@ -64,6 +78,12 @@ class EntityViewSet(BaseModelViewSet):
                 "Reference Link",
                 "Relationship Types",
                 "Legal Identifiers",
+                "Country",
+                "Currency",
+                "DORA Entity Type",
+                "DORA Entity Hierarchy",
+                "DORA Assets Value",
+                "DORA Competent Authority",
                 "Folder",
                 "Created At",
                 "Updated At",
@@ -93,6 +113,18 @@ class EntityViewSet(BaseModelViewSet):
                     entity.reference_link or "",
                     relationships,
                     legal_ids,
+                    entity.country or "",
+                    entity.currency or "",
+                    entity.get_dora_entity_type_display()
+                    if entity.dora_entity_type
+                    else "",
+                    entity.get_dora_entity_hierarchy_display()
+                    if entity.dora_entity_hierarchy
+                    else "",
+                    entity.dora_assets_value
+                    if entity.dora_assets_value is not None
+                    else "",
+                    entity.dora_competent_authority or "",
                     entity.folder.name if entity.folder else "",
                     entity.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                     entity.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
@@ -116,6 +148,22 @@ class EntityViewSet(BaseModelViewSet):
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
 
         return response
+
+    @action(detail=False, name="Get country choices")
+    def country(self, request):
+        return Response(dict(COUNTRY_CHOICES))
+
+    @action(detail=False, name="Get currency choices")
+    def currency(self, request):
+        return Response(dict(CURRENCY_CHOICES))
+
+    @action(detail=False, name="Get DORA entity type choices")
+    def dora_entity_type(self, request):
+        return Response(dict(DORA_ENTITY_TYPE_CHOICES))
+
+    @action(detail=False, name="Get DORA entity hierarchy choices")
+    def dora_entity_hierarchy(self, request):
+        return Response(dict(DORA_ENTITY_HIERARCHY_CHOICES))
 
 
 class EntityAssessmentViewSet(BaseModelViewSet):
@@ -235,13 +283,24 @@ class SolutionViewSet(BaseModelViewSet):
     """
 
     model = Solution
-    filterset_fields = ["name", "provider_entity", "assets", "criticality", "contracts"]
+    filterset_fields = [
+        "name",
+        "provider_entity",
+        "assets",
+        "criticality",
+        "contracts",
+        "dora_ict_service_type",
+    ]
 
     def perform_create(self, serializer):
         serializer.save()
         solution = serializer.instance
         solution.recipient_entity = Entity.objects.get(builtin=True)
         solution.save()
+
+    @action(detail=False, name="Get DORA ICT service type choices")
+    def dora_ict_service_type(self, request):
+        return Response(dict(DORA_ICT_SERVICE_CHOICES))
 
 
 class ContractViewSet(BaseModelViewSet):
@@ -250,8 +309,36 @@ class ContractViewSet(BaseModelViewSet):
     """
 
     model = Contract
-    filterset_fields = ["name", "folder", "entities", "status", "owner"]
+    filterset_fields = [
+        "name",
+        "folder",
+        "entities",
+        "status",
+        "owner",
+        "dora_contractual_arrangement",
+        "currency",
+        "termination_reason",
+        "is_intragroup",
+        "overarching_contract",
+        "governing_law_country",
+    ]
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Contract.Status.choices))
+
+    @action(detail=False, name="Get currency choices")
+    def currency(self, request):
+        return Response(dict(CURRENCY_CHOICES))
+
+    @action(detail=False, name="Get DORA contractual arrangement choices")
+    def dora_contractual_arrangement(self, request):
+        return Response(dict(DORA_CONTRACTUAL_ARRANGEMENT_CHOICES))
+
+    @action(detail=False, name="Get termination reason choices")
+    def termination_reason(self, request):
+        return Response(dict(TERMINATION_REASON_CHOICES))
+
+    @action(detail=False, name="Get governing law country choices")
+    def governing_law_country(self, request):
+        return Response(dict(COUNTRY_CHOICES))
