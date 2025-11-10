@@ -14,6 +14,8 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
+	import SelectModal from '../Modals/SelectModal.svelte';
+	import { z } from 'zod';
 
 	import { Tabs, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
@@ -228,6 +230,36 @@
 	}
 
 	let openStateRA = $state(false);
+
+	function modalSelectForm(urlmodel: string): void {
+		const { field, optionsEndpoint } = data.modelsToSelect[urlmodel] ?? {};
+
+		if (!data.selectForms[urlmodel]) {
+			console.error('No select form found for', urlmodel);
+			return;
+		}
+
+		const selectForm = data.selectForms[urlmodel];
+
+		let modalComponent: ModalComponent = {
+			ref: SelectModal,
+			props: {
+				form: selectForm,
+				model: urlmodel,
+				field: field,
+				optionsEndpoint: optionsEndpoint
+			}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: safeTranslate('select-' + urlmodel)
+		};
+		modalStore.trigger(modal);
+	}
+
+	let hasSelectButton = $derived((urlModel: string) => data.modelsToSelect ? data.modelsToSelect.hasOwnProperty(urlModel) : false);
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -568,16 +600,43 @@
 									deleteForm={model.deleteForm}
 									URLModel={urlmodel}
 									fields={fieldsToUse}
+									canSelectObject={true}
 								>
+									{#snippet selectButton()}
+										{#if hasSelectButton(model.urlModel)}
+											<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="select-button"
+													title={safeTranslate('select-' + urlmodel)}
+													onclick={(_) => modalSelectForm(urlmodel)}
+													><i class="fa-solid fa-hand-pointer"></i>
+												</button>
+											</span>
+										{/if}
+									{/snippet}
 									{#snippet addButton()}
-										<button
-											class="btn preset-filled-primary-500 self-end my-auto"
-											data-testid="add-button"
-											onclick={(_) => modalCreateForm(model)}
-											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
-												'add-' + model.info.localName
-											)}</button
-										>
+										{#if hasSelectButton(model.urlModel)}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+											>
+												<button
+													class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+													data-testid="add-button"
+													title={safeTranslate('add-' + data.model.localName)}
+													onclick={(_) => modalCreateForm(model)}
+													><i class="fa-solid fa-file-circle-plus"></i>
+												</button>
+											</span>
+										{:else}
+											<button
+												class="btn preset-filled-primary-500 self-end my-auto"
+												data-testid="add-button"
+												onclick={(_) => modalCreateForm(model)}
+												><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
+													'add-' + model.info.localName
+												)}</button>
+											{/if}
 									{/snippet}
 								</ModelTable>
 							{/if}

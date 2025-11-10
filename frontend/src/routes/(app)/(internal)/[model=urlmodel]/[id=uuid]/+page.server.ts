@@ -12,12 +12,26 @@ import { z } from 'zod';
 import {
 	nestedDeleteFormAction,
 	nestedWriteFormAction,
-	handleErrorResponse
+	handleErrorResponse,
+	defaultWriteFormAction
 } from '$lib/utils/actions';
 import { modelSchema } from '$lib/utils/schemas';
 
 import { loadDetail } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
+
+interface SelectableModel {
+	backendViewset?: string;
+	field: string;
+	optionsEndpoint: string;
+}
+
+const SELECT_MAP: Record<string, Record<string, SelectableModel>> = {
+	"applied-controls": {
+		"evidences": { field: "evidences", optionsEndpoint: "evidences" },
+		"task-templates": { backendViewset: "task-templates", field: "applied_controls", optionsEndpoint: "task-templates" }
+	}
+};
 
 export const load: PageServerLoad = async (event) => {
 	const modelInfo = getModelInfo(event.params.model);
@@ -27,6 +41,58 @@ export const load: PageServerLoad = async (event) => {
 		model: modelInfo,
 		id: event.params.id
 	});
+
+	const objectEndpoint = `${BASE_API_URL}/${modelInfo.endpointUrl || event.params.model}/${event.params.id}/object/`;
+	const objectResponse = await event.fetch(objectEndpoint);
+	const object = await objectResponse.json();
+
+	const modelsToSelect = SELECT_MAP[event.params.model];
+	let selectForms = null;
+
+	if (modelsToSelect) {
+		selectForms = {}
+		await Promise.all(Object.entries(modelsToSelect).map(async ([urlModel, { field, backendViewset }]) => {
+			if (!field) {
+				console.error(`Field name not found for model '${event.params.model}'`);
+				return;
+			}
+
+			let formData = {};
+
+			const selectSchema = z.object({
+				urlModel: z.string(),
+				[field]: z.string().uuid().array().optional()
+			});
+
+			if (backendViewset) {
+				const selectedObjectEndpoint = `${BASE_API_URL}/${backendViewset}/?applied_controls=${event.params.id}`;
+				const selectedObjectsReq = await event.fetch(selectedObjectEndpoint);
+				let selectedObjects: string[] = [];
+
+				if (selectedObjectsReq.ok) {
+						const selectedObjectRes = await selectedObjectsReq.json();
+						selectedObjects = selectedObjectRes.results.map((obj) => obj.id);
+				} else {
+						console.warn(`Failed to fetch selected objects with: ${selectedObjectEndpoint}`);
+				}
+
+				formData = {
+					urlModel: urlModel,
+					[field]: selectedObjects
+				};
+			} else {
+				formData = {
+					urlModel: urlModel,
+					[field]: object[field] || []
+				};
+			}
+
+			const selectForm = await superValidate(formData, zod(selectSchema), { errors: false });
+			selectForms[urlModel] = selectForm;
+		}))
+	}
+	data.selectForms = selectForms;
+	data.modelsToSelect = modelsToSelect ?? {};
 
 	if (event.params.model === 'applied-controls') {
 		const appliedControlSchema = modelSchema(event.params.model);
@@ -54,6 +120,110 @@ export const actions: Actions = {
 	create: async (event) => {
 		const redirectToWrittenObject = Boolean(event.params.model === 'perimeters');
 		return nestedWriteFormAction({ event, action: 'create', redirectToWrittenObject });
+	},
+	select: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return;
+
+		const modelForm = await superValidate(formData, zod(z.object({
+			urlModel: z.string()
+		})));
+		const urlModel = modelForm.data.urlModel;
+
+		if (!urlModel) {
+			return fail(400);
+		}
+
+		const modelsToSelect = SELECT_MAP[event.params.model as string];
+		if (!modelsToSelect)
+			return fail(400);
+
+		const { field, backendViewset } = modelsToSelect[urlModel];
+
+		const form = await superValidate(formData, zod(z.object({
+			urlModel: z.string(),
+			[field]: z.string().uuid().array().optional()
+		})));
+
+		if (!form.valid) {
+			console.error(form.errors);
+			return fail(400, { form: form });
+		}
+
+		const selectedObjects: string[] = form.data[field];
+		if (backendViewset) {
+			// This doesn't scale to have one request per M2M association (write it in the PR description)
+			// Maybe create a solution directly instead. (some kind of generic endpoint for adding a single M2M value to a a bunch of different objects of the same model)
+
+			const currentSelectedObjectsReq = await event.fetch(`/${backendViewset}?${field}=${event.params.id}`);
+			const currentSelectedObjectsRes = await currentSelectedObjectsReq.json();
+			const currentSelectedObjects = currentSelectedObjectsRes.results.map((obj) => obj.id);
+
+			const currentSelectedObjectsSet = new Set(currentSelectedObjects)
+			const selectedObjectsSet = new Set(selectedObjects);
+
+			const unselectedObjects = currentSelectedObjects.filter((id) => !selectedObjectsSet.has(id));
+			const newlySelectedObjects = selectedObjects.filter((id) => !currentSelectedObjectsSet.has(id));
+
+			const selectActions = [
+				...(newlySelectedObjects.map((id) => [id, true])),
+				...(unselectedObjects.map(   (id) => [id, false]))
+			];
+
+			await Promise.all(
+				selectActions.map(async ([id, isSelectAction]) => {
+					const endpoint = `${BASE_API_URL}/${backendViewset}/${id}/`;
+					const req = await event.fetch(endpoint);
+					if (!req.ok)
+						return;
+					const obj = req.json();
+					const idListValue = obj[field];
+					const idList = Array.isArray(idListValue) ? idListValue : [];
+
+					const newIdList = isSelectAction ? [...idList, event.params.id] : idList.filter((id) => id !== event.params.id);
+
+					const patchReq = await event.fetch(endpoint, {
+						method: "PATCH",
+						headers: {"Content-Type": "application/json"},
+						body: JSON.stringify({
+							[field]: newIdList
+						})
+					})
+				})
+			);
+		} else {
+			const formData = {
+				id: event.params.id,
+				[field]: selectedObjects
+			}
+
+			const endpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/`;
+			const req = await event.fetch(endpoint, {
+				method: "PATCH",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify(formData)
+			});
+
+			if (!req.ok) {
+				console.warn(`Failed to select object with the following endpoint: ${endpoint}`);
+				return fail(400, { form });
+			}
+		}
+
+		// TODO: Add toast on success.
+		// TODO: Add a successfullyAddedObject translation.
+		/* setFlash(
+			{
+				type: 'success',
+				message: m.successfullyAddedObject({ object: safeTranslate(modelVerboseName).toLowerCase() })
+			},
+			event
+		); */
+
+		return { form };
+	},
+	update: async (event) => {
+		return defaultWriteFormAction({ event, urlModel: event.params.model, action: 'edit' });
 	},
 	delete: async (event) => {
 		return nestedDeleteFormAction({ event });
