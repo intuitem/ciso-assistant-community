@@ -788,6 +788,10 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     )
 
     def create(self, validated_data: Any):
+        validated_data.pop("create_remote_object", None)
+        validated_data.pop("remote_object_id", None)
+        validated_data.pop("integration_config", None)
+
         owner_data = validated_data.get("owner", [])
         applied_control = super().create(validated_data)
         findings = validated_data.pop("findings", [])
@@ -2123,6 +2127,7 @@ class FindingReadSerializer(FindingWriteSerializer):
     )
     folder = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")
+    priority = serializers.CharField(source="get_priority_display")
 
     class Meta:
         model = Finding
@@ -2482,6 +2487,7 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     compliance_assessments = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
+    findings_assessment = FieldsRelatedField(many=True)
 
     def get_name(self, obj):
         return obj.task_template.name if obj.task_template else ""

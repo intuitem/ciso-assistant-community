@@ -244,6 +244,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Threats',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'loaded-libraries' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		]
 	},
@@ -1432,7 +1433,22 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings', urlModel: 'applied-controls' },
 			{ field: 'findings', urlModel: 'evidences' }
 		],
-		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }]
+		selectFields: [
+			{ field: 'severity', valueType: 'number' },
+			{ field: 'status' },
+			{ field: 'priority', valueType: 'number' }
+		],
+		filters: [
+			{ field: 'owner' },
+			{ field: 'folder' },
+			{ field: 'status' },
+			{ field: 'severity' },
+			{ field: 'priority' },
+			{ field: 'findings_assessment' },
+			{ field: 'filtering_labels' },
+			{ field: 'applied_controls' },
+			{ field: 'evidences' }
+		]
 	},
 	incidents: {
 		name: 'incident',
@@ -1500,7 +1516,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'task_template', urlModel: 'task-templates' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'folder', urlModel: 'folders' }
+			{ field: 'assigned_to', urlModel: 'users' },
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
+			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
 		]
 	},
 	campaigns: {

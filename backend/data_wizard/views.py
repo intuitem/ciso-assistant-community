@@ -98,7 +98,7 @@ class LoadFileView(APIView):
             )
 
         return Response(
-            {"message": "File loaded successfully", "results": []},
+            {"message": "File loaded successfully", "results": res},
             status=status.HTTP_200_OK,
         )
 
@@ -113,7 +113,6 @@ class LoadFileView(APIView):
         matrix_id=None,
     ):
         records = dataframe.to_dict(orient="records")
-        logger.warning("I am here")
         folders_map = get_accessible_objects(request.user)
 
         # Dispatch to appropriate handler

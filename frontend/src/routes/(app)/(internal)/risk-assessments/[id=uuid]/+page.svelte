@@ -346,6 +346,14 @@
 						{m.syncToAppliedControls()}
 					</button>
 				{/if}
+				<Anchor
+					href="/risk-assessments/{risk_assessment.id}/convert-to-quantitative"
+					label={m.convertToQuantitative()}
+					class="btn text-gray-100 bg-linear-to-r from-purple-500 to-pink-500"
+				>
+					<i class="fa-solid fa-calculator mr-2"></i>
+					{m.convertToQuantitative()}
+				</Anchor>
 			</div>
 		</div>
 	</div>

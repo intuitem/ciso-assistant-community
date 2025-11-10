@@ -356,6 +356,17 @@ const FINDINGS_STATUS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+const FINDINGS_PRIORITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'findings/priority',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'priority',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 const EXCEPTION_SEVERITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -499,6 +510,15 @@ const PROVIDER_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'stored-libraries/provider',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
+		multiple: true
+	}
+};
+
+const LIBRARY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'library',
+		optionsEndpoint: 'loaded-libraries',
 		multiple: true
 	}
 };
@@ -1082,8 +1102,8 @@ export const listViewFields = {
 		}
 	},
 	threats: {
-		head: ['ref_id', 'name', 'description', 'provider', 'domain', 'labels'],
-		body: ['ref_id', 'name', 'description', 'provider', 'folder', 'filtering_labels'],
+		head: ['ref_id', 'name', 'description', 'library', 'domain', 'labels'],
+		body: ['ref_id', 'name', 'description', 'library', 'folder', 'filtering_labels'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1091,6 +1111,7 @@ export const listViewFields = {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'threats/provider' }
 			},
+			library: LIBRARY_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -1807,6 +1828,7 @@ export const listViewFields = {
 			'name',
 			'findings_assessment',
 			'severity',
+			'priority',
 			'owner',
 			'status',
 			'applied_controls',
@@ -1817,6 +1839,7 @@ export const listViewFields = {
 			'name',
 			'findings_assessment',
 			'severity',
+			'priority',
 			'owner',
 			'status',
 			'applied_controls',
@@ -1826,6 +1849,7 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER,
 			severity: FINDINGS_SEVERITY_FILTER,
 			status: FINDINGS_STATUS_FILTER,
+			priority: FINDINGS_PRIORITY_FILTER,
 			owner: FINDINGS_OWNER_FILTER
 		}
 	},
@@ -1892,8 +1916,8 @@ export const listViewFields = {
 		}
 	},
 	'quantitative-risk-studies': {
-		head: ['name', 'description', 'status', 'domain'],
-		body: ['name', 'description', 'status', 'folder'],
+		head: ['name', 'description', 'status', 'updatedAt', 'domain'],
+		body: ['name', 'description', 'status', 'updated_at', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER
