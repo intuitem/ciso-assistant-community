@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List
+from typing import Self, Union, List, Optional
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -3920,41 +3920,55 @@ class AppliedControl(
 
         return annual_cost
 
+    @staticmethod
+    def _stringify_cost(cost: float, currency: str) -> str:
+        match currency:
+            case "$":
+                return f"${cost}"
+            case "€":
+                return f"{cost}€"
+            case "£":
+                return f"£{cost}"
+            case "A$":
+                return f"A${cost}"
+            case "NZ$":
+                return f"NZ${cost}"
+            case "C$":
+                return f"C${cost}"
+            case "¥":
+                return f"¥{cost}"
+
+        logger.error("Unknown currency detected", currency=currency)
+        return f"{cost} *"
+
     @property
-    def display_cost(self):
+    def display_cost(self) -> str:
         """Returns a human-readable cost display string"""
         if not self.cost:
             return ""
 
         currency = self.cost.get("currency", "")
-        parts = []
+        string_parts: list[str] = []
 
-        build_cost = self.cost.get("build", {})
-        run_cost = self.cost.get("run", {})
+        for cost_type in ["build", "run"]:
+            if (cost_data := self.cost.get(cost_type)) is None:
+                continue
 
-        if build_cost:
-            build_fixed = build_cost.get("fixed_cost", 0)
-            build_people = build_cost.get("people_days", 0)
-            if build_fixed > 0 or build_people > 0:
-                build_parts = []
-                if build_fixed > 0:
-                    build_parts.append(f"{build_fixed}{currency}")
-                if build_people > 0:
-                    build_parts.append(f"{build_people} people days")
-                parts.append(f"Build: {', '.join(build_parts)}")
+            if (cost := cost_data.get("fixed_cost", 0)) == 0:
+                continue
 
-        if run_cost:
-            run_fixed = run_cost.get("fixed_cost", 0)
-            run_people = run_cost.get("people_days", 0)
-            if run_fixed > 0 or run_people > 0:
-                run_parts = []
-                if run_fixed > 0:
-                    run_parts.append(f"{run_fixed}{currency}")
-                if run_people > 0:
-                    run_parts.append(f"{run_people} people days")
-                parts.append(f"Run: {', '.join(run_parts)}")
+            people_days = cost_data.get("people_days", 0)
+            cost_parts: list[str] = []
 
-        return " | ".join(parts) if parts else ""
+            stringified_cost = self._stringify_cost(cost, currency)
+            cost_parts.append(stringified_cost)
+            if people_days > 0:
+                cost_parts.append(f"{people_days} people days")
+
+            cost_string = ", ".join(cost_parts)
+            string_parts.append(f"{cost_type.capitalize()}: {cost_string}")
+
+        return " | ".join(string_parts)
 
     def get_ranking_score(self):
         value = 0
@@ -6729,6 +6743,10 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     def risk_assessments(self):
         return self.task_template.risk_assessments.all()
 
+    @property
+    def findings_assessment(self):
+        return self.task_template.findings_assessment.all()
+
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"
@@ -6789,10 +6807,6 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 auditlog.register(
-    Folder,
-    exclude_fields=common_exclude,
-)
-auditlog.register(
     Perimeter,
     exclude_fields=common_exclude,
 )
@@ -6819,6 +6833,34 @@ auditlog.register(
 )
 auditlog.register(
     TimelineEntry,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Terminology,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    EvidenceRevision,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OrganisationIssue,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OrganisationObjective,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Campaign,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TaskNode,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TaskTemplate,
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete

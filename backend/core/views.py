@@ -1909,6 +1909,304 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             {"changes": RiskScenarioReadSerializer(changes, many=True).data}
         )
 
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="convert_to_quantitative",
+    )
+    def convert_to_quantitative(self, request, pk):
+        """
+        Convert a qualitative risk assessment to a quantitative risk study.
+
+        Expected payload:
+        {
+            "probability_anchors": [{"index": 0, "value": 0.05}, ...],
+            "impact_anchors": [{"index": 0, "central_value": 25000}, ...],
+            "loss_threshold": 100000
+        }
+        """
+        from crq.models import (
+            QuantitativeRiskStudy,
+            QuantitativeRiskScenario,
+            QuantitativeRiskHypothesis,
+        )
+
+        risk_assessment: RiskAssessment = self.get_object()
+
+        # Check permissions
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_quantitativeriskstudy"),
+            folder=risk_assessment.folder,
+        ):
+            return Response(
+                {
+                    "detail": "You do not have permission to create quantitative risk studies in this domain."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Validate payload
+        probability_anchors = request.data.get("probability_anchors", [])
+        impact_anchors = request.data.get("impact_anchors", [])
+        loss_threshold = request.data.get("loss_threshold")
+
+        if not probability_anchors or not impact_anchors or loss_threshold is None:
+            return Response(
+                {
+                    "detail": "Missing required fields: probability_anchors, impact_anchors, and loss_threshold"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate loss_threshold is a positive number
+        try:
+            loss_threshold = float(loss_threshold)
+            if loss_threshold <= 0:
+                return Response(
+                    {"detail": "loss_threshold must be greater than 0"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "loss_threshold must be a valid number"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate and build probability mapping
+        probability_map = {}
+        try:
+            for item in probability_anchors:
+                idx = item["index"]
+                value = float(item["value"])
+                if not (0 <= value <= 1):
+                    return Response(
+                        {
+                            "detail": f"Probability value must be between 0 and 1, got {value} for index {idx}"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                probability_map[idx] = value
+        except (KeyError, TypeError, ValueError) as e:
+            logger.warning(f"Invalid probability anchor format: {e}")
+            return Response(
+                {
+                    "detail": "Invalid probability anchor format. Each anchor must have 'index' and 'value' fields, with value between 0 and 1."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate and build impact mapping
+        # Using a narrow fixed ratio: roughly ±30% around central value
+        # LB = central_value * 0.7, UB = central_value * 1.43
+        # This gives a spread factor of ~2x which minimizes overlap between adjacent levels
+        impact_map = {}
+        try:
+            for item in impact_anchors:
+                idx = item["index"]
+                central_value = float(item["central_value"])
+                if central_value <= 0:
+                    return Response(
+                        {
+                            "detail": f"Impact central value must be positive, got {central_value} for index {idx}"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                impact_map[idx] = {
+                    "lb": central_value * 0.7,
+                    "ub": central_value * 1.43,
+                }
+        except (KeyError, TypeError, ValueError) as e:
+            logger.warning(f"Invalid impact anchor format: {e}")
+            return Response(
+                {
+                    "detail": "Invalid impact anchor format. Each anchor must have 'index' and 'central_value' fields, with central_value greater than 0."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Generate ref_id for the quantitative study
+        # If source has ref_id, append _QUANT, otherwise leave blank
+        quant_ref_id = (
+            f"{risk_assessment.ref_id}_QUANT" if risk_assessment.ref_id else ""
+        )
+
+        # Create the quantitative risk study with [QUANT] prefix
+        quantitative_study = QuantitativeRiskStudy.objects.create(
+            name=f"[QUANT] {risk_assessment.name}",
+            description=f"Converted from qualitative risk assessment: {risk_assessment.name}\n\n{risk_assessment.description or ''}",
+            folder=risk_assessment.folder,
+            ref_id=quant_ref_id,
+            status=risk_assessment.status if risk_assessment.status else "planned",
+            loss_threshold=loss_threshold,
+            distribution_model="lognormal_ci90",
+        )
+
+        # Copy authors and reviewers
+        quantitative_study.authors.set(risk_assessment.authors.all())
+        quantitative_study.reviewers.set(risk_assessment.reviewers.all())
+
+        scenarios_converted = 0
+        scenarios_skipped = 0
+
+        # Convert each risk scenario to a quantitative risk scenario
+        for scenario in risk_assessment.risk_scenarios.all():
+            # Skip scenarios without threats or assets
+            if not scenario.threats.exists() and not scenario.assets.exists():
+                logger.info(
+                    f"Skipping scenario '{scenario.name}' - no threats or assets associated"
+                )
+                scenarios_skipped += 1
+                continue
+
+            # Check if we have current probability and impact
+            current_proba = scenario.current_proba
+            current_impact = scenario.current_impact
+            has_current = (
+                current_proba is not None
+                and current_impact is not None
+                and current_proba in probability_map
+                and current_impact in impact_map
+            )
+
+            # Check if we have residual probability and impact
+            residual_proba = scenario.residual_proba
+            residual_impact = scenario.residual_impact
+            has_residual = (
+                residual_proba is not None
+                and residual_impact is not None
+                and residual_proba in probability_map
+                and residual_impact in impact_map
+            )
+
+            # Skip if we don't have at least current values
+            if not has_current and not has_residual:
+                logger.info(
+                    f"Skipping scenario '{scenario.name}' - no valid probability/impact values"
+                )
+                scenarios_skipped += 1
+                continue
+
+            # Create quantitative risk scenario with same name and ref_id
+            quant_scenario = QuantitativeRiskScenario.objects.create(
+                quantitative_risk_study=quantitative_study,
+                name=scenario.name,
+                description=scenario.description or "",
+                ref_id=scenario.ref_id or "",
+                folder=risk_assessment.folder,
+            )
+
+            # Copy threats, assets, and owners
+            quant_scenario.threats.set(scenario.threats.all())
+            quant_scenario.assets.set(scenario.assets.all())
+            quant_scenario.vulnerabilities.set(scenario.vulnerabilities.all())
+            quant_scenario.owner.set(scenario.owner.all())
+
+            # Delete the auto-created "baseline" current hypothesis
+            # (we'll create our own if needed)
+            QuantitativeRiskHypothesis.objects.filter(
+                quantitative_risk_scenario=quant_scenario, risk_stage="current"
+            ).delete()
+
+            # Create current hypothesis if current values are set
+            if has_current:
+                probability_value = probability_map[current_proba]
+                impact_value = impact_map[current_impact]
+
+                current_hypothesis = QuantitativeRiskHypothesis.objects.create(
+                    quantitative_risk_scenario=quant_scenario,
+                    name="current",
+                    risk_stage="current",
+                    ref_id=scenario.ref_id or "",
+                    folder=risk_assessment.folder,
+                    parameters={
+                        "probability": probability_value,
+                        "impact": {
+                            "distribution": "LOGNORMAL-CI90",
+                            "lb": impact_value["lb"],
+                            "ub": impact_value["ub"],
+                        },
+                    },
+                )
+
+                # Link to existing applied controls
+                if scenario.existing_applied_controls.exists():
+                    current_hypothesis.existing_applied_controls.set(
+                        scenario.existing_applied_controls.all()
+                    )
+                current_hypothesis.save()
+
+                # Run simulation for the current hypothesis
+                try:
+                    current_hypothesis.run_simulation()
+                    logger.info(
+                        f"Simulation completed for current hypothesis: {scenario.name}"
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"Failed to run simulation for scenario {scenario.name}: {str(e)}"
+                    )
+
+            # Create residual hypothesis if residual values are set
+            if has_residual:
+                residual_probability_value = probability_map[residual_proba]
+                residual_impact_value = impact_map[residual_impact]
+
+                residual_hypothesis = QuantitativeRiskHypothesis.objects.create(
+                    quantitative_risk_scenario=quant_scenario,
+                    name="residual",
+                    risk_stage="residual",
+                    is_selected=True,
+                    ref_id=f"{scenario.ref_id}_RES" if scenario.ref_id else "",
+                    folder=risk_assessment.folder,
+                    parameters={
+                        "probability": residual_probability_value,
+                        "impact": {
+                            "distribution": "LOGNORMAL-CI90",
+                            "lb": residual_impact_value["lb"],
+                            "ub": residual_impact_value["ub"],
+                        },
+                    },
+                )
+
+                # Link to existing controls and added controls
+                if scenario.existing_applied_controls.exists():
+                    residual_hypothesis.existing_applied_controls.set(
+                        scenario.existing_applied_controls.all()
+                    )
+                if scenario.applied_controls.exists():
+                    residual_hypothesis.added_applied_controls.set(
+                        scenario.applied_controls.all()
+                    )
+                residual_hypothesis.save()
+
+                # Run simulation for the residual hypothesis
+                try:
+                    residual_hypothesis.run_simulation()
+                    logger.info(
+                        f"Simulation completed for residual hypothesis: {scenario.name}"
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"Failed to run simulation for residual scenario {scenario.name}: {str(e)}"
+                    )
+
+            scenarios_converted += 1
+
+        logger.info(
+            f"Conversion completed: {scenarios_converted} scenarios converted, {scenarios_skipped} skipped"
+        )
+
+        return Response(
+            {
+                "message": "Conversion successful",
+                "quantitative_risk_study_id": str(quantitative_study.id),
+                "scenarios_converted": scenarios_converted,
+                "scenarios_skipped": scenarios_skipped,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
 
 def convert_date_to_timestamp(date):
     """
@@ -7198,6 +7496,137 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         )
         return Response({p: p for p in providers})
 
+    @action(detail=False, methods=["get"], url_path="graph-data")
+    def graph_data_list(self, request):
+        from core.mappings.engine import engine
+
+        max_depth = MAPPING_MAX_DETPH
+
+        all_paths = engine.get_mapping_graph(max_depth=max_depth)
+
+        all_framework_urns = set()
+        for path in all_paths:
+            all_framework_urns.update(path)
+
+        framework_details = {}
+
+        framework_libs_qs = StoredLibrary.objects.filter(
+            content__framework__urn__in=all_framework_urns,
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        )
+
+        for lib in framework_libs_qs:
+            try:
+                fw_content = lib.content["framework"]
+                urn = fw_content.get("urn")
+
+                if not urn:
+                    continue
+
+                display_name = fw_content.get("name", urn)
+
+                display_value = fw_content.get("description", display_name)
+
+                framework_details[urn] = {
+                    "name": display_name,
+                    "value": display_value,
+                    "pk": lib.pk,
+                }
+            except (KeyError, TypeError):
+                # Skip this library if content is malformed
+                continue
+
+        nodes = []
+        urn_to_index = {}  # Map URNs to their index in the `nodes` list
+
+        # Sort for a consistent node order
+        sorted_urns = sorted(list(all_framework_urns))
+
+        for i, urn in enumerate(sorted_urns):
+            urn_to_index[urn] = i
+
+            details = framework_details.get(urn, {"name": urn, "value": urn})
+
+            nodes.append(
+                {
+                    "name": details["name"],  # Display name for the node
+                    "category": 0
+                    if urn in engine.frameworks.keys()
+                    else 1,  # All nodes are in the "Frameworks" category
+                    "value": details["value"],  # Tooltip content
+                    "urn": urn,  # Pass URN as extra data
+                    "pk": details.get("pk"),
+                    # `symbolSize` will be added below after degrees are calculated
+                }
+            )
+
+        links = []
+        link_set = set()  # Use a set to prevent duplicate links
+
+        node_degrees = [0] * len(nodes)
+
+        for path in all_paths:
+            # A path [A, B, C] creates links (A, B) and (B, C)
+            for i in range(len(path) - 1):
+                source_urn = path[i]
+                target_urn = path[i + 1]
+                link_tuple = (source_urn, target_urn)
+
+                if link_tuple not in link_set:
+                    link_set.add(link_tuple)
+
+                    # Get the integer index for source and target
+                    source_index = urn_to_index.get(source_urn)
+                    target_index = urn_to_index.get(target_urn)
+
+                    if source_index is not None and target_index is not None:
+                        links.append(
+                            {
+                                "source": source_index,
+                                "target": target_index,
+                                "value": "maps to",
+                            }
+                        )
+
+                        node_degrees[source_index] += 1
+                        node_degrees[target_index] += 1
+
+        min_size = 10
+        max_size = 30
+
+        non_zero_degrees = [d for d in node_degrees if d > 0]
+
+        if not non_zero_degrees:
+            min_degree = 0
+            max_degree = 0
+        else:
+            min_degree = min(non_zero_degrees)
+            max_degree = max(node_degrees)
+
+        degree_range = max_degree - min_degree
+        size_range = max_size - min_size
+
+        for i, node in enumerate(nodes):
+            degree = node_degrees[i]
+
+            if degree == 0:
+                # Assign min size for nodes with no connections (if any)
+                node["symbolSize"] = min_size
+            elif degree_range == 0:
+                # All nodes have the same degree, assign min_size
+                node["symbolSize"] = min_size
+            else:
+                # Scale the size proportionally
+                normalized_degree = (degree - min_degree) / degree_range
+                scaled_size = min_size + (normalized_degree * size_range)
+                node["symbolSize"] = int(round(scaled_size))
+
+        categories = [{"name": "importedFrameworks"}, {"name": "notImportedFrameworks"}]
+
+        return Response({"nodes": nodes, "links": links, "categories": categories})
+
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
         obj = StoredLibrary.objects.get(id=pk)
@@ -8958,7 +9387,9 @@ class TaskTemplateViewSet(BaseModelViewSet):
         processed_tasks_identifiers = set()  # Track tasks we've already processed
 
         # Sort tasks by due date
-        sorted_tasks = sorted(tasks_list, key=lambda x: x["due_date"])
+        sorted_tasks = sorted(
+            [t for t in tasks_list if t.get("due_date")], key=lambda x: x["due_date"]
+        )
 
         # Process all past tasks and next 10 upcoming tasks
         current_date = datetime.now().date()
