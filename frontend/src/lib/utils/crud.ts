@@ -824,7 +824,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'recipient_entity', urlModel: 'entities' },
 			{ field: 'assets', urlModel: 'assets' }
 		],
-		selectFields: [{ field: 'dora_ict_service_type' }]
+		selectFields: [
+			{ field: 'dora_ict_service_type' },
+			{ field: 'data_location_storage' },
+			{ field: 'data_location_processing' },
+			{ field: 'dora_data_sensitiveness' },
+			{ field: 'dora_reliance_level' }
+		]
 	},
 	contracts: {
 		name: 'contract',

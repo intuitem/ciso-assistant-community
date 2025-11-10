@@ -2,7 +2,6 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
-	import Select from '../Select.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -42,13 +41,22 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
-<Select
+<AutocompleteSelect
 	{form}
 	field="status"
-	optionsEndpoint="contracts/status"
+	options={model.selectOptions?.status}
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
 	label={m.status()}
+/>
+<AutocompleteSelect
+	{form}
+	field="dora_contractual_arrangement"
+	options={model.selectOptions?.dora_contractual_arrangement}
+	label={m.doraContractualArrangement()}
+	nullable={false}
+	cacheLock={cacheLocks['dora_contractual_arrangement']}
+	bind:cachedValue={formDataCache['dora_contractual_arrangement']}
 />
 <TextField
 	type="date"
@@ -65,16 +73,6 @@
 	label={m.endDate()}
 	cacheLock={cacheLocks['end_date']}
 	bind:cachedValue={formDataCache['end_date']}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="users"
-	optionsLabelField="email"
-	field="owner"
-	cacheLock={cacheLocks['owner']}
-	bind:cachedValue={formDataCache['owner']}
-	label={m.owner()}
 />
 <AutocompleteSelect
 	{form}
@@ -118,16 +116,19 @@
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-ellipsis" header={m.more()}>
 	<AutocompleteSelect
 		{form}
-		field="dora_contractual_arrangement"
-		options={model.selectOptions?.dora_contractual_arrangement}
-		label={m.doraContractualArrangement()}
-		cacheLock={cacheLocks['dora_contractual_arrangement']}
-		bind:cachedValue={formDataCache['dora_contractual_arrangement']}
+		multiple
+		optionsEndpoint="users"
+		optionsLabelField="email"
+		field="owner"
+		cacheLock={cacheLocks['owner']}
+		bind:cachedValue={formDataCache['owner']}
+		label={m.owner()}
 	/>
 	<AutocompleteSelect
 		{form}
 		field="overarching_contract"
 		optionsEndpoint="contracts?dora_contractual_arrangement=eba_CO:x2"
+		optionsExtraFields={[['folder', 'str']]}
 		label={m.overarchingContract()}
 		helpText={m.overarchingContractHelpText()}
 		cacheLock={cacheLocks['overarching_contract']}
@@ -163,6 +164,20 @@
 		label={m.governingLawCountry()}
 		cacheLock={cacheLocks['governing_law_country']}
 		bind:cachedValue={formDataCache['governing_law_country']}
+	/>
+	<NumberField
+		{form}
+		field="notice_period_entity"
+		label={m.noticePeriodEntity()}
+		cacheLock={cacheLocks['notice_period_entity']}
+		bind:cachedValue={formDataCache['notice_period_entity']}
+	/>
+	<NumberField
+		{form}
+		field="notice_period_provider"
+		label={m.noticePeriodProvider()}
+		cacheLock={cacheLocks['notice_period_provider']}
+		bind:cachedValue={formDataCache['notice_period_provider']}
 	/>
 	<Checkbox
 		{form}

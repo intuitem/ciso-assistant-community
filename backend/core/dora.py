@@ -88,3 +88,21 @@ DORA_ICT_SERVICE_CHOICES = [
     ("eba_TA:S18", "Cloud services: PaaS"),
     ("eba_TA:S19", "Cloud services: SaaS"),
 ]
+
+DORA_BINARY_CHOICES = [
+    ("eba_BT:x28", "Yes"),
+    ("eba_BT:x29", "No"),
+]
+
+DORA_RELIANCE_CHOICES = [
+    ("eba_ZZ:x794", "Not significant"),
+    ("eba_ZZ:x795", "Low reliance"),
+    ("eba_ZZ:x796", "Material reliance"),
+    ("eba_ZZ:x797", "Full reliance"),
+]
+
+DORA_SENSITIVENESS_CHOICES = [
+    ("eba_ZZ:x791", "Low"),
+    ("eba_ZZ:x792", "Medium"),
+    ("eba_ZZ:x793", "High"),
+]

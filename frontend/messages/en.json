@@ -2636,5 +2636,12 @@
 	"annualExpense": "Annual Expense",
 	"terminationReason": "Termination Reason",
 	"governingLawCountry": "Governing Law Country",
-	"isIntragroup": "Is Intra-group"
+	"isIntragroup": "Is Intra-group",
+	"noticePeriodEntity": "Notice Period for Entity (days)",
+	"noticePeriodProvider": "Notice Period for Provider (days)",
+	"storageOfData": "Is storing data",
+	"dataLocationStorage": "Location of Data at Rest",
+	"dataLocationProcessing": "Location of Data during Processing",
+	"doraDataSensitiveness": "Data Sensitiveness",
+	"doraRelianceLevel": "Level of Reliance"
 }

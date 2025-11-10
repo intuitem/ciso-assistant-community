@@ -612,7 +612,12 @@ export const solutionSchema = z.object({
 	ref_id: z.string().optional(),
 	criticality: z.number().optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	dora_ict_service_type: z.string().optional()
+	dora_ict_service_type: z.string().optional(),
+	storage_of_data: z.boolean().optional().default(false),
+	data_location_storage: z.string().optional(),
+	data_location_processing: z.string().optional(),
+	dora_data_sensitiveness: z.string().optional(),
+	dora_reliance_level: z.string().optional()
 });
 
 export const representativeSchema = z.object({
@@ -638,13 +643,15 @@ export const contractSchema = z.object({
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	end_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	ref_id: z.string().optional(),
-	dora_contractual_arrangement: z.string().optional(),
+	dora_contractual_arrangement: z.string().default('eba_CO:x1'),
 	currency: z.string().optional(),
 	annual_expense: z.number().optional().nullable(),
 	termination_reason: z.string().optional(),
 	is_intragroup: z.boolean().optional().default(false),
 	overarching_contract: z.string().optional(),
-	governing_law_country: z.string().optional()
+	governing_law_country: z.string().optional(),
+	notice_period_entity: z.number().optional().nullable(),
+	notice_period_provider: z.number().optional().nullable()
 });
 
 export const vulnerabilitySchema = z.object({

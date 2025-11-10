@@ -16,6 +16,8 @@ from core.dora import (
     DORA_CONTRACTUAL_ARRANGEMENT_CHOICES,
     TERMINATION_REASON_CHOICES,
     DORA_ICT_SERVICE_CHOICES,
+    DORA_SENSITIVENESS_CHOICES,
+    DORA_RELIANCE_CHOICES,
 )
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from iam.views import User
@@ -217,6 +219,39 @@ class Solution(NameDescriptionMixin):
         verbose_name=_("DORA ICT service type"),
         help_text=_("DORA ICT service type classification"),
     )
+    storage_of_data = models.BooleanField(
+        default=False,
+        verbose_name=_("Storage of data"),
+        help_text=_("Whether data is stored by the ICT service provider"),
+    )
+    data_location_storage = models.CharField(
+        max_length=3,
+        choices=COUNTRY_CHOICES,
+        blank=True,
+        verbose_name=_("Location of data at rest"),
+        help_text=_("Country where data is stored"),
+    )
+    data_location_processing = models.CharField(
+        max_length=3,
+        choices=COUNTRY_CHOICES,
+        blank=True,
+        verbose_name=_("Location of data processing"),
+        help_text=_("Country where data is processed/managed"),
+    )
+    dora_data_sensitiveness = models.CharField(
+        max_length=20,
+        choices=DORA_SENSITIVENESS_CHOICES,
+        blank=True,
+        verbose_name=_("Data sensitiveness"),
+        help_text=_("Sensitiveness of the data stored"),
+    )
+    dora_reliance_level = models.CharField(
+        max_length=20,
+        choices=DORA_RELIANCE_CHOICES,
+        blank=True,
+        verbose_name=_("Level of reliance"),
+        help_text=_("Level of reliance on the ICT service"),
+    )
 
     fields_to_check = ["name"]
 
@@ -288,7 +323,7 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     dora_contractual_arrangement = models.CharField(
         max_length=20,
         choices=DORA_CONTRACTUAL_ARRANGEMENT_CHOICES,
-        blank=True,
+        default="eba_CO:x1",
         verbose_name=_("DORA contractual arrangement"),
         help_text=_("DORA contractual arrangement type"),
     )
@@ -332,6 +367,18 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         blank=True,
         verbose_name=_("Governing law country"),
         help_text=_("Country whose law governs this contract"),
+    )
+    notice_period_entity = models.IntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_("Notice period for entity (days)"),
+        help_text=_("Notice period in days for the financial entity"),
+    )
+    notice_period_provider = models.IntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_("Notice period for provider (days)"),
+        help_text=_("Notice period in days for the ICT third-party service provider"),
     )
 
     fields_to_check = ["name"]
