@@ -152,7 +152,7 @@ export const actions: Actions = {
 
 		const selectedObjects: string[] = form.data[field];
 		if (backendViewset) {
-			// This doesn't scale to have one request per M2M association (write it in the PR description)
+			// This doesn't scale weel as it submits one request per M2M association (write it in the PR description)
 			// Maybe create a solution directly instead. (some kind of generic endpoint for adding a single M2M value to a a bunch of different objects of the same model)
 
 			const currentSelectedObjectsReq = await event.fetch(`/${backendViewset}?${field}=${event.params.id}`);
