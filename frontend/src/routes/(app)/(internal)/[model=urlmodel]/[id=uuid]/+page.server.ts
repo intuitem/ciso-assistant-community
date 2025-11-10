@@ -182,7 +182,7 @@ export const actions: Actions = {
 
 					const newIdList = isSelectAction ? [...idList, event.params.id] : idList.filter((id) => id !== event.params.id);
 
-					const patchReq = await event.fetch(endpoint, {
+					await event.fetch(endpoint, {
 						method: "PATCH",
 						headers: {"Content-Type": "application/json"},
 						body: JSON.stringify({
