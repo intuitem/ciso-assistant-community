@@ -33,6 +33,10 @@
 				goto(href);
 			}
 		}
+    else {
+      const href = `/settings`;
+      goto(href);
+    }
 	}
 </script>
 
