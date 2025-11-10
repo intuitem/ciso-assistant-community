@@ -32,11 +32,10 @@
 				// Fallback to a full navigation if preloading fails for any reason.
 				goto(href);
 			}
+		} else {
+			const href = `/settings`;
+			goto(href);
 		}
-    else {
-      const href = `/settings`;
-      goto(href);
-    }
 	}
 </script>
 
