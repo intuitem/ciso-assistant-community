@@ -76,7 +76,6 @@
 />
 <AutocompleteSelect
 	{form}
-	multiple
 	optionsEndpoint="entities"
 	field="entities"
 	cacheLock={cacheLocks['entities']}
@@ -85,7 +84,6 @@
 />
 <AutocompleteSelect
 	{form}
-	multiple
 	optionsEndpoint="solutions"
 	optionsExtraFields={[['provider_entity', 'str']]}
 	field="solutions"
