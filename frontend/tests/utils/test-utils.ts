@@ -38,6 +38,7 @@ type Fixtures = {
 	ebiosRmStudyPage: PageContent;
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
+	campaignsPage: PageContent;
 	settingsPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
@@ -81,6 +82,7 @@ export const test = base.extend<Fixtures>({
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
 			threatsPage,
+			campaignsPage,
 			usersPage
 		},
 		use
@@ -105,6 +107,7 @@ export const test = base.extend<Fixtures>({
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
 			threatsPage,
+			campaignsPage,
 			usersPage
 		});
 	},
@@ -359,6 +362,17 @@ export const test = base.extend<Fixtures>({
 			{ name: 'justification', type: type.TEXT }
 		]);
 		await use(ePage);
+	},
+
+	campaignsPage: async ({ page }, use) => {
+		const cPage = new PageContent(page, '/campaigns', 'Campaigns', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'frameworks', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'perimeters', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(cPage);
 	},
 
 	usersPage: async ({ page }, use) => {
@@ -769,6 +783,23 @@ export class TestContent {
 					str: vars.assetName,
 					asset: vars.folderName + '/' + vars.assetName,
 					bia: vars.biaName
+				}
+			},
+			campaignsPage: {
+				displayName: 'Campaigns',
+				modelName: 'campaign',
+				dependency: vars.framework,
+				build: {
+					str: `${vars.campaignName}`,
+					name: vars.campaignName,
+					description: vars.description,
+					perimeters: [vars.folderName + '/' + vars.perimeterName],
+					frameworks: [vars.framework.name],
+					folder: vars.folderName
+				},
+				editParams: {
+					name: '',
+					description: ''
 				}
 			}
 		};

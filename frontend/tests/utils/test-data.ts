@@ -1,6 +1,7 @@
 export default {
 	assessmentName: 'Test assessment',
 	assetName: 'Test asset',
+	campaignName: 'Test campaign',
 	evidenceName: 'Test evidence',
 	folderName: 'Test domain',
 	perimeterName: 'Test perimeter',
