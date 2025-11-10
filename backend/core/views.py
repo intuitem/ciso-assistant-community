@@ -6652,7 +6652,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for req in target_requirement_assessments:
-                    for field in ["result", "status", "observation", "mapping_inference"]:
+                    for field in [
+                        "result",
+                        "status",
+                        "observation",
+                        "mapping_inference",
+                    ]:
                         if best_results["requirement_assessments"][
                             req.requirement.urn
                         ].get(field):
