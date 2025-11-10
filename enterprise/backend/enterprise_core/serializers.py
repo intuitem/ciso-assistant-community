@@ -156,7 +156,7 @@ class LogEntrySerializer(serializers.ModelSerializer):
             and "password" in change_dict
         ):
             # We want to mask the password in the audit logs.
-            change_dict["password"] = ["[old password]", "[new passord]"]
+            change_dict["password"] = ["[old password]", "[new password]"]
 
         log_data["changes"] = change_dict
         return log_data
