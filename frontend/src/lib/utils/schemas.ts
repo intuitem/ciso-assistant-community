@@ -580,10 +580,10 @@ export const EntitiesSchema = z.object({
 	country: z.string().optional(),
 	currency: z.string().optional(),
 	dora_entity_type: z.string().optional(),
-	dora_entity_hierarchy: z.string().optional().default('eba_RP:x53'),
+	dora_entity_hierarchy: z.string().optional(),
 	dora_assets_value: z.number().optional().nullable(),
 	dora_competent_authority: z.string().optional(),
-	dora_provider_person_type: z.string().optional().default('eba_CT:x212')
+	dora_provider_person_type: z.string().optional()
 });
 
 export const EntityAssessmentSchema = z.object({

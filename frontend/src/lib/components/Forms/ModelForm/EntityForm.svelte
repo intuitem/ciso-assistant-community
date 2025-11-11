@@ -89,14 +89,6 @@
 		cacheLock={cacheLocks['country']}
 		bind:cachedValue={formDataCache['country']}
 	/>
-</Dropdown>
-
-<Dropdown
-	open={false}
-	style="hover:text-primary-700"
-	icon="fa-solid fa-scale-balanced"
-	header={m.doraSpecific()}
->
 	<AutocompleteSelect
 		{form}
 		field="currency"
@@ -105,6 +97,22 @@
 		cacheLock={cacheLocks['currency']}
 		bind:cachedValue={formDataCache['currency']}
 	/>
+	<AutocompleteSelect
+		{form}
+		field="dora_provider_person_type"
+		options={model.selectOptions?.dora_provider_person_type}
+		label={m.doraProviderPersonType()}
+		cacheLock={cacheLocks['dora_provider_person_type']}
+		bind:cachedValue={formDataCache['dora_provider_person_type']}
+	/>
+</Dropdown>
+
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-scale-balanced"
+	header={m.doraSpecific()}
+>
 	<AutocompleteSelect
 		{form}
 		field="dora_entity_type"
@@ -134,13 +142,5 @@
 		label={m.doraCompetentAuthority()}
 		cacheLock={cacheLocks['dora_competent_authority']}
 		bind:cachedValue={formDataCache['dora_competent_authority']}
-	/>
-	<AutocompleteSelect
-		{form}
-		field="dora_provider_person_type"
-		options={model.selectOptions?.dora_provider_person_type}
-		label={m.doraProviderPersonType()}
-		cacheLock={cacheLocks['dora_provider_person_type']}
-		bind:cachedValue={formDataCache['dora_provider_person_type']}
 	/>
 </Dropdown>
