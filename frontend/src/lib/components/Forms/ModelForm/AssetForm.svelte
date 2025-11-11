@@ -38,7 +38,15 @@
 
 	type SecurityObjectiveScale = '0-3' | '1-4' | 'FIPS-199';
 	const scale: SecurityObjectiveScale = page.data.settings.security_objective_scale;
-	const securityObjectiveScaleMap: string[] = SECURITY_OBJECTIVE_SCALE_MAP[scale];
+	const securityObjectiveUnscaledMap: string[] = SECURITY_OBJECTIVE_SCALE_MAP[scale].reduce(
+		(acc, value) => {
+			if (!acc.includes(value)) {
+				acc.push(value);
+			}
+			return acc;
+		},
+		[]
+	);
 
 	async function fetchSecurityObjectives(): Promise<string[]> {
 		const endpoint = '/assets/security-objectives/';
@@ -66,21 +74,12 @@
 		suggested?: boolean;
 	}
 
-	const createOption = (label: string, value: number): Option => ({
+	const createOption = (label: string): Option => ({
 		label,
-		value
+		value: Number(label)
 	});
 
-	// Helper function to filter duplicate consecutive labels
-	const filterDuplicateLabels = (options: Option[]): Option[] =>
-		options.map((option, index, arr) => ({
-			...option,
-			label: index > 0 && option.label === arr[index - 1].label ? '' : option.label
-		}));
-
-	const securityObjectiveOptions: Option[] = filterDuplicateLabels(
-		securityObjectiveScaleMap.map(createOption)
-	);
+	const securityObjectiveOptions: Option[] = securityObjectiveUnscaledMap.map(createOption);
 
 	// Dynamic configuration based on asset type
 	const typeConfig = $derived.by(() => {
