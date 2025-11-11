@@ -122,13 +122,8 @@ class Folder(NameDescriptionMixin):
     def __str__(self) -> str:
         return self.name.__str__()
 
-    def get_sub_folders(
-        self, *, include_self: bool = False
-    ) -> Generator[Self, None, None]:
+    def get_sub_folders(self) -> Generator[Self, None, None]:
         """Return the list of subfolders"""
-
-        if include_self:
-            yield self
 
         def sub_folders_in(folder):
             for sub_folder in folder.folder_set.all():

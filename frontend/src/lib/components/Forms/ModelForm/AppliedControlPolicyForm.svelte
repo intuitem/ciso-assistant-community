@@ -76,12 +76,6 @@
 			});
 		}
 	});
-
-	let domainOptionEndpoint = $derived(
-		origin === 'requirement-assessments'
-			? `folders/${initialData.folder}/subdomains/`
-			: 'folders?content_type=DO&content_type=GL'
-	);
 </script>
 
 {#if !duplicate}
@@ -445,7 +439,10 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint={domainOptionEndpoint}
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	optionsDetailedUrlParameters={origin === 'requirement-assessments'
+		? [['scope_folder_id', initialData.folder]]
+		: []}
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}

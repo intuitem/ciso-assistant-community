@@ -4113,26 +4113,6 @@ class FolderViewSet(BaseModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
-    @action(detail=True, methods=["get"])
-    def subdomains(self, request, pk):
-        """
-        Returns a list composed of the given domain and all its subdomains
-        """
-        instance = Folder.objects.filter(pk=pk).first()
-        if not instance:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        if not RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=Permission.objects.get(codename="view_folder"),
-            folder=instance,
-        ):
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-        subfolders = list(instance.get_sub_folders(include_self=True))
-        serializer = FolderReadSerializer(subfolders, many=True)
-        return Response(serializer.data)
-
     @action(detail=False, methods=["get"])
     def org_tree(self, request):
         """
