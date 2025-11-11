@@ -73,7 +73,7 @@
 	open={false}
 	style="hover:text-primary-700"
 	icon="fa-solid fa-scale-balanced"
-	header={m.doraSpecific()}
+	header={m.doraAttributes()}
 >
 	<AutocompleteSelect
 		{form}
@@ -83,12 +83,21 @@
 		cacheLock={cacheLocks['dora_ict_service_type']}
 		bind:cachedValue={formDataCache['dora_ict_service_type']}
 	/>
+</Dropdown>
+
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-clipboard-check"
+	header={m.doraAssessment()}
+>
 	<Checkbox
 		{form}
 		field="storage_of_data"
 		label={m.storageOfData()}
 		cacheLock={cacheLocks['storage_of_data']}
 		bind:cachedValue={formDataCache['storage_of_data']}
+		classesContainer="my-4"
 	/>
 	<AutocompleteSelect
 		{form}
@@ -121,5 +130,60 @@
 		label={m.doraRelianceLevel()}
 		cacheLock={cacheLocks['dora_reliance_level']}
 		bind:cachedValue={formDataCache['dora_reliance_level']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="dora_substitutability"
+		options={model.selectOptions?.dora_substitutability}
+		label={m.doraSubstitutability()}
+		cacheLock={cacheLocks['dora_substitutability']}
+		bind:cachedValue={formDataCache['dora_substitutability']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="dora_non_substitutability_reason"
+		options={model.selectOptions?.dora_non_substitutability_reason}
+		label={m.doraNonSubstitutabilityReason()}
+		cacheLock={cacheLocks['dora_non_substitutability_reason']}
+		bind:cachedValue={formDataCache['dora_non_substitutability_reason']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="dora_has_exit_plan"
+		options={model.selectOptions?.dora_has_exit_plan}
+		label={m.doraHasExitPlan()}
+		cacheLock={cacheLocks['dora_has_exit_plan']}
+		bind:cachedValue={formDataCache['dora_has_exit_plan']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="dora_reintegration_possibility"
+		options={model.selectOptions?.dora_reintegration_possibility}
+		label={m.doraReintegrationPossibility()}
+		cacheLock={cacheLocks['dora_reintegration_possibility']}
+		bind:cachedValue={formDataCache['dora_reintegration_possibility']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="dora_discontinuing_impact"
+		options={model.selectOptions?.dora_discontinuing_impact}
+		label={m.doraDiscontinuingImpact()}
+		cacheLock={cacheLocks['dora_discontinuing_impact']}
+		bind:cachedValue={formDataCache['dora_discontinuing_impact']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="dora_alternative_providers_identified"
+		options={model.selectOptions?.dora_alternative_providers_identified}
+		label={m.doraAlternativeProvidersIdentified()}
+		cacheLock={cacheLocks['dora_alternative_providers_identified']}
+		bind:cachedValue={formDataCache['dora_alternative_providers_identified']}
+	/>
+	<TextField
+		{form}
+		field="dora_alternative_providers"
+		label={m.doraAlternativeProviders()}
+		cacheLock={cacheLocks['dora_alternative_providers']}
+		bind:cachedValue={formDataCache['dora_alternative_providers']}
 	/>
 </Dropdown>

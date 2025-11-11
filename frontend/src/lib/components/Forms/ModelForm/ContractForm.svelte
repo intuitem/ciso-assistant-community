@@ -77,19 +77,19 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="entities"
-	field="entities"
-	cacheLock={cacheLocks['entities']}
-	bind:cachedValue={formDataCache['entities']}
-	label={m.entities()}
+	field="provider_entity"
+	cacheLock={cacheLocks['provider_entity']}
+	bind:cachedValue={formDataCache['provider_entity']}
+	label={m.providerEntity()}
 />
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="solutions"
 	optionsExtraFields={[['provider_entity', 'str']]}
-	field="solutions"
-	cacheLock={cacheLocks['solutions']}
-	bind:cachedValue={formDataCache['solutions']}
-	label={m.solutions()}
+	field="solution"
+	cacheLock={cacheLocks['solution']}
+	bind:cachedValue={formDataCache['solution']}
+	label={m.solution()}
 />
 <AutocompleteSelect
 	{form}

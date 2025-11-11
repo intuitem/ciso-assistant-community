@@ -130,13 +130,6 @@
 	bind:cachedValue={formDataCache['owner']}
 	label={m.owner()}
 />
-<Checkbox
-	{form}
-	field="is_critical"
-	label={m.isCritical()}
-	cacheLock={cacheLocks['is_critical']}
-	bind:cachedValue={formDataCache['is_critical']}
-/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
@@ -251,6 +244,55 @@
 				/>
 			{/each}
 		</div>
+	</Dropdown>
+{/if}
+{#if data.type === 'PR'}
+	<Dropdown
+		open={false}
+		style="hover:text-purple-700"
+		icon="fa-solid fa-building-columns"
+		header={m.doraSpecific()}
+	>
+		<Checkbox
+			{form}
+			field="is_business_function"
+			label={m.isBusinessFunction()}
+			cacheLock={cacheLocks['is_business_function']}
+			bind:cachedValue={formDataCache['is_business_function']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['dora_licenced_activity']}
+			field="dora_licenced_activity"
+			label={m.doraLicencedActivity()}
+			cacheLock={cacheLocks['dora_licenced_activity']}
+			bind:cachedValue={formDataCache['dora_licenced_activity']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['dora_criticality_assessment']}
+			field="dora_criticality_assessment"
+			label={m.doraCriticalityAssessment()}
+			cacheLock={cacheLocks['dora_criticality_assessment']}
+			bind:cachedValue={formDataCache['dora_criticality_assessment']}
+			disableDoubleDash={true}
+		/>
+		<TextField
+			{form}
+			field="dora_criticality_justification"
+			label={m.doraCriticalityJustification()}
+			cacheLock={cacheLocks['dora_criticality_justification']}
+			bind:cachedValue={formDataCache['dora_criticality_justification']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['dora_discontinuing_impact']}
+			field="dora_discontinuing_impact"
+			label={m.doraDiscontinuingImpact()}
+			cacheLock={cacheLocks['dora_discontinuing_impact']}
+			bind:cachedValue={formDataCache['dora_discontinuing_impact']}
+			disableDoubleDash={true}
+		/>
 	</Dropdown>
 {/if}
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>

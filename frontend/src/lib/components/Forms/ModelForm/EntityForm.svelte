@@ -64,6 +64,15 @@
 />
 
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-ellipsis" header={m.more()}>
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="entities"
+		field="parent_entity"
+		cacheLock={cacheLocks['parent_entity']}
+		bind:cachedValue={formDataCache['parent_entity']}
+		label={m.parentEntity()}
+		helpText={m.parentEntityHelpText()}
+	/>
 	<TextField
 		{form}
 		field="reference_link"
@@ -125,5 +134,13 @@
 		label={m.doraCompetentAuthority()}
 		cacheLock={cacheLocks['dora_competent_authority']}
 		bind:cachedValue={formDataCache['dora_competent_authority']}
+	/>
+	<AutocompleteSelect
+		{form}
+		field="dora_provider_person_type"
+		options={model.selectOptions?.dora_provider_person_type}
+		label={m.doraProviderPersonType()}
+		cacheLock={cacheLocks['dora_provider_person_type']}
+		bind:cachedValue={formDataCache['dora_provider_person_type']}
 	/>
 </Dropdown>

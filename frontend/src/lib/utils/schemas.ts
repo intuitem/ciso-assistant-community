@@ -306,7 +306,11 @@ export const AssetSchema = z.object({
 	observation: z.string().optional().nullable(),
 	overridden_children_capabilities: z.string().uuid().optional().array().optional(),
 	solutions: z.string().uuid().optional().array().optional(),
-	is_critical: z.boolean().default(false)
+	is_business_function: z.boolean().default(false),
+	dora_licenced_activity: z.string().optional().nullable(),
+	dora_criticality_assessment: z.string().default('eba_BT:x21'),
+	dora_criticality_justification: z.string().optional().nullable(),
+	dora_discontinuing_impact: z.string().default('eba_ZZ:x799')
 });
 
 export const FilteringLabelSchema = z.object({
@@ -563,6 +567,7 @@ export const SSOSettingsSchema = z.object({
 export const EntitiesSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
+	parent_entity: z.string().optional(),
 	mission: z.string().optional(),
 	reference_link: z
 		.string()
@@ -575,9 +580,10 @@ export const EntitiesSchema = z.object({
 	country: z.string().optional(),
 	currency: z.string().optional(),
 	dora_entity_type: z.string().optional(),
-	dora_entity_hierarchy: z.string().optional(),
+	dora_entity_hierarchy: z.string().optional().default('eba_RP:x53'),
 	dora_assets_value: z.number().optional().nullable(),
-	dora_competent_authority: z.string().optional()
+	dora_competent_authority: z.string().optional(),
+	dora_provider_person_type: z.string().optional().default('eba_CT:x212')
 });
 
 export const EntityAssessmentSchema = z.object({
@@ -617,7 +623,14 @@ export const solutionSchema = z.object({
 	data_location_storage: z.string().optional(),
 	data_location_processing: z.string().optional(),
 	dora_data_sensitiveness: z.string().optional(),
-	dora_reliance_level: z.string().optional()
+	dora_reliance_level: z.string().optional(),
+	dora_substitutability: z.string().optional(),
+	dora_non_substitutability_reason: z.string().optional(),
+	dora_has_exit_plan: z.string().optional(),
+	dora_reintegration_possibility: z.string().optional(),
+	dora_discontinuing_impact: z.string().optional(),
+	dora_alternative_providers_identified: z.string().optional(),
+	dora_alternative_providers: z.string().optional()
 });
 
 export const representativeSchema = z.object({
@@ -636,9 +649,9 @@ export const contractSchema = z.object({
 	folder: z.string(),
 	filtering_labels: z.array(z.string()).optional(),
 	owner: z.array(z.string().optional()).optional(),
-	entities: z.array(z.string().optional()).optional(),
+	provider_entity: z.string().optional(),
 	evidences: z.array(z.string().optional()).optional(),
-	solutions: z.array(z.string().optional()).optional(),
+	solution: z.string().optional(),
 	status: z.string().optional().default('draft'),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	end_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),

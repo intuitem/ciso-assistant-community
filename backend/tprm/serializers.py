@@ -21,6 +21,8 @@ User = get_user_model()
 class EntityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     owned_folders = FieldsRelatedField(many=True)
+    parent_entity = FieldsRelatedField()
+    branches = FieldsRelatedField(many=True)
     relationship = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
     legal_identifiers = serializers.SerializerMethodField()
@@ -299,9 +301,9 @@ class SolutionWriteSerializer(BaseModelSerializer):
 class ContractReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     owner = FieldsRelatedField(many=True)
-    entities = FieldsRelatedField(many=True)
+    provider_entity = FieldsRelatedField()
     evidences = FieldsRelatedField(many=True)
-    solutions = FieldsRelatedField(many=True)
+    solution = FieldsRelatedField()
     overarching_contract = FieldsRelatedField()
 
     class Meta:

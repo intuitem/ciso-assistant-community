@@ -516,7 +516,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'overridden_children_capabilities', urlModel: 'asset-capabilities' },
 			{ field: 'solutions', urlModel: 'solutions' }
 		],
-		selectFields: [{ field: 'type' }, { field: 'asset_class' }],
+		selectFields: [
+			{ field: 'type' },
+			{ field: 'asset_class' },
+			{ field: 'dora_licenced_activity' },
+			{ field: 'dora_criticality_assessment' },
+			{ field: 'dora_discontinuing_impact' }
+		],
 		filters: [
 			{ field: 'parent_assets' },
 			{ field: 'folder' },
@@ -766,19 +772,23 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'name' },
 			{ field: 'description' },
 			{ field: 'mission' },
+			{ field: 'parent_entity' },
 			{ field: 'relationship' },
 			{ field: 'legal_identifiers' },
+			{ field: 'branches' },
 			{ field: 'reference_link' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'entity', urlModel: 'entity-assessments' },
 			{ field: 'entity', urlModel: 'representatives' },
 			{ field: 'provider_entity', urlModel: 'solutions' },
-			{ field: 'entities', urlModel: 'contracts' }
+			{ field: 'provider_entity', urlModel: 'contracts' }
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'owned_folders', urlModel: 'folders', urlParams: 'owned=false' },
+			{ field: 'parent_entity', urlModel: 'entities' },
+			{ field: 'branches', urlModel: 'entities' },
 			{
 				field: 'relationship',
 				urlModel: 'terminologies',
@@ -789,7 +799,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'country' },
 			{ field: 'currency' },
 			{ field: 'dora_entity_type' },
-			{ field: 'dora_entity_hierarchy' }
+			{ field: 'dora_entity_hierarchy' },
+			{ field: 'dora_provider_person_type' }
 		]
 	},
 	'entity-assessments': {
@@ -818,7 +829,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'solutions',
 		verboseName: 'Solution',
 		verboseNamePlural: 'Solutions',
-		reverseForeignKeyFields: [{ field: 'solutions', urlModel: 'contracts' }],
+		reverseForeignKeyFields: [{ field: 'solution', urlModel: 'contracts' }],
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
@@ -829,7 +840,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'data_location_storage' },
 			{ field: 'data_location_processing' },
 			{ field: 'dora_data_sensitiveness' },
-			{ field: 'dora_reliance_level' }
+			{ field: 'dora_reliance_level' },
+			{ field: 'dora_substitutability' },
+			{ field: 'dora_non_substitutability_reason' },
+			{ field: 'dora_has_exit_plan' },
+			{ field: 'dora_reintegration_possibility' },
+			{ field: 'dora_discontinuing_impact' },
+			{ field: 'dora_alternative_providers_identified' }
 		]
 	},
 	contracts: {
@@ -838,17 +855,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'contracts',
 		verboseName: 'Contract',
 		verboseNamePlural: 'Contracts',
-		reverseForeignKeyFields: [
-			{ field: 'contracts', urlModel: 'evidences', disableDelete: true },
-			{ field: 'contracts', urlModel: 'entities', disableDelete: true, disableCreate: true },
-			{ field: 'contracts', urlModel: 'solutions', disableDelete: true, disableCreate: true }
-		],
+		reverseForeignKeyFields: [{ field: 'contracts', urlModel: 'evidences', disableDelete: true }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'owner', urlModel: 'users' },
-			{ field: 'entities', urlModel: 'entities' },
+			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'solutions', urlModel: 'solutions' },
+			{ field: 'solution', urlModel: 'solutions' },
 			{ field: 'overarching_contract', urlModel: 'contracts' }
 		],
 		selectFields: [

@@ -18,6 +18,12 @@ from core.dora import (
     DORA_ICT_SERVICE_CHOICES,
     DORA_SENSITIVENESS_CHOICES,
     DORA_RELIANCE_CHOICES,
+    DORA_PROVIDER_PERSON_TYPE_CHOICES,
+    DORA_SUBSTITUTABILITY_CHOICES,
+    DORA_NON_SUBSTITUTABILITY_REASON_CHOICES,
+    DORA_BINARY_CHOICES,
+    DORA_REINTEGRATION_POSSIBILITY_CHOICES,
+    DORA_DISCONTINUING_IMPACT_CHOICES,
 )
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
 from iam.views import User
@@ -39,6 +45,15 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         verbose_name=_("Owned folders"),
     )
     builtin = models.BooleanField(default=False)
+    parent_entity = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="branches",
+        verbose_name=_("Parent entity"),
+        help_text=_("Parent entity for branch/subsidiary relationships"),
+    )
     relationship = models.ManyToManyField(
         Terminology,
         blank=True,
@@ -95,6 +110,13 @@ class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         blank=True,
         verbose_name=_("DORA competent authority"),
         help_text=_("Competent authority overseeing this entity for DORA compliance"),
+    )
+    dora_provider_person_type = models.CharField(
+        max_length=20,
+        choices=DORA_PROVIDER_PERSON_TYPE_CHOICES,
+        blank=True,
+        verbose_name=_("DORA provider person type"),
+        help_text=_("Type of person for ICT third-party service providers"),
     )
 
     fields_to_check = ["name"]
@@ -252,6 +274,57 @@ class Solution(NameDescriptionMixin):
         verbose_name=_("Level of reliance"),
         help_text=_("Level of reliance on the ICT service"),
     )
+    dora_substitutability = models.CharField(
+        max_length=20,
+        choices=DORA_SUBSTITUTABILITY_CHOICES,
+        blank=True,
+        verbose_name=_("Substitutability"),
+        help_text=_("Substitutability of the ICT third-party service provider"),
+    )
+    dora_non_substitutability_reason = models.CharField(
+        max_length=20,
+        choices=DORA_NON_SUBSTITUTABILITY_REASON_CHOICES,
+        blank=True,
+        verbose_name=_("Non-substitutability reason"),
+        help_text=_(
+            "Reason if the ICT third-party service provider is considered not substitutable or difficult to be substitutable"
+        ),
+    )
+    dora_has_exit_plan = models.CharField(
+        max_length=20,
+        choices=DORA_BINARY_CHOICES,
+        blank=True,
+        verbose_name=_("Exit plan"),
+        help_text=_("Existence of an exit plan"),
+    )
+    dora_reintegration_possibility = models.CharField(
+        max_length=20,
+        choices=DORA_REINTEGRATION_POSSIBILITY_CHOICES,
+        blank=True,
+        verbose_name=_("Reintegration possibility"),
+        help_text=_("Possibility of reintegration of the contracted ICT service"),
+    )
+    dora_discontinuing_impact = models.CharField(
+        max_length=20,
+        choices=DORA_DISCONTINUING_IMPACT_CHOICES,
+        blank=True,
+        verbose_name=_("Discontinuing impact"),
+        help_text=_("Impact of discontinuing the ICT services"),
+    )
+    dora_alternative_providers_identified = models.CharField(
+        max_length=20,
+        choices=DORA_BINARY_CHOICES,
+        blank=True,
+        verbose_name=_("Alternative providers identified"),
+        help_text=_(
+            "Are there alternative ICT third-party service providers identified?"
+        ),
+    )
+    dora_alternative_providers = models.TextField(
+        blank=True,
+        verbose_name=_("Alternative providers"),
+        help_text=_("Identification of alternative ICT third-party service providers"),
+    )
 
     fields_to_check = ["name"]
 
@@ -277,12 +350,14 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         related_name="contracts",
         blank=True,
     )
-    entities = models.ManyToManyField(
+    provider_entity = models.ForeignKey(
         Entity,
-        related_name="contracts",
+        on_delete=models.SET_NULL,
+        null=True,
         blank=True,
-        verbose_name=_("Entities"),
-        help_text=_("Entities involved in this contract"),
+        related_name="contracts",
+        verbose_name=_("Provider entity"),
+        help_text=_("Entity providing this contract"),
     )
     evidences = models.ManyToManyField(
         Evidence,
@@ -291,12 +366,14 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name=_("Evidences"),
         help_text=_("Supporting evidence for this contract"),
     )
-    solutions = models.ManyToManyField(
+    solution = models.ForeignKey(
         "tprm.Solution",
+        on_delete=models.SET_NULL,
         blank=True,
+        null=True,
         related_name="contracts",
-        verbose_name=_("Solutions"),
-        help_text=_("Solutions covered by this contract"),
+        verbose_name=_("Solution"),
+        help_text=_("Solution covered by this contract"),
     )
     status = models.CharField(
         max_length=20,

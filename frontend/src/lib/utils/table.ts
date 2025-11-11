@@ -708,6 +708,15 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+const SOLUTION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'solution',
+		optionsEndpoint: 'solutions',
+		multiple: true
+	}
+};
+
 const ENTITY_RELATIONSHIP_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -834,10 +843,10 @@ const ASSET_CLASS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const ASSET_IS_CRITICAL_FILTER: ListViewFilterConfig = {
+const ASSET_IS_BUSINESS_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'is_critical',
+		label: 'is_business_function',
 		options: YES_NO_OPTIONS,
 		multiple: true
 	}
@@ -1308,7 +1317,7 @@ export const listViewFields = {
 			type: ASSET_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER,
 			asset_class: ASSET_CLASS_FILTER,
-			is_critical: ASSET_IS_CRITICAL_FILTER
+			is_business_function: ASSET_IS_BUSINESS_FUNCTION_FILTER
 		}
 	},
 	'asset-class': {
@@ -1482,10 +1491,11 @@ export const listViewFields = {
 		}
 	},
 	entities: {
-		head: ['refId', 'name', 'description', 'domain', 'relationship'],
-		body: ['ref_id', 'name', 'description', 'folder', 'relationship'],
+		head: ['refId', 'name', 'description', 'domain', 'parentEntity', 'relationship'],
+		body: ['ref_id', 'name', 'description', 'folder', 'parent_entity', 'relationship'],
 		filters: {
 			folder: DOMAIN_FILTER,
+			parent_entity: ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER
 		}
 	},
@@ -1509,11 +1519,30 @@ export const listViewFields = {
 		}
 	},
 	contracts: {
-		head: ['refId', 'name', 'description', 'status', 'startDate', 'endDate', 'entities'],
-		body: ['ref_id', 'name', 'description', 'status', 'start_date', 'end_date', 'entities'],
+		head: [
+			'refId',
+			'name',
+			'description',
+			'status',
+			'startDate',
+			'endDate',
+			'providerEntity',
+			'solution'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'status',
+			'start_date',
+			'end_date',
+			'provider_entity',
+			'solution'
+		],
 		filters: {
 			status: CONTRACT_STATUS_FILTER,
-			entities: ENTITY_FILTER
+			provider_entity: ENTITY_FILTER,
+			solution: SOLUTION_FILTER
 		}
 	},
 	representatives: {
