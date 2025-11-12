@@ -108,12 +108,29 @@ class EntityViewSet(BaseModelViewSet):
         )
 
         # Prepare entity lists
-        all_entities = [main_entity] + list(
-            Entity.objects.filter(id__in=viewable_entities, parent_entity=main_entity)
+        # Subsidiaries: entities with main entity as parent AND dora_provider_person_type set (legal person)
+        # Branches: entities with main entity as parent AND dora_provider_person_type not set
+        subsidiaries = list(
+            Entity.objects.filter(
+                id__in=viewable_entities,
+                parent_entity=main_entity,
+                dora_provider_person_type__isnull=False,
+            ).exclude(dora_provider_person_type="")
         )
         branches = list(
-            Entity.objects.filter(id__in=viewable_entities, parent_entity=main_entity)
+            Entity.objects.filter(
+                id__in=viewable_entities,
+                parent_entity=main_entity,
+                dora_provider_person_type__isnull=True,
+            )
+            | Entity.objects.filter(
+                id__in=viewable_entities,
+                parent_entity=main_entity,
+                dora_provider_person_type="",
+            )
         )
+        # b_01.02 includes only main entity and subsidiaries (not branches)
+        entities_for_b_01_02 = [main_entity] + subsidiaries
 
         # Prepare contract QuerySets
         contracts = Contract.objects.filter(id__in=viewable_contracts)
@@ -128,7 +145,9 @@ class EntityViewSet(BaseModelViewSet):
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
             # Generate all DORA ROI reports
             dora_export.generate_b_01_01_main_entity(zip_file, main_entity)
-            dora_export.generate_b_01_02_entities(zip_file, main_entity, all_entities)
+            dora_export.generate_b_01_02_entities(
+                zip_file, main_entity, entities_for_b_01_02
+            )
             dora_export.generate_b_01_03_branches(zip_file, main_entity, branches)
 
             dora_export.generate_b_02_01_contracts(zip_file, contracts)
@@ -179,6 +198,16 @@ class EntityViewSet(BaseModelViewSet):
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
 
         return response
+
+    @action(detail=False, methods=["get"], name="Lint DORA ROI")
+    def dora_roi_lint(self, request):
+        """
+        Validate DORA ROI requirements and return linting results.
+        """
+        from tprm import dora_linter
+
+        lint_results = dora_linter.lint_dora_roi()
+        return Response(lint_results)
 
     @action(detail=False, name="Get country choices")
     def country(self, request):

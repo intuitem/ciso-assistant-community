@@ -113,7 +113,7 @@ def generate_b_01_02_entities(
     Args:
         zip_file: ZIP file object to write to
         main_entity: The main builtin entity
-        all_entities: List of all entities (main + branches)
+        all_entities: List of entities (main entity + subsidiaries only, no branches)
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
@@ -191,10 +191,18 @@ def generate_b_01_03_branches(
     """
     Generate b_01.03.csv - Branches of the main entity.
 
+    Branches are entities with the main entity as parent and dora_provider_person_type not set.
+    Subsidiaries (with dora_provider_person_type set) are NOT included in this report.
+
+    Each row represents a branch with:
+    - c0010: Main entity LEI
+    - c0020: Main entity legal identifier
+    - c0030: Main entity identifier type
+
     Args:
         zip_file: ZIP file object to write to
         main_entity: The main builtin entity
-        branches: List of branch entities
+        branches: List of branch entities (dora_provider_person_type not set)
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
@@ -202,13 +210,13 @@ def generate_b_01_03_branches(
     # Write CSV headers
     csv_writer.writerow(["c0010", "c0020", "c0030"])
 
-    # Get main entity LEI
+    # Get main entity identifiers
     main_lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
+    main_code, code_type = get_entity_identifier(main_entity)
 
-    # Write branch data
+    # Write branch data (one row per branch, with main entity identifiers)
     for branch in branches:
-        branch_code, code_type = get_entity_identifier(branch)
-        csv_writer.writerow([main_lei, branch_code, code_type])
+        csv_writer.writerow([main_lei, main_code, code_type])
 
     zip_file.writestr("reports/b_01.03.csv", csv_buffer.getvalue().encode("utf-8"))
 
