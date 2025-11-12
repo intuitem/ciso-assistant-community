@@ -10,6 +10,7 @@
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { tableHandlers } from '$lib/utils/stores';
+	import { LANGUAGE_FILTER, PROVIDER_FILTER } from '$lib/utils/table.js';
 
 	let { data, ...rest } = $props();
 
@@ -48,6 +49,10 @@
 					>
 				{/if}
 			</Tabs.Control>
+			<Tabs.Control value="mappings" labelBase="inert"
+				>{m.mappingLibraries()}
+				<span class="badge preset-tonal-primary">{data.mappingLibrariesTable.meta.count}</span>
+			</Tabs.Control>
 		{/snippet}
 		{#if data.loadedLibrariesTable.meta.count < 0}
 			<div class="card p-4 preset-tonal-secondary w-full m-4">
@@ -75,7 +80,6 @@
 					source={data.storedLibrariesTable}
 					URLModel="stored-libraries"
 					deleteForm={data.deleteForm}
-					server={false}
 				/>
 			</Tabs.Panel>
 			<Tabs.Panel value="loaded">
@@ -84,7 +88,18 @@
 					URLModel="loaded-libraries"
 					deleteForm={data.deleteForm}
 					detailQueryParameter="loaded"
-					server={false}
+				/>
+			</Tabs.Panel>
+			<Tabs.Panel value="mappings">
+				<ModelTable
+					source={data.mappingLibrariesTable}
+					URLModel="stored-libraries"
+					baseEndpoint="mapping-libraries"
+					tableFilters={{
+						locale: LANGUAGE_FILTER,
+						provider: PROVIDER_FILTER
+					}}
+					deleteForm={data.deleteForm}
 				/>
 			</Tabs.Panel>
 		{/snippet}

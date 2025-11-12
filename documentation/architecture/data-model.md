@@ -1148,6 +1148,10 @@ When a library is loaded, this loading is stored in the database, and the corres
 
 Deleting a library is possible only if none of its objects is currently used. Removing individual elements of a library is not possible. Dependencies are not concerned by the deletion, they should be deleted individually.
 
+There is a hidden boolean flag "autoload" on stored libraries that indicates if this library should be auto-loaded at startup. The default value is false by default, except for requirement mapping sets. When unloading a library, the flag is set to false.
+
+Loaded requirement mapping sets are cached in memory. As an exception, their dependencies are not loaded automatically.
+
 ## Referential objects
 
 Frameworks (including requirement nodes), mappings, threats, reference controls and risk matrices are called "referential objects", as they constitute the basis of an assessment.

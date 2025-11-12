@@ -96,7 +96,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await librariesPage.goto();
 		await librariesPage.hasUrl();
 
-		await librariesPage.importLibrary('NIST CSF v2.0', undefined, 'any');
+		await librariesPage.importLibrary('NIST-CSF-2.0', undefined, 'any');
 
 		// Optional: Confirm import
 		await librariesPage.tab('Libraries store').click();
