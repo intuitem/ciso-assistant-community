@@ -1,5 +1,5 @@
 from hashlib import sha256
-from typing import Any
+from typing import Any, Optional, Type
 
 from django.db import models
 from rest_framework import serializers
@@ -34,17 +34,29 @@ class FieldsRelatedField(serializers.RelatedField):
 
     fields = []
 
-    def __init__(self, fields: list[str | dict[str, list[str]]] = ["id"], **kwargs):
+    def __init__(
+        self,
+        fields: list[str | dict[str, list[str]]] = ["id"],
+        serializer: Optional[Type[serializers.ModelSerializer]] = None,
+        **kwargs,
+    ):
         kwargs["read_only"] = True
         self.fields = fields
+        self.serializer = serializer
         super().__init__(**kwargs)
 
     def to_representation(
         self, value, fields: list[str | dict[str, list[str]]] | None = None
     ) -> dict[str, Any]:
-        res = {"str": str(value)}
-
         fields = fields or self.fields
+        if self.serializer is not None:
+            data: dict = self.serializer(value).data
+            if fields is not None:
+                data = {field: data.get(field) for field in fields}
+
+            return data
+
+        res = {"str": str(value)}
 
         field_data: dict[str, Any] = {
             field_name: self._process_field(value, field_name, sub_fields)
