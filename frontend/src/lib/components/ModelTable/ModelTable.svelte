@@ -604,6 +604,8 @@
 															{:else}
 																{value.str ?? '-'}
 															{/if}
+														{:else if value && value.name}
+															{value.name}
 														{:else if value && value.hexcolor}
 															<p
 																class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
