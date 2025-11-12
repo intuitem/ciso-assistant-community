@@ -681,14 +681,14 @@ class LibraryUpdater:
                         and ra.compliance_assessment in compliance_assessments_to_update
                     ):
                         ca_min = (
-                            ra.compliance_assessment.min_score
-                            if ra.compliance_assessment.min_score is not None
-                            else new_framework.min_score
+                            new_framework.min_score
+                            if new_framework.min_score is not None
+                            else 0
                         )
                         ca_max = (
-                            ra.compliance_assessment.max_score
-                            if ra.compliance_assessment.max_score is not None
-                            else new_framework.max_score
+                            new_framework.max_score
+                            if new_framework.max_score is not None
+                            else 100
                         )
 
                         # Apply the chosen strategy for score transformation
