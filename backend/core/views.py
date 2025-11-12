@@ -58,6 +58,7 @@ from docxtpl import DocxTemplate
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from integrations.registry import IntegrationRegistry
+from library.serializers import StoredLibrarySerializer
 from .generators import gen_audit_context
 
 from django.utils import timezone
@@ -98,7 +99,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 
 from weasyprint import HTML
@@ -7499,15 +7500,31 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
 
 class RequirementMappingSetViewSet(BaseModelViewSet):
-    model = RequirementMappingSet
+    model = StoredLibrary
 
-    filterset_fields = ["target_framework", "source_framework", "library__provider"]
+    filterset_fields = [
+        "provider",
+    ]
+
+    def get_serializer_class(self, **kwargs):
+        return RequirementMappingSetReadSerializer
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                Q(content__requirement_mapping_set__isnull=False)
+                | Q(content__requirement_mapping_sets__isnull=False)
+            )
+        )
 
     @action(detail=False, name="Get provider choices")
     def provider(self, request):
         providers = set(
-            LoadedLibrary.objects.filter(
-                provider__isnull=False, requirement_mapping_sets__isnull=False
+            StoredLibrary.objects.filter(
+                provider__isnull=False,
+                objects_meta__requirement_mapping_sets__isnull=False,
             ).values_list("provider", flat=True)
         )
         return Response({p: p for p in providers})
@@ -7645,8 +7662,40 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
-        mapping_set_id = pk
-        mapping_set = get_object_or_404(RequirementMappingSet, id=mapping_set_id)
+        obj = StoredLibrary.objects.get(id=pk)
+
+        mapping_set = obj.content.get(
+            "requirement_mapping_sets",
+            [obj.content.get("requirement_mapping_set", {})],
+        )[0]
+
+        source_framework_lib = StoredLibrary.objects.filter(
+            content__framework__urn=mapping_set["source_framework_urn"],
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        ).first()
+        if not source_framework_lib:
+            raise NotFound("Source framework library not found")
+
+        target_framework_lib = StoredLibrary.objects.filter(
+            content__framework__urn=mapping_set["target_framework_urn"],
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        ).first()
+        if not target_framework_lib:
+            raise NotFound("Target framework library not found")
+
+        source_framework = source_framework_lib.content["framework"]
+        target_framework = target_framework_lib.content["framework"]
+
+        source_nodes_dict = {
+            n.get("urn"): n for n in source_framework["requirement_nodes"]
+        }
+        target_nodes_dict = {
+            n.get("urn"): n for n in target_framework["requirement_nodes"]
+        }
 
         nodes = []
         links = []
@@ -7654,54 +7703,59 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         tnodes_idx = dict()
         categories = [
             {
-                "name": mapping_set.source_framework.name,
+                "name": source_framework["name"],
             },
             {
-                "name": mapping_set.target_framework.name,
+                "name": target_framework["name"],
             },
         ]
         N = 0
-        for req in RequirementNode.objects.filter(
-            framework=mapping_set.source_framework
-        ).filter(assessable=True):
+        for req in source_framework["requirement_nodes"]:
             nodes.append(
                 {
-                    "name": req.ref_id,
+                    "name": req.get("ref_id"),
                     "category": 0,
-                    "value": req.name if req.name else req.description,
+                    "value": req.get("name", req.get("description")),
                 }
             )
-            snodes_idx[req.ref_id] = N
+            snodes_idx[req.get("urn")] = N
             N += 1
 
-        for req in RequirementNode.objects.filter(
-            framework=mapping_set.target_framework
-        ).filter(assessable=True):
+        for req in target_framework["requirement_nodes"]:
             nodes.append(
                 {
-                    "name": req.ref_id,
+                    "name": req.get("ref_id"),
                     "category": 1,
-                    "value": req.name if req.name else req.description,
+                    "value": req.get("name", req.get("description")),
                 }
             )
-            tnodes_idx[req.ref_id] = N
+            tnodes_idx[req.get("urn")] = N
             N += 1
-        req_mappings = RequirementMapping.objects.filter(mapping_set=mapping_set_id)
-        for item in req_mappings:
+        req_mappings = mapping_set.get("requirement_mappings", [])
+        for mapping in req_mappings:
+            source_urn = mapping.get("source_requirement_urn")
+            target_urn = mapping.get("target_requirement_urn")
+            source_node = source_nodes_dict.get(source_urn)
+            target_node = target_nodes_dict.get(target_urn)
+
             if (
-                item.source_requirement.assessable
-                and item.target_requirement.assessable
+                mapping.get("source_requirement_urn") not in snodes_idx
+                or mapping.get("target_requirement_urn") not in tnodes_idx
+                or not source_node
+                or not target_node
             ):
-                links.append(
-                    {
-                        "source": snodes_idx[item.source_requirement.ref_id],
-                        "target": tnodes_idx[item.target_requirement.ref_id],
-                        "value": item.coverage,
-                    }
-                )
+                continue
+
+            links.append(
+                {
+                    "source": snodes_idx[source_node.get("urn")],
+                    "target": tnodes_idx[target_node.get("urn")],
+                    "value": mapping.get("relationship"),
+                }
+            )
 
         meta = {
-            "display_name": f"{mapping_set.source_framework.name} ➜ {mapping_set.target_framework.name}"
+            "display_name": f"{source_framework['name']} ➜ {target_framework['name']}"
         }
 
         return Response(

@@ -1,4 +1,5 @@
 from ctypes import sizeof
+from django.db.models import Q
 from icecream import ic
 from core.models import (
     Framework,
@@ -63,7 +64,11 @@ class MappingEngine:
         self.direct_mappings = set()
         self.all_rms = {}
 
-        for lib in StoredLibrary.objects.all():
+        for lib in StoredLibrary.objects.filter(
+            Q(content__requirement_mapping_set__isnull=False)
+            | Q(content__requirement_mapping_sets__isnull=False),
+            is_loaded=True,
+        ):
             library_urn = lib.urn
             content = lib.content
 
