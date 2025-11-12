@@ -11,6 +11,7 @@ from collections import defaultdict, deque
 from typing import Optional
 import json
 import zlib
+import time
 
 
 class MappingEngine:
@@ -488,7 +489,6 @@ class MappingEngine:
         paths = self.all_paths_between(source_urn, dest_urn, max_depth)
         inferences = {}
         best_path = []
-
         for path in paths:
             tmp_inferences = source_audit.copy()
             tmp_urn = source_urn
@@ -530,7 +530,9 @@ class MappingEngine:
             audit_results["requirement_assessments"][ra.requirement.urn] = {
                 field: getattr(ra, field) for field in fields
             }
-            audit_results["requirement_assessments"][ra.requirement.urn]["str"] = ra.requirement.display_short
+            audit_results["requirement_assessments"][ra.requirement.urn]["str"] = (
+                ra.requirement.display_short
+            )
             for m2m_field in self.m2m_fields:
                 attr = getattr(ra, m2m_field)
                 if isinstance(attr, QuerySet) or hasattr(attr, "all"):
