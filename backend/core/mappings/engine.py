@@ -1,4 +1,5 @@
 from ctypes import sizeof
+
 from icecream import ic
 from core.models import (
     Framework,
@@ -435,12 +436,12 @@ class MappingEngine:
                     "result", ""
                 ),
                 "source_requirement_assessment": {
-                    "id": str(src_id),
-                    "str": str(source_audit["requirement_assessments"][src]),
-                    "coverage": "full" if rel in ("equal", "superset") else "partial",
+                    "id": src_id,
+                    "str": source_audit["requirement_assessments"][src].get("str"),
+                    "coverage": "full" if rel in {"equal", "superset"} else "partial",
                     "score": source_audit["requirement_assessments"][src].get("score"),
                     "is_scored": source_audit["requirement_assessments"][src].get(
-                        "is_scored"
+                        "is_scored", False
                     ),
                 },
                 "annotation": source_audit["requirement_assessments"][src]
@@ -517,7 +518,8 @@ class MappingEngine:
         Returns:
             A dictionary mapping requirement URNs to their requested fields.
         """
-        fields = self.fields_to_map
+
+        fields = self.fields_to_map + ["id"]
         all_ra = audit.get_requirement_assessments(include_non_assessable=False)
         audit_results = {
             "min_score": audit.min_score,
@@ -528,6 +530,7 @@ class MappingEngine:
             audit_results["requirement_assessments"][ra.requirement.urn] = {
                 field: getattr(ra, field) for field in fields
             }
+            audit_results["requirement_assessments"][ra.requirement.urn]["str"] = ra.requirement.display_short
             for m2m_field in self.m2m_fields:
                 attr = getattr(ra, m2m_field)
                 if isinstance(attr, QuerySet) or hasattr(attr, "all"):
