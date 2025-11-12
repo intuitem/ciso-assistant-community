@@ -209,6 +209,210 @@ class EntityViewSet(BaseModelViewSet):
         lint_results = dora_linter.lint_dora_roi()
         return Response(lint_results)
 
+    @action(detail=False, methods=["get"], name="Get entities graph")
+    def graph(self, request):
+        """
+        Generate graph data for entities, showing:
+        - Entity hierarchy (parent-child relationships)
+        - Solutions provided by entities
+        - Contracts between entities
+        - Assets linked to solutions
+        """
+        # Get accessible objects for the current user
+        (viewable_entities, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Entity,
+        )
+
+        (viewable_contracts, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Contract,
+        )
+
+        (viewable_solutions, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Solution,
+        )
+
+        (viewable_assets, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Asset,
+        )
+
+        # Get entities, solutions, contracts, and assets
+        entities = Entity.objects.filter(id__in=viewable_entities)
+        solutions = Solution.objects.filter(id__in=viewable_solutions).select_related(
+            "provider_entity"
+        )
+        contracts = Contract.objects.filter(id__in=viewable_contracts).select_related(
+            "provider_entity", "beneficiary_entity", "solution"
+        )
+        assets = Asset.objects.filter(id__in=viewable_assets)
+
+        # Build nodes and links
+        nodes = []
+        links = []
+        categories = []
+        category_map = {}
+        node_index = 0
+
+        # Create entity nodes
+        entity_node_map = {}
+        for entity in entities:
+            nodes.append(
+                {
+                    "name": entity.name,
+                    "category": 0,  # Entities category
+                    "symbol": "roundRect",
+                    "symbolSize": 35,
+                    "value": f"Entity: {entity.name}",
+                }
+            )
+            entity_node_map[entity.id] = node_index
+            node_index += 1
+
+        # Add entity hierarchy links (parent-child relationships)
+        for entity in entities:
+            if entity.parent_entity and entity.parent_entity.id in entity_node_map:
+                links.append(
+                    {
+                        "source": entity_node_map[entity.parent_entity.id],
+                        "target": entity_node_map[entity.id],
+                        "value": "parent of",
+                    }
+                )
+
+        # Create solution nodes
+        solution_node_map = {}
+        for solution in solutions:
+            nodes.append(
+                {
+                    "name": solution.name,
+                    "category": 1,  # Solutions category
+                    "symbol": "diamond",
+                    "symbolSize": 30,
+                    "value": f"Solution: {solution.name}",
+                }
+            )
+            solution_node_map[solution.id] = node_index
+
+            # Link solution to provider entity
+            if (
+                solution.provider_entity
+                and solution.provider_entity.id in entity_node_map
+            ):
+                links.append(
+                    {
+                        "source": entity_node_map[solution.provider_entity.id],
+                        "target": node_index,
+                        "value": "provides",
+                    }
+                )
+
+            node_index += 1
+
+        # Create contract nodes
+        contract_node_map = {}
+        for contract in contracts:
+            nodes.append(
+                {
+                    "name": contract.name,
+                    "category": 2,  # Contracts category
+                    "symbol": "circle",
+                    "symbolSize": 25,
+                    "value": f"Contract: {contract.name}",
+                }
+            )
+            contract_node_map[contract.id] = node_index
+
+            # Link contract to provider entity
+            if (
+                contract.provider_entity
+                and contract.provider_entity.id in entity_node_map
+            ):
+                links.append(
+                    {
+                        "source": entity_node_map[contract.provider_entity.id],
+                        "target": node_index,
+                        "value": "provider",
+                    }
+                )
+
+            # Link contract to beneficiary entity
+            if (
+                contract.beneficiary_entity
+                and contract.beneficiary_entity.id in entity_node_map
+            ):
+                links.append(
+                    {
+                        "source": node_index,
+                        "target": entity_node_map[contract.beneficiary_entity.id],
+                        "value": "beneficiary",
+                    }
+                )
+
+            # Link contract to solution
+            if contract.solution and contract.solution.id in solution_node_map:
+                links.append(
+                    {
+                        "source": node_index,
+                        "target": solution_node_map[contract.solution.id],
+                        "value": "for solution",
+                    }
+                )
+
+            node_index += 1
+
+        # Create asset nodes (only those linked to solutions)
+        for asset in assets:
+            # Check if asset is linked to any solution
+            linked_solutions = solutions.filter(assets=asset)
+            if linked_solutions.exists():
+                nodes.append(
+                    {
+                        "name": asset.name,
+                        "category": 3,  # Assets category
+                        "symbol": "triangle",
+                        "symbolSize": 20,
+                        "value": f"Asset: {asset.name}",
+                    }
+                )
+                asset_node_index = node_index
+
+                # Link asset to solutions
+                for solution in linked_solutions:
+                    if solution.id in solution_node_map:
+                        links.append(
+                            {
+                                "source": solution_node_map[solution.id],
+                                "target": asset_node_index,
+                                "value": "uses",
+                            }
+                        )
+
+                node_index += 1
+
+        # Define categories
+        categories = [
+            {"name": "Entities"},
+            {"name": "Solutions"},
+            {"name": "Contracts"},
+            {"name": "Assets"},
+        ]
+
+        return Response(
+            {
+                "nodes": nodes,
+                "links": links,
+                "categories": categories,
+                "meta": {"display_name": "Entities Graph"},
+            }
+        )
+
     @action(detail=False, name="Get country choices")
     def country(self, request):
         return Response(dict(COUNTRY_CHOICES))
