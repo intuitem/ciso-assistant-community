@@ -788,7 +788,7 @@ export class TestContent {
 			campaignsPage: {
 				displayName: 'Campaigns',
 				modelName: 'campaign',
-				dependency: vars.framework,
+				dependency: vars.framework2,
 				build: {
 					str: `${vars.campaignName}`,
 					name: vars.campaignName,

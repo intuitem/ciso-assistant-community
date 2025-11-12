@@ -588,6 +588,11 @@ export default {
 		ref: 'NIST-CSF-1.1',
 		urn: 'urn:intuitem:risk:library:nist-csf-1.1'
 	},
+	framework2: {
+		name: 'International standard ISO/IEC 27001:2022',
+		ref: 'ISO/IEC 27001:2022',
+		urn: 'urn:intuitem:risk:library:iso27001-2022'
+	},
 	matrix: {
 		name: 'Critical risk matrix 5x5',
 		displayName: 'critical 5x5',
