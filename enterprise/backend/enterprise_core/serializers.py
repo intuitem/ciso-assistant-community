@@ -145,6 +145,22 @@ class LogEntrySerializer(serializers.ModelSerializer):
     def get_content_type(self, obj):
         return obj.content_type.name
 
+    def to_representation(self, instance):
+        log_data = super().to_representation(instance)
+        content_type = log_data.get("content_type")
+        change_dict = log_data.get("changes", {})
+
+        if (
+            isinstance(change_dict, dict)
+            and content_type == "user"
+            and "password" in change_dict
+        ):
+            # We want to mask the password in the audit logs.
+            change_dict["password"] = ["[old password]", "[new password]"]
+
+        log_data["changes"] = change_dict
+        return log_data
+
     class Meta:
         model = LogEntry
         fields = "__all__"
