@@ -38,14 +38,9 @@
 
 	type SecurityObjectiveScale = '0-3' | '1-4' | 'FIPS-199';
 	const scale: SecurityObjectiveScale = page.data.settings.security_objective_scale;
-	const securityObjectiveUnscaledMap: string[] = SECURITY_OBJECTIVE_SCALE_MAP[scale].reduce(
-		(acc, value) => {
-			if (!acc.includes(value)) {
-				acc.push(value);
-			}
-			return acc;
-		},
-		[]
+	const securityObjectiveScaleMap = SECURITY_OBJECTIVE_SCALE_MAP[scale];
+	const reducedSecurityObjectiveMap = securityObjectiveScaleMap.filter(
+		(label, index) => !securityObjectiveScaleMap.slice(0, index).includes(label)
 	);
 
 	async function fetchSecurityObjectives(): Promise<string[]> {
@@ -76,10 +71,10 @@
 
 	const createOption = (label: string): Option => ({
 		label,
-		value: Number(label)
+		value: securityObjectiveScaleMap.findIndex((_label) => label === _label)
 	});
 
-	const securityObjectiveOptions: Option[] = securityObjectiveUnscaledMap.map(createOption);
+	const securityObjectiveOptions: Option[] = reducedSecurityObjectiveMap.map(createOption);
 
 	// Dynamic configuration based on asset type
 	const typeConfig = $derived.by(() => {
