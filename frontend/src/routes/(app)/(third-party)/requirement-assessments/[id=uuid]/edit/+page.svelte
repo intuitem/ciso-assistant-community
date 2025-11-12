@@ -105,6 +105,7 @@
 				form: data.evidenceCreateForm,
 				formAction: '?/createEvidence',
 				model: data.evidenceModel,
+				invalidateAll: false,
 				debug: false
 			}
 		};
@@ -124,6 +125,7 @@
 				form: data.securityExceptionCreateForm,
 				formAction: '?/createSecurityException',
 				model: data.securityExceptionModel,
+				invalidateAll: false,
 				debug: false
 			}
 		};
