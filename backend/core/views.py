@@ -863,19 +863,24 @@ class AssetViewSet(BaseModelViewSet):
             else "1-4"
         )
         objective_scale = Asset.SECURITY_OBJECTIVES_SCALES[scale_key]
+
         objectives = asset_data["security_objectives"].get("objectives", {})
+        security_capabilities = asset_data["security_capabilities"].get(
+            "objectives", {}
+        )
         reduced_objective_scale: dict[str, int] = {
             value: index
             for index, value in enumerate(objective_scale)
             if value not in objective_scale[:index]
         }
 
-        for objective_name, objective_data in objectives.items():
-            if (objective_value := objective_data.get("value")) is None:
-                continue
-            objective_label = objective_scale[objective_value]
-            reduced_value = reduced_objective_scale[objective_label]
-            objective_data["value"] = reduced_value
+        for objective_dict in [objectives, security_capabilities]:
+            for objective_data in objective_dict.values():
+                if (objective_value := objective_data.get("value")) is None:
+                    continue
+                objective_label = objective_scale[objective_value]
+                reduced_value = reduced_objective_scale[objective_label]
+                objective_data["value"] = reduced_value
 
         return Response(asset_data)
 
