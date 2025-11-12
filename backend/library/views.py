@@ -518,6 +518,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
                     "prev_scores": e.prev_scores,
                     "new_scores": e.new_scores,
                     "affected_assessments": e.affected_assessments,
+                    "strategies": e.strategies,
                     "message": "Score boundaries have changed. Please choose a strategy.",
                 },
                 status=status.HTTP_409_CONFLICT,

@@ -376,6 +376,15 @@ class LibraryUpdater:
             self.prev_scores = prev_scores
             self.new_scores = new_scores
             self.affected_assessments = affected_assessments
+            self.strategies = [
+                {"name": "clamp", "description": "clampDescription", "action": "clamp"},
+                {"name": "reset", "description": "resetDescription", "action": "reset"},
+                {
+                    "name": "rule_of_three",
+                    "description": "ruleOfThreeDescription",
+                    "action": "rule_of_three",
+                },
+            ]
             super().__init__("Score boundaries changed, user decision required")
 
     def __init__(
