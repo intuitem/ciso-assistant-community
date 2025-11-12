@@ -492,7 +492,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             folder=Folder.get_root_folder(),
         ):
             return Response(status=HTTP_403_FORBIDDEN)
-        strategy = request.data.get("strategy")
+        strategy = request.query_params.get("action")
         if strategy and strategy not in ["rule_of_three", "reset", "clamp"]:
             return Response(
                 {
@@ -530,7 +530,12 @@ class LoadedLibraryViewSet(BaseModelViewSet):
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
         if error_msg is None:
-            return Response({"error": "NoContent"}, status=HTTP_204_NO_CONTENT)
+            return Response({"status": "success"})
+        else:
+            return Response(
+                {"status": "error", "error": error_msg},
+                status=HTTP_400_BAD_REQUEST,
+            )
 
     @action(methods=("get",), detail=False, url_path="available-updates")
     def available_updates(self, request):

@@ -843,7 +843,7 @@ class LibraryUpdater:
             if requirement_assessment_objects_to_update:
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessment_objects_to_update,
-                    ["answers", "score"],
+                    ["answers", "score", "is_scored"],
                     batch_size=100,
                 )
                 # Keep selected_implementation_groups consistent for dynamic frameworks

@@ -23,6 +23,7 @@
 			ref: ChoicesModal,
 			props: {
 				parent: null,
+				formAction: `/loaded-libraries/${library.id}?/update`,
 				choices: choices,
 				message: m.scoreChangeDetected()
 			}
