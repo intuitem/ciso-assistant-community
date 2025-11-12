@@ -359,6 +359,15 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name=_("Provider entity"),
         help_text=_("Entity providing this contract"),
     )
+    beneficiary_entity = models.ForeignKey(
+        Entity,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="beneficiary_contracts",
+        verbose_name=_("Beneficiary entity"),
+        help_text=_("Entity benefiting from/receiving this contract"),
+    )
     evidences = models.ManyToManyField(
         Evidence,
         blank=True,
@@ -459,6 +468,14 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     )
 
     fields_to_check = ["name"]
+
+    def save(self, *args, **kwargs):
+        # If beneficiary_entity is not set, default to main entity
+        if not self.beneficiary_entity:
+            main_entity = Entity.get_main_entity()
+            if main_entity:
+                self.beneficiary_entity = main_entity
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _("Contract")

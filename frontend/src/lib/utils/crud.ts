@@ -860,6 +860,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'provider_entity', urlModel: 'entities' },
+			{ field: 'beneficiary_entity', urlModel: 'entities' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'solution', urlModel: 'solutions' },
 			{ field: 'overarching_contract', urlModel: 'contracts' }

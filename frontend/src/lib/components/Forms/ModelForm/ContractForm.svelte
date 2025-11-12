@@ -84,6 +84,14 @@
 />
 <AutocompleteSelect
 	{form}
+	optionsEndpoint="entities"
+	field="beneficiary_entity"
+	cacheLock={cacheLocks['beneficiary_entity']}
+	bind:cachedValue={formDataCache['beneficiary_entity']}
+	label={m.beneficiaryEntity()}
+/>
+<AutocompleteSelect
+	{form}
 	optionsEndpoint="solutions"
 	optionsExtraFields={[['provider_entity', 'str']]}
 	field="solution"

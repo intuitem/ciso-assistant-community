@@ -302,6 +302,7 @@ class ContractReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     owner = FieldsRelatedField(many=True)
     provider_entity = FieldsRelatedField()
+    beneficiary_entity = FieldsRelatedField()
     evidences = FieldsRelatedField(many=True)
     solution = FieldsRelatedField()
     overarching_contract = FieldsRelatedField()

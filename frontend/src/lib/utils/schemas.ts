@@ -650,6 +650,7 @@ export const contractSchema = z.object({
 	filtering_labels: z.array(z.string()).optional(),
 	owner: z.array(z.string().optional()).optional(),
 	provider_entity: z.string().optional(),
+	beneficiary_entity: z.string().optional(),
 	evidences: z.array(z.string().optional()).optional(),
 	solution: z.string().optional(),
 	status: z.string().optional().default('draft'),

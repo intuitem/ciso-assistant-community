@@ -793,6 +793,7 @@
 	"solution": "Solution",
 	"addSolution": "Ajouter une solution",
 	"providerEntity": "Entité fournisseur",
+	"beneficiaryEntity": "Entité bénéficiaire",
 	"parentEntity": "Entité parente",
 	"parentEntityHelpText": "Entité parente pour les relations de succursale ou de filiale",
 	"addProduct": "Ajouter un produit",

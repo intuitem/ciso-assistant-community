@@ -1527,6 +1527,7 @@ export const listViewFields = {
 			'startDate',
 			'endDate',
 			'providerEntity',
+			'beneficiaryEntity',
 			'solution'
 		],
 		body: [
@@ -1537,11 +1538,13 @@ export const listViewFields = {
 			'start_date',
 			'end_date',
 			'provider_entity',
+			'beneficiary_entity',
 			'solution'
 		],
 		filters: {
 			status: CONTRACT_STATUS_FILTER,
 			provider_entity: ENTITY_FILTER,
+			beneficiary_entity: ENTITY_FILTER,
 			solution: SOLUTION_FILTER
 		}
 	},

@@ -840,6 +840,7 @@
 	"addSolution": "Add solution",
 	"solutionsLinkedToAssetHelpText": "Solutions associated with this asset",
 	"providerEntity": "Provider entity",
+	"beneficiaryEntity": "Beneficiary entity",
 	"parentEntity": "Parent entity",
 	"parentEntityHelpText": "Parent entity for branch or subsidiary relationships",
 	"addProduct": "Add product",

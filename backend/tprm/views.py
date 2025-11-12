@@ -428,6 +428,7 @@ class ContractViewSet(BaseModelViewSet):
         "name",
         "folder",
         "provider_entity",
+        "beneficiary_entity",
         "solution",
         "status",
         "owner",
