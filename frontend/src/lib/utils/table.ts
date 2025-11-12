@@ -1511,8 +1511,8 @@ export const listViewFields = {
 		}
 	},
 	solutions: {
-		head: ['name', 'description', 'providerEntity', 'recipientEntity', 'criticality'],
-		body: ['name', 'description', 'provider_entity', 'recipient_entity', 'criticality'],
+		head: ['refId', 'name', 'description', 'providerEntity', 'recipientEntity', 'criticality'],
+		body: ['ref_id', 'name', 'description', 'provider_entity', 'recipient_entity', 'criticality'],
 		filters: {
 			provider_entity: ENTITY_FILTER,
 			criticality: SOLUTION_CRITICALITY_FILTER

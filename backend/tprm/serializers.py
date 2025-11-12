@@ -45,6 +45,19 @@ class EntityWriteSerializer(BaseModelSerializer):
         model = Entity
         exclude = ["owned_folders"]
 
+    def validate_legal_identifiers(self, value):
+        """
+        Validate legal identifiers, ensuring LEI is exactly 20 characters if provided.
+        """
+        if value and isinstance(value, dict):
+            lei = value.get("LEI", "")
+            # Strip whitespace and check if LEI exists
+            if lei:
+                lei_stripped = lei.strip()
+                if lei_stripped and len(lei_stripped) != 20:
+                    raise serializers.ValidationError(_("leiLengthError"))
+        return value
+
 
 class EntityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)

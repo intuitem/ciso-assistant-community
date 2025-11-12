@@ -7,6 +7,7 @@ Each function generates a specific report and writes it to a ZIP file.
 
 import csv
 import io
+import json
 from typing import Dict, List, Optional, Any
 
 from django.db.models import QuerySet
@@ -59,13 +60,16 @@ def format_date(date_obj) -> str:
 # Report Generation Functions
 
 
-def generate_b_01_01_main_entity(zip_file, main_entity: Entity) -> None:
+def generate_b_01_01_main_entity(
+    zip_file, main_entity: Entity, folder_prefix: str = ""
+) -> None:
     """
     Generate b_01.01.csv - Main entity information.
 
     Args:
         zip_file: ZIP file object to write to
         main_entity: The main builtin entity
+        folder_prefix: Optional folder prefix to prepend to file path
     """
     from datetime import datetime
 
@@ -100,12 +104,17 @@ def generate_b_01_01_main_entity(zip_file, main_entity: Entity) -> None:
         ]
     )
 
-    # Add CSV to zip
-    zip_file.writestr("reports/b_01.01.csv", csv_buffer.getvalue().encode("utf-8"))
+    # Add CSV to zip with folder prefix
+    path = (
+        f"{folder_prefix}/reports/b_01.01.csv"
+        if folder_prefix
+        else "reports/b_01.01.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
 def generate_b_01_02_entities(
-    zip_file, main_entity: Entity, all_entities: List[Entity]
+    zip_file, main_entity: Entity, all_entities: List[Entity], folder_prefix: str = ""
 ) -> None:
     """
     Generate b_01.02.csv - Entity register with all entity details.
@@ -114,6 +123,7 @@ def generate_b_01_02_entities(
         zip_file: ZIP file object to write to
         main_entity: The main builtin entity
         all_entities: List of entities (main entity + subsidiaries only, no branches)
+        folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
@@ -182,11 +192,16 @@ def generate_b_01_02_entities(
         )
 
     # Add CSV to zip
-    zip_file.writestr("reports/b_01.02.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_01.02.csv"
+        if folder_prefix
+        else "reports/b_01.02.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
 def generate_b_01_03_branches(
-    zip_file, main_entity: Entity, branches: List[Entity]
+    zip_file, main_entity: Entity, branches: List[Entity], folder_prefix: str = ""
 ) -> None:
     """
     Generate b_01.03.csv - Branches of the main entity.
@@ -218,10 +233,17 @@ def generate_b_01_03_branches(
     for branch in branches:
         csv_writer.writerow([main_lei, main_code, code_type])
 
-    zip_file.writestr("reports/b_01.03.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_01.03.csv"
+        if folder_prefix
+        else "reports/b_01.03.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
-def generate_b_02_01_contracts(zip_file, contracts: QuerySet) -> None:
+def generate_b_02_01_contracts(
+    zip_file, contracts: QuerySet, folder_prefix: str = ""
+) -> None:
     """
     Generate b_02.01.csv - Contractual arrangements for ICT services.
 
@@ -273,10 +295,17 @@ def generate_b_02_01_contracts(zip_file, contracts: QuerySet) -> None:
             ]
         )
 
-    zip_file.writestr("reports/b_02.01.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_02.01.csv"
+        if folder_prefix
+        else "reports/b_02.01.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
-def generate_b_02_02_ict_services(zip_file, contracts: QuerySet) -> None:
+def generate_b_02_02_ict_services(
+    zip_file, contracts: QuerySet, folder_prefix: str = ""
+) -> None:
     """
     Generate b_02.02.csv - ICT services supporting functions.
 
@@ -297,10 +326,17 @@ def generate_b_02_02_ict_services(zip_file, contracts: QuerySet) -> None:
 
         csv_writer.writerow([contract_ref, ict_service_type])
 
-    zip_file.writestr("reports/b_02.02.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_02.02.csv"
+        if folder_prefix
+        else "reports/b_02.02.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
-def generate_b_02_03_intragroup_contracts(zip_file, contracts: QuerySet) -> None:
+def generate_b_02_03_intragroup_contracts(
+    zip_file, contracts: QuerySet, folder_prefix: str = ""
+) -> None:
     """
     Generate b_02.03.csv - Intra-group contractual arrangements.
 
@@ -329,11 +365,16 @@ def generate_b_02_03_intragroup_contracts(zip_file, contracts: QuerySet) -> None
 
         csv_writer.writerow([subordinate_ref, overarching_ref, arrangement_type])
 
-    zip_file.writestr("reports/b_02.03.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_02.03.csv"
+        if folder_prefix
+        else "reports/b_02.03.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
 def generate_b_03_01_signing_entities(
-    zip_file, main_entity: Entity, contracts: QuerySet
+    zip_file, main_entity: Entity, contracts: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
     Generate b_03.01.csv - Signing entities (main entity for all contracts).
@@ -357,10 +398,17 @@ def generate_b_03_01_signing_entities(
         contract_ref = contract.ref_id or str(contract.id)
         csv_writer.writerow([contract_ref, main_code, code_type])
 
-    zip_file.writestr("reports/b_03.01.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_03.01.csv"
+        if folder_prefix
+        else "reports/b_03.01.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
-def generate_b_03_02_ict_providers(zip_file, contracts: QuerySet) -> None:
+def generate_b_03_02_ict_providers(
+    zip_file, contracts: QuerySet, folder_prefix: str = ""
+) -> None:
     """
     Generate b_03.02.csv - ICT third-party service providers.
 
@@ -388,11 +436,16 @@ def generate_b_03_02_ict_providers(zip_file, contracts: QuerySet) -> None:
 
         csv_writer.writerow([contract_ref, provider_code, code_type])
 
-    zip_file.writestr("reports/b_03.02.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_03.02.csv"
+        if folder_prefix
+        else "reports/b_03.02.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
 def generate_b_03_03_intragroup_providers(
-    zip_file, main_entity: Entity, contracts: QuerySet
+    zip_file, main_entity: Entity, contracts: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
     Generate b_03.03.csv - ICT intra-group service providers.
@@ -419,11 +472,20 @@ def generate_b_03_03_intragroup_providers(
         contract_ref = contract.ref_id or str(contract.id)
         csv_writer.writerow([contract_ref, main_code, code_type])
 
-    zip_file.writestr("reports/b_03.03.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_03.03.csv"
+        if folder_prefix
+        else "reports/b_03.03.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
 def generate_b_04_01_service_users(
-    zip_file, main_entity: Entity, branches: List[Entity], contracts: QuerySet
+    zip_file,
+    main_entity: Entity,
+    branches: List[Entity],
+    contracts: QuerySet,
+    folder_prefix: str = "",
 ) -> None:
     """
     Generate b_04.01.csv - Entities using ICT services.
@@ -460,11 +522,16 @@ def generate_b_04_01_service_users(
 
             csv_writer.writerow([contract_ref, main_code, main_code_type, branch_code])
 
-    zip_file.writestr("reports/b_04.01.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_04.01.csv"
+        if folder_prefix
+        else "reports/b_04.01.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
 def generate_b_05_01_provider_details(
-    zip_file, main_entity: Entity, contracts: QuerySet
+    zip_file, main_entity: Entity, contracts: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
     Generate b_05.01.csv - Details of ICT third-party service providers.
@@ -545,11 +612,16 @@ def generate_b_05_01_provider_details(
             ]
         )
 
-    zip_file.writestr("reports/b_05.01.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_05.01.csv"
+        if folder_prefix
+        else "reports/b_05.01.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
 def generate_b_05_02_supply_chains(
-    zip_file, main_entity: Entity, contracts: QuerySet
+    zip_file, main_entity: Entity, contracts: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
     Generate b_05.02.csv - ICT service supply chains.
@@ -608,11 +680,16 @@ def generate_b_05_02_supply_chains(
             ]
         )
 
-    zip_file.writestr("reports/b_05.02.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_05.02.csv"
+        if folder_prefix
+        else "reports/b_05.02.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
 def generate_b_06_01_functions(
-    zip_file, main_entity: Entity, business_functions: QuerySet
+    zip_file, main_entity: Entity, business_functions: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
     Generate b_06.01.csv - Critical or important functions register.
@@ -689,10 +766,17 @@ def generate_b_06_01_functions(
             ]
         )
 
-    zip_file.writestr("reports/b_06.01.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_06.01.csv"
+        if folder_prefix
+        else "reports/b_06.01.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
-def generate_b_07_01_assessment(zip_file, contracts: QuerySet) -> None:
+def generate_b_07_01_assessment(
+    zip_file, contracts: QuerySet, folder_prefix: str = ""
+) -> None:
     """
     Generate b_07.01.csv - Assessment of ICT services.
 
@@ -768,11 +852,16 @@ def generate_b_07_01_assessment(zip_file, contracts: QuerySet) -> None:
             ]
         )
 
-    zip_file.writestr("reports/b_07.01.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_07.01.csv"
+        if folder_prefix
+        else "reports/b_07.01.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
 def generate_b_99_01_aggregation(
-    zip_file, contracts: QuerySet, business_functions: QuerySet
+    zip_file, contracts: QuerySet, business_functions: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
     Generate b_99.01.csv - Aggregation report placeholder (standard not yet finalized).
@@ -815,4 +904,152 @@ def generate_b_99_01_aggregation(
 
     # TODO: Add data rows once DORA standard is properly defined
 
-    zip_file.writestr("reports/b_99.01.csv", csv_buffer.getvalue().encode("utf-8"))
+    path = (
+        f"{folder_prefix}/reports/b_99.01.csv"
+        if folder_prefix
+        else "reports/b_99.01.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
+
+
+def generate_filing_indicators(zip_file, folder_prefix: str = "") -> None:
+    """
+    Generate FilingIndicators.csv - Indicates which templates are included in the report.
+
+    This file lists all the DORA ROI template IDs with a "reported" flag set to TRUE,
+    indicating that each template has been included in the export.
+
+    Args:
+        zip_file: ZIP file object to write to
+    """
+    csv_buffer = io.StringIO()
+    csv_writer = csv.writer(csv_buffer)
+
+    # Write CSV headers
+    csv_writer.writerow(["templateID", "reported"])
+
+    # List of all DORA ROI template IDs
+    template_ids = [
+        "B_01.01",
+        "B_01.02",
+        "B_01.03",
+        "B_02.01",
+        "B_02.02",
+        "B_02.03",
+        "B_03.01",
+        "B_03.02",
+        "B_03.03",
+        "B_04.01",
+        "B_05.01",
+        "B_05.02",
+        "B_06.01",
+        "B_07.01",
+        "B_99.01",
+    ]
+
+    # Write each template ID with reported=true
+    for template_id in template_ids:
+        csv_writer.writerow([template_id, "true"])
+
+    path = (
+        f"{folder_prefix}/reports/FilingIndicators.csv"
+        if folder_prefix
+        else "reports/FilingIndicators.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
+
+
+def generate_parameters(zip_file, main_entity: Entity, folder_prefix: str = "") -> None:
+    """
+    Generate parameters.csv - Report metadata and configuration parameters.
+
+    This file contains key metadata about the DORA ROI report including entity
+    identification, reporting period, base currency, and decimal formatting rules.
+
+    Args:
+        zip_file: ZIP file object to write to
+        main_entity: The main builtin entity
+    """
+    csv_buffer = io.StringIO()
+    csv_writer = csv.writer(csv_buffer)
+
+    # Write CSV headers
+    csv_writer.writerow(["name", "value"])
+
+    # Get LEI for entityID
+    lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
+    entity_id = f"rs:{lei}.CON" if lei else "rs:UNKNOWN.CON"
+
+    # Get currency for baseCurrency
+    base_currency = (
+        f"iso4217:{main_entity.currency}" if main_entity.currency else "iso4217:EUR"
+    )
+
+    # Write parameters
+    parameters = [
+        ("entityID", entity_id),
+        ("refPeriod", "2025-03-31"),  # Placeholder - can be made dynamic later
+        ("baseCurrency", base_currency),
+        ("decimalsInteger", "0"),
+        ("decimalsMonetary", "-3"),
+    ]
+
+    for name, value in parameters:
+        csv_writer.writerow([name, value])
+
+    path = (
+        f"{folder_prefix}/reports/parameters.csv"
+        if folder_prefix
+        else "reports/parameters.csv"
+    )
+    zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
+
+
+def generate_report_package_json(zip_file, folder_prefix: str = "") -> None:
+    """
+    Generate META-INF/reportPackage.json - Report package metadata.
+
+    This file contains metadata about the XBRL report package format.
+
+    Args:
+        zip_file: ZIP file object to write to
+    """
+    report_package = {
+        "documentInfo": {"documentType": "https://xbrl.org/report-package/2023"}
+    }
+
+    json_content = json.dumps(report_package, indent=2)
+    path = (
+        f"{folder_prefix}/META-INF/reportPackage.json"
+        if folder_prefix
+        else "META-INF/reportPackage.json"
+    )
+    zip_file.writestr(path, json_content)
+
+
+def generate_report_json(zip_file, folder_prefix: str = "") -> None:
+    """
+    Generate reports/report.json - Report metadata and XBRL CSV configuration.
+
+    This file contains metadata about the XBRL CSV format and references to
+    the DORA taxonomy.
+
+    Args:
+        zip_file: ZIP file object to write to
+    """
+    report_metadata = {
+        "documentInfo": {
+            "documentType": "https://xbrl.org/2021/xbrl-csv",
+            "extends": [
+                "http://www.eba.europa.eu/eu/fr/xbrl/crr/fws/dora/4.0/mod/dora.json"
+            ],
+        }
+    }
+
+    json_content = json.dumps(report_metadata, indent=2)
+    path = (
+        f"{folder_prefix}/reports/report.json"
+        if folder_prefix
+        else "reports/report.json"
+    )
+    zip_file.writestr(path, json_content)

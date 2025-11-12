@@ -808,6 +808,7 @@
 	"recipientEntity": "Entité destinataire",
 	"financial": "Financier",
 	"legal": "Juridique",
+	"leiLengthError": "Le LEI doit contenir exactement 20 caractères",
 	"reputation": "Réputation",
 	"operational": "Opérationnel",
 	"confidentiality": "Confidentialité",

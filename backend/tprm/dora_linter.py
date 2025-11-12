@@ -6,7 +6,7 @@ It checks for mandatory and recommended fields before generating the actual repo
 """
 
 from typing import List, Dict, Any
-from tprm.models import Entity
+from tprm.models import Entity, Contract, Solution
 from core.models import Asset
 from django.db.models import Q
 import re
@@ -58,6 +58,34 @@ def lint_main_entity(entity: Entity) -> List[Dict[str, Any]]:
                 "object_name": entity.name,
             }
         )
+
+    # Check LEI length if provided (must be exactly 20 characters)
+    if entity.legal_identifiers and entity.legal_identifiers.get("LEI"):
+        lei = entity.legal_identifiers.get("LEI")
+        if len(lei) != 20:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Main Entity",
+                    "message": f"LEI must be exactly 20 characters long (current: {len(lei)} characters)",
+                    "field": "legal_identifiers",
+                    "object_type": "entities",
+                    "object_id": str(entity.id),
+                    "object_name": entity.name,
+                }
+            )
+        else:
+            results.append(
+                {
+                    "severity": "ok",
+                    "category": "Main Entity",
+                    "message": "LEI has correct length (20 characters)",
+                    "field": "legal_identifiers",
+                    "object_type": "entities",
+                    "object_id": str(entity.id),
+                    "object_name": entity.name,
+                }
+            )
 
     # Check country (mandatory)
     if entity.country:
@@ -213,6 +241,22 @@ def lint_subsidiaries(main_entity: Entity) -> List[Dict[str, Any]]:
                 }
             )
 
+        # Check LEI length if provided (must be exactly 20 characters)
+        if subsidiary.legal_identifiers and subsidiary.legal_identifiers.get("LEI"):
+            lei = subsidiary.legal_identifiers.get("LEI")
+            if len(lei) != 20:
+                results.append(
+                    {
+                        "severity": "error",
+                        "category": "Subsidiaries",
+                        "message": f"Subsidiary '{subsidiary.name}' has LEI with incorrect length (must be 20 characters, current: {len(lei)})",
+                        "field": "legal_identifiers",
+                        "object_type": "entities",
+                        "object_id": str(subsidiary.id),
+                        "object_name": subsidiary.name,
+                    }
+                )
+
         # Check country (mandatory)
         if not subsidiary.country:
             results.append(
@@ -249,6 +293,20 @@ def lint_subsidiaries(main_entity: Entity) -> List[Dict[str, Any]]:
                     "category": "Subsidiaries",
                     "message": f"Subsidiary '{subsidiary.name}' must have a DORA entity hierarchy set",
                     "field": "dora_entity_hierarchy",
+                    "object_type": "entities",
+                    "object_id": str(subsidiary.id),
+                    "object_name": subsidiary.name,
+                }
+            )
+
+        # Check currency (warning)
+        if not subsidiary.currency:
+            results.append(
+                {
+                    "severity": "warning",
+                    "category": "Subsidiaries",
+                    "message": f"Subsidiary '{subsidiary.name}' should have a currency set",
+                    "field": "currency",
                     "object_type": "entities",
                     "object_id": str(subsidiary.id),
                     "object_name": subsidiary.name,
@@ -359,6 +417,310 @@ def lint_business_functions() -> List[Dict[str, Any]]:
     return results
 
 
+def lint_contracts() -> List[Dict[str, Any]]:
+    """
+    Validate contracts for DORA ROI requirements.
+
+    Checks that contracts have required fields:
+    - ref_id
+    - currency
+    - dora_contractual_arrangement (type of contract)
+    - annual_expense
+
+    Returns:
+        List of validation results with severity levels (error, warning, ok)
+    """
+    results = []
+
+    # Get all contracts
+    contracts = Contract.objects.all()
+
+    if not contracts.exists():
+        # No contracts found - this could be OK, but let's inform the user
+        results.append(
+            {
+                "severity": "warning",
+                "category": "Contracts",
+                "message": "No contracts found in the system",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+        return results
+
+    # Track validation statistics
+    total_contracts = contracts.count()
+    contracts_with_errors = 0
+
+    # Check each contract
+    for contract in contracts:
+        contract_has_error = False
+
+        # Check ref_id (mandatory)
+        if not contract.ref_id:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Contracts",
+                    "message": f"Contract '{contract.name}' must have a reference ID (ref_id) set",
+                    "field": "ref_id",
+                    "object_type": "contracts",
+                    "object_id": str(contract.id),
+                    "object_name": contract.name,
+                }
+            )
+            contract_has_error = True
+
+        # Check currency (mandatory)
+        if not contract.currency:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Contracts",
+                    "message": f"Contract '{contract.name}' must have a currency set",
+                    "field": "currency",
+                    "object_type": "contracts",
+                    "object_id": str(contract.id),
+                    "object_name": contract.name,
+                }
+            )
+            contract_has_error = True
+
+        # Check DORA contractual arrangement (mandatory)
+        if not contract.dora_contractual_arrangement:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Contracts",
+                    "message": f"Contract '{contract.name}' must have a DORA contractual arrangement (type) set",
+                    "field": "dora_contractual_arrangement",
+                    "object_type": "contracts",
+                    "object_id": str(contract.id),
+                    "object_name": contract.name,
+                }
+            )
+            contract_has_error = True
+
+        # Check annual expense (mandatory)
+        if contract.annual_expense is None:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Contracts",
+                    "message": f"Contract '{contract.name}' must have an annual expense set",
+                    "field": "annual_expense",
+                    "object_type": "contracts",
+                    "object_id": str(contract.id),
+                    "object_name": contract.name,
+                }
+            )
+            contract_has_error = True
+
+        if contract_has_error:
+            contracts_with_errors += 1
+
+    # Add success message if all contracts are valid
+    contracts_valid = total_contracts - contracts_with_errors
+    if contracts_valid == total_contracts:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Contracts",
+                "message": f"All {total_contracts} contracts have required fields set",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+    elif contracts_valid > 0:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Contracts",
+                "message": f"{contracts_valid} of {total_contracts} contracts have all required fields set",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+
+    return results
+
+
+def lint_solutions() -> List[Dict[str, Any]]:
+    """
+    Validate solutions for DORA ROI requirements.
+
+    Only validates solutions that are associated with assets marked as business functions,
+    as these are the ones relevant for DORA reporting.
+
+    Checks that solutions have required fields:
+    - dora_ict_service_type (ICT service type)
+    - data_location_storage (location of data at rest)
+    - data_location_processing (location of data at processing)
+    - provider_entity must have country set
+
+    Returns:
+        List of validation results with severity levels (error, warning, ok)
+    """
+    results = []
+
+    # Get only solutions associated with business function assets
+    solutions = (
+        Solution.objects.filter(assets__is_business_function=True)
+        .distinct()
+        .select_related("provider_entity")
+    )
+
+    if not solutions.exists():
+        # No solutions found linked to business functions
+        results.append(
+            {
+                "severity": "warning",
+                "category": "Solutions",
+                "message": "No solutions found linked to business function assets",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+        return results
+
+    # Track validation statistics
+    total_solutions = solutions.count()
+    solutions_with_errors = 0
+
+    # Check each solution
+    for solution in solutions:
+        solution_has_error = False
+
+        # Check ICT service type (mandatory)
+        if not solution.dora_ict_service_type:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Solutions",
+                    "message": f"Solution '{solution.name}' must have ICT service type set",
+                    "field": "dora_ict_service_type",
+                    "object_type": "solutions",
+                    "object_id": str(solution.id),
+                    "object_name": solution.name,
+                }
+            )
+            solution_has_error = True
+
+        # Check data_location_storage (mandatory)
+        if not solution.data_location_storage:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Solutions",
+                    "message": f"Solution '{solution.name}' must have location of data at rest (data storage location) set",
+                    "field": "data_location_storage",
+                    "object_type": "solutions",
+                    "object_id": str(solution.id),
+                    "object_name": solution.name,
+                }
+            )
+            solution_has_error = True
+        else:
+            # Warning: if data_location_storage is set but storage_of_data flag is not set
+            if not solution.storage_of_data:
+                results.append(
+                    {
+                        "severity": "warning",
+                        "category": "Solutions",
+                        "message": f"Solution '{solution.name}' has data storage location set but 'Storage of data' flag is not enabled",
+                        "field": "storage_of_data",
+                        "object_type": "solutions",
+                        "object_id": str(solution.id),
+                        "object_name": solution.name,
+                    }
+                )
+
+        # Check data_location_processing (mandatory)
+        if not solution.data_location_processing:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Solutions",
+                    "message": f"Solution '{solution.name}' must have location of data processing set",
+                    "field": "data_location_processing",
+                    "object_type": "solutions",
+                    "object_id": str(solution.id),
+                    "object_name": solution.name,
+                }
+            )
+            solution_has_error = True
+
+        # Check provider_entity country (mandatory)
+        if solution.provider_entity:
+            if not solution.provider_entity.country:
+                results.append(
+                    {
+                        "severity": "error",
+                        "category": "Solutions",
+                        "message": f"Solution '{solution.name}' has provider entity '{solution.provider_entity.name}' without a country set",
+                        "field": "country",
+                        "object_type": "entities",
+                        "object_id": str(solution.provider_entity.id),
+                        "object_name": solution.provider_entity.name,
+                    }
+                )
+                solution_has_error = True
+        else:
+            # No provider entity - this is also an error
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Solutions",
+                    "message": f"Solution '{solution.name}' must have a provider entity set",
+                    "field": "provider_entity",
+                    "object_type": "solutions",
+                    "object_id": str(solution.id),
+                    "object_name": solution.name,
+                }
+            )
+            solution_has_error = True
+
+        if solution_has_error:
+            solutions_with_errors += 1
+
+    # Add success message if all solutions are valid
+    solutions_valid = total_solutions - solutions_with_errors
+    if solutions_valid == total_solutions:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Solutions",
+                "message": f"All {total_solutions} solutions have required fields set",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+    elif solutions_valid > 0:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Solutions",
+                "message": f"{solutions_valid} of {total_solutions} solutions have all required fields set",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+
+    return results
+
+
 def lint_dora_roi() -> Dict[str, Any]:
     """
     Perform comprehensive linting for DORA ROI export.
@@ -391,6 +753,8 @@ def lint_dora_roi() -> Dict[str, Any]:
     results.extend(lint_main_entity(main_entity))
     results.extend(lint_subsidiaries(main_entity))
     results.extend(lint_business_functions())
+    results.extend(lint_contracts())
+    results.extend(lint_solutions())
 
     # Calculate summary
     summary = {

@@ -858,6 +858,7 @@
 	"identifierType": "Identifier type",
 	"identifierValue": "Identifier value",
 	"identifierErrorMessage": "Invalid identifier",
+	"leiLengthError": "LEI must be exactly 20 characters long",
 	"enterIdentifierValue": "Enter identifier value...",
 	"removeIdentifier": "Remove identifier",
 	"phone": "Phone",

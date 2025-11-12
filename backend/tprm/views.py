@@ -79,6 +79,10 @@ class EntityViewSet(BaseModelViewSet):
         - b_06.01: Critical functions register
         - b_07.01: Assessment of ICT services
         - b_99.01: Aggregation report
+        - FilingIndicators.csv: Template inclusion indicators
+        - parameters.csv: Report metadata and configuration
+        - META-INF/reportPackage.json: XBRL report package metadata
+        - reports/report.json: XBRL CSV configuration and taxonomy references
         """
         from tprm import dora_export
 
@@ -140,59 +144,88 @@ class EntityViewSet(BaseModelViewSet):
             id__in=viewable_assets, is_business_function=True
         )
 
+        # Calculate folder name for the ZIP structure (without .zip extension)
+        lei, _ = dora_export.get_entity_identifier(main_entity, priority=["LEI"])
+        competent_authority = main_entity.dora_competent_authority or "UNKNOWN"
+
+        if lei:
+            base_folder_name = f"LEI_{lei}.CON_{competent_authority}_DOR_DORA_ROI"
+        else:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            base_folder_name = f"DORA_ROI_{timestamp}"
+
         # Create zip file in memory
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-            # Generate all DORA ROI reports
-            dora_export.generate_b_01_01_main_entity(zip_file, main_entity)
-            dora_export.generate_b_01_02_entities(
-                zip_file, main_entity, entities_for_b_01_02
+            # Generate all DORA ROI reports (with folder prefix)
+            dora_export.generate_b_01_01_main_entity(
+                zip_file, main_entity, base_folder_name
             )
-            dora_export.generate_b_01_03_branches(zip_file, main_entity, branches)
+            dora_export.generate_b_01_02_entities(
+                zip_file, main_entity, entities_for_b_01_02, base_folder_name
+            )
+            dora_export.generate_b_01_03_branches(
+                zip_file, main_entity, branches, base_folder_name
+            )
 
-            dora_export.generate_b_02_01_contracts(zip_file, contracts)
-            dora_export.generate_b_02_02_ict_services(zip_file, contracts)
-            dora_export.generate_b_02_03_intragroup_contracts(zip_file, contracts)
+            dora_export.generate_b_02_01_contracts(
+                zip_file, contracts, base_folder_name
+            )
+            dora_export.generate_b_02_02_ict_services(
+                zip_file, contracts, base_folder_name
+            )
+            dora_export.generate_b_02_03_intragroup_contracts(
+                zip_file, contracts, base_folder_name
+            )
 
             dora_export.generate_b_03_01_signing_entities(
-                zip_file, main_entity, contracts
+                zip_file, main_entity, contracts, base_folder_name
             )
-            dora_export.generate_b_03_02_ict_providers(zip_file, contracts)
+            dora_export.generate_b_03_02_ict_providers(
+                zip_file, contracts, base_folder_name
+            )
             dora_export.generate_b_03_03_intragroup_providers(
-                zip_file, main_entity, contracts
+                zip_file, main_entity, contracts, base_folder_name
             )
 
             dora_export.generate_b_04_01_service_users(
-                zip_file, main_entity, branches, contracts
+                zip_file, main_entity, branches, contracts, base_folder_name
             )
 
             dora_export.generate_b_05_01_provider_details(
-                zip_file, main_entity, contracts
+                zip_file, main_entity, contracts, base_folder_name
             )
-            dora_export.generate_b_05_02_supply_chains(zip_file, main_entity, contracts)
+            dora_export.generate_b_05_02_supply_chains(
+                zip_file, main_entity, contracts, base_folder_name
+            )
 
             dora_export.generate_b_06_01_functions(
-                zip_file, main_entity, business_functions
+                zip_file, main_entity, business_functions, base_folder_name
             )
 
-            dora_export.generate_b_07_01_assessment(zip_file, contracts)
+            dora_export.generate_b_07_01_assessment(
+                zip_file, contracts, base_folder_name
+            )
 
             dora_export.generate_b_99_01_aggregation(
-                zip_file, contracts, business_functions
+                zip_file, contracts, business_functions, base_folder_name
             )
+
+            # Generate FilingIndicators.csv
+            dora_export.generate_filing_indicators(zip_file, base_folder_name)
+
+            # Generate parameters.csv
+            dora_export.generate_parameters(zip_file, main_entity, base_folder_name)
+
+            # Generate JSON metadata files
+            dora_export.generate_report_package_json(zip_file, base_folder_name)
+            dora_export.generate_report_json(zip_file, base_folder_name)
 
         # Prepare response
         zip_buffer.seek(0)
 
-        # Extract LEI for filename
-        lei, _ = dora_export.get_entity_identifier(main_entity, priority=["LEI"])
-
-        # Use LEI in filename, fallback to timestamp if no LEI
-        if lei:
-            filename = f"LEI_{lei}_DORA_ROI.zip"
-        else:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"DORA_ROI_{timestamp}.zip"
+        # Use the same base folder name for the ZIP filename
+        filename = f"{base_folder_name}.zip"
 
         response = HttpResponse(zip_buffer.getvalue(), content_type="application/zip")
         response["Content-Disposition"] = f'attachment; filename="{filename}"'

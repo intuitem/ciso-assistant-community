@@ -104,6 +104,19 @@
 		</button>
 	</div>
 
+	<!-- Display field-level errors -->
+	{#if $errors && !Array.isArray($errors) && typeof $errors === 'string'}
+		<div class="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+			{m[$errors] || $errors}
+		</div>
+	{:else if $errors && Array.isArray($errors) && $errors.length > 0}
+		<div class="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+			{#each $errors as error}
+				<div>{m[error] || error}</div>
+			{/each}
+		</div>
+	{/if}
+
 	{#if Object.keys(legalIdentifiers).length === 0}
 		<div
 			class="text-gray-500 text-sm italic text-center py-4 border-2 border-dashed border-gray-200 rounded"
