@@ -26,6 +26,7 @@
 		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
 		formAction?: string;
 		context?: string;
+		origin?: string | null;
 		additionalInitialData?: any;
 		suggestions?: { [key: string]: any };
 		taintedMessage?: string | boolean;
@@ -43,6 +44,7 @@
 		invalidateAll = true,
 		formAction = '?/create',
 		context = 'create',
+		origin = null,
 		additionalInitialData = {},
 		suggestions = {},
 		taintedMessage = false,
@@ -87,6 +89,7 @@
 			{model}
 			{closeModal}
 			{context}
+			{origin}
 			{duplicate}
 			{taintedMessage}
 			caching={true}
