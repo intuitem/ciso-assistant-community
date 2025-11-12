@@ -72,6 +72,7 @@
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/risk-assessments/{page.params.id}/action-plan"
 			fields={[
+				'ref_id',
 				'name',
 				'status',
 				'priority',
