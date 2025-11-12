@@ -4887,7 +4887,7 @@ class RiskScenario(NameDescriptionMixin):
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
 
-    def get_folder_full_path(self, include_root: bool = False) -> list[Folder]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
         return self.risk_assessment.get_folder_full_path(include_root=include_root)
 
     @property
@@ -6727,6 +6727,10 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     def risk_assessments(self):
         return self.task_template.risk_assessments.all()
 
+    @property
+    def findings_assessment(self):
+        return self.task_template.findings_assessment.all()
+
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"
@@ -6787,10 +6791,6 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 auditlog.register(
-    Folder,
-    exclude_fields=common_exclude,
-)
-auditlog.register(
     Perimeter,
     exclude_fields=common_exclude,
 )
@@ -6817,6 +6817,34 @@ auditlog.register(
 )
 auditlog.register(
     TimelineEntry,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Terminology,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    EvidenceRevision,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OrganisationIssue,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OrganisationObjective,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Campaign,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TaskNode,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TaskTemplate,
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete
