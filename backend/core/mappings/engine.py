@@ -35,11 +35,9 @@ class MappingEngine:
         ]
 
         self.m2m_fields = [
-            "id",
             "applied_controls",
             "security_exceptions",
             "evidences",
-            "mapping_inference",
         ]
 
     # --- Compression helpers ---
@@ -431,17 +429,24 @@ class MappingEngine:
                         )
 
             # Add the mapping inference
-            src_id = source_audit["requirement_assessments"][src].get("id", "noid")
-            if src_id != "noid":
-                target_audit["requirement_assessments"][dst]["mapping_inference"] = {
-                    "result": target_audit["requirement_assessments"][dst].get(
-                        "result", ""
+            src_id = source_audit["requirement_assessments"][src].get("id")
+            target_audit["requirement_assessments"][dst]["mapping_inference"] = {
+                "result": target_audit["requirement_assessments"][dst].get(
+                    "result", ""
+                ),
+                "source_requirement_assessment": {
+                    "id": str(src_id),
+                    "str": str(source_audit["requirement_assessments"][src]),
+                    "coverage": "full" if rel in ("equal", "superset") else "partial",
+                    "score": source_audit["requirement_assessments"][src].get("score"),
+                    "is_scored": source_audit["requirement_assessments"][src].get(
+                        "is_scored"
                     ),
-                    "source_requirement_assessment": str(src_id),
-                    "annotation": source_audit["requirement_assessments"][src]
-                    .get("mapping_inference", {})
-                    .get("annotation", ""),
-                }
+                },
+                "annotation": source_audit["requirement_assessments"][src]
+                .get("mapping_inference", {})
+                .get("annotation", ""),
+            }
         return target_audit
 
     def _most_restrictive_result(self, result1, result2):
