@@ -1167,6 +1167,7 @@ def startup(sender: AppConfig, **kwargs):
         logger.error("Error creating Jira IntegrationProvider", exc_info=True)
 
     call_command("storelibraries")
+    call_command("autoloadlibraries")
 
     # if superuser defined and does not exist, then create it
     if (
