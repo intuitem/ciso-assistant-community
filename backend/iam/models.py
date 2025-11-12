@@ -1122,7 +1122,7 @@ common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     User,
     m2m_fields={"user_groups"},
-    exclude_fields=common_exclude + ["password"],
+    exclude_fields=common_exclude,
 )
 auditlog.register(
     Folder,
