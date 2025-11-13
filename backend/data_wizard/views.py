@@ -1012,6 +1012,16 @@ class LoadFileView(APIView):
                         except (ValueError, TypeError):
                             pass
 
+                # Handle legal identifiers (LEI, EUID, DUNS, VAT, etc.)
+                legal_identifiers = {}
+                for identifier_type in ["lei", "euid", "duns", "vat"]:
+                    value = record.get(identifier_type, "")
+                    if value and str(value).strip():
+                        legal_identifiers[identifier_type.upper()] = str(value).strip()
+
+                if legal_identifiers:
+                    entity_data["legal_identifiers"] = legal_identifiers
+
                 # Create the entity first, then handle parent relationship
                 serializer = EntityWriteSerializer(
                     data=entity_data, context={"request": request}
