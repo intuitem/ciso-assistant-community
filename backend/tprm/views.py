@@ -11,7 +11,8 @@ from rest_framework.response import Response
 
 from django.utils.formats import date_format
 from django.http import HttpResponse
-from django.db.models import Sum
+from django.db.models import Sum, F, FloatField, Case, When, Value
+from django.db.models.functions import Cast, Greatest, Coalesce
 
 from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES
 from core.dora import (
@@ -69,6 +70,30 @@ class EntityViewSet(BaseModelViewSet):
         "default_maturity",
         "default_trust",
     ]
+
+    def get_queryset(self):
+        """Add annotation for default_criticality to enable sorting"""
+        qs = super().get_queryset()
+
+        # Annotate with default_criticality calculation
+        # Formula: (default_dependency * default_penetration) / (default_maturity * default_trust)
+        # Handle division by zero by using Case/When
+        qs = qs.annotate(
+            default_criticality=Case(
+                # If maturity or trust is 0, return 0.0
+                When(default_maturity=0, then=Value(0.0)),
+                When(default_trust=0, then=Value(0.0)),
+                # Otherwise, calculate criticality
+                default=Cast(
+                    (F("default_dependency") * F("default_penetration"))
+                    / (F("default_maturity") * F("default_trust")),
+                    output_field=FloatField(),
+                ),
+                output_field=FloatField(),
+            )
+        )
+
+        return qs
 
     @action(detail=False, methods=["get"], name="Generate DORA ROI")
     def generate_dora_roi(self, request):
