@@ -3,28 +3,19 @@
 	import type { CacheLock } from '$lib/utils/types';
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import { getSearchTarget, normalizeSearchString } from '$lib/utils/helpers';
+	import { createEventDispatcher } from 'svelte';
 	import MultiSelect from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
 	import * as m from '$paraglide/messages.js';
-	import { run } from 'svelte/legacy';
+	import { toCamelCase } from '$lib/utils/locales';
 
 	interface Option {
 		label: string;
 		value: string | number;
 		suggested?: boolean;
-		translatedLabel?: string;
-		path?: string[];
-		infoString?: {
-			string: string;
-			position: 'suffix' | 'prefix';
-			classes?: string;
-		};
-		contentType?: string;
 	}
 
 	type FieldContext = 'form-input' | 'filter-input';
-
 	interface Props {
 		fieldContext?: FieldContext;
 		label?: string | undefined;
@@ -37,7 +28,6 @@
 		multiple?: boolean;
 		nullable?: boolean;
 		mandatory?: boolean;
-		disabled?: boolean;
 		hidden?: boolean;
 		translateOptions?: boolean;
 		options?: Option[];
@@ -47,19 +37,6 @@
 		optionsValueField?: string;
 		browserCache?: RequestCache;
 		optionsExtraFields?: [string, string][];
-		additionalMultiselectOptions?: Record<string, any>;
-		optionsInfoFields?: {
-			fields: {
-				field: string; // Field name in the object
-				path?: string; // Optional, used for nested fields};
-				translate?: boolean; // Optional, used for translating the field
-				display?: (value: any) => string;
-			}[];
-			position?: 'suffix' | 'prefix'; // Default: 'suffix'
-			separator?: string; // Default: ' '
-			classes?: string; // Optional, used for custom styling
-		};
-		pathField?: string;
 		optionsSuggestions?: any[];
 		optionsSelf?: any;
 		optionsSelfSelect?: boolean;
@@ -67,9 +44,6 @@
 		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
-		includeAllOptionFields?: boolean;
-		mount?: (value: any) => void;
-		optionSnippet?: import('svelte').Snippet<[Record<string, any>]>;
 	}
 
 	let {
@@ -84,7 +58,6 @@
 		multiple = false,
 		nullable = false,
 		mandatory = false,
-		disabled = false,
 		hidden = false,
 		translateOptions = true,
 		options = [],
@@ -94,69 +67,56 @@
 		optionsValueField = 'id',
 		browserCache = 'default',
 		optionsExtraFields = [],
-		optionsInfoFields = {
-			fields: [],
-			position: 'suffix',
-			separator: ' ',
-			classes: 'text-surface-500'
-		},
-		additionalMultiselectOptions = {},
-		pathField = '',
 		optionsSuggestions = [],
 		optionsSelf = null,
 		optionsSelfSelect = false,
 		allowUserOptions = false,
 		onChange = () => {},
-		includeAllOptionFields = false,
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
 			resolve: (x: any) => x
 		},
-		cachedValue = $bindable(),
-		mount = () => null,
-		optionSnippet = undefined
+		cachedValue = $bindable()
 	}: Props = $props();
 
-	if (translateOptions) {
-		options = options.map((option) => {
-			return {
-				...option,
-				translatedLabel:
-					safeTranslate(option.label) !== option.label
-						? safeTranslate(option.label)
-						: safeTranslate(option.value) !== option.value
-							? safeTranslate(option.value)
-							: option.label
-			};
-		});
+	const norm = (v: any) => (v == null ? '' : String(v));
+	const lc = (v: any) => norm(v).trim().toLowerCase();
+	function getNestedValue(obj: any, path: string, field = '') {
+		if (field) return obj?.[path]?.[field];
+		return path.split('.').reduce((o, p) => (o || {})[p], obj);
 	}
-
-	let optionHashmap: Record<string, Option> = {};
-	let _disabled = $state(disabled);
 
 	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
-	let selected: typeof options = $state([]);
+	let optionHashmap: Record<string, Option> = {};
+	let disabled = $state(false);
+	// Allow strings (typed text) + Option objects from MultiSelect
+	let selected: (Option | string)[] = $state([]);
 	let selectedValues: (string | undefined)[] = $derived(
-		selected.map((item) => item.value || item.label || item)
+		selected.map((item) =>
+			typeof item === 'string' ? item : ((item.value as any) ?? item.label ?? (item as any))
+		)
 	);
+
 	let isInternalUpdate = false;
 	let optionsLoaded = $state(Boolean(options.length));
 	const initialValue = resetForm ? undefined : $value;
 	const default_value = nullable ? null : selectedValues[0];
 
+	// Disable user-created options until options are ready (prevents the early mis-add)
+	const effectiveAllowUserOptions = $derived(optionsLoaded ? allowUserOptions : false);
 	const multiSelectOptions = {
 		minSelect: $constraints && $constraints.required === true ? 1 : 0,
 		maxSelect: multiple ? undefined : 1,
 		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
-		outerDivClass: '!input !bg-surface-100 !px-2 !flex',
-		closeDropdownOnSelect: !multiple,
-		...additionalMultiselectOptions
+		outerDivClass: '!input !px-2 !flex',
+		closeDropdownOnSelect: !multiple
 	};
-
+	const dispatch = createEventDispatcher();
 	let isLoading = $state(false);
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
+
 	async function fetchOptions() {
 		isLoading = true;
 		try {
@@ -180,25 +140,20 @@
 				const response = await fetch(endpoint, { cache: browserCache });
 				if (response.ok) {
 					const data = await response.json().then((res) => res?.results ?? res);
-					if (data.length > 0) {
+					if (data?.length > 0) {
 						options = processOptions(data);
 					}
 					const isRequired = mandatory || $constraints?.required;
 					const hasNoOptions = options.length === 0;
 					const isMissing = isRequired && hasNoOptions;
-					if (updateMissingConstraint) {
-						updateMissingConstraint(field, isMissing);
-					}
+					if (updateMissingConstraint) updateMissingConstraint(field, isMissing);
 					optionsLoaded = true;
 				}
 			}
 			// After options are loaded, set initial selection using stored initial value
 			if (initialValue) {
-				selected = options.filter((item) =>
-					Array.isArray(initialValue)
-						? initialValue.includes(item.value)
-						: item.value === initialValue
-				);
+				const iv = Array.isArray(initialValue) ? initialValue.map(norm) : [norm(initialValue)];
+				selected = options.filter((item) => iv.includes(norm(item.value)));
 			} else if (options.length === 1 && $constraints?.required) {
 				selected = [options[0]];
 			}
@@ -224,113 +179,93 @@
 					return value !== undefined ? value.toString() : '';
 				});
 
-				const path: string[] =
-					pathField && object?.[pathField]
-						? object[pathField].map((obj: { str: string; id: string }) => {
-								return obj.str;
-							})
-						: [];
+				const fullLabel =
+					optionsExtraFields.length > 0 ? `${extraParts.join('/')}/${mainLabel}` : mainLabel;
 
-				const infoFields = optionsInfoFields.fields
-					.map((f) => {
-						const value = getNestedValue(object, f.field, f.path);
-						return f.display ? f.display(value) : f.translate ? safeTranslate(value) : value;
-					})
-					.filter(Boolean);
-
-				let infoString: { string: string; position: 'suffix' | 'prefix' } | undefined = undefined;
-				if (infoFields.length > 0) {
-					const separator = optionsInfoFields.separator || ' ';
-					const position = optionsInfoFields.position || 'suffix';
-					infoString = {
-						string: infoFields.join(separator),
-						position: position,
-						...optionsInfoFields
-					};
-				}
-
-				const fullLabel = `${extraParts.length ? extraParts.join('/') + '/' : ''}${mainLabel}`;
-				const valueField = getNestedValue(object, optionsValueField);
-
-				const opt = {
+				const rawVal = getNestedValue(object, optionsValueField);
+				return {
 					label: fullLabel,
-					value: valueField,
+					value: rawVal,
 					suggested: optionsSuggestions?.some(
-						(s) => getNestedValue(s, optionsValueField) === valueField
-					),
-					translatedLabel:
-						safeTranslate(fullLabel) !== fullLabel
-							? safeTranslate(fullLabel)
-							: safeTranslate(valueField) !== valueField
-								? safeTranslate(valueField)
-								: fullLabel,
-					path,
-					infoString,
-					contentType: object?.content_type || ''
-				};
-
-				if (includeAllOptionFields) {
-					return { ...opt, ...object };
-				} else {
-					return opt;
-				}
+						(s) => getNestedValue(s, optionsValueField) === rawVal
+					)
+				} as Option;
 			})
 			.filter(
 				(option) =>
 					optionsSelfSelect || option.value !== getNestedValue(optionsSelf, optionsValueField)
 			)
-			.sort((a, b) => {
-				// Show suggested items first
-				if (a.suggested && !b.suggested) return -1;
-				if (!a.suggested && b.suggested) return 1;
-				// Sort folder by path
-				if (a.contentType && b.contentType) {
-					const aPath = a.path.join('') + a.label;
-					const bPath = b.path.join('') + b.label;
-					const alphaCompare = aPath.localeCompare(bPath);
-					return alphaCompare !== 0 ? alphaCompare : aPath.length - bPath.length;
-				}
-
-				return a.translatedLabel!.toLowerCase().localeCompare(b.translatedLabel!.toLowerCase());
-			});
-	}
-
-	function getNestedValue(obj: any, path: string, field = '') {
-		if (field) return obj[path]?.[field];
-		return path.split('.').reduce((o, p) => (o || {})[p], obj);
+			.sort((a, b) => (a.suggested && !b.suggested ? -1 : !a.suggested && b.suggested ? 1 : 0));
 	}
 
 	onMount(async () => {
 		await fetchOptions();
-		mount($value);
+		dispatch('mount', $value);
 		const cacheResult = await cacheLock.promise;
 		if (cacheResult && cacheResult.length > 0) {
-			selected = cacheResult.map((value: string | number) => optionHashmap[value]).filter(Boolean);
+			selected = cacheResult
+				.map((v: string | number) => optionHashmap[norm(v)] ?? norm(v))
+				.filter(Boolean);
 		}
 	});
 
+	// Build hashmap early (before DOM update)
+	$effect.pre(() => {
+		optionHashmap = options.reduce(
+			(acc, option) => {
+				acc[norm(option.value)] = option;
+				return acc;
+			},
+			{} as Record<string, Option>
+		);
+	});
+
+	// Coerce typed strings in `selected` to existing options ASAP (before other effects)
+	$effect.pre(() => {
+		if (!options.length || !selected.length) return;
+		let changed = false;
+		const coerced = selected.map((item) => {
+			if (typeof item === 'string') {
+				const needle = lc(item);
+				const found =
+					options.find((o) => lc(o.value) === needle) ||
+					options.find((o) => lc(o.label) === needle);
+				if (found) {
+					changed = true;
+					return found;
+				}
+			}
+			return item;
+		});
+		if (changed) selected = coerced;
+	});
+
+	// External form value -> selected
 	$effect(() => {
 		if (!isInternalUpdate && $value && optionsLoaded && $value !== initialValue) {
-			const valueArray = Array.isArray($value) ? $value : [$value];
-			if (valueArray.length !== 0) {
-				selected = options.filter((item) => valueArray.includes(item.value));
-			}
+			const targets = Array.isArray($value) ? $value.map(lc) : [lc($value)];
+			selected = targets.map((t) => options.find((o) => lc(o.value) === t) ?? t).filter(Boolean);
 		}
 	});
 
 	async function handleSelectChange() {
-		if (allowUserOptions && selectedValues.length > 0) {
+		// Only create a new option if it truly doesn't exist (by value OR label)
+		if (
+			(effectiveAllowUserOptions === true || effectiveAllowUserOptions === 'append') &&
+			selectedValues.length > 0
+		) {
 			for (const val of selectedValues) {
-				if (!options.some((opt) => opt.value === val)) {
-					const newOption: Option = { label: val as string, value: val as string };
+				const existsByVal = options.some((opt) => lc(opt.value) === lc(val));
+				const existsByLab = options.some((opt) => lc(opt.label) === lc(val));
+				if (!existsByVal && !existsByLab) {
+					const newOption: Option = { label: String(val), value: String(val) };
 					options = [...options, newOption];
 				}
 			}
 		}
 
-		// change($value);
-		await onChange($value);
-		// dispatch('cache', selected);
+		await onChange($value); // direct callback (no nested $effect)
+		dispatch('cache', selected);
 	}
 
 	function arraysEqual(
@@ -342,8 +277,8 @@
 			return val ?? [];
 		};
 
-		const a1 = normalize(arr1);
-		const a2 = normalize(arr2);
+		const a1 = normalize(arr1).map(norm);
+		const a2 = normalize(arr2).map(norm);
 
 		if (a1.length !== a2.length) return false;
 
@@ -353,23 +288,18 @@
 		for (const value of set1) {
 			if (!set2.has(value)) return false;
 		}
-
 		return true;
 	}
 
-	run(() => {
-		optionHashmap = options.reduce((acc, option) => {
-			acc[option.value] = option;
-			return acc;
-		}, {});
+	// Keep cachedValue in sync
+	$effect(() => {
+		cachedValue = selected.map((option) =>
+			typeof option === 'string' ? option : (option.value as any)
+		);
 	});
 
-	run(() => {
-		cachedValue = selected.map((option) => option.value);
-	});
-
-	run(() => {
-		// Only update value after options are loaded
+	// Push selected -> form value (runs after pre-effects, so selected is already coerced)
+	$effect(() => {
 		if (!isInternalUpdate && optionsLoaded && !arraysEqual(selectedValues, $value)) {
 			isInternalUpdate = true;
 			$value = multiple ? selectedValues : (selectedValues[0] ?? default_value);
@@ -378,9 +308,9 @@
 		}
 	});
 
-	run(() => {
-		_disabled =
-			disabled || Boolean(selected.length && options.length === 1 && $constraints?.required);
+	// Disabled state
+	$effect(() => {
+		disabled = Boolean(selected.length && options.length === 1 && $constraints?.required);
 	});
 
 	onDestroy(() => {
@@ -388,25 +318,6 @@
 			updateMissingConstraint(field, false);
 		}
 	});
-
-	const searchTargetMap = $derived(new Map(options.map((opt) => [opt, getSearchTarget(opt)])));
-
-	const fastFilter = (opt: Option, searchText: string) => {
-		if (!searchText) {
-			return true;
-		}
-
-		const target = searchTargetMap.get(opt) || '';
-
-		const normalizedSearch = normalizeSearchString(searchText);
-		const searchTerms = normalizedSearch.split(' ').filter(Boolean);
-
-		if (searchTerms.length === 0) {
-			return true;
-		}
-
-		return searchTerms.every((term) => target.includes(term));
-	};
 </script>
 
 <div class={baseClass} {hidden}>
@@ -419,6 +330,7 @@
 			<label class="text-sm font-semibold" for={field}>{label}</label>
 		{/if}
 	{/if}
+
 	{#if $errors && $errors._errors}
 		<div>
 			{#each $errors._errors as error}
@@ -432,120 +344,60 @@
 			{/each}
 		</div>
 	{/if}
+
 	<div
 		class="control overflow-x-clip flex items-center space-x-2"
 		data-testid="{fieldContext}-{field.replaceAll('_', '-')}"
 	>
-		{#if Array.isArray($value)}
-			{#each $value as val}
-				<input type="hidden" name={field} value={val} />
-			{/each}
-		{:else if $value}
-			<input type="hidden" name={field} value={$value} />
-		{/if}
+		<input type="hidden" name={field} value={$value ? $value : ''} />
 
 		<MultiSelect
 			bind:selected
 			{options}
 			{...multiSelectOptions}
-			disabled={_disabled}
+			{disabled}
 			allowEmpty={true}
-			{allowUserOptions}
-			duplicates={false}
-			key={JSON.stringify}
-			filterFunc={fastFilter}
+			allowUserOptions={effectiveAllowUserOptions}
 		>
-			{#snippet option({ option })}
-				{#if optionSnippet}
-					{@render optionSnippet?.(option)}
-				{:else}
-					{#if option.infoString?.position === 'prefix'}
-						<span class="text-xs {option.infoString.classes}">
-							{option.infoString.string}
-						</span>
-					{/if}
-					{#if option.path}
-						<span>
-							{#each option.path as item}
-								<span class="text-surface-500 font-light">
-									{item} /&nbsp;
-								</span>
-							{/each}
-						</span>
-					{/if}
-					{#if translateOptions && option}
-						{#if field === 'ro_to_couple'}
-							{@const [firstPart, ...restParts] = option.label.split(' - ')}
-							{safeTranslate(firstPart)} - {restParts.join(' - ')}
-						{:else}
-							{option.translatedLabel}
-						{/if}
-					{:else}
-						{option.label || option}
-					{/if}
-					{#if option.infoString?.position === 'suffix'}
-						<span class="text-xs {option.infoString.classes}">
-							{option.infoString.string}
-						</span>
-					{/if}
-					{#if option.suggested}
-						<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
-					{/if}
-				{/if}
-			{/snippet}
-			{#snippet selectedItem({ option })}
-				{#if option.infoString?.position === 'prefix'}
-					<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
-				{/if}
-				{#if option.path}
-					<span>
-						{#each option.path as item, idx}
-							<span class="text-xs font-light">
-								{item}
-								{#if idx < option.path.length - 1}
-									&nbsp;/
-								{/if}&nbsp;
-							</span>
-						{/each}
-					</span>
-				{/if}
-				{#if translateOptions && option}
-					{#if field === 'ro_to_couple'}
-						{@const [firstPart, ...restParts] = option.label.split(' - ')}
-						{safeTranslate(firstPart)} - {restParts.join(' - ')}
-					{:else}
-						{option.translatedLabel}
-					{/if}
-				{:else}
-					{option.label || option}
-				{/if}
-				{#if option.infoString?.position === 'suffix'}
-					<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
-				{/if}
+			<!-- Svelte 5 + svelte-multiselect v11 snippet API -->
+			{#snippet children({ option })}
 				{#if option.suggested}
-					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+					<span class="text-indigo-600">{option.label}</span>
+					<span class="text-sm text-gray-500"> (suggested)</span>
+				{:else if translateOptions && option.label}
+					{#if field === 'ro_to_couple'}
+						{safeTranslate(toCamelCase(String(option.label).split(' - ')[0]))} - {String(
+							option.label
+						).split('-')[1]}
+					{:else}
+						{m[toCamelCase(String(option.value))]
+							? safeTranslate(String(option.value))
+							: safeTranslate(String(option.label))}
+					{/if}
+				{:else}
+					{String(option.label)}
 				{/if}
 			{/snippet}
 		</MultiSelect>
+
 		{#if isLoading}
 			<svg
-				class="animate-spin h-5 w-5 text-primary-500 loading-spinner"
+				class="animate-spin h-5 w-5 text-primary-500"
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
 				viewBox="0 0 24 24"
-				data-testid="loading-spinner"
 			>
-				<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
-				></circle>
+				<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
 				<path
 					class="opacity-75"
 					fill="currentColor"
 					d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-				></path>
+				/>
 			</svg>
 		{/if}
 	</div>
+
 	{#if helpText}
-		<p class="text-sm text-gray-500 whitespace-pre-line">{helpText}</p>
+		<p class="text-sm text-gray-500">{helpText}</p>
 	{/if}
 </div>
