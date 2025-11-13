@@ -202,7 +202,7 @@ class EntityViewSet(BaseModelViewSet):
                 zip_file, contracts, base_folder_name
             )
             dora_export.generate_b_02_02_ict_services(
-                zip_file, main_entity, contracts, base_folder_name
+                zip_file, contracts, base_folder_name
             )
             dora_export.generate_b_02_03_intragroup_contracts(
                 zip_file, contracts, base_folder_name
@@ -219,14 +219,14 @@ class EntityViewSet(BaseModelViewSet):
             )
 
             dora_export.generate_b_04_01_service_users(
-                zip_file, main_entity, branches, contracts, base_folder_name
+                zip_file, branches, contracts, base_folder_name
             )
 
             dora_export.generate_b_05_01_provider_details(
                 zip_file, main_entity, contracts, base_folder_name
             )
             dora_export.generate_b_05_02_supply_chains(
-                zip_file, main_entity, contracts, base_folder_name
+                zip_file, contracts, base_folder_name
             )
 
             dora_export.generate_b_06_01_functions(

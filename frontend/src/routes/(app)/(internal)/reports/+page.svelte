@@ -30,37 +30,7 @@
 			icon: 'fa-solid fa-building-shield',
 			category: 'compliance',
 			href: '/reports/dora-roi',
-			tags: ['DORA', 'Regulation', 'Entities']
-		},
-		{
-			id: 'compliance-summary',
-			title: m.complianceSummaryReport ? m.complianceSummaryReport() : 'Compliance Summary Report',
-			description: m.complianceSummaryReportDesc
-				? m.complianceSummaryReportDesc()
-				: 'Generate comprehensive compliance status across all frameworks',
-			icon: 'fa-solid fa-clipboard-check',
-			category: 'compliance',
-			tags: ['Compliance', 'Frameworks', 'Audits']
-		},
-		{
-			id: 'incident-analysis',
-			title: m.incidentAnalysisReport ? m.incidentAnalysisReport() : 'Incident Analysis Report',
-			description: m.incidentAnalysisReportDesc
-				? m.incidentAnalysisReportDesc()
-				: 'Comprehensive analysis of security incidents and trends',
-			icon: 'fa-solid fa-bug',
-			category: 'operations',
-			tags: ['Incidents', 'Operations', 'Security']
-		},
-		{
-			id: 'asset-inventory',
-			title: m.assetInventoryReport ? m.assetInventoryReport() : 'Asset Inventory Report',
-			description: m.assetInventoryReportDesc
-				? m.assetInventoryReportDesc()
-				: 'Complete inventory of assets and their risk profiles',
-			icon: 'fa-solid fa-gem',
-			category: 'assets',
-			tags: ['Assets', 'Inventory', 'Risk']
+			tags: ['DORA', 'Regulation', 'Entities', 'Beta']
 		}
 	];
 
@@ -80,7 +50,7 @@
 
 	<!-- Reports Grid with White Background -->
 	<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 			{#each reportTiles as tile}
 				<ReportTile
 					title={tile.title}

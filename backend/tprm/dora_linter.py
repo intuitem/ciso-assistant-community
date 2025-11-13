@@ -452,22 +452,25 @@ def lint_subsidiaries(main_entity: Entity) -> List[Dict[str, Any]]:
     return results
 
 
-def lint_branches() -> List[Dict[str, Any]]:
+def lint_branches(main_entity: Entity) -> List[Dict[str, Any]]:
     """
     Validate branches for DORA ROI requirements.
 
-    Branches are entities without dora_provider_person_type set.
+    Branches are entities with the main entity as parent and without dora_provider_person_type set.
     Each branch must have a parent entity with a legal identifier (for b_01.03 report).
+
+    Args:
+        main_entity: The main Entity instance
 
     Returns:
         List of validation results with severity levels (error, warning, ok)
     """
     results = []
 
-    # Get all branches (entities with no dora_provider_person_type)
-    branches = Entity.objects.filter(
+    # Get all branches (entities with main entity as parent and no dora_provider_person_type)
+    branches = Entity.objects.filter(parent_entity=main_entity).filter(
         Q(dora_provider_person_type__isnull=True) | Q(dora_provider_person_type="")
-    ).exclude(builtin=True)
+    )
 
     if not branches.exists():
         # No branches found - this is OK, not an error
@@ -475,70 +478,31 @@ def lint_branches() -> List[Dict[str, Any]]:
 
     branches_with_errors = 0
 
+    # Check that main entity (parent of all branches) has a legal identifier
+    main_has_identifier = False
+    if main_entity.legal_identifiers:
+        identifier_types = ["LEI", "EUID", "VAT", "DUNS"]
+        for id_type in identifier_types:
+            if main_entity.legal_identifiers.get(id_type):
+                main_has_identifier = True
+                break
+
+    if not main_has_identifier and branches.exists():
+        results.append(
+            {
+                "severity": "error",
+                "category": "Branches",
+                "message": f"Main entity '{main_entity.name}' (parent of branches) must have at least one legal identifier (LEI, EUID, VAT, or DUNS) for DORA b_01.03 reporting",
+                "field": "legal_identifiers",
+                "object_type": "entities",
+                "object_id": str(main_entity.id),
+                "object_name": main_entity.name,
+            }
+        )
+
     # Check each branch
     for branch in branches:
         branch_has_error = False
-
-        # Check that branch has a parent entity
-        if not branch.parent_entity:
-            results.append(
-                {
-                    "severity": "error",
-                    "category": "Branches",
-                    "message": f"Branch '{branch.name}' must have a parent entity set for DORA b_01.03 reporting",
-                    "field": "parent_entity",
-                    "object_type": "entities",
-                    "object_id": str(branch.id),
-                    "object_name": branch.name,
-                }
-            )
-            branch_has_error = True
-        else:
-            # Check that parent entity has a legal identifier
-            parent_has_identifier = False
-            if branch.parent_entity.legal_identifiers:
-                identifier_types = ["LEI", "EUID", "VAT", "DUNS"]
-                for id_type in identifier_types:
-                    if branch.parent_entity.legal_identifiers.get(id_type):
-                        parent_has_identifier = True
-                        break
-
-            if not parent_has_identifier:
-                results.append(
-                    {
-                        "severity": "error",
-                        "category": "Branches",
-                        "message": f"Parent entity '{branch.parent_entity.name}' of branch '{branch.name}' must have at least one legal identifier (LEI, EUID, VAT, or DUNS) for DORA b_01.03 reporting",
-                        "field": "legal_identifiers",
-                        "object_type": "entities",
-                        "object_id": str(branch.parent_entity.id),
-                        "object_name": branch.parent_entity.name,
-                    }
-                )
-                branch_has_error = True
-
-        # Check branch itself has legal identifier
-        branch_has_identifier = False
-        if branch.legal_identifiers:
-            identifier_types = ["LEI", "EUID", "VAT", "DUNS"]
-            for id_type in identifier_types:
-                if branch.legal_identifiers.get(id_type):
-                    branch_has_identifier = True
-                    break
-
-        if not branch_has_identifier:
-            results.append(
-                {
-                    "severity": "error",
-                    "category": "Branches",
-                    "message": f"Branch '{branch.name}' must have at least one legal identifier (LEI, EUID, VAT, or DUNS) for DORA b_01.03 reporting",
-                    "field": "legal_identifiers",
-                    "object_type": "entities",
-                    "object_id": str(branch.id),
-                    "object_name": branch.name,
-                }
-            )
-            branch_has_error = True
 
         # Check country (mandatory)
         if not branch.country:
@@ -719,6 +683,8 @@ def lint_contracts() -> List[Dict[str, Any]]:
     - currency
     - dora_contractual_arrangement (type of contract)
     - annual_expense
+    - beneficiary_entity (with legal identifier)
+    - start_date
 
     Returns:
         List of validation results with severity levels (error, warning, ok)
@@ -726,7 +692,7 @@ def lint_contracts() -> List[Dict[str, Any]]:
     results = []
 
     # Get all contracts
-    contracts = Contract.objects.all()
+    contracts = Contract.objects.all().select_related("beneficiary_entity")
 
     if not contracts.exists():
         # No contracts found - this could be OK, but let's inform the user
@@ -811,6 +777,59 @@ def lint_contracts() -> List[Dict[str, Any]]:
             )
             contract_has_error = True
 
+        # Check beneficiary entity (mandatory for b_02.02 reporting)
+        if not contract.beneficiary_entity:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Contracts",
+                    "message": f"Contract '{contract.name}' must have a beneficiary entity set for DORA b_02.02 reporting",
+                    "field": "beneficiary_entity",
+                    "object_type": "contracts",
+                    "object_id": str(contract.id),
+                    "object_name": contract.name,
+                }
+            )
+            contract_has_error = True
+        else:
+            # Check that beneficiary entity has a legal identifier
+            beneficiary_has_identifier = False
+            if contract.beneficiary_entity.legal_identifiers:
+                identifier_types = ["LEI", "EUID", "VAT", "DUNS"]
+                for id_type in identifier_types:
+                    if contract.beneficiary_entity.legal_identifiers.get(id_type):
+                        beneficiary_has_identifier = True
+                        break
+
+            if not beneficiary_has_identifier:
+                results.append(
+                    {
+                        "severity": "error",
+                        "category": "Contracts",
+                        "message": f"Beneficiary entity '{contract.beneficiary_entity.name}' of contract '{contract.name}' must have at least one legal identifier (LEI, EUID, VAT, or DUNS) for DORA b_02.02 reporting",
+                        "field": "legal_identifiers",
+                        "object_type": "entities",
+                        "object_id": str(contract.beneficiary_entity.id),
+                        "object_name": contract.beneficiary_entity.name,
+                    }
+                )
+                contract_has_error = True
+
+        # Check start_date (mandatory for b_02.02 reporting)
+        if not contract.start_date:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Contracts",
+                    "message": f"Contract '{contract.name}' must have a start date set for DORA b_02.02 reporting",
+                    "field": "start_date",
+                    "object_type": "contracts",
+                    "object_id": str(contract.id),
+                    "object_name": contract.name,
+                }
+            )
+            contract_has_error = True
+
         if contract_has_error:
             contracts_with_errors += 1
 
@@ -834,6 +853,151 @@ def lint_contracts() -> List[Dict[str, Any]]:
                 "severity": "ok",
                 "category": "Contracts",
                 "message": f"{contracts_valid} of {total_contracts} contracts have all required fields set",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+
+    return results
+
+
+def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
+    """
+    Validate contracts for DORA b_02.02 (ICT services supporting functions) requirements.
+
+    Only validates contracts with solutions linked to business function assets,
+    as these are the ones included in b_02.02 reporting.
+
+    Checks that contracts have:
+    - beneficiary_entity has LEI specifically (c0020 requires LEI)
+    - provider_entity set
+    - provider_entity has at least one legal identifier (LEI, EUID, VAT, DUNS)
+
+    Returns:
+        List of validation results with severity levels (error, warning, ok)
+    """
+    results = []
+
+    # Get contracts that will be included in b_02.02:
+    # those with solutions linked to business function assets
+    b_02_02_contracts = (
+        Contract.objects.filter(
+            solution__isnull=False, solution__assets__is_business_function=True
+        )
+        .distinct()
+        .select_related("provider_entity", "solution", "beneficiary_entity")
+    )
+
+    if not b_02_02_contracts.exists():
+        # No contracts found for b_02.02
+        return results
+
+    # Track validation statistics
+    total_contracts = b_02_02_contracts.count()
+    contracts_with_errors = 0
+
+    # Check each contract
+    for contract in b_02_02_contracts:
+        contract_has_error = False
+
+        # Check that beneficiary entity has LEI specifically (c0020 requires LEI)
+        if not contract.beneficiary_entity:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "B_02.02 Contracts",
+                    "message": f"Contract '{contract.name}' (linked to business functions) must have a beneficiary entity set for DORA b_02.02 reporting (c0020)",
+                    "field": "beneficiary_entity",
+                    "object_type": "contracts",
+                    "object_id": str(contract.id),
+                    "object_name": contract.name,
+                }
+            )
+            contract_has_error = True
+        else:
+            # Check that beneficiary entity has LEI specifically
+            beneficiary_has_lei = False
+            if contract.beneficiary_entity.legal_identifiers:
+                if contract.beneficiary_entity.legal_identifiers.get("LEI"):
+                    beneficiary_has_lei = True
+
+            if not beneficiary_has_lei:
+                results.append(
+                    {
+                        "severity": "error",
+                        "category": "B_02.02 Contracts",
+                        "message": f"Beneficiary entity '{contract.beneficiary_entity.name}' of contract '{contract.name}' must have an LEI (not just any identifier) for DORA b_02.02 reporting (c0020 requires LEI)",
+                        "field": "legal_identifiers",
+                        "object_type": "entities",
+                        "object_id": str(contract.beneficiary_entity.id),
+                        "object_name": contract.beneficiary_entity.name,
+                    }
+                )
+                contract_has_error = True
+
+        # Check that contract has a provider entity (mandatory for b_02.02)
+        if not contract.provider_entity:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "B_02.02 Contracts",
+                    "message": f"Contract '{contract.name}' (linked to business functions) must have a provider entity set for DORA b_02.02 reporting",
+                    "field": "provider_entity",
+                    "object_type": "contracts",
+                    "object_id": str(contract.id),
+                    "object_name": contract.name,
+                }
+            )
+            contract_has_error = True
+        else:
+            # Check that provider entity has a legal identifier
+            provider_has_identifier = False
+            if contract.provider_entity.legal_identifiers:
+                identifier_types = ["LEI", "EUID", "VAT", "DUNS"]
+                for id_type in identifier_types:
+                    if contract.provider_entity.legal_identifiers.get(id_type):
+                        provider_has_identifier = True
+                        break
+
+            if not provider_has_identifier:
+                results.append(
+                    {
+                        "severity": "error",
+                        "category": "B_02.02 Contracts",
+                        "message": f"Provider entity '{contract.provider_entity.name}' of contract '{contract.name}' must have at least one legal identifier (LEI, EUID, VAT, or DUNS) for DORA b_02.02 reporting",
+                        "field": "legal_identifiers",
+                        "object_type": "entities",
+                        "object_id": str(contract.provider_entity.id),
+                        "object_name": contract.provider_entity.name,
+                    }
+                )
+                contract_has_error = True
+
+        if contract_has_error:
+            contracts_with_errors += 1
+
+    # Add success message if all contracts are valid
+    contracts_valid = total_contracts - contracts_with_errors
+    if contracts_valid == total_contracts:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "B_02.02 Contracts",
+                "message": f"All {total_contracts} contracts linked to business functions have provider entities with legal identifiers",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+    elif contracts_valid > 0:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "B_02.02 Contracts",
+                "message": f"{contracts_valid} of {total_contracts} contracts linked to business functions have valid provider entities",
                 "field": None,
                 "object_type": None,
                 "object_id": None,
@@ -1109,10 +1273,11 @@ def lint_dora_roi() -> Dict[str, Any]:
     # Run all validation checks
     results.extend(lint_main_entity(main_entity))
     results.extend(lint_subsidiaries(main_entity))
-    results.extend(lint_branches())
+    results.extend(lint_branches(main_entity))
     results.extend(lint_unique_leis(main_entity))
     results.extend(lint_business_functions())
     results.extend(lint_contracts())
+    results.extend(lint_b_02_02_contracts())
     results.extend(lint_solutions())
     results.extend(lint_provider_entities())
 

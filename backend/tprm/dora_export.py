@@ -344,7 +344,7 @@ def generate_b_02_01_contracts(
 
 
 def generate_b_02_02_ict_services(
-    zip_file, main_entity: Entity, contracts: QuerySet, folder_prefix: str = ""
+    zip_file, contracts: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
     Generate b_02.02.csv - ICT services supporting functions.
@@ -354,8 +354,8 @@ def generate_b_02_02_ict_services(
 
     Args:
         zip_file: ZIP file object to write to
-        main_entity: The main builtin entity
         contracts: QuerySet of Contract objects with solutions
+        folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
@@ -384,16 +384,13 @@ def generate_b_02_02_ict_services(
         ]
     )
 
-    # Get main entity LEI
-    main_lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
-
     # Filter contracts: only those with solutions linked to business function assets
     filtered_contracts = (
         contracts.filter(
             solution__isnull=False, solution__assets__is_business_function=True
         )
         .distinct()
-        .select_related("solution", "provider_entity")
+        .select_related("solution", "provider_entity", "beneficiary_entity")
         .prefetch_related("solution__assets")
     )
 
@@ -408,8 +405,12 @@ def generate_b_02_02_ict_services(
             # c0010: Contract reference
             contract_ref = contract.ref_id or str(contract.id)
 
-            # c0020: LEI of entity using the service (main entity)
-            entity_lei = main_lei
+            # c0020: LEI of entity using the service (beneficiary entity)
+            entity_lei = ""
+            if contract.beneficiary_entity:
+                entity_lei, _ = get_entity_identifier(
+                    contract.beneficiary_entity, priority=["LEI"]
+                )
 
             # c0030, c0040: Provider identification
             provider_code, provider_code_type = "", ""
@@ -427,8 +428,10 @@ def generate_b_02_02_ict_services(
             # c0070: Start date
             start_date = format_date(contract.start_date) if contract.start_date else ""
 
-            # c0080: End date
-            end_date = format_date(contract.end_date) if contract.end_date else ""
+            # c0080: End date (use placeholder if not set)
+            end_date = (
+                format_date(contract.end_date) if contract.end_date else "2999-12-31"
+            )
 
             # c0090: Termination reason
             termination_reason = contract.termination_reason or ""
@@ -513,9 +516,17 @@ def generate_b_02_03_intragroup_contracts(
     """
     Generate b_02.03.csv - Intra-group contractual arrangements.
 
+    Only includes intra-group contracts with an overarching contract.
+
+    Columns:
+    - c0010: Subordinate contractual arrangement reference number
+    - c0020: Overarching contractual arrangement reference number
+    - c0030: Link (always "true" for populated rows)
+
     Args:
         zip_file: ZIP file object to write to
         contracts: QuerySet of Contract objects
+        folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
@@ -530,13 +541,18 @@ def generate_b_02_03_intragroup_contracts(
 
     # Write intra-group contract relationships
     for contract in intragroup_contracts:
+        # c0010: Subordinate contractual arrangement reference number
         subordinate_ref = contract.ref_id or str(contract.id)
+
+        # c0020: Overarching contractual arrangement reference number
         overarching_ref = contract.overarching_contract.ref_id or str(
             contract.overarching_contract.id
         )
-        arrangement_type = contract.dora_contractual_arrangement or ""
 
-        csv_writer.writerow([subordinate_ref, overarching_ref, arrangement_type])
+        # c0030: Link (always "true" for populated rows)
+        link = "true"
+
+        csv_writer.writerow([subordinate_ref, overarching_ref, link])
 
     path = (
         f"{folder_prefix}/reports/b_02.03.csv"
@@ -552,10 +568,16 @@ def generate_b_03_01_signing_entities(
     """
     Generate b_03.01.csv - Signing entities (main entity for all contracts).
 
+    Columns:
+    - c0010: Contractual arrangement reference number
+    - c0020: LEI of the entity signing the contractual arrangement
+    - c0030: Link (always "true" for populated rows)
+
     Args:
         zip_file: ZIP file object to write to
         main_entity: The main builtin entity
         contracts: QuerySet of Contract objects
+        folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
@@ -564,12 +586,20 @@ def generate_b_03_01_signing_entities(
     csv_writer.writerow(["c0010", "c0020", "c0030"])
 
     # Get main entity identifier
-    main_code, code_type = get_entity_identifier(main_entity)
+    main_code, _ = get_entity_identifier(main_entity)
 
     # Write contract-entity data (main entity signs all contracts)
     for contract in contracts:
+        # c0010: Contract reference
         contract_ref = contract.ref_id or str(contract.id)
-        csv_writer.writerow([contract_ref, main_code, code_type])
+
+        # c0020: LEI of signing entity (main entity)
+        signing_entity_lei = main_code
+
+        # c0030: Link (always "true" for populated rows)
+        link = "true"
+
+        csv_writer.writerow([contract_ref, signing_entity_lei, link])
 
     path = (
         f"{folder_prefix}/reports/b_03.01.csv"
@@ -670,7 +700,6 @@ def generate_b_03_03_intragroup_providers(
 
 def generate_b_04_01_service_users(
     zip_file,
-    main_entity: Entity,
     branches: List[Entity],
     contracts: QuerySet,
     folder_prefix: str = "",
@@ -679,14 +708,20 @@ def generate_b_04_01_service_users(
     Generate b_04.01.csv - Entities using ICT services.
 
     For each contract, reports which entities use the service.
-    - One row per contract for the main entity (branch code empty)
-    - Additional rows for each branch that uses the contract (branch code filled)
+    - One row per contract for the beneficiary entity (branch code empty, nature = "not a branch")
+    - Additional rows for each branch that uses the contract (branch code filled, nature = "branch")
+
+    Columns:
+    - c0010: Contractual arrangement reference number
+    - c0020: LEI of the entity making use of the ICT service(s) (beneficiary entity)
+    - c0030: Nature of the entity (branch or not branch)
+    - c0040: Identification code of the branch
 
     Args:
         zip_file: ZIP file object to write to
-        main_entity: The main builtin entity
         branches: List of branch entities
         contracts: QuerySet of Contract objects
+        folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
@@ -694,29 +729,47 @@ def generate_b_04_01_service_users(
     # Write CSV headers
     csv_writer.writerow(["c0010", "c0020", "c0030", "c0040"])
 
-    # Get main entity identifier
-    main_code, main_code_type = get_entity_identifier(main_entity)
+    # Select related beneficiary_entity for performance
+    contracts = contracts.select_related("beneficiary_entity")
 
     # Track written combinations to avoid duplicates
     written_combinations = set()
 
     # Write user data for each contract
     for contract in contracts:
+        # c0010: Contract reference
         contract_ref = contract.ref_id or str(contract.id)
 
-        # Write row for main entity (always included, branch code empty)
-        combination = (contract_ref, main_code, "")
+        # c0020: LEI of beneficiary entity
+        beneficiary_lei = ""
+        if contract.beneficiary_entity:
+            beneficiary_lei, _ = get_entity_identifier(
+                contract.beneficiary_entity, priority=["LEI"]
+            )
+
+        # Write row for beneficiary entity (not a branch)
+        combination = (contract_ref, beneficiary_lei, "")
         if combination not in written_combinations:
-            csv_writer.writerow([contract_ref, main_code, main_code_type, ""])
+            # c0030: Nature of entity (not a branch)
+            entity_nature = "eba_ZZ:x839"  # not a branch
+            # c0040: Branch code (empty for non-branch)
+            branch_code = ""
+
+            csv_writer.writerow(
+                [contract_ref, beneficiary_lei, entity_nature, branch_code]
+            )
             written_combinations.add(combination)
 
-        # Write rows for branches (branch code filled)
+        # Write rows for branches
         for branch in branches:
             branch_code, _ = get_entity_identifier(branch)
-            combination = (contract_ref, main_code, branch_code)
+            combination = (contract_ref, beneficiary_lei, branch_code)
             if combination not in written_combinations:
+                # c0030: Nature of entity (branch of a financial entity)
+                entity_nature = "eba_ZZ:x838"  # branch of a financial entity
+
                 csv_writer.writerow(
-                    [contract_ref, main_code, main_code_type, branch_code]
+                    [contract_ref, beneficiary_lei, entity_nature, branch_code]
                 )
                 written_combinations.add(combination)
 
@@ -836,15 +889,24 @@ def generate_b_05_01_provider_details(
 
 
 def generate_b_05_02_supply_chains(
-    zip_file, main_entity: Entity, contracts: QuerySet, folder_prefix: str = ""
+    zip_file, contracts: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
     Generate b_05.02.csv - ICT service supply chains.
 
+    Columns:
+    - c0010: Contractual arrangement reference number
+    - c0020: Type of ICT services
+    - c0030: Identification code of the ICT third-party service provider
+    - c0040: Type of code to identify the provider
+    - c0050: Rank (criticality)
+    - c0060: Identification code of the recipient (beneficiary entity)
+    - c0070: Type of code to identify the recipient
+
     Args:
         zip_file: ZIP file object to write to
-        main_entity: The main builtin entity
         contracts: QuerySet of Contract objects with solutions
+        folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
@@ -862,26 +924,35 @@ def generate_b_05_02_supply_chains(
         ]
     )
 
-    # Get main entity identifier
-    main_code, main_code_type = get_entity_identifier(main_entity)
-
     # Get contracts with both provider and solution
     supply_chain_contracts = contracts.filter(
         is_intragroup=False,
         provider_entity__isnull=False,
         solution__isnull=False,
-    ).select_related("provider_entity", "solution")
+    ).select_related("provider_entity", "solution", "beneficiary_entity")
 
     # Write supply chain data
     for contract in supply_chain_contracts:
+        # c0010: Contract reference
         contract_ref = contract.ref_id or str(contract.id)
+
+        # c0020: ICT service type
         ict_service_type = contract.solution.dora_ict_service_type or ""
 
+        # c0030, c0040: Provider identification
         provider_code, provider_code_type = get_entity_identifier(
             contract.provider_entity
         )
 
+        # c0050: Rank (criticality)
         rank = contract.solution.criticality if contract.solution.criticality else ""
+
+        # c0060, c0070: Recipient identification (beneficiary entity)
+        recipient_code, recipient_code_type = "", ""
+        if contract.beneficiary_entity:
+            recipient_code, recipient_code_type = get_entity_identifier(
+                contract.beneficiary_entity
+            )
 
         csv_writer.writerow(
             [
@@ -890,8 +961,8 @@ def generate_b_05_02_supply_chains(
                 provider_code,
                 provider_code_type,
                 rank,
-                main_code,
-                main_code_type,
+                recipient_code,
+                recipient_code_type,
             ]
         )
 

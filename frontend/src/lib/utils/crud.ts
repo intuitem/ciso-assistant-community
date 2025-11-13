@@ -829,7 +829,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'solutions',
 		verboseName: 'Solution',
 		verboseNamePlural: 'Solutions',
-		reverseForeignKeyFields: [{ field: 'solution', urlModel: 'contracts' }],
+		reverseForeignKeyFields: [{ field: 'solution', urlModel: 'contracts', disableDelete: true }],
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
