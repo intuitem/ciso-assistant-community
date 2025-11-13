@@ -9,7 +9,7 @@ const invalidate = vi.fn();
 const invalidateAll = vi.fn();
 
 module.exports = {
-    goto,
-    invalidate,
-    invalidateAll
+	goto,
+	invalidate,
+	invalidateAll
 };

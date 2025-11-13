@@ -14,8 +14,7 @@ export default defineConfig({
 		alias: {
 			$lib: path.resolve(__dirname, 'src/lib'),
 			$paraglide: path.resolve('./src/paraglide'),
-			$app: path.resolve(__dirname, 'mocks/app'),
+			$app: path.resolve(__dirname, 'mocks/app')
 		}
 	}
 });
-
