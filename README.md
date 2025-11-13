@@ -213,6 +213,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 80. Post-Quantum Cryptography (PQC) Migration Roadmap (May 2025) 🔐
 81. Cloud Sovereignty Framework - 1.2.1 - Oct 2025 🇪🇺
 82. ISO 22301:2019 outline - Business continuity management systems 🌐
+83. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
 
 ### Community contributions
 

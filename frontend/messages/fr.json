@@ -2548,6 +2548,7 @@
 	"showOverlapWithOtherFrameworks": "Afficher les superpositions avec d'autres référentiels",
 	"tests": "Tests",
 	"withDifferences": "avec des différences",
+	"mappingLibraries": "Bibliothèques de mappings",
 	"convertToQuantitative": "Convertir en quantitative",
 	"convertToQuantitativeRisk": "Convertir en analyse de risque quantitative",
 	"convertToQuantitativeRiskDescription": "Fournissez des points d'ancrage pour convertir cette analyse de risque qualitative en étude de risque quantitative avec simulations Monte Carlo.",

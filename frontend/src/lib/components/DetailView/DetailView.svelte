@@ -532,7 +532,7 @@
 													>
 												{:else}
 													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-														>{value.str}</Anchor
+														>{value.str || value.name}</Anchor
 													>
 												{/if}
 												<!-- Shortcut before DetailView refactoring -->

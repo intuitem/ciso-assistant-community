@@ -6,7 +6,11 @@ from tprm.views import (
     EntityAssessmentViewSet,
     ContractViewSet,
 )
-from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
+from library.views import (
+    MappingLibrariesList,
+    StoredLibraryViewSet,
+    LoadedLibraryViewSet,
+)
 import importlib
 
 
@@ -183,6 +187,10 @@ urlpatterns = [
     path(
         "risk-assessments/<uuid:pk>/action-plan/",
         RiskAssessmentActionPlanList.as_view(),
+    ),
+    path(
+        "mapping-libraries/",
+        MappingLibrariesList.as_view(),
     ),
     path(
         "folders/<uuid:pk>/users/",
