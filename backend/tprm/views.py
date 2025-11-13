@@ -196,9 +196,7 @@ class EntityViewSet(BaseModelViewSet):
             dora_export.generate_b_01_02_entities(
                 zip_file, main_entity, entities_for_b_01_02, base_folder_name
             )
-            dora_export.generate_b_01_03_branches(
-                zip_file, main_entity, branches, base_folder_name
-            )
+            dora_export.generate_b_01_03_branches(zip_file, branches, base_folder_name)
 
             dora_export.generate_b_02_01_contracts(
                 zip_file, contracts, base_folder_name

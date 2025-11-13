@@ -201,24 +201,26 @@ def generate_b_01_02_entities(
 
 
 def generate_b_01_03_branches(
-    zip_file, main_entity: Entity, branches: List[Entity], folder_prefix: str = ""
+    zip_file, branches: List[Entity], folder_prefix: str = ""
 ) -> None:
     """
-    Generate b_01.03.csv - Branches of the main entity.
+    Generate b_01.03.csv - Branches register.
 
-    Branches are entities with the main entity as parent and dora_provider_person_type not set.
+    Branches are entities with dora_provider_person_type not set.
     Subsidiaries (with dora_provider_person_type set) are NOT included in this report.
+
+    For each branch, the LEI of its parent entity (head office) is reported in c0020.
 
     Columns:
     - c0010: Identification code of the branch
-    - c0020: LEI of the financial entity head office of the branch
+    - c0020: LEI of the financial entity head office of the branch (parent entity)
     - c0030: Name of the branch
     - c0040: Country of the branch
 
     Args:
         zip_file: ZIP file object to write to
-        main_entity: The main builtin entity
         branches: List of branch entities (dora_provider_person_type not set)
+        folder_prefix: Optional folder prefix to prepend to file path
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
@@ -226,16 +228,17 @@ def generate_b_01_03_branches(
     # Write CSV headers
     csv_writer.writerow(["c0010", "c0020", "c0030", "c0040"])
 
-    # Get main entity LEI (head office)
-    main_lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
-
     # Write branch data (one row per branch)
     for branch in branches:
         # c0010: Identification code of the branch
         branch_code, _ = get_entity_identifier(branch)
 
-        # c0020: LEI of the financial entity head office
-        head_office_lei = main_lei
+        # c0020: LEI of the financial entity head office (parent entity)
+        head_office_lei = ""
+        if branch.parent_entity:
+            head_office_lei, _ = get_entity_identifier(
+                branch.parent_entity, priority=["LEI"]
+            )
 
         # c0030: Name of the branch
         branch_name = branch.name
@@ -315,7 +318,7 @@ def generate_b_02_01_contracts(
         # b_02.01.0040: Currency
         currency = ""
         if contract.currency:
-            currency = f"iso4217:{contract.currency}"
+            currency = f"eba_CU:{contract.currency}"
 
         # b_02.01.0050: Annual expense
         annual_expense = (
@@ -795,10 +798,10 @@ def generate_b_05_01_provider_details(
         if provider.country:
             country = f"eba_GA:{provider.country}"
 
-        # c0060: Currency with iso4217 prefix
+        # c0060: Currency with eba_CU prefix
         currency = ""
         if data["currency"]:
-            currency = f"iso4217:{data['currency']}"
+            currency = f"eba_CU:{data['currency']}"
 
         # c0070: Total annual expense
         total_expense = data["total_expense"]

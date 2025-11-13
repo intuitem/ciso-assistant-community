@@ -452,6 +452,142 @@ def lint_subsidiaries(main_entity: Entity) -> List[Dict[str, Any]]:
     return results
 
 
+def lint_branches() -> List[Dict[str, Any]]:
+    """
+    Validate branches for DORA ROI requirements.
+
+    Branches are entities without dora_provider_person_type set.
+    Each branch must have a parent entity with a legal identifier (for b_01.03 report).
+
+    Returns:
+        List of validation results with severity levels (error, warning, ok)
+    """
+    results = []
+
+    # Get all branches (entities with no dora_provider_person_type)
+    branches = Entity.objects.filter(
+        Q(dora_provider_person_type__isnull=True) | Q(dora_provider_person_type="")
+    ).exclude(builtin=True)
+
+    if not branches.exists():
+        # No branches found - this is OK, not an error
+        return results
+
+    branches_with_errors = 0
+
+    # Check each branch
+    for branch in branches:
+        branch_has_error = False
+
+        # Check that branch has a parent entity
+        if not branch.parent_entity:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Branches",
+                    "message": f"Branch '{branch.name}' must have a parent entity set for DORA b_01.03 reporting",
+                    "field": "parent_entity",
+                    "object_type": "entities",
+                    "object_id": str(branch.id),
+                    "object_name": branch.name,
+                }
+            )
+            branch_has_error = True
+        else:
+            # Check that parent entity has a legal identifier
+            parent_has_identifier = False
+            if branch.parent_entity.legal_identifiers:
+                identifier_types = ["LEI", "EUID", "VAT", "DUNS"]
+                for id_type in identifier_types:
+                    if branch.parent_entity.legal_identifiers.get(id_type):
+                        parent_has_identifier = True
+                        break
+
+            if not parent_has_identifier:
+                results.append(
+                    {
+                        "severity": "error",
+                        "category": "Branches",
+                        "message": f"Parent entity '{branch.parent_entity.name}' of branch '{branch.name}' must have at least one legal identifier (LEI, EUID, VAT, or DUNS) for DORA b_01.03 reporting",
+                        "field": "legal_identifiers",
+                        "object_type": "entities",
+                        "object_id": str(branch.parent_entity.id),
+                        "object_name": branch.parent_entity.name,
+                    }
+                )
+                branch_has_error = True
+
+        # Check branch itself has legal identifier
+        branch_has_identifier = False
+        if branch.legal_identifiers:
+            identifier_types = ["LEI", "EUID", "VAT", "DUNS"]
+            for id_type in identifier_types:
+                if branch.legal_identifiers.get(id_type):
+                    branch_has_identifier = True
+                    break
+
+        if not branch_has_identifier:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Branches",
+                    "message": f"Branch '{branch.name}' must have at least one legal identifier (LEI, EUID, VAT, or DUNS) for DORA b_01.03 reporting",
+                    "field": "legal_identifiers",
+                    "object_type": "entities",
+                    "object_id": str(branch.id),
+                    "object_name": branch.name,
+                }
+            )
+            branch_has_error = True
+
+        # Check country (mandatory)
+        if not branch.country:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Branches",
+                    "message": f"Branch '{branch.name}' must have a country set for DORA b_01.03 reporting",
+                    "field": "country",
+                    "object_type": "entities",
+                    "object_id": str(branch.id),
+                    "object_name": branch.name,
+                }
+            )
+            branch_has_error = True
+
+        if branch_has_error:
+            branches_with_errors += 1
+
+    # If we have branches and no errors, add a success message
+    valid_branches = branches.count() - branches_with_errors
+    if valid_branches == branches.count():
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Branches",
+                "message": f"All {branches.count()} branch(es) have required fields set",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+    elif valid_branches > 0:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Branches",
+                "message": f"{valid_branches} of {branches.count()} branch(es) have all required fields set",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+
+    return results
+
+
 def lint_business_functions() -> List[Dict[str, Any]]:
     """
     Validate that business function assets exist in the system.
@@ -973,6 +1109,7 @@ def lint_dora_roi() -> Dict[str, Any]:
     # Run all validation checks
     results.extend(lint_main_entity(main_entity))
     results.extend(lint_subsidiaries(main_entity))
+    results.extend(lint_branches())
     results.extend(lint_unique_leis(main_entity))
     results.extend(lint_business_functions())
     results.extend(lint_contracts())
