@@ -320,3 +320,12 @@ Reference controls can be bundled also as a library.
 * domain
 
 {% file src="../.gitbook/assets/sample_threats.xlsx" %}
+
+
+
+### Third parties ecosystems
+
+Adding entities, solutions and contracts go through the same file to be able to keep consistent relationships. Each concept needs to be on a separate tab of the excel sheet.\
+
+
+{% file src="../.gitbook/assets/third_parties_ecosystem_template.xlsx" %}
