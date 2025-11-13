@@ -28,6 +28,27 @@
 		initialData = {},
 		object = {}
 	}: Props = $props();
+
+	const formData = form.form;
+
+	const getCriticality = (
+		dependency: number,
+		penetration: number,
+		maturity: number,
+		trust: number
+	) => {
+		if (maturity === 0 || trust === 0) return 0;
+		return ((dependency * penetration) / (maturity * trust)).toFixed(2).replace(/\.?0+$/, '');
+	};
+
+	let defaultCriticality = $derived(
+		getCriticality(
+			$formData.default_dependency,
+			$formData.default_penetration,
+			$formData.default_maturity,
+			$formData.default_trust
+		)
+	);
 </script>
 
 <TextField
@@ -183,72 +204,92 @@
 	header={m.ebiosRmDefaults()}
 >
 	<p class="text-sm text-surface-500 mb-4">{m.ebiosRmDefaultsHelpText()}</p>
-	<div class="flex flex-col space-y-4">
-		<RadioGroup
-			{form}
-			possibleOptions={[
-				{ label: '0', value: 0 },
-				{ label: '1', value: 1 },
-				{ label: '2', value: 2 },
-				{ label: '3', value: 3 },
-				{ label: '4', value: 4 }
-			]}
-			label={m.dependency()}
-			field="default_dependency"
-			labelKey="label"
-			key="value"
-			cacheLock={cacheLocks['default_dependency']}
-			bind:cachedValue={formDataCache['default_dependency']}
-			helpText={m.dependencyHelpText()}
-		/>
-		<RadioGroup
-			{form}
-			possibleOptions={[
-				{ label: '0', value: 0 },
-				{ label: '1', value: 1 },
-				{ label: '2', value: 2 },
-				{ label: '3', value: 3 },
-				{ label: '4', value: 4 }
-			]}
-			label={m.penetration()}
-			field="default_penetration"
-			labelKey="label"
-			key="value"
-			cacheLock={cacheLocks['default_penetration']}
-			bind:cachedValue={formDataCache['default_penetration']}
-			helpText={m.penetrationHelpText()}
-		/>
-		<RadioGroup
-			{form}
-			possibleOptions={[
-				{ label: '1', value: 1 },
-				{ label: '2', value: 2 },
-				{ label: '3', value: 3 },
-				{ label: '4', value: 4 }
-			]}
-			label={m.maturity()}
-			field="default_maturity"
-			labelKey="label"
-			key="value"
-			cacheLock={cacheLocks['default_maturity']}
-			bind:cachedValue={formDataCache['default_maturity']}
-			helpText={m.maturityHelpText()}
-		/>
-		<RadioGroup
-			{form}
-			possibleOptions={[
-				{ label: '1', value: 1 },
-				{ label: '2', value: 2 },
-				{ label: '3', value: 3 },
-				{ label: '4', value: 4 }
-			]}
-			label={m.trust()}
-			field="default_trust"
-			labelKey="label"
-			key="value"
-			cacheLock={cacheLocks['default_trust']}
-			bind:cachedValue={formDataCache['default_trust']}
-			helpText={m.trustHelpText()}
-		/>
+	<div class="flex flex-row items-center space-x-4">
+		<div class="flex flex-col space-y-4 w-fit items-center">
+			<span class="flex flex-row items-center space-x-4">
+				<RadioGroup
+					{form}
+					possibleOptions={[
+						{ label: '0', value: 0 },
+						{ label: '1', value: 1 },
+						{ label: '2', value: 2 },
+						{ label: '3', value: 3 },
+						{ label: '4', value: 4 }
+					]}
+					label={m.dependency()}
+					field="default_dependency"
+					labelKey="label"
+					key="value"
+					cacheLock={cacheLocks['default_dependency']}
+					bind:cachedValue={formDataCache['default_dependency']}
+					helpText={m.dependencyHelpText()}
+				/>
+				<i class="fa-solid fa-times"></i>
+				<RadioGroup
+					{form}
+					possibleOptions={[
+						{ label: '0', value: 0 },
+						{ label: '1', value: 1 },
+						{ label: '2', value: 2 },
+						{ label: '3', value: 3 },
+						{ label: '4', value: 4 }
+					]}
+					label={m.penetration()}
+					field="default_penetration"
+					labelKey="label"
+					key="value"
+					cacheLock={cacheLocks['default_penetration']}
+					bind:cachedValue={formDataCache['default_penetration']}
+					helpText={m.penetrationHelpText()}
+				/>
+			</span>
+
+			<hr class="border-t-2! border-surface-900! self-stretch" />
+
+			<span class="flex flex-row items-center space-x-4">
+				<RadioGroup
+					{form}
+					possibleOptions={[
+						{ label: '1', value: 1 },
+						{ label: '2', value: 2 },
+						{ label: '3', value: 3 },
+						{ label: '4', value: 4 }
+					]}
+					label={m.maturity()}
+					field="default_maturity"
+					labelKey="label"
+					key="value"
+					cacheLock={cacheLocks['default_maturity']}
+					bind:cachedValue={formDataCache['default_maturity']}
+					helpText={m.maturityHelpText()}
+				/>
+				<i class="fa-solid fa-times"></i>
+				<RadioGroup
+					{form}
+					possibleOptions={[
+						{ label: '1', value: 1 },
+						{ label: '2', value: 2 },
+						{ label: '3', value: 3 },
+						{ label: '4', value: 4 }
+					]}
+					label={m.trust()}
+					field="default_trust"
+					labelKey="label"
+					key="value"
+					cacheLock={cacheLocks['default_trust']}
+					bind:cachedValue={formDataCache['default_trust']}
+					helpText={m.trustHelpText()}
+				/></span
+			>
+		</div>
+		<i class="fa-solid fa-equals"></i>
+		<div class="flex flex-col mb-5">
+			<label for="default_criticality" class="text-sm font-semibold">
+				{m.criticality()}
+			</label>
+			<span class="chip text-base text-center px-4 py-1 rounded-base preset-filled">
+				{defaultCriticality}
+			</span>
+		</div>
 	</div>
 </Dropdown>

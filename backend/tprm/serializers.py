@@ -26,6 +26,7 @@ class EntityReadSerializer(BaseModelSerializer):
     relationship = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
     legal_identifiers = serializers.SerializerMethodField()
+    default_criticality = serializers.ReadOnlyField()
 
     def get_legal_identifiers(self, obj):
         """Format legal identifiers as a readable string for display"""

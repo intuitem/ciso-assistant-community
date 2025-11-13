@@ -158,6 +158,20 @@ class Entity(
         verbose_name = _("Entity")
         verbose_name_plural = _("Entities")
 
+    @property
+    def default_criticality(self) -> float:
+        """
+        Compute default criticality based on the formula:
+        (default_dependency * default_penetration) / (default_maturity * default_trust)
+        """
+        if self.default_maturity == 0 or self.default_trust == 0:
+            return 0.0
+        return round(
+            (self.default_dependency * self.default_penetration)
+            / (self.default_maturity * self.default_trust),
+            2,
+        )
+
     @classmethod
     def get_main_entity(cls):
         return (

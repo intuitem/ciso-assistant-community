@@ -702,7 +702,7 @@ const PERTINENCE_FILTER: ListViewFilterConfig = {
 const ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'entity',
+		label: 'parentEntity',
 		optionsEndpoint: 'entities',
 		multiple: true
 	}
@@ -1491,8 +1491,24 @@ export const listViewFields = {
 		}
 	},
 	entities: {
-		head: ['refId', 'name', 'description', 'domain', 'parentEntity', 'relationship'],
-		body: ['ref_id', 'name', 'description', 'folder', 'parent_entity', 'relationship'],
+		head: [
+			'refId',
+			'name',
+			'description',
+			'domain',
+			'parentEntity',
+			'relationship',
+			'defaultCriticality'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'folder',
+			'parent_entity',
+			'relationship',
+			'default_criticality'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			parent_entity: ENTITY_FILTER,

@@ -833,6 +833,7 @@
 	"entityAssessments": "Entity assessments",
 	"addEntityAssessment": "Add entity assessment",
 	"criticality": "Criticality",
+	"defaultCriticality": "Default criticality",
 	"penetration": "Penetration",
 	"dependency": "Dependency",
 	"trust": "Trust",
