@@ -288,11 +288,15 @@
 	}
 
 	onMount(async () => {
-		await fetchOptions();
-		mount($value);
-		const cacheResult = await cacheLock.promise;
-		if (cacheResult && cacheResult.length > 0) {
-			selected = cacheResult.map((value: string | number) => optionHashmap[value]).filter(Boolean);
+		if (typeof window !== 'undefined') {
+			await fetchOptions();
+			mount($value);
+			const cacheResult = await cacheLock.promise;
+			if (cacheResult && cacheResult.length > 0) {
+				selected = cacheResult
+					.map((value: string | number) => optionHashmap[value])
+					.filter(Boolean);
+			}
 		}
 	});
 
