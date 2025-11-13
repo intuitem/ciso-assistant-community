@@ -30,7 +30,9 @@
 		{ field: 'quantitative_risk_studies', label: m.quantitativeRiskStudies() },
 		{ field: 'terminologies', label: m.terminologies() },
 		{ field: 'bia', label: m.businessImpactAnalysis() },
-		{ field: 'project_management', label: m.projectManagement() }
+		{ field: 'project_management', label: m.projectManagement() },
+		{ field: 'contracts', label: m.contracts() },
+		{ field: 'reports', label: m.reports() }
 	];
 </script>
 

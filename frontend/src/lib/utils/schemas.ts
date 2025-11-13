@@ -503,7 +503,9 @@ export const FeatureFlagsSchema = z.object({
 	quantitative_risk_studies: z.boolean().optional(),
 	terminologies: z.boolean().optional(),
 	bia: z.boolean().optional(),
-	project_management: z.boolean().optional()
+	project_management: z.boolean().optional(),
+	contracts: z.boolean().optional(),
+	reports: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({

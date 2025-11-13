@@ -357,7 +357,9 @@
 						>
 							<div>
 								<p class="text-gray-700">TPRM (Third-Party Risk Management)</p>
-								<p class="text-gray-500 text-xs">Import entities, solutions, and contracts from a multi-sheet Excel file</p>
+								<p class="text-gray-500 text-xs">
+									Import entities, solutions, and contracts from a multi-sheet Excel file
+								</p>
 							</div>
 
 							<input
