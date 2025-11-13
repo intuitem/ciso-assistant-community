@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.core.validators import MaxValueValidator, MinValueValidator
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.models import (
     Assessment,
@@ -31,11 +32,43 @@ from iam.views import User
 from auditlog.registry import auditlog
 
 
-class Entity(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
+class Entity(
+    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+):
     """
     An entity represents a legal entity, a corporate body, an administrative body, an association
     """
 
+    ref_id = models.CharField(max_length=255, blank=True)
+    is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
+    default_dependency = models.PositiveSmallIntegerField(
+        verbose_name=_("Default dependency"),
+        default=0,
+        blank=True,
+        validators=[MaxValueValidator(4)],
+        help_text=_("Default dependency level for stakeholder assessment (0-4)"),
+    )
+    default_penetration = models.PositiveSmallIntegerField(
+        verbose_name=_("Default penetration"),
+        default=0,
+        blank=True,
+        validators=[MaxValueValidator(4)],
+        help_text=_("Default penetration level for stakeholder assessment (0-4)"),
+    )
+    default_maturity = models.PositiveSmallIntegerField(
+        verbose_name=_("Default maturity"),
+        default=1,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(4)],
+        help_text=_("Default maturity level for stakeholder assessment (1-4)"),
+    )
+    default_trust = models.PositiveSmallIntegerField(
+        verbose_name=_("Default trust"),
+        default=1,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(4)],
+        help_text=_("Default trust level for stakeholder assessment (1-4)"),
+    )
     mission = models.TextField(blank=True)
     reference_link = models.URLField(blank=True, null=True, max_length=2048)
     owned_folders = models.ManyToManyField(
@@ -182,12 +215,13 @@ class EntityAssessment(Assessment):
         verbose_name_plural = _("Entity assessments")
 
 
-class Representative(AbstractBaseModel):
+class Representative(AbstractBaseModel, FilteringLabelMixin):
     """
     This represents a person that is linked to an entity (typically an employee),
     and that is relevant for the main entity, like a contact person for an assessment
     """
 
+    ref_id = models.CharField(max_length=255, blank=True)
     entity = models.ForeignKey(
         Entity,
         on_delete=models.CASCADE,
@@ -205,7 +239,7 @@ class Representative(AbstractBaseModel):
     fields_to_check = ["email"]
 
 
-class Solution(NameDescriptionMixin):
+class Solution(NameDescriptionMixin, FilteringLabelMixin):
     """
     A solution represents a product or service that is offered by an entity
     """
@@ -225,6 +259,8 @@ class Solution(NameDescriptionMixin):
         blank=True,
     )
     ref_id = models.CharField(max_length=255, blank=True)
+    is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
+    reference_link = models.URLField(blank=True, null=True, max_length=2048)
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))
 
     assets = models.ManyToManyField(

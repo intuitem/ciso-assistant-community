@@ -209,10 +209,11 @@ def generate_b_01_03_branches(
     Branches are entities with the main entity as parent and dora_provider_person_type not set.
     Subsidiaries (with dora_provider_person_type set) are NOT included in this report.
 
-    Each row represents a branch with:
-    - c0010: Main entity LEI
-    - c0020: Main entity legal identifier
-    - c0030: Main entity identifier type
+    Columns:
+    - c0010: Identification code of the branch
+    - c0020: LEI of the financial entity head office of the branch
+    - c0030: Name of the branch
+    - c0040: Country of the branch
 
     Args:
         zip_file: ZIP file object to write to
@@ -223,15 +224,28 @@ def generate_b_01_03_branches(
     csv_writer = csv.writer(csv_buffer)
 
     # Write CSV headers
-    csv_writer.writerow(["c0010", "c0020", "c0030"])
+    csv_writer.writerow(["c0010", "c0020", "c0030", "c0040"])
 
-    # Get main entity identifiers
+    # Get main entity LEI (head office)
     main_lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
-    main_code, code_type = get_entity_identifier(main_entity)
 
-    # Write branch data (one row per branch, with main entity identifiers)
+    # Write branch data (one row per branch)
     for branch in branches:
-        csv_writer.writerow([main_lei, main_code, code_type])
+        # c0010: Identification code of the branch
+        branch_code, _ = get_entity_identifier(branch)
+
+        # c0020: LEI of the financial entity head office
+        head_office_lei = main_lei
+
+        # c0030: Name of the branch
+        branch_name = branch.name
+
+        # c0040: Country of the branch
+        branch_country = ""
+        if branch.country:
+            branch_country = f"eba_GA:{branch.country}"
+
+        csv_writer.writerow([branch_code, head_office_lei, branch_name, branch_country])
 
     path = (
         f"{folder_prefix}/reports/b_01.03.csv"
@@ -245,7 +259,16 @@ def generate_b_02_01_contracts(
     zip_file, contracts: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
-    Generate b_02.01.csv - Contractual arrangements for ICT services.
+    Generate b_02.01.csv - Contractual arrangements – General Information.
+
+    Only includes contracts associated with solutions that are linked to business function assets.
+
+    Columns:
+    - b_02.01.0010: Contractual arrangement reference number
+    - b_02.01.0020: Type of contractual arrangement
+    - b_02.01.0030: Overarching contractual arrangement reference number
+    - b_02.01.0040: Currency of the amount reported in RT.02.01.0050
+    - b_02.01.0050: Annual expense or estimated cost
 
     Args:
         zip_file: ZIP file object to write to
@@ -257,39 +280,53 @@ def generate_b_02_01_contracts(
     # Write CSV headers
     csv_writer.writerow(
         [
-            "c0010",  # Contract reference
+            "c0010",  # Contractual arrangement reference number
             "c0020",  # Type of contractual arrangement
-            "c0030",  # Start date
-            "c0040",  # End date
-            "c0050",  # Notice period for entity
-            "c0060",  # Notice period for provider
-            "c0070",  # Governing law country
-            "c0080",  # Currency
-            "c0090",  # Annual expense
+            "c0030",  # Overarching contractual arrangement reference number
+            "c0040",  # Currency
+            "c0050",  # Annual expense
         ]
     )
 
+    # Filter contracts: only those with solutions linked to business function assets
+    filtered_contracts = (
+        contracts.filter(
+            solution__isnull=False, solution__assets__is_business_function=True
+        )
+        .distinct()
+        .select_related("solution", "overarching_contract")
+    )
+
     # Write contract data
-    for contract in contracts:
+    for contract in filtered_contracts:
+        # b_02.01.0010: Contractual arrangement reference number
         contract_ref = contract.ref_id or str(contract.id)
+
+        # b_02.01.0020: Type of contractual arrangement
         arrangement_type = contract.dora_contractual_arrangement or ""
-        start_date = format_date(contract.start_date)
-        end_date = format_date(contract.end_date)
-        notice_entity = contract.notice_period_entity or ""
-        notice_provider = contract.notice_period_provider or ""
-        governing_law = contract.governing_law_country or ""
-        currency = contract.currency or ""
-        annual_expense = contract.annual_expense or ""
+
+        # b_02.01.0030: Overarching contractual arrangement reference number
+        overarching_ref = ""
+        if contract.overarching_contract:
+            overarching_ref = contract.overarching_contract.ref_id or str(
+                contract.overarching_contract.id
+            )
+
+        # b_02.01.0040: Currency
+        currency = ""
+        if contract.currency:
+            currency = f"iso4217:{contract.currency}"
+
+        # b_02.01.0050: Annual expense
+        annual_expense = (
+            contract.annual_expense if contract.annual_expense is not None else ""
+        )
 
         csv_writer.writerow(
             [
                 contract_ref,
                 arrangement_type,
-                start_date,
-                end_date,
-                notice_entity,
-                notice_provider,
-                governing_law,
+                overarching_ref,
                 currency,
                 annual_expense,
             ]
@@ -304,27 +341,160 @@ def generate_b_02_01_contracts(
 
 
 def generate_b_02_02_ict_services(
-    zip_file, contracts: QuerySet, folder_prefix: str = ""
+    zip_file, main_entity: Entity, contracts: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
     Generate b_02.02.csv - ICT services supporting functions.
 
+    Only includes contracts associated with solutions that are linked to business function assets.
+    One row per contract-function combination.
+
     Args:
         zip_file: ZIP file object to write to
+        main_entity: The main builtin entity
         contracts: QuerySet of Contract objects with solutions
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
 
-    # Write CSV headers
-    csv_writer.writerow(["c0010", "c0020"])
+    # Write CSV headers (18 columns)
+    csv_writer.writerow(
+        [
+            "c0010",  # Contractual arrangement reference number
+            "c0020",  # LEI of the entity making use of the ICT service(s)
+            "c0030",  # Identification code of the ICT third-party service provider
+            "c0040",  # Type of code to identify the ICT third-party service provider
+            "c0050",  # Function identifier
+            "c0060",  # Type of ICT services
+            "c0070",  # Start date of the contractual arrangement
+            "c0080",  # End date of the contractual arrangement
+            "c0090",  # Reason of the termination or ending
+            "c0100",  # Notice period for the financial entity
+            "c0110",  # Notice period for the ICT third-party service provider
+            "c0120",  # Country of the governing law
+            "c0130",  # Country of provision of the ICT services
+            "c0140",  # Storage of data
+            "c0150",  # Location of the data at rest (storage)
+            "c0160",  # Location of management of the data (processing)
+            "c0170",  # Sensitiveness of the data stored
+            "c0180",  # Level of reliance on the ICT service
+        ]
+    )
 
-    # Write contract-solution data
-    for contract in contracts.filter(solution__isnull=False).select_related("solution"):
-        contract_ref = contract.ref_id or str(contract.id)
-        ict_service_type = contract.solution.dora_ict_service_type or ""
+    # Get main entity LEI
+    main_lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
 
-        csv_writer.writerow([contract_ref, ict_service_type])
+    # Filter contracts: only those with solutions linked to business function assets
+    filtered_contracts = (
+        contracts.filter(
+            solution__isnull=False, solution__assets__is_business_function=True
+        )
+        .distinct()
+        .select_related("solution", "provider_entity")
+        .prefetch_related("solution__assets")
+    )
+
+    # Write contract-solution-function data
+    for contract in filtered_contracts:
+        solution = contract.solution
+
+        # Get business functions associated with this solution
+        business_functions = solution.assets.filter(is_business_function=True)
+
+        for function in business_functions:
+            # c0010: Contract reference
+            contract_ref = contract.ref_id or str(contract.id)
+
+            # c0020: LEI of entity using the service (main entity)
+            entity_lei = main_lei
+
+            # c0030, c0040: Provider identification
+            provider_code, provider_code_type = "", ""
+            if contract.provider_entity:
+                provider_code, provider_code_type = get_entity_identifier(
+                    contract.provider_entity, priority=["LEI", "EUID", "VAT", "DUNS"]
+                )
+
+            # c0050: Function identifier
+            function_id = function.ref_id or str(function.id)
+
+            # c0060: Type of ICT services
+            ict_service_type = solution.dora_ict_service_type or ""
+
+            # c0070: Start date
+            start_date = format_date(contract.start_date) if contract.start_date else ""
+
+            # c0080: End date
+            end_date = format_date(contract.end_date) if contract.end_date else ""
+
+            # c0090: Termination reason
+            termination_reason = contract.termination_reason or ""
+
+            # c0100: Notice period for entity (days)
+            notice_period_entity = (
+                contract.notice_period_entity
+                if contract.notice_period_entity is not None
+                else ""
+            )
+
+            # c0110: Notice period for provider (days)
+            notice_period_provider = (
+                contract.notice_period_provider
+                if contract.notice_period_provider is not None
+                else ""
+            )
+
+            # c0120: Country of governing law
+            governing_law_country = ""
+            if contract.governing_law_country:
+                governing_law_country = f"eba_GA:{contract.governing_law_country}"
+
+            # c0130: Country of provision of ICT services (provider country)
+            provider_country = ""
+            if contract.provider_entity and contract.provider_entity.country:
+                provider_country = f"eba_GA:{contract.provider_entity.country}"
+
+            # c0140: Storage of data (Yes/No)
+            storage_of_data = "eba_BT:x28" if solution.storage_of_data else "eba_BT:x29"
+
+            # c0150: Location of data at rest
+            data_location_storage = ""
+            if solution.data_location_storage:
+                data_location_storage = f"eba_GA:{solution.data_location_storage}"
+
+            # c0160: Location of data processing
+            data_location_processing = ""
+            if solution.data_location_processing:
+                data_location_processing = f"eba_GA:{solution.data_location_processing}"
+
+            # c0170: Data sensitiveness
+            data_sensitiveness = solution.dora_data_sensitiveness or ""
+
+            # c0180: Level of reliance
+            reliance_level = solution.dora_reliance_level or ""
+
+            csv_writer.writerow(
+                [
+                    contract_ref,
+                    entity_lei,
+                    provider_code,
+                    provider_code_type,
+                    function_id,
+                    ict_service_type,
+                    start_date,
+                    end_date,
+                    termination_reason,
+                    notice_period_entity,
+                    notice_period_provider,
+                    governing_law_country,
+                    provider_country,
+                    storage_of_data,
+                    data_location_storage,
+                    data_location_processing,
+                    data_sensitiveness,
+                    reliance_level,
+                ]
+            )
 
     path = (
         f"{folder_prefix}/reports/b_02.02.csv"
@@ -412,6 +582,12 @@ def generate_b_03_02_ict_providers(
     """
     Generate b_03.02.csv - ICT third-party service providers.
 
+    Columns:
+    - c0010: Contractual arrangement reference number
+    - c0020: Identification code of ICT third-party service provider
+    - c0030: Type of code to identify the ICT third-party service provider
+    - c0045: Link (fill with "true" for each populated row)
+
     Args:
         zip_file: ZIP file object to write to
         contracts: QuerySet of Contract objects with providers
@@ -420,7 +596,7 @@ def generate_b_03_02_ict_providers(
     csv_writer = csv.writer(csv_buffer)
 
     # Write CSV headers
-    csv_writer.writerow(["c0010", "c0020", "c0030"])
+    csv_writer.writerow(["c0010", "c0020", "c0030", "c0045"])
 
     # Get third-party contracts with providers
     third_party_contracts = contracts.filter(
@@ -432,9 +608,12 @@ def generate_b_03_02_ict_providers(
         contract_ref = contract.ref_id or str(contract.id)
         provider = contract.provider_entity
 
-        provider_code, code_type = get_entity_identifier(provider)
+        # Get provider identifier (prioritize LEI)
+        provider_code, code_type = get_entity_identifier(
+            provider, priority=["LEI", "EUID", "VAT", "DUNS"]
+        )
 
-        csv_writer.writerow([contract_ref, provider_code, code_type])
+        csv_writer.writerow([contract_ref, provider_code, code_type, "true"])
 
     path = (
         f"{folder_prefix}/reports/b_03.02.csv"
@@ -448,7 +627,13 @@ def generate_b_03_03_intragroup_providers(
     zip_file, main_entity: Entity, contracts: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
-    Generate b_03.03.csv - ICT intra-group service providers.
+    Generate b_03.03.csv - Entities signing the Contractual arrangements for providing ICT service(s)
+    to other entity within the scope of consolidation.
+
+    Columns:
+    - b_03.03.0010 (c0010): Contractual arrangement reference number
+    - b_03.03.0020 (c0020): LEI of the entity providing ICT services
+    - b_03.03.0031 (c0031): Link (fill with "true" for each populated row)
 
     Args:
         zip_file: ZIP file object to write to
@@ -459,10 +644,10 @@ def generate_b_03_03_intragroup_providers(
     csv_writer = csv.writer(csv_buffer)
 
     # Write CSV headers
-    csv_writer.writerow(["c0010", "c0020", "c0030"])
+    csv_writer.writerow(["c0010", "c0020", "c0031"])
 
-    # Get main entity identifier
-    main_code, code_type = get_entity_identifier(main_entity)
+    # Get main entity LEI
+    main_lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
 
     # Get intra-group contracts
     intragroup_contracts = contracts.filter(is_intragroup=True)
@@ -470,7 +655,7 @@ def generate_b_03_03_intragroup_providers(
     # Write provider data (main entity provides intra-group services)
     for contract in intragroup_contracts:
         contract_ref = contract.ref_id or str(contract.id)
-        csv_writer.writerow([contract_ref, main_code, code_type])
+        csv_writer.writerow([contract_ref, main_lei, "true"])
 
     path = (
         f"{folder_prefix}/reports/b_03.03.csv"
@@ -490,6 +675,10 @@ def generate_b_04_01_service_users(
     """
     Generate b_04.01.csv - Entities using ICT services.
 
+    For each contract, reports which entities use the service.
+    - One row per contract for the main entity (branch code empty)
+    - Additional rows for each branch that uses the contract (branch code filled)
+
     Args:
         zip_file: ZIP file object to write to
         main_entity: The main builtin entity
@@ -502,25 +691,31 @@ def generate_b_04_01_service_users(
     # Write CSV headers
     csv_writer.writerow(["c0010", "c0020", "c0030", "c0040"])
 
-    # Combine main entity and branches
-    all_entities = [main_entity] + list(branches)
-
     # Get main entity identifier
     main_code, main_code_type = get_entity_identifier(main_entity)
+
+    # Track written combinations to avoid duplicates
+    written_combinations = set()
 
     # Write user data for each contract
     for contract in contracts:
         contract_ref = contract.ref_id or str(contract.id)
 
-        for entity in all_entities:
-            entity_code, code_type = get_entity_identifier(entity)
+        # Write row for main entity (always included, branch code empty)
+        combination = (contract_ref, main_code, "")
+        if combination not in written_combinations:
+            csv_writer.writerow([contract_ref, main_code, main_code_type, ""])
+            written_combinations.add(combination)
 
-            # Determine if this is a branch
-            branch_code = ""
-            if entity.parent_entity:
-                branch_code = entity_code
-
-            csv_writer.writerow([contract_ref, main_code, main_code_type, branch_code])
+        # Write rows for branches (branch code filled)
+        for branch in branches:
+            branch_code, _ = get_entity_identifier(branch)
+            combination = (contract_ref, main_code, branch_code)
+            if combination not in written_combinations:
+                csv_writer.writerow(
+                    [contract_ref, main_code, main_code_type, branch_code]
+                )
+                written_combinations.add(combination)
 
     path = (
         f"{folder_prefix}/reports/b_04.01.csv"
@@ -547,15 +742,15 @@ def generate_b_05_01_provider_details(
     # Write CSV headers
     csv_writer.writerow(
         [
-            "c0010",  # Provider code
-            "c0020",  # Provider code type
-            "c0030",  # Country
+            "c0010",  # Identification code of ICT third-party service provider
+            "c0020",  # Type of code
+            "c0030",  # Name of the ICT third-party service provider
             "c0040",  # Type of person
-            "c0050",  # Expense currency
-            "c0060",  # Total annual expense
-            "c0070",  # Competent authority
-            "c0080",  # Parent code
-            "c0090",  # Parent code type
+            "c0050",  # Country
+            "c0060",  # Currency
+            "c0070",  # Total annual expense
+            "c0080",  # Identification code of parent undertaking
+            "c0090",  # Type of code for parent undertaking
         ]
     )
 
@@ -584,29 +779,46 @@ def generate_b_05_01_provider_details(
     for provider_id, data in providers_data.items():
         provider = data["provider"]
 
-        provider_code, code_type = get_entity_identifier(provider)
-        country = provider.country or ""
-        person_type = provider.dora_provider_person_type or ""
-        currency = data["currency"]
-        total_expense = data["total_expense"]
-        competent_authority = provider.dora_competent_authority or ""
+        # c0010, c0020: Provider identifier (prioritize LEI)
+        provider_code, code_type = get_entity_identifier(
+            provider, priority=["LEI", "EUID", "VAT", "DUNS"]
+        )
 
-        # Get parent entity identifier
+        # c0030: Provider name
+        provider_name = provider.name
+
+        # c0040: Type of person
+        person_type = provider.dora_provider_person_type or ""
+
+        # c0050: Country with eba_GA prefix
+        country = ""
+        if provider.country:
+            country = f"eba_GA:{provider.country}"
+
+        # c0060: Currency with iso4217 prefix
+        currency = ""
+        if data["currency"]:
+            currency = f"iso4217:{data['currency']}"
+
+        # c0070: Total annual expense
+        total_expense = data["total_expense"]
+
+        # c0080, c0090: Parent entity identifier (prioritize LEI)
         parent_code, parent_code_type = "", ""
         if provider.parent_entity:
             parent_code, parent_code_type = get_entity_identifier(
-                provider.parent_entity
+                provider.parent_entity, priority=["LEI", "EUID", "VAT", "DUNS"]
             )
 
         csv_writer.writerow(
             [
                 provider_code,
                 code_type,
-                country,
+                provider_name,
                 person_type,
+                country,
                 currency,
                 total_expense,
-                competent_authority,
                 parent_code,
                 parent_code_type,
             ]

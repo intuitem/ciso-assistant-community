@@ -567,6 +567,8 @@ export const SSOSettingsSchema = z.object({
 export const EntitiesSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
+	ref_id: z.string().optional(),
+	is_active: z.boolean().optional(),
 	parent_entity: z.string().optional(),
 	mission: z.string().optional(),
 	reference_link: z
@@ -583,7 +585,12 @@ export const EntitiesSchema = z.object({
 	dora_entity_hierarchy: z.string().optional(),
 	dora_assets_value: z.number().optional().nullable(),
 	dora_competent_authority: z.string().optional(),
-	dora_provider_person_type: z.string().optional()
+	dora_provider_person_type: z.string().optional(),
+	default_dependency: z.number().optional(),
+	default_penetration: z.number().optional(),
+	default_maturity: z.number().optional(),
+	default_trust: z.number().optional(),
+	filtering_labels: z.array(z.string()).optional()
 });
 
 export const EntityAssessmentSchema = z.object({

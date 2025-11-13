@@ -51,6 +51,8 @@ class EntityViewSet(BaseModelViewSet):
     model = Entity
     filterset_fields = [
         "name",
+        "ref_id",
+        "is_active",
         "folder",
         "parent_entity",
         "relationship",
@@ -61,6 +63,11 @@ class EntityViewSet(BaseModelViewSet):
         "dora_entity_type",
         "dora_entity_hierarchy",
         "dora_competent_authority",
+        "filtering_labels",
+        "default_dependency",
+        "default_penetration",
+        "default_maturity",
+        "default_trust",
     ]
 
     @action(detail=False, methods=["get"], name="Generate DORA ROI")
@@ -172,7 +179,7 @@ class EntityViewSet(BaseModelViewSet):
                 zip_file, contracts, base_folder_name
             )
             dora_export.generate_b_02_02_ict_services(
-                zip_file, contracts, base_folder_name
+                zip_file, main_entity, contracts, base_folder_name
             )
             dora_export.generate_b_02_03_intragroup_contracts(
                 zip_file, contracts, base_folder_name
@@ -574,7 +581,7 @@ class RepresentativeViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     model = Representative
-    filterset_fields = ["entity"]
+    filterset_fields = ["entity", "ref_id", "filtering_labels"]
     search_fields = ["email"]
 
 
@@ -586,6 +593,8 @@ class SolutionViewSet(BaseModelViewSet):
     model = Solution
     filterset_fields = [
         "name",
+        "ref_id",
+        "is_active",
         "provider_entity",
         "assets",
         "criticality",
@@ -602,6 +611,7 @@ class SolutionViewSet(BaseModelViewSet):
         "dora_reintegration_possibility",
         "dora_discontinuing_impact",
         "dora_alternative_providers_identified",
+        "filtering_labels",
     ]
 
     @action(detail=False, name="Get data location storage choices")

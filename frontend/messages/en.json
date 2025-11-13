@@ -2636,6 +2636,8 @@
 	"impactRequirements": "All values must be provided and greater than 0. Values must increase from top to bottom (e.g., Minor: 5,000 → Major: 50,000 → Critical: 500,000).",
 	"reports": "Reports",
 	"doraSpecific": "DORA specific",
+	"ebiosRmDefaults": "Rapid criticality assessment (EBIOS RM)",
+	"ebiosRmDefaultsHelpText": "Default values for dependency, penetration, maturity, and trust used when creating stakeholders in EBIOS RM Workshop 3",
 	"doraEntityType": "Entity Type",
 	"doraEntityHierarchy": "Entity Hierarchy",
 	"doraAssetsValue": "Value of total assets",
@@ -2660,9 +2662,9 @@
 	"doraNonSubstitutabilityReason": "Non-Substitutability Reason",
 	"doraHasExitPlan": "Exit Plan",
 	"doraReintegrationPossibility": "Reintegration Possibility",
-	"doraDiscontinuingImpact": "Discontinuing Impact",
 	"doraAlternativeProvidersIdentified": "Alternative Providers Identified",
 	"doraAlternativeProviders": "Alternative Providers",
 	"doraAttributes": "DORA Attributes",
-	"doraAssessment": "DORA Assessment"
+	"doraAssessment": "DORA Assessment",
+	"moreOnTerminologiesHelpText": "Hint: more options can be defined through terminologies"
 }

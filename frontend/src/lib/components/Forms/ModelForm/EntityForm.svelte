@@ -5,6 +5,8 @@
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import LegalIdentifierField from '../LegalIdentifierField.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import RadioGroup from '../RadioGroup.svelte';
+	import Checkbox from '../Checkbox.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -28,12 +30,19 @@
 	}: Props = $props();
 </script>
 
-<TextArea
+<TextField
 	{form}
-	field="mission"
-	label={m.mission()}
-	cacheLock={cacheLocks['mission']}
-	bind:cachedValue={formDataCache['mission']}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
+<Checkbox
+	{form}
+	field="is_active"
+	label={m.isActive()}
+	cacheLock={cacheLocks['is_active']}
+	bind:cachedValue={formDataCache['is_active']}
 />
 <AutocompleteSelect
 	{form}
@@ -53,6 +62,7 @@
 		cacheLock={cacheLocks['relationship']}
 		bind:cachedValue={formDataCache['relationship']}
 		label={m.relationship()}
+		helpText={m.moreOnTerminologiesHelpText()}
 		multiple
 	/>
 {/if}
@@ -64,6 +74,13 @@
 />
 
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-ellipsis" header={m.more()}>
+	<TextArea
+		{form}
+		field="mission"
+		label={m.mission()}
+		cacheLock={cacheLocks['mission']}
+		bind:cachedValue={formDataCache['mission']}
+	/>
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="entities"
@@ -72,14 +89,6 @@
 		bind:cachedValue={formDataCache['parent_entity']}
 		label={m.parentEntity()}
 		helpText={m.parentEntityHelpText()}
-	/>
-	<TextField
-		{form}
-		field="reference_link"
-		label={m.referenceLink()}
-		helpText={m.linkHelpText()}
-		cacheLock={cacheLocks['reference_link']}
-		bind:cachedValue={formDataCache['reference_link']}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -104,6 +113,28 @@
 		label={m.doraProviderPersonType()}
 		cacheLock={cacheLocks['dora_provider_person_type']}
 		bind:cachedValue={formDataCache['dora_provider_person_type']}
+	/>
+	<TextField
+		{form}
+		field="reference_link"
+		label={m.referenceLink()}
+		helpText={m.linkHelpText()}
+		cacheLock={cacheLocks['reference_link']}
+		bind:cachedValue={formDataCache['reference_link']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		translateOptions={false}
+		allowUserOptions="append"
+		cacheLock={cacheLocks['filtering_labels']}
+		bind:cachedValue={formDataCache['filtering_labels']}
 	/>
 </Dropdown>
 
@@ -143,4 +174,81 @@
 		cacheLock={cacheLocks['dora_competent_authority']}
 		bind:cachedValue={formDataCache['dora_competent_authority']}
 	/>
+</Dropdown>
+
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-shield-halved"
+	header={m.ebiosRmDefaults()}
+>
+	<p class="text-sm text-surface-500 mb-4">{m.ebiosRmDefaultsHelpText()}</p>
+	<div class="flex flex-col space-y-4">
+		<RadioGroup
+			{form}
+			possibleOptions={[
+				{ label: '0', value: 0 },
+				{ label: '1', value: 1 },
+				{ label: '2', value: 2 },
+				{ label: '3', value: 3 },
+				{ label: '4', value: 4 }
+			]}
+			label={m.dependency()}
+			field="default_dependency"
+			labelKey="label"
+			key="value"
+			cacheLock={cacheLocks['default_dependency']}
+			bind:cachedValue={formDataCache['default_dependency']}
+			helpText={m.dependencyHelpText()}
+		/>
+		<RadioGroup
+			{form}
+			possibleOptions={[
+				{ label: '0', value: 0 },
+				{ label: '1', value: 1 },
+				{ label: '2', value: 2 },
+				{ label: '3', value: 3 },
+				{ label: '4', value: 4 }
+			]}
+			label={m.penetration()}
+			field="default_penetration"
+			labelKey="label"
+			key="value"
+			cacheLock={cacheLocks['default_penetration']}
+			bind:cachedValue={formDataCache['default_penetration']}
+			helpText={m.penetrationHelpText()}
+		/>
+		<RadioGroup
+			{form}
+			possibleOptions={[
+				{ label: '1', value: 1 },
+				{ label: '2', value: 2 },
+				{ label: '3', value: 3 },
+				{ label: '4', value: 4 }
+			]}
+			label={m.maturity()}
+			field="default_maturity"
+			labelKey="label"
+			key="value"
+			cacheLock={cacheLocks['default_maturity']}
+			bind:cachedValue={formDataCache['default_maturity']}
+			helpText={m.maturityHelpText()}
+		/>
+		<RadioGroup
+			{form}
+			possibleOptions={[
+				{ label: '1', value: 1 },
+				{ label: '2', value: 2 },
+				{ label: '3', value: 3 },
+				{ label: '4', value: 4 }
+			]}
+			label={m.trust()}
+			field="default_trust"
+			labelKey="label"
+			key="value"
+			cacheLock={cacheLocks['default_trust']}
+			bind:cachedValue={formDataCache['default_trust']}
+			helpText={m.trustHelpText()}
+		/>
+	</div>
 </Dropdown>

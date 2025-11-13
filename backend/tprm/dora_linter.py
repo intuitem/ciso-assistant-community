@@ -12,6 +12,128 @@ from django.db.models import Q
 import re
 
 
+def lint_provider_entities() -> List[Dict[str, Any]]:
+    """
+    Validate provider entities used in DORA ROI reports.
+
+    Checks that third-party providers have:
+    - At least one legal identifier (LEI, EUID, VAT, DUNS)
+    - Country set
+    - Parent entity with legal identifier (if parent exists)
+
+    Returns:
+        List of validation results with severity levels (error, warning, ok)
+    """
+    results = []
+
+    # Get all provider entities from third-party contracts
+    provider_entities = Entity.objects.filter(
+        contracts__is_intragroup=False, contracts__isnull=False
+    ).distinct()
+
+    if not provider_entities.exists():
+        return results
+
+    providers_with_errors = 0
+
+    for provider in provider_entities:
+        provider_has_error = False
+
+        # Check legal identifiers (mandatory)
+        has_legal_identifier = False
+        if provider.legal_identifiers:
+            identifier_types = ["LEI", "EUID", "VAT", "DUNS"]
+            for id_type in identifier_types:
+                if provider.legal_identifiers.get(id_type):
+                    has_legal_identifier = True
+                    break
+
+        if not has_legal_identifier:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Provider Entities",
+                    "message": f"Provider entity '{provider.name}' must have at least one legal identifier (LEI, EUID, VAT, or DUNS) for DORA reporting",
+                    "field": "legal_identifiers",
+                    "object_type": "entities",
+                    "object_id": str(provider.id),
+                    "object_name": provider.name,
+                }
+            )
+            provider_has_error = True
+
+        # Check country (mandatory)
+        if not provider.country:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Provider Entities",
+                    "message": f"Provider entity '{provider.name}' must have a country set for DORA reporting",
+                    "field": "country",
+                    "object_type": "entities",
+                    "object_id": str(provider.id),
+                    "object_name": provider.name,
+                }
+            )
+            provider_has_error = True
+
+        # Check parent entity has legal identifier (if parent exists)
+        if provider.parent_entity:
+            parent_has_identifier = False
+            if provider.parent_entity.legal_identifiers:
+                identifier_types = ["LEI", "EUID", "VAT", "DUNS"]
+                for id_type in identifier_types:
+                    if provider.parent_entity.legal_identifiers.get(id_type):
+                        parent_has_identifier = True
+                        break
+
+            if not parent_has_identifier:
+                results.append(
+                    {
+                        "severity": "error",
+                        "category": "Provider Entities",
+                        "message": f"Parent entity '{provider.parent_entity.name}' of provider '{provider.name}' must have at least one legal identifier for DORA reporting",
+                        "field": "legal_identifiers",
+                        "object_type": "entities",
+                        "object_id": str(provider.parent_entity.id),
+                        "object_name": provider.parent_entity.name,
+                    }
+                )
+                provider_has_error = True
+
+        if provider_has_error:
+            providers_with_errors += 1
+
+    # Add success message if all providers are valid
+    valid_providers = provider_entities.count() - providers_with_errors
+    if valid_providers == provider_entities.count():
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Provider Entities",
+                "message": f"All {provider_entities.count()} provider entities have required fields set",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+    elif valid_providers > 0:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Provider Entities",
+                "message": f"{valid_providers} of {provider_entities.count()} provider entities have all required fields set",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+
+    return results
+
+
 def lint_main_entity(entity: Entity) -> List[Dict[str, Any]]:
     """
     Validate the main entity for DORA ROI requirements.
@@ -362,15 +484,21 @@ def lint_business_functions() -> List[Dict[str, Any]]:
     # Pattern for ref_id: F followed by one or more digits
     ref_id_pattern = re.compile(r"^F\d+$")
 
-    # Check each business function's ref_id
+    # Check each business function's ref_id and licensed activity
     invalid_ref_ids = []
+    missing_licensed_activity = []
     valid_count = 0
 
     for bf in business_functions:
+        # Check ref_id pattern
         if not bf.ref_id or not ref_id_pattern.match(bf.ref_id):
             invalid_ref_ids.append(bf)
         else:
             valid_count += 1
+
+        # Check licensed activity (mandatory for DORA reporting)
+        if not bf.dora_licenced_activity:
+            missing_licensed_activity.append(bf)
 
     # Report results
     if invalid_ref_ids:
@@ -382,6 +510,21 @@ def lint_business_functions() -> List[Dict[str, Any]]:
                     "category": "Business Functions",
                     "message": f"Business function '{bf.name}' has ref_id '{ref_id_display}' that doesn't match pattern 'F' + number (e.g., F1, F2)",
                     "field": "ref_id",
+                    "object_type": "assets",
+                    "object_id": str(bf.id),
+                    "object_name": bf.name,
+                }
+            )
+
+    # Report missing licensed activity
+    if missing_licensed_activity:
+        for bf in missing_licensed_activity:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Business Functions",
+                    "message": f"Business function '{bf.name}' must have a licensed activity set for DORA reporting",
+                    "field": "dora_licenced_activity",
                     "object_type": "assets",
                     "object_id": str(bf.id),
                     "object_name": bf.name,
@@ -407,6 +550,20 @@ def lint_business_functions() -> List[Dict[str, Any]]:
                 "severity": "ok",
                 "category": "Business Functions",
                 "message": f"{valid_count} of {business_functions.count()} business function(s) have valid ref_id pattern",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+
+    # Add success message if all business functions have licensed activity
+    if not missing_licensed_activity:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Business Functions",
+                "message": f"All {business_functions.count()} business function(s) have licensed activity set",
                 "field": None,
                 "object_type": None,
                 "object_id": None,
@@ -721,6 +878,70 @@ def lint_solutions() -> List[Dict[str, Any]]:
     return results
 
 
+def lint_unique_leis(main_entity: Entity) -> List[Dict[str, Any]]:
+    """
+    Validate that LEIs are unique across entities included in DORA ROI report.
+
+    The b_01.02 report includes main entity + subsidiaries, and each must have a unique LEI.
+
+    Args:
+        main_entity: The main Entity instance
+
+    Returns:
+        List of validation results with severity levels (error, warning, ok)
+    """
+    results = []
+
+    # Get all entities for b_01.02: main entity + subsidiaries
+    subsidiaries = Entity.objects.filter(
+        parent_entity=main_entity, dora_provider_person_type__isnull=False
+    ).exclude(dora_provider_person_type="")
+
+    all_entities = [main_entity] + list(subsidiaries)
+
+    # Collect LEIs
+    lei_map = {}  # lei -> list of entities with that LEI
+    for entity in all_entities:
+        if entity.legal_identifiers and entity.legal_identifiers.get("LEI"):
+            lei = entity.legal_identifiers.get("LEI")
+            if lei not in lei_map:
+                lei_map[lei] = []
+            lei_map[lei].append(entity)
+
+    # Check for duplicates
+    has_duplicates = False
+    for lei, entities in lei_map.items():
+        if len(entities) > 1:
+            has_duplicates = True
+            entity_names = ", ".join([f"'{e.name}'" for e in entities])
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Unique LEIs",
+                    "message": f"LEI '{lei}' is used by multiple entities: {entity_names}. Each entity in the DORA ROI report must have a unique LEI.",
+                    "field": "legal_identifiers",
+                    "object_type": None,
+                    "object_id": None,
+                    "object_name": None,
+                }
+            )
+
+    if not has_duplicates and lei_map:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Unique LEIs",
+                "message": "All entities have unique LEIs",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+
+    return results
+
+
 def lint_dora_roi() -> Dict[str, Any]:
     """
     Perform comprehensive linting for DORA ROI export.
@@ -752,9 +973,11 @@ def lint_dora_roi() -> Dict[str, Any]:
     # Run all validation checks
     results.extend(lint_main_entity(main_entity))
     results.extend(lint_subsidiaries(main_entity))
+    results.extend(lint_unique_leis(main_entity))
     results.extend(lint_business_functions())
     results.extend(lint_contracts())
     results.extend(lint_solutions())
+    results.extend(lint_provider_entities())
 
     # Calculate summary
     summary = {
