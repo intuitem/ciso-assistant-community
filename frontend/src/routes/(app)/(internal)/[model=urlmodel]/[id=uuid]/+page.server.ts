@@ -24,15 +24,22 @@ interface SelectableModel {
 	backendViewset?: string;
 	field: string;
 	optionsEndpoint: string;
+	updatedObjectName: string;
 }
 
 const SELECT_MAP: Record<string, Record<string, SelectableModel>> = {
 	'applied-controls': {
-		evidences: { field: 'evidences', optionsEndpoint: 'evidences' },
+		// m.appliedControl() is considered as the updatedObjectName (as evidences is a M2M field of the applied control)
+		evidences: {
+			field: 'evidences',
+			optionsEndpoint: 'evidences',
+			updatedObjectName: m.appliedControl()
+		},
 		'task-templates': {
 			backendViewset: 'task-templates',
 			field: 'applied_controls',
-			optionsEndpoint: 'task-templates'
+			optionsEndpoint: 'task-templates',
+			updatedObjectName: m.tasks()
 		}
 	}
 };
@@ -148,7 +155,7 @@ export const actions: Actions = {
 		const modelsToSelect = SELECT_MAP[event.params.model as string];
 		if (!modelsToSelect) return fail(400);
 
-		const { field, backendViewset } = modelsToSelect[urlModel];
+		const { field, backendViewset, updatedObjectName } = modelsToSelect[urlModel];
 
 		const form = await superValidate(
 			formData,
@@ -231,6 +238,10 @@ export const actions: Actions = {
 			}
 		}
 
+		setFlash(
+			{ type: 'success', message: m.successfullyUpdatedObject({ object: updatedObjectName }) },
+			event
+		);
 		return { form };
 	},
 	update: async (event) => {
