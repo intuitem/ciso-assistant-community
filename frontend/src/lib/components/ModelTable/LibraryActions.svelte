@@ -25,7 +25,8 @@
 				parent: null,
 				formAction: `/loaded-libraries/${library.id}?/update`,
 				choices: choices,
-				message: m.scoreChangeDetected()
+				title: m.scoreChangeDetected(),
+				message: m.scoreChangeDetectedDescription()
 			}
 		};
 		const modal: ModalSettings = {

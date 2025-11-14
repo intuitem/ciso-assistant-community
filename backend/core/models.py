@@ -380,7 +380,7 @@ class LibraryUpdater:
                 {"name": "clamp", "description": "clampDescription", "action": "clamp"},
                 {"name": "reset", "description": "resetDescription", "action": "reset"},
                 {
-                    "name": "rule_of_three",
+                    "name": "ruleOfThree",
                     "description": "ruleOfThreeDescription",
                     "action": "rule_of_three",
                 },
