@@ -194,9 +194,10 @@ export const actions: Actions = {
 					const endpoint = `${BASE_API_URL}/${backendViewset}/${id}/`;
 					const req = await event.fetch(endpoint);
 					if (!req.ok) return;
+
 					const obj = await req.json();
 					const idListValue = obj[field];
-					const idList = Array.isArray(idListValue) ? idListValue : [];
+					const idList = idListValue.map((obj) => obj.id);
 
 					const newIdList = isSelectAction
 						? [...idList, event.params.id]
