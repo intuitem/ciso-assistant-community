@@ -8,6 +8,7 @@
 	let { data } = $props();
 
 	const appliedControlsHead = {
+		ref_id: 'refId',
 		name: 'name',
 		status: 'status',
 		priority: 'priority',
@@ -78,6 +79,7 @@
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/risk-assessments/{page.params.id}/action-plan"
 			fields={[
+				'ref_id',
 				'name',
 				'status',
 				'priority',
