@@ -18,7 +18,7 @@ export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	});
 }
 
-interface ListViewFilterConfig {
+export interface ListViewFilterConfig {
 	component: ComponentType;
 	props?: { label: string; optionsEndpoint?: string; multiple?: boolean; options?: Option[] };
 	hide?: boolean;
@@ -65,7 +65,7 @@ const RISK_STAGE_OPTIONS = [
 	{ label: 'Current', value: 'current' },
 	{ label: 'Residual', value: 'residual' }
 ];
-const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
+export const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'perimeters/lc_status',
@@ -77,7 +77,7 @@ const PERIMETER_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const ACCREDITATION_STATUS_FILTER: ListViewFilterConfig = {
+export const ACCREDITATION_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'terminologies?field_path=accreditation.status',
@@ -88,7 +88,7 @@ const ACCREDITATION_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
+export const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'terminologies?field_path=accreditation.category',
@@ -99,7 +99,7 @@ const ACCREDITATION_CATEGORY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const DOMAIN_FILTER: ListViewFilterConfig = {
+export const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
@@ -108,7 +108,7 @@ const DOMAIN_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const LABELS_FILTER: ListViewFilterConfig = {
+export const LABELS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'filtering-labels',
@@ -118,7 +118,7 @@ const LABELS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const PRIORITY_FILTER: ListViewFilterConfig = {
+export const PRIORITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'applied-controls/priority',
@@ -130,7 +130,7 @@ const PRIORITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const EFFORT_FILTER: ListViewFilterConfig = {
+export const EFFORT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'applied-controls/effort',
@@ -142,7 +142,7 @@ const EFFORT_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const PERIMETER_FILTER: ListViewFilterConfig = {
+export const PERIMETER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'perimeter',
@@ -151,7 +151,7 @@ const PERIMETER_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
+export const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		options: [
@@ -170,7 +170,7 @@ const RISK_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const QUANT_RISK_SCENARIO_STATUS_FILTER: ListViewFilterConfig = {
+export const QUANT_RISK_SCENARIO_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		options: [
@@ -188,7 +188,7 @@ const QUANT_RISK_SCENARIO_STATUS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const RISK_STAGE_FILTER: ListViewFilterConfig = {
+export const RISK_STAGE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'risk_stage',
@@ -197,7 +197,7 @@ const RISK_STAGE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const COMPLIANCE_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
+export const COMPLIANCE_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'compliance-assessments/status',
@@ -208,7 +208,7 @@ const COMPLIANCE_ASSESSMENT_STATUS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const ENTITY_ASSESSMENT_CONCLUSION_FILTER: ListViewFilterConfig = {
+export const ENTITY_ASSESSMENT_CONCLUSION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'entity-assessments/conclusion',
@@ -220,7 +220,7 @@ const ENTITY_ASSESSMENT_CONCLUSION_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const REQUIREMENT_ASSESSMENT_RESULT_FILTER: ListViewFilterConfig = {
+export const REQUIREMENT_ASSESSMENT_RESULT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'requirement-assessments/result',
@@ -231,7 +231,7 @@ const REQUIREMENT_ASSESSMENT_RESULT_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
+export const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'applied-controls/status',
@@ -243,7 +243,7 @@ const APPLIED_CONTROL_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const APPLIED_CONTROL_IMPACT_FILTER: ListViewFilterConfig = {
+export const APPLIED_CONTROL_IMPACT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'applied-controls/control_impact',
@@ -255,7 +255,7 @@ const APPLIED_CONTROL_IMPACT_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const APPLIED_CONTROL_EFFORT_FILTER: ListViewFilterConfig = {
+export const APPLIED_CONTROL_EFFORT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'applied-controls/effort',
@@ -267,7 +267,7 @@ const APPLIED_CONTROL_EFFORT_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
+export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'withinTolerance',
@@ -276,7 +276,7 @@ const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const TASK_STATUS_FILTER: ListViewFilterConfig = {
+export const TASK_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'task-nodes/status',
@@ -288,7 +288,7 @@ const TASK_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const INCIDENT_STATUS_FILTER: ListViewFilterConfig = {
+export const INCIDENT_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'incidents/status',
@@ -300,7 +300,7 @@ const INCIDENT_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const CAMPAIGN_STATUS_FILTER: ListViewFilterConfig = {
+export const CAMPAIGN_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'campaigns/status',
@@ -312,7 +312,7 @@ const CAMPAIGN_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const INCIDENT_DETECTION_FILTER: ListViewFilterConfig = {
+export const INCIDENT_DETECTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'incidents/detection',
@@ -323,7 +323,7 @@ const INCIDENT_DETECTION_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const INCIDENT_SEVERITY_FILTER: ListViewFilterConfig = {
+export const INCIDENT_SEVERITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'incidents/severity',
@@ -334,7 +334,7 @@ const INCIDENT_SEVERITY_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const FINDINGS_SEVERITY_FILTER: ListViewFilterConfig = {
+export const FINDINGS_SEVERITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'findings/severity',
@@ -345,7 +345,7 @@ const FINDINGS_SEVERITY_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const FINDINGS_STATUS_FILTER: ListViewFilterConfig = {
+export const FINDINGS_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'findings/status',
@@ -356,7 +356,7 @@ const FINDINGS_STATUS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const FINDINGS_PRIORITY_FILTER: ListViewFilterConfig = {
+export const FINDINGS_PRIORITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'findings/priority',
@@ -367,7 +367,7 @@ const FINDINGS_PRIORITY_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const EXCEPTION_SEVERITY_FILTER: ListViewFilterConfig = {
+export const EXCEPTION_SEVERITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'security-exceptions/severity',
@@ -378,7 +378,7 @@ const EXCEPTION_SEVERITY_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const EXCEPTION_STATUS_FILTER: ListViewFilterConfig = {
+export const EXCEPTION_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'security-exceptions/status',
@@ -389,7 +389,7 @@ const EXCEPTION_STATUS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const PROCESSING_STATUS_FILTER: ListViewFilterConfig = {
+export const PROCESSING_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'processings/status',
@@ -400,7 +400,7 @@ const PROCESSING_STATUS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const LEGAL_BASIS_FILTER: ListViewFilterConfig = {
+export const LEGAL_BASIS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'purposes/legal_basis',
@@ -411,7 +411,7 @@ const LEGAL_BASIS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const PROCESSING_NATURE_FILTER: ListViewFilterConfig = {
+export const PROCESSING_NATURE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'processing-natures',
@@ -420,7 +420,7 @@ const PROCESSING_NATURE_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const ORGANISATION_OBJECTIVE_STATUS_FILTER: ListViewFilterConfig = {
+export const ORGANISATION_OBJECTIVE_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'organisation-objectives/status',
@@ -431,7 +431,7 @@ const ORGANISATION_OBJECTIVE_STATUS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const ORGANISATION_OBJECTIVE_HEALTH_FILTER: ListViewFilterConfig = {
+export const ORGANISATION_OBJECTIVE_HEALTH_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'organisation-objectives/health',
@@ -442,7 +442,7 @@ const ORGANISATION_OBJECTIVE_HEALTH_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const TREATMENT_FILTER: ListViewFilterConfig = {
+export const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'risk-scenarios/treatment',
@@ -454,7 +454,7 @@ const TREATMENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const STATE_FILTER: ListViewFilterConfig = {
+export const STATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'risk-acceptances/state',
@@ -466,7 +466,7 @@ const STATE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const APPROVER_FILTER: ListViewFilterConfig = {
+export const APPROVER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'approver',
@@ -476,7 +476,7 @@ const APPROVER_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
+export const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'riskAssessment',
@@ -485,7 +485,7 @@ const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const REFERENCE_CONTROL_FILTER: ListViewFilterConfig = {
+export const REFERENCE_CONTROL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'referenceControl',
@@ -494,7 +494,7 @@ const REFERENCE_CONTROL_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const COMPLIANCE_ASSESSMENT_FILTER: ListViewFilterConfig = {
+export const COMPLIANCE_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'complianceAssessment',
@@ -503,7 +503,7 @@ const COMPLIANCE_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const PROVIDER_FILTER: ListViewFilterConfig = {
+export const PROVIDER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'provider',
@@ -514,16 +514,7 @@ const PROVIDER_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const LIBRARY_FILTER: ListViewFilterConfig = {
-	component: AutocompleteSelect,
-	props: {
-		label: 'library',
-		optionsEndpoint: 'loaded-libraries',
-		multiple: true
-	}
-};
-
-const THREAT_FILTER: ListViewFilterConfig = {
+export const THREAT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'threats',
@@ -532,7 +523,16 @@ const THREAT_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const ASSET_FILTER: ListViewFilterConfig = {
+export const LIBRARY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'library',
+		optionsEndpoint: 'loaded-libraries',
+		multiple: true
+	}
+};
+
+export const ASSET_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'assets',
@@ -541,7 +541,7 @@ const ASSET_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const PROCESSING_FILTER: ListViewFilterConfig = {
+export const PROCESSING_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'processings',
@@ -550,7 +550,7 @@ const PROCESSING_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const QUALIFICATION_FILTER: ListViewFilterConfig = {
+export const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'qualification',
@@ -559,7 +559,7 @@ const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const PERSONAL_DATA_CATEGORY_FILTER: ListViewFilterConfig = {
+export const PERSONAL_DATA_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'personal-data/category',
@@ -571,7 +571,7 @@ const PERSONAL_DATA_CATEGORY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const SOLUTION_CRITICALITY_FILTER: ListViewFilterConfig = {
+export const SOLUTION_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'criticality',
@@ -580,7 +580,7 @@ const SOLUTION_CRITICALITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const ENTITY_CRITICALITY_FILTER: ListViewFilterConfig = {
+export const ENTITY_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'criticality',
@@ -588,7 +588,7 @@ const ENTITY_CRITICALITY_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
-const RISK_IMPACT_FILTER: ListViewFilterConfig = {
+export const RISK_IMPACT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'gravity',
@@ -599,7 +599,7 @@ const RISK_IMPACT_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const RISK_PROBABILITY_FILTER: ListViewFilterConfig = {
+export const RISK_PROBABILITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'likelihood',
@@ -610,7 +610,7 @@ const RISK_PROBABILITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const IS_SELECTED_FILTER: ListViewFilterConfig = {
+export const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'is_selected',
@@ -619,7 +619,7 @@ const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const IS_RECURRENT_FILTER: ListViewFilterConfig = {
+export const IS_RECURRENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'is_recurrent',
@@ -628,7 +628,7 @@ const IS_RECURRENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
+export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'assigned_to',
@@ -639,7 +639,7 @@ const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const USER_IS_ACTIVE_FILTER: ListViewFilterConfig = {
+export const USER_IS_ACTIVE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'is_active',
@@ -648,7 +648,7 @@ const USER_IS_ACTIVE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const USER_IS_THIRD_PARTY_FILTER: ListViewFilterConfig = {
+export const USER_IS_THIRD_PARTY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'is_third_party',
@@ -657,7 +657,7 @@ const USER_IS_THIRD_PARTY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const IS_ASSESSABLE_FILTER: ListViewFilterConfig = {
+export const IS_ASSESSABLE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'assessable',
@@ -666,7 +666,7 @@ const IS_ASSESSABLE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
+export const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'risk_origin',
@@ -678,7 +678,7 @@ const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const FEARED_EVENT_FILTER: ListViewFilterConfig = {
+export const FEARED_EVENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'feared_event',
@@ -687,7 +687,7 @@ const FEARED_EVENT_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const PERTINENCE_FILTER: ListViewFilterConfig = {
+export const PERTINENCE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'pertinence',
@@ -699,7 +699,7 @@ const PERTINENCE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const ENTITY_FILTER: ListViewFilterConfig = {
+export const ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'entity',
@@ -708,7 +708,7 @@ const ENTITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const ENTITY_RELATIONSHIP_FILTER: ListViewFilterConfig = {
+export const ENTITY_RELATIONSHIP_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'terminologies?field_path=entity.relationship',
@@ -719,7 +719,7 @@ const ENTITY_RELATIONSHIP_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const ACCREDITATION_AUTHORITY_FILTER: ListViewFilterConfig = {
+export const ACCREDITATION_AUTHORITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'authority',
@@ -728,7 +728,7 @@ const ACCREDITATION_AUTHORITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const CURRENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+export const CURRENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'current_level',
@@ -739,7 +739,7 @@ const CURRENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const RESIDUAL_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+export const RESIDUAL_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		...CURRENT_RISK_LEVEL_FILTER.props,
@@ -747,7 +747,7 @@ const RESIDUAL_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const INHERENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
+export const INHERENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		...CURRENT_RISK_LEVEL_FILTER.props,
@@ -756,7 +756,7 @@ const INHERENT_RISK_LEVEL_FILTER: ListViewFilterConfig = {
 };
 
 // TODO: TEST THIS
-const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
+export const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'current_criticality',
@@ -774,7 +774,7 @@ const CURRENT_CRITICALITY_FILTER: ListViewFilterConfig = {
 };
 
 // TODO: TEST THIS
-const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
+export const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		...CURRENT_CRITICALITY_FILTER.props,
@@ -782,7 +782,7 @@ const RESIDUAL_CRITICALITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const STAKEHOLDER_FILTER: ListViewFilterConfig = {
+export const STAKEHOLDER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'stakeholder',
@@ -792,7 +792,7 @@ const STAKEHOLDER_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const FRAMEWORK_FILTER: ListViewFilterConfig = {
+export const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'framework',
@@ -801,7 +801,7 @@ const FRAMEWORK_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const LANGUAGE_FILTER: ListViewFilterConfig = {
+export const LANGUAGE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'language',
@@ -813,7 +813,7 @@ const LANGUAGE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const ASSET_TYPE_FILTER: ListViewFilterConfig = {
+export const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'type',
@@ -825,7 +825,7 @@ const ASSET_TYPE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const ASSET_CLASS_FILTER: ListViewFilterConfig = {
+export const ASSET_CLASS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'asset_class',
@@ -834,7 +834,7 @@ const ASSET_CLASS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
+export const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'category',
@@ -846,7 +846,7 @@ const REFERENCE_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const FINDINGS_ASSESSMENTS_CATEGORY_FILTER: ListViewFilterConfig = {
+export const FINDINGS_ASSESSMENTS_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'category',
@@ -858,7 +858,7 @@ const FINDINGS_ASSESSMENTS_CATEGORY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
+export const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'terminologies?field_path=entity.relationship',
@@ -869,7 +869,7 @@ const STAKEHOLDER_CATEGORY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
+export const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'reference-controls/csf_function',
@@ -881,7 +881,7 @@ const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const OWNER_FILTER: ListViewFilterConfig = {
+export const OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
@@ -892,7 +892,7 @@ const OWNER_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
+export const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
@@ -903,7 +903,7 @@ const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const LAST_OCCURENCE_STATUS_FILTER: ListViewFilterConfig = {
+export const LAST_OCCURENCE_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'last_occurrence_status',
@@ -915,7 +915,7 @@ const LAST_OCCURENCE_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const NEXT_OCCURENCE_STATUS_FILTER: ListViewFilterConfig = {
+export const NEXT_OCCURENCE_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'next_occurrence_status',
@@ -927,7 +927,7 @@ const NEXT_OCCURENCE_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const HAS_UPDATE_FILTER: ListViewFilterConfig = {
+export const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'updateAvailable',
@@ -936,7 +936,7 @@ const HAS_UPDATE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const MAPPING_SUGGESTED_FILTER: ListViewFilterConfig = {
+export const MAPPING_SUGGESTED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'mappingSuggested',
@@ -945,7 +945,7 @@ const MAPPING_SUGGESTED_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const LIBRARY_TYPE_FILTER = {
+export const LIBRARY_TYPE_FILTER = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'objectType',
@@ -957,7 +957,7 @@ const LIBRARY_TYPE_FILTER = {
 	}
 };
 
-const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
+export const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'isAssigned',
@@ -966,7 +966,7 @@ const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const FIELD_PATH_FILTER: ListViewFilterConfig = {
+export const FIELD_PATH_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'field_path',
@@ -977,7 +977,7 @@ const FIELD_PATH_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const BUILTIN_FILTER: ListViewFilterConfig = {
+export const BUILTIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'builtin',
@@ -986,7 +986,7 @@ const BUILTIN_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const IS_VISIBLE_FILTER: ListViewFilterConfig = {
+export const IS_VISIBLE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'is_visible',
@@ -995,7 +995,7 @@ const IS_VISIBLE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const EVIDENCE_STATUS_FILTER: ListViewFilterConfig = {
+export const EVIDENCE_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'status',
@@ -1007,7 +1007,7 @@ const EVIDENCE_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
+export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
@@ -1018,7 +1018,7 @@ const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const VULNERABILITY_STATUS_FILTER: ListViewFilterConfig = {
+export const VULNERABILITY_STATUS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'vulnerabilities/status',
@@ -1030,7 +1030,7 @@ const VULNERABILITY_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
+export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'vulnerabilities/severity',
@@ -1453,7 +1453,7 @@ export const listViewFields = {
 		head: ['sourceFramework', 'targetFramework'],
 		body: ['source_framework', 'target_framework'],
 		filters: {
-			library__provider: {
+			provider: {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'requirement-mapping-sets/provider' }
 			}
