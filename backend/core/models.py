@@ -492,8 +492,8 @@ class LibraryUpdater:
         """
         Update frameworks with score change handling.
 
-        Args: (only for score update actually)
-            strategy: One of:
+         Behavior (score-boundary updates only)
+            self.strategy: One of:
                 - None: Check for changes and raise exception if detected
                 - 'clamp': Clamp existing scores to new boundaries (default behavior)
                 - 'reset': Reset all scores to None
@@ -634,6 +634,13 @@ class LibraryUpdater:
                     ["min_score", "max_score", "scores_definition"],
                     batch_size=100,
                 )
+                ca_bounds = {
+                    ca.id: (
+                        (ca.min_score if ca.min_score is not None else (new_framework.min_score if new_framework.min_score is not None else 0)),
+                        (ca.max_score if ca.max_score is not None else (new_framework.max_score if new_framework.max_score is not None else 100)),
+                    )
+                    for ca in compliance_assessments_to_update
+                }
 
             # main loop by requirement_node
             for requirement_node in requirement_nodes:
@@ -680,16 +687,9 @@ class LibraryUpdater:
                         and ra.score is not None
                         and ra.compliance_assessment in compliance_assessments_to_update
                     ):
-                        ca_min = (
-                            new_framework.min_score
-                            if new_framework.min_score is not None
-                            else 0
-                        )
-                        ca_max = (
-                            new_framework.max_score
-                            if new_framework.max_score is not None
-                            else 100
-                        )
+                        default_min = 0 if new_framework.min_score is None else new_framework.min_score
+                        default_max = 100 if new_framework.max_score is None else new_framework.max_score
+                        ca_min, ca_max = ca_bounds.get(ra.compliance_assessment_id, (default_min, default_max))
 
                         # Apply the chosen strategy for score transformation
                         if self.strategy == "reset":
@@ -711,10 +711,9 @@ class LibraryUpdater:
                                     prev_max - prev_min
                                 )
                                 # Scale to new range
-                                new_score = ca_min + (normalized * (ca_max - ca_min))
-                                # Round to avoid floating point issues
-                                ra.score = round(new_score, 2)
-                                requirement_assessment_objects_to_update.append(ra)
+                                scaled = ca_min + (normalized * (ca_max - ca_min))
+                                # Round to int and clamp into [ca_min, ca_max]
+                                ra.score = max(min(int(round(scaled)), ca_max), ca_min)
                             else:
                                 # If old range was invalid, clamp instead
                                 clamped = min(max(ra.score, ca_min), ca_max)

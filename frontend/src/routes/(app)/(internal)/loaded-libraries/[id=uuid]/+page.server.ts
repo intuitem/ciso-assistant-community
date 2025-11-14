@@ -9,7 +9,7 @@ export const actions: Actions = {
 		const action = new URL(event.request.url).searchParams.get('action');
 		const endpoint =
 			`${BASE_API_URL}/loaded-libraries/${event.params.id}/update` +
-			(action ? `?action=${action}` : '/');
+			(action ? `?action=${action}` : '');
 		const res = await event.fetch(endpoint); // We will have to make this a PATCH later (we should use PATCH when modifying an object)
 		const result = await res.json();
 
