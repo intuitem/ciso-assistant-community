@@ -8,6 +8,7 @@
 	let { data } = $props();
 
 	const appliedControlsHead = {
+		ref_id: 'refId',
 		name: 'name',
 		status: 'status',
 		priority: 'priority',
