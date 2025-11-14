@@ -22,9 +22,6 @@
 		<Tabs.Control value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Control
 		>
-		<Tabs.Control value="integrations"
-			><i class="fa-solid fa-plug"></i> {m.integrations()}</Tabs.Control
-		>
 	{/snippet}
 	{#snippet content()}
 		<Tabs.Panel value="general">
