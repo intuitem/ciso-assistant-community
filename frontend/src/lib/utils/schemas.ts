@@ -571,7 +571,7 @@ export const EntitiesSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	is_active: z.boolean().optional(),
-	parent_entity: z.string().optional(),
+	parent_entity: z.string().optional().nullable(),
 	mission: z.string().optional(),
 	reference_link: z
 		.string()

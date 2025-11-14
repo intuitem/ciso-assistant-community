@@ -60,6 +60,16 @@ class EntityWriteSerializer(BaseModelSerializer):
                     raise serializers.ValidationError(_("leiLengthError"))
         return value
 
+    def validate_parent_entity(self, value):
+        """
+        Validate that an entity cannot be set as its own parent.
+        """
+        if value and self.instance and value.id == self.instance.id:
+            raise serializers.ValidationError(
+                _("An entity cannot be set as its own parent")
+            )
+        return value
+
 
 class EntityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)

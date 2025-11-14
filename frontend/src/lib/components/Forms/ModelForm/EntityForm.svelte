@@ -106,6 +106,8 @@
 		{form}
 		optionsEndpoint="entities"
 		field="parent_entity"
+		optionsSelf={object}
+		nullable
 		cacheLock={cacheLocks['parent_entity']}
 		bind:cachedValue={formDataCache['parent_entity']}
 		label={m.parentEntity()}
