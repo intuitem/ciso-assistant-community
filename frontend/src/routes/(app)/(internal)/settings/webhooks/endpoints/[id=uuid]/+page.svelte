@@ -1,0 +1,68 @@
+<script lang="ts">
+	import type { ActionData, PageData } from './$types';
+	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import { m } from '$paraglide/messages';
+	import TextField from '$lib/components/Forms/TextField.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { webhookEndpointSchema } from '$lib/utils/schemas';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
+
+	const formStore = data.form?.form;
+	let showSecretField = $state(!data.webhookEndpoint?.has_secret);
+</script>
+
+<SuperForm
+	class="flex flex-col space-y-3"
+	data={data?.form}
+	dataType="form"
+	validators={zod(webhookEndpointSchema)}
+>
+	{#snippet children({ form })}
+		<TextField {form} field="name" label={m.name()} data-focusindex="0" />
+		<MarkdownField {form} field="description" label={m.description()} data-focusindex="1" />
+		<TextField {form} field="url" label={m.url()} data-focusindex="2" />
+		{#if showSecretField}
+			<TextField
+				{form}
+				type="password"
+				field="secret"
+				label={m.secret()}
+				helpText={m.webhookSecretHelpText()}
+			/>
+		{:else}
+			<div class="w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary">
+				<p>{m.secretAlreadySetHelpText()}</p>
+				<button
+					class="btn preset-filled"
+					onclick={() => {
+						showSecretField = true;
+						$formStore.secret = '';
+					}}>{m.resetSecret()}</button
+				>
+			</div>
+		{/if}
+		<AutocompleteSelect
+			{form}
+			field="event_types"
+			label={m.events()}
+			optionsEndpoint="settings/webhooks/event-types"
+			optionsLabelField="label"
+			optionsValueField="value"
+			multiple
+		/>
+		<p class="">
+			<button
+				class="btn preset-filled-primary-500 font-semibold w-full"
+				data-testid="login-btn"
+				type="submit">{m.save()}</button
+			>
+		</p>
+	{/snippet}
+</SuperForm>
