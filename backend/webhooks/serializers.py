@@ -23,14 +23,25 @@ class WebhookEndpointSerializer(serializers.ModelSerializer):
         required=False,
     )
 
+    has_secret = serializers.SerializerMethodField()
+
     class Meta:
         model = WebhookEndpoint
         fields = [
             "id",
+            "name",
+            "description",
             "url",
             "event_types",
             "is_active",
             "created_at",
             "secret",
+            "has_secret",
         ]
         read_only_fields = ["id", "created_at"]
+
+    def get_has_secret(self, obj):
+        """
+        Indicates whether the webhook endpoint has a secret set.
+        """
+        return bool(obj.secret)

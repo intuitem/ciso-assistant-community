@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from core.models import AbstractBaseModel
+from core.base_models import NameDescriptionMixin
 
 
 class WebhookEventType(models.Model):
@@ -23,7 +23,7 @@ class WebhookEventType(models.Model):
         return self.name
 
 
-class WebhookEndpoint(AbstractBaseModel):
+class WebhookEndpoint(NameDescriptionMixin):
     """
     Represents a single consumer endpoint for receiving webhooks.
     """
