@@ -170,6 +170,9 @@ export const actions: Actions = {
 			const currentSelectedObjectsReq = await event.fetch(
 				`/${backendViewset}?${field}=${event.params.id}`
 			);
+			if (!currentSelectedObjectsReq.ok) {
+				return fail(currentSelectedObjectsReq.status);
+			}
 			const currentSelectedObjectsRes = await currentSelectedObjectsReq.json();
 			const currentSelectedObjects = currentSelectedObjectsRes.results.map((obj) => obj.id);
 
