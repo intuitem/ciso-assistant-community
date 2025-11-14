@@ -59,6 +59,7 @@ from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from integrations.registry import IntegrationRegistry
 from library.serializers import StoredLibrarySerializer
+from webhooks.service import dispatch_webhook_event
 from .generators import gen_audit_context
 
 from django.utils import timezone
@@ -360,6 +361,18 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(queryset, many=True, context=context)
         return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        dispatch_webhook_event(instance, "created")
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        dispatch_webhook_event(instance, "updated")
+
+    def perform_destroy(self, instance):
+        dispatch_webhook_event(instance, "deleted")
+        instance.delete()
 
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
