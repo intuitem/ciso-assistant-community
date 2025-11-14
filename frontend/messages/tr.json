@@ -1712,5 +1712,13 @@
 	"samlAuthnRequestSignedHelpText": "Etkinleştirildiğinde, SAML kimlik doğrulama isteği aşağıdaki özel anahtar ile imzalanır. İmzayı doğrulayabilmesi için ilgili genel sertifika Kimlik Sağlayıcıya gönderilir.",
 	"downloadCertificate": "Sertifikayı indir",
 	"viewMore": "Daha fazla görüntüle",
-	"viewLess": "Daha az görüntüle"
+	"viewLess": "Daha az görüntüle",
+	"scoreChangeDetected": "Puan değişikliği algılandı",
+	"scoreChangeDetectedDescription": "Puanlarda bir değişiklik algılandı. İlişkili denetimler için puan güncellemelerini nasıl yöneteceğinizi seçin.",
+	"clamp": "Sınırla",
+	"clampDescription": "Değeri tanımlanan sınırlar içinde kısıtlayın",
+	"reset": "Sıfırla",
+	"resetDescription": "Denetim puanlarını sıfırla",
+	"ruleOfThree": "Üçlü Kural",
+	"ruleOfThreeDescription": "Puanları yeni sınırlar arasında ölçeklemek için Üçlü Kuralı uygulayın"
 }

@@ -376,9 +376,36 @@ class StoredLibrary(LibraryMixin):
 
 
 class LibraryUpdater:
-    def __init__(self, old_library: "LoadedLibrary", new_library: StoredLibrary):
+    class ScoreChangeDetected(Exception):
+        """Exception raised when score boundaries change, requiring user decision"""
+
+        def __init__(
+            self, framework_urn, prev_scores, new_scores, affected_assessments
+        ):
+            self.framework_urn = framework_urn
+            self.prev_scores = prev_scores
+            self.new_scores = new_scores
+            self.affected_assessments = affected_assessments
+            self.strategies = [
+                {"name": "clamp", "description": "clampDescription", "action": "clamp"},
+                {"name": "reset", "description": "resetDescription", "action": "reset"},
+                {
+                    "name": "ruleOfThree",
+                    "description": "ruleOfThreeDescription",
+                    "action": "rule_of_three",
+                },
+            ]
+            super().__init__("Score boundaries changed, user decision required")
+
+    def __init__(
+        self,
+        old_library: "LoadedLibrary",
+        new_library: StoredLibrary,
+        strategy: Optional[str] = None,
+    ):
         self.old_library = old_library
         self.new_library = new_library
+        self.strategy = strategy
         new_library_content = self.new_library.content
         self.dependencies: List[str] = self.new_library.dependencies or []
         self.i18n_object_dict = {
@@ -472,10 +499,24 @@ class LibraryUpdater:
             )
 
     def update_frameworks(self):
+        """
+        Update frameworks with score change handling.
+
+         Behavior (score-boundary updates only)
+            self.strategy: One of:
+                - None: Check for changes and raise exception if detected
+                - 'clamp': Clamp existing scores to new boundaries (default behavior)
+                - 'reset': Reset all scores to None
+                - 'rule_of_three': Apply proportional scaling from old to new range
+        """
         for new_framework in self.new_frameworks:
             requirement_nodes = new_framework["requirement_nodes"]
             framework_dict = {**new_framework}
             del framework_dict["requirement_nodes"]
+            prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
+            prev_min = getattr(prev_fw, "min_score", None)
+            prev_max = getattr(prev_fw, "max_score", None)
+            prev_def = getattr(prev_fw, "scores_definition", None)
 
             new_framework, _ = Framework.objects.update_or_create(
                 urn=new_framework["urn"],
@@ -530,7 +571,7 @@ class LibraryUpdater:
             existing_requirement_assessment_objects = defaultdict(list)
             for ra in RequirementAssessment.objects.filter(
                 requirement__framework=new_framework
-            ):
+            ).select_related("compliance_assessment"):
                 existing_requirement_assessment_objects[
                     ra.requirement.urn.lower()
                 ].append(ra)
@@ -540,6 +581,92 @@ class LibraryUpdater:
             requirement_node_objects_to_update = []
             order_id = 0
             all_fields_to_update = set()
+
+            # Check if score boundaries changed
+            score_boundaries_changed = (
+                prev_min != new_framework.min_score
+                or prev_max != new_framework.max_score
+                or prev_def != new_framework.scores_definition
+            )
+
+            # If scores changed and no strategy provided, raise exception for frontend to handle
+            if (
+                score_boundaries_changed
+                and self.strategy is None
+                and compliance_assessments
+            ):
+                # Check which assessments would be affected
+                affected_cas = [
+                    ca
+                    for ca in compliance_assessments
+                    if (
+                        ca.min_score == prev_min
+                        and ca.max_score == prev_max
+                        and ca.scores_definition == prev_def
+                    )
+                ]
+
+                if affected_cas:
+                    raise self.ScoreChangeDetected(
+                        framework_urn=new_framework.urn,
+                        prev_scores={
+                            "min_score": prev_min,
+                            "max_score": prev_max,
+                            "scores_definition": prev_def,
+                        },
+                        new_scores={
+                            "min_score": new_framework.min_score,
+                            "max_score": new_framework.max_score,
+                            "scores_definition": new_framework.scores_definition,
+                        },
+                        affected_assessments=[ca.id for ca in affected_cas],
+                    )
+
+            # Update compliance assessments score boundaries
+            compliance_assessments_to_update = []
+            for ca in compliance_assessments:
+                # preserve user overrides: update only if CA still equals previous framework defaults
+                still_on_prev_defaults = (
+                    ca.min_score == prev_min
+                    and ca.max_score == prev_max
+                    and ca.scores_definition == prev_def
+                )
+
+                if still_on_prev_defaults and score_boundaries_changed:
+                    ca.min_score = new_framework.min_score
+                    ca.max_score = new_framework.max_score
+                    ca.scores_definition = new_framework.scores_definition
+                    compliance_assessments_to_update.append(ca)
+
+            if compliance_assessments_to_update:
+                ComplianceAssessment.objects.bulk_update(
+                    compliance_assessments_to_update,
+                    ["min_score", "max_score", "scores_definition"],
+                    batch_size=100,
+                )
+                ca_bounds = {
+                    ca.id: (
+                        (
+                            ca.min_score
+                            if ca.min_score is not None
+                            else (
+                                new_framework.min_score
+                                if new_framework.min_score is not None
+                                else 0
+                            )
+                        ),
+                        (
+                            ca.max_score
+                            if ca.max_score is not None
+                            else (
+                                new_framework.max_score
+                                if new_framework.max_score is not None
+                                else 100
+                            )
+                        ),
+                    )
+                    for ca in compliance_assessments_to_update
+                }
 
             # main loop by requirement_node
             for requirement_node in requirement_nodes:
@@ -579,10 +706,67 @@ class LibraryUpdater:
                             )
                         )
 
-                # update anwsers for each ra for the current requirement_node, when relevant
+                # update answers or score for each ra for the current requirement_node, when relevant
                 for ra in existing_requirement_assessment_objects.get(urn, []):
+                    if (
+                        ra.is_scored
+                        and ra.score is not None
+                        and ra.compliance_assessment in compliance_assessments_to_update
+                    ):
+                        default_min = (
+                            0
+                            if new_framework.min_score is None
+                            else new_framework.min_score
+                        )
+                        default_max = (
+                            100
+                            if new_framework.max_score is None
+                            else new_framework.max_score
+                        )
+                        ca_min, ca_max = ca_bounds.get(
+                            ra.compliance_assessment_id, (default_min, default_max)
+                        )
+
+                        # Apply the chosen strategy for score transformation
+                        if self.strategy == "reset":
+                            # Strategy 1: Reset all scores to None
+                            ra.score = None
+                            ra.is_scored = False
+                            requirement_assessment_objects_to_update.append(ra)
+
+                        elif self.strategy == "rule_of_three":
+                            # Strategy 2: Proportional scaling (rule of three)
+                            # Convert score from old range to new range
+                            if (
+                                prev_min is not None
+                                and prev_max is not None
+                                and prev_min != prev_max
+                            ):
+                                # Normalize to 0-1 range based on old boundaries
+                                normalized = (ra.score - prev_min) / (
+                                    prev_max - prev_min
+                                )
+                                # Scale to new range
+                                scaled = ca_min + (normalized * (ca_max - ca_min))
+                                # Round to int and clamp into [ca_min, ca_max]
+                                ra.score = max(min(int(round(scaled)), ca_max), ca_min)
+                            else:
+                                # If old range was invalid, clamp instead
+                                clamped = min(max(ra.score, ca_min), ca_max)
+                                if clamped != ra.score:
+                                    ra.score = clamped
+                                    requirement_assessment_objects_to_update.append(ra)
+
+                        else:  # strategy == 'clamp' or default behavior
+                            # Strategy 3: Clamp to new boundaries (comportement par défaut)
+                            clamped = min(max(ra.score, ca_min), ca_max)
+                            if clamped != ra.score:
+                                ra.score = clamped
+                                requirement_assessment_objects_to_update.append(ra)
+
                     if not questions:
-                        requirement_assessment_objects_to_update.append(ra)
+                        if ra not in requirement_assessment_objects_to_update:
+                            requirement_assessment_objects_to_update.append(ra)
                         continue
 
                     answers = ra.answers or {}
@@ -652,7 +836,8 @@ class LibraryUpdater:
                                     answers[urn] = None
 
                     ra.answers = answers
-                    requirement_assessment_objects_to_update.append(ra)
+                    if ra not in requirement_assessment_objects_to_update:
+                        requirement_assessment_objects_to_update.append(ra)
 
                 # update threats linked to the requirement_node
                 for threat_urn in requirement_node.get("threats", []):
@@ -693,9 +878,20 @@ class LibraryUpdater:
             if requirement_assessment_objects_to_update:
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessment_objects_to_update,
-                    ["answers"],
+                    ["answers", "score", "is_scored"],
                     batch_size=100,
                 )
+                # Keep selected_implementation_groups consistent for dynamic frameworks
+                if new_framework.is_dynamic():
+                    impacted_ca_ids = {
+                        ra.compliance_assessment_id
+                        for ra in requirement_assessment_objects_to_update
+                        if ra.answers is not None  # answers potentially changed
+                    }
+                    for ca in ComplianceAssessment.objects.filter(
+                        id__in=impacted_ca_ids
+                    ):
+                        update_selected_implementation_groups(ca)
 
             if requirement_assessment_objects_to_create:
                 RequirementAssessment.objects.bulk_create(
@@ -869,7 +1065,7 @@ class LoadedLibrary(LibraryMixin):
     )
 
     @transaction.atomic
-    def update(self) -> Union[str, None]:
+    def update(self, strategy=None) -> Union[str, None]:
         new_libraries = [
             *StoredLibrary.objects.filter(
                 urn=self.urn, locale=self.locale, version__gt=self.version
@@ -880,7 +1076,7 @@ class LoadedLibrary(LibraryMixin):
             return "libraryHasNoUpdate"
 
         new_library = max(new_libraries, key=lambda lib: lib.version)
-        library_updater = LibraryUpdater(self, new_library)
+        library_updater = LibraryUpdater(self, new_library, strategy)
         return library_updater.update_library()
 
     @property
