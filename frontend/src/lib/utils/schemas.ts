@@ -1309,3 +1309,11 @@ export const modelSchema = (model: string) => {
 export const composerSchema = z.object({
 	risk_assessments: z.array(z.string().uuid())
 });
+
+export const webhookEndpointSchema = z.object({
+	...NameDescriptionMixin,
+	url: z.string().url(),
+	event_types: z.array(z.string().min(1)),
+	is_active: z.boolean().default(true),
+	secret: z.string().min(1).optional()
+});
