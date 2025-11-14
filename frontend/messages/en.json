@@ -2560,6 +2560,8 @@
 	"showOverlapWithOtherFrameworks": "Show overlap with other frameworks",
 	"spPrivateKeyAlreadySetHelpText": "A private key has already been set. For security reasons, you cannot view it again. You can only replace it with a new one.",
 	"resetSpPrivateKey": "Reset private key",
+	"showEmptySections": "Show empty sections",
+	"hideEmptySections": "Hide empty sections",
 	"outgoingSync": "Outgoing sync",
 	"incomingSync": "Incoming sync",
 	"synced": "Synced",
