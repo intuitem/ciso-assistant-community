@@ -227,6 +227,27 @@
 		modalStore.trigger(modal);
 	}
 
+	function modalSendInvitation(id: string, name: string, action: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: { id: id, urlmodel: getModelInfo('representatives').urlModel },
+				id: id,
+				debug: false,
+				URLModel: getModelInfo('representatives').urlModel,
+				formAction: action
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`
+		};
+		modalStore.trigger(modal);
+	}
+
 	function getReverseForeignKeyEndpoint({
 		parentModel,
 		targetUrlModel,
@@ -632,6 +653,16 @@
 			{/if}
 
 			{#if displayEditButton()}
+				{#if data.urlModel === 'representatives'}
+					<button
+						class="btn preset-filled-ghost-500 mr-2"
+						onclick={() => modalSendInvitation(data.data.id, data.data.str || data.data.name, '?/resend-invitation')}
+						data-testid="send-invitation-button"
+					>
+						<i class="fa-solid fa-envelope mr-2"></i>
+						Send invitation
+					</button>
+				{/if}
 				{#if data.data.state === 'Created'}
 					<Tooltip
 						open={openStateRA && !data.data.approver}
