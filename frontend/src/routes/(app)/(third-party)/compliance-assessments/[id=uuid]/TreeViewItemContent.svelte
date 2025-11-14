@@ -242,10 +242,20 @@
 								>
 									{resultCounts[rp.result]}
 								</div>
-							{:else}
-								<div class="rounded-md px-1 bg-gray-100 text-gray-400 mx-1 leading-4">0</div>
 							{/if}
 						{/each}
+						{#if resultCounts && resultCounts['not_assessed'] !== undefined}
+							<div
+								class="rounded-md px-1 mx-1 leading-4"
+								style="background-color: {complianceResultColorMap[
+									'not_assessed'
+								]}; color: {complianceResultColorMap['not_assessed'] === '#000000'
+									? '#ffffff'
+									: '#111827'}"
+							>
+								{resultCounts['not_assessed']}
+							</div>
+						{/if}
 					</div>
 				{/if}
 				<div>
