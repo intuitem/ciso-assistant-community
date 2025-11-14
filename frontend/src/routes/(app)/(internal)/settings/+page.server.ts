@@ -17,6 +17,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const featureFlagSettings = await fetch(`${BASE_API_URL}/settings/feature-flags/`).then((res) =>
 		res.json()
 	);
+	const webhookEndpoints = await fetch(`${BASE_API_URL}/webhooks/endpoints/`)
+		.then((res) => res.json())
+		.then((res) => res.results);
 
 	const selectOptions: Record<string, any> = {};
 
@@ -98,6 +101,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		featureFlagSettings,
 		featureFlagForm,
 		featureFlagModel,
+		webhookEndpoints,
 		title: m.settings()
 	};
 };
