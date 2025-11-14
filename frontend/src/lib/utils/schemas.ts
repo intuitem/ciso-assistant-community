@@ -442,7 +442,7 @@ export const EvidenceSchema = z.object({
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
 	timeline_entries: z.string().optional().array().optional(),
-
+	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {

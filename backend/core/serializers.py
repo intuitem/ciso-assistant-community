@@ -14,7 +14,7 @@ from core.serializer_fields import (
 )
 from core.utils import time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
-from tprm.models import Solution
+from tprm.models import Contract, Solution
 from global_settings.utils import ff_is_enabled
 from iam.models import *
 from django.contrib.auth.models import Permission
@@ -1420,6 +1420,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
+    contracts = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     owner = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
@@ -1455,6 +1456,9 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     )
     timeline_entries = serializers.PrimaryKeyRelatedField(
         many=True, queryset=TimelineEntry.objects.all(), required=False
+    )
+    contracts = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Contract.objects.all(), required=False
     )
     owner = serializers.PrimaryKeyRelatedField(
         many=True, queryset=User.objects.all(), required=False
