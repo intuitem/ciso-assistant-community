@@ -32,6 +32,9 @@
 				// Fallback to a full navigation if preloading fails for any reason.
 				goto(href);
 			}
+		} else {
+			const href = `/settings`;
+			goto(href);
 		}
 	}
 </script>
@@ -64,7 +67,7 @@
 					schema={GeneralSettingsSchema}
 					model={data.generalSettingModel}
 					cancelButton={false}
-					action="?/general"
+					action="/settings?/general"
 				/>
 			</div>
 		</Tabs.Panel>
@@ -76,7 +79,7 @@
 					schema={SSOSettingsSchema}
 					model={data.ssoModel}
 					cancelButton={false}
-					action="?/sso"
+					action="/settings?/sso"
 				/>
 			</div>
 		</Tabs.Panel>
@@ -88,7 +91,7 @@
 					schema={FeatureFlagsSchema}
 					model={data.featureFlagModel}
 					cancelButton={false}
-					action="?/featureFlags"
+					action="/settings?/featureFlags"
 				/>
 			</div>
 		</Tabs.Panel>
