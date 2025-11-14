@@ -31,7 +31,6 @@
 	cacheLock={cacheLocks['provider_entity']}
 	bind:cachedValue={formDataCache['provider_entity']}
 	label={m.providerEntity()}
-	hidden={initialData.provider_entity}
 />
 <TextField
 	{form}

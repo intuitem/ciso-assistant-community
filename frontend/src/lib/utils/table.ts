@@ -702,12 +702,28 @@ export const PERTINENCE_FILTER: ListViewFilterConfig = {
 export const ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'parentEntity',
+		label: 'entity',
 		optionsEndpoint: 'entities',
 		multiple: true
 	}
 };
 
+export const PROVIDER_ENTITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'providerEntity',
+		optionsEndpoint: 'entities',
+		multiple: true
+	}
+};
+export const BENEFICIARY_ENTITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'beneficiaryEntity',
+		optionsEndpoint: 'entities',
+		multiple: true
+	}
+};
 export const SOLUTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1527,8 +1543,8 @@ export const listViewFields = {
 		}
 	},
 	solutions: {
-		head: ['refId', 'name', 'description', 'providerEntity', 'recipientEntity', 'criticality'],
-		body: ['ref_id', 'name', 'description', 'provider_entity', 'recipient_entity', 'criticality'],
+		head: ['refId', 'name', 'description', 'providerEntity', 'criticality'],
+		body: ['ref_id', 'name', 'description', 'provider_entity', 'criticality'],
 		filters: {
 			provider_entity: ENTITY_FILTER,
 			criticality: SOLUTION_CRITICALITY_FILTER
@@ -1559,8 +1575,8 @@ export const listViewFields = {
 		],
 		filters: {
 			status: CONTRACT_STATUS_FILTER,
-			provider_entity: ENTITY_FILTER,
-			beneficiary_entity: ENTITY_FILTER,
+			provider_entity: PROVIDER_ENTITY_FILTER,
+			beneficiary_entity: BENEFICIARY_ENTITY_FILTER,
 			solution: SOLUTION_FILTER
 		}
 	},
