@@ -313,11 +313,12 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:aud
       ref_id: AUD.02
-      description: "Un audit de l\u2019application ou de l\u2019organisation peut\
-        \ \xEAtre r\xE9alis\xE9."
+      description: "Des tests de p\xE9n\xE9tration sont conduits r\xE9guli\xE8rement\
+        \ par une entit\xE9 ind\xE9pendante."
       translations:
         en:
-          description: Penetration tests (pentests) are conducted regularly.
+          description: Penetration tests (pentests) are conducted regularly by an
+            independent entity.
     - urn: urn:intuitem:risk:req_node:vendor-due-diligence:aud.03
       assessable: true
       depth: 2
@@ -359,7 +360,7 @@ objects:
       assessable: false
       depth: 1
       ref_id: BAK
-      name: "Gestion de la continuit\xE9"
+      name: "Plan de continuit\xE9"
       translations:
         en:
           name: Business continuity
