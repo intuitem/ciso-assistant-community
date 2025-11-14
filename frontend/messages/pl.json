@@ -1646,8 +1646,14 @@
 	"associatedFindingsAssessments": "Powiązane dalsze działania",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Godzina",
 				"countPlural=few": "{count} Godziny",
@@ -1657,8 +1663,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Minuta",
 				"countPlural=few": "{count} Minuty",
@@ -1668,8 +1679,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Dzień",
 				"countPlural=few": "{count} Dni",
@@ -1719,5 +1735,6 @@
 	"samlAuthnRequestSignedHelpText": "Gdy włączone, żądanie uwierzytelniania SAML jest podpisywane kluczem prywatnym poniżej. Odpowiedni certyfikat publiczny jest wysyłany do dostawcy tożsamości, aby mógł zweryfikować podpis.",
 	"downloadCertificate": "Pobierz certyfikat",
 	"viewMore": "Voir plus",
-	"viewLess": "Voir moins"
+	"viewLess": "Voir moins",
+	"loginFailed": "Logowanie nieudane"
 }

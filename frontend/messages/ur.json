@@ -899,8 +899,14 @@
 	"associatedFindingsAssessments": "متعلقہ فالو اپز",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "گھنٹہ {count}",
 				"countPlural=other": "گھنٹے {count}"
@@ -909,8 +915,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "منٹ {count}",
 				"countPlural=other": "منٹ {count}"
@@ -919,8 +930,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "دن {count}",
 				"countPlural=other": "دن {count}"
@@ -947,5 +963,6 @@
 	"samlAuthnRequestSignedHelpText": "جب فعال ہو، تو SAML توثیق کی درخواست نیچے دی گئی پریویٹ کلی کے ساتھ سائن کی جاتی ہے۔ متعلقہ پبلک سرٹیفکیٹ کو شناخت فراہم کنندہ کو بھیجا جاتا ہے تاکہ وہ دستخط کی تصدیق کر سکے۔",
 	"downloadCertificate": "سرٹیفکیٹ ڈاؤن لوڈ کریں",
 	"viewMore": "مزید دیکھیں",
-	"viewLess": "کم دیکھیں"
+	"viewLess": "کم دیکھیں",
+	"loginFailed": "لاگ ان ناکام"
 }

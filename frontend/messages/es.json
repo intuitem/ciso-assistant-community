@@ -938,8 +938,14 @@
 	"associatedFindingsAssessments": "Seguimientos asociados",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Hora",
 				"countPlural=other": "{count} Horas"
@@ -948,8 +954,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Minuto",
 				"countPlural=other": "{count} Minutos"
@@ -958,8 +969,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Día",
 				"countPlural=other": "{count} Días"
@@ -986,5 +1002,6 @@
 	"samlAuthnRequestSignedHelpText": "Cuando está habilitado, la solicitud de autenticación SAML se firma con la clave privada a continuación. El certificado público correspondiente se envía al Proveedor de Identidad para que pueda verificar la firma.",
 	"downloadCertificate": "Descargar certificado",
 	"viewMore": "Ver más",
-	"viewLess": "Ver menos"
+	"viewLess": "Ver menos",
+	"loginFailed": "Inicio fallido"
 }

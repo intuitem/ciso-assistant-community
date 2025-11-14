@@ -900,8 +900,14 @@
 	"associatedFindingsAssessments": "संबद्ध फॉलो-अप",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} घंटा",
 				"countPlural=other": "{count} घंटे"
@@ -910,8 +916,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} मिनट",
 				"countPlural=other": "{count} मिनट"
@@ -920,8 +931,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} दिन",
 				"countPlural=other": "{count} दिन"
@@ -948,5 +964,6 @@
 	"samlAuthnRequestSignedHelpText": "जब सक्षम किया जाता है, तो SAML प्रमाणीकरण अनुरोध नीचे दिए गए निजी कुंजी के साथ हस्ताक्षरित किया जाता है। संबंधित सार्वजनिक सर्टिफिकेट को पहचान प्रदाता को भेजा जाता है ताकि यह हस्ताक्षर की पुष्टि कर सके।",
 	"downloadCertificate": "सर्टिफिकेट डाउनलोड करें",
 	"viewMore": "और देखें",
-	"viewLess": "कम देखें"
+	"viewLess": "कम देखें",
+	"loginFailed": "लॉगिन विफल"
 }

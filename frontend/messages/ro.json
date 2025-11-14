@@ -928,8 +928,14 @@
 	"associatedFindingsAssessments": "Urmărire asociată",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Oră",
 				"countPlural=other": "{count} Ore"
@@ -938,8 +944,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Minut",
 				"countPlural=other": "{count} Minute"
@@ -948,8 +959,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Zi",
 				"countPlural=other": "{count} Zile"
@@ -976,5 +992,6 @@
 	"samlAuthnRequestSignedHelpText": "Când este activat, cererea de autentificare SAML este semnată cu cheia privată de mai jos. Certificatul public corespunzător este trimis furnizorului de identitate pentru a putea verifica semnătura.",
 	"downloadCertificate": "Descărcați certificatul",
 	"viewMore": "Vizualizați mai mult",
-	"viewLess": "Vizualizați mai puțin"
+	"viewLess": "Vizualizați mai puțin",
+	"loginFailed": "Autentificare eșuată"
 }

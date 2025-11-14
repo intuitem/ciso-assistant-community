@@ -899,8 +899,14 @@
 	"associatedFindingsAssessments": "التقييمات المرتبطة",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["count", "countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"count",
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "ساعة {count} ",
 				"countPlural=other": "ساعات {count} "
@@ -909,8 +915,13 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "دقيقة {count}",
 				"countPlural=other": "دقائق {count}"
@@ -919,8 +930,13 @@
 	],
 	"dayCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "يوم {count}",
 				"countPlural=other": "أيام {count}"
@@ -947,5 +963,6 @@
 	"samlAuthnRequestSignedHelpText": "عند التمكين، يتم توقيع طلب المصادقة SAML بالمفتاح الخاص أدناه. يتم إرسال الشهادة العامة المقابلة إلى موفر الهوية حتى يتمكن من التحقق من التوقيع.",
 	"downloadCertificate": "تنزيل الشهادة",
 	"viewMore": "عرض المزيد",
-	"viewLess": "عرض أقل"
+	"viewLess": "عرض أقل",
+	"loginFailed": "فشل الدخول"
 }

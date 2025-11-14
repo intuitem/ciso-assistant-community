@@ -1638,8 +1638,13 @@
 	"associatedFindingsAssessments": "Συνδεδεμένες παρακολουθήσεις",
 	"hourCount": [
 		{
-			"declarations": ["input count", "local countPlural = count: plural"],
-			"selectors": ["countPlural"],
+			"declarations": [
+				"input count",
+				"local countPlural = count: plural"
+			],
+			"selectors": [
+				"countPlural"
+			],
 			"match": {
 				"countPlural=one": "{count} Ώρα",
 				"countPlural=other": "{count} Ώρες"
@@ -1676,5 +1681,6 @@
 	"samlAuthnRequestSignedHelpText": "Όταν είναι ενεργοποιημένο, το αίτημα αυθεντικοποίησης SAML υπογράφεται με το ιδιωτικό κλειδί παρακάτω. Το αντίστοιχο δημόσιο πιστοποιητικό αποστέλλεται στον πάροχο ταυτότητας ώστε να μπορέσει να επαληθεύσει την υπογραφή.",
 	"downloadCertificate": "Λήψη πιστοποιητικού",
 	"viewMore": "Προβολή περισσότερων",
-	"viewLess": "Προβολή λιγότερων"
+	"viewLess": "Προβολή λιγότερων",
+	"loginFailed": "Αποτυχία σύνδεσης"
 }
