@@ -1503,6 +1503,7 @@
 	"demoDataAlreadyImported": "Les données de démonstration ont déjà été importées. Effacez ou renommez le domaine DEMO existant.",
 	"finding": "Constat",
 	"findings": "Constats",
+	"findingsExplorer": "Tableau combiné des constats",
 	"associatedFindings": "Constats associés",
 	"findingsAssessment": "Suivi",
 	"findingsAssessments": "Suivis",
