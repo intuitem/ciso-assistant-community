@@ -1,9 +1,11 @@
+import signal
 from pathlib import Path
 
-import structlog, signal
+import structlog
+from django.core.management.base import BaseCommand
+
 from ciso_assistant.settings import LIBRARIES_PATH
 from core.models import StoredLibrary
-from django.core.management.base import BaseCommand
 
 logger = structlog.getLogger(__name__)
 

@@ -93,6 +93,7 @@
 		taintedMessage?: string | boolean;
 		model: ModelInfo;
 		context?: string;
+		origin?: string | null;
 		caching?: boolean;
 		closeModal?: boolean;
 		parent?: any;
@@ -113,6 +114,7 @@
 		taintedMessage = m.taintedFormMessage(),
 		model,
 		context = 'default',
+		origin = null,
 		caching = false,
 		closeModal = false,
 		parent = {},
@@ -262,6 +264,13 @@
 >
 	{#snippet children({ form, data, initialData })}
 		<input type="hidden" name="urlmodel" value={model.urlModel} />
+		{#if additionalInitialData?.genericcollection}
+			<input
+				type="hidden"
+				name="genericcollection"
+				value={additionalInitialData.genericcollection}
+			/>
+		{/if}
 		<!--NOTE: Not the cleanest pattern, will refactor-->
 		<!--TODO: Refactor-->
 		{#if shape.reference_control && !duplicate}
@@ -367,7 +376,9 @@
 				{cacheLocks}
 				{formDataCache}
 				{schema}
+				{origin}
 				{initialData}
+				{context}
 				{...rest}
 			/>
 		{:else if URLModel === 'vulnerabilities'}

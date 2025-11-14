@@ -1,0 +1,256 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:cloud-sovereignty-framework
+locale: en
+ref_id: cloud-sovereignty-framework
+name: Cloud Sovereignty Framework
+description: Cloud Sovereignty Framework - version 1.2.1 - Oct 2025
+copyright: EUROPEAN COMMISSION
+version: 2
+publication_date: 2025-10-30
+provider: EUROPEAN COMMISSION
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cloud-sovereignty-framework
+    ref_id: cloud-sovereignty-framework
+    name: Cloud Sovereignty Framework
+    description: Cloud Sovereignty Framework - version 1.2.1 - Oct 2025
+    min_score: 0
+    max_score: 4
+    scores_definition:
+    - score: 0
+      name: SEAL-0
+      description: 'No Sovereignty:
+
+        Service, technology or operations under exclusive control of non-EU third
+        parties, governed entirely in non-EU jurisdictions.'
+    - score: 1
+      name: SEAL-1
+      description: 'Jurisdictional Sovereignty:
+
+        EU law formally applies with limited practical enforceability; service, technology
+        or operations under exclusive control of non-EU third parties.'
+    - score: 2
+      name: SEAL-2
+      description: 'Data Sovereignty:
+
+        EU law applicable and enforceable, with material non-EU dependencies remaining;
+        service, technology or operations under indirect control of non-EU third parties.'
+    - score: 3
+      name: SEAL-3
+      description: 'Digital Resilience:
+
+        EU law applicable and enforceable, EU actors exercising meaningful but not
+        full influence; service, technology or operations under marginal control of
+        non-EU third parties.'
+    - score: 4
+      name: SEAL-4
+      description: 'Full Digital Sovereignty:
+
+        Technology and operations under complete EU control, subject only to EU law,
+        with no critical non-EU dependencies.'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework:sov-1
+      assessable: true
+      depth: 1
+      ref_id: SOV-1
+      name: Strategic Sovereignty
+      description: Strategic sovereignty captures the degree to which the services
+        of a cloud provider (or technology actor) are anchored within the European
+        Union legal, financial, and industrial ecosystem. It assesses ownership stability,
+        governance influence, and alignment with EU strategic priorities.
+      annotation: '- Ensuring that bodies having decisive authority over your services
+        are located within EU jurisdiction,
+
+        - Evaluating the assurances against change of control.
+
+        - Degree to which the provider relies on financing coming from EU sources.
+
+        - Extent of investment, jobs, and value creation within EU.
+
+        - Involvement in EU initiatives, Consistency with digital, green, and industrial
+        sovereignty objectives defined at EU level.
+
+        - Ability to sustain secure operations against requests to cease or suspend
+        the service, or if vendor support is withdrawn or disrupted.'
+      weight: 15
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework:sov-2
+      assessable: true
+      depth: 1
+      ref_id: SOV-2
+      name: Legal & Jurisdictional Sovereignty
+      description: 'Legal & Jurisdictional sovereignty evaluates the legal environment,
+
+        exposure to foreign authority, and enforceability of rights that govern
+
+        the services of a technology provider. It determines the extent to which
+
+        the services are anchored in European jurisdiction and insulated from
+
+        external legal claims.'
+      annotation: "- The national legal system governing the provider\u2019s operations\
+        \ and contracts.\n- Degree of exposure to non-EU laws with cross-border reach\
+        \ (e.g., US CLOUD Act, Chinese Cybersecurity Law).\n- Existence of legal,\
+        \ contractual, or technical channels through which non-EU authorities could\
+        \ compel access to data or systems.\n- Applicability of international regimes,\
+        \ which may restrict usage or transfer.\n- Location of intellectual property\
+        \ creation, registration, and development (EU vs. third countries), legal\
+        \ jurisdiction where IP is created and developed."
+      weight: 10
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework:sov-3
+      assessable: true
+      depth: 1
+      ref_id: SOV-3
+      name: Data & AI Sovereignty
+      description: 'Data & AI sovereignty focuses on the protection, control, and
+
+        independence of data assets and AI services within the EU. It addresses how
+        data is secured, where it is processed, and the degree of autonomy
+
+        customers retain over AI capabilities.'
+      annotation: '- Ensuring that only the customer, not the provider, has effective
+        control over cryptographic access to their data.
+
+        - Visibility into when, where, and by whom data is accessed, including auditability
+        of AI model usage, mechanisms guaranteeing irreversible removal of data, with
+        verifiable evidence.
+
+        - Strict confinement of storage and processing to European jurisdictions,
+        with no fallback to third countries.
+
+        - Extent to which AI models and data pipelines are developed, trained, hosted,
+        and governed under EU control, minimizing dependency on non-EU technology
+        stacks.'
+      weight: 10
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework:sov-4
+      assessable: true
+      depth: 1
+      ref_id: SOV-4
+      name: Operational Sovereignty
+      description: 'Operational sovereignty measures the practical ability of EU actors
+        to
+
+        run, support, and evolve a technology independently of foreign
+
+        control. It focuses on continuity of operations, skill availability, and
+
+        resilience against external dependencies.'
+      annotation: '- Ease of migrating workloads or integrating with alternative EU-controlled
+        solutions without vendor lock-in.
+
+        - Capacity for EU operators to manage, maintain, and support the technology
+        without requiring non-EU vendor involvement
+
+        - Existence of an EU-based talent pool with the expertise to operate and sustain
+        the service.
+
+        - Assurance that operational support is delivered from within the EU and subject
+        exclusively to EU legal frameworks
+
+        - Availability of full technical documentation, source code, and operational
+        know-how enabling long-term autonomy.
+
+        - Location and legal control of critical suppliers or subcontractors involved
+        in service delivery.'
+      weight: 15
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework:sov-5
+      assessable: true
+      depth: 1
+      ref_id: SOV-5
+      name: Supply Chain Sovereignty
+      description: 'Supply chain sovereignty evaluates the geographic origin,
+
+        transparency, and resilience of the technology supply chain, focusing
+
+        on the extent to which critical components and processes remain under EU control
+        or exposed to non-EU dependencies.'
+      annotation: '- Geographic source of key physical parts, manufacturing location
+        - countries where hardware is manufactured or assembled
+
+        - Jurisdiction and provenance of embedded code controlling hardware,firmware
+
+        - Origin of Software: where and by whom software is architected and programmed,
+        location and jurisdiction governing software packaging, distribution, and
+        updates.
+
+        - Degree of reliance on non-EU vendors, facilities, or proprietary technologies
+
+        - Visibility into the entire supplier and sub-supplier chain, including audit
+        rights.'
+      weight: 20
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework:sov-6
+      assessable: true
+      depth: 1
+      ref_id: SOV-6
+      name: Technology Sovereignty
+      description: 'Technology sovereignty evaluates the degree of openness,
+
+        transparency, and independence in the underlying technological
+
+        stack, ensuring EU actors can interoperate, audit, and evolve solutions
+
+        without lock-in to foreign proprietary systems.'
+      annotation: '- Ability to integrate with other technologies through well-documented
+        and non-proprietary APIs or protocols, extent to which the solution adheres
+        to publicly governed and widely adopted standards, reducing dependency on
+        single vendors
+
+        - Whether software is accessible under open licenses, with rights to audit,
+        modify, and redistribute, ensuring transparency and adaptability
+
+        - Visibility into the design and functioning of the service, including architectural
+        documentation, data flows, and dependencies
+
+        - Degree of EU independence in high-performance computing capabilities, including
+        processors, accelerators, and software ecosystems.'
+      weight: 15
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework:sov-7
+      assessable: true
+      depth: 1
+      ref_id: SOV-7
+      name: Security & Compliance Sovereignty
+      description: 'Security & Compliance sovereignty measures the extent to which
+
+        security operations, compliance obligations, and resilience measures
+
+        are controlled within the EU, ensuring independence from foreign
+
+        jurisdictions and long-term operational assurance.'
+      annotation: '- Attainment of EU and internationally recognized certifications
+        (e.g., ISO, ENISA schemes)
+
+        - Adherence to GDPR, NIS2, DORA, and other EU frameworks
+
+        - Security Operations Centres and response teams operating
+
+        exclusively under EU jurisdiction, control over security monitoring/logging
+        - customer or EU authority ability to oversee logs, alerts, and monitoring
+        functions directly.
+
+        - Transparent, timely, and EU-compliant reporting of breaches or vulnerabilities,
+        maintenance Autonomy - ability to develop, test, and apply security patches
+        independently of non-EU vendors
+
+        - Capacity for EU entities to perform independent security and compliance
+        audits with full access.'
+      weight: 10
+    - urn: urn:intuitem:risk:req_node:cloud-sovereignty-framework:sov-8
+      assessable: true
+      depth: 1
+      ref_id: SOV-8
+      name: Environmental Sustainability
+      description: Environmental sustainability assesses autonomy and resilience of
+        cloud services over the long term in relation to energy usage, dependency
+        and raw material scarcity.
+      annotation: '- Adoption of energy-efficient infrastructure (e.g., low PUE) and
+        measurable improvement targets.
+
+        - Circular economy practices ensuring reuse, refurbishment, and responsible
+        end-of-life treatment of hardware.
+
+        - Transparent measurement and disclosure of carbon emissions, water usage,
+        and other sustainability indicators.
+
+        - Sourcing of renewable or low-carbon energy to power infrastructure and operations'
+      weight: 5

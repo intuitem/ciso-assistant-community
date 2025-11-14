@@ -1,4 +1,5 @@
 from ctypes import sizeof
+from django.db.models import Q
 from icecream import ic
 from core.models import (
     Framework,
@@ -59,7 +60,15 @@ class MappingEngine:
         Loads requirement mapping sets (RMS) from libraries.
         Builds internal structures: all_rms and framework_mappings.
         """
-        for lib in StoredLibrary.objects.all():
+        self.framework_mappings = defaultdict(list)
+        self.direct_mappings = set()
+        self.all_rms = {}
+
+        for lib in StoredLibrary.objects.filter(
+            Q(content__requirement_mapping_set__isnull=False)
+            | Q(content__requirement_mapping_sets__isnull=False),
+            is_loaded=True,
+        ):
             library_urn = lib.urn
             content = lib.content
 
@@ -195,6 +204,59 @@ class MappingEngine:
         for path_list in paths.values():
             yield from path_list
 
+    def get_mapping_graph(self, max_depth: int = 3) -> list[list[str]]:
+        """
+        Generates a graph of all connected frameworks by finding all
+        simple paths (no cycles) up to a given max_depth.
+
+        The `max_depth` refers to the number of nodes in the path.
+        - max_depth = 2 (minimum): Returns only direct mappings [A, B]
+        - max_depth = 3 (default): Returns [A, B] and [A, B, C]
+
+        Args:
+            max_depth: The maximum length (number of nodes) for any
+                       mapping path. Defaults to 3.
+
+        Returns:
+            A list of all unique mapping paths found, where each path
+            is a list of framework URNs.
+        """
+        # Enforce minimum max_depth of 2 (for a direct A -> B mapping)
+        if max_depth < 2:
+            max_depth = 2
+
+        all_paths: list[list[str]] = []
+        found_paths_set: set[tuple[str, ...]] = set()
+
+        # start a search from every framework as a potential source
+        for start_node in self.frameworks.keys():
+            # The queue will store the path explored so far
+            queue: deque[list[str]] = deque()
+            queue.append([start_node])
+
+            while queue:
+                current_path = queue.popleft()
+                current_node = current_path[-1]
+
+                # Store the path if it's a valid mapping (len >= 2)
+                #    and we haven't seen it before.
+                if len(current_path) >= 2:
+                    path_tuple = tuple(current_path)
+                    if path_tuple not in found_paths_set:
+                        all_paths.append(current_path)
+                        found_paths_set.add(path_tuple)
+
+                # If we are not yet at max_depth, explore neighbors
+                if len(current_path) < max_depth:
+                    for neighbor in self.framework_mappings.get(current_node, []):
+                        # Avoid cycles within the *current* path
+                        if neighbor not in current_path:
+                            # Create and enqueue the new path
+                            new_path = current_path + [neighbor]
+                            queue.append(new_path)
+
+        return all_paths
+
     def map_audit_results(
         self,
         source_audit: dict[str, str | dict[str, str]],
@@ -202,15 +264,14 @@ class MappingEngine:
     ) -> dict[str, str | dict[str, str]]:
         if not source_audit.get("requirement_assessments"):
             return {}
-        target_audit: dict[str, str | dict[str, str]] = defaultdict(dict)
+        target_audit: dict[str, str | dict[str, str | dict[str, str]]] = {
+            "requirement_assessments": defaultdict(dict)
+        }
         # Framework info may be missing (library references frameworks not in DB).
         # Use .get() and treat missing info as "non equal" so we don't attempt
         # to copy scores that cannot be validated against a target framework.
         target_framework_urn = requirement_mapping_set.get("target_framework_urn", "")
         target_framework = self.frameworks.get(target_framework_urn)
-        # TODO: Make this more resilient
-        if target_framework is not None:
-            ic(target_framework)
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
             dst = mapping["target_requirement_urn"]
@@ -235,65 +296,97 @@ class MappingEngine:
                     if dst in target_audit:
                         for m2m_field in self.m2m_fields:
                             if m2m_field in src_assessment:
-                                existing = set(target_audit[dst].get(m2m_field, []))
-                                new_values = set(src_assessment.get(m2m_field, []))
-                                target_audit[dst][m2m_field] = list(
-                                    existing | new_values
+                                existing = set(
+                                    target_audit["requirement_assessments"][dst].get(
+                                        m2m_field, []
+                                    )
                                 )
+                                new_values = set(src_assessment.get(m2m_field, []))
+                                target_audit["requirement_assessments"][dst][
+                                    m2m_field
+                                ] = list(existing | new_values)
                         # Keep the most restrictive result
                         if "result" in src_assessment:
-                            existing_result = target_audit[dst].get("result")
+                            existing_result = target_audit["requirement_assessments"][
+                                dst
+                            ].get("result")
                             new_result = src_assessment["result"]
-                            target_audit[dst]["result"] = self._most_restrictive_result(
-                                existing_result, new_result
+                            target_audit["requirement_assessments"][dst]["result"] = (
+                                self._most_restrictive_result(
+                                    existing_result, new_result
+                                )
                             )
                     else:
-                        target_audit[dst] = src_assessment.copy()
+                        target_audit["requirement_assessments"][dst] = (
+                            src_assessment.copy()
+                        )
                 else:
                     for field in self.fields_to_map:
                         if field not in ["score", "is_scored"]:
                             if field == "result" and dst in target_audit:
                                 # Keep the most restrictive result
-                                existing_result = target_audit[dst].get("result")
+                                existing_result = target_audit[
+                                    "requirement_assessments"
+                                ][dst].get("result")
                                 new_result = src_assessment.get(field)
-                                target_audit[dst][field] = (
+                                target_audit["requirement_assessments"][dst][field] = (
                                     self._most_restrictive_result(
                                         existing_result, new_result
                                     )
                                 )
                             else:
-                                target_audit[dst][field] = src_assessment.get(field)
+                                target_audit["requirement_assessments"][dst][field] = (
+                                    src_assessment.get(field)
+                                )
 
                     # Merge m2m fields for collisions
                     for m2m_field in self.m2m_fields:
                         if m2m_field in src_assessment:
-                            if dst in target_audit and m2m_field in target_audit[dst]:
-                                existing = set(target_audit[dst].get(m2m_field, []))
+                            if (
+                                dst in target_audit
+                                and m2m_field
+                                in target_audit["requirement_assessments"][dst]
+                            ):
+                                existing = set(
+                                    target_audit["requirement_assessments"][dst].get(
+                                        m2m_field, []
+                                    )
+                                )
                                 new_values = set(src_assessment.get(m2m_field, []))
-                                target_audit[dst][m2m_field] = list(
-                                    existing | new_values
-                                )
-                            else:
-                                target_audit[dst][m2m_field] = src_assessment.get(
+                                target_audit["requirement_assessments"][dst][
                                     m2m_field
-                                )
+                                ] = list(existing | new_values)
+                            else:
+                                target_audit["requirement_assessments"][dst][
+                                    m2m_field
+                                ] = src_assessment.get(m2m_field)
 
             elif (
                 rel in ("subset", "intersect")
                 and src in source_audit["requirement_assessments"]
             ):
-                result = source_audit["requirement_assessments"][src]["result"]
+                result = source_audit["requirement_assessments"][src].get("result")
 
                 # Merge applied_controls for collisions
                 src_applied_controls = source_audit["requirement_assessments"][src].get(
                     "applied_controls", []
                 )
-                if dst in target_audit and "applied_controls" in target_audit[dst]:
-                    existing = set(target_audit[dst]["applied_controls"])
+                if (
+                    dst in target_audit
+                    and "applied_controls"
+                    in target_audit["requirement_assessments"][dst]
+                ):
+                    existing = set(
+                        target_audit["requirement_assessments"][dst]["applied_controls"]
+                    )
                     new_values = set(src_applied_controls)
-                    target_audit[dst]["applied_controls"] = list(existing | new_values)
+                    target_audit["requirement_assessments"][dst]["applied_controls"] = (
+                        list(existing | new_values)
+                    )
                 else:
-                    target_audit[dst]["applied_controls"] = src_applied_controls
+                    target_audit["requirement_assessments"][dst]["applied_controls"] = (
+                        src_applied_controls
+                    )
 
                 # Merge other m2m fields
                 for m2m_field in self.m2m_fields:
@@ -304,24 +397,41 @@ class MappingEngine:
                         src_values = source_audit["requirement_assessments"][src].get(
                             m2m_field, []
                         )
-                        if dst in target_audit and m2m_field in target_audit[dst]:
-                            existing = set(target_audit[dst][m2m_field])
+                        if (
+                            dst in target_audit
+                            and m2m_field
+                            in target_audit["requirement_assessments"][dst]
+                        ):
+                            existing = set(
+                                target_audit["requirement_assessments"][dst][m2m_field]
+                            )
                             new_values = set(src_values)
-                            target_audit[dst][m2m_field] = list(existing | new_values)
+                            target_audit["requirement_assessments"][dst][m2m_field] = (
+                                list(existing | new_values)
+                            )
                         else:
-                            target_audit[dst][m2m_field] = src_values
+                            target_audit["requirement_assessments"][dst][m2m_field] = (
+                                src_values
+                            )
 
                 # Handle result: keep the most restrictive
-                if dst in target_audit and "result" in target_audit[dst]:
-                    existing_result = target_audit[dst]["result"]
-                    target_audit[dst]["result"] = self._most_restrictive_result(
-                        existing_result, result
+                if (
+                    dst in target_audit
+                    and "result" in target_audit["requirement_assessments"][dst]
+                ):
+                    existing_result = target_audit["requirement_assessments"][dst][
+                        "result"
+                    ]
+                    target_audit["requirement_assessments"][dst]["result"] = (
+                        self._most_restrictive_result(existing_result, result)
                     )
                 else:
                     if result in ("not_assessed", "non_compliant"):
-                        target_audit[dst]["result"] = result
+                        target_audit["requirement_assessments"][dst]["result"] = result
                     elif result in ("compliant", "partially_compliant"):
-                        target_audit[dst]["result"] = "partially_compliant"
+                        target_audit["requirement_assessments"][dst]["result"] = (
+                            "partially_compliant"
+                        )
         return target_audit
 
     def _most_restrictive_result(self, result1, result2):
@@ -397,7 +507,7 @@ class MappingEngine:
         audit_results = {
             "min_score": audit.min_score,
             "max_score": audit.max_score,
-            "requirement_assessments": {},
+            "requirement_assessments": defaultdict(dict),
         }
         for ra in all_ra:
             audit_results["requirement_assessments"][ra.requirement.urn] = {

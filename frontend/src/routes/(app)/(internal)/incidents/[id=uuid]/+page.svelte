@@ -17,7 +17,6 @@
 	import RowCount from '$lib/components/ModelTable/RowCount.svelte';
 	import Pagination from '$lib/components/ModelTable/Pagination.svelte';
 	import { listViewFields } from '$lib/utils/table';
-	import { browser } from '$app/environment';
 	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
@@ -26,8 +25,9 @@
 	import Select from '$lib/components/Forms/Select.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	import { canPerformAction } from '$lib/utils/access-control';
 	import {
@@ -225,7 +225,7 @@
 			>
 				{#if canEditObject}
 					<!-- new record form -->
-					<h1 class="text-xl font-bold mb-2">{m.addTimelineEntry()}</h1>
+					<h1 class="text-xl font-bold mb-1">{m.addTimelineEntry()}</h1>
 					<SuperForm
 						class="flex flex-col space-y-3"
 						action={formAction}
@@ -261,7 +261,8 @@
 								/>
 							{/key}
 							<TextField {form} field="entry" label={m.entry()} data-focusindex="0" />
-							<TextArea {form} field="observation" label={m.observation()} />
+							<MarkdownField {form} field="observation" label={m.observation()} />
+
 							{#key refreshKey}
 								<div class="flex items-end justify-center">
 									<div class="w-full mr-2">
@@ -319,7 +320,7 @@
 	</DetailView>
 
 	<div class="card shadow-lg bg-white p-4 space-y-2">
-		<div class="flex flex-row justify-between items-center">
+		<div class="flex flex-row justify-between items-center mb-4">
 			<h1 class="text-xl font-bold">{m.timeline()}</h1>
 			<Search {handler} />
 			<RowsPerPage {handler} />
@@ -328,13 +329,13 @@
 			{#each $rows as row, rowIndex}
 				{@const meta = row?.meta ?? row}
 				{@const actionsURLModel = 'timeline-entries'}
-				<li class="mb-10 ms-4">
+				<li class="ms-4">
 					<div
 						class="absolute w-3 h-3 bg-primary-500 rounded-full mt-1.5 -start-1.5 border border-white dark:border-primary-900 dark:bg-primary-700"
 					></div>
 					<div class="flex flex-col">
-						<div class="flex flex-row items-center space-x-3">
-							<time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
+						<div class="flex flex-row items-center space-x-3 mb-1">
+							<time class="text-sm font-normal leading-none text-gray-600 dark:text-gray-800">
 								{formatDateOrDateTime(meta.timestamp, getLocale())} - {#if meta.author}{meta?.author
 										?.str}{:else}{m.unknownOrDeletedUser()}{/if}</time
 							>
@@ -355,19 +356,40 @@
 								</span>
 							{/if}
 						</div>
-						<div class="mb-1">
-							<span class="text-xs font-mono bg-violet-700 text-white p-1 rounded-sm"
+						<div class="flex mb-2">
+							<span class="text-xs font-mono bg-violet-700 text-white py-1 px-2 rounded-sm mr-1"
 								>{safeTranslate(meta.entry_type)}</span
 							>
+							<a
+								href={`/${actionsURLModel}/${meta.id}`}
+								class="font-semibold capitalize"
+								data-testid="name-entry-{rowIndex}">{safeTranslate(meta.entry)}</a
+							>
 						</div>
-						<a
-							href={`/${actionsURLModel}/${meta.id}`}
-							class="font-semibold capitalize"
-							data-testid="name-entry-{rowIndex}">{safeTranslate(meta.entry)}</a
-						>
-						<p class="text-xs italic text-gray-500 dark:text-gray-400 whitespace-pre-line">
-							{meta.observation ?? m.noObservation()}
-						</p>
+						<div class="py-1 mb-2">
+							{#if meta.observation}
+								<MarkdownRenderer content={meta.observation} class="bg-primary-50 rounded-lg p-2" />
+							{:else}
+								<p class="italic text-gray-500 dark:text-gray-400">{m.noObservation()}</p>
+							{/if}
+						</div>
+						{#if meta.evidences && meta.evidences.length > 0}
+							<div class="mb-2">
+								<p class="text-xs font-medium text-gray-700 mb-1">{m.associatedEvidences()}:</p>
+								<div class="flex flex-wrap gap-1">
+									{#each meta.evidences as evidence}
+										<a
+											href={`/evidences/${evidence.id}`}
+											class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hover:bg-blue-200 transition-colors max-w-50"
+											title={evidence.str}
+										>
+											<i class="fa-solid fa-paperclip mr-1 flex-shrink-0"></i>
+											<span class="truncate">{evidence.str}</span>
+										</a>
+									{/each}
+								</div>
+							</div>
+						{/if}
 					</div>
 				</li>
 			{/each}
