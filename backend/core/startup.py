@@ -956,6 +956,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # webhooks
+    "add_webhookendpoint",
+    "view_webhookendpoint",
+    "change_webhookendpoint",
+    "delete_webhookendpoint",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
