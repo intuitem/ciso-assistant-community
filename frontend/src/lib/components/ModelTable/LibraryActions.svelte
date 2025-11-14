@@ -131,7 +131,7 @@
 				}}
 			>
 				<button title={m.updateThisLibrary()} onclick={(e) => e.stopPropagation()}>
-					<i class="fa-solid fa-circle-up"></i>
+					<i class="fa-solid fa-circle-up text-success-700-300 hover:text-success-600-400"></i>
 				</button>
 			</form>
 		</span>
