@@ -329,7 +329,9 @@
 		modalStore.trigger(modal);
 	}
 
-	let hasSelectButton = $derived((urlModel: string) => data.modelsToSelect ? data.modelsToSelect.hasOwnProperty(urlModel) : false);
+	let hasSelectButton = $derived((urlModel: string) =>
+		data.modelsToSelect ? data.modelsToSelect.hasOwnProperty(urlModel) : false
+	);
 
 	let expandedTable = $state(false);
 	const MAX_ROWS = 10;
@@ -775,7 +777,9 @@
 								>
 									{#snippet selectButton()}
 										{#if hasSelectButton(model.urlModel)}
-											<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+											>
 												<button
 													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 													data-testid="select-button"
@@ -806,8 +810,9 @@
 												onclick={(_) => modalCreateForm(model)}
 												><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
 													'add-' + model.info.localName
-												)}</button>
-											{/if}
+												)}</button
+											>
+										{/if}
 									{/snippet}
 								</ModelTable>
 							{/if}

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { superForm, type SuperValidated } from 'sveltekit-superforms';
+	import { superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { getModalStore, type ModalStore } from './stores';
-  import SuperForm from '$lib/components/Forms/Form.svelte';
-  import AutocompleteSelect from '../Forms/AutocompleteSelect.svelte';
-  import { zod } from 'sveltekit-superforms/adapters';
-  import { z, type AnyZodObject } from 'zod';
-  import * as m from '$paraglide/messages';
+	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import AutocompleteSelect from '../Forms/AutocompleteSelect.svelte';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { z, type AnyZodObject } from 'zod';
+	import * as m from '$paraglide/messages';
 	import HiddenInput from '../Forms/HiddenInput.svelte';
 
 	const modalStore: ModalStore = getModalStore();
@@ -15,30 +15,25 @@
 	const cHeader = 'text-2xl font-bold';
 
 	interface Props {
-    parent: any;
+		parent: any;
 		form: SuperValidated<AnyZodObject>;
-	  optionsEndpoint: string;
-    field: string;
+		optionsEndpoint: string;
+		field: string;
 	}
 
-	let {
-    parent,
-    form,
-		field,
-    optionsEndpoint
-	}: Props = $props();
+	let { parent, form, field, optionsEndpoint }: Props = $props();
 
-  const schema = z.object({
-    urlModel: z.string(),
-    [field]: z.string().uuid().array().optional()
-  })
+	const schema = z.object({
+		urlModel: z.string(),
+		[field]: z.string().uuid().array().optional()
+	});
 
 	const _form = superForm(form, {
-		dataType: "json",
-		enctype: "application/x-www-form-urlencoded",
-    invalidateAll: true,
+		dataType: 'json',
+		enctype: 'application/x-www-form-urlencoded',
+		invalidateAll: true,
 		validators: zod(schema),
-    onUpdated: parent.onClose
+		onUpdated: parent.onClose
 	});
 </script>
 
@@ -59,31 +54,28 @@
 			</div>
 		</div>
 
-    <SuperForm
-      class="flex flex-col space-y-3"
-      dataType="json"
-      enctype="application/x-www-form-urlencoded"
-      data={form}
-      {_form}
-      validators={zod(schema)}
-      action="?/select"
-      debug={true}
-    >
-      <HiddenInput form={_form} field="urlModel" />
-      <AutocompleteSelect
-        form={_form}
-        multiple
-        {optionsEndpoint}
-        optionsExtraFields={[['folder', 'str']]}
-        field={field}
-        label={m.evidences()}
-      />
-      <button
-        class="btn preset-filled-primary-500 font-semibold w-full"
-        type="submit"
-        >{m.save()}</button
-      >
-    </SuperForm>
+		<SuperForm
+			class="flex flex-col space-y-3"
+			dataType="json"
+			enctype="application/x-www-form-urlencoded"
+			data={form}
+			{_form}
+			validators={zod(schema)}
+			action="?/select"
+			debug={true}
+		>
+			<HiddenInput form={_form} field="urlModel" />
+			<AutocompleteSelect
+				form={_form}
+				multiple
+				{optionsEndpoint}
+				optionsExtraFields={[['folder', 'str']]}
+				{field}
+				label={m.evidences()}
+			/>
+			<button class="btn preset-filled-primary-500 font-semibold w-full" type="submit"
+				>{m.save()}</button
+			>
+		</SuperForm>
 	</div>
 {/if}
-

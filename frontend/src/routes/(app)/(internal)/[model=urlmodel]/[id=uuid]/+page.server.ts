@@ -27,9 +27,13 @@ interface SelectableModel {
 }
 
 const SELECT_MAP: Record<string, Record<string, SelectableModel>> = {
-	"applied-controls": {
-		"evidences": { field: "evidences", optionsEndpoint: "evidences" },
-		"task-templates": { backendViewset: "task-templates", field: "applied_controls", optionsEndpoint: "task-templates" }
+	'applied-controls': {
+		evidences: { field: 'evidences', optionsEndpoint: 'evidences' },
+		'task-templates': {
+			backendViewset: 'task-templates',
+			field: 'applied_controls',
+			optionsEndpoint: 'task-templates'
+		}
 	}
 };
 
@@ -50,46 +54,48 @@ export const load: PageServerLoad = async (event) => {
 	let selectForms = null;
 
 	if (modelsToSelect) {
-		selectForms = {}
-		await Promise.all(Object.entries(modelsToSelect).map(async ([urlModel, { field, backendViewset }]) => {
-			if (!field) {
-				console.error(`Field name not found for model '${event.params.model}'`);
-				return;
-			}
-
-			let formData = {};
-
-			const selectSchema = z.object({
-				urlModel: z.string(),
-				[field]: z.string().uuid().array().optional()
-			});
-
-			if (backendViewset) {
-				const selectedObjectEndpoint = `${BASE_API_URL}/${backendViewset}/?applied_controls=${event.params.id}`;
-				const selectedObjectsReq = await event.fetch(selectedObjectEndpoint);
-				let selectedObjects: string[] = [];
-
-				if (selectedObjectsReq.ok) {
-						const selectedObjectRes = await selectedObjectsReq.json();
-						selectedObjects = selectedObjectRes.results.map((obj) => obj.id);
-				} else {
-						console.warn(`Failed to fetch selected objects with: ${selectedObjectEndpoint}`);
+		selectForms = {};
+		await Promise.all(
+			Object.entries(modelsToSelect).map(async ([urlModel, { field, backendViewset }]) => {
+				if (!field) {
+					console.error(`Field name not found for model '${event.params.model}'`);
+					return;
 				}
 
-				formData = {
-					urlModel: urlModel,
-					[field]: selectedObjects
-				};
-			} else {
-				formData = {
-					urlModel: urlModel,
-					[field]: object[field] || []
-				};
-			}
+				let formData = {};
 
-			const selectForm = await superValidate(formData, zod(selectSchema), { errors: false });
-			selectForms[urlModel] = selectForm;
-		}))
+				const selectSchema = z.object({
+					urlModel: z.string(),
+					[field]: z.string().uuid().array().optional()
+				});
+
+				if (backendViewset) {
+					const selectedObjectEndpoint = `${BASE_API_URL}/${backendViewset}/?applied_controls=${event.params.id}`;
+					const selectedObjectsReq = await event.fetch(selectedObjectEndpoint);
+					let selectedObjects: string[] = [];
+
+					if (selectedObjectsReq.ok) {
+						const selectedObjectRes = await selectedObjectsReq.json();
+						selectedObjects = selectedObjectRes.results.map((obj) => obj.id);
+					} else {
+						console.warn(`Failed to fetch selected objects with: ${selectedObjectEndpoint}`);
+					}
+
+					formData = {
+						urlModel: urlModel,
+						[field]: selectedObjects
+					};
+				} else {
+					formData = {
+						urlModel: urlModel,
+						[field]: object[field] || []
+					};
+				}
+
+				const selectForm = await superValidate(formData, zod(selectSchema), { errors: false });
+				selectForms[urlModel] = selectForm;
+			})
+		);
 	}
 	data.selectForms = selectForms;
 	data.modelsToSelect = modelsToSelect ?? {};
@@ -125,9 +131,14 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		if (!formData) return;
 
-		const modelForm = await superValidate(formData, zod(z.object({
-			urlModel: z.string()
-		})));
+		const modelForm = await superValidate(
+			formData,
+			zod(
+				z.object({
+					urlModel: z.string()
+				})
+			)
+		);
 		const urlModel = modelForm.data.urlModel;
 
 		if (!urlModel) {
@@ -135,15 +146,19 @@ export const actions: Actions = {
 		}
 
 		const modelsToSelect = SELECT_MAP[event.params.model as string];
-		if (!modelsToSelect)
-			return fail(400);
+		if (!modelsToSelect) return fail(400);
 
 		const { field, backendViewset } = modelsToSelect[urlModel];
 
-		const form = await superValidate(formData, zod(z.object({
-			urlModel: z.string(),
-			[field]: z.string().uuid().array().optional()
-		})));
+		const form = await superValidate(
+			formData,
+			zod(
+				z.object({
+					urlModel: z.string(),
+					[field]: z.string().uuid().array().optional()
+				})
+			)
+		);
 
 		if (!form.valid) {
 			console.error(form.errors);
@@ -152,55 +167,57 @@ export const actions: Actions = {
 
 		const selectedObjects: string[] = form.data[field];
 		if (backendViewset) {
-			// This doesn't scale weel as it submits one request per M2M association (write it in the PR description)
-			// Maybe create a solution directly instead. (some kind of generic endpoint for adding a single M2M value to a a bunch of different objects of the same model)
-
-			const currentSelectedObjectsReq = await event.fetch(`/${backendViewset}?${field}=${event.params.id}`);
+			const currentSelectedObjectsReq = await event.fetch(
+				`/${backendViewset}?${field}=${event.params.id}`
+			);
 			const currentSelectedObjectsRes = await currentSelectedObjectsReq.json();
 			const currentSelectedObjects = currentSelectedObjectsRes.results.map((obj) => obj.id);
 
-			const currentSelectedObjectsSet = new Set(currentSelectedObjects)
+			const currentSelectedObjectsSet = new Set(currentSelectedObjects);
 			const selectedObjectsSet = new Set(selectedObjects);
 
 			const unselectedObjects = currentSelectedObjects.filter((id) => !selectedObjectsSet.has(id));
-			const newlySelectedObjects = selectedObjects.filter((id) => !currentSelectedObjectsSet.has(id));
+			const newlySelectedObjects = selectedObjects.filter(
+				(id) => !currentSelectedObjectsSet.has(id)
+			);
 
 			const selectActions = [
-				...(newlySelectedObjects.map((id) => [id, true])),
-				...(unselectedObjects.map(   (id) => [id, false]))
+				...newlySelectedObjects.map((id) => [id, true]),
+				...unselectedObjects.map((id) => [id, false])
 			];
 
 			await Promise.all(
 				selectActions.map(async ([id, isSelectAction]) => {
 					const endpoint = `${BASE_API_URL}/${backendViewset}/${id}/`;
 					const req = await event.fetch(endpoint);
-					if (!req.ok)
-						return;
+					if (!req.ok) return;
 					const obj = req.json();
 					const idListValue = obj[field];
 					const idList = Array.isArray(idListValue) ? idListValue : [];
 
-					const newIdList = isSelectAction ? [...idList, event.params.id] : idList.filter((id) => id !== event.params.id);
+					const newIdList = isSelectAction
+						? [...idList, event.params.id]
+						: idList.filter((id) => id !== event.params.id);
 
 					await event.fetch(endpoint, {
-						method: "PATCH",
-						headers: {"Content-Type": "application/json"},
+						method: 'PATCH',
+						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({
 							[field]: newIdList
 						})
-					})
+					});
 				})
 			);
 		} else {
 			const formData = {
 				id: event.params.id,
 				[field]: selectedObjects
-			}
+			};
 
 			const endpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/`;
 			const req = await event.fetch(endpoint, {
-				method: "PATCH",
-				headers: {"Content-Type": "application/json"},
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(formData)
 			});
 
@@ -209,16 +226,6 @@ export const actions: Actions = {
 				return fail(400, { form });
 			}
 		}
-
-		// TODO: Add toast on success.
-		// TODO: Add a successfullyAddedObject translation.
-		/* setFlash(
-			{
-				type: 'success',
-				message: m.successfullyAddedObject({ object: safeTranslate(modelVerboseName).toLowerCase() })
-			},
-			event
-		); */
 
 		return { form };
 	},
