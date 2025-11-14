@@ -199,6 +199,7 @@ INSTALLED_APPS = [
     "library",
     "serdes",
     "integrations",
+    "webhooks",
     "rest_framework",
     "knox",
     "drf_spectacular",
