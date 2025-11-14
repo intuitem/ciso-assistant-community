@@ -62,7 +62,6 @@
 			{_form}
 			validators={zod(schema)}
 			action="?/select"
-			debug={true}
 		>
 			<HiddenInput form={_form} field="urlModel" />
 			<AutocompleteSelect

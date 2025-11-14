@@ -1719,5 +1719,6 @@
 	"samlAuthnRequestSignedHelpText": "Gdy włączone, żądanie uwierzytelniania SAML jest podpisywane kluczem prywatnym poniżej. Odpowiedni certyfikat publiczny jest wysyłany do dostawcy tożsamości, aby mógł zweryfikować podpis.",
 	"downloadCertificate": "Pobierz certyfikat",
 	"viewMore": "Voir plus",
-	"viewLess": "Voir moins"
+	"viewLess": "Voir moins",
+	"selectTaskTemplates": "Wybierz zadania"
 }

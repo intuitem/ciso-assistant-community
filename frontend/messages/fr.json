@@ -2547,7 +2547,6 @@
 	"impactAnchoringDescription": "Pour chaque niveau d'impact, fournissez une valeur de perte financière typique. Le système calculera les bornes (marge de ±30%) pour les simulations Monte Carlo.",
 	"lowerBound": "Borne inférieure",
 	"upperBound": "Borne supérieure",
-	"lossThreshold": "Seuil de perte",
 	"lossThresholdDescription": "La valeur maximale de perte acceptable pour l'étude de risque quantitative. Cela aide à définir la tolérance au risque de votre organisation.",
 	"converting": "Conversion en cours...",
 	"conversionSuccessful": "Conversion réussie ! Redirection vers la nouvelle étude de risque quantitative...",
@@ -2564,5 +2563,6 @@
 	"impactValuesMustBeIncreasing": "L'impact pour '{current}' doit être supérieur à '{previous}'. Les valeurs doivent augmenter entre les niveaux.",
 	"runningMonteCarloSimulations": "Exécution des simulations Monte Carlo pour l'analyse de risque quantitative. Cela peut prendre un moment...",
 	"probabilityRequirements": "Toutes les valeurs doivent être fournies et comprises entre 0 et 100 (par exemple, 5, 20, 50, 90). Les valeurs doivent augmenter de haut en bas.",
-	"impactRequirements": "Toutes les valeurs doivent être fournies et supérieures à 0. Les valeurs doivent augmenter de haut en bas (par exemple, Mineur : 5 000 → Majeur : 50 000 → Critique : 500 000)."
+	"impactRequirements": "Toutes les valeurs doivent être fournies et supérieures à 0. Les valeurs doivent augmenter de haut en bas (par exemple, Mineur : 5 000 → Majeur : 50 000 → Critique : 500 000).",
+	"selectTaskTemplates": "Sélectionner des tâches"
 }
