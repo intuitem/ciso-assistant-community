@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import WebhookEndpointViewSet
+from .views import WebhookEndpointViewSet, WebhookEventTypeView
 
 router = DefaultRouter()
 router.register(
@@ -12,4 +12,5 @@ router.register(
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("event-types/", WebhookEventTypeView.as_view(), name="webhook-event-types"),
 ]
