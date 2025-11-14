@@ -833,7 +833,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
-			{ field: 'assets', urlModel: 'assets' }
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [
 			{ field: 'dora_ict_service_type' },
@@ -847,7 +849,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'dora_reintegration_possibility' },
 			{ field: 'dora_discontinuing_impact' },
 			{ field: 'dora_alternative_providers_identified' }
-		]
+		],
+		filters: [{ field: 'owner' }, { field: 'filtering_labels' }]
 	},
 	contracts: {
 		name: 'contract',

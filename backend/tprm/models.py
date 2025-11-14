@@ -262,6 +262,12 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
     is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
     reference_link = models.URLField(blank=True, null=True, max_length=2048)
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))
+    owner = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="solutions",
+    )
 
     assets = models.ManyToManyField(
         Asset,

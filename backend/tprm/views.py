@@ -622,6 +622,7 @@ class SolutionViewSet(BaseModelViewSet):
         "assets",
         "criticality",
         "contracts",
+        "owner",
         "dora_ict_service_type",
         "storage_of_data",
         "data_location_storage",

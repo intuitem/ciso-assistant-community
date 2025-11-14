@@ -580,6 +580,17 @@ export const SOLUTION_CRITICALITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const SOLUTION_OWNER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'owner',
+		optionsLabelField: 'email',
+		optionsValueField: 'id',
+		optionsEndpoint: 'solutions/owner',
+		multiple: true
+	}
+};
+
 export const ENTITY_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1543,11 +1554,12 @@ export const listViewFields = {
 		}
 	},
 	solutions: {
-		head: ['refId', 'name', 'description', 'providerEntity', 'criticality'],
-		body: ['ref_id', 'name', 'description', 'provider_entity', 'criticality'],
+		head: ['refId', 'name', 'description', 'providerEntity', 'criticality', 'labels'],
+		body: ['ref_id', 'name', 'description', 'provider_entity', 'criticality', 'filtering_labels'],
 		filters: {
 			provider_entity: ENTITY_FILTER,
-			criticality: SOLUTION_CRITICALITY_FILTER
+			criticality: SOLUTION_CRITICALITY_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	contracts: {

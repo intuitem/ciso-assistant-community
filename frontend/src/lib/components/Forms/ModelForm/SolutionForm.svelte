@@ -51,6 +51,16 @@
 <AutocompleteSelect
 	{form}
 	multiple
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="owner"
+	cacheLock={cacheLocks['owner']}
+	bind:cachedValue={formDataCache['owner']}
+	label={m.owner()}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
 	optionsEndpoint="assets"
 	optionsLabelField="auto"
 	optionsExtraFields={[['folder', 'str']]}
@@ -66,6 +76,18 @@
 	cacheLock={cacheLocks['assets']}
 	bind:cachedValue={formDataCache['assets']}
 	label={m.assets()}
+/>
+<AutocompleteSelect
+	multiple
+	{form}
+	createFromSelection={true}
+	optionsEndpoint="filtering-labels"
+	translateOptions={false}
+	optionsLabelField="label"
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
+	allowUserOptions="append"
 />
 
 <Dropdown

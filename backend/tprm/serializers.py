@@ -27,6 +27,7 @@ class EntityReadSerializer(BaseModelSerializer):
     contracts = FieldsRelatedField(many=True)
     legal_identifiers = serializers.SerializerMethodField()
     default_criticality = serializers.ReadOnlyField()
+    filtering_labels = FieldsRelatedField(many=True)
 
     def get_legal_identifiers(self, obj):
         """Format legal identifiers as a readable string for display"""
@@ -230,6 +231,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 class RepresentativeReadSerializer(BaseModelSerializer):
     entity = FieldsRelatedField()
     user = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(many=True)
 
     class Meta:
         model = Representative
@@ -300,6 +302,8 @@ class SolutionReadSerializer(BaseModelSerializer):
     recipient_entity = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
+    owner = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(many=True)
 
     class Meta:
         model = Solution
@@ -320,6 +324,7 @@ class ContractReadSerializer(BaseModelSerializer):
     evidences = FieldsRelatedField(many=True)
     solution = FieldsRelatedField()
     overarching_contract = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(many=True)
 
     class Meta:
         model = Contract
