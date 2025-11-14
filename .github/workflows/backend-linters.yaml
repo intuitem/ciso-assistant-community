@@ -6,10 +6,11 @@ on:
   pull_request:
     paths:
       - "backend/**"
+      - "enterprise/backend/**"
 
-# If two events are triggered within a short time in the same PR, cancel the run of the oldest event
+# Cancel older in-progress runs for the same PR or the same ref (branch)
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -18,7 +19,7 @@ env:
   UBUNTU_VERSION: "ubuntu-24.04"
 
 jobs:
-  ruff:
+  ruff-community:
     runs-on: ubuntu-24.04
     env:
       working-directory: ./backend
@@ -31,7 +32,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Install ruff
+        working-directory: ${{env.working-directory}}
+        run: |
+          python -m pip install ruff==0.9.2
+      - name: Run ruff format check
+        working-directory: ${{env.working-directory}}
+        run: ruff format --check .
+      # NOTE: The following will be uncommented once the codebase is cleaned up
+      # - name: ruff
+      #   working-directory: ${{env.working-directory}}
+      #   run: ruff check .
+  ruff-enterprise:
+    runs-on: ubuntu-24.04
+    env:
+      working-directory: ./enterprise/backend
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"

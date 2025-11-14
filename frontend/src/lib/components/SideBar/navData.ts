@@ -164,9 +164,21 @@ export const navData = {
 				},
 				{
 					name: 'policies',
-					fa_icon: 'fa-solid fa-book',
+					fa_icon: 'fa-solid fa-file-alt',
 					href: '/policies',
 					permissions: ['view_appliedcontrol']
+				},
+				{
+					name: 'organisationIssues',
+					fa_icon: 'fa-solid fa-briefcase',
+					href: '/organisation-issues',
+					permissions: ['view_organisationissue']
+				},
+				{
+					name: 'organisationObjectives',
+					fa_icon: 'fa-solid fa-bullseye',
+					href: '/organisation-objectives',
+					permissions: ['view_organisationobjective']
 				},
 				{
 					name: 'riskAcceptances',
@@ -197,6 +209,12 @@ export const navData = {
 					name: 'ebiosRM',
 					fa_icon: 'fa-solid fa-gopuram',
 					href: '/ebios-rm'
+				},
+				{
+					name: 'quantitativeRiskStudies',
+					fa_icon: 'fa-solid fa-calculator',
+					href: '/quantitative-risk-studies',
+					permissions: ['view_quantitativeriskstudy']
 				},
 				{
 					name: 'riskScenarios',
@@ -235,7 +253,7 @@ export const navData = {
 					name: 'recap',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/recap',
-					permissions: ['view_appliedcontrol'] //this is temporary workaround to manage 3rd parties
+					permissions: ['view_perimeter'] //this is temporary workaround to manage 3rd parties
 				}
 			]
 		},
@@ -246,12 +264,7 @@ export const navData = {
 					name: 'tprmOverview',
 					fa_icon: 'fa-solid fa-gauge',
 					href: '/analytics/tprm',
-					permissions: [
-						'view_entity',
-						'view_solution',
-						'view_entityassessment',
-						'view_appliedcontrol'
-					]
+					permissions: ['view_entity', 'view_solution', 'view_entityassessment']
 				},
 				{
 					name: 'entities',
@@ -301,6 +314,35 @@ export const navData = {
 					fa_icon: 'fa-solid fa-diamond',
 					href: '/purposes',
 					permissions: ['view_purpose']
+				},
+				{
+					name: 'rightRequests',
+					fa_icon: 'fa-solid fa-user-shield',
+					href: '/right-requests',
+					permissions: ['view_rightrequest']
+				},
+				{
+					name: 'dataBreaches',
+					fa_icon: 'fa-solid fa-triangle-exclamation',
+					href: '/data-breaches',
+					permissions: ['view_databreach']
+				}
+			]
+		},
+		{
+			name: 'projectManagement',
+			items: [
+				{
+					name: 'genericCollections',
+					fa_icon: 'fa-solid fa-box-archive',
+					href: '/generic-collections',
+					permissions: ['view_genericcollection']
+				},
+				{
+					name: 'accreditations',
+					fa_icon: 'fa-solid fa-award',
+					href: '/accreditations',
+					permissions: ['view_accreditation']
 				}
 			]
 		},
@@ -312,6 +354,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-tag',
 					href: '/filtering-labels',
 					permissions: ['view_filteringlabel']
+				},
+				{
+					name: 'terminologies',
+					fa_icon: 'fa-solid fa-language',
+					href: '/terminologies',
+					permissions: ['view_terminology']
 				},
 				{
 					name: 'settings',

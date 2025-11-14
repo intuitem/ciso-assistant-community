@@ -181,15 +181,18 @@ INSTALLED_APPS = [
     "tailwind",
     "iam",
     "global_settings",
-    "tprm",
+    "pmbok",
     "ebios_rm",
+    "tprm",
     "privacy",
     "resilience",
+    "crq",
     "core",
     "cal",
     "django_filters",
     "library",
     "serdes",
+    "integrations",
     "rest_framework",
     "knox",
     "drf_spectacular",
@@ -201,6 +204,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.openid_connect",
     "allauth.mfa",
     "huey.contrib.djhuey",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -374,6 +378,8 @@ LANGUAGES = [
     ("hu", "Hungarian"),
     ("uk", "Ukrainian"),
     ("el", "Greek"),
+    ("tr", "Turkish"),
+    ("hr", "Croatian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))

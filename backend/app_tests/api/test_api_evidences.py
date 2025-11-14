@@ -106,7 +106,6 @@ class TestEvidencesAuthenticated:
             {
                 "name": EVIDENCE_NAME,
                 "description": EVIDENCE_DESCRIPTION,
-                "link": EVIDENCE_LINK,
                 "folder": test.folder,
                 "applied_controls": [applied_control],
             },
@@ -150,7 +149,7 @@ class TestEvidencesAuthenticated:
                             "str": applied_control.name,
                         }
                     ],
-                    "attachment": EVIDENCE_ATTACHMENT,
+                    "attachment": "/" + EVIDENCE_ATTACHMENT,
                 },
                 query_format="multipart",
                 user_group=test.user_group,
@@ -174,17 +173,14 @@ class TestEvidencesAuthenticated:
                 {
                     "name": EVIDENCE_NAME,
                     "description": EVIDENCE_DESCRIPTION,
-                    "link": EVIDENCE_LINK,
                     "folder": test.folder,
                     "applied_controls": [applied_control],
                 },
                 {
                     "name": "new " + EVIDENCE_NAME,
                     "description": "new " + EVIDENCE_DESCRIPTION,
-                    "link": EVIDENCE_LINK + "/new",
                     "folder": str(folder.id),
                     "applied_controls": [str(applied_control2.id)],
-                    "attachment": file,
                 },
                 {
                     "folder": {"id": str(test.folder.id), "str": test.folder.name},
@@ -196,7 +192,7 @@ class TestEvidencesAuthenticated:
                     ],
                 },
                 {
-                    "attachment": EVIDENCE_ATTACHMENT,
+                    "applied_controls": [str(applied_control2.id)],
                 },
                 query_format="multipart",
                 user_group=test.user_group,

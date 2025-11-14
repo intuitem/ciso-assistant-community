@@ -6,6 +6,17 @@ import { m } from '$paraglide/messages';
 let vars = TestContent.generateTestVars();
 let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
+const escalationThresholdsData = {
+	displayName: 'Escalation thresholds',
+	modelName: 'escalationthreshold',
+	build: {
+		point_in_time: { days: 1, hours: 1, minutes: 30 },
+		qualifications: ['confidentiality', 'integrity', 'availability'],
+		quali_impact: 'High',
+		justification: 'Commodo adipisicing cillum labore ullamco ad id dolore reprehenderit.'
+	}
+};
+
 test('user can create asset assessments inside BIA', async ({
 	logedPage,
 	foldersPage,
@@ -14,6 +25,7 @@ test('user can create asset assessments inside BIA', async ({
 	librariesPage,
 	businessImpactAnalysisPage,
 	assetAssessmentsPage,
+	escalationThresholdsPage,
 	page
 }) => {
 	await test.step('create required folder', async () => {
@@ -84,6 +96,37 @@ test('user can create asset assessments inside BIA', async ({
 			testObjectsData.businessImpactAnalysisPage.build.name
 		);
 		await assetAssessmentsPage.createItem({ asset: vars.assetName }, undefined, page);
+	});
+
+	await test.step('check that asset assessment is created', async () => {
+		await businessImpactAnalysisPage.getRow(vars.assetName).click();
+		await assetAssessmentsPage.hasUrl();
+	});
+
+	await test.step('create escalation threshold', async () => {
+		await escalationThresholdsPage.createItem(escalationThresholdsData.build);
+	});
+
+	await test.step('check that escalation threshold is created', async () => {
+		await expect(
+			assetAssessmentsPage.getRow(escalationThresholdsData.build.quali_impact)
+		).toBeVisible();
+	});
+
+	await test.step('check that line heatmap has been updated', async () => {
+		await expect(page.getByTestId('line-heatmap')).toContainText(
+			escalationThresholdsData.build.quali_impact
+		);
+	});
+
+	await test.step('delete escalation threshold', async () => {
+		await assetAssessmentsPage
+			.deleteItemButton(escalationThresholdsData.build.quali_impact)
+			.click();
+		await assetAssessmentsPage.deleteModalConfirmButton.click();
+		await expect(
+			assetAssessmentsPage.getRow(escalationThresholdsData.build.quali_impact)
+		).not.toBeVisible();
 	});
 });
 

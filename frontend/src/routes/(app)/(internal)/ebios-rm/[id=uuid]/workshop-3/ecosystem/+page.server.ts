@@ -16,8 +16,17 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const deleteForm = await superValidate(zod(schema));
 	const URLModel = 'stakeholders';
 	const createSchema = modelSchema(URLModel);
+	const objectEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/object/`;
+	const objectResponse = await fetch(objectEndpoint);
+	let object: any = {};
+	if (objectResponse.ok) {
+		object = await objectResponse.json();
+	} else {
+		console.error(`Failed to fetch study object: ${objectResponse.statusText}`);
+	}
 	const initialData = {
-		ebios_rm_study: params.id
+		ebios_rm_study: params.id,
+		folder: object.folder
 	};
 	const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 	const model: ModelInfo = getModelInfo(URLModel);
@@ -27,8 +36,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		await Promise.all(
 			model.selectFields.map(async (selectField) => {
 				const url = model.endpointUrl
-					? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}`
-					: `${BASE_API_URL}/${model.urlModel}/${selectField.field}`;
+					? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
+					: `${BASE_API_URL}/${model.urlModel}/${selectField.field}/`;
 				const response = await fetch(url);
 				if (!response.ok) {
 					console.error(`Failed to fetch data from ${url}: ${response.statusText}`);
@@ -61,11 +70,15 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	};
 
 	const radarEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/ecosystem_chart_data/`;
+	const circularRadarEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/ecosystem_circular_chart_data/`;
 
 	const radarRes = await fetch(radarEndpoint);
 	const radar = await radarRes.json();
 
-	return { createForm, deleteForm, model, URLModel, table, radar };
+	const circularRadarRes = await fetch(circularRadarEndpoint);
+	const circularRadar = await circularRadarRes.json();
+
+	return { createForm, deleteForm, model, URLModel, table, radar, circularRadar };
 };
 
 export const actions: Actions = {

@@ -84,8 +84,8 @@ test('user usual routine actions are working correctly', async ({
 		await pages.frameworksPage.hasUrl();
 		await pages.frameworksPage.hasTitle();
 
-		await pages.frameworksPage.addButton.click();
-		await pages.librariesPage.hasTitle();
+		await pages.frameworksPage.importButton.click();
+		await pages.librariesPage.goto();
 		await pages.librariesPage.hasTitle();
 
 		await pages.librariesPage.importLibrary(vars.framework.ref, vars.framework.urn);
@@ -191,8 +191,8 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskMatricesPage.hasUrl();
 		await pages.riskMatricesPage.hasTitle();
 
-		await pages.riskMatricesPage.addButton.click();
-		await pages.librariesPage.hasUrl(true, '/libraries?object_type=risk_matrix');
+		await pages.riskMatricesPage.importButton.click();
+		await pages.librariesPage.hasUrl(true, '/libraries?object_type=risk_matrices');
 		await pages.librariesPage.hasTitle();
 
 		await pages.librariesPage.importLibrary(vars.matrix.name, vars.matrix.urn);
@@ -290,7 +290,9 @@ test.afterEach('cleanup', async ({ foldersPage, usersPage, page }) => {
 	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 
 	await usersPage.goto();
-	await usersPage.deleteItemButton(vars.user.email).click();
-	await usersPage.deleteModalConfirmButton.click();
-	await expect(usersPage.getRow(vars.user.email)).not.toBeVisible();
+	if (await usersPage.getRow(vars.user.email).isVisible()) {
+		await usersPage.deleteItemButton(vars.user.email).click();
+		await usersPage.deleteModalConfirmButton.click();
+		await expect(usersPage.getRow(vars.user.email)).not.toBeVisible();
+	}
 });

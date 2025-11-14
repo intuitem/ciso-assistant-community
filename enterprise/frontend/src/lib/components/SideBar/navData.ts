@@ -107,6 +107,12 @@ export const navData = {
 					href: '/user-groups'
 				},
 				{
+					name: 'roles',
+					fa_icon: 'fa-solid fa-shield-halved',
+					href: '/roles',
+					permissions: ['add_role']
+				},
+				{
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
@@ -201,9 +207,21 @@ export const navData = {
 				},
 				{
 					name: 'policies',
-					fa_icon: 'fa-solid fa-book',
+					fa_icon: 'fa-solid fa-file-alt',
 					href: '/policies',
 					permissions: ['view_appliedcontrol']
+				},
+				{
+					name: 'organisationIssues',
+					fa_icon: 'fa-solid fa-briefcase',
+					href: '/organisation-issues',
+					permissions: ['view_organisationissue']
+				},
+				{
+					name: 'organisationObjectives',
+					fa_icon: 'fa-solid fa-bullseye',
+					href: '/organisation-objectives',
+					permissions: ['view_organisationobjective']
 				},
 				{
 					name: 'riskAcceptances',
@@ -234,6 +252,12 @@ export const navData = {
 					name: 'ebiosRM',
 					fa_icon: 'fa-solid fa-gopuram',
 					href: '/ebios-rm'
+				},
+				{
+					name: 'quantitativeRiskStudies',
+					fa_icon: 'fa-solid fa-calculator',
+					href: '/quantitative-risk-studies',
+					permissions: ['view_quantitativeriskstudy']
 				},
 				{
 					name: 'riskScenarios',
@@ -344,6 +368,35 @@ export const navData = {
 					fa_icon: 'fa-solid fa-diamond',
 					href: '/purposes',
 					permissions: ['view_purpose']
+				},
+				{
+					name: 'rightRequests',
+					fa_icon: 'fa-solid fa-user-shield',
+					href: '/right-requests',
+					permissions: ['view_rightrequest']
+				},
+				{
+					name: 'dataBreaches',
+					fa_icon: 'fa-solid fa-triangle-exclamation',
+					href: '/data-breaches',
+					permissions: ['view_databreach']
+				}
+			]
+		},
+		{
+			name: 'projectManagement',
+			items: [
+				{
+					name: 'genericCollections',
+					fa_icon: 'fa-solid fa-box-archive',
+					href: '/generic-collections',
+					permissions: ['view_genericcollection']
+				},
+				{
+					name: 'accreditations',
+					fa_icon: 'fa-solid fa-award',
+					href: '/accreditations',
+					permissions: ['view_accreditation']
 				}
 			]
 		},
@@ -355,6 +408,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-tag',
 					href: '/filtering-labels',
 					permissions: ['view_filteringlabel']
+				},
+				{
+					name: 'terminologies',
+					fa_icon: 'fa-solid fa-language',
+					href: '/terminologies',
+					permissions: ['view_terminology']
 				},
 				{
 					name: 'settings',

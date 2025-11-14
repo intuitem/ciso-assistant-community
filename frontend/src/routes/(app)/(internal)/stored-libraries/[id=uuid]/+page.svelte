@@ -16,7 +16,6 @@
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
 	let { data } = $props();
-
 	let loading = $state({ form: false, library: '' });
 	const showRisks = true;
 
@@ -98,7 +97,13 @@
 		applyAction(result);
 	}
 
-	let displayImportButton = $derived(!(data.library.is_loaded ?? true));
+	let displayImportButton = $derived(
+		!(
+			data.library?.is_loaded ||
+			data.library?.objects?.requirement_mapping_set ||
+			data.library?.objects?.requirement_mapping_sets
+		)
+	);
 </script>
 
 <div class="card bg-white p-4 shadow-sm space-y-4">
@@ -125,7 +130,11 @@
 							onsubmit={handleSubmit}
 						>
 							{#if page.data.user.is_admin}
-								<button type="submit" class="p-1 btn text-xl hover:text-primary-500">
+								<button
+									type="submit"
+									class="p-1 btn text-xl hover:text-primary-500"
+									aria-label="load library"
+								>
 									<i class="fa-solid fa-file-import"></i>
 								</button>
 							{/if}

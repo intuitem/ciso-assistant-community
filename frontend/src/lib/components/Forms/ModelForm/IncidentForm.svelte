@@ -64,6 +64,7 @@
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -97,8 +98,9 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="qualifications"
+	optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 	field="qualifications"
+	optionsLabelField="translated_name"
 	label={m.qualifications()}
 />
 <TextField
@@ -145,5 +147,14 @@
 		cacheLock={cacheLocks['owners']}
 		bind:cachedValue={formDataCache['owners']}
 		label={m.owners()}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="entities"
+		field="entities"
+		cacheLock={cacheLocks['entities']}
+		bind:cachedValue={formDataCache['entities']}
+		label={m.entities()}
 	/>
 </Dropdown>

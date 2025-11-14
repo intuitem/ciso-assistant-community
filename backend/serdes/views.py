@@ -20,6 +20,7 @@ from serdes.serializers import LoadBackupSerializer
 from auditlog.models import LogEntry
 from django.db.models.signals import post_save
 from core.custom_middleware import add_user_info_to_log_entry
+from django.apps import apps
 
 from auditlog.context import disable_auditlog
 
@@ -35,7 +36,7 @@ class ExportBackupView(APIView):
         response = HttpResponse(content_type="application/json")
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         response["Content-Disposition"] = (
-            f'attachment; filename="ciso-assistant-db-{timestamp}.json"'
+            f'attachment; filename="ciso-assistant-db-{VERSION}-{timestamp}.json"'
         )
 
         buffer = io.StringIO()
@@ -71,7 +72,6 @@ class LoadBackupView(APIView):
 
     def load_backup(self, request, decompressed_data, backup_version, current_version):
         # Temporarily disconnect the problematic signal
-
         post_save.disconnect(add_user_info_to_log_entry, sender=LogEntry)
 
         # Back up current database state using dumpdata into an in-memory string.
@@ -115,7 +115,6 @@ class LoadBackupView(APIView):
                     logger.debug(f"Loaded: {last_model} with pk={instance.pk}")
 
             # Connect to the post_save signal
-
             post_save.connect(fixture_callback)
             with disable_auditlog():
                 management.call_command("flush", interactive=False)
@@ -183,6 +182,7 @@ class LoadBackupView(APIView):
         full_decompressed_data = gzip.decompress(data) if is_gzip else data
         # Performances could be improved (by avoiding the json.loads + json.dumps calls with a direct raw manipulation on the JSON body)
         # But performances of the backup loading is not that much important.
+
         full_decompressed_data = json.loads(full_decompressed_data)
         metadata, decompressed_data = full_decompressed_data
         metadata = metadata["meta"]
@@ -199,6 +199,11 @@ class LoadBackupView(APIView):
 
         try:
             schema_version_int = int(schema_version)
+            compare_schema_versions(schema_version_int, backup_version)
+            if backup_version != VERSION:
+                raise ValueError(
+                    "The version of the current instance and the one that generated the backup are not the same."
+                )
         except (ValueError, TypeError) as e:
             logger.error(
                 "Invalid schema version format",
@@ -208,7 +213,20 @@ class LoadBackupView(APIView):
             return Response(
                 {"error": "InvalidSchemaVersion"}, status=status.HTTP_400_BAD_REQUEST
             )
-        compare_schema_versions(schema_version_int, backup_version)
+
+        is_enterprise = apps.is_installed("enterprise_core")
+        if not is_enterprise:
+            for obj in decompressed_data:
+                if obj["model"] != "iam.role":
+                    continue
+                permissions = obj["fields"]["permissions"]
+                enterprise_perms_indices = [
+                    i
+                    for i, perm in enumerate(permissions)
+                    if perm[1] == "enterprise_core"
+                ]
+                for perm_index in reversed(enterprise_perms_indices):
+                    permissions.pop(perm_index)
 
         decompressed_data = json.dumps(decompressed_data)
         return self.load_backup(

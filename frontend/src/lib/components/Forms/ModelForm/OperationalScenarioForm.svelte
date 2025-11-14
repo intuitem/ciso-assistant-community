@@ -50,6 +50,14 @@
 	label={m.ebiosRmStudy()}
 	hidden={initialData.ebios_rm_study}
 />
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
+/>
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
 		? 'border-2 border-primary-500'
@@ -62,15 +70,15 @@
 	>
 		{m.activityOne()}
 	</p>
-	<TextArea
-		{form}
-		field="operating_modes_description"
-		label={m.operatingModesDescription()}
-		cacheLock={cacheLocks['operating_modes_description']}
-		bind:cachedValue={formDataCache['operating_modes_description']}
-		data-focusindex="1"
-		helpText={m.operatingModesDescriptionHelpText()}
-	/>
+	{#if context !== 'edit'}
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="attack-paths?is_selected=true&used=false"
+			optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
+			field="attack_path"
+			label={m.attackPath() + ` (${m.strategicScenario()})`}
+		/>
+	{/if}
 	<AutocompleteSelect
 		{form}
 		multiple
@@ -83,15 +91,15 @@
 		label={m.elementaryActionsTechniques()}
 		helpText={m.operationalScenarioThreatsHelpText()}
 	/>
-	{#if context !== 'edit'}
-		<AutocompleteSelect
-			{form}
-			optionsEndpoint="attack-paths?is_selected=true&used=false"
-			optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
-			field="attack_path"
-			label={m.attackPath() + ` (${m.strategicScenario()})`}
-		/>
-	{/if}
+	<TextArea
+		{form}
+		field="operating_modes_description"
+		label={m.operatingModesDescription()}
+		cacheLock={cacheLocks['operating_modes_description']}
+		bind:cachedValue={formDataCache['operating_modes_description']}
+		data-focusindex="1"
+		helpText={m.operatingModesDescriptionHelpText()}
+	/>
 </div>
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'two'

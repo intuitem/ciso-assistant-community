@@ -16,8 +16,17 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const deleteForm = await superValidate(zod(schema));
 	const URLModel = 'strategic-scenarios';
 	const createSchema = modelSchema(URLModel);
+	const objectEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/object/`;
+	const objectResponse = await fetch(objectEndpoint);
+	let object: any = {};
+	if (objectResponse.ok) {
+		object = await objectResponse.json();
+	} else {
+		console.error(`Failed to fetch study object: ${objectResponse.statusText}`);
+	}
 	const initialData = {
-		ebios_rm_study: params.id
+		ebios_rm_study: params.id,
+		folder: object.folder
 	};
 	const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 	const model: ModelInfo = getModelInfo(URLModel);
@@ -27,8 +36,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		await Promise.all(
 			model.selectFields.map(async (selectField) => {
 				const url = model.endpointUrl
-					? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}`
-					: `${BASE_API_URL}/${model.urlModel}/${selectField.field}`;
+					? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
+					: `${BASE_API_URL}/${model.urlModel}/${selectField.field}/`;
 				const response = await fetch(url);
 				if (!response.ok) {
 					console.error(`Failed to fetch data from ${url}: ${response.statusText}`);
@@ -47,7 +56,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	model.selectOptions = selectOptions;
 
 	const missingAttackPathResponse = await fetch(
-		`${BASE_API_URL}/ebios-rm/strategic-scenarios?ebios_rm_study=${params.id}&attack_paths__isnull=true`
+		`${BASE_API_URL}/ebios-rm/strategic-scenarios/?ebios_rm_study=${params.id}&attack_paths__isnull=true`
 	);
 	const scenariosWithoutAttackPath = missingAttackPathResponse.ok
 		? await missingAttackPathResponse.json()

@@ -1,7 +1,6 @@
 // schema for the validation of forms
 import { z, type AnyZodObject } from 'zod';
 import * as m from '$paraglide/messages';
-import type { evidences } from '$paraglide/messages/hi';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
@@ -75,7 +74,8 @@ const NameDescriptionMixin = {
 export const FolderSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
-	parent_folder: z.string().optional()
+	parent_folder: z.string().optional(),
+	filtering_labels: z.array(z.string()).optional()
 });
 
 export const FolderImportSchema = z.object({
@@ -112,12 +112,14 @@ export const RiskAssessmentSchema = z.object({
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	risk_matrix: z.string(),
+	risk_tolerance: z.number().optional().default(-1),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
-	ebios_rm_study: z.string().uuid().optional()
+	ebios_rm_study: z.string().uuid().optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const ThreatSchema = z.object({
@@ -140,7 +142,7 @@ export const RiskScenarioSchema = z.object({
 	residual_proba: z.number().optional(),
 	residual_impact: z.number().optional(),
 	treatment: z.string().optional(),
-	qualifications: z.string().optional().array().optional(),
+	qualifications: z.string().uuid().optional().array().optional(),
 	strength_of_knowledge: z.number().default(-1).optional(),
 	justification: z.string().optional().nullable(),
 	risk_assessment: z.string(),
@@ -160,6 +162,7 @@ export const AppliedControlSchema = z.object({
 	priority: z.number().optional().nullable(),
 	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
+	objectives: z.string().optional().array().optional(),
 	assets: z.string().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -172,7 +175,24 @@ export const AppliedControlSchema = z.object({
 		.optional(),
 	effort: z.string().optional().nullable(),
 	control_impact: z.number().optional().nullable(),
-	cost: z.number().multipleOf(0.000001).optional().nullable(),
+	cost: z
+		.object({
+			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
+			amortization_period: z.number().min(1).max(50).default(1),
+			build: z
+				.object({
+					fixed_cost: z.number().min(0).default(0),
+					people_days: z.number().min(0).default(0)
+				})
+				.default({ fixed_cost: 0, people_days: 0 }),
+			run: z
+				.object({
+					fixed_cost: z.number().min(0).default(0),
+					people_days: z.number().min(0).default(0)
+				})
+				.default({ fixed_cost: 0, people_days: 0 })
+		})
+		.optional(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional(),
@@ -180,7 +200,11 @@ export const AppliedControlSchema = z.object({
 	stakeholders: z.string().uuid().optional().array().optional(),
 	progress_field: z.number().optional().default(0),
 	filtering_labels: z.string().optional().array().optional(),
-	findings: z.string().uuid().optional().array().optional()
+	findings: z.string().uuid().optional().array().optional(),
+	observation: z.string().optional().nullable(),
+	integration_config: z.string().optional().nullable(),
+	remote_object_id: z.string().optional().nullable(),
+	create_remote_object: z.boolean().optional().default(false)
 });
 
 export const AppliedControlDuplicateSchema = z.object({
@@ -216,6 +240,7 @@ export const AssetSchema = z.object({
 	folder: z.string(),
 	asset_class: z.string().optional(),
 	parent_assets: z.string().optional().array().optional(),
+	support_assets: z.string().optional().array().optional(),
 	security_objectives: z
 		.object({
 			objectives: z
@@ -241,6 +266,31 @@ export const AssetSchema = z.object({
 				.optional()
 		})
 		.optional(),
+	security_capabilities: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional(),
+						is_enabled: z.boolean().default(false)
+					})
+				)
+				.optional()
+		})
+		.optional(),
+	recovery_capabilities: z
+		.object({
+			objectives: z
+				.record(
+					z.string(),
+					z.object({
+						value: z.number().nonnegative().optional()
+					})
+				)
+				.optional()
+		})
+		.optional(),
 	reference_link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
@@ -252,7 +302,9 @@ export const AssetSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
-	ref_id: z.string().max(100).optional()
+	ref_id: z.string().max(100).optional(),
+	observation: z.string().optional().nullable(),
+	overridden_children_capabilities: z.string().uuid().optional().array().optional()
 });
 
 export const FilteringLabelSchema = z.object({
@@ -268,12 +320,12 @@ export const RequirementAssessmentSchema = z.object({
 	documentation_score: z.number().optional().nullable(),
 	comment: z.string().optional().nullable(),
 	folder: z.string(),
-	requirement: z.string(),
 	evidences: z.array(z.string().uuid().optional()).optional(),
 	compliance_assessment: z.string(),
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
-	security_exceptions: z.string().uuid().optional().array().optional()
+	security_exceptions: z.string().uuid().optional().array().optional(),
+	noRedirect: z.boolean().default(false)
 });
 
 export const UserEditSchema = z.object({
@@ -282,11 +334,43 @@ export const UserEditSchema = z.object({
 	last_name: z.string().optional(),
 	is_active: z.boolean().optional(),
 	keep_local_login: z.boolean().optional(),
-	user_groups: z.array(z.string().uuid().optional()).optional()
+	user_groups: z.array(z.string().uuid().optional()).optional(),
+	observation: z.string().optional().nullable(),
+	expiry_date: z
+		.union([z.literal('').transform(() => null), z.string().date()])
+		.nullish()
+		.refine(
+			(val) => {
+				if (!val) return true; // Allow null/undefined values
+				const expiryDate = new Date(val);
+				const today = new Date();
+				today.setHours(0, 0, 0, 0); // Set to start of today to allow today's date
+				return expiryDate >= today;
+			},
+			{
+				message: 'Expiry date cannot be in the past'
+			}
+		)
 });
 
 export const UserCreateSchema = z.object({
-	email: z.string().email()
+	email: z.string().email(),
+	observation: z.string().optional().nullable(),
+	expiry_date: z
+		.union([z.literal('').transform(() => null), z.string().date()])
+		.nullish()
+		.refine(
+			(val) => {
+				if (!val) return true; // Allow null/undefined values
+				const expiryDate = new Date(val);
+				const today = new Date();
+				today.setHours(0, 0, 0, 0); // Set to start of today to allow today's date
+				return expiryDate >= today;
+			},
+			{
+				message: 'Expiry date cannot be in the past'
+			}
+		)
 });
 
 export const ChangePasswordSchema = z.object({
@@ -324,7 +408,8 @@ export const ComplianceAssessmentSchema = z.object({
 	observation: z.string().optional().nullable(),
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	evidences: z.string().uuid().optional().array().optional()
+	evidences: z.string().uuid().optional().array().optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const CampaignSchema = z.object({
@@ -358,12 +443,28 @@ export const EvidenceSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	owner: z.string().optional().array().optional(),
+	status: z.string().optional().default('draft'),
+	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+});
+
+export const EvidenceRevisionSchema = z.object({
+	folder: z.string().uuid(),
+	evidence: z.string().uuid(),
+	version: z.number().optional(),
+	attachment: z.any().optional().nullable(),
+	link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: "Link must be either empty or a valid URL starting with 'http'"
+		})
+		.optional(),
+	observation: z.string().optional().nullable()
 });
 
 export const GeneralSettingsSchema = z.object({
 	security_objective_scale: z.string(),
-	ebios_radar_max: z.number(),
 	ebios_radar_green_zone_radius: z.number(),
 	ebios_radar_yellow_zone_radius: z.number(),
 	ebios_radar_red_zone_radius: z.number(),
@@ -371,7 +472,9 @@ export const GeneralSettingsSchema = z.object({
 	interface_agg_scenario_matrix: z.boolean().optional(),
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
-	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional()
+	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
+	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
+	daily_rate: z.number().default(500).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -388,7 +491,13 @@ export const FeatureFlagsSchema = z.object({
 	ebiosrm: z.boolean().optional(),
 	privacy: z.boolean().optional(),
 	experimental: z.boolean().optional(),
-	inherent_risk: z.boolean().optional()
+	inherent_risk: z.boolean().optional(),
+	organisation_objectives: z.boolean().optional(),
+	organisation_issues: z.boolean().optional(),
+	quantitative_risk_studies: z.boolean().optional(),
+	terminologies: z.boolean().optional(),
+	bia: z.boolean().optional(),
+	project_management: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -433,6 +542,8 @@ export const SSOSettingsSchema = z.object({
 	want_message_signed: z.boolean().optional().nullable(),
 	want_name_id: z.boolean().optional().nullable(),
 	want_name_id_encrypted: z.boolean().optional().nullable(),
+	sp_x509cert: z.string().optional(),
+	sp_private_key: z.string().optional(),
 	server_url: z.string().optional().nullable(),
 	token_auth_method: z
 		.enum([
@@ -456,7 +567,8 @@ export const EntitiesSchema = z.object({
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
-		.optional()
+		.optional(),
+	relationship: z.string().optional().array().optional()
 });
 
 export const EntityAssessmentSchema = z.object({
@@ -556,16 +668,60 @@ export const processingSchema = z.object({
 	ref_id: z.string().optional().default(''),
 	filtering_labels: z.string().optional().array().optional(),
 	status: z.string().optional(),
-	legal_basis: z.string(),
 	dpia_required: z.boolean().optional(),
 	has_sensitive_personal_data: z.boolean().optional(),
 	nature: z.string().optional().array().optional(),
-	associated_controls: z.array(z.string().optional()).optional()
+	associated_controls: z.array(z.string().optional()).optional(),
+	assigned_to: z.string().uuid().optional().array().optional()
+});
+
+export const rightRequestSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional().default(''),
+	owner: z.string().uuid().optional().array().optional(),
+	requested_on: z
+		.string()
+		.min(1)
+		.default(() => new Date().toISOString().split('T')[0]),
+	due_date: z.string().optional(),
+	request_type: z.string(),
+	status: z.string(),
+	observation: z.string().optional(),
+	processings: z.array(z.string()).optional().default([])
+});
+
+export const dataBreachSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional().default(''),
+	assigned_to: z.string().uuid().optional().array().optional(),
+	discovered_on: z
+		.string()
+		.min(1)
+		.default(() => new Date().toISOString()),
+	breach_type: z.string(),
+	risk_level: z.string(),
+	status: z.string(),
+	affected_subjects_count: z.number().optional().default(0),
+	affected_processings: z.array(z.string()).optional().default([]),
+	affected_personal_data: z.array(z.string()).optional().default([]),
+	affected_personal_data_count: z.number().optional().default(0),
+	authorities: z.array(z.string()).optional().default([]),
+	authority_notified_on: z.string().optional(),
+	authority_notification_ref: z.string().optional(),
+	subjects_notified_on: z.string().optional(),
+	potential_consequences: z.string().optional(),
+	remediation_measures: z.array(z.string()).optional().default([]),
+	incident: z.string().optional(),
+	reference_link: z.string().url().optional().or(z.literal('')),
+	observation: z.string().optional()
 });
 
 export const purposeSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional().default(''),
+	legal_basis: z.string(),
 	processing: z.string()
 });
 export const dataSubjectSchema = z.object({
@@ -617,9 +773,113 @@ export const personalDataSchema = z.object({
 	retention: z.string(),
 	deletion_policy: z.string(),
 	is_sensitive: z.boolean().optional(),
-	processing: z.string()
+	processing: z.string(),
+	assets: z.string().uuid().optional().array().optional()
 });
 
+export const organisationObjectiveSchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional().default(''),
+	folder: z.string(),
+	status: z.string().optional().default('draft'),
+	health: z.string().optional(),
+	assigned_to: z.string().optional().array().optional(),
+	issues: z.string().uuid().optional().array().optional(),
+	assets: z.string().uuid().optional().array().optional(),
+	tasks: z.string().uuid().optional().array().optional(),
+	observation: z.string().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+});
+export const organisationIssueSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional().default(''),
+	observation: z.string().optional().nullable(),
+	category: z.string().optional(),
+	origin: z.string().optional(),
+	assets: z.string().uuid().optional().array().optional()
+});
+
+export const quantitativeRiskStudySchema = z.object({
+	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
+	status: z.string().optional().nullable(),
+	distribution_model: z.string().optional().default('lognormal_ci90'),
+	authors: z.array(z.string().optional()).optional(),
+	reviewers: z.array(z.string().optional()).optional(),
+	observation: z.string().optional().nullable(),
+	risk_tolerance: z
+		.object({
+			points: z
+				.object({
+					point1: z
+						.object({
+							probability: z.number().min(0.01).max(0.99).optional(),
+							acceptable_loss: z.number().min(1).optional()
+						})
+						.default({ probability: 0.99 })
+						.optional(),
+					point2: z
+						.object({
+							probability: z.number().min(0.01).max(0.99).optional(),
+							acceptable_loss: z.number().min(1).optional()
+						})
+						.optional()
+				})
+				.optional(),
+			curve_data: z
+				.object({
+					loss_values: z.array(z.number()).optional(),
+					probability_values: z.array(z.number()).optional()
+				})
+				.optional()
+		})
+		.optional(),
+	// .default({
+	// 	points: { point1: { probability: 0.99, acceptable_loss: 1 }, point2: { probability: 0.01 } }
+	// }),
+	loss_threshold: z.number().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	folder: z.string()
+});
+
+export const quantitativeRiskScenarioSchema = z.object({
+	...NameDescriptionMixin,
+	quantitative_risk_study: z.string().uuid(),
+	assets: z.string().uuid().optional().array().optional(),
+	owner: z.string().uuid().optional().array().optional(),
+	priority: z.number().optional().nullable(),
+	status: z.string().optional().default('draft'),
+	vulnerabilities: z.string().uuid().optional().array().optional(),
+	threats: z.string().uuid().optional().array().optional(),
+	qualifications: z.string().uuid().optional().array().optional(),
+	observation: z.string().optional().nullable(),
+	is_selected: z.boolean().default(true),
+	ref_id: z.string().optional()
+});
+
+export const quantitativeRiskHypothesisSchema = z.object({
+	...NameDescriptionMixin,
+	quantitative_risk_scenario: z.string().uuid(),
+	existing_applied_controls: z.string().uuid().optional().array().optional(),
+	added_applied_controls: z.string().uuid().optional().array().optional(),
+	removed_applied_controls: z.string().uuid().optional().array().optional(),
+	risk_stage: z.string().optional().default('residual'),
+	ref_id: z.string().optional(),
+	is_selected: z.boolean().default(true),
+	probability: z.coerce.number().min(0).max(1).optional(),
+	impact: z
+		.object({
+			distribution: z.string().default('LOGNORMAL-CI90'),
+			lb: z.coerce.number().min(0).optional(),
+			ub: z.coerce.number().min(0).optional()
+		})
+		.optional(),
+	observation: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
+});
 export const ebiosRMSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
@@ -644,11 +904,12 @@ export const fearedEventsSchema = z.object({
 	ebios_rm_study: z.string(),
 	folder: z.string(),
 	assets: z.string().uuid().optional().array().optional(),
-	qualifications: z.string().optional().array().optional()
+	qualifications: z.string().uuid().optional().array().optional()
 });
 
 export const roToSchema = z.object({
 	ebios_rm_study: z.string(),
+	folder: z.string(),
 	feared_events: z.string().uuid().optional().array().optional(),
 	risk_origin: z.string(),
 	target_objective: z.string(),
@@ -675,32 +936,37 @@ export const StakeholderSchema = z.object({
 	residual_trust: z.number().min(1).max(4).default(1).optional(),
 	residual_criticality: z.number().min(0).max(16).default(0).optional(),
 	is_selected: z.boolean().default(true),
-	justification: z.string().optional()
+	justification: z.string().optional(),
+	folder: z.string()
 });
 
 export const StrategicScenarioSchema = z.object({
 	...NameDescriptionMixin,
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
-	ref_id: z.string().optional()
+	ref_id: z.string().optional(),
+	folder: z.string()
 });
 
 export const AttackPathSchema = z.object({
 	...NameDescriptionMixin,
+	ebios_rm_study: z.string(),
 	strategic_scenario: z.string().uuid(),
 	stakeholders: z.string().uuid().optional().array().optional(),
 	is_selected: z.boolean().default(true),
-	justification: z.string().optional()
+	justification: z.string().optional(),
+	folder: z.string()
 });
 
 export const operationalScenarioSchema = z.object({
 	ebios_rm_study: z.string(),
 	attack_path: z.string().uuid(),
 	threats: z.string().uuid().optional().array().optional(),
-	operating_modes_description: z.string(),
+	operating_modes_description: z.string().optional(),
 	likelihood: z.number().optional().default(-1),
 	is_selected: z.boolean().default(true),
-	justification: z.string().optional()
+	justification: z.string().optional(),
+	folder: z.string()
 });
 
 export const SecurityExceptionSchema = z.object({
@@ -726,10 +992,12 @@ export const FindingSchema = z.object({
 	reference_controls: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string(),
 	severity: z.number().default(-1),
+	priority: z.number().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional(),
 	evidences: z.string().uuid().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	observation: z.string().optional().nullable()
 });
 
 export const FindingsAssessmentSchema = z.object({
@@ -745,7 +1013,8 @@ export const FindingsAssessmentSchema = z.object({
 	owner: z.string().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	category: z.string().default('--'),
-	evidences: z.string().uuid().optional().array().optional()
+	evidences: z.string().uuid().optional().array().optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const IncidentSchema = z.object({
@@ -771,10 +1040,12 @@ export const IncidentSchema = z.object({
 	threats: z.string().uuid().optional().array().optional(),
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	qualifications: z.string().uuid().optional().array().optional()
+	qualifications: z.string().uuid().optional().array().optional(),
+	entities: z.string().uuid().optional().array().optional()
 });
 
 export const TimelineEntrySchema = z.object({
+	folder: z.string(),
 	incident: z.string(),
 	entry: z.string(),
 	entry_type: z.string().default('observation'),
@@ -807,7 +1078,7 @@ export const TaskTemplateSchema = z.object({
 	is_recurrent: z.boolean().optional(),
 	enabled: z.boolean().default(true).optional(),
 	assets: z.string().uuid().optional().array().optional(),
-	applied_controls: z.string().uuid().optional().array().optional(),
+	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	compliance_assessments: z.string().uuid().optional().array().optional(),
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
@@ -825,6 +1096,53 @@ export const TaskTemplateSchema = z.object({
 		.default({
 			interval: 1,
 			frequency: 'DAILY'
+		})
+		.optional()
+		// Add cross-field validation for weeks_of_month and days_of_week (only for MONTHLY/YEARLY)
+		.refine(
+			(schedule) => {
+				if (!schedule) return true;
+
+				// Only apply this validation for MONTHLY and YEARLY frequencies
+				if (schedule.frequency !== 'MONTHLY' && schedule.frequency !== 'YEARLY') {
+					return true;
+				}
+
+				const hasWeeksOfMonth = schedule.weeks_of_month && schedule.weeks_of_month.length > 0;
+				const hasDaysOfWeek = schedule.days_of_week && schedule.days_of_week.length > 0;
+
+				// If weeks_of_month is provided, days_of_week must also be provided
+				return !hasWeeksOfMonth || hasDaysOfWeek;
+			},
+			{
+				message: m.daysOfWeekErrorMessage(),
+				path: ['days_of_week']
+			}
+		)
+		.refine(
+			(schedule) => {
+				if (!schedule) return true;
+
+				// Only apply this validation for MONTHLY and YEARLY frequencies
+				if (schedule.frequency !== 'MONTHLY' && schedule.frequency !== 'YEARLY') {
+					return true;
+				}
+
+				const hasWeeksOfMonth = schedule.weeks_of_month && schedule.weeks_of_month.length > 0;
+				const hasDaysOfWeek = schedule.days_of_week && schedule.days_of_week.length > 0;
+
+				// If days_of_week is provided, weeks_of_month must also be provided
+				return !hasDaysOfWeek || hasWeeksOfMonth;
+			},
+			{
+				message: m.weeksOfMonthErrorMessage(),
+				path: ['weeks_of_month']
+			}
+		),
+	link: z
+		.string()
+		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
+			message: 'Invalid URL format'
 		})
 		.optional()
 });
@@ -856,7 +1174,8 @@ export const OperatingModeSchema = z.object({
 	operational_scenario: z.string().uuid(),
 	ref_id: z.string().optional(),
 	elementary_actions: z.string().uuid().optional().array().optional(),
-	likelihood: z.number().optional().default(-1)
+	likelihood: z.number().optional().default(-1),
+	folder: z.string()
 });
 
 export const KillChainSchema = z.object({
@@ -864,7 +1183,54 @@ export const KillChainSchema = z.object({
 	elementary_action: z.string().uuid(),
 	// is_highlighted: z.boolean().default(false),
 	antecedents: z.string().uuid().optional().array().optional(),
-	logic_operator: z.string().optional().nullable()
+	logic_operator: z.string().optional().nullable(),
+	folder: z.string()
+});
+
+export const TerminologySchema = z.object({
+	...NameDescriptionMixin,
+	field_path: z.string().min(1),
+	is_visible: z.boolean().default(true),
+	translations: z.record(z.string().min(1), z.string().min(1))
+});
+
+export const RoleSchema = z.object({
+	...NameDescriptionMixin,
+	permissions: z.array(z.number()).optional()
+});
+
+// PMBOK
+export const GenericCollectionSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	compliance_assessments: z.array(z.string().uuid().optional()).optional(),
+	risk_assessments: z.array(z.string().uuid().optional()).optional(),
+	crq_studies: z.array(z.string().uuid().optional()).optional(),
+	ebios_studies: z.array(z.string().uuid().optional()).optional(),
+	entity_assessments: z.array(z.string().uuid().optional()).optional(),
+	findings_assessments: z.array(z.string().uuid().optional()).optional(),
+	documents: z.array(z.string().uuid().optional()).optional(),
+	security_exceptions: z.array(z.string().uuid().optional()).optional(),
+	policies: z.array(z.string().uuid().optional()).optional(),
+	dependencies: z.array(z.string().uuid().optional()).optional(),
+	observation: z.string().optional().nullable(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional()
+});
+
+export const AccreditationSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	category: z.string().uuid(),
+	authority: z.string().uuid().optional().nullable(),
+	status: z.string().uuid(),
+	author: z.string().uuid().optional().nullable(),
+	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	linked_collection: z.string().uuid().optional().nullable(),
+	checklist: z.string().uuid().optional().nullable(),
+	observation: z.string().optional().nullable(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional()
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
@@ -885,6 +1251,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'compliance-assessments': ComplianceAssessmentSchema,
 	campaigns: CampaignSchema,
 	evidences: EvidenceSchema,
+	'evidence-revisions': EvidenceRevisionSchema,
 	users: UserCreateSchema,
 	'sso-settings': SSOSettingsSchema,
 	'general-settings': GeneralSettingsSchema,
@@ -899,6 +1266,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'asset-assessments': AssetAssessmentSchema,
 	'escalation-thresholds': EscalationThresholdSchema,
 	processings: processingSchema,
+	'right-requests': rightRequestSchema,
+	'data-breaches': dataBreachSchema,
 	purposes: purposeSchema,
 	'personal-data': personalDataSchema,
 	'data-subjects': dataSubjectSchema,
@@ -921,7 +1290,16 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'task-nodes': TaskNodeSchema,
 	'elementary-actions': ElementaryActionSchema,
 	'operating-modes': OperatingModeSchema,
-	'kill-chains': KillChainSchema
+	'kill-chains': KillChainSchema,
+	'organisation-objectives': organisationObjectiveSchema,
+	'organisation-issues': organisationIssueSchema,
+	'quantitative-risk-studies': quantitativeRiskStudySchema,
+	'quantitative-risk-scenarios': quantitativeRiskScenarioSchema,
+	'quantitative-risk-hypotheses': quantitativeRiskHypothesisSchema,
+	terminologies: TerminologySchema,
+	roles: RoleSchema,
+	'generic-collections': GenericCollectionSchema,
+	accreditations: AccreditationSchema
 };
 
 export const modelSchema = (model: string) => {

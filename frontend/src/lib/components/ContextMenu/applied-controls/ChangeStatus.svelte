@@ -72,3 +72,5 @@
 		{/each}
 	</ContextMenu.SubContent>
 </ContextMenu.Sub>
+
+<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />

@@ -52,6 +52,14 @@
 	}
 </script>
 
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
+/>
 {#if context !== 'selectElementaryActions'}
 	<AutocompleteSelect
 		{form}

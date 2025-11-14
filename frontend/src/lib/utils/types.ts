@@ -51,6 +51,7 @@ export const URL_MODEL = [
 	'role-assignments',
 	'compliance-assessments',
 	'evidences',
+	'evidence-revisions',
 	'frameworks',
 	'requirements',
 	'requirement-assessments',
@@ -77,8 +78,6 @@ export const URL_MODEL = [
 	'elementary-actions',
 	'operating-modes',
 	'kill-chains',
-	// qualifications
-	'qualifications',
 	'processings',
 	'processing-natures',
 	'security-exceptions',
@@ -86,6 +85,8 @@ export const URL_MODEL = [
 	'findings-assessments',
 	// privacy,
 	'processings',
+	'right-requests',
+	'data-breaches',
 	'purposes',
 	'personal-data',
 	'data-subjects',
@@ -103,11 +104,31 @@ export const URL_MODEL = [
 	'escalation-thresholds',
 	'asset-assessments',
 	'asset-class',
+	'asset-capabilities',
 	// campaigns,
-	'campaigns'
+	'campaigns',
+	// iso,
+	'organisation-issues',
+	'organisation-objectives',
+	// crq,
+	'quantitative-risk-studies',
+	'quantitative-risk-scenarios',
+	'quantitative-risk-hypotheses',
+	// terminologies
+	'terminologies',
+	// roles,
+	'roles',
+	'permissions',
+	// pmbok
+	'generic-collections',
+	'accreditations'
 ] as const;
 
-export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
+export const THIRD_PARTY_URL_MODEL = [
+	'compliance-assessments',
+	'evidences',
+	'evidence-revisions'
+] as const;
 
 export type urlModel = (typeof URL_MODEL)[number];
 
@@ -192,6 +213,12 @@ export interface AggregatedData {
 }
 
 export interface AppliedControlStatus {
+	localLables: string[];
+	labels: any[];
+	values: any[]; // Set these types later on
+}
+
+export interface AppliedControlImpact {
 	localLables: string[];
 	labels: any[];
 	values: any[]; // Set these types later on

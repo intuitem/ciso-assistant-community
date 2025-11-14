@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import ComplianceAssessment, Framework
@@ -20,6 +21,7 @@ User = get_user_model()
 class EntityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     owned_folders = FieldsRelatedField(many=True)
+    relationship = FieldsRelatedField(many=True)
 
     class Meta:
         model = Entity
@@ -87,33 +89,45 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
     def _create_or_update_audit(self, instance, audit_data):
         if audit_data["create_audit"]:
-            if not audit_data["framework"]:
+            if not audit_data.get("framework"):
                 raise serializers.ValidationError(
                     {"framework": [_("Framework required")]}
                 )
 
-            audit = ComplianceAssessment.objects.create(
-                name=instance.name,
-                framework=audit_data["framework"],
-                perimeter=instance.perimeter,
-                selected_implementation_groups=audit_data[
-                    "selected_implementation_groups"
-                ],
-            )
+            with transaction.atomic():
+                locked = EntityAssessment.objects.select_for_update().get(
+                    pk=instance.pk
+                )  # lock entity assessment until the end of the transaction
+                if getattr(locked, "compliance_assessment_id", None):
+                    raise serializers.ValidationError(
+                        {
+                            "create_audit": [
+                                _("An audit already exists for this assessment")
+                            ]
+                        }
+                    )
+                audit = ComplianceAssessment.objects.create(
+                    name=locked.name,
+                    framework=audit_data["framework"],
+                    perimeter=locked.perimeter,
+                    selected_implementation_groups=audit_data[
+                        "selected_implementation_groups"
+                    ],
+                )
 
-            enclave = Folder.objects.create(
-                content_type=Folder.ContentType.ENCLAVE,
-                name=f"{instance.perimeter.name}/{instance.name}",
-                parent_folder=instance.folder,
-            )
-            audit.folder = enclave
-            audit.save()
+                enclave = Folder.objects.create(
+                    content_type=Folder.ContentType.ENCLAVE,
+                    name=f"{instance.perimeter.name}/{instance.name}",
+                    parent_folder=instance.folder,
+                )
+                audit.folder = enclave
+                audit.save()
 
-            audit.create_requirement_assessments()
-            audit.reviewers.set(instance.reviewers.all())
-            audit.authors.set(instance.representatives.all())
-            instance.compliance_assessment = audit
-            instance.save()
+                audit.create_requirement_assessments()
+                audit.reviewers.set(instance.reviewers.all())
+                audit.authors.set(instance.representatives.all())
+                instance.compliance_assessment = audit
+                instance.save()
         else:
             if instance.compliance_assessment:
                 audit = instance.compliance_assessment
@@ -153,11 +167,12 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         audit_data = self._extract_audit_data(validated_data)
-        instance = super().create(validated_data)
-        self._create_or_update_audit(instance, audit_data)
-        self._assign_third_party_respondents(
-            instance, set(instance.representatives.all())
-        )
+        with transaction.atomic():
+            instance = super().create(validated_data)
+            self._create_or_update_audit(instance, audit_data)
+            self._assign_third_party_respondents(
+                instance, set(instance.representatives.all())
+            )
         return instance
 
     def update(self, instance: EntityAssessment, validated_data):
@@ -166,12 +181,13 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         old_representatives = set(instance.representatives.all()) - set(
             validated_data.get("representatives", [])
         )
-        instance = super().update(instance, validated_data)
-
-        self._create_or_update_audit(instance, audit_data)
-        self._assign_third_party_respondents(
-            instance, representatives, old_representatives
-        )
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            self._create_or_update_audit(instance, audit_data)
+            if "representatives" in validated_data:
+                self._assign_third_party_respondents(
+                    instance, representatives, old_representatives
+                )
         return instance
 
     class Meta:

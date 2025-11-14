@@ -1,13 +1,9 @@
 import time
 
 from .helpers import get_referential_translation
-from pathlib import Path
 from typing import List, Union
-from django.core.exceptions import SuspiciousFileOperation, ValidationError
-from django.http import Http404
 
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
-from ciso_assistant import settings
 from core.models import (
     Framework,
     RequirementMapping,
@@ -89,6 +85,7 @@ class RequirementNodeImporter:
             name=self.requirement_data.get("name"),
             description=self.requirement_data.get("description"),
             implementation_groups=self.requirement_data.get("implementation_groups"),
+            weight=self.requirement_data.get("weight", 1),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),
@@ -96,11 +93,17 @@ class RequirementNodeImporter:
             questions=self.requirement_data.get("questions"),
         )
         for threat in self.requirement_data.get("threats", []):
+            logger.info(
+                f"Parsing the threats for {self.requirement_data.get('ref_id')}"
+            )
             requirement_node.threats.add(
                 Threat.objects.get(urn=threat.lower())
             )  # URN are not case insensitive in the whole codebase yet, we should fix that and make sure URNs are always transformed into lowercase before being used.
 
         for reference_control in self.requirement_data.get("reference_controls", []):
+            logger.info(
+                f"Parsing the reference controls for {self.requirement_data.get('ref_id')}"
+            )
             requirement_node.reference_controls.add(
                 ReferenceControl.objects.get(urn=reference_control.lower())
             )
@@ -197,22 +200,7 @@ class RequirementMappingSetImporter:
         self,
         library_object: LoadedLibrary,
     ):
-        _target_framework = Framework.objects.get(
-            urn=self.data["target_framework_urn"].lower(), default_locale=True
-        )
-        _source_framework = Framework.objects.get(
-            urn=self.data["source_framework_urn"].lower(), default_locale=True
-        )
-        mapping_set = RequirementMappingSet.objects.create(
-            name=self.data["name"],
-            urn=self.data["urn"].lower(),
-            target_framework=_target_framework,
-            source_framework=_source_framework,
-            library=library_object,
-        )
-        for mapping in self._requirement_mappings:
-            mapping.load(mapping_set)
-        return mapping_set
+        pass
 
     def init(self) -> Union[str, None]:
         if missing_fields := self.REQUIRED_FIELDS - set(self.data.keys()):
@@ -695,7 +683,14 @@ class LibraryImporter:
 
     def check_and_import_dependencies(self) -> Union[str, None]:
         """Check and import library dependencies."""
-        if not self._library.dependencies:
+        if (
+            not self._library.dependencies
+            or self._library.content.get(
+                "requirement_mapping_set",
+                self._library.content.get("requirement_mapping_sets"),
+            )
+            is not None
+        ):
             return None
         for dependency_urn in self._library.dependencies:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():

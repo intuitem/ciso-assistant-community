@@ -9,7 +9,7 @@
 	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getSecureRedirect } from '$lib/utils/helpers';
@@ -31,6 +31,12 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import {
+		computeRequirementScoreAndResult,
+		formatScoreValue,
+		displayScoreColor
+	} from '$lib/utils/helpers';
 
 	interface Props {
 		data: PageData;
@@ -48,6 +54,15 @@
 
 	const has_threats = threats.length > 0;
 	const has_reference_controls = reference_controls.length > 0;
+
+	// Map implementation group ref_ids to their display names
+	const implementationGroupsDefinition =
+		data.requirementAssessment.compliance_assessment.framework?.implementation_groups_definition ??
+		[];
+
+	function getImplementationGroupName(refId: string): string {
+		return implementationGroupsDefinition.find((g) => g.ref_id === refId)?.name ?? refId;
+	}
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -70,6 +85,7 @@
 				model: data.measureModel,
 				debug: false,
 				invalidateAll: false,
+				origin: 'requirement-assessments',
 				suggestions: { reference_control: reference_controls }
 			}
 		};
@@ -89,6 +105,7 @@
 				form: data.evidenceCreateForm,
 				formAction: '?/createEvidence',
 				model: data.evidenceModel,
+				invalidateAll: false,
 				debug: false
 			}
 		};
@@ -108,6 +125,7 @@
 				form: data.securityExceptionCreateForm,
 				formAction: '?/createSecurityException',
 				model: data.securityExceptionModel,
+				invalidateAll: false,
 				debug: false
 			}
 		};
@@ -248,25 +266,59 @@
 	$effect(() => {
 		if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
 	});
+
+	let computedScoreAndResult = $derived(
+		computeRequirementScoreAndResult(data.requirementAssessment, $formStore.answers)
+	);
+
+	let computedResult = $derived(computedScoreAndResult.result);
+	let computedScore = $derived(computedScoreAndResult.score);
 </script>
 
+{#if data.requirementAssessment.compliance_assessment.is_locked}
+	<div
+		class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm mb-4"
+	>
+		<div class="flex items-center">
+			<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
+			<span class="font-medium">{m.lockedAssessment()}</span>
+			<span class="ml-2 text-sm">{m.lockedRequirementAssessmentMessage()}</span>
+		</div>
+	</div>
+{/if}
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex justify-between">
-		<span class="code left h-min">{data.requirement.urn}</span>
+		<div class="flex">
+			<span class="code left h-min">{data.requirement.urn}</span>
+		</div>
 		<a
 			class="text-pink-500 hover:text-pink-400"
 			href={complianceAssessmentURL}
 			aria-label="Go to compliance assessment"><i class="fa-solid fa-turn-up"></i></a
 		>
 	</div>
-	{#if data.requirement.description}
-		<p class="whitespace-pre-line p-2 font-light text-lg">
-			👉 {data.requirement.description}
-		</p>
+	{#if data.requirement?.implementation_groups?.length > 0}
+		<div class="mb-2">
+			{#each data.requirement.implementation_groups as ig}
+				<span class="badge bg-blue-100 mr-2">
+					{getImplementationGroupName(ig)}
+				</span>
+			{/each}
+		</div>
 	{/if}
-	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
-		<div class="card p-4 preset-tonal-primary text-sm flex flex-col justify-evenly cursor-auto">
-			<h2 class="font-semibold text-lg flex flex-row justify-between">
+	{#if data.requirement.description}
+		<div class="font-light text-lg card p-4 preset-tonal-primary">
+			<h2 class="font-semibold text-base flex flex-row justify-between">
+				<div>
+					<i class="fa-solid fa-file-lines mr-2"></i>{m.description()}
+				</div>
+			</h2>
+			<MarkdownRenderer content={data.requirement.description} />
+		</div>
+	{/if}
+	{#if has_threats || has_reference_controls || annotation || mappingInference.result || typical_evidence}
+		<div class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto">
+			<h2 class="font-semibold text-base flex flex-row justify-between">
 				<div>
 					<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
 				</div>
@@ -331,9 +383,9 @@
 							<i class="fa-solid fa-pencil"></i>
 							{m.annotation()}
 						</p>
-						<p class="whitespace-pre-line py-1">
-							{annotation}
-						</p>
+						<div class="py-1">
+							<MarkdownRenderer content={annotation} />
+						</div>
 					</div>
 				{/if}
 				{#if typical_evidence}
@@ -342,9 +394,9 @@
 							<i class="fa-solid fa-pencil"></i>
 							{m.typicalEvidence()}
 						</p>
-						<p class="whitespace-pre-line py-1">
-							{typical_evidence}
-						</p>
+						<div class="py-1">
+							<MarkdownRenderer content={typical_evidence} />
+						</div>
 					</div>
 				{/if}
 				{#if mappingInference.result}
@@ -572,58 +624,100 @@
 						field="status"
 						label={m.status()}
 					/>
-					<Select
-						{form}
-						options={page.data.model.selectOptions['result']}
-						field="result"
-						label={m.result()}
-					/>
-					<div class="flex flex-col">
-						<Score
+					{#if computedResult}
+						<p class="flex flex-row items-center space-x-4">
+							<span class="font-medium">{m.result()}</span>
+							<span
+								class="badge text-sm font-semibold"
+								style="background-color: {complianceResultColorMap[
+									computedResult || 'not_assessed'
+								] || '#ddd'}"
+							>
+								{safeTranslate(computedResult || 'not_assessed')}
+							</span>
+						</p>
+					{:else}
+						<Select
 							{form}
-							min_score={page.data.compliance_assessment_score.min_score}
-							max_score={page.data.compliance_assessment_score.max_score}
-							scores_definition={page.data.compliance_assessment_score.scores_definition}
-							field="score"
-							label={page.data.compliance_assessment_score.show_documentation_score
-								? m.implementationScore()
-								: m.score()}
-							disabled={!data.is_scored || data.result === 'not_applicable'}
-						>
-							{#snippet left()}
-								<div>
-									<Checkbox
-										{form}
-										field="is_scored"
-										label={''}
-										helpText={m.scoringHelpText()}
-										checkboxComponent="switch"
-										classes="h-full flex flex-row items-center justify-center my-1"
-										classesContainer="h-full flex flex-row items-center space-x-4"
-									/>
-								</div>
-							{/snippet}
-						</Score>
-					</div>
-					{#if page.data.compliance_assessment_score.show_documentation_score}
-						<Score
-							{form}
-							min_score={page.data.compliance_assessment_score.min_score}
-							max_score={page.data.compliance_assessment_score.max_score}
-							scores_definition={page.data.compliance_assessment_score.scores_definition}
-							field="documentation_score"
-							label={m.documentationScore()}
-							isDoc={true}
-							disabled={!data.is_scored || data.result === 'not_applicable'}
+							options={page.data.model.selectOptions['result']}
+							field="result"
+							label={m.result()}
 						/>
 					{/if}
+					{#if computedScore !== null}
+						<div class="flex flex-row items-center space-x-4">
+							<span class="font-medium">{m.score()}</span>
+							<ProgressRing
+								strokeWidth="20px"
+								meterStroke={displayScoreColor(
+									computedScore,
+									page.data.compliance_assessment_score.max_score
+								)}
+								value={formatScoreValue(
+									computedScore || 0,
+									page.data.compliance_assessment_score.max_score
+								)}
+								classes="shrink-0"
+								size="size-10">{computedScore}</ProgressRing
+							>
+						</div>
+					{:else}
+						<div class="flex flex-col">
+							<Score
+								{form}
+								min_score={page.data.compliance_assessment_score.min_score}
+								max_score={page.data.compliance_assessment_score.max_score}
+								scores_definition={page.data.compliance_assessment_score.scores_definition}
+								field="score"
+								label={page.data.compliance_assessment_score.show_documentation_score
+									? m.implementationScore()
+									: m.score()}
+								disabled={!data.is_scored || data.result === 'not_applicable'}
+							>
+								{#snippet left()}
+									<div>
+										<Checkbox
+											{form}
+											field="is_scored"
+											label={''}
+											helpText={m.scoringHelpText()}
+											checkboxComponent="switch"
+											classes="h-full flex flex-row items-center justify-center my-1"
+											classesContainer="h-full flex flex-row items-center space-x-4"
+										/>
+									</div>
+								{/snippet}
+							</Score>
+						</div>
+						{#if page.data.compliance_assessment_score.show_documentation_score}
+							<Score
+								{form}
+								min_score={page.data.compliance_assessment_score.min_score}
+								max_score={page.data.compliance_assessment_score.max_score}
+								scores_definition={page.data.compliance_assessment_score.scores_definition}
+								field="documentation_score"
+								label={m.documentationScore()}
+								isDoc={true}
+								disabled={!data.is_scored || data.result === 'not_applicable'}
+							/>
+						{/if}
+					{/if}
 
-					<TextArea {form} field="observation" label="Observation" />
+					<MarkdownField {form} field="observation" label="Observation" />
 					<div class="flex flex-row justify-between space-x-4">
 						<button
 							class="btn bg-gray-400 text-white font-semibold w-full"
 							type="button"
 							onclick={cancel}>{m.cancel()}</button
+						>
+						<button
+							class="btn preset-filled-secondary-500 font-semibold w-full"
+							data-testid="save-no-continue-button"
+							type="submit"
+							onclick={() =>
+								form.form.update((data) => {
+									return { ...data, noRedirect: true };
+								})}>{m.saveAndContinue()}</button
 						>
 						<button
 							class="btn preset-filled-primary-500 font-semibold w-full"

@@ -25,13 +25,13 @@
 	}: Props = $props();
 </script>
 
-<!-- <TextField -->
-<!-- 	{form} -->
-<!-- 	field="ref_id" -->
-<!-- 	label={m.refId()} -->
-<!-- 	cacheLock={cacheLocks['ref_id']} -->
-<!-- 	bind:cachedValue={formDataCache['ref_id']} -->
-<!-- /> -->
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
 
 <AutocompleteSelect
 	{form}
@@ -42,6 +42,16 @@
 	label={m.status()}
 />
 <AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="users?is_third_party=false"
+	optionsLabelField="email"
+	field="assigned_to"
+	cacheLock={cacheLocks['assigned_to']}
+	bind:cachedValue={formDataCache['assigned_to']}
+	label={m.assignedTo()}
+/>
+<AutocompleteSelect
 	multiple
 	{form}
 	optionsEndpoint="processing-natures"
@@ -50,16 +60,9 @@
 />
 <AutocompleteSelect
 	{form}
-	field="legal_basis"
-	options={model.selectOptions['legal_basis']}
-	cacheLock={cacheLocks['legal_basis']}
-	bind:cachedValue={formDataCache['legal_basis']}
-	label={m.legalBasis()}
-/>
-<AutocompleteSelect
-	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -71,6 +74,7 @@
 	createFromSelection={true}
 	optionsEndpoint="filtering-labels"
 	optionsLabelField="label"
+	translateOptions={false}
 	field="filtering_labels"
 	helpText={m.labelsHelpText()}
 	label={m.labels()}
@@ -88,7 +92,7 @@
 	{form}
 	field="dpia_reference"
 	label={m.dpiaReference()}
-	helpText={m.linkHelpText()}
+	helpText={m.dpiaReferenceHelpText()}
 	cacheLock={cacheLocks['dpia_reference']}
 	bind:cachedValue={formDataCache['dpia_reference']}
 />

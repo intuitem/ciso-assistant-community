@@ -8,6 +8,8 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+
 	interface Props {
 		form: SuperForm<any>;
 		model: ModelInfo;
@@ -19,6 +21,7 @@
 	let formDataCache = $state({});
 
 	const formStore = form.form;
+	const modalStore = getModalStore();
 
 	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
 
@@ -30,8 +33,56 @@
 	let horizontalAxisPos = $derived(flipVertically ? 'top-8' : 'bottom-8');
 	let horizontalLabelPos = $derived(flipVertically ? 'top-2' : 'bottom-2');
 
-	let openAccordionItems = $state(['notifications', 'interface']);
+	let openAccordionItems = $state(['notifications', 'financial']);
+
+	// Track original currency for change detection
+	let originalCurrency = $state($formStore.currency);
+	let conversionRateValue = $state('1.0');
+
+	function handleCurrencyChange(newCurrency: string) {
+		if (originalCurrency && originalCurrency !== newCurrency) {
+			// Show modal to ask for conversion rate
+			const modal: ModalSettings = {
+				type: 'prompt',
+				title: m.currencyConversionRate?.() || 'Currency Conversion Rate',
+				body: `Converting from ${originalCurrency} to ${newCurrency}. Enter conversion rate (default: 1.0):`,
+				value: '1.0',
+				valueAttr: {
+					type: 'text',
+					pattern: '[0-9]+([\\.][0-9]+)?',
+					required: true,
+					placeholder: '1.0'
+				},
+				response: (rate: string | false) => {
+					if (rate !== false && rate !== null && rate !== '') {
+						// Validate it's a valid number
+						const n = Number(rate);
+						if (Number.isFinite(n) && n > 0) {
+							conversionRateValue = rate.toString();
+							// Accept change
+							originalCurrency = newCurrency;
+						} else {
+							// Revert currency change
+							$formStore.currency = originalCurrency;
+							conversionRateValue = '1.0';
+						}
+					} else {
+						// User cancelled - revert currency
+						$formStore.currency = originalCurrency;
+						conversionRateValue = '1.0';
+					}
+				}
+			};
+			modalStore.trigger(modal);
+		} else {
+			// No currency change, reset conversion rate
+			conversionRateValue = '1.0';
+		}
+	}
 </script>
+
+<!-- Hidden input to send conversion_rate with the form -->
+<input type="hidden" name="conversion_rate" value={conversionRateValue} />
 
 <Accordion
 	value={openAccordionItems}
@@ -48,20 +99,6 @@
 					{form}
 					field="notifications_enable_mailing"
 					label={m.settingsNotificationsMail()}
-				/>
-			</div>
-		{/snippet}
-	</Accordion.Item>
-	<Accordion.Item value="interface">
-		{#snippet control()}
-			<i class="fa-solid fa-asterisk mr-2"></i>{m.settingsInterface()}
-		{/snippet}
-		{#snippet panel()}
-			<div class="p-4">
-				<Checkbox
-					{form}
-					field="interface_agg_scenario_matrix"
-					label={m.settingsAggregateMatrix()}
 				/>
 			</div>
 		{/snippet}
@@ -89,6 +126,11 @@
 		{#snippet panel()}
 			<div class="flex flex-row gap-4">
 				<div class="flex flex-col flex-1 space-y-4">
+					<Checkbox
+						{form}
+						field="interface_agg_scenario_matrix"
+						label={m.settingsAggregateMatrix()}
+					/>
 					<Checkbox
 						{form}
 						field="risk_matrix_swap_axes"
@@ -148,16 +190,6 @@
 		{#snippet panel()}
 			<NumberField
 				{form}
-				field="ebios_radar_max"
-				label={m.maxRadius()}
-				min={6}
-				max={16}
-				step={0.1}
-				cacheLock={cacheLocks['ebios_radar_max']}
-				bind:cachedValue={formDataCache['ebios_radar_max']}
-			/>
-			<NumberField
-				{form}
 				field="ebios_radar_green_zone_radius"
 				label={m.greenZoneRadius()}
 				min={0.1}
@@ -186,6 +218,39 @@
 				cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
 				bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
 			/>
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item value="financial">
+		{#snippet control()}
+			<i class="fa-solid fa-coins mr-2"></i>{m.financialSettings()}
+		{/snippet}
+		{#snippet panel()}
+			<div class="p-4 space-y-4">
+				<Select
+					{form}
+					field="currency"
+					options={[
+						{ label: 'Euro (€)', value: '€' },
+						{ label: 'US Dollar ($)', value: '$' },
+						{ label: 'British Pound (£)', value: '£' },
+						{ label: 'Japanese Yen (¥)', value: '¥' },
+						{ label: 'Canadian Dollar (C$)', value: 'C$' },
+						{ label: 'Australian Dollar (A$)', value: 'A$' },
+						{ label: 'New Zealand Dollar (NZ$)', value: 'NZ$' }
+					]}
+					label={m.currency()}
+					helpText={m.currencyHelpText()}
+					onchange={(e) => handleCurrencyChange(e.target.value)}
+				/>
+				<NumberField
+					{form}
+					field="daily_rate"
+					label={m.dailyRate()}
+					helpText={m.dailyRateHelpText()}
+					min={0}
+					step={1}
+				/>
+			</div>
 		{/snippet}
 	</Accordion.Item>
 </Accordion>

@@ -14,6 +14,13 @@
 		value: string | number;
 		suggested?: boolean;
 		translatedLabel?: string;
+		path?: string[];
+		infoString?: {
+			string: string;
+			position: 'suffix' | 'prefix';
+			classes?: string;
+		};
+		contentType?: string;
 	}
 
 	type FieldContext = 'form-input' | 'filter-input';
@@ -40,6 +47,7 @@
 		optionsValueField?: string;
 		browserCache?: RequestCache;
 		optionsExtraFields?: [string, string][];
+		additionalMultiselectOptions?: Record<string, any>;
 		optionsInfoFields?: {
 			fields: {
 				field: string; // Field name in the object
@@ -59,8 +67,9 @@
 		onChange: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
-		disabled?: boolean;
+		includeAllOptionFields?: boolean;
 		mount?: (value: any) => void;
+		optionSnippet?: import('svelte').Snippet<[Record<string, any>]>;
 	}
 
 	let {
@@ -91,18 +100,21 @@
 			separator: ' ',
 			classes: 'text-surface-500'
 		},
+		additionalMultiselectOptions = {},
 		pathField = '',
 		optionsSuggestions = [],
 		optionsSelf = null,
 		optionsSelfSelect = false,
 		allowUserOptions = false,
 		onChange = () => {},
+		includeAllOptionFields = false,
 		cacheLock = {
 			promise: new Promise((res) => res(null)),
 			resolve: (x: any) => x
 		},
 		cachedValue = $bindable(),
-		mount = () => null
+		mount = () => null,
+		optionSnippet = undefined
 	}: Props = $props();
 
 	if (translateOptions) {
@@ -139,7 +151,8 @@
 		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
 		outerDivClass: '!input !bg-surface-100 !px-2 !flex',
-		closeDropdownOnSelect: !multiple
+		closeDropdownOnSelect: !multiple,
+		...additionalMultiselectOptions
 	};
 
 	let isLoading = $state(false);
@@ -237,18 +250,30 @@
 				}
 
 				const fullLabel = `${extraParts.length ? extraParts.join('/') + '/' : ''}${mainLabel}`;
+				const valueField = getNestedValue(object, optionsValueField);
 
-				return {
+				const opt = {
 					label: fullLabel,
-					value: getNestedValue(object, optionsValueField),
+					value: valueField,
 					suggested: optionsSuggestions?.some(
-						(s) =>
-							getNestedValue(s, optionsValueField) === getNestedValue(object, optionsValueField)
+						(s) => getNestedValue(s, optionsValueField) === valueField
 					),
-					translatedLabel: safeTranslate(fullLabel),
+					translatedLabel:
+						safeTranslate(fullLabel) !== fullLabel
+							? safeTranslate(fullLabel)
+							: safeTranslate(valueField) !== valueField
+								? safeTranslate(valueField)
+								: fullLabel,
 					path,
-					infoString
+					infoString,
+					contentType: object?.content_type || ''
 				};
+
+				if (includeAllOptionFields) {
+					return { ...opt, ...object };
+				} else {
+					return opt;
+				}
 			})
 			.filter(
 				(option) =>
@@ -258,6 +283,14 @@
 				// Show suggested items first
 				if (a.suggested && !b.suggested) return -1;
 				if (!a.suggested && b.suggested) return 1;
+				// Sort folder by path
+				if (a.contentType && b.contentType) {
+					const aPath = a.path.join('') + a.label;
+					const bPath = b.path.join('') + b.label;
+					const alphaCompare = aPath.localeCompare(bPath);
+					return alphaCompare !== 0 ? alphaCompare : aPath.length - bPath.length;
+				}
+
 				return a.translatedLabel!.toLowerCase().localeCompare(b.translatedLabel!.toLowerCase());
 			});
 	}
@@ -410,6 +443,7 @@
 		{:else if $value}
 			<input type="hidden" name={field} value={$value} />
 		{/if}
+
 		<MultiSelect
 			bind:selected
 			{options}
@@ -422,37 +456,41 @@
 			filterFunc={fastFilter}
 		>
 			{#snippet option({ option })}
-				{#if option.infoString?.position === 'prefix'}
-					<span class="text-xs {option.infoString.classes}">
-						{option.infoString.string}
-					</span>
-				{/if}
-				{#if option.path}
-					<span>
-						{#each option.path as item}
-							<span class="text-surface-500 font-light">
-								{item} /&nbsp;
-							</span>
-						{/each}
-					</span>
-				{/if}
-				{#if translateOptions && option}
-					{#if field === 'ro_to_couple'}
-						{@const [firstPart, ...restParts] = option.label.split(' - ')}
-						{safeTranslate(firstPart)} - {restParts.join(' - ')}
-					{:else}
-						{option.translatedLabel}
-					{/if}
+				{#if optionSnippet}
+					{@render optionSnippet?.(option)}
 				{:else}
-					{option.label || option}
-				{/if}
-				{#if option.infoString?.position === 'suffix'}
-					<span class="text-xs {option.infoString.classes}">
-						{option.infoString.string}
-					</span>
-				{/if}
-				{#if option.suggested}
-					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+					{#if option.infoString?.position === 'prefix'}
+						<span class="text-xs {option.infoString.classes}">
+							{option.infoString.string}
+						</span>
+					{/if}
+					{#if option.path}
+						<span>
+							{#each option.path as item}
+								<span class="text-surface-500 font-light">
+									{item} /&nbsp;
+								</span>
+							{/each}
+						</span>
+					{/if}
+					{#if translateOptions && option}
+						{#if field === 'ro_to_couple'}
+							{@const [firstPart, ...restParts] = option.label.split(' - ')}
+							{safeTranslate(firstPart)} - {restParts.join(' - ')}
+						{:else}
+							{option.translatedLabel}
+						{/if}
+					{:else}
+						{option.label || option}
+					{/if}
+					{#if option.infoString?.position === 'suffix'}
+						<span class="text-xs {option.infoString.classes}">
+							{option.infoString.string}
+						</span>
+					{/if}
+					{#if option.suggested}
+						<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+					{/if}
 				{/if}
 			{/snippet}
 			{#snippet selectedItem({ option })}
@@ -491,10 +529,11 @@
 		</MultiSelect>
 		{#if isLoading}
 			<svg
-				class="animate-spin h-5 w-5 text-primary-500"
+				class="animate-spin h-5 w-5 text-primary-500 loading-spinner"
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
 				viewBox="0 0 24 24"
+				data-testid="loading-spinner"
 			>
 				<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
 				></circle>
@@ -507,6 +546,6 @@
 		{/if}
 	</div>
 	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
+		<p class="text-sm text-gray-500 whitespace-pre-line">{helpText}</p>
 	{/if}
 </div>

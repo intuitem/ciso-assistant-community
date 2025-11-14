@@ -32,8 +32,6 @@ Star the project 🌟 to get releases notification and help growing the communit
 <a href="https://intuitem.gitbook.io/ciso-assistant"><img src="https://img.shields.io/static/v1?message=Documentation&logo=gitbook&logoColor=ffffff&label=%20&labelColor=5c5c5c&color=F4E28D"></a>
 <a href="https://ca-api-doc.pages.dev/"><img src="https://img.shields.io/static/v1?message=API&logo=swagger&label=%20"></a>
 
-
-
 CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
 - Designed as a central hub to connect multiple cybersecurity concepts with smart linking between objects,
@@ -47,6 +45,8 @@ CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC*
 - Supports custom frameworks via a simple syntax and flexible tooling,
 - Provides rich **import/export** capabilities across various channels and formats (UI, CLI, Kafka, reports, etc.).
 
+![Single Hub](single_hub.png)
+
 Our vision is to create a **one-stop-shop** for cybersecurity management—modernizing GRC through **simplification** and **interoperability**.
 
 As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.
@@ -55,23 +55,23 @@ We’re constantly evolving with input from users and customers. Like an octopus
 
 ---
 
+## Features
+
+![Current features](features.png)
+
+Upcoming features are listed on the roadmap.
+
+CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
+
+---
+
 ## Core Concepts
 
-Here’s a snapshot of the fundamental building blocks in CISO Assistant:
+Here’s an extract of some of the building blocks in CISO Assistant to illustrate the decoupling concept that encourages reusability:
 
 ![Core Objects](core_objects.png)
 
 For full details, check the [data model documentation](documentation/architecture/data-model.md).
-
----
-
-## Features
-
-Explore the full range of features and capabilities:
-
-![Features Overview](features.png)
-
-CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
 
 ---
 
@@ -211,6 +211,9 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
 79. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
 80. Post-Quantum Cryptography (PQC) Migration Roadmap (May 2025) 🔐
+81. Cloud Sovereignty Framework - 1.2.1 - Oct 2025 🇪🇺
+82. ISO 22301:2019 outline - Business continuity management systems 🌐
+83. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
 
 ### Community contributions
 
@@ -236,6 +239,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 20. Guides des mécanismes cryptographiques 🇫🇷
 21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
 22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
+23. NIST 800-82 (OT) - appendix 🏭🤖
 
 <br/>
 
@@ -252,7 +256,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - OWASP SAMM
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
-- NIST 800-82
 - ASD ISM 🇦🇺
 - Baseline informatiebeveiliging Overheid (BIO) 🇳🇱
 
@@ -364,7 +367,7 @@ export POSTGRES_PASSWORD_FILE=<XXX>  # alternative way to specify password
 export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
-# CISO Assistant will use filesystem storage backend bu default.
+# CISO Assistant will use filesystem storage backend by default.
 # You can use a S3 Bucket by declaring these variables
 # The S3 bucket must be created before starting CISO Assistant
 export USE_S3=True
@@ -431,7 +434,7 @@ pre-commit install
 
 - Choose your s3 provider or try s3 feature with miniO with this command:
   - `docker run -p 9000:9000 -p 9001:9001 -e "MINIO_ROOT_USER=XXX" -e "MINIO_ROOT_PASSWORD=XXX" quay.io/minio/minio server /data --console-address ":9001"`
-- You can now check your bucket on http://localhost:9001
+- You can now check your bucket on <http://localhost:9001>
   - Fill the login with the credentials you filled on the docker run env variables
 - Export in the backend directory all the env variables asked about S3
   - You can see the list above in the recommanded variables
@@ -536,13 +539,19 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 ## API and Swagger
 
-- The API is available only on dev mode. To get that, you need to switch on the backend, for instance, `export DJANGO_DEBUG=True`
-- The API documentation will be available on `<backend_endpoint>/api/schema/swagger/`, for instance <http://127.0.0.1:8000/api/schema/swagger/>
+- The interactive API documentation (Swagger UI) is available only in development mode.
+  To enable it, set `export DJANGO_DEBUG=True` before starting the backend.
+- Once the server is running, the documentation will be accessible at `<backend_endpoint>/api/schema/swagger/`,
+  for example: <http://127.0.0.1:8000/api/schema/swagger/>.
 
-To interact with it:
+To interact with the API via Swagger or directly with HTTP calls:
 
-- call `/api/iam/login/` with your credentials in the body to get the token
-- pass it then as a header `Authorization: Token {token}` for your next calls. Notice it's `Token` not `Bearer`.
+1. Authenticate by sending a POST request to `/api/iam/login/` with your credentials in the request body. The response will include an authentication token.
+2. Include this token in the header of subsequent requests as: `Authorization: Token <token>`
+
+⚠️ Note: use `Token`, **not** `Bearer`.
+
+When using the interactive Swagger UI, simply log in, the token will be automatically handled for subsequent requests.
 
 ## Setting CISO Assistant for production
 
@@ -577,6 +586,8 @@ Set DJANGO_DEBUG=False for security reason.
 17. HU: Hungarian
 18. UK: Ukrainian
 19. EL: Greek
+20. TR: Turkish
+21. HR: Croatian
 
 ## Contributors 🤝
 

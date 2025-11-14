@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page } from './test-utils.js';
-import { navData } from '../../src/lib/components/SideBar/navData.js';
+import { navData } from '$lib/components/SideBar/navData.js';
+import { getSidebarVisibleItems } from '$lib/utils/sidebar-config.js';
 
 type TabContent = {
 	name: string;
@@ -22,8 +23,16 @@ export class SideBar {
 
 	constructor(page: Page) {
 		this.page = page;
+		// Get default feature flags (empty object uses all defaults)
+		const sideBarVisibleItems = getSidebarVisibleItems({});
+
+		// Filter nav items based on sideBarVisibleItems, same logic as SideBarNavigation.svelte
+		const filteredNavData = navData.items.filter(
+			(item) => sideBarVisibleItems[item.name] !== false
+		);
+
 		this.items = new Map(
-			navData.items.map((item) => [
+			filteredNavData.map((item) => [
 				item.name,
 				item.items.flatMap((item: TabContent) => ({ name: item.name, href: item.href }))
 			])
@@ -41,11 +50,27 @@ export class SideBar {
 	}
 
 	async logout() {
-		await this.moreButton.click();
-		await expect(this.morePanel).not.toHaveAttribute('inert');
-		await expect(this.logoutButton).toBeVisible();
-		await this.logoutButton.click();
-		await expect(this.page).toHaveURL(/^.*\/login$/);
+		await expect(async () => {
+			const modalBackdrop = this.page.getByTestId('modal-backdrop');
+
+			if (await modalBackdrop.isVisible()) {
+				await modalBackdrop.press('Escape');
+				await expect(modalBackdrop).not.toBeVisible();
+			}
+
+			if (await this.page.locator('#driver-dummy-element').isVisible()) {
+				await this.page.locator('#driver-dummy-element').press('Escape');
+			}
+
+			// Attempt to close any remaining modals
+			await this.page.locator('body').press('Escape');
+
+			await this.moreButton.click({ timeout: 500 });
+			await expect(this.morePanel).not.toHaveAttribute('inert');
+			await expect(this.logoutButton).toBeVisible();
+			await this.logoutButton.click();
+			await expect(this.page).toHaveURL(/^.*\/login$/);
+		}).toPass({ timeout: 10000, intervals: [500, 1000, 3000] });
 	}
 
 	async click(parent: string, tab: string, waitForURL = true) {

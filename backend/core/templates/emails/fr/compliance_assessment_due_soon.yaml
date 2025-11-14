@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Audit à échoir dans ${days_remaining} jour(s)"
+body: |
+  Bonjour,
+
+  Vous avez ${assessment_count} audit(s) à échoir dans ${days_remaining} jour(s):
+
+  ${assessment_list}
+
+  Veuillez vous connecter à votre portail CISO Assistant pour réviser et compléter ces audits:
+  ${ciso_assistant_url}
+
+  Merci.

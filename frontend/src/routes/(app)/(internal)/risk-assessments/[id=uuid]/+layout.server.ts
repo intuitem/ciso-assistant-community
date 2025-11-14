@@ -21,7 +21,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		`${BASE_API_URL}/risk-matrices/${risk_assessment.risk_matrix.id}/`
 	).then((res) => res.json());
 
-	const interface_settings = await fetch(`${BASE_API_URL}/settings/general/object`).then((res) =>
+	const interface_settings = await fetch(`${BASE_API_URL}/settings/general/object/`).then((res) =>
 		res.json()
 	);
 
@@ -32,6 +32,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		'inherentLevel',
 		'existingControls',
 		'currentLevel',
+		'withinTolerance',
 		'extraAppliedControls',
 		'residualLevel'
 	];
@@ -43,6 +44,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		'inherent_level',
 		'existing_applied_controls',
 		'current_level',
+		'within_tolerance',
 		'applied_controls',
 		'residual_level'
 	];

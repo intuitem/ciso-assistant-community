@@ -42,8 +42,18 @@
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
 	hidden={initialData.folder}
+/>
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="terminologies?field_path=entity.relationship"
+	field="relationship"
+	cacheLock={cacheLocks['relationship']}
+	bind:cachedValue={formDataCache['relationship']}
+	label={m.relationship()}
+	multiple
 />

@@ -35,7 +35,7 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     reference_entity = FieldsRelatedField()
     risk_matrix = FieldsRelatedField()
     reference_entity = FieldsRelatedField()
-    assets = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(["id", "type", {"folder": ["id"]}], many=True)
     compliance_assessments = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
@@ -46,6 +46,10 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     operational_scenario_count = serializers.IntegerField()
     applied_control_count = serializers.IntegerField()
     last_risk_assessment = FieldsRelatedField()
+    counters = serializers.SerializerMethodField()
+
+    def get_counters(self, obj):
+        return obj.get_counters()
 
     class Meta:
         model = EbiosRMStudy
@@ -85,8 +89,6 @@ class EbiosRMStudyImportExportSerializer(BaseModelSerializer):
 
 
 class FearedEventWriteSerializer(BaseModelSerializer):
-    folder = serializers.PrimaryKeyRelatedField(read_only=True)
-
     class Meta:
         model = FearedEvent
         exclude = ["created_at", "updated_at"]
@@ -94,7 +96,7 @@ class FearedEventWriteSerializer(BaseModelSerializer):
 
 class FearedEventReadSerializer(BaseModelSerializer):
     ebios_rm_study = FieldsRelatedField()
-    qualifications = FieldsRelatedField(["name"], many=True)
+    qualifications = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     gravity = serializers.JSONField(source="get_gravity_display")
     folder = FieldsRelatedField()
@@ -106,7 +108,7 @@ class FearedEventReadSerializer(BaseModelSerializer):
 
 class FearedEventImportExportSerializer(BaseModelSerializer):
     qualifications = serializers.SlugRelatedField(
-        slug_field="urn", many=True, read_only=True
+        slug_field="name", read_only=True, many=True
     )
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
@@ -134,7 +136,7 @@ class FearedEventImportExportSerializer(BaseModelSerializer):
 class RoToWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RoTo
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class RoToReadSerializer(BaseModelSerializer):
@@ -142,11 +144,15 @@ class RoToReadSerializer(BaseModelSerializer):
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     feared_events = FieldsRelatedField(["folder", "id"], many=True)
+    risk_origin = serializers.SerializerMethodField()
+
+    def get_risk_origin(self, obj):
+        return obj.risk_origin.get_name_translated
 
     motivation = serializers.CharField(source="get_motivation_display")
     resources = serializers.CharField(source="get_resources_display")
     activity = serializers.CharField(source="get_activity_display")
-    pertinence = serializers.CharField(source="get_pertinence")
+    pertinence = serializers.CharField(source="get_pertinence_display")
 
     class Meta:
         model = RoTo
@@ -157,6 +163,7 @@ class RoToImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
     feared_events = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    risk_origin = serializers.SlugRelatedField(slug_field="name", read_only=True)
 
     class Meta:
         model = RoTo
@@ -189,7 +196,7 @@ class StakeholderWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Stakeholder
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class StakeholderReadSerializer(BaseModelSerializer):
@@ -198,8 +205,11 @@ class StakeholderReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     entity = FieldsRelatedField()
     applied_controls = FieldsRelatedField(many=True)
+    category = serializers.SerializerMethodField()
 
-    category = serializers.CharField(source="get_category_display")
+    def get_category(self, obj):
+        return obj.category.get_name_translated if obj.category else None
+
     current_criticality = serializers.CharField(
         source="get_current_criticality_display"
     )
@@ -217,6 +227,7 @@ class StakeholderImportExportSerializer(BaseModelSerializer):
     ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
     entity = HashSlugRelatedField(slug_field="pk", read_only=True)
     applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    category = serializers.SlugRelatedField(slug_field="name", read_only=True)
 
     class Meta:
         model = Stakeholder
@@ -243,7 +254,7 @@ class StakeholderImportExportSerializer(BaseModelSerializer):
 class StrategicScenarioWriteSerializer(BaseModelSerializer):
     class Meta:
         model = StrategicScenario
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class StrategicScenarioReadSerializer(BaseModelSerializer):
@@ -280,7 +291,7 @@ class StrategicScenarioImportExportSerializer(BaseModelSerializer):
 class AttackPathWriteSerializer(BaseModelSerializer):
     class Meta:
         model = AttackPath
-        exclude = ["created_at", "updated_at", "folder", "ebios_rm_study"]
+        exclude = ["created_at", "updated_at"]
 
 
 class AttackPathReadSerializer(BaseModelSerializer):
@@ -288,7 +299,9 @@ class AttackPathReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()
     stakeholders = FieldsRelatedField(many=True)
-    risk_origin = serializers.CharField(source="ro_to_couple.get_risk_origin_display")
+    risk_origin = serializers.CharField(
+        source="ro_to_couple.risk_origin.get_name_translated"
+    )
     target_objective = serializers.CharField(source="ro_to_couple.target_objective")
 
     strategic_scenario = FieldsRelatedField()
@@ -326,7 +339,7 @@ class OperationalScenarioWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = OperationalScenario
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class OperationalScenarioReadSerializer(BaseModelSerializer):
@@ -341,6 +354,20 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     gravity = serializers.JSONField(source="get_gravity_display")
     risk_level = serializers.JSONField(source="get_risk_level_display")
     ref_id = serializers.CharField()
+    operating_modes_description = serializers.SerializerMethodField()
+    operating_modes = FieldsRelatedField(many=True)
+
+    def get_operating_modes_description(self, obj):
+        # If there's a description, use it
+        if obj.operating_modes_description:
+            return obj.operating_modes_description
+
+        # Otherwise, generate from operating modes
+        operating_modes = obj.operating_modes.all()
+        if operating_modes:
+            return " | ".join([mode.name for mode in operating_modes])
+
+        return ""
 
     class Meta:
         model = OperationalScenario
@@ -352,6 +379,24 @@ class OperationalScenarioImportExportSerializer(BaseModelSerializer):
     attack_path = HashSlugRelatedField(slug_field="pk", read_only=True)
     threats = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    operating_modes_description = serializers.SerializerMethodField()
+
+    def get_operating_modes_description(self, obj):
+        if obj.operating_modes_description:
+            return obj.operating_modes_description
+
+        # If empty, return combination of operating modes
+        operating_modes = obj.operating_modes.all()
+        if operating_modes:
+            mode_descriptions = []
+            for mode in operating_modes:
+                mode_text = mode.name
+                if mode.description:
+                    mode_text += f": {mode.description}"
+                mode_descriptions.append(mode_text)
+            return "\n".join(mode_descriptions)
+
+        return ""
 
     class Meta:
         model = OperationalScenario
@@ -383,11 +428,14 @@ class ElementaryActionWriteSerializer(BaseModelSerializer):
         exclude = ["created_at", "updated_at"]
 
 
+from core.serializers import ThreatReadSerializer
+
+
 class ElementaryActionReadSerializer(BaseModelSerializer):
     icon = serializers.CharField(source="get_icon_display")
     icon_fa_class = serializers.CharField()
     icon_fa_hex = serializers.CharField()
-    threat = FieldsRelatedField()
+    threat = FieldsRelatedField(["id", "name"], serializer=ThreatReadSerializer)
     folder = FieldsRelatedField()
     attack_stage = serializers.CharField(source="get_attack_stage_display")
 
@@ -399,7 +447,7 @@ class ElementaryActionReadSerializer(BaseModelSerializer):
 class OperatingModeWriteSerializer(BaseModelSerializer):
     class Meta:
         model = OperatingMode
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
 
 class OperatingModeReadSerializer(BaseModelSerializer):
@@ -417,7 +465,7 @@ class OperatingModeReadSerializer(BaseModelSerializer):
 class KillChainWriteSerializer(BaseModelSerializer):
     class Meta:
         model = KillChain
-        exclude = ["created_at", "updated_at", "folder"]
+        exclude = ["created_at", "updated_at"]
 
     def validate(self, attrs):
         elementary_action = attrs.get("elementary_action")
