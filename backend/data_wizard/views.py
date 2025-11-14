@@ -1229,10 +1229,10 @@ class LoadFileView(APIView):
                 }
 
                 # Add optional solution reference
-                solution_ref_id = record.get("solution_ref_id", "").strip()
+                solution_ref_id = str(record.get("solution_ref_id", "")).strip()
                 if solution_ref_id:
                     if solution_ref_id in solution_ref_map:
-                        contract_data["solutions"] = [solution_ref_map[solution_ref_id]]
+                        contract_data["solution"] = solution_ref_map[solution_ref_id]
                     else:
                         logger.warning(
                             f"Solution with ref_id '{solution_ref_id}' not found for contract '{ref_id}'"
