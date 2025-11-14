@@ -176,6 +176,31 @@ class EntityViewSet(BaseModelViewSet):
             id__in=viewable_assets, is_business_function=True
         )
 
+        # Collect all assets related to business functions (including child assets)
+        # This ensures that solutions linked to child assets are also captured in DORA reports
+        business_function_asset_ids = set(
+            business_functions.values_list("id", flat=True)
+        )
+        for business_function in business_functions:
+            # Get all descendant (child) assets for each business function
+            # Note: get_descendants() returns Asset objects, not IDs
+            descendants = business_function.get_descendants()
+            business_function_asset_ids.update(asset.id for asset in descendants)
+
+        # Get all solutions related to business functions and their child assets
+        # These are the ICT services that support critical business functions
+        related_solutions = Solution.objects.filter(
+            assets__id__in=business_function_asset_ids
+        ).distinct()
+
+        # Filter contracts to only those with solutions related to business functions
+        # This subset is used for reports that focus on ICT services supporting critical functions
+        # (b_02.02, b_07.01, b_99.01)
+        related_solution_ids = set(related_solutions.values_list("id", flat=True))
+        business_function_contracts = contracts.filter(
+            solution__id__in=related_solution_ids
+        )
+
         # Calculate folder name for the ZIP structure (without .zip extension)
         lei, _ = dora_export.get_entity_identifier(main_entity, priority=["LEI"])
         competent_authority = main_entity.dora_competent_authority or "UNKNOWN"
@@ -202,7 +227,7 @@ class EntityViewSet(BaseModelViewSet):
                 zip_file, contracts, base_folder_name
             )
             dora_export.generate_b_02_02_ict_services(
-                zip_file, contracts, base_folder_name
+                zip_file, contracts, base_folder_name, business_function_asset_ids
             )
             dora_export.generate_b_02_03_intragroup_contracts(
                 zip_file, contracts, base_folder_name
@@ -234,11 +259,14 @@ class EntityViewSet(BaseModelViewSet):
             )
 
             dora_export.generate_b_07_01_assessment(
-                zip_file, contracts, base_folder_name
+                zip_file, business_function_contracts, base_folder_name
             )
 
             dora_export.generate_b_99_01_aggregation(
-                zip_file, contracts, business_functions, base_folder_name
+                zip_file,
+                business_function_contracts,
+                business_functions,
+                base_folder_name,
             )
 
             # Generate FilingIndicators.csv
@@ -280,6 +308,7 @@ class EntityViewSet(BaseModelViewSet):
         - Solutions provided by entities
         - Contracts between entities
         - Assets linked to solutions
+        - Asset hierarchy (parent-child asset relationships)
         """
         # Get accessible objects for the current user
         (viewable_entities, _, _) = RoleAssignment.get_accessible_object_ids(
@@ -424,17 +453,28 @@ class EntityViewSet(BaseModelViewSet):
                     {
                         "source": node_index,
                         "target": solution_node_map[contract.solution.id],
-                        "value": "for solution",
+                        "value": "frames",
                     }
                 )
 
             node_index += 1
 
-        # Create asset nodes (only those linked to solutions)
+        # Create asset nodes (only those with connections)
+        asset_node_map = {}
         for asset in assets:
-            # Check if asset is linked to any solution
+            # Check if asset has any connections (to solutions or other assets)
             linked_solutions = solutions.filter(assets=asset)
-            if linked_solutions.exists():
+            parent_assets = asset.parent_assets.filter(id__in=viewable_assets)
+            child_assets = assets.filter(parent_assets=asset)
+
+            has_connections = (
+                linked_solutions.exists()
+                or parent_assets.exists()
+                or child_assets.exists()
+            )
+
+            # Only create node if asset has connections
+            if has_connections:
                 nodes.append(
                     {
                         "name": asset.name,
@@ -444,20 +484,35 @@ class EntityViewSet(BaseModelViewSet):
                         "value": f"Asset: {asset.name}",
                     }
                 )
-                asset_node_index = node_index
+                asset_node_map[asset.id] = node_index
 
                 # Link asset to solutions
                 for solution in linked_solutions:
                     if solution.id in solution_node_map:
                         links.append(
                             {
-                                "source": solution_node_map[solution.id],
-                                "target": asset_node_index,
+                                "source": node_index,
+                                "target": solution_node_map[solution.id],
                                 "value": "uses",
                             }
                         )
 
                 node_index += 1
+
+        # Add asset hierarchy links (parent-child relationships)
+        for asset in assets:
+            if asset.id in asset_node_map:
+                # Get parent assets for this asset
+                parent_assets = asset.parent_assets.filter(id__in=viewable_assets)
+                for parent_asset in parent_assets:
+                    if parent_asset.id in asset_node_map:
+                        links.append(
+                            {
+                                "source": asset_node_map[parent_asset.id],
+                                "target": asset_node_map[asset.id],
+                                "value": "relies on",
+                            }
+                        )
 
         # Define categories
         categories = [

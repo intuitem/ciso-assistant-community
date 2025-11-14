@@ -19,6 +19,7 @@ def lint_provider_entities() -> List[Dict[str, Any]]:
     Checks that third-party providers have:
     - At least one legal identifier (LEI, EUID, VAT, DUNS)
     - Country set
+    - DORA provider person type set (mandatory for b_05.01 c0040)
     - Parent entity with legal identifier (if parent exists)
 
     Returns:
@@ -70,6 +71,21 @@ def lint_provider_entities() -> List[Dict[str, Any]]:
                     "category": "Provider Entities",
                     "message": f"Provider entity '{provider.name}' must have a country set for DORA reporting",
                     "field": "country",
+                    "object_type": "entities",
+                    "object_id": str(provider.id),
+                    "object_name": provider.name,
+                }
+            )
+            provider_has_error = True
+
+        # Check DORA provider person type (mandatory for b_05.01 c0040)
+        if not provider.dora_provider_person_type:
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Provider Entities",
+                    "message": f"Provider entity '{provider.name}' must have a DORA provider person type set for DORA b_05.01 reporting (c0040)",
+                    "field": "dora_provider_person_type",
                     "object_type": "entities",
                     "object_id": str(provider.id),
                     "object_name": provider.name,
@@ -867,7 +883,7 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
     """
     Validate contracts for DORA b_02.02 (ICT services supporting functions) requirements.
 
-    Only validates contracts with solutions linked to business function assets,
+    Only validates contracts with solutions linked to business function assets or their child assets,
     as these are the ones included in b_02.02 reporting.
 
     Checks that contracts have:
@@ -880,11 +896,22 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
     """
     results = []
 
+    # Get business function assets
+    business_functions = Asset.objects.filter(is_business_function=True)
+
+    # Collect all assets related to business functions (including children)
+    business_function_asset_ids = set(business_functions.values_list("id", flat=True))
+    for business_function in business_functions:
+        # Get all descendant (child) assets for each business function
+        # Note: get_descendants() returns Asset objects, not IDs
+        descendants = business_function.get_descendants()
+        business_function_asset_ids.update(asset.id for asset in descendants)
+
     # Get contracts that will be included in b_02.02:
-    # those with solutions linked to business function assets
+    # those with solutions linked to business function assets or their children
     b_02_02_contracts = (
         Contract.objects.filter(
-            solution__isnull=False, solution__assets__is_business_function=True
+            solution__isnull=False, solution__assets__id__in=business_function_asset_ids
         )
         .distinct()
         .select_related("provider_entity", "solution", "beneficiary_entity")
@@ -1012,25 +1039,38 @@ def lint_solutions() -> List[Dict[str, Any]]:
     """
     Validate solutions for DORA ROI requirements.
 
-    Only validates solutions that are associated with assets marked as business functions,
-    as these are the ones relevant for DORA reporting.
+    Only validates solutions that are associated with assets marked as business functions
+    or their child assets, as these are the ones relevant for DORA reporting.
 
     Checks that solutions have required fields:
     - dora_ict_service_type (ICT service type)
     - data_location_storage (location of data at rest)
     - data_location_processing (location of data at processing)
     - provider_entity must have country set
+    - contract associated with solution (warning if missing)
 
     Returns:
         List of validation results with severity levels (error, warning, ok)
     """
     results = []
 
-    # Get only solutions associated with business function assets
+    # Get business function assets
+    business_functions = Asset.objects.filter(is_business_function=True)
+
+    # Collect all assets related to business functions (including children)
+    business_function_asset_ids = set(business_functions.values_list("id", flat=True))
+    for business_function in business_functions:
+        # Get all descendant (child) assets for each business function
+        # Note: get_descendants() returns Asset objects, not IDs
+        descendants = business_function.get_descendants()
+        business_function_asset_ids.update(asset.id for asset in descendants)
+
+    # Get solutions associated with business function assets or their children
     solutions = (
-        Solution.objects.filter(assets__is_business_function=True)
+        Solution.objects.filter(assets__id__in=business_function_asset_ids)
         .distinct()
         .select_related("provider_entity")
+        .prefetch_related("contracts")
     )
 
     if not solutions.exists():
@@ -1138,6 +1178,21 @@ def lint_solutions() -> List[Dict[str, Any]]:
                     "category": "Solutions",
                     "message": f"Solution '{solution.name}' must have a provider entity set",
                     "field": "provider_entity",
+                    "object_type": "solutions",
+                    "object_id": str(solution.id),
+                    "object_name": solution.name,
+                }
+            )
+            solution_has_error = True
+
+        # Check if solution has at least one contract (mandatory for DORA reporting)
+        if not solution.contracts.exists():
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Solutions",
+                    "message": f"Solution '{solution.name}' linked to business function(s) must have at least one associated contract for DORA reporting",
+                    "field": "contracts",
                     "object_type": "solutions",
                     "object_id": str(solution.id),
                     "object_name": solution.name,

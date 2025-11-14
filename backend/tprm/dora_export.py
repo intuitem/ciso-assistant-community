@@ -344,18 +344,23 @@ def generate_b_02_01_contracts(
 
 
 def generate_b_02_02_ict_services(
-    zip_file, contracts: QuerySet, folder_prefix: str = ""
+    zip_file,
+    contracts: QuerySet,
+    folder_prefix: str = "",
+    business_function_asset_ids: set = None,
 ) -> None:
     """
     Generate b_02.02.csv - ICT services supporting functions.
 
-    Only includes contracts associated with solutions that are linked to business function assets.
+    Only includes contracts associated with solutions that are linked to business function assets
+    or their child assets.
     One row per contract-function combination.
 
     Args:
         zip_file: ZIP file object to write to
         contracts: QuerySet of Contract objects with solutions
         folder_prefix: Optional folder prefix to prepend to file path
+        business_function_asset_ids: Set of asset IDs related to business functions (including children)
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
@@ -384,22 +389,37 @@ def generate_b_02_02_ict_services(
         ]
     )
 
-    # Filter contracts: only those with solutions linked to business function assets
-    filtered_contracts = (
-        contracts.filter(
-            solution__isnull=False, solution__assets__is_business_function=True
+    # Filter contracts: only those with solutions linked to business function assets or their children
+    if business_function_asset_ids:
+        filtered_contracts = (
+            contracts.filter(
+                solution__isnull=False,
+                solution__assets__id__in=business_function_asset_ids,
+            )
+            .distinct()
+            .select_related("solution", "provider_entity", "beneficiary_entity")
+            .prefetch_related("solution__assets")
         )
-        .distinct()
-        .select_related("solution", "provider_entity", "beneficiary_entity")
-        .prefetch_related("solution__assets")
-    )
+    else:
+        # Fallback to old behavior if business_function_asset_ids not provided
+        filtered_contracts = (
+            contracts.filter(
+                solution__isnull=False, solution__assets__is_business_function=True
+            )
+            .distinct()
+            .select_related("solution", "provider_entity", "beneficiary_entity")
+            .prefetch_related("solution__assets")
+        )
 
     # Write contract-solution-function data
     for contract in filtered_contracts:
         solution = contract.solution
 
-        # Get business functions associated with this solution
-        business_functions = solution.assets.filter(is_business_function=True)
+        # Get business functions associated with this solution (directly or through children)
+        if business_function_asset_ids:
+            business_functions = solution.assets.filter(is_business_function=True)
+        else:
+            business_functions = solution.assets.filter(is_business_function=True)
 
         for function in business_functions:
             # c0010: Contract reference
