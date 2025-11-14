@@ -5,7 +5,11 @@
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { tableHandlers } from '$lib/utils/stores';
 	import ChoicesModal from '$lib/components/Modals/ChoicesModal.svelte';
-	import { getModalStore, type ModalComponent, type ModalSettings } from '$lib/components/Modals/stores';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		meta: any;

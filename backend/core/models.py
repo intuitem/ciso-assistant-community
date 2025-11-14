@@ -636,8 +636,24 @@ class LibraryUpdater:
                 )
                 ca_bounds = {
                     ca.id: (
-                        (ca.min_score if ca.min_score is not None else (new_framework.min_score if new_framework.min_score is not None else 0)),
-                        (ca.max_score if ca.max_score is not None else (new_framework.max_score if new_framework.max_score is not None else 100)),
+                        (
+                            ca.min_score
+                            if ca.min_score is not None
+                            else (
+                                new_framework.min_score
+                                if new_framework.min_score is not None
+                                else 0
+                            )
+                        ),
+                        (
+                            ca.max_score
+                            if ca.max_score is not None
+                            else (
+                                new_framework.max_score
+                                if new_framework.max_score is not None
+                                else 100
+                            )
+                        ),
                     )
                     for ca in compliance_assessments_to_update
                 }
@@ -687,9 +703,19 @@ class LibraryUpdater:
                         and ra.score is not None
                         and ra.compliance_assessment in compliance_assessments_to_update
                     ):
-                        default_min = 0 if new_framework.min_score is None else new_framework.min_score
-                        default_max = 100 if new_framework.max_score is None else new_framework.max_score
-                        ca_min, ca_max = ca_bounds.get(ra.compliance_assessment_id, (default_min, default_max))
+                        default_min = (
+                            0
+                            if new_framework.min_score is None
+                            else new_framework.min_score
+                        )
+                        default_max = (
+                            100
+                            if new_framework.max_score is None
+                            else new_framework.max_score
+                        )
+                        ca_min, ca_max = ca_bounds.get(
+                            ra.compliance_assessment_id, (default_min, default_max)
+                        )
 
                         # Apply the chosen strategy for score transformation
                         if self.strategy == "reset":
