@@ -835,7 +835,7 @@
 				<i class="fa-solid fa-times"></i>
 			</button>
 		</div>
-
+		
 		<div class="threats-content">
 			<ForceCirclePacking data={data.threats.graph} name="threats_graph" height="h-[600px]" />
 		</div>
