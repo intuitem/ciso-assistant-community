@@ -90,11 +90,12 @@
 	allowUserOptions="append"
 />
 
+
 <Dropdown
 	open={false}
 	style="hover:text-primary-700"
-	icon="fa-solid fa-scale-balanced"
-	header={m.doraAttributes()}
+	icon="fa-solid fa-clipboard-check"
+	header={m.doraAssessment()}
 >
 	<AutocompleteSelect
 		{form}
@@ -104,14 +105,6 @@
 		cacheLock={cacheLocks['dora_ict_service_type']}
 		bind:cachedValue={formDataCache['dora_ict_service_type']}
 	/>
-</Dropdown>
-
-<Dropdown
-	open={false}
-	style="hover:text-primary-700"
-	icon="fa-solid fa-clipboard-check"
-	header={m.doraAssessment()}
->
 	<Checkbox
 		{form}
 		field="storage_of_data"
