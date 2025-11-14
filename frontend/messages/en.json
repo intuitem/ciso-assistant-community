@@ -2614,5 +2614,6 @@
 	"events": "Events",
 	"webhookSecretHelpText": "Shared used to sign the webhook payload for verification purposes.",
 	"secretAlreadySetHelpText": "Secret already set.",
-	"resetSecret": "Reset secret"
+	"resetSecret": "Reset secret",
+	"createWebhookEndpoint": "Create webhook endpoint"
 }

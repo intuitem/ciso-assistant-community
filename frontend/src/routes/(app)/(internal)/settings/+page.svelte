@@ -1,12 +1,39 @@
 <script lang="ts">
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
+	import WebhookEndpointCreateModal from './webhooks/endpoints/WebhookEndpointCreateModal.svelte';
 	import { SSOSettingsSchema, GeneralSettingsSchema, FeatureFlagsSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+
+	const modalStore: ModalStore = getModalStore();
 
 	let group = $state('general');
 
 	let { data } = $props();
+
+	function modalWebhookEndpointCreateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: WebhookEndpointCreateModal,
+			props: {
+				form: data.webhookEndpointCreateForm,
+				formAction: '?/createWebhookEndpoint',
+				invalidateAll: true
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.createWebhookEndpoint()
+		};
+		modalStore.trigger(modal);
+	}
 </script>
 
 <Tabs
@@ -79,6 +106,10 @@
 			<div class="flex flex-col gap-2">
 				<span class="text-gray-500">{m.configureOutgoingWebhooks()}</span>
 				<span class="font-semibold">{m.webhookEndpoints()}</span>
+				<button
+					class="btn preset-filled-primary-500 w-fit"
+					on:click={modalWebhookEndpointCreateForm}>{m.createWebhookEndpoint()}</button
+				>
 				{#each data.webhookEndpoints as endpoint}
 					<a
 						href="/settings/webhooks/endpoints/{endpoint.id}"

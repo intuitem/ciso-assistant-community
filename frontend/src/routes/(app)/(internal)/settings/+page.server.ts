@@ -1,7 +1,12 @@
 import { handleErrorResponse } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { SSOSettingsSchema, GeneralSettingsSchema, FeatureFlagsSchema } from '$lib/utils/schemas';
+import {
+	SSOSettingsSchema,
+	GeneralSettingsSchema,
+	FeatureFlagsSchema,
+	webhookEndpointSchema
+} from '$lib/utils/schemas';
 import { m } from '$paraglide/messages';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -207,5 +212,32 @@ export const actions: Actions = {
 		setFlash({ type: 'success', message: m.samlKeysGenerated() }, event);
 
 		return { generatedKeys: { cert } };
+	},
+	createWebhookEndpoint: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const schema = webhookEndpointSchema;
+		const form = await superValidate(formData, zod(schema));
+		const endpoint = `${BASE_API_URL}/webhooks/endpoints/`;
+
+		const requestInitOptions: RequestInit = {
+			method: 'POST',
+			body: JSON.stringify(form.data)
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash(
+			{ type: 'success', message: m.successfullyCreatedObject({ object: m.webhookEndpoint }) },
+			event
+		);
+
+		return { form };
 	}
 };

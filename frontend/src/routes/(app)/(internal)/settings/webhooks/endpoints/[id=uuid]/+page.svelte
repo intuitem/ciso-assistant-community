@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ActionData, PageData } from './$types';
+	import type { PageData } from './$types';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import { m } from '$paraglide/messages';
 	import TextField from '$lib/components/Forms/TextField.svelte';
