@@ -1173,6 +1173,7 @@ def startup(sender: AppConfig, **kwargs):
 
     call_command("storelibraries")
     call_command("autoloadlibraries")
+    call_command("sync_event_types")
 
     # if superuser defined and does not exist, then create it
     if (
