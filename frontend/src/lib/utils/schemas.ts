@@ -673,7 +673,7 @@ export const contractSchema = z.object({
 	annual_expense: z.number().optional().nullable(),
 	termination_reason: z.string().optional(),
 	is_intragroup: z.boolean().optional().default(false),
-	overarching_contract: z.string().optional(),
+	overarching_contract: z.string().optional().nullable(),
 	governing_law_country: z.string().optional(),
 	notice_period_entity: z.number().optional().nullable(),
 	notice_period_provider: z.number().optional().nullable()

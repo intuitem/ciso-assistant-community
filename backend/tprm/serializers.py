@@ -345,3 +345,13 @@ class ContractWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Contract
         exclude = []
+
+    def validate_overarching_contract(self, value):
+        """
+        Validate that a contract cannot be set as its own overarching contract.
+        """
+        if value and self.instance and value.id == self.instance.id:
+            raise serializers.ValidationError(
+                _("A contract cannot be set as its own overarching contract")
+            )
+        return value

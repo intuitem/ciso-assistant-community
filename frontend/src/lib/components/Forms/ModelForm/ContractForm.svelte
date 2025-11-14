@@ -14,6 +14,7 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
+		object?: any;
 	}
 
 	let {
@@ -21,7 +22,8 @@
 		model,
 		cacheLocks = {},
 		formDataCache = $bindable({}),
-		initialData = {}
+		initialData = {},
+		object = {}
 	}: Props = $props();
 </script>
 
@@ -135,6 +137,8 @@
 		field="overarching_contract"
 		optionsEndpoint="contracts?dora_contractual_arrangement=eba_CO:x2"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsSelf={object}
+		nullable
 		label={m.overarchingContract()}
 		helpText={m.overarchingContractHelpText()}
 		cacheLock={cacheLocks['overarching_contract']}
