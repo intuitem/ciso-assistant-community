@@ -979,5 +979,13 @@
 	"samlAuthnRequestSignedHelpText": "Quando ativado, a solicitação de autenticação SAML é assinada com a chave privada abaixo. O certificado público correspondente é enviado ao Provedor de Identidade para que ele possa verificar a assinatura.",
 	"downloadCertificate": "Baixar certificado",
 	"viewMore": "Ver mais",
-	"viewLess": "Ver menos"
+	"viewLess": "Ver menos",
+	"scoreChangeDetected": "Alteração de pontuação detectada",
+	"scoreChangeDetectedDescription": "Uma alteração nas pontuações foi detectada. Escolha como lidar com as atualizações de pontuação para as auditorias associadas.",
+	"clamp": "Limitar",
+	"clampDescription": "Restringir o valor dentro dos limites definidos",
+	"reset": "Redefinir",
+	"resetDescription": "Redefinir as pontuações das auditorias",
+	"ruleOfThree": "Regra dos Três",
+	"ruleOfThreeDescription": "Aplicar a Regra dos Três para escalar pontuações entre novos limites"
 }

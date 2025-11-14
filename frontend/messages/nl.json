@@ -982,5 +982,13 @@
 	"samlAuthnRequestSignedHelpText": "Wanneer ingeschakeld, wordt het SAML-authenticatieverzoek ondertekend met de privésleutel hieronder. Het bijbehorende openbare certificaat wordt naar de identiteitsprovider verzonden, zodat deze de handtekening kan verifiëren.",
 	"downloadCertificate": "Certificaat downloaden",
 	"viewMore": "Afficher plus",
-	"viewLess": "Afficher moins"
+	"viewLess": "Afficher moins",
+	"scoreChangeDetected": "Changement de score détecté",
+	"scoreChangeDetectedDescription": "Un changement de scores a été détecté. Choisissez comment gérer les mises à jour des scores pour les audits associés.",
+	"clamp": "Clamp",
+	"clampDescription": "Restreindre la valeur dans les limites définies",
+	"reset": "Réinitialiser",
+	"resetDescription": "Réinitialiser les scores des audits",
+	"ruleOfThree": "Règle de trois",
+	"ruleOfThreeDescription": "Appliquer la règle de trois pour mettre à l'échelle les scores entre les nouvelles limites"
 }

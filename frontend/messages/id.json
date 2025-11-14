@@ -1164,5 +1164,13 @@
 	"samlAuthnRequestSignedHelpText": "Ketika diaktifkan, permintaan autentikasi SAML ditandatangani dengan kunci privat di bawah ini. Sertifikat publik yang sesuai dikirimkan ke Penyedia Identitas sehingga dapat memverifikasi tanda tangan.",
 	"downloadCertificate": "Unduh sertifikat",
 	"viewMore": "Lihat lebih banyak",
-	"viewLess": "Lihat lebih sedikit"
+	"viewLess": "Lihat lebih sedikit",
+	"scoreChangeDetected": "Perubahan skor terdeteksi",
+	"scoreChangeDetectedDescription": "Perubahan dalam skor telah terdeteksi. Pilih cara menangani pembaruan skor untuk audit yang terkait.",
+	"clamp": "Batas",
+	"clampDescription": "Batasi nilai dalam batas yang ditentukan",
+	"reset": "Atur ulang",
+	"resetDescription": "Atur ulang skor audit",
+	"ruleOfThree": "Aturan Tiga",
+	"ruleOfThreeDescription": "Terapkan Aturan Tiga untuk menskalakan skor antara batas baru"
 }

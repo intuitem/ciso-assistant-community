@@ -979,5 +979,13 @@
 	"samlAuthnRequestSignedHelpText": "Ha engedélyezve van, a SAML hitelesítési kérelem aláírva lesz az alábbi privát kulccsal. A megfelelő nyilvános tanúsítvány elküldve lesz az Azonosítószolgáltatónak, hogy ellenőrizhesse az aláírást.",
 	"downloadCertificate": "Tanúsítvány letöltése",
 	"viewMore": "Megtekintés több",
-	"viewLess": "Megtekintés kevesebb"
+	"viewLess": "Megtekintés kevesebb",
+	"scoreChangeDetected": "Pontszám változás észlelve",
+	"scoreChangeDetectedDescription": "Pontszámváltozás észlelve. Válassza ki, hogyan kezelje a kapcsolódó auditok pontszámainak frissítését.",
+	"clamp": "Korlátozás",
+	"clampDescription": "A pontszámok korlátozása a meghatározott határokon belül",
+	"reset": "Visszaállítás",
+	"resetDescription": "Az auditok pontszámainak visszaállítása",
+	"ruleOfThree": "Háromszoros szabály",
+	"ruleOfThreeDescription": "A Háromszoros szabály alkalmazása a pontszámok átméretezése új határok között"
 }

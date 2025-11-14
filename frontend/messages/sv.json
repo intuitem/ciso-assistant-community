@@ -970,5 +970,13 @@
 	"samlAuthnRequestSignedHelpText": "När det är aktiverat, signeras SAML-autentiseringsbegäran med den privata nyckeln nedan. Det motsvarande offentliga certifikatet skickas till identitetsleverantören så att den kan verifiera signaturen.",
 	"downloadCertificate": "Ladda ner certifikat",
 	"viewMore": "Visa mer",
-	"viewLess": "Visa mindre"
+	"viewLess": "Visa mindre",
+	"scoreChangeDetected": "Ändring i poäng upptäckt",
+	"scoreChangeDetectedDescription": "En ändring i poäng har upptäckts. Välj hur du vill hantera uppdateringarna av poängen för de associerade revisionerna.",
+	"clamp": "Begränsa",
+	"clampDescription": "Begränsa värdet inom de definierade gränserna",
+	"reset": "Återställ",
+	"resetDescription": "Återställ revisionernas poäng",
+	"ruleOfThree": "Trets regler",
+	"ruleOfThreeDescription": "Tillämpa trets regler för att skala poäng mellan nya gränser"
 }

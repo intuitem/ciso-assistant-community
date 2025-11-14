@@ -986,5 +986,13 @@
 	"samlAuthnRequestSignedHelpText": "Wenn aktiviert, wird die SAML-Authentifizierungsanfrage mit dem privaten Schlüssel unten signiert. Das zugehörige öffentliche Zertifikat wird an den Identitätsanbieter gesendet, damit er die Signatur überprüfen kann.",
 	"downloadCertificate": "Zertifikat herunterladen",
 	"viewMore": "Mehr anzeigen",
-	"viewLess": "Weniger anzeigen"
+	"viewLess": "Weniger anzeigen",
+	"scoreChangeDetected": "Änderung der Punktzahl erkannt",
+	"scoreChangeDetectedDescription": "Eine Änderung der Punktzahlen wurde erkannt. Wählen Sie, wie die Aktualisierungen der Punktzahlen für die zugehörigen Audits behandelt werden sollen.",
+	"clamp": "Begrenzen",
+	"clampDescription": "Begrenzen Sie den Wert innerhalb der definierten Grenzen",
+	"reset": "Zurücksetzen",
+	"resetDescription": "Setzen Sie die Punktzahlen der Audits zurück",
+	"ruleOfThree": "Dreigesetz",
+	"ruleOfThreeDescription": "Wenden Sie das Dreigesetz an, um Punktzahlen zwischen neuen Grenzen zu skalieren"
 }
