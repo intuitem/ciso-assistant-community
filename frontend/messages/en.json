@@ -1557,6 +1557,7 @@
 	"demoDataAlreadyImported": "Demo data has already been imported. Delete or rename your existing DEMO domain.",
 	"finding": "Finding",
 	"findings": "Findings",
+	"findingsExplorer": "Combined findings review",
 	"associatedFindings": "Associated findings",
 	"findingsAssessment": "Follow-up",
 	"findingsAssessments": "Follow-ups",
