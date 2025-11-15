@@ -7,10 +7,11 @@
 		props: {
 			label: 'action',
 			options: [
-				{ label: 'Create', value: '0' },
-				{ label: 'Update', value: '1' },
-				{ label: 'Delete', value: '2' },
-				{ label: 'Access', value: '3' }
+				{ label: 'create', value: '0' },
+				{ label: 'update', value: '1' },
+				{ label: 'delete', value: '2' },
+				{ label: 'access', value: '3' },
+				{ label: 'loginFailed', value: '4' }
 			],
 			multiple: true
 		}
