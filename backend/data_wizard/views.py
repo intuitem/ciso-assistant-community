@@ -34,6 +34,12 @@ from core.serializers import (
     ThreatWriteSerializer,
 )
 from ebios_rm.serializers import ElementaryActionWriteSerializer
+from tprm.models import Entity, Solution, Contract
+from tprm.serializers import (
+    EntityWriteSerializer,
+    SolutionWriteSerializer,
+    ContractWriteSerializer,
+)
 from iam.models import RoleAssignment
 
 logger = logging.getLogger(__name__)
@@ -78,17 +84,24 @@ class LoadFileView(APIView):
 
         res = None
         try:
-            # Read Excel file into a pandas DataFrame
-            df = pd.read_excel(excel_data).fillna("")
-            res = self.process_data(
-                request,
-                df,
-                model_type,
-                folder_id,
-                perimeter_id,
-                framework_id,
-                matrix_id,
-            )
+            # Special handling for TPRM multi-sheet import
+            if model_type == "TPRM":
+                folders_map = get_accessible_objects(request.user)
+                res = self._process_tprm_file(
+                    request, excel_data, folders_map, folder_id
+                )
+            else:
+                # Read Excel file into a pandas DataFrame
+                df = pd.read_excel(excel_data).fillna("")
+                res = self.process_data(
+                    request,
+                    df,
+                    model_type,
+                    folder_id,
+                    perimeter_id,
+                    framework_id,
+                    matrix_id,
+                )
 
         except Exception as e:
             logger.error("Error parsing Excel file", exc_info=e)
@@ -151,6 +164,8 @@ class LoadFileView(APIView):
             )
         elif model_type == "Threat":
             return self._process_threats(request, records, folders_map, folder_id)
+        elif model_type == "TPRM":
+            return self._process_tprm(request, records, folders_map, folder_id)
         else:
             return {
                 "successful": 0,
@@ -848,6 +863,439 @@ class LoadFileView(APIView):
             )
 
         return results
+
+    def _process_tprm_file(self, request, excel_data, folders_map, folder_id):
+        """
+        Process TPRM multi-sheet Excel file with Entities, Solutions, and Contracts
+        """
+        try:
+            # Read all sheets from Excel file
+            excel_file = pd.ExcelFile(excel_data)
+
+            # Track overall results
+            overall_results = {
+                "entities": {"successful": 0, "failed": 0, "errors": []},
+                "solutions": {"successful": 0, "failed": 0, "errors": []},
+                "contracts": {"successful": 0, "failed": 0, "errors": []},
+            }
+
+            # Track ref_id to actual ID mappings
+            entity_ref_map = {}  # ref_id -> actual UUID
+            solution_ref_map = {}  # ref_id -> actual UUID
+
+            # Process Entities sheet first
+            if "Entities" in excel_file.sheet_names:
+                logger.info("Processing Entities sheet")
+                entities_df = pd.read_excel(excel_data, sheet_name="Entities").fillna(
+                    ""
+                )
+                entities_records = entities_df.to_dict(orient="records")
+                entities_result, entity_ref_map = self._process_entities(
+                    request, entities_records, folders_map, folder_id
+                )
+                overall_results["entities"] = entities_result
+            else:
+                logger.warning("No 'Entities' sheet found in Excel file")
+
+            # Process Solutions sheet second (requires entities to exist)
+            if "Solutions" in excel_file.sheet_names:
+                logger.info("Processing Solutions sheet")
+                solutions_df = pd.read_excel(excel_data, sheet_name="Solutions").fillna(
+                    ""
+                )
+                solutions_records = solutions_df.to_dict(orient="records")
+                solutions_result, solution_ref_map = self._process_solutions(
+                    request, solutions_records, folders_map, folder_id, entity_ref_map
+                )
+                overall_results["solutions"] = solutions_result
+            else:
+                logger.warning("No 'Solutions' sheet found in Excel file")
+
+            # Process Contracts sheet last (requires entities and solutions)
+            if "Contracts" in excel_file.sheet_names:
+                logger.info("Processing Contracts sheet")
+                contracts_df = pd.read_excel(excel_data, sheet_name="Contracts").fillna(
+                    ""
+                )
+                contracts_records = contracts_df.to_dict(orient="records")
+                contracts_result = self._process_contracts(
+                    request,
+                    contracts_records,
+                    folders_map,
+                    folder_id,
+                    entity_ref_map,
+                    solution_ref_map,
+                )
+                overall_results["contracts"] = contracts_result
+            else:
+                logger.warning("No 'Contracts' sheet found in Excel file")
+
+            # Calculate totals
+            total_successful = (
+                overall_results["entities"]["successful"]
+                + overall_results["solutions"]["successful"]
+                + overall_results["contracts"]["successful"]
+            )
+            total_failed = (
+                overall_results["entities"]["failed"]
+                + overall_results["solutions"]["failed"]
+                + overall_results["contracts"]["failed"]
+            )
+
+            logger.info(
+                f"TPRM import complete. Total success: {total_successful}, Total failed: {total_failed}"
+            )
+
+            return overall_results
+
+        except Exception as e:
+            logger.error(f"Error processing TPRM file: {str(e)}")
+            return {
+                "entities": {
+                    "successful": 0,
+                    "failed": 0,
+                    "errors": [{"error": str(e)}],
+                },
+                "solutions": {"successful": 0, "failed": 0, "errors": []},
+                "contracts": {"successful": 0, "failed": 0, "errors": []},
+            }
+
+    def _process_entities(self, request, records, folders_map, folder_id):
+        """Process entities from TPRM import"""
+        results = {"successful": 0, "failed": 0, "errors": []}
+        ref_id_map = {}  # Map ref_id to actual UUID
+
+        for record in records:
+            try:
+                ref_id = record.get("ref_id", "").strip()
+                if not ref_id:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "error": "ref_id field is mandatory"}
+                    )
+                    continue
+
+                # Check if name is provided
+                if not record.get("name"):
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "error": "name field is mandatory"}
+                    )
+                    continue
+
+                # Get domain from record or use fallback
+                domain = folder_id
+                if record.get("domain") != "":
+                    domain = folders_map.get(record.get("domain"), folder_id)
+
+                # Prepare entity data
+                entity_data = {
+                    "ref_id": ref_id,
+                    "name": record.get("name"),
+                    "description": record.get("description", ""),
+                    "mission": record.get("mission", ""),
+                    "folder": domain,
+                }
+
+                # Add optional fields
+                if record.get("country"):
+                    entity_data["country"] = record.get("country")
+                if record.get("currency"):
+                    entity_data["currency"] = record.get("currency")
+
+                # Add EBIOS RM fields with type conversion
+                for field in ["dependency", "penetration", "maturity", "trust"]:
+                    value = record.get(field)
+                    if value != "" and value is not None:
+                        try:
+                            entity_data[f"default_{field}"] = int(value)
+                        except (ValueError, TypeError):
+                            pass
+
+                # Handle legal identifiers (LEI, EUID, DUNS, VAT, etc.)
+                legal_identifiers = {}
+                for identifier_type in ["lei", "euid", "duns", "vat"]:
+                    value = record.get(identifier_type, "")
+                    if value and str(value).strip():
+                        legal_identifiers[identifier_type.upper()] = str(value).strip()
+
+                if legal_identifiers:
+                    entity_data["legal_identifiers"] = legal_identifiers
+
+                # Create the entity first, then handle parent relationship
+                serializer = EntityWriteSerializer(
+                    data=entity_data, context={"request": request}
+                )
+
+                if serializer.is_valid(raise_exception=True):
+                    entity = serializer.save()
+                    ref_id_map[ref_id] = str(entity.id)
+                    results["successful"] += 1
+                    logger.debug(f"Created entity: {entity.name} with ref_id: {ref_id}")
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+
+            except Exception as e:
+                logger.warning(f"Error creating entity: {str(e)}")
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        # Second pass: handle parent_entity relationships
+        for record in records:
+            try:
+                ref_id = record.get("ref_id", "").strip()
+                parent_ref_id = record.get("parent_entity_ref_id", "").strip()
+
+                if ref_id and parent_ref_id and ref_id in ref_id_map:
+                    if parent_ref_id in ref_id_map:
+                        entity = Entity.objects.get(id=ref_id_map[ref_id])
+                        entity.parent_entity_id = ref_id_map[parent_ref_id]
+                        entity.save()
+                        logger.debug(
+                            f"Linked entity {ref_id} to parent {parent_ref_id}"
+                        )
+                    else:
+                        logger.warning(
+                            f"Parent entity ref_id '{parent_ref_id}' not found for entity '{ref_id}'"
+                        )
+            except Exception as e:
+                logger.warning(f"Error linking parent entity: {str(e)}")
+
+        logger.info(
+            f"Entity import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results, ref_id_map
+
+    def _process_solutions(
+        self, request, records, folders_map, folder_id, entity_ref_map
+    ):
+        """Process solutions from TPRM import"""
+        results = {"successful": 0, "failed": 0, "errors": []}
+        ref_id_map = {}  # Map ref_id to actual UUID
+
+        for record in records:
+            try:
+                ref_id = record.get("ref_id", "").strip()
+                if not ref_id:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "error": "ref_id field is mandatory"}
+                    )
+                    continue
+
+                # Check if name is provided
+                if not record.get("name"):
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "error": "name field is mandatory"}
+                    )
+                    continue
+
+                # Check provider_entity_ref_id
+                provider_ref_id = record.get("provider_entity_ref_id", "").strip()
+                if not provider_ref_id:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": "provider_entity_ref_id field is mandatory",
+                        }
+                    )
+                    continue
+
+                # Lookup provider entity UUID
+                if provider_ref_id not in entity_ref_map:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": f"Provider entity with ref_id '{provider_ref_id}' not found",
+                        }
+                    )
+                    continue
+
+                provider_entity_id = entity_ref_map[provider_ref_id]
+
+                # Prepare solution data
+                solution_data = {
+                    "ref_id": ref_id,
+                    "name": record.get("name"),
+                    "description": record.get("description", ""),
+                    "provider_entity": provider_entity_id,
+                }
+
+                # Add criticality if provided
+                if (
+                    record.get("criticality") != ""
+                    and record.get("criticality") is not None
+                ):
+                    try:
+                        solution_data["criticality"] = int(record.get("criticality"))
+                    except (ValueError, TypeError):
+                        pass
+
+                # Create the solution
+                serializer = SolutionWriteSerializer(
+                    data=solution_data, context={"request": request}
+                )
+
+                if serializer.is_valid(raise_exception=True):
+                    solution = serializer.save()
+                    ref_id_map[ref_id] = str(solution.id)
+                    results["successful"] += 1
+                    logger.debug(
+                        f"Created solution: {solution.name} with ref_id: {ref_id}"
+                    )
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+
+            except Exception as e:
+                logger.warning(f"Error creating solution: {str(e)}")
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        logger.info(
+            f"Solution import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results, ref_id_map
+
+    def _process_contracts(
+        self, request, records, folders_map, folder_id, entity_ref_map, solution_ref_map
+    ):
+        """Process contracts from TPRM import"""
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        for record in records:
+            try:
+                ref_id = record.get("ref_id", "").strip()
+                if not ref_id:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "error": "ref_id field is mandatory"}
+                    )
+                    continue
+
+                # Check if name is provided
+                if not record.get("name"):
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "error": "name field is mandatory"}
+                    )
+                    continue
+
+                # Check provider_entity_ref_id
+                provider_ref_id = record.get("provider_entity_ref_id", "").strip()
+                if not provider_ref_id:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": "provider_entity_ref_id field is mandatory",
+                        }
+                    )
+                    continue
+
+                # Lookup provider entity UUID
+                if provider_ref_id not in entity_ref_map:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": f"Provider entity with ref_id '{provider_ref_id}' not found",
+                        }
+                    )
+                    continue
+
+                provider_entity_id = entity_ref_map[provider_ref_id]
+
+                # Get domain from record or use fallback
+                domain = folder_id
+                if record.get("domain") != "":
+                    domain = folders_map.get(record.get("domain"), folder_id)
+
+                # Prepare contract data
+                contract_data = {
+                    "ref_id": ref_id,
+                    "name": record.get("name"),
+                    "description": record.get("description", ""),
+                    "provider_entity": provider_entity_id,
+                    "folder": domain,
+                }
+
+                # Add optional solution reference
+                solution_ref_id = str(record.get("solution_ref_id", "")).strip()
+                if solution_ref_id:
+                    if solution_ref_id in solution_ref_map:
+                        contract_data["solution"] = solution_ref_map[solution_ref_id]
+                    else:
+                        logger.warning(
+                            f"Solution with ref_id '{solution_ref_id}' not found for contract '{ref_id}'"
+                        )
+
+                # Add optional fields
+                if record.get("status"):
+                    contract_data["status"] = record.get("status")
+                if record.get("start_date"):
+                    contract_data["start_date"] = record.get("start_date")
+                if record.get("end_date"):
+                    contract_data["end_date"] = record.get("end_date")
+                if (
+                    record.get("annual_expense") != ""
+                    and record.get("annual_expense") is not None
+                ):
+                    try:
+                        contract_data["annual_expense"] = float(
+                            record.get("annual_expense")
+                        )
+                    except (ValueError, TypeError):
+                        pass
+                if record.get("currency"):
+                    contract_data["currency"] = record.get("currency")
+
+                # Create the contract
+                serializer = ContractWriteSerializer(
+                    data=contract_data, context={"request": request}
+                )
+
+                if serializer.is_valid(raise_exception=True):
+                    contract = serializer.save()
+                    results["successful"] += 1
+                    logger.debug(
+                        f"Created contract: {contract.name} with ref_id: {ref_id}"
+                    )
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+
+            except Exception as e:
+                logger.warning(f"Error creating contract: {str(e)}")
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        logger.info(
+            f"Contract import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
+    def _process_tprm(self, request, records, folders_map, folder_id):
+        """Legacy handler - TPRM should use _process_tprm_file for multi-sheet support"""
+        return {
+            "successful": 0,
+            "failed": 0,
+            "errors": [
+                {
+                    "error": "TPRM import requires multi-sheet Excel file. Please use the proper TPRM template."
+                }
+            ],
+        }
 
     def post(self, request, *args, **kwargs):
         # if not request.user.has_file_permission:

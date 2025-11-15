@@ -26,7 +26,7 @@
 	{#snippet content()}
 		<Tabs.Panel value="general">
 			<div>
-				<span class="text-gray-500">{m.generalSettingsDescription()}</span>
+				<span class="text-gray-500 block mb-6">{m.generalSettingsDescription()}</span>
 				<ModelForm
 					form={data.generalSettingForm}
 					schema={GeneralSettingsSchema}
@@ -38,7 +38,7 @@
 		</Tabs.Panel>
 		<Tabs.Panel value="sso">
 			<div>
-				<span class="text-gray-500">{m.ssoSettingsDescription()}</span>
+				<span class="text-gray-500 block mb-6">{m.ssoSettingsDescription()}</span>
 				<ModelForm
 					form={data.ssoForm}
 					schema={SSOSettingsSchema}
@@ -50,7 +50,7 @@
 		</Tabs.Panel>
 		<Tabs.Panel value="featureFlags">
 			<div>
-				<span class="text-gray-500">{m.configureFeatureFlags()}</span>
+				<span class="text-gray-500 block mb-6">{m.configureFeatureFlags()}</span>
 				<ModelForm
 					form={data.featureFlagForm}
 					schema={FeatureFlagsSchema}
