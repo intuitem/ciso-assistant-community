@@ -16,6 +16,17 @@ export const navData = {
 					]
 				},
 				{
+					name: 'reports',
+					fa_icon: 'fas fa-file-invoice',
+					href: '/reports',
+					permissions: [
+						'view_perimeter',
+						'view_riskscenario',
+						'view_referencecontrol',
+						'view_riskassessment'
+					]
+				},
+				{
 					name: 'domainAnalytics',
 					fa_icon: 'fa-solid fa-folder-tree',
 					href: '/domain-analytics',
@@ -317,6 +328,7 @@ export const navData = {
 						'view_appliedcontrol',
 						'view_entity',
 						'view_solution',
+						'view_contract',
 						'view_entityassessment'
 					]
 				},
@@ -324,11 +336,6 @@ export const navData = {
 					name: 'entities',
 					fa_icon: 'fa-solid fa-building',
 					href: '/entities'
-				},
-				{
-					name: 'entityAssessments',
-					fa_icon: 'fa-solid fa-clipboard-list',
-					href: '/entity-assessments'
 				},
 				{
 					name: 'representatives',
@@ -339,6 +346,16 @@ export const navData = {
 					name: 'solutions',
 					fa_icon: 'fa-solid fa-box',
 					href: '/solutions'
+				},
+				{
+					name: 'contracts',
+					fa_icon: 'fa-solid fa-file-contract',
+					href: '/contracts'
+				},
+				{
+					name: 'entityAssessments',
+					fa_icon: 'fa-solid fa-clipboard-list',
+					href: '/entity-assessments'
 				}
 			]
 		},
