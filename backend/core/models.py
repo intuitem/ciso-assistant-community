@@ -52,6 +52,7 @@ from .validators import (
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
+from . import dora
 from collections import defaultdict, deque
 
 logger = get_logger(__name__)
@@ -243,6 +244,10 @@ class StoredLibrary(LibraryMixin):
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
     content = models.JSONField()
+    autoload = models.BooleanField(
+        default=False,
+        help_text="If set to true, the library will be automatically loaded on migrate.",
+    )
 
     REQUIRED_FIELDS = {"urn", "name", "version", "objects"}
     FIELDS_VERIFIERS = {}
@@ -340,6 +345,12 @@ class StoredLibrary(LibraryMixin):
             builtin=builtin,
             hash_checksum=hash_checksum,
             content=library_objects,
+            autoload=bool(
+                library_objects.get(
+                    "requirement_mapping_set",
+                    library_objects.get("requirement_mapping_sets"),
+                )
+            ),  # autoload is true if the library contains requirement mapping sets
         )
 
     @classmethod
@@ -923,7 +934,13 @@ class LoadedLibrary(LibraryMixin):
             )
             .distinct()
             .count()
-            + LoadedLibrary.objects.filter(dependencies=self).distinct().count()
+            + LoadedLibrary.objects.filter(
+                objects_meta__requirement_mapping_sets__isnull=True,
+                objects_meta__requirement_mapping_set__isnull=True,
+                dependencies=self,
+            )
+            .distinct()
+            .count()
         )
 
     @property
@@ -962,7 +979,7 @@ class LoadedLibrary(LibraryMixin):
             )
         super(LoadedLibrary, self).delete(*args, **kwargs)
         StoredLibrary.objects.filter(urn=self.urn, locale=self.locale).update(
-            is_loaded=False
+            is_loaded=False, autoload=False
         )
 
 
@@ -2148,6 +2165,34 @@ class Asset(
     )
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+
+    is_business_function = models.BooleanField("is_business_function", default=False)
+    dora_licenced_activity = models.CharField(
+        max_length=50,
+        choices=dora.DORA_LICENSED_ACTIVITY_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name=_("DORA Licensed Activity"),
+    )
+    dora_criticality_assessment = models.CharField(
+        max_length=50,
+        choices=dora.DORA_FUNCTION_CRITICALITY_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name=_("DORA Criticality Assessment"),
+    )
+    dora_criticality_justification = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("DORA Criticality Justification"),
+    )
+    dora_discontinuing_impact = models.CharField(
+        max_length=50,
+        choices=dora.DORA_DISCONTINUING_IMPACT_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name=_("DORA Discontinuing Impact"),
+    )
 
     fields_to_check = ["name"]
 
@@ -4887,7 +4932,7 @@ class RiskScenario(NameDescriptionMixin):
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
 
-    def get_folder_full_path(self, include_root: bool = False) -> list[Folder]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
         return self.risk_assessment.get_folder_full_path(include_root=include_root)
 
     @property

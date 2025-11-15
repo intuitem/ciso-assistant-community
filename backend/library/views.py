@@ -2,7 +2,8 @@ from itertools import chain
 import json
 from django.db import IntegrityError
 from django.db.models import F, Q, IntegerField, OuterRef, Subquery
-from rest_framework import viewsets, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, generics, viewsets, status
 from django.conf import settings
 
 from rest_framework.status import (
@@ -172,6 +173,13 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
     search_fields = ["name", "description", "urn", "ref_id"]
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        )
+
     def get_serializer_class(self):
         if self.action == "list":
             return StoredLibrarySerializer
@@ -324,7 +332,13 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get all library objects types")
     def object_type(self, request):
-        return Response(LibraryImporter.NON_DEPRECATED_OBJECT_FIELDS)
+        return Response(
+            [
+                f
+                for f in LibraryImporter.NON_DEPRECATED_OBJECT_FIELDS
+                if "requirement_mapping_sets" not in f
+            ]
+        )
 
 
 class LoadedLibraryFilterSet(LibraryMixinFilterSet):
@@ -424,8 +438,13 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             lib = LoadedLibrary.objects.get(
                 **{key: pk}
             )  # There is no "locale" value involved in the fetch + we have to handle the exception if the pk urn doesn't exist
-        except:
+        except LoadedLibrary.DoesNotExist:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+        except Exception:
+            logger.error("Error retrieving library", pk=pk, exc_info=True)
+            return Response(
+                data="Error retrieving library.", status=HTTP_400_BAD_REQUEST
+            )
         data = LoadedLibraryDetailedSerializer(lib).data
         data["objects"] = lib._objects
         return Response(data)
@@ -441,8 +460,13 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(**{key: pk})
-        except:
+        except LoadedLibrary.DoesNotExist:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+        except Exception:
+            logger.error("Error unloading library", pk=pk, exc_info=True)
+            return Response(
+                data="Error unloading library.", status=HTTP_400_BAD_REQUEST
+            )
 
         if lib.reference_count != 0:
             return Response(
@@ -512,3 +536,35 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         return Response(
             LoadedLibrarySerializer(LoadedLibrary.updatable_libraries(), many=True).data
         )
+
+
+class MappingLibrariesList(generics.ListAPIView):
+    filterset_fields = {
+        "provider": ["exact"],
+        "packager": ["exact"],
+        "locale": ["exact"],
+    }
+    search_fields = ["name", "description", "urn", "ref_id"]
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    ordering_fields = "__all__"
+
+    serializer_class = StoredLibrarySerializer
+
+    def get_queryset(self):
+        """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
+        qs = StoredLibrary.objects.filter(
+            Q(content__requirement_mapping_set__isnull=False)
+            | Q(content__requirement_mapping_sets__isnull=False)
+        ).distinct()
+
+        viewable_libraries, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(),
+            self.request.user,
+            StoredLibrary,
+        )
+        return qs.filter(id__in=viewable_libraries)
