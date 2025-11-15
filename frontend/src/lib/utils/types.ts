@@ -65,6 +65,7 @@ export const URL_MODEL = [
 	'entities',
 	'entity-assessments',
 	'solutions',
+	'contracts',
 	'representatives',
 	'vulnerabilities',
 	'filtering-labels',

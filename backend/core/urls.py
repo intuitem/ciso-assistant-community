@@ -4,6 +4,7 @@ from tprm.views import (
     RepresentativeViewSet,
     SolutionViewSet,
     EntityAssessmentViewSet,
+    ContractViewSet,
 )
 from library.views import (
     MappingLibrariesList,
@@ -27,6 +28,7 @@ router.register(
 )
 router.register(r"solutions", SolutionViewSet, basename="solutions")
 router.register(r"representatives", RepresentativeViewSet, basename="representatives")
+router.register(r"contracts", ContractViewSet, basename="contracts")
 router.register(r"perimeters", PerimeterViewSet, basename="perimeters")
 router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")

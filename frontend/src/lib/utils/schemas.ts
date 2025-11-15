@@ -304,7 +304,13 @@ export const AssetSchema = z.object({
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	ref_id: z.string().max(100).optional(),
 	observation: z.string().optional().nullable(),
-	overridden_children_capabilities: z.string().uuid().optional().array().optional()
+	overridden_children_capabilities: z.string().uuid().optional().array().optional(),
+	solutions: z.string().uuid().optional().array().optional(),
+	is_business_function: z.boolean().default(false),
+	dora_licenced_activity: z.string().optional().nullable(),
+	dora_criticality_assessment: z.string().default('eba_BT:x21'),
+	dora_criticality_justification: z.string().optional().nullable(),
+	dora_discontinuing_impact: z.string().default('eba_ZZ:x799')
 });
 
 export const FilteringLabelSchema = z.object({
@@ -436,7 +442,7 @@ export const EvidenceSchema = z.object({
 		.preprocess(toArrayPreprocessor, z.array(z.string().optional()))
 		.optional(),
 	timeline_entries: z.string().optional().array().optional(),
-
+	contracts: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	link: z
 		.string()
 		.refine((val) => val === '' || (val.startsWith('http') && URL.canParse(val)), {
@@ -497,7 +503,9 @@ export const FeatureFlagsSchema = z.object({
 	quantitative_risk_studies: z.boolean().optional(),
 	terminologies: z.boolean().optional(),
 	bia: z.boolean().optional(),
-	project_management: z.boolean().optional()
+	project_management: z.boolean().optional(),
+	contracts: z.boolean().optional(),
+	reports: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -561,6 +569,9 @@ export const SSOSettingsSchema = z.object({
 export const EntitiesSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
+	ref_id: z.string().optional(),
+	is_active: z.boolean().optional(),
+	parent_entity: z.string().optional().nullable(),
 	mission: z.string().optional(),
 	reference_link: z
 		.string()
@@ -568,7 +579,20 @@ export const EntitiesSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	relationship: z.string().optional().array().optional()
+	relationship: z.string().optional().array().optional(),
+	legal_identifiers: z.record(z.string()).optional(),
+	country: z.string().optional(),
+	currency: z.string().optional(),
+	dora_entity_type: z.string().optional(),
+	dora_entity_hierarchy: z.string().optional(),
+	dora_assets_value: z.number().optional().nullable(),
+	dora_competent_authority: z.string().optional(),
+	dora_provider_person_type: z.string().optional(),
+	default_dependency: z.number().optional(),
+	default_penetration: z.number().optional(),
+	default_maturity: z.number().optional(),
+	default_trust: z.number().optional(),
+	filtering_labels: z.array(z.string()).optional()
 });
 
 export const EntityAssessmentSchema = z.object({
@@ -602,7 +626,22 @@ export const solutionSchema = z.object({
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
 	criticality: z.number().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	owner: z.string().uuid().optional().array().optional(),
+	assets: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
+	dora_ict_service_type: z.string().optional(),
+	storage_of_data: z.boolean().optional().default(false),
+	data_location_storage: z.string().optional(),
+	data_location_processing: z.string().optional(),
+	dora_data_sensitiveness: z.string().optional(),
+	dora_reliance_level: z.string().optional(),
+	dora_substitutability: z.string().optional(),
+	dora_non_substitutability_reason: z.string().optional(),
+	dora_has_exit_plan: z.string().optional(),
+	dora_reintegration_possibility: z.string().optional(),
+	dora_discontinuing_impact: z.string().optional(),
+	dora_alternative_providers_identified: z.string().optional(),
+	dora_alternative_providers: z.string().optional()
 });
 
 export const representativeSchema = z.object({
@@ -614,6 +653,30 @@ export const representativeSchema = z.object({
 	phone: z.string().optional(),
 	role: z.string().optional(),
 	description: z.string().optional()
+});
+
+export const contractSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	filtering_labels: z.array(z.string()).optional(),
+	owner: z.array(z.string().optional()).optional(),
+	provider_entity: z.string().optional(),
+	beneficiary_entity: z.string().optional(),
+	evidences: z.array(z.string().optional()).optional(),
+	solution: z.string().optional(),
+	status: z.string().optional().default('draft'),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	end_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	ref_id: z.string().optional(),
+	dora_contractual_arrangement: z.string().default('eba_CO:x1'),
+	currency: z.string().optional(),
+	annual_expense: z.number().optional().nullable(),
+	termination_reason: z.string().optional(),
+	is_intragroup: z.boolean().optional().default(false),
+	overarching_contract: z.string().optional().nullable(),
+	governing_law_country: z.string().optional(),
+	notice_period_entity: z.number().optional().nullable(),
+	notice_period_provider: z.number().optional().nullable()
 });
 
 export const vulnerabilitySchema = z.object({
@@ -1260,6 +1323,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
 	solutions: solutionSchema,
+	contracts: contractSchema,
 	vulnerabilities: vulnerabilitySchema,
 	'filtering-labels': FilteringLabelSchema,
 	'business-impact-analysis': BusinessImpactAnalysisSchema,

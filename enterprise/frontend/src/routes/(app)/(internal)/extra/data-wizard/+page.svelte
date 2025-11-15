@@ -64,7 +64,8 @@
 			selectedModel === 'Perimeter' ||
 			selectedModel === 'ElementaryAction' ||
 			selectedModel === 'ReferenceControl' ||
-			selectedModel === 'Threat'
+			selectedModel === 'Threat' ||
+			selectedModel === 'TPRM'
 	);
 
 	// Fixed: Check files correctly
@@ -343,6 +344,29 @@
 								name="model"
 								value="Threat"
 								id="Threat"
+								class="size-5 border-gray-300 text-blue-500"
+								bind:group={selectedModel}
+							/>
+						</label>
+					</div>
+
+					<div>
+						<label
+							for="TPRM"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
+						>
+							<div>
+								<p class="text-gray-700">TPRM (Third-Party Risk Management)</p>
+								<p class="text-gray-500 text-xs">
+									Import entities, solutions, and contracts from a multi-sheet Excel file
+								</p>
+							</div>
+
+							<input
+								type="radio"
+								name="model"
+								value="TPRM"
+								id="TPRM"
 								class="size-5 border-gray-300 text-blue-500"
 								bind:group={selectedModel}
 							/>

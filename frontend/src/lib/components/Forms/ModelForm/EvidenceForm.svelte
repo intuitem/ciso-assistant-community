@@ -57,6 +57,7 @@
 <HiddenInput {form} field="findings" />
 <HiddenInput {form} field="findings_assessments" />
 <HiddenInput {form} field="timeline_entries" />
+<HiddenInput {form} field="contracts" />
 
 {#if context !== 'edit'}
 	<FileInput

@@ -168,6 +168,15 @@
 										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
 									>
 								{/if}
+								{#if URLModel === 'entities'}
+									<Anchor
+										href="entities/graph/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.exploreButton()}
+										label={m.inspect()}
+										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
+									>
+								{/if}
 								{#if URLModel === 'folders'}
 									<button
 										class="text-gray-50 inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
