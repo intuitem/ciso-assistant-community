@@ -27,9 +27,13 @@ export class SideBar {
 		const sideBarVisibleItems = getSidebarVisibleItems({});
 
 		// Filter nav items based on sideBarVisibleItems, same logic as SideBarNavigation.svelte
-		const filteredNavData = navData.items.filter(
-			(item) => sideBarVisibleItems[item.name] !== false
-		);
+		const filteredNavData = navData.items
+			.filter((category) => sideBarVisibleItems[category.name] !== false) // Filter categories
+			.map((category) => ({
+				...category,
+				items: category.items.filter((item) => sideBarVisibleItems[item.name] !== false) // Filter items
+			}))
+			.filter((category) => category.items.length > 0); // Remove empty categories
 
 		this.items = new Map(
 			filteredNavData.map((item) => [

@@ -580,6 +580,17 @@ export const SOLUTION_CRITICALITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const SOLUTION_OWNER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'owner',
+		optionsLabelField: 'email',
+		optionsValueField: 'id',
+		optionsEndpoint: 'solutions/owner',
+		multiple: true
+	}
+};
+
 export const ENTITY_CRITICALITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -708,6 +719,31 @@ export const ENTITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const PROVIDER_ENTITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'providerEntity',
+		optionsEndpoint: 'entities',
+		multiple: true
+	}
+};
+export const BENEFICIARY_ENTITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'beneficiaryEntity',
+		optionsEndpoint: 'entities',
+		multiple: true
+	}
+};
+export const SOLUTION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'solution',
+		optionsEndpoint: 'solutions',
+		multiple: true
+	}
+};
+
 export const ENTITY_RELATIONSHIP_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -830,6 +866,15 @@ export const ASSET_CLASS_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'asset_class',
 		optionsEndpoint: 'assets/asset_class',
+		multiple: true
+	}
+};
+
+const ASSET_IS_BUSINESS_FUNCTION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_business_function',
+		options: YES_NO_OPTIONS,
 		multiple: true
 	}
 };
@@ -1000,6 +1045,18 @@ export const EVIDENCE_STATUS_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'status',
 		optionsEndpoint: 'evidences/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const CONTRACT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'status',
+		optionsEndpoint: 'contracts/status',
 		optionsLabelField: 'label',
 		optionsValueField: 'value',
 		browserCache: 'force-cache',
@@ -1286,7 +1343,8 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			type: ASSET_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER,
-			asset_class: ASSET_CLASS_FILTER
+			asset_class: ASSET_CLASS_FILTER,
+			is_business_function: ASSET_IS_BUSINESS_FUNCTION_FILTER
 		}
 	},
 	'asset-class': {
@@ -1460,10 +1518,27 @@ export const listViewFields = {
 		}
 	},
 	entities: {
-		head: ['name', 'description', 'domain', 'relationship', 'ownedFolders'],
-		body: ['name', 'description', 'folder', 'relationship', 'owned_folders'],
+		head: [
+			'refId',
+			'name',
+			'description',
+			'domain',
+			'parentEntity',
+			'relationship',
+			'defaultCriticality'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'folder',
+			'parent_entity',
+			'relationship',
+			'default_criticality'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
+			parent_entity: ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER
 		}
 	},
@@ -1479,11 +1554,42 @@ export const listViewFields = {
 		}
 	},
 	solutions: {
-		head: ['name', 'description', 'providerEntity', 'recipientEntity', 'criticality'],
-		body: ['name', 'description', 'provider_entity', 'recipient_entity', 'criticality'],
+		head: ['refId', 'name', 'description', 'providerEntity', 'criticality', 'labels'],
+		body: ['ref_id', 'name', 'description', 'provider_entity', 'criticality', 'filtering_labels'],
 		filters: {
 			provider_entity: ENTITY_FILTER,
-			criticality: SOLUTION_CRITICALITY_FILTER
+			criticality: SOLUTION_CRITICALITY_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	contracts: {
+		head: [
+			'refId',
+			'name',
+			'description',
+			'status',
+			'startDate',
+			'endDate',
+			'providerEntity',
+			'beneficiaryEntity',
+			'solution'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'status',
+			'start_date',
+			'end_date',
+			'provider_entity',
+			'beneficiary_entity',
+			'solution'
+		],
+		filters: {
+			status: CONTRACT_STATUS_FILTER,
+			provider_entity: PROVIDER_ENTITY_FILTER,
+			beneficiary_entity: BENEFICIARY_ENTITY_FILTER,
+			solution: SOLUTION_FILTER
 		}
 	},
 	representatives: {
