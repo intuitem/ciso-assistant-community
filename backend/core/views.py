@@ -13,7 +13,7 @@ import uuid
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 import time
 from django.db.models import (
     F,
@@ -232,11 +232,48 @@ class GenericFilterSet(df.FilterSet):
         }
 
 
+class CustomOrderingFilter(filters.OrderingFilter):
+    """A base class to map field ordering to specific field paths.
+
+    Example
+    -------
+    class SomeOrderingFilter(CustomOrderingFilter):
+        // The ordering of the "name" field will be based on the "owner__name" value instead.
+        ordering_mapping = { "name": "owner__name" }
+    """
+
+    ordering_mapping: dict[str, str]
+
+    def get_ordering(self, request, queryset, view) -> Optional[list[str]]:
+        """Map ordering terms based on `ordering_mapping` when provided on the subclass."""
+        ordering_list = super().get_ordering(request, queryset, view)
+        if ordering_list is None:
+            return None
+
+        mapping = getattr(self, "ordering_mapping", None)
+        if mapping is None:
+            return ordering_list
+
+        new_ordering_list = []
+        for ordering_term in ordering_list:
+            field_name = ordering_term.lstrip("-")
+
+            if (new_field := mapping.get(field_name)) is None:
+                new_ordering_list.append(ordering_term)
+                continue
+
+            is_desc = ordering_term.startswith("-")
+            new_ordering_term = f"-{new_field}" if is_desc else new_field
+            new_ordering_list.append(new_ordering_term)
+
+        return new_ordering_list
+
+
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        CustomOrderingFilter,
     ]
     ordering = ["created_at"]
     ordering_fields = "__all__"
