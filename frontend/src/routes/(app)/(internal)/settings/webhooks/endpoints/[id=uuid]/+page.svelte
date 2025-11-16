@@ -7,6 +7,7 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { webhookEndpointSchema } from '$lib/utils/schemas';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 
 	interface Props {
 		data: PageData;
@@ -25,6 +26,7 @@
 	validators={zod(webhookEndpointSchema)}
 >
 	{#snippet children({ form })}
+		<Checkbox {form} field="is_active" label={m.isActive()} />
 		<TextField {form} field="name" label={m.name()} data-focusindex="0" />
 		<MarkdownField {form} field="description" label={m.description()} data-focusindex="1" />
 		<TextField {form} field="url" label={m.url()} data-focusindex="2" />

@@ -3,7 +3,6 @@
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { onMount, tick } from 'svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { page } from '$app/state';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	const modalStore: ModalStore = getModalStore();
@@ -11,6 +10,7 @@
 	import { m } from '$paraglide/messages';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { webhookEndpointSchema } from '$lib/utils/schemas';
 
 	// Base Classes
@@ -62,6 +62,7 @@
 			action={formAction}
 		>
 			{#snippet children({ form })}
+				<Checkbox {form} field="is_active" label={m.isActive()} />
 				<TextField {form} field="name" label={m.name()} data-focusindex="0" />
 				<MarkdownField {form} field="description" label={m.description()} data-focusindex="1" />
 				<TextField {form} field="url" label={m.url()} data-focusindex="2" />
