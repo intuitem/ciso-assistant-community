@@ -6781,6 +6781,97 @@ class TaskNode(AbstractBaseModel, FolderMixin):
         verbose_name_plural = "Task nodes"
 
 
+class ValidationFlow(AbstractBaseModel, FolderMixin):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        ACCEPTED = "accepted", "Accepted"
+        REJECTED = "rejected", "Rejected"
+        REVOKED = "revoked", "Revoked"
+        EXPIRED = "expired", "Expired"
+
+    compliance_assessments = models.ManyToManyField(
+        ComplianceAssessment,
+        blank=True,
+    )
+    risk_assessments = models.ManyToManyField(
+        RiskAssessment,
+        blank=True,
+    )
+    crq_studies = models.ManyToManyField(
+        "crq.QuantitativeRiskStudy",
+        blank=True,
+    )
+
+    ebios_studies = models.ManyToManyField(
+        "ebios_rm.EbiosRMStudy",
+        blank=True,
+    )
+    entity_assessments = models.ManyToManyField(
+        "tprm.EntityAssessment",
+        blank=True,
+    )
+    findings_assessments = models.ManyToManyField(
+        FindingsAssessment,
+        blank=True,
+    )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+    )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+    )
+
+    policies = models.ManyToManyField(
+        Policy,
+        blank=True,
+    )
+    request_notes = models.TextField(null=True, blank=True)
+    approver = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    approver_observation = models.TextField(null=True, blank=True)
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+    )
+    status = models.CharField(
+        choices=Status.choices,
+        default=Status.PENDING,
+        max_length=20,
+    )
+    expiration_date = models.DateField(
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = "Validation flow"
+        verbose_name_plural = "Validation flows"
+
+    @classmethod
+    def get_default_ref_id(cls, folder):
+        """return default ref_id for validation flow in folder"""
+        flows_ref_ids = [
+            x.ref_id for x in cls.objects.filter(folder=folder) if x.ref_id
+        ]
+        nb_flows = len(flows_ref_ids) + 1
+        candidates = [f"VAL.{i:02d}" for i in range(1, nb_flows + 1)]
+        return next(x for x in candidates if x not in flows_ref_ids)
+
+    @property
+    def name(self) -> str:
+        key = str(self.id).split("-")[0]
+        return f"Validation {key}"
+
+    def __str__(self) -> str:
+        key = str(self.id).split("-")[0]
+        return f"Validation {key}"
+
+
 common_exclude = ["created_at", "updated_at"]
 
 auditlog.register(
