@@ -80,7 +80,7 @@
 		buttonTextSubmit = $bindable('Submit'),
 		regionBackdrop = '',
 		regionHeader = 'text-2xl font-bold',
-		regionBody = 'max-h-[200px] overflow-hidden',
+		regionBody = 'max-h-[600px] overflow-y-auto whitespace-pre-line',
 		regionFooter = 'flex justify-end space-x-2',
 		transitions = true,
 		transitionIn = fly as TransitionIn,
