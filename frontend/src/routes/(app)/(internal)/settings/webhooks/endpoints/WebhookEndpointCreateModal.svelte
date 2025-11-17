@@ -1,17 +1,15 @@
 <script lang="ts">
-	import type { ModelInfo } from '$lib/utils/types';
-	import type { SuperForm } from 'sveltekit-superforms';
-	import { onMount, tick } from 'svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	const modalStore: ModalStore = getModalStore();
-	import Form from '$lib/components/Forms/Form.svelte';
-	import { m } from '$paraglide/messages';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Form from '$lib/components/Forms/Form.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import { webhookEndpointSchema } from '$lib/utils/schemas';
+	import { m } from '$paraglide/messages';
+	import { onMount, tick } from 'svelte';
+	import type { SuperForm } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import EventTypesSelect from './EventTypesSelect.svelte';
 
 	// Base Classes
 	const cBase = 'card bg-surface-50 p-4 w-fit max-w-4xl shadow-xl space-y-4';
@@ -26,7 +24,11 @@
 		[key: string]: any;
 	}
 
-	let { parent, form, formAction = '?/createWebhookEndpoint', debug = false }: Props = $props();
+	const modalStore: ModalStore = getModalStore();
+
+	let { parent, form, formAction = '?/createWebhookEndpoint' }: Props = $props();
+
+	let eventTypeOptions = $state([]);
 
 	// Focus the first field when modal opens
 	onMount(async () => {
@@ -35,6 +37,7 @@
 		if (firstField instanceof HTMLElement) {
 			firstField.focus();
 		}
+		eventTypeOptions = await fetch('/settings/webhooks/event-types').then((res) => res.json());
 	});
 </script>
 
@@ -73,14 +76,11 @@
 					label={m.secret()}
 					helpText={m.webhookSecretHelpText()}
 				/>
-				<AutocompleteSelect
+				<EventTypesSelect
 					{form}
 					field="event_types"
 					label={m.events()}
-					optionsEndpoint="settings/webhooks/event-types"
-					optionsLabelField="label"
-					optionsValueField="value"
-					multiple
+					options={eventTypeOptions}
 				/>
 				<p class="">
 					<button
