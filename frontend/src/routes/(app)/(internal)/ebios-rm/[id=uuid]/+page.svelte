@@ -162,14 +162,15 @@
     ${m.ebiosRmCreateNewDescription()}`,
 				buttonTextConfirm: m.ebiosRmSyncExisting(),
 				buttonTextCancel: m.ebiosRmCreateNew(),
-				response: (confirmed: boolean) => {
-					if (confirmed) {
+				response: (confirmed: boolean | undefined) => {
+					if (confirmed === true) {
 						// Sync existing - navigate to sync
 						window.location.href = `${page.url.pathname}/workshop-5/risk-analyses?sync=${riskAssessment.id}`;
-					} else {
+					} else if (confirmed === false) {
 						// Create new
 						modalCreateForm();
 					}
+					// If confirmed is undefined (close button/escape), do nothing
 				}
 			};
 			modalStore.trigger(choiceModal);
