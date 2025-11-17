@@ -1105,6 +1105,70 @@ class AssetViewSet(BaseModelViewSet):
                 status=500, content="An error occurred while generating the CSV export."
             )
 
+    @action(detail=False, name="Export assets as XLSX")
+    def export_xlsx(self, request):
+        (viewable_assets_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Asset
+        )
+
+        entries = []
+        for asset in Asset.objects.filter(id__in=viewable_assets_ids):
+            entry = {
+                "internal_id": asset.id,
+                "name": asset.name,
+                "description": asset.description,
+                "type": asset.type,
+                "folder": asset.folder.name,
+                "security_objectives": ",".join(
+                    [
+                        f"{k}: {v}"
+                        for obj in asset.get_security_objectives_display()
+                        for k, v in obj.items()
+                    ]
+                ),
+                "disaster_recovery_objectives": ",".join(
+                    [i["str"] for i in asset.get_disaster_recovery_objectives_display()]
+                ),
+                "link": asset.reference_link,
+                "owners": ",".join([o.email for o in asset.owner.all()]),
+                "parent_assets": ",".join([o.name for o in asset.parent_assets.all()]),
+                "labels": ",".join([o.label for o in asset.filtering_labels.all()]),
+            }
+            entries.append(entry)
+
+        df = pd.DataFrame(entries)
+        buffer = io.BytesIO()
+
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False)
+            worksheet = writer.sheets["Sheet1"]
+
+            wrap_columns = ["name", "description"]
+            wrap_indices = [
+                df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
+            ]
+
+            for col_idx in wrap_indices:
+                for row_idx in range(2, len(df) + 2):
+                    cell = worksheet.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(wrap_text=True)
+
+            for idx, col in enumerate(df.columns):
+                column_width = 20
+                if col in wrap_columns:
+                    column_width = 40
+                worksheet.column_dimensions[
+                    worksheet.cell(row=1, column=idx + 1).column_letter
+                ].width = column_width
+
+        buffer.seek(0)
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = 'attachment; filename="assets_export.xlsx"'
+        return response
+
 
 class AssetClassViewSet(BaseModelViewSet):
     model = AssetClass
@@ -1769,6 +1833,124 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return Response(
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
+
+    @action(detail=True, name="Get risk assessment XLSX")
+    def risk_assessment_xlsx(self, request, pk):
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskAssessment
+        )
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        risk_assessment = self.get_object()
+        entries = []
+
+        columns = [
+            "ref_id",
+            "assets",
+            "threats",
+            "name",
+            "description",
+            "existing_controls",
+            "current_impact",
+            "current_proba",
+            "current_risk",
+            "additional_controls",
+            "residual_impact",
+            "residual_proba",
+            "residual_risk",
+            "treatment",
+            "strength_of_knowledge",
+        ]
+
+        if ff_is_enabled("inherent_risk"):
+            # insert inherent_risk columns just before existing_controls
+            columns.insert(columns.index("existing_controls"), "inherent_impact")
+            columns.insert(columns.index("existing_controls"), "inherent_proba")
+            columns.insert(columns.index("existing_controls"), "inherent_level")
+
+        for scenario in risk_assessment.risk_scenarios.all().order_by("ref_id"):
+            additional_controls = ", ".join(
+                [m.name for m in scenario.applied_controls.all()]
+            )
+            existing_controls = ", ".join(
+                [m.name for m in scenario.existing_applied_controls.all()]
+            )
+            threats = ", ".join([t.name for t in scenario.threats.all()])
+            assets = ", ".join([t.name for t in scenario.assets.all()])
+
+            entry = {
+                "ref_id": scenario.ref_id,
+                "assets": assets,
+                "threats": threats,
+                "name": scenario.name,
+                "description": scenario.description,
+                "existing_controls": existing_controls,
+                "current_impact": scenario.get_current_impact()["name"],
+                "current_proba": scenario.get_current_proba()["name"],
+                "current_risk": scenario.get_current_risk()["name"],
+                "additional_controls": additional_controls,
+                "residual_impact": scenario.get_residual_impact()["name"],
+                "residual_proba": scenario.get_residual_proba()["name"],
+                "residual_risk": scenario.get_residual_risk()["name"],
+                "treatment": scenario.treatment,
+                "strength_of_knowledge": RiskScenario.DEFAULT_SOK_OPTIONS[
+                    scenario.strength_of_knowledge
+                ]["name"],
+            }
+
+            if ff_is_enabled("inherent_risk"):
+                entry["inherent_impact"] = scenario.get_inherent_impact()["name"]
+                entry["inherent_proba"] = scenario.get_inherent_proba()["name"]
+                entry["inherent_level"] = scenario.get_inherent_risk()["name"]
+
+            entries.append(entry)
+
+        df = pd.DataFrame(entries, columns=columns)
+
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False, sheet_name="Risk Assessment")
+            worksheet = writer.sheets["Risk Assessment"]
+
+            from openpyxl.styles import Alignment
+
+            # Apply text wrapping to description and control columns
+            wrap_columns = [
+                "name",
+                "description",
+                "existing_controls",
+                "additional_controls",
+            ]
+            wrap_indices = [
+                df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
+            ]
+
+            for col_idx in wrap_indices:
+                for row_idx in range(2, len(df) + 2):
+                    cell = worksheet.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(wrap_text=True)
+
+            # Adjust column widths
+            for idx, col in enumerate(df.columns, 1):
+                column_letter = worksheet.cell(row=1, column=idx).column_letter
+                if col in wrap_columns:
+                    worksheet.column_dimensions[column_letter].width = 40
+                else:
+                    worksheet.column_dimensions[column_letter].width = 20
+
+        buffer.seek(0)
+        response = HttpResponse(
+            buffer.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="risk_assessment_{pk}.xlsx"'
+        )
+
+        return response
 
     @action(detail=True, name="Get risk assessment PDF")
     def risk_assessment_pdf(self, request, pk):
@@ -2702,6 +2884,122 @@ class AppliedControlViewSet(BaseModelViewSet):
                 labels,
             ]
             writer.writerow(row)
+        return response
+
+    @action(detail=False, name="Export controls as XLSX")
+    def export_xlsx(self, request):
+        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, AppliedControl
+        )
+
+        entries = []
+        for control in (
+            AppliedControl.objects.filter(id__in=viewable_controls_ids)
+            .select_related("reference_control", "folder")
+            .prefetch_related("owner", "filtering_labels")
+        ):
+            ref_control_name = (
+                control.reference_control.name if control.reference_control else ""
+            )
+            ref_control_ref_id = (
+                control.reference_control.ref_id if control.reference_control else ""
+            )
+            effort_display = control.get_effort_display() if control.effort else ""
+            impact_display = (
+                control.get_control_impact_display() if control.control_impact else ""
+            )
+
+            cost_currency = ""
+            cost_build_fixed = ""
+            cost_build_people_days = ""
+            cost_run_fixed = ""
+            cost_run_people_days = ""
+            cost_amortization = ""
+
+            if control.cost:
+                cost_currency = control.cost.get("currency", "")
+                cost_amortization = control.cost.get("amortization_period", "")
+                build_costs = control.cost.get("build", {})
+                run_costs = control.cost.get("run", {})
+                cost_build_fixed = (
+                    build_costs.get("fixed_cost", "") if build_costs else ""
+                )
+                cost_build_people_days = (
+                    build_costs.get("people_days", "") if build_costs else ""
+                )
+                cost_run_fixed = run_costs.get("fixed_cost", "") if run_costs else ""
+                cost_run_people_days = (
+                    run_costs.get("people_days", "") if run_costs else ""
+                )
+
+            labels = ",".join([lbl.label for lbl in control.filtering_labels.all()])
+            owners = (
+                ",".join([o.email for o in control.owner.all()])
+                if control.owner.exists()
+                else ""
+            )
+
+            entry = {
+                "internal_id": control.id,
+                "ref_id": control.ref_id or "",
+                "name": control.name,
+                "description": control.description,
+                "reference_control_name": ref_control_name,
+                "reference_control_ref_id": ref_control_ref_id,
+                "category": control.category or "",
+                "csf_function": control.csf_function or "",
+                "folder": control.folder.name,
+                "status": control.status,
+                "start_date": control.start_date or "",
+                "eta": control.eta or "",
+                "expiry_date": control.expiry_date or "",
+                "priority": control.priority or "",
+                "effort": effort_display,
+                "impact": impact_display,
+                "cost_currency": cost_currency,
+                "cost_build_fixed": cost_build_fixed,
+                "cost_build_people_days": cost_build_people_days,
+                "cost_run_fixed": cost_run_fixed,
+                "cost_run_people_days": cost_run_people_days,
+                "cost_amortization_period": cost_amortization,
+                "owner": owners,
+                "labels": labels,
+            }
+            entries.append(entry)
+
+        df = pd.DataFrame(entries)
+        buffer = io.BytesIO()
+
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False)
+            worksheet = writer.sheets["Sheet1"]
+
+            wrap_columns = ["name", "description"]
+            wrap_indices = [
+                df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
+            ]
+
+            for col_idx in wrap_indices:
+                for row_idx in range(2, len(df) + 2):
+                    cell = worksheet.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(wrap_text=True)
+
+            for idx, col in enumerate(df.columns):
+                column_width = 20
+                if col in wrap_columns:
+                    column_width = 40
+                worksheet.column_dimensions[
+                    worksheet.cell(row=1, column=idx + 1).column_letter
+                ].width = column_width
+
+        buffer.seek(0)
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            'attachment; filename="applied_controls_export.xlsx"'
+        )
         return response
 
     @action(detail=False, methods=["get"])
@@ -3729,6 +4027,85 @@ class RiskScenarioViewSet(BaseModelViewSet):
             return HttpResponse(
                 status=500, content="An error occurred while generating the CSV export."
             )
+
+    @action(detail=False, name="Export risk scenarios as XLSX")
+    def export_xlsx(self, request):
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskScenario
+        )
+
+        entries = []
+        for scenario in RiskScenario.objects.filter(id__in=viewable_ids):
+            entry = {
+                "internal_id": scenario.id,
+                "ref_id": scenario.ref_id,
+                "name": scenario.name,
+                "description": scenario.description,
+                "risk_assessment": scenario.risk_assessment.name
+                if scenario.risk_assessment
+                else "",
+                "treatment": scenario.get_treatment_display(),
+                "inherent_probability": scenario.get_inherent_proba().get("name", "--"),
+                "inherent_impact": scenario.get_inherent_impact().get("name", "--"),
+                "inherent_level": scenario.get_inherent_risk().get("name", "--"),
+                "current_probability": scenario.get_current_proba().get("name", "--"),
+                "current_impact": scenario.get_current_impact().get("name", "--"),
+                "current_level": scenario.get_current_risk().get("name", "--"),
+                "residual_probability": scenario.get_residual_proba().get("name", "--"),
+                "residual_impact": scenario.get_residual_impact().get("name", "--"),
+                "residual_level": scenario.get_residual_risk().get("name", "--"),
+                "owners": ",".join([o.email for o in scenario.owner.all()]),
+                "threats": ",".join([t.name for t in scenario.threats.all()]),
+                "assets": ",".join([a.name for a in scenario.assets.all()]),
+                "vulnerabilities": ",".join(
+                    [v.name for v in scenario.vulnerabilities.all()]
+                ),
+                "applied_controls": ",".join(
+                    [c.name for c in scenario.applied_controls.all()]
+                ),
+                "existing_applied_controls": ",".join(
+                    [c.name for c in scenario.existing_applied_controls.all()]
+                ),
+                "qualifications": ",".join(
+                    [q.name for q in scenario.qualifications.all()]
+                ),
+            }
+            entries.append(entry)
+
+        df = pd.DataFrame(entries)
+        buffer = io.BytesIO()
+
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False)
+            worksheet = writer.sheets["Sheet1"]
+
+            wrap_columns = ["name", "description"]
+            wrap_indices = [
+                df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
+            ]
+
+            for col_idx in wrap_indices:
+                for row_idx in range(2, len(df) + 2):
+                    cell = worksheet.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(wrap_text=True)
+
+            for idx, col in enumerate(df.columns):
+                column_width = 20
+                if col in wrap_columns:
+                    column_width = 40
+                worksheet.column_dimensions[
+                    worksheet.cell(row=1, column=idx + 1).column_letter
+                ].width = column_width
+
+        buffer.seek(0)
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            'attachment; filename="risk_scenarios_export.xlsx"'
+        )
+        return response
 
     @action(detail=False, name="Get risk count per level")
     def count_per_level(self, request):
@@ -6453,6 +6830,82 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         return response
 
+    @action(detail=True, name="Get action plan XLSX")
+    def action_plan_xlsx(self, request, pk):
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+        requirement_assessments = compliance_assessment.get_requirement_assessments(
+            include_non_assessable=False
+        )
+        queryset = AppliedControl.objects.filter(
+            requirement_assessments__in=requirement_assessments
+        ).distinct()
+
+        serializer = ComplianceAssessmentActionPlanSerializer(
+            queryset, many=True, context={"pk": pk}
+        )
+
+        entries = []
+        for item in serializer.data:
+            entry = {
+                "name": item.get("name"),
+                "description": item.get("description"),
+                "category": item.get("category"),
+                "csf_function": item.get("csf_function"),
+                "priority": item.get("priority"),
+                "status": item.get("status"),
+                "eta": item.get("eta"),
+                "expiry_date": item.get("expiry_date"),
+                "effort": item.get("effort"),
+                "impact": item.get("impact"),
+                "cost": item.get("annual_cost"),
+                "covered_requirements": "\n".join(
+                    [ra.get("str") for ra in item.get("requirement_assessments")]
+                ),
+            }
+            entries.append(entry)
+
+        df = pd.DataFrame(entries)
+        buffer = io.BytesIO()
+
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False)
+            worksheet = writer.sheets["Sheet1"]
+
+            wrap_columns = ["name", "description", "covered_requirements"]
+            wrap_indices = [
+                df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
+            ]
+
+            for col_idx in wrap_indices:
+                for row_idx in range(2, len(df) + 2):
+                    cell = worksheet.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(wrap_text=True)
+
+            for idx, col in enumerate(df.columns):
+                column_width = 20
+                if col in wrap_columns:
+                    column_width = 40
+                worksheet.column_dimensions[
+                    worksheet.cell(row=1, column=idx + 1).column_letter
+                ].width = column_width
+
+        buffer.seek(0)
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="action_plan_{pk}.xlsx"'
+        )
+        return response
+
     @action(detail=True, name="Get action plan PDF")
     def action_plan_pdf(self, request, pk):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
@@ -8098,6 +8551,63 @@ class SecurityExceptionViewSet(BaseModelViewSet):
                 status=500, content="An error occurred while generating the CSV export."
             )
 
+    @action(detail=False, name="Export security exceptions as XLSX")
+    def export_xlsx(self, request):
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, SecurityException
+        )
+
+        entries = []
+        for exception in SecurityException.objects.filter(id__in=viewable_ids):
+            entry = {
+                "internal_id": exception.id,
+                "ref_id": exception.ref_id,
+                "name": exception.name,
+                "description": exception.description,
+                "severity": exception.get_severity_display(),
+                "status": exception.get_status_display(),
+                "expiration_date": exception.expiration_date,
+                "owners": ",".join([o.email for o in exception.owners.all()]),
+                "approver": exception.approver.email if exception.approver else "",
+                "folder": exception.folder.name if exception.folder else "",
+            }
+            entries.append(entry)
+
+        df = pd.DataFrame(entries)
+        buffer = io.BytesIO()
+
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False)
+            worksheet = writer.sheets["Sheet1"]
+
+            wrap_columns = ["name", "description"]
+            wrap_indices = [
+                df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
+            ]
+
+            for col_idx in wrap_indices:
+                for row_idx in range(2, len(df) + 2):
+                    cell = worksheet.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(wrap_text=True)
+
+            for idx, col in enumerate(df.columns):
+                column_width = 20
+                if col in wrap_columns:
+                    column_width = 40
+                worksheet.column_dimensions[
+                    worksheet.cell(row=1, column=idx + 1).column_letter
+                ].width = column_width
+
+        buffer.seek(0)
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            'attachment; filename="security_exceptions_export.xlsx"'
+        )
+        return response
+
     def get_queryset(self):
         return (
             super()
@@ -8882,6 +9392,79 @@ class IncidentViewSet(BaseModelViewSet):
             return HttpResponse(
                 status=500, content="An error occurred while generating the CSV export."
             )
+
+    @action(detail=False, name="Export incidents as XLSX")
+    def export_xlsx(self, request):
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Incident
+        )
+
+        entries = []
+        for incident in Incident.objects.filter(id__in=viewable_ids):
+            # Convert timezone-aware datetime to timezone-naive for Excel compatibility
+            reported_at = incident.reported_at
+            if (
+                reported_at
+                and hasattr(reported_at, "tzinfo")
+                and reported_at.tzinfo is not None
+            ):
+                reported_at = reported_at.replace(tzinfo=None)
+
+            entry = {
+                "internal_id": incident.id,
+                "ref_id": incident.ref_id,
+                "name": incident.name,
+                "description": incident.description,
+                "status": incident.get_status_display(),
+                "severity": incident.get_severity_display(),
+                "detection": incident.get_detection_display()
+                if incident.detection
+                else "",
+                "reported_at": reported_at,
+                "owners": ",".join([o.email for o in incident.owners.all()]),
+                "folder": incident.folder.name if incident.folder else "",
+                "qualifications": ",".join(
+                    [q.name for q in incident.qualifications.all()]
+                ),
+                "threats": ",".join([t.name for t in incident.threats.all()]),
+                "assets": ",".join([a.name for a in incident.assets.all()]),
+                "entities": ",".join([e.name for e in incident.entities.all()]),
+                "link": incident.link,
+            }
+            entries.append(entry)
+
+        df = pd.DataFrame(entries)
+        buffer = io.BytesIO()
+
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False)
+            worksheet = writer.sheets["Sheet1"]
+
+            wrap_columns = ["name", "description"]
+            wrap_indices = [
+                df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
+            ]
+
+            for col_idx in wrap_indices:
+                for row_idx in range(2, len(df) + 2):
+                    cell = worksheet.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(wrap_text=True)
+
+            for idx, col in enumerate(df.columns):
+                column_width = 20
+                if col in wrap_columns:
+                    column_width = 40
+                worksheet.column_dimensions[
+                    worksheet.cell(row=1, column=idx + 1).column_letter
+                ].width = column_width
+
+        buffer.seek(0)
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = 'attachment; filename="incidents_export.xlsx"'
+        return response
 
     def perform_update(self, serializer):
         previous_instance = self.get_object()
