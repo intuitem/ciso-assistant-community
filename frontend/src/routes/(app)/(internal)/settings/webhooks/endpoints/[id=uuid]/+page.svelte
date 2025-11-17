@@ -31,7 +31,6 @@
 	data={data?.form}
 	dataType="form"
 	validators={zod(webhookEndpointSchema)}
-	debug
 >
 	{#snippet children({ form })}
 		<Checkbox {form} field="is_active" label={m.isActive()} />
