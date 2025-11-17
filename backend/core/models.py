@@ -626,6 +626,7 @@ class LibraryUpdater:
 
             # Update compliance assessments score boundaries
             compliance_assessments_to_update = []
+            ca_bounds = {}
             for ca in compliance_assessments:
                 # preserve user overrides: update only if CA still equals previous framework defaults
                 still_on_prev_defaults = (
