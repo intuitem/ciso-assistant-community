@@ -559,7 +559,9 @@ class LibraryUpdater:
                 for threat in Threat.objects.filter(library__in=involved_libraries):
                     objects_tracked[threat.urn.lower()] = threat
 
-                for rc in ReferenceControl.objects.filter(library__in=involved_libraries):
+                for rc in ReferenceControl.objects.filter(
+                    library__in=involved_libraries
+                ):
                     objects_tracked[rc.urn.lower()] = rc
 
                 compliance_assessments = [
@@ -690,7 +692,9 @@ class LibraryUpdater:
                         requirement_node_object = existing_requirement_node_objects[urn]
                         for key, value in requirement_node_dict.items():
                             setattr(requirement_node_object, key, value)
-                        requirement_node_objects_to_update.append(requirement_node_object)
+                        requirement_node_objects_to_update.append(
+                            requirement_node_object
+                        )
                     else:
                         requirement_node_object = RequirementNode.objects.create(
                             urn=urn,
@@ -715,7 +719,8 @@ class LibraryUpdater:
                         if (
                             ra.is_scored
                             and ra.score is not None
-                            and ra.compliance_assessment in compliance_assessments_to_update
+                            and ra.compliance_assessment
+                            in compliance_assessments_to_update
                         ):
                             default_min = (
                                 0
@@ -753,14 +758,18 @@ class LibraryUpdater:
                                     # Scale to new range
                                     scaled = ca_min + (normalized * (ca_max - ca_min))
                                     # Round to int and clamp into [ca_min, ca_max]
-                                    ra.score = max(min(int(round(scaled)), ca_max), ca_min)
+                                    ra.score = max(
+                                        min(int(round(scaled)), ca_max), ca_min
+                                    )
                                     requirement_assessment_objects_to_update.append(ra)
                                 else:
                                     # If old range was invalid, clamp instead
                                     clamped = min(max(ra.score, ca_min), ca_max)
                                     if clamped != ra.score:
                                         ra.score = clamped
-                                        requirement_assessment_objects_to_update.append(ra)
+                                        requirement_assessment_objects_to_update.append(
+                                            ra
+                                        )
 
                             else:  # strategy == 'clamp' or default behavior
                                 # Strategy 3: Clamp to new boundaries (comportement par défaut)
@@ -776,7 +785,9 @@ class LibraryUpdater:
 
                         answers = ra.answers or {}
                         old_answers = ra.answers or {}
-                        answers = dict(old_answers) if isinstance(old_answers, dict) else {}
+                        answers = (
+                            dict(old_answers) if isinstance(old_answers, dict) else {}
+                        )
 
                         # Remove answers corresponding to questions that have been removed
                         for urn in list(answers.keys()):
@@ -810,13 +821,16 @@ class LibraryUpdater:
                             elif type == "unique_choice":
                                 # If the answer does not match a valid choice, reset it to None
                                 valid_choices = {
-                                    choice["urn"] for choice in question.get("choices", [])
+                                    choice["urn"]
+                                    for choice in question.get("choices", [])
                                 }
                                 if isinstance(answer_val, list):
                                     answers[urn] = None
                                 else:
                                     answers[urn] = (
-                                        answer_val if answer_val in valid_choices else None
+                                        answer_val
+                                        if answer_val in valid_choices
+                                        else None
                                     )
 
                             elif type == "text":
