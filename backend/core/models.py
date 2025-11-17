@@ -579,6 +579,7 @@ class LibraryUpdater:
 
             requirement_assessment_objects_to_create = []
             requirement_assessment_objects_to_update = []
+            answers_changed_ca_ids = set()
             requirement_node_objects_to_update = []
             order_id = 0
             all_fields_to_update = set()
@@ -751,6 +752,7 @@ class LibraryUpdater:
                                 scaled = ca_min + (normalized * (ca_max - ca_min))
                                 # Round to int and clamp into [ca_min, ca_max]
                                 ra.score = max(min(int(round(scaled)), ca_max), ca_min)
+                                requirement_assessment_objects_to_update.append(ra)
                             else:
                                 # If old range was invalid, clamp instead
                                 clamped = min(max(ra.score, ca_min), ca_max)
@@ -771,6 +773,8 @@ class LibraryUpdater:
                         continue
 
                     answers = ra.answers or {}
+                    old_answers = ra.answers or {}
+                    answers = dict(old_answers) if isinstance(old_answers, dict) else {}
 
                     # Remove answers corresponding to questions that have been removed
                     for urn in list(answers.keys()):
@@ -836,9 +840,10 @@ class LibraryUpdater:
                                 except Exception:
                                     answers[urn] = None
 
-                    ra.answers = answers
-                    if ra not in requirement_assessment_objects_to_update:
+                    if answers != old_answers:
+                        ra.answers = answers
                         requirement_assessment_objects_to_update.append(ra)
+                        answers_changed_ca_ids.add(ra.compliance_assessment_id)
 
                 # update threats linked to the requirement_node
                 for threat_urn in requirement_node.get("threats", []):
@@ -884,13 +889,8 @@ class LibraryUpdater:
                 )
                 # Keep selected_implementation_groups consistent for dynamic frameworks
                 if new_framework.is_dynamic():
-                    impacted_ca_ids = {
-                        ra.compliance_assessment_id
-                        for ra in requirement_assessment_objects_to_update
-                        if ra.answers is not None  # answers potentially changed
-                    }
                     for ca in ComplianceAssessment.objects.filter(
-                        id__in=impacted_ca_ids
+                        id__in=answers_changed_ca_ids
                     ):
                         update_selected_implementation_groups(ca)
 

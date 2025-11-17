@@ -117,15 +117,17 @@
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/loaded-libraries/{library.id}?/update"
-				use:enhance={(form) => {
+				action={`/loaded-libraries/${library.id}?/update`}
+				use:enhance={() => {
 					loading.form = true;
 					loading.library = library.urn;
 					return async ({ result, update }) => {
 						loading.form = false;
 						loading.library = '';
-						await update();
-						if (result.data.error === 'score_change_detected') {
+						if (result.type !== 'error') {
+							await update();
+						}
+						if (result.type === 'failure' && result.data?.error === 'score_change_detected') {
 							choicesModal(result.data.choices);
 						}
 						Object.values($tableHandlers).forEach((handler) => {

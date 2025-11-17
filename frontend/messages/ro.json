@@ -979,7 +979,7 @@
 	"viewLess": "Vizualizați mai puțin",
 	"scoreChangeDetected": "Schimbare de scor detectată",
 	"scoreChangeDetectedDescription": "A fost detectată o schimbare în scoruri. Alegeți cum să gestionați actualizările scorurilor pentru auditurile asociate.",
-	"clamp": "Clamp",
+	"clamp": "Limitare",
 	"clampDescription": "Restricționați valoarea în limitele definite",
 	"reset": "Resetare",
 	"resetDescription": "Resetați scorurile auditurilor",
