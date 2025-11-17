@@ -212,13 +212,16 @@ export const actions: Actions = {
 						? [...idList, event.params.id]
 						: idList.filter((id) => id !== event.params.id);
 
-					await event.fetch(endpoint, {
+					const patchReq = await event.fetch(endpoint, {
 						method: 'PATCH',
 						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({
 							[field]: newIdList
 						})
 					});
+					if (!patchReq.ok) {
+						console.warn(`Failed to update object via: ${endpoint}`);
+					}
 				})
 			);
 		} else {
