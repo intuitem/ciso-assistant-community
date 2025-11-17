@@ -137,6 +137,7 @@ from .models import *
 from .serializers import *
 
 from .models import Severity
+from . import dora
 
 from serdes.utils import (
     get_domain_export_objects,
@@ -676,6 +677,10 @@ class AssetFilter(GenericFilterSet):
             "filtering_labels",
             "asset_class",
             "personal_data",
+            "is_business_function",
+            "dora_licenced_activity",
+            "dora_criticality_assessment",
+            "dora_discontinuing_impact",
         ]
 
 
@@ -851,6 +856,21 @@ class AssetViewSet(BaseModelViewSet):
                 for ac in AssetClass.objects.filter(assets__isnull=False).distinct()
             ]
         )
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get DORA licensed activity choices")
+    def dora_licenced_activity(self, request):
+        return Response(dict(dora.DORA_LICENSED_ACTIVITY_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get DORA criticality assessment choices")
+    def dora_criticality_assessment(self, request):
+        return Response(dict(dora.DORA_FUNCTION_CRITICALITY_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get DORA discontinuing impact choices")
+    def dora_discontinuing_impact(self, request):
+        return Response(dict(dora.DORA_DISCONTINUING_IMPACT_CHOICES))
 
     @action(detail=True, name="Get asset write data")
     def object(self, request, pk):
@@ -5830,6 +5850,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "owner",
         "status",
         "expiry_date",
+        "contracts",
     ]
 
     @action(detail=False, name="Get all evidences owners")

@@ -293,7 +293,7 @@ class MappingEngine:
                     == source_audit.get("max_score")
                 ):
                     # Handle collision: merge m2m fields if target already exists
-                    if dst in target_audit:
+                    if dst in target_audit["requirement_assessments"]:
                         for m2m_field in self.m2m_fields:
                             if m2m_field in src_assessment:
                                 existing = set(
@@ -323,7 +323,10 @@ class MappingEngine:
                 else:
                     for field in self.fields_to_map:
                         if field not in ["score", "is_scored"]:
-                            if field == "result" and dst in target_audit:
+                            if (
+                                field == "result"
+                                and dst in target_audit["requirement_assessments"]
+                            ):
                                 # Keep the most restrictive result
                                 existing_result = target_audit[
                                     "requirement_assessments"
@@ -343,7 +346,7 @@ class MappingEngine:
                     for m2m_field in self.m2m_fields:
                         if m2m_field in src_assessment:
                             if (
-                                dst in target_audit
+                                dst in target_audit["requirement_assessments"]
                                 and m2m_field
                                 in target_audit["requirement_assessments"][dst]
                             ):
@@ -372,7 +375,7 @@ class MappingEngine:
                     "applied_controls", []
                 )
                 if (
-                    dst in target_audit
+                    dst in target_audit["requirement_assessments"]
                     and "applied_controls"
                     in target_audit["requirement_assessments"][dst]
                 ):
@@ -398,7 +401,7 @@ class MappingEngine:
                             m2m_field, []
                         )
                         if (
-                            dst in target_audit
+                            dst in target_audit["requirement_assessments"]
                             and m2m_field
                             in target_audit["requirement_assessments"][dst]
                         ):
@@ -416,7 +419,7 @@ class MappingEngine:
 
                 # Handle result: keep the most restrictive
                 if (
-                    dst in target_audit
+                    dst in target_audit["requirement_assessments"]
                     and "result" in target_audit["requirement_assessments"][dst]
                 ):
                     existing_result = target_audit["requirement_assessments"][dst][
