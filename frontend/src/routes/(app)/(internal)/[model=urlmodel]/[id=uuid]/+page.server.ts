@@ -23,6 +23,7 @@ import type { PageServerLoad } from './$types';
 interface SelectableModel {
 	backendViewset?: string;
 	field: string;
+	fieldName: string;
 	optionsEndpoint: string;
 	updatedObjectName: string;
 }
@@ -33,11 +34,13 @@ const SELECT_MAP: Record<string, Record<string, SelectableModel>> = {
 		evidences: {
 			field: 'evidences',
 			optionsEndpoint: 'evidences',
+			fieldName: m.evidences(),
 			updatedObjectName: m.appliedControl()
 		},
 		'task-templates': {
 			backendViewset: 'task-templates',
 			field: 'applied_controls',
+			fieldName: m.tasks(),
 			optionsEndpoint: 'task-templates',
 			updatedObjectName: m.tasks()
 		}

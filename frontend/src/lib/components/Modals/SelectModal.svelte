@@ -19,9 +19,10 @@
 		form: SuperValidated<AnyZodObject>;
 		optionsEndpoint: string;
 		field: string;
+		fieldName: string;
 	}
 
-	let { parent, form, field, optionsEndpoint }: Props = $props();
+	let { parent, form, field, fieldName, optionsEndpoint }: Props = $props();
 
 	const schema = z.object({
 		urlModel: z.string(),
@@ -70,7 +71,7 @@
 				{optionsEndpoint}
 				optionsExtraFields={[['folder', 'str']]}
 				{field}
-				label={m.evidences()}
+				label={fieldName}
 			/>
 			<button class="btn preset-filled-primary-500 font-semibold w-full" type="submit"
 				>{m.save()}</button

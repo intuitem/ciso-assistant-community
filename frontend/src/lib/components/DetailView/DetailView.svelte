@@ -15,7 +15,6 @@
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
 	import SelectModal from '../Modals/SelectModal.svelte';
-	import { z } from 'zod';
 
 	import { Tabs, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
@@ -303,7 +302,7 @@
 	let openStateRA = $state(false);
 
 	function modalSelectForm(urlmodel: string): void {
-		const { field, optionsEndpoint } = data.modelsToSelect[urlmodel] ?? {};
+		const { field, fieldName, optionsEndpoint } = data.modelsToSelect[urlmodel] ?? {};
 
 		if (!data.selectForms[urlmodel]) {
 			console.error('No select form found for', urlmodel);
@@ -318,6 +317,7 @@
 				form: selectForm,
 				model: urlmodel,
 				field: field,
+				fieldName: fieldName,
 				optionsEndpoint: optionsEndpoint
 			}
 		};
