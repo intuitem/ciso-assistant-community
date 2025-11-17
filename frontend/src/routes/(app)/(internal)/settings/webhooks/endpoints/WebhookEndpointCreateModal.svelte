@@ -65,7 +65,7 @@
 			action={formAction}
 		>
 			{#snippet children({ form })}
-				<Checkbox {form} field="is_active" label={m.isActive()} />
+				<Checkbox {form} field="is_active" label={m.isActive()} checked />
 				<TextField {form} field="name" label={m.name()} data-focusindex="0" />
 				<MarkdownField {form} field="description" label={m.description()} data-focusindex="1" />
 				<TextField {form} field="url" label={m.url()} data-focusindex="2" autocomplete="off" />
