@@ -174,7 +174,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     quotation_method = models.CharField(
         max_length=100,
         choices=QuotationMethod.choices,
-        default=QuotationMethod.MANUAL,
+        default=QuotationMethod.EXPRESS,
         verbose_name=_("Quotation method"),
         help_text=_(
             "Method used to quote the study: 'manual' for manual likelihood assessment, 'express' for automatic propagation from operating modes"
