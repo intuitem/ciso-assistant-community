@@ -1,3 +1,4 @@
+from sqlite3 import OperationalError, ProgrammingError
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
@@ -159,18 +160,28 @@ MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
 
-def get_mapping_max_depth():
-    """Get mapping max depth from general settings, with fallback to default."""
-    general_settings = GlobalSettings.objects.filter(name="general").first()
-    if general_settings and "mapping_max_depth" in general_settings.value:
-        return general_settings.value.get("mapping_max_depth", 3)
-    return 3
-
-
-MAPPING_MAX_DEPTH = get_mapping_max_depth()
+MAPPING_MAX_DEPTH = 3
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
+
+
+def get_mapping_max_depth():
+    """Get mapping max depth from general settings at runtime; safe during migrations."""
+    try:
+        gs = GlobalSettings.objects.filter(name="general").only("value").first()
+        if not gs or not isinstance(getattr(gs, "value", None), dict):
+            return MAPPING_MAX_DEPTH
+        raw = gs.value.get("mapping_max_depth", MAPPING_MAX_DEPTH)
+        try:
+            val = int(raw)
+        except (TypeError, ValueError):
+            return MAPPING_MAX_DEPTH
+        # Clamp to UI constraints
+        return max(2, min(5, val))
+    except (OperationalError, ProgrammingError):
+        # DB not ready (e.g., migrate, makemigrations)
+        return MAPPING_MAX_DEPTH
 
 
 class GenericFilterSet(df.FilterSet):

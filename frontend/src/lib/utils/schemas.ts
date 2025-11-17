@@ -481,7 +481,7 @@ export const GeneralSettingsSchema = z.object({
 	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
 	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
 	daily_rate: z.number().default(500).optional(),
-	mapping_max_depth: z.number().min(2).max(5).default(3).optional()
+	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
