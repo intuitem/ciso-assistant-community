@@ -1513,22 +1513,94 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 for operational_scenario in ebios_rm_study.operational_scenarios.all()
                 if operational_scenario.is_selected
             ]:
+                # Build comprehensive description from EBIOS RM components
+                description_parts = []
+
+                # Feared events
+                ro_to = operational_scenario.ro_to
+                feared_events = ro_to.feared_events.filter(is_selected=True)
+                if feared_events.exists():
+                    feared_events_list = []
+                    for fe in feared_events:
+                        gravity_display = fe.get_gravity_display()
+                        gravity_text = (
+                            f" [{_('Gravity').capitalize()}: {gravity_display['name']}]"
+                            if gravity_display["value"] >= 0
+                            else ""
+                        )
+                        fe_text = f"- {fe.name}{gravity_text}"
+                        if fe.description:
+                            fe_text += f": {fe.description}"
+                        feared_events_list.append(fe_text)
+                    feared_events_text = (
+                        f"**{_('Feared events').capitalize()}:**\n"
+                        + "\n".join(feared_events_list)
+                    )
+                    description_parts.append(feared_events_text)
+
+                # Risk origin and target objective
+                risk_origin_name = (
+                    ro_to.risk_origin.get_name_translated
+                    if hasattr(ro_to.risk_origin, "get_name_translated")
+                    else str(ro_to.risk_origin)
+                )
+                ro_to_text = f"**{_('Risk origin').capitalize()}:** {risk_origin_name}\n**{_('Target objective').capitalize()}:** {ro_to.target_objective}"
+                description_parts.append(ro_to_text)
+
+                # Strategic scenario
+                strategic_scenario = operational_scenario.attack_path.strategic_scenario
+                if strategic_scenario.description:
+                    description_parts.append(
+                        f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}\n{strategic_scenario.description}"
+                    )
+                elif strategic_scenario.name:
+                    description_parts.append(
+                        f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}"
+                    )
+
+                # Attack path
+                attack_path = operational_scenario.attack_path
+                if attack_path.description:
+                    description_parts.append(
+                        f"**{_('Attack path').capitalize()}:** {attack_path.name}\n{attack_path.description}"
+                    )
+                elif attack_path.name:
+                    description_parts.append(
+                        f"**{_('Attack path').capitalize()}:** {attack_path.name}"
+                    )
+
+                # Operating modes
+                operating_modes = operational_scenario.operating_modes.all()
+                if operating_modes.exists():
+                    operating_modes_list = []
+                    for om in operating_modes:
+                        likelihood_display = om.get_likelihood_display()
+                        likelihood_text = (
+                            f" [{_('Likelihood').capitalize()}: {likelihood_display['name']}]"
+                            if likelihood_display["value"] >= 0
+                            else ""
+                        )
+                        om_text = f"- {om.name}{likelihood_text}"
+                        if om.description:
+                            om_text += f": {om.description}"
+                        operating_modes_list.append(om_text)
+                    operating_modes_text = (
+                        f"**{_('operating modes').capitalize()}:**\n"
+                        + "\n".join(operating_modes_list)
+                    )
+                    description_parts.append(operating_modes_text)
+                elif operational_scenario.operating_modes_description:
+                    description_parts.append(
+                        f"**{_('operating modes').capitalize()}:**\n{operational_scenario.operating_modes_description}"
+                    )
+
                 risk_scenario = RiskScenario(
                     risk_assessment=instance,
                     name=operational_scenario.name,
                     ref_id=operational_scenario.ref_id
                     if operational_scenario.ref_id
                     else RiskScenario.get_default_ref_id(instance),
-                    description="\n\n".join(
-                        filter(
-                            None,
-                            [
-                                operational_scenario.attack_path.strategic_scenario.description,
-                                operational_scenario.attack_path.description,
-                                operational_scenario.operating_modes_description,
-                            ],
-                        )
-                    ),
+                    description="\n\n".join(description_parts),
                 )
                 if ff_is_enabled("inherent_risk"):
                     risk_scenario.inherent_proba = operational_scenario.likelihood
