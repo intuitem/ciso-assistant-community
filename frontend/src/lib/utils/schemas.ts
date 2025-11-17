@@ -1377,7 +1377,7 @@ export const composerSchema = z.object({
 export const webhookEndpointSchema = z.object({
 	...NameDescriptionMixin,
 	url: z.string().url(),
-	event_types: z.array(z.string().min(1)),
+	event_types: z.string().array().nonempty(),
 	is_active: z.boolean().default(true),
 	secret: z.string().min(1).optional()
 });
