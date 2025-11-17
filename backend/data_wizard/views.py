@@ -1595,6 +1595,11 @@ class LoadFileView(APIView):
                 record.get("residual_proba", ""), matrix_mappings["probability"]
             )
 
+            logger.debug(
+                f"Risk scenario '{name}': current_proba={current_proba}, current_impact={current_impact}, "
+                f"residual_proba={residual_proba}, residual_impact={residual_impact}"
+            )
+
             # Prepare risk scenario data
             # Note: inherent_level, current_level, and residual_level will be computed automatically
             scenario_data = {
@@ -1648,15 +1653,26 @@ class LoadFileView(APIView):
 
     def _map_risk_value(self, value, mapping_dict):
         """Map a risk value label to its numeric value using the mapping dictionary"""
-        if not value or not isinstance(value, str):
+        if not value:
             return -1
+
+        # Convert to string if needed (pandas may read Excel cells as numbers, etc.)
+        original_value = value
+        if not isinstance(value, str):
+            value = str(value)
 
         # Try exact match first
         clean_value = value.strip().lower()
         if clean_value in mapping_dict:
-            return mapping_dict[clean_value]
+            mapped_value = mapping_dict[clean_value]
+            logger.debug(f"Mapped risk value '{original_value}' -> {mapped_value}")
+            return mapped_value
 
         # If no match found, return -1 (undefined)
+        logger.warning(
+            f"Failed to map risk value '{original_value}' (type: {type(original_value).__name__}). "
+            f"Available values: {list(mapping_dict.keys())}"
+        )
         return -1
 
     def _link_controls_to_scenario(
