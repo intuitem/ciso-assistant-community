@@ -13,6 +13,7 @@ showNotification.subscribe((val) => {
 });
 
 export const pageTitle = writable('');
+export const modelName = writable('');
 export const clientSideToast = writable(undefined);
 
 const requirementAssessmentsList: string[] = [];

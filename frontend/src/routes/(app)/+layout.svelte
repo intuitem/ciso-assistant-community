@@ -9,9 +9,10 @@
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
-	import { pageTitle, clientSideToast } from '$lib/utils/stores';
+	import { pageTitle, modelName, clientSideToast } from '$lib/utils/stores';
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
 
 	import type { PageData, ActionData } from './$types';
@@ -47,6 +48,10 @@
 	}: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
+
+	// Display title and model name from either page data or manual store setting
+	const displayTitle = $derived($page.data?.title || $pageTitle);
+	const displayModelName = $derived($page.data?.modelVerboseName || $modelName);
 
 	// Initialize external link interceptor
 	$effect(() => {
@@ -108,12 +113,13 @@
 				class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
 				id="page-title"
 			>
-				{safeTranslate($pageTitle)}
+				{safeTranslate(displayTitle)}
 			</div>
-      <div class="text-slate-500">
-
-        <span>{data.model}</span><span><i class="ml-2 "></i>tooltip to explain the model</span>
-      </div>
+			{#if displayModelName}
+				<div class="text-sm text-slate-500 font-medium">
+					{safeTranslate(displayModelName)}
+				</div>
+			{/if}
 			{#if data?.user?.is_admin}
 				<button
 					onclick={modalQuickStart}
