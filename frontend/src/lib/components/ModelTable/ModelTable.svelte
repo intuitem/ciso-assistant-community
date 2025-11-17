@@ -604,8 +604,6 @@
 															{:else}
 																{value.str ?? '-'}
 															{/if}
-														{:else if value && value.name}
-															{value.name}
 														{:else if value && value.hexcolor}
 															<p
 																class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
@@ -647,6 +645,8 @@
 															</div>
 														{:else if key === 'icon_fa_class'}
 															<i class="text-lg fa {value}"></i>
+														{:else if value && value.name}
+															{value.name}
 														{:else}
 															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
 															{#if value?.length > 300}
