@@ -227,11 +227,11 @@
 		modalStore.trigger(modal);
 	}
 
-	function modalSendInvitation(id: string, name: string, action: string): void {
+	function modalSendInvitation(id: string, name: string, action: string, email?: string): void {
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
-				_form: { id: id, urlmodel: getModelInfo('representatives').urlModel },
+				_form: { id: id, urlmodel: getModelInfo('representatives').urlModel, email: email },
 				id: id,
 				debug: false,
 				URLModel: getModelInfo('representatives').urlModel,
@@ -241,7 +241,6 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: m.confirmModalTitle(),
 			body: `${m.confirmModalMessage()}: ${name}?`
 		};
@@ -656,7 +655,13 @@
 				{#if data.urlModel === 'representatives'}
 					<button
 						class="btn preset-filled-ghost-500 mr-2"
-						onclick={() => modalSendInvitation(data.data.id, data.data.str || data.data.name, '?/resend-invitation')}
+						onclick={() =>
+							modalSendInvitation(
+								data.data.id,
+								data.data.str || data.data.name,
+								'?/iam/send-invitation',
+								data.data.email
+							)}
 						data-testid="send-invitation-button"
 					>
 						<i class="fa-solid fa-envelope mr-2"></i>

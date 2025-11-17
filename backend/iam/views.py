@@ -239,7 +239,7 @@ class CurrentUserView(views.APIView):
             "preferences": request.user.preferences,
         }
         return Response(res_data, status=HTTP_200_OK)
-
+    
 
 class SessionTokenView(views.APIView):
     """
@@ -265,6 +265,31 @@ class SessionTokenView(views.APIView):
         login(request, user)
         session_token = request.session.session_key
         return Response({"token": session_token})
+
+class SendInvtationView(views.APIView):
+    permission_classes = [permissions.AllowAny]
+
+    @method_decorator(ensure_csrf_cookie)
+    def post(self, request):
+        email = request.data["email"]  # type: ignore
+        associated_user = User.objects.filter(email=email).first()
+        if EMAIL_HOST or EMAIL_HOST_RESCUE:
+            if associated_user is not None and associated_user.is_local:
+                try:
+                    associated_user.mailing(
+                        email_template_name="registration/first_connection_email.html",
+                        subject=_("CISO Assistant: Invitation"),
+                    )
+                    print("Sending reset mail to", email)
+                except Exception as e:
+                    print(e)
+            return Response(status=HTTP_202_ACCEPTED)
+        return Response(
+            data={
+                "error": "Email server not configured, please contact your administrator"
+            },
+            status=HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 
 class PasswordResetView(views.APIView):
