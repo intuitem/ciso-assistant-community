@@ -1733,10 +1733,36 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             processed_os_ids.add(operational_scenario.id)
 
             # Try to find existing risk scenario for this operational scenario
+            risk_scenario = None
+
+            # First, try to find by operational_scenario link
             try:
                 risk_scenario = risk_assessment.risk_scenarios.get(
                     operational_scenario=operational_scenario
                 )
+            except RiskScenario.DoesNotExist:
+                # Fallback: try to match by name (for backward compatibility with old data)
+                # Remove [ARCHIVED] prefix when matching
+                clean_name = operational_scenario.name.replace("[ARCHIVED] ", "")
+                try:
+                    risk_scenario = risk_assessment.risk_scenarios.get(
+                        operational_scenario__isnull=True, name=clean_name
+                    )
+                    # Establish the link for this old risk scenario
+                    risk_scenario.operational_scenario = operational_scenario
+                except RiskScenario.DoesNotExist:
+                    # Also try matching with [ARCHIVED] prefix
+                    try:
+                        risk_scenario = risk_assessment.risk_scenarios.get(
+                            operational_scenario__isnull=True,
+                            name=f"[ARCHIVED] {clean_name}",
+                        )
+                        # Establish the link for this old risk scenario
+                        risk_scenario.operational_scenario = operational_scenario
+                    except RiskScenario.DoesNotExist:
+                        pass
+
+            if risk_scenario:
                 # Update existing risk scenario - remove [ARCHIVED] prefix if present
                 risk_scenario.name = operational_scenario.name.replace(
                     "[ARCHIVED] ", ""
@@ -1770,8 +1796,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
                 updated_count += 1
 
-            except RiskScenario.DoesNotExist:
-                # Create new risk scenario
+            else:
+                # Create new risk scenario (no existing match found)
                 risk_scenario = RiskScenario(
                     risk_assessment=risk_assessment,
                     operational_scenario=operational_scenario,
