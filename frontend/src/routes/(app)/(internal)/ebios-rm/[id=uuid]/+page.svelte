@@ -149,21 +149,19 @@
 			const riskAssessment = data.data.last_risk_assessment;
 			const riskAssessmentName = riskAssessment.str || riskAssessment.name || 'Existing Risk Assessment';
 
-			// Show choice modal - using simple text formatting
+			// Show choice modal - using i18n strings
 			const choiceModal: ModalSettings = {
 				type: 'confirm',
-				title: 'Risk Assessment Options',
-				body: `A risk assessment already exists for this EBIOS RM study: "${riskAssessmentName}"
+				title: m.ebiosRmSyncModalTitle(),
+				body: `${m.ebiosRmSyncModalBody({ name: riskAssessmentName })}
 
-Would you like to:
+  • ${m.ebiosRmSyncExisting()}
+    ${m.ebiosRmSyncExistingDescription()}
 
-  • Sync Existing
-    Update the existing risk assessment with current EBIOS RM data (preserves your work)
-
-  • Create New
-    Create a new risk assessment revision`,
-				buttonTextConfirm: 'Sync Existing',
-				buttonTextCancel: 'Create New',
+  • ${m.ebiosRmCreateNew()}
+    ${m.ebiosRmCreateNewDescription()}`,
+				buttonTextConfirm: m.ebiosRmSyncExisting(),
+				buttonTextCancel: m.ebiosRmCreateNew(),
 				response: (confirmed: boolean) => {
 					if (confirmed) {
 						// Sync existing - navigate to sync

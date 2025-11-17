@@ -2670,5 +2670,11 @@
 	"webhookEndpointUrlHelpText": "L'URL où l'application recevra les webhooks entrants du service tiers.",
 	"webhookSecret": "Secret webhook",
 	"webhookSecretAlreadySetHelpText": "Le secret webhook est déjà défini.",
-	"webhookUrl": "URL webhook"
+	"webhookUrl": "URL webhook",
+	"ebiosRmSyncModalTitle": "Options d'analyse de risque",
+	"ebiosRmSyncModalBody": "Une analyse de risque existe déjà pour cette étude EBIOS RM : \"{name}\"\n\nQue souhaitez-vous faire :",
+	"ebiosRmSyncExisting": "Synchroniser l'existante",
+	"ebiosRmSyncExistingDescription": "Mettre à jour l'analyse de risque existante avec les données EBIOS RM actuelles (préserve votre travail)",
+	"ebiosRmCreateNew": "Créer une nouvelle",
+	"ebiosRmCreateNewDescription": "Créer une nouvelle révision de l'analyse de risque"
 }

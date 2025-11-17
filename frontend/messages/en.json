@@ -2670,5 +2670,11 @@
 	"doraAlternativeProviders": "Alternative Providers",
 	"doraAttributes": "DORA Attributes",
 	"doraAssessment": "DORA Assessment",
-	"moreOnTerminologiesHelpText": "Hint: more options can be defined through terminologies"
+	"moreOnTerminologiesHelpText": "Hint: more options can be defined through terminologies",
+	"ebiosRmSyncModalTitle": "Risk Assessment Options",
+	"ebiosRmSyncModalBody": "A risk assessment already exists for this EBIOS RM study: \"{name}\"\n\nWould you like to:",
+	"ebiosRmSyncExisting": "Sync Existing",
+	"ebiosRmSyncExistingDescription": "Update the existing risk assessment with current EBIOS RM data (preserves your work)",
+	"ebiosRmCreateNew": "Create New",
+	"ebiosRmCreateNewDescription": "Create a new risk assessment revision"
 }
