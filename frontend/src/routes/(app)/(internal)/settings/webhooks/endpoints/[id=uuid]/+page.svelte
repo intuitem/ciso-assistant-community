@@ -6,8 +6,9 @@
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { webhookEndpointSchema } from '$lib/utils/schemas';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import EventTypesSelect from '../EventTypesSelect.svelte';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		data: PageData;
@@ -17,6 +18,12 @@
 
 	const formStore = data.form?.form;
 	let showSecretField = $state(!data.webhookEndpoint?.has_secret);
+
+	let eventTypeOptions = $state([]);
+
+	onMount(async () => {
+		eventTypeOptions = await fetch('/settings/webhooks/event-types').then((res) => res.json());
+	});
 </script>
 
 <SuperForm
@@ -24,6 +31,7 @@
 	data={data?.form}
 	dataType="form"
 	validators={zod(webhookEndpointSchema)}
+	debug
 >
 	{#snippet children({ form })}
 		<Checkbox {form} field="is_active" label={m.isActive()} />
@@ -50,21 +58,11 @@
 				>
 			</div>
 		{/if}
-		<AutocompleteSelect
-			{form}
-			field="event_types"
-			label={m.events()}
-			optionsEndpoint="settings/webhooks/event-types"
-			optionsLabelField="label"
-			optionsValueField="value"
-			multiple
-		/>
-		<p class="">
-			<button
-				class="btn preset-filled-primary-500 font-semibold w-full"
-				data-testid="login-btn"
-				type="submit">{m.save()}</button
-			>
-		</p>
+		<EventTypesSelect {form} field="event_types" label={m.events()} options={eventTypeOptions} />
+		<button
+			class="btn preset-filled-primary-500 font-semibold w-full"
+			data-testid="login-btn"
+			type="submit">{m.save()}</button
+		>
 	{/snippet}
 </SuperForm>
