@@ -147,7 +147,8 @@
 		// Check if a risk assessment already exists
 		if (data.data.last_risk_assessment) {
 			const riskAssessment = data.data.last_risk_assessment;
-			const riskAssessmentName = riskAssessment.str || riskAssessment.name || 'Existing Risk Assessment';
+			const riskAssessmentName =
+				riskAssessment.str || riskAssessment.name || 'Existing Risk Assessment';
 
 			// Show choice modal - using i18n strings
 			const choiceModal: ModalSettings = {
@@ -241,7 +242,10 @@
 		>
 			{#snippet addRiskAnalysis()}
 				<div>
-					<button class="flex flex-col text-left hover:text-purple-800" onclick={handleActivityOneClick}>
+					<button
+						class="flex flex-col text-left hover:text-purple-800"
+						onclick={handleActivityOneClick}
+					>
 						{#if data.data.meta.workshops[4].steps[0].status == 'done'}
 							<span
 								class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"

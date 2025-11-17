@@ -1151,7 +1151,15 @@ export const listViewFields = {
 	},
 	'risk-assessments': {
 		head: ['ref_id', 'name', 'riskMatrix', 'status', 'riskScenarios', 'perimeter', 'updatedAt'],
-		body: ['ref_id', 'str', 'risk_matrix', 'status', 'risk_scenarios_count', 'perimeter', 'updated_at'],
+		body: [
+			'ref_id',
+			'str',
+			'risk_matrix',
+			'status',
+			'risk_scenarios_count',
+			'perimeter',
+			'updated_at'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,

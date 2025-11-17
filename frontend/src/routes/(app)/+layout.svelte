@@ -67,9 +67,7 @@
 
 		const camelCase = model
 			.split('-')
-			.map((word, index) =>
-				index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
-			)
+			.map((word, index) => (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
 			.join('');
 		return `${camelCase}Description`;
 	});
@@ -83,7 +81,7 @@
 	// For list pages: show description subtitle
 	// For detail pages: show model name subtitle
 	const displayModelName = $derived(
-		hasObjectTitle ? ($page.data?.modelVerboseName || $modelName) : ''
+		hasObjectTitle ? $page.data?.modelVerboseName || $modelName : ''
 	);
 
 	const displayModelDescription = $derived(
@@ -147,7 +145,7 @@
 		};
 		modalStore.trigger(modal);
 	}
-  // $inspect(data);
+	// $inspect(data);
 </script>
 
 <!-- App Shell -->
