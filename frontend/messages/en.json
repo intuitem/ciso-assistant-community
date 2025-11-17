@@ -2640,6 +2640,7 @@
 	"impactRequirements": "All values must be provided and greater than 0. Values must increase from top to bottom (e.g., Minor: 5,000 → Major: 50,000 → Critical: 500,000).",
 	"webhooks": "Webhooks",
 	"configureOutgoingWebhooks": "Configure outgoing webhooks",
+	"webhookEndpoint": "Webhook Endpoint",
 	"webhookEndpoints": "Webhook Endpoints",
 	"url": "URL",
 	"events": "Events",
