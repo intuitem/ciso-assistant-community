@@ -68,11 +68,12 @@
 				<Checkbox {form} field="is_active" label={m.isActive()} />
 				<TextField {form} field="name" label={m.name()} data-focusindex="0" />
 				<MarkdownField {form} field="description" label={m.description()} data-focusindex="1" />
-				<TextField {form} field="url" label={m.url()} data-focusindex="2" />
+				<TextField {form} field="url" label={m.url()} data-focusindex="2" autocomplete="off" />
 				<TextField
 					{form}
 					type="password"
 					field="secret"
+					autocomplete="new-password"
 					label={m.secret()}
 					helpText={m.webhookSecretHelpText()}
 				/>
@@ -82,13 +83,21 @@
 					label={m.events()}
 					options={eventTypeOptions}
 				/>
-				<p class="">
+				<div class="flex flex-row justify-between space-x-4">
+					<button
+						class="btn bg-gray-400 text-white font-semibold w-full"
+						data-testid="cancel-button"
+						type="button"
+						onclick={(event) => {
+							parent.onClose(event);
+						}}>{m.cancel()}</button
+					>
 					<button
 						class="btn preset-filled-primary-500 font-semibold w-full"
 						data-testid="login-btn"
 						type="submit">{m.save()}</button
 					>
-				</p>
+				</div>
 			{/snippet}
 		</Form>
 	</div>

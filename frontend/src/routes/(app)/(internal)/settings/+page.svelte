@@ -10,6 +10,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { page } from '$app/state';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -109,7 +110,7 @@
 				>
 				{#each data.webhookEndpoints as endpoint}
 					<a
-						href="/settings/webhooks/endpoints/{endpoint.id}"
+						href="/settings/webhooks/endpoints/{endpoint.id}?next={page.url.pathname}"
 						class="block mt-2 text-blue-600 hover:underline"
 					>
 						{endpoint.name} - {endpoint.url}</a

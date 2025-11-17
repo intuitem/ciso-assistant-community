@@ -9,6 +9,9 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import EventTypesSelect from '../EventTypesSelect.svelte';
 	import { onMount } from 'svelte';
+	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { goto } from '$lib/utils/breadcrumbs';
+	import { page } from '$app/state';
 
 	interface Props {
 		data: PageData;
@@ -20,6 +23,11 @@
 	let showSecretField = $state(!data.webhookEndpoint?.has_secret);
 
 	let eventTypeOptions = $state([]);
+
+	function cancel(): void {
+		const nextValue = getSecureRedirect(page.url.searchParams.get('next'));
+		if (nextValue) goto(nextValue);
+	}
 
 	onMount(async () => {
 		eventTypeOptions = await fetch('/settings/webhooks/event-types').then((res) => res.json());
@@ -58,10 +66,15 @@
 			</div>
 		{/if}
 		<EventTypesSelect {form} field="event_types" label={m.events()} options={eventTypeOptions} />
-		<button
-			class="btn preset-filled-primary-500 font-semibold w-full"
-			data-testid="login-btn"
-			type="submit">{m.save()}</button
-		>
+		<div class="flex flex-row justify-between space-x-4">
+			<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" onclick={cancel}
+				>{m.cancel()}</button
+			>
+			<button
+				class="btn preset-filled-primary-500 font-semibold w-full"
+				data-testid="login-btn"
+				type="submit">{m.save()}</button
+			>
+		</div>
 	{/snippet}
 </SuperForm>
