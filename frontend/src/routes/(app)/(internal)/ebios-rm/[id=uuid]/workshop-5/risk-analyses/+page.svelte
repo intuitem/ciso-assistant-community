@@ -10,8 +10,11 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
+	import { enhance } from '$app/forms';
 
 	const modalStore: ModalStore = getModalStore();
+	const toastStore = getToastStore();
 
 	interface Props {
 		data: PageData;
@@ -20,6 +23,19 @@
 	let { data }: Props = $props();
 
 	const URLModel = data.URLModel;
+	let syncing = $state(false);
+
+	// Check if we should auto-sync on page load
+	$effect(() => {
+		const urlParams = new URLSearchParams(window.location.search);
+		const syncId = urlParams.get('sync');
+		if (syncId && data.lastRiskAssessment && syncId === data.lastRiskAssessment.id) {
+			// Auto-trigger sync
+			syncRiskAssessment();
+			// Clean URL
+			window.history.replaceState({}, '', window.location.pathname);
+		}
+	});
 
 	function modalCreateForm(): void {
 		let modalComponent: ModalComponent = {
@@ -37,6 +53,52 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	async function syncRiskAssessment() {
+		syncing = true;
+		try {
+			const formData = new FormData();
+			formData.append('risk_assessment_id', data.lastRiskAssessment.id);
+
+			const response = await fetch('?/sync', {
+				method: 'POST',
+				body: formData
+			});
+
+			const result = await response.json();
+			console.log('Sync response:', result); // Debug log
+
+			// SvelteKit wraps action responses in a specific structure
+			if (result.type === 'success' || result.data?.success) {
+				const actionData = result.data || result;
+				toastStore.trigger({
+					message: actionData.message || 'Synchronization complete',
+					background: 'variant-filled-success',
+					timeout: 5000
+				});
+				// Redirect to the risk assessment
+				setTimeout(() => {
+					window.location.href = `/risk-assessments/${data.lastRiskAssessment.id}`;
+				}, 1000);
+			} else {
+				const actionData = result.data || result;
+				toastStore.trigger({
+					message: actionData.message || 'Synchronization failed',
+					background: 'variant-filled-error',
+					timeout: 5000
+				});
+			}
+		} catch (error) {
+			console.error('Sync error:', error);
+			toastStore.trigger({
+				message: 'An error occurred during synchronization',
+				background: 'variant-filled-error',
+				timeout: 5000
+			});
+		} finally {
+			syncing = false;
+		}
+	}
 </script>
 
 <ModelTable
@@ -46,13 +108,28 @@
 	baseEndpoint="/risk-assessments/?ebios_rm_study={page.params.id}"
 >
 	{#snippet addButton()}
-		<div>
+		<div class="flex gap-2">
+			{#if data.lastRiskAssessment}
+				<!-- Sync button when risk assessment exists -->
+				<button
+					class="btn btn-sm variant-filled-secondary"
+					onclick={() => syncRiskAssessment()}
+					disabled={syncing}
+					title="Synchronize existing risk assessment with EBIOS RM"
+				>
+					<i class="fa-solid fa-sync {syncing ? 'fa-spin' : ''}"></i>
+					<span>{syncing ? 'Syncing...' : 'Sync from EBIOS RM'}</span>
+				</button>
+			{/if}
+
+			<!-- Create new button (always visible) -->
 			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 				<button
 					class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 					data-testid="add-button"
 					title={safeTranslate('add-' + data.model.localName)}
 					onclick={modalCreateForm}
+					disabled={syncing}
 					><i class="fa-solid fa-file-circle-plus"></i>
 				</button>
 			</span>

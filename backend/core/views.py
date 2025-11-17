@@ -1596,6 +1596,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
                 risk_scenario = RiskScenario(
                     risk_assessment=instance,
+                    operational_scenario=operational_scenario,
                     name=operational_scenario.name,
                     ref_id=operational_scenario.ref_id
                     if operational_scenario.ref_id
@@ -1617,6 +1618,204 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 )
         instance.save()
         return super().perform_create(serializer)
+
+    @action(detail=True, methods=["post"], name="Sync with EBIOS RM")
+    def sync_from_ebios_rm(self, request, pk=None):
+        """
+        Synchronize an existing risk assessment with its linked EBIOS RM study.
+        Updates existing risk scenarios, adds new ones, and archives outdated ones.
+        """
+        risk_assessment = self.get_object()
+
+        if not risk_assessment.ebios_rm_study:
+            return Response(
+                {"error": "Risk assessment is not linked to an EBIOS RM study"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        ebios_rm_study = risk_assessment.ebios_rm_study
+        selected_operational_scenarios = [
+            os for os in ebios_rm_study.operational_scenarios.all() if os.is_selected
+        ]
+
+        # Track which operational scenarios we've processed
+        processed_os_ids = set()
+        updated_count = 0
+        created_count = 0
+        archived_count = 0
+
+        # Helper function to build description (DRY)
+        def build_description(operational_scenario):
+            description_parts = []
+
+            # Feared events
+            ro_to = operational_scenario.ro_to
+            feared_events = ro_to.feared_events.filter(is_selected=True)
+            if feared_events.exists():
+                feared_events_list = []
+                for fe in feared_events:
+                    gravity_display = fe.get_gravity_display()
+                    gravity_text = (
+                        f" [{_('Gravity').capitalize()}: {gravity_display['name']}]"
+                        if gravity_display["value"] >= 0
+                        else ""
+                    )
+                    fe_text = f"- {fe.name}{gravity_text}"
+                    if fe.description:
+                        fe_text += f": {fe.description}"
+                    feared_events_list.append(fe_text)
+                feared_events_text = (
+                    f"**{_('Feared events').capitalize()}:**\n"
+                    + "\n".join(feared_events_list)
+                )
+                description_parts.append(feared_events_text)
+
+            # Risk origin and target objective
+            risk_origin_name = (
+                ro_to.risk_origin.get_name_translated
+                if hasattr(ro_to.risk_origin, "get_name_translated")
+                else str(ro_to.risk_origin)
+            )
+            ro_to_text = f"**{_('Risk origin').capitalize()}:** {risk_origin_name}\n**{_('Target objective').capitalize()}:** {ro_to.target_objective}"
+            description_parts.append(ro_to_text)
+
+            # Strategic scenario
+            strategic_scenario = operational_scenario.attack_path.strategic_scenario
+            if strategic_scenario.description:
+                description_parts.append(
+                    f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}\n{strategic_scenario.description}"
+                )
+            elif strategic_scenario.name:
+                description_parts.append(
+                    f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}"
+                )
+
+            # Attack path
+            attack_path = operational_scenario.attack_path
+            if attack_path.description:
+                description_parts.append(
+                    f"**{_('Attack path').capitalize()}:** {attack_path.name}\n{attack_path.description}"
+                )
+            elif attack_path.name:
+                description_parts.append(
+                    f"**{_('Attack path').capitalize()}:** {attack_path.name}"
+                )
+
+            # Operating modes
+            operating_modes = operational_scenario.operating_modes.all()
+            if operating_modes.exists():
+                operating_modes_list = []
+                for om in operating_modes:
+                    likelihood_display = om.get_likelihood_display()
+                    likelihood_text = (
+                        f" [{_('Likelihood').capitalize()}: {likelihood_display['name']}]"
+                        if likelihood_display["value"] >= 0
+                        else ""
+                    )
+                    om_text = f"- {om.name}{likelihood_text}"
+                    if om.description:
+                        om_text += f": {om.description}"
+                    operating_modes_list.append(om_text)
+                operating_modes_text = (
+                    f"**{_('operating modes').capitalize()}:**\n"
+                    + "\n".join(operating_modes_list)
+                )
+                description_parts.append(operating_modes_text)
+            elif operational_scenario.operating_modes_description:
+                description_parts.append(
+                    f"**{_('operating modes').capitalize()}:**\n{operational_scenario.operating_modes_description}"
+                )
+
+            return "\n\n".join(description_parts)
+
+        # Update or create risk scenarios for selected operational scenarios
+        for operational_scenario in selected_operational_scenarios:
+            processed_os_ids.add(operational_scenario.id)
+
+            # Try to find existing risk scenario for this operational scenario
+            try:
+                risk_scenario = risk_assessment.risk_scenarios.get(
+                    operational_scenario=operational_scenario
+                )
+                # Update existing risk scenario - remove [ARCHIVED] prefix if present
+                risk_scenario.name = operational_scenario.name.replace(
+                    "[ARCHIVED] ", ""
+                )
+                risk_scenario.description = build_description(operational_scenario)
+
+                # Update inherent or current probability/impact based on feature flag
+                if ff_is_enabled("inherent_risk"):
+                    risk_scenario.inherent_proba = operational_scenario.likelihood
+                    risk_scenario.inherent_impact = operational_scenario.gravity
+                else:
+                    risk_scenario.current_proba = operational_scenario.likelihood
+                    risk_scenario.current_impact = operational_scenario.gravity
+
+                risk_scenario.save()
+
+                # Update relationships
+                risk_scenario.assets.set(operational_scenario.get_assets())
+                risk_scenario.threats.set(operational_scenario.threats.all())
+
+                # Merge existing controls: keep user-added ones + update from EBIOS RM
+                # Get current existing controls
+                current_existing_controls = set(
+                    risk_scenario.existing_applied_controls.all()
+                )
+                # Get controls from EBIOS RM
+                ebios_controls = set(operational_scenario.get_applied_controls())
+                # Merge them (union)
+                merged_controls = current_existing_controls | ebios_controls
+                risk_scenario.existing_applied_controls.set(merged_controls)
+
+                updated_count += 1
+
+            except RiskScenario.DoesNotExist:
+                # Create new risk scenario
+                risk_scenario = RiskScenario(
+                    risk_assessment=risk_assessment,
+                    operational_scenario=operational_scenario,
+                    name=operational_scenario.name,
+                    ref_id=operational_scenario.ref_id
+                    if operational_scenario.ref_id
+                    else RiskScenario.get_default_ref_id(risk_assessment),
+                    description=build_description(operational_scenario),
+                )
+                if ff_is_enabled("inherent_risk"):
+                    risk_scenario.inherent_proba = operational_scenario.likelihood
+                    risk_scenario.inherent_impact = operational_scenario.gravity
+                else:
+                    risk_scenario.current_proba = operational_scenario.likelihood
+                    risk_scenario.current_impact = operational_scenario.gravity
+                risk_scenario.save()
+
+                risk_scenario.assets.set(operational_scenario.get_assets())
+                risk_scenario.threats.set(operational_scenario.threats.all())
+                risk_scenario.existing_applied_controls.set(
+                    operational_scenario.get_applied_controls()
+                )
+
+                created_count += 1
+
+        # Archive risk scenarios that are no longer selected
+        for risk_scenario in risk_assessment.risk_scenarios.filter(
+            operational_scenario__isnull=False
+        ):
+            if risk_scenario.operational_scenario_id not in processed_os_ids:
+                if not risk_scenario.name.startswith("[ARCHIVED] "):
+                    risk_scenario.name = f"[ARCHIVED] {risk_scenario.name}"
+                    risk_scenario.save()
+                    archived_count += 1
+
+        return Response(
+            {
+                "success": True,
+                "updated": updated_count,
+                "created": created_count,
+                "archived": archived_count,
+                "total_scenarios": risk_assessment.risk_scenarios.count(),
+            }
+        )
 
     @action(detail=False, name="Risk assessments per status")
     def per_status(self, request):

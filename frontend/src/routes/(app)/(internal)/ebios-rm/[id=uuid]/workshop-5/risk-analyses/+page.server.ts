@@ -63,7 +63,20 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: []
 	};
 
-	return { createForm, deleteForm, model, URLModel, table };
+	// Check if there's already a risk assessment for this EBIOS RM study
+	const riskAssessmentsRes = await fetch(
+		`${BASE_API_URL}/risk-assessments/?ebios_rm_study=${params.id}`
+	);
+	let lastRiskAssessment = null;
+	if (riskAssessmentsRes.ok) {
+		const riskAssessments = await riskAssessmentsRes.json();
+		if (riskAssessments.results && riskAssessments.results.length > 0) {
+			// Get the most recent one (assuming they're ordered by created_at desc)
+			lastRiskAssessment = riskAssessments.results[0];
+		}
+	}
+
+	return { createForm, deleteForm, model, URLModel, table, lastRiskAssessment };
 };
 
 export const actions: Actions = {
@@ -78,5 +91,34 @@ export const actions: Actions = {
 	},
 	delete: async (event) => {
 		return defaultDeleteFormAction({ event, urlModel: 'risk-assessments' });
+	},
+	sync: async ({ request, fetch, params }) => {
+		const formData = await request.formData();
+		const riskAssessmentId = formData.get('risk_assessment_id');
+
+		const response = await fetch(
+			`${BASE_API_URL}/risk-assessments/${riskAssessmentId}/sync_from_ebios_rm/`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			}
+		);
+
+		if (response.ok) {
+			const result = await response.json();
+			return {
+				success: true,
+				message: `Synchronization complete: ${result.updated} updated, ${result.created} created, ${result.archived} archived`,
+				result
+			};
+		} else {
+			const error = await response.json();
+			return {
+				success: false,
+				message: error.error || 'Synchronization failed'
+			};
+		}
 	}
 };

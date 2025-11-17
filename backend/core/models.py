@@ -4793,6 +4793,15 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("RiskAssessment"),
         related_name="risk_scenarios",
     )
+    operational_scenario = models.ForeignKey(
+        "ebios_rm.OperationalScenario",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Operational scenario"),
+        related_name="risk_scenarios",
+        help_text=_("EBIOS RM operational scenario that generated this risk scenario"),
+    )
     assets = models.ManyToManyField(
         Asset,
         verbose_name=_("Assets"),

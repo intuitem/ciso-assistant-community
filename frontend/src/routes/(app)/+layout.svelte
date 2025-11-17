@@ -92,6 +92,7 @@
 		};
 		modalStore.trigger(modal);
 	}
+  // $inspect(data);
 </script>
 
 <!-- App Shell -->
@@ -103,12 +104,16 @@
 		padding="pb-2 px-4"
 	>
 		{#snippet headline()}
-			<span
+			<div
 				class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
 				id="page-title"
 			>
 				{safeTranslate($pageTitle)}
-			</span>
+			</div>
+      <div class="text-slate-500">
+
+        <span>{data.model}</span><span><i class="ml-2 "></i>tooltip to explain the model</span>
+      </div>
 			{#if data?.user?.is_admin}
 				<button
 					onclick={modalQuickStart}
