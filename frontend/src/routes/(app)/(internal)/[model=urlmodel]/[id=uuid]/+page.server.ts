@@ -61,10 +61,9 @@ export const load: PageServerLoad = async (event) => {
 	const object = await objectResponse.json();
 
 	const modelsToSelect = SELECT_MAP[event.params.model];
-	let selectForms = null;
+	let selectForms = {};
 
 	if (modelsToSelect) {
-		selectForms = {};
 		await Promise.all(
 			Object.entries(modelsToSelect).map(async ([urlModel, { field, backendViewset }]) => {
 				if (!field) {
