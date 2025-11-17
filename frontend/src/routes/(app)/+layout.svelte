@@ -9,7 +9,7 @@
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
-	import { pageTitle, modelName, clientSideToast } from '$lib/utils/stores';
+	import { pageTitle, modelName, modelDescription, clientSideToast } from '$lib/utils/stores';
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
@@ -49,9 +49,59 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	// Display title and model name from either page data or manual store setting
+	// Display title, model name, and description from either page data or manual store setting
 	const displayTitle = $derived($page.data?.title || $pageTitle);
-	const displayModelName = $derived($page.data?.modelVerboseName || $modelName);
+
+	// Auto-detect model from URL for list pages
+	// Match pattern: /model-name or /model-name/ (but not /model-name/uuid or /model-name/something)
+	const urlModel = $derived(() => {
+		const path = $page.url.pathname;
+		const match = path.match(/^\/([a-z-]+)\/?$/);
+		return match ? match[1] : null;
+	});
+
+	// Generate description key from URL model: "risk-matrices" → "riskMatricesDescription"
+	const urlDescriptionKey = $derived(() => {
+		const model = urlModel();
+		if (!model) return null;
+
+		const camelCase = model
+			.split('-')
+			.map((word, index) =>
+				index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
+			)
+			.join('');
+		return `${camelCase}Description`;
+	});
+
+	// Determine if we're on a list page vs detail page
+	// List page: URL matches /model-name pattern (e.g., /risk-assessments)
+	// Detail page: has an object title from loadDetail (e.g., /risk-assessments/uuid)
+	const matchesListUrl = $derived(!!urlModel());
+	const hasObjectTitle = $derived(!!$page.data?.title);
+
+	// For list pages: show description subtitle
+	// For detail pages: show model name subtitle
+	const displayModelName = $derived(
+		hasObjectTitle ? ($page.data?.modelVerboseName || $modelName) : ''
+	);
+
+	const displayModelDescription = $derived(
+		(() => {
+			// Only show description on list pages (not on detail pages with object titles)
+			if (hasObjectTitle) return '';
+			if (!matchesListUrl && !$page.data?.modelDescriptionKey) return '';
+
+			// List pages: get description from i18n
+			const descKey = $page.data?.modelDescriptionKey || urlDescriptionKey();
+			if (descKey && m[descKey]) {
+				return m[descKey]();
+			}
+
+			// Fallback to manual store
+			return $modelDescription;
+		})()
+	);
 
 	// Initialize external link interceptor
 	$effect(() => {
@@ -118,6 +168,11 @@
 			{#if displayModelName}
 				<div class="text-sm text-slate-500 font-medium">
 					{safeTranslate(displayModelName)}
+				</div>
+			{/if}
+			{#if displayModelDescription}
+				<div class="text-xs text-slate-400 italic">
+					{safeTranslate(displayModelDescription)}
 				</div>
 			{/if}
 			{#if data?.user?.is_admin}
