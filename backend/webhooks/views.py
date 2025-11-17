@@ -1,4 +1,5 @@
-from rest_framework import viewsets, permissions
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, viewsets, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import WebhookEndpoint, WebhookEventType
@@ -12,8 +13,15 @@ class WebhookEndpointViewSet(viewsets.ModelViewSet):
     Webhook Endpoints.
     """
 
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+
     serializer_class = WebhookEndpointSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    ordering_fields = ["is_active", "created_at", "name", "url"]
+    ordering = ["-is_active", "-created_at"]
 
     def get_queryset(self):
         """
