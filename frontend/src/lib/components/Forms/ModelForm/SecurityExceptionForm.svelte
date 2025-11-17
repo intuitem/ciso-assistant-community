@@ -154,6 +154,7 @@
 				optionsExtraFields={[['folder', 'str']]}
 				field="applied_controls"
 				label={m.appliedControls()}
+				placeholder={m.selectExistingAppliedControls()}
 			/>
 		{/key}
 	</div>

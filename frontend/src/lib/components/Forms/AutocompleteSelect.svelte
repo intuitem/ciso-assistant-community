@@ -40,6 +40,7 @@
 		disabled?: boolean;
 		hidden?: boolean;
 		translateOptions?: boolean;
+		placeholder?: string | null;
 		options?: Option[];
 		optionsEndpoint?: string;
 		optionsDetailedUrlParameters?: [string, string][];
@@ -88,6 +89,7 @@
 		disabled = false,
 		hidden = false,
 		translateOptions = true,
+		placeholder = null,
 		options = [],
 		optionsEndpoint = '',
 		optionsDetailedUrlParameters = [],
@@ -457,6 +459,7 @@
 			duplicates={false}
 			key={JSON.stringify}
 			filterFunc={fastFilter}
+			{placeholder}
 		>
 			{#snippet option({ option })}
 				{#if optionSnippet}

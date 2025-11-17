@@ -2670,5 +2670,6 @@
 	"webhookEndpointUrlHelpText": "L'URL où l'application recevra les webhooks entrants du service tiers.",
 	"webhookSecret": "Secret webhook",
 	"webhookSecretAlreadySetHelpText": "Le secret webhook est déjà défini.",
-	"webhookUrl": "URL webhook"
+	"webhookUrl": "URL webhook",
+	"selectExistingAppliedControls": "Sélectionnez des mesures appliquées existantes..."
 }

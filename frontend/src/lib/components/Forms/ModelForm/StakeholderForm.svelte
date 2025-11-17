@@ -297,6 +297,7 @@
 					optionsExtraFields={[['folder', 'str']]}
 					field="applied_controls"
 					label={m.appliedControls()}
+					placeholder={m.selectExistingAppliedControls()}
 				/>
 			</div>
 			<div class="flex items-end">

@@ -2670,5 +2670,6 @@
 	"doraAlternativeProviders": "Alternative Providers",
 	"doraAttributes": "DORA Attributes",
 	"doraAssessment": "DORA Assessment",
-	"moreOnTerminologiesHelpText": "Hint: more options can be defined through terminologies"
+	"moreOnTerminologiesHelpText": "Hint: more options can be defined through terminologies",
+	"selectExistingAppliedControls": "Select existing applied controls..."
 }
