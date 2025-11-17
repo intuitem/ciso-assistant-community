@@ -774,22 +774,18 @@
 									deleteForm={model.deleteForm}
 									URLModel={urlmodel}
 									fields={fieldsToUse}
-									canSelectObject={true}
+									canSelectObject={hasSelectButton(model.urlModel)}
 								>
 									{#snippet selectButton()}
-										{#if hasSelectButton(model.urlModel)}
-											<span
-												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
-											>
-												<button
-													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-													data-testid="select-button"
-													title={safeTranslate('select-' + urlmodel)}
-													onclick={(_) => modalSelectForm(urlmodel)}
-													><i class="fa-solid fa-hand-pointer"></i>
-												</button>
-											</span>
-										{/if}
+										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+											<button
+												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+												data-testid="select-button"
+												title={safeTranslate('select-' + urlmodel)}
+												onclick={(_) => modalSelectForm(urlmodel)}
+												><i class="fa-solid fa-hand-pointer"></i>
+											</button>
+										</span>
 									{/snippet}
 									{#snippet addButton()}
 										{#if hasSelectButton(model.urlModel)}
