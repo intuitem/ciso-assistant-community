@@ -805,6 +805,8 @@
 	"representatives": "Représentants",
 	"representative": "Représentant",
 	"addRepresentative": "Ajouter un représentant",
+	"mappingMaxDepth": "Profondeur maximale de mapping",
+	"mappingMaxDepthHelpText": "Profondeur maximale pour explorer les relations de mapping entre référentiels (2-5). Des valeurs plus élevées trouvent plus de mappings indirects mais nécessitent plus de temps de calcul.",
 	"phone": "Téléphone",
 	"role": "Rôle",
 	"questions": "Questions",

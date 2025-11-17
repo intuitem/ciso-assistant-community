@@ -158,7 +158,16 @@ SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
-MAPPING_MAX_DETPH = 3
+
+def get_mapping_max_depth():
+    """Get mapping max depth from general settings, with fallback to default."""
+    general_settings = GlobalSettings.objects.filter(name="general").first()
+    if general_settings and "mapping_max_depth" in general_settings.value:
+        return general_settings.value.get("mapping_max_depth", 3)
+    return 3
+
+
+MAPPING_MAX_DEPTH = get_mapping_max_depth()
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
@@ -6176,12 +6185,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         from core.mappings.engine import engine
 
         audit_from_results = engine.load_audit_fields(audit)
+        max_depth = get_mapping_max_depth()
         data = []
         for dest_urn in sorted(
             [
                 p[-1]
                 for p in engine.all_paths_from(
-                    source_urn=audit.framework.urn, max_depth=MAPPING_MAX_DETPH
+                    source_urn=audit.framework.urn, max_depth=max_depth
                 )
             ]
         ):
@@ -6189,7 +6199,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 audit_from_results,
                 audit.framework.urn,
                 dest_urn,
-                max_depth=MAPPING_MAX_DETPH,
+                max_depth=max_depth,
             )
             if best_results:
                 framework = Framework.objects.filter(urn=dest_urn).first()
@@ -6694,9 +6704,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 source_urn = baseline.framework.urn
                 audit_from_results = engine.load_audit_fields(baseline)
                 dest_urn = serializer.validated_data["framework"].urn
+                max_depth = get_mapping_max_depth()
 
                 best_results, _ = engine.best_mapping_inferences(
-                    audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
+                    audit_from_results, source_urn, dest_urn, max_depth
                 )
 
                 requirement_assessments_to_update: list[RequirementAssessment] = []
@@ -7554,7 +7565,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
     def graph_data_list(self, request):
         from core.mappings.engine import engine
 
-        max_depth = MAPPING_MAX_DETPH
+        max_depth = get_mapping_max_depth()
 
         all_paths = engine.get_mapping_graph(max_depth=max_depth)
 
