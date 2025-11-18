@@ -30,7 +30,9 @@ def dispatch_webhook_event(instance, action):
     # Enqueue tasks
     for endpoint in endpoints:
         transaction.on_commit(
-            lambda: send_webhook_request.schedule(
-                args=(endpoint.id, event_type, data_payload), delay=1
-            ),
+            (
+                lambda e_id=endpoint.id: send_webhook_request.schedule(
+                    args=(e_id, event_type, data_payload), delay=1
+                )
+            )
         )
