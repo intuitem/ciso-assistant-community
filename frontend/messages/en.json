@@ -2644,7 +2644,7 @@
 	"webhookEndpoints": "Webhook Endpoints",
 	"url": "URL",
 	"events": "Events",
-	"webhookSecretHelpText": "Shared used to sign the webhook payload for verification purposes.",
+	"webhookSecretHelpText": "Shared secret used to sign the webhook payload for verification purposes.",
 	"secretAlreadySetHelpText": "Secret already set.",
 	"resetSecret": "Reset secret",
 	"createWebhookEndpoint": "Create webhook endpoint",
