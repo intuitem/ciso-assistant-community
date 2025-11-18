@@ -10,10 +10,11 @@
 	import { onMount, tick } from 'svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import { superForm } from 'sveltekit-superforms/client';
 	import EventTypesSelect from './EventTypesSelect.svelte';
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-fit max-w-4xl shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50 p-4 shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	interface Props {
@@ -40,10 +41,21 @@
 		}
 		eventTypeOptions = await fetch('/settings/webhooks/event-types').then((res) => res.json());
 	});
+
+	const _form = superForm(form, {
+		dataType: 'json',
+		validators: zod(webhookEndpointSchema),
+		validationMethod: 'onsubmit',
+		onUpdated: async ({ form }) => {
+			if (form.valid && parent && typeof parent.onConfirm === 'function') {
+				parent.onConfirm();
+			}
+		}
+	});
 </script>
 
 {#if $modalStore[0]}
-	<div class="modal-example-form {cBase}">
+	<div class="w-2xl {cBase}">
 		<div class="flex items-center justify-between">
 			<header class={cHeader} data-testid="modal-title">
 				{$modalStore[0].title ?? '(title missing)'}
@@ -60,14 +72,13 @@
 		</div>
 		<Form
 			class="flex flex-col space-y-3"
+			{_form}
 			data={form}
-			dataType="form"
+			dataType="json"
 			validators={zod(webhookEndpointSchema)}
 			action={formAction}
-			debug
 		>
 			{#snippet children({ form })}
-				{@const formStore = form}
 				<Checkbox {form} field="is_active" label={m.isActive()} checked />
 				<TextField {form} field="name" label={m.name()} data-focusindex="0" />
 				<MarkdownField {form} field="description" label={m.description()} data-focusindex="1" />

@@ -97,6 +97,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const featureFlagForm = await superValidate(featureFlagSettings, zod(FeatureFlagsSchema), {
 		errors: false
 	});
+	const webhookEndpointCreateForm = await superValidate(zod(webhookEndpointSchema), {
+		errors: false
+	});
 
 	return {
 		ssoSettings,
@@ -109,6 +112,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		featureFlagForm,
 		featureFlagModel,
 		webhookEndpoints,
+		webhookEndpointCreateForm,
 		title: m.settings()
 	};
 };
@@ -236,7 +240,7 @@ export const actions: Actions = {
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
 		setFlash(
-			{ type: 'success', message: m.successfullyCreatedObject({ object: m.webhookEndpoint }) },
+			{ type: 'success', message: m.successfullyCreatedObject({ object: m.webhookEndpoint() }) },
 			event
 		);
 
