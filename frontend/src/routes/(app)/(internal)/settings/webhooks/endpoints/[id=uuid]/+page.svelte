@@ -12,6 +12,7 @@
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { page } from '$app/state';
+	import WebhookSecretGenerator from '$lib/components/Forms/WebhookSecretGenerator.svelte';
 
 	interface Props {
 		data: PageData;
@@ -20,8 +21,8 @@
 	let { data }: Props = $props();
 
 	const formStore = data.form?.form;
+
 	let showSecretField = $state(!data.webhookEndpoint?.has_secret);
-	console.log(data.webhookEndpoint);
 
 	let eventTypeOptions = $state([]);
 
@@ -47,13 +48,7 @@
 		<MarkdownField {form} field="description" label={m.description()} data-focusindex="1" />
 		<TextField {form} field="url" label={m.url()} data-focusindex="2" />
 		{#if showSecretField}
-			<TextField
-				{form}
-				type="password"
-				field="secret"
-				label={m.secret()}
-				helpText={m.webhookSecretHelpText()}
-			/>
+			<WebhookSecretGenerator {form} field="secret" />
 		{:else}
 			<div class="w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary">
 				<p>{m.secretAlreadySetHelpText()}</p>
