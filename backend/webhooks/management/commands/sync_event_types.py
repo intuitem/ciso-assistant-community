@@ -12,15 +12,16 @@ class Command(BaseCommand):
 
         # Find types in DB that are no longer in code
         types_in_db = set(WebhookEventType.objects.values_list("name", flat=True))
-        types_to_remove = types_in_db - set(all_types)
+        removed_types = types_in_db - set(all_types)
 
-        if types_to_remove:
-            WebhookEventType.objects.filter(name__in=types_to_remove).delete()
+        if removed_types:
             self.stdout.write(
                 self.style.WARNING(
-                    f"Removed {len(types_to_remove)} obsolete event types."
+                    f"{len(removed_types)} were removed from the codebase, but are still present in the database."
                 )
             )
+            for type_name in removed_types:
+                self.stdout.write(self.style.WARNING(f"  - {type_name}"))
 
         # Add new types from code
         created_count = 0
