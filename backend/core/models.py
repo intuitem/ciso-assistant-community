@@ -5072,6 +5072,13 @@ class RiskScenario(NameDescriptionMixin):
     def __str__(self):
         return str(self.parent_perimeter()) + _(": ") + str(self.name)
 
+    def delete(self, *args, **kwargs):
+        risk_assessment = self.risk_assessment
+        result = super(RiskScenario, self).delete(*args, **kwargs)
+        # Update parent risk assessment's updated_at timestamp
+        risk_assessment.save(update_fields=["updated_at"])
+        return result
+
     def save(self, *args, **kwargs):
         if self.inherent_proba >= 0 and self.inherent_impact >= 0:
             self.inherent_level = risk_scoring(
@@ -5098,6 +5105,8 @@ class RiskScenario(NameDescriptionMixin):
         else:
             self.residual_level = -1
         super(RiskScenario, self).save(*args, **kwargs)
+        # Update parent risk assessment's updated_at timestamp
+        self.risk_assessment.save(update_fields=["updated_at"])
         self.risk_assessment.upsert_daily_metrics()
 
 
