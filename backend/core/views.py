@@ -371,10 +371,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         instance = serializer.save()
         dispatch_webhook_event(instance, "updated")
 
-    def perform_destroy(self, instance):
-        dispatch_webhook_event(instance, "deleted")
-        instance.delete()
-
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         if request.data.get("filtering_labels"):
@@ -397,6 +393,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+        instance = self.get_object()
+        try:
+            dispatch_webhook_event(instance, "deleted")
+        except Exception:
+            logger.error("Webhook dispatch failed on delete", exc_info=True)
         return super().destroy(request, *args, **kwargs)
 
     def _get_optimized_object_data(self, queryset):
