@@ -12,6 +12,12 @@ import { safeTranslate } from '$lib/utils/i18n';
 export const load: PageServerLoad = async (event) => {
 	const endpoint = `${BASE_API_URL}/webhooks/endpoints/${event.params.id}/`;
 	const response = await event.fetch(endpoint);
+
+	if (!response.ok) {
+		console.error('Failed to fetch webhook endpoint:', await response.text());
+		redirect(302, '/settings');
+	}
+
 	const webhookEndpoint = await response.json();
 	const form = await superValidate(webhookEndpoint, zod(webhookEndpointSchema), { errors: false });
 
@@ -39,8 +45,8 @@ export const actions: Actions = {
 			console.error(response);
 			if (response.error) {
 				setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
+				return fail(res.status, { form });
 			}
-			redirect(302, '/login');
 		}
 
 		setFlash(
