@@ -228,6 +228,12 @@ class LoadBackupView(APIView):
                 for perm_index in reversed(enterprise_perms_indices):
                     permissions.pop(perm_index)
 
+            decompressed_data = [
+                obj
+                for obj in decompressed_data
+                if obj["model"].split(".", 1)[0] != "enterprise_core"
+            ]
+
         decompressed_data = json.dumps(decompressed_data)
         return self.load_backup(
             request, decompressed_data, backup_version, current_version
