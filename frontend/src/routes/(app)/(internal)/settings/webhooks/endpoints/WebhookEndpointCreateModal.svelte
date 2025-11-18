@@ -65,7 +65,12 @@
 				tabindex="0"
 				class="flex items-center hover:text-primary-500 cursor-pointer"
 				onclick={parent.onClose}
-				onkeydown={parent.onClose}
+				onkeydown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						e.preventDefault();
+						parent.onClose(e);
+					}
+				}}
 			>
 				<i class="fa-solid fa-xmark"></i>
 			</div>
