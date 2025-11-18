@@ -46,7 +46,7 @@ export const actions: Actions = {
 		setFlash(
 			{
 				type: 'success',
-				message: m.successfullyUpdatedObject({ object: m.webhookEndpoint })
+				message: m.successfullyUpdatedObject({ object: m.webhookEndpoint() })
 			},
 			event
 		);
