@@ -7,12 +7,12 @@
 </script>
 
 <div>
-    <span class="text-gray-500 block mb-6">{m.configureFeatureFlags()}</span>
-    <ModelForm
-        form={data.featureFlagForm}
-        schema={FeatureFlagsSchema}
-        model={data.featureFlagModel}
-        cancelButton={false}
-        action="/settings?/featureFlags"
-    />
+	<span class="text-gray-500 block mb-6">{m.configureFeatureFlags()}</span>
+	<ModelForm
+		form={data.featureFlagForm}
+		schema={FeatureFlagsSchema}
+		model={data.featureFlagModel}
+		cancelButton={false}
+		action="/settings?/featureFlags"
+	/>
 </div>
