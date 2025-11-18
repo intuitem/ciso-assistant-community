@@ -68,9 +68,6 @@
         <button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>{m.cancel()}</button>
         <input type="hidden" name="urlmodel" value={URLModel} />
         <input type="hidden" name="id" value={id} />
-				{#if _form && _form.email}
-					<input type="hidden" name="email" value={_form.email} />
-				{/if}
         <button class="btn preset-filled-error-500" type="submit" onclick={parent.onConfirm}>{m.submit()}</button>
       </footer>
 		</SuperForm>

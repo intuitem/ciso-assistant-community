@@ -227,7 +227,7 @@
 		modalStore.trigger(modal);
 	}
 
-	function modalSendInvitation(id: string, name: string, action: string, email?: string): void {
+	function modalSendInvitation(id: string, email: string, action: string): void {
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
@@ -242,7 +242,7 @@
 			type: 'component',
 			component: modalComponent,
 			title: m.confirmModalTitle(),
-			body: `${m.confirmModalMessage()}: ${name}?`
+			body: `Do you want to send the invitation to ${email}?`
 		};
 		modalStore.trigger(modal);
 	}
@@ -652,15 +652,14 @@
 			{/if}
 
 			{#if displayEditButton()}
-				{#if data.urlModel === 'representatives'}
+				{#if data.urlModel === 'representatives' && data.data.user}
 					<button
 						class="btn preset-filled-ghost-500 mr-2"
 						onclick={() =>
 							modalSendInvitation(
 								data.data.id,
-								data.data.str || data.data.name,
-								'?/iam/send-invitation',
-								data.data.email
+								data.data.email,
+								'/representatives/send-invitation'
 							)}
 						data-testid="send-invitation-button"
 					>

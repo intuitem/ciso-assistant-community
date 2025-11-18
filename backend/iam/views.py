@@ -239,7 +239,7 @@ class CurrentUserView(views.APIView):
             "preferences": request.user.preferences,
         }
         return Response(res_data, status=HTTP_200_OK)
-    
+
 
 class SessionTokenView(views.APIView):
     """
@@ -266,6 +266,7 @@ class SessionTokenView(views.APIView):
         session_token = request.session.session_key
         return Response({"token": session_token})
 
+
 class SendInvtationView(views.APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -273,6 +274,11 @@ class SendInvtationView(views.APIView):
     def post(self, request):
         email = request.data["email"]  # type: ignore
         associated_user = User.objects.filter(email=email).first()
+        if associated_user is None:
+            return Response(
+                status=HTTP_500_INTERNAL_SERVER_ERROR,
+                data={"error": "No user associated with this email"},
+            )
         if EMAIL_HOST or EMAIL_HOST_RESCUE:
             if associated_user is not None and associated_user.is_local:
                 try:
@@ -280,7 +286,7 @@ class SendInvtationView(views.APIView):
                         email_template_name="registration/first_connection_email.html",
                         subject=_("CISO Assistant: Invitation"),
                     )
-                    print("Sending reset mail to", email)
+                    print("Sending invitation mail to", email)
                 except Exception as e:
                     print(e)
             return Response(status=HTTP_202_ACCEPTED)
