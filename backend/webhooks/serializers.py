@@ -13,7 +13,7 @@ class WebhookEndpointSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False,
         allow_blank=True,
-        help_text="Provide a secret, or leave blank to auto-generate.",
+        help_text="HMAC signing secret",
     )
 
     event_types = serializers.SlugRelatedField(
