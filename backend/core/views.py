@@ -1,4 +1,4 @@
-from sqlite3 import OperationalError, ProgrammingError
+from django.db.utils import OperationalError, ProgrammingError
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
