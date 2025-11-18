@@ -640,6 +640,27 @@ def create_library(
         "provider": library_meta.get("provider"),
         "packager": library_meta.get("packager"),
     }
+    
+    # Labels Addition
+    labels : str = library_meta.get("labels")
+
+    if(labels != None):
+        labels = labels.strip()
+        labels = re.split(r'[,\n]+', labels)   # Separate with "commas" and "\n"
+        
+        library["labels"] = []
+        
+        for l in labels:
+            
+            l = l.strip()
+            
+            if " " in l : raise ValueError(
+                f"(library_meta) Invalid label \"{l}\": Labels must not contain spaces"
+            )
+            
+            # Force uppercase for all labels 
+            library["labels"].append(l.upper())
+
 
     translations = extract_translations_from_metadata(library_meta, "library")
     if translations:
