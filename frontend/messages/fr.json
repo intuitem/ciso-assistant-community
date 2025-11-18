@@ -2670,5 +2670,7 @@
 	"webhookEndpointUrlHelpText": "L'URL où l'application recevra les webhooks entrants du service tiers.",
 	"webhookSecret": "Secret webhook",
 	"webhookSecretAlreadySetHelpText": "Le secret webhook est déjà défini.",
-	"webhookUrl": "URL webhook"
+	"webhookUrl": "URL webhook",
+	"syncWithReferenceControl": "Synchroniser avec les mesures de référence",
+	"syncWithReferenceControlHelpText": "Met à jour les champs lors de la mise à jour d’une mesure de référence."
 }

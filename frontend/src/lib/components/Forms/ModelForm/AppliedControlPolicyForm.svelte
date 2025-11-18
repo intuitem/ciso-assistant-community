@@ -69,6 +69,11 @@
 		}
 	});
 
+	let hasReferenceControl = $state(false);
+	form.form.subscribe((newFormData) => {
+		hasReferenceControl = Boolean(newFormData.reference_control);
+	});
+
 	run(() => {
 		if (model?.selectOptions?.priority) {
 			model.selectOptions.priority.forEach((element) => {
@@ -125,6 +130,15 @@
 		bind:cachedValue={formDataCache['evidences']}
 		label={m.evidences()}
 	/>
+
+	{#if hasReferenceControl}
+		<Checkbox
+			{form}
+			field="is_synced_from_reference_control"
+			label={m.syncWithReferenceControl()}
+			helpText={m.syncWithReferenceControlHelpText()}
+		/>
+	{/if}
 
 	<Dropdown
 		open={false}

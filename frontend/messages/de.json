@@ -986,5 +986,7 @@
 	"samlAuthnRequestSignedHelpText": "Wenn aktiviert, wird die SAML-Authentifizierungsanfrage mit dem privaten Schlüssel unten signiert. Das zugehörige öffentliche Zertifikat wird an den Identitätsanbieter gesendet, damit er die Signatur überprüfen kann.",
 	"downloadCertificate": "Zertifikat herunterladen",
 	"viewMore": "Mehr anzeigen",
-	"viewLess": "Weniger anzeigen"
+	"viewLess": "Weniger anzeigen",
+	"syncWithReferenceControl": "Mit Referenzkontrollen synchronisieren",
+	"syncWithReferenceControlHelpText": "Aktualisiert Felder bei Aktualisierung der Referenzkontrolle."
 }

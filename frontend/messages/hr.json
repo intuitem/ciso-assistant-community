@@ -1945,5 +1945,7 @@
 	"samlPrivateKeyHelpText": "Samo za pisanje: koristite ovo polje samo ako trebate unijeti vlastiti privatni ključ/certifikat. U suprotnom, aplikacija će ga generirati.",
 	"samlCertificateHelpText": "Možete navesti vlastiti certifikat ili pustiti aplikaciju da ga generira.",
 	"samlAuthnRequestSignedHelpText": "Kada je omogućeno, zahtjev za SAML autentifikaciju potpisuje se privatnim ključem ispod. Odgovarajući javni certifikat šalje se Identity Provideru kako bi mogao provjeriti potpis.",
-	"downloadCertificate": "Preuzmi certifikat"
+	"downloadCertificate": "Preuzmi certifikat",
+	"syncWithReferenceControl": "Sinkronizacija s referentnim kontrolama",
+	"syncWithReferenceControlHelpText": "Ažurira polja pri ažuriranju referentne kontrole."
 }

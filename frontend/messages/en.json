@@ -209,7 +209,7 @@
 	"strengthOfKnowledge": "Strength of knowledge",
 	"dueDate": "Due date",
 	"startDate": "Start date",
-	"endDate": "End date",
+	"endDate": "End Date",
 	"attachment": "Attachment",
 	"observation": "Observation",
 	"observationHelpText": "Additional notes and comments in markdown format",
@@ -930,7 +930,6 @@
 	"timeline": "Timeline",
 	"timelineEntries": "Timeline",
 	"graph": "Graph",
-	"startDate": "Start date",
 	"startDateHelpText": "Start date (useful for timeline)",
 	"backupLoadingError": "An error occurred while loading the backup.",
 	"backupVersionError": "Can't load the backup, the version of the backup is invalid",
@@ -1695,7 +1694,6 @@
 	"month": "Month",
 	"months": "Months",
 	"year": "Year",
-	"endDate": "End Date",
 	"pending": "Pending",
 	"completed": "Completed",
 	"cancelled": "Cancelled",
@@ -2670,5 +2668,7 @@
 	"doraAlternativeProviders": "Alternative Providers",
 	"doraAttributes": "DORA Attributes",
 	"doraAssessment": "DORA Assessment",
-	"moreOnTerminologiesHelpText": "Hint: more options can be defined through terminologies"
+	"moreOnTerminologiesHelpText": "Hint: more options can be defined through terminologies",
+	"syncWithReferenceControl": "Sync with reference controls",
+	"syncWithReferenceControlHelpText": "Updates fields on reference control update."
 }

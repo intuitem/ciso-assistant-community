@@ -970,5 +970,7 @@
 	"samlAuthnRequestSignedHelpText": "När det är aktiverat, signeras SAML-autentiseringsbegäran med den privata nyckeln nedan. Det motsvarande offentliga certifikatet skickas till identitetsleverantören så att den kan verifiera signaturen.",
 	"downloadCertificate": "Ladda ner certifikat",
 	"viewMore": "Visa mer",
-	"viewLess": "Visa mindre"
+	"viewLess": "Visa mindre",
+	"syncWithReferenceControl": "Synkronisera med referenskontroller",
+	"syncWithReferenceControlHelpText": "Uppdaterar fält vid uppdatering av referenskontroll."
 }
