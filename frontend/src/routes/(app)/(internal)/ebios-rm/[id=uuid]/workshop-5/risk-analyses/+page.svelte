@@ -27,11 +27,9 @@
 
 	// Check if we should auto-sync on page load
 	$effect(() => {
-		const urlParams = new URLSearchParams(window.location.search);
-		const syncId = urlParams.get('sync');
-		if (syncId && data.lastRiskAssessment && syncId === data.lastRiskAssessment.id) {
-			// Auto-trigger sync
-			syncRiskAssessment();
+		if (data.riskAssessmentToSync) {
+			// Auto-trigger sync for the specific risk assessment
+			syncRiskAssessment(data.riskAssessmentToSync.id);
 			// Clean URL
 			window.history.replaceState({}, '', window.location.pathname);
 		}
@@ -54,11 +52,23 @@
 		modalStore.trigger(modal);
 	}
 
-	async function syncRiskAssessment() {
+	async function syncRiskAssessment(riskAssessmentId?: string) {
 		syncing = true;
+		const idToSync = riskAssessmentId || data.lastRiskAssessment?.id;
+
+		if (!idToSync) {
+			toastStore.trigger({
+				message: 'No risk assessment to sync',
+				background: 'variant-filled-error',
+				timeout: 5000
+			});
+			syncing = false;
+			return;
+		}
+
 		try {
 			const formData = new FormData();
-			formData.append('risk_assessment_id', data.lastRiskAssessment.id);
+			formData.append('risk_assessment_id', idToSync);
 
 			const response = await fetch('?/sync', {
 				method: 'POST',
@@ -78,7 +88,7 @@
 				});
 				// Redirect to the risk assessment
 				setTimeout(() => {
-					window.location.href = `/risk-assessments/${data.lastRiskAssessment.id}`;
+					window.location.href = `/risk-assessments/${idToSync}`;
 				}, 1000);
 			} else {
 				const actionData = result.data || result;

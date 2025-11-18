@@ -11,7 +11,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params, fetch }) => {
+export const load: PageServerLoad = async ({ params, fetch, url }) => {
 	const schema = z.object({ id: z.string().uuid() });
 	const deleteForm = await superValidate(zod(schema));
 	const URLModel = 'risk-assessments';
@@ -68,6 +68,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		`${BASE_API_URL}/risk-assessments/?ebios_rm_study=${params.id}`
 	);
 	let lastRiskAssessment = null;
+	let riskAssessmentToSync = null;
+
 	if (riskAssessmentsRes.ok) {
 		const riskAssessments = await riskAssessmentsRes.json();
 		if (riskAssessments.results && riskAssessments.results.length > 0) {
@@ -76,7 +78,24 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		}
 	}
 
-	return { createForm, deleteForm, model, URLModel, table, lastRiskAssessment };
+	// Check if there's a specific risk assessment to sync from URL parameter
+	const syncId = url.searchParams.get('sync');
+	if (syncId) {
+		const syncRiskAssessmentRes = await fetch(`${BASE_API_URL}/risk-assessments/${syncId}/`);
+		if (syncRiskAssessmentRes.ok) {
+			riskAssessmentToSync = await syncRiskAssessmentRes.json();
+		}
+	}
+
+	return {
+		createForm,
+		deleteForm,
+		model,
+		URLModel,
+		table,
+		lastRiskAssessment,
+		riskAssessmentToSync
+	};
 };
 
 export const actions: Actions = {
