@@ -567,7 +567,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if not getattr(for_user, "is_authenticated", False):
             return User.objects.none()
 
-        (_, changeable_user_groups_ids, _) = RoleAssignment.get_accessible_object_ids(
+        (viewable_user_group_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), for_user, UserGroup
         )
 
@@ -579,10 +579,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 Folder.get_root_folder(), for_user, User
             )
             base_qs = (
-                User.objects.filter(
-                    Q(id__in=visible_users_ids)
-                    | Q(user_groups__in=changeable_user_groups_ids)
-                )
+                User.objects.filter(id__in=visible_users_ids)
                 | User.objects.filter(pk=for_user.pk)
             ).distinct()
 
@@ -590,9 +587,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return base_qs.prefetch_related(
             Prefetch(
                 "user_groups",
-                queryset=UserGroup.objects.filter(
-                    id__in=changeable_user_groups_ids
-                ).only("id", "builtin"),  # minimal
+                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
+                    "id", "builtin"
+                ),  # minimal
             )
         )
 
