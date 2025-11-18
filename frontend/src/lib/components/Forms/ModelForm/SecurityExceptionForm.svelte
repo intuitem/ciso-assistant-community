@@ -144,6 +144,17 @@
 	cacheLock={cacheLocks['expiration_date']}
 	bind:cachedValue={formDataCache['expiration_date']}
 />
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="assets"
+	optionsLabelField="auto"
+	pathField="path"
+	field="assets"
+	cacheLock={cacheLocks['assets']}
+	bind:cachedValue={formDataCache['assets']}
+	label={m.assets()}
+/>
 <div class="flex flex-row space-x-2 items-center">
 	<div class="w-full">
 		{#key page.data}
@@ -154,6 +165,7 @@
 				optionsExtraFields={[['folder', 'str']]}
 				field="applied_controls"
 				label={m.appliedControls()}
+				placeholder={m.selectExistingAppliedControls()}
 			/>
 		{/key}
 	</div>

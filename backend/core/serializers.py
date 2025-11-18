@@ -396,6 +396,11 @@ class AssetWriteSerializer(BaseModelSerializer):
         queryset=Solution.objects.all(),
         required=False,
     )
+    security_exceptions = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=SecurityException.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = Asset
@@ -2067,6 +2072,9 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
     )
     applied_controls = serializers.PrimaryKeyRelatedField(
         many=True, queryset=AppliedControl.objects.all(), required=False
+    )
+    assets = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Asset.objects.all(), required=False
     )
 
     class Meta:

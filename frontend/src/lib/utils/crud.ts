@@ -489,6 +489,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'security_capabilities', tooltip: 'securityCapabilitiesTooltip' },
 			{ field: 'recovery_capabilities', tooltip: 'recoveryCapabilitiesTooltip' },
 			{ field: 'reference_link' },
+			{ field: 'security_exceptions' },
 			{ field: 'solutions' },
 			{ field: 'observation' }
 		],

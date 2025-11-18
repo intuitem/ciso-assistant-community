@@ -301,6 +301,16 @@
 	<AutocompleteSelect
 		multiple
 		{form}
+		optionsEndpoint="security-exceptions"
+		optionsLabelField="auto"
+		field="security_exceptions"
+		cacheLock={cacheLocks['security_exceptions']}
+		bind:cachedValue={formDataCache['security_exceptions']}
+		label={m.securityExceptions()}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
 		createFromSelection={true}
 		optionsEndpoint="filtering-labels"
 		optionsLabelField="label"
