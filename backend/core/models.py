@@ -5073,10 +5073,12 @@ class RiskScenario(NameDescriptionMixin):
         return str(self.parent_perimeter()) + _(": ") + str(self.name)
 
     def delete(self, *args, **kwargs):
-        risk_assessment = self.risk_assessment
+        risk_assessment_id = self.risk_assessment.id
         result = super(RiskScenario, self).delete(*args, **kwargs)
-        # Update parent risk assessment's updated_at timestamp
-        risk_assessment.save(update_fields=["updated_at"])
+        # Update parent risk assessment's updated_at timestamp (bypass save to avoid recursion)
+        RiskAssessment.objects.filter(id=risk_assessment_id).update(
+            updated_at=timezone.now()
+        )
         return result
 
     def save(self, *args, **kwargs):
@@ -5105,8 +5107,10 @@ class RiskScenario(NameDescriptionMixin):
         else:
             self.residual_level = -1
         super(RiskScenario, self).save(*args, **kwargs)
-        # Update parent risk assessment's updated_at timestamp
-        self.risk_assessment.save(update_fields=["updated_at"])
+        # Update parent risk assessment's updated_at timestamp (bypass save to avoid recursion)
+        RiskAssessment.objects.filter(id=self.risk_assessment.id).update(
+            updated_at=timezone.now()
+        )
         self.risk_assessment.upsert_daily_metrics()
 
 
