@@ -33,7 +33,8 @@ LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
-FORCE_CREATE_ADMIN = os.environ.get("FORCE_CREATE_ADMIN", "False").lower() == "true" 
+FORCE_CREATE_ADMIN = os.environ.get("FORCE_CREATE_ADMIN", "False").lower() == "true"
+
 
 def set_ciso_assistant_url(_, __, event_dict):
     event_dict["ciso_assistant_url"] = CISO_ASSISTANT_URL

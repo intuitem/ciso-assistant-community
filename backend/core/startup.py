@@ -1186,7 +1186,10 @@ def startup(sender: AppConfig, **kwargs):
     administrators = UserGroup.objects.get(
         name="BI-UG-ADM", folder=Folder.get_root_folder()
     )
-    if User.objects.filter(user_groups=administrators).distinct().count() == 0 or FORCE_CREATE_ADMIN:
+    if (
+        User.objects.filter(user_groups=administrators).distinct().count() == 0
+        or FORCE_CREATE_ADMIN
+    ):
         # if superuser defined and does not exist, then create it
         if (
             CISO_ASSISTANT_SUPERUSER_EMAIL
@@ -1199,7 +1202,6 @@ def startup(sender: AppConfig, **kwargs):
             except Exception as e:
                 logger.error("Error creating superuser", exc_info=True)
 
-        
         for u in User.objects.filter(is_superuser=True):
             u.user_groups.add(administrators)
 
