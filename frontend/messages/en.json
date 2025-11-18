@@ -2684,7 +2684,7 @@
 	"assetsDescription": "Business process and functions (Primary), apps or technical components (Supporting)",
 	"threatsDescription": "Potential threats to your organization",
 	"vulnerabilitiesDescription": "Known vulnerabilities and weaknesses",
-	"riskScenariosDescription": "Risk scenarios and their treatments",
+	"riskScenariosDescription": "Risk register with scenarios and their treatments",
 	"referenceControlsDescription": "Template of typical security controls",
 	"requirementMappingSetsDescription": "Mappings between different frameworks and standards",
 	"riskMatricesDescription": "Risk matrices for probability and impact assessment",

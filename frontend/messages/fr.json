@@ -2684,7 +2684,7 @@
 	"assetsDescription": "Processus et fonctions métiers (primaires), applications ou composants techniques (support)",
 	"threatsDescription": "Menaces potentielles pour votre organisation",
 	"vulnerabilitiesDescription": "Vulnérabilités et faiblesses connues",
-	"riskScenariosDescription": "Scénarios de risque et leurs traitements",
+	"riskScenariosDescription": "Registre des scénarios de risque et leurs traitements",
 	"referenceControlsDescription": "Bibliothèque de mesures de sécurité de référence",
 	"requirementMappingSetsDescription": "Correspondances entre différents référentiels et normes",
 	"riskMatricesDescription": "Matrices de risque pour l'évaluation de probabilité et d'impact",
