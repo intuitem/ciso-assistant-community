@@ -650,16 +650,16 @@ def create_library(
         
         library["labels"] = []
         
-        for l in labels:
+        for label in labels:
             
-            l = l.strip()
+            label = label.strip()
             
-            if " " in l : raise ValueError(
-                f"(library_meta) Invalid label \"{l}\": Labels must not contain spaces"
+            if " " in label : raise ValueError(
+                f"(library_meta) Invalid label \"{label}\": Labels must not contain spaces"
             )
             
             # Force uppercase for all labels 
-            library["labels"].append(l.upper())
+            library["labels"].append(label.upper())
 
 
     translations = extract_translations_from_metadata(library_meta, "library")
