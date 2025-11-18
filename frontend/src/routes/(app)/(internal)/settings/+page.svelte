@@ -72,6 +72,16 @@
 	let displayedEndpoint = $state(
 		data?.webhookEndpoints?.length > 0 ? data.webhookEndpoints[0] : undefined
 	);
+
+	$effect(() => {
+		if (
+			!(data.webhookEndpoints ?? [])
+				.map((e: Record<string, any>) => JSON.stringify(e))
+				.includes(JSON.stringify(displayedEndpoint))
+		) {
+			displayedEndpoint = data?.webhookEndpoints?.length > 0 ? data.webhookEndpoints[0] : undefined;
+		}
+	});
 </script>
 
 <Tabs
