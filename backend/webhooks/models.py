@@ -68,12 +68,14 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
                 raise ValidationError("The URL provided is invalid.")
 
             # Try to parse the hostname as an IP address
-            # ip = ipaddress.ip_address(hostname)
-            #
-            # if not validate_ip(ip, private=False, loopback=False, reserved=False):
-            #      raise ValidationError(
-            #         "The URL cannot be an internal, loopback, or reserved IP address."
-            #      )
+            ip = ipaddress.ip_address(hostname)
+
+            if not settings.DEBUG and (
+                ip.is_private or ip.is_loopback or ip.is_reserved
+            ):
+                raise ValidationError(
+                    "In production, the URL cannot be an internal, loopback, or reserved IP address."
+                )
         except ValueError:
             # It's a domain name, not an IP address. This is fine.
             # We are NOT resolving DNS here, as that's a blocking network call
