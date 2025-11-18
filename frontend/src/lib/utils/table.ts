@@ -1789,8 +1789,8 @@ export const listViewFields = {
 		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
 	},
 	'ebios-rm': {
-		head: ['name', 'description', 'domain', 'quotationMethod', 'updatedAt'],
-		body: ['name', 'description', 'folder', 'quotation_method', 'updated_at'],
+		head: ['name', 'description', 'domain', 'quotationMethod', 'createdAt'],
+		body: ['name', 'description', 'folder', 'quotation_method', 'created_at'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}
