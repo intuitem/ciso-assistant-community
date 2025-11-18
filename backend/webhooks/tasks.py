@@ -29,7 +29,7 @@ def send_webhook_request(endpoint_id, event_type, data_payload):
         return
 
     # Build payload
-    timestamp_iso = f"{datetime.now(timezone.utc).isoformat()}Z"
+    timestamp_iso = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     full_payload = {
         "type": event_type,
         "timestamp": timestamp_iso,  # Event occurrence timestamp
