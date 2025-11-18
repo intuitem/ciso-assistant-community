@@ -642,7 +642,7 @@ def create_library(
     }
     
     # Labels Addition
-    labels : str = library_meta.get("labels")
+    labels = library_meta.get("labels")
 
     if(labels != None):
         labels = labels.strip()
@@ -653,6 +653,10 @@ def create_library(
         for label in labels:
             
             label = label.strip()
+            
+            # Skip empty labels
+            if not label:
+                continue
             
             if " " in label : raise ValueError(
                 f"(library_meta) Invalid label \"{label}\": Labels must not contain spaces"
