@@ -1506,6 +1506,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         instance: RiskAssessment = serializer.save()
         if instance.ebios_rm_study:
+            # Unlink all previous risk assessments from this EBIOS RM study
+            RiskAssessment.objects.filter(
+                ebios_rm_study=instance.ebios_rm_study
+            ).exclude(id=instance.id).update(ebios_rm_study=None)
+
             instance.risk_matrix = instance.ebios_rm_study.risk_matrix
             ebios_rm_study = EbiosRMStudy.objects.get(id=instance.ebios_rm_study.id)
             for operational_scenario in [
