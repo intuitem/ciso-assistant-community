@@ -79,7 +79,7 @@
 		}, {});
 	};
 
-	let classesDisabled = $derived((d: boolean) => (d ? 'opacity-50' : ''));
+	let classesDisabled = $derived(disabled ? 'opacity-50' : '');
 </script>
 
 <div class={classesContainer} {hidden}>
