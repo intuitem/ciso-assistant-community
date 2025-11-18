@@ -3,6 +3,7 @@
 	import Form from '$lib/components/Forms/Form.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
+	import WebhookSecretGenerator from '$lib/components/Forms/WebhookSecretGenerator.svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import { webhookEndpointSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
@@ -63,20 +64,15 @@
 			dataType="form"
 			validators={zod(webhookEndpointSchema)}
 			action={formAction}
+			debug
 		>
 			{#snippet children({ form })}
+				{@const formStore = form}
 				<Checkbox {form} field="is_active" label={m.isActive()} checked />
 				<TextField {form} field="name" label={m.name()} data-focusindex="0" />
 				<MarkdownField {form} field="description" label={m.description()} data-focusindex="1" />
 				<TextField {form} field="url" label={m.url()} data-focusindex="2" autocomplete="off" />
-				<TextField
-					{form}
-					type="password"
-					field="secret"
-					autocomplete="new-password"
-					label={m.secret()}
-					helpText={m.webhookSecretHelpText()}
-				/>
+				<WebhookSecretGenerator {form} field="secret" />
 				<EventTypesSelect
 					{form}
 					field="event_types"

@@ -21,6 +21,7 @@
 
 	const formStore = data.form?.form;
 	let showSecretField = $state(!data.webhookEndpoint?.has_secret);
+	console.log(data.webhookEndpoint);
 
 	let eventTypeOptions = $state([]);
 

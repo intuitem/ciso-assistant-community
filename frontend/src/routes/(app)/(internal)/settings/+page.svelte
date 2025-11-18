@@ -21,7 +21,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	let group = $state('general');
+	let group = $state('webhooks');
 
 	let { data } = $props();
 
