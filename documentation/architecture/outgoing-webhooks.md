@@ -1,5 +1,24 @@
 # Outgoing webhooks
 
+<!--toc:start-->
+
+- [Outgoing webhooks](#outgoing-webhooks)
+  - [Overview & goals](#overview-goals)
+  - [Technical specification & tradeoffs](#technical-specification-tradeoffs)
+    - [Data models](#data-models)
+    - [Architecture: the registry pattern](#architecture-the-registry-pattern)
+    - [Event triggering](#event-triggering)
+      - [Rationale](#rationale)
+    - [Huey task execution](#huey-task-execution)
+    - [Security & consumer management](#security-consumer-management)
+    - [Payload](#payload)
+      - [Payload structure](#payload-structure)
+      - ["Thin" payload strategy and rationale](#thin-payload-strategy-and-rationale)
+    - [Webhook headers](#webhook-headers)
+    - [Verifying signatures (MVP)](#verifying-signatures-mvp)
+  - [MVP limitations & future iterations](#mvp-limitations-future-iterations)
+  <!--toc:end-->
+
 ## Overview & goals
 
 This document outlines the MVP implementation for **Outgoing Webhooks** in CISO Assistant.
@@ -117,7 +136,7 @@ All outgoing webhooks will include the following HTTP headers, as specified by S
 
 **Example headers:**
 
-```
+```http
 webhook-id: msg_1a2b3c4d5e6f7a8b9c0d
 webhook-timestamp: 1674087231
 webhook-signature: v1,K5oZfzN95Z9UVu1EsfQmfVNQhnkZ2pj9o9NDN/H/pI4=
