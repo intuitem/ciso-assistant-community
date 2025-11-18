@@ -15,7 +15,7 @@ class WebhookRegistry:
         def decorator(config_class):
             if model_class in self._registry:
                 # This check prevents duplicate registrations on app reloads
-                pass
+                return config_class
             self._registry[model_class] = config_class()
             return config_class
 
