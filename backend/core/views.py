@@ -223,6 +223,132 @@ def create_xlsx_response(entries, filename, wrap_columns=None):
     return response
 
 
+class ExportMixin:
+    """
+    Generic export mixin for CSV/XLSX exports.
+    ViewSets define export_config with fields, formatting, and query optimization hints.
+    """
+
+    export_config = None
+
+    def _get_export_queryset(self):
+        """Get filtered queryset with permissions applied."""
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, self.model
+        )
+        queryset = self.model.objects.filter(id__in=viewable_ids)
+
+        if self.export_config:
+            if self.export_config.get("select_related"):
+                queryset = queryset.select_related(
+                    *self.export_config["select_related"]
+                )
+            if self.export_config.get("prefetch_related"):
+                queryset = queryset.prefetch_related(
+                    *self.export_config["prefetch_related"]
+                )
+
+        return queryset
+
+    def _resolve_field_value(self, obj, field_config):
+        """Resolve field value from object using dot notation or callable."""
+        source = field_config.get("source")
+        if not source:
+            return ""
+
+        parts = source.split(".")
+        value = obj
+        for part in parts:
+            if value is None:
+                return ""
+            value = getattr(value, part, "")
+
+        # Call methods but keep managers for format functions
+        if callable(value):
+            # Check if it's a Django manager/queryset (has .all() method)
+            is_manager = hasattr(value, "all")
+            # Call methods, but pass managers as-is
+            if not is_manager:
+                try:
+                    value = value()
+                except TypeError:
+                    pass
+
+        # Apply format function if provided
+        format_func = field_config.get("format")
+        if format_func and value:
+            value = format_func(value)
+
+        if field_config.get("escape") and value:
+            value = escape_excel_formula(value)
+
+        return value if value is not None else ""
+
+    @action(detail=False, name="Export as CSV")
+    def export_csv(self, request):
+        if not self.export_config:
+            return HttpResponse(
+                status=501, content="Export not configured for this model"
+            )
+
+        try:
+            queryset = self._get_export_queryset()
+            response = HttpResponse(content_type="text/csv")
+            filename = f"{self.export_config.get('filename', 'export')}.csv"
+            response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+            writer = csv.writer(response, delimiter=";")
+            fields = self.export_config["fields"]
+            writer.writerow([f.get("label", name) for name, f in fields.items()])
+
+            has_prefetch = bool(self.export_config.get("prefetch_related"))
+            if has_prefetch:
+                for obj in queryset:
+                    row = [
+                        self._resolve_field_value(obj, field_config)
+                        for field_config in fields.values()
+                    ]
+                    writer.writerow(row)
+            else:
+                for obj in queryset.iterator():
+                    row = [
+                        self._resolve_field_value(obj, field_config)
+                        for field_config in fields.values()
+                    ]
+                    writer.writerow(row)
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Error exporting {self.model.__name__} to CSV: {str(e)}")
+            return HttpResponse(
+                status=500, content="An error occurred while generating the CSV export."
+            )
+
+    @action(detail=False, name="Export as XLSX")
+    def export_xlsx(self, request):
+        if not self.export_config:
+            return HttpResponse(
+                status=501, content="Export not configured for this model"
+            )
+
+        queryset = self._get_export_queryset()
+        entries = []
+        fields = self.export_config["fields"]
+
+        for obj in queryset:
+            entry = {}
+            for field_name, field_config in fields.items():
+                entry[field_config.get("label", field_name)] = (
+                    self._resolve_field_value(obj, field_config)
+                )
+            entries.append(entry)
+
+        filename = f"{self.export_config.get('filename', 'export')}.xlsx"
+        wrap_columns = self.export_config.get("wrap_columns", ["name", "description"])
+        return create_xlsx_response(entries, filename, wrap_columns)
+
+
 class GenericFilterSet(df.FilterSet):
     @classmethod
     def filter_for_lookup(cls, field, lookup_type):
@@ -748,7 +874,7 @@ class AssetCapabilityViewSet(BaseModelViewSet):
     search_fields = ["name"]
 
 
-class AssetViewSet(BaseModelViewSet):
+class AssetViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows assets to be viewed or edited.
     """
@@ -1104,117 +1230,58 @@ class AssetViewSet(BaseModelViewSet):
     def disaster_recovery_objectives(self, request):
         return Response({"results": Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES})
 
-    @action(detail=False, name="Export assets as CSV")
-    def export_csv(self, request):
-        try:
-            (viewable_assets_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, Asset
-            )
-            response = HttpResponse(content_type="text/csv")
-            response["Content-Disposition"] = 'attachment; filename="assets_export.csv"'
-
-            writer = csv.writer(response, delimiter=";")
-            columns = [
-                "internal_id",
-                "name",
-                "description",
-                "type",
-                "folder",
-                "security_objectives",
-                "disaster_recovery_objectives",
-                "link",
-                "owners",
-                "parent_assets",
-                "labels",
-            ]
-            writer.writerow(columns)
-
-            for asset in Asset.objects.filter(id__in=viewable_assets_ids).iterator():
-                row = [
-                    asset.id,
-                    asset.name,
-                    asset.description,
-                    asset.type,
-                    asset.folder.name,
-                    ",".join(
-                        [
-                            f"{k}: {v}"
-                            for obj in asset.get_security_objectives_display()
-                            for k, v in obj.items()
-                        ]
-                    ),
-                    ",".join(
-                        [
-                            i["str"]
-                            for i in asset.get_disaster_recovery_objectives_display()
-                        ]
-                    ),
-                    asset.reference_link,
-                    ",".join([o.email for o in asset.owner.all()]),
-                    ",".join([o.name for o in asset.parent_assets.all()]),
-                    ",".join([o.label for o in asset.filtering_labels.all()]),
-                ]
-                writer.writerow(row)
-
-            return response
-
-        except Exception as e:
-            logger.error(f"Error exporting assets to CSV: {str(e)}")
-            return HttpResponse(
-                status=500, content="An error occurred while generating the CSV export."
-            )
-
-    @action(detail=False, name="Export assets as XLSX")
-    def export_xlsx(self, request):
-        (viewable_assets_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Asset
-        )
-
-        entries = []
-        assets = (
-            Asset.objects.filter(id__in=viewable_assets_ids)
-            .select_related("folder")
-            .prefetch_related("owner", "parent_assets", "filtering_labels")
-        )
-
-        for asset in assets:
-            entry = {
-                "internal_id": asset.id,
-                "name": escape_excel_formula(asset.name),
-                "description": escape_excel_formula(asset.description),
-                "type": asset.type,
-                "folder": escape_excel_formula(asset.folder.name),
-                "security_objectives": escape_excel_formula(
-                    ",".join(
-                        [
-                            f"{k}: {v}"
-                            for obj in asset.get_security_objectives_display()
-                            for k, v in obj.items()
-                        ]
-                    )
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "type": {"source": "type", "label": "type"},
+            "folder": {"source": "folder.name", "label": "folder", "escape": True},
+            "security_objectives": {
+                "source": "get_security_objectives_display",
+                "label": "security_objectives",
+                "format": lambda objs: ",".join(
+                    f"{k}: {v}" for obj in objs for k, v in obj.items()
                 ),
-                "disaster_recovery_objectives": escape_excel_formula(
-                    ",".join(
-                        [
-                            i["str"]
-                            for i in asset.get_disaster_recovery_objectives_display()
-                        ]
-                    )
+                "escape": True,
+            },
+            "disaster_recovery_objectives": {
+                "source": "get_disaster_recovery_objectives_display",
+                "label": "disaster_recovery_objectives",
+                "format": lambda objs: ",".join(i["str"] for i in objs),
+                "escape": True,
+            },
+            "link": {"source": "reference_link", "label": "link", "escape": True},
+            "owners": {
+                "source": "owner",
+                "label": "owners",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.email) for o in qs.all()
                 ),
-                "link": escape_excel_formula(asset.reference_link),
-                "owners": ",".join(
-                    escape_excel_formula(o.email) for o in asset.owner.all()
+            },
+            "parent_assets": {
+                "source": "parent_assets",
+                "label": "parent_assets",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.name) for o in qs.all()
                 ),
-                "parent_assets": ",".join(
-                    escape_excel_formula(o.name) for o in asset.parent_assets.all()
+            },
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.label) for o in qs.all()
                 ),
-                "labels": ",".join(
-                    escape_excel_formula(o.label) for o in asset.filtering_labels.all()
-                ),
-            }
-            entries.append(entry)
-
-        return create_xlsx_response(entries, "assets_export.xlsx")
+            },
+        },
+        "filename": "assets_export",
+        "select_related": ["folder"],
+        "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
+    }
 
 
 class AssetClassViewSet(BaseModelViewSet):
@@ -2628,7 +2695,7 @@ class AppliedControlFilterSet(GenericFilterSet):
         }
 
 
-class AppliedControlViewSet(BaseModelViewSet):
+class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows applied controls to be viewed or edited.
     """
@@ -2636,6 +2703,106 @@ class AppliedControlViewSet(BaseModelViewSet):
     model = AppliedControl
     filterset_class = AppliedControlFilterSet
     search_fields = ["name", "description", "ref_id"]
+
+    @staticmethod
+    def _extract_cost_field(control, *path):
+        """Helper to safely extract nested cost fields."""
+        value = control.cost
+        if not value:
+            return ""
+        for key in path:
+            value = value.get(key, "")
+            if not value:
+                return ""
+        return value
+
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "reference_control_name": {
+                "source": "reference_control.name",
+                "label": "reference_control_name",
+                "escape": True,
+            },
+            "reference_control_ref_id": {
+                "source": "reference_control.ref_id",
+                "label": "reference_control_ref_id",
+                "escape": True,
+            },
+            "category": {"source": "category", "label": "category"},
+            "csf_function": {"source": "csf_function", "label": "csf_function"},
+            "folder": {"source": "folder.name", "label": "folder"},
+            "status": {"source": "status", "label": "status"},
+            "start_date": {"source": "start_date", "label": "start_date"},
+            "eta": {"source": "eta", "label": "eta"},
+            "expiry_date": {"source": "expiry_date", "label": "expiry_date"},
+            "priority": {"source": "priority", "label": "priority"},
+            "effort": {"source": "get_effort_display", "label": "effort"},
+            "impact": {"source": "get_control_impact_display", "label": "impact"},
+            "cost_currency": {
+                "source": "cost",
+                "label": "cost_currency",
+                "format": lambda cost: cost.get("currency", "") if cost else "",
+            },
+            "cost_build_fixed": {
+                "source": "cost",
+                "label": "cost_build_fixed",
+                "format": lambda cost: cost.get("build", {}).get("fixed_cost", "")
+                if cost
+                else "",
+            },
+            "cost_build_people_days": {
+                "source": "cost",
+                "label": "cost_build_people_days",
+                "format": lambda cost: cost.get("build", {}).get("people_days", "")
+                if cost
+                else "",
+            },
+            "cost_run_fixed": {
+                "source": "cost",
+                "label": "cost_run_fixed",
+                "format": lambda cost: cost.get("run", {}).get("fixed_cost", "")
+                if cost
+                else "",
+            },
+            "cost_run_people_days": {
+                "source": "cost",
+                "label": "cost_run_people_days",
+                "format": lambda cost: cost.get("run", {}).get("people_days", "")
+                if cost
+                else "",
+            },
+            "cost_amortization_period": {
+                "source": "cost",
+                "label": "cost_amortization_period",
+                "format": lambda cost: cost.get("amortization_period", "")
+                if cost
+                else "",
+            },
+            "owner": {
+                "source": "owner",
+                "label": "owner",
+                "format": lambda qs: ",".join(o.email for o in qs.all())
+                if qs.exists()
+                else "",
+            },
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(lbl.label for lbl in qs.all()),
+            },
+        },
+        "filename": "audit_export",
+        "select_related": ["reference_control", "folder"],
+        "prefetch_related": ["owner", "filtering_labels"],
+    }
 
     def get_queryset(self):
         """Optimize queries by prefetching related objects used in the table view and serializer"""
@@ -2823,210 +2990,6 @@ class AppliedControlViewSet(BaseModelViewSet):
         """
 
         return Response({"results": measures})
-
-    @action(detail=False, name="Export controls as CSV")
-    def export_csv(self, request):
-        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
-        )
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = 'attachment; filename="audit_export.csv"'
-
-        writer = csv.writer(response, delimiter=";")
-        columns = [
-            "internal_id",
-            "ref_id",
-            "name",
-            "description",
-            "reference_control_name",
-            "reference_control_ref_id",
-            "category",
-            "csf_function",
-            "folder",
-            "status",
-            "start_date",
-            "eta",
-            "expiry_date",
-            "priority",
-            "effort",
-            "impact",
-            "cost_currency",
-            "cost_build_fixed",
-            "cost_build_people_days",
-            "cost_run_fixed",
-            "cost_run_people_days",
-            "cost_amortization_period",
-            "owner",
-            "labels",
-        ]
-        writer.writerow(columns)
-
-        for control in (
-            AppliedControl.objects.filter(id__in=viewable_controls_ids)
-            .select_related("reference_control", "folder")
-            .prefetch_related("owner", "filtering_labels")
-        ):
-            # Get reference control name and ref_id
-            ref_control_name = (
-                control.reference_control.name if control.reference_control else ""
-            )
-            ref_control_ref_id = (
-                control.reference_control.ref_id if control.reference_control else ""
-            )
-
-            # Get effort display value (translated)
-            effort_display = control.get_effort_display() if control.effort else ""
-
-            # Get impact display value (translated)
-            impact_display = (
-                control.get_control_impact_display() if control.control_impact else ""
-            )
-
-            # Extract cost details
-            cost_currency = ""
-            cost_build_fixed = ""
-            cost_build_people_days = ""
-            cost_run_fixed = ""
-            cost_run_people_days = ""
-            cost_amortization = ""
-
-            if control.cost:
-                cost_currency = control.cost.get("currency", "")
-                cost_amortization = control.cost.get("amortization_period", "")
-                build_costs = control.cost.get("build", {})
-                run_costs = control.cost.get("run", {})
-                cost_build_fixed = (
-                    build_costs.get("fixed_cost", "") if build_costs else ""
-                )
-                cost_build_people_days = (
-                    build_costs.get("people_days", "") if build_costs else ""
-                )
-                cost_run_fixed = run_costs.get("fixed_cost", "") if run_costs else ""
-                cost_run_people_days = (
-                    run_costs.get("people_days", "") if run_costs else ""
-                )
-
-            # Get labels
-            labels = ",".join([lbl.label for lbl in control.filtering_labels.all()])
-
-            # Get owners
-            owners = (
-                ",".join([o.email for o in control.owner.all()])
-                if control.owner.exists()
-                else ""
-            )
-
-            row = [
-                control.id,
-                control.ref_id or "",
-                control.name,
-                control.description,
-                ref_control_name,
-                ref_control_ref_id,
-                control.category or "",
-                control.csf_function or "",
-                control.folder.name,
-                control.status,
-                control.start_date or "",
-                control.eta or "",
-                control.expiry_date or "",
-                control.priority or "",
-                effort_display,
-                impact_display,
-                cost_currency,
-                cost_build_fixed,
-                cost_build_people_days,
-                cost_run_fixed,
-                cost_run_people_days,
-                cost_amortization,
-                owners,
-                labels,
-            ]
-            writer.writerow(row)
-        return response
-
-    @action(detail=False, name="Export controls as XLSX")
-    def export_xlsx(self, request):
-        (viewable_controls_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
-        )
-
-        entries = []
-        for control in (
-            AppliedControl.objects.filter(id__in=viewable_controls_ids)
-            .select_related("reference_control", "folder")
-            .prefetch_related("owner", "filtering_labels")
-        ):
-            ref_control_name = (
-                control.reference_control.name if control.reference_control else ""
-            )
-            ref_control_ref_id = (
-                control.reference_control.ref_id if control.reference_control else ""
-            )
-            effort_display = control.get_effort_display() if control.effort else ""
-            impact_display = (
-                control.get_control_impact_display() if control.control_impact else ""
-            )
-
-            cost_currency = ""
-            cost_build_fixed = ""
-            cost_build_people_days = ""
-            cost_run_fixed = ""
-            cost_run_people_days = ""
-            cost_amortization = ""
-
-            if control.cost:
-                cost_currency = control.cost.get("currency", "")
-                cost_amortization = control.cost.get("amortization_period", "")
-                build_costs = control.cost.get("build", {})
-                run_costs = control.cost.get("run", {})
-                cost_build_fixed = (
-                    build_costs.get("fixed_cost", "") if build_costs else ""
-                )
-                cost_build_people_days = (
-                    build_costs.get("people_days", "") if build_costs else ""
-                )
-                cost_run_fixed = run_costs.get("fixed_cost", "") if run_costs else ""
-                cost_run_people_days = (
-                    run_costs.get("people_days", "") if run_costs else ""
-                )
-
-            labels = ",".join([lbl.label for lbl in control.filtering_labels.all()])
-            owners = (
-                ",".join([o.email for o in control.owner.all()])
-                if control.owner.exists()
-                else ""
-            )
-
-            entry = {
-                "internal_id": control.id,
-                "ref_id": escape_excel_formula(control.ref_id or ""),
-                "name": escape_excel_formula(control.name),
-                "description": escape_excel_formula(control.description),
-                "reference_control_name": escape_excel_formula(ref_control_name),
-                "reference_control_ref_id": escape_excel_formula(ref_control_ref_id),
-                "category": control.category or "",
-                "csf_function": control.csf_function or "",
-                "folder": control.folder.name,
-                "status": control.status,
-                "start_date": control.start_date or "",
-                "eta": control.eta or "",
-                "expiry_date": control.expiry_date or "",
-                "priority": control.priority or "",
-                "effort": effort_display,
-                "impact": impact_display,
-                "cost_currency": cost_currency,
-                "cost_build_fixed": cost_build_fixed,
-                "cost_build_people_days": cost_build_people_days,
-                "cost_run_fixed": cost_run_fixed,
-                "cost_run_people_days": cost_run_people_days,
-                "cost_amortization_period": cost_amortization,
-                "owner": owners,
-                "labels": labels,
-            }
-            entries.append(entry)
-
-        return create_xlsx_response(entries, "applied_controls_export.xlsx")
 
     @action(detail=False, methods=["get"])
     def get_controls_info(self, request):
@@ -3879,7 +3842,7 @@ class RiskScenarioFilter(GenericFilterSet):
         }
 
 
-class RiskScenarioViewSet(BaseModelViewSet):
+class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows risk scenarios to be viewed or edited.
     """
@@ -3888,6 +3851,130 @@ class RiskScenarioViewSet(BaseModelViewSet):
     filterset_class = RiskScenarioFilter
     ordering = ["ref_id"]
     search_fields = ["name", "description", "ref_id"]
+
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "risk_assessment": {
+                "source": "risk_assessment.name",
+                "label": "risk_assessment",
+                "escape": True,
+            },
+            "treatment": {"source": "get_treatment_display", "label": "treatment"},
+            "inherent_probability": {
+                "source": "get_inherent_proba",
+                "label": "inherent_probability",
+                "format": lambda v: v.get("name", "--"),
+            },
+            "inherent_impact": {
+                "source": "get_inherent_impact",
+                "label": "inherent_impact",
+                "format": lambda v: v.get("name", "--"),
+            },
+            "inherent_level": {
+                "source": "get_inherent_risk",
+                "label": "inherent_level",
+                "format": lambda v: v.get("name", "--"),
+            },
+            "current_probability": {
+                "source": "get_current_proba",
+                "label": "current_probability",
+                "format": lambda v: v.get("name", "--"),
+            },
+            "current_impact": {
+                "source": "get_current_impact",
+                "label": "current_impact",
+                "format": lambda v: v.get("name", "--"),
+            },
+            "current_level": {
+                "source": "get_current_risk",
+                "label": "current_level",
+                "format": lambda v: v.get("name", "--"),
+            },
+            "residual_probability": {
+                "source": "get_residual_proba",
+                "label": "residual_probability",
+                "format": lambda v: v.get("name", "--"),
+            },
+            "residual_impact": {
+                "source": "get_residual_impact",
+                "label": "residual_impact",
+                "format": lambda v: v.get("name", "--"),
+            },
+            "residual_level": {
+                "source": "get_residual_risk",
+                "label": "residual_level",
+                "format": lambda v: v.get("name", "--"),
+            },
+            "owners": {
+                "source": "owner",
+                "label": "owners",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.email) for o in qs.all()
+                ),
+            },
+            "threats": {
+                "source": "threats",
+                "label": "threats",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(t.name) for t in qs.all()
+                ),
+            },
+            "assets": {
+                "source": "assets",
+                "label": "assets",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(a.name) for a in qs.all()
+                ),
+            },
+            "vulnerabilities": {
+                "source": "vulnerabilities",
+                "label": "vulnerabilities",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(v.name) for v in qs.all()
+                ),
+            },
+            "applied_controls": {
+                "source": "applied_controls",
+                "label": "applied_controls",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(c.name) for c in qs.all()
+                ),
+            },
+            "existing_applied_controls": {
+                "source": "existing_applied_controls",
+                "label": "existing_applied_controls",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(c.name) for c in qs.all()
+                ),
+            },
+            "qualifications": {
+                "source": "qualifications",
+                "label": "qualifications",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(q.name) for q in qs.all()
+                ),
+            },
+        },
+        "filename": "risk_scenarios_export",
+        "select_related": ["risk_assessment"],
+        "prefetch_related": [
+            "owner",
+            "threats",
+            "assets",
+            "vulnerabilities",
+            "applied_controls",
+            "existing_applied_controls",
+            "qualifications",
+        ],
+    }
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -3978,149 +4065,6 @@ class RiskScenarioViewSet(BaseModelViewSet):
             sok_choices = RiskScenario.DEFAULT_SOK_OPTIONS
         choices = undefined | sok_choices
         return Response(choices)
-
-    @action(detail=False, name="Export risk scenarios as CSV")
-    def export_csv(self, request):
-        try:
-            (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, RiskScenario
-            )
-            response = HttpResponse(content_type="text/csv")
-            response["Content-Disposition"] = (
-                'attachment; filename="risk_scenarios_export.csv"'
-            )
-
-            writer = csv.writer(response, delimiter=";")
-            columns = [
-                "internal_id",
-                "ref_id",
-                "name",
-                "description",
-                "risk_assessment",
-                "treatment",
-                "inherent_probability",
-                "inherent_impact",
-                "inherent_level",
-                "current_probability",
-                "current_impact",
-                "current_level",
-                "residual_probability",
-                "residual_impact",
-                "residual_level",
-                "owners",
-                "threats",
-                "assets",
-                "vulnerabilities",
-                "applied_controls",
-                "existing_applied_controls",
-                "qualifications",
-            ]
-            writer.writerow(columns)
-
-            for scenario in RiskScenario.objects.filter(id__in=viewable_ids).iterator():
-                row = [
-                    scenario.id,
-                    scenario.ref_id,
-                    scenario.name,
-                    scenario.description,
-                    scenario.risk_assessment.name if scenario.risk_assessment else "",
-                    scenario.get_treatment_display(),
-                    scenario.get_inherent_proba().get("name", "--"),
-                    scenario.get_inherent_impact().get("name", "--"),
-                    scenario.get_inherent_risk().get("name", "--"),
-                    scenario.get_current_proba().get("name", "--"),
-                    scenario.get_current_impact().get("name", "--"),
-                    scenario.get_current_risk().get("name", "--"),
-                    scenario.get_residual_proba().get("name", "--"),
-                    scenario.get_residual_impact().get("name", "--"),
-                    scenario.get_residual_risk().get("name", "--"),
-                    ",".join([o.email for o in scenario.owner.all()]),
-                    ",".join([t.name for t in scenario.threats.all()]),
-                    ",".join([a.name for a in scenario.assets.all()]),
-                    ",".join([v.name for v in scenario.vulnerabilities.all()]),
-                    ",".join([c.name for c in scenario.applied_controls.all()]),
-                    ",".join(
-                        [c.name for c in scenario.existing_applied_controls.all()]
-                    ),
-                    ",".join([q.name for q in scenario.qualifications.all()]),
-                ]
-                writer.writerow(row)
-
-            return response
-
-        except Exception as e:
-            logger.error(f"Error exporting risk scenarios to CSV: {str(e)}")
-            return HttpResponse(
-                status=500, content="An error occurred while generating the CSV export."
-            )
-
-    @action(detail=False, name="Export risk scenarios as XLSX")
-    def export_xlsx(self, request):
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, RiskScenario
-        )
-
-        entries = []
-        scenarios = (
-            RiskScenario.objects.filter(id__in=viewable_ids)
-            .select_related("risk_assessment")
-            .prefetch_related(
-                "owner",
-                "threats",
-                "assets",
-                "vulnerabilities",
-                "applied_controls",
-                "existing_applied_controls",
-                "qualifications",
-            )
-        )
-
-        for scenario in scenarios:
-            entry = {
-                "internal_id": scenario.id,
-                "ref_id": escape_excel_formula(scenario.ref_id),
-                "name": escape_excel_formula(scenario.name),
-                "description": escape_excel_formula(scenario.description),
-                "risk_assessment": escape_excel_formula(scenario.risk_assessment.name)
-                if scenario.risk_assessment
-                else "",
-                "treatment": scenario.get_treatment_display(),
-                "inherent_probability": scenario.get_inherent_proba().get("name", "--"),
-                "inherent_impact": scenario.get_inherent_impact().get("name", "--"),
-                "inherent_level": scenario.get_inherent_risk().get("name", "--"),
-                "current_probability": scenario.get_current_proba().get("name", "--"),
-                "current_impact": scenario.get_current_impact().get("name", "--"),
-                "current_level": scenario.get_current_risk().get("name", "--"),
-                "residual_probability": scenario.get_residual_proba().get("name", "--"),
-                "residual_impact": scenario.get_residual_impact().get("name", "--"),
-                "residual_level": scenario.get_residual_risk().get("name", "--"),
-                "owners": ",".join(
-                    escape_excel_formula(o.email) for o in scenario.owner.all()
-                ),
-                "threats": ",".join(
-                    escape_excel_formula(t.name) for t in scenario.threats.all()
-                ),
-                "assets": ",".join(
-                    escape_excel_formula(a.name) for a in scenario.assets.all()
-                ),
-                "vulnerabilities": ",".join(
-                    escape_excel_formula(v.name) for v in scenario.vulnerabilities.all()
-                ),
-                "applied_controls": ",".join(
-                    escape_excel_formula(c.name)
-                    for c in scenario.applied_controls.all()
-                ),
-                "existing_applied_controls": ",".join(
-                    escape_excel_formula(c.name)
-                    for c in scenario.existing_applied_controls.all()
-                ),
-                "qualifications": ",".join(
-                    escape_excel_formula(q.name) for q in scenario.qualifications.all()
-                ),
-            }
-            entries.append(entry)
-
-        return create_xlsx_response(entries, "risk_scenarios_export.xlsx")
 
     @action(detail=False, name="Get risk count per level")
     def count_per_level(self, request):
@@ -8485,7 +8429,7 @@ def export_mp_csv(request):
     return response
 
 
-class SecurityExceptionViewSet(BaseModelViewSet):
+class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows security exceptions to be viewed or edited.
     """
@@ -8504,6 +8448,45 @@ class SecurityExceptionViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id"]
 
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "severity": {"source": "get_severity_display", "label": "severity"},
+            "status": {"source": "get_status_display", "label": "status"},
+            "expiration_date": {
+                "source": "expiration_date",
+                "label": "expiration_date",
+            },
+            "owners": {
+                "source": "owners",
+                "label": "owners",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.email) for o in qs.all()
+                ),
+            },
+            "approver": {
+                "source": "approver.email",
+                "label": "approver",
+                "escape": True,
+            },
+            "folder": {
+                "source": "folder.name",
+                "label": "folder",
+                "escape": True,
+            },
+        },
+        "filename": "security_exceptions_export",
+        "select_related": ["folder", "approver"],
+        "prefetch_related": ["owners"],
+    }
+
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Severity.choices))
@@ -8512,93 +8495,6 @@ class SecurityExceptionViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(SecurityException.Status.choices))
-
-    @action(detail=False, name="Export security exceptions as CSV")
-    def export_csv(self, request):
-        try:
-            (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, SecurityException
-            )
-            response = HttpResponse(content_type="text/csv")
-            response["Content-Disposition"] = (
-                'attachment; filename="security_exceptions_export.csv"'
-            )
-
-            writer = csv.writer(response, delimiter=";")
-            columns = [
-                "internal_id",
-                "ref_id",
-                "name",
-                "description",
-                "severity",
-                "status",
-                "expiration_date",
-                "owners",
-                "approver",
-                "folder",
-            ]
-            writer.writerow(columns)
-
-            for exception in SecurityException.objects.filter(
-                id__in=viewable_ids
-            ).iterator():
-                row = [
-                    exception.id,
-                    exception.ref_id,
-                    exception.name,
-                    exception.description,
-                    exception.get_severity_display(),
-                    exception.get_status_display(),
-                    exception.expiration_date,
-                    ",".join([o.email for o in exception.owners.all()]),
-                    exception.approver.email if exception.approver else "",
-                    exception.folder.name if exception.folder else "",
-                ]
-                writer.writerow(row)
-
-            return response
-
-        except Exception as e:
-            logger.error(f"Error exporting security exceptions to CSV: {str(e)}")
-            return HttpResponse(
-                status=500, content="An error occurred while generating the CSV export."
-            )
-
-    @action(detail=False, name="Export security exceptions as XLSX")
-    def export_xlsx(self, request):
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, SecurityException
-        )
-
-        entries = []
-        exceptions = (
-            SecurityException.objects.filter(id__in=viewable_ids)
-            .select_related("folder", "approver")
-            .prefetch_related("owners")
-        )
-
-        for exception in exceptions:
-            entry = {
-                "internal_id": exception.id,
-                "ref_id": escape_excel_formula(exception.ref_id),
-                "name": escape_excel_formula(exception.name),
-                "description": escape_excel_formula(exception.description),
-                "severity": exception.get_severity_display(),
-                "status": exception.get_status_display(),
-                "expiration_date": exception.expiration_date,
-                "owners": ",".join(
-                    escape_excel_formula(o.email) for o in exception.owners.all()
-                ),
-                "approver": escape_excel_formula(exception.approver.email)
-                if exception.approver
-                else "",
-                "folder": escape_excel_formula(exception.folder.name)
-                if exception.folder
-                else "",
-            }
-            entries.append(entry)
-
-        return create_xlsx_response(entries, "security_exceptions_export.xlsx")
 
     def get_queryset(self):
         return (
@@ -9298,7 +9194,7 @@ class FindingViewSet(BaseModelViewSet):
         return Response({"results": {"nodes": nodes, "links": links}})
 
 
-class IncidentViewSet(BaseModelViewSet):
+class IncidentViewSet(ExportMixin, BaseModelViewSet):
     model = Incident
     search_fields = ["name", "description", "ref_id"]
     filterset_fields = [
@@ -9310,6 +9206,75 @@ class IncidentViewSet(BaseModelViewSet):
         "owners",
         "entities",
     ]
+
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "status": {"source": "get_status_display", "label": "status"},
+            "severity": {"source": "get_severity_display", "label": "severity"},
+            "detection": {"source": "get_detection_display", "label": "detection"},
+            "reported_at": {
+                "source": "reported_at",
+                "label": "reported_at",
+                "format": lambda dt: dt.replace(tzinfo=None)
+                if dt and hasattr(dt, "tzinfo") and dt.tzinfo
+                else dt,
+            },
+            "owners": {
+                "source": "owners",
+                "label": "owners",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.email) for o in qs.all()
+                ),
+            },
+            "folder": {"source": "folder.name", "label": "folder", "escape": True},
+            "qualifications": {
+                "source": "qualifications",
+                "label": "qualifications",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(q.name) for q in qs.all()
+                ),
+            },
+            "threats": {
+                "source": "threats",
+                "label": "threats",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(t.name) for t in qs.all()
+                ),
+            },
+            "assets": {
+                "source": "assets",
+                "label": "assets",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(a.name) for a in qs.all()
+                ),
+            },
+            "entities": {
+                "source": "entities",
+                "label": "entities",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(e.name) for e in qs.all()
+                ),
+            },
+            "link": {"source": "link", "label": "link", "escape": True},
+        },
+        "filename": "incidents_export",
+        "select_related": ["folder"],
+        "prefetch_related": [
+            "owners",
+            "qualifications",
+            "threats",
+            "assets",
+            "entities",
+        ],
+    }
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -9325,125 +9290,6 @@ class IncidentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get detection channel choices")
     def detection(self, request):
         return Response(dict(Incident.Detection.choices))
-
-    @action(detail=False, name="Export incidents as CSV")
-    def export_csv(self, request):
-        try:
-            (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, Incident
-            )
-            response = HttpResponse(content_type="text/csv")
-            response["Content-Disposition"] = (
-                'attachment; filename="incidents_export.csv"'
-            )
-
-            writer = csv.writer(response, delimiter=";")
-            columns = [
-                "internal_id",
-                "ref_id",
-                "name",
-                "description",
-                "status",
-                "severity",
-                "detection",
-                "reported_at",
-                "owners",
-                "folder",
-                "qualifications",
-                "threats",
-                "assets",
-                "entities",
-                "link",
-            ]
-            writer.writerow(columns)
-
-            for incident in Incident.objects.filter(id__in=viewable_ids).iterator():
-                row = [
-                    incident.id,
-                    incident.ref_id,
-                    incident.name,
-                    incident.description,
-                    incident.get_status_display(),
-                    incident.get_severity_display(),
-                    incident.get_detection_display() if incident.detection else "",
-                    incident.reported_at,
-                    ",".join([o.email for o in incident.owners.all()]),
-                    incident.folder.name if incident.folder else "",
-                    ",".join([q.name for q in incident.qualifications.all()]),
-                    ",".join([t.name for t in incident.threats.all()]),
-                    ",".join([a.name for a in incident.assets.all()]),
-                    ",".join([e.name for e in incident.entities.all()]),
-                    incident.link,
-                ]
-                writer.writerow(row)
-
-            return response
-
-        except Exception as e:
-            logger.error(f"Error exporting incidents to CSV: {str(e)}")
-            return HttpResponse(
-                status=500, content="An error occurred while generating the CSV export."
-            )
-
-    @action(detail=False, name="Export incidents as XLSX")
-    def export_xlsx(self, request):
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
-        )
-
-        entries = []
-        incidents = (
-            Incident.objects.filter(id__in=viewable_ids)
-            .select_related("folder")
-            .prefetch_related(
-                "owners", "qualifications", "threats", "assets", "entities"
-            )
-        )
-
-        for incident in incidents:
-            # Convert timezone-aware datetime to timezone-naive for Excel compatibility
-            reported_at = incident.reported_at
-            if (
-                reported_at
-                and hasattr(reported_at, "tzinfo")
-                and reported_at.tzinfo is not None
-            ):
-                reported_at = reported_at.replace(tzinfo=None)
-
-            entry = {
-                "internal_id": incident.id,
-                "ref_id": escape_excel_formula(incident.ref_id),
-                "name": escape_excel_formula(incident.name),
-                "description": escape_excel_formula(incident.description),
-                "status": incident.get_status_display(),
-                "severity": incident.get_severity_display(),
-                "detection": incident.get_detection_display()
-                if incident.detection
-                else "",
-                "reported_at": reported_at,
-                "owners": ",".join(
-                    escape_excel_formula(o.email) for o in incident.owners.all()
-                ),
-                "folder": escape_excel_formula(incident.folder.name)
-                if incident.folder
-                else "",
-                "qualifications": ",".join(
-                    escape_excel_formula(q.name) for q in incident.qualifications.all()
-                ),
-                "threats": ",".join(
-                    escape_excel_formula(t.name) for t in incident.threats.all()
-                ),
-                "assets": ",".join(
-                    escape_excel_formula(a.name) for a in incident.assets.all()
-                ),
-                "entities": ",".join(
-                    escape_excel_formula(e.name) for e in incident.entities.all()
-                ),
-                "link": escape_excel_formula(incident.link),
-            }
-            entries.append(entry)
-
-        return create_xlsx_response(entries, "incidents_export.xlsx")
 
     def perform_update(self, serializer):
         previous_instance = self.get_object()
