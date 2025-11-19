@@ -65,6 +65,15 @@
 		cacheLock={cacheLocks['ref_id']}
 		bind:cachedValue={formDataCache['ref_id']}
 	/>
+	<Select
+		{form}
+		options={model.selectOptions['quotation_method']}
+		field="quotation_method"
+		disableDoubleDash
+		label={m.quotationMethod()}
+		cacheLock={cacheLocks['quotation_method']}
+		bind:cachedValue={formDataCache['quotation_method']}
+	/>
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="folders?content_type=DO"
