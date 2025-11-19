@@ -2089,6 +2089,7 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
     approver = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")
     associated_objects_count = serializers.SerializerMethodField()
+    assets = FieldsRelatedField(many=True)
 
     def get_associated_objects_count(self, obj):
         """Prefer annotated or prefetched counts to avoid extra DB queries."""
