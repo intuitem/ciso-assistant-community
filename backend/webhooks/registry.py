@@ -1,25 +1,37 @@
+from .config import WebhookConfigBase
+
+
 class WebhookRegistry:
     def __init__(self):
         self._registry = {}  # {ModelClass: ConfigClass}
 
-    def register(self, model_class):
+    def register(self, model_class, events=None):
         """
-        A decorator for registering a model with the webhook system.
+        A method for registering a model with the webhook system.
 
         Example:
-            @webhook_registry.register(AppliedControl)
-            class AppliedControlWebhookConfig(WebhookConfigBase):
-                ...
+            webhook_registry.register(AppliedControl)
         """
+        if model_class in self._registry:
+            # This check prevents duplicate registrations on app reloads
+            return
 
-        def decorator(config_class):
-            if model_class in self._registry:
-                # This check prevents duplicate registrations on app reloads
-                return config_class
-            self._registry[model_class] = config_class()
-            return config_class
+        class GenericWebhookConfig(WebhookConfigBase):
+            def __init__(self, model_class, events):
+                self.model_class = model_class
+                self.model_name = model_class._meta.model_name.lower()
+                self.events = events or ["created", "updated", "deleted"]
 
-        return decorator
+            def get_event_type(self, instance, action):
+                return f"{self.model_name}.{action}"
+
+            def get_payload(self, instance):
+                return {"id": str(instance.id)}
+
+            def get_event_types(self):
+                return [f"{self.model_name}.{event}" for event in self.events]
+
+        self._registry[model_class] = GenericWebhookConfig(model_class, events)
 
     def get_config(self, instance):
         """
