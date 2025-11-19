@@ -41,4 +41,4 @@ class Command(BaseCommand):
                         error_msg=error_msg,
                     )
         except Exception:
-            pass
+            logger.error("Failed to update libraries", exc_info=True)
