@@ -23,7 +23,7 @@
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
 	import type { Node } from './types';
 
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -286,6 +286,23 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalRequestValidation(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.validationFlowForm,
+				model: getModelInfo('validation-flows'),
+				formAction: '/validation-flows?/create'
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.requestValidation()
 		};
 		modalStore.trigger(modal);
 	}
@@ -639,10 +656,18 @@
 						><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
 					</button>
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-orange-500 to-red-500 h-fit"
+						class="btn text-gray-100 bg-linear-to-r from-rose-500 to-pink-500 h-fit"
 						onclick={() => modalCompareAudit()}
 						data-testid="compare-audit-button"
 						><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
+					</button>
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+						onclick={() => modalRequestValidation()}
+						data-testid="request-validation-button"
+					>
+						<i class="fa-solid fa-check-circle mr-2"></i>
+						{m.requestValidation()}
 					</button>
 				{/if}
 
@@ -701,12 +726,12 @@
 				{/if}
 				{#if has_threats && !page.data.user.is_third_party}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-amber-500 to-orange-500 h-fit"
+						class="btn text-gray-100 bg-linear-to-r from-yellow-500 to-red-600 h-fit"
 						onclick={openThreatsDialog}
 					>
 						<div class="flex items-center space-x-2">
-							<i class="fa-solid fa-triangle-exclamation text-red-700"></i>
-							<span class="text-red-700 font-bold">{data.threats.total_unique_threats}</span>
+							<i class="fa-solid fa-triangle-exclamation text-white"></i>
+							<span class="text-white font-bold">{data.threats.total_unique_threats}</span>
 							<span>{m.potentialThreats()}</span>
 						</div>
 					</button>

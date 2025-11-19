@@ -2587,6 +2587,8 @@ class TerminologyWriteSerializer(BaseModelSerializer):
 
 
 class ValidationFlowWriteSerializer(BaseModelSerializer):
+    ref_id = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
     def create(self, validated_data: dict) -> ValidationFlow:
         """
         Override create to automatically set the requester to the current user.
@@ -2597,25 +2599,39 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
 
     def update(self, instance: ValidationFlow, validated_data: dict) -> ValidationFlow:
         """
-        Override update to ensure only the assigned approver can modify
-        status and approver_observation fields.
+        Override update to ensure proper permissions for status transitions:
+        - Approver can modify status when status is 'submitted' or 'accepted'
+        - Requester can modify status when status is 'change_requested'
         """
         request_user = self.context["request"].user
 
-        # Fields that only the approver can modify
-        approver_only_fields = {"status", "approver_observation"}
+        # Check if status is being modified
+        if "status" in validated_data:
+            new_status = validated_data["status"]
+            current_status = instance.status
 
-        # Check if any approver-only fields are being modified
-        modified_approver_fields = approver_only_fields.intersection(
-            validated_data.keys()
-        )
-
-        if modified_approver_fields:
-            # Verify the user making the change is the assigned approver
-            if instance.approver != request_user:
+            # Define who can modify based on current status
+            if current_status in ["submitted", "accepted"]:
+                # Only approver can change status from submitted or accepted
+                if instance.approver != request_user:
+                    raise PermissionDenied(
+                        {
+                            "error": "Only the assigned approver can modify this validation"
+                        }
+                    )
+            elif current_status == "change_requested":
+                # Only requester can change status from change_requested
+                if instance.requester != request_user:
+                    raise PermissionDenied(
+                        {
+                            "error": "Only the requester can resubmit or drop this validation"
+                        }
+                    )
+            else:
+                # Terminal states (rejected, revoked, dropped, expired) cannot be modified
                 raise PermissionDenied(
                     {
-                        "error": "Only the assigned approver can modify status and observations"
+                        "error": "This validation is in a terminal state and cannot be modified"
                     }
                 )
 
@@ -2628,6 +2644,7 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
 
 
 class ValidationFlowReadSerializer(BaseModelSerializer):
+    str = serializers.CharField(source="__str__", read_only=True)
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     compliance_assessments = FieldsRelatedField(many=True)
@@ -2641,9 +2658,9 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     policies = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
-    requester = FieldsRelatedField(["id", "first_name", "last_name"])
-    approver = FieldsRelatedField(["id", "first_name", "last_name"])
-    status = serializers.CharField(source="get_status_display")
+    requester = FieldsRelatedField(["id", "email", "first_name", "last_name"])
+    approver = FieldsRelatedField(["id", "email", "first_name", "last_name"])
+    linked_models = serializers.ListField(read_only=True)
 
     class Meta:
         model = ValidationFlow

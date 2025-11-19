@@ -119,7 +119,8 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const validationFlowSchema = modelSchema('validation-flows');
 	const validationFlowInitialData = {
 		folder: risk_assessment.folder.id,
-		risk_assessments: [params.id]
+		risk_assessments: [params.id],
+		ref_id: ''
 	};
 	const validationFlowForm = await superValidate(
 		validationFlowInitialData,

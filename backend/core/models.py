@@ -6805,11 +6805,13 @@ class TaskNode(AbstractBaseModel, FolderMixin):
 
 class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
-        PENDING = "pending", "Pending"
+        SUBMITTED = "submitted", "Submitted"
         ACCEPTED = "accepted", "Accepted"
         REJECTED = "rejected", "Rejected"
         REVOKED = "revoked", "Revoked"
         EXPIRED = "expired", "Expired"
+        DROPPED = "dropped", "Dropped"
+        CHANGE_REQUESTED = "change_requested", "Change requested"
 
     compliance_assessments = models.ManyToManyField(
         ComplianceAssessment,
@@ -6868,14 +6870,35 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         null=True,
         blank=True,
     )
-    approver_observation = models.TextField(null=True, blank=True)
+
+    # Transition notes fields
+    accept_notes = models.TextField(
+        null=True, blank=True, verbose_name=_("Accept notes")
+    )
+    rejection_notes = models.TextField(
+        null=True, blank=True, verbose_name=_("Rejection notes")
+    )
+    revocation_notes = models.TextField(
+        null=True, blank=True, verbose_name=_("Revocation notes")
+    )
+    changes_request_notes = models.TextField(
+        null=True, blank=True, verbose_name=_("Changes request notes")
+    )
+    drop_notes = models.TextField(null=True, blank=True, verbose_name=_("Drop notes"))
+    resubmission_notes = models.TextField(
+        null=True, blank=True, verbose_name=_("Resubmission notes")
+    )
 
     ref_id = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name=_("Reference ID")
+        max_length=100,
+        null=True,
+        blank=True,
+        unique=True,
+        verbose_name=_("Reference ID"),
     )
     status = models.CharField(
         choices=Status.choices,
-        default=Status.PENDING,
+        default=Status.SUBMITTED,
         max_length=20,
     )
     expiration_date = models.DateField(
@@ -6886,15 +6909,39 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         verbose_name = "Validation flow"
         verbose_name_plural = "Validation flows"
 
+    def save(self, *args, **kwargs):
+        if not self.ref_id:
+            self.ref_id = self.get_default_ref_id()
+        super().save(*args, **kwargs)
+
     @classmethod
-    def get_default_ref_id(cls, folder):
-        """return default ref_id for validation flow in folder"""
-        flows_ref_ids = [
-            x.ref_id for x in cls.objects.filter(folder=folder) if x.ref_id
-        ]
+    def get_default_ref_id(cls):
+        """return default ref_id for validation flow (globally unique)"""
+        flows_ref_ids = [x.ref_id for x in cls.objects.all() if x.ref_id]
         nb_flows = len(flows_ref_ids) + 1
-        candidates = [f"VAL.{i:05d}" for i in range(1, nb_flows + 1)]
+        candidates = [f"VAL.{i:06d}" for i in range(1, nb_flows + 1)]
         return next(x for x in candidates if x not in flows_ref_ids)
+
+    @property
+    def linked_models(self) -> list[str]:
+        """Return list of model types that have linked objects"""
+        linked = []
+        model_fields = [
+            "compliance_assessments",
+            "risk_assessments",
+            "business_impact_analysis",
+            "crq_studies",
+            "ebios_studies",
+            "entity_assessments",
+            "findings_assessments",
+            "evidences",
+            "security_exceptions",
+            "policies",
+        ]
+        for field in model_fields:
+            if getattr(self, field).exists():
+                linked.append(field)
+        return linked
 
     def __str__(self) -> str:
         return self.ref_id

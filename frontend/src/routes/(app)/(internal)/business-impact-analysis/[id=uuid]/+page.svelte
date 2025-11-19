@@ -30,11 +30,7 @@
 				model: data.validationFlowModel,
 				debug: false,
 				invalidateAll: false,
-				formAction: '/validation-flows?/create',
-				additionalInitialData: {
-					folder: business_impact_analysis.folder.id,
-					business_impact_analysis: [business_impact_analysis.id]
-				}
+				formAction: '/validation-flows?/create'
 			}
 		};
 

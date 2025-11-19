@@ -38,9 +38,9 @@
 		initialData.entity_assessments ||
 		initialData.findings_assessments;
 
-	async function fetchDefaultRefId(folderId: string) {
+	async function fetchDefaultRefId() {
 		try {
-			const response = await fetch(`/validation-flows/default-ref-id/?folder=${folderId}`);
+			const response = await fetch(`/validation-flows/default-ref-id/`);
 			const result = await response.json();
 			if (response.ok && result.results) {
 				form.form.update((currentData) => {
@@ -104,7 +104,7 @@
 	hidden={initialData.folder}
 	onChange={async (e) => {
 		if (e && !object?.id) {
-			await fetchDefaultRefId(e);
+			await fetchDefaultRefId();
 		}
 	}}
 />
@@ -135,15 +135,6 @@
 		cacheLock={cacheLocks['expiration_date']}
 		bind:cachedValue={formDataCache['expiration_date']}
 		disabled={initialData.expiration_date}
-	/>
-{/if}
-{#if object?.id}
-	<TextArea
-		{form}
-		field="approver_observation"
-		label={m.approverObservation()}
-		cacheLock={cacheLocks['approver_observation']}
-		bind:cachedValue={formDataCache['approver_observation']}
 	/>
 {/if}
 {#if !hasPresetAssessments}

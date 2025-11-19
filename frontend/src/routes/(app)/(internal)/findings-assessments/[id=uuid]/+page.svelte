@@ -35,11 +35,7 @@
 				model: data.validationFlowModel,
 				debug: false,
 				invalidateAll: false,
-				formAction: '/validation-flows?/create',
-				additionalInitialData: {
-					folder: findings_assessment.folder.id,
-					findings_assessments: [findings_assessment.id]
-				}
+				formAction: '/validation-flows?/create'
 			}
 		};
 

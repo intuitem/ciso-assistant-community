@@ -91,11 +91,7 @@
 				form: data.validationFlowForm,
 				model: data.validationFlowModel,
 				debug: false,
-				invalidateAll: false,
-				additionalInitialData: {
-					folder: risk_assessment.folder.id,
-					risk_assessments: [risk_assessment.id]
-				}
+				invalidateAll: false
 			}
 		};
 

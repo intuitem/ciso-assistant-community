@@ -4297,6 +4297,26 @@ class UserFilter(GenericFilterSet):
 
 
 class ValidationFlowFilterSet(GenericFilterSet):
+    linked_models = df.CharFilter(method="filter_linked_models", label="Linked models")
+
+    def filter_linked_models(self, queryset, name, value):
+        """
+        Filter validation flows by linked model types.
+        Usage: ?linked_models=risk_assessments,evidences
+        """
+        if not value:
+            return queryset
+
+        model_types = [m.strip() for m in value.split(",")]
+        filtered_qs = queryset
+
+        for model_type in model_types:
+            # Use the field name with __isnull=False to check if objects are linked
+            filter_kwargs = {f"{model_type}__isnull": False}
+            filtered_qs = filtered_qs.filter(**filter_kwargs).distinct()
+
+        return filtered_qs
+
     class Meta:
         model = ValidationFlow
         fields = [
@@ -4328,11 +4348,8 @@ class ValidationFlowViewSet(BaseModelViewSet):
     search_fields = ["ref_id", "request_notes", "approver_observation"]
 
     def _perform_write(self, serializer):
-        if not serializer.validated_data.get(
-            "ref_id"
-        ) and serializer.validated_data.get("folder"):
-            folder = serializer.validated_data["folder"]
-            ref_id = ValidationFlow.get_default_ref_id(folder)
+        if not serializer.validated_data.get("ref_id"):
+            ref_id = ValidationFlow.get_default_ref_id()
             serializer.validated_data["ref_id"] = ref_id
         serializer.save()
 
@@ -4347,18 +4364,31 @@ class ValidationFlowViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ValidationFlow.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get linked models choices")
+    def linked_models(self, request):
+        """Return available model types that can be linked to validation flows"""
+        model_types = {
+            "compliance_assessments": "Compliance Assessments",
+            "risk_assessments": "Risk Assessments",
+            "business_impact_analysis": "Business Impact Analysis",
+            "crq_studies": "Quantitative Risk Studies",
+            "ebios_studies": "EBIOS RM Studies",
+            "entity_assessments": "Entity Assessments",
+            "findings_assessments": "Findings Assessments",
+            "evidences": "Evidences",
+            "security_exceptions": "Security Exceptions",
+            "policies": "Policies",
+        }
+        return Response(model_types)
+
     @action(
         detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
     )
     def default_ref_id(self, request):
-        folder_id = request.query_params.get("folder")
-        if not folder_id:
-            return Response({"error": "Missing 'folder' parameter."}, status=400)
         try:
-            folder = Folder.objects.get(pk=folder_id)
-
-            # Use the class method to compute the default ref_id
-            default_ref_id = ValidationFlow.get_default_ref_id(folder)
+            # Use the class method to compute the default ref_id (globally unique)
+            default_ref_id = ValidationFlow.get_default_ref_id()
             return Response({"results": default_ref_id})
         except Exception as e:
             logger.error("Error in default_ref_id: %s", str(e))

@@ -25,7 +25,8 @@ export const load: PageServerLoad = async (event) => {
 	const validationFlowSchema = modelSchema('validation-flows');
 	const validationFlowInitialData = {
 		folder: detailData.data.folder.id,
-		findings_assessments: [event.params.id]
+		findings_assessments: [event.params.id],
+		ref_id: ''
 	};
 	const validationFlowForm = await superValidate(
 		validationFlowInitialData,
