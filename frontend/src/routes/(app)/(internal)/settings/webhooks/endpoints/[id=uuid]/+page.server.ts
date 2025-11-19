@@ -1,13 +1,12 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { zod } from 'sveltekit-superforms/adapters';
-import { getModelInfo } from '$lib/utils/crud';
-import { fail, superValidate } from 'sveltekit-superforms';
-import type { PageServerLoad } from './$types';
-import { webhookEndpointSchema } from '$lib/utils/schemas';
-import { setFlash } from 'sveltekit-flash-message/server';
-import { redirect } from '@sveltejs/kit';
-import { m } from '$paraglide/messages';
 import { safeTranslate } from '$lib/utils/i18n';
+import { webhookEndpointSchema } from '$lib/utils/schemas';
+import { m } from '$paraglide/messages';
+import { redirect } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { fail, superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	const endpoint = `${BASE_API_URL}/webhooks/endpoints/${event.params.id}/`;
