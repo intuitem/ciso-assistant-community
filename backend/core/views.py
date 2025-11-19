@@ -274,9 +274,9 @@ class ExportMixin:
                 except TypeError:
                     pass
 
-        # Apply format function if provided
+        # Always apply if formatter exists, let formatter handle empties
         format_func = field_config.get("format")
-        if format_func and value:
+        if format_func:
             value = format_func(value)
 
         if field_config.get("escape") and value:
