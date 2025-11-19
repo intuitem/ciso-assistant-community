@@ -1,3 +1,12 @@
+"""
+Web Scraper for ANSSI AD Framework (v0.1)
+
+This scraper extract the content of the website and store it in a JSON file.
+TODO: Format text in Markdown according to the HTML tags and store it correctly in an Excel (.xlsx) file. 
+"""
+
+
+
 import json
 from playwright.sync_api import sync_playwright
 
