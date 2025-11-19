@@ -58,13 +58,13 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="users?is_approver=true"
+	optionsEndpoint="users?is_approver=true&exclude_current=true"
 	optionsLabelField="email"
 	field="approver"
 	cacheLock={cacheLocks['approver']}
 	bind:cachedValue={formDataCache['approver']}
 	label={m.approver()}
-	helpText={m.approverHelpText()}
+	helpText={m.validationApproverHelpText()}
 	disabled={initialData.approver}
 />
 {#if object?.id}
@@ -79,6 +79,18 @@
 		label={m.requestNotes()}
 		cacheLock={cacheLocks['request_notes']}
 		bind:cachedValue={formDataCache['request_notes']}
+	/>
+{/if}
+{#if !object?.id}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="filtering-labels"
+		field="filtering_labels"
+		optionsLabelField="label"
+		cacheLock={cacheLocks['filtering_labels']}
+		bind:cachedValue={formDataCache['filtering_labels']}
+		label={m.labels()}
+		multiple
 	/>
 {/if}
 <AutocompleteSelect

@@ -452,7 +452,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Validation flows',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
+			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true&exclude_current=true' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'business_impact_analysis', urlModel: 'business-impact-analysis' },
@@ -465,7 +466,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'policies', urlModel: 'policies' }
 		],
 		selectFields: [{ field: 'status' }],
-		filters: [{ field: 'folder' }, { field: 'status' }, { field: 'approver' }]
+		filters: [{ field: 'folder' }, { field: 'status' }, { field: 'requester' }, { field: 'approver' }, { field: 'filtering_labels' }]
 	},
 	'reference-controls': {
 		name: 'referencecontrol',

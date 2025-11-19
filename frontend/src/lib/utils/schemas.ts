@@ -231,6 +231,7 @@ export const ValidationFlowSchema = z.object({
 	request_notes: z.string().optional().nullable(),
 	approver: z.string(),
 	approver_observation: z.string().optional().nullable(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional(),
 	compliance_assessments: z.array(z.string()).optional(),
 	risk_assessments: z.array(z.string()).optional(),
 	business_impact_analysis: z.array(z.string()).optional(),

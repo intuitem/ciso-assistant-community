@@ -6803,7 +6803,7 @@ class TaskNode(AbstractBaseModel, FolderMixin):
         verbose_name_plural = "Task nodes"
 
 
-class ValidationFlow(AbstractBaseModel, FolderMixin):
+class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         PENDING = "pending", "Pending"
         ACCEPTED = "accepted", "Accepted"
@@ -6896,14 +6896,8 @@ class ValidationFlow(AbstractBaseModel, FolderMixin):
         candidates = [f"VAL.{i:05d}" for i in range(1, nb_flows + 1)]
         return next(x for x in candidates if x not in flows_ref_ids)
 
-    @property
-    def name(self) -> str:
-        key = str(self.id).split("-")[0]
-        return f"Validation {key}"
-
     def __str__(self) -> str:
-        key = str(self.id).split("-")[0]
-        return f"Validation {key}"
+        return self.ref_id
 
 
 common_exclude = ["created_at", "updated_at"]

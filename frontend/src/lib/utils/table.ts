@@ -476,6 +476,16 @@ export const APPROVER_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const REQUESTER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'requester',
+		optionsEndpoint: 'users',
+		optionsLabelField: 'email',
+		multiple: true
+	}
+};
+
 export const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1231,8 +1241,8 @@ export const listViewFields = {
 		}
 	},
 	'validation-flows': {
-		head: ['ref_id', 'status', 'createdAt', 'requester', 'approver', 'domain'],
-		body: ['ref_id', 'status', 'created_at', 'requester', 'approver', 'folder'],
+		head: ['ref_id', 'status', 'createdAt', 'requester', 'approver', 'labels', 'domain'],
+		body: ['ref_id', 'status', 'created_at', 'requester', 'approver', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: {
@@ -1246,7 +1256,9 @@ export const listViewFields = {
 					multiple: true
 				}
 			},
-			approver: APPROVER_FILTER
+			requester: REQUESTER_FILTER,
+			approver: APPROVER_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'applied-controls': {

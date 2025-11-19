@@ -4257,6 +4257,9 @@ class UserFilter(GenericFilterSet):
     is_applied_control_owner = df.BooleanFilter(
         method="filter_applied_control_owner", label="Applied control owner"
     )
+    exclude_current = df.BooleanFilter(
+        method="filter_exclude_current", label="Exclude current user"
+    )
 
     def filter_approver(self, queryset, name, value):
         """we don't know yet which folders will be used, so filter on any folder"""
@@ -4271,6 +4274,12 @@ class UserFilter(GenericFilterSet):
     def filter_applied_control_owner(self, queryset, name, value):
         return queryset.filter(applied_controls__isnull=not value)
 
+    def filter_exclude_current(self, queryset, name, value):
+        """Exclude the current user from the queryset"""
+        if value and self.request and self.request.user:
+            return queryset.exclude(id=self.request.user.id)
+        return queryset
+
     class Meta:
         model = User
         fields = [
@@ -4283,6 +4292,7 @@ class UserFilter(GenericFilterSet):
             "is_third_party",
             "expiry_date",
             "user_groups",
+            "exclude_current",
         ]
 
 
@@ -4292,7 +4302,9 @@ class ValidationFlowFilterSet(GenericFilterSet):
         fields = [
             "folder",
             "status",
+            "requester",
             "approver",
+            "filtering_labels",
             "compliance_assessments",
             "risk_assessments",
             "crq_studies",

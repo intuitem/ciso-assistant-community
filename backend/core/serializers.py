@@ -2640,6 +2640,7 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
     evidences = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     policies = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(many=True)
     requester = FieldsRelatedField(["id", "first_name", "last_name"])
     approver = FieldsRelatedField(["id", "first_name", "last_name"])
     status = serializers.CharField(source="get_status_display")
