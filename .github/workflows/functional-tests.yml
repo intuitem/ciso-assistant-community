@@ -97,6 +97,8 @@ jobs:
 
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
         run: make
 
       - name: Upload Enterprise Frontend Build Artifact

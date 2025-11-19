@@ -1150,8 +1150,16 @@ export const listViewFields = {
 		}
 	},
 	'risk-assessments': {
-		head: ['ref_id', 'name', 'riskMatrix', 'status', 'riskScenarios', 'perimeter'],
-		body: ['ref_id', 'str', 'risk_matrix', 'status', 'risk_scenarios_count', 'perimeter'],
+		head: ['ref_id', 'name', 'riskMatrix', 'status', 'riskScenarios', 'perimeter', 'updatedAt'],
+		body: [
+			'ref_id',
+			'str',
+			'risk_matrix',
+			'status',
+			'risk_scenarios_count',
+			'perimeter',
+			'updated_at'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1777,8 +1785,8 @@ export const listViewFields = {
 		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
 	},
 	'ebios-rm': {
-		head: ['name', 'description', 'domain', 'quotationMethod'],
-		body: ['name', 'description', 'folder', 'quotation_method'],
+		head: ['name', 'description', 'domain', 'quotationMethod', 'createdAt', 'updatedAt'],
+		body: ['name', 'description', 'folder', 'quotation_method', 'created_at', 'updated_at'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}

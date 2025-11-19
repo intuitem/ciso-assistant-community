@@ -301,7 +301,7 @@
 						<Anchor
 							href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
 							label={m.edit()}
-							class="btn preset-filled-primary-500"
+							class="btn preset-filled-primary-500 w-full"
 							data-testid="edit-button"
 						>
 							<i class="fa-solid fa-edit mr-2"></i>
