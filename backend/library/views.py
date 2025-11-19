@@ -1,5 +1,6 @@
 from itertools import chain
 import json
+from typing import Optional
 from django.db import IntegrityError
 from django.db.models import F, Q, IntegerField, OuterRef, Subquery
 from django_filters.rest_framework import DjangoFilterBackend
@@ -224,8 +225,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
         lib.delete()
         return Response(status=HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=["post"], url_path="import")
-    def import_library(self, request, pk):
+    def _import_library(self, request, pk) -> Optional[Response]:
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_loadedlibrary"),
@@ -257,6 +257,11 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
+    @action(detail=True, methods=["post"], url_path="import")
+    def import_library(self, request, pk):
+        if (response := self._import_library(request, pk)) is not None:
+            return response
+
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         try:
@@ -279,6 +284,13 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="upload")
     def upload_library(self, request):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_storedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
+
         if not request.data:
             return HttpResponse(
                 json.dumps({"error": "noFileDetected"}), status=HTTP_400_BAD_REQUEST
@@ -292,7 +304,20 @@ class StoredLibraryViewSet(BaseModelViewSet):
             content = attachment.read()  # Should we read it chunck by chunck or ensure that the file size of the library content is reasonnable before reading ?
 
             try:
-                library = StoredLibrary.store_library_content(content)
+                library, outdated_library = StoredLibrary.store_library_content(content)
+
+                if library is not None:
+                    if not (_has_update := outdated_library is not None):
+                        response = self._import_library(request, library.urn)
+                        if response is not None:
+                            return response
+
+                    else:
+                        if error_msg := outdated_library.update():
+                            return Response(
+                                error_msg, status=status.HTTP_400_BAD_REQUEST
+                            )
+
                 return Response(
                     StoredLibrarySerializer(library).data, status=HTTP_201_CREATED
                 )
