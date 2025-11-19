@@ -40,5 +40,5 @@ class Command(BaseCommand):
                         library=lib,
                         error_msg=error_msg,
                     )
-        except:
+        except Exception:
             pass
