@@ -21,7 +21,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		`${BASE_API_URL}/risk-matrices/${risk_assessment.risk_matrix.id}/`
 	).then((res) => res.json());
 
-	const interface_settings = await fetch(`${BASE_API_URL}/settings/general/object`).then((res) =>
+	const interface_settings = await fetch(`${BASE_API_URL}/settings/general/object/`).then((res) =>
 		res.json()
 	);
 

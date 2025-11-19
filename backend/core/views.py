@@ -55,6 +55,10 @@ import random
 from django.db.models.functions import Lower
 
 from docxtpl import DocxTemplate
+from integrations.models import SyncMapping
+from integrations.tasks import sync_object_to_integrations
+from integrations.registry import IntegrationRegistry
+from library.serializers import StoredLibrarySerializer
 from .generators import gen_audit_context
 
 from django.utils import timezone
@@ -95,7 +99,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 
 from weasyprint import HTML
@@ -133,6 +137,7 @@ from .models import *
 from .serializers import *
 
 from .models import Severity
+from . import dora
 
 from serdes.utils import (
     get_domain_export_objects,
@@ -153,7 +158,7 @@ SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
-MAPPING_MAX_DETPH = 2
+MAPPING_MAX_DETPH = 3
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
@@ -279,6 +284,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             )[0]
         queryset = self.model.objects.filter(id__in=object_ids_view)
         return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["action"] = self.action
+        return context
 
     def get_serializer_class(self, **kwargs):
         serializer_factory = SerializerFactory(
@@ -572,7 +582,13 @@ class ThreatViewSet(BaseModelViewSet):
     """
 
     model = Threat
-    filterset_fields = ["folder", "provider", "risk_scenarios", "filtering_labels"]
+    filterset_fields = [
+        "folder",
+        "provider",
+        "library",
+        "risk_scenarios",
+        "filtering_labels",
+    ]
     search_fields = ["name", "provider", "description"]
 
     def get_queryset(self):
@@ -661,6 +677,10 @@ class AssetFilter(GenericFilterSet):
             "filtering_labels",
             "asset_class",
             "personal_data",
+            "is_business_function",
+            "dora_licenced_activity",
+            "dora_criticality_assessment",
+            "dora_discontinuing_impact",
         ]
 
 
@@ -829,10 +849,61 @@ class AssetViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get asset class choices")
     def asset_class(self, request):
-        # this is for filters
+        # This endpoint is exclusively for filters.
         return Response(
-            [{"id": ac.id, "name": ac.full_path} for ac in AssetClass.objects.all()]
+            [
+                {"id": ac.id, "name": ac.full_path}
+                for ac in AssetClass.objects.filter(assets__isnull=False).distinct()
+            ]
         )
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get DORA licensed activity choices")
+    def dora_licenced_activity(self, request):
+        return Response(dict(dora.DORA_LICENSED_ACTIVITY_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get DORA criticality assessment choices")
+    def dora_criticality_assessment(self, request):
+        return Response(dict(dora.DORA_FUNCTION_CRITICALITY_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get DORA discontinuing impact choices")
+    def dora_discontinuing_impact(self, request):
+        return Response(dict(dora.DORA_DISCONTINUING_IMPACT_CHOICES))
+
+    @action(detail=True, name="Get asset write data")
+    def object(self, request, pk):
+        serializer_class = self.get_serializer_class(action="update")
+        asset_data = serializer_class(super().get_object()).data
+
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        scale_key = (
+            general_settings.value.get("security_objective_scale", "1-4")
+            if general_settings
+            else "1-4"
+        )
+        objective_scale = Asset.SECURITY_OBJECTIVES_SCALES[scale_key]
+
+        objectives = asset_data["security_objectives"].get("objectives", {})
+        security_capabilities = asset_data["security_capabilities"].get(
+            "objectives", {}
+        )
+        reduced_objective_scale: dict[str, int] = {
+            value: index
+            for index, value in enumerate(objective_scale)
+            if value not in objective_scale[:index]
+        }
+
+        for objective_dict in [objectives, security_capabilities]:
+            for objective_data in objective_dict.values():
+                if (objective_value := objective_data.get("value")) is None:
+                    continue
+                objective_label = objective_scale[objective_value]
+                reduced_value = reduced_objective_scale[objective_label]
+                objective_data["value"] = reduced_value
+
+        return Response(asset_data)
 
     @action(detail=False, name="Get assets graph")
     def graph(self, request):
@@ -841,6 +912,10 @@ class AssetViewSet(BaseModelViewSet):
         nodes_idx = dict()
         categories = []
         N = 0
+        hide_domains = (
+            request.query_params.get("hide_domains", "false").lower() == "true"
+        )
+
         (viewable_folders, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
@@ -851,19 +926,24 @@ class AssetViewSet(BaseModelViewSet):
             user=request.user,
             object_type=Asset,
         )
+        # Build category index mapping first (key by UUID to avoid name collisions)
+        domain_to_category = {}
         for domain in Folder.objects.filter(id__in=viewable_folders):
             categories.append({"name": domain.name})
-            nodes_idx[domain.name] = N
-            nodes.append(
-                {
-                    "name": domain.name,
-                    "category": N,
-                    "symbol": "roundRect",
-                    "symbolSize": 30,
-                    "value": "Domain",
-                }
-            )
-            N += 1
+            domain_to_category[domain.id] = len(categories) - 1
+
+            if not hide_domains:
+                nodes_idx[domain.id] = N
+                nodes.append(
+                    {
+                        "name": domain.name,
+                        "category": domain_to_category[domain.id],
+                        "symbol": "roundRect",
+                        "symbolSize": 30,
+                        "value": "Domain",
+                    }
+                )
+                N += 1
         for asset in Asset.objects.filter(id__in=viewable_assets):
             # Only include assets whose folders are also viewable to avoid KeyError
             if asset.folder.id not in viewable_folders:
@@ -879,7 +959,7 @@ class AssetViewSet(BaseModelViewSet):
                     "name": asset.name,
                     "symbol": symbol,
                     "symbolSize": 25,
-                    "category": nodes_idx[asset.folder.name],
+                    "category": domain_to_category[asset.folder.id],
                     "value": "Primary" if asset.type == "PR" else "Support",
                 }
             )
@@ -887,30 +967,32 @@ class AssetViewSet(BaseModelViewSet):
             N += 1
 
         # Add links between domains (folders) based on parent-child relationships
-        for domain in Folder.objects.filter(id__in=viewable_folders):
-            if domain.parent_folder and domain.parent_folder.id in viewable_folders:
+        if not hide_domains:
+            for domain in Folder.objects.filter(id__in=viewable_folders):
+                if domain.parent_folder and domain.parent_folder.id in viewable_folders:
+                    links.append(
+                        {
+                            "source": nodes_idx[domain.parent_folder.id],
+                            "target": nodes_idx[domain.id],
+                            "value": "contains",
+                        }
+                    )
+
+        # Add links between assets and their domains
+        if not hide_domains:
+            for asset in Asset.objects.filter(id__in=viewable_assets):
+                # Only include assets whose folders are also viewable to avoid KeyError
+                if asset.folder.id not in viewable_folders:
+                    continue
+
+                asset_key = f"{asset.folder.name}/{asset.name}"
                 links.append(
                     {
-                        "source": nodes_idx[domain.parent_folder.name],
-                        "target": nodes_idx[domain.name],
+                        "source": nodes_idx[asset.folder.id],
+                        "target": nodes_idx[asset_key],
                         "value": "contains",
                     }
                 )
-
-        # Add links between assets and their domains
-        for asset in Asset.objects.filter(id__in=viewable_assets):
-            # Only include assets whose folders are also viewable to avoid KeyError
-            if asset.folder.id not in viewable_folders:
-                continue
-
-            asset_key = f"{asset.folder.name}/{asset.name}"
-            links.append(
-                {
-                    "source": nodes_idx[asset.folder.name],
-                    "target": nodes_idx[asset_key],
-                    "value": "contains",
-                }
-            )
 
         # Add links between assets (existing relationships)
         for asset in Asset.objects.filter(id__in=viewable_assets):
@@ -1424,6 +1506,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         instance: RiskAssessment = serializer.save()
         if instance.ebios_rm_study:
+            # Unlink all previous risk assessments from this EBIOS RM study
+            RiskAssessment.objects.filter(
+                ebios_rm_study=instance.ebios_rm_study
+            ).exclude(id=instance.id).update(ebios_rm_study=None)
+
             instance.risk_matrix = instance.ebios_rm_study.risk_matrix
             ebios_rm_study = EbiosRMStudy.objects.get(id=instance.ebios_rm_study.id)
             for operational_scenario in [
@@ -1431,22 +1518,95 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 for operational_scenario in ebios_rm_study.operational_scenarios.all()
                 if operational_scenario.is_selected
             ]:
+                # Build comprehensive description from EBIOS RM components
+                description_parts = []
+
+                # Feared events
+                ro_to = operational_scenario.ro_to
+                feared_events = ro_to.feared_events.filter(is_selected=True)
+                if feared_events.exists():
+                    feared_events_list = []
+                    for fe in feared_events:
+                        gravity_display = fe.get_gravity_display()
+                        gravity_text = (
+                            f" [{_('Gravity').capitalize()}: {gravity_display['name']}]"
+                            if gravity_display["value"] >= 0
+                            else ""
+                        )
+                        fe_text = f"- {fe.name}{gravity_text}"
+                        if fe.description:
+                            fe_text += f": {fe.description}"
+                        feared_events_list.append(fe_text)
+                    feared_events_text = (
+                        f"**{_('Feared events').capitalize()}:**\n"
+                        + "\n".join(feared_events_list)
+                    )
+                    description_parts.append(feared_events_text)
+
+                # Risk origin and target objective
+                risk_origin_name = (
+                    ro_to.risk_origin.get_name_translated
+                    if hasattr(ro_to.risk_origin, "get_name_translated")
+                    else str(ro_to.risk_origin)
+                )
+                ro_to_text = f"**{_('Risk origin').capitalize()}:** {risk_origin_name}\n**{_('Target objective').capitalize()}:** {ro_to.target_objective}"
+                description_parts.append(ro_to_text)
+
+                # Strategic scenario
+                strategic_scenario = operational_scenario.attack_path.strategic_scenario
+                if strategic_scenario.description:
+                    description_parts.append(
+                        f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}\n{strategic_scenario.description}"
+                    )
+                elif strategic_scenario.name:
+                    description_parts.append(
+                        f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}"
+                    )
+
+                # Attack path
+                attack_path = operational_scenario.attack_path
+                if attack_path.description:
+                    description_parts.append(
+                        f"**{_('Attack path').capitalize()}:** {attack_path.name}\n{attack_path.description}"
+                    )
+                elif attack_path.name:
+                    description_parts.append(
+                        f"**{_('Attack path').capitalize()}:** {attack_path.name}"
+                    )
+
+                # Operating modes
+                operating_modes = operational_scenario.operating_modes.all()
+                if operating_modes.exists():
+                    operating_modes_list = []
+                    for om in operating_modes:
+                        likelihood_display = om.get_likelihood_display()
+                        likelihood_text = (
+                            f" [{_('Likelihood').capitalize()}: {likelihood_display['name']}]"
+                            if likelihood_display["value"] >= 0
+                            else ""
+                        )
+                        om_text = f"- {om.name}{likelihood_text}"
+                        if om.description:
+                            om_text += f": {om.description}"
+                        operating_modes_list.append(om_text)
+                    operating_modes_text = (
+                        f"**{_('operating modes').capitalize()}:**\n"
+                        + "\n".join(operating_modes_list)
+                    )
+                    description_parts.append(operating_modes_text)
+                elif operational_scenario.operating_modes_description:
+                    description_parts.append(
+                        f"**{_('operating modes').capitalize()}:**\n{operational_scenario.operating_modes_description}"
+                    )
+
                 risk_scenario = RiskScenario(
                     risk_assessment=instance,
+                    operational_scenario=operational_scenario,
                     name=operational_scenario.name,
                     ref_id=operational_scenario.ref_id
                     if operational_scenario.ref_id
                     else RiskScenario.get_default_ref_id(instance),
-                    description="\n\n".join(
-                        filter(
-                            None,
-                            [
-                                operational_scenario.attack_path.strategic_scenario.description,
-                                operational_scenario.attack_path.description,
-                                operational_scenario.operating_modes_description,
-                            ],
-                        )
-                    ),
+                    description="\n\n".join(description_parts),
                 )
                 if ff_is_enabled("inherent_risk"):
                     risk_scenario.inherent_proba = operational_scenario.likelihood
@@ -1463,6 +1623,230 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 )
         instance.save()
         return super().perform_create(serializer)
+
+    @action(detail=True, methods=["post"], name="Sync with EBIOS RM")
+    def sync_from_ebios_rm(self, request, pk=None):
+        """
+        Synchronize an existing risk assessment with its linked EBIOS RM study.
+        Updates existing risk scenarios, adds new ones, and archives outdated ones.
+        """
+        risk_assessment = self.get_object()
+
+        if not risk_assessment.ebios_rm_study:
+            return Response(
+                {"error": "Risk assessment is not linked to an EBIOS RM study"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        ebios_rm_study = risk_assessment.ebios_rm_study
+        selected_operational_scenarios = [
+            os for os in ebios_rm_study.operational_scenarios.all() if os.is_selected
+        ]
+
+        # Track which operational scenarios we've processed
+        processed_os_ids = set()
+        updated_count = 0
+        created_count = 0
+        archived_count = 0
+
+        # Helper function to build description (DRY)
+        def build_description(operational_scenario):
+            description_parts = []
+
+            # Feared events
+            ro_to = operational_scenario.ro_to
+            feared_events = ro_to.feared_events.filter(is_selected=True)
+            if feared_events.exists():
+                feared_events_list = []
+                for fe in feared_events:
+                    gravity_display = fe.get_gravity_display()
+                    gravity_text = (
+                        f" [{_('Gravity').capitalize()}: {gravity_display['name']}]"
+                        if gravity_display["value"] >= 0
+                        else ""
+                    )
+                    fe_text = f"- {fe.name}{gravity_text}"
+                    if fe.description:
+                        fe_text += f": {fe.description}"
+                    feared_events_list.append(fe_text)
+                feared_events_text = (
+                    f"**{_('Feared events').capitalize()}:**\n"
+                    + "\n".join(feared_events_list)
+                )
+                description_parts.append(feared_events_text)
+
+            # Risk origin and target objective
+            risk_origin_name = (
+                ro_to.risk_origin.get_name_translated
+                if hasattr(ro_to.risk_origin, "get_name_translated")
+                else str(ro_to.risk_origin)
+            )
+            ro_to_text = f"**{_('Risk origin').capitalize()}:** {risk_origin_name}\n**{_('Target objective').capitalize()}:** {ro_to.target_objective}"
+            description_parts.append(ro_to_text)
+
+            # Strategic scenario
+            strategic_scenario = operational_scenario.attack_path.strategic_scenario
+            if strategic_scenario.description:
+                description_parts.append(
+                    f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}\n{strategic_scenario.description}"
+                )
+            elif strategic_scenario.name:
+                description_parts.append(
+                    f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}"
+                )
+
+            # Attack path
+            attack_path = operational_scenario.attack_path
+            if attack_path.description:
+                description_parts.append(
+                    f"**{_('Attack path').capitalize()}:** {attack_path.name}\n{attack_path.description}"
+                )
+            elif attack_path.name:
+                description_parts.append(
+                    f"**{_('Attack path').capitalize()}:** {attack_path.name}"
+                )
+
+            # Operating modes
+            operating_modes = operational_scenario.operating_modes.all()
+            if operating_modes.exists():
+                operating_modes_list = []
+                for om in operating_modes:
+                    likelihood_display = om.get_likelihood_display()
+                    likelihood_text = (
+                        f" [{_('Likelihood').capitalize()}: {likelihood_display['name']}]"
+                        if likelihood_display["value"] >= 0
+                        else ""
+                    )
+                    om_text = f"- {om.name}{likelihood_text}"
+                    if om.description:
+                        om_text += f": {om.description}"
+                    operating_modes_list.append(om_text)
+                operating_modes_text = (
+                    f"**{_('operating modes').capitalize()}:**\n"
+                    + "\n".join(operating_modes_list)
+                )
+                description_parts.append(operating_modes_text)
+            elif operational_scenario.operating_modes_description:
+                description_parts.append(
+                    f"**{_('operating modes').capitalize()}:**\n{operational_scenario.operating_modes_description}"
+                )
+
+            return "\n\n".join(description_parts)
+
+        # Update or create risk scenarios for selected operational scenarios
+        for operational_scenario in selected_operational_scenarios:
+            processed_os_ids.add(operational_scenario.id)
+
+            # Try to find existing risk scenario for this operational scenario
+            risk_scenario = None
+
+            # First, try to find by operational_scenario link
+            try:
+                risk_scenario = risk_assessment.risk_scenarios.get(
+                    operational_scenario=operational_scenario
+                )
+            except RiskScenario.DoesNotExist:
+                # Fallback: try to match by name (for backward compatibility with old data)
+                # Remove [ARCHIVED] prefix when matching
+                clean_name = operational_scenario.name.replace("[ARCHIVED] ", "")
+                try:
+                    risk_scenario = risk_assessment.risk_scenarios.get(
+                        operational_scenario__isnull=True, name=clean_name
+                    )
+                    # Establish the link for this old risk scenario
+                    risk_scenario.operational_scenario = operational_scenario
+                except RiskScenario.DoesNotExist:
+                    # Also try matching with [ARCHIVED] prefix
+                    try:
+                        risk_scenario = risk_assessment.risk_scenarios.get(
+                            operational_scenario__isnull=True,
+                            name=f"[ARCHIVED] {clean_name}",
+                        )
+                        # Establish the link for this old risk scenario
+                        risk_scenario.operational_scenario = operational_scenario
+                    except RiskScenario.DoesNotExist:
+                        pass
+
+            if risk_scenario:
+                # Update existing risk scenario - remove [ARCHIVED] prefix if present
+                risk_scenario.name = operational_scenario.name.replace(
+                    "[ARCHIVED] ", ""
+                )
+                risk_scenario.description = build_description(operational_scenario)
+
+                # Update inherent or current probability/impact based on feature flag
+                if ff_is_enabled("inherent_risk"):
+                    risk_scenario.inherent_proba = operational_scenario.likelihood
+                    risk_scenario.inherent_impact = operational_scenario.gravity
+                else:
+                    risk_scenario.current_proba = operational_scenario.likelihood
+                    risk_scenario.current_impact = operational_scenario.gravity
+
+                risk_scenario.save()
+
+                # Update relationships
+                risk_scenario.assets.set(operational_scenario.get_assets())
+                risk_scenario.threats.set(operational_scenario.threats.all())
+
+                # Merge existing controls: keep user-added ones + update from EBIOS RM
+                # Get current existing controls
+                current_existing_controls = set(
+                    risk_scenario.existing_applied_controls.all()
+                )
+                # Get controls from EBIOS RM
+                ebios_controls = set(operational_scenario.get_applied_controls())
+                # Merge them (union)
+                merged_controls = current_existing_controls | ebios_controls
+                risk_scenario.existing_applied_controls.set(merged_controls)
+
+                updated_count += 1
+
+            else:
+                # Create new risk scenario (no existing match found)
+                risk_scenario = RiskScenario(
+                    risk_assessment=risk_assessment,
+                    operational_scenario=operational_scenario,
+                    name=operational_scenario.name,
+                    ref_id=operational_scenario.ref_id
+                    if operational_scenario.ref_id
+                    else RiskScenario.get_default_ref_id(risk_assessment),
+                    description=build_description(operational_scenario),
+                )
+                if ff_is_enabled("inherent_risk"):
+                    risk_scenario.inherent_proba = operational_scenario.likelihood
+                    risk_scenario.inherent_impact = operational_scenario.gravity
+                else:
+                    risk_scenario.current_proba = operational_scenario.likelihood
+                    risk_scenario.current_impact = operational_scenario.gravity
+                risk_scenario.save()
+
+                risk_scenario.assets.set(operational_scenario.get_assets())
+                risk_scenario.threats.set(operational_scenario.threats.all())
+                risk_scenario.existing_applied_controls.set(
+                    operational_scenario.get_applied_controls()
+                )
+
+                created_count += 1
+
+        # Archive risk scenarios that are no longer selected
+        for risk_scenario in risk_assessment.risk_scenarios.filter(
+            operational_scenario__isnull=False
+        ):
+            if risk_scenario.operational_scenario_id not in processed_os_ids:
+                if not risk_scenario.name.startswith("[ARCHIVED] "):
+                    risk_scenario.name = f"[ARCHIVED] {risk_scenario.name}"
+                    risk_scenario.save()
+                    archived_count += 1
+
+        return Response(
+            {
+                "success": True,
+                "updated": updated_count,
+                "created": created_count,
+                "archived": archived_count,
+                "total_scenarios": risk_assessment.risk_scenarios.count(),
+            }
+        )
 
     @action(detail=False, name="Risk assessments per status")
     def per_status(self, request):
@@ -1880,6 +2264,304 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             {"changes": RiskScenarioReadSerializer(changes, many=True).data}
         )
 
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="convert_to_quantitative",
+    )
+    def convert_to_quantitative(self, request, pk):
+        """
+        Convert a qualitative risk assessment to a quantitative risk study.
+
+        Expected payload:
+        {
+            "probability_anchors": [{"index": 0, "value": 0.05}, ...],
+            "impact_anchors": [{"index": 0, "central_value": 25000}, ...],
+            "loss_threshold": 100000
+        }
+        """
+        from crq.models import (
+            QuantitativeRiskStudy,
+            QuantitativeRiskScenario,
+            QuantitativeRiskHypothesis,
+        )
+
+        risk_assessment: RiskAssessment = self.get_object()
+
+        # Check permissions
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_quantitativeriskstudy"),
+            folder=risk_assessment.folder,
+        ):
+            return Response(
+                {
+                    "detail": "You do not have permission to create quantitative risk studies in this domain."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Validate payload
+        probability_anchors = request.data.get("probability_anchors", [])
+        impact_anchors = request.data.get("impact_anchors", [])
+        loss_threshold = request.data.get("loss_threshold")
+
+        if not probability_anchors or not impact_anchors or loss_threshold is None:
+            return Response(
+                {
+                    "detail": "Missing required fields: probability_anchors, impact_anchors, and loss_threshold"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate loss_threshold is a positive number
+        try:
+            loss_threshold = float(loss_threshold)
+            if loss_threshold <= 0:
+                return Response(
+                    {"detail": "loss_threshold must be greater than 0"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "loss_threshold must be a valid number"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate and build probability mapping
+        probability_map = {}
+        try:
+            for item in probability_anchors:
+                idx = item["index"]
+                value = float(item["value"])
+                if not (0 <= value <= 1):
+                    return Response(
+                        {
+                            "detail": f"Probability value must be between 0 and 1, got {value} for index {idx}"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                probability_map[idx] = value
+        except (KeyError, TypeError, ValueError) as e:
+            logger.warning(f"Invalid probability anchor format: {e}")
+            return Response(
+                {
+                    "detail": "Invalid probability anchor format. Each anchor must have 'index' and 'value' fields, with value between 0 and 1."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate and build impact mapping
+        # Using a narrow fixed ratio: roughly ±30% around central value
+        # LB = central_value * 0.7, UB = central_value * 1.43
+        # This gives a spread factor of ~2x which minimizes overlap between adjacent levels
+        impact_map = {}
+        try:
+            for item in impact_anchors:
+                idx = item["index"]
+                central_value = float(item["central_value"])
+                if central_value <= 0:
+                    return Response(
+                        {
+                            "detail": f"Impact central value must be positive, got {central_value} for index {idx}"
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                impact_map[idx] = {
+                    "lb": central_value * 0.7,
+                    "ub": central_value * 1.43,
+                }
+        except (KeyError, TypeError, ValueError) as e:
+            logger.warning(f"Invalid impact anchor format: {e}")
+            return Response(
+                {
+                    "detail": "Invalid impact anchor format. Each anchor must have 'index' and 'central_value' fields, with central_value greater than 0."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Generate ref_id for the quantitative study
+        # If source has ref_id, append _QUANT, otherwise leave blank
+        quant_ref_id = (
+            f"{risk_assessment.ref_id}_QUANT" if risk_assessment.ref_id else ""
+        )
+
+        # Create the quantitative risk study with [QUANT] prefix
+        quantitative_study = QuantitativeRiskStudy.objects.create(
+            name=f"[QUANT] {risk_assessment.name}",
+            description=f"Converted from qualitative risk assessment: {risk_assessment.name}\n\n{risk_assessment.description or ''}",
+            folder=risk_assessment.folder,
+            ref_id=quant_ref_id,
+            status=risk_assessment.status if risk_assessment.status else "planned",
+            loss_threshold=loss_threshold,
+            distribution_model="lognormal_ci90",
+        )
+
+        # Copy authors and reviewers
+        quantitative_study.authors.set(risk_assessment.authors.all())
+        quantitative_study.reviewers.set(risk_assessment.reviewers.all())
+
+        scenarios_converted = 0
+        scenarios_skipped = 0
+
+        # Convert each risk scenario to a quantitative risk scenario
+        for scenario in risk_assessment.risk_scenarios.all():
+            # Skip scenarios without threats or assets
+            if not scenario.threats.exists() and not scenario.assets.exists():
+                logger.info(
+                    f"Skipping scenario '{scenario.name}' - no threats or assets associated"
+                )
+                scenarios_skipped += 1
+                continue
+
+            # Check if we have current probability and impact
+            current_proba = scenario.current_proba
+            current_impact = scenario.current_impact
+            has_current = (
+                current_proba is not None
+                and current_impact is not None
+                and current_proba in probability_map
+                and current_impact in impact_map
+            )
+
+            # Check if we have residual probability and impact
+            residual_proba = scenario.residual_proba
+            residual_impact = scenario.residual_impact
+            has_residual = (
+                residual_proba is not None
+                and residual_impact is not None
+                and residual_proba in probability_map
+                and residual_impact in impact_map
+            )
+
+            # Skip if we don't have at least current values
+            if not has_current and not has_residual:
+                logger.info(
+                    f"Skipping scenario '{scenario.name}' - no valid probability/impact values"
+                )
+                scenarios_skipped += 1
+                continue
+
+            # Create quantitative risk scenario with same name and ref_id
+            quant_scenario = QuantitativeRiskScenario.objects.create(
+                quantitative_risk_study=quantitative_study,
+                name=scenario.name,
+                description=scenario.description or "",
+                ref_id=scenario.ref_id or "",
+                folder=risk_assessment.folder,
+            )
+
+            # Copy threats, assets, and owners
+            quant_scenario.threats.set(scenario.threats.all())
+            quant_scenario.assets.set(scenario.assets.all())
+            quant_scenario.vulnerabilities.set(scenario.vulnerabilities.all())
+            quant_scenario.owner.set(scenario.owner.all())
+
+            # Delete the auto-created "baseline" current hypothesis
+            # (we'll create our own if needed)
+            QuantitativeRiskHypothesis.objects.filter(
+                quantitative_risk_scenario=quant_scenario, risk_stage="current"
+            ).delete()
+
+            # Create current hypothesis if current values are set
+            if has_current:
+                probability_value = probability_map[current_proba]
+                impact_value = impact_map[current_impact]
+
+                current_hypothesis = QuantitativeRiskHypothesis.objects.create(
+                    quantitative_risk_scenario=quant_scenario,
+                    name="current",
+                    risk_stage="current",
+                    ref_id=scenario.ref_id or "",
+                    folder=risk_assessment.folder,
+                    parameters={
+                        "probability": probability_value,
+                        "impact": {
+                            "distribution": "LOGNORMAL-CI90",
+                            "lb": impact_value["lb"],
+                            "ub": impact_value["ub"],
+                        },
+                    },
+                )
+
+                # Link to existing applied controls
+                if scenario.existing_applied_controls.exists():
+                    current_hypothesis.existing_applied_controls.set(
+                        scenario.existing_applied_controls.all()
+                    )
+                current_hypothesis.save()
+
+                # Run simulation for the current hypothesis
+                try:
+                    current_hypothesis.run_simulation()
+                    logger.info(
+                        f"Simulation completed for current hypothesis: {scenario.name}"
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"Failed to run simulation for scenario {scenario.name}: {str(e)}"
+                    )
+
+            # Create residual hypothesis if residual values are set
+            if has_residual:
+                residual_probability_value = probability_map[residual_proba]
+                residual_impact_value = impact_map[residual_impact]
+
+                residual_hypothesis = QuantitativeRiskHypothesis.objects.create(
+                    quantitative_risk_scenario=quant_scenario,
+                    name="residual",
+                    risk_stage="residual",
+                    is_selected=True,
+                    ref_id=f"{scenario.ref_id}_RES" if scenario.ref_id else "",
+                    folder=risk_assessment.folder,
+                    parameters={
+                        "probability": residual_probability_value,
+                        "impact": {
+                            "distribution": "LOGNORMAL-CI90",
+                            "lb": residual_impact_value["lb"],
+                            "ub": residual_impact_value["ub"],
+                        },
+                    },
+                )
+
+                # Link to existing controls and added controls
+                if scenario.existing_applied_controls.exists():
+                    residual_hypothesis.existing_applied_controls.set(
+                        scenario.existing_applied_controls.all()
+                    )
+                if scenario.applied_controls.exists():
+                    residual_hypothesis.added_applied_controls.set(
+                        scenario.applied_controls.all()
+                    )
+                residual_hypothesis.save()
+
+                # Run simulation for the residual hypothesis
+                try:
+                    residual_hypothesis.run_simulation()
+                    logger.info(
+                        f"Simulation completed for residual hypothesis: {scenario.name}"
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"Failed to run simulation for residual scenario {scenario.name}: {str(e)}"
+                    )
+
+            scenarios_converted += 1
+
+        logger.info(
+            f"Conversion completed: {scenarios_converted} scenarios converted, {scenarios_skipped} skipped"
+        )
+
+        return Response(
+            {
+                "message": "Conversion successful",
+                "quantitative_risk_study_id": str(quantitative_study.id),
+                "scenarios_converted": scenarios_converted,
+                "scenarios_skipped": scenarios_skipped,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
 
 def convert_date_to_timestamp(date):
     """
@@ -2037,6 +2719,76 @@ class AppliedControlViewSet(BaseModelViewSet):
             )
         )
 
+    def perform_create(self, serializer):
+        create_remote_object = serializer.validated_data.pop(
+            "create_remote_object", False
+        )
+        integration_config = serializer.validated_data.pop("integration_config", None)
+        serializer.validated_data.pop("remote_object_id", None)  # Remove if present
+
+        # Create the local object first
+        super().perform_create(serializer)
+        instance = serializer.instance
+
+        if create_remote_object and integration_config:
+            try:
+                logger.info(
+                    "Creating remote object for Applied Control",
+                    applied_control_id=instance.id,
+                    integration_config_id=integration_config.id,
+                )
+                sync_object_to_integrations.schedule(
+                    args=(
+                        ContentType.objects.get_for_model(self.model),
+                        serializer.instance.id,
+                        [integration_config.id],
+                        ["name", "description", "status", "priority"],
+                    ),
+                    delay=1,  # Small delay to ensure transaction is committed
+                )
+
+            except Exception:
+                logger.error(
+                    "Error creating remote object for Applied Control",
+                    applied_control_id=instance.id,
+                    exc_info=True,
+                )
+
+    def perform_update(self, serializer):
+        integration_config = serializer.validated_data.pop("integration_config", None)
+        remote_object_id = serializer.validated_data.pop("remote_object_id", None)
+        serializer.validated_data.pop("create_remote_object", None)  # Remove if present
+
+        super().perform_update(serializer)
+        if not integration_config or not remote_object_id:
+            return
+        try:
+            if remote_object_id:
+                logger.info(
+                    "Attaching applied control to external object",
+                    applied_control_id=serializer.instance.id,
+                    remote_id=remote_object_id,
+                )
+                sync_mapping = SyncMapping.objects.create(
+                    configuration=integration_config,
+                    content_type=ContentType.objects.get_for_model(self.model),
+                    local_object_id=serializer.instance.id,
+                    remote_id=remote_object_id,
+                    sync_status=SyncMapping.SyncStatus.PENDING,
+                )
+                sync_object_to_integrations.schedule(
+                    args=(
+                        sync_mapping.content_type,
+                        serializer.instance.id,
+                        [integration_config.id],
+                        ["status"],
+                    ),
+                    delay=1,  # Small delay to ensure transaction is committed
+                )
+
+        except Exception:
+            logger.error("Error creating SyncMapping", exc_info=True)
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -2144,33 +2896,113 @@ class AppliedControlViewSet(BaseModelViewSet):
         writer = csv.writer(response, delimiter=";")
         columns = [
             "internal_id",
+            "ref_id",
             "name",
             "description",
+            "reference_control_name",
+            "reference_control_ref_id",
             "category",
             "csf_function",
             "folder",
             "status",
+            "start_date",
             "eta",
+            "expiry_date",
             "priority",
+            "effort",
+            "impact",
+            "cost_currency",
+            "cost_build_fixed",
+            "cost_build_people_days",
+            "cost_run_fixed",
+            "cost_run_people_days",
+            "cost_amortization_period",
             "owner",
+            "labels",
         ]
         writer.writerow(columns)
 
-        for control in AppliedControl.objects.filter(id__in=viewable_controls_ids):
+        for control in (
+            AppliedControl.objects.filter(id__in=viewable_controls_ids)
+            .select_related("reference_control", "folder")
+            .prefetch_related("owner", "filtering_labels")
+        ):
+            # Get reference control name and ref_id
+            ref_control_name = (
+                control.reference_control.name if control.reference_control else ""
+            )
+            ref_control_ref_id = (
+                control.reference_control.ref_id if control.reference_control else ""
+            )
+
+            # Get effort display value (translated)
+            effort_display = control.get_effort_display() if control.effort else ""
+
+            # Get impact display value (translated)
+            impact_display = (
+                control.get_control_impact_display() if control.control_impact else ""
+            )
+
+            # Extract cost details
+            cost_currency = ""
+            cost_build_fixed = ""
+            cost_build_people_days = ""
+            cost_run_fixed = ""
+            cost_run_people_days = ""
+            cost_amortization = ""
+
+            if control.cost:
+                cost_currency = control.cost.get("currency", "")
+                cost_amortization = control.cost.get("amortization_period", "")
+                build_costs = control.cost.get("build", {})
+                run_costs = control.cost.get("run", {})
+                cost_build_fixed = (
+                    build_costs.get("fixed_cost", "") if build_costs else ""
+                )
+                cost_build_people_days = (
+                    build_costs.get("people_days", "") if build_costs else ""
+                )
+                cost_run_fixed = run_costs.get("fixed_cost", "") if run_costs else ""
+                cost_run_people_days = (
+                    run_costs.get("people_days", "") if run_costs else ""
+                )
+
+            # Get labels
+            labels = ",".join([lbl.label for lbl in control.filtering_labels.all()])
+
+            # Get owners
+            owners = (
+                ",".join([o.email for o in control.owner.all()])
+                if control.owner.exists()
+                else ""
+            )
+
             row = [
                 control.id,
+                control.ref_id or "",
                 control.name,
                 control.description,
-                control.category,
-                control.csf_function,
+                ref_control_name,
+                ref_control_ref_id,
+                control.category or "",
+                control.csf_function or "",
                 control.folder.name,
                 control.status,
-                control.eta,
-                control.priority,
+                control.start_date or "",
+                control.eta or "",
+                control.expiry_date or "",
+                control.priority or "",
+                effort_display,
+                impact_display,
+                cost_currency,
+                cost_build_fixed,
+                cost_build_people_days,
+                cost_run_fixed,
+                cost_run_people_days,
+                cost_amortization,
+                owners,
+                labels,
             ]
-            if len(control.owner.all()) > 0:
-                owners = ",".join([o.email for o in control.owner.all()])
-                row += [owners]
             writer.writerow(row)
         return response
 
@@ -5389,6 +6221,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "owner",
         "status",
         "expiry_date",
+        "contracts",
     ]
 
     @action(detail=False, name="Get all evidences owners")
@@ -5714,12 +6547,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         from core.mappings.engine import engine
 
         audit_from_results = engine.load_audit_fields(audit)
-        frameworks_in_mappings = set()
         data = []
-        for src, tgt in engine.all_rms.keys():
-            frameworks_in_mappings.add(src)
-            frameworks_in_mappings.add(tgt)
-        for dest_urn in sorted(frameworks_in_mappings):
+        for dest_urn in sorted(
+            [
+                p[-1]
+                for p in engine.all_paths_from(
+                    source_urn=audit.framework.urn, max_depth=MAPPING_MAX_DETPH
+                )
+            ]
+        ):
             best_results, _ = engine.best_mapping_inferences(
                 audit_from_results,
                 audit.framework.urn,
@@ -5728,7 +6564,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             )
             if best_results:
                 framework = Framework.objects.filter(urn=dest_urn).first()
-                if framework:
+                if framework and str(framework) not in str(data):
                     assessable_requirements_count = framework.requirement_nodes.filter(
                         assessable=True
                     ).count()
@@ -6233,20 +7069,24 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 best_results, _ = engine.best_mapping_inferences(
                     audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
                 )
-                ic(best_results)
 
                 requirement_assessments_to_update: list[RequirementAssessment] = []
 
                 target_requirement_assessments = RequirementAssessment.objects.filter(
                     compliance_assessment=instance,
-                    requirement__urn__in=best_results,
+                    requirement__urn__in=best_results["requirement_assessments"],
                 )
 
                 for req in target_requirement_assessments:
                     for field in ["result", "status", "observation"]:
-                        if best_results[req.requirement.urn].get(field):
+                        if best_results["requirement_assessments"][
+                            req.requirement.urn
+                        ].get(field):
                             req.__setattr__(
-                                field, best_results[req.requirement.urn][field]
+                                field,
+                                best_results["requirement_assessments"][
+                                    req.requirement.urn
+                                ][field],
                             )
                     requirement_assessments_to_update.append(req)
 
@@ -6257,31 +7097,37 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for ra in requirement_assessments_to_update:
-                    if best_results[ra.requirement.urn].get("applied_controls"):
+                    if best_results["requirement_assessments"][ra.requirement.urn].get(
+                        "applied_controls"
+                    ):
                         ra.applied_controls.add(
                             *[
                                 control
-                                for control in best_results[ra.requirement.urn][
-                                    "applied_controls"
-                                ]
+                                for control in best_results["requirement_assessments"][
+                                    ra.requirement.urn
+                                ]["applied_controls"]
                             ]
                         )
-                    if best_results[ra.requirement.urn].get("evidences"):
+                    if best_results["requirement_assessments"][ra.requirement.urn].get(
+                        "evidences"
+                    ):
                         ra.evidences.add(
                             *[
                                 evidence
-                                for evidence in best_results[ra.requirement.urn][
-                                    "evidences"
-                                ]
+                                for evidence in best_results["requirement_assessments"][
+                                    ra.requirement.urn
+                                ]["evidences"]
                             ]
                         )
-                    if best_results[ra.requirement.urn].get("security_exceptions"):
+                    if best_results["requirement_assessments"][ra.requirement.urn].get(
+                        "security_exceptions"
+                    ):
                         ra.security_exceptions.add(
                             *[
                                 exception
-                                for exception in best_results[ra.requirement.urn][
-                                    "security_exceptions"
-                                ]
+                                for exception in best_results[
+                                    "requirement_assessments"
+                                ][ra.requirement.urn]["security_exceptions"]
                             ]
                         )
 
@@ -7046,31 +7892,202 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
 
 class RequirementMappingSetViewSet(BaseModelViewSet):
-    model = RequirementMappingSet
+    model = StoredLibrary
 
-    filterset_fields = ["target_framework", "source_framework", "library__provider"]
+    filterset_fields = [
+        "provider",
+    ]
+
+    def get_serializer_class(self, **kwargs):
+        return RequirementMappingSetReadSerializer
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                Q(content__requirement_mapping_set__isnull=False)
+                | Q(content__requirement_mapping_sets__isnull=False)
+            )
+        )
 
     @action(detail=False, name="Get provider choices")
     def provider(self, request):
         providers = set(
-            LoadedLibrary.objects.filter(
-                provider__isnull=False, requirement_mapping_sets__isnull=False
+            StoredLibrary.objects.filter(
+                provider__isnull=False,
+                objects_meta__requirement_mapping_sets__isnull=False,
             ).values_list("provider", flat=True)
         )
         return Response({p: p for p in providers})
 
-    def perform_create(self, serializer):
-        # create the new requirement mapping set and reload the engine.
-        instance = serializer.save()
+    @action(detail=False, methods=["get"], url_path="graph-data")
+    def graph_data_list(self, request):
         from core.mappings.engine import engine
 
-        engine.load_rms_data()
-        return instance
+        max_depth = MAPPING_MAX_DETPH
+
+        all_paths = engine.get_mapping_graph(max_depth=max_depth)
+
+        all_framework_urns = set()
+        for path in all_paths:
+            all_framework_urns.update(path)
+
+        framework_details = {}
+
+        framework_libs_qs = StoredLibrary.objects.filter(
+            content__framework__urn__in=all_framework_urns,
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        )
+
+        for lib in framework_libs_qs:
+            try:
+                fw_content = lib.content["framework"]
+                urn = fw_content.get("urn")
+
+                if not urn:
+                    continue
+
+                display_name = fw_content.get("name", urn)
+
+                display_value = fw_content.get("description", display_name)
+
+                framework_details[urn] = {
+                    "name": display_name,
+                    "value": display_value,
+                    "pk": lib.pk,
+                }
+            except (KeyError, TypeError):
+                # Skip this library if content is malformed
+                continue
+
+        nodes = []
+        urn_to_index = {}  # Map URNs to their index in the `nodes` list
+
+        # Sort for a consistent node order
+        sorted_urns = sorted(list(all_framework_urns))
+
+        for i, urn in enumerate(sorted_urns):
+            urn_to_index[urn] = i
+
+            details = framework_details.get(urn, {"name": urn, "value": urn})
+
+            nodes.append(
+                {
+                    "name": details["name"],  # Display name for the node
+                    "category": 0
+                    if urn in engine.frameworks.keys()
+                    else 1,  # All nodes are in the "Frameworks" category
+                    "value": details["value"],  # Tooltip content
+                    "urn": urn,  # Pass URN as extra data
+                    "pk": details.get("pk"),
+                    # `symbolSize` will be added below after degrees are calculated
+                }
+            )
+
+        links = []
+        link_set = set()  # Use a set to prevent duplicate links
+
+        node_degrees = [0] * len(nodes)
+
+        for path in all_paths:
+            # A path [A, B, C] creates links (A, B) and (B, C)
+            for i in range(len(path) - 1):
+                source_urn = path[i]
+                target_urn = path[i + 1]
+                link_tuple = (source_urn, target_urn)
+
+                if link_tuple not in link_set:
+                    link_set.add(link_tuple)
+
+                    # Get the integer index for source and target
+                    source_index = urn_to_index.get(source_urn)
+                    target_index = urn_to_index.get(target_urn)
+
+                    if source_index is not None and target_index is not None:
+                        links.append(
+                            {
+                                "source": source_index,
+                                "target": target_index,
+                                "value": "maps to",
+                            }
+                        )
+
+                        node_degrees[source_index] += 1
+                        node_degrees[target_index] += 1
+
+        min_size = 10
+        max_size = 30
+
+        non_zero_degrees = [d for d in node_degrees if d > 0]
+
+        if not non_zero_degrees:
+            min_degree = 0
+            max_degree = 0
+        else:
+            min_degree = min(non_zero_degrees)
+            max_degree = max(node_degrees)
+
+        degree_range = max_degree - min_degree
+        size_range = max_size - min_size
+
+        for i, node in enumerate(nodes):
+            degree = node_degrees[i]
+
+            if degree == 0:
+                # Assign min size for nodes with no connections (if any)
+                node["symbolSize"] = min_size
+            elif degree_range == 0:
+                # All nodes have the same degree, assign min_size
+                node["symbolSize"] = min_size
+            else:
+                # Scale the size proportionally
+                normalized_degree = (degree - min_degree) / degree_range
+                scaled_size = min_size + (normalized_degree * size_range)
+                node["symbolSize"] = int(round(scaled_size))
+
+        categories = [{"name": "importedFrameworks"}, {"name": "notImportedFrameworks"}]
+
+        return Response({"nodes": nodes, "links": links, "categories": categories})
 
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
-        mapping_set_id = pk
-        mapping_set = get_object_or_404(RequirementMappingSet, id=mapping_set_id)
+        obj = StoredLibrary.objects.get(id=pk)
+
+        mapping_set = obj.content.get(
+            "requirement_mapping_sets",
+            [obj.content.get("requirement_mapping_set", {})],
+        )[0]
+
+        source_framework_lib = StoredLibrary.objects.filter(
+            content__framework__urn=mapping_set["source_framework_urn"],
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        ).first()
+        if not source_framework_lib:
+            raise NotFound("Source framework library not found")
+
+        target_framework_lib = StoredLibrary.objects.filter(
+            content__framework__urn=mapping_set["target_framework_urn"],
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        ).first()
+        if not target_framework_lib:
+            raise NotFound("Target framework library not found")
+
+        source_framework = source_framework_lib.content["framework"]
+        target_framework = target_framework_lib.content["framework"]
+
+        source_nodes_dict = {
+            n.get("urn"): n for n in source_framework["requirement_nodes"]
+        }
+        target_nodes_dict = {
+            n.get("urn"): n for n in target_framework["requirement_nodes"]
+        }
 
         nodes = []
         links = []
@@ -7078,54 +8095,59 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         tnodes_idx = dict()
         categories = [
             {
-                "name": mapping_set.source_framework.name,
+                "name": source_framework["name"],
             },
             {
-                "name": mapping_set.target_framework.name,
+                "name": target_framework["name"],
             },
         ]
         N = 0
-        for req in RequirementNode.objects.filter(
-            framework=mapping_set.source_framework
-        ).filter(assessable=True):
+        for req in source_framework["requirement_nodes"]:
             nodes.append(
                 {
-                    "name": req.ref_id,
+                    "name": req.get("ref_id"),
                     "category": 0,
-                    "value": req.name if req.name else req.description,
+                    "value": req.get("name", req.get("description")),
                 }
             )
-            snodes_idx[req.ref_id] = N
+            snodes_idx[req.get("urn")] = N
             N += 1
 
-        for req in RequirementNode.objects.filter(
-            framework=mapping_set.target_framework
-        ).filter(assessable=True):
+        for req in target_framework["requirement_nodes"]:
             nodes.append(
                 {
-                    "name": req.ref_id,
+                    "name": req.get("ref_id"),
                     "category": 1,
-                    "value": req.name if req.name else req.description,
+                    "value": req.get("name", req.get("description")),
                 }
             )
-            tnodes_idx[req.ref_id] = N
+            tnodes_idx[req.get("urn")] = N
             N += 1
-        req_mappings = RequirementMapping.objects.filter(mapping_set=mapping_set_id)
-        for item in req_mappings:
+        req_mappings = mapping_set.get("requirement_mappings", [])
+        for mapping in req_mappings:
+            source_urn = mapping.get("source_requirement_urn")
+            target_urn = mapping.get("target_requirement_urn")
+            source_node = source_nodes_dict.get(source_urn)
+            target_node = target_nodes_dict.get(target_urn)
+
             if (
-                item.source_requirement.assessable
-                and item.target_requirement.assessable
+                mapping.get("source_requirement_urn") not in snodes_idx
+                or mapping.get("target_requirement_urn") not in tnodes_idx
+                or not source_node
+                or not target_node
             ):
-                links.append(
-                    {
-                        "source": snodes_idx[item.source_requirement.ref_id],
-                        "target": tnodes_idx[item.target_requirement.ref_id],
-                        "value": item.coverage,
-                    }
-                )
+                continue
+
+            links.append(
+                {
+                    "source": snodes_idx[source_node.get("urn")],
+                    "target": tnodes_idx[target_node.get("urn")],
+                    "value": mapping.get("relationship"),
+                }
+            )
 
         meta = {
-            "display_name": f"{mapping_set.source_framework.name} ➜ {mapping_set.target_framework.name}"
+            "display_name": f"{source_framework['name']} ➜ {target_framework['name']}"
         }
 
         return Response(
@@ -8004,6 +9026,7 @@ class FindingViewSet(BaseModelViewSet):
         "folder",
         "status",
         "severity",
+        "priority",
         "findings_assessment",
         "filtering_labels",
         "applied_controls",
@@ -8028,6 +9051,11 @@ class FindingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get severity choices")
     def severity(self, request):
         return Response(dict(Severity.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get priority choices")
+    def priority(self, request):
+        return Response(dict(Finding.PRIORITY))
 
     @action(detail=False, name="Get all findings owners")
     def owner(self, request):
@@ -8784,7 +9812,9 @@ class TaskTemplateViewSet(BaseModelViewSet):
         processed_tasks_identifiers = set()  # Track tasks we've already processed
 
         # Sort tasks by due date
-        sorted_tasks = sorted(tasks_list, key=lambda x: x["due_date"])
+        sorted_tasks = sorted(
+            [t for t in tasks_list if t.get("due_date")], key=lambda x: x["due_date"]
+        )
 
         # Process all past tasks and next 10 upcoming tasks
         current_date = datetime.now().date()
