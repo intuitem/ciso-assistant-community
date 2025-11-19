@@ -1,5 +1,6 @@
 import { listViewFields } from '$lib/utils/table';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '$lib/utils/crud';
 
 import type { urlModel } from '$lib/utils/types';
 
@@ -18,5 +19,9 @@ export const load = async ({ fetch, params }) => {
 		meta: []
 	};
 
-	return { table };
+	return {
+		table,
+		modelVerboseName: urlParamModelVerboseName(params.model),
+		modelDescriptionKey: urlParamModelDescriptionKey(params.model)
+	};
 };
