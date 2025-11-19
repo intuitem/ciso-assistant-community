@@ -58,6 +58,31 @@
 
 <AutocompleteSelect
 	{form}
+	optionsEndpoint="users?is_approver=true"
+	optionsLabelField="email"
+	field="approver"
+	cacheLock={cacheLocks['approver']}
+	bind:cachedValue={formDataCache['approver']}
+	label={m.approver()}
+	helpText={m.approverHelpText()}
+	disabled={initialData.approver}
+/>
+{#if object?.id}
+	<div class="space-y-2">
+		<label class="text-sm font-medium text-gray-700">{m.requestNotes()}</label>
+		<MarkdownRenderer content={object.request_notes} class="p-3 bg-gray-50 rounded-lg" />
+	</div>
+{:else}
+	<TextArea
+		{form}
+		field="request_notes"
+		label={m.requestNotes()}
+		cacheLock={cacheLocks['request_notes']}
+		bind:cachedValue={formDataCache['request_notes']}
+	/>
+{/if}
+<AutocompleteSelect
+	{form}
 	optionsEndpoint="folders?content_type=DO"
 	field="folder"
 	pathField="path"
@@ -70,14 +95,6 @@
 			await fetchDefaultRefId(e);
 		}
 	}}
-/>
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-	disabled={initialData.ref_id}
 />
 {#if object?.id}
 	<Select
@@ -109,31 +126,6 @@
 	/>
 {/if}
 {#if object?.id}
-	<div class="space-y-2">
-		<label class="text-sm font-medium text-gray-700">{m.requestNotes()}</label>
-		<MarkdownRenderer content={object.request_notes} class="p-3 bg-gray-50 rounded-lg" />
-	</div>
-{:else}
-	<TextArea
-		{form}
-		field="request_notes"
-		label={m.requestNotes()}
-		cacheLock={cacheLocks['request_notes']}
-		bind:cachedValue={formDataCache['request_notes']}
-	/>
-{/if}
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="users?is_approver=true"
-	optionsLabelField="email"
-	field="approver"
-	cacheLock={cacheLocks['approver']}
-	bind:cachedValue={formDataCache['approver']}
-	label={m.approver()}
-	helpText={m.approverHelpText()}
-	disabled={initialData.approver}
-/>
-{#if object?.id}
 	<TextArea
 		{form}
 		field="approver_observation"
@@ -144,6 +136,14 @@
 {/if}
 {#if !hasPresetAssessments}
 	<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+	disabled={initialData.ref_id}
+/>
 		<AutocompleteSelect
 			{form}
 			optionsEndpoint="compliance-assessments"

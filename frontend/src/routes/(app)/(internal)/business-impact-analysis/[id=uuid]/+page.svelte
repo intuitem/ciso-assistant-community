@@ -5,11 +5,46 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { page } from '$app/state';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
+
+	const modalStore: ModalStore = getModalStore();
+	const business_impact_analysis = data.data;
+
+	function modalRequestValidation(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.validationFlowForm,
+				model: data.validationFlowModel,
+				debug: false,
+				invalidateAll: false,
+				formAction: '/validation-flows?/create',
+				additionalInitialData: {
+					folder: business_impact_analysis.folder.id,
+					business_impact_analysis: [business_impact_analysis.id]
+				}
+			}
+		};
+
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.requestValidation()
+		};
+		modalStore.trigger(modal);
+	}
 </script>
 
 <DetailView {data}>
@@ -26,6 +61,16 @@
 				class="btn preset-filled-primary-500 h-fit"
 				breadcrumbAction="push"><i class="fa-solid fa-file-lines mr-2"></i>{m.report()}</Anchor
 			>
+			{#if !business_impact_analysis?.is_locked}
+				<button
+					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					onclick={() => modalRequestValidation()}
+					data-testid="request-validation-button"
+				>
+					<i class="fa-solid fa-check-circle mr-2"></i>
+					{m.requestValidation()}
+				</button>
+			{/if}
 		</div>
 	{/snippet}
 	{#snippet widgets()}

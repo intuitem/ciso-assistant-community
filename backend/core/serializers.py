@@ -2587,6 +2587,14 @@ class TerminologyWriteSerializer(BaseModelSerializer):
 
 
 class ValidationFlowWriteSerializer(BaseModelSerializer):
+    def create(self, validated_data: dict) -> ValidationFlow:
+        """
+        Override create to automatically set the requester to the current user.
+        """
+        request_user = self.context["request"].user
+        validated_data["requester"] = request_user
+        return super().create(validated_data)
+
     def update(self, instance: ValidationFlow, validated_data: dict) -> ValidationFlow:
         """
         Override update to ensure only the assigned approver can modify
@@ -2616,6 +2624,7 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ValidationFlow
         fields = "__all__"
+        read_only_fields = ["requester"]
 
 
 class ValidationFlowReadSerializer(BaseModelSerializer):
@@ -2623,6 +2632,7 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessments = FieldsRelatedField(many=True)
     risk_assessments = FieldsRelatedField(many=True)
+    business_impact_analysis = FieldsRelatedField(many=True)
     crq_studies = FieldsRelatedField(many=True)
     ebios_studies = FieldsRelatedField(many=True)
     entity_assessments = FieldsRelatedField(many=True)
@@ -2630,6 +2640,7 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
     evidences = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     policies = FieldsRelatedField(many=True)
+    requester = FieldsRelatedField(["id", "first_name", "last_name"])
     approver = FieldsRelatedField(["id", "first_name", "last_name"])
     status = serializers.CharField(source="get_status_display")
 

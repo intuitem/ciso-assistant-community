@@ -455,6 +455,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
+			{ field: 'business_impact_analysis', urlModel: 'business-impact-analysis' },
 			{ field: 'crq_studies', urlModel: 'quantitative-risk-studies' },
 			{ field: 'ebios_studies', urlModel: 'ebios-rm' },
 			{ field: 'entity_assessments', urlModel: 'entity-assessments' },

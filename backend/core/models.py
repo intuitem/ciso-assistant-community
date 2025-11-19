@@ -6819,6 +6819,10 @@ class ValidationFlow(AbstractBaseModel, FolderMixin):
         RiskAssessment,
         blank=True,
     )
+    business_impact_analysis = models.ManyToManyField(
+        "resilience.BusinessImpactAnalysis",
+        blank=True,
+    )
     crq_studies = models.ManyToManyField(
         "crq.QuantitativeRiskStudy",
         blank=True,
@@ -6850,6 +6854,14 @@ class ValidationFlow(AbstractBaseModel, FolderMixin):
         blank=True,
     )
     request_notes = models.TextField(null=True, blank=True)
+    requester = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="validation_requests",
+        verbose_name=_("Requester"),
+    )
     approver = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -6881,7 +6893,7 @@ class ValidationFlow(AbstractBaseModel, FolderMixin):
             x.ref_id for x in cls.objects.filter(folder=folder) if x.ref_id
         ]
         nb_flows = len(flows_ref_ids) + 1
-        candidates = [f"VAL.{i:02d}" for i in range(1, nb_flows + 1)]
+        candidates = [f"VAL.{i:05d}" for i in range(1, nb_flows + 1)]
         return next(x for x in candidates if x not in flows_ref_ids)
 
     @property

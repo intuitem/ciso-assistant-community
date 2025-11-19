@@ -368,14 +368,6 @@
 						</span>
 						{m.syncToAppliedControls()}
 					</button>
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-pink-500"
-						onclick={() => modalRequestValidation()}
-						data-testid="request-validation-button"
-					>
-						<i class="fa-solid fa-check-circle mr-2"></i>
-						{m.requestValidation()}
-					</button>
 				{/if}
 				<Anchor
 					href="/risk-assessments/{risk_assessment.id}/convert-to-quantitative"
@@ -385,6 +377,16 @@
 					<i class="fa-solid fa-calculator mr-2"></i>
 					{m.convertToQuantitative()}
 				</Anchor>
+				{#if !risk_assessment?.is_locked}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500"
+						onclick={() => modalRequestValidation()}
+						data-testid="request-validation-button"
+					>
+						<i class="fa-solid fa-check-circle mr-2"></i>
+						{m.requestValidation()}
+					</button>
+				{/if}
 			</div>
 		</div>
 	</div>

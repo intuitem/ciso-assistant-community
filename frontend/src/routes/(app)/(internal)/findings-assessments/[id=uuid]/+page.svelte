@@ -7,6 +7,13 @@
 	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: PageData;
@@ -16,6 +23,33 @@
 	let { data, form }: Props = $props();
 	let exportPopupOpen = $state(false);
 	let chartKey = $state(0);
+
+	const modalStore: ModalStore = getModalStore();
+	const findings_assessment = data.data;
+
+	function modalRequestValidation(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.validationFlowForm,
+				model: data.validationFlowModel,
+				debug: false,
+				invalidateAll: false,
+				formAction: '/validation-flows?/create',
+				additionalInitialData: {
+					folder: findings_assessment.folder.id,
+					findings_assessments: [findings_assessment.id]
+				}
+			}
+		};
+
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.requestValidation()
+		};
+		modalStore.trigger(modal);
+	}
 
 	function resizeObserver(node: HTMLElement) {
 		const observer = new ResizeObserver(() => {
@@ -81,6 +115,16 @@
 				class="btn preset-filled-primary-500 h-fit"
 				breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 			>
+			{#if !findings_assessment?.is_locked}
+				<button
+					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					onclick={() => modalRequestValidation()}
+					data-testid="request-validation-button"
+				>
+					<i class="fa-solid fa-check-circle mr-2"></i>
+					{m.requestValidation()}
+				</button>
+			{/if}
 		</div>
 	{/snippet}
 
