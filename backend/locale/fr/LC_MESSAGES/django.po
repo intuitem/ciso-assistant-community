@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-11 18:23+0000\n"
+"POT-Creation-Date: 2025-11-17 13:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,545 +18,1060 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: ebios_rm/models.py:20
+#: crq/models.py:27 ebios_rm/models.py:58
 msgid "Planned"
 msgstr ""
 
-#: ebios_rm/models.py:21
+#: crq/models.py:28 ebios_rm/models.py:59
 msgid "In progress"
 msgstr ""
 
-#: ebios_rm/models.py:22
+#: crq/models.py:29 ebios_rm/models.py:60
 msgid "In review"
 msgstr ""
 
-#: ebios_rm/models.py:23
+#: crq/models.py:30 ebios_rm/models.py:61
 msgid "Done"
 msgstr ""
 
-#: ebios_rm/models.py:24
+#: crq/models.py:31 ebios_rm/models.py:62
 msgid "Deprecated"
 msgstr ""
 
-#: ebios_rm/models.py:29
-msgid "Risk matrix"
+#: crq/models.py:34
+msgid "Lognormal - CI 90"
 msgstr ""
 
-#: ebios_rm/models.py:32
+#: crq/models.py:41 ebios_rm/models.py:151 tprm/models.py:433
+msgid "Status"
+msgstr ""
+
+#: crq/models.py:48 ebios_rm/models.py:158
+msgid "Authors"
+msgstr ""
+
+#: crq/models.py:54 ebios_rm/models.py:164
+msgid "Reviewers"
+msgstr ""
+
+#: crq/models.py:57 crq/models.py:432 crq/models.py:568 ebios_rm/models.py:167
+msgid "Observation"
+msgstr ""
+
+#: crq/models.py:63
 msgid ""
-"Risk matrix used as a reference for the study. Defaults to `urn:intuitem:"
-"risk:library:risk-matrix-4x4-ebios-rm`"
+"Risk tolerance points and curve data. Expected format: {'points': {'point1': "
+"{'probability': float, 'acceptable_loss': float}, 'point2': {'probability': "
+"float, 'acceptable_loss': float}}, 'curve_data': {'loss_values': [...], "
+"'probability_values': [...]}}"
 msgstr ""
 
-#: ebios_rm/models.py:38 ebios_rm/models.py:118
+#: crq/models.py:73
+msgid "Distribution model"
+msgstr ""
+
+#: crq/models.py:80
+msgid ""
+"Cached portfolio simulation results to improve performance. Contains current "
+"and residual portfolio calculations with metadata."
+msgstr ""
+
+#: crq/models.py:360
+msgid "Quantitative Risk Study"
+msgstr ""
+
+#: crq/models.py:361
+msgid "Quantitative Risk Studies"
+msgstr ""
+
+#: crq/models.py:371 ebios_rm/models.py:115 ebios_rm/models.py:307
 msgid "Assets"
 msgstr ""
 
-#: ebios_rm/models.py:40
+#: crq/models.py:373
+msgid "Assets impacted by the risk scenario"
+msgstr ""
+
+#: crq/models.py:379 tprm/models.py:268 tprm/models.py:391
+msgid "Owner"
+msgstr ""
+
+#: crq/models.py:383 tprm/models.py:384
+msgid "Draft"
+msgstr ""
+
+#: crq/models.py:384
+msgid "Open"
+msgstr ""
+
+#: crq/models.py:385
+msgid "Mitigate"
+msgstr ""
+
+#: crq/models.py:386
+msgid "Accept"
+msgstr ""
+
+#: crq/models.py:387
+msgid "Transfer"
+msgstr ""
+
+#: crq/models.py:391
+msgid "P1"
+msgstr ""
+
+#: crq/models.py:392
+msgid "P2"
+msgstr ""
+
+#: crq/models.py:393
+msgid "P3"
+msgstr ""
+
+#: crq/models.py:394
+msgid "P4"
+msgstr ""
+
+#: crq/models.py:401
+msgid "Priority"
+msgstr ""
+
+#: crq/models.py:407
+msgid "status"
+msgstr ""
+
+#: crq/models.py:411
+msgid "Vulnerabilities"
+msgstr ""
+
+#: crq/models.py:413
+msgid "Vulnerabities exploited by the risk scenario"
+msgstr ""
+
+#: crq/models.py:418 ebios_rm/models.py:910
+msgid "Threats"
+msgstr ""
+
+#: crq/models.py:435 crq/models.py:574 ebios_rm/models.py:324
+#: ebios_rm/models.py:477 ebios_rm/models.py:593 ebios_rm/models.py:711
+#: ebios_rm/models.py:922
+msgid "Is selected"
+msgstr ""
+
+#: crq/models.py:518
+msgid "Quantitative Risk Scenario"
+msgstr ""
+
+#: crq/models.py:519
+msgid "Quantitative Risk Scenarios"
+msgstr ""
+
+#: crq/models.py:533
+msgid "Inherent"
+msgstr ""
+
+#: crq/models.py:534
+msgid "Current"
+msgstr ""
+
+#: crq/models.py:535
+msgid "Residual"
+msgstr ""
+
+#: crq/models.py:542
+msgid "Existing Applied controls"
+msgstr ""
+
+#: crq/models.py:548
+msgid "Added Applied controls"
+msgstr ""
+
+#: crq/models.py:554
+msgid "Removed Applied controls"
+msgstr ""
+
+#: crq/models.py:562
+msgid "risk stage"
+msgstr ""
+
+#: crq/models.py:571
+msgid "Is simulation fresh"
+msgstr ""
+
+#: crq/models.py:587
+msgid "Quantitative Risk Hypothesis"
+msgstr ""
+
+#: crq/models.py:588
+msgid "Quantitative Risk Hypotheses"
+msgstr ""
+
+#: ebios_rm/models.py:108
+msgid "Risk matrix"
+msgstr ""
+
+#: ebios_rm/models.py:110
+msgid "Risk matrix used as a reference for the study"
+msgstr ""
+
+#: ebios_rm/models.py:117
 msgid "Assets that are pertinent to the study"
 msgstr ""
 
-#: ebios_rm/models.py:46
+#: ebios_rm/models.py:123
 msgid "Compliance assessments"
 msgstr ""
 
-#: ebios_rm/models.py:49
+#: ebios_rm/models.py:126
 msgid ""
 "Compliance assessments established as security baseline during workshop 1.4"
 msgstr ""
 
-#: ebios_rm/models.py:55
-msgid "Risk assessments"
-msgstr ""
-
-#: ebios_rm/models.py:57
-msgid "Risk assessments generated at the end of workshop 4"
-msgstr ""
-
-#: ebios_rm/models.py:62
+#: ebios_rm/models.py:132
 msgid "Reference entity"
 msgstr ""
 
-#: ebios_rm/models.py:64
+#: ebios_rm/models.py:134
 msgid "Entity that is the focus of the study"
 msgstr ""
 
-#: ebios_rm/models.py:73
+#: ebios_rm/models.py:143
 msgid "Version of the Ebios RM study (eg. 1.0, 2.0, etc.)"
 msgstr ""
 
-#: ebios_rm/models.py:74
+#: ebios_rm/models.py:144
 msgid "Version"
 msgstr ""
 
-#: ebios_rm/models.py:81
-msgid "Status"
+#: ebios_rm/models.py:170
+msgid "Metadata"
 msgstr ""
 
-#: ebios_rm/models.py:88
-msgid "Authors"
+#: ebios_rm/models.py:178
+msgid "Quotation method"
 msgstr ""
 
-#: ebios_rm/models.py:94
-msgid "Reviewers"
+#: ebios_rm/models.py:180
+msgid ""
+"Method used to quote the study: 'manual' for manual likelihood assessment, "
+"'express' for automatic propagation from operating modes"
 msgstr ""
 
-#: ebios_rm/models.py:97
-msgid "Observation"
-msgstr ""
-
-#: ebios_rm/models.py:100
+#: ebios_rm/models.py:187
 msgid "Ebios RM Study"
 msgstr ""
 
-#: ebios_rm/models.py:101
+#: ebios_rm/models.py:188
 msgid "Ebios RM Studies"
 msgstr ""
 
-#: ebios_rm/models.py:112 ebios_rm/models.py:201 ebios_rm/models.py:254
-#: ebios_rm/models.py:365 ebios_rm/models.py:401
+#: ebios_rm/models.py:301 ebios_rm/models.py:440 ebios_rm/models.py:520
+#: ebios_rm/models.py:657 ebios_rm/models.py:692 ebios_rm/models.py:897
 msgid "EBIOS RM study"
 msgstr ""
 
-#: ebios_rm/models.py:120
+#: ebios_rm/models.py:309
 msgid "Assets that are affected by the feared event"
 msgstr ""
 
-#: ebios_rm/models.py:125
-msgid "Qualifications"
-msgstr ""
-
-#: ebios_rm/models.py:127
-msgid "Qualifications carried by the feared event"
-msgstr ""
-
-#: ebios_rm/models.py:131
+#: ebios_rm/models.py:323
 msgid "Gravity"
-msgstr ""
+msgstr "Gravité"
 
-#: ebios_rm/models.py:132 ebios_rm/models.py:230 ebios_rm/models.py:320
-#: ebios_rm/models.py:382 ebios_rm/models.py:421
-msgid "Is selected"
-msgstr ""
-
-#: ebios_rm/models.py:133 ebios_rm/models.py:231 ebios_rm/models.py:321
-#: ebios_rm/models.py:383 ebios_rm/models.py:422
+#: ebios_rm/models.py:325 ebios_rm/models.py:478 ebios_rm/models.py:594
+#: ebios_rm/models.py:712 ebios_rm/models.py:923
 msgid "Justification"
 msgstr ""
 
-#: ebios_rm/models.py:136
+#: ebios_rm/models.py:330
 msgid "Feared event"
-msgstr ""
+msgstr "Événement redouté"
 
-#: ebios_rm/models.py:137 ebios_rm/models.py:205
+#: ebios_rm/models.py:331 ebios_rm/models.py:445
 msgid "Feared events"
-msgstr ""
+msgstr "Evénements redoutés"
 
-#: ebios_rm/models.py:169
-msgid "State"
-msgstr ""
-
-#: ebios_rm/models.py:170
-msgid "Organized crime"
-msgstr ""
-
-#: ebios_rm/models.py:171
-msgid "Terrorist"
-msgstr ""
-
-#: ebios_rm/models.py:172
-msgid "Activist"
-msgstr ""
-
-#: ebios_rm/models.py:173
-msgid "Competitor"
-msgstr ""
-
-#: ebios_rm/models.py:174
-msgid "Amateur"
-msgstr ""
-
-#: ebios_rm/models.py:175
-msgid "Avenger"
-msgstr ""
-
-#: ebios_rm/models.py:176
-msgid "Pathological"
-msgstr ""
-
-#: ebios_rm/models.py:209
+#: ebios_rm/models.py:453
 msgid "Risk origin"
-msgstr ""
+msgstr "Source de risque"
 
-#: ebios_rm/models.py:211
+#: ebios_rm/models.py:460
 msgid "Target objective"
-msgstr ""
+msgstr "Objectif visé"
 
-#: ebios_rm/models.py:213
+#: ebios_rm/models.py:462
 msgid "Motivation"
 msgstr ""
 
-#: ebios_rm/models.py:218
+#: ebios_rm/models.py:467
 msgid "Resources"
 msgstr ""
 
-#: ebios_rm/models.py:223
-msgid "Pertinence"
-msgstr ""
-
-#: ebios_rm/models.py:228
+#: ebios_rm/models.py:472
 msgid "Activity"
 msgstr ""
 
-#: ebios_rm/models.py:237 ebios_rm/models.py:370
+#: ebios_rm/models.py:488 ebios_rm/models.py:663
 msgid "RO/TO couple"
 msgstr ""
 
-#: ebios_rm/models.py:238
+#: ebios_rm/models.py:489
 msgid "RO/TO couples"
 msgstr ""
 
-#: ebios_rm/models.py:248
-msgid "Client"
-msgstr ""
-
-#: ebios_rm/models.py:249
-msgid "Partner"
-msgstr ""
-
-#: ebios_rm/models.py:250
-msgid "Supplier"
-msgstr ""
-
-#: ebios_rm/models.py:255
+#: ebios_rm/models.py:521
 msgid "EBIOS RM study that the stakeholder is part of"
 msgstr ""
 
-#: ebios_rm/models.py:262 tprm/models.py:27 tprm/models.py:97
+#: ebios_rm/models.py:528 tprm/models.py:158 tprm/models.py:229
 msgid "Entity"
 msgstr ""
 
-#: ebios_rm/models.py:264
+#: ebios_rm/models.py:530
 msgid "Entity qualified by the stakeholder"
 msgstr ""
 
-#: ebios_rm/models.py:268
+#: ebios_rm/models.py:534
 msgid "Applied controls"
 msgstr ""
 
-#: ebios_rm/models.py:271
+#: ebios_rm/models.py:537
 msgid "Controls applied to lower stakeholder criticality"
 msgstr ""
 
-#: ebios_rm/models.py:275
+#: ebios_rm/models.py:543
 msgid "Category"
 msgstr ""
 
-#: ebios_rm/models.py:279
+#: ebios_rm/models.py:552
 msgid "Current dependency"
 msgstr ""
 
-#: ebios_rm/models.py:284
+#: ebios_rm/models.py:557
 msgid "Current penetration"
 msgstr ""
 
-#: ebios_rm/models.py:289
+#: ebios_rm/models.py:562
 msgid "Current maturity"
 msgstr ""
 
-#: ebios_rm/models.py:294
+#: ebios_rm/models.py:567
 msgid "Current trust"
 msgstr ""
 
-#: ebios_rm/models.py:300
+#: ebios_rm/models.py:573
 msgid "Residual dependency"
 msgstr ""
 
-#: ebios_rm/models.py:305
+#: ebios_rm/models.py:578
 msgid "Residual penetration"
 msgstr ""
 
-#: ebios_rm/models.py:310
+#: ebios_rm/models.py:583
 msgid "Residual maturity"
 msgstr ""
 
-#: ebios_rm/models.py:315
+#: ebios_rm/models.py:588
 msgid "Residual trust"
 msgstr ""
 
-#: ebios_rm/models.py:324
+#: ebios_rm/models.py:599
 msgid "Stakeholder"
 msgstr ""
 
-#: ebios_rm/models.py:325 ebios_rm/models.py:376
+#: ebios_rm/models.py:600 ebios_rm/models.py:704
 msgid "Stakeholders"
 msgstr ""
 
-#: ebios_rm/models.py:372
+#: ebios_rm/models.py:665
 msgid "RO/TO couple from which the attach path is derived"
 msgstr ""
 
-#: ebios_rm/models.py:378
+#: ebios_rm/models.py:672
+msgid "Strategic Scenario"
+msgstr "Scénario stratégique"
+
+#: ebios_rm/models.py:673
+msgid "Strategic Scenarios"
+msgstr ""
+
+#: ebios_rm/models.py:697
+msgid "Strategic scenario"
+msgstr ""
+
+#: ebios_rm/models.py:700
+msgid "Strategic scenario from which the attack path is derived"
+msgstr ""
+
+#: ebios_rm/models.py:706
 msgid "Stakeholders leveraged by the attack path"
 msgstr ""
 
-#: ebios_rm/models.py:381 ebios_rm/models.py:419
-msgid "Description"
-msgstr ""
-
-#: ebios_rm/models.py:386
+#: ebios_rm/models.py:717 ebios_rm/models.py:903
 msgid "Attack path"
-msgstr ""
+msgstr "Chemin d'attaque"
 
-#: ebios_rm/models.py:387 ebios_rm/models.py:407
+#: ebios_rm/models.py:718
 msgid "Attack paths"
 msgstr ""
 
-#: ebios_rm/models.py:409
-msgid "Attack paths that are pertinent to the operational scenario"
+#: ebios_rm/models.py:790
+msgid "Threat"
 msgstr ""
 
-#: ebios_rm/models.py:413
-msgid "Threats"
+#: ebios_rm/models.py:792
+msgid "Threat that the elementary action is derived from"
 msgstr ""
 
-#: ebios_rm/models.py:416
-msgid "Threats leveraged by the operational scenario"
-msgstr ""
-
-#: ebios_rm/models.py:420
-msgid "Likelihood"
-msgstr ""
-
-#: ebios_rm/models.py:425
+#: ebios_rm/models.py:836 ebios_rm/models.py:930
 msgid "Operational scenario"
 msgstr ""
 
-#: ebios_rm/models.py:426
+#: ebios_rm/models.py:842
+msgid "Elementary actions"
+msgstr ""
+
+#: ebios_rm/models.py:844
+msgid "Elementary actions that are part of the operating mode"
+msgstr ""
+
+#: ebios_rm/models.py:913
+msgid "Threats leveraged by the operational scenario"
+msgstr ""
+
+#: ebios_rm/models.py:917
+msgid "Operating modes description"
+msgstr ""
+
+#: ebios_rm/models.py:918
+msgid "Description of the operating modes of the operational scenario"
+msgstr ""
+
+#: ebios_rm/models.py:921
+msgid "Likelihood"
+msgstr "Vraisemblance"
+
+#: ebios_rm/models.py:931
 msgid "Operational scenarios"
 msgstr ""
 
-#: iam/models.py:78
+#: iam/models.py:90
 msgid "GLOBAL"
 msgstr ""
 
-#: iam/models.py:79
+#: iam/models.py:91
 msgid "DOMAIN"
 msgstr ""
 
-#: iam/models.py:80
+#: iam/models.py:92
 msgid "ENCLAVE"
 msgstr ""
 
-#: iam/models.py:90
+#: iam/models.py:102
 msgid "parent folder"
 msgstr ""
 
-#: iam/models.py:100
+#: iam/models.py:110
+msgid "Labels"
+msgstr ""
+
+#: iam/models.py:119
 msgid "Folder"
 msgstr ""
 
-#: iam/models.py:101
+#: iam/models.py:120
 msgid "Folders"
 msgstr ""
 
-#: iam/models.py:223
+#: iam/models.py:367
 msgid "user group"
 msgstr ""
 
-#: iam/models.py:224 iam/models.py:371
+#: iam/models.py:368 iam/models.py:528
 msgid "user groups"
 msgstr ""
 
-#: iam/models.py:299
+#: iam/models.py:450
 msgid "Welcome to Ciso Assistant!"
 msgstr "Bienvenue sur CISO Assistant !"
 
-#: iam/models.py:346
+#: iam/models.py:498
 msgid "last name"
 msgstr ""
 
-#: iam/models.py:347
+#: iam/models.py:499
 msgid "first name"
 msgstr ""
 
-#: iam/models.py:354
+#: iam/models.py:506
+msgid ""
+"If True allow the user to log in using the normal login form even with SSO "
+"forced."
+msgstr ""
+
+#: iam/models.py:511
 msgid "active"
 msgstr ""
 
-#: iam/models.py:357
+#: iam/models.py:514
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
 msgstr ""
 
-#: iam/models.py:361
+#: iam/models.py:518
 msgid "date joined"
 msgstr ""
 
-#: iam/models.py:363
+#: iam/models.py:520
 msgid "superuser status"
 msgstr ""
 
-#: iam/models.py:366
+#: iam/models.py:523
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
 msgstr ""
 
-#: iam/models.py:374
+#: iam/models.py:531
 msgid ""
 "The user groups this user belongs to. A user will get all permissions "
 "granted to each of their user groups."
 msgstr ""
 
-#: iam/models.py:389
+#: iam/models.py:541
+msgid "Expiry date"
+msgstr ""
+
+#: iam/models.py:554
 msgid "user"
 msgstr ""
 
-#: iam/models.py:390
+#: iam/models.py:555
 msgid "users"
 msgstr ""
 
-#: iam/models.py:557
+#: iam/models.py:794
 msgid "permissions"
 msgstr ""
 
-#: iam/models.py:572
+#: iam/models.py:811
 msgid "Domain"
 msgstr ""
 
-#: iam/models.py:578
+#: iam/models.py:817
 msgid "Role"
 msgstr ""
 
-#: iam/models.py:579
+#: iam/models.py:818
 msgid "sub folders are visible"
 msgstr ""
 
-#: iam/sso/models.py:73
+#: iam/sso/models.py:74
 msgid "is enabled"
 msgstr ""
 
-#: iam/sso/models.py:78
+#: iam/sso/models.py:77
+msgid "Force SSO Login"
+msgstr ""
+
+#: iam/sso/models.py:80
 msgid "provider"
 msgstr ""
 
-#: iam/sso/models.py:82
+#: iam/sso/models.py:84
 msgid "provider ID"
 msgstr ""
 
-#: iam/sso/models.py:86
+#: iam/sso/models.py:88
 msgid "name"
 msgstr ""
 
-#: iam/sso/models.py:88
+#: iam/sso/models.py:90
 msgid "client id"
 msgstr ""
 
-#: iam/sso/models.py:90
+#: iam/sso/models.py:92
 msgid "App ID, or consumer key"
 msgstr ""
 
-#: iam/sso/models.py:94
+#: iam/sso/models.py:96
 msgid "secret key"
 msgstr ""
 
-#: iam/sso/models.py:97
+#: iam/sso/models.py:99
 msgid "API secret, client secret, or consumer secret"
 msgstr ""
 
-#: iam/sso/models.py:100
+#: iam/sso/models.py:102
 msgid "key"
 msgstr ""
 
-#: iam/sso/models.py:100
+#: iam/sso/models.py:102
 msgid "Key"
 msgstr ""
 
-#: iam/views.py:128
+#: iam/views.py:282
 msgid "CISO Assistant: Password Reset"
 msgstr "CISO Assistant : réinitialisation de mot de passe"
 
-#: tprm/models.py:20
-msgid "Owned folders"
-msgstr ""
-
-#: tprm/models.py:28
-msgid "Entities"
-msgstr ""
-
-#: tprm/models.py:42
-msgid "Blocker"
-msgstr ""
-
-#: tprm/models.py:43
-msgid "Warning"
-msgstr ""
-
-#: tprm/models.py:44
-msgid "Ok"
+#: tprm/models.py:43 tprm/models.py:262
+msgid "Is active"
 msgstr ""
 
 #: tprm/models.py:45
-msgid "Not applicable"
-msgstr ""
-
-#: tprm/models.py:47 tprm/models.py:130
-msgid "Criticality"
-msgstr ""
-
-#: tprm/models.py:48
-msgid "Penetration"
+msgid "Default dependency"
 msgstr ""
 
 #: tprm/models.py:49
-msgid "Dependency"
+msgid "Default dependency level for stakeholder assessment (0-4)"
 msgstr ""
 
-#: tprm/models.py:50
-msgid "Maturity"
+#: tprm/models.py:52
+msgid "Default penetration"
 msgstr ""
 
-#: tprm/models.py:51
-msgid "Trust"
+#: tprm/models.py:56
+msgid "Default penetration level for stakeholder assessment (0-4)"
 msgstr ""
 
-#: tprm/models.py:55
-msgid "Representative"
+#: tprm/models.py:59
+msgid "Default maturity"
 msgstr ""
 
-#: tprm/models.py:66 tprm/models.py:136
-msgid "Solutions"
+#: tprm/models.py:63
+msgid "Default maturity level for stakeholder assessment (1-4)"
 msgstr ""
 
-#: tprm/models.py:77
-msgid "Conclusion"
+#: tprm/models.py:66
+msgid "Default trust"
 msgstr ""
 
-#: tprm/models.py:83
-msgid "Entity assessment"
+#: tprm/models.py:70
+msgid "Default trust level for stakeholder assessment (1-4)"
 msgstr ""
 
-#: tprm/models.py:84
-msgid "Entity assessments"
+#: tprm/models.py:78
+msgid "Owned folders"
+msgstr ""
+
+#: tprm/models.py:87
+msgid "Parent entity"
+msgstr ""
+
+#: tprm/models.py:88
+msgid "Parent entity for branch/subsidiary relationships"
+msgstr ""
+
+#: tprm/models.py:98
+msgid "Relationship"
+msgstr ""
+
+#: tprm/models.py:99
+msgid "Type of relationship with this entity"
+msgstr ""
+
+#: tprm/models.py:104
+msgid "Legal identifiers"
+msgstr ""
+
+#: tprm/models.py:105
+msgid "Legal identifiers (LEI, EUID, VAT, DUNS, etc.)"
+msgstr ""
+
+#: tprm/models.py:111
+msgid "Country"
+msgstr ""
+
+#: tprm/models.py:112
+msgid "Country where the entity is located"
+msgstr ""
+
+#: tprm/models.py:118 tprm/models.py:462
+msgid "Currency"
 msgstr ""
 
 #: tprm/models.py:119
-msgid "Provider entity"
+msgid "Default currency for the entity"
 msgstr ""
 
 #: tprm/models.py:125
+msgid "DORA entity type"
+msgstr ""
+
+#: tprm/models.py:126
+msgid "DORA entity type classification"
+msgstr ""
+
+#: tprm/models.py:132
+msgid "DORA entity hierarchy"
+msgstr ""
+
+#: tprm/models.py:133
+msgid "DORA entity hierarchy classification"
+msgstr ""
+
+#: tprm/models.py:138
+msgid "DORA assets value"
+msgstr ""
+
+#: tprm/models.py:139
+msgid "Total assets value for DORA reporting"
+msgstr ""
+
+#: tprm/models.py:144
+msgid "DORA competent authority"
+msgstr ""
+
+#: tprm/models.py:145
+msgid "Competent authority overseeing this entity for DORA compliance"
+msgstr ""
+
+#: tprm/models.py:151
+msgid "DORA provider person type"
+msgstr ""
+
+#: tprm/models.py:152
+msgid "Type of person for ICT third-party service providers"
+msgstr ""
+
+#: tprm/models.py:159
+msgid "Entities"
+msgstr ""
+
+#: tprm/models.py:173
+msgid "Blocker"
+msgstr ""
+
+#: tprm/models.py:174
+msgid "Warning"
+msgstr ""
+
+#: tprm/models.py:175
+msgid "Ok"
+msgstr ""
+
+#: tprm/models.py:176
+msgid "Not applicable"
+msgstr ""
+
+#: tprm/models.py:178 tprm/models.py:264
+msgid "Criticality"
+msgstr ""
+
+#: tprm/models.py:179
+msgid "Penetration"
+msgstr ""
+
+#: tprm/models.py:180
+msgid "Dependency"
+msgstr ""
+
+#: tprm/models.py:181
+msgid "Maturity"
+msgstr ""
+
+#: tprm/models.py:182
+msgid "Trust"
+msgstr ""
+
+#: tprm/models.py:186
+msgid "Representative"
+msgstr ""
+
+#: tprm/models.py:197 tprm/models.py:375
+msgid "Solutions"
+msgstr ""
+
+#: tprm/models.py:208
+msgid "Conclusion"
+msgstr ""
+
+#: tprm/models.py:214
+msgid "Entity assessment"
+msgstr ""
+
+#: tprm/models.py:215
+msgid "Entity assessments"
+msgstr ""
+
+#: tprm/models.py:251 tprm/models.py:401
+msgid "Provider entity"
+msgstr ""
+
+#: tprm/models.py:257
 msgid "Recipient entity"
 msgstr ""
 
-#: tprm/models.py:135
+#: tprm/models.py:274
+msgid "Related assets"
+msgstr ""
+
+#: tprm/models.py:276
+msgid "Assets related to the solution"
+msgstr ""
+
+#: tprm/models.py:283
+msgid "DORA ICT service type"
+msgstr ""
+
+#: tprm/models.py:284
+msgid "DORA ICT service type classification"
+msgstr ""
+
+#: tprm/models.py:288
+msgid "Storage of data"
+msgstr ""
+
+#: tprm/models.py:289
+msgid "Whether data is stored by the ICT service provider"
+msgstr ""
+
+#: tprm/models.py:295
+msgid "Location of data at rest"
+msgstr ""
+
+#: tprm/models.py:296
+msgid "Country where data is stored"
+msgstr ""
+
+#: tprm/models.py:302
+msgid "Location of data processing"
+msgstr ""
+
+#: tprm/models.py:303
+msgid "Country where data is processed/managed"
+msgstr ""
+
+#: tprm/models.py:309
+msgid "Data sensitiveness"
+msgstr ""
+
+#: tprm/models.py:310
+msgid "Sensitiveness of the data stored"
+msgstr ""
+
+#: tprm/models.py:316
+msgid "Level of reliance"
+msgstr ""
+
+#: tprm/models.py:317
+msgid "Level of reliance on the ICT service"
+msgstr ""
+
+#: tprm/models.py:323
+msgid "Substitutability"
+msgstr ""
+
+#: tprm/models.py:324
+msgid "Substitutability of the ICT third-party service provider"
+msgstr ""
+
+#: tprm/models.py:330
+msgid "Non-substitutability reason"
+msgstr ""
+
+#: tprm/models.py:332
+msgid ""
+"Reason if the ICT third-party service provider is considered not "
+"substitutable or difficult to be substitutable"
+msgstr ""
+
+#: tprm/models.py:339
+msgid "Exit plan"
+msgstr ""
+
+#: tprm/models.py:340
+msgid "Existence of an exit plan"
+msgstr ""
+
+#: tprm/models.py:346
+msgid "Reintegration possibility"
+msgstr ""
+
+#: tprm/models.py:347
+msgid "Possibility of reintegration of the contracted ICT service"
+msgstr ""
+
+#: tprm/models.py:353
+msgid "Discontinuing impact"
+msgstr ""
+
+#: tprm/models.py:354
+msgid "Impact of discontinuing the ICT services"
+msgstr ""
+
+#: tprm/models.py:360
+msgid "Alternative providers identified"
+msgstr ""
+
+#: tprm/models.py:362
+msgid "Are there alternative ICT third-party service providers identified?"
+msgstr ""
+
+#: tprm/models.py:367
+msgid "Alternative providers"
+msgstr ""
+
+#: tprm/models.py:368
+msgid "Identification of alternative ICT third-party service providers"
+msgstr ""
+
+#: tprm/models.py:374 tprm/models.py:426
 msgid "Solution"
 msgstr ""
 
-#: tprm/serializers.py:74
+#: tprm/models.py:385
+msgid "Active"
+msgstr ""
+
+#: tprm/models.py:386
+msgid "Expired"
+msgstr ""
+
+#: tprm/models.py:387
+msgid "Terminated"
+msgstr ""
+
+#: tprm/models.py:402
+msgid "Entity providing this contract"
+msgstr ""
+
+#: tprm/models.py:410
+msgid "Beneficiary entity"
+msgstr ""
+
+#: tprm/models.py:411
+msgid "Entity benefiting from/receiving this contract"
+msgstr ""
+
+#: tprm/models.py:417
+msgid "Evidences"
+msgstr ""
+
+#: tprm/models.py:418
+msgid "Supporting evidence for this contract"
+msgstr ""
+
+#: tprm/models.py:427
+msgid "Solution covered by this contract"
+msgstr ""
+
+#: tprm/models.py:438
+msgid "Start date"
+msgstr ""
+
+#: tprm/models.py:443
+msgid "End date"
+msgstr ""
+
+#: tprm/models.py:448
+msgid "Reference ID"
+msgstr ""
+
+#: tprm/models.py:449
+msgid "Contract reference number or identifier"
+msgstr ""
+
+#: tprm/models.py:455
+msgid "DORA contractual arrangement"
+msgstr ""
+
+#: tprm/models.py:456
+msgid "DORA contractual arrangement type"
+msgstr ""
+
+#: tprm/models.py:463
+msgid "Currency for contract expenses"
+msgstr ""
+
+#: tprm/models.py:468
+msgid "Annual expense"
+msgstr ""
+
+#: tprm/models.py:469
+msgid "Annual expense amount for this contract"
+msgstr ""
+
+#: tprm/models.py:475
+msgid "Termination reason"
+msgstr ""
+
+#: tprm/models.py:476
+msgid "Reason for contract termination"
+msgstr ""
+
+#: tprm/models.py:480
+msgid "Is intragroup"
+msgstr ""
+
+#: tprm/models.py:481
+msgid "Whether this is an intragroup contract"
+msgstr ""
+
+#: tprm/models.py:489
+msgid "Overarching contract"
+msgstr ""
+
+#: tprm/models.py:490
+msgid "Parent/overarching contract if this is a subordinate arrangement"
+msgstr ""
+
+#: tprm/models.py:496
+msgid "Governing law country"
+msgstr ""
+
+#: tprm/models.py:497
+msgid "Country whose law governs this contract"
+msgstr ""
+
+#: tprm/models.py:502
+msgid "Notice period for entity (days)"
+msgstr ""
+
+#: tprm/models.py:503
+msgid "Notice period in days for the financial entity"
+msgstr ""
+
+#: tprm/models.py:508
+msgid "Notice period for provider (days)"
+msgstr ""
+
+#: tprm/models.py:509
+msgid "Notice period in days for the ICT third-party service provider"
+msgstr ""
+
+#: tprm/models.py:523
+msgid "Contract"
+msgstr ""
+
+#: tprm/models.py:524
+msgid "Contracts"
+msgstr ""
+
+#: tprm/serializers.py:60
+msgid "leiLengthError"
+msgstr ""
+
+#: tprm/serializers.py:69
+msgid "An entity cannot be set as its own parent"
+msgstr ""
+
+#: tprm/serializers.py:137
 msgid "Framework required"
 msgstr ""
+
+#: tprm/serializers.py:148
+msgid "An audit already exists for this assessment"
+msgstr ""
+
+#: tprm/serializers.py:355
+msgid "A contract cannot be set as its own overarching contract"
+msgstr ""
+
+#: core/views.py
+msgid "operating modes"
+msgstr "modes opératoires"
 
 #~ msgid "CISO Assistant: A questionnaire has been assigned to you"
 #~ msgstr "CISO Assistant: Un questionnaire vous a été assigné"

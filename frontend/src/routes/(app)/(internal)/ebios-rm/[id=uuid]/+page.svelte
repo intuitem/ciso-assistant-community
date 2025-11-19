@@ -143,6 +143,44 @@
 		]
 	};
 
+	function handleActivityOneClick(): void {
+		// Check if a risk assessment already exists
+		if (data.data.last_risk_assessment) {
+			const riskAssessment = data.data.last_risk_assessment;
+			const riskAssessmentName =
+				riskAssessment.str || riskAssessment.name || 'Existing Risk Assessment';
+
+			// Show choice modal - using i18n strings
+			const choiceModal: ModalSettings = {
+				type: 'confirm',
+				title: m.ebiosRmSyncModalTitle(),
+				body: `${m.ebiosRmSyncModalBody({ name: riskAssessmentName })}
+
+  • ${m.ebiosRmSyncExisting()}
+    ${m.ebiosRmSyncExistingDescription()}
+
+  • ${m.ebiosRmCreateNew()}
+    ${m.ebiosRmCreateNewDescription()}`,
+				buttonTextConfirm: m.ebiosRmSyncExisting(),
+				buttonTextCancel: m.ebiosRmCreateNew(),
+				response: (confirmed: boolean | undefined) => {
+					if (confirmed === true) {
+						// Sync existing - navigate to sync
+						window.location.href = `${page.url.pathname}/workshop-5/risk-analyses?sync=${riskAssessment.id}`;
+					} else if (confirmed === false) {
+						// Create new
+						modalCreateForm();
+					}
+					// If confirmed is undefined (close button/escape), do nothing
+				}
+			};
+			modalStore.trigger(choiceModal);
+		} else {
+			// No existing assessment, just create
+			modalCreateForm();
+		}
+	}
+
 	function modalCreateForm(): void {
 		let modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -204,7 +242,10 @@
 		>
 			{#snippet addRiskAnalysis()}
 				<div>
-					<button class="flex flex-col text-left hover:text-purple-800" onclick={modalCreateForm}>
+					<button
+						class="flex flex-col text-left hover:text-purple-800"
+						onclick={handleActivityOneClick}
+					>
 						{#if data.data.meta.workshops[4].steps[0].status == 'done'}
 							<span
 								class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
