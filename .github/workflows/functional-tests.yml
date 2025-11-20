@@ -59,6 +59,8 @@ jobs:
 
       - name: Build community frontend
         working-directory: ${{ env.frontend-directory }}
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
         run: pnpm run build
 
       - name: Upload Community Frontend Build Artifact
