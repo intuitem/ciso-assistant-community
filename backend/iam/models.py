@@ -408,6 +408,7 @@ class UserManager(BaseUserManager):
         """
         validate_email(email)
         email = self.normalize_email(email)
+        is_third_party = extra_fields.get("is_third_party", False)
         user = self.model(
             email=email,
             first_name=extra_fields.get("first_name", ""),
@@ -416,7 +417,8 @@ class UserManager(BaseUserManager):
             is_active=extra_fields.get("is_active", True),
             observation=extra_fields.get("observation"),
             folder=_get_root_folder(),
-            keep_local_login=extra_fields.get("keep_local_login", False),
+            is_third_party=is_third_party,
+            keep_local_login=extra_fields.get("keep_local_login", is_third_party),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         if password:
