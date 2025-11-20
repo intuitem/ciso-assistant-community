@@ -4,6 +4,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
+	import { DISPLAY_EVENTS } from './constants';
 
 	interface Option {
 		label: string;
@@ -29,7 +30,7 @@
 		field,
 		valuePath = field,
 		options = [],
-		displayEvents = false,
+		displayEvents = DISPLAY_EVENTS,
 		form,
 		hidden = false,
 		disabled = false,
