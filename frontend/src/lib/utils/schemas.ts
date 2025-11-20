@@ -1379,5 +1379,6 @@ export const webhookEndpointSchema = z.object({
 	url: z.string().url(),
 	event_types: z.string().array().nonempty(),
 	is_active: z.boolean().default(true),
-	secret: z.string().min(1).optional()
+	secret: z.string().min(1).optional(),
+	target_folders: z.string().uuid().optional().array().optional()
 });
