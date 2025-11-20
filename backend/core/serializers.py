@@ -2355,6 +2355,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
 class TaskTemplateReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    evidences = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
     compliance_assessments = FieldsRelatedField(many=True)
@@ -2373,7 +2374,6 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     # Expose task_node fields directly
     status = serializers.SerializerMethodField()
     observation = serializers.SerializerMethodField()
-    evidences = serializers.SerializerMethodField()
 
     class Meta:
         model = TaskTemplate
@@ -2395,20 +2395,11 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
         task_node = self.get_task_node(obj)
         return task_node.observation if task_node else ""
 
-    def get_evidences(self, obj):
-        task_node = self.get_task_node(obj)
-        if task_node:
-            return [{"id": e.id, "str": e.name} for e in task_node.evidences.all()]
-        return []
-
 
 class TaskTemplateWriteSerializer(BaseModelSerializer):
     status = serializers.CharField(required=False)
     observation = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
-    )
-    evidences = serializers.PrimaryKeyRelatedField(
-        queryset=Evidence.objects.all(), many=True, required=False
     )
 
     class Meta:
@@ -2426,11 +2417,9 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
             if task_node:
                 data["status"] = task_node.status
                 data["observation"] = task_node.observation
-                data["evidences"] = [e.id for e in task_node.evidences.all()]
             else:
                 data["status"] = None
                 data["observation"] = ""
-                data["evidences"] = []
         return data
 
     def create(self, validated_data):
@@ -2495,7 +2484,6 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
         return {
             "status": validated_data.pop("status", None),
             "observation": validated_data.pop("observation", None),
-            "evidences": validated_data.pop("evidences", []),
         }
 
     def _sync_task_node(
@@ -2536,10 +2524,6 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
             task_node.observation = tasknode_data["observation"]
         task_node.save()
 
-        evidences = tasknode_data.get("evidences")
-        if evidences is not None:
-            task_node.evidences.set(evidences)
-
 
 class TaskNodeReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
@@ -2549,6 +2533,7 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     assigned_to = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
+    global_evidences = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
     compliance_assessments = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)

@@ -1588,6 +1588,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'task_template', urlModel: 'task-templates' },
 			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'global_evidences', urlModel: 'evidences' },
 			{ field: 'assigned_to', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },

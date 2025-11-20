@@ -217,15 +217,6 @@
 		bind:cachedValue={formDataCache['status']}
 		disableDoubleDash={true}
 	/>
-	<AutocompleteSelect
-		multiple
-		{form}
-		optionsEndpoint="evidences"
-		optionsExtraFields={[['folder', 'str']]}
-		optionsLabelField="auto"
-		field="evidences"
-		label={m.evidences()}
-	/>
 {/if}
 <AutocompleteSelect
 	{form}
@@ -244,6 +235,15 @@
 		label={m.refId()}
 		cacheLock={cacheLocks['ref_id']}
 		bind:cachedValue={formDataCache['ref_id']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="evidences"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="evidences"
+		label={m.evidences()}
 	/>
 	<AutocompleteSelect
 		multiple

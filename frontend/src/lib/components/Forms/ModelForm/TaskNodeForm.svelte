@@ -45,6 +45,7 @@
 />
 <AutocompleteSelect
 	multiple
+	disabled
 	{form}
 	optionsEndpoint="evidences"
 	optionsExtraFields={[['folder', 'str']]}
