@@ -6929,7 +6929,7 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         return self.ref_id
 
 
-class ValidationFlowEvent(AbstractBaseModel, FolderMixin):
+class FlowEvent(AbstractBaseModel, FolderMixin):
     validation_flow = models.ForeignKey(
         ValidationFlow,
         on_delete=models.CASCADE,
@@ -6958,8 +6958,8 @@ class ValidationFlowEvent(AbstractBaseModel, FolderMixin):
     # created_at is already covered on the abstract model
 
     class Meta:
-        verbose_name = _("Validation flow event")
-        verbose_name_plural = _("Validation flow events")
+        verbose_name = _("Flow event")
+        verbose_name_plural = _("Flow events")
         ordering = ["-created_at"]
 
     def __str__(self) -> str:

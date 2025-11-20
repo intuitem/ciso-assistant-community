@@ -6,7 +6,7 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     ValidationFlow,
-    ValidationFlowEvent,
+    FlowEvent,
 )
 from tprm.models import EntityAssessment
 from iam.models import User
@@ -572,9 +572,9 @@ def expire_validation_flows():
         flow.status = "expired"
         flow.save()
 
-        # Create ValidationFlowEvent for the expiration
+        # Create FlowEvent for the expiration
         # Use approver as the event actor (system action on behalf of approver)
-        ValidationFlowEvent.objects.create(
+        FlowEvent.objects.create(
             validation_flow=flow,
             event_type="expired",
             event_actor=flow.approver,

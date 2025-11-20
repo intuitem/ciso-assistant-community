@@ -2628,7 +2628,7 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         Override create to automatically set the requester to the current user
         and create initial submission event.
         """
-        from core.models import ValidationFlowEvent
+        from core.models import FlowEvent
 
         request_user = self.context["request"].user
         validated_data["requester"] = request_user
@@ -2642,7 +2642,7 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         instance = super().create(validated_data)
 
         # Create initial submission event
-        ValidationFlowEvent.objects.create(
+        FlowEvent.objects.create(
             validation_flow=instance,
             event_type=instance.status,
             event_actor=request_user,
@@ -2657,9 +2657,9 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         Override update to ensure proper permissions for status transitions:
         - Approver can modify status when status is 'submitted' or 'accepted'
         - Requester can modify status when status is 'change_requested'
-        - Creates ValidationFlowEvent for each status transition
+        - Creates FlowEvent for each status transition
         """
-        from core.models import ValidationFlowEvent
+        from core.models import FlowEvent
 
         request_user = self.context["request"].user
 
@@ -2699,8 +2699,8 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
             # Update the instance
             updated_instance = super().update(instance, validated_data)
 
-            # Create ValidationFlowEvent after successful status transition
-            ValidationFlowEvent.objects.create(
+            # Create FlowEvent after successful status transition
+            FlowEvent.objects.create(
                 validation_flow=updated_instance,
                 event_type=updated_instance.status,
                 event_actor=request_user,
@@ -2718,11 +2718,11 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         read_only_fields = ["requester"]
 
 
-class ValidationFlowEventSerializer(BaseModelSerializer):
+class FlowEventSerializer(BaseModelSerializer):
     event_actor = FieldsRelatedField(["id", "email", "first_name", "last_name"])
 
     class Meta:
-        model = ValidationFlowEvent
+        model = FlowEvent
         fields = ["id", "event_type", "event_actor", "event_notes", "created_at"]
 
 
@@ -2744,7 +2744,7 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
     requester = FieldsRelatedField(["id", "email", "first_name", "last_name"])
     approver = FieldsRelatedField(["id", "email", "first_name", "last_name"])
     linked_models = serializers.ListField(read_only=True)
-    events = ValidationFlowEventSerializer(many=True, read_only=True)
+    events = FlowEventSerializer(many=True, read_only=True)
 
     class Meta:
         model = ValidationFlow
