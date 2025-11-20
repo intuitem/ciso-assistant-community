@@ -38,7 +38,10 @@
 
 	type SecurityObjectiveScale = '0-3' | '1-4' | 'FIPS-199';
 	const scale: SecurityObjectiveScale = page.data.settings.security_objective_scale;
-	const securityObjectiveScaleMap: string[] = SECURITY_OBJECTIVE_SCALE_MAP[scale];
+	const securityObjectiveScaleMap = SECURITY_OBJECTIVE_SCALE_MAP[scale];
+	const reducedSecurityObjectiveMap = securityObjectiveScaleMap.filter(
+		(label, index) => !securityObjectiveScaleMap.slice(0, index).includes(label)
+	);
 
 	async function fetchSecurityObjectives(): Promise<string[]> {
 		const endpoint = '/assets/security-objectives/';
@@ -66,21 +69,12 @@
 		suggested?: boolean;
 	}
 
-	const createOption = (label: string, value: number): Option => ({
+	const createOption = (label: string): Option => ({
 		label,
-		value
+		value: securityObjectiveScaleMap.findIndex((_label) => label === _label)
 	});
 
-	// Helper function to filter duplicate consecutive labels
-	const filterDuplicateLabels = (options: Option[]): Option[] =>
-		options.map((option, index, arr) => ({
-			...option,
-			label: index > 0 && option.label === arr[index - 1].label ? '' : option.label
-		}));
-
-	const securityObjectiveOptions: Option[] = filterDuplicateLabels(
-		securityObjectiveScaleMap.map(createOption)
-	);
+	const securityObjectiveOptions: Option[] = reducedSecurityObjectiveMap.map(createOption);
 
 	// Dynamic configuration based on asset type
 	const typeConfig = $derived.by(() => {
@@ -246,6 +240,55 @@
 		</div>
 	</Dropdown>
 {/if}
+{#if data.type === 'PR'}
+	<Dropdown
+		open={false}
+		style="hover:text-purple-700"
+		icon="fa-solid fa-building-columns"
+		header={m.doraSpecific()}
+	>
+		<Checkbox
+			{form}
+			field="is_business_function"
+			label={m.isBusinessFunction()}
+			cacheLock={cacheLocks['is_business_function']}
+			bind:cachedValue={formDataCache['is_business_function']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['dora_licenced_activity']}
+			field="dora_licenced_activity"
+			label={m.doraLicencedActivity()}
+			cacheLock={cacheLocks['dora_licenced_activity']}
+			bind:cachedValue={formDataCache['dora_licenced_activity']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['dora_criticality_assessment']}
+			field="dora_criticality_assessment"
+			label={m.doraCriticalityAssessment()}
+			cacheLock={cacheLocks['dora_criticality_assessment']}
+			bind:cachedValue={formDataCache['dora_criticality_assessment']}
+			disableDoubleDash={true}
+		/>
+		<TextField
+			{form}
+			field="dora_criticality_justification"
+			label={m.doraCriticalityJustification()}
+			cacheLock={cacheLocks['dora_criticality_justification']}
+			bind:cachedValue={formDataCache['dora_criticality_justification']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['dora_discontinuing_impact']}
+			field="dora_discontinuing_impact"
+			label={m.doraDiscontinuingImpact()}
+			cacheLock={cacheLocks['dora_discontinuing_impact']}
+			bind:cachedValue={formDataCache['dora_discontinuing_impact']}
+			disableDoubleDash={true}
+		/>
+	</Dropdown>
+{/if}
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<TextField
 		{form}
@@ -286,6 +329,18 @@
 		helpText={m.observationHelpText()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="solutions"
+		optionsLabelField="auto"
+		optionsExtraFields={[['provider_entity', 'str']]}
+		field="solutions"
+		cacheLock={cacheLocks['solutions']}
+		bind:cachedValue={formDataCache['solutions']}
+		label={m.solutions()}
+		helpText={m.solutionsLinkedToAssetHelpText()}
 	/>
 </Dropdown>
 {#if initialData.ebios_rm_studies}

@@ -482,12 +482,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'support_assets' },
 			{ field: 'children_assets' },
 			{ field: 'owner' },
+			{ field: 'is_critical' },
 			{ field: 'filtering_labels' },
 			{ field: 'security_objectives', tooltip: 'securityObjectivesTooltip' },
 			{ field: 'disaster_recovery_objectives', tooltip: 'disasterRecoveryObjectivesTooltip' },
 			{ field: 'security_capabilities', tooltip: 'securityCapabilitiesTooltip' },
 			{ field: 'recovery_capabilities', tooltip: 'recoveryCapabilitiesTooltip' },
 			{ field: 'reference_link' },
+			{ field: 'solutions' },
 			{ field: 'observation' }
 		],
 		reverseForeignKeyFields: [
@@ -498,7 +500,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true
 			},
 			{ field: 'assets', urlModel: 'vulnerabilities' },
-			{ field: 'assets', urlModel: 'solutions' },
+			{ field: 'assets', urlModel: 'solutions', disableCreate: true, disableDelete: true },
 			{ field: 'assets', urlModel: 'personal-data', disableCreate: true, disableDelete: true }
 		],
 		foreignKeyFields: [
@@ -511,9 +513,16 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
-			{ field: 'overridden_children_capabilities', urlModel: 'asset-capabilities' }
+			{ field: 'overridden_children_capabilities', urlModel: 'asset-capabilities' },
+			{ field: 'solutions', urlModel: 'solutions' }
 		],
-		selectFields: [{ field: 'type' }, { field: 'asset_class' }],
+		selectFields: [
+			{ field: 'type' },
+			{ field: 'asset_class' },
+			{ field: 'dora_licenced_activity' },
+			{ field: 'dora_criticality_assessment' },
+			{ field: 'dora_discontinuing_impact' }
+		],
 		filters: [
 			{ field: 'parent_assets' },
 			{ field: 'folder' },
@@ -757,19 +766,41 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'entities',
 		verboseName: 'Entity',
 		verboseNamePlural: 'Entities',
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'mission' },
+			{ field: 'parent_entity' },
+			{ field: 'relationship' },
+			{ field: 'legal_identifiers' },
+			{ field: 'branches' },
+			{ field: 'reference_link' }
+		],
 		reverseForeignKeyFields: [
 			{ field: 'entity', urlModel: 'entity-assessments' },
 			{ field: 'entity', urlModel: 'representatives' },
-			{ field: 'provider_entity', urlModel: 'solutions' }
+			{ field: 'provider_entity', urlModel: 'solutions' },
+			{ field: 'provider_entity', urlModel: 'contracts' }
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'owned_folders', urlModel: 'folders', urlParams: 'owned=false' },
+			{ field: 'parent_entity', urlModel: 'entities' },
+			{ field: 'branches', urlModel: 'entities' },
 			{
 				field: 'relationship',
 				urlModel: 'terminologies',
 				urlParams: 'field_path=entity.relationship'
 			}
+		],
+		selectFields: [
+			{ field: 'country' },
+			{ field: 'currency' },
+			{ field: 'dora_entity_type' },
+			{ field: 'dora_entity_hierarchy' },
+			{ field: 'dora_provider_person_type' }
 		]
 	},
 	'entity-assessments': {
@@ -798,10 +829,51 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'solutions',
 		verboseName: 'Solution',
 		verboseNamePlural: 'Solutions',
+		reverseForeignKeyFields: [{ field: 'solution', urlModel: 'contracts', disableDelete: true }],
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
-			{ field: 'assets', urlModel: 'assets' }
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		selectFields: [
+			{ field: 'dora_ict_service_type' },
+			{ field: 'data_location_storage' },
+			{ field: 'data_location_processing' },
+			{ field: 'dora_data_sensitiveness' },
+			{ field: 'dora_reliance_level' },
+			{ field: 'dora_substitutability' },
+			{ field: 'dora_non_substitutability_reason' },
+			{ field: 'dora_has_exit_plan' },
+			{ field: 'dora_reintegration_possibility' },
+			{ field: 'dora_discontinuing_impact' },
+			{ field: 'dora_alternative_providers_identified' }
+		],
+		filters: [{ field: 'owner' }, { field: 'filtering_labels' }]
+	},
+	contracts: {
+		name: 'contract',
+		localName: 'contract',
+		localNamePlural: 'contracts',
+		verboseName: 'Contract',
+		verboseNamePlural: 'Contracts',
+		reverseForeignKeyFields: [{ field: 'contracts', urlModel: 'evidences', disableDelete: true }],
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'provider_entity', urlModel: 'entities' },
+			{ field: 'beneficiary_entity', urlModel: 'entities' },
+			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'solution', urlModel: 'solutions' },
+			{ field: 'overarching_contract', urlModel: 'contracts' }
+		],
+		selectFields: [
+			{ field: 'status' },
+			{ field: 'currency' },
+			{ field: 'dora_contractual_arrangement' },
+			{ field: 'termination_reason' },
+			{ field: 'governing_law_country' }
 		]
 	},
 	representatives: {
@@ -1516,7 +1588,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'task_template', urlModel: 'task-templates' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'folder', urlModel: 'folders' }
+			{ field: 'assigned_to', urlModel: 'users' },
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
+			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
+			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
 		]
 	},
 	campaigns: {
@@ -2029,6 +2107,16 @@ export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
 export const urlParamModelVerboseName = (model: string): string => {
 	const modelInfo = getModelInfo(model);
 	return modelInfo?.localName || modelInfo?.verboseName || model;
+};
+
+export const urlParamModelDescriptionKey = (model: string): string => {
+	// Convert model URL to camelCase description key
+	// e.g., "risk-assessments" → "riskAssessmentsDescription"
+	const camelCase = model
+		.split('-')
+		.map((word, index) => (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+		.join('');
+	return `${camelCase}Description`;
 };
 
 export const urlParamModelForeignKeyFields = (model: string): ForeignKeyField[] => {

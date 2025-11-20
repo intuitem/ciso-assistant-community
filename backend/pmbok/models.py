@@ -18,6 +18,8 @@ from tprm.models import Entity, EntityAssessment
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from django.db.models import Count
 
+from auditlog.registry import auditlog
+
 
 class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
     class Meta:
@@ -138,3 +140,14 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
         related_name="accreditation_checklist",
     )
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+
+
+common_exclude = ["created_at", "updated_at"]
+auditlog.register(
+    GenericCollection,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Accreditation,
+    exclude_fields=common_exclude,
+)

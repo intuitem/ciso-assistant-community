@@ -58,6 +58,7 @@ from docxtpl import DocxTemplate
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from integrations.registry import IntegrationRegistry
+from library.serializers import StoredLibrarySerializer
 from .generators import gen_audit_context
 
 from django.utils import timezone
@@ -98,7 +99,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 from rest_framework.views import APIView
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 
 from weasyprint import HTML
@@ -136,6 +137,7 @@ from .models import *
 from .serializers import *
 
 from .models import Severity
+from . import dora
 
 from serdes.utils import (
     get_domain_export_objects,
@@ -675,6 +677,10 @@ class AssetFilter(GenericFilterSet):
             "filtering_labels",
             "asset_class",
             "personal_data",
+            "is_business_function",
+            "dora_licenced_activity",
+            "dora_criticality_assessment",
+            "dora_discontinuing_impact",
         ]
 
 
@@ -850,6 +856,54 @@ class AssetViewSet(BaseModelViewSet):
                 for ac in AssetClass.objects.filter(assets__isnull=False).distinct()
             ]
         )
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get DORA licensed activity choices")
+    def dora_licenced_activity(self, request):
+        return Response(dict(dora.DORA_LICENSED_ACTIVITY_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get DORA criticality assessment choices")
+    def dora_criticality_assessment(self, request):
+        return Response(dict(dora.DORA_FUNCTION_CRITICALITY_CHOICES))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get DORA discontinuing impact choices")
+    def dora_discontinuing_impact(self, request):
+        return Response(dict(dora.DORA_DISCONTINUING_IMPACT_CHOICES))
+
+    @action(detail=True, name="Get asset write data")
+    def object(self, request, pk):
+        serializer_class = self.get_serializer_class(action="update")
+        asset_data = serializer_class(super().get_object()).data
+
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        scale_key = (
+            general_settings.value.get("security_objective_scale", "1-4")
+            if general_settings
+            else "1-4"
+        )
+        objective_scale = Asset.SECURITY_OBJECTIVES_SCALES[scale_key]
+
+        objectives = asset_data["security_objectives"].get("objectives", {})
+        security_capabilities = asset_data["security_capabilities"].get(
+            "objectives", {}
+        )
+        reduced_objective_scale: dict[str, int] = {
+            value: index
+            for index, value in enumerate(objective_scale)
+            if value not in objective_scale[:index]
+        }
+
+        for objective_dict in [objectives, security_capabilities]:
+            for objective_data in objective_dict.values():
+                if (objective_value := objective_data.get("value")) is None:
+                    continue
+                objective_label = objective_scale[objective_value]
+                reduced_value = reduced_objective_scale[objective_label]
+                objective_data["value"] = reduced_value
+
+        return Response(asset_data)
 
     @action(detail=False, name="Get assets graph")
     def graph(self, request):
@@ -1452,6 +1506,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         instance: RiskAssessment = serializer.save()
         if instance.ebios_rm_study:
+            # Unlink all previous risk assessments from this EBIOS RM study
+            RiskAssessment.objects.filter(
+                ebios_rm_study=instance.ebios_rm_study
+            ).exclude(id=instance.id).update(ebios_rm_study=None)
+
             instance.risk_matrix = instance.ebios_rm_study.risk_matrix
             ebios_rm_study = EbiosRMStudy.objects.get(id=instance.ebios_rm_study.id)
             for operational_scenario in [
@@ -1459,22 +1518,95 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 for operational_scenario in ebios_rm_study.operational_scenarios.all()
                 if operational_scenario.is_selected
             ]:
+                # Build comprehensive description from EBIOS RM components
+                description_parts = []
+
+                # Feared events
+                ro_to = operational_scenario.ro_to
+                feared_events = ro_to.feared_events.filter(is_selected=True)
+                if feared_events.exists():
+                    feared_events_list = []
+                    for fe in feared_events:
+                        gravity_display = fe.get_gravity_display()
+                        gravity_text = (
+                            f" [{_('Gravity').capitalize()}: {gravity_display['name']}]"
+                            if gravity_display["value"] >= 0
+                            else ""
+                        )
+                        fe_text = f"- {fe.name}{gravity_text}"
+                        if fe.description:
+                            fe_text += f": {fe.description}"
+                        feared_events_list.append(fe_text)
+                    feared_events_text = (
+                        f"**{_('Feared events').capitalize()}:**\n"
+                        + "\n".join(feared_events_list)
+                    )
+                    description_parts.append(feared_events_text)
+
+                # Risk origin and target objective
+                risk_origin_name = (
+                    ro_to.risk_origin.get_name_translated
+                    if hasattr(ro_to.risk_origin, "get_name_translated")
+                    else str(ro_to.risk_origin)
+                )
+                ro_to_text = f"**{_('Risk origin').capitalize()}:** {risk_origin_name}\n**{_('Target objective').capitalize()}:** {ro_to.target_objective}"
+                description_parts.append(ro_to_text)
+
+                # Strategic scenario
+                strategic_scenario = operational_scenario.attack_path.strategic_scenario
+                if strategic_scenario.description:
+                    description_parts.append(
+                        f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}\n{strategic_scenario.description}"
+                    )
+                elif strategic_scenario.name:
+                    description_parts.append(
+                        f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}"
+                    )
+
+                # Attack path
+                attack_path = operational_scenario.attack_path
+                if attack_path.description:
+                    description_parts.append(
+                        f"**{_('Attack path').capitalize()}:** {attack_path.name}\n{attack_path.description}"
+                    )
+                elif attack_path.name:
+                    description_parts.append(
+                        f"**{_('Attack path').capitalize()}:** {attack_path.name}"
+                    )
+
+                # Operating modes
+                operating_modes = operational_scenario.operating_modes.all()
+                if operating_modes.exists():
+                    operating_modes_list = []
+                    for om in operating_modes:
+                        likelihood_display = om.get_likelihood_display()
+                        likelihood_text = (
+                            f" [{_('Likelihood').capitalize()}: {likelihood_display['name']}]"
+                            if likelihood_display["value"] >= 0
+                            else ""
+                        )
+                        om_text = f"- {om.name}{likelihood_text}"
+                        if om.description:
+                            om_text += f": {om.description}"
+                        operating_modes_list.append(om_text)
+                    operating_modes_text = (
+                        f"**{_('operating modes').capitalize()}:**\n"
+                        + "\n".join(operating_modes_list)
+                    )
+                    description_parts.append(operating_modes_text)
+                elif operational_scenario.operating_modes_description:
+                    description_parts.append(
+                        f"**{_('operating modes').capitalize()}:**\n{operational_scenario.operating_modes_description}"
+                    )
+
                 risk_scenario = RiskScenario(
                     risk_assessment=instance,
+                    operational_scenario=operational_scenario,
                     name=operational_scenario.name,
                     ref_id=operational_scenario.ref_id
                     if operational_scenario.ref_id
                     else RiskScenario.get_default_ref_id(instance),
-                    description="\n\n".join(
-                        filter(
-                            None,
-                            [
-                                operational_scenario.attack_path.strategic_scenario.description,
-                                operational_scenario.attack_path.description,
-                                operational_scenario.operating_modes_description,
-                            ],
-                        )
-                    ),
+                    description="\n\n".join(description_parts),
                 )
                 if ff_is_enabled("inherent_risk"):
                     risk_scenario.inherent_proba = operational_scenario.likelihood
@@ -1491,6 +1623,230 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 )
         instance.save()
         return super().perform_create(serializer)
+
+    @action(detail=True, methods=["post"], name="Sync with EBIOS RM")
+    def sync_from_ebios_rm(self, request, pk=None):
+        """
+        Synchronize an existing risk assessment with its linked EBIOS RM study.
+        Updates existing risk scenarios, adds new ones, and archives outdated ones.
+        """
+        risk_assessment = self.get_object()
+
+        if not risk_assessment.ebios_rm_study:
+            return Response(
+                {"error": "Risk assessment is not linked to an EBIOS RM study"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        ebios_rm_study = risk_assessment.ebios_rm_study
+        selected_operational_scenarios = [
+            os for os in ebios_rm_study.operational_scenarios.all() if os.is_selected
+        ]
+
+        # Track which operational scenarios we've processed
+        processed_os_ids = set()
+        updated_count = 0
+        created_count = 0
+        archived_count = 0
+
+        # Helper function to build description (DRY)
+        def build_description(operational_scenario):
+            description_parts = []
+
+            # Feared events
+            ro_to = operational_scenario.ro_to
+            feared_events = ro_to.feared_events.filter(is_selected=True)
+            if feared_events.exists():
+                feared_events_list = []
+                for fe in feared_events:
+                    gravity_display = fe.get_gravity_display()
+                    gravity_text = (
+                        f" [{_('Gravity').capitalize()}: {gravity_display['name']}]"
+                        if gravity_display["value"] >= 0
+                        else ""
+                    )
+                    fe_text = f"- {fe.name}{gravity_text}"
+                    if fe.description:
+                        fe_text += f": {fe.description}"
+                    feared_events_list.append(fe_text)
+                feared_events_text = (
+                    f"**{_('Feared events').capitalize()}:**\n"
+                    + "\n".join(feared_events_list)
+                )
+                description_parts.append(feared_events_text)
+
+            # Risk origin and target objective
+            risk_origin_name = (
+                ro_to.risk_origin.get_name_translated
+                if hasattr(ro_to.risk_origin, "get_name_translated")
+                else str(ro_to.risk_origin)
+            )
+            ro_to_text = f"**{_('Risk origin').capitalize()}:** {risk_origin_name}\n**{_('Target objective').capitalize()}:** {ro_to.target_objective}"
+            description_parts.append(ro_to_text)
+
+            # Strategic scenario
+            strategic_scenario = operational_scenario.attack_path.strategic_scenario
+            if strategic_scenario.description:
+                description_parts.append(
+                    f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}\n{strategic_scenario.description}"
+                )
+            elif strategic_scenario.name:
+                description_parts.append(
+                    f"**{_('Strategic Scenario').capitalize()}:** {strategic_scenario.name}"
+                )
+
+            # Attack path
+            attack_path = operational_scenario.attack_path
+            if attack_path.description:
+                description_parts.append(
+                    f"**{_('Attack path').capitalize()}:** {attack_path.name}\n{attack_path.description}"
+                )
+            elif attack_path.name:
+                description_parts.append(
+                    f"**{_('Attack path').capitalize()}:** {attack_path.name}"
+                )
+
+            # Operating modes
+            operating_modes = operational_scenario.operating_modes.all()
+            if operating_modes.exists():
+                operating_modes_list = []
+                for om in operating_modes:
+                    likelihood_display = om.get_likelihood_display()
+                    likelihood_text = (
+                        f" [{_('Likelihood').capitalize()}: {likelihood_display['name']}]"
+                        if likelihood_display["value"] >= 0
+                        else ""
+                    )
+                    om_text = f"- {om.name}{likelihood_text}"
+                    if om.description:
+                        om_text += f": {om.description}"
+                    operating_modes_list.append(om_text)
+                operating_modes_text = (
+                    f"**{_('operating modes').capitalize()}:**\n"
+                    + "\n".join(operating_modes_list)
+                )
+                description_parts.append(operating_modes_text)
+            elif operational_scenario.operating_modes_description:
+                description_parts.append(
+                    f"**{_('operating modes').capitalize()}:**\n{operational_scenario.operating_modes_description}"
+                )
+
+            return "\n\n".join(description_parts)
+
+        # Update or create risk scenarios for selected operational scenarios
+        for operational_scenario in selected_operational_scenarios:
+            processed_os_ids.add(operational_scenario.id)
+
+            # Try to find existing risk scenario for this operational scenario
+            risk_scenario = None
+
+            # First, try to find by operational_scenario link
+            try:
+                risk_scenario = risk_assessment.risk_scenarios.get(
+                    operational_scenario=operational_scenario
+                )
+            except RiskScenario.DoesNotExist:
+                # Fallback: try to match by name (for backward compatibility with old data)
+                # Remove [ARCHIVED] prefix when matching
+                clean_name = operational_scenario.name.replace("[ARCHIVED] ", "")
+                try:
+                    risk_scenario = risk_assessment.risk_scenarios.get(
+                        operational_scenario__isnull=True, name=clean_name
+                    )
+                    # Establish the link for this old risk scenario
+                    risk_scenario.operational_scenario = operational_scenario
+                except RiskScenario.DoesNotExist:
+                    # Also try matching with [ARCHIVED] prefix
+                    try:
+                        risk_scenario = risk_assessment.risk_scenarios.get(
+                            operational_scenario__isnull=True,
+                            name=f"[ARCHIVED] {clean_name}",
+                        )
+                        # Establish the link for this old risk scenario
+                        risk_scenario.operational_scenario = operational_scenario
+                    except RiskScenario.DoesNotExist:
+                        pass
+
+            if risk_scenario:
+                # Update existing risk scenario - remove [ARCHIVED] prefix if present
+                risk_scenario.name = operational_scenario.name.replace(
+                    "[ARCHIVED] ", ""
+                )
+                risk_scenario.description = build_description(operational_scenario)
+
+                # Update inherent or current probability/impact based on feature flag
+                if ff_is_enabled("inherent_risk"):
+                    risk_scenario.inherent_proba = operational_scenario.likelihood
+                    risk_scenario.inherent_impact = operational_scenario.gravity
+                else:
+                    risk_scenario.current_proba = operational_scenario.likelihood
+                    risk_scenario.current_impact = operational_scenario.gravity
+
+                risk_scenario.save()
+
+                # Update relationships
+                risk_scenario.assets.set(operational_scenario.get_assets())
+                risk_scenario.threats.set(operational_scenario.threats.all())
+
+                # Merge existing controls: keep user-added ones + update from EBIOS RM
+                # Get current existing controls
+                current_existing_controls = set(
+                    risk_scenario.existing_applied_controls.all()
+                )
+                # Get controls from EBIOS RM
+                ebios_controls = set(operational_scenario.get_applied_controls())
+                # Merge them (union)
+                merged_controls = current_existing_controls | ebios_controls
+                risk_scenario.existing_applied_controls.set(merged_controls)
+
+                updated_count += 1
+
+            else:
+                # Create new risk scenario (no existing match found)
+                risk_scenario = RiskScenario(
+                    risk_assessment=risk_assessment,
+                    operational_scenario=operational_scenario,
+                    name=operational_scenario.name,
+                    ref_id=operational_scenario.ref_id
+                    if operational_scenario.ref_id
+                    else RiskScenario.get_default_ref_id(risk_assessment),
+                    description=build_description(operational_scenario),
+                )
+                if ff_is_enabled("inherent_risk"):
+                    risk_scenario.inherent_proba = operational_scenario.likelihood
+                    risk_scenario.inherent_impact = operational_scenario.gravity
+                else:
+                    risk_scenario.current_proba = operational_scenario.likelihood
+                    risk_scenario.current_impact = operational_scenario.gravity
+                risk_scenario.save()
+
+                risk_scenario.assets.set(operational_scenario.get_assets())
+                risk_scenario.threats.set(operational_scenario.threats.all())
+                risk_scenario.existing_applied_controls.set(
+                    operational_scenario.get_applied_controls()
+                )
+
+                created_count += 1
+
+        # Archive risk scenarios that are no longer selected
+        for risk_scenario in risk_assessment.risk_scenarios.filter(
+            operational_scenario__isnull=False
+        ):
+            if risk_scenario.operational_scenario_id not in processed_os_ids:
+                if not risk_scenario.name.startswith("[ARCHIVED] "):
+                    risk_scenario.name = f"[ARCHIVED] {risk_scenario.name}"
+                    risk_scenario.save()
+                    archived_count += 1
+
+        return Response(
+            {
+                "success": True,
+                "updated": updated_count,
+                "created": created_count,
+                "archived": archived_count,
+                "total_scenarios": risk_assessment.risk_scenarios.count(),
+            }
+        )
 
     @action(detail=False, name="Risk assessments per status")
     def per_status(self, request):
@@ -5796,6 +6152,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "owner",
         "status",
         "expiry_date",
+        "contracts",
     ]
 
     @action(detail=False, name="Get all evidences owners")
@@ -7466,15 +7823,31 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
 
 class RequirementMappingSetViewSet(BaseModelViewSet):
-    model = RequirementMappingSet
+    model = StoredLibrary
 
-    filterset_fields = ["target_framework", "source_framework", "library__provider"]
+    filterset_fields = [
+        "provider",
+    ]
+
+    def get_serializer_class(self, **kwargs):
+        return RequirementMappingSetReadSerializer
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                Q(content__requirement_mapping_set__isnull=False)
+                | Q(content__requirement_mapping_sets__isnull=False)
+            )
+        )
 
     @action(detail=False, name="Get provider choices")
     def provider(self, request):
         providers = set(
-            LoadedLibrary.objects.filter(
-                provider__isnull=False, requirement_mapping_sets__isnull=False
+            StoredLibrary.objects.filter(
+                provider__isnull=False,
+                objects_meta__requirement_mapping_sets__isnull=False,
             ).values_list("provider", flat=True)
         )
         return Response({p: p for p in providers})
@@ -7612,8 +7985,40 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="graph_data")
     def graph_data(self, request, pk=None):
-        mapping_set_id = pk
-        mapping_set = get_object_or_404(RequirementMappingSet, id=mapping_set_id)
+        obj = StoredLibrary.objects.get(id=pk)
+
+        mapping_set = obj.content.get(
+            "requirement_mapping_sets",
+            [obj.content.get("requirement_mapping_set", {})],
+        )[0]
+
+        source_framework_lib = StoredLibrary.objects.filter(
+            content__framework__urn=mapping_set["source_framework_urn"],
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        ).first()
+        if not source_framework_lib:
+            raise NotFound("Source framework library not found")
+
+        target_framework_lib = StoredLibrary.objects.filter(
+            content__framework__urn=mapping_set["target_framework_urn"],
+            content__framework__isnull=False,
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        ).first()
+        if not target_framework_lib:
+            raise NotFound("Target framework library not found")
+
+        source_framework = source_framework_lib.content["framework"]
+        target_framework = target_framework_lib.content["framework"]
+
+        source_nodes_dict = {
+            n.get("urn"): n for n in source_framework["requirement_nodes"]
+        }
+        target_nodes_dict = {
+            n.get("urn"): n for n in target_framework["requirement_nodes"]
+        }
 
         nodes = []
         links = []
@@ -7621,54 +8026,59 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         tnodes_idx = dict()
         categories = [
             {
-                "name": mapping_set.source_framework.name,
+                "name": source_framework["name"],
             },
             {
-                "name": mapping_set.target_framework.name,
+                "name": target_framework["name"],
             },
         ]
         N = 0
-        for req in RequirementNode.objects.filter(
-            framework=mapping_set.source_framework
-        ).filter(assessable=True):
+        for req in source_framework["requirement_nodes"]:
             nodes.append(
                 {
-                    "name": req.ref_id,
+                    "name": req.get("ref_id"),
                     "category": 0,
-                    "value": req.name if req.name else req.description,
+                    "value": req.get("name", req.get("description")),
                 }
             )
-            snodes_idx[req.ref_id] = N
+            snodes_idx[req.get("urn")] = N
             N += 1
 
-        for req in RequirementNode.objects.filter(
-            framework=mapping_set.target_framework
-        ).filter(assessable=True):
+        for req in target_framework["requirement_nodes"]:
             nodes.append(
                 {
-                    "name": req.ref_id,
+                    "name": req.get("ref_id"),
                     "category": 1,
-                    "value": req.name if req.name else req.description,
+                    "value": req.get("name", req.get("description")),
                 }
             )
-            tnodes_idx[req.ref_id] = N
+            tnodes_idx[req.get("urn")] = N
             N += 1
-        req_mappings = RequirementMapping.objects.filter(mapping_set=mapping_set_id)
-        for item in req_mappings:
+        req_mappings = mapping_set.get("requirement_mappings", [])
+        for mapping in req_mappings:
+            source_urn = mapping.get("source_requirement_urn")
+            target_urn = mapping.get("target_requirement_urn")
+            source_node = source_nodes_dict.get(source_urn)
+            target_node = target_nodes_dict.get(target_urn)
+
             if (
-                item.source_requirement.assessable
-                and item.target_requirement.assessable
+                mapping.get("source_requirement_urn") not in snodes_idx
+                or mapping.get("target_requirement_urn") not in tnodes_idx
+                or not source_node
+                or not target_node
             ):
-                links.append(
-                    {
-                        "source": snodes_idx[item.source_requirement.ref_id],
-                        "target": tnodes_idx[item.target_requirement.ref_id],
-                        "value": item.coverage,
-                    }
-                )
+                continue
+
+            links.append(
+                {
+                    "source": snodes_idx[source_node.get("urn")],
+                    "target": tnodes_idx[target_node.get("urn")],
+                    "value": mapping.get("relationship"),
+                }
+            )
 
         meta = {
-            "display_name": f"{mapping_set.source_framework.name} ➜ {mapping_set.target_framework.name}"
+            "display_name": f"{source_framework['name']} ➜ {target_framework['name']}"
         }
 
         return Response(
@@ -9333,7 +9743,9 @@ class TaskTemplateViewSet(BaseModelViewSet):
         processed_tasks_identifiers = set()  # Track tasks we've already processed
 
         # Sort tasks by due date
-        sorted_tasks = sorted(tasks_list, key=lambda x: x["due_date"])
+        sorted_tasks = sorted(
+            [t for t in tasks_list if t.get("due_date")], key=lambda x: x["due_date"]
+        )
 
         # Process all past tasks and next 10 upcoming tasks
         current_date = datetime.now().date()
