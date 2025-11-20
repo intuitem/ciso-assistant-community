@@ -2737,5 +2737,7 @@
 	"dataBreachesDescription": "Data breach incidents and notifications",
 	"webhookSharedSecretShownOnce": "The shared secret is shown only once upon creation. Make sure to copy and store it securely.",
 	"searchResourcesPlaceholder": "Search resources...",
-	"noResourceMatchQuery": "No resource matching your query was found."
+	"noResourceMatchQuery": "No resource matching your query was found.",
+	"targetDomains": "Target Domains",
+	"webhookEndpointTargetDomainsHelpText": "Select the domains for which this webhook endpoint will be triggered. If no domain is selected, the webhook will be triggered for all domains."
 }
