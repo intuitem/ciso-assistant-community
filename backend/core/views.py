@@ -9905,6 +9905,59 @@ class TaskNodeViewSet(BaseModelViewSet):
         return super().perform_create(serializer)
 
 
+class TaskNodeEvidenceList(generics.ListAPIView):
+    serializer_class = EvidenceReadSerializer
+    filterset_fields = {
+        "folder": ["exact"],
+        "status": ["exact"],
+        "owner": ["exact"],
+        "name": ["icontains"],
+        "expiry_date": ["exact", "lte", "gte"],
+        "created_at": ["exact", "lte", "gte"],
+        "updated_at": ["exact", "lte", "gte"],
+    }
+    search_fields = ["name", "description"]
+    ordering_fields = ["name", "status", "updated_at", "expiry_date"]
+    ordering = ["name"]
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"pk": self.kwargs["pk"]})
+        return context
+
+    def get_queryset(self):
+        """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
+        task_node_id = self.kwargs["pk"]
+
+        if not RoleAssignment.is_object_readable(
+            self.request.user,
+            TaskNode,
+            task_node_id,
+        ):
+            raise PermissionDenied()
+
+        task_node = TaskNode.objects.get(id=task_node_id)
+
+        # Get task node's template
+        task_template = task_node.task_template
+
+        # Get visible evidences to filter result
+        viewable_evidences, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, Evidence
+        )
+        return Evidence.objects.filter(
+            id__in=task_template.evidences.filter(
+                id__in=viewable_evidences
+            ).values_list("id", flat=True)
+        )
+
+
 class TerminologyViewSet(BaseModelViewSet):
     model = Terminology
     filterset_fields = ["field_path", "folder", "is_visible", "builtin"]
