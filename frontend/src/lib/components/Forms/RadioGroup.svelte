@@ -43,6 +43,7 @@
 	const { value } = form ? formFieldProxy(form, valuePath) : {};
 
 	let internalValue = $state(value ? $value : initialValue);
+	let lastExternalValue = $state(value ? $value : undefined);
 
 	$effect(() => {
 		if (initialValue) {
@@ -50,9 +51,19 @@
 		}
 	});
 
+	// React to external changes to $value (avoid circular updates)
 	$effect(() => {
-		if (value) {
+		if (value && $value !== undefined && $value !== lastExternalValue) {
+			lastExternalValue = $value;
+			internalValue = $value;
+		}
+	});
+
+	// Sync internalValue back to form and update radio button state
+	$effect(() => {
+		if (value && internalValue !== lastExternalValue) {
 			$value = internalValue;
+			lastExternalValue = internalValue;
 		}
 		const input = radioInputs[internalValue];
 		if (input) input.checked = true;

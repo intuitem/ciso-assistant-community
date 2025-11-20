@@ -745,6 +745,8 @@
 	"waitingRiskAcceptances": "Hallo! Sie haben derzeit {number} Risiko{s} zur Annahme ausstehend. Sie finden sie im Menü „Governance“.",
 	"licenseSeats": "Lizenzplätze",
 	"licenseExpiration": "Ablauf der Lizenz",
+	"diskSpace": "Festplattenspeicher",
+	"diskUsed": "Festplatte verwendet",
 	"answer": "Antwort",
 	"questionnaireMode": "Fragebogenmodus",
 	"assessmentMode": "Bewertungsmodus",
@@ -975,5 +977,14 @@
 	"securityObjectiveScale": "Skala für Sicherheitsmerkmale",
 	"securityObjectiveScaleHelpText": "Wählen Sie Ihre Skala für Sicherheitsmerkmale (Standardmäßig 1 bis 4)",
 	"actor": "Akteur",
-	"action": "Aktion"
+	"action": "Aktion",
+	"privateKey": "Privater Schlüssel",
+	"generate": "Generiere",
+	"samlKeysGenerated": "SAML-Schlüssel erfolgreich generiert",
+	"samlPrivateKeyHelpText": "Schreibgeschützt: Verwenden Sie dieses Feld nur, wenn Sie Ihren eigenen privaten Schlüssel/Zertifikat angeben müssen. Andernfalls generiert die Anwendung ihn.",
+	"samlCertificateHelpText": "Sie können Ihr eigenes Zertifikat angeben oder die Anwendung generieren lassen.",
+	"samlAuthnRequestSignedHelpText": "Wenn aktiviert, wird die SAML-Authentifizierungsanfrage mit dem privaten Schlüssel unten signiert. Das zugehörige öffentliche Zertifikat wird an den Identitätsanbieter gesendet, damit er die Signatur überprüfen kann.",
+	"downloadCertificate": "Zertifikat herunterladen",
+	"viewMore": "Mehr anzeigen",
+	"viewLess": "Weniger anzeigen"
 }

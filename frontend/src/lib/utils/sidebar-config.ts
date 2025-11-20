@@ -16,6 +16,10 @@ type SidebarBackendKeys = {
 	organisation_issues: boolean;
 	quantitative_risk_studies: boolean;
 	terminologies: boolean;
+	bia: boolean;
+	project_management: boolean;
+	contracts: boolean;
+	reports: boolean;
 };
 
 type SidebarFrontendKeys = {
@@ -36,6 +40,10 @@ type SidebarFrontendKeys = {
 	organisationIssues: boolean;
 	quantitativeRiskStudies: boolean;
 	terminologies: boolean;
+	businessImpactAnalysis: boolean;
+	projectManagement: boolean;
+	contracts: boolean;
+	reports: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -58,6 +66,10 @@ export function getSidebarVisibleItems(
 		organisationObjectives: featureFlags?.organisation_objectives ?? false,
 		organisationIssues: featureFlags?.organisation_issues ?? false,
 		quantitativeRiskStudies: featureFlags?.quantitative_risk_studies ?? false,
-		terminologies: featureFlags?.terminologies ?? true
+		terminologies: featureFlags?.terminologies ?? true,
+		businessImpactAnalysis: featureFlags?.bia ?? true,
+		projectManagement: featureFlags?.project_management ?? false,
+		contracts: featureFlags?.contracts ?? false,
+		reports: featureFlags?.reports ?? false
 	};
 }

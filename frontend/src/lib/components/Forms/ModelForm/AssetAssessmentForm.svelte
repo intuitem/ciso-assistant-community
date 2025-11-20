@@ -7,6 +7,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -48,7 +49,7 @@
 	bind:cachedValue={formDataCache['asset']}
 	label={m.asset()}
 	hidden={initialData.asset}
-	helpText="Scoped asset"
+	helpText={m.scopedAsset()}
 />
 <AutocompleteSelect
 	{form}
@@ -66,8 +67,8 @@
 	field="dependencies"
 	cacheLock={cacheLocks['dependencies']}
 	bind:cachedValue={formDataCache['dependencies']}
-	label={m.dependencies()}
-	helpText="Other assets affecting the availability"
+	label={m.extraDependencies()}
+	helpText={m.extraDependenciesHelpText()}
 />
 <AutocompleteSelect
 	{form}
@@ -87,7 +88,7 @@
 	cacheLock={cacheLocks['associated_controls']}
 	bind:cachedValue={formDataCache['associated_controls']}
 	label={m.associatedControls()}
-	helpText="Actions or procedures related to resilience management"
+	helpText={m.associatedControlsBiaHelpText()}
 />
 <Checkbox {form} field="recovery_documented" label={m.recoveryDocumented()} />
 <Checkbox {form} field="recovery_tested" label={m.recoveryTested()} />
@@ -101,9 +102,9 @@
 	cacheLock={cacheLocks['evidences']}
 	bind:cachedValue={formDataCache['evidences']}
 	label={m.evidences()}
-	helpText="Evidences related to resilience management"
+	helpText={m.evidencesBiaHelpText()}
 />
-<TextArea
+<MarkdownField
 	{form}
 	field="observation"
 	label={m.observation()}

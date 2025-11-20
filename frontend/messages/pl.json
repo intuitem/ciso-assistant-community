@@ -1710,5 +1710,14 @@
 	"image": "Obraz",
 	"securityObjectives": "Właściwości bezpieczeństwa",
 	"securityObjectiveScale": "Skala właściwości bezpieczeństwa",
-	"securityObjectiveScaleHelpText": "Wybierz skalę dla właściwości bezpieczeństwa (domyślnie 1 do 4)"
+	"securityObjectiveScaleHelpText": "Wybierz skalę dla właściwości bezpieczeństwa (domyślnie 1 do 4)",
+	"privateKey": "Klucz prywatny",
+	"generate": "Generowanie",
+	"samlKeysGenerated": "Klucze SAML pomyślnie wygenerowane",
+	"samlPrivateKeyHelpText": "Tylko do zapisu: użyj tego pola tylko wtedy, gdy musisz dostarczyć własny klucz prywatny/certyfikat. W przeciwnym razie aplikacja wygeneruje go.",
+	"samlCertificateHelpText": "Możesz określić własny certyfikat lub pozwolić aplikacji wygenerować go.",
+	"samlAuthnRequestSignedHelpText": "Gdy włączone, żądanie uwierzytelniania SAML jest podpisywane kluczem prywatnym poniżej. Odpowiedni certyfikat publiczny jest wysyłany do dostawcy tożsamości, aby mógł zweryfikować podpis.",
+	"downloadCertificate": "Pobierz certyfikat",
+	"viewMore": "Pokaż więcej",
+	"viewLess": "Pokaż mniej"
 }

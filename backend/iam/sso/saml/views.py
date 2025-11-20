@@ -1,5 +1,25 @@
-from allauth.account.models import EmailAddress
+# === Python standard library ===
+import json
+from datetime import datetime, timedelta, timezone
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
+from django.http.response import Http404
+from django.urls import reverse
+from django.utils.decorators import method_decorator
+from django.views import View
+
+# === Third-party packages ===
 import structlog
+from rest_framework.views import APIView
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.response import Response
+from rest_framework import status
+
+from cryptography import x509
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import NameOID
+
+from allauth.account.models import EmailAddress
 from allauth.core.exceptions import SignupClosedException
 from allauth.socialaccount.adapter import get_account_adapter
 from allauth.socialaccount.internal.flows.login import (
@@ -7,6 +27,7 @@ from allauth.socialaccount.internal.flows.login import (
     record_authentication,
 )
 from allauth.socialaccount.models import PermissionDenied, SocialLogin
+from allauth.socialaccount.providers.saml.provider import SAMLProvider
 from allauth.socialaccount.providers.saml.views import (
     AuthProcess,
     LoginSession,
@@ -18,19 +39,15 @@ from allauth.socialaccount.providers.saml.views import (
     httpkit,
     render_authentication_error,
 )
-from allauth.socialaccount.providers.saml.provider import SAMLProvider
 from allauth.utils import ValidationError
-from django.http import HttpRequest, HttpResponseRedirect
-from django.http.response import Http404
-from django.urls import reverse
-from django.utils.decorators import method_decorator
-from django.views import View
-from rest_framework.views import csrf_exempt
 
+# === Application-specific imports ===
+from core.permissions import IsAdministrator  # ou une permission plus adaptée
 from iam.models import User
 from iam.sso.errors import AuthError
 from iam.sso.models import SSOSettings
 from iam.utils import generate_token
+from global_settings.models import GlobalSettings
 
 DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL = SAMLProvider.default_attribute_mapping["email"]
 
@@ -141,8 +158,9 @@ class FinishACSView(SAMLViewMixin, View):
             ] or DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL
             emails = [auth.get_attribute(x) or [] for x in email_attributes]
             emails = [x for xs in emails for x in xs]  # flatten
-            emails.append(auth.get_nameid())  # default behavior
-            user = User.objects.get(email__in=emails)
+            user = User.objects.filter(email=auth.get_nameid()).first()
+            if not user:
+                user = User.objects.filter(email=emails[0]).first()
             idp_first_names = auth.get_attribute(
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
             )
@@ -192,3 +210,86 @@ class FinishACSView(SAMLViewMixin, View):
                     email_object.save()
                     logger.info("Email verified", user=user)
             return HttpResponseRedirect(next_url)
+
+
+class GenerateSAMLKeyView(SAMLViewMixin, APIView):
+    """
+    Endpoint to generate a key pair (private key + self-signed X.509 certificate).
+    Accessible only to admins (to be adapted as needed).
+    """
+
+    permission_classes = [IsAdministrator]
+
+    def post(self, request, organization_slug):
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            data = {}
+        cn = data.get("common_name", "saml-sp.example.com")
+        days = int(data.get("days", 365))
+
+        # RSA key generation
+        key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048,
+        )
+
+        # Self-signed certificate generation
+        subject = issuer = x509.Name(
+            [
+                x509.NameAttribute(NameOID.COMMON_NAME, cn),
+            ]
+        )
+        cert = (
+            x509.CertificateBuilder()
+            .subject_name(subject)
+            .issuer_name(issuer)
+            .public_key(key.public_key())
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(datetime.now(timezone.utc))
+            .not_valid_after(datetime.now(timezone.utc) + timedelta(days=days))
+            .sign(private_key=key, algorithm=hashes.SHA256())
+        )
+
+        private_key_pem = key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+
+        cert_pem = cert.public_bytes(serialization.Encoding.PEM)
+
+        provider = self.get_provider(organization_slug)
+        # Retrieves the 'advanced' dictionary, or creates it if it doesn't exist
+        advanced_settings = provider.app.settings.get("advanced", {})
+        advanced_settings["private_key"] = private_key_pem.decode("utf-8")
+        advanced_settings["x509cert"] = cert_pem.decode("utf-8")
+
+        # Re-injects the dict into the application configuration
+        settings = GlobalSettings.objects.get(name=GlobalSettings.Names.SSO)
+        settings.value["settings"]["advanced"] = advanced_settings
+        settings.save()
+
+        return Response(
+            {
+                "message": f"Key and certificate saved in advanced settings of SP {organization_slug}",
+                "cert": cert_pem.decode("utf-8"),
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class DownloadSAMLPublicCertView(SAMLViewMixin, APIView):
+    permission_classes = [IsAdministrator]
+
+    def get(self, request, organization_slug):
+        provider = self.get_provider(organization_slug)
+        cert_pem = provider.app.settings.get("advanced", {}).get("x509cert")
+        if not cert_pem:
+            return HttpResponse(status=404)
+
+        response = HttpResponse(cert_pem, content_type="application/x-pem-file")
+        response["Content-Disposition"] = (
+            'attachment; filename="ciso-saml-public-cert.pem"'
+        )
+        return response

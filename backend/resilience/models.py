@@ -21,6 +21,8 @@ from iam.models import FolderMixin
 from django.db.models import Count, Q
 from django.utils.functional import cached_property
 
+from auditlog.registry import auditlog
+
 
 class BusinessImpactAnalysis(Assessment):
     risk_matrix = models.ForeignKey(
@@ -250,4 +252,24 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
     @property
     def get_impact_compact_display(self):
         raw = self.get_impact_display
-        return {"value": raw["value"], "name": raw["name"], "hexcolor": raw["hexcolor"]}
+        return {
+            "value": raw["value"],
+            "name": raw["name"],
+            "description": raw["description"],
+            "hexcolor": raw["hexcolor"],
+        }
+
+
+common_exclude = ["created_at", "updated_at"]
+auditlog.register(
+    AssetAssessment,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    BusinessImpactAnalysis,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    EscalationThreshold,
+    exclude_fields=common_exclude,
+)

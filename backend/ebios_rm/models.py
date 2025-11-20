@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models import Case, When, IntegerField, Q
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
@@ -174,7 +175,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     quotation_method = models.CharField(
         max_length=100,
         choices=QuotationMethod.choices,
-        default=QuotationMethod.MANUAL,
+        default=QuotationMethod.EXPRESS,
         verbose_name=_("Quotation method"),
         help_text=_(
             "Method used to quote the study: 'manual' for manual likelihood assessment, 'express' for automatic propagation from operating modes"
@@ -217,6 +218,50 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     @property
     def applied_control_count(self):
         return AppliedControl.objects.filter(stakeholders__ebios_rm_study=self).count()
+
+    def get_counters(self):
+        """Return all counters as a dictionary"""
+        from core.models import RequirementAssessment
+
+        # Get compliance applied controls count
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment__in=self.compliance_assessments.all()
+        )
+        compliance_applied_control_count = (
+            AppliedControl.objects.filter(
+                requirement_assessments__in=requirement_assessments
+            )
+            .distinct()
+            .count()
+        )
+
+        # Get risk assessment applied controls count
+        risk_assessment_applied_control_count = 0
+        if self.last_risk_assessment:
+            risk_scenarios = self.last_risk_assessment.risk_scenarios.all()
+            risk_assessment_applied_control_count = (
+                AppliedControl.objects.filter(risk_scenarios__in=risk_scenarios)
+                .distinct()
+                .count()
+            )
+
+        return {
+            "selected_asset_count": self.assets.count(),
+            "selected_feared_event_count": FearedEvent.objects.filter(
+                ebios_rm_study=self, is_selected=True
+            ).count(),
+            "compliance_assessment_count": self.compliance_assessments.count(),
+            "roto_count": self.roto_set.count(),
+            "stakeholder_count": Stakeholder.objects.filter(
+                ebios_rm_study=self, is_selected=True
+            ).count(),
+            "strategic_scenario_count": StrategicScenario.objects.filter(
+                ebios_rm_study=self
+            ).count(),
+            "operational_scenario_count": self.operational_scenarios.count(),
+            "compliance_applied_control_count": compliance_applied_control_count,
+            "risk_assessment_applied_control_count": risk_assessment_applied_control_count,
+        }
 
     @property
     def last_risk_assessment(self):
@@ -291,6 +336,17 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         # Ensure the folder is set to the study's folder
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
+
+    def delete(self, *args, **kwargs):
+        ebios_rm_study_id = self.ebios_rm_study.id
+        result = super().delete(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
+        return result
 
     @property
     def risk_matrix(self):
@@ -448,6 +504,17 @@ class RoTo(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
+
+    def delete(self, *args, **kwargs):
+        ebios_rm_study_id = self.ebios_rm_study.id
+        result = super().delete(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
+        return result
 
     def get_pertinence_display(self):
         PERTINENCE_MATRIX = [
@@ -471,11 +538,6 @@ class RoTo(AbstractBaseModel, FolderMixin):
 
 
 class Stakeholder(AbstractBaseModel, FolderMixin):
-    class Category(models.TextChoices):
-        CLIENT = "client", _("Client")
-        PARTNER = "partner", _("Partner")
-        SUPPLIER = "supplier", _("Supplier")
-
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
@@ -498,8 +560,15 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         help_text=_("Controls applied to lower stakeholder criticality"),
     )
 
-    category = models.CharField(
-        max_length=32, verbose_name=_("Category"), choices=Category.choices
+    category = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        verbose_name=_("Category"),
+        related_name="stakeholders_category",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.ENTITY_RELATIONSHIP,
+            "is_visible": True,
+        },
     )
 
     current_dependency = models.PositiveSmallIntegerField(
@@ -558,11 +627,22 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         return self.__class__.objects.filter(ebios_rm_study=self.ebios_rm_study)
 
     def __str__(self):
-        return f"{self.entity.name} ({self.get_category_display()})"
+        return f"{self.entity.name} ({self.category.get_name_translated if self.category else 'N/A'})"
 
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
+
+    def delete(self, *args, **kwargs):
+        ebios_rm_study_id = self.ebios_rm_study.id
+        result = super().delete(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
+        return result
 
     @staticmethod
     def _compute_criticality(
@@ -633,6 +713,17 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
+
+    def delete(self, *args, **kwargs):
+        ebios_rm_study_id = self.ebios_rm_study.id
+        result = super().delete(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
+        return result
 
     def get_gravity_display(self):
         return FearedEvent.format_gravity(
@@ -679,6 +770,17 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         self.ebios_rm_study = self.strategic_scenario.ebios_rm_study
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
+
+    def delete(self, *args, **kwargs):
+        ebios_rm_study_id = self.ebios_rm_study.id
+        result = super().delete(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
+        return result
 
     @property
     def ro_to_couple(self):
@@ -811,11 +913,18 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
         self.folder = self.operational_scenario.folder
         super().save(*args, **kwargs)
         self.operational_scenario.update_likelihood_from_operating_modes()
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
 
     def delete(self, *args, **kwargs):
         operational_scenario = self.operational_scenario
+        ebios_rm_study_id = self.ebios_rm_study.id
         super().delete(*args, **kwargs)
         operational_scenario.update_likelihood_from_operating_modes()
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
 
     @property
     def ebios_rm_study(self):
@@ -870,6 +979,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     operating_modes_description = models.TextField(
         verbose_name=_("Operating modes description"),
         help_text=_("Description of the operating modes of the operational scenario"),
+        blank=True,
     )
     likelihood = models.SmallIntegerField(default=-1, verbose_name=_("Likelihood"))
     is_selected = models.BooleanField(verbose_name=_("Is selected"), default=False)
@@ -887,6 +997,17 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
+
+    def delete(self, *args, **kwargs):
+        ebios_rm_study_id = self.ebios_rm_study.id
+        result = super().delete(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
+        return result
 
     @property
     def risk_matrix(self):
@@ -1076,5 +1197,17 @@ auditlog.register(
 )
 auditlog.register(
     OperationalScenario,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    ElementaryAction,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    KillChain,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OperatingMode,
     exclude_fields=common_exclude,
 )

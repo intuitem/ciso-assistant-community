@@ -34,6 +34,7 @@ READER_PERMISSIONS_LIST = [
     "view_riskmatrix",
     "view_riskscenario",
     "view_solution",
+    "view_contract",
     "view_storedlibrary",
     "view_threat",
     "view_vulnerability",
@@ -59,6 +60,7 @@ READER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "view_escalationthreshold",
     "view_assetclass",
+    "view_assetcapability",
     # privacy,
     "view_processing",
     "view_processingnature",
@@ -68,6 +70,8 @@ READER_PERMISSIONS_LIST = [
     "view_datarecipient",
     "view_datacontractor",
     "view_datatransfer",
+    "view_rightrequest",
+    "view_databreach",
     # campaigns,
     "view_campaign",
     # operating modes
@@ -78,6 +82,11 @@ READER_PERMISSIONS_LIST = [
     "view_quantitativeriskstudy",
     "view_quantitativeriskscenario",
     "view_quantitativeriskhypothesis",
+    # pmbok
+    "view_genericcollection",
+    "view_accreditation",
+    # integrations
+    "view_syncmapping",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -126,6 +135,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_assetassessment",
     "view_escalationthreshold",
     "view_assetclass",
+    "view_assetcapability",
     # campaigns,
     "view_campaign",
     # privacy,
@@ -137,6 +147,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_datarecipient",
     "view_datacontractor",
     "view_datatransfer",
+    "view_rightrequest",
     # operating modes
     "view_elementaryaction",
     "view_operatingmode",
@@ -145,6 +156,11 @@ APPROVER_PERMISSIONS_LIST = [
     "view_quantitativeriskstudy",
     "view_quantitativeriskscenario",
     "view_quantitativeriskhypothesis",
+    # pmbok
+    "view_genericcollection",
+    "view_accreditation",
+    # integrations
+    "view_syncmapping",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -160,6 +176,7 @@ ANALYST_PERMISSIONS_LIST = [
     "add_riskassessment",
     "add_riskscenario",
     "add_solution",
+    "add_contract",
     "add_threat",
     "add_vulnerability",
     "change_appliedcontrol",
@@ -178,6 +195,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_riskassessment",
     "change_riskscenario",
     "change_solution",
+    "change_contract",
     "change_threat",
     "delete_appliedcontrol",
     "delete_asset",
@@ -194,6 +212,7 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_riskassessment",
     "delete_riskscenario",
     "delete_solution",
+    "delete_contract",
     "delete_threat",
     "view_appliedcontrol",
     "view_asset",
@@ -218,6 +237,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_riskmatrix",
     "view_riskscenario",
     "view_solution",
+    "view_contract",
     "view_storedlibrary",
     "view_threat",
     "view_user",
@@ -294,6 +314,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    "view_assetcapability",
     # campaigns,
     "view_campaign",
     # privacy,
@@ -356,6 +377,29 @@ ANALYST_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    "add_rightrequest",
+    "change_rightrequest",
+    "view_rightrequest",
+    "delete_rightrequest",
+    "add_databreach",
+    "change_databreach",
+    "view_databreach",
+    "delete_databreach",
+    # pmbok
+    "view_genericcollection",
+    "add_genericcollection",
+    "change_genericcollection",
+    "delete_genericcollection",
+    "view_accreditation",
+    "add_accreditation",
+    "change_accreditation",
+    "delete_accreditation",
+    # integrations
+    "view_integrationconfiguration",
+    "add_syncmapping",
+    "view_syncmapping",
+    "change_syncmapping",
+    "delete_syncmapping",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -375,6 +419,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_riskmatrix",
     "add_riskscenario",
     "add_solution",
+    "add_contract",
     "add_threat",
     "change_appliedcontrol",
     "change_asset",
@@ -393,6 +438,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_riskmatrix",
     "change_riskscenario",
     "change_solution",
+    "change_contract",
     "change_threat",
     "delete_appliedcontrol",
     "delete_asset",
@@ -414,6 +460,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_vulnerability",
     "delete_riskscenario",
     "delete_solution",
+    "delete_contract",
     "delete_threat",
     "view_appliedcontrol",
     "view_asset",
@@ -437,10 +484,13 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_riskmatrix",
     "view_riskscenario",
     "view_solution",
+    "view_contract",
     "view_storedlibrary",
     "view_threat",
     "view_user",
     "view_usergroup",
+    "change_usergroup",
+    "delete_usergroup",
     "add_ebiosrmstudy",
     "view_ebiosrmstudy",
     "change_ebiosrmstudy",
@@ -513,6 +563,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_assetassessment",
     "delete_assetassessment",
     "view_assetclass",
+    "view_assetcapability",
     # campaigns,
     "add_campaign",
     "view_campaign",
@@ -588,6 +639,31 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    "add_rightrequest",
+    "change_rightrequest",
+    "view_rightrequest",
+    "delete_rightrequest",
+    "add_databreach",
+    "change_databreach",
+    "view_databreach",
+    "delete_databreach",
+    # pmbok
+    "view_genericcollection",
+    "add_genericcollection",
+    "change_genericcollection",
+    "delete_genericcollection",
+    "view_accreditation",
+    "add_accreditation",
+    "change_accreditation",
+    "delete_accreditation",
+    # integrations
+    "add_integrationconfiguration",
+    "view_integrationconfiguration",
+    "delete_integrationconfiguration",
+    "add_syncmapping",
+    "view_syncmapping",
+    "change_syncmapping",
+    "delete_syncmapping",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -596,6 +672,8 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_user",
     "delete_user",
     "view_usergroup",
+    "change_usergroup",
+    "delete_usergroup",
     "add_event",
     "view_event",
     "change_event",
@@ -608,6 +686,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_assetclass",
     "change_assetclass",
     "delete_assetclass",
+    "view_assetcapability",
     "add_threat",
     "view_threat",
     "change_threat",
@@ -700,6 +779,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_solution",
     "view_solution",
     "delete_solution",
+    "add_contract",
+    "change_contract",
+    "view_contract",
+    "delete_contract",
     "add_entityassessment",
     "change_entityassessment",
     "view_entityassessment",
@@ -790,6 +873,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_datatransfer",
     "view_datatransfer",
     "delete_datatransfer",
+    "add_rightrequest",
+    "change_rightrequest",
+    "view_rightrequest",
+    "delete_rightrequest",
+    "add_databreach",
+    "change_databreach",
+    "view_databreach",
+    "delete_databreach",
     # incidents,
     "add_incident",
     "view_incident",
@@ -854,12 +945,30 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_terminology",
     "change_terminology",
     "delete_terminology",
+    # pmbok
+    "view_genericcollection",
+    "add_genericcollection",
+    "change_genericcollection",
+    "delete_genericcollection",
+    "view_accreditation",
+    "add_accreditation",
+    "change_accreditation",
+    "delete_accreditation",
     # roles,
     "add_role",
     "view_role",
     "change_role",
     "delete_role",
     "view_permission",
+    # integrations
+    "add_integrationconfiguration",
+    "view_integrationconfiguration",
+    "change_integrationconfiguration",
+    "delete_integrationconfiguration",
+    "add_syncmapping",
+    "view_syncmapping",
+    "change_syncmapping",
+    "delete_syncmapping",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -886,11 +995,15 @@ def startup(sender: AppConfig, **kwargs):
     """
     from django.contrib.auth.models import Permission
 
-    from core.models import AssetClass, Terminology
+    from core.models import AssetCapability, AssetClass, Terminology
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
     from tprm.models import Entity
     from privacy.models import ProcessingNature
     from global_settings.models import GlobalSettings
+    from integrations.models import IntegrationProvider
+
+    # first load in memory of the frameworks and mappings
+    from core.mappings.engine import engine
 
     print("startup handler: initialize database")
 
@@ -1012,27 +1125,62 @@ def startup(sender: AppConfig, **kwargs):
     try:
         Terminology.create_default_qualifications()
     except Exception as e:
-        logger.error("Error creating default qualifications", exc_info=e)
+        logger.error("Error creating default qualifications", exc_info=True)
+
+    # Create default accreditation status
+    try:
+        Terminology.create_default_accreditations_status()
+    except Exception as e:
+        logger.error("Error creating default accreditation status", exc_info=True)
+
+    # Create default accreditation category
+    try:
+        Terminology.create_default_accreditations_category()
+    except Exception as e:
+        logger.error("Error creating default accreditation category", exc_info=True)
 
     # Create default Processing natures
     try:
         ProcessingNature.create_default_values()
     except Exception as e:
-        logger.error("Error creating default ProcessingNature", exc_info=e)
+        logger.error("Error creating default ProcessingNature", exc_info=True)
 
     # Create default AssetClass
     try:
         AssetClass.create_default_values()
     except Exception as e:
-        logger.error("Error creating default AssetClass", exc_info=e)
+        logger.error("Error creating default AssetClass", exc_info=True)
+
+    # Create default AssetCapability
+    try:
+        AssetCapability.create_default_values()
+    except Exception as e:
+        logger.error("Error creating default AssetCapability", exc_info=True)
 
     # Create default Terminologies
     try:
         Terminology.create_default_roto_risk_origins()
     except Exception as e:
-        logger.error("Error creating default ROTO Risk Origins", exc_info=e)
+        logger.error("Error creating default ROTO Risk Origins", exc_info=True)
+
+    # Create default Entity Relationships
+    try:
+        Terminology.create_default_entity_relationships()
+    except Exception as e:
+        logger.error("Error creating default Entity Relationships", exc_info=True)
+
+    # Init integration providers
+
+    try:
+        IntegrationProvider.objects.get_or_create(
+            name="jira",
+            defaults={"provider_type": IntegrationProvider.ProviderType.ITSM},
+        )
+    except Exception as e:
+        logger.error("Error creating Jira IntegrationProvider", exc_info=True)
 
     call_command("storelibraries")
+    call_command("autoloadlibraries")
 
     # if superuser defined and does not exist, then create it
     if (
@@ -1044,7 +1192,7 @@ def startup(sender: AppConfig, **kwargs):
                 email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
             )
         except Exception as e:
-            logger.error("Error creating superuser", exc_info=e)
+            logger.error("Error creating superuser", exc_info=True)
 
     # add administrators group to superusers (for resiliency)
     administrators = UserGroup.objects.get(

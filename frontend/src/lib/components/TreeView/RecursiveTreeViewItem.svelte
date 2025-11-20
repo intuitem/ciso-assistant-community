@@ -191,22 +191,24 @@
 				{/if}
 			{/snippet}
 			{#snippet childrenSlot()}
-				<RecursiveTreeViewItem
-					nodes={node.children}
-					bind:expandedNodes
-					bind:disabledNodes
-					bind:checkedNodes
-					bind:indeterminateNodes
-					bind:treeItems={childrenNodes[i]}
-					on:click={(e) =>
-						dispatch('click', {
-							id: e.detail.id
-						})}
-					on:toggle={(e) =>
-						dispatch('toggle', {
-							id: e.detail.id
-						})}
-				/>
+				{#if expandedNodes.includes(node.id)}
+					<RecursiveTreeViewItem
+						nodes={node.children}
+						bind:expandedNodes
+						bind:disabledNodes
+						bind:checkedNodes
+						bind:indeterminateNodes
+						bind:treeItems={childrenNodes[i]}
+						on:click={(e) =>
+							dispatch('click', {
+								id: e.detail.id
+							})}
+						on:toggle={(e) =>
+							dispatch('toggle', {
+								id: e.detail.id
+							})}
+					/>
+				{/if}
 			{/snippet}
 		</TreeViewItem>
 	{/each}

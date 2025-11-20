@@ -46,14 +46,17 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
 		await expect(page.getByTestId('toast')).not.toBeVisible();
 
-		await page.getByRole('gridcell', { name: 'New' }).locator('span').waitFor({ state: 'visible' });
+		await page
+			.getByRole('gridcell', { name: 'New' })
+			.getByTestId('model-table-td-array-elem')
+			.waitFor({ state: 'visible' });
 		await page
 			.getByRole('gridcell', { name: 'Minor' })
-			.locator('span')
+			.getByTestId('model-table-td-array-elem')
 			.waitFor({ state: 'visible' });
 		await page
 			.getByRole('gridcell', { name: 'Internal' })
-			.locator('span')
+			.getByTestId('model-table-td-array-elem')
 			.waitFor({ state: 'visible' });
 	});
 
@@ -86,10 +89,12 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		await expect(page.locator('#page-title')).toHaveText('Minor->Major');
 
 		await page.getByTestId('edit-button').click();
-		// await page.getByTestId(`markdown-edit-btn-${field}`).click();
+
+		await page.getByTestId('markdown-edit-btn-observation').click();
 		await page
 			.getByTestId('form-input-observation')
 			.fill('This is an observation: I love mango juice but I prefer orange juice');
+
 		await page.getByText('Save').click();
 		await expect(page.getByTestId('toast')).toBeVisible();
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();

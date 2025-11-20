@@ -4,7 +4,7 @@
 	import { m } from '$paraglide/messages';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
-	let group = $state('instance');
+	let group = $state('general');
 
 	let { data } = $props();
 </script>
@@ -17,46 +17,46 @@
 	active="bg-primary-100 text-primary-800 border-b border-primary-800"
 >
 	{#snippet list()}
-		<Tabs.Control value="instance"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Control>
+		<Tabs.Control value="general"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Control>
 		<Tabs.Control value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Control>
 		<Tabs.Control value="featureFlags"
 			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Control
 		>
 	{/snippet}
 	{#snippet content()}
-		<Tabs.Panel value="instance">
+		<Tabs.Panel value="general">
 			<div>
-				<span class="text-gray-500">{m.generalSettingsDescription()}</span>
+				<span class="text-gray-500 block mb-6">{m.generalSettingsDescription()}</span>
 				<ModelForm
 					form={data.generalSettingForm}
 					schema={GeneralSettingsSchema}
 					model={data.generalSettingModel}
 					cancelButton={false}
-					action="?/general"
+					action="/settings?/general"
 				/>
 			</div>
 		</Tabs.Panel>
 		<Tabs.Panel value="sso">
 			<div>
-				<span class="text-gray-500">{m.ssoSettingsDescription()}</span>
+				<span class="text-gray-500 block mb-6">{m.ssoSettingsDescription()}</span>
 				<ModelForm
 					form={data.ssoForm}
 					schema={SSOSettingsSchema}
 					model={data.ssoModel}
 					cancelButton={false}
-					action="?/sso"
+					action="/settings?/sso"
 				/>
 			</div>
 		</Tabs.Panel>
 		<Tabs.Panel value="featureFlags">
 			<div>
-				<span class="text-gray-500">{m.configureFeatureFlags()}</span>
+				<span class="text-gray-500 block mb-6">{m.configureFeatureFlags()}</span>
 				<ModelForm
 					form={data.featureFlagForm}
 					schema={FeatureFlagsSchema}
 					model={data.featureFlagModel}
 					cancelButton={false}
-					action="?/featureFlags"
+					action="/settings?/featureFlags"
 				/>
 			</div>
 		</Tabs.Panel>

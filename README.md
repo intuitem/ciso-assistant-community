@@ -45,6 +45,8 @@ CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC*
 - Supports custom frameworks via a simple syntax and flexible tooling,
 - Provides rich **import/export** capabilities across various channels and formats (UI, CLI, Kafka, reports, etc.).
 
+![Single Hub](single_hub.png)
+
 Our vision is to create a **one-stop-shop** for cybersecurity management—modernizing GRC through **simplification** and **interoperability**.
 
 As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.
@@ -70,8 +72,6 @@ Here’s an extract of some of the building blocks in CISO Assistant to illustra
 ![Core Objects](core_objects.png)
 
 For full details, check the [data model documentation](documentation/architecture/data-model.md).
-
-
 
 ---
 
@@ -211,6 +211,9 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
 79. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
 80. Post-Quantum Cryptography (PQC) Migration Roadmap (May 2025) 🔐
+81. Cloud Sovereignty Framework - 1.2.1 - Oct 2025 🇪🇺
+82. ISO 22301:2019 outline - Business continuity management systems 🌐
+83. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
 
 ### Community contributions
 
@@ -536,13 +539,19 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 ## API and Swagger
 
-- The API is available only on dev mode. To get that, you need to switch on the backend, for instance, `export DJANGO_DEBUG=True`
-- The API documentation will be available on `<backend_endpoint>/api/schema/swagger/`, for instance <http://127.0.0.1:8000/api/schema/swagger/>
+- The interactive API documentation (Swagger UI) is available only in development mode.
+  To enable it, set `export DJANGO_DEBUG=True` before starting the backend.
+- Once the server is running, the documentation will be accessible at `<backend_endpoint>/api/schema/swagger/`,
+  for example: <http://127.0.0.1:8000/api/schema/swagger/>.
 
-To interact with it:
+To interact with the API via Swagger or directly with HTTP calls:
 
-- call `/api/iam/login/` with your credentials in the body to get the token
-- pass it then as a header `Authorization: Token {token}` for your next calls. Notice it's `Token` not `Bearer`.
+1. Authenticate by sending a POST request to `/api/iam/login/` with your credentials in the request body. The response will include an authentication token.
+2. Include this token in the header of subsequent requests as: `Authorization: Token <token>`
+
+⚠️ Note: use `Token`, **not** `Bearer`.
+
+When using the interactive Swagger UI, simply log in, the token will be automatically handled for subsequent requests.
 
 ## Setting CISO Assistant for production
 
