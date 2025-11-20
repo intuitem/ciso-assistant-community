@@ -1231,7 +1231,19 @@ export const listViewFields = {
 		}
 	},
 	'applied-controls': {
-		head: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'domain', 'owner', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'priority',
+			'status',
+			'category',
+			'eta',
+			'domain',
+			'owner',
+			'controlImpact',
+			'effort',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
@@ -1241,6 +1253,8 @@ export const listViewFields = {
 			'eta',
 			'folder',
 			'owner',
+			'control_impact',
+			'effort',
 			'filtering_labels'
 		],
 		filters: {
@@ -1362,6 +1376,7 @@ export const listViewFields = {
 			'lastName',
 			'userGroups',
 			'isActive',
+			'expiryDate',
 			'keep_local_login',
 			'is_third_party',
 			'hasMfaEnabled'
@@ -1372,6 +1387,7 @@ export const listViewFields = {
 			'last_name',
 			'user_groups',
 			'is_active',
+			'expiry_date',
 			'keep_local_login',
 			'is_third_party',
 			'has_mfa_enabled'
