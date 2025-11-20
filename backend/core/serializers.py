@@ -712,6 +712,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
         source="risk_assessment.perimeter", fields=["id", "name", "folder"]
     )
     version = serializers.StringRelatedField(source="risk_assessment.version")
+    operational_scenario = FieldsRelatedField(["id", "name", "ebios_rm_study"])
     threats = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
