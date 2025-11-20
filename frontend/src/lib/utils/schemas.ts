@@ -362,6 +362,7 @@ export const UserEditSchema = z.object({
 export const UserCreateSchema = z.object({
 	email: z.string().email(),
 	observation: z.string().optional().nullable(),
+	is_third_party: z.boolean().optional(),
 	expiry_date: z
 		.union([z.literal('').transform(() => null), z.string().date()])
 		.nullish()

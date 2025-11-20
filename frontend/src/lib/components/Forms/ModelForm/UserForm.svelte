@@ -24,6 +24,15 @@
 		shape = {},
 		context
 	}: Props = $props();
+	$effect(() => {
+		const data = form?.data;
+		if (!data || context !== 'create') {
+			return;
+		}
+		if (data.is_third_party && !data.keep_local_login) {
+			data.keep_local_login = true;
+		}
+	});
 </script>
 
 <TextField
@@ -65,8 +74,11 @@
 {#if shape.is_active}
 	<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 {/if}
+{#if shape.is_third_party}
+	<Checkbox {form} field="is_third_party" label={m.isThirdParty()} />
+{/if}
 
-{#if context !== 'create'}
+{#if shape.keep_local_login}
 	<Checkbox
 		{form}
 		field="keep_local_login"
