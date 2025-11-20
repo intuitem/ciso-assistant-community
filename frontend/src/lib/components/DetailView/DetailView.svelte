@@ -69,6 +69,7 @@
 			'revoked_at',
 			'eta',
 			'expiration_date',
+			'validation_deadline',
 			'timestamp',
 			'reported_at',
 			'due_date',

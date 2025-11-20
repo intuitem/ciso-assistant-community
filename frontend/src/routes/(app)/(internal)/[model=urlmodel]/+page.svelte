@@ -116,7 +116,7 @@
 				source={data.table}
 				deleteForm={data.deleteForm}
 				{URLModel}
-				disableEdit={['user-groups'].includes(URLModel)}
+				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
 				disableDelete={['user-groups'].includes(URLModel)}
 			>
 				{#snippet addButton()}

@@ -182,6 +182,7 @@
 	"cost": "Coût",
 	"impact": "Conséquence",
 	"expiryDate": "Date d'expiration",
+	"validationDeadline": "Date limite de validation",
 	"link": "Lien",
 	"createdAt": "Créé le",
 	"updatedAt": "Mis à jour le",

@@ -1256,6 +1256,7 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'status',
+			'validationDeadline',
 			'createdAt',
 			'requester',
 			'approver',
@@ -1266,6 +1267,7 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'status',
+			'validation_deadline',
 			'created_at',
 			'requester',
 			'approver',

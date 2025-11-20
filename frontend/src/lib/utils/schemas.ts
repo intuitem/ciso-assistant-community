@@ -227,7 +227,7 @@ export const ValidationFlowSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	status: z.string().default('submitted'),
-	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	validation_deadline: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	request_notes: z.string().optional().nullable(),
 	approver: z.string(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional(),

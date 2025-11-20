@@ -6883,8 +6883,10 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         default=Status.SUBMITTED,
         max_length=20,
     )
-    expiration_date = models.DateField(
+    validation_deadline = models.DateField(
         null=True,
+        blank=True,
+        verbose_name=_("Validation deadline"),
     )
 
     class Meta:

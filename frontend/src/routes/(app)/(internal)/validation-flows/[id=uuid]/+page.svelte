@@ -284,11 +284,11 @@
 				</div>
 			</div>
 
-			{#if validation_flow.expiration_date}
+			{#if validation_flow.validation_deadline}
 				<div class="space-y-2">
-					<div class="text-sm font-medium text-gray-700">{m.expiryDate()}</div>
+					<div class="text-sm font-medium text-gray-700">{m.validationDeadline()}</div>
 					<div class="text-sm text-gray-600">
-						{formatDateOrDateTime(validation_flow.expiration_date, getLocale())}
+						{formatDateOrDateTime(validation_flow.validation_deadline, getLocale())}
 					</div>
 				</div>
 			{/if}

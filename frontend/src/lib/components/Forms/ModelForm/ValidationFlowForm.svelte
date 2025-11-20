@@ -121,21 +121,21 @@
 	/>
 {/if}
 {#if object?.id}
-	{#if object.expiration_date}
+	{#if object.validation_deadline}
 		<div class="space-y-2">
-			<label class="text-sm font-medium text-gray-700">{m.expiryDate()}</label>
-			<p class="p-3 bg-gray-50 rounded-lg text-sm">{object.expiration_date}</p>
+			<label class="text-sm font-medium text-gray-700">{m.validationDeadline()}</label>
+			<p class="p-3 bg-gray-50 rounded-lg text-sm">{object.validation_deadline}</p>
 		</div>
 	{/if}
 {:else}
 	<TextField
 		{form}
 		type="date"
-		field="expiration_date"
-		label={m.expiryDate()}
-		cacheLock={cacheLocks['expiration_date']}
-		bind:cachedValue={formDataCache['expiration_date']}
-		disabled={initialData.expiration_date}
+		field="validation_deadline"
+		label={m.validationDeadline()}
+		cacheLock={cacheLocks['validation_deadline']}
+		bind:cachedValue={formDataCache['validation_deadline']}
+		disabled={initialData.validation_deadline}
 	/>
 {/if}
 {#if !hasPresetAssessments}
