@@ -33,6 +33,7 @@
 	const hasPresetAssessments =
 		initialData.risk_assessments ||
 		initialData.compliance_assessments ||
+		initialData.business_impact_analysis ||
 		initialData.crq_studies ||
 		initialData.ebios_studies ||
 		initialData.entity_assessments ||
