@@ -1974,6 +1974,8 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
             content__requirement_mapping_set__isnull=True,
             content__requirement_mapping_sets__isnull=True,
         ).first()
+        if framework_lib is None:
+            return None
         framework = framework_lib.content.get("framework")
         return {
             "str": framework.get("name", framework.get("urn")),
@@ -1990,6 +1992,9 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
             content__requirement_mapping_set__isnull=True,
             content__requirement_mapping_sets__isnull=True,
         ).first()
+        if framework_lib is None:
+            return None
+
         framework = framework_lib.content.get("framework")
         return {
             "str": framework.get("name", framework.get("urn")),

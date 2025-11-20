@@ -7833,14 +7833,47 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         return RequirementMappingSetReadSerializer
 
     def get_queryset(self):
-        return (
+        urns = self.model.objects.filter(
+            Q(content__framework__isnull=False)
+            & Q(content__framework__urn__isnull=False)
+            & Q(is_loaded=True)
+        ).values_list("urn", flat=True)
+        print(f"{len(urns)} loaded urns")
+        #         | Q(content__requirement_mapping_set__target_framework_urn__in=urns)
+        # | Q(content__requirement_mapping_set__source_framework_urn__in=urns)
+        for x in urns:
+            print(x)
+        res = (
             super()
             .get_queryset()
             .filter(
-                Q(content__requirement_mapping_set__isnull=False)
-                | Q(content__requirement_mapping_sets__isnull=False)
+                (
+                    (
+                        Q(content__requirement_mapping_set__isnull=False)
+                        & Q(
+                            content__requirement_mapping_set__target_framework_urn__in=urns
+                        )
+                        & Q(
+                            content__requirement_mapping_set__source_framework_urn__in=urns
+                        )
+                    )
+                    | (
+                        Q(content__requirement_mapping_sets__isnull=False)
+                        & Q(
+                            content__requirement_mapping_sets__0__target_framework_urn__in=urns
+                        )
+                        & Q(
+                            content__requirement_mapping_sets__0__source_framework_urn__in=urns
+                        )
+                    )
+                )
+                & Q(is_loaded=True)
             )
         )
+        with open("test.json", "w") as j:
+            j.write(str(super().get_queryset().all().values_list()))
+        print(super().get_queryset().all())
+        return res
 
     @action(detail=False, name="Get provider choices")
     def provider(self, request):
