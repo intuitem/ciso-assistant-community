@@ -1,7 +1,13 @@
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
-from core.models import AppliedControl, ComplianceAssessment, Evidence
+from core.models import (
+    AppliedControl,
+    ComplianceAssessment,
+    Evidence,
+    ValidationFlow,
+    ValidationFlowEvent,
+)
 from tprm.models import EntityAssessment
 from iam.models import User
 from django.core.mail import send_mail
@@ -548,3 +554,40 @@ def mark_expired_evidences():
         logger.info(f"Successfully marked {count} evidences as expired")
     else:
         logger.debug("No expired evidences found to mark")
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="3", minute="40"))
+def expire_validation_flows():
+    """Automatically expire validation flows that have passed their expiration_date"""
+    today = date.today()
+    expired_flows = ValidationFlow.objects.filter(
+        expiration_date__lt=today,
+        expiration_date__isnull=False,
+    ).exclude(status__in=["rejected", "revoked", "expired", "dropped"])
+
+    count = 0
+    for flow in expired_flows:
+        # Update status to expired
+        flow.status = "expired"
+        flow.save()
+
+        # Create ValidationFlowEvent for the expiration
+        # Use approver as the event actor (system action on behalf of approver)
+        ValidationFlowEvent.objects.create(
+            validation_flow=flow,
+            event_type="expired",
+            event_actor=flow.approver,
+            event_notes=f"Automatically expired on {today.isoformat()}",
+            folder=flow.folder,
+        )
+
+        count += 1
+        logger.info(
+            f"Expired validation flow: {flow.ref_id} (ID: {flow.id}), expiry date: {flow.expiration_date}"
+        )
+
+    if count > 0:
+        logger.info(f"Successfully expired {count} validation flows")
+    else:
+        logger.debug("No expired validation flows found")
