@@ -228,6 +228,11 @@ export const actions: Actions = {
 
 		const schema = webhookEndpointSchema;
 		const form = await superValidate(formData, zod(schema));
+
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
 		const endpoint = `${BASE_API_URL}/webhooks/endpoints/`;
 
 		const requestInitOptions: RequestInit = {
