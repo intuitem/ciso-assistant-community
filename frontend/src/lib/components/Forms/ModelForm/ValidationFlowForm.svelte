@@ -170,33 +170,13 @@
 		/>
 		<AutocompleteSelect
 			{form}
-			optionsEndpoint="quantitative-risk-studies"
-			field="crq_studies"
-			cacheLock={cacheLocks['crq_studies']}
-			bind:cachedValue={formDataCache['crq_studies']}
-			label={m.quantitativeRiskStudies()}
+			optionsEndpoint="business-impact-analyses"
+			field="business_impact_analysis"
+			cacheLock={cacheLocks['business_impact_analysis']}
+			bind:cachedValue={formDataCache['business_impact_analysis']}
+			label={m.businessImpactAnalysis()}
 			multiple
-			disabled={initialData.crq_studies}
-		/>
-		<AutocompleteSelect
-			{form}
-			optionsEndpoint="ebios-rm"
-			field="ebios_studies"
-			cacheLock={cacheLocks['ebios_studies']}
-			bind:cachedValue={formDataCache['ebios_studies']}
-			label={m.ebiosRMStudies()}
-			multiple
-			disabled={initialData.ebios_studies}
-		/>
-		<AutocompleteSelect
-			{form}
-			optionsEndpoint="entity-assessments"
-			field="entity_assessments"
-			cacheLock={cacheLocks['entity_assessments']}
-			bind:cachedValue={formDataCache['entity_assessments']}
-			label={m.entityAssessments()}
-			multiple
-			disabled={initialData.entity_assessments}
+			disabled={initialData.business_impact_analysis}
 		/>
 		<AutocompleteSelect
 			{form}
@@ -207,36 +187,6 @@
 			label={m.findingsAssessments()}
 			multiple
 			disabled={initialData.findings_assessments}
-		/>
-		<AutocompleteSelect
-			{form}
-			optionsEndpoint="evidences"
-			field="evidences"
-			cacheLock={cacheLocks['evidences']}
-			bind:cachedValue={formDataCache['evidences']}
-			label={m.evidences()}
-			multiple
-			disabled={initialData.evidences}
-		/>
-		<AutocompleteSelect
-			{form}
-			optionsEndpoint="security-exceptions"
-			field="security_exceptions"
-			cacheLock={cacheLocks['security_exceptions']}
-			bind:cachedValue={formDataCache['security_exceptions']}
-			label={m.securityExceptions()}
-			multiple
-			disabled={initialData.security_exceptions}
-		/>
-		<AutocompleteSelect
-			{form}
-			optionsEndpoint="policies"
-			field="policies"
-			cacheLock={cacheLocks['policies']}
-			bind:cachedValue={formDataCache['policies']}
-			label={m.policies()}
-			multiple
-			disabled={initialData.policies}
 		/>
 	</Dropdown>
 {/if}
