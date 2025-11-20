@@ -14,6 +14,7 @@
 	import EventTypesSelect from './EventTypesSelect.svelte';
 	import { SHOW_TARGET_DOMAINS } from './constants';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 
 	// Base Classes
 	const cBase = 'card bg-surface-50 p-4 shadow-xl space-y-4';
@@ -90,6 +91,18 @@
 				<TextField {form} field="name" label={m.name()} data-focusindex="0" />
 				<MarkdownField {form} field="description" label={m.description()} data-focusindex="1" />
 				<TextField {form} field="url" label={m.url()} data-focusindex="2" autocomplete="off" />
+				<RadioGroup
+					{form}
+					field="payload_format"
+					label={m.payloadFormat()}
+					possibleOptions={[
+						{ label: m.thin(), value: 'thin' },
+						{ label: m.full(), value: 'full' }
+					]}
+					labelKey="label"
+					valueKey="value"
+					helpText={m.payloadFormatHelpText()}
+				/>
 				<WebhookSecretGenerator {form} field="secret" />
 				{#if SHOW_TARGET_DOMAINS}
 					<AutocompleteSelect

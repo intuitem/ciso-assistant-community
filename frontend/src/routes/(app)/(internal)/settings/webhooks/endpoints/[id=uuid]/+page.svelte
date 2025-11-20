@@ -15,6 +15,7 @@
 	import WebhookSecretGenerator from '$lib/components/Forms/WebhookSecretGenerator.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { SHOW_TARGET_DOMAINS } from '../constants';
+	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 
 	interface Props {
 		data: PageData;
@@ -43,12 +44,25 @@
 	data={data?.form}
 	dataType="form"
 	validators={zod(webhookEndpointSchema)}
+	debug
 >
 	{#snippet children({ form })}
 		<Checkbox {form} field="is_active" label={m.isActive()} />
 		<TextField {form} field="name" label={m.name()} data-focusindex="0" />
 		<MarkdownField {form} field="description" label={m.description()} data-focusindex="1" />
 		<TextField {form} field="url" label={m.url()} data-focusindex="2" />
+		<RadioGroup
+			{form}
+			field="payload_format"
+			label={m.payloadFormat()}
+			possibleOptions={[
+				{ label: m.thin(), value: 'thin' },
+				{ label: m.full(), value: 'full' }
+			]}
+			labelKey="label"
+			valueKey="value"
+			helpText={m.payloadFormatHelpText()}
+		/>
 		{#if showSecretField}
 			<WebhookSecretGenerator {form} field="secret" />
 		{:else}
