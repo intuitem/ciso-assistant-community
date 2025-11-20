@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from iam.models import Folder
 from .models import WebhookEndpoint, WebhookEventType
 
 
@@ -23,6 +25,10 @@ class WebhookEndpointSerializer(serializers.ModelSerializer):
         required=False,
     )
 
+    target_folders = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Folder.objects.all(), required=False
+    )
+
     has_secret = serializers.SerializerMethodField()
 
     class Meta:
@@ -37,6 +43,7 @@ class WebhookEndpointSerializer(serializers.ModelSerializer):
             "created_at",
             "secret",
             "has_secret",
+            "target_folders",
         ]
         read_only_fields = ["id", "created_at"]
 

@@ -5,7 +5,7 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from core.base_models import NameDescriptionMixin
-from iam.models import FolderMixin
+from iam.models import Folder, FolderMixin
 
 
 class WebhookEventType(models.Model):
@@ -46,6 +46,12 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         WebhookEventType,
         blank=True,
         help_text="A list of event types this endpoint subscribes to.",
+    )
+
+    target_folders = models.ManyToManyField(
+        Folder,
+        blank=True,
+        help_text="Folders to which this webhook endpoint is scoped. If empty, the endpoint applies to all folders the owner has access to.",
     )
 
     is_active = models.BooleanField(
