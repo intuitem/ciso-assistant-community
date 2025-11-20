@@ -15,6 +15,7 @@
 		field: string;
 		valuePath?: any;
 		options?: Option[];
+		displayEvents?: boolean;
 		form: SuperForm<Record<string, any | undefined>>;
 		hidden?: boolean;
 		disabled?: boolean;
@@ -28,6 +29,7 @@
 		field,
 		valuePath = field,
 		options = [],
+		displayEvents = false,
 		form,
 		hidden = false,
 		disabled = false,
@@ -163,7 +165,11 @@
 			<div class="ml-6 border-l pl-3">
 				{#each model.options as option}
 					{@const action = option.value.split('.')[1]}
-					<div class="flex items-center mb-2 {classes} {classesDisabled(disabled)}">
+					<div
+						class="flex items-center mb-2 {classes} {classesDisabled(disabled)} {displayEvents
+							? ''
+							: 'hidden'}"
+					>
 						<input
 							type="checkbox"
 							name={field}
