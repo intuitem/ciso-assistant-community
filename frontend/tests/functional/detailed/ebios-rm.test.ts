@@ -118,6 +118,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('workshop-1-step-1-link').click();
 			await ebiosRmStudyPage.hasBreadcrumbPath([workshopStepsNames[11]], false);
 			await page.getByRole('link', { name: ' Edit' }).click();
+			await expect(page).toHaveURL(/.*edit.*/);
 			await ebiosRmStudyPage.form.fill({
 				authors: [LoginPage.defaultEmail],
 				reviewers: [LoginPage.defaultEmail]
@@ -258,6 +259,7 @@ test('ebios rm study', async ({
 			await expect(page).toHaveURL(/.*workshop-2.*/);
 		}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 		await page.getByTestId('tablerow-edit-button').click();
+		await expect(page).toHaveURL(/.*edit.*/);
 		await page.getByTestId('form-input-motivation').selectOption('3');
 		await page.getByTestId('form-input-resources').selectOption('1');
 		await page.getByTestId('form-input-activity').selectOption('3');
@@ -276,6 +278,7 @@ test('ebios rm study', async ({
 			await expect(page).toHaveURL(/.*workshop-2.*/);
 		}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 		await page.getByTestId('tablerow-edit-button').click();
+		await expect(page).toHaveURL(/.*edit.*/);
 		await page.getByTestId('form-input-is-selected').uncheck();
 		await page.getByTestId('form-input-is-selected').check();
 		await page.getByTestId('form-input-feared-events').getByRole('textbox').click();
@@ -394,6 +397,7 @@ test('ebios rm study', async ({
 			await page.getByRole('link', { name: 'Define security measures for' }).click();
 			await expect(page).toHaveURL(/.*workshop-3.*/);
 			await page.getByTestId('tablerow-edit-button').click();
+			await expect(page).toHaveURL(/.*edit.*/);
 			await page
 				.locator(
 					'div:nth-child(4) > .flex.flex-col.space-y-4 > span > div:nth-child(3) > .p-1 > label:nth-child(3) > .text-base'
@@ -547,12 +551,6 @@ test('ebios rm study', async ({
 			await page.getByRole('gridcell', { name: 'test attack path 1' }).click();
 			await expect(page).not.toHaveURL(/.*workshop-4.*/);
 			await page.getByRole('button', { name: ' Severity High ' }).click();
-			await page.getByRole('link', { name: ' Edit' }).click();
-			await page.getByTestId('form-input-likelihood').selectOption('3');
-			await page.getByTestId('save-button').click();
-			await expect(page.getByTestId('modal-title')).not.toBeVisible();
-			await page.getByRole('button', { name: ' Likelihood High ' }).click();
-			await page.getByRole('button', { name: ' Risk level High ' }).click();
 			await page.getByTestId('add-button').click();
 			await expect(page.getByTestId('modal-title')).toBeVisible();
 			for (const spinner of await page.locator('.loading-spinner').all()) {
@@ -574,9 +572,12 @@ test('ebios rm study', async ({
 			}
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('test operating mode 2');
-			await page.getByTestId('form-input-likelihood').selectOption('4');
+			await page.getByTestId('form-input-likelihood').selectOption('3');
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
+			await page.getByRole('button', { name: ' Likelihood High ' }).click();
+			await page.getByRole('button', { name: ' Severity High ' }).click();
+			await page.getByRole('button', { name: ' Risk level High ' }).click();
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await page
 				.getByRole('listitem')
