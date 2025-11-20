@@ -147,9 +147,9 @@
 					</div>
 				</div>
 
-				<div class="card p-2 bg-gray-50 shadow-xs flex-1 flex flex-col gap-2" use:resizeObserver>
+				<div class="card p-2 bg-gray-50 shadow-xs flex-1 flex flex-row gap-2" use:resizeObserver>
 					{#key chartKey}
-						<div class="flex-1 min-h-0">
+						<div class="flex-1 min-h-0 min-w-0">
 							<HalfDonutChart
 								name="current_h"
 								title={m.severity()}
@@ -158,7 +158,7 @@
 								colors={data.findings_metrics.severity_chart_data.map((object) => object.color)}
 							/>
 						</div>
-						<div class="flex-1 min-h-0">
+						<div class="flex-1 min-h-0 min-w-0">
 							<DonutChart
 								classesContainer="card p-2 bg-white h-full"
 								name="f_treatment_progress"
