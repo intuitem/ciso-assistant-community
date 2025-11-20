@@ -1598,7 +1598,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'evidences', urlModel: 'evidences', endpointUrl: './evidences' }
+			{
+				field: 'evidence',
+				urlModel: 'evidences',
+				endpointUrl: './evidences',
+				disableCreate: true,
+				disableDelete: true
+			}
 		]
 	},
 	campaigns: {
