@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from django.utils.formats import date_format
 from django.http import HttpResponse
 from django.db.models import Sum, F, FloatField, Case, When, Value
-from django.db.models.functions import Cast, Greatest, Coalesce
+from django.db.models.functions import Cast, Greatest, Coalesce, Round
 
 from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES
 from core.dora import (
@@ -78,17 +78,24 @@ class EntityViewSet(BaseModelViewSet):
         # Annotate with default_criticality calculation
         # Formula: (default_dependency * default_penetration) / (default_maturity * default_trust)
         # Handle division by zero by using Case/When
+        # Rounded to 2 decimal places by multiplying by 100, rounding, then dividing by 100
         qs = qs.annotate(
-            default_criticality=Case(
-                # If maturity or trust is 0, return 0.0
-                When(default_maturity=0, then=Value(0.0)),
-                When(default_trust=0, then=Value(0.0)),
-                # Otherwise, calculate criticality
-                default=Cast(
-                    (F("default_dependency") * F("default_penetration"))
-                    / (F("default_maturity") * F("default_trust")),
-                    output_field=FloatField(),
-                ),
+            default_criticality=Cast(
+                Round(
+                    Case(
+                        # If maturity or trust is 0, return 0.0
+                        When(default_maturity=0, then=Value(0.0)),
+                        When(default_trust=0, then=Value(0.0)),
+                        # Otherwise, calculate criticality * 100
+                        default=Cast(
+                            (F("default_dependency") * F("default_penetration") * 100.0)
+                            / (F("default_maturity") * F("default_trust")),
+                            output_field=FloatField(),
+                        ),
+                        output_field=FloatField(),
+                    )
+                )
+                / 100.0,
                 output_field=FloatField(),
             )
         )
