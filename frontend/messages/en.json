@@ -2739,5 +2739,8 @@
 	"searchResourcesPlaceholder": "Search resources...",
 	"noResourceMatchQuery": "No resource matching your query was found.",
 	"targetDomains": "Target Domains",
-	"webhookEndpointTargetDomainsHelpText": "Select the domains for which this webhook endpoint will be triggered. If no domain is selected, the webhook will be triggered for all domains."
+	"webhookEndpointTargetDomainsHelpText": "Select the domains for which this webhook endpoint will be triggered. If no domain is selected, the webhook will be triggered for all domains.",
+	"thin": "Thin",
+	"payloadFormat": "Payload Format",
+	"payloadFormatHelpText": "Select the format of the webhook payload."
 }
