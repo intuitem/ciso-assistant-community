@@ -2650,6 +2650,11 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
             folder=instance.folder,
         )
 
+        # Send notification to approver
+        from core.tasks import send_validation_flow_created_notification
+
+        send_validation_flow_created_notification(instance)
+
         return instance
 
     def update(self, instance: ValidationFlow, validated_data: dict) -> ValidationFlow:

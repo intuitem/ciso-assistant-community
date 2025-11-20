@@ -194,6 +194,52 @@ def check_evidences_expiring_tomorrow():
         send_evidence_expiring_soon_notification(owner_email, evidences, days=1)
 
 
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="40"))
+def check_validation_flows_deadline_in_week():
+    """Check for ValidationFlows with deadline in 7 days"""
+    target_date = date.today() + timedelta(days=7)
+    validations_due_soon = ValidationFlow.objects.filter(
+        validation_deadline=target_date
+    ).exclude(status__in=["approved", "rejected", "cancelled"])
+
+    # Group by individual approver
+    approver_validations = {}
+    for validation in validations_due_soon:
+        if validation.approver and validation.approver.email:
+            approver_email = validation.approver.email
+            if approver_email not in approver_validations:
+                approver_validations[approver_email] = []
+            approver_validations[approver_email].append(validation)
+
+    # Send personalized email to each approver
+    for approver_email, validations in approver_validations.items():
+        send_validation_deadline_notification(approver_email, validations, days=7)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="45"))
+def check_validation_flows_deadline_tomorrow():
+    """Check for ValidationFlows with deadline in 1 day"""
+    target_date = date.today() + timedelta(days=1)
+    validations_due_tomorrow = ValidationFlow.objects.filter(
+        validation_deadline=target_date
+    ).exclude(status__in=["approved", "rejected", "cancelled"])
+
+    # Group by individual approver
+    approver_validations = {}
+    for validation in validations_due_tomorrow:
+        if validation.approver and validation.approver.email:
+            approver_email = validation.approver.email
+            if approver_email not in approver_validations:
+                approver_validations[approver_email] = []
+            approver_validations[approver_email].append(validation)
+
+    # Send personalized email to each approver
+    for approver_email, validations in approver_validations.items():
+        send_validation_deadline_notification(approver_email, validations, days=1)
+
+
 @task()
 def send_notification_email_expired_eta(owner_email, controls):
     if not check_email_configuration(owner_email, controls):
@@ -467,6 +513,87 @@ def send_evidence_expiring_soon_notification(owner_email, evidences, days):
     else:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
+        )
+
+
+def send_validation_flow_created_notification(validation_flow):
+    """Send notification to approver when validation flow is created"""
+    if not validation_flow.approver or not validation_flow.approver.email:
+        logger.warning(
+            f"No approver email for validation flow {validation_flow.ref_id}"
+        )
+        return
+
+    approver_email = validation_flow.approver.email
+    if not check_email_configuration(approver_email, [validation_flow]):
+        return
+
+    from .email_utils import render_email_template
+
+    requester_name = (
+        f"{validation_flow.requester.first_name} {validation_flow.requester.last_name}".strip()
+        if validation_flow.requester
+        and (
+            validation_flow.requester.first_name or validation_flow.requester.last_name
+        )
+        else validation_flow.requester.email
+        if validation_flow.requester
+        else "Unknown"
+    )
+
+    context = {
+        "validation_ref_id": validation_flow.ref_id,
+        "requester_name": requester_name,
+        "validation_deadline": (
+            validation_flow.validation_deadline.strftime("%Y-%m-%d")
+            if validation_flow.validation_deadline
+            else "Not set"
+        ),
+        "folder_name": validation_flow.folder.name
+        if validation_flow.folder
+        else "Unknown",
+        "validation_url": f"{getattr(settings, 'CISO_ASSISTANT_URL', 'http://localhost:5173')}/validation-flows/{validation_flow.id}",
+    }
+
+    rendered = render_email_template("validation_flow_created", context)
+    if rendered:
+        send_notification_email(rendered["subject"], rendered["body"], approver_email)
+        logger.info(
+            f"Sent validation flow creation notification to {approver_email} for {validation_flow.ref_id}"
+        )
+    else:
+        logger.error(
+            f"Failed to render validation_flow_created email template for {approver_email}"
+        )
+
+
+def send_validation_deadline_notification(approver_email, validations, days):
+    """Send notification about validation deadlines approaching"""
+    if not check_email_configuration(approver_email, validations):
+        return
+
+    from .email_utils import render_email_template, format_validation_list
+
+    template_name = f"validation_deadline_d{days}"
+    s = "s" if len(validations) > 1 else ""
+    are = "are" if len(validations) > 1 else "is"
+    their = "their" if len(validations) > 1 else "its"
+
+    context = {
+        "days": days,
+        "validation_list": format_validation_list(validations),
+        "validation_count": len(validations),
+        "s": s,
+        "are": are,
+        "their": their,
+    }
+
+    rendered = render_email_template(template_name, context)
+    if rendered:
+        send_notification_email(rendered["subject"], rendered["body"], approver_email)
+    else:
+        logger.error(
+            f"Failed to render {template_name} email template for {approver_email}"
         )
 
 
