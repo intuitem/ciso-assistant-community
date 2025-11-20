@@ -18,7 +18,12 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	let { data } = $props();
+	interface Props {
+		data: any;
+		allowMultiple?: boolean;
+	}
+
+	let { data, allowMultiple = false }: Props = $props();
 
 	function modalWebhookEndpointCreateForm(): void {
 		const modalComponent: ModalComponent = {
@@ -82,33 +87,37 @@
 <div class="flex flex-col gap-3">
 	<span class="text-gray-500">{m.configureOutgoingWebhooks()}</span>
 	<span class="flex flex-row justify-between">
-		<h3 class="h3">{m.webhookEndpoints()}</h3>
-		<button class="btn preset-filled-primary-500 w-fit" onclick={modalWebhookEndpointCreateForm}
-			><i class="fa-solid fa-plus mr-2"></i>{m.createWebhookEndpoint()}</button
-		></span
-	>
+		<h3 class="h3">{allowMultiple ? m.webhookEndpoints() : m.webhookEndpoint()}</h3>
+		{#if data?.webhookEndpoints?.length == 0 || allowMultiple}
+			<button class="btn preset-filled-primary-500 w-fit" onclick={modalWebhookEndpointCreateForm}
+				><i class="fa-solid fa-plus mr-2"></i>{m.createWebhookEndpoint()}</button
+			>
+		{/if}
+	</span>
 	{#if displayedEndpoint}
 		<div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8">
-			<div class="card p-2 bg-surface-50-950">
-				{#each data.webhookEndpoints as endpoint}
-					<span class="flex flex-row gap-4 items-center">
-						<button
-							onclick={() => {
-								displayedEndpoint = endpoint;
-							}}
-							class="text-secondary-600 hover:underline {JSON.stringify(displayedEndpoint) ===
-							JSON.stringify(endpoint)
-								? 'font-semibold'
-								: ''}"
-						>
-							{endpoint.name}</button
-						>
-						{#if endpoint.is_active}
-							<span class="badge preset-tonal-success">{m.active()}</span>
-						{/if}
-					</span>
-				{/each}
-			</div>
+			{#if allowMultiple}
+				<div class="card p-2 bg-surface-50-950">
+					{#each data.webhookEndpoints as endpoint}
+						<span class="flex flex-row gap-4 items-center">
+							<button
+								onclick={() => {
+									displayedEndpoint = endpoint;
+								}}
+								class="text-secondary-600 hover:underline {JSON.stringify(displayedEndpoint) ===
+								JSON.stringify(endpoint)
+									? 'font-semibold'
+									: ''}"
+							>
+								{endpoint.name}</button
+							>
+							{#if endpoint.is_active}
+								<span class="badge preset-tonal-success">{m.active()}</span>
+							{/if}
+						</span>
+					{/each}
+				</div>
+			{/if}
 			<div class="card p-2 lg:col-span-2">
 				<div class="flex flex-col gap-4">
 					<span class="flex flex-row gap-2 items-center">

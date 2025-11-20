@@ -83,7 +83,7 @@
 			<FeatureFlagsSettings {data} />
 		</Tabs.Panel>
 		<Tabs.Panel value="webhooks">
-			<WebhooksSettings {data} />
+			<WebhooksSettings {data} allowMultiple />
 		</Tabs.Panel>
 		<Tabs.Panel value="integrations">
 			<div>
