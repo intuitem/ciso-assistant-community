@@ -38,6 +38,7 @@
 	import { derived } from 'svelte/store';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 
 	interface Props {
 		data: PageData;
@@ -499,6 +500,9 @@
 					<div class="font-medium">{m.createdAt()}</div>
 					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
 				</div>
+				{#if page.data?.featureflags?.validation_flows}
+					<ValidationFlowsSection validationFlows={data.compliance_assessment.validation_flows} />
+				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
 				<div class="flex w-1/3 relative">
@@ -661,14 +665,16 @@
 						data-testid="compare-audit-button"
 						><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
 					</button>
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
-						onclick={() => modalRequestValidation()}
-						data-testid="request-validation-button"
-					>
-						<i class="fa-solid fa-check-circle mr-2"></i>
-						{m.requestValidation()}
-					</button>
+					{#if page.data?.featureflags?.validation_flows}
+						<button
+							class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+							onclick={() => modalRequestValidation()}
+							data-testid="request-validation-button"
+						>
+							<i class="fa-solid fa-check-circle mr-2"></i>
+							{m.requestValidation()}
+						</button>
+					{/if}
 				{/if}
 
 				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}

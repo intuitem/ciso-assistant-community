@@ -2165,6 +2165,7 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
 
 class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(read_only=True)
+    folder = FieldsRelatedField()
     owner = FieldsRelatedField(many=True)
     findings_count = serializers.IntegerField(source="findings.count")
     evidences = FieldsRelatedField(many=True)

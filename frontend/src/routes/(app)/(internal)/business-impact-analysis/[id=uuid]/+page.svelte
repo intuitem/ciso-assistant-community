@@ -12,6 +12,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 
 	interface Props {
 		data: PageData;
@@ -57,7 +58,7 @@
 				class="btn preset-filled-primary-500 h-fit"
 				breadcrumbAction="push"><i class="fa-solid fa-file-lines mr-2"></i>{m.report()}</Anchor
 			>
-			{#if !business_impact_analysis?.is_locked}
+			{#if !business_impact_analysis?.is_locked && page.data?.featureflags?.validation_flows}
 				<button
 					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
 					onclick={() => modalRequestValidation()}
@@ -77,6 +78,9 @@
 					<ActivityTracker metrics={data.metrics} />
 				</div>
 			</div>
+			{#if page.data?.featureflags?.validation_flows}
+				<ValidationFlowsSection validationFlows={business_impact_analysis.validation_flows} />
+			{/if}
 		</div>
 	{/snippet}
 </DetailView>

@@ -24,7 +24,7 @@ export const load: PageServerLoad = async (event) => {
 	// Validation flow form with preset data
 	const validationFlowSchema = modelSchema('validation-flows');
 	const validationFlowInitialData = {
-		folder: detailData.data.folder.id,
+		folder: detailData.data.folder?.id || detailData.data.folder,
 		findings_assessments: [event.params.id],
 		ref_id: ''
 	};
