@@ -182,7 +182,7 @@
 {#if !displayOnlyAssessableNodes || assessable || hasAssessableChildren}
 	<div class="flex flex-row justify-between space-x-8">
 		<div class="flex flex-1 justify-center max-w-[80ch] flex-col">
-			<div class="flex flex-row space-x-2" style="font-weight: 300;">
+			<div class="flex flex-row space-x-2 items-center" style="font-weight: 300;">
 				<div>
 					{#if assessable}
 						<span class="w-full h-full flex rounded-base hover:text-primary-500">
@@ -228,6 +228,36 @@
 						</p>
 					{/if}
 				</div>
+				{#if !assessable}
+					<div class="flex flex-row items-end items-middle text-xs mr-2" style="width:6rem">
+						{#each orderedResultPercentages as rp}
+							{#if resultCounts && resultCounts[rp.result] !== undefined}
+								<div
+									class="rounded-md px-1 mx-1 leading-4"
+									style="background-color: {complianceResultColorMap[
+										rp.result
+									]}; color: {complianceResultColorMap[rp.result] === '#000000'
+										? '#ffffff'
+										: '#111827'}"
+								>
+									{resultCounts[rp.result]}
+								</div>
+							{/if}
+						{/each}
+						{#if resultCounts && resultCounts['not_assessed'] !== undefined}
+							<div
+								class="rounded-md px-1 mx-1 leading-4"
+								style="background-color: {complianceResultColorMap[
+									'not_assessed'
+								]}; color: {complianceResultColorMap['not_assessed'] === '#000000'
+									? '#ffffff'
+									: '#111827'}"
+							>
+								{resultCounts['not_assessed']}
+							</div>
+						{/if}
+					</div>
+				{/if}
 				<div>
 					{#if hasAssessableChildren}
 						{#each Object.entries(complianceStatusColorMap) as [status, color]}

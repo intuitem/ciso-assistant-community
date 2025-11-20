@@ -9,6 +9,11 @@ from ..resolvers import (
     resolve_risk_assessment_id,
 )
 from ..config import GLOBAL_FOLDER_ID
+from ..utils.response_formatter import (
+    success_response,
+    error_response,
+    http_error_response,
+)
 
 
 async def create_folder(
@@ -16,12 +21,12 @@ async def create_folder(
     description: str = "",
     parent_folder_id: str = None,
 ) -> str:
-    """Create a new folder (domain) in CISO Assistant
+    """Create folder (domain)
 
     Args:
-        name: Name of the folder
-        description: Optional description of the folder
-        parent_folder_id: Optional parent folder ID or name (can use folder name instead of UUID)
+        name: Folder name
+        description: Description
+        parent_folder_id: Parent folder ID/name
     """
     try:
         payload = {
@@ -29,7 +34,6 @@ async def create_folder(
             "description": description,
         }
 
-        # Resolve parent folder name to ID if needed
         if parent_folder_id:
             parent_folder_id = resolve_folder_id(parent_folder_id)
             payload["parent_folder"] = parent_folder_id
@@ -38,7 +42,7 @@ async def create_folder(
 
         if res.status_code == 201:
             folder = res.json()
-            return f"✅ Folder created successfully: {folder.get('name')} (ID: {folder.get('id')})"
+            return f"Created folder: {folder.get('name')} (ID: {folder.get('id')})"
         else:
             return f"Error creating folder: {res.status_code} - {res.text}"
     except Exception as e:
@@ -50,18 +54,17 @@ async def create_perimeter(
     description: str = "",
     folder_id: str = None,
 ) -> str:
-    """Create a new perimeter in CISO Assistant
+    """Create perimeter (assessment scope)
 
     Args:
-        name: Name of the perimeter
-        description: Optional description of the perimeter
-        folder_id: Optional folder/domain ID or name where to create the perimeter (can use folder name instead of UUID)
+        name: Perimeter name
+        description: Description
+        folder_id: Folder ID/name
     """
     try:
         if not folder_id and GLOBAL_FOLDER_ID:
             folder_id = GLOBAL_FOLDER_ID
 
-        # Resolve folder name to ID if needed
         if folder_id:
             folder_id = resolve_folder_id(folder_id)
 
@@ -77,7 +80,7 @@ async def create_perimeter(
 
         if res.status_code == 201:
             perimeter = res.json()
-            return f"✅ Perimeter created successfully: {perimeter.get('name')} (ID: {perimeter.get('id')})"
+            return f"Created perimeter: {perimeter.get('name')} (ID: {perimeter.get('id')})"
         else:
             return f"Error creating perimeter: {res.status_code} - {res.text}"
     except Exception as e:
@@ -90,13 +93,13 @@ async def create_asset(
     asset_type: str = "PR",
     folder_id: str = None,
 ) -> str:
-    """Create a new asset in CISO Assistant
+    """Create asset in folder
 
     Args:
-        name: Name of the asset
-        description: Optional description of the asset
-        asset_type: Type of asset - "PR" for Primary or "SP" for Supporting (defaults to "PR")
-        folder_id: Optional folder/domain ID or name where to create the asset (can use folder name instead of UUID)
+        name: Asset name
+        description: Description
+        asset_type: PR (Primary) | SP (Supporting)
+        folder_id: Folder ID/name
     """
     try:
         # If no folder specified, try to get the default folder
@@ -120,7 +123,7 @@ async def create_asset(
 
         if res.status_code == 201:
             asset = res.json()
-            return f"✅ Asset created successfully: {asset.get('name')} (ID: {asset.get('id')})"
+            return f"Created asset: {asset.get('name')} (ID: {asset.get('id')})"
         else:
             return f"Error creating asset: {res.status_code} - {res.text}"
     except Exception as e:
@@ -134,14 +137,14 @@ async def create_threat(
     ref_id: str = "",
     folder_id: str = None,
 ) -> str:
-    """Create a new threat in CISO Assistant
+    """Create threat in folder
 
     Args:
-        name: Name of the threat
-        description: Optional description of the threat
-        provider: Optional provider/source of the threat (e.g., "MITRE ATT&CK", "Custom")
-        ref_id: Optional reference ID for the threat
-        folder_id: Optional folder/domain ID or name where to create the threat (can use folder name instead of UUID)
+        name: Threat name
+        description: Description
+        provider: Provider/source (e.g. "MITRE ATT&CK")
+        ref_id: Reference ID
+        folder_id: Folder ID/name
     """
     try:
         # If no folder specified, try to get the default folder
@@ -170,7 +173,7 @@ async def create_threat(
 
         if res.status_code == 201:
             threat = res.json()
-            return f"✅ Threat created successfully: {threat.get('name')} (ID: {threat.get('id')})"
+            return f"Created threat: {threat.get('name')} (ID: {threat.get('id')})"
         else:
             return f"Error creating threat: {res.status_code} - {res.text}"
     except Exception as e:
@@ -185,15 +188,15 @@ async def create_applied_control(
     category: str = "technical",
     status: str = "planned",
 ) -> str:
-    """Create a new applied control (security measure) in CISO Assistant
+    """Create applied control (security measure)
 
     Args:
-        name: Name of the control
-        description: Optional description of what the control does
-        eta: Optional estimated completion date (format: YYYY-MM-DD)
-        folder_id: Optional folder/domain ID or name where to create the control (can use folder name instead of UUID)
-        category: Control category (technical, physical, organizational, or procedural) - defaults to "technical"
-        status: Control status (planned, active, or inactive) - defaults to "planned"
+        name: Control name
+        description: Description
+        eta: Completion date YYYY-MM-DD
+        folder_id: Folder ID/name
+        category: technical | physical | organizational | procedural
+        status: planned | active | inactive
     """
     try:
         if not folder_id and GLOBAL_FOLDER_ID:
@@ -220,7 +223,7 @@ async def create_applied_control(
 
         if res.status_code == 201:
             control = res.json()
-            return f"✅ Applied control created successfully: {control.get('name')} (ID: {control.get('id')})"
+            return f"Created applied control: {control.get('name')} (ID: {control.get('id')})"
         else:
             return f"Error creating applied control: {res.status_code} - {res.text}"
     except Exception as e:
@@ -236,16 +239,16 @@ async def create_risk_assessment(
     status: str = "planned",
     folder_id: str = None,
 ) -> str:
-    """Create a new risk assessment in CISO Assistant
+    """Create risk assessment with risk matrix and perimeter
 
     Args:
-        name: Name of the risk assessment
-        risk_matrix_id: ID or name of the risk matrix to use (can use risk matrix name instead of UUID; required)
-        perimeter_id: ID or name of the perimeter (scope) for this assessment (can use perimeter name instead of UUID; required)
-        description: Optional description
-        version: Optional version string (defaults to "1.0")
-        status: Optional status - "planned", "in_progress", "in_review", "done", or "deprecated" (defaults to "planned")
-        folder_id: Optional folder/domain ID or name where to create the assessment (can use folder name instead of UUID; if not provided, inherits from perimeter)
+        name: Assessment name
+        risk_matrix_id: Risk matrix ID/name (required)
+        perimeter_id: Perimeter ID/name (required)
+        description: Description
+        version: Version string
+        status: planned | in_progress | in_review | done | deprecated
+        folder_id: Folder ID/name (inherits from perimeter if not set)
     """
     try:
         # Resolve risk matrix name to ID if needed
@@ -277,11 +280,21 @@ async def create_risk_assessment(
 
         if res.status_code == 201:
             assessment = res.json()
-            return f"✅ Risk assessment created successfully: {assessment.get('name')} (ID: {assessment.get('id')})"
+            result = f"Created risk assessment: {assessment.get('name')} (ID: {assessment.get('id')})"
+            return success_response(
+                result,
+                "create_risk_assessment",
+                "Risk assessment created successfully. You can now create risk scenarios for this assessment",
+            )
         else:
-            return f"Error creating risk assessment: {res.status_code} - {res.text}"
+            return http_error_response(res.status_code, res.text)
     except Exception as e:
-        return f"Error in create_risk_assessment: {str(e)}"
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
 async def create_risk_scenario(
@@ -297,20 +310,20 @@ async def create_risk_scenario(
     applied_controls: list = None,
     existing_applied_controls: list = None,
 ) -> str:
-    """Create a new risk scenario in CISO Assistant
+    """Create risk scenario with linked assets/threats/controls
 
     Args:
-        name: Name/title of the risk scenario
-        description: Description of the risk scenario
-        risk_assessment_id: Optional ID or name of the risk assessment to link this scenario to (can use risk assessment name instead of UUID)
-        folder_id: Optional folder/domain ID or name where to create the scenario (can use folder name instead of UUID)
-        existing_controls: Optional description of existing controls (text field)
-        current_proba: Optional current probability level (0-4, where 0=very low, 4=very high)
-        current_impact: Optional current impact level (0-4, where 0=very low, 4=very high)
-        assets: Optional list of asset IDs or names to link to this scenario (can use asset names instead of UUIDs)
-        threats: Optional list of threat IDs or names to link to this scenario (can use threat names instead of UUIDs)
-        applied_controls: Optional list of new/planned applied control IDs or names to link (can use control names instead of UUIDs)
-        existing_applied_controls: Optional list of existing applied control IDs or names to link (can use control names instead of UUIDs)
+        name: Scenario name
+        description: Description
+        risk_assessment_id: Risk assessment ID/name
+        folder_id: Folder ID/name
+        existing_controls: Existing controls description
+        current_proba: Probability 0-4 (0=very low, 4=very high)
+        current_impact: Impact 0-4 (0=very low, 4=very high)
+        assets: List of asset IDs/names
+        threats: List of threat IDs/names
+        applied_controls: List of planned control IDs/names
+        existing_applied_controls: List of existing control IDs/names
     """
     try:
         from ..resolvers import resolve_asset_id, resolve_applied_control_id
@@ -399,7 +412,7 @@ async def create_risk_scenario(
 
         if res.status_code == 201:
             scenario = res.json()
-            message = f"✅ Risk scenario created successfully: {scenario.get('name')} (ID: {scenario.get('id')})"
+            message = f"Created Risk scenario: {scenario.get('name')} (ID: {scenario.get('id')})"
             if assets:
                 message += f"\n   Linked to {len(assets)} asset(s)"
             if threats:
@@ -410,11 +423,20 @@ async def create_risk_scenario(
                 )
             if existing_applied_controls:
                 message += f"\n   Linked to {len(existing_applied_controls)} existing control(s)"
-            return message
+            return success_response(
+                message,
+                "create_risk_scenario",
+                "Risk scenario created successfully. You can now update risk ratings or add more scenarios",
+            )
         else:
-            return f"Error creating risk scenario: {res.status_code} - {res.text}"
+            return http_error_response(res.status_code, res.text)
     except Exception as e:
-        return f"Error in create_risk_scenario: {str(e)}"
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
 
 
 async def create_business_impact_analysis(
@@ -426,16 +448,16 @@ async def create_business_impact_analysis(
     status: str = "planned",
     folder_id: str = None,
 ) -> str:
-    """Create a new Business Impact Analysis (BIA) in CISO Assistant
+    """Create Business Impact Analysis (BIA)
 
     Args:
-        name: Name of the BIA
-        risk_matrix_id: ID or name of the risk matrix to use (can use risk matrix name instead of UUID; required)
-        perimeter_id: ID or name of the perimeter (scope) for this BIA (can use perimeter name instead of UUID; required)
-        description: Optional description
-        version: Optional version string (defaults to "1.0")
-        status: Optional status - "planned", "in_progress", "in_review", "done", or "deprecated" (defaults to "planned")
-        folder_id: Optional folder/domain ID or name where to create the BIA (can use folder name instead of UUID; if not provided, inherits from perimeter)
+        name: BIA name
+        risk_matrix_id: Risk matrix ID/name (required)
+        perimeter_id: Perimeter ID/name (required)
+        description: Description
+        version: Version string
+        status: planned | in_progress | in_review | done | deprecated
+        folder_id: Folder ID/name (inherits from perimeter if not set)
     """
     try:
         # Resolve risk matrix name to ID if needed
@@ -467,7 +489,7 @@ async def create_business_impact_analysis(
 
         if res.status_code == 201:
             bia = res.json()
-            return f"✅ Business Impact Analysis created successfully: {bia.get('name')} (ID: {bia.get('id')})"
+            return f"Created Business Impact Analysis: {bia.get('name')} (ID: {bia.get('id')})"
         else:
             return f"Error creating Business Impact Analysis: {res.status_code} - {res.text}"
     except Exception as e:
@@ -483,16 +505,16 @@ async def create_compliance_assessment(
     status: str = "planned",
     folder_id: str = None,
 ) -> str:
-    """Create a new compliance assessment (audit) in CISO Assistant
+    """Create compliance assessment (audit) for framework
 
     Args:
-        name: Name of the compliance assessment
-        framework_id: ID, URN, or name of the framework to use (e.g., "ISO 27001" or "urn:intuitem:risk:library:iso27001-2022")
-        perimeter_id: ID or name of the perimeter (scope) for this assessment
-        description: Optional description of the assessment
-        version: Optional version string (defaults to "1.0")
-        status: Optional status - "planned", "in_progress", "in_review", "done", or "deprecated" (defaults to "planned")
-        folder_id: Optional folder/domain ID or name where to create the assessment (can use folder name instead of UUID; if not provided, inherits from perimeter)
+        name: Assessment name
+        framework_id: Framework ID/URN/name (e.g. "ISO 27001")
+        perimeter_id: Perimeter ID/name
+        description: Description
+        version: Version string
+        status: planned | in_progress | in_review | done | deprecated
+        folder_id: Folder ID/name (inherits from perimeter if not set)
     """
     try:
         # Resolve framework name/URN to ID if needed
@@ -524,7 +546,7 @@ async def create_compliance_assessment(
 
         if res.status_code == 201:
             assessment = res.json()
-            return f"✅ Compliance assessment created successfully: {assessment.get('name')} (ID: {assessment.get('id')})"
+            return f"Created Compliance assessment: {assessment.get('name')} (ID: {assessment.get('id')})"
         else:
             return (
                 f"Error creating compliance assessment: {res.status_code} - {res.text}"
@@ -545,23 +567,19 @@ async def create_quantitative_risk_study(
     risk_tolerance_point2_acceptable_loss: float = None,
     folder_id: str = None,
 ) -> str:
-    """Create a new quantitative risk study in CISO Assistant
+    """Create quantitative risk study with risk tolerance curve (2 points define appetite curve)
 
     Args:
-        name: Name of the quantitative risk study
-        description: Optional description of the study
-        status: Optional status - "planned", "in_progress", "in_review", "done", or "deprecated" (defaults to "planned")
-        distribution_model: Distribution model to use (defaults to "lognormal_ci90")
-        loss_threshold: Optional loss threshold value (monetary amount)
-        risk_tolerance_point1_probability: Optional probability for first risk tolerance point (0.0-1.0, e.g., 0.01 for 1%)
-        risk_tolerance_point1_acceptable_loss: Optional acceptable loss for first point (monetary amount)
-        risk_tolerance_point2_probability: Optional probability for second risk tolerance point (0.0-1.0, e.g., 0.001 for 0.1%)
-        risk_tolerance_point2_acceptable_loss: Optional acceptable loss for second point (monetary amount)
-        folder_id: Optional folder/domain ID or name where to create the study (can use folder name instead of UUID)
-
-    Note: Risk tolerance points define your organization's risk appetite curve.
-    Example: point1 (1% probability, $100K acceptable loss), point2 (0.1% probability, $1M acceptable loss)
-    The curve is automatically generated from these two points.
+        name: Study name
+        description: Description
+        status: planned | in_progress | in_review | done | deprecated
+        distribution_model: Distribution model (default: lognormal_ci90)
+        loss_threshold: Loss threshold (monetary)
+        risk_tolerance_point1_probability: Point1 probability (0.0-1.0, e.g. 0.01=1%)
+        risk_tolerance_point1_acceptable_loss: Point1 acceptable loss (monetary)
+        risk_tolerance_point2_probability: Point2 probability (0.0-1.0, e.g. 0.001=0.1%)
+        risk_tolerance_point2_acceptable_loss: Point2 acceptable loss (monetary)
+        folder_id: Folder ID/name
     """
     try:
         if not folder_id and GLOBAL_FOLDER_ID:
@@ -631,7 +649,7 @@ async def create_quantitative_risk_study(
 
         if res.status_code == 201:
             study = res.json()
-            return f"✅ Quantitative risk study created successfully: {study.get('name')} (ID: {study.get('id')})"
+            return f"Created Quantitative risk study: {study.get('name')} (ID: {study.get('id')})"
         else:
             return f"Error creating quantitative risk study: {res.status_code} - {res.text}"
     except Exception as e:
@@ -648,17 +666,17 @@ async def create_quantitative_risk_scenario(
     assets: list = None,
     threats: list = None,
 ) -> str:
-    """Create a new quantitative risk scenario in CISO Assistant
+    """Create quantitative risk scenario in study
 
     Args:
-        name: Name of the quantitative risk scenario
-        quantitative_risk_study_id: ID or name of the quantitative risk study to link this scenario to (required)
-        description: Optional description of the scenario
-        status: Optional status - "draft", "open", "mitigate", "accept", or "transfer" (defaults to "draft")
-        priority: Optional priority (1=P1, 2=P2, 3=P3, 4=P4)
-        folder_id: Optional folder/domain ID or name where to create the scenario (can use folder name instead of UUID)
-        assets: Optional list of asset IDs or names to link to this scenario (can use asset names instead of UUIDs)
-        threats: Optional list of threat IDs or names to link to this scenario (can use threat names instead of UUIDs)
+        name: Scenario name
+        quantitative_risk_study_id: Study ID/name (required)
+        description: Description
+        status: draft | open | mitigate | accept | transfer
+        priority: Priority 1-4 (1=P1, 4=P4)
+        folder_id: Folder ID/name
+        assets: List of asset IDs/names
+        threats: List of threat IDs/names
     """
     try:
         from ..resolvers import resolve_id_or_name, resolve_asset_id
@@ -723,7 +741,7 @@ async def create_quantitative_risk_scenario(
 
         if res.status_code == 201:
             scenario = res.json()
-            message = f"✅ Quantitative risk scenario created successfully: {scenario.get('name')} (ID: {scenario.get('id')})"
+            message = f"Created Quantitative risk scenario: {scenario.get('name')} (ID: {scenario.get('id')})"
             if assets:
                 message += f"\n   Linked to {len(assets)} asset(s)"
             if threats:
@@ -748,20 +766,20 @@ async def create_quantitative_risk_hypothesis(
     existing_applied_controls: list = None,
     added_applied_controls: list = None,
 ) -> str:
-    """Create a new quantitative risk hypothesis in CISO Assistant
+    """Create quantitative risk hypothesis for scenario
 
     Args:
-        name: Name of the quantitative risk hypothesis
-        quantitative_risk_scenario_id: ID or name of the quantitative risk scenario to link this hypothesis to (required)
-        risk_stage: Risk stage - "inherent", "current", or "residual" (defaults to "current")
-        description: Optional description of the hypothesis
-        probability: Optional probability value (0.0 to 1.0)
-        impact_lb: Optional impact lower bound value
-        impact_ub: Optional impact upper bound value
-        impact_distribution: Impact distribution model (defaults to "LOGNORMAL-CI90")
-        folder_id: Optional folder/domain ID or name where to create the hypothesis (can use folder name instead of UUID)
-        existing_applied_controls: Optional list of existing applied control IDs or names (for residual hypotheses, can use control names)
-        added_applied_controls: Optional list of added applied control IDs or names (for residual hypotheses, can use control names)
+        name: Hypothesis name
+        quantitative_risk_scenario_id: Scenario ID/name (required)
+        risk_stage: inherent | current | residual
+        description: Description
+        probability: Probability 0.0-1.0
+        impact_lb: Impact lower bound
+        impact_ub: Impact upper bound
+        impact_distribution: Distribution model (default: LOGNORMAL-CI90)
+        folder_id: Folder ID/name
+        existing_applied_controls: List of existing control IDs/names
+        added_applied_controls: List of added control IDs/names
     """
     try:
         from ..resolvers import resolve_id_or_name, resolve_applied_control_id
@@ -824,7 +842,7 @@ async def create_quantitative_risk_hypothesis(
 
         if res.status_code == 201:
             hypothesis = res.json()
-            message = f"✅ Quantitative risk hypothesis created successfully: {hypothesis.get('name')} (ID: {hypothesis.get('id')})"
+            message = f"Created Quantitative risk hypothesis: {hypothesis.get('name')} (ID: {hypothesis.get('id')})"
             if existing_applied_controls:
                 message += f"\n   Linked to {len(existing_applied_controls)} existing control(s)"
             if added_applied_controls:
@@ -839,17 +857,10 @@ async def create_quantitative_risk_hypothesis(
 
 
 async def refresh_quantitative_risk_study_simulations(study_id: str) -> str:
-    """Refresh all simulations for a quantitative risk study
-
-    This triggers a complete recalculation of:
-    - All hypothesis simulations (Monte Carlo simulations for each hypothesis with valid parameters)
-    - Portfolio simulation (combined Annual Loss Expectancy and Loss Exceedance Curves)
-    - Risk tolerance curves
-
-    Note: This operation can take some time as it processes multiple simulations.
+    """Refresh all Monte Carlo simulations (hypotheses, portfolio, risk tolerance). May take time
 
     Args:
-        study_id: ID or name of the quantitative risk study to refresh simulations for
+        study_id: Study ID/name
     """
     try:
         from ..resolvers import resolve_id_or_name
@@ -879,25 +890,12 @@ async def refresh_quantitative_risk_study_simulations(study_id: str) -> str:
             )
             failed_sims = sim_results.get("failed_simulations", [])
 
-            # Build response message
-            response = f"✅ Simulation refresh completed for study {study_id}\n\n"
-            response += f"**Summary:**\n"
-            response += f"- Hypothesis simulations: {successful_count} successful"
-
+            response = f"Simulation refresh completed for study {study_id}\n"
+            response += f"Hypothesis simulations: {successful_count} successful"
             if failed_sims:
                 response += f", {len(failed_sims)} failed"
-
-            response += f"\n- Portfolio simulation: {'✓' if sim_results.get('portfolio_generated') else '✗'}\n"
-            response += f"- Risk tolerance curve: {'✓' if sim_results.get('risk_tolerance_generated') else '✗'}\n"
-
-            if failed_sims:
-                response += f"\n**Failed simulations:**\n"
-                for fail in failed_sims[:5]:  # Show first 5 failures
-                    scenario = fail.get("scenario", "Unknown")
-                    hypothesis = fail.get("hypothesis", "Unknown")
-                    reason = fail.get("reason", "Unknown error")
-                    response += f"- {scenario} / {hypothesis}: {reason}\n"
-
+            response += f"\nPortfolio: {'yes' if sim_results.get('portfolio_generated') else 'no'}"
+            response += f"\nRisk tolerance: {'yes' if sim_results.get('risk_tolerance_generated') else 'no'}"
             return response
         else:
             return f"Error refreshing simulations: {res.status_code} - {res.text}"

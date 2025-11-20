@@ -1090,8 +1090,8 @@ class TestLibrary:
         domain = Folder.objects.create(name="Domain", description="Domain description")
         perimeter = Perimeter.objects.create(name="Perimeter", folder=domain)
 
-        library = LoadedLibrary.objects.get()
         risk_matrix = RiskMatrix.objects.get()
+        library = risk_matrix.library
 
         assert library.reference_count == 0
 
@@ -1245,7 +1245,13 @@ class TestLibrary:
         except:
             None
 
-        assert LoadedLibrary.objects.count() == 0
+        assert (
+            LoadedLibrary.objects.filter(
+                objects_meta__requirement_mapping_sets__isnull=True,
+                objects_meta__requirement_mapping_set__isnull=True,
+            ).count()
+            == 0
+        )
 
     @pytest.mark.usefixtures("domain_perimeter_fixture")
     def test_library_cannot_be_deleted_if_it_is_a_dependency_of_other_libraries(self):
@@ -1275,13 +1281,25 @@ class TestLibrary:
         except:
             None
 
-        assert LoadedLibrary.objects.count() == 1
+        assert (
+            LoadedLibrary.objects.filter(
+                objects_meta__requirement_mapping_sets__isnull=True,
+                objects_meta__requirement_mapping_set__isnull=True,
+            ).count()
+            == 1
+        )
 
         try:  # wrapping in try/except to avoid raising exception due to StoredLibrary not existing
             dependency_library.delete()
         except:
             None
-        assert LoadedLibrary.objects.count() == 0
+
+        assert (
+            LoadedLibrary.objects.filter(
+                objects_meta__requirement_mapping_sets__isnull=True,
+                objects_meta__requirement_mapping_set__isnull=True,
+            ).count()
+        ) == 0
 
 
 @pytest.mark.django_db

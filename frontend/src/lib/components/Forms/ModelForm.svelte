@@ -23,6 +23,7 @@
 	import EntitiesForm from './ModelForm/EntityForm.svelte';
 	import EntityAssessmentForm from './ModelForm/EntityAssessmentForm.svelte';
 	import SolutionsForm from './ModelForm/SolutionForm.svelte';
+	import ContractsForm from './ModelForm/ContractForm.svelte';
 	import RepresentativesForm from './ModelForm/RepresentativeForm.svelte';
 	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
 	import UsersForm from './ModelForm/UserForm.svelte';
@@ -93,6 +94,7 @@
 		taintedMessage?: string | boolean;
 		model: ModelInfo;
 		context?: string;
+		origin?: string | null;
 		caching?: boolean;
 		closeModal?: boolean;
 		parent?: any;
@@ -113,6 +115,7 @@
 		taintedMessage = m.taintedFormMessage(),
 		model,
 		context = 'default',
+		origin = null,
 		caching = false,
 		closeModal = false,
 		parent = {},
@@ -374,6 +377,7 @@
 				{cacheLocks}
 				{formDataCache}
 				{schema}
+				{origin}
 				{initialData}
 				{context}
 				{...rest}
@@ -440,7 +444,7 @@
 		{:else if URLModel === 'requirement-assessments'}
 			<RequirementAssessmentsForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
 		{:else if URLModel === 'entities'}
-			<EntitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<EntitiesForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {...rest} />
 		{:else if URLModel === 'entity-assessments'}
 			<EntityAssessmentForm
 				{form}
@@ -453,6 +457,8 @@
 			/>
 		{:else if URLModel === 'solutions'}
 			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+		{:else if URLModel === 'contracts'}
+			<ContractsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'representatives'}
 			<RepresentativesForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
 		{:else if URLModel === 'frameworks'}
