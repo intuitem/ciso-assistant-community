@@ -30,14 +30,14 @@ jobs:
     env:
       LOG_LEVEL: DEBUG
       LOG_OUTFILE: ciso-assistant.log
-      DJANGO_DEBUG: 'True'
+      DJANGO_DEBUG: "True"
       DJANGO_SUPERUSER_EMAIL: admin@tests.com
       DJANGO_SUPERUSER_PASSWORD: 1234
       POSTGRES_NAME: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
       PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
@@ -97,6 +97,8 @@ jobs:
           poetry run python manage.py createsuperuser --noinput
           nohup poetry run python manage.py runserver &
       - name: Build frontend
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
         working-directory: ${{ env.frontend-directory }}
         run: pnpm run build
       - name: Run tests
@@ -168,14 +170,14 @@ jobs:
     env:
       LOG_LEVEL: DEBUG
       LOG_OUTFILE: ciso-assistant.log
-      DJANGO_DEBUG: 'True'
+      DJANGO_DEBUG: "True"
       DJANGO_SUPERUSER_EMAIL: admin@tests.com
       DJANGO_SUPERUSER_PASSWORD: 1234
       POSTGRES_NAME: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
       DJANGO_SETTINGS_MODULE: enterprise_core.settings
       PUBLIC_BACKEND_API_URL: http://localhost:8000/api
@@ -226,6 +228,8 @@ jobs:
         run: poetry install
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
         run: make
       - name: Install Playwright Browsers
         working-directory: ${{ env.enterprise-frontend-build-directory }}
