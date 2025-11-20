@@ -250,7 +250,9 @@
 					</ul>
 				</div>
 				<br />
-				<ValidationFlowsSection validationFlows={risk_assessment.validation_flows} />
+				{#if page.data?.featureflags?.validation_flows}
+					<ValidationFlowsSection validationFlows={risk_assessment.validation_flows} />
+				{/if}
 			</div>
 			<div class="container w-2/3">
 				<div class="text-sm">
@@ -376,7 +378,7 @@
 					<i class="fa-solid fa-calculator mr-2"></i>
 					{m.convertToQuantitative()}
 				</Anchor>
-				{#if !risk_assessment?.is_locked}
+				{#if !risk_assessment?.is_locked && page.data?.featureflags?.validation_flows}
 					<button
 						class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500"
 						onclick={() => modalRequestValidation()}

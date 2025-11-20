@@ -525,7 +525,8 @@ export const FeatureFlagsSchema = z.object({
 	bia: z.boolean().optional(),
 	project_management: z.boolean().optional(),
 	contracts: z.boolean().optional(),
-	reports: z.boolean().optional()
+	reports: z.boolean().optional(),
+	validation_flows: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({

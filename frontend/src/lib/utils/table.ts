@@ -1253,8 +1253,26 @@ export const listViewFields = {
 		}
 	},
 	'validation-flows': {
-		head: ['ref_id', 'status', 'createdAt', 'requester', 'approver', 'linkedModels', 'labels', 'domain'],
-		body: ['ref_id', 'status', 'created_at', 'requester', 'approver', 'linked_models', 'filtering_labels', 'folder'],
+		head: [
+			'ref_id',
+			'status',
+			'createdAt',
+			'requester',
+			'approver',
+			'linkedModels',
+			'labels',
+			'domain'
+		],
+		body: [
+			'ref_id',
+			'status',
+			'created_at',
+			'requester',
+			'approver',
+			'linked_models',
+			'filtering_labels',
+			'folder'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: {
@@ -1275,7 +1293,19 @@ export const listViewFields = {
 		}
 	},
 	'applied-controls': {
-		head: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'domain', 'owner', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'priority',
+			'status',
+			'category',
+			'eta',
+			'domain',
+			'owner',
+			'controlImpact',
+			'effort',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
@@ -1285,6 +1315,8 @@ export const listViewFields = {
 			'eta',
 			'folder',
 			'owner',
+			'control_impact',
+			'effort',
 			'filtering_labels'
 		],
 		filters: {
