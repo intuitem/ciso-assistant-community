@@ -62,7 +62,12 @@
 </script>
 
 {#if validationFlows && validationFlows.length > 0}
-	<Dropdown header={m.validationFlows()} icon="fa-solid fa-check-double" style="hover:text-primary-700" open={false}>
+	<Dropdown
+		header={m.validationFlows()}
+		icon="fa-solid fa-check-double"
+		style="hover:text-primary-700"
+		open={false}
+	>
 		<div class="space-y-3">
 			{#each validationFlows as validation_flow}
 				<div class="p-3 bg-gray-50 rounded-lg border border-gray-200">

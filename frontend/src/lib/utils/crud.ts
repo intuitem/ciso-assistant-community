@@ -466,7 +466,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'policies', urlModel: 'policies' }
 		],
 		selectFields: [{ field: 'status' }],
-		filters: [{ field: 'folder' }, { field: 'status' }, { field: 'requester' }, { field: 'approver' }, { field: 'linked_models' }, { field: 'filtering_labels' }]
+		filters: [
+			{ field: 'folder' },
+			{ field: 'status' },
+			{ field: 'requester' },
+			{ field: 'approver' },
+			{ field: 'linked_models' },
+			{ field: 'filtering_labels' }
+		]
 	},
 	'reference-controls': {
 		name: 'referencecontrol',

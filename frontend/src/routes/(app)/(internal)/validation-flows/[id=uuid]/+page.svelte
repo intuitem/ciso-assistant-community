@@ -31,18 +31,17 @@
 	const isApprover = String(user.id) === String(validation_flow.approver?.id);
 	const isRequester = String(user.id) === String(validation_flow.requester?.id);
 
-	// Debug logging
-	console.log('Debug - User ID:', user.id, 'Approver ID:', validation_flow.approver?.id, 'isApprover:', isApprover);
-	console.log('Debug - Requester ID:', validation_flow.requester?.id, 'isRequester:', isRequester);
-	console.log('Debug - Status:', validation_flow.status);
-
 	// Modal state
 	let showObservationModal = $state(false);
-	let currentAction = $state<'approve' | 'reject' | 'revoke' | 'drop' | 'request_changes' | 'resubmit' | null>(null);
+	let currentAction = $state<
+		'approve' | 'reject' | 'revoke' | 'drop' | 'request_changes' | 'resubmit' | null
+	>(null);
 	let notes = $state('');
 	let isSubmitting = $state(false);
 
-	function openObservationModal(action: 'approve' | 'reject' | 'revoke' | 'drop' | 'request_changes' | 'resubmit') {
+	function openObservationModal(
+		action: 'approve' | 'reject' | 'revoke' | 'drop' | 'request_changes' | 'resubmit'
+	) {
 		console.log('Opening modal for action:', action);
 		currentAction = action;
 		notes = ''; // Reset notes for new action
@@ -223,13 +222,17 @@
 					</div>
 				{:else if validation_flow.status === 'submitted'}
 					<!-- Not the approver for submitted status -->
-					<div class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg text-sm">
+					<div
+						class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg text-sm"
+					>
 						<i class="fa-solid fa-exclamation-triangle mr-2"></i>
 						{m.onlyApproverCanModify()}
 					</div>
 				{:else if validation_flow.status === 'change_requested'}
 					<!-- Not the requester for change_requested status -->
-					<div class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg text-sm">
+					<div
+						class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg text-sm"
+					>
 						<i class="fa-solid fa-exclamation-triangle mr-2"></i>
 						{m.onlyRequesterCanModify()}
 					</div>
@@ -339,44 +342,46 @@
 	</div>
 </div>
 
-	<!-- Events History Section -->
-	{#if validation_flow.events && validation_flow.events.length > 0}
-		<div class="card px-6 py-4 bg-white shadow-lg">
-			<h2 class="text-xl font-semibold mb-4">{m.eventsHistory()}</h2>
-			<div class="space-y-4">
-				{#each validation_flow.events as event}
-					<div class="border-l-4 border-primary-500 pl-4 py-2">
-						<div class="flex justify-between items-start mb-2">
-							<div>
-								<span class="badge {statusColors[event.event_type] || 'bg-gray-100 text-gray-800'} px-2 py-1 rounded text-xs font-medium mr-2">
-									{safeTranslate(event.event_type)}
-								</span>
-								<span class="text-sm font-medium text-gray-700">
-									{#if event.event_actor}
-										{#if event.event_actor.first_name || event.event_actor.last_name}
-											{event.event_actor.first_name}
-											{event.event_actor.last_name}
-										{:else}
-											{event.event_actor.email}
-										{/if}
+<!-- Events History Section -->
+{#if validation_flow.events && validation_flow.events.length > 0}
+	<div class="card px-6 py-4 bg-white shadow-lg">
+		<h2 class="text-xl font-semibold mb-4">{m.eventsHistory()}</h2>
+		<div class="space-y-4">
+			{#each validation_flow.events as event}
+				<div class="border-l-4 border-primary-500 pl-4 py-2">
+					<div class="flex justify-between items-start mb-2">
+						<div>
+							<span
+								class="badge {statusColors[event.event_type] ||
+									'bg-gray-100 text-gray-800'} px-2 py-1 rounded text-xs font-medium mr-2"
+							>
+								{safeTranslate(event.event_type)}
+							</span>
+							<span class="text-sm font-medium text-gray-700">
+								{#if event.event_actor}
+									{#if event.event_actor.first_name || event.event_actor.last_name}
+										{event.event_actor.first_name}
+										{event.event_actor.last_name}
+									{:else}
+										{event.event_actor.email}
 									{/if}
-								</span>
-							</div>
-							<div class="text-xs text-gray-500">
-								{formatDateOrDateTime(event.created_at, getLocale())}
-							</div>
+								{/if}
+							</span>
 						</div>
-						{#if event.event_notes}
-							<div class="text-sm text-gray-600">
-								<MarkdownRenderer content={event.event_notes} />
-							</div>
-						{/if}
+						<div class="text-xs text-gray-500">
+							{formatDateOrDateTime(event.created_at, getLocale())}
+						</div>
 					</div>
-				{/each}
-			</div>
+					{#if event.event_notes}
+						<div class="text-sm text-gray-600">
+							<MarkdownRenderer content={event.event_notes} />
+						</div>
+					{/if}
+				</div>
+			{/each}
 		</div>
-	{/if}
-
+	</div>
+{/if}
 
 <!-- Observation Modal -->
 {#if showObservationModal}
