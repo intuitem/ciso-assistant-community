@@ -334,6 +334,16 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
     ebios_rm_study = FieldsRelatedField(["id", "name"])
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = RiskAssessment
@@ -1679,6 +1689,16 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     progress = serializers.ReadOnlyField()
     assets = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = ComplianceAssessment
@@ -2148,6 +2168,16 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
     owner = FieldsRelatedField(many=True)
     findings_count = serializers.IntegerField(source="findings.count")
     evidences = FieldsRelatedField(many=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = FindingsAssessment

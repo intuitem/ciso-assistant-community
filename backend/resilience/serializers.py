@@ -18,6 +18,16 @@ class BusinessImpactAnalysisReadSerializer(AssessmentReadSerializer):
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
     risk_matrix = FieldsRelatedField()
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
 
 class BusinessImpactAnalysisWriteSerializer(BaseModelSerializer):

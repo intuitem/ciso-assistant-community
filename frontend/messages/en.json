@@ -97,7 +97,7 @@
 	"validationFlow": "Validation flow",
 	"validationFlowsDescription": "Validations management",
 	"addValidationFlow": "Request a validation",
-	"validationApproverHelpText": "Validator requested for this approval flow",
+	"validationApproverHelpText": "Only users with approver roles appear here",
 	"validationApproved": "Validation approved successfully",
 	"validationRejected": "Validation rejected successfully",
 	"validationRevoked": "Validation revoked successfully",

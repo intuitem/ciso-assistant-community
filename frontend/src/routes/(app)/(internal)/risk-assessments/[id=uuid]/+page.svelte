@@ -25,6 +25,7 @@
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import z from 'zod';
+	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 
 	let { data, form } = $props();
 
@@ -248,6 +249,8 @@
 						</li>
 					</ul>
 				</div>
+				<br />
+				<ValidationFlowsSection validationFlows={risk_assessment.validation_flows} />
 			</div>
 			<div class="container w-2/3">
 				<div class="text-sm">
