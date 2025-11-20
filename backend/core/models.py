@@ -4,9 +4,10 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List
+from typing import Self, Union, List, Optional
 import statistics
 
+from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from icecream import ic
 from auditlog.registry import auditlog
@@ -51,6 +52,7 @@ from .validators import (
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
+from . import dora
 from collections import defaultdict, deque
 
 logger = get_logger(__name__)
@@ -242,6 +244,10 @@ class StoredLibrary(LibraryMixin):
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
     content = models.JSONField()
+    autoload = models.BooleanField(
+        default=False,
+        help_text="If set to true, the library will be automatically loaded on migrate.",
+    )
 
     REQUIRED_FIELDS = {"urn", "name", "version", "objects"}
     FIELDS_VERIFIERS = {}
@@ -339,6 +345,12 @@ class StoredLibrary(LibraryMixin):
             builtin=builtin,
             hash_checksum=hash_checksum,
             content=library_objects,
+            autoload=bool(
+                library_objects.get(
+                    "requirement_mapping_set",
+                    library_objects.get("requirement_mapping_sets"),
+                )
+            ),  # autoload is true if the library contains requirement mapping sets
         )
 
     @classmethod
@@ -922,7 +934,13 @@ class LoadedLibrary(LibraryMixin):
             )
             .distinct()
             .count()
-            + LoadedLibrary.objects.filter(dependencies=self).distinct().count()
+            + LoadedLibrary.objects.filter(
+                objects_meta__requirement_mapping_sets__isnull=True,
+                objects_meta__requirement_mapping_set__isnull=True,
+                dependencies=self,
+            )
+            .distinct()
+            .count()
         )
 
     @property
@@ -961,7 +979,7 @@ class LoadedLibrary(LibraryMixin):
             )
         super(LoadedLibrary, self).delete(*args, **kwargs)
         StoredLibrary.objects.filter(urn=self.urn, locale=self.locale).update(
-            is_loaded=False
+            is_loaded=False, autoload=False
         )
 
 
@@ -2139,10 +2157,42 @@ class Asset(
         related_name="assets",
     )
     asset_class = models.ForeignKey(
-        "AssetClass", on_delete=models.SET_NULL, blank=True, null=True
+        "AssetClass",
+        related_name="assets",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
     )
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+
+    is_business_function = models.BooleanField("is_business_function", default=False)
+    dora_licenced_activity = models.CharField(
+        max_length=50,
+        choices=dora.DORA_LICENSED_ACTIVITY_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name=_("DORA Licensed Activity"),
+    )
+    dora_criticality_assessment = models.CharField(
+        max_length=50,
+        choices=dora.DORA_FUNCTION_CRITICALITY_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name=_("DORA Criticality Assessment"),
+    )
+    dora_criticality_justification = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("DORA Criticality Justification"),
+    )
+    dora_discontinuing_impact = models.CharField(
+        max_length=50,
+        choices=dora.DORA_DISCONTINUING_IMPACT_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name=_("DORA Discontinuing Impact"),
+    )
 
     fields_to_check = ["name"]
 
@@ -3758,13 +3808,82 @@ class AppliedControl(
         verbose_name_plural = _("Applied controls")
 
     def save(self, *args, **kwargs):
+        # Track what changed
+        changed_fields = []
+        old_instance = AppliedControl.objects.filter(pk=self.pk).first()
+        if old_instance:
+            changed_fields = self._get_changed_fields(old_instance)
+
         if self.reference_control and self.category is None:
             self.category = self.reference_control.category
         if self.reference_control and self.csf_function is None:
             self.csf_function = self.reference_control.csf_function
         if self.status == "active":
             self.progress_field = 100
+
+        # Save first
+        is_new = self.pk is None
+        skip_sync = kwargs.pop("skip_sync", False)
         super(AppliedControl, self).save(*args, **kwargs)
+
+        # Then trigger sync (async, non-blocking)
+        if not skip_sync:
+            logger.info(
+                "Triggering sync for AppliedControl", applied_control_id=self.pk
+            )
+            self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
+
+    def _get_changed_fields(self, old_instance):
+        """Detect which fields changed"""
+        changed = []
+        # Check syncable fields only
+        syncable_fields = [
+            "name",
+            "description",
+            "status",
+            "priority",
+            "eta",
+            "start_date",
+            "effort",
+            "observation",
+        ]
+
+        for field in syncable_fields:
+            old_val = getattr(old_instance, field)
+            new_val = getattr(self, field)
+            if old_val != new_val:
+                changed.append(field)
+
+        return changed
+
+    def _trigger_sync(self, is_new: bool, changed_fields: List[str]):
+        """Queue sync tasks for all active integrations"""
+        from integrations.tasks import sync_object_to_integrations
+        from integrations.models import IntegrationConfiguration
+
+        # Find all active ITSM integrations for this folder
+        configurations = IntegrationConfiguration.objects.filter(
+            folder=Folder.get_root_folder(),
+            provider__provider_type="itsm",
+            is_active=True,
+        )
+
+        if configurations.exists() and (is_new or changed_fields):
+            # Dispatch async task
+            logger.debug(
+                "Dispatching remote object sync task", applied_control_id=self.pk
+            )
+            transaction.on_commit(
+                lambda: sync_object_to_integrations.schedule(
+                    args=(
+                        ContentType.objects.get_for_model(self),
+                        self.pk,
+                        list(configurations.values_list("id", flat=True)),
+                        changed_fields,
+                    ),
+                    delay=1,
+                )
+            )
 
     @property
     def risk_scenarios(self):
@@ -3830,41 +3949,55 @@ class AppliedControl(
 
         return annual_cost
 
+    @staticmethod
+    def _stringify_cost(cost: float, currency: str) -> str:
+        match currency:
+            case "$":
+                return f"${cost}"
+            case "€":
+                return f"{cost}€"
+            case "£":
+                return f"£{cost}"
+            case "A$":
+                return f"A${cost}"
+            case "NZ$":
+                return f"NZ${cost}"
+            case "C$":
+                return f"C${cost}"
+            case "¥":
+                return f"¥{cost}"
+
+        logger.error("Unknown currency detected", currency=currency)
+        return f"{cost} *"
+
     @property
-    def display_cost(self):
+    def display_cost(self) -> str:
         """Returns a human-readable cost display string"""
         if not self.cost:
             return ""
 
         currency = self.cost.get("currency", "")
-        parts = []
+        string_parts: list[str] = []
 
-        build_cost = self.cost.get("build", {})
-        run_cost = self.cost.get("run", {})
+        for cost_type in ["build", "run"]:
+            if (cost_data := self.cost.get(cost_type)) is None:
+                continue
 
-        if build_cost:
-            build_fixed = build_cost.get("fixed_cost", 0)
-            build_people = build_cost.get("people_days", 0)
-            if build_fixed > 0 or build_people > 0:
-                build_parts = []
-                if build_fixed > 0:
-                    build_parts.append(f"{build_fixed}{currency}")
-                if build_people > 0:
-                    build_parts.append(f"{build_people} people days")
-                parts.append(f"Build: {', '.join(build_parts)}")
+            if (cost := cost_data.get("fixed_cost", 0)) == 0:
+                continue
 
-        if run_cost:
-            run_fixed = run_cost.get("fixed_cost", 0)
-            run_people = run_cost.get("people_days", 0)
-            if run_fixed > 0 or run_people > 0:
-                run_parts = []
-                if run_fixed > 0:
-                    run_parts.append(f"{run_fixed}{currency}")
-                if run_people > 0:
-                    run_parts.append(f"{run_people} people days")
-                parts.append(f"Run: {', '.join(run_parts)}")
+            people_days = cost_data.get("people_days", 0)
+            cost_parts: list[str] = []
 
-        return " | ".join(parts) if parts else ""
+            stringified_cost = self._stringify_cost(cost, currency)
+            cost_parts.append(stringified_cost)
+            if people_days > 0:
+                cost_parts.append(f"{people_days} people days")
+
+            cost_string = ", ".join(cost_parts)
+            string_parts.append(f"{cost_type.capitalize()}: {cost_string}")
+
+        return " | ".join(string_parts)
 
     def get_ranking_score(self):
         value = 0
@@ -4660,6 +4793,15 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("RiskAssessment"),
         related_name="risk_scenarios",
     )
+    operational_scenario = models.ForeignKey(
+        "ebios_rm.OperationalScenario",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Operational scenario"),
+        related_name="risk_scenarios",
+        help_text=_("EBIOS RM operational scenario that generated this risk scenario"),
+    )
     assets = models.ManyToManyField(
         Asset,
         verbose_name=_("Assets"),
@@ -4780,7 +4922,7 @@ class RiskScenario(NameDescriptionMixin):
         help_text=_("The strength of the knowledge supporting the assessment"),
     )
     justification = models.CharField(
-        max_length=500, blank=True, null=True, verbose_name=_("Justification")
+        max_length=2000, blank=True, null=True, verbose_name=_("Justification")
     )
     security_exceptions = models.ManyToManyField(
         SecurityException,
@@ -4799,7 +4941,7 @@ class RiskScenario(NameDescriptionMixin):
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
 
-    def get_folder_full_path(self, include_root: bool = False) -> list[Folder]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
         return self.risk_assessment.get_folder_full_path(include_root=include_root)
 
     @property
@@ -4930,6 +5072,15 @@ class RiskScenario(NameDescriptionMixin):
     def __str__(self):
         return str(self.parent_perimeter()) + _(": ") + str(self.name)
 
+    def delete(self, *args, **kwargs):
+        risk_assessment_id = self.risk_assessment.id
+        result = super(RiskScenario, self).delete(*args, **kwargs)
+        # Update parent risk assessment's updated_at timestamp (bypass save to avoid recursion)
+        RiskAssessment.objects.filter(id=risk_assessment_id).update(
+            updated_at=timezone.now()
+        )
+        return result
+
     def save(self, *args, **kwargs):
         if self.inherent_proba >= 0 and self.inherent_impact >= 0:
             self.inherent_level = risk_scoring(
@@ -4956,6 +5107,10 @@ class RiskScenario(NameDescriptionMixin):
         else:
             self.residual_level = -1
         super(RiskScenario, self).save(*args, **kwargs)
+        # Update parent risk assessment's updated_at timestamp (bypass save to avoid recursion)
+        RiskAssessment.objects.filter(id=self.risk_assessment.id).update(
+            updated_at=timezone.now()
+        )
         self.risk_assessment.upsert_daily_metrics()
 
 
@@ -6228,6 +6383,13 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         CLOSED = "closed", _("Closed")
         DEPRECATED = "deprecated", _("Deprecated")
 
+    PRIORITY = [
+        (1, _("P1")),
+        (2, _("P2")),
+        (3, _("P3")),
+        (4, _("P4")),
+    ]
+
     findings_assessment = models.ForeignKey(
         FindingsAssessment, on_delete=models.CASCADE, related_name="findings"
     )
@@ -6258,6 +6420,12 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
 
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    priority = models.PositiveSmallIntegerField(
+        choices=PRIORITY,
+        null=True,
+        blank=True,
+        verbose_name=_("Priority"),
     )
     severity = models.SmallIntegerField(
         verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
@@ -6626,6 +6794,10 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     def risk_assessments(self):
         return self.task_template.risk_assessments.all()
 
+    @property
+    def findings_assessment(self):
+        return self.task_template.findings_assessment.all()
+
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"
@@ -6686,10 +6858,6 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 auditlog.register(
-    Folder,
-    exclude_fields=common_exclude,
-)
-auditlog.register(
     Perimeter,
     exclude_fields=common_exclude,
 )
@@ -6716,6 +6884,34 @@ auditlog.register(
 )
 auditlog.register(
     TimelineEntry,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Terminology,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    EvidenceRevision,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OrganisationIssue,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OrganisationObjective,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Campaign,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TaskNode,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TaskTemplate,
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete

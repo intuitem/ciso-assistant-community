@@ -428,11 +428,14 @@ class ElementaryActionWriteSerializer(BaseModelSerializer):
         exclude = ["created_at", "updated_at"]
 
 
+from core.serializers import ThreatReadSerializer
+
+
 class ElementaryActionReadSerializer(BaseModelSerializer):
     icon = serializers.CharField(source="get_icon_display")
     icon_fa_class = serializers.CharField()
     icon_fa_hex = serializers.CharField()
-    threat = FieldsRelatedField()
+    threat = FieldsRelatedField(["id", "name"], serializer=ThreatReadSerializer)
     folder = FieldsRelatedField()
     attack_stage = serializers.CharField(source="get_attack_stage_display")
 

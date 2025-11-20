@@ -211,8 +211,9 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
 79. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
 80. Post-Quantum Cryptography (PQC) Migration Roadmap (May 2025) 🔐
-81. Cloud Sovereignty Framework - 1.2 - Sept 2025 🇪🇺
+81. Cloud Sovereignty Framework - 1.2.1 - Oct 2025 🇪🇺
 82. ISO 22301:2019 outline - Business continuity management systems 🌐
+83. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
 
 ### Community contributions
 
