@@ -13,6 +13,8 @@
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { page } from '$app/state';
 	import WebhookSecretGenerator from '$lib/components/Forms/WebhookSecretGenerator.svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { SHOW_TARGET_DOMAINS } from '../constants';
 
 	interface Props {
 		data: PageData;
@@ -61,6 +63,17 @@
 				>
 			</div>
 		{/if}
+		{#if SHOW_TARGET_DOMAINS}
+			<AutocompleteSelect
+				{form}
+				field="target_folders"
+				label={m.targetDomains()}
+				helpText={m.webhookEndpointTargetDomainsHelpText()}
+				optionsEndpoint="folders?content_type=DO&content_type=GL"
+				multiple
+			/>
+		{/if}
+
 		<EventTypesSelect {form} field="event_types" label={m.events()} options={eventTypeOptions} />
 		<div class="flex flex-row justify-between space-x-4">
 			<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" onclick={cancel}

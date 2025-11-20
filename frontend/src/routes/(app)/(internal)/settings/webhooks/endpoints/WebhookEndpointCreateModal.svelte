@@ -12,6 +12,8 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
 	import EventTypesSelect from './EventTypesSelect.svelte';
+	import { SHOW_TARGET_DOMAINS } from './constants';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 
 	// Base Classes
 	const cBase = 'card bg-surface-50 p-4 shadow-xl space-y-4';
@@ -89,6 +91,16 @@
 				<MarkdownField {form} field="description" label={m.description()} data-focusindex="1" />
 				<TextField {form} field="url" label={m.url()} data-focusindex="2" autocomplete="off" />
 				<WebhookSecretGenerator {form} field="secret" />
+				{#if SHOW_TARGET_DOMAINS}
+					<AutocompleteSelect
+						{form}
+						field="target_folders"
+						label={m.targetDomains()}
+						helpText={m.webhookEndpointTargetDomainsHelpText()}
+						optionsEndpoint="folders?content_type=DO&content_type=GL"
+						multiple
+					/>
+				{/if}
 				<EventTypesSelect
 					{form}
 					field="event_types"
