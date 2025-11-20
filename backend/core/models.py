@@ -6871,24 +6871,6 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         blank=True,
     )
 
-    # Transition notes fields
-    accept_notes = models.TextField(
-        null=True, blank=True, verbose_name=_("Accept notes")
-    )
-    rejection_notes = models.TextField(
-        null=True, blank=True, verbose_name=_("Rejection notes")
-    )
-    revocation_notes = models.TextField(
-        null=True, blank=True, verbose_name=_("Revocation notes")
-    )
-    changes_request_notes = models.TextField(
-        null=True, blank=True, verbose_name=_("Changes request notes")
-    )
-    drop_notes = models.TextField(null=True, blank=True, verbose_name=_("Drop notes"))
-    resubmission_notes = models.TextField(
-        null=True, blank=True, verbose_name=_("Resubmission notes")
-    )
-
     ref_id = models.CharField(
         max_length=100,
         null=True,
@@ -6945,6 +6927,43 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
 
     def __str__(self) -> str:
         return self.ref_id
+
+
+class ValidationFlowEvent(AbstractBaseModel, FolderMixin):
+    validation_flow = models.ForeignKey(
+        ValidationFlow,
+        on_delete=models.CASCADE,
+        related_name="events",
+        verbose_name=_("Validation flow"),
+    )
+    event_type = models.CharField(
+        max_length=50,
+        verbose_name=_("Event type"),
+    )
+    event_actor = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Event actor"),
+    )
+    event_notes = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_("Event notes"),
+    )
+    is_tainted = models.BooleanField(
+        default=False,
+        verbose_name=_("Is tainted"),
+    )
+    # created_at is already covered on the abstract model
+
+    class Meta:
+        verbose_name = _("Validation flow event")
+        verbose_name_plural = _("Validation flow events")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.validation_flow.ref_id} - {self.event_type} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 common_exclude = ["created_at", "updated_at"]

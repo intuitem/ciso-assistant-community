@@ -2588,21 +2588,48 @@ class TerminologyWriteSerializer(BaseModelSerializer):
 
 class ValidationFlowWriteSerializer(BaseModelSerializer):
     ref_id = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    event_notes = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True, write_only=True
+    )
 
     def create(self, validated_data: dict) -> ValidationFlow:
         """
-        Override create to automatically set the requester to the current user.
+        Override create to automatically set the requester to the current user
+        and create initial submission event.
         """
+        from core.models import ValidationFlowEvent
+
         request_user = self.context["request"].user
         validated_data["requester"] = request_user
-        return super().create(validated_data)
+
+        # Extract event_notes (if provided) or use request_notes for initial event
+        event_notes = validated_data.pop("event_notes", None)
+        if not event_notes:
+            event_notes = validated_data.get("request_notes", None)
+
+        # Create the validation flow
+        instance = super().create(validated_data)
+
+        # Create initial submission event
+        ValidationFlowEvent.objects.create(
+            validation_flow=instance,
+            event_type=instance.status,
+            event_actor=request_user,
+            event_notes=event_notes,
+            folder=instance.folder,
+        )
+
+        return instance
 
     def update(self, instance: ValidationFlow, validated_data: dict) -> ValidationFlow:
         """
         Override update to ensure proper permissions for status transitions:
         - Approver can modify status when status is 'submitted' or 'accepted'
         - Requester can modify status when status is 'change_requested'
+        - Creates ValidationFlowEvent for each status transition
         """
+        from core.models import ValidationFlowEvent
+
         request_user = self.context["request"].user
 
         # Check if status is being modified
@@ -2635,12 +2662,37 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                     }
                 )
 
+            # Extract event notes from validated_data (passed from actions)
+            event_notes = validated_data.pop("event_notes", None)
+
+            # Update the instance
+            updated_instance = super().update(instance, validated_data)
+
+            # Create ValidationFlowEvent after successful status transition
+            ValidationFlowEvent.objects.create(
+                validation_flow=updated_instance,
+                event_type=updated_instance.status,
+                event_actor=request_user,
+                event_notes=event_notes,
+                folder=updated_instance.folder,
+            )
+
+            return updated_instance
+
         return super().update(instance, validated_data)
 
     class Meta:
         model = ValidationFlow
         fields = "__all__"
         read_only_fields = ["requester"]
+
+
+class ValidationFlowEventSerializer(BaseModelSerializer):
+    event_actor = FieldsRelatedField(["id", "email", "first_name", "last_name"])
+
+    class Meta:
+        model = ValidationFlowEvent
+        fields = ["id", "event_type", "event_actor", "event_notes", "created_at"]
 
 
 class ValidationFlowReadSerializer(BaseModelSerializer):
@@ -2661,6 +2713,7 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
     requester = FieldsRelatedField(["id", "email", "first_name", "last_name"])
     approver = FieldsRelatedField(["id", "email", "first_name", "last_name"])
     linked_models = serializers.ListField(read_only=True)
+    events = ValidationFlowEventSerializer(many=True, read_only=True)
 
     class Meta:
         model = ValidationFlow

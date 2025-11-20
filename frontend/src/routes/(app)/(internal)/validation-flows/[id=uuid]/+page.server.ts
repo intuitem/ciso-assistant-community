@@ -18,11 +18,11 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 export const actions: Actions = {
 	approve: async ({ request, fetch, params, cookies }) => {
 		const formData = await request.formData();
-		const accept_notes = formData.get('notes') as string;
+		const event_notes = formData.get('notes') as string;
 
 		const updateData = {
 			status: 'accepted',
-			accept_notes
+			event_notes
 		};
 
 		const response = await fetch(`${BASE_API_URL}/validation-flows/${params.id}/`, {
@@ -44,14 +44,12 @@ export const actions: Actions = {
 
 	reject: async ({ request, fetch, params, cookies }) => {
 		const formData = await request.formData();
-		const rejection_notes = formData.get('notes') as string;
+		const event_notes = formData.get('notes') as string;
 
 		const updateData = {
 			status: 'rejected',
-			rejection_notes
+			event_notes
 		};
-
-		console.log('Server action - rejecting validation:', params.id, updateData);
 
 		const response = await fetch(`${BASE_API_URL}/validation-flows/${params.id}/`, {
 			method: 'PATCH',
@@ -61,25 +59,22 @@ export const actions: Actions = {
 			body: JSON.stringify(updateData)
 		});
 
-		console.log('Server action - response status:', response.status);
-
 		if (response.ok) {
 			setFlash({ type: 'success', message: m.validationRejected() }, cookies);
 			return { success: true };
 		} else {
 			const error = await response.json();
-			console.error('Server action - error:', error);
 			return fail(400, { error });
 		}
 	},
 
 	revoke: async ({ request, fetch, params, cookies }) => {
 		const formData = await request.formData();
-		const revocation_notes = formData.get('notes') as string;
+		const event_notes = formData.get('notes') as string;
 
 		const updateData = {
 			status: 'revoked',
-			revocation_notes
+			event_notes
 		};
 
 		const response = await fetch(`${BASE_API_URL}/validation-flows/${params.id}/`, {
@@ -101,11 +96,11 @@ export const actions: Actions = {
 
 	drop: async ({ request, fetch, params, cookies }) => {
 		const formData = await request.formData();
-		const drop_notes = formData.get('notes') as string;
+		const event_notes = formData.get('notes') as string;
 
 		const updateData = {
 			status: 'dropped',
-			drop_notes
+			event_notes
 		};
 
 		const response = await fetch(`${BASE_API_URL}/validation-flows/${params.id}/`, {
@@ -127,11 +122,11 @@ export const actions: Actions = {
 
 	request_changes: async ({ request, fetch, params, cookies }) => {
 		const formData = await request.formData();
-		const changes_request_notes = formData.get('notes') as string;
+		const event_notes = formData.get('notes') as string;
 
 		const updateData = {
 			status: 'change_requested',
-			changes_request_notes
+			event_notes
 		};
 
 		const response = await fetch(`${BASE_API_URL}/validation-flows/${params.id}/`, {
@@ -153,11 +148,11 @@ export const actions: Actions = {
 
 	resubmit: async ({ request, fetch, params, cookies }) => {
 		const formData = await request.formData();
-		const resubmission_notes = formData.get('notes') as string;
+		const event_notes = formData.get('notes') as string;
 
 		const updateData = {
 			status: 'submitted',
-			resubmission_notes
+			event_notes
 		};
 
 		const response = await fetch(`${BASE_API_URL}/validation-flows/${params.id}/`, {

@@ -114,6 +114,7 @@
 	"drop": "Drop",
 	"resubmit": "Resubmit",
 	"onlyRequesterCanModify": "Only the requester can perform actions on this validation",
+	"eventsHistory": "Events history",
 	"linkedModels": "Associated objects",
 	"notes": "notes",
 	"complianceAssessments": "Audits",

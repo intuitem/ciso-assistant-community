@@ -109,6 +109,7 @@
 	"drop": "Abandonner",
 	"resubmit": "Resoumettre",
 	"onlyRequesterCanModify": "Seul le demandeur peut effectuer des actions sur cette validation",
+	"eventsHistory": "Historique des événements",
 	"linkedModels": "Objets associés",
 	"complianceAssessments": "Audits",
 	"complianceAssessment": "Audit",

@@ -313,64 +313,10 @@
 				</div>
 			</div>
 		{/if}
-
-		{#if validation_flow.accept_notes}
-			<div class="mt-4 space-y-2">
-				<div class="text-sm font-medium text-gray-700">{m.acceptNotes()}</div>
-				<div class="p-3 bg-gray-50 rounded-lg text-sm">
-					<MarkdownRenderer content={validation_flow.accept_notes} />
-				</div>
-			</div>
-		{/if}
-
-		{#if validation_flow.rejection_notes}
-			<div class="mt-4 space-y-2">
-				<div class="text-sm font-medium text-gray-700">{m.rejectionNotes()}</div>
-				<div class="p-3 bg-gray-50 rounded-lg text-sm">
-					<MarkdownRenderer content={validation_flow.rejection_notes} />
-				</div>
-			</div>
-		{/if}
-
-		{#if validation_flow.revocation_notes}
-			<div class="mt-4 space-y-2">
-				<div class="text-sm font-medium text-gray-700">{m.revocationNotes()}</div>
-				<div class="p-3 bg-gray-50 rounded-lg text-sm">
-					<MarkdownRenderer content={validation_flow.revocation_notes} />
-				</div>
-			</div>
-		{/if}
-
-		{#if validation_flow.changes_request_notes}
-			<div class="mt-4 space-y-2">
-				<div class="text-sm font-medium text-gray-700">{m.changesRequestNotes()}</div>
-				<div class="p-3 bg-gray-50 rounded-lg text-sm">
-					<MarkdownRenderer content={validation_flow.changes_request_notes} />
-				</div>
-			</div>
-		{/if}
-
-		{#if validation_flow.drop_notes}
-			<div class="mt-4 space-y-2">
-				<div class="text-sm font-medium text-gray-700">{m.dropNotes()}</div>
-				<div class="p-3 bg-gray-50 rounded-lg text-sm">
-					<MarkdownRenderer content={validation_flow.drop_notes} />
-				</div>
-			</div>
-		{/if}
-
-		{#if validation_flow.resubmission_notes}
-			<div class="mt-4 space-y-2">
-				<div class="text-sm font-medium text-gray-700">{m.resubmissionNotes()}</div>
-				<div class="p-3 bg-gray-50 rounded-lg text-sm">
-					<MarkdownRenderer content={validation_flow.resubmission_notes} />
-				</div>
-			</div>
-		{/if}
 	</div>
 
 	<!-- Associated Links Section -->
-	<div class="card px-6 py-4 bg-white shadow-lg">
+	<div class="card px-6 py-4 bg-white shadow-lg mb-4">
 		<h2 class="text-xl font-semibold mb-4">{m.associatedObjects()}</h2>
 		<div class="grid grid-cols-1 gap-4">
 			{#each Object.entries(validation_flow) as [key, value]}
@@ -392,6 +338,45 @@
 		</div>
 	</div>
 </div>
+
+	<!-- Events History Section -->
+	{#if validation_flow.events && validation_flow.events.length > 0}
+		<div class="card px-6 py-4 bg-white shadow-lg">
+			<h2 class="text-xl font-semibold mb-4">{m.eventsHistory()}</h2>
+			<div class="space-y-4">
+				{#each validation_flow.events as event}
+					<div class="border-l-4 border-primary-500 pl-4 py-2">
+						<div class="flex justify-between items-start mb-2">
+							<div>
+								<span class="badge {statusColors[event.event_type] || 'bg-gray-100 text-gray-800'} px-2 py-1 rounded text-xs font-medium mr-2">
+									{safeTranslate(event.event_type)}
+								</span>
+								<span class="text-sm font-medium text-gray-700">
+									{#if event.event_actor}
+										{#if event.event_actor.first_name || event.event_actor.last_name}
+											{event.event_actor.first_name}
+											{event.event_actor.last_name}
+										{:else}
+											{event.event_actor.email}
+										{/if}
+									{/if}
+								</span>
+							</div>
+							<div class="text-xs text-gray-500">
+								{formatDateOrDateTime(event.created_at, getLocale())}
+							</div>
+						</div>
+						{#if event.event_notes}
+							<div class="text-sm text-gray-600">
+								<MarkdownRenderer content={event.event_notes} />
+							</div>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
+
 
 <!-- Observation Modal -->
 {#if showObservationModal}
