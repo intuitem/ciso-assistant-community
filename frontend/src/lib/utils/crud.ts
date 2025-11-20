@@ -1433,7 +1433,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'owners', urlModel: 'users' },
 			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
-			{ field: 'folder', urlModel: 'folders' }
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'assets', urlModel: 'assets' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
 		reverseForeignKeyFields: [
