@@ -29,6 +29,18 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
     Represents a single consumer endpoint for receiving webhooks.
     """
 
+    class PayloadFormats(models.TextChoices):
+        THIN = "thin", "Thin"
+        FULL = "full", "Full"
+
+    format = models.CharField(
+        verbose_name="Payload Format",
+        max_length=10,
+        choices=PayloadFormats.choices,
+        default=PayloadFormats.THIN,
+        help_text="The format of the webhook payload sent to this endpoint.",
+    )
+
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name="webhook_endpoints",
