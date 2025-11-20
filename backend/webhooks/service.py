@@ -1,4 +1,7 @@
 from django.db import transaction
+from django.db.models import Q
+
+from iam.models import Folder
 from .models import WebhookEndpoint
 from .registry import webhook_registry
 from .tasks import send_webhook_request
@@ -23,9 +26,18 @@ def dispatch_webhook_event(instance, action):
     data_payload = config.get_payload(instance)
 
     # Find all active endpoints subscribed to this event
-    endpoints = WebhookEndpoint.objects.filter(
-        is_active=True, event_types__name=event_type
-    )
+    folder = Folder.get_folder(instance)
+    if not folder:
+        endpoints = WebhookEndpoint.objects.filter(
+            is_active=True,
+            event_types__name=event_type,
+        )
+    else:
+        endpoints = WebhookEndpoint.objects.filter(
+            Q(target_folders__isnull=True) | Q(target_folders=folder),
+            is_active=True,
+            event_types__name=event_type,
+        )
 
     # Enqueue tasks
     for endpoint in endpoints:
