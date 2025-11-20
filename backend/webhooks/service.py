@@ -41,7 +41,7 @@ def dispatch_webhook_event(instance, action, serializer=None):
     for endpoint in endpoints:
         _serializer = (
             serializer
-            if endpoint.format == WebhookEndpoint.PayloadFormats.FULL
+            if endpoint.payload_format == WebhookEndpoint.PayloadFormats.FULL
             else None
         )
         payloads[endpoint.id] = config.get_payload(instance, _serializer)

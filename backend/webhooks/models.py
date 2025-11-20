@@ -33,7 +33,7 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         THIN = "thin", "Thin"
         FULL = "full", "Full"
 
-    format = models.CharField(
+    payload_format = models.CharField(
         verbose_name="Payload Format",
         max_length=10,
         choices=PayloadFormats.choices,

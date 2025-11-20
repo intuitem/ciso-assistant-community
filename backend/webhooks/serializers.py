@@ -37,7 +37,7 @@ class WebhookEndpointSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
-            "format",
+            "payload_format",
             "url",
             "event_types",
             "is_active",
