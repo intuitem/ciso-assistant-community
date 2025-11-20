@@ -1871,14 +1871,16 @@ export const listViewFields = {
 			'attackPath',
 			'operatingModes',
 			'operatingModesDescription',
-			'likelihood'
+			'likelihood',
+			'strategicScenario'
 		],
 		body: [
 			'is_selected',
 			'attack_path',
 			'operating_modes',
 			'operating_modes_description',
-			'likelihood'
+			'likelihood',
+			'strategic_scenario'
 		],
 		filters: {
 			threats: THREAT_FILTER,

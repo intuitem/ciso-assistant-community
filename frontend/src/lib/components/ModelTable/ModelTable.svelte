@@ -587,6 +587,15 @@
 																	</li>
 																{/each}
 															</ul>
+														{:else if key === 'attack_path' && URLModel === 'operational-scenarios' && value && value.display_name}
+															{#if value.id}
+																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																	>{value.display_name}</Anchor
+																>
+															{:else}
+																{value.display_name}
+															{/if}
 														{:else if value && value.str}
 															{#if value.id}
 																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}

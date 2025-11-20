@@ -782,6 +782,17 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         )
         return result
 
+    def __str__(self):
+        base_name = self.name or f"Attack Path {str(self.id)[:8]}"
+        if self.strategic_scenario:
+            return f"{base_name} ({self.strategic_scenario.name})"
+        return base_name
+
+    @property
+    def display_name(self):
+        """Returns just the attack path name without strategic scenario for table display"""
+        return self.name or f"Attack Path {str(self.id)[:8]}"
+
     @property
     def ro_to_couple(self):
         return self.strategic_scenario.ro_to_couple

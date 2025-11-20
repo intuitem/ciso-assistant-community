@@ -1029,7 +1029,8 @@ export const operationalScenarioSchema = z.object({
 	likelihood: z.number().optional().default(-1),
 	is_selected: z.boolean().default(true),
 	justification: z.string().optional(),
-	folder: z.string()
+	folder: z.string(),
+	strategic_scenario: z.string().optional()
 });
 
 export const SecurityExceptionSchema = z.object({
