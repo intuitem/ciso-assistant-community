@@ -5,7 +5,12 @@ import json
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup, NavigableString, Tag
 
+
 URL = "https://www.cert.ssi.gouv.fr/uploads/ad_checklist.html"
+
+# Set this value to "True" in order to get the English version of the framework
+FRAMEWORK_IN_ENGLISH = False
+
 
 
 # ---------------- Markdown formatting helpers ---------------- #
@@ -533,6 +538,25 @@ def extract_checklist():
         page.wait_for_selector("div#root table tbody tr td:nth-child(2)")
         
         
+        if FRAMEWORK_IN_ENGLISH:
+            print("> ⌛ Switching page to English...")
+            # Find the button whose inner text contains "EN"
+            en_button = page.locator("nav button:has-text('EN')")
+
+            # If the button exists, click it
+            if en_button.count() > 0:
+                en_button.first.click()
+
+                # Wait for the language to switch (e.g. title changes)
+                page.wait_for_timeout(1000)  # small delay to allow refresh
+                
+                print("> ✅ Page switched to English !")
+            else:
+                print("> ⚠️ English switch button not found")
+        else:
+            print("> ✅ Using default language for page (French)")
+        
+        
         # > Specific code for span in order to give them colors in the Markdown 
         # Inject computed background-color as inline style on level spans
         page.evaluate(
@@ -656,7 +680,11 @@ def extract_checklist():
 
 if __name__ == "__main__":
     
+    print(f"⌛ Extracting Framework from website \"{URL}\"...")
+    
     data = extract_checklist()
+    
+    print(f"✅ Extraction finished!\n")
     
     root_elements = data.get("root_elements", [])
     checklist = data.get("checklist", [])
@@ -684,10 +712,10 @@ if __name__ == "__main__":
             f.write(entry["recommendation_markdown"])
             f.write("\n\n---\n\n")
 
-    print("✓ Markdown file saved: checklist.md")
+    print("✅ Markdown file saved: checklist.md")
 
     # --- Save JSON ---
     with open("checklist_markdown.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-    print("\n✓ JSON file saved: checklist_markdown.json")
+    print("✅ JSON file saved: checklist_markdown.json")
