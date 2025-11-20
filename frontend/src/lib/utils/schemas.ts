@@ -1381,5 +1381,5 @@ export const webhookEndpointSchema = z.object({
 	is_active: z.boolean().default(true),
 	secret: z.string().min(1).optional(),
 	target_folders: z.string().uuid().optional().array().optional(),
-	payload_format: z.enum(['thin', 'full']).default('thin')
+	payload_format: z.enum(['thin', 'full']).default('full')
 });

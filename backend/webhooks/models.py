@@ -37,7 +37,7 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         verbose_name="Payload Format",
         max_length=10,
         choices=PayloadFormats.choices,
-        default=PayloadFormats.THIN,
+        default=PayloadFormats.FULL,
         help_text="The format of the webhook payload sent to this endpoint.",
     )
 
