@@ -25,8 +25,10 @@ class WebhookRegistry:
             def get_event_type(self, instance, action):
                 return f"{self.model_name}.{action}"
 
-            def get_payload(self, instance):
-                return {"id": str(instance.id)}
+            def get_payload(self, instance, serializer=None):
+                if not serializer:
+                    return {"id": str(instance.id)}
+                return serializer.data
 
             def get_event_types(self):
                 return [f"{self.model_name}.{event}" for event in self.events]

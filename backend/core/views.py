@@ -365,11 +365,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        dispatch_webhook_event(instance, "created")
+        dispatch_webhook_event(instance, "created", serializer=serializer)
 
     def perform_update(self, serializer):
         instance = serializer.save()
-        dispatch_webhook_event(instance, "updated")
+        dispatch_webhook_event(instance, "updated", serializer=serializer)
 
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)

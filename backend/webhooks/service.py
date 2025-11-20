@@ -2,28 +2,26 @@ from django.db import transaction
 from django.db.models import Q
 
 from iam.models import Folder
+
 from .models import WebhookEndpoint
 from .registry import webhook_registry
 from .tasks import send_webhook_request
 
 
-def dispatch_webhook_event(instance, action):
+def dispatch_webhook_event(instance, action, serializer=None):
     """
     Main service function called by views.
 
     - 'instance' is the model object (e.g., an AppliedControl)
     - 'action' is a string (e.g., "created", "updated", "deleted")
     """
-
     # Check if the model is registered
     config = webhook_registry.get_config(instance)
 
     if not config:
         return  # This model isn't tracked, do nothing
 
-    # Get the event details from its config
     event_type = config.get_event_type(instance, action)
-    data_payload = config.get_payload(instance)
 
     # Find all active endpoints subscribed to this event
     folder = Folder.get_folder(instance)
@@ -39,12 +37,21 @@ def dispatch_webhook_event(instance, action):
             event_types__name=event_type,
         )
 
+    payloads = {}
+    for endpoint in endpoints:
+        _serializer = (
+            serializer
+            if endpoint.format == WebhookEndpoint.PayloadFormats.FULL
+            else None
+        )
+        payloads[endpoint.id] = config.get_payload(instance, _serializer)
+
     # Enqueue tasks
     for endpoint in endpoints:
         transaction.on_commit(
             (
                 lambda e_id=endpoint.id: send_webhook_request.schedule(
-                    args=(e_id, event_type, data_payload), delay=1
+                    args=(e_id, event_type, payloads[e_id]), delay=1
                 )
             )
         )
