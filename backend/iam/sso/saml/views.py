@@ -158,8 +158,9 @@ class FinishACSView(SAMLViewMixin, View):
             ] or DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL
             emails = [auth.get_attribute(x) or [] for x in email_attributes]
             emails = [x for xs in emails for x in xs]  # flatten
-            emails.append(auth.get_nameid())  # default behavior
-            user = User.objects.get(email__in=emails)
+            user = User.objects.filter(email=auth.get_nameid()).first()
+            if not user:
+                user = User.objects.filter(email=emails[0]).first()
             idp_first_names = auth.get_attribute(
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
             )
