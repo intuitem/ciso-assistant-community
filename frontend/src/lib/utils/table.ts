@@ -1362,6 +1362,7 @@ export const listViewFields = {
 			'lastName',
 			'userGroups',
 			'isActive',
+			'expiryDate',
 			'keep_local_login',
 			'is_third_party',
 			'hasMfaEnabled'
@@ -1372,6 +1373,7 @@ export const listViewFields = {
 			'last_name',
 			'user_groups',
 			'is_active',
+			'expiry_date',
 			'keep_local_login',
 			'is_third_party',
 			'has_mfa_enabled'
