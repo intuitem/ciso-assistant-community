@@ -831,9 +831,6 @@ class AssetViewSet(BaseModelViewSet):
         ]
 
     def _perform_write(self, serializer):
-        type = serializer.validated_data.get("type")
-        if type == Asset.Type.PRIMARY:
-            serializer.validated_data["parent_assets"] = []
         serializer.save()
 
     def perform_create(self, serializer):
@@ -941,6 +938,7 @@ class AssetViewSet(BaseModelViewSet):
                         "symbol": "roundRect",
                         "symbolSize": 30,
                         "value": "Domain",
+                        "pk": str(domain.id),
                     }
                 )
                 N += 1
@@ -961,6 +959,7 @@ class AssetViewSet(BaseModelViewSet):
                     "symbolSize": 25,
                     "category": domain_to_category[asset.folder.id],
                     "value": "Primary" if asset.type == "PR" else "Support",
+                    "pk": str(asset.id),
                 }
             )
             nodes_idx[asset_key] = N
@@ -1014,7 +1013,7 @@ class AssetViewSet(BaseModelViewSet):
                     {
                         "source": nodes_idx[relationship_key],
                         "target": nodes_idx[asset_key],
-                        "value": "supported by",
+                        "value": "depends on",
                     }
                 )
         meta = {"display_name": "Assets Explorer"}
