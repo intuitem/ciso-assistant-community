@@ -94,9 +94,7 @@ Web Application
 			</div>
 
 			<div class="rounded-lg p-4 border-2 border-pink-500">
-				<label for="assets" class="block text-sm font-medium text-gray-900">
-					Assets List *
-				</label>
+				<label for="assets" class="block text-sm font-medium text-gray-900"> Assets List * </label>
 				<textarea
 					id="assets"
 					name="assets_text"
@@ -111,20 +109,11 @@ Web Application
 			</div>
 
 			<div class="flex gap-2">
-				<button
-					type="submit"
-					class="btn preset-filled"
-				>
+				<button type="submit" class="btn preset-filled">
 					<i class="fa-solid fa-plus mr-2"></i>
 					Create Assets
 				</button>
-				<button
-					type="button"
-					onclick={handleCancel}
-					class="btn"
-				>
-					Cancel
-				</button>
+				<button type="button" onclick={handleCancel} class="btn"> Cancel </button>
 			</div>
 		</form>
 	</div>
