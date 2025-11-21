@@ -372,6 +372,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+
+        # NOTE: Handle filtering_labels field - SvelteKit SuperForms behavior inconsistency:
+        # Forms with file inputs (like Evidence attachments) use dataType="form" and omit empty fields
+        # Forms without file inputs use dataType="json" and send empty arrays []
+        if hasattr(self.model, "_meta") and "filtering_labels" in [
+            f.name for f in self.model._meta.get_fields()
+        ]:
+            if "filtering_labels" not in request.data:
+                request.data["filtering_labels"] = []
+
         if request.data.get("filtering_labels"):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
