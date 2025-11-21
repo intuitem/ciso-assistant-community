@@ -183,6 +183,7 @@ def get_mapping_max_depth():
         # DB not ready (e.g., migrate, makemigrations)
         return MAPPING_MAX_DEPTH
 
+
 def escape_excel_formula(value):
     """
     Escape Excel formula injection by prefixing dangerous characters.
