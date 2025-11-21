@@ -642,29 +642,13 @@ def create_library(
     }
     
     # Labels Addition
-    labels = library_meta.get("labels")
-
-    if(labels != None):
-        labels = labels.strip()
-        labels = re.split(r'[,\n]+', labels)   # Separate with "commas" and "\n"
-        
-        library["labels"] = []
-        
-        for label in labels:
-            
-            label = label.strip()
-            
-            # Skip empty labels
-            if not label:
-                continue
-            
-            if " " in label : raise ValueError(
-                f"(library_meta) Invalid label \"{label}\": Labels must not contain spaces"
-            )
-            
-            # Force uppercase for all labels 
-            library["labels"].append(label.upper())
-
+    labels_cell = library_meta.get("labels")
+    if labels_cell:
+        library["labels"] = [
+            label.upper()
+            for label in re.split(r'[\s,\n]+', labels_cell.strip())
+            if label
+        ]
 
     translations = extract_translations_from_metadata(library_meta, "library")
     if translations:

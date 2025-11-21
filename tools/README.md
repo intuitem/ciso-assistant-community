@@ -185,7 +185,7 @@ The `library_meta` contains the following keys:
 - copyright (*)
 - provider (*)
 - packager (*)
-- labels: Works like the hashtag system in social media. Labels mustn't contain spaces. They are separated by line breaks or commas. All labels will be forced to uppercase in the resulting YAML file.
+- labels: Works like the hashtag system in social media. They are separated by spaces, line breaks or commas. All labels will be forced to uppercase.
 - dependencies: list of the urns of libraries referenced in this current one
 
 ### Frameworks
