@@ -1105,6 +1105,103 @@ class AssetViewSet(BaseModelViewSet):
                 status=500, content="An error occurred while generating the CSV export."
             )
 
+    @action(detail=False, methods=["post"], url_path="batch-create")
+    def batch_create(self, request):
+        """
+        Batch create multiple assets from a text list.
+        Expected format:
+        {
+            "assets_text": "asset1\\nSP:asset2\\nPR:asset3",
+            "folder": "folder-uuid"
+        }
+        """
+        try:
+            assets_text = request.data.get("assets_text", "")
+            folder_id = request.data.get("folder")
+
+            if not assets_text:
+                return Response(
+                    {"error": "assets_text is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if not folder_id:
+                return Response(
+                    {"error": "folder is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Verify folder exists and user has access
+            try:
+                folder = Folder.objects.get(id=folder_id)
+            except Folder.DoesNotExist:
+                return Response(
+                    {"error": "Folder not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            # Parse the assets text
+            lines = [line.strip() for line in assets_text.split("\n") if line.strip()]
+            created_assets = []
+            errors = []
+
+            for line in lines:
+                # Check for type prefix (SP: or PR:)
+                asset_type = Asset.Type.SUPPORT  # default
+                asset_name = line
+
+                if line.upper().startswith("SP:"):
+                    asset_type = Asset.Type.SUPPORT
+                    asset_name = line[3:].strip()
+                elif line.upper().startswith("PR:"):
+                    asset_type = Asset.Type.PRIMARY
+                    asset_name = line[3:].strip()
+
+                if not asset_name:
+                    errors.append({"line": line, "error": "Empty asset name"})
+                    continue
+
+                # Create asset using the serializer to respect IAM
+                asset_data = {
+                    "name": asset_name,
+                    "type": asset_type,
+                    "folder": folder_id,
+                }
+
+                serializer = AssetWriteSerializer(
+                    data=asset_data, context={"request": request}
+                )
+
+                if serializer.is_valid():
+                    asset = serializer.save()
+                    created_assets.append(
+                        {
+                            "id": str(asset.id),
+                            "name": asset.name,
+                            "type": asset.get_type_display(),
+                        }
+                    )
+                else:
+                    errors.append({"line": line, "errors": serializer.errors})
+
+            return Response(
+                {
+                    "created": len(created_assets),
+                    "assets": created_assets,
+                    "errors": errors,
+                },
+                status=status.HTTP_201_CREATED
+                if created_assets
+                else status.HTTP_400_BAD_REQUEST,
+            )
+
+        except Exception as e:
+            logger.error(f"Error in batch asset creation: {str(e)}")
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
 
 class AssetClassViewSet(BaseModelViewSet):
     model = AssetClass

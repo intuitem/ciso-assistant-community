@@ -19,4 +19,10 @@
 		link="/findings"
 		tags={['analysis', 'findings']}
 	/>
+	<Article
+		title="Batch Asset Creation"
+		desc="Create multiple assets at once from a simple text list"
+		link="/experimental/batch-assets"
+		tags={['assets', 'bulk']}
+	/>
 </div>
