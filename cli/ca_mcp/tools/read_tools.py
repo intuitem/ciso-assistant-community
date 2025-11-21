@@ -122,7 +122,7 @@ async def get_applied_controls(folder: str = None):
             csf_function = item.get("csf_function", "N/A")
             effort = item.get("effort", "N/A")
             impact = item.get("control_impact", "N/A")
-            priority =  item.get("priority", "N/A")
+            priority = item.get("priority", "N/A")
             cost = item.get("cost", 0)
 
             result += f"|{uuid}|{ref_id}|{name}|{status}|{eta}|{domain}|{category}|{csf_function}|{effort}|{impact}|{priority}|{cost}|\n"
