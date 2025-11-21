@@ -1718,6 +1718,14 @@
 	"samlCertificateHelpText": "Możesz określić własny certyfikat lub pozwolić aplikacji wygenerować go.",
 	"samlAuthnRequestSignedHelpText": "Gdy włączone, żądanie uwierzytelniania SAML jest podpisywane kluczem prywatnym poniżej. Odpowiedni certyfikat publiczny jest wysyłany do dostawcy tożsamości, aby mógł zweryfikować podpis.",
 	"downloadCertificate": "Pobierz certyfikat",
-	"viewMore": "Pokaż więcej",
-	"viewLess": "Pokaż mniej"
+	"viewMore": "Voir plus",
+	"viewLess": "Voir moins",
+	"scoreChangeDetected": "Zmiana wyniku wykryta",
+	"scoreChangeDetectedDescription": "Wykryto zmianę wyników. Wybierz sposób obsługi aktualizacji wyników dla powiązanych audytów.",
+	"clamp": "Ograniczyć",
+	"clampDescription": "Ogranicz wartość w ramach zdefiniowanych granic",
+	"reset": "Resetowanie",
+	"resetDescription": "Zresetuj wyniki audytów",
+	"ruleOfThree": "Zasada trzech",
+	"ruleOfThreeDescription": "Zastosuj zasadę trzech, aby skalować wyniki między nowymi granicami"
 }

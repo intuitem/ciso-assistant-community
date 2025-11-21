@@ -1945,5 +1945,13 @@
 	"samlPrivateKeyHelpText": "Samo za pisanje: koristite ovo polje samo ako trebate unijeti vlastiti privatni ključ/certifikat. U suprotnom, aplikacija će ga generirati.",
 	"samlCertificateHelpText": "Možete navesti vlastiti certifikat ili pustiti aplikaciju da ga generira.",
 	"samlAuthnRequestSignedHelpText": "Kada je omogućeno, zahtjev za SAML autentifikaciju potpisuje se privatnim ključem ispod. Odgovarajući javni certifikat šalje se Identity Provideru kako bi mogao provjeriti potpis.",
-	"downloadCertificate": "Preuzmi certifikat"
+	"downloadCertificate": "Preuzmi certifikat",
+	"scoreChangeDetected": "Promjena ocjene otkrivena",
+	"scoreChangeDetectedDescription": "Promjena ocjena je otkrivena. Odaberite kako želite upravljati ažuriranjem ocjena za povezane audite.",
+	"clamp": "Ograniči",
+	"clampDescription": "Ograničite vrijednost unutar definiranih granica",
+	"reset": "Resetiraj",
+	"resetDescription": "Resetiraj ocjene audita",
+	"ruleOfThree": "Pravilo trojke",
+	"ruleOfThreeDescription": "Primijenite pravilo trojke za skaliranje ocjena između novih granica"
 }
