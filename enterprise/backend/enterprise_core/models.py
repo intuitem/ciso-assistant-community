@@ -11,6 +11,8 @@ from core.base_models import AbstractBaseModel
 from core.utils import sha256
 from iam.models import FolderMixin
 
+from enum import IntEnum
+
 
 class ClientSettings(AbstractBaseModel, FolderMixin):
     class FileField(Enum):
@@ -85,3 +87,22 @@ class ClientSettings(AbstractBaseModel, FolderMixin):
 
     def filename(self, field: FileField):
         return os.path.basename(getattr(self, field.value).name)
+
+
+class LogEntryAction(IntEnum):
+    CREATE = 0
+    UPDATE = 1
+    DELETE = 2
+    ACCESS = 3
+    LOGIN_FAILED = 4
+
+    def to_string(self):
+        LOG_ENTRY_ACTION_TRANSLATIONS: dict[LogEntryAction, str] = {
+            LogEntryAction.CREATE: "create",
+            LogEntryAction.UPDATE: "update",
+            LogEntryAction.DELETE: "delete",
+            LogEntryAction.ACCESS: "access",
+            LogEntryAction.LOGIN_FAILED: "loginFailed",
+        }
+        UNKNOWN_ACTION_TRANSLATION = "unknown"
+        return LOG_ENTRY_ACTION_TRANSLATIONS.get(self, UNKNOWN_ACTION_TRANSLATION)
