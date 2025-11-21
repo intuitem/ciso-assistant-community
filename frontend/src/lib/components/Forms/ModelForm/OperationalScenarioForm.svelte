@@ -76,7 +76,7 @@
 			{form}
 			optionsEndpoint="attack-paths?is_selected=true&used=false"
 			optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
-			optionsLabelField="str"
+			optionsLabelField="form_display_name"
 			field="attack_path"
 			label={m.attackPath() + ` (${m.strategicScenario()})`}
 		/>

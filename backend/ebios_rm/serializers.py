@@ -295,7 +295,7 @@ class AttackPathWriteSerializer(BaseModelSerializer):
 
 
 class AttackPathReadSerializer(BaseModelSerializer):
-    str = serializers.CharField(source="__str__")
+    form_display_name = serializers.CharField()
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()
@@ -347,7 +347,7 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
-    attack_path = FieldsRelatedField(["id", "name", "description", "display_name"])
+    attack_path = FieldsRelatedField(["id", "name", "description", "form_display_name"])
     stakeholders = FieldsRelatedField(many=True)
     ro_to = FieldsRelatedField(["risk_origin", "target_objective"])
     threats = FieldsRelatedField(many=True)
