@@ -2640,6 +2640,7 @@
 	"runningMonteCarloSimulations": "Running Monte Carlo simulations for quantitative risk analysis. This may take a moment...",
 	"probabilityRequirements": "All values must be provided and between 0 and 100 (e.g., 5, 20, 50, 90). Values must increase from top to bottom.",
 	"impactRequirements": "All values must be provided and greater than 0. Values must increase from top to bottom (e.g., Minor: 5,000 → Major: 50,000 → Critical: 500,000).",
+	"loginFailed": "Login failed",
 	"reports": "Reports",
 	"doraSpecific": "DORA specific",
 	"ebiosRmDefaults": "Rapid criticality assessment (EBIOS RM)",

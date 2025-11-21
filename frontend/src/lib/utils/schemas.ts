@@ -1043,7 +1043,8 @@ export const SecurityExceptionSchema = z.object({
 	status: z.string().default('draft'),
 	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	requirement_assessments: z.string().optional().array().optional(),
-	applied_controls: z.string().uuid().optional().array().optional()
+	applied_controls: z.string().uuid().optional().array().optional(),
+	assets: z.string().uuid().optional().array().optional()
 });
 
 export const FindingSchema = z.object({
