@@ -174,7 +174,7 @@
 	"library": "Bibliothèque",
 	"typicalEvidence": "Preuve typique",
 	"parentAsset": "Actif supporté",
-	"parentAssets": "Est une dépendence de ↑",
+	"parentAssets": "Est une dépendance de ↑",
 	"supportAssets": "Dépend de ↓",
 	"supportedAssetsHelpText": "D'autres actifs supportés par celui-là (upstream)",
 	"childrenAssets": "Actifs sous-jacents",
