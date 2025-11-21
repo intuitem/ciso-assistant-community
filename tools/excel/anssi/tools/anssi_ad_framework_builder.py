@@ -302,6 +302,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
     columns = [
         "assessable",
         "depth",
+        "urn_id",
         "ref_id",
         "name",
         "description",
@@ -317,6 +318,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
     def add_row(
         assessable: str = "",
         depth: str = "",
+        urn_id: str = "",
         ref_id: str = "",
         name: str = "",
         description: str = "",
@@ -333,6 +335,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
         row = {
             "assessable": str(replace_non_breaking_space(assessable)) if assessable is not None else "",
             "depth": str(depth) if depth is not None else "",
+            "urn_id": str(urn_id) if urn_id is not None else "",
             "ref_id": str(ref_id) if ref_id is not None else "",
             "name": str(replace_non_breaking_space(name)) if name is not None else "",
             "description": str(replace_non_breaking_space(description)) if description is not None else "",
@@ -349,7 +352,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
     # depth = 1 ; ref_id = "intro" ; name/name[en]
     add_row(
         depth="1",
-        ref_id="intro",
+        urn_id="intro",
         name="Introduction",
         name_en="Introduction",
     )
@@ -357,7 +360,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
     # depth = 2 ; ref_id = "intro_text" ; description/description[en]
     add_row(
         depth="2",
-        ref_id="intro_text",
+        urn_id="intro_text",
         description=intro_body_fr,
         description_en=intro_body_en,
     )
@@ -367,7 +370,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
     # depth = 1 ; ref_id = "about_assessment_item_list"
     add_row(
         depth="1",
-        ref_id="about_assessment_item_list",
+        urn_id="about_assessment_item_list",
         name="A propos de la Liste des points de contrôle",
         name_en="About Assessment Item List",
     )
@@ -375,7 +378,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
     # depth = 2 ; ref_id = "about_assessment_item_list_text" ; description/description[en]
     add_row(
         depth="2",
-        ref_id="about_assessment_item_list_text",
+        urn_id="about_assessment_item_list_text",
         description=about_body_fr,
         description_en=about_body_en,
     )
@@ -391,7 +394,7 @@ def build_framework_content(json_fr: dict, json_en: dict, base_excel_file_name: 
     # Before the loop: assessment_item_list group
     add_row(
         depth="1",
-        ref_id="assessment_item_list",
+        urn_id="assessment_item_list",
         name="Liste des points de contrôle",
         name_en="Assessment Item List",
     )
@@ -622,11 +625,11 @@ def step2_build_excel() -> None:
     os.remove(YAML_CONFIG_FILENAME)
 
     # --- Create framework_content sheet ---
-    print("\n[MAIN] ▶️  Creating Framework Excel sheet...")
+    print("[MAIN] ▶️  Creating Framework Excel sheet...")
     build_framework_content(json_framework_fr, json_framework_en, EXCEL_FILE_NAME)
 
     # --- Remove JSON files ---
-    print("\n[MAIN] ▶️  Removing JSON files...")
+    print("[MAIN] ▶️  Removing JSON files...")
     os.remove(JSON_FR)
     os.remove(JSON_EN)
 
