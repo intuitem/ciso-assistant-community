@@ -1,3 +1,61 @@
+"""
+    ANSSI Active Directory Control Points Extractor
+    -----------------------------------------------
+
+    This script programmatically extracts the full content of the ANSSI "Active Directory
+    Control Points" checklist (https://www.cert.ssi.gouv.fr/uploads/ad_checklist.html).
+    It loads the dynamic React page via Playwright, switches to the English version if
+    requested, expands all interactive sections, retrieves the HTML structure, and converts
+    it into structured Markdown and JSON.
+
+    The extractor reproduces:
+        * Control point headers (Level, Title, Identifier)
+        * Vulnerability descriptions and recommendations
+        * Rich formatting (headings, paragraphs, spans, hyperlinks, code blocks)
+        * Nested lists (ul/ol)
+        * Formatted tables with checkbox rendering
+        * Colorized spans extracted from runtime CSS
+        * Special span logic (legend formatting, word+definition pairs)
+        * Root-section metadata (intro + about control points)
+
+    Results are exported as:
+        * checklist.md              -> Complete Markdown export
+        * checklist_markdown.json   -> Structured JSON preserving all fields
+
+    /!\\ [IMPORTANT] Playwright installation /!\\ :
+    ---------------------------------------------
+    Playwright requires browser binaries to be installed **separately** from the Python package.
+    To install everything correctly:
+
+        pip install playwright
+        playwright install          # downloads Chromium, Firefox, WebKit
+
+    If running inside a virtual environment:
+        python -m playwright install firefox
+
+    Running the extractor:
+    ----------------------
+    Simply execute:
+
+        python anssi_ad_web_scraper.py
+
+    Playwright will launch Firefox in headless mode, simulate the language switch,
+    collect the rendered HTML, and generate the Markdown/JSON output files.
+
+    Notes for developers:
+    ---------------------
+    * The script relies heavily on Playwright's dynamic DOM evaluation and BeautifulSoup parsing.
+    * CSS class names on the website are auto-generated; avoid targeting them directly.
+    * Extraction logic is based on semantic structure (e.g., table headers, variant attributes),
+    special cases (legend spans, code blocks), and stable DOM patterns rather than CSS classes.
+    * If ANSSI updates the website, adjust the DOM selectors in extract_checklist().
+    * The formatting layer is modular (render_inline, render_block, list rendering, code extraction)
+    and can be extended easily if new HTML patterns appear.
+
+"""
+
+
+
 import json
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup, NavigableString, Tag
@@ -615,7 +673,7 @@ def extract_checklist(framework_in_english : bool = False):
     results = []
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.firefox.launch(headless=True)
         page = browser.new_page()
 
         page.goto(URL, wait_until="load")
