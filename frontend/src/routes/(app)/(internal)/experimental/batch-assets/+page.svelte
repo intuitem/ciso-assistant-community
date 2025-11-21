@@ -52,13 +52,26 @@
 		</div>
 
 		<div class="py-4">
+			<h5 class="font-semibold mb-2 text-sm">Instructions:</h5>
 			<ol class="list-decimal list-inside space-y-1 text-sm">
 				<li>Select the target folder</li>
 				<li>Enter asset names (one per line)</li>
 				<li>Use SP: prefix for Support assets (default)</li>
 				<li>Use PR: prefix for Primary assets</li>
+				<li>Indent with 2 spaces per level to create parent-child relationships</li>
 				<li>Click Create Assets</li>
 			</ol>
+			<div class="mt-3 p-3 bg-gray-50 rounded text-xs">
+				<p class="font-semibold mb-1">Example with multi-level hierarchy:</p>
+				<pre class="font-mono">PR:Customer Database
+  SP:User Data
+    SP:Login Data
+    SP:Profile Data
+  SP:Payment Data
+Web Application
+  SP:API Gateway
+  SP:Load Balancer</pre>
+			</div>
 		</div>
 
 		<form method="post" use:enhance class="space-y-4">
@@ -88,9 +101,8 @@
 					id="assets"
 					name="assets_text"
 					bind:value={assetsText}
-					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm font-mono"
 					rows="15"
-					placeholder="Enter asset names, one per line&#10;Example:&#10;Web Server&#10;SP:Database Server&#10;PR:Customer Database"
 					required
 				></textarea>
 				<p class="text-sm mt-1">
@@ -132,6 +144,9 @@
 									{asset.name}
 								</a>
 								<span class="text-gray-500">({asset.type})</span>
+								{#if asset.parent}
+									<span class="text-gray-400 text-xs">→ child of {asset.parent}</span>
+								{/if}
 							</div>
 						{/each}
 					</div>

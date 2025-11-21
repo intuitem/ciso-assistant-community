@@ -1108,12 +1108,13 @@ class AssetViewSet(BaseModelViewSet):
     @action(detail=False, methods=["post"], url_path="batch-create")
     def batch_create(self, request):
         """
-        Batch create multiple assets from a text list.
+        Batch create multiple assets from a text list with parent-child relationships.
         Expected format:
         {
-            "assets_text": "asset1\\nSP:asset2\\nPR:asset3",
+            "assets_text": "PR:Parent Asset\\n  SP:Child Asset 1\\n  SP:Child Asset 2",
             "folder": "folder-uuid"
         }
+        Lines with leading spaces (2+) are children of the previous non-indented line.
         """
         try:
             assets_text = request.data.get("assets_text", "")
@@ -1140,26 +1141,38 @@ class AssetViewSet(BaseModelViewSet):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            # Parse the assets text
-            lines = [line.strip() for line in assets_text.split("\n") if line.strip()]
+            # Parse the assets text with indentation (2 spaces per level)
+            lines = [line.rstrip() for line in assets_text.split("\n") if line.strip()]
             created_assets = []
             errors = []
+            depth_stack = []  # Stack of assets at each depth level
 
             for line in lines:
+                # Count leading spaces and calculate depth (2 spaces = 1 level)
+                leading_spaces = len(line) - len(line.lstrip())
+                depth = leading_spaces // 2
+                line_content = line.strip()
+
                 # Check for type prefix (SP: or PR:)
                 asset_type = Asset.Type.SUPPORT  # default
-                asset_name = line
+                asset_name = line_content
 
-                if line.upper().startswith("SP:"):
+                if line_content.upper().startswith("SP:"):
                     asset_type = Asset.Type.SUPPORT
-                    asset_name = line[3:].strip()
-                elif line.upper().startswith("PR:"):
+                    asset_name = line_content[3:].strip()
+                elif line_content.upper().startswith("PR:"):
                     asset_type = Asset.Type.PRIMARY
-                    asset_name = line[3:].strip()
+                    asset_name = line_content[3:].strip()
 
                 if not asset_name:
-                    errors.append({"line": line, "error": "Empty asset name"})
+                    errors.append({"line": line_content, "error": "Empty asset name"})
                     continue
+
+                # Trim stack to current depth
+                depth_stack = depth_stack[:depth]
+
+                # Parent is the asset at the previous depth level
+                parent_asset = depth_stack[-1] if depth_stack else None
 
                 # Create asset using the serializer to respect IAM
                 asset_data = {
@@ -1168,21 +1181,31 @@ class AssetViewSet(BaseModelViewSet):
                     "folder": folder_id,
                 }
 
+                # Add parent relationship if exists
+                if parent_asset:
+                    asset_data["parent_assets"] = [parent_asset.id]
+
                 serializer = AssetWriteSerializer(
                     data=asset_data, context={"request": request}
                 )
 
                 if serializer.is_valid():
                     asset = serializer.save()
+
+                    # Add to stack for potential children
+                    depth_stack.append(asset)
+
                     created_assets.append(
                         {
                             "id": str(asset.id),
                             "name": asset.name,
                             "type": asset.get_type_display(),
+                            "parent": parent_asset.name if parent_asset else None,
+                            "depth": depth,
                         }
                     )
                 else:
-                    errors.append({"line": line, "errors": serializer.errors})
+                    errors.append({"line": line_content, "errors": serializer.errors})
 
             return Response(
                 {
