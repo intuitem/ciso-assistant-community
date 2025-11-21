@@ -7,6 +7,7 @@
 	// const modalStore: ModalStore = getModalStore();
 
 	import { m } from '$paraglide/messages';
+	import type { ValidationAdapter } from 'sveltekit-superforms/adapters';
 
 	function handleFormUpdated({ form, closeModal }: { form: any; closeModal: boolean }) {
 		if (form.valid) {
@@ -19,7 +20,7 @@
 		data?: SuperValidated<AnyZodObject>;
 		dataType?: 'form' | 'json';
 		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
-		validators?: AnyZodObject | undefined;
+		validators?: ValidationAdapter<any> | undefined;
 		applyAction?: boolean;
 		resetForm?: boolean;
 		onSubmit?: any;
