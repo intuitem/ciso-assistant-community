@@ -747,7 +747,7 @@ async def update_task_template(
     """Update task template properties
 
     Args:
-        task_id: Task template ID (required)
+        task_id: Task template ID/name (required)
         name: Task template name
         description: Description
         status: Status
@@ -804,7 +804,11 @@ async def update_task_template(
         if assets is not None:
             payload["assets"] = assets
         if applied_controls is not None:
-            payload["applied_controls"] = applied_controls
+            resolved_controls = []
+            for control in applied_controls:
+                resolved_control_id = resolve_applied_control_id(control)
+                resolved_controls.append(resolved_control_id)
+            payload["applied_controls"] = resolved_controls
         if compliance_assessments is not None:
             payload["compliance_assessments"] = compliance_assessments
         if risk_assessments is not None:
