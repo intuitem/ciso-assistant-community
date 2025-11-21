@@ -28,6 +28,7 @@
     To install everything correctly:
 
         pip install playwright
+        playwright install-deps
         playwright install          # downloads Chromium, Firefox, WebKit
 
     If running inside a virtual environment:
