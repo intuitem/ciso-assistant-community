@@ -30,9 +30,11 @@ description: 'This framework is based on 2 documents:
   Source : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance'
 copyright: EUROPEAN COMMISSION + ENISA
 version: 12
-publication_date: 2025-11-21
+publication_date: 2025-11-22
 provider: EUROPEAN COMMISSION + ENISA
 packager: intuitem
+labels:
+- NIS2
 translations:
   fr:
     name: "NIS2 - Annexe au r\xE8glement d'implementation 2024/2690 de la Commission\
