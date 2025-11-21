@@ -7,6 +7,7 @@ from ..resolvers import (
     resolve_risk_matrix_id,
     resolve_framework_id,
     resolve_risk_assessment_id,
+    resolve_applied_control_id,
 )
 from ..config import GLOBAL_FOLDER_ID
 from ..utils.response_formatter import (
@@ -984,7 +985,11 @@ async def create_task_template(
         if assets is not None:
             payload["assets"] = assets
         if applied_controls is not None:
-            payload["applied_controls"] = applied_controls
+            resolved_controls = []
+            for control in applied_controls:
+                resolved_control_id = resolve_applied_control_id(control)
+                resolved_controls.append(resolved_control_id)
+            payload["applied_controls"] = resolved_controls
         if compliance_assessments is not None:
             payload["compliance_assessments"] = compliance_assessments
         if risk_assessments is not None:
@@ -1001,3 +1006,4 @@ async def create_task_template(
             return f"Error creating task template: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_task_template: {str(e)}"
+    

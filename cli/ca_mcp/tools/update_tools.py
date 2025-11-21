@@ -355,7 +355,11 @@ async def update_requirement_assessment(
         if selected is not None:
             payload["selected"] = selected
         if applied_controls is not None:
-            payload["applied_controls"] = applied_controls
+            resolved_controls = []
+            for control in applied_controls:
+                resolved_control_id = resolve_applied_control_id(control)
+                resolved_controls.append(resolved_control_id)
+            payload["applied_controls"] = resolved_controls
 
         if not payload:
             return "Error: No fields provided to update"
