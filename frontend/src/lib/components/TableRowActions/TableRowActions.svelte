@@ -172,14 +172,12 @@
 	);
 	let displayDelete = $derived(canDeleteObject && deleteForm !== null);
 
-	async function modalRevisionCreate(row: {
-		[key: string]: string | number | boolean | null;
-	}): void {
+	async function modalRevisionCreate(row: Record<string, any>): Promise<void> {
 		const model = getModelInfo('evidence-revisions');
 		const createSchema = modelSchema(model.urlModel);
 		const initialData = {
 			evidence: row.meta.id,
-			folder: row.meta.folder.id
+			folder: row.meta.folder?.id
 		};
 		const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 		let modalComponent: ModalComponent = {
