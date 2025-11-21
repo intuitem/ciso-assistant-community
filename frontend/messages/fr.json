@@ -2722,5 +2722,7 @@
 	"personalDataDescription": "Inventaire et classification des données personnelles",
 	"purposesDescription": "Finalités des traitements de données (RGPD)",
 	"rightRequestsDescription": "Demandes d'exercice de droits des personnes concernées (RGPD)",
-	"dataBreachesDescription": "Incidents de violations de données et notifications"
+	"dataBreachesDescription": "Incidents de violations de données et notifications",
+	"syncWithReferenceControl": "Synchroniser avec les mesures de référence",
+	"syncWithReferenceControlHelpText": "Met à jour les champs lors de la mise à jour d’une mesure de référence."
 }

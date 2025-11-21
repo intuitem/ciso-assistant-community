@@ -1164,5 +1164,7 @@
 	"samlAuthnRequestSignedHelpText": "Ketika diaktifkan, permintaan autentikasi SAML ditandatangani dengan kunci privat di bawah ini. Sertifikat publik yang sesuai dikirimkan ke Penyedia Identitas sehingga dapat memverifikasi tanda tangan.",
 	"downloadCertificate": "Unduh sertifikat",
 	"viewMore": "Lihat lebih banyak",
-	"viewLess": "Lihat lebih sedikit"
+	"viewLess": "Lihat lebih sedikit",
+	"syncWithReferenceControl": "Sinkronkan dengan kontrol referensi",
+	"syncWithReferenceControlHelpText": "Memperbarui bidang saat kontrol referensi diperbarui."
 }

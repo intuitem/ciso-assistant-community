@@ -156,7 +156,7 @@ export const RiskScenarioSchema = z.object({
 
 export const AppliedControlSchema = z.object({
 	...NameDescriptionMixin,
-	ref_id: z.string().optional(),
+	ref_id: z.string().optional().nullable(),
 	category: z.string().optional().nullable(),
 	csf_function: z.string().optional().nullable(),
 	priority: z.number().optional().nullable(),
@@ -195,6 +195,7 @@ export const AppliedControlSchema = z.object({
 		.optional(),
 	folder: z.string(),
 	reference_control: z.string().optional().nullable(),
+	is_synced_from_reference_control: z.boolean().optional().default(true),
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
 	stakeholders: z.string().uuid().optional().array().optional(),

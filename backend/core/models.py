@@ -1452,6 +1452,39 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         verbose_name = _("Reference control")
         verbose_name_plural = _("Reference controls")
 
+    def save(self, *args, **kwargs):
+        old_description = ""
+        if self.pk:
+            old_reference_control = ReferenceControl.objects.filter(pk=self.pk).first()
+            if old_reference_control is not None:
+                old_description = old_reference_control.description
+
+        return_value = super().save(*args, **kwargs)
+
+        synced_applied_controls = self.applied_controls.filter(is_synced_from_reference_control=True)
+        for applied_control in synced_applied_controls:
+            applied_control.category = self.category
+            applied_control.csf_function = self.csf_function
+
+        AppliedControl.objects.bulk_update(
+            synced_applied_controls,
+            ["category", "csf_function"],
+            batch_size=1000
+        )
+
+        unset_description_applied_controls = synced_applied_controls.filter(
+            Q(description__isnull=True) | Q(description__in=["", old_description])
+        )
+        for applied_control in unset_description_applied_controls:
+            applied_control.description = self.description
+
+        AppliedControl.objects.bulk_update(
+            unset_description_applied_controls,
+            ["description"],
+            batch_size=1000
+        )
+        return return_value
+
     def is_deletable(self) -> bool:
         """
         Returns True if the framework can be deleted
@@ -3653,8 +3686,10 @@ class AppliedControl(
         on_delete=models.CASCADE,
         null=True,
         blank=True,
+        related_name="applied_controls",
         verbose_name=_("Reference Control"),
     )
+    is_synced_from_reference_control = models.BooleanField(default=True, verbose_name=_("Is synced from reference control"))
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
