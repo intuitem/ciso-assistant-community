@@ -329,6 +329,7 @@ async def update_requirement_assessment(
         eta: ETA date YYYY-MM-DD
         due_date: Due date YYYY-MM-DD
         selected: Applicability flag
+        applied_controls: List of applied control IDs/names to associate with this requirement assessment. Can be None to leave unchanged, or empty list to clear associations. Elements should be strings representing control identifiers.
     """
     try:
         # Validate UUID
@@ -762,7 +763,7 @@ async def update_task_template(
         folder_id: Folder ID/name
         assigned_to: Array of user UUIDs
         assets: Array of asset UUIDs
-        applied_controls: Array of applied control UUIDs
+        applied_controls: List of applied control IDs/names to associate with this task template. Can be None to leave unchanged, or empty list to clear associations. Elements should be strings representing control identifiers.
         compliance_assessments: Array of compliance assessment UUIDs
         risk_assessments: Array of risk assessment UUIDs
         findings_assessment: Array of finding assessment UUIDs
