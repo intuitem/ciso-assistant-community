@@ -2,10 +2,10 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any
   Mode}'
 urn: urn:intuitem:risk:library:annex-technical-and-methodological-requirements-nis2
 locale: en
-ref_id: Annex-Implementing-Regulation-of-NIS2-on-T-M-with-Technical-Implementation-Guidance-by-ENISA
-name: NIS2 (Annex) - Technical and Methodological Requirements 2024/2690 with Technical
+ref_id: annex-nis2-regulation--2024-2690-with-technical-implementation-guidance-by-enisa
+name: NIS2 - Annex to the Commission Implementing Regulation 2024/2690 with Technical
   Implementation Guidance by ENISA
-description: 'This framework is based on 2 documents :
+description: 'This framework is based on 2 documents:
 
 
   1. ANNEX to the Commission Implementing Regulation laying down rules for the application
@@ -28,15 +28,15 @@ description: 'This framework is based on 2 documents :
   JUNE 2025, VERSION 1.0
 
   Source : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance'
-copyright: EUROPEAN COMMISSION
+copyright: EUROPEAN COMMISSION + ENISA
 version: 12
-publication_date: 2025-11-18
-provider: EUROPEAN COMMISSION
+publication_date: 2025-11-21
+provider: EUROPEAN COMMISSION + ENISA
 packager: intuitem
 translations:
   fr:
-    name: "NIS2 (Annexe) - Exigences techniques et m\xE9thodologiques du 2024/2690\
-      \ avec Recommandation Technique de mise en \u0153uvre par l\u2019ENISA"
+    name: "NIS2 - Annexe au r\xE8glement d'implementation 2024/2690 de la Commission\
+      \ avec avec les recommandation techniques de mise en \u0153uvre de l\u2019ENISA"
     description: "Ce framework est issu de 2 documents :\n\n1. ANNEXE du R\xE8glement\
       \ d\u2019ex\xE9cution (UE) 2024/2690 de la Commission du 17 octobre 2024 \xE9\
       tablissant des r\xE8gles relatives \xE0 l\u2019application de la directive (UE)\
@@ -56,10 +56,10 @@ translations:
       \ les r\xE8gles d\u2019application de la directive NIS2 concernant les exigences\
       \ techniques et m\xE9thodologiques des mesures de gestion des risques en cybers\xE9\
       curit\xE9.\nJUIN 2025, VERSION 1.0\nSource : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
-    copyright: "COMMISSION EUROP\xC9ENNE"
+    copyright: "COMMISSION EUROP\xC9ENNE + ENISA"
   es:
-    name: "NIS2 (Anexo) - Requisitos T\xE9cnicos y Metodol\xF3gicos 2024/2690 con\
-      \ Directrices de Implementaci\xF3n T\xE9cnica por ENISA"
+    name: "NIS2 - Anexo al Reglamento de Aplicaci\xF3n de la Comisi\xF3n 2024/2690\
+      \ con Directrices T\xE9cnicas de Implementaci\xF3n de ENISA"
     description: "Este referencial se basa en 2 documentos:\n\n1. ANEXO del Reglamento\
       \ de Ejecuci\xF3n de la Comisi\xF3n por el que se establecen -seg\xFAn el art\xED\
       culo 2- las disposiciones de aplicaci\xF3n de la Directiva (UE) 2022/2555 en\
@@ -71,10 +71,10 @@ translations:
       \ normas para la aplicaci\xF3n de la Directiva NIS2 en cuanto a los requisitos\
       \ t\xE9cnicos y metodol\xF3gicos de las medidas de gesti\xF3n de riesgos en\
       \ ciberseguridad.\nJUNIO 2025, VERSI\xD3N 1.0\nFuente: https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
-    copyright: COMISION EUROPEA
+    copyright: COMISION EUROPEA + ENISA
   cs:
-    name: "NIS2 (P\u0159\xEDloha) \u2013 Technick\xE9 a metodologick\xE9 po\u017E\
-      adavky 2024/2690 s technick\xFDmi implementa\u010Dn\xEDmi pokyny od ENISA"
+    name: "NIS2 - P\u0159\xEDloha k prov\xE1d\u011Bc\xEDmu na\u0159\xEDzen\xED Komise\
+      \ 2024/2690 s technick\xFDmi implementa\u010Dn\xEDmi pokyny od ENISA"
     description: "Tento r\xE1mec vych\xE1z\xED ze 2 dokument\u016F:\n\n1. Prov\xE1\
       d\u011Bc\xED na\u0159\xEDzen\xED 2024/2690 kter\xFDm se stanov\xED pravidla\
       \ pro uplat\u0148ov\xE1n\xED sm\u011Brnice (EU) 2022/2555, pokud jde o technick\xE9\
@@ -95,10 +95,10 @@ translations:
       \ pravidla pro aplikaci sm\u011Brnice NIS2 ve vztahu k technick\xFDm a metodologick\xFD\
       m po\u017Eadavk\u016Fm opat\u0159en\xED \u0159\xEDzen\xED kybernetick\xFDch\
       \ rizik.\n\u010CERVEN 2025, VERZE 1.0\nZdroj: https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
-    copyright: "EVROPSK\xC1 KOMISE"
+    copyright: "EVROPSK\xC1 KOMISE + ENISA"
   it:
-    name: NIS2 (Allego) - Requisiti Tecnici e Metodologici 2024/2690 con Guida per
-      l'Implementazione Tecnica di ENISA
+    name: NIS2 - Allegato al Regolamento di Esecuzione della Commissione 2024/2690
+      con Linee Guida Tecniche per l'Implementazione di ENISA
     description: "Questo quadro di riferimento deriva da 2 documenti:\n\n1. ALLEGATO\
       \ del Regolamento di Esecuzione della Commissione che stabilisce - ai sensi\
       \ dell\u2019articolo 2 - le disposizioni di attuazione della Direttiva (UE)\
@@ -110,13 +110,13 @@ translations:
       \ l'applicazione della Direttiva NIS2 riguardo ai requisiti tecnici e metodologici\
       \ delle misure di gestione del rischio in materia di cybersecurity.\nGIUGNO\
       \ 2025, VERSIONE 1.0\nFonte: https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
-    copyright: COMMISSIONE EUROPEA
+    copyright: COMMISSIONE EUROPEA + ENISA
 objects:
   framework:
     urn: urn:intuitem:risk:framework:annex-technical-and-methodological-requirements-nis2
-    ref_id: Annex-Implementing-Regulation-of-NIS2-on-T-M-with-Technical-Implementation-Guidance-by-ENISA
-    name: NIS2 (Annex) - Technical and Methodological Requirements 2024/2690 with
-      Technical Implementation Guidance by ENISA
+    ref_id: annex-nis2-regulation--2024-2690-with-technical-implementation-guidance-by-enisa
+    name: NIS2 - Annex to the Commission Implementing Regulation 2024/2690 with Technical
+      Implementation Guidance by ENISA
     description: 'This framework is based on 2 documents :
 
 
@@ -143,8 +143,9 @@ objects:
       Source : https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance'
     translations:
       fr:
-        name: "NIS2 (Annexe) - Exigences techniques et m\xE9thodologiques du 2024/2690\
-          \ avec Recommandation Technique de mise en \u0153uvre par l\u2019ENISA"
+        name: "NIS2 - Annexe au r\xE8glement d'implementation 2024/2690 de la Commission\
+          \ avec avec les recommandation techniques de mise en \u0153uvre de l\u2019\
+          ENISA"
         description: "Ce framework est issu de 2 documents :\n\n1. ANNEXE du R\xE8\
           glement d\u2019ex\xE9cution (UE) 2024/2690 de la Commission du 17 octobre\
           \ 2024 \xE9tablissant des r\xE8gles relatives \xE0 l\u2019application de\
@@ -167,8 +168,8 @@ objects:
           \ des risques en cybers\xE9curit\xE9.\nJUIN 2025, VERSION 1.0\nSource :\
           \ https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
       es:
-        name: "NIS2 (Anexo) - Requisitos T\xE9cnicos y Metodol\xF3gicos 2024/2690\
-          \ con Directrices de Implementaci\xF3n T\xE9cnica por ENISA"
+        name: "NIS2 - Anexo al Reglamento de Aplicaci\xF3n de la Comisi\xF3n 2024/2690\
+          \ con Directrices T\xE9cnicas de Implementaci\xF3n de ENISA"
         description: "Este referencial se basa en 2 documentos:\n\n1. ANEXO del Reglamento\
           \ de Ejecuci\xF3n de la Comisi\xF3n por el que se establecen -seg\xFAn el\
           \ art\xEDculo 2- las disposiciones de aplicaci\xF3n de la Directiva (UE)\
@@ -182,8 +183,8 @@ objects:
           \ requisitos t\xE9cnicos y metodol\xF3gicos de las medidas de gesti\xF3\
           n de riesgos en ciberseguridad.\nJUNIO 2025, VERSI\xD3N 1.0\nFuente: https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
       cs:
-        name: "NIS2 (P\u0159\xEDloha) \u2013 Technick\xE9 a metodologick\xE9 po\u017E\
-          adavky 2024/2690 s technick\xFDmi implementa\u010Dn\xEDmi pokyny od ENISA"
+        name: "NIS2 - P\u0159\xEDloha k prov\xE1d\u011Bc\xEDmu na\u0159\xEDzen\xED\
+          \ Komise 2024/2690 s technick\xFDmi implementa\u010Dn\xEDmi pokyny od ENISA"
         description: "Tento r\xE1mec vych\xE1z\xED ze 2 dokument\u016F:\n\n1. Prov\xE1\
           d\u011Bc\xED na\u0159\xEDzen\xED 2024/2690 kter\xFDm se stanov\xED pravidla\
           \ pro uplat\u0148ov\xE1n\xED sm\u011Brnice (EU) 2022/2555, pokud jde o technick\xE9\
@@ -207,8 +208,8 @@ objects:
           \ \u0159\xEDzen\xED kybernetick\xFDch rizik.\n\u010CERVEN 2025, VERZE 1.0\n\
           Zdroj: https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance"
       it:
-        name: NIS2 (Allego) - Requisiti Tecnici e Metodologici 2024/2690 con Guida
-          per l'Implementazione Tecnica di ENISA
+        name: NIS2 - Allegato al Regolamento di Esecuzione della Commissione 2024/2690
+          con Linee Guida Tecniche per l'Implementazione di ENISA
         description: "Questo quadro di riferimento deriva da 2 documenti:\n\n1. ALLEGATO\
           \ del Regolamento di Esecuzione della Commissione che stabilisce - ai sensi\
           \ dell\u2019articolo 2 - le disposizioni di attuazione della Direttiva (UE)\
