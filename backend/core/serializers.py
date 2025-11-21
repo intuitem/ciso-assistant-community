@@ -396,6 +396,11 @@ class AssetWriteSerializer(BaseModelSerializer):
         queryset=Solution.objects.all(),
         required=False,
     )
+    security_exceptions = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=SecurityException.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = Asset
@@ -2069,6 +2074,9 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
     applied_controls = serializers.PrimaryKeyRelatedField(
         many=True, queryset=AppliedControl.objects.all(), required=False
     )
+    assets = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Asset.objects.all(), required=False
+    )
 
     class Meta:
         model = SecurityException
@@ -2082,6 +2090,7 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
     approver = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")
     associated_objects_count = serializers.SerializerMethodField()
+    assets = FieldsRelatedField(many=True)
 
     def get_associated_objects_count(self, obj):
         """Prefer annotated or prefetched counts to avoid extra DB queries."""
