@@ -220,7 +220,7 @@ async def update_applied_control(
     category: str = None,
     csf_function: str = None,
     effort: str = None,
-    cost: list = None,
+    cost: dict = None,
     control_impact: int = None,
     eta: str = None,
     start_date: str = None,
