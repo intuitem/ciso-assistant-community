@@ -1,6 +1,3 @@
-# TODO: Fix tables in (vuln_dnsadmins) and code blocks (take the code in "vuln_dnsadmins" as example)
-
-
 import json
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup, NavigableString, Tag
@@ -320,11 +317,17 @@ def render_block(node: Tag) -> str:
 
     # Tables -> Markdown table with empty header
     if name == "table":
-        rows = node.find_all("tr", recursive=False)
+        
+        table_body = node.find("tbody")
+        
+        rows = table_body.find_all("tr", recursive=False)
         if not rows:
             return ""
+        
+        # Remove 1st row because it contains a button
+        rows = rows[1:]
 
-        # Determine column count from first row
+        # Determine column count from 2nd row
         first_cells = rows[0].find_all(["td", "th"], recursive=False)
         if not first_cells:
             return ""
@@ -338,7 +341,7 @@ def render_block(node: Tag) -> str:
             cells = tr.find_all(["td", "th"], recursive=False)
             if not cells:
                 continue
-            contents = [render_inline_children(td) for td in cells]
+            contents = [render_table_cell(td) for td in cells]
             body_lines.append("| " + " | ".join(contents) + " |")
 
         table_md = header + separator + "\n".join(body_lines) + "\n\n"
@@ -346,10 +349,10 @@ def render_block(node: Tag) -> str:
 
     # <div variant="code"> -> ```code```
     if name == "div" and node.get("variant") == "code":
-        code_text = node.get_text("\n", strip=True)
+        code_text = extract_code_from_variant_div(node)
         if not code_text:
             return ""
-        return f"```\n{code_text}\n```\n\n"
+        return f"```powershell\n{code_text}\n```\n\n"
 
     # Generic <div> or other block: render children as a sequence of blocks
     parts = []
@@ -426,8 +429,91 @@ def render_list(node: Tag, level: int, ordered: bool) -> str:
         return ""
 
     return "\n".join(lines) + "\n\n"
-    
 
+
+def render_table_cell(td: Tag) -> str:
+    """
+    Render a <td>/<th> cell to Markdown content.
+    If it contains checkbox inputs, render them as HTML <input type="checkbox"... />
+    followed by the label text.
+    """
+    # Find checkbox inputs inside the cell
+    checkbox_inputs = td.find_all("input", attrs={"type": "checkbox"}, recursive=True)
+
+    if checkbox_inputs:
+        parts = []
+
+        for inp in checkbox_inputs:
+            attrs = ['type="checkbox"']
+            if inp.has_attr("disabled"):
+                attrs.append("disabled")
+            if inp.has_attr("checked"):
+                attrs.append("checked")
+
+            checkbox_html = f"<input {" ".join(attrs)} />"
+            parts.append(checkbox_html)
+
+        # Try to get associated label text(s)
+        label_texts = []
+        for lbl in td.find_all("label", recursive=True):
+            txt = render_inline_children(lbl).strip()
+            if txt:
+                label_texts.append(txt)
+
+        if label_texts:
+            parts.append(" ".join(label_texts))
+
+        return " ".join(parts).strip()
+
+    # Fallback: normal cell content
+    return render_inline_children(td)
+
+
+def extract_code_from_variant_div(node: Tag) -> str:
+    """
+    Extract code text from a <div variant="code"> block.
+    - Preserve line breaks only where there are <br> tags.
+    - Ignore markup (span, classes, etc.).
+    """
+    # On some blocks, the actual code is inside an inner <div>, like in your example.
+    inner = node.find("div") or node
+
+    lines = []
+    buffer = []
+
+    for element in inner.descendants:
+        if isinstance(element, NavigableString):
+            # Keep raw text, including spaces
+            buffer.append(str(element))
+            
+        elif isinstance(element, Tag):
+            
+            name = element.name.lower()
+            
+            if name == "br":
+                # Flush current buffer as a line
+                line = "".join(buffer)
+                # Normalize non-breaking spaces and strip right side
+                line = line.replace("\xa0", " ").rstrip()
+                lines.append(line)
+                buffer = []
+
+    # Flush last line if any remaining text
+    if buffer:
+        line = "".join(buffer)
+        line = line.replace("\xa0", " ").rstrip()
+        
+        if line:
+            lines.append(line)
+
+    # Remove leading/trailing empty lines, just in case
+    while lines and not lines[0].strip():
+        lines.pop(0)
+        
+    while lines and not lines[-1].strip():
+        lines.pop()
+
+    return "\n".join(lines)
 
 
 def format_root_secondary_html(html: str) -> str:
@@ -525,7 +611,7 @@ def format_recommendation_html(html: str) -> str:
 
 # ---------------- Checklist extraction with Playwright ---------------- #
 
-def extract_checklist():
+def extract_checklist(framework_in_english : bool = False):
     results = []
 
     with sync_playwright() as p:
@@ -537,8 +623,14 @@ def extract_checklist():
         # Wait until at least one header TR is mounted
         page.wait_for_selector("div#root table tbody tr td:nth-child(2)")
         
+        use_english = False
         
-        if FRAMEWORK_IN_ENGLISH:
+        if framework_in_english is not None:
+            use_english = framework_in_english
+        else:
+            use_english = FRAMEWORK_IN_ENGLISH
+            
+        if use_english:
             print("> ⌛ Switching page to English...")
             # Find the button whose inner text contains "EN"
             en_button = page.locator("nav button:has-text('EN')")
@@ -616,7 +708,7 @@ def extract_checklist():
         # --- Table with all vulnerabilities ---
         
         # Retrieve all TR elements
-        rows = page.query_selector_all("div#root table tbody tr")
+        rows = page.query_selector_all("div#root > div > table > tbody > tr")
 
         i = 0
         while i < len(rows):
@@ -678,17 +770,19 @@ def extract_checklist():
 
 # ---------------- Main ---------------- #
 
-if __name__ == "__main__":
+# A 2nd "framework_in_english" has been added to let external calls to select a language (the default one will be used if no boolean given)
+def main(framework_in_english : bool = False):
     
     print(f"⌛ Extracting Framework from website \"{URL}\"...")
     
-    data = extract_checklist()
+    data = extract_checklist(framework_in_english)
     
     print(f"✅ Extraction finished!\n")
     
     root_elements = data.get("root_elements", [])
     checklist = data.get("checklist", [])
     
+    print(f"ℹ️  Elements found in checklist: {len(checklist)} ")
 
     # --- Save everything into a single Markdown file ---
     with open("checklist.md", "w", encoding="utf-8") as f:
@@ -719,3 +813,8 @@ if __name__ == "__main__":
         json.dump(data, f, ensure_ascii=False, indent=4)
 
     print("✅ JSON file saved: checklist_markdown.json")
+
+
+
+if __name__ == "__main__":
+    main()
