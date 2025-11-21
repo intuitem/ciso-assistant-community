@@ -2722,5 +2722,10 @@
 	"personalDataDescription": "Personal data inventory and classification",
 	"purposesDescription": "Data processing purposes (GDPR)",
 	"rightRequestsDescription": "Data subject rights requests (GDPR)",
-	"dataBreachesDescription": "Data breach incidents and notifications"
+	"dataBreachesDescription": "Data breach incidents and notifications",
+	"globalEvidences": "Global Evidence",
+	"taskNodeLegacyEvidence": "This field is deprecated. Evidence are now globally linked to the task and spread to occurences",
+	"taskNodeNewEvidence": "Evidence globally linked to the task and spread to occurences. You can add a revision in the 'Evidences' tab below",
+	"newSemiColon": "New:",
+	"evidenceRevisionAnnouncement": "Evidence revision can now be added from the table with the button"
 }

@@ -1605,6 +1605,25 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			}
+		],
+		detailViewFields: [
+			{ field: 'task_template' },
+			{ field: 'folder' },
+			{ field: 'name' },
+			{ field: 'assigned_to' },
+			{ field: 'evidences', tooltip: 'taskNodeLegacyEvidence' },
+			{ field: 'is_recurrent' },
+			{ field: 'global_evidences', tooltip: 'taskNodeNewEvidence' },
+			{ field: 'applied_controls' },
+			{ field: 'compliance_assessments' },
+			{ field: 'assets' },
+			{ field: 'risk_assessments' },
+			{ field: 'findings_assessment' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'due_date' },
+			{ field: 'status' },
+			{ field: 'observation' }
 		]
 	},
 	campaigns: {

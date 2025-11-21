@@ -488,6 +488,24 @@
 			{/if}
 		</div>
 	</header>
+	{#if model.urlModel === 'evidences'}
+		<div class="flex w-full items-center justify-center p-1">
+			<div
+				class="flex items-center gap-2 text-secondary-400-600 text-sm
+				bg-gradient-to-r from-secondary-100 to-secondary-50
+				border border-secondary-200 rounded-md shadow-sm p-3
+				animate-fade-in"
+			>
+				<i class="fa-solid fa-bullhorn bg-clip-text"></i>
+
+				<span class="font-bold bg-clip-text">
+					{m.newSemiColon()}
+				</span>
+				{m.evidenceRevisionAnnouncement()}
+				<i class="fa-solid fa-file-circle-plus"></i>
+			</div>
+		</div>
+	{/if}
 	<!-- Table -->
 	<table
 		class="table caption-bottom {classesTable}"
