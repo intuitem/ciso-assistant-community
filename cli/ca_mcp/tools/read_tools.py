@@ -1110,7 +1110,7 @@ async def get_task_templates(limit: int = None, offset: int = None, ordering: st
         tasks = get_paginated_results(data)
 
         if not tasks:
-            return "No task tasks found"
+            return "No task found"
 
         result = f"Found {len(tasks)} task templates\n\n"
         result += "|ID|Name|Description|Ref ID|Status|Recurrent|Enabled|Task Date|\n"
