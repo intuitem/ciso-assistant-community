@@ -818,8 +818,11 @@ async def update_task_template(
 
         if not payload:
             return "Error: No fields provided to update"
+            
+        # Resolve task name to ID if needed
+        resolved_task_id = resolve_task_template_id(task_id)
 
-        res = make_patch_request(f"/task-templates/{task_id}/", payload)
+        res = make_patch_request(f"/task-templates/{resolved_task_id}/", payload)
 
         if res.status_code == 200:
             task = res.json()
