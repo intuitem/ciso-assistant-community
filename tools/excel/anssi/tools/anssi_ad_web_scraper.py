@@ -1,6 +1,6 @@
 """
-    ANSSI Active Directory Control Points Extractor
-    -----------------------------------------------
+    ANSSI Active Directory (AD) Security Assessment Checklist Extractor
+    -------------------------------------------------------------------
 
     This script programmatically extracts the full content of the ANSSI "Active Directory
     Control Points" checklist (https://www.cert.ssi.gouv.fr/uploads/ad_checklist.html).
@@ -829,7 +829,7 @@ def extract_checklist(framework_in_english : bool = False):
 # ---------------- Main ---------------- #
 
 # A 2nd "framework_in_english" has been added to let external calls to select a language (the default one will be used if no boolean given)
-def main(framework_in_english : bool = False):
+def main(framework_in_english: bool = False, files_suffix: str = None):
     
     print(f"⌛ Extracting Framework from website \"{URL}\"...")
     
@@ -841,9 +841,12 @@ def main(framework_in_english : bool = False):
     checklist = data.get("checklist", [])
     
     print(f"ℹ️  Elements found in checklist: {len(checklist)} ")
+    
+    markdown_filename = f"checklist{'_' + files_suffix if files_suffix else ""}.md"
+    json_filename = f"checklist_markdown{'_' + files_suffix if files_suffix else ""}.json"
 
     # --- Save everything into a single Markdown file ---
-    with open("checklist.md", "w", encoding="utf-8") as f:
+    with open(markdown_filename, "w", encoding="utf-8") as f:
 
         # 1) Root-level elements (intro + about_ctrl_points)
         for root in root_elements:
@@ -864,13 +867,13 @@ def main(framework_in_english : bool = False):
             f.write(entry["recommendation_markdown"])
             f.write("\n\n---\n\n")
 
-    print("✅ Markdown file saved: checklist.md")
+    print(f"✅ Markdown file saved: \"{markdown_filename}\"")
 
     # --- Save JSON ---
-    with open("checklist_markdown.json", "w", encoding="utf-8") as f:
+    with open(json_filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-    print("✅ JSON file saved: checklist_markdown.json")
+    print(f"✅ JSON file saved: \"{json_filename}\"")
 
 
 
