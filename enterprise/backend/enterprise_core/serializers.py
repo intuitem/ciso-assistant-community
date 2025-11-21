@@ -7,7 +7,7 @@ from core.serializers import (
 from core.serializer_fields import FieldsRelatedField
 from iam.models import Folder, User, Role
 
-from .models import ClientSettings
+from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
 
 import structlog
@@ -135,12 +135,15 @@ class LogEntrySerializer(serializers.ModelSerializer):
     """
 
     actor = serializers.SerializerMethodField(method_name="get_actor")
-    action = serializers.CharField(source="get_action_display")
+    action = serializers.SerializerMethodField(method_name="get_action_display")
     content_type = serializers.SerializerMethodField(method_name="get_content_type")
     folder = serializers.CharField(source="additional_data.folder", read_only=True)
 
+    def get_action_display(self, obj):
+        return LogEntryAction(obj.action).to_string()
+
     def get_actor(self, obj):
-        return obj.additional_data["user_email"] if obj.additional_data else None
+        return obj.additional_data.get("user_email") if obj.additional_data else None
 
     def get_content_type(self, obj):
         return obj.content_type.name
