@@ -250,6 +250,21 @@
 				</div>
 			</div>
 
+			{#if validation_flow.filtering_labels && validation_flow.filtering_labels.length > 0}
+				<div class="space-y-2">
+					<div class="text-sm font-medium text-gray-700">{m.filteringLabels()}</div>
+					<div class="flex flex-wrap gap-2">
+						{#each validation_flow.filtering_labels as label}
+							<Anchor href="/filtering-labels/{label.id}" class="anchor">
+								<span class="badge preset-tonal-primary px-2 py-1 rounded text-xs">
+									{label.str}
+								</span>
+							</Anchor>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
 			<div class="space-y-2">
 				<div class="text-sm font-medium text-gray-700">{m.requester()}</div>
 				<div class="text-sm text-gray-600">
@@ -321,20 +336,48 @@
 	<!-- Associated Links Section -->
 	<div class="card px-6 py-4 bg-white shadow-lg mb-4">
 		<h2 class="text-xl font-semibold mb-4">{m.associatedObjects()}</h2>
-		<div class="grid grid-cols-1 gap-4">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			{#each Object.entries(validation_flow) as [key, value]}
 				{#if Array.isArray(value) && value.length > 0 && modelDisplayNames[key]}
 					<div class="space-y-2">
 						<h3 class="text-sm font-medium text-gray-700">{modelDisplayNames[key]}</h3>
-						<ul class="space-y-1">
+						<div class="space-y-2">
 							{#each value as item}
-								<li>
-									<Anchor href="/{modelUrlNames[key]}/{item.id}" class="anchor text-sm">
-										{item.str}
-									</Anchor>
-								</li>
+								<div class="border rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition">
+									<div class="flex items-start justify-between gap-2 mb-2">
+										<Anchor href="/{modelUrlNames[key]}/{item.id}" class="anchor text-sm font-medium">
+											{item.str}
+										</Anchor>
+										{#if item.status}
+											<span
+												class="badge {statusColors[item.status] ||
+													'bg-gray-100 text-gray-800'} px-2 py-1 rounded text-xs font-medium whitespace-nowrap flex-shrink-0"
+											>
+												{safeTranslate(item.status)}
+											</span>
+										{/if}
+									</div>
+									<div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
+										{#if item.perimeter}
+											<div class="flex items-center gap-1">
+												<i class="fa-solid fa-draw-polygon text-gray-400"></i>
+												<span>{m.perimeter()}:</span>
+												<Anchor href="/perimeters/{item.perimeter.id}" class="anchor">
+													{item.perimeter.str}
+												</Anchor>
+											</div>
+										{/if}
+										{#if item.updated_at}
+											<div class="flex items-center gap-1">
+												<i class="fa-solid fa-clock text-gray-400"></i>
+												<span>{m.lastUpdate()}:</span>
+												<span>{formatDateOrDateTime(item.updated_at, getLocale())}</span>
+											</div>
+										{/if}
+									</div>
+								</div>
 							{/each}
-						</ul>
+						</div>
 					</div>
 				{/if}
 			{/each}
