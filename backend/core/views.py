@@ -1330,13 +1330,12 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 )
 
             # Verify folder exists and user has access
-            try:
-                folder = Folder.objects.get(id=folder_id)
-            except Folder.DoesNotExist:
+            if not RoleAssignment.is_object_readable(request.user, Folder, folder_id):
                 return Response(
                     {"error": "Folder not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
+            folder = Folder.objects.get(id=folder_id)
 
             # Parse the assets text with indentation (2 spaces per level)
             lines = [line.rstrip() for line in assets_text.split("\n") if line.strip()]

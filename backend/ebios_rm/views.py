@@ -2,6 +2,7 @@ import django_filters as df
 from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
 from core.models import Terminology
+from iam.models import RoleAssignment
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
     EbiosRMStudy,
@@ -425,13 +426,14 @@ class FearedEventViewSet(BaseModelViewSet):
                 )
 
             # Verify study exists and user has access
-            try:
-                study = EbiosRMStudy.objects.get(id=study_id)
-            except EbiosRMStudy.DoesNotExist:
+            if not RoleAssignment.is_object_readable(
+                request.user, EbiosRMStudy, study_id
+            ):
                 return Response(
                     {"error": "EBIOS RM Study not found"},
                     status=http_status.HTTP_404_NOT_FOUND,
                 )
+            study = EbiosRMStudy.objects.get(id=study_id)
 
             # Parse the feared events text
             lines = [
