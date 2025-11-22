@@ -2761,7 +2761,6 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         """
         Automatically lock/unlock associated objects based on validation status.
         - Lock when status becomes 'accepted'
-        - Unlock when status changes from 'accepted' to 'revoked'
         """
         # Only act on specific transitions
         should_lock = new_status == "accepted"
