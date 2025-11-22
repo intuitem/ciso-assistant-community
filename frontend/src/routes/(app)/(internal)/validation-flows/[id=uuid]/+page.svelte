@@ -220,8 +220,27 @@
 					<div class="text-sm text-gray-500 italic">
 						{m.noActionsAvailableForThisStatus()}
 					</div>
+				{:else if validation_flow.status === 'submitted' && isRequester}
+					<!-- Requester actions for submitted status - can drop their own request -->
+					<div class="flex flex-col gap-2">
+						<button
+							type="button"
+							onclick={() => openObservationModal('drop')}
+							class="btn preset-filled-surface-500"
+							data-testid="drop-button"
+						>
+							<i class="fa-solid fa-trash mr-2"></i>
+							{m.drop()}
+						</button>
+						<div
+							class="alert bg-blue-100 border border-blue-300 text-blue-800 px-4 py-3 rounded-lg text-xs"
+						>
+							<i class="fa-solid fa-info-circle mr-2"></i>
+							{m.onlyApproverCanModify()}
+						</div>
+					</div>
 				{:else if validation_flow.status === 'submitted'}
-					<!-- Not the approver for submitted status -->
+					<!-- Not the approver or requester for submitted status -->
 					<div
 						class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg text-sm"
 					>

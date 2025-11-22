@@ -2695,13 +2695,26 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
 
             # Define who can modify based on current status
             if current_status in ["submitted", "accepted"]:
-                # Only approver can change status from submitted or accepted
-                if instance.approver != request_user:
-                    raise PermissionDenied(
-                        {
-                            "error": "Only the assigned approver can modify this validation"
-                        }
-                    )
+                # For submitted status: approver can do any action, requester can only drop
+                if current_status == "submitted" and new_status == "dropped":
+                    # Allow requester to drop their own request
+                    if (
+                        instance.requester != request_user
+                        and instance.approver != request_user
+                    ):
+                        raise PermissionDenied(
+                            {
+                                "error": "Only the requester or approver can drop this validation"
+                            }
+                        )
+                else:
+                    # Only approver can change status from submitted or accepted (for other actions)
+                    if instance.approver != request_user:
+                        raise PermissionDenied(
+                            {
+                                "error": "Only the assigned approver can modify this validation"
+                            }
+                        )
             elif current_status == "change_requested":
                 # Only requester can change status from change_requested
                 if instance.requester != request_user:
