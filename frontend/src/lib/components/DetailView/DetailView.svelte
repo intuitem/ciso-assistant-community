@@ -579,7 +579,7 @@
 			</div>
 			<!-- Right side - Widgets area (only if widgets exist) -->
 			{#if hasWidgets}
-				<div class="flex-[2] min-w-[300px] flex flex-col">
+				<div class="flex-1 min-w-[300px] flex flex-col">
 					<!-- Slot for widgets and metrics -->
 					<div class="h-full">
 						{@render widgets?.()}

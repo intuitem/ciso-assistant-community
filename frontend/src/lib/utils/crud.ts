@@ -1536,7 +1536,20 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings_assessment', urlModel: 'findings' },
 			{ field: 'findings_assessments', urlModel: 'evidences' }
 		],
-		selectFields: [{ field: 'status' }, { field: 'category' }]
+		selectFields: [{ field: 'status' }, { field: 'category' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'perimeter' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'version' },
+			{ field: 'status' },
+			{ field: 'observation' },
+			{ field: 'is_locked' }
+		]
 	},
 	findings: {
 		name: 'finding',
