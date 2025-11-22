@@ -935,7 +935,19 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [{ field: 'bia', urlModel: 'asset-assessments' }],
 		selectFields: [{ field: 'status' }],
-		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }]
+		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'name' },
+			{ field: 'perimeter' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'description' },
+			{ field: 'version' },
+			{ field: 'is_locked' },
+			{ field: 'observation' }
+		]
 	},
 	'asset-assessments': {
 		endpointUrl: 'resilience/asset-assessments',

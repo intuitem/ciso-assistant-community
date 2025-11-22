@@ -723,7 +723,8 @@ export const BusinessImpactAnalysisSchema = z.object({
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional()
+	reviewers: z.array(z.string().optional()).optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const AssetAssessmentSchema = z.object({

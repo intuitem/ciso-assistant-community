@@ -51,6 +51,7 @@
 		widgets?: import('svelte').Snippet;
 		actions?: import('svelte').Snippet;
 		disableCreate?: boolean;
+		disableEdit?: boolean;
 		disableDelete?: boolean;
 	}
 
@@ -78,6 +79,7 @@
 		widgets,
 		actions,
 		disableCreate = false,
+		disableEdit = false,
 		disableDelete = false
 	}: Props = $props();
 
@@ -737,6 +739,7 @@
 									})}
 									source={model.table}
 									disableCreate={disableCreate || model.disableCreate}
+									disableEdit={disableEdit || model.disableEdit}
 									disableDelete={disableDelete || model.disableDelete}
 									deleteForm={model.deleteForm}
 									URLModel={urlmodel}

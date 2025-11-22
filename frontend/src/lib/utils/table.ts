@@ -1685,7 +1685,12 @@ export const listViewFields = {
 	},
 	'business-impact-analysis': {
 		head: ['name', 'perimeter', 'status'],
-		body: ['name', 'perimeter', 'status']
+		body: ['name', 'perimeter', 'status'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			perimeter: PERIMETER_FILTER,
+			status: RISK_ASSESSMENT_STATUS_FILTER
+		}
 	},
 	'asset-assessments': {
 		head: [

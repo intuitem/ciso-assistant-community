@@ -2044,6 +2044,7 @@
 	"lockedRiskScenarioMessage": "This risk scenario cannot be modified because its parent risk assessment is locked.",
 	"lockedRequirementAssessmentMessage": "This requirement cannot be modified because its parent compliance assessment is locked.",
 	"lockedFindingMessage": "This finding cannot be modified because its parent findings assessment is locked.",
+	"parentAssessmentLocked": "The parent assessment is locked",
 	"impactEffortMatrixHint": "Hint: you can use right-click to quickly toggle the impact and effort estimates. Refresh the page to redraw the matrix",
 	"resetFilter": "Reset filter",
 	"noActiveFilter": "No active filter",

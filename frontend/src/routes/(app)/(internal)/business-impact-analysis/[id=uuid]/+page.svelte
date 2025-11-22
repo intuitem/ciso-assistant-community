@@ -44,7 +44,24 @@
 	}
 </script>
 
-<DetailView {data}>
+{#if business_impact_analysis.is_locked}
+	<div
+		class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm mx-4 mt-4"
+	>
+		<div class="flex items-center">
+			<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
+			<span class="font-medium">{m.lockedAssessment()}</span>
+			<span class="ml-2 text-sm">{m.lockedAssessmentMessage()}</span>
+		</div>
+	</div>
+{/if}
+
+<DetailView
+	{data}
+	disableCreate={business_impact_analysis.is_locked}
+	disableEdit={business_impact_analysis.is_locked}
+	disableDelete={business_impact_analysis.is_locked}
+>
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
 			<Anchor
