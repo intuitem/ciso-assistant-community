@@ -1868,19 +1868,19 @@ export const listViewFields = {
 	'operational-scenarios': {
 		head: [
 			'is_selected',
+			'strategicScenario',
 			'attackPath',
 			'operatingModes',
 			'operatingModesDescription',
-			'likelihood',
-			'strategicScenario'
+			'likelihood'
 		],
 		body: [
 			'is_selected',
+			'strategic_scenario',
 			'attack_path',
 			'operating_modes',
 			'operating_modes_description',
-			'likelihood',
-			'strategic_scenario'
+			'likelihood'
 		],
 		filters: {
 			threats: THREAT_FILTER,
