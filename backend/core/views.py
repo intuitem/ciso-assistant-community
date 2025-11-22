@@ -1,3 +1,4 @@
+from django.db.utils import OperationalError, ProgrammingError
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
@@ -158,10 +159,29 @@ SHORT_CACHE_TTL = 2  # mn
 MED_CACHE_TTL = 5  # mn
 LONG_CACHE_TTL = 60  # mn
 
-MAPPING_MAX_DETPH = 3
+
+MAPPING_MAX_DEPTH = 3
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
+
+
+def get_mapping_max_depth():
+    """Get mapping max depth from general settings at runtime; safe during migrations."""
+    try:
+        gs = GlobalSettings.objects.filter(name="general").only("value").first()
+        if not gs or not isinstance(getattr(gs, "value", None), dict):
+            return MAPPING_MAX_DEPTH
+        raw = gs.value.get("mapping_max_depth", MAPPING_MAX_DEPTH)
+        try:
+            val = int(raw)
+        except (TypeError, ValueError):
+            return MAPPING_MAX_DEPTH
+        # Clamp to UI constraints
+        return max(2, min(5, val))
+    except (OperationalError, ProgrammingError):
+        # DB not ready (e.g., migrate, makemigrations)
+        return MAPPING_MAX_DEPTH
 
 
 def escape_excel_formula(value):
@@ -6814,12 +6834,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         from core.mappings.engine import engine
 
         audit_from_results = engine.load_audit_fields(audit)
+        max_depth = get_mapping_max_depth()
         data = []
         for dest_urn in sorted(
             [
                 p[-1]
                 for p in engine.all_paths_from(
-                    source_urn=audit.framework.urn, max_depth=MAPPING_MAX_DETPH
+                    source_urn=audit.framework.urn, max_depth=max_depth
                 )
             ]
         ):
@@ -6827,7 +6848,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 audit_from_results,
                 audit.framework.urn,
                 dest_urn,
-                max_depth=MAPPING_MAX_DETPH,
+                max_depth=max_depth,
             )
             if best_results:
                 framework = Framework.objects.filter(urn=dest_urn).first()
@@ -7406,9 +7427,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 source_urn = baseline.framework.urn
                 audit_from_results = engine.load_audit_fields(baseline)
                 dest_urn = serializer.validated_data["framework"].urn
+                max_depth = get_mapping_max_depth()
 
                 best_results, _ = engine.best_mapping_inferences(
-                    audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
+                    audit_from_results, source_urn, dest_urn, max_depth
                 )
 
                 requirement_assessments_to_update: list[RequirementAssessment] = []
@@ -8266,7 +8288,7 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
     def graph_data_list(self, request):
         from core.mappings.engine import engine
 
-        max_depth = MAPPING_MAX_DETPH
+        max_depth = get_mapping_max_depth()
 
         all_paths = engine.get_mapping_graph(max_depth=max_depth)
 
