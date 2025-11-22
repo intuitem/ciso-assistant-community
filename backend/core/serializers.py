@@ -385,6 +385,11 @@ class AssetWriteSerializer(BaseModelSerializer):
         allow_null=True,
         write_only=True,
     )
+    parent_assets = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Asset.objects.all(),
+        required=False,
+    )
     support_assets = serializers.PrimaryKeyRelatedField(
         source="child_assets",
         many=True,
@@ -394,6 +399,11 @@ class AssetWriteSerializer(BaseModelSerializer):
     solutions = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Solution.objects.all(),
+        required=False,
+    )
+    security_exceptions = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=SecurityException.objects.all(),
         required=False,
     )
 
@@ -421,27 +431,26 @@ class AssetWriteSerializer(BaseModelSerializer):
         return data
 
     def create(self, validated_data):
+        parent_assets = validated_data.pop("parent_assets", None)
         child_assets = validated_data.pop("child_assets", None)
         asset = super().create(validated_data)
 
+        if parent_assets is not None:
+            asset.parent_assets.set(parent_assets)
         if child_assets is not None:
             asset.child_assets.set(child_assets)
 
         return asset
 
     def update(self, instance, validated_data):
+        parent_assets = validated_data.pop("parent_assets", None)
         child_assets = validated_data.pop("child_assets", None)
-        old_type = instance.type
-        new_type = validated_data.get("type", old_type)
-
-        # If switching to PRIMARY type, clear parent_assets and prevent reapplication
-        if old_type != new_type and new_type == Asset.Type.PRIMARY:
-            validated_data.pop("parent_assets", None)
-            instance.parent_assets.clear()
 
         instance = super().update(instance, validated_data)
 
-        # Set support_assets (child_assets) if provided (both PRIMARY and SUPPORT can have children)
+        # Set parent_assets and support_assets (child_assets) if provided
+        if parent_assets is not None:
+            instance.parent_assets.set(parent_assets)
         if child_assets is not None:
             instance.child_assets.set(child_assets)
 
@@ -707,6 +716,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
         source="risk_assessment.perimeter", fields=["id", "name", "folder"]
     )
     version = serializers.StringRelatedField(source="risk_assessment.version")
+    operational_scenario = FieldsRelatedField(["id", "name", "ebios_rm_study"])
     threats = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
@@ -2068,6 +2078,9 @@ class SecurityExceptionWriteSerializer(BaseModelSerializer):
     applied_controls = serializers.PrimaryKeyRelatedField(
         many=True, queryset=AppliedControl.objects.all(), required=False
     )
+    assets = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Asset.objects.all(), required=False
+    )
 
     class Meta:
         model = SecurityException
@@ -2081,6 +2094,7 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
     approver = FieldsRelatedField()
     severity = serializers.CharField(source="get_severity_display")
     associated_objects_count = serializers.SerializerMethodField()
+    assets = FieldsRelatedField(many=True)
 
     def get_associated_objects_count(self, obj):
         """Prefer annotated or prefetched counts to avoid extra DB queries."""

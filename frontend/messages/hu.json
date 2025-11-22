@@ -978,6 +978,7 @@
 	"samlCertificateHelpText": "Saját tanúsítványt adhat meg, vagy az alkalmazás generálhatja.",
 	"samlAuthnRequestSignedHelpText": "Ha engedélyezve van, a SAML hitelesítési kérelem aláírva lesz az alábbi privát kulccsal. A megfelelő nyilvános tanúsítvány elküldve lesz az Azonosítószolgáltatónak, hogy ellenőrizhesse az aláírást.",
 	"downloadCertificate": "Tanúsítvány letöltése",
-	"viewMore": "Több megjelenítése",
-	"viewLess": "Kevesebb megjelenítése"
+	"viewMore": "Megtekintés több",
+	"viewLess": "Megtekintés kevesebb",
+	"loginFailed": "Sikertelen bejelentkezés"
 }

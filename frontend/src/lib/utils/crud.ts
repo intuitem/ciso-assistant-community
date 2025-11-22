@@ -489,6 +489,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'security_capabilities', tooltip: 'securityCapabilitiesTooltip' },
 			{ field: 'recovery_capabilities', tooltip: 'recoveryCapabilitiesTooltip' },
 			{ field: 'reference_link' },
+			{ field: 'security_exceptions' },
 			{ field: 'solutions' },
 			{ field: 'observation' }
 		],
@@ -1336,6 +1337,11 @@ export const URL_MODEL_MAP: ModelMap = {
 				endpointUrl: 'ebios-rm/attack-paths',
 				urlParams: 'is_selected=true&used=false&ebios_rm_study=',
 				detail: true
+			},
+			{
+				field: 'strategic_scenario',
+				urlModel: 'strategic-scenarios',
+				endpointUrl: 'ebios-rm/strategic-scenarios'
 			}
 		],
 		reverseForeignKeyFields: [
@@ -1432,7 +1438,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'owners', urlModel: 'users' },
 			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
-			{ field: 'folder', urlModel: 'folders' }
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'assets', urlModel: 'assets' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
 		reverseForeignKeyFields: [
@@ -2107,6 +2114,16 @@ export const getModelInfo = (model: urlModel | string): ModelMapEntry => {
 export const urlParamModelVerboseName = (model: string): string => {
 	const modelInfo = getModelInfo(model);
 	return modelInfo?.localName || modelInfo?.verboseName || model;
+};
+
+export const urlParamModelDescriptionKey = (model: string): string => {
+	// Convert model URL to camelCase description key
+	// e.g., "risk-assessments" → "riskAssessmentsDescription"
+	const camelCase = model
+		.split('-')
+		.map((word, index) => (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+		.join('');
+	return `${camelCase}Description`;
 };
 
 export const urlParamModelForeignKeyFields = (model: string): ForeignKeyField[] => {

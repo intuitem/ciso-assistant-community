@@ -1216,6 +1216,7 @@ def startup(sender: AppConfig, **kwargs):
         "interface_agg_scenario_matrix": False,
         "currency": "€",
         "daily_rate": 500,
+        "mapping_max_depth": 3,
     }
     try:
         settings, _ = GlobalSettings.objects.get_or_create(
