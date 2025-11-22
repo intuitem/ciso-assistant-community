@@ -2663,10 +2663,17 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
             folder=instance.folder,
         )
 
-        # Send notification to approver
-        from core.tasks import send_validation_flow_created_notification
+        # Send notification to approver (best-effort only, don't break creation)
+        try:
+            from core.tasks import send_validation_flow_created_notification
 
-        send_validation_flow_created_notification(instance)
+            send_validation_flow_created_notification(instance)
+        except Exception as e:
+            logger.error(
+                "Failed to send validation flow creation notification",
+                validation_flow_id=instance.id,
+                ref_id=instance.ref_id,
+            )
 
         return instance
 

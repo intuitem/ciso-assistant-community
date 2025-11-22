@@ -1256,9 +1256,9 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'status',
-			'validationDeadline',
 			'createdAt',
 			'requester',
+			'validationDeadline',
 			'approver',
 			'linkedModels',
 			'labels',
@@ -1267,9 +1267,9 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'status',
-			'validation_deadline',
 			'created_at',
 			'requester',
+			'validation_deadline',
 			'approver',
 			'linked_models',
 			'filtering_labels',
