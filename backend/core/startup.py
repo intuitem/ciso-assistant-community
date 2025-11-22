@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.db.models.signals import post_migrate
 from structlog import get_logger
 
-from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL, FORCE_CREATE_ADMIN
 from core.utils import RoleCodename, UserGroupCodename
 
 logger = get_logger(__name__)
@@ -1196,24 +1196,28 @@ def startup(sender: AppConfig, **kwargs):
     call_command("storelibraries")
     call_command("autoloadlibraries")
 
-    # if superuser defined and does not exist, then create it
-    if (
-        CISO_ASSISTANT_SUPERUSER_EMAIL
-        and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
-    ):
-        try:
-            User.objects.create_superuser(
-                email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
-            )
-        except Exception as e:
-            logger.error("Error creating superuser", exc_info=True)
-
     # add administrators group to superusers (for resiliency)
     administrators = UserGroup.objects.get(
         name="BI-UG-ADM", folder=Folder.get_root_folder()
     )
-    for u in User.objects.filter(is_superuser=True):
-        u.user_groups.add(administrators)
+    if (
+        User.objects.filter(user_groups=administrators).distinct().count() == 0
+        or FORCE_CREATE_ADMIN
+    ):
+        # if superuser defined and does not exist, then create it
+        if (
+            CISO_ASSISTANT_SUPERUSER_EMAIL
+            and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
+        ):
+            try:
+                User.objects.create_superuser(
+                    email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
+                )
+            except Exception as e:
+                logger.error("Error creating superuser", exc_info=True)
+
+        for u in User.objects.filter(is_superuser=True):
+            u.user_groups.add(administrators)
 
     # reset global setings in case of an issue
     default_settings = {
