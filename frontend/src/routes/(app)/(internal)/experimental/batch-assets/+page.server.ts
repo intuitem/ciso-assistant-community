@@ -57,7 +57,9 @@ export const actions: Actions = {
 			return {
 				success: true,
 				created: data.created,
+				reused: data.reused || 0,
 				assets: data.assets,
+				reused_assets: data.reused_assets || [],
 				errors: data.errors
 			};
 		} catch (error) {

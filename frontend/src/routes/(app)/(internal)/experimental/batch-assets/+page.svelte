@@ -22,11 +22,22 @@
 
 	$effect(() => {
 		if (form?.success) {
+			const messages = [];
+			if (form.created > 0) {
+				messages.push(`Created ${form.created} asset(s)`);
+			}
+			if (form.reused > 0) {
+				messages.push(`Reused ${form.reused} existing asset(s)`);
+			}
+			if (form.errors && form.errors.length > 0) {
+				messages.push(`${form.errors.length} error(s)`);
+			}
 			toastStore.trigger({
-				message: `Successfully created ${form.created} asset(s)`
+				message: messages.join(', ')
 			});
 
-			if (form.errors.length === 0) {
+			// Only clear form if there are no errors
+			if (!form.errors || form.errors.length === 0) {
 				assetsText = '';
 				selectedFolderId = '';
 			}
@@ -46,7 +57,7 @@
 	<div class="col-span-2 bg-white shadow-sm py-4 px-6 space-y-2">
 		<div>
 			<h4 class="h4 font-bold">
-				<i class="fa-solid fa-layer-group mr-2"></i>Batch Asset Creation
+				<i class="fa-solid fa-layer-group mr-2"></i>Scratchpad: batch Assets creation
 			</h4>
 			<p class="text-sm">Create multiple assets at once by entering them in the text area below.</p>
 		</div>
@@ -61,9 +72,10 @@
 				<li>Indent with 2 spaces per level to create parent-child relationships</li>
 				<li>Click Create Assets</li>
 			</ol>
-			<div class="mt-3 p-3 bg-gray-50 rounded text-xs">
-				<p class="font-semibold mb-1">Example with multi-level hierarchy:</p>
-				<pre class="font-mono">PR:Customer Database
+			<div class="mt-3 p-3 bg-gray-50 rounded text-xs space-y-2">
+				<div>
+					<p class="font-semibold mb-1">Example with multi-level hierarchy:</p>
+					<pre class="font-mono">PR:Customer Database
   SP:User Data
     SP:Login Data
     SP:Profile Data
@@ -71,6 +83,14 @@
 Web Application
   SP:API Gateway
   SP:Load Balancer</pre>
+				</div>
+				<div class="pt-2 border-t border-gray-200">
+					<p class="font-semibold mb-1">Note:</p>
+					<ul class="list-disc list-inside space-y-1">
+						<li>Assets with the same name in the folder will be reused</li>
+						<li>Errors won't stop the batch process</li>
+					</ul>
+				</div>
 			</div>
 		</div>
 
@@ -123,21 +143,48 @@ Web Application
 		{#if formSubmitted}
 			{#if form?.success}
 				<div class="alert alert-success preset-filled-success-500 mb-4">
-					<div>Successfully created {form.created} asset(s)</div>
+					<div>
+						{#if form.created > 0}Created {form.created} asset(s){/if}
+						{#if form.created > 0 && form.reused > 0}, {/if}
+						{#if form.reused > 0}Reused {form.reused} existing asset(s){/if}
+					</div>
 				</div>
+
 				{#if form.assets && form.assets.length > 0}
-					<div class="space-y-1 mb-4">
-						{#each form.assets as asset}
-							<div class="text-sm">
-								<a href="/assets/{asset.id}" class="text-indigo-600 hover:text-indigo-400">
-									{asset.name}
-								</a>
-								<span class="text-gray-500">({asset.type})</span>
-								{#if asset.parent}
-									<span class="text-gray-400 text-xs">→ child of {asset.parent}</span>
-								{/if}
-							</div>
-						{/each}
+					<div class="mb-4">
+						<h5 class="font-semibold text-sm mb-2 text-green-600">Created Assets:</h5>
+						<div class="space-y-1">
+							{#each form.assets as asset}
+								<div class="text-sm">
+									<a href="/assets/{asset.id}" class="text-indigo-600 hover:text-indigo-400">
+										{asset.name}
+									</a>
+									<span class="text-gray-500">({asset.type})</span>
+									{#if asset.parent}
+										<span class="text-gray-400 text-xs">→ child of {asset.parent}</span>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+				{#if form.reused_assets && form.reused_assets.length > 0}
+					<div class="mb-4">
+						<h5 class="font-semibold text-sm mb-2 text-blue-600">Reused Existing Assets:</h5>
+						<div class="space-y-1">
+							{#each form.reused_assets as asset}
+								<div class="text-sm">
+									<a href="/assets/{asset.id}" class="text-indigo-600 hover:text-indigo-400">
+										{asset.name}
+									</a>
+									<span class="text-gray-500">({asset.type})</span>
+									{#if asset.parent}
+										<span class="text-gray-400 text-xs">→ child of {asset.parent}</span>
+									{/if}
+								</div>
+							{/each}
+						</div>
 					</div>
 				{/if}
 

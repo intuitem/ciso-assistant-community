@@ -1144,6 +1144,7 @@ class AssetViewSet(BaseModelViewSet):
             # Parse the assets text with indentation (2 spaces per level)
             lines = [line.rstrip() for line in assets_text.split("\n") if line.strip()]
             created_assets = []
+            reused_assets = []
             errors = []
             depth_stack = []  # Stack of assets at each depth level
 
@@ -1171,31 +1172,32 @@ class AssetViewSet(BaseModelViewSet):
                 # Trim stack to current depth
                 depth_stack = depth_stack[:depth]
 
-                # Parent is the asset at the previous depth level
-                parent_asset = depth_stack[-1] if depth_stack else None
+                # Parent is the asset at the previous depth level (skip None entries from errors)
+                parent_asset = None
+                if depth_stack:
+                    # Find the last non-None entry in the stack
+                    for i in range(len(depth_stack) - 1, -1, -1):
+                        if depth_stack[i] is not None:
+                            parent_asset = depth_stack[i]
+                            break
 
-                # Create asset using the serializer to respect IAM
-                asset_data = {
-                    "name": asset_name,
-                    "type": asset_type,
-                    "folder": folder_id,
-                }
+                # Check if asset already exists in the folder
+                existing_asset = Asset.objects.filter(
+                    name=asset_name, folder=folder_id
+                ).first()
 
-                # Add parent relationship if exists
-                if parent_asset:
-                    asset_data["parent_assets"] = [parent_asset.id]
+                if existing_asset:
+                    # Reuse existing asset
+                    asset = existing_asset
 
-                serializer = AssetWriteSerializer(
-                    data=asset_data, context={"request": request}
-                )
-
-                if serializer.is_valid():
-                    asset = serializer.save()
+                    # Update parent relationship if needed and parent exists
+                    if parent_asset and parent_asset not in asset.parent_assets.all():
+                        asset.parent_assets.add(parent_asset)
 
                     # Add to stack for potential children
                     depth_stack.append(asset)
 
-                    created_assets.append(
+                    reused_assets.append(
                         {
                             "id": str(asset.id),
                             "name": asset.name,
@@ -1205,16 +1207,56 @@ class AssetViewSet(BaseModelViewSet):
                         }
                     )
                 else:
-                    errors.append({"line": line_content, "errors": serializer.errors})
+                    # Create new asset using the serializer to respect IAM
+                    asset_data = {
+                        "name": asset_name,
+                        "type": asset_type,
+                        "folder": folder_id,
+                    }
+
+                    # Add parent relationship if exists
+                    if parent_asset:
+                        asset_data["parent_assets"] = [parent_asset.id]
+
+                    serializer = AssetWriteSerializer(
+                        data=asset_data, context={"request": request}
+                    )
+
+                    if serializer.is_valid():
+                        asset = serializer.save()
+
+                        # Add to stack for potential children
+                        depth_stack.append(asset)
+
+                        created_assets.append(
+                            {
+                                "id": str(asset.id),
+                                "name": asset.name,
+                                "type": asset.get_type_display(),
+                                "parent": parent_asset.name if parent_asset else None,
+                                "depth": depth,
+                            }
+                        )
+                    else:
+                        # Error creating asset - add None to stack to maintain depth
+                        depth_stack.append(None)
+                        errors.append(
+                            {
+                                "line": line_content,
+                                "errors": serializer.errors,
+                            }
+                        )
 
             return Response(
                 {
                     "created": len(created_assets),
+                    "reused": len(reused_assets),
                     "assets": created_assets,
+                    "reused_assets": reused_assets,
                     "errors": errors,
                 },
                 status=status.HTTP_201_CREATED
-                if created_assets
+                if created_assets or reused_assets
                 else status.HTTP_400_BAD_REQUEST,
             )
 
