@@ -6894,17 +6894,35 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         verbose_name_plural = "Validation flows"
 
     def save(self, *args, **kwargs):
+        from django.db import IntegrityError, transaction
+
         if not self.ref_id:
-            self.ref_id = self.get_default_ref_id()
-        super().save(*args, **kwargs)
+            max_retries = 3
+            for attempt in range(max_retries):
+                self.ref_id = self.get_default_ref_id()
+                try:
+                    with transaction.atomic():
+                        super().save(*args, **kwargs)
+                        return  # Success
+                except IntegrityError:
+                    if attempt == max_retries - 1:
+                        raise  # Final attempt failed, propagate error
+                    self.ref_id = None
+        else:
+            super().save(*args, **kwargs)
 
     @classmethod
-    def get_default_ref_id(cls):
-        """return default ref_id for validation flow (globally unique)"""
-        flows_ref_ids = [x.ref_id for x in cls.objects.all() if x.ref_id]
-        nb_flows = len(flows_ref_ids) + 1
-        candidates = [f"VAL.{i:06d}" for i in range(1, nb_flows + 1)]
-        return next(x for x in candidates if x not in flows_ref_ids)
+    def get_default_ref_id(cls) -> str:
+        """Return globally unique ref_id for validation flow (VAL.NNNNNN format)"""
+        last = cls.objects.filter(ref_id__startswith="VAL.").order_by("-ref_id").first()
+        if not last or not last.ref_id:
+            return "VAL.000001"
+        try:
+            suffix = int(last.ref_id.split(".")[1])
+        except (IndexError, ValueError):
+            # Fallback if existing data is malformed
+            suffix = 0
+        return f"VAL.{suffix + 1:06d}"
 
     @property
     def linked_models(self) -> list[str]:
