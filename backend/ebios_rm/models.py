@@ -783,6 +783,14 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         return result
 
     @property
+    def form_display_name(self):
+        """Returns attack path name with strategic scenario for form dropdown display"""
+        base_name = self.name or f"Attack Path {str(self.id)[:8]}"
+        if self.strategic_scenario:
+            return f"{base_name} ({self.strategic_scenario.name})"
+        return base_name
+
+    @property
     def ro_to_couple(self):
         return self.strategic_scenario.ro_to_couple
 
