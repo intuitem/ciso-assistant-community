@@ -101,6 +101,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "risk_matrix_swap_axes": False,
             "risk_matrix_flip_vertical": False,
             "risk_matrix_labels": "ISO",
+            "mapping_max_depth": 3,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
