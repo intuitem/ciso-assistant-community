@@ -1302,6 +1302,167 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
     }
 
+    @action(detail=False, methods=["post"], url_path="batch-create")
+    def batch_create(self, request):
+        """
+        Batch create multiple assets from a text list with parent-child relationships.
+        Expected format:
+        {
+            "assets_text": "PR:Parent Asset\\n  SP:Child Asset 1\\n  SP:Child Asset 2",
+            "folder": "folder-uuid"
+        }
+        Lines with leading spaces (2+) are children of the previous non-indented line.
+        """
+        try:
+            assets_text = request.data.get("assets_text", "")
+            folder_id = request.data.get("folder")
+
+            if not assets_text:
+                return Response(
+                    {"error": "assets_text is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if not folder_id:
+                return Response(
+                    {"error": "folder is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Verify folder exists and user has access
+            if not RoleAssignment.is_object_readable(request.user, Folder, folder_id):
+                return Response(
+                    {"error": "Folder not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            folder = Folder.objects.get(id=folder_id)
+
+            # Parse the assets text with indentation (2 spaces per level)
+            lines = [line.rstrip() for line in assets_text.split("\n") if line.strip()]
+            created_assets = []
+            reused_assets = []
+            errors = []
+            depth_stack = []  # Stack of assets at each depth level
+
+            for line in lines:
+                # Count leading spaces and calculate depth (2 spaces = 1 level)
+                leading_spaces = len(line) - len(line.lstrip())
+                depth = leading_spaces // 2
+                line_content = line.strip()
+
+                # Check for type prefix (SP: or PR:)
+                asset_type = Asset.Type.SUPPORT  # default
+                asset_name = line_content
+
+                if line_content.upper().startswith("SP:"):
+                    asset_type = Asset.Type.SUPPORT
+                    asset_name = line_content[3:].strip()
+                elif line_content.upper().startswith("PR:"):
+                    asset_type = Asset.Type.PRIMARY
+                    asset_name = line_content[3:].strip()
+
+                if not asset_name:
+                    errors.append({"line": line_content, "error": "Empty asset name"})
+                    continue
+
+                # Trim stack to current depth
+                depth_stack = depth_stack[:depth]
+
+                # Parent is the asset at the previous depth level (skip None entries from errors)
+                parent_asset = None
+                if depth_stack:
+                    # Find the last non-None entry in the stack
+                    for i in range(len(depth_stack) - 1, -1, -1):
+                        if depth_stack[i] is not None:
+                            parent_asset = depth_stack[i]
+                            break
+
+                # Check if asset already exists in the folder
+                existing_asset = Asset.objects.filter(
+                    name=asset_name, folder=folder_id
+                ).first()
+
+                if existing_asset:
+                    # Reuse existing asset
+                    asset = existing_asset
+
+                    # Update parent relationship if needed and parent exists
+                    if parent_asset and parent_asset not in asset.parent_assets.all():
+                        asset.parent_assets.add(parent_asset)
+
+                    # Add to stack for potential children
+                    depth_stack.append(asset)
+
+                    reused_assets.append(
+                        {
+                            "id": str(asset.id),
+                            "name": asset.name,
+                            "type": asset.get_type_display(),
+                            "parent": parent_asset.name if parent_asset else None,
+                            "depth": depth,
+                        }
+                    )
+                else:
+                    # Create new asset using the serializer to respect IAM
+                    asset_data = {
+                        "name": asset_name,
+                        "type": asset_type,
+                        "folder": folder_id,
+                    }
+
+                    # Add parent relationship if exists
+                    if parent_asset:
+                        asset_data["parent_assets"] = [parent_asset.id]
+
+                    serializer = AssetWriteSerializer(
+                        data=asset_data, context={"request": request}
+                    )
+
+                    if serializer.is_valid():
+                        asset = serializer.save()
+
+                        # Add to stack for potential children
+                        depth_stack.append(asset)
+
+                        created_assets.append(
+                            {
+                                "id": str(asset.id),
+                                "name": asset.name,
+                                "type": asset.get_type_display(),
+                                "parent": parent_asset.name if parent_asset else None,
+                                "depth": depth,
+                            }
+                        )
+                    else:
+                        # Error creating asset - add None to stack to maintain depth
+                        depth_stack.append(None)
+                        errors.append(
+                            {
+                                "line": line_content,
+                                "errors": serializer.errors,
+                            }
+                        )
+
+            return Response(
+                {
+                    "created": len(created_assets),
+                    "reused": len(reused_assets),
+                    "assets": created_assets,
+                    "reused_assets": reused_assets,
+                    "errors": errors,
+                },
+                status=status.HTTP_201_CREATED
+                if created_assets or reused_assets
+                else status.HTTP_400_BAD_REQUEST,
+            )
+
+        except Exception as e:
+            logger.error(f"Error in batch asset creation: {str(e)}")
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
 
 class AssetClassViewSet(BaseModelViewSet):
     model = AssetClass
