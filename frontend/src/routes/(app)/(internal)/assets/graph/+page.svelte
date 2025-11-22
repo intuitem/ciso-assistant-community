@@ -3,6 +3,7 @@
 	import GraphExplorer from '$lib/components/DataViz/GraphExplorer.svelte';
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
+	import { goto } from '$lib/utils/breadcrumbs';
 
 	interface Props {
 		data: PageData;
@@ -35,6 +36,19 @@
 		{/if}
 	</div>
 	<div class="w-full h-screen">
-		<GraphExplorer title="Assets Explorer" data={data.data} edgeLength={100} maxLegendItems={15} />
+		<GraphExplorer
+			title="Assets Explorer"
+			data={data.data}
+			edgeLength={100}
+			maxLegendItems={15}
+			onNodeDoubleClick={(params) => {
+				if (params.dataType === 'node' && params.data?.value !== 'Domain') {
+					goto(`/assets/${params.data?.pk}`, {
+						breadcrumbAction: 'push',
+						label: params.data?.name || 'Asset Detail'
+					});
+				}
+			}}
+		/>
 	</div>
 </div>
