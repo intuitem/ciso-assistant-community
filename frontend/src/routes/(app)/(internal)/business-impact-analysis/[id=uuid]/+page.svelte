@@ -4,6 +4,7 @@
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { page } from '$app/state';
+	import { invalidateAll } from '$app/navigation';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
@@ -21,7 +22,7 @@
 	let { data }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
-	const business_impact_analysis = data.data;
+	const business_impact_analysis = $derived(data.data);
 
 	function modalRequestValidation(): void {
 		const modalComponent: ModalComponent = {
@@ -30,8 +31,11 @@
 				form: data.validationFlowForm,
 				model: data.validationFlowModel,
 				debug: false,
-				invalidateAll: false,
-				formAction: '/validation-flows?/create'
+				invalidateAll: true,
+				formAction: '/validation-flows?/create',
+				onConfirm: async () => {
+					await invalidateAll();
+				}
 			}
 		};
 
@@ -88,16 +92,18 @@
 		</div>
 	{/snippet}
 	{#snippet widgets()}
-		<div class="h-full flex flex-col space-y-4">
-			<div class="card p-4 bg-gray-50 shadow-xs grow">
-				<div class="font-bold text-xl mb-4">{m.recoveryInsights()}</div>
-				<div class="flex items-center justify-center">
-					<ActivityTracker metrics={data.metrics} />
+		{#key business_impact_analysis.validation_flows}
+			<div class="h-full flex flex-col space-y-4">
+				<div class="card p-4 bg-gray-50 shadow-xs grow">
+					<div class="font-bold text-xl mb-4">{m.recoveryInsights()}</div>
+					<div class="flex items-center justify-center">
+						<ActivityTracker metrics={data.metrics} />
+					</div>
 				</div>
+				{#if page.data?.featureflags?.validation_flows}
+					<ValidationFlowsSection validationFlows={business_impact_analysis.validation_flows} />
+				{/if}
 			</div>
-			{#if page.data?.featureflags?.validation_flows}
-				<ValidationFlowsSection validationFlows={business_impact_analysis.validation_flows} />
-			{/if}
-		</div>
+		{/key}
 	{/snippet}
 </DetailView>
