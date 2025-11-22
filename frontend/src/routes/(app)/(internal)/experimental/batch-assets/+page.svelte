@@ -145,7 +145,8 @@ Web Application
 				<div class="alert alert-success preset-filled-success-500 mb-4">
 					<div>
 						{#if form.created > 0}Created {form.created} asset(s){/if}
-						{#if form.created > 0 && form.reused > 0}, {/if}
+						{#if form.created > 0 && form.reused > 0},
+						{/if}
 						{#if form.reused > 0}Reused {form.reused} existing asset(s){/if}
 					</div>
 				</div>
