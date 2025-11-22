@@ -2733,9 +2733,48 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                 folder=updated_instance.folder,
             )
 
+            # Auto-lock/unlock associated objects based on status transitions
+            self._manage_associated_objects_lock(
+                updated_instance, current_status, new_status
+            )
+
             return updated_instance
 
         return super().update(instance, validated_data)
+
+    def _manage_associated_objects_lock(
+        self, validation_flow, old_status: str, new_status: str
+    ):
+        """
+        Automatically lock/unlock associated objects based on validation status.
+        - Lock when status becomes 'accepted'
+        - Unlock when status changes from 'accepted' to 'revoked'
+        """
+        # Only act on specific transitions
+        should_lock = new_status == "accepted"
+        should_unlock = old_status == "accepted" and new_status == "revoked"
+
+        if not (should_lock or should_unlock):
+            return
+
+        lock_value = should_lock
+
+        # Get all assessment model fields
+        assessment_fields = [
+            "compliance_assessments",
+            "risk_assessments",
+            "business_impact_analysis",
+            "findings_assessments",
+        ]
+
+        for field_name in assessment_fields:
+            related_manager = getattr(validation_flow, field_name)
+            if related_manager.exists():
+                related_manager.update(is_locked=lock_value)
+                logger.info(
+                    f"{'Locked' if lock_value else 'Unlocked'} {related_manager.count()} "
+                    f"{field_name} for validation flow {validation_flow.ref_id}"
+                )
 
     class Meta:
         model = ValidationFlow
