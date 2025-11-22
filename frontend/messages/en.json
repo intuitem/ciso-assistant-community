@@ -804,6 +804,8 @@
 	"currencyHelpText": "Select the default currency for financial units",
 	"dailyRate": "Daily rate",
 	"dailyRateHelpText": "People-days conversion rate for cost calculation",
+	"mappingMaxDepth": "Mapping max depth",
+	"mappingMaxDepthHelpText": "Maximum depth for exploring framework mapping relationships (2-5). Higher values find more indirect mappings but take longer to compute.",
 	"selectComplianceAssessments": "Select audits",
 	"selectEbiosRm": "Select EBIOS RM studies",
 	"selectEntityAssessments": "Select entity assessments",
