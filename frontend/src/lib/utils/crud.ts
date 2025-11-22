@@ -1651,6 +1651,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'task_template', urlModel: 'task-templates' },
 			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'global_evidences', urlModel: 'evidences' },
 			{ field: 'assigned_to', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
@@ -1658,6 +1659,34 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'evidence',
+				urlModel: 'evidences',
+				endpointUrl: './evidences',
+				disableCreate: true,
+				disableDelete: true
+			}
+		],
+		detailViewFields: [
+			{ field: 'task_template' },
+			{ field: 'folder' },
+			{ field: 'name' },
+			{ field: 'assigned_to' },
+			{ field: 'evidences', tooltip: 'taskNodeLegacyEvidence' },
+			{ field: 'is_recurrent' },
+			{ field: 'global_evidences', tooltip: 'taskNodeNewEvidence' },
+			{ field: 'applied_controls' },
+			{ field: 'compliance_assessments' },
+			{ field: 'assets' },
+			{ field: 'risk_assessments' },
+			{ field: 'findings_assessment' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'due_date' },
+			{ field: 'status' },
+			{ field: 'observation' }
 		]
 	},
 	campaigns: {
