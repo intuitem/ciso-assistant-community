@@ -10,7 +10,7 @@
 
 	import { Switch, ProgressRing, Popover } from '@skeletonlabs/skeleton-svelte';
 
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 
 	import {} from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
@@ -47,13 +47,15 @@
 
 	let { data, form }: Props = $props();
 
+	const compliance_assessment = $derived(data.compliance_assessment);
+
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
 		model: model.name,
-		domain: data.compliance_assessment.folder.id
+		domain: compliance_assessment.folder.id
 	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
 	const canEditRequirementAssessment: boolean =
@@ -297,7 +299,11 @@
 			props: {
 				form: data.validationFlowForm,
 				model: getModelInfo('validation-flows'),
-				formAction: '/validation-flows?/create'
+				formAction: '/validation-flows?/create',
+				invalidateAll: true,
+				onConfirm: async () => {
+					await invalidateAll();
+				}
 			}
 		};
 		const modal: ModalSettings = {
@@ -501,7 +507,9 @@
 					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
 				</div>
 				{#if page.data?.featureflags?.validation_flows}
-					<ValidationFlowsSection validationFlows={data.compliance_assessment.validation_flows} />
+					{#key compliance_assessment.validation_flows}
+						<ValidationFlowsSection validationFlows={compliance_assessment.validation_flows} />
+					{/key}
 				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}

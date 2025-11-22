@@ -15,6 +15,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -26,7 +27,7 @@
 	let chartKey = $state(0);
 
 	const modalStore: ModalStore = getModalStore();
-	const findings_assessment = data.data;
+	const findings_assessment = $derived(data.data);
 
 	function modalRequestValidation(): void {
 		const modalComponent: ModalComponent = {
@@ -35,8 +36,11 @@
 				form: data.validationFlowForm,
 				model: data.validationFlowModel,
 				debug: false,
-				invalidateAll: false,
-				formAction: '/validation-flows?/create'
+				invalidateAll: true,
+				formAction: '/validation-flows?/create',
+				onConfirm: async () => {
+					await invalidateAll();
+				}
 			}
 		};
 
@@ -169,7 +173,9 @@
 					{/key}
 				</div>
 				{#if page.data?.featureflags?.validation_flows}
-					<ValidationFlowsSection validationFlows={findings_assessment.validation_flows} />
+					{#key findings_assessment.validation_flows}
+						<ValidationFlowsSection validationFlows={findings_assessment.validation_flows} />
+					{/key}
 				{/if}
 			</div>
 		{/key}
