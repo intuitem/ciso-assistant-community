@@ -15,6 +15,7 @@ GENERAL_SETTINGS_KEYS = [
     "risk_matrix_labels",
     "currency",
     "daily_rate",
+    "mapping_max_depth",
 ]
 
 
