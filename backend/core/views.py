@@ -4700,7 +4700,7 @@ class ValidationFlowViewSet(BaseModelViewSet):
     model = ValidationFlow
     serializer_class = ValidationFlowWriteSerializer
     filterset_class = ValidationFlowFilterSet
-    search_fields = ["ref_id", "request_notes", "approver_observation"]
+    search_fields = ["ref_id", "request_notes"]
 
     def _perform_write(self, serializer):
         if not serializer.validated_data.get("ref_id"):
