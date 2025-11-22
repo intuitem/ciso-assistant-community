@@ -516,6 +516,7 @@ def send_evidence_expiring_soon_notification(owner_email, evidences, days):
         )
 
 
+@task()
 def send_validation_flow_created_notification(validation_flow):
     """Send notification to approver when validation flow is created"""
     if not validation_flow.approver or not validation_flow.approver.email:
@@ -567,6 +568,7 @@ def send_validation_flow_created_notification(validation_flow):
         )
 
 
+@task()
 def send_validation_deadline_notification(approver_email, validations, days):
     """Send notification about validation deadlines approaching"""
     if not check_email_configuration(approver_email, validations):

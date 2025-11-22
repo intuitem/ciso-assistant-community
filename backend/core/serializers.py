@@ -2765,11 +2765,13 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         """
         # Only act on specific transitions
         should_lock = new_status == "accepted"
-        should_unlock = old_status == "accepted" and new_status == "revoked"
+        # should_unlock = old_status == "accepted" and new_status == "revoked"
+        #
+        # if not (should_lock or should_unlock):
+        #     return
 
-        if not (should_lock or should_unlock):
+        if not should_lock:
             return
-
         lock_value = should_lock
 
         # Get all assessment model fields
