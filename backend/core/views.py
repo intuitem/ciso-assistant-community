@@ -4702,18 +4702,6 @@ class ValidationFlowViewSet(BaseModelViewSet):
     filterset_class = ValidationFlowFilterSet
     search_fields = ["ref_id", "request_notes"]
 
-    def _perform_write(self, serializer):
-        if not serializer.validated_data.get("ref_id"):
-            ref_id = ValidationFlow.get_default_ref_id()
-            serializer.validated_data["ref_id"] = ref_id
-        serializer.save()
-
-    def perform_create(self, serializer):
-        return self._perform_write(serializer)
-
-    def perform_update(self, serializer):
-        return self._perform_write(serializer)
-
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
