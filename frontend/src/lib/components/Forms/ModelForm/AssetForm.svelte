@@ -144,7 +144,6 @@
 	bind:cachedValue={formDataCache['type']}
 />
 <AutocompleteSelect
-	hidden={data.type === 'PR'}
 	multiple
 	{form}
 	optionsEndpoint="assets"
@@ -169,7 +168,7 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="assets?type=SP"
+	optionsEndpoint="assets"
 	optionsInfoFields={{
 		fields: [
 			{

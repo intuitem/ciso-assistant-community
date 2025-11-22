@@ -385,6 +385,11 @@ class AssetWriteSerializer(BaseModelSerializer):
         allow_null=True,
         write_only=True,
     )
+    parent_assets = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Asset.objects.all(),
+        required=False,
+    )
     support_assets = serializers.PrimaryKeyRelatedField(
         source="child_assets",
         many=True,
@@ -426,27 +431,26 @@ class AssetWriteSerializer(BaseModelSerializer):
         return data
 
     def create(self, validated_data):
+        parent_assets = validated_data.pop("parent_assets", None)
         child_assets = validated_data.pop("child_assets", None)
         asset = super().create(validated_data)
 
+        if parent_assets is not None:
+            asset.parent_assets.set(parent_assets)
         if child_assets is not None:
             asset.child_assets.set(child_assets)
 
         return asset
 
     def update(self, instance, validated_data):
+        parent_assets = validated_data.pop("parent_assets", None)
         child_assets = validated_data.pop("child_assets", None)
-        old_type = instance.type
-        new_type = validated_data.get("type", old_type)
-
-        # If switching to PRIMARY type, clear parent_assets and prevent reapplication
-        if old_type != new_type and new_type == Asset.Type.PRIMARY:
-            validated_data.pop("parent_assets", None)
-            instance.parent_assets.clear()
 
         instance = super().update(instance, validated_data)
 
-        # Set support_assets (child_assets) if provided (both PRIMARY and SUPPORT can have children)
+        # Set parent_assets and support_assets (child_assets) if provided
+        if parent_assets is not None:
+            instance.parent_assets.set(parent_assets)
         if child_assets is not None:
             instance.child_assets.set(child_assets)
 
