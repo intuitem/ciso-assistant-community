@@ -345,7 +345,10 @@
 							{#each value as item}
 								<div class="border rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition">
 									<div class="flex items-start justify-between gap-2 mb-2">
-										<Anchor href="/{modelUrlNames[key]}/{item.id}" class="anchor text-sm font-medium">
+										<Anchor
+											href="/{modelUrlNames[key]}/{item.id}"
+											class="anchor text-sm font-medium"
+										>
 											{item.str}
 										</Anchor>
 										{#if item.status}
