@@ -25,6 +25,8 @@
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import z from 'zod';
+	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	let { data, form } = $props();
 
@@ -32,7 +34,7 @@
 
 	const showRisks = true;
 	const useBubbles = data.useBubbles;
-	const risk_assessment = data.risk_assessment;
+	const risk_assessment = $derived(data.risk_assessment);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -80,6 +82,29 @@
 			component: modalComponent,
 			// Data
 			title: m.duplicateRiskAssessment()
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalRequestValidation(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.validationFlowForm,
+				model: data.validationFlowModel,
+				debug: false,
+				invalidateAll: true,
+				formAction: '/validation-flows?/create',
+				onConfirm: async () => {
+					await invalidateAll();
+				}
+			}
+		};
+
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.requestValidation()
 		};
 		modalStore.trigger(modal);
 	}
@@ -229,6 +254,12 @@
 						</li>
 					</ul>
 				</div>
+				<br />
+				{#if page.data?.featureflags?.validation_flows}
+					{#key risk_assessment.validation_flows}
+						<ValidationFlowsSection validationFlows={risk_assessment.validation_flows} />
+					{/key}
+				{/if}
 			</div>
 			<div class="container w-2/3">
 				<div class="text-sm">
@@ -358,6 +389,16 @@
 					<i class="fa-solid fa-calculator mr-2"></i>
 					{m.convertToQuantitative()}
 				</Anchor>
+				{#if !risk_assessment?.is_locked && page.data?.featureflags?.validation_flows}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500"
+						onclick={() => modalRequestValidation()}
+						data-testid="request-validation-button"
+					>
+						<i class="fa-solid fa-check-circle mr-2"></i>
+						{m.requestValidation()}
+					</button>
+				{/if}
 			</div>
 		</div>
 	</div>

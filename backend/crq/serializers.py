@@ -89,6 +89,16 @@ class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
         source="get_risk_tolerance_display", read_only=True
     )
     loss_threshold_display = serializers.CharField(read_only=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = QuantitativeRiskStudy

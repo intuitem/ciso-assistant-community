@@ -198,6 +198,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     reports = serializers.BooleanField(
         source="value.reports", required=False, default=False
     )
+    validation_flows = serializers.BooleanField(
+        source="value.validation_flows", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings
@@ -224,6 +227,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "project_management",
             "contracts",
             "reports",
+            "validation_flows",
         ]
         read_only_fields = ["name"]
 
