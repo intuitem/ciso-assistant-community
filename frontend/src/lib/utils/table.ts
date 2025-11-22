@@ -1884,6 +1884,7 @@ export const listViewFields = {
 	'operational-scenarios': {
 		head: [
 			'is_selected',
+			'strategicScenario',
 			'attackPath',
 			'operatingModes',
 			'operatingModesDescription',
@@ -1891,6 +1892,7 @@ export const listViewFields = {
 		],
 		body: [
 			'is_selected',
+			'strategic_scenario',
 			'attack_path',
 			'operating_modes',
 			'operating_modes_description',
