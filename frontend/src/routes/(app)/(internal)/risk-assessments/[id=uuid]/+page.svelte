@@ -305,8 +305,12 @@
 								>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/export/csv"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
+								>
+								<a
+									href="/risk-assessments/{risk_assessment.id}/export/xlsx"
 									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-									>... {m.asCSV()}</a
+									>... {m.asXLSX()}</a
 								>
 								<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
 								<a

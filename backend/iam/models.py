@@ -417,6 +417,7 @@ class UserManager(BaseUserManager):
             observation=extra_fields.get("observation"),
             folder=_get_root_folder(),
             keep_local_login=extra_fields.get("keep_local_login", False),
+            expiry_date=extra_fields.get("expiry_date"),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         if password:

@@ -597,6 +597,12 @@
 									>
 									<a
 										href="/compliance-assessments/{data.compliance_assessment
+											.id}/action-plan/export/xlsx"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asXLSX()}</a
+									>
+									<a
+										href="/compliance-assessments/{data.compliance_assessment
 											.id}/action-plan/export/pdf"
 										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 										>... {m.asPDF()}</a
