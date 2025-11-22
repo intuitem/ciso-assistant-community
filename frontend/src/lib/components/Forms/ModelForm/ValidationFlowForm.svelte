@@ -170,7 +170,7 @@
 		/>
 		<AutocompleteSelect
 			{form}
-			optionsEndpoint="business-impact-analyses"
+			optionsEndpoint="business-impact-analysis"
 			field="business_impact_analysis"
 			cacheLock={cacheLocks['business_impact_analysis']}
 			bind:cachedValue={formDataCache['business_impact_analysis']}
