@@ -51,6 +51,24 @@
 	function handleCancel() {
 		goto('/experimental');
 	}
+
+	function handleTextareaKeydown(event: KeyboardEvent) {
+		if (event.key === 'Tab') {
+			event.preventDefault();
+			const target = event.target as HTMLTextAreaElement;
+			const start = target.selectionStart;
+			const end = target.selectionEnd;
+
+			// Insert 2 spaces (matching the indentation format in instructions)
+			const indent = '  ';
+			assetsText = assetsText.substring(0, start) + indent + assetsText.substring(end);
+
+			// Move cursor after the inserted indentation
+			requestAnimationFrame(() => {
+				target.selectionStart = target.selectionEnd = start + indent.length;
+			});
+		}
+	}
 </script>
 
 <div class="grid grid-cols-4 gap-4">
@@ -69,7 +87,9 @@
 				<li>Enter asset names (one per line)</li>
 				<li>Use SP: prefix for Support assets (default)</li>
 				<li>Use PR: prefix for Primary assets</li>
-				<li>Indent with 2 spaces per level to create parent-child relationships</li>
+				<li>
+					Indent with 2 spaces (tab will do the same) per level to create parent-child relationships
+				</li>
 				<li>Click Create Assets</li>
 			</ol>
 			<div class="mt-3 p-3 bg-gray-50 rounded text-xs space-y-2">
@@ -119,6 +139,7 @@ Web Application
 					id="assets"
 					name="assets_text"
 					bind:value={assetsText}
+					onkeydown={handleTextareaKeydown}
 					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm font-mono"
 					rows="15"
 					required
