@@ -236,6 +236,31 @@
 			/>
 		</div>
 	{/if}
+	{#if (showEmptySections || counts.validationFlows > 0) && data.featureflags?.validation_flows}
+		<div class="col-span-6 bg-linear-to-br from-orange-200 to-orange-50 p-2 rounded">
+			<div class="font-bold mb-2">
+				<i class="fa-solid fa-check-circle mr-2" />{m.validationFlows()}
+				{#if counts.validationFlows > 0}
+					<span class="badge variant-filled-surface ml-2">{counts.validationFlows}</span>
+				{/if}
+			</div>
+			<ModelTable
+				source={{
+					head: {
+						ref_id: 'ref_id',
+						status: 'status',
+						created_at: 'created_at',
+						requester: 'requester',
+						folder: 'folder'
+					},
+					body: []
+				}}
+				hideFilters={true}
+				URLModel="validation-flows"
+				baseEndpoint="/validation-flows?approver={data.user.id}"
+			/>
+		</div>
+	{/if}
 	{#if showEmptySections || counts.findings > 0}
 		<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
 			<div class="font-bold mb-2">
