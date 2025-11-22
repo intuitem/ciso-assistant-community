@@ -3,9 +3,12 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '../Select.svelte';
+	import Checkbox from '../Checkbox.svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -26,6 +29,8 @@
 		initialData = {},
 		object = {}
 	}: Props = $props();
+
+	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
 
 	// export let updated_fields: Set<string> = new Set();
 </script>
@@ -96,3 +101,15 @@
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
 />
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	{#if !page.data.user.is_third_party}
+		<Checkbox
+			{form}
+			field="is_locked"
+			label={m.isLocked()}
+			helpText={m.isLockedHelpText()}
+			cacheLock={cacheLocks['is_locked']}
+			bind:cachedValue={formDataCache['is_locked']}
+		/>
+	{/if}
+</Dropdown>

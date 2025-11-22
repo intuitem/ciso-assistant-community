@@ -115,6 +115,42 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 
 	const riskAssessmentModel = getModelInfo('risk-assessments');
 
+	// Validation flow form with preset data
+	const validationFlowSchema = modelSchema('validation-flows');
+	const validationFlowInitialData = {
+		folder: risk_assessment.folder.id,
+		risk_assessments: [params.id],
+		ref_id: ''
+	};
+	const validationFlowForm = await superValidate(
+		validationFlowInitialData,
+		zod(validationFlowSchema),
+		{
+			errors: false
+		}
+	);
+	const validationFlowModel = getModelInfo('validation-flows');
+
+	// Populate selectOptions for validation flow model
+	const validationFlowSelectOptions: Record<string, any> = {};
+	if (validationFlowModel.selectFields) {
+		for (const selectField of validationFlowModel.selectFields) {
+			const url = `${BASE_API_URL}/validation-flows/${selectField.field}/`;
+			const response = await fetch(url);
+			if (response.ok) {
+				validationFlowSelectOptions[selectField.field] = await response.json().then((data) =>
+					Object.entries(data).map(([key, value]) => ({
+						label: value,
+						value: selectField.valueType === 'number' ? parseInt(key) : key
+					}))
+				);
+			} else {
+				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
+			}
+		}
+	}
+	validationFlowModel.selectOptions = validationFlowSelectOptions;
+
 	return {
 		risk_assessment,
 		scenarioModel,
@@ -123,6 +159,8 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		scenarioCreateForm,
 		riskAssessmentDuplicateForm,
 		riskAssessmentModel,
+		validationFlowForm,
+		validationFlowModel,
 		title: risk_assessment.str,
 		useBubbles: interface_settings.interface_agg_scenario_matrix
 	};

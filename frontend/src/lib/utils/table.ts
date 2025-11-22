@@ -476,6 +476,28 @@ export const APPROVER_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const REQUESTER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'requester',
+		optionsEndpoint: 'users',
+		optionsLabelField: 'email',
+		multiple: true
+	}
+};
+
+export const LINKED_MODELS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'linkedModels',
+		optionsEndpoint: 'validation-flows/linked_models',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1230,6 +1252,48 @@ export const listViewFields = {
 			approver: APPROVER_FILTER
 		}
 	},
+	'validation-flows': {
+		head: [
+			'ref_id',
+			'status',
+			'createdAt',
+			'requester',
+			'validationDeadline',
+			'approver',
+			'linkedModels',
+			'labels',
+			'domain'
+		],
+		body: [
+			'ref_id',
+			'status',
+			'created_at',
+			'requester',
+			'validation_deadline',
+			'approver',
+			'linked_models',
+			'filtering_labels',
+			'folder'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'validation-flows/status',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'status',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			requester: REQUESTER_FILTER,
+			approver: APPROVER_FILTER,
+			linked_models: LINKED_MODELS_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
 	'applied-controls': {
 		head: [
 			'ref_id',
@@ -1621,7 +1685,12 @@ export const listViewFields = {
 	},
 	'business-impact-analysis': {
 		head: ['name', 'perimeter', 'status'],
-		body: ['name', 'perimeter', 'status']
+		body: ['name', 'perimeter', 'status'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			perimeter: PERIMETER_FILTER,
+			status: RISK_ASSESSMENT_STATUS_FILTER
+		}
 	},
 	'asset-assessments': {
 		head: [
