@@ -27,6 +27,7 @@ class BaseModelViewSet(AbstractBaseModelViewSet):
 class BusinessImpactAnalysisViewSet(BaseModelViewSet):
     model = BusinessImpactAnalysis
     filterset_fields = [
+        "folder",
         "perimeter",
         "perimeter__folder",
         "authors",

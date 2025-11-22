@@ -223,6 +223,26 @@ export const RiskAcceptanceSchema = z.object({
 	risk_scenarios: z.array(z.string())
 });
 
+export const ValidationFlowSchema = z.object({
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	status: z.string().default('submitted'),
+	validation_deadline: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	request_notes: z.string().optional().nullable(),
+	approver: z.string(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional(),
+	compliance_assessments: z.array(z.string()).optional(),
+	risk_assessments: z.array(z.string()).optional(),
+	business_impact_analysis: z.array(z.string()).optional(),
+	crq_studies: z.array(z.string()).optional(),
+	ebios_studies: z.array(z.string()).optional(),
+	entity_assessments: z.array(z.string()).optional(),
+	findings_assessments: z.array(z.string()).optional(),
+	evidences: z.array(z.string()).optional(),
+	security_exceptions: z.array(z.string()).optional(),
+	policies: z.array(z.string()).optional()
+});
+
 export const ReferenceControlSchema = z.object({
 	...NameDescriptionMixin,
 	provider: z.string().optional().nullable(),
@@ -506,7 +526,8 @@ export const FeatureFlagsSchema = z.object({
 	bia: z.boolean().optional(),
 	project_management: z.boolean().optional(),
 	contracts: z.boolean().optional(),
-	reports: z.boolean().optional()
+	reports: z.boolean().optional(),
+	validation_flows: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -702,7 +723,8 @@ export const BusinessImpactAnalysisSchema = z.object({
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional()
+	reviewers: z.array(z.string().optional()).optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const AssetAssessmentSchema = z.object({
@@ -1311,6 +1333,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'applied-controls_duplicate': AppliedControlDuplicateSchema,
 	policies: PolicySchema,
 	'risk-acceptances': RiskAcceptanceSchema,
+	'validation-flows': ValidationFlowSchema,
 	'reference-controls': ReferenceControlSchema,
 	assets: AssetSchema,
 	'requirement-assessments': RequirementAssessmentSchema,

@@ -32,7 +32,8 @@
 		{ field: 'bia', label: m.businessImpactAnalysis() },
 		{ field: 'project_management', label: m.projectManagement() },
 		{ field: 'contracts', label: m.contracts() },
-		{ field: 'reports', label: m.reports() }
+		{ field: 'reports', label: m.reports() },
+		{ field: 'validation_flows', label: m.validationFlows() }
 	];
 </script>
 

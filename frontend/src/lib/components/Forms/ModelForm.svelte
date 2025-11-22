@@ -15,6 +15,7 @@
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
 	import VulnerabilitiesForm from './ModelForm/VulnerabilitiesForm.svelte';
 	import RiskAcceptancesForm from './ModelForm/RiskAcceptanceForm.svelte';
+	import ValidationFlowForm from './ModelForm/ValidationFlowForm.svelte';
 	import ReferenceControlsForm from './ModelForm/ReferenceControlForm.svelte';
 	import EvidencesForm from './ModelForm/EvidenceForm.svelte';
 	import ComplianceAssessmentsForm from './ModelForm/ComplianceAssessmentForm.svelte';
@@ -393,6 +394,16 @@
 				{object}
 				{initialData}
 				{$page}
+				{...rest}
+			/>
+		{:else if URLModel === 'validation-flows'}
+			<ValidationFlowForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{object}
+				{initialData}
 				{...rest}
 			/>
 		{:else if URLModel === 'reference-controls'}

@@ -240,6 +240,12 @@ export const navData = {
 					href: '/risk-acceptances'
 				},
 				{
+					name: 'validationFlows',
+					fa_icon: 'fa-solid fa-clipboard-check',
+					href: '/validation-flows',
+					permissions: ['view_validationflow']
+				},
+				{
 					name: 'securityExceptions',
 					fa_icon: 'fa-solid fa-circle-exclamation',
 					href: '/security-exceptions'

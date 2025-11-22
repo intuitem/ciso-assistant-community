@@ -47,6 +47,16 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     applied_control_count = serializers.IntegerField()
     last_risk_assessment = FieldsRelatedField()
     counters = serializers.SerializerMethodField()
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     def get_counters(self, obj):
         return obj.get_counters()
