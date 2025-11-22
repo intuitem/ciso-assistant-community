@@ -197,11 +197,11 @@ def check_evidences_expiring_tomorrow():
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="40"))
 def check_validation_flows_deadline_in_week():
-    """Check for ValidationFlows with deadline in 7 days"""
+    """Check for ValidationFlows with deadline in 7 days (only submitted status)"""
     target_date = date.today() + timedelta(days=7)
     validations_due_soon = ValidationFlow.objects.filter(
-        validation_deadline=target_date
-    ).exclude(status__in=["approved", "rejected", "cancelled"])
+        validation_deadline=target_date, status=ValidationFlow.Status.SUBMITTED
+    )
 
     # Group by individual approver
     approver_validations = {}
@@ -220,11 +220,11 @@ def check_validation_flows_deadline_in_week():
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="45"))
 def check_validation_flows_deadline_tomorrow():
-    """Check for ValidationFlows with deadline in 1 day"""
+    """Check for ValidationFlows with deadline in 1 day (only submitted status)"""
     target_date = date.today() + timedelta(days=1)
     validations_due_tomorrow = ValidationFlow.objects.filter(
-        validation_deadline=target_date
-    ).exclude(status__in=["approved", "rejected", "cancelled"])
+        validation_deadline=target_date, status=ValidationFlow.Status.SUBMITTED
+    )
 
     # Group by individual approver
     approver_validations = {}
