@@ -2748,13 +2748,53 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__", read_only=True)
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
-    compliance_assessments = FieldsRelatedField(many=True)
-    risk_assessments = FieldsRelatedField(many=True)
-    business_impact_analysis = FieldsRelatedField(many=True)
+    compliance_assessments = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "status",
+            "updated_at",
+            {"perimeter": ["id", {"folder": ["id"]}]},
+        ],
+    )
+    risk_assessments = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "status",
+            "updated_at",
+            {"perimeter": ["id", {"folder": ["id"]}]},
+        ],
+    )
+    business_impact_analysis = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "status",
+            "updated_at",
+            {"perimeter": ["id", {"folder": ["id"]}]},
+        ],
+    )
     crq_studies = FieldsRelatedField(many=True)
     ebios_studies = FieldsRelatedField(many=True)
-    entity_assessments = FieldsRelatedField(many=True)
-    findings_assessments = FieldsRelatedField(many=True)
+    entity_assessments = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "status",
+            "updated_at",
+            {"perimeter": ["id", {"folder": ["id"]}]},
+        ],
+    )
+    findings_assessments = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "status",
+            "updated_at",
+            {"perimeter": ["id", {"folder": ["id"]}]},
+        ],
+    )
     evidences = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     policies = FieldsRelatedField(many=True)
