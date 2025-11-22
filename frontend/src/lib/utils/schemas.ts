@@ -480,7 +480,8 @@ export const GeneralSettingsSchema = z.object({
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
 	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
 	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
-	daily_rate: z.number().default(500).optional()
+	daily_rate: z.number().default(500).optional(),
+	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -1029,7 +1030,8 @@ export const operationalScenarioSchema = z.object({
 	likelihood: z.number().optional().default(-1),
 	is_selected: z.boolean().default(true),
 	justification: z.string().optional(),
-	folder: z.string()
+	folder: z.string(),
+	strategic_scenario: z.string().optional()
 });
 
 export const SecurityExceptionSchema = z.object({

@@ -1337,6 +1337,11 @@ export const URL_MODEL_MAP: ModelMap = {
 				endpointUrl: 'ebios-rm/attack-paths',
 				urlParams: 'is_selected=true&used=false&ebios_rm_study=',
 				detail: true
+			},
+			{
+				field: 'strategic_scenario',
+				urlModel: 'strategic-scenarios',
+				endpointUrl: 'ebios-rm/strategic-scenarios'
 			}
 		],
 		reverseForeignKeyFields: [

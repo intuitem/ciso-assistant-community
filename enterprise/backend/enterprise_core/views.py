@@ -412,11 +412,16 @@ def get_build(request):
     )
 
 
+class NumberInFilter(df.BaseInFilter, df.NumberFilter):
+    pass
+
+
 class LogEntryFilterSet(GenericFilterSet):
     actor = df.CharFilter(field_name="actor__email", lookup_expr="icontains")
     folder = df.CharFilter(
         field_name="additional_data__folder", lookup_expr="icontains"
     )
+    action = NumberInFilter(field_name="action", lookup_expr="in")
     content_type = df.CharFilter(method="filter_content_type_model")
 
     class Meta:
