@@ -53,6 +53,104 @@ def extract_scf_mapping(input_file: str, output_file: str):
             "target_iso27002",
         ]
 
+        # Process ISO 27001 column
+        def process_iso27001(cell_value):
+            """
+            Process ISO 27001 cell:
+            - Split by lines
+            - Drop anything after '('
+            - Remove duplicates
+            - Join back with line breaks
+            """
+            if pd.isna(cell_value):
+                return cell_value
+
+            # Split by newlines
+            lines = str(cell_value).split("\n")
+
+            # Process each line: strip whitespace and remove content after '('
+            processed = []
+            for line in lines:
+                line = line.strip()
+                if line:
+                    # Remove anything after '('
+                    if "(" in line:
+                        line = line.split("(")[0].strip()
+                    processed.append(line)
+
+            # Remove duplicates while preserving order
+            seen = set()
+            unique = []
+            for item in processed:
+                if item not in seen:
+                    seen.add(item)
+                    unique.append(item)
+
+            # Join back with newlines
+            return "\n".join(unique) if unique else None
+
+        # Process ISO 27002 column
+        def process_iso27002(cell_value):
+            """
+            Process ISO 27002 cell:
+            - Split by lines
+            - Prefix each with 'A.'
+            - Join back with line breaks
+            """
+            if pd.isna(cell_value):
+                return cell_value
+
+            # Split by newlines
+            lines = str(cell_value).split("\n")
+
+            # Process each line: strip and prefix with 'A.'
+            processed = []
+            for line in lines:
+                line = line.strip()
+                if line:
+                    # Add 'A.' prefix if not already present
+                    if not line.startswith("A."):
+                        line = f"A.{line}"
+                    processed.append(line)
+
+            # Join back with newlines
+            return "\n".join(processed) if processed else None
+
+        # Apply processing to the columns
+        print("\nProcessing ISO 27001 column...")
+        result_df["target_iso27001"] = result_df["target_iso27001"].apply(
+            process_iso27001
+        )
+
+        print("Processing ISO 27002 column...")
+        result_df["target_iso27002"] = result_df["target_iso27002"].apply(
+            process_iso27002
+        )
+
+        # Create combined column 'iso27001-2022'
+        def combine_iso_columns(row):
+            """
+            Combine ISO 27001 and ISO 27002 columns into a single column.
+            """
+            iso27001_val = row["target_iso27001"]
+            iso27002_val = row["target_iso27002"]
+
+            parts = []
+
+            # Add ISO 27001 values if present
+            if pd.notna(iso27001_val) and str(iso27001_val).strip():
+                parts.append(str(iso27001_val).strip())
+
+            # Add ISO 27002 values if present
+            if pd.notna(iso27002_val) and str(iso27002_val).strip():
+                parts.append(str(iso27002_val).strip())
+
+            # Join with newline if both are present
+            return "\n".join(parts) if parts else None
+
+        print("Creating combined 'iso27001-2022' column...")
+        result_df["iso27001-2022"] = result_df.apply(combine_iso_columns, axis=1)
+
         # Filter out rows where BOTH ISO columns are empty/NaN
         initial_count = len(result_df)
         result_df = result_df[
