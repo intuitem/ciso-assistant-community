@@ -103,7 +103,7 @@
 		label={m.doraIctServiceType()}
 		cacheLock={cacheLocks['dora_ict_service_type']}
 		bind:cachedValue={formDataCache['dora_ict_service_type']}
-    nullable
+		nullable
 	/>
 	<Checkbox
 		{form}
