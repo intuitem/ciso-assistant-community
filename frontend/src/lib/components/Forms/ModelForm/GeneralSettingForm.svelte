@@ -253,4 +253,20 @@
 			</div>
 		{/snippet}
 	</Accordion.Item>
+	<Accordion.Item value="mappings">
+		{#snippet control()}
+			<i class="fa-solid fa-diagram-project mr-2"></i>{m.requirementMappingSets()}
+		{/snippet}
+		{#snippet panel()}
+			<NumberField
+				{form}
+				field="mapping_max_depth"
+				label={m.mappingMaxDepth()}
+				helpText={m.mappingMaxDepthHelpText()}
+				min={2}
+				max={5}
+				step={1}
+			/>
+		{/snippet}
+	</Accordion.Item>
 </Accordion>

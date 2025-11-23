@@ -18,6 +18,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
+	import type { ListViewFilterConfig } from '$lib/utils/table';
 	import { goto, breadcrumbs } from '$lib/utils/breadcrumbs';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isDark } from '$lib/utils/helpers';
@@ -78,6 +79,7 @@
 		canSelectObject?: boolean;
 		overrideFilters?: { [key: string]: any[] };
 		hideFilters?: boolean;
+		tableFilters?: Record<string, ListViewFilterConfig>;
 		folderId?: string;
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
@@ -126,6 +128,11 @@
 		canSelectObject = false,
 		overrideFilters = {},
 		hideFilters = $bindable(false),
+		tableFilters = URLModel &&
+		listViewFields[URLModel] &&
+		Object.hasOwn(listViewFields[URLModel], 'filters')
+			? listViewFields[URLModel].filters
+			: {},
 		folderId = '',
 		forcePreventDelete = false,
 		forcePreventEdit = false,
@@ -265,14 +272,7 @@
 
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
 
-	const filters =
-		source?.filters ??
-		(tableURLModel &&
-		listViewFields[tableURLModel] &&
-		Object.hasOwn(listViewFields[tableURLModel], 'filters')
-			? listViewFields[tableURLModel].filters
-			: {});
-
+	const filters = source?.filters ?? tableFilters;
 	const filteredFields = Object.keys(filters);
 	const filterValues: { [key: string]: any } = $state(
 		Object.fromEntries(
@@ -407,6 +407,7 @@
 	const MULTI_VALUE_COLUMNS = [
 		'owner',
 		'filtering_labels',
+		'linked_models',
 		'threats',
 		'assets',
 		'applied_controls',
@@ -422,6 +423,23 @@
 			MULTI_VALUE_COLUMNS.includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
+	};
+
+	// Helper function to convert linked_models snake_case to camelCase for translation
+	const convertLinkedModelName = (snakeCaseName: string): string => {
+		const mapping: Record<string, string> = {
+			compliance_assessments: 'complianceAssessments',
+			risk_assessments: 'riskAssessments',
+			business_impact_analysis: 'businessImpactAnalysis',
+			crq_studies: 'quantitativeRiskStudies',
+			ebios_studies: 'ebiosRMStudies',
+			entity_assessments: 'entityAssessments',
+			findings_assessments: 'findingsAssessments',
+			evidences: 'evidences',
+			security_exceptions: 'securityExceptions',
+			policies: 'policies'
+		};
+		return mapping[snakeCaseName] || snakeCaseName;
 	};
 
 	let openState = $state(false);
@@ -565,12 +583,14 @@
 																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 																}) as val}
 																	<li>
-																		{#if key === 'security_objectives' || key === 'security_capabilities'}
+																		{#if key === 'linked_models' && typeof val === 'string'}
+																			{safeTranslate(convertLinkedModelName(val))}
+																		{:else if key === 'security_objectives' || key === 'security_capabilities'}
 																			{@const [securityObjectiveName, securityObjectiveValue] =
 																				Object.entries(val)[0]}
 																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
 																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
-																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key}/${val.id}`}
+																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
 																			<Anchor href={itemHref} class="anchor" stopPropagation
 																				>{val.str}</Anchor
 																			>
@@ -645,6 +665,8 @@
 															</div>
 														{:else if key === 'icon_fa_class'}
 															<i class="text-lg fa {value}"></i>
+														{:else if value && value.name}
+															{value.name}
 														{:else}
 															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
 															{#if value?.length > 300}

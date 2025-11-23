@@ -47,6 +47,16 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     applied_control_count = serializers.IntegerField()
     last_risk_assessment = FieldsRelatedField()
     counters = serializers.SerializerMethodField()
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     def get_counters(self, obj):
         return obj.get_counters()
@@ -295,6 +305,7 @@ class AttackPathWriteSerializer(BaseModelSerializer):
 
 
 class AttackPathReadSerializer(BaseModelSerializer):
+    form_display_name = serializers.CharField()
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()
@@ -346,16 +357,24 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
-    attack_path = FieldsRelatedField(["id", "name", "description"])
+    attack_path = FieldsRelatedField(["id", "name", "description", "form_display_name"])
     stakeholders = FieldsRelatedField(many=True)
     ro_to = FieldsRelatedField(["risk_origin", "target_objective"])
     threats = FieldsRelatedField(many=True)
+    strategic_scenario = serializers.SerializerMethodField()
     likelihood = serializers.JSONField(source="get_likelihood_display")
     gravity = serializers.JSONField(source="get_gravity_display")
     risk_level = serializers.JSONField(source="get_risk_level_display")
     ref_id = serializers.CharField()
     operating_modes_description = serializers.SerializerMethodField()
     operating_modes = FieldsRelatedField(many=True)
+
+    def get_strategic_scenario(self, obj):
+        if obj.attack_path and obj.attack_path.strategic_scenario:
+            return FieldsRelatedField().to_representation(
+                obj.attack_path.strategic_scenario
+            )
+        return None
 
     def get_operating_modes_description(self, obj):
         # If there's a description, use it
@@ -428,11 +447,14 @@ class ElementaryActionWriteSerializer(BaseModelSerializer):
         exclude = ["created_at", "updated_at"]
 
 
+from core.serializers import ThreatReadSerializer
+
+
 class ElementaryActionReadSerializer(BaseModelSerializer):
     icon = serializers.CharField(source="get_icon_display")
     icon_fa_class = serializers.CharField()
     icon_fa_hex = serializers.CharField()
-    threat = FieldsRelatedField()
+    threat = FieldsRelatedField(["id", "name"], serializer=ThreatReadSerializer)
     folder = FieldsRelatedField()
     attack_stage = serializers.CharField(source="get_attack_stage_display")
 

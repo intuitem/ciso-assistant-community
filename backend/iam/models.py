@@ -139,7 +139,7 @@ class Folder(NameDescriptionMixin):
         while (current_folder := current_folder.parent_folder) is not None:
             yield current_folder
 
-    def get_folder_full_path(self, include_root: bool = False) -> list[Self]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Self]:
         """
         Get the full path of the folder including its parents.
         If include_root is True, the root folder is included in the path.
@@ -328,7 +328,7 @@ class FolderMixin(models.Model):
         default=Folder.get_root_folder_id,
     )
 
-    def get_folder_full_path(self, include_root: bool = False) -> list[Folder]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
         folders = ([self.folder] + [f for f in self.folder.get_parent_folders()])[::-1]
         if include_root:
             return folders
@@ -417,6 +417,7 @@ class UserManager(BaseUserManager):
             observation=extra_fields.get("observation"),
             folder=_get_root_folder(),
             keep_local_login=extra_fields.get("keep_local_login", False),
+            expiry_date=extra_fields.get("expiry_date"),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         if password:
@@ -567,7 +568,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if not getattr(for_user, "is_authenticated", False):
             return User.objects.none()
 
-        (_, changeable_user_groups_ids, _) = RoleAssignment.get_accessible_object_ids(
+        (viewable_user_group_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), for_user, UserGroup
         )
 
@@ -579,10 +580,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 Folder.get_root_folder(), for_user, User
             )
             base_qs = (
-                User.objects.filter(
-                    Q(id__in=visible_users_ids)
-                    | Q(user_groups__in=changeable_user_groups_ids)
-                )
+                User.objects.filter(id__in=visible_users_ids)
                 | User.objects.filter(pk=for_user.pk)
             ).distinct()
 
@@ -590,9 +588,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return base_qs.prefetch_related(
             Prefetch(
                 "user_groups",
-                queryset=UserGroup.objects.filter(
-                    id__in=changeable_user_groups_ids
-                ).only("id", "builtin"),  # minimal
+                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
+                    "id", "builtin"
+                ),  # minimal
             )
         )
 
@@ -1118,8 +1116,13 @@ class PersonalAccessToken(models.Model):
         return f"{self.auth_token.user.email} : {self.name} : {self.auth_token.digest}"
 
 
+common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     User,
     m2m_fields={"user_groups"},
-    exclude_fields=["created_at", "updated_at", "password"],
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Folder,
+    exclude_fields=common_exclude,
 )

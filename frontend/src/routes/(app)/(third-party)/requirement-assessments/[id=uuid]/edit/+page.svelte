@@ -85,6 +85,7 @@
 				model: data.measureModel,
 				debug: false,
 				invalidateAll: false,
+				origin: 'requirement-assessments',
 				suggestions: { reference_control: reference_controls }
 			}
 		};
@@ -104,6 +105,7 @@
 				form: data.evidenceCreateForm,
 				formAction: '?/createEvidence',
 				model: data.evidenceModel,
+				invalidateAll: false,
 				debug: false
 			}
 		};
@@ -123,6 +125,7 @@
 				form: data.securityExceptionCreateForm,
 				formAction: '?/createSecurityException',
 				model: data.securityExceptionModel,
+				invalidateAll: false,
 				debug: false
 			}
 		};

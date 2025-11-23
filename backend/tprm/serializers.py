@@ -8,7 +8,7 @@ from core.serializers import BaseModelSerializer
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import Folder, Role, RoleAssignment, UserGroup
 from django.contrib.auth import get_user_model
-from tprm.models import Entity, EntityAssessment, Representative, Solution
+from tprm.models import Entity, EntityAssessment, Representative, Solution, Contract
 from django.utils.translation import gettext_lazy as _
 
 import structlog
@@ -21,7 +21,21 @@ User = get_user_model()
 class EntityReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     owned_folders = FieldsRelatedField(many=True)
+    parent_entity = FieldsRelatedField()
+    branches = FieldsRelatedField(many=True)
     relationship = FieldsRelatedField(many=True)
+    contracts = FieldsRelatedField(many=True)
+    legal_identifiers = serializers.SerializerMethodField()
+    default_criticality = serializers.ReadOnlyField()
+    filtering_labels = FieldsRelatedField(many=True)
+
+    def get_legal_identifiers(self, obj):
+        """Format legal identifiers as a readable string for display"""
+        if not obj.legal_identifiers:
+            return ""
+        return "\n".join(
+            [f"{key}: {value}" for key, value in obj.legal_identifiers.items()]
+        )
 
     class Meta:
         model = Entity
@@ -32,6 +46,29 @@ class EntityWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Entity
         exclude = ["owned_folders"]
+
+    def validate_legal_identifiers(self, value):
+        """
+        Validate legal identifiers, ensuring LEI is exactly 20 characters if provided.
+        """
+        if value and isinstance(value, dict):
+            lei = value.get("LEI", "")
+            # Strip whitespace and check if LEI exists
+            if lei:
+                lei_stripped = lei.strip()
+                if lei_stripped and len(lei_stripped) != 20:
+                    raise serializers.ValidationError(_("leiLengthError"))
+        return value
+
+    def validate_parent_entity(self, value):
+        """
+        Validate that an entity cannot be set as its own parent.
+        """
+        if value and self.instance and value.id == self.instance.id:
+            raise serializers.ValidationError(
+                _("An entity cannot be set as its own parent")
+            )
+        return value
 
 
 class EntityImportExportSerializer(BaseModelSerializer):
@@ -47,6 +84,12 @@ class EntityImportExportSerializer(BaseModelSerializer):
             "mission",
             "reference_link",
             "owned_folders",
+            "country",
+            "currency",
+            "dora_entity_type",
+            "dora_entity_hierarchy",
+            "dora_assets_value",
+            "dora_competent_authority",
             "created_at",
             "updated_at",
         ]
@@ -62,6 +105,16 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
     representatives = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = EntityAssessment
@@ -198,6 +251,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 class RepresentativeReadSerializer(BaseModelSerializer):
     entity = FieldsRelatedField()
     user = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(many=True)
 
     class Meta:
         model = Representative
@@ -267,6 +321,9 @@ class SolutionReadSerializer(BaseModelSerializer):
     provider_entity = FieldsRelatedField()
     recipient_entity = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
+    contracts = FieldsRelatedField(many=True)
+    owner = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(many=True)
 
     class Meta:
         model = Solution
@@ -277,3 +334,34 @@ class SolutionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Solution
         exclude = ["recipient_entity"]
+
+
+class ContractReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    owner = FieldsRelatedField(many=True)
+    provider_entity = FieldsRelatedField()
+    beneficiary_entity = FieldsRelatedField()
+    evidences = FieldsRelatedField(many=True)
+    solution = FieldsRelatedField()
+    overarching_contract = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = Contract
+        exclude = []
+
+
+class ContractWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Contract
+        exclude = []
+
+    def validate_overarching_contract(self, value):
+        """
+        Validate that a contract cannot be set as its own overarching contract.
+        """
+        if value and self.instance and value.id == self.instance.id:
+            raise serializers.ValidationError(
+                _("A contract cannot be set as its own overarching contract")
+            )
+        return value

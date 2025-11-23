@@ -4,8 +4,13 @@ from tprm.views import (
     RepresentativeViewSet,
     SolutionViewSet,
     EntityAssessmentViewSet,
+    ContractViewSet,
 )
-from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
+from library.views import (
+    MappingLibrariesList,
+    StoredLibraryViewSet,
+    LoadedLibraryViewSet,
+)
 import importlib
 
 
@@ -23,6 +28,7 @@ router.register(
 )
 router.register(r"solutions", SolutionViewSet, basename="solutions")
 router.register(r"representatives", RepresentativeViewSet, basename="representatives")
+router.register(r"contracts", ContractViewSet, basename="contracts")
 router.register(r"perimeters", PerimeterViewSet, basename="perimeters")
 router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")
@@ -32,6 +38,7 @@ router.register(r"risk-scenarios", RiskScenarioViewSet, basename="risk-scenarios
 router.register(r"applied-controls", AppliedControlViewSet, basename="applied-controls")
 router.register(r"policies", PolicyViewSet, basename="policies")
 router.register(r"risk-acceptances", RiskAcceptanceViewSet, basename="risk-acceptances")
+router.register(r"validation-flows", ValidationFlowViewSet, basename="validation-flows")
 router.register(
     r"reference-controls", ReferenceControlViewSet, basename="reference-controls"
 )
@@ -182,6 +189,10 @@ urlpatterns = [
     path(
         "risk-assessments/<uuid:pk>/action-plan/",
         RiskAssessmentActionPlanList.as_view(),
+    ),
+    path(
+        "mapping-libraries/",
+        MappingLibrariesList.as_view(),
     ),
     path(
         "folders/<uuid:pk>/users/",

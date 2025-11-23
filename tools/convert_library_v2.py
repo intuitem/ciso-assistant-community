@@ -640,6 +640,15 @@ def create_library(
         "provider": library_meta.get("provider"),
         "packager": library_meta.get("packager"),
     }
+    
+    # Labels Addition
+    labels_cell = library_meta.get("labels")
+    if labels_cell:
+        library["labels"] = list(set([
+            label.upper()
+            for label in re.split(r'[\s,\n]+', labels_cell.strip())
+            if label
+        ]))
 
     translations = extract_translations_from_metadata(library_meta, "library")
     if translations:
@@ -770,10 +779,12 @@ def create_library(
                     entry["name"] = str(data["name"]).strip()
                 if "category" in data and data["category"]:
                     entry["category"] = str(data["category"]).strip()
-                if "description" in data and data["description"]:
-                    entry["description"] = str(data["description"]).strip()
                 if "csf_function" in data and data["csf_function"]:
                     entry["csf_function"] = str(data["csf_function"]).strip()
+                if "description" in data and data["description"]:
+                    entry["description"] = str(data["description"]).strip()
+                if "annotation" in data and data["annotation"]:
+                    entry["annotation"] = str(data["annotation"]).strip()
 
                 translations = extract_translations_from_row(header, row)
                 if translations:
@@ -781,8 +792,10 @@ def create_library(
 
                 controls.append(entry)
 
-            library["objects"]["reference_controls"] = controls
-
+            if library["objects"].get("reference_controls"):
+                library["objects"]["reference_controls"].extend(controls)
+            else:
+                library["objects"]["reference_controls"] = controls
         elif obj_type == "threats":
             threats = []
             base_urn = obj["meta"].get("base_urn")
@@ -816,7 +829,10 @@ def create_library(
 
                 threats.append(entry)
 
-            library["objects"]["threats"] = threats
+            if library["objects"].get("threats"):
+                library["objects"]["threats"].extend(threats)
+            else:
+                library["objects"]["threats"] = threats
 
         elif obj_type == "framework":
             meta = obj["meta"]

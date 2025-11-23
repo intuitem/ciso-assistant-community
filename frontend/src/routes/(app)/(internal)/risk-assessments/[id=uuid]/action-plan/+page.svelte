@@ -8,11 +8,13 @@
 	let { data } = $props();
 
 	const appliedControlsHead = {
+		ref_id: 'refId',
 		name: 'name',
 		status: 'status',
 		priority: 'priority',
 		category: 'category',
 		csf_function: 'csfFunction',
+		owner: 'owner',
 		eta: 'eta',
 		expiry_date: 'expiryDate',
 		effort: 'effort',
@@ -25,6 +27,10 @@
 		body: [],
 		meta: []
 	};
+
+	let hasAppliedControls = $derived(
+		data.scenariosTable.body.some((riskScenario) => riskScenario.applied_controls.length > 0)
+	);
 </script>
 
 <div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
@@ -54,14 +60,16 @@
 				{m.actionPlanHelpText()}
 			</p>
 		</div>
-		<div class="flex gap-2 ml-auto">
-			<Anchor
-				breadcrumbAction="push"
-				href={`/applied-controls/flash-mode?risk_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
-				class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
-				><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
-			>
-		</div>
+		{#if hasAppliedControls}
+			<div class="flex gap-2 ml-auto">
+				<Anchor
+					breadcrumbAction="push"
+					href={`/applied-controls/flash-mode?risk_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
+					class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+					><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
+				>
+			</div>
+		{/if}
 	</div>
 	<div class="">
 		<ModelTable
@@ -72,11 +80,13 @@
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/risk-assessments/{page.params.id}/action-plan"
 			fields={[
+				'ref_id',
 				'name',
 				'status',
 				'priority',
 				'category',
 				'csf_function',
+				'owner',
 				'eta',
 				'expiry_date',
 				'effort',

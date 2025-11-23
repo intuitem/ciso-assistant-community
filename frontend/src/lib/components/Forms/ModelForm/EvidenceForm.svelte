@@ -6,6 +6,7 @@
 	import Select from '$lib/components/Forms/Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
+	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -28,6 +29,15 @@
 		context
 	}: Props = $props();
 
+	onMount(async () => {
+		if (!model.selectOptions) {
+			const selectOptions = {
+				status: await fetch('/evidences/status').then((r) => r.json())
+			};
+			model.selectOptions = selectOptions;
+		}
+	});
+
 	function getFilename(path) {
 		if (!path) return '';
 
@@ -47,6 +57,7 @@
 <HiddenInput {form} field="findings" />
 <HiddenInput {form} field="findings_assessments" />
 <HiddenInput {form} field="timeline_entries" />
+<HiddenInput {form} field="contracts" />
 
 {#if context !== 'edit'}
 	<FileInput
@@ -112,7 +123,7 @@
 
 <Select
 	{form}
-	options={model.selectOptions['status']}
+	options={model.selectOptions?.status}
 	field="status"
 	label={m.status()}
 	disableDoubleDash={true}

@@ -148,6 +148,67 @@ def format_assessment_list(assessments) -> str:
     return "\n".join(assessment_lines)
 
 
+def format_evidence_list(evidences) -> str:
+    """
+    Format a list of evidences for email templates
+
+    Args:
+        evidences: List of Evidence objects
+
+    Returns:
+        Formatted string with evidence information
+    """
+    evidence_lines = []
+    for evidence in evidences:
+        expiry_date = (
+            evidence.expiry_date.strftime("%Y-%m-%d")
+            if evidence.expiry_date
+            else "Not set"
+        )
+        status = (
+            evidence.get_status_display()
+            if hasattr(evidence, "get_status_display")
+            else evidence.status
+        )
+        evidence_lines.append(
+            f"- {evidence.name} (Status: {status}, Expiry: {expiry_date})"
+        )
+
+    return "\n".join(evidence_lines)
+
+
+def format_validation_list(validations) -> str:
+    """
+    Format a list of validation flows for email templates
+
+    Args:
+        validations: List of ValidationFlow objects
+
+    Returns:
+        Formatted string with validation flow information
+    """
+    validation_lines = []
+    for validation in validations:
+        deadline = (
+            validation.validation_deadline.strftime("%Y-%m-%d")
+            if validation.validation_deadline
+            else "Not set"
+        )
+        requester_name = (
+            f"{validation.requester.first_name} {validation.requester.last_name}".strip()
+            if validation.requester
+            and (validation.requester.first_name or validation.requester.last_name)
+            else validation.requester.email
+            if validation.requester
+            else "Unknown"
+        )
+        validation_lines.append(
+            f"- {validation.ref_id} (Requester: {requester_name}, Deadline: {deadline})"
+        )
+
+    return "\n".join(validation_lines)
+
+
 def get_default_context() -> Dict[str, str]:
     """
     Get default context variables for email templates

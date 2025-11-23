@@ -15,6 +15,7 @@ GENERAL_SETTINGS_KEYS = [
     "risk_matrix_labels",
     "currency",
     "daily_rate",
+    "mapping_max_depth",
 ]
 
 
@@ -191,6 +192,15 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     project_management = serializers.BooleanField(
         source="value.project_management", required=False, default=False
     )
+    contracts = serializers.BooleanField(
+        source="value.contracts", required=False, default=False
+    )
+    reports = serializers.BooleanField(
+        source="value.reports", required=False, default=False
+    )
+    validation_flows = serializers.BooleanField(
+        source="value.validation_flows", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings
@@ -215,6 +225,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "terminologies",
             "bia",
             "project_management",
+            "contracts",
+            "reports",
+            "validation_flows",
         ]
         read_only_fields = ["name"]
 
