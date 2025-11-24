@@ -558,7 +558,7 @@
 </div>
 
 <style>
-	:global(.control input::placeholder) {
+	.control :global(input::placeholder) {
 		font-style: italic;
 	}
 </style>

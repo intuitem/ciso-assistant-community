@@ -28,3 +28,10 @@
 	bind:value
 	oninput={search}
 />
+
+<style>
+	#search-input::placeholder {
+		font-style: italic;
+		color: #9ca3af;
+	}
+</style>
