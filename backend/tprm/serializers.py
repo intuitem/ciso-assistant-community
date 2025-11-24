@@ -280,6 +280,7 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                 user = User.objects.filter(email=instance.email).first()
                 if user and send_mail:
                     user.is_third_party = True
+                    user.keep_local_login = True
                     user.save()
                     instance.user = user
                     instance.save()
@@ -296,6 +297,7 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                         {"error": ["An error occurred while creating the user"]}
                     )
             user.is_third_party = True
+            user.keep_local_login = True
         user.save()
         instance.user = user
         instance.save()

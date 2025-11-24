@@ -935,6 +935,7 @@
 	"blocker": "Blocker",
 	"createUser": "Create user",
 	"createUserHelpText": "Create or link a third party user to the representative based on the email",
+	"userLinkedToRepresentative": "A user is already linked to this representative.",
 	"nameDuplicate": "Name already exists",
 	"noAnswer": "No answer",
 	"entityAssessmentRepresentativesHelpText": "The third party users who are responsible for questionnaire completion",
