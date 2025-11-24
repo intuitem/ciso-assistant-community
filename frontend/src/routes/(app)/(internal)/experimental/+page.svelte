@@ -19,4 +19,10 @@
 		link="/findings"
 		tags={['analysis', 'findings']}
 	/>
+	<Article
+		title="Batch Creation"
+		desc="Create multiple assets, entities, or feared events at once from a simple text list"
+		link="/experimental/batch-create"
+		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
+	/>
 </div>
