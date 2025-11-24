@@ -2671,7 +2671,7 @@
 	"webhookSecret": "Secret webhook",
 	"webhookSecretAlreadySetHelpText": "Le secret webhook est déjà défini.",
 	"webhookUrl": "URL webhook",
-	"selectExistingAppliedControls": "Sélectionnez des mesures appliquées existantes...",
+	"selectPlaceholder": "Sélectionner...",
 	"ebiosRmSyncModalTitle": "Options d'analyse de risque",
 	"ebiosRmSyncModalBody": "Une analyse de risque existe déjà pour cette étude EBIOS RM : \"{name}\"\n\nQue souhaitez-vous faire :",
 	"ebiosRmSyncExisting": "Synchroniser l'existante",

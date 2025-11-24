@@ -89,7 +89,7 @@
 		disabled = false,
 		hidden = false,
 		translateOptions = true,
-		placeholder = null,
+		placeholder = m.selectPlaceholder(),
 		options = [],
 		optionsEndpoint = '',
 		optionsDetailedUrlParameters = [],
@@ -373,7 +373,7 @@
 		cachedOptions = selected;
 	});
 
-	run(() => {
+	$effect(() => {
 		// Only update value after options are loaded
 		if (!isInternalUpdate && optionsLoaded && !arraysEqual(selectedValues, $value)) {
 			isInternalUpdate = true;
@@ -460,6 +460,7 @@
 			key={JSON.stringify}
 			filterFunc={fastFilter}
 			{placeholder}
+			--sms-placeholder-color="#9ca3af"
 		>
 			{#snippet option({ option })}
 				{#if optionSnippet}
@@ -555,3 +556,9 @@
 		<p class="text-sm text-gray-500 whitespace-pre-line">{helpText}</p>
 	{/if}
 </div>
+
+<style>
+	:global(.control input::placeholder) {
+		font-style: italic;
+	}
+</style>

@@ -304,7 +304,6 @@
 									field="existing_applied_controls"
 									label={m.existingControls()}
 									helpText={m.existingControlsHelper()}
-									placeholder={m.selectExistingAppliedControls()}
 								/>
 							{/key}
 						</div>
@@ -381,7 +380,6 @@
 									field="applied_controls"
 									label={m.extraAppliedControls()}
 									helpText={m.extraControlsHelper()}
-									placeholder={m.selectExistingAppliedControls()}
 								/>
 							{/key}
 						</div>
