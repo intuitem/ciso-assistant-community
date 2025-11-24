@@ -1,0 +1,15 @@
+subject: "CISO Assistant: New validation request requires your approval"
+body: |
+  Hello,
+
+  A new validation request has been assigned to you for approval:
+
+  - Reference: ${validation_ref_id}
+  - Requester: ${requester_name}
+  - Validation Deadline: ${validation_deadline}
+  - Domain: ${folder_name}
+
+  Please review and take action on this validation request:
+  ${validation_url}
+
+  Thank you.

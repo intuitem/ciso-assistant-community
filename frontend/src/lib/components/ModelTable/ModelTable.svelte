@@ -407,6 +407,7 @@
 	const MULTI_VALUE_COLUMNS = [
 		'owner',
 		'filtering_labels',
+		'linked_models',
 		'threats',
 		'assets',
 		'applied_controls',
@@ -422,6 +423,23 @@
 			MULTI_VALUE_COLUMNS.includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
+	};
+
+	// Helper function to convert linked_models snake_case to camelCase for translation
+	const convertLinkedModelName = (snakeCaseName: string): string => {
+		const mapping: Record<string, string> = {
+			compliance_assessments: 'complianceAssessments',
+			risk_assessments: 'riskAssessments',
+			business_impact_analysis: 'businessImpactAnalysis',
+			crq_studies: 'quantitativeRiskStudies',
+			ebios_studies: 'ebiosRMStudies',
+			entity_assessments: 'entityAssessments',
+			findings_assessments: 'findingsAssessments',
+			evidences: 'evidences',
+			security_exceptions: 'securityExceptions',
+			policies: 'policies'
+		};
+		return mapping[snakeCaseName] || snakeCaseName;
 	};
 
 	let openState = $state(false);
@@ -583,7 +601,9 @@
 																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 																}) as val}
 																	<li>
-																		{#if key === 'security_objectives' || key === 'security_capabilities'}
+																		{#if key === 'linked_models' && typeof val === 'string'}
+																			{safeTranslate(convertLinkedModelName(val))}
+																		{:else if key === 'security_objectives' || key === 'security_capabilities'}
 																			{@const [securityObjectiveName, securityObjectiveValue] =
 																				Object.entries(val)[0]}
 																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}

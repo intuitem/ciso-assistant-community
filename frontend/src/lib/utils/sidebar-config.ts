@@ -20,6 +20,7 @@ type SidebarBackendKeys = {
 	project_management: boolean;
 	contracts: boolean;
 	reports: boolean;
+	validation_flows: boolean;
 };
 
 type SidebarFrontendKeys = {
@@ -44,6 +45,7 @@ type SidebarFrontendKeys = {
 	projectManagement: boolean;
 	contracts: boolean;
 	reports: boolean;
+	validationFlows: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -70,6 +72,7 @@ export function getSidebarVisibleItems(
 		businessImpactAnalysis: featureFlags?.bia ?? true,
 		projectManagement: featureFlags?.project_management ?? false,
 		contracts: featureFlags?.contracts ?? false,
-		reports: featureFlags?.reports ?? false
+		reports: featureFlags?.reports ?? false,
+		validationFlows: featureFlags?.validation_flows ?? false
 	};
 }
