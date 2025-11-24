@@ -26,22 +26,10 @@ class WebhookEndpointSerializer(serializers.ModelSerializer):
     )
 
     target_folders = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Folder.objects.none(), required=False
+        many=True, queryset=Folder.objects.all(), required=False
     )
 
     has_secret = serializers.SerializerMethodField()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
-            user = request.user
-            (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, Folder
-            )
-            self.fields["target_folders"].queryset = Folder.objects.filter(
-                id__in=viewable_folders_ids
-            )
 
     class Meta:
         model = WebhookEndpoint
@@ -65,3 +53,17 @@ class WebhookEndpointSerializer(serializers.ModelSerializer):
         Indicates whether the webhook endpoint has a secret set.
         """
         return bool(obj.secret)
+
+    def validate_target_folders(self, value):
+        request = self.context.get("request")
+        if not request and hasattr(request, "user"):
+            raise serializers.ValidationError("Request context with user is required.")
+        user = getattr(request, "user")
+        (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), user, Folder
+        )
+        if not all(folder.id in viewable_folders_ids for folder in value):
+            raise serializers.ValidationError(
+                "One or more target folders are not accessible by the user."
+            )
+        return value
