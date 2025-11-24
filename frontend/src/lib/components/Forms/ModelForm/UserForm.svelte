@@ -24,15 +24,6 @@
 		shape = {},
 		context
 	}: Props = $props();
-	$effect(() => {
-		const data = form?.data;
-		if (!data || context !== 'create') {
-			return;
-		}
-		if (data.is_third_party && !data.keep_local_login) {
-			data.keep_local_login = true;
-		}
-	});
 </script>
 
 <TextField
@@ -79,12 +70,23 @@
 {/if}
 
 {#if shape.keep_local_login}
-	<Checkbox
-		{form}
-		field="keep_local_login"
-		label={m.keepLocalLogin()}
-		helpText={m.keepLocalLoginHelpText()}
-	/>
+	{#if context === 'create'}
+		{#if formDataCache['is_third_party']}
+			<Checkbox
+				{form}
+				field="keep_local_login"
+				label={m.keepLocalLogin()}
+				helpText={m.keepLocalLoginHelpText()}
+			/>
+		{/if}
+	{:else if !page.data.object?.is_third_party}
+		<Checkbox
+			{form}
+			field="keep_local_login"
+			label={m.keepLocalLogin()}
+			helpText={m.keepLocalLoginHelpText()}
+		/>
+	{/if}
 {/if}
 {#if shape.expiry_date && !page.data.object?.is_superuser}
 	<TextField
