@@ -333,41 +333,43 @@
 	<div
 		class="card px-6 py-4 bg-white flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
 	>
-		<div
-			class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full"
-		>
-			<a
-				href="/compliance-assessments/{complianceAssessment.id}"
-				class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+		{#if !questionnaireOnly}
+			<div
+				class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full"
 			>
-				<i class="fa-solid fa-arrow-left"></i>
-				<p class="">{m.goBackToAudit()} {complianceAssessment.name}</p>
-			</a>
-			{#if !(questionnaireOnly ? hasQuestions : !hasQuestions)}
-				<div class="flex items-center justify-center space-x-4">
-					{#if questionnaireMode}
-						<p class="font-bold text-sm">{m.assessmentMode()}</p>
-					{:else}
-						<p class="font-bold text-sm text-green-500">{m.assessmentMode()}</p>
-					{/if}
-					<Switch
-						name="questionnaireToggle"
-						classes="flex flex-row items-center justify-center"
-						controlActive="bg-primary-500"
-						controlInactive="bg-green-500"
-						onCheckedChange={(e) => {
-							questionnaireMode = e.checked;
-						}}
-					>
+				<a
+					href="/compliance-assessments/{complianceAssessment.id}"
+					class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+				>
+					<i class="fa-solid fa-arrow-left"></i>
+					<p class="">{m.goBackToAudit()} {complianceAssessment.name}</p>
+				</a>
+				{#if !hasQuestions}
+					<div class="flex items-center justify-center space-x-4">
 						{#if questionnaireMode}
-							<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
+							<p class="font-bold text-sm">{m.assessmentMode()}</p>
 						{:else}
-							<p class="font-bold text-sm">{m.questionnaireMode()}</p>
+							<p class="font-bold text-sm text-green-500">{m.assessmentMode()}</p>
 						{/if}
-					</Switch>
-				</div>
-			{/if}
-		</div>
+						<Switch
+							name="questionnaireToggle"
+							classes="flex flex-row items-center justify-center"
+							controlActive="bg-primary-500"
+							controlInactive="bg-green-500"
+							onCheckedChange={(e) => {
+								questionnaireMode = e.checked;
+							}}
+						>
+							{#if questionnaireMode}
+								<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
+							{:else}
+								<p class="font-bold text-sm">{m.questionnaireMode()}</p>
+							{/if}
+						</Switch>
+					</div>
+				{/if}
+			</div>
+		{/if}
 		{#each requirementAssessments as requirementAssessment, i}
 			<div class="w-2"></div>
 

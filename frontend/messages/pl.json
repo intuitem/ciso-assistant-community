@@ -1718,6 +1718,7 @@
 	"samlCertificateHelpText": "Możesz określić własny certyfikat lub pozwolić aplikacji wygenerować go.",
 	"samlAuthnRequestSignedHelpText": "Gdy włączone, żądanie uwierzytelniania SAML jest podpisywane kluczem prywatnym poniżej. Odpowiedni certyfikat publiczny jest wysyłany do dostawcy tożsamości, aby mógł zweryfikować podpis.",
 	"downloadCertificate": "Pobierz certyfikat",
+	"loginFailed": "Logowanie nieudane",
 	"viewMore": "Pokaż więcej",
 	"viewLess": "Pokaż mniej"
 }

@@ -144,7 +144,6 @@
 	bind:cachedValue={formDataCache['type']}
 />
 <AutocompleteSelect
-	hidden={data.type === 'PR'}
 	multiple
 	{form}
 	optionsEndpoint="assets"
@@ -169,7 +168,7 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="assets?type=SP"
+	optionsEndpoint="assets"
 	optionsInfoFields={{
 		fields: [
 			{
@@ -297,6 +296,16 @@
 		helpText={m.linkHelpText()}
 		cacheLock={cacheLocks['reference_link']}
 		bind:cachedValue={formDataCache['reference_link']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="security-exceptions"
+		optionsLabelField="auto"
+		field="security_exceptions"
+		cacheLock={cacheLocks['security_exceptions']}
+		bind:cachedValue={formDataCache['security_exceptions']}
+		label={m.securityExceptions()}
 	/>
 	<AutocompleteSelect
 		multiple
