@@ -74,12 +74,19 @@
 	);
 
 	$effect(() => {
-		if (
-			!data.webhookEndpoints
-				.map((e: Record<string, any>) => JSON.stringify(e))
-				.includes(JSON.stringify(displayedEndpoint))
-		) {
-			displayedEndpoint = data?.webhookEndpoints?.length > 0 ? data.webhookEndpoints[0] : undefined;
+		const endpoints = data?.webhookEndpoints ?? [];
+
+		if (!endpoints.length) {
+			displayedEndpoint = undefined;
+			return;
+		}
+
+		const exists = displayedEndpoint
+			? endpoints.some((e: Record<string, any>) => e.id === displayedEndpoint.id)
+			: false;
+
+		if (!exists) {
+			displayedEndpoint = endpoints[0];
 		}
 	});
 </script>
