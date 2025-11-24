@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from django.utils.formats import date_format
 from django.http import HttpResponse
 from django.db.models import Sum, F, FloatField, Case, When, Value
-from django.db.models.functions import Cast, Greatest, Coalesce
+from django.db.models.functions import Cast, Greatest, Coalesce, Round
 
 from core.constants import COUNTRY_CHOICES, CURRENCY_CHOICES
 from core.dora import (
@@ -78,17 +78,24 @@ class EntityViewSet(BaseModelViewSet):
         # Annotate with default_criticality calculation
         # Formula: (default_dependency * default_penetration) / (default_maturity * default_trust)
         # Handle division by zero by using Case/When
+        # Rounded to 2 decimal places by multiplying by 100, rounding, then dividing by 100
         qs = qs.annotate(
-            default_criticality=Case(
-                # If maturity or trust is 0, return 0.0
-                When(default_maturity=0, then=Value(0.0)),
-                When(default_trust=0, then=Value(0.0)),
-                # Otherwise, calculate criticality
-                default=Cast(
-                    (F("default_dependency") * F("default_penetration"))
-                    / (F("default_maturity") * F("default_trust")),
-                    output_field=FloatField(),
-                ),
+            default_criticality=Cast(
+                Round(
+                    Case(
+                        # If maturity or trust is 0, return 0.0
+                        When(default_maturity=0, then=Value(0.0)),
+                        When(default_trust=0, then=Value(0.0)),
+                        # Otherwise, calculate criticality * 100
+                        default=Cast(
+                            (F("default_dependency") * F("default_penetration") * 100.0)
+                            / (F("default_maturity") * F("default_trust")),
+                            output_field=FloatField(),
+                        ),
+                        output_field=FloatField(),
+                    )
+                )
+                / 100.0,
                 output_field=FloatField(),
             )
         )
@@ -550,6 +557,131 @@ class EntityViewSet(BaseModelViewSet):
     @action(detail=False, name="Get DORA provider person type choices")
     def dora_provider_person_type(self, request):
         return Response(dict(DORA_PROVIDER_PERSON_TYPE_CHOICES))
+
+    @action(detail=False, methods=["post"], url_path="batch-create")
+    def batch_create(self, request):
+        """
+        Batch create multiple entities from a text list.
+        Expected format:
+        {
+            "entities_text": "Entity 1\\nEntity 2\\nREF-001:Entity 3",
+            "folder": "folder-uuid"
+        }
+        Lines can optionally have a ref_id prefix (REF-001:Entity Name).
+        Entities with the same name in the folder will be skipped.
+        """
+        from rest_framework import status
+        from tprm.serializers import EntityWriteSerializer
+
+        try:
+            entities_text = request.data.get("entities_text", "")
+            folder_id = request.data.get("folder")
+
+            if not entities_text:
+                return Response(
+                    {"error": "entities_text is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if not folder_id:
+                return Response(
+                    {"error": "folder is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Verify folder exists and user has access
+            if not RoleAssignment.is_object_readable(request.user, Folder, folder_id):
+                return Response(
+                    {"error": "Folder not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            folder = Folder.objects.get(id=folder_id)
+
+            # Parse the entities text
+            lines = [line.strip() for line in entities_text.split("\n") if line.strip()]
+            created_entities = []
+            skipped_entities = []
+            errors = []
+
+            for line in lines:
+                # Check for ref_id prefix (REF-001:Entity Name)
+                ref_id = ""
+                entity_name = line
+
+                if ":" in line:
+                    parts = line.split(":", 1)
+                    if len(parts) == 2 and parts[0].strip():
+                        ref_id = parts[0].strip()
+                        entity_name = parts[1].strip()
+
+                if not entity_name:
+                    errors.append({"line": line, "error": "Empty entity name"})
+                    continue
+
+                # Check if entity already exists in the folder
+                existing_entity = Entity.objects.filter(
+                    name=entity_name, folder=folder_id
+                ).first()
+
+                if existing_entity:
+                    # Skip existing entity
+                    skipped_entities.append(
+                        {
+                            "id": str(existing_entity.id),
+                            "name": existing_entity.name,
+                            "ref_id": existing_entity.ref_id,
+                        }
+                    )
+                    continue
+
+                # Create new entity using the serializer to respect IAM
+                entity_data = {
+                    "name": entity_name,
+                    "folder": folder_id,
+                }
+
+                if ref_id:
+                    entity_data["ref_id"] = ref_id
+
+                serializer = EntityWriteSerializer(
+                    data=entity_data, context={"request": request}
+                )
+
+                if serializer.is_valid():
+                    entity = serializer.save()
+
+                    created_entities.append(
+                        {
+                            "id": str(entity.id),
+                            "name": entity.name,
+                            "ref_id": entity.ref_id,
+                        }
+                    )
+                else:
+                    errors.append(
+                        {
+                            "line": line,
+                            "errors": serializer.errors,
+                        }
+                    )
+
+            return Response(
+                {
+                    "created": len(created_entities),
+                    "skipped": len(skipped_entities),
+                    "entities": created_entities,
+                    "skipped_entities": skipped_entities,
+                    "errors": errors,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            logger.error("Error in batch create entities", error=str(e))
+            return Response(
+                {"error": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class EntityAssessmentViewSet(BaseModelViewSet):

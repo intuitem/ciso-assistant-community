@@ -986,5 +986,6 @@
 	"samlAuthnRequestSignedHelpText": "Cuando está habilitado, la solicitud de autenticación SAML se firma con la clave privada a continuación. El certificado público correspondiente se envía al Proveedor de Identidad para que pueda verificar la firma.",
 	"downloadCertificate": "Descargar certificado",
 	"viewMore": "Ver más",
-	"viewLess": "Ver menos"
+	"viewLess": "Ver menos",
+	"loginFailed": "Inicio fallido"
 }
