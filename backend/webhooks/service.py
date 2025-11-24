@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from global_settings.utils import ff_is_enabled
 from iam.models import Folder
@@ -28,17 +28,15 @@ def dispatch_webhook_event(instance, action, serializer=None):
 
     # Find all active endpoints subscribed to this event
     folder = Folder.get_folder(instance)
-    if not folder:
-        endpoints = WebhookEndpoint.objects.filter(
+    endpoints = (
+        WebhookEndpoint.objects.annotate(folder_count=Count("target_folders"))
+        .filter(
+            Q(folder_count=0) | Q(target_folders=folder),
             is_active=True,
             event_types__name=event_type,
         )
-    else:
-        endpoints = WebhookEndpoint.objects.filter(
-            Q(target_folders__isnull=True) | Q(target_folders=folder),
-            is_active=True,
-            event_types__name=event_type,
-        )
+        .distinct()
+    )
 
     payloads = {}
     for endpoint in endpoints:
