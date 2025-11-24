@@ -13,7 +13,7 @@
     - [Security & consumer management](#security-consumer-management)
     - [Payload](#payload)
       - [Payload structure](#payload-structure)
-      - ["Thin" payload strategy and rationale](#thin-payload-strategy-and-rationale)
+      - [Payload strategy](#payload-strategy)
     - [Webhook headers](#webhook-headers)
     - [Verifying signatures (MVP)](#verifying-signatures-mvp)
   - [MVP limitations & future iterations](#mvp-limitations-future-iterations)
@@ -29,7 +29,7 @@ This document outlines the MVP implementation for **Outgoing Webhooks** in CISO 
   - **Backend:** Django / DRF
   - **Queueing:** Huey (with SQLite backend)
   - **Signatures:** HMAC-SHA256 (`v1`)
-  - **Payloads:** "Thin" (ID-only)
+  - **Payloads:** "Thin" (ID-only) or "Full" (entire object) JSON
 
 ---
 
@@ -95,11 +95,11 @@ The top-level JSON object will always contain
 
 - **`type`** (string): The event type, formatted hierarchically with full stops. This identifies the action that occurred.
 - **`timestamp`** (string): The [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) formatted timestamp of when the event occurred in our system (this is not the same as the `webhook-timestamp` header, which indicates when the send attempt was made).
-- **`data`** (object): The object containing the event's data. Per our strategy, this will be a "thin" payload.
+- **`data`** (object): The object containing the event's data. Per our strategy, this will be a "thin" or "full" payload.
 
-#### "Thin" payload strategy and rationale
+#### Payload strategy
 
-CISO Assistant exclusively uses **"thin" payloads**.
+CISO Assistant allows for two payload modes: **thin** and **full** payloads.
 
 A "thin" payload contains _only the ID_ of the resource that changed, not the full object. You must use this ID to call back to our API to fetch the complete, up-to-date details.
 
@@ -115,12 +115,85 @@ A "thin" payload contains _only the ID_ of the resource that changed, not the fu
 }
 ```
 
-**Rationale:**
+A "full" payload contains _the entirety_ of the resource that changed.
 
-1. **Consumers must make authenticated requests to the API to retrieve the full payload.**
-2. **Prevents brittle contracts:** If we sent "fat" payloads, any change to the API, which is still in beta (like renaming a field), would become a breaking change for all webhook consumers.
-3. **Single source of truth:** This forces consumers to call back to our (beta) API to get the full data. It couples them to the _single, explicit_ API contract, which is the desired behavior.
-4. **Resilience:** Consumer pain is reduced from "my parser broke" (a code change) to "the API call failed" (a transient, retry-able error).
+**Example: `appliedcontrol.created` event**
+
+```json
+{
+  "type": "appliedcontrol.created",
+  "timestamp": "2025-11-13T14:35:06.123456Z",
+  "data": {
+    "id": "53709ff2-ade7-4172-9dee-daa580cbba5b",
+    "findings": [],
+    "stakeholders": [],
+    "cost": null,
+    "path": [],
+    "folder": {
+      "str": "Global",
+      "id": "5941b4a9-6a22-45bf-9044-38a5a4566696"
+    },
+    "reference_control": {
+      "str": "DOC.AUDIT_PLAN - Audit plan document",
+      "id": "988bd9d1-4381-4f26-b685-7ed0355d7560"
+    },
+    "priority": "P3",
+    "category": "Process",
+    "csf_function": "Govern",
+    "evidences": [
+      {
+        "str": "acceptable_encryption_policy",
+        "id": "5225715c-0291-409a-b176-99a613bd12b1"
+      },
+      {
+        "str": "data_breach_response",
+        "id": "c3af2b74-56ab-450f-9a79-41f5c47e53ac"
+      }
+    ],
+    "objectives": [],
+    "effort": null,
+    "control_impact": null,
+    "annual_cost": "0.00",
+    "currency": "€",
+    "annual_cost_display": "",
+    "filtering_labels": [],
+    "assets": [],
+    "ranking_score": 0,
+    "owner": [],
+    "security_exceptions": [],
+    "state": {
+      "name": "incoming",
+      "hexcolor": "#93c5fd"
+    },
+    "findings_count": 0,
+    "is_assigned": false,
+    "created_at": "2025-10-31T15:35:10.514059Z",
+    "updated_at": "2025-11-21T17:19:17.819806Z",
+    "name": "Audit plan document",
+    "description": null,
+    "ref_id": null,
+    "status": "in_progress",
+    "start_date": null,
+    "eta": "2025-11-29",
+    "expiry_date": null,
+    "link": null,
+    "progress_field": 100,
+    "is_published": true,
+    "observation": null,
+    "sync_mappings": [
+      {
+        "id": "49eb13ee-f52d-45a9-82d8-ba0f21d1fb46",
+        "remote_id": "KAN-1",
+        "sync_status": "failed",
+        "last_synced_at": "2025-11-06T13:02:23.269321Z",
+        "last_sync_direction": "pull",
+        "error_message": "Remote object was deleted",
+        "provider": "jira"
+      }
+    ]
+  }
+}
+```
 
 ---
 
