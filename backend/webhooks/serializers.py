@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from iam.models import Folder
+from iam.models import Folder, RoleAssignment
 from .models import WebhookEndpoint, WebhookEventType
 
 
@@ -26,10 +26,22 @@ class WebhookEndpointSerializer(serializers.ModelSerializer):
     )
 
     target_folders = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Folder.objects.all(), required=False
+        many=True, queryset=Folder.objects.none(), required=False
     )
 
     has_secret = serializers.SerializerMethodField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            user = request.user
+            (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, Folder
+            )
+            self.fields["target_folders"].queryset = Folder.objects.filter(
+                id__in=viewable_folders_ids
+            )
 
     class Meta:
         model = WebhookEndpoint
