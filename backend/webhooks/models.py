@@ -88,7 +88,7 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
             # Try to parse the hostname as an IP address
             ip = ipaddress.ip_address(hostname)
 
-            if not settings.DEBUG and (
+            if settings.WEBHOOK_ALLOW_PRIVATE_IPS and (
                 ip.is_private or ip.is_loopback or ip.is_reserved
             ):
                 raise ValidationError(
