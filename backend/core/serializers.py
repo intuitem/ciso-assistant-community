@@ -1246,6 +1246,9 @@ class UserWriteSerializer(BaseModelSerializer):
                     new_user_groups=new_groups,
                 )
                 # instance.user_groups.set(user_groups_data)
+        if validated_data.get("is_third_party") and not instance.is_third_party:
+            validated_data["keep_local_login"] = True
+
         return super().update(instance, validated_data)
 
 
