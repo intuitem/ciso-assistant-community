@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.db.models import Q
 
+from global_settings.utils import ff_is_enabled
 from iam.models import Folder
 
 from .models import WebhookEndpoint
@@ -15,6 +16,8 @@ def dispatch_webhook_event(instance, action, serializer=None):
     - 'instance' is the model object (e.g., an AppliedControl)
     - 'action' is a string (e.g., "created", "updated", "deleted")
     """
+    if not ff_is_enabled("outgoing_webhooks"):
+        return
     # Check if the model is registered
     config = webhook_registry.get_config(instance)
 
