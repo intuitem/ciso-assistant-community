@@ -96,7 +96,7 @@
 			>
 			<button
 				class="btn preset-filled-primary-500 font-semibold w-full"
-				data-testid="login-btn"
+				data-testid="save-btn"
 				type="submit">{m.save()}</button
 			>
 		</div>
