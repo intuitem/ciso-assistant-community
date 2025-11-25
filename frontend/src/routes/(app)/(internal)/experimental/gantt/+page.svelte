@@ -191,28 +191,416 @@
 		return ((d - min) / (max - min)) * 100;
 	}
 
+	// Zoom levels
+	type ZoomLevel = 'day' | 'week' | 'month' | 'year';
+
 	// State
 	let useDummyData = $state(true);
+	let zoomLevel = $state<ZoomLevel>('month');
+	let viewStartDate = $state<Date>(new Date());
 	let ganttEntries = $derived(
 		useDummyData
 			? getDummyGanttEntries()
 			: transformAppliedControlsToGanttEntries(data.appliedControls)
 	);
 	let ganttGroups = $derived(getGroupsFromEntries(ganttEntries));
-	let dateRange = $derived(getDateRange(ganttEntries));
 	let selectedFolder = $state<string>('');
 
-	// Filtered entries
-	let filteredEntries = $derived(
-		selectedFolder
-			? ganttEntries.filter((entry) => entry.folder_uuid === selectedFolder)
-			: ganttEntries
+	// Calculate visible date range based on zoom level and current view position
+	function getVisibleDateRange(
+		startDate: Date,
+		zoom: ZoomLevel,
+		latestEventDate?: Date
+	): { min: Date; max: Date } {
+		const min = new Date(startDate);
+		const max = new Date(startDate);
+
+		switch (zoom) {
+			case 'day':
+				// Show 7 days
+				max.setDate(max.getDate() + 7);
+				break;
+			case 'week':
+				// Show 8 weeks (2 months)
+				max.setDate(max.getDate() + 56);
+				break;
+			case 'month':
+				// Show 6 months
+				max.setMonth(max.getMonth() + 6);
+				break;
+			case 'year':
+				// Show 2 years
+				max.setFullYear(max.getFullYear() + 2);
+				break;
+		}
+
+		// If we have latest event date, extend the range to include it with margin
+		if (latestEventDate) {
+			const latestWithMargin = new Date(latestEventDate);
+			switch (zoom) {
+				case 'day':
+					latestWithMargin.setDate(latestWithMargin.getDate() + 2); // 2 days after
+					break;
+				case 'week':
+					latestWithMargin.setDate(latestWithMargin.getDate() + 14); // 2 weeks after
+					break;
+				case 'month':
+					latestWithMargin.setMonth(latestWithMargin.getMonth() + 2); // 2 months after
+					break;
+				case 'year':
+					latestWithMargin.setMonth(latestWithMargin.getMonth() + 6); // 6 months after
+					break;
+			}
+
+			// Extend max if needed to include latest event
+			if (latestWithMargin > max) {
+				max.setTime(latestWithMargin.getTime());
+			}
+		}
+
+		return { min, max };
+	}
+
+	// Calculate timeline width based on zoom level (in pixels)
+	function getTimelineWidth(zoom: ZoomLevel): number {
+		switch (zoom) {
+			case 'day':
+				return 120 * 7; // 120px per day × 7 days = 840px
+			case 'week':
+				return 150 * 8; // 150px per week × 8 weeks = 1200px
+			case 'month':
+				return 180 * 6; // 180px per month × 6 months = 1080px
+			case 'year':
+				return 180 * 8; // 180px per quarter × 8 quarters = 1440px
+		}
+	}
+
+	// Get earliest and latest dates from all entries
+	function getDataDateRange(entries: GanttEntry[]): { earliest: Date; latest: Date } | null {
+		if (entries.length === 0) return null;
+
+		const dates: Date[] = [];
+		entries.forEach((entry) => {
+			if (entry.start_date) dates.push(new Date(entry.start_date));
+			if (entry.end_date) dates.push(new Date(entry.end_date));
+		});
+
+		if (dates.length === 0) return null;
+
+		return {
+			earliest: new Date(Math.min(...dates.map((d) => d.getTime()))),
+			latest: new Date(Math.max(...dates.map((d) => d.getTime())))
+		};
+	}
+
+	let dataDateRange = $derived(getDataDateRange(ganttEntries));
+
+	// Calculate minimum allowed start date (earliest event - margin)
+	// Margin should be at least 2x the view duration to ensure events are visible
+	function getMinStartDate(earliest: Date | null, zoom: ZoomLevel): Date {
+		if (!earliest) return new Date(new Date().getFullYear() - 1, 0, 1); // Default to 1 year ago
+
+		const minDate = new Date(earliest);
+		switch (zoom) {
+			case 'day':
+				minDate.setDate(minDate.getDate() - 14); // 2 weeks before (2x view duration)
+				break;
+			case 'week':
+				minDate.setDate(minDate.getDate() - 112); // 16 weeks before (2x view duration)
+				break;
+			case 'month':
+				minDate.setMonth(minDate.getMonth() - 12); // 12 months before (2x view duration)
+				break;
+			case 'year':
+				minDate.setFullYear(minDate.getFullYear() - 4); // 4 years before (2x view duration)
+				break;
+		}
+		return minDate;
+	}
+
+	// Calculate maximum allowed start date (latest event + margin - view duration)
+	// This ensures we can scroll right to see all events
+	function getMaxStartDate(latest: Date | null, zoom: ZoomLevel): Date {
+		if (!latest) return new Date(new Date().getFullYear() + 1, 11, 31); // Default to 1 year ahead
+
+		const maxDate = new Date(latest);
+		switch (zoom) {
+			case 'day':
+				maxDate.setDate(maxDate.getDate() + 14); // 2 weeks after latest event
+				maxDate.setDate(maxDate.getDate() - 7); // minus view duration (7 days)
+				break;
+			case 'week':
+				maxDate.setDate(maxDate.getDate() + 112); // 16 weeks after latest event
+				maxDate.setDate(maxDate.getDate() - 56); // minus view duration (8 weeks)
+				break;
+			case 'month':
+				maxDate.setMonth(maxDate.getMonth() + 12); // 12 months after latest event
+				maxDate.setMonth(maxDate.getMonth() - 6); // minus view duration (6 months)
+				break;
+			case 'year':
+				maxDate.setFullYear(maxDate.getFullYear() + 4); // 4 years after latest event
+				maxDate.setFullYear(maxDate.getFullYear() - 2); // minus view duration (2 years)
+				break;
+		}
+		return maxDate;
+	}
+
+	let minStartDate = $derived(
+		getMinStartDate(dataDateRange?.earliest || null, zoomLevel)
+	);
+	let maxStartDate = $derived(
+		getMaxStartDate(dataDateRange?.latest || null, zoomLevel)
 	);
 
-	// Format date for display
-	function formatDate(date: Date): string {
-		return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+	let dateRange = $derived(
+		getVisibleDateRange(viewStartDate, zoomLevel, dataDateRange?.latest)
+	);
+
+	// Calculate timeline width dynamically based on actual date range
+	function getActualTimelineWidth(range: { min: Date; max: Date }, zoom: ZoomLevel): number {
+		const days = Math.ceil((range.max.getTime() - range.min.getTime()) / (1000 * 60 * 60 * 24));
+
+		switch (zoom) {
+			case 'day':
+				return Math.max(840, (days / 7) * 840); // 120px per day
+			case 'week':
+				const weeks = Math.ceil(days / 7);
+				return Math.max(1200, (weeks / 8) * 1200); // 150px per week
+			case 'month':
+				const months = Math.ceil(days / 30);
+				return Math.max(1080, (months / 6) * 1080); // 180px per month
+			case 'year':
+				const quarters = Math.ceil(days / 91);
+				return Math.max(1440, (quarters / 8) * 1440); // 180px per quarter
+		}
 	}
+
+	let timelineWidth = $derived(getActualTimelineWidth(dateRange, zoomLevel));
+
+	// Filtered entries - only show entries that fall within visible date range
+	let filteredEntries = $derived(
+		ganttEntries.filter((entry) => {
+			if (selectedFolder && entry.folder_uuid !== selectedFolder) return false;
+
+			// Check if entry overlaps with visible date range
+			const entryStart = entry.start_date ? new Date(entry.start_date) : null;
+			const entryEnd = entry.end_date ? new Date(entry.end_date) : null;
+
+			if (entryEnd && entryEnd < dateRange.min) return false;
+			if (entryStart && entryStart > dateRange.max) return false;
+
+			return true;
+		})
+	);
+
+	// Navigation functions
+	function slideLeft() {
+		const newDate = new Date(viewStartDate);
+		switch (zoomLevel) {
+			case 'day':
+				newDate.setDate(newDate.getDate() - 7);
+				break;
+			case 'week':
+				newDate.setDate(newDate.getDate() - 28);
+				break;
+			case 'month':
+				newDate.setMonth(newDate.getMonth() - 3);
+				break;
+			case 'year':
+				newDate.setFullYear(newDate.getFullYear() - 1);
+				break;
+		}
+		// Don't go before minimum start date
+		if (newDate < minStartDate) {
+			viewStartDate = new Date(minStartDate);
+		} else {
+			viewStartDate = newDate;
+		}
+	}
+
+	function slideRight() {
+		const newDate = new Date(viewStartDate);
+		switch (zoomLevel) {
+			case 'day':
+				newDate.setDate(newDate.getDate() + 7);
+				break;
+			case 'week':
+				newDate.setDate(newDate.getDate() + 28);
+				break;
+			case 'month':
+				newDate.setMonth(newDate.getMonth() + 3);
+				break;
+			case 'year':
+				newDate.setFullYear(newDate.getFullYear() + 1);
+				break;
+		}
+		// Don't go beyond maximum start date
+		if (newDate > maxStartDate) {
+			viewStartDate = new Date(maxStartDate);
+		} else {
+			viewStartDate = newDate;
+		}
+	}
+
+	function resetToToday() {
+		// Set to start of current week/month depending on zoom
+		const today = new Date();
+		const newDate = new Date(today);
+
+		switch (zoomLevel) {
+			case 'day':
+			case 'week':
+				// Start of week (Sunday)
+				newDate.setDate(today.getDate() - today.getDay());
+				break;
+			case 'month':
+				// Start of month
+				newDate.setDate(1);
+				break;
+			case 'year':
+				// Start of year
+				newDate.setMonth(0, 1);
+				break;
+		}
+
+		// If there's data and the earliest event is in the future, show from earliest event
+		if (dataDateRange && dataDateRange.earliest > today) {
+			viewStartDate = new Date(minStartDate);
+		} else {
+			viewStartDate = newDate;
+		}
+	}
+
+	// Initialize view to show data appropriately
+	function initializeView() {
+		if (!dataDateRange) {
+			resetToToday();
+			return;
+		}
+
+		const today = new Date();
+		const earliest = dataDateRange.earliest;
+		const latest = dataDateRange.latest;
+
+		// Calculate a good starting point that shows earliest events with context
+		const startFromEarliest = new Date(earliest);
+
+		// Add a small margin before the earliest event (25% of view duration)
+		switch (zoomLevel) {
+			case 'day':
+				startFromEarliest.setDate(startFromEarliest.getDate() - 2); // 2 days before
+				break;
+			case 'week':
+				startFromEarliest.setDate(startFromEarliest.getDate() - 14); // 2 weeks before
+				break;
+			case 'month':
+				startFromEarliest.setMonth(startFromEarliest.getMonth() - 2); // 2 months before
+				break;
+			case 'year':
+				startFromEarliest.setMonth(startFromEarliest.getMonth() - 6); // 6 months before
+				break;
+		}
+
+		// If all events are in the future, start from earliest
+		if (earliest > today) {
+			viewStartDate = startFromEarliest;
+		}
+		// If all events are in the past, show the latest events
+		else if (latest < today) {
+			const startDate = new Date(latest);
+			switch (zoomLevel) {
+				case 'day':
+					startDate.setDate(startDate.getDate() - 7);
+					break;
+				case 'week':
+					startDate.setDate(startDate.getDate() - 56);
+					break;
+				case 'month':
+					startDate.setMonth(startDate.getMonth() - 6);
+					break;
+				case 'year':
+					startDate.setFullYear(startDate.getFullYear() - 2);
+					break;
+			}
+			viewStartDate = startDate;
+		}
+		// Events span across today - show from earliest with margin to see full context
+		else {
+			// Make sure we can see the earliest event
+			if (startFromEarliest < today) {
+				viewStartDate = startFromEarliest;
+			} else {
+				resetToToday();
+			}
+		}
+	}
+
+	// Initialize view when component loads or zoom changes
+	$effect(() => {
+		initializeView();
+	});
+
+	// Format date for display based on zoom level
+	function formatDate(date: Date): string {
+		switch (zoomLevel) {
+			case 'day':
+				return date.toLocaleDateString('en-US', {
+					month: 'short',
+					day: 'numeric',
+					year: 'numeric'
+				});
+			case 'week':
+				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+			case 'month':
+				return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+			case 'year':
+				return date.toLocaleDateString('en-US', { year: 'numeric' });
+		}
+	}
+
+	// Generate time scale markers
+	function getTimeScaleMarkers(): { label: string; position: number }[] {
+		const markers: { label: string; position: number }[] = [];
+		const { min, max } = dateRange;
+		const current = new Date(min);
+
+		while (current <= max) {
+			const position = getDatePosition(current.toISOString().split('T')[0], min, max);
+			markers.push({
+				label: formatDate(current),
+				position
+			});
+
+			// Increment based on zoom level
+			switch (zoomLevel) {
+				case 'day':
+					current.setDate(current.getDate() + 1);
+					break;
+				case 'week':
+					current.setDate(current.getDate() + 7);
+					break;
+				case 'month':
+					current.setMonth(current.getMonth() + 1);
+					break;
+				case 'year':
+					current.setMonth(current.getMonth() + 3); // Quarterly
+					break;
+			}
+		}
+
+		return markers;
+	}
+
+	let timeScaleMarkers = $derived(getTimeScaleMarkers());
+
+	// Get today's position
+	function getTodayPosition(): number | null {
+		const today = new Date();
+		if (today < dateRange.min || today > dateRange.max) return null;
+		return getDatePosition(today.toISOString().split('T')[0], dateRange.min, dateRange.max);
+	}
+
+	let todayPosition = $derived(getTodayPosition());
 </script>
 
 <div class="bg-white p-6 shadow-sm space-y-4">
@@ -223,16 +611,80 @@
 		</div>
 
 		<div class="flex gap-4 items-end">
+			<!-- Zoom level -->
+			<div>
+				<label class="block text-sm font-medium text-gray-900 mb-1">Zoom</label>
+				<div class="flex gap-1">
+					<button
+						type="button"
+						class="btn btn-sm {zoomLevel === 'day' ? 'preset-filled' : 'preset-outlined'}"
+						onclick={() => {
+							zoomLevel = 'day';
+							resetToToday();
+						}}
+					>
+						Day
+					</button>
+					<button
+						type="button"
+						class="btn btn-sm {zoomLevel === 'week' ? 'preset-filled' : 'preset-outlined'}"
+						onclick={() => {
+							zoomLevel = 'week';
+							resetToToday();
+						}}
+					>
+						Week
+					</button>
+					<button
+						type="button"
+						class="btn btn-sm {zoomLevel === 'month' ? 'preset-filled' : 'preset-outlined'}"
+						onclick={() => {
+							zoomLevel = 'month';
+							resetToToday();
+						}}
+					>
+						Month
+					</button>
+					<button
+						type="button"
+						class="btn btn-sm {zoomLevel === 'year' ? 'preset-filled' : 'preset-outlined'}"
+						onclick={() => {
+							zoomLevel = 'year';
+							resetToToday();
+						}}
+					>
+						Year
+					</button>
+				</div>
+			</div>
+
+			<!-- Navigation -->
+			<div>
+				<label class="block text-sm font-medium text-gray-900 mb-1">Navigate</label>
+				<div class="flex gap-1">
+					<button type="button" class="btn btn-sm preset-outlined" onclick={slideLeft}>
+						<i class="fas fa-chevron-left"></i>
+					</button>
+					<button type="button" class="btn btn-sm preset-outlined" onclick={resetToToday}>
+						<i class="fas fa-calendar-day mr-1"></i>
+						Today
+					</button>
+					<button type="button" class="btn btn-sm preset-outlined" onclick={slideRight}>
+						<i class="fas fa-chevron-right"></i>
+					</button>
+				</div>
+			</div>
+
 			<!-- Data source toggle -->
 			<div>
 				<label class="block text-sm font-medium text-gray-900 mb-1">Data Source</label>
 				<button
 					type="button"
-					class="btn {useDummyData ? 'preset-filled' : 'preset-outlined'}"
+					class="btn btn-sm {useDummyData ? 'preset-filled' : 'preset-outlined'}"
 					onclick={() => (useDummyData = !useDummyData)}
 				>
 					<i class="fas {useDummyData ? 'fa-flask' : 'fa-database'} mr-2"></i>
-					{useDummyData ? 'Demo Data' : 'Real Data'}
+					{useDummyData ? 'Demo' : 'Real'}
 				</button>
 			</div>
 
@@ -289,89 +741,154 @@
 			<p>No items with dates found. Applied controls need ETA or due dates to appear here.</p>
 		</div>
 	{:else}
-		<!-- Timeline header -->
+		<!-- Timeline container with horizontal scroll -->
 		<div class="border-t pt-4">
-			<div class="flex items-center text-sm text-gray-600 mb-2">
-				<div class="w-64 font-semibold">Name</div>
-				<div class="flex-1 flex justify-between px-4">
-					<span>{formatDate(dateRange.min)}</span>
-					<span>{formatDate(dateRange.max)}</span>
-				</div>
-			</div>
-
-			<!-- Gantt chart -->
-			<div class="space-y-2">
-				{#each filteredEntries as entry (entry.id)}
-					<div class="flex items-center border-b pb-2">
-						<!-- Entry name -->
-						<div class="w-64 pr-4">
-							<div class="font-medium text-sm truncate" title={entry.name}>
-								{#if entry.type === 'milestone'}
-									<i class="fas fa-flag text-green-500 mr-1"></i>
-								{:else if entry.type === 'task'}
-									<i class="fas fa-square text-yellow-500 mr-1"></i>
-								{:else}
-									<i class="fas fa-bars text-purple-500 mr-1"></i>
-								{/if}
-								{entry.name}
-							</div>
-							{#if entry.ref_id}
-								<div class="text-xs text-gray-500">{entry.ref_id}</div>
-							{/if}
-						</div>
-
-						<!-- Timeline visualization -->
-						<div class="flex-1 relative h-8 bg-gray-50 rounded">
-							{#if entry.type === 'milestone'}
-								<!-- Milestone: single point -->
-								<div
-									class="absolute top-0 h-8 flex items-center justify-center"
-									style="left: {getDatePosition(
-										entry.end_date,
-										dateRange.min,
-										dateRange.max
-									)}%; transform: translateX(-50%);"
-								>
-									<div class="w-4 h-4 bg-green-500 rotate-45 border-2 border-white shadow"></div>
-								</div>
-							{:else if entry.type === 'task'}
-								<!-- Task: single day bar -->
-								<div
-									class="absolute top-1 h-6 bg-yellow-500 rounded shadow"
-									style="left: {getDatePosition(
-										entry.end_date,
-										dateRange.min,
-										dateRange.max
-									)}%; width: 2px;"
-								></div>
-							{:else if entry.type === 'activity'}
-								<!-- Control Implementation: range bar with progress -->
-								{@const leftPos = getDatePosition(entry.start_date, dateRange.min, dateRange.max)}
-								{@const rightPos = getDatePosition(entry.end_date, dateRange.min, dateRange.max)}
-								{@const width = rightPos - leftPos}
-								<div
-									class="absolute top-1 h-6 bg-purple-200 rounded shadow"
-									style="left: {leftPos}%; width: {width}%;"
-								>
-									<!-- Progress bar -->
-									<div
-										class="h-full bg-purple-500 rounded transition-all"
-										style="width: {entry.progress}%;"
-									></div>
-								</div>
-								<!-- Progress label -->
-								<div
-									class="absolute top-1 h-6 flex items-center justify-center text-xs font-semibold text-white"
-									style="left: {leftPos}%; width: {width}%;"
-								>
-									{#if entry.progress > 0}
-										{entry.progress}%
+			<div class="flex items-start">
+				<!-- Fixed column for names -->
+				<div class="w-64 flex-shrink-0 pr-4">
+					<div class="font-semibold text-sm text-gray-600 mb-4 h-10 flex items-end pb-1">
+						Name
+					</div>
+					<!-- Entry names -->
+					<div class="space-y-2">
+						{#each filteredEntries as entry (entry.id)}
+							<div class="h-10 flex items-center border-b pb-2">
+								<div class="w-full">
+									<div class="font-medium text-sm truncate" title={entry.name}>
+										{#if entry.type === 'milestone'}
+											<i class="fas fa-flag text-green-500 mr-1"></i>
+										{:else if entry.type === 'task'}
+											<i class="fas fa-square text-yellow-500 mr-1"></i>
+										{:else}
+											<i class="fas fa-bars text-purple-500 mr-1"></i>
+										{/if}
+										{entry.name}
+									</div>
+									{#if entry.ref_id}
+										<div class="text-xs text-gray-500">{entry.ref_id}</div>
 									{/if}
 								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+
+				<!-- Scrollable timeline area -->
+				<div class="flex-1 overflow-x-auto">
+					<div style="width: {timelineWidth}px;">
+						<!-- Time scale markers -->
+						<div class="relative h-10 border-b border-gray-300 mb-4">
+							{#each timeScaleMarkers as marker}
+								<div
+									class="absolute top-0 h-10 flex flex-col items-start justify-end pb-1"
+									style="left: {marker.position}%;"
+								>
+									<div class="h-2 w-px bg-gray-300 mb-1"></div>
+									<span class="text-xs text-gray-600 transform -translate-x-1/2 whitespace-nowrap">
+										{marker.label}
+									</span>
+								</div>
+							{/each}
+
+							<!-- Today marker -->
+							{#if todayPosition !== null}
+								<div
+									class="absolute top-0 h-full w-0.5 bg-red-500 z-10"
+									style="left: {todayPosition}%;"
+								>
+									<div
+										class="absolute -top-1 left-1/2 transform -translate-x-1/2 text-xs font-semibold text-red-500 whitespace-nowrap"
+									>
+										Today
+									</div>
+								</div>
 							{/if}
 						</div>
+
+						<!-- Gantt chart bars -->
+						<div class="space-y-2">
+							{#each filteredEntries as entry (entry.id)}
+								<div class="h-10 flex items-center border-b pb-2">
+									<!-- Timeline visualization -->
+									<div class="w-full relative h-8 bg-gray-50 rounded overflow-visible">
+										<!-- Background grid lines -->
+										{#each timeScaleMarkers as marker}
+											<div
+												class="absolute top-0 h-8 w-px bg-gray-200"
+												style="left: {marker.position}%;"
+											></div>
+										{/each}
+
+										<!-- Today marker line -->
+										{#if todayPosition !== null}
+											<div
+												class="absolute top-0 h-8 w-0.5 bg-red-300 z-0"
+												style="left: {todayPosition}%;"
+											></div>
+										{/if}
+										{#if entry.type === 'milestone'}
+											<!-- Milestone: single point -->
+											<div
+												class="absolute top-0 h-8 flex items-center justify-center z-10"
+												style="left: {getDatePosition(
+													entry.end_date,
+													dateRange.min,
+													dateRange.max
+												)}%; transform: translateX(-50%);"
+											>
+												<div
+													class="w-4 h-4 bg-green-500 rotate-45 border-2 border-white shadow"
+												></div>
+											</div>
+										{:else if entry.type === 'task'}
+											<!-- Task: single day bar -->
+											<div
+												class="absolute top-1 h-6 bg-yellow-500 rounded shadow z-10"
+												style="left: {getDatePosition(
+													entry.end_date,
+													dateRange.min,
+													dateRange.max
+												)}%; width: 3px;"
+											></div>
+										{:else if entry.type === 'activity'}
+											<!-- Control Implementation: range bar with progress -->
+											{@const leftPos = getDatePosition(
+												entry.start_date,
+												dateRange.min,
+												dateRange.max
+											)}
+											{@const rightPos = getDatePosition(
+												entry.end_date,
+												dateRange.min,
+												dateRange.max
+											)}
+											{@const width = rightPos - leftPos}
+											<div
+												class="absolute top-1 h-6 bg-purple-200 rounded shadow z-10"
+												style="left: {leftPos}%; width: {width}%;"
+											>
+												<!-- Progress bar -->
+												<div
+													class="h-full bg-purple-500 rounded transition-all"
+													style="width: {entry.progress}%;"
+												></div>
+											</div>
+											<!-- Progress label -->
+											<div
+												class="absolute top-1 h-6 flex items-center justify-center text-xs font-semibold text-white z-20"
+												style="left: {leftPos}%; width: {width}%;"
+											>
+												{#if entry.progress > 0}
+													{entry.progress}%
+												{/if}
+											</div>
+										{/if}
+									</div>
+								</div>
+							{/each}
+						</div>
 					</div>
-				{/each}
+				</div>
 			</div>
 		</div>
 
