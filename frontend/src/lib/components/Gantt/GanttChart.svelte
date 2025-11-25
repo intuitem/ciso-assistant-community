@@ -29,57 +29,53 @@
 
 	type ZoomLevel = 'day' | 'week' | 'month' | 'year';
 
+	// Margin configuration per zoom level (before earliest and after latest event)
+	const ZOOM_MARGINS = {
+		day: { days: 3 }, // 3 days before/after
+		week: { days: 7 }, // 1 week before/after
+		month: { months: 1 }, // 1 month before/after
+		year: { months: 3 } // 3 months (1 quarter) before/after
+	} as const;
+
+	// View duration per zoom level (what's shown in the viewport)
+	const ZOOM_VIEW_DURATION = {
+		day: { days: 7 }, // Shows 7 days
+		week: { days: 56 }, // Shows 8 weeks
+		month: { months: 6 }, // Shows 6 months
+		year: { years: 2 } // Shows 2 years
+	} as const;
+
 	// State
 	let zoomLevel = $state<ZoomLevel>('month');
 	let viewStartDate = $state<Date>(new Date());
 	let selectedItemId = $state<string | null>(null);
 	let selectedFolder = $state<string>('');
 
-	// Calculate visible date range based on zoom level and current view position
-	function getVisibleDateRange(
-		startDate: Date,
-		zoom: ZoomLevel,
-		latestEventDate?: Date
+	// Calculate the full timeline range with margins (earliest-margin to latest+margin)
+	// This is used for rendering the entire timeline
+	function getFullTimelineRange(
+		dataRange: { earliest: Date; latest: Date } | null,
+		zoom: ZoomLevel
 	): { min: Date; max: Date } {
-		const min = new Date(startDate);
-		const max = new Date(startDate);
-
-		switch (zoom) {
-			case 'day':
-				max.setDate(max.getDate() + 7);
-				break;
-			case 'week':
-				max.setDate(max.getDate() + 56);
-				break;
-			case 'month':
-				max.setMonth(max.getMonth() + 6);
-				break;
-			case 'year':
-				max.setFullYear(max.getFullYear() + 2);
-				break;
+		if (!dataRange) {
+			const now = new Date();
+			return {
+				min: new Date(now.getFullYear(), now.getMonth() - 3, 1),
+				max: new Date(now.getFullYear(), now.getMonth() + 3, 0)
+			};
 		}
 
-		// If we have latest event date, extend the range to include it with margin
-		if (latestEventDate) {
-			const latestWithMargin = new Date(latestEventDate);
-			switch (zoom) {
-				case 'day':
-					latestWithMargin.setDate(latestWithMargin.getDate() + 2);
-					break;
-				case 'week':
-					latestWithMargin.setDate(latestWithMargin.getDate() + 14);
-					break;
-				case 'month':
-					latestWithMargin.setMonth(latestWithMargin.getMonth() + 2);
-					break;
-				case 'year':
-					latestWithMargin.setMonth(latestWithMargin.getMonth() + 6);
-					break;
-			}
+		const min = new Date(dataRange.earliest);
+		const max = new Date(dataRange.latest);
 
-			if (latestWithMargin > max) {
-				max.setTime(latestWithMargin.getTime());
-			}
+		// Add margins based on zoom level
+		const margin = ZOOM_MARGINS[zoom];
+		if ('days' in margin) {
+			min.setDate(min.getDate() - margin.days);
+			max.setDate(max.getDate() + margin.days);
+		} else if ('months' in margin) {
+			min.setMonth(min.getMonth() - margin.months);
+			max.setMonth(max.getMonth() + margin.months);
 		}
 
 		return { min, max };
@@ -110,19 +106,11 @@
 		if (!earliest) return new Date(new Date().getFullYear() - 1, 0, 1);
 
 		const minDate = new Date(earliest);
-		switch (zoom) {
-			case 'day':
-				minDate.setDate(minDate.getDate() - 14);
-				break;
-			case 'week':
-				minDate.setDate(minDate.getDate() - 112);
-				break;
-			case 'month':
-				minDate.setMonth(minDate.getMonth() - 12);
-				break;
-			case 'year':
-				minDate.setMonth(minDate.getMonth() - 3);
-				break;
+		const margin = ZOOM_MARGINS[zoom];
+		if ('days' in margin) {
+			minDate.setDate(minDate.getDate() - margin.days);
+		} else if ('months' in margin) {
+			minDate.setMonth(minDate.getMonth() - margin.months);
 		}
 		return minDate;
 	}
@@ -132,30 +120,30 @@
 		if (!latest) return new Date(new Date().getFullYear() + 1, 11, 31);
 
 		const maxDate = new Date(latest);
-		switch (zoom) {
-			case 'day':
-				maxDate.setDate(maxDate.getDate() + 14);
-				maxDate.setDate(maxDate.getDate() - 7);
-				break;
-			case 'week':
-				maxDate.setDate(maxDate.getDate() + 112);
-				maxDate.setDate(maxDate.getDate() - 56);
-				break;
-			case 'month':
-				maxDate.setMonth(maxDate.getMonth() + 12);
-				maxDate.setMonth(maxDate.getMonth() - 6);
-				break;
-			case 'year':
-				maxDate.setMonth(maxDate.getMonth() + 6);
-				maxDate.setFullYear(maxDate.getFullYear() - 2);
-				break;
+		// Add margin
+		const margin = ZOOM_MARGINS[zoom];
+		if ('days' in margin) {
+			maxDate.setDate(maxDate.getDate() + margin.days);
+		} else if ('months' in margin) {
+			maxDate.setMonth(maxDate.getMonth() + margin.months);
+		}
+
+		// Subtract view duration to get the max start date
+		const viewDuration = ZOOM_VIEW_DURATION[zoom];
+		if ('days' in viewDuration) {
+			maxDate.setDate(maxDate.getDate() - viewDuration.days);
+		} else if ('months' in viewDuration) {
+			maxDate.setMonth(maxDate.getMonth() - viewDuration.months);
+		} else if ('years' in viewDuration) {
+			maxDate.setFullYear(maxDate.getFullYear() - viewDuration.years);
 		}
 		return maxDate;
 	}
 
 	let minStartDate = $derived(getMinStartDate(dataDateRange?.earliest || null, zoomLevel));
 	let maxStartDate = $derived(getMaxStartDate(dataDateRange?.latest || null, zoomLevel));
-	let dateRange = $derived(getVisibleDateRange(viewStartDate, zoomLevel, dataDateRange?.latest));
+	// Use the full timeline range for rendering (earliest-margin to latest+margin)
+	let dateRange = $derived(getFullTimelineRange(dataDateRange, zoomLevel));
 
 	// Calculate timeline width dynamically based on actual date range
 	function getActualTimelineWidth(range: { min: Date; max: Date }, zoom: ZoomLevel): number {
@@ -196,20 +184,21 @@
 	// Navigation functions
 	function slideLeft() {
 		const newDate = new Date(viewStartDate);
-		switch (zoomLevel) {
-			case 'day':
-				newDate.setDate(newDate.getDate() - 7);
-				break;
-			case 'week':
-				newDate.setDate(newDate.getDate() - 28);
-				break;
-			case 'month':
-				newDate.setMonth(newDate.getMonth() - 3);
-				break;
-			case 'year':
-				newDate.setFullYear(newDate.getFullYear() - 1);
-				break;
+		const viewDuration = ZOOM_VIEW_DURATION[zoomLevel];
+
+		// Slide by the full view duration for day, half for others
+		if ('days' in viewDuration) {
+			if (zoomLevel === 'day') {
+				newDate.setDate(newDate.getDate() - viewDuration.days);
+			} else {
+				newDate.setDate(newDate.getDate() - Math.floor(viewDuration.days / 2));
+			}
+		} else if ('months' in viewDuration) {
+			newDate.setMonth(newDate.getMonth() - Math.floor(viewDuration.months / 2));
+		} else if ('years' in viewDuration) {
+			newDate.setFullYear(newDate.getFullYear() - Math.floor(viewDuration.years / 2));
 		}
+
 		if (newDate < minStartDate) {
 			viewStartDate = new Date(minStartDate);
 		} else {
@@ -219,20 +208,21 @@
 
 	function slideRight() {
 		const newDate = new Date(viewStartDate);
-		switch (zoomLevel) {
-			case 'day':
-				newDate.setDate(newDate.getDate() + 7);
-				break;
-			case 'week':
-				newDate.setDate(newDate.getDate() + 28);
-				break;
-			case 'month':
-				newDate.setMonth(newDate.getMonth() + 3);
-				break;
-			case 'year':
-				newDate.setFullYear(newDate.getFullYear() + 1);
-				break;
+		const viewDuration = ZOOM_VIEW_DURATION[zoomLevel];
+
+		// Slide by the full view duration for day, half for others
+		if ('days' in viewDuration) {
+			if (zoomLevel === 'day') {
+				newDate.setDate(newDate.getDate() + viewDuration.days);
+			} else {
+				newDate.setDate(newDate.getDate() + Math.floor(viewDuration.days / 2));
+			}
+		} else if ('months' in viewDuration) {
+			newDate.setMonth(newDate.getMonth() + Math.floor(viewDuration.months / 2));
+		} else if ('years' in viewDuration) {
+			newDate.setFullYear(newDate.getFullYear() + Math.floor(viewDuration.years / 2));
 		}
+
 		if (newDate > maxStartDate) {
 			viewStartDate = new Date(maxStartDate);
 		} else {
@@ -245,19 +235,14 @@
 
 		if (!dataDateRange) {
 			const newDate = new Date(today);
-			switch (zoomLevel) {
-				case 'day':
-					newDate.setDate(today.getDate() - 3);
-					break;
-				case 'week':
-					newDate.setDate(today.getDate() - 28);
-					break;
-				case 'month':
-					newDate.setMonth(today.getMonth() - 3);
-					break;
-				case 'year':
-					newDate.setFullYear(today.getFullYear() - 1);
-					break;
+			// Go back half the view duration from today
+			const viewDuration = ZOOM_VIEW_DURATION[zoomLevel];
+			if ('days' in viewDuration) {
+				newDate.setDate(today.getDate() - Math.floor(viewDuration.days / 2));
+			} else if ('months' in viewDuration) {
+				newDate.setMonth(today.getMonth() - Math.floor(viewDuration.months / 2));
+			} else if ('years' in viewDuration) {
+				newDate.setFullYear(today.getFullYear() - Math.floor(viewDuration.years / 2));
 			}
 			viewStartDate = newDate;
 			return;
@@ -266,23 +251,13 @@
 		const earliestWithMargin = new Date(dataDateRange.earliest);
 		const latestWithMargin = new Date(dataDateRange.latest);
 
-		switch (zoomLevel) {
-			case 'day':
-				earliestWithMargin.setDate(earliestWithMargin.getDate() - 2);
-				latestWithMargin.setDate(latestWithMargin.getDate() + 2);
-				break;
-			case 'week':
-				earliestWithMargin.setDate(earliestWithMargin.getDate() - 14);
-				latestWithMargin.setDate(latestWithMargin.getDate() + 14);
-				break;
-			case 'month':
-				earliestWithMargin.setMonth(earliestWithMargin.getMonth() - 2);
-				latestWithMargin.setMonth(latestWithMargin.getMonth() + 2);
-				break;
-			case 'year':
-				earliestWithMargin.setMonth(earliestWithMargin.getMonth() - 3);
-				latestWithMargin.setMonth(latestWithMargin.getMonth() + 6);
-				break;
+		const margin = ZOOM_MARGINS[zoomLevel];
+		if ('days' in margin) {
+			earliestWithMargin.setDate(earliestWithMargin.getDate() - margin.days);
+			latestWithMargin.setDate(latestWithMargin.getDate() + margin.days);
+		} else if ('months' in margin) {
+			earliestWithMargin.setMonth(earliestWithMargin.getMonth() - margin.months);
+			latestWithMargin.setMonth(latestWithMargin.getMonth() + margin.months);
 		}
 
 		const dataRangeMidpoint = new Date(
@@ -293,19 +268,14 @@
 			today >= earliestWithMargin && today <= latestWithMargin ? today : dataRangeMidpoint;
 
 		const newDate = new Date(centerPoint);
-		switch (zoomLevel) {
-			case 'day':
-				newDate.setDate(centerPoint.getDate() - 3);
-				break;
-			case 'week':
-				newDate.setDate(centerPoint.getDate() - 28);
-				break;
-			case 'month':
-				newDate.setMonth(centerPoint.getMonth() - 3);
-				break;
-			case 'year':
-				newDate.setFullYear(centerPoint.getFullYear() - 1);
-				break;
+		// Go back half the view duration from the center point
+		const viewDuration = ZOOM_VIEW_DURATION[zoomLevel];
+		if ('days' in viewDuration) {
+			newDate.setDate(centerPoint.getDate() - Math.floor(viewDuration.days / 2));
+		} else if ('months' in viewDuration) {
+			newDate.setMonth(centerPoint.getMonth() - Math.floor(viewDuration.months / 2));
+		} else if ('years' in viewDuration) {
+			newDate.setFullYear(centerPoint.getFullYear() - Math.floor(viewDuration.years / 2));
 		}
 
 		if (newDate < minStartDate) {
@@ -329,39 +299,25 @@
 		const latest = dataDateRange.latest;
 
 		const startFromEarliest = new Date(earliest);
-
-		switch (zoomLevel) {
-			case 'day':
-				startFromEarliest.setDate(startFromEarliest.getDate() - 2);
-				break;
-			case 'week':
-				startFromEarliest.setDate(startFromEarliest.getDate() - 14);
-				break;
-			case 'month':
-				startFromEarliest.setMonth(startFromEarliest.getMonth() - 2);
-				break;
-			case 'year':
-				startFromEarliest.setMonth(startFromEarliest.getMonth() - 6);
-				break;
+		const margin = ZOOM_MARGINS[zoomLevel];
+		if ('days' in margin) {
+			startFromEarliest.setDate(startFromEarliest.getDate() - margin.days);
+		} else if ('months' in margin) {
+			startFromEarliest.setMonth(startFromEarliest.getMonth() - margin.months);
 		}
 
 		if (earliest > today) {
 			viewStartDate = startFromEarliest;
 		} else if (latest < today) {
 			const startDate = new Date(latest);
-			switch (zoomLevel) {
-				case 'day':
-					startDate.setDate(startDate.getDate() - 7);
-					break;
-				case 'week':
-					startDate.setDate(startDate.getDate() - 56);
-					break;
-				case 'month':
-					startDate.setMonth(startDate.getMonth() - 6);
-					break;
-				case 'year':
-					startDate.setFullYear(startDate.getFullYear() - 2);
-					break;
+			// Go back by the view duration to show the latest events
+			const viewDuration = ZOOM_VIEW_DURATION[zoomLevel];
+			if ('days' in viewDuration) {
+				startDate.setDate(startDate.getDate() - viewDuration.days);
+			} else if ('months' in viewDuration) {
+				startDate.setMonth(startDate.getMonth() - viewDuration.months);
+			} else if ('years' in viewDuration) {
+				startDate.setFullYear(startDate.getFullYear() - viewDuration.years);
 			}
 			viewStartDate = startDate;
 		} else {
