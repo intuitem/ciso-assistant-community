@@ -2258,8 +2258,8 @@ export const listViewFields = {
 		}
 	},
 	'metric-definitions': {
-		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'folder'],
-		body: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'folder'],
+		head: ['ref_id', 'name', 'description', 'category', 'provider', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'category', 'provider', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			category: {
@@ -2283,14 +2283,33 @@ export const listViewFields = {
 			},
 			provider: {
 				...PROVIDER_FILTER,
-				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'metrology/metric-definitions/provider' }
+				props: {
+					...PROVIDER_FILTER.props,
+					optionsEndpoint: 'metrology/metric-definitions/provider'
+				}
 			},
 			filtering_labels: LABELS_FILTER
 		}
 	},
 	'metric-instances': {
-		head: ['ref_id', 'name', 'metric_definition', 'status', 'collection_frequency', 'target_value', 'folder'],
-		body: ['ref_id', 'name', 'metric_definition', 'status', 'collection_frequency', 'target_value', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'metric_definition',
+			'status',
+			'collection_frequency',
+			'target_value',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'metric_definition',
+			'status',
+			'collection_frequency',
+			'target_value',
+			'folder'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			metric_definition: {

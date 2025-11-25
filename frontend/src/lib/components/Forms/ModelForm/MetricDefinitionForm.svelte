@@ -91,8 +91,9 @@
 		<OrderedEntryList bind:entries={choicesEntries} onchange={handleChoicesChange} />
 	</div>
 {:else}
-	<TextField
+	<AutocompleteSelect
 		{form}
+		optionsEndpoint="terminologies?field_path=metric_definition.unit&is_visible=true"
 		field="unit"
 		label={m.unit()}
 		cacheLock={cacheLocks['unit']}
