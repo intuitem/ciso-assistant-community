@@ -1326,10 +1326,8 @@ export const MetricDefinitionSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	category: z.string().default('quantitative_float'),
+	category: z.string().default('quantitative'),
 	unit: z.string().optional().nullable(),
-	min_value: z.coerce.number().optional().nullable(),
-	max_value: z.coerce.number().optional().nullable(),
 	choices_definition: jsonSchema.optional().nullable(),
 	provider: z.string().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional()

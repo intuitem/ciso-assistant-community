@@ -98,22 +98,6 @@
 		cacheLock={cacheLocks['unit']}
 		bind:cachedValue={formDataCache['unit']}
 	/>
-	<TextField
-		{form}
-		type="number"
-		field="min_value"
-		label={m.minValue()}
-		cacheLock={cacheLocks['min_value']}
-		bind:cachedValue={formDataCache['min_value']}
-	/>
-	<TextField
-		{form}
-		type="number"
-		field="max_value"
-		label={m.maxValue()}
-		cacheLock={cacheLocks['max_value']}
-		bind:cachedValue={formDataCache['max_value']}
-	/>
 {/if}
 <TextField
 	{form}
