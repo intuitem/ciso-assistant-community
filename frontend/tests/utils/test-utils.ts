@@ -788,6 +788,7 @@ export class TestContent {
 			campaignsPage: {
 				displayName: 'Campaigns',
 				modelName: 'campaign',
+				actions: ['view', 'add', 'change'],
 				dependency: vars.framework2,
 				build: {
 					str: `${vars.campaignName}`,
@@ -848,10 +849,15 @@ export function replaceValues(obj: any, searchValue: string, replaceValue: strin
 export function userFromUserGroupHasPermission(
 	userGroup: string,
 	permission: string,
-	object: string
+	object: Record<string, any>
 ) {
-	const perm = `${permission}_${object.toLowerCase().replace(' ', '')}`;
-	return userGroup in testData.usergroups && testData.usergroups[userGroup].perms.includes(perm);
+	const _object = object.modelName ?? object.displayName;
+	const perm = `${permission}_${_object.toLowerCase().replace(' ', '')}`;
+	return (
+		userGroup in testData.usergroups &&
+		testData.usergroups[userGroup].perms.includes(perm) &&
+		(!object.actions || object.actions.includes(permission))
+	);
 }
 
 export function getObjectNameWithoutScope(name: string) {
