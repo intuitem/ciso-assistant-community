@@ -85,23 +85,25 @@
 		];
 	}
 
-	// Transform applied controls to Gantt entries
+	// Transform applied controls to Gantt entries (Control Implementation)
 	function transformAppliedControlsToGanttEntries(appliedControls: any[]): GanttEntry[] {
 		return appliedControls
-			.filter((control) => control.eta || control.due_date)
+			.filter((control) => control.start_date || control.eta)
 			.map((control) => {
 				// Determine type based on dates
-				let type: 'milestone' | 'task' | 'activity' = 'task';
+				let type: 'milestone' | 'task' | 'activity' = 'milestone';
 				let start_date = null;
 				let end_date = null;
 
-				if (control.eta && control.due_date) {
+				if (control.start_date && control.eta) {
+					// Both dates -> activity (Control Implementation)
 					type = 'activity';
-					start_date = control.eta;
-					end_date = control.due_date;
-				} else if (control.eta || control.due_date) {
+					start_date = control.start_date;
+					end_date = control.eta;
+				} else if (control.start_date || control.eta) {
+					// Single date -> milestone
 					type = 'milestone';
-					end_date = control.eta || control.due_date;
+					end_date = control.eta || control.start_date;
 				}
 
 				// Calculate progress based on status
@@ -110,7 +112,7 @@
 				else if (control.status === 'in_progress') progress = 50;
 
 				return {
-					id: control.id,
+					id: `control-${control.id}`,
 					name: control.name || 'Unnamed Control',
 					type,
 					start_date,
@@ -124,14 +126,38 @@
 			});
 	}
 
-	// State for dummy data toggle
-	let useDummyData = $state(true);
+	// Transform task nodes to Gantt entries (Tasks)
+	function transformTaskNodesToGanttEntries(taskNodes: any[]): GanttEntry[] {
+		return taskNodes
+			.filter((task) => task.due_date)
+			.map((task) => {
+				// Tasks are single-day items with only due_date
+				return {
+					id: `task-${task.id}`,
+					name: task.name || 'Unnamed Task',
+					type: 'task' as const,
+					start_date: null,
+					end_date: task.due_date,
+					progress: 0,
+					description: task.description || '',
+					ref_id: '',
+					folder_uuid: task.folder?.id || '',
+					group_id: null
+				};
+			});
+	}
+
+	// State for dummy data toggle (default to real data)
+	let useDummyData = $state(false);
 
 	// Compute entries based on data source
 	let ganttEntries = $derived(
 		useDummyData
 			? getDummyGanttEntries()
-			: transformAppliedControlsToGanttEntries(data.appliedControls)
+			: [
+					...transformAppliedControlsToGanttEntries(data.appliedControls),
+					...transformTaskNodesToGanttEntries(data.taskNodes)
+				]
 	);
 
 	// Transform folders to match component interface
@@ -143,12 +169,22 @@
 		}))
 	);
 
-	// URL builder for real applied controls
+	// URL builder for real data (applied controls and tasks)
 	function itemUrlBuilder(entry: GanttEntry): string {
 		if (useDummyData) {
 			return '#';
 		}
-		return `/applied-controls/${entry.id}`;
+
+		// Extract the actual ID (remove prefix)
+		if (entry.id.startsWith('control-')) {
+			const controlId = entry.id.replace('control-', '');
+			return `/applied-controls/${controlId}`;
+		} else if (entry.id.startsWith('task-')) {
+			const taskId = entry.id.replace('task-', '');
+			return `/task-nodes/${taskId}`;
+		}
+
+		return '#';
 	}
 </script>
 

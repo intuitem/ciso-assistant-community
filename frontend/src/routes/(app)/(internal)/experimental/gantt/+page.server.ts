@@ -8,11 +8,17 @@ export const load = (async ({ fetch }) => {
 	const appliedControlsData = await appliedControlsRes.json();
 	const appliedControls = appliedControlsData.results || appliedControlsData;
 
+	// Load task nodes for Gantt visualization
+	const taskNodesEndpoint = `${BASE_API_URL}/task-nodes/`;
+	const taskNodesRes = await fetch(taskNodesEndpoint);
+	const taskNodesData = await taskNodesRes.json();
+	const taskNodes = taskNodesData.results || taskNodesData;
+
 	// Load folders for filtering
 	const foldersEndpoint = `${BASE_API_URL}/folders/`;
 	const foldersRes = await fetch(foldersEndpoint);
 	const foldersData = await foldersRes.json();
 	const folders = foldersData.results || foldersData;
 
-	return { appliedControls, folders };
+	return { appliedControls, taskNodes, folders };
 }) satisfies PageServerLoad;
