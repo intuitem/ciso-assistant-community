@@ -2779,5 +2779,14 @@
 	"personalDataDescription": "Personal data inventory and classification",
 	"purposesDescription": "Data processing purposes (GDPR)",
 	"rightRequestsDescription": "Data subject rights requests (GDPR)",
-	"dataBreachesDescription": "Data breach incidents and notifications"
+	"dataBreachesDescription": "Data breach incidents and notifications",
+	"orderedEntryListAddNewEntry": "Add New Entry",
+	"orderedEntryListRefIdPlaceholder": "Ref ID",
+	"orderedEntryListNamePlaceholder": "Name",
+	"orderedEntryListAddButton": "Add",
+	"orderedEntryListEmptyState": "No entries yet. Add one above!",
+	"orderedEntryListDeleteAriaLabel": "Delete entry",
+	"orderedEntryListDebugTitle": "Debug - JSON Output",
+	"orderedEntryListRefIdLabel": "Ref ID:",
+	"orderedEntryListNameLabel": "Name:"
 }
