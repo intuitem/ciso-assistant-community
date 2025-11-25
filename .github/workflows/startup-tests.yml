@@ -6,6 +6,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   GITHUB_WORKFLOW: github_actions
@@ -25,14 +30,14 @@ jobs:
     env:
       LOG_LEVEL: DEBUG
       LOG_OUTFILE: ciso-assistant.log
-      DJANGO_DEBUG: 'True'
+      DJANGO_DEBUG: "True"
       DJANGO_SUPERUSER_EMAIL: admin@tests.com
       DJANGO_SUPERUSER_PASSWORD: 1234
       POSTGRES_NAME: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
       PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
@@ -60,11 +65,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
@@ -85,6 +97,8 @@ jobs:
           poetry run python manage.py createsuperuser --noinput
           nohup poetry run python manage.py runserver &
       - name: Build frontend
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
         working-directory: ${{ env.frontend-directory }}
         run: pnpm run build
       - name: Run tests
@@ -109,6 +123,7 @@ jobs:
 
   startup-docker-compose-test:
     runs-on: ubuntu-24.04
+    timeout-minutes: 22
     env:
       COMPOSE_TEST: True
     steps:
@@ -131,7 +146,7 @@ jobs:
           docker compose -f docker-compose-build.yml up -d
       - name: Config the Docker app
         run: |
-          sleep 120 # give the migrations time to finish (included in the up on the previous step)
+          sleep 200 # give the migrations time to finish (included in the up on the previous step)
           docker compose -f docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
@@ -151,17 +166,18 @@ jobs:
 
   enterprise-startup-functional-test:
     runs-on: ubuntu-24.04
+    timeout-minutes: 19
     env:
       LOG_LEVEL: DEBUG
       LOG_OUTFILE: ciso-assistant.log
-      DJANGO_DEBUG: 'True'
+      DJANGO_DEBUG: "True"
       DJANGO_SUPERUSER_EMAIL: admin@tests.com
       DJANGO_SUPERUSER_PASSWORD: 1234
       POSTGRES_NAME: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       DB_HOST: localhost
-      CISO_ASSISTANT_SUPERUSER_EMAIL: ''
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://localhost:4173
       DJANGO_SETTINGS_MODULE: enterprise_core.settings
       PUBLIC_BACKEND_API_URL: http://localhost:8000/api
@@ -190,11 +206,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      - name: Configure Poetry to not use virtualenvs
+        run: poetry config virtualenvs.create false
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
@@ -203,6 +228,8 @@ jobs:
         run: poetry install
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
         run: make
       - name: Install Playwright Browsers
         working-directory: ${{ env.enterprise-frontend-build-directory }}
@@ -258,7 +285,7 @@ jobs:
         env:
           SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          sleep 120 # give the migrations time to finish (included in the up on the previous step)
+          sleep 200 # give the migrations time to finish (included in the up on the previous step)
           docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE" && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}

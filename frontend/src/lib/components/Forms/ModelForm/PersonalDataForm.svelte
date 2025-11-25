@@ -23,8 +23,6 @@
 		formDataCache = $bindable({}),
 		initialData = {}
 	}: Props = $props();
-
-	console.log(model);
 </script>
 
 <TextField
@@ -74,6 +72,26 @@
 	label={m.isSensitive()}
 	cacheLock={cacheLocks['is_sensitive']}
 	bind:cachedValue={formDataCache['is_sensitive']}
+/>
+
+<AutocompleteSelect
+	{form}
+	field="assets"
+	optionsEndpoint="assets"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type',
+				translate: true
+			}
+		],
+		classes: 'text-blue-500'
+	}}
+	cacheLock={cacheLocks['assets']}
+	bind:cachedValue={formDataCache['assets']}
+	label={m.assets()}
+	multiple={true}
 />
 <!-- retention = models.CharField(max_length=255, blank=True) -->
 <!-- deletion_policy = models.CharField( -->

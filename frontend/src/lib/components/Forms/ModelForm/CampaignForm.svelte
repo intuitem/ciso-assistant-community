@@ -78,8 +78,11 @@
 	multiple
 	{form}
 	optionsEndpoint="perimeters"
+	optionsExtraFields={[['folder', 'str']]}
 	field="perimeters"
-	label="Perimeters in scope"
+	cacheLock={cacheLocks['perimeters']}
+	bind:cachedValue={formDataCache['perimeters']}
+	label={m.perimeters()}
 	hidden={initialData.perimeters}
 />
 <TextField
@@ -110,6 +113,7 @@
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}

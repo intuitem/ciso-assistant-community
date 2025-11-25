@@ -20,6 +20,10 @@ export const load = (async ({ fetch, params }) => {
 		)
 	);
 
+	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/`;
+	const framework = await fetch(frameworkEndpoint).then((res) => res.json());
+	compliance_assessment.framework = framework;
+
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
 	const scoreSchema = z.object({

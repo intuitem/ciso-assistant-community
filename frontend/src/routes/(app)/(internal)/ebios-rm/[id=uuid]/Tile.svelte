@@ -91,6 +91,7 @@
 										prefixCrumbs={[{ label: safeTranslate(`ebiosWs${workshop}`) }]}
 										label={safeTranslate(`ebiosWs${workshop}_${getStepNumber(i)}`)}
 										class="hover:text-purple-800"
+										data-testid="workshop-{workshop}-step-{getStepNumber(i)}-link"
 									>
 										<span
 											class="absolute flex items-center justify-center w-8 h-8 {step.status ===

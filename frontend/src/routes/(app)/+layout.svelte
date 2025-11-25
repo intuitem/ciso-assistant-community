@@ -9,9 +9,10 @@
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
-	import { pageTitle, clientSideToast } from '$lib/utils/stores';
+	import { pageTitle, modelName, modelDescription, clientSideToast } from '$lib/utils/stores';
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
 
 	import type { PageData, ActionData } from './$types';
@@ -26,11 +27,89 @@
 	} from '$lib/components/Modals/stores';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
+	import { interceptExternalLinks, setGlobalModalStore } from '$lib/utils/external-links';
 
 	let sidebarOpen = $state(true);
 
 	let classesSidebarOpen = $derived((open: boolean) => (open ? 'ml-64' : 'ml-7'));
 
+	interface Props {
+		data: PageData;
+		form: ActionData;
+		sideBarVisibleItems?: any;
+		children?: import('svelte').Snippet;
+	}
+
+	let {
+		data,
+		form,
+		sideBarVisibleItems = getSidebarVisibleItems(data?.featureflags),
+		children
+	}: Props = $props();
+
+	const modalStore: ModalStore = getModalStore();
+
+	// Display title, model name, and description from either page data or manual store setting
+	const displayTitle = $derived($page.data?.title || $pageTitle);
+
+	// Auto-detect model from URL for list pages
+	// Match pattern: /model-name or /model-name/ (but not /model-name/uuid or /model-name/something)
+	const urlModel = $derived(() => {
+		const path = $page.url.pathname;
+		const match = path.match(/^\/([a-z-]+)\/?$/);
+		return match ? match[1] : null;
+	});
+
+	// Generate description key from URL model: "risk-matrices" → "riskMatricesDescription"
+	const urlDescriptionKey = $derived(() => {
+		const model = urlModel();
+		if (!model) return null;
+
+		const camelCase = model
+			.split('-')
+			.map((word, index) => (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+			.join('');
+		return `${camelCase}Description`;
+	});
+
+	// Determine if we're on a list page vs detail page
+	// List page: URL matches /model-name pattern (e.g., /risk-assessments)
+	// Detail page: has an object title from loadDetail (e.g., /risk-assessments/uuid)
+	const matchesListUrl = $derived(!!urlModel());
+	const hasObjectTitle = $derived(!!$page.data?.title);
+
+	// For list pages: show description subtitle
+	// For detail pages: show model name subtitle
+	const displayModelName = $derived(
+		hasObjectTitle ? $page.data?.modelVerboseName || $modelName : ''
+	);
+
+	const displayModelDescription = $derived(
+		(() => {
+			// Only show description on list pages (not on detail pages with object titles)
+			if (hasObjectTitle) return '';
+			if (!matchesListUrl && !$page.data?.modelDescriptionKey) return '';
+
+			// List pages: get description from i18n
+			const descKey = $page.data?.modelDescriptionKey || urlDescriptionKey();
+			if (descKey && m[descKey]) {
+				return m[descKey]();
+			}
+
+			// Fallback to manual store
+			return $modelDescription;
+		})()
+	);
+
+	// Initialize external link interceptor
+	$effect(() => {
+		if (browser) {
+			setGlobalModalStore(modalStore);
+			interceptExternalLinks();
+		}
+	});
+
+	// Handle login-specific logic
 	run(() => {
 		if (browser) {
 			const fromLogin = getCookie('from_login');
@@ -53,21 +132,6 @@
 		}
 	});
 
-	interface Props {
-		data: PageData;
-		form: ActionData;
-		sideBarVisibleItems?: any;
-		children?: import('svelte').Snippet;
-	}
-
-	let {
-		data,
-		form,
-		sideBarVisibleItems = getSidebarVisibleItems(data?.featureflags),
-		children
-	}: Props = $props();
-
-	const modalStore: ModalStore = getModalStore();
 	function modalQuickStart(): void {
 		let modalComponent: ModalComponent = {
 			ref: QuickStartModal,
@@ -81,6 +145,7 @@
 		};
 		modalStore.trigger(modal);
 	}
+	// $inspect(data);
 </script>
 
 <!-- App Shell -->
@@ -92,12 +157,22 @@
 		padding="pb-2 px-4"
 	>
 		{#snippet headline()}
-			<span
+			<div
 				class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
 				id="page-title"
 			>
-				{safeTranslate($pageTitle)}
-			</span>
+				{safeTranslate(displayTitle)}
+			</div>
+			{#if displayModelName}
+				<div class="text-sm text-slate-500 font-medium">
+					{safeTranslate(displayModelName)}
+				</div>
+			{/if}
+			{#if displayModelDescription}
+				<div class="text-xs text-slate-400 italic">
+					{safeTranslate(displayModelDescription)}
+				</div>
+			{/if}
 			{#if data?.user?.is_admin}
 				<button
 					onclick={modalQuickStart}

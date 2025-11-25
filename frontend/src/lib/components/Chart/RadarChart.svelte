@@ -28,6 +28,36 @@
 	for (const index in values) {
 		if (values[index].localName) {
 			values[index].name = safeTranslate(values[index].localName);
+		} else {
+			// Auto-translate common severity, detection, and status values
+			const nameToTranslate = values[index].name?.toLowerCase();
+			if (nameToTranslate) {
+				const translatedName = safeTranslate(nameToTranslate);
+				if (translatedName !== nameToTranslate) {
+					values[index].name = translatedName;
+				}
+			}
+		}
+	}
+
+	// Auto-translate radar chart labels
+	for (const index in labels) {
+		if (typeof labels[index] === 'object' && labels[index].name) {
+			const nameToTranslate = labels[index].name?.toLowerCase();
+			if (nameToTranslate) {
+				const translatedName = safeTranslate(nameToTranslate);
+				if (translatedName !== nameToTranslate) {
+					labels[index].name = translatedName;
+				}
+			}
+		} else if (typeof labels[index] === 'string') {
+			const nameToTranslate = labels[index]?.toLowerCase();
+			if (nameToTranslate) {
+				const translatedName = safeTranslate(nameToTranslate);
+				if (translatedName !== nameToTranslate) {
+					labels[index] = translatedName;
+				}
+			}
 		}
 	}
 
@@ -51,7 +81,9 @@
 			},
 			radar: {
 				shape: 'circle',
-				indicator: labels
+				indicator: labels,
+				radius: '65%',
+				center: ['50%', '55%']
 			},
 			series: [
 				{

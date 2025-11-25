@@ -85,6 +85,7 @@
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -142,6 +143,17 @@
 	label={m.expirationDate()}
 	cacheLock={cacheLocks['expiration_date']}
 	bind:cachedValue={formDataCache['expiration_date']}
+/>
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="assets"
+	optionsLabelField="auto"
+	pathField="path"
+	field="assets"
+	cacheLock={cacheLocks['assets']}
+	bind:cachedValue={formDataCache['assets']}
+	label={m.assets()}
 />
 <div class="flex flex-row space-x-2 items-center">
 	<div class="w-full">
