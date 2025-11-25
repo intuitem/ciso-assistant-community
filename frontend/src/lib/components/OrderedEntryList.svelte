@@ -60,31 +60,28 @@
 
 <div class="space-y-4 border-2 border-dashed border-gray-300 rounded-lg p-4">
 	<!-- Add Entry Form -->
-	<div class="card bg-white p-4 shadow-sm">
-		<h3 class="text-lg font-semibold mb-3">{m.orderedEntryListAddNewEntry()}</h3>
-		<div class="flex gap-2">
-			<input
-				type="text"
-				bind:value={newRefId}
-				placeholder={m.orderedEntryListRefIdPlaceholder()}
-				class="input px-3 py-2 border border-gray-300 rounded w-1/3"
-				onkeydown={(e) => e.key === 'Enter' && addEntry()}
-			/>
-			<input
-				type="text"
-				bind:value={newName}
-				placeholder={m.orderedEntryListNamePlaceholder()}
-				class="input px-3 py-2 border border-gray-300 rounded w-2/3"
-				onkeydown={(e) => e.key === 'Enter' && addEntry()}
-			/>
-			<button
-				type="button"
-				class="btn bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded font-medium transition-colors whitespace-nowrap"
-				onclick={addEntry}
-			>
-				{m.orderedEntryListAddButton()}
-			</button>
-		</div>
+	<div class="flex gap-2">
+		<input
+			type="text"
+			bind:value={newRefId}
+			placeholder={m.orderedEntryListRefIdPlaceholder()}
+			class="input px-3 py-2 border border-gray-300 rounded w-1/3"
+			onkeydown={(e) => e.key === 'Enter' && addEntry()}
+		/>
+		<input
+			type="text"
+			bind:value={newName}
+			placeholder={m.orderedEntryListNamePlaceholder()}
+			class="input px-3 py-2 border border-gray-300 rounded w-2/3"
+			onkeydown={(e) => e.key === 'Enter' && addEntry()}
+		/>
+		<button
+			type="button"
+			class="btn bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded font-medium transition-colors whitespace-nowrap"
+			onclick={addEntry}
+		>
+			{m.orderedEntryListAddButton()}
+		</button>
 	</div>
 
 	<!-- Entries List -->

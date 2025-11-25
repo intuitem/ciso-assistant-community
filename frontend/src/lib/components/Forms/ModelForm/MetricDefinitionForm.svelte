@@ -3,9 +3,11 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '../Select.svelte';
+	import OrderedEntryList from '$lib/components/OrderedEntryList.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { formFieldProxy } from 'sveltekit-superforms';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -28,6 +30,33 @@
 	const isQualitative = $derived.by(() => {
 		return data?.category === 'qualitative';
 	});
+
+	// Handle choices_definition as parsed array
+	const { value: choicesDefinitionValue } = formFieldProxy(form, 'choices_definition');
+
+	let choicesEntries = $state<Array<{ ref_id: string; name: string }>>([]);
+
+	// Parse initial value
+	$effect(() => {
+		if ($choicesDefinitionValue) {
+			try {
+				if (typeof $choicesDefinitionValue === 'string') {
+					choicesEntries = JSON.parse($choicesDefinitionValue);
+				} else if (Array.isArray($choicesDefinitionValue)) {
+					choicesEntries = $choicesDefinitionValue;
+				}
+			} catch (e) {
+				console.error('Failed to parse choices_definition:', e);
+				choicesEntries = [];
+			}
+		} else {
+			choicesEntries = [];
+		}
+	});
+
+	function handleChoicesChange(entries: Array<{ ref_id: string; name: string }>) {
+		$choicesDefinitionValue = entries;
+	}
 </script>
 
 <AutocompleteSelect
@@ -57,14 +86,10 @@
 	bind:cachedValue={formDataCache['category']}
 />
 {#if isQualitative}
-	<TextArea
-		{form}
-		field="choices_definition"
-		label={m.choicesDefinition()}
-		helpText={'JSON format for qualitative choices: [{"name": "low", "description": "Low level", "translations": {"fr": {"name": "faible", "description": "Niveau faible"}}}]'}
-		cacheLock={cacheLocks['choices_definition']}
-		bind:cachedValue={formDataCache['choices_definition']}
-	/>
+	<div class="form-group">
+		<label class="text-sm font-semibold mb-2 block">{m.choicesDefinition()}</label>
+		<OrderedEntryList bind:entries={choicesEntries} onchange={handleChoicesChange} />
+	</div>
 {:else}
 	<TextField
 		{form}
