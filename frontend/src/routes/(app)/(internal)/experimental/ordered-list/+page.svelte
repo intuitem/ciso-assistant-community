@@ -2,14 +2,14 @@
 	import OrderedEntryList from '$lib/components/OrderedEntryList.svelte';
 
 	let entries = $state([
-		{ refid: 'REF-001', name: 'First Entry' },
-		{ refid: 'REF-002', name: 'Second Entry' },
-		{ refid: 'REF-003', name: 'Third Entry' }
+		{ ref_id: 'REF-001', name: 'First Entry' },
+		{ ref_id: 'REF-002', name: 'Second Entry' },
+		{ ref_id: 'REF-003', name: 'Third Entry' }
 	]);
 
 	let debugMode = $state(true);
 
-	function handleChange(newEntries: Array<{ refid: string; name: string }>) {
+	function handleChange(newEntries: Array<{ ref_id: string; name: string }>) {
 		console.log('Entries updated:', newEntries);
 	}
 </script>

@@ -2,7 +2,7 @@
 	import * as m from '$paraglide/messages';
 
 	interface Entry {
-		refid: string;
+		ref_id: string;
 		name: string;
 	}
 
@@ -20,7 +20,7 @@
 
 	function addEntry() {
 		if (newRefId.trim() && newName.trim()) {
-			entries = [...entries, { refid: newRefId.trim(), name: newName.trim() }];
+			entries = [...entries, { ref_id: newRefId.trim(), name: newName.trim() }];
 			newRefId = '';
 			newName = '';
 			onchange?.(entries);
@@ -94,7 +94,7 @@
 				{m.orderedEntryListEmptyState()}
 			</div>
 		{:else}
-			{#each entries as entry, index (entry.refid + '-' + index)}
+			{#each entries as entry, index (entry.ref_id + '-' + index)}
 				<div
 					class="card bg-white p-4 shadow-sm flex items-center gap-3 cursor-move hover:bg-gray-50 transition-colors"
 					class:opacity-50={draggedIndex === index}
@@ -124,7 +124,7 @@
 					</div>
 					<div class="flex-1 flex gap-4">
 						<div class="w-1/3">
-							<span class="font-medium">{entry.refid}</span>
+							<span class="font-medium">{entry.ref_id}</span>
 						</div>
 						<div class="w-2/3">
 							<span class="font-medium">{entry.name}</span>
