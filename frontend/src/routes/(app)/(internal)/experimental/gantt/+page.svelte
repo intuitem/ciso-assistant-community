@@ -29,11 +29,6 @@
 		activity: 'Control Implementation'
 	};
 
-	interface GanttGroup {
-		id: string;
-		name: string;
-	}
-
 	// Hardcoded dummy data for demonstration
 	function getDummyGanttEntries(): GanttEntry[] {
 		const today = new Date();
@@ -149,17 +144,6 @@
 			});
 	}
 
-	// Get unique groups from entries
-	function getGroupsFromEntries(entries: GanttEntry[]): GanttGroup[] {
-		const groupMap = new Map<string, string>();
-		entries.forEach((entry) => {
-			if (entry.group_id) {
-				groupMap.set(entry.group_id, entry.group_id);
-			}
-		});
-		return Array.from(groupMap.entries()).map(([id, name]) => ({ id, name }));
-	}
-
 	// Calculate date range for visualization
 	function getDateRange(entries: GanttEntry[]): { min: Date; max: Date } {
 		const dates: Date[] = [];
@@ -198,13 +182,12 @@
 	let useDummyData = $state(true);
 	let zoomLevel = $state<ZoomLevel>('month');
 	let viewStartDate = $state<Date>(new Date());
-	let selectedItemId = $state<string | null>(null); // Track which item's tooltip is open
+	let selectedItemId = $state<string | null>(null); // Track which item is selected
 	let ganttEntries = $derived(
 		useDummyData
 			? getDummyGanttEntries()
 			: transformAppliedControlsToGanttEntries(data.appliedControls)
 	);
-	let ganttGroups = $derived(getGroupsFromEntries(ganttEntries));
 	let selectedFolder = $state<string>('');
 
 	// Calculate visible date range based on zoom level and current view position
