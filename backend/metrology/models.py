@@ -7,6 +7,7 @@ from core.models import (
     I18nObjectMixin,
     LoadedLibrary,
     ReferentialObjectMixin,
+    Terminology,
 )
 from iam.models import FolderMixin, PublishInRootFolderMixin, User
 
@@ -29,12 +30,20 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         default=Category.QUANTITATIVE,
         verbose_name=_("Category"),
     )
-    unit = models.CharField(
-        max_length=50,
+    unit = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
         blank=True,
         null=True,
         verbose_name=_("Unit"),
-        help_text=_("Unit of measurement (e.g., seconds, count, percentage)"),
+        help_text=_(
+            "Unit of measurement (e.g., count, users, bytes, percentage, score, event_per_second)"
+        ),
+        related_name="metric_definition_units",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.METRIC_UNIT,
+            "is_visible": True,
+        },
     )
     choices_definition = models.JSONField(
         blank=True,

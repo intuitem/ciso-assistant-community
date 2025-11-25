@@ -16,6 +16,7 @@ class MetricDefinitionReadSerializer(ReferentialSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
+    unit = FieldsRelatedField(["name", "id"])
     filtering_labels = FieldsRelatedField(["folder"], many=True)
 
     class Meta:

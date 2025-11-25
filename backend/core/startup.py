@@ -1196,6 +1196,11 @@ def startup(sender: AppConfig, **kwargs):
     except Exception as e:
         logger.error("Error creating default Entity Relationships", exc_info=True)
 
+    try:
+        Terminology.create_default_metric_units()
+    except Exception as e:
+        logger.error("Error creating default Metric Units", exc_info=True)
+
     # Init integration providers
 
     try:

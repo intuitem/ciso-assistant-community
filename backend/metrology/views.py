@@ -17,6 +17,7 @@ class MetricDefinitionViewSet(BaseModelViewSet):
     filterset_fields = [
         "folder",
         "category",
+        "unit",
         "library",
         "provider",
         "filtering_labels",
