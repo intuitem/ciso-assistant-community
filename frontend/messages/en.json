@@ -2788,5 +2788,9 @@
 	"orderedEntryListDeleteAriaLabel": "Delete entry",
 	"orderedEntryListDebugTitle": "Debug - JSON Output",
 	"orderedEntryListRefIdLabel": "Ref ID:",
-	"orderedEntryListNameLabel": "Name:"
+	"orderedEntryListNameLabel": "Name:",
+	"qualitative": "Qualitative",
+	"quantitative": "Quantitative",
+	"choices": "choices",
+	"number": "Number"
 }

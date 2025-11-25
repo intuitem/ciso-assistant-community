@@ -34,7 +34,9 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
 class MetricInstanceReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
-    metric_definition = FieldsRelatedField(["name", "ref_id", "id", "category", "unit"])
+    metric_definition = FieldsRelatedField(
+        ["name", "ref_id", "id", "category", "unit", "choices_definition"]
+    )
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     status = serializers.CharField(source="get_status_display", read_only=True)

@@ -2019,7 +2019,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'collection_frequency' }],
-		reverseForeignKeyFields: [{ field: 'metric_instance', urlModel: 'metric-samples' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'metric_instance',
+				urlModel: 'metric-samples',
+				fieldForInitialData: ['metric_definition']
+			}
+		],
 		filters: [
 			{ field: 'folder' },
 			{ field: 'metric_definition' },
