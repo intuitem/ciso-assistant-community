@@ -13,9 +13,8 @@ from iam.models import FolderMixin, PublishInRootFolderMixin, User
 
 class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):
     class Category(models.TextChoices):
-        QUALITATIVE = "qualitative", _("Qualitative")
-        QUANTITATIVE_INT = "quantitative_int", _("Quantitative (Integer)")
-        QUANTITATIVE_FLOAT = "quantitative_float", _("Quantitative (Float)")
+        QUALITATIVE = "qualitative", _("Qualitative (Level)")
+        QUANTITATIVE = "quantitative", _("Quantitative (Number)")
 
     library = models.ForeignKey(
         LoadedLibrary,
@@ -27,7 +26,7 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
     category = models.CharField(
         max_length=20,
         choices=Category.choices,
-        default=Category.QUANTITATIVE_FLOAT,
+        default=Category.QUANTITATIVE,
         verbose_name=_("Category"),
     )
     unit = models.CharField(
@@ -36,18 +35,6 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         null=True,
         verbose_name=_("Unit"),
         help_text=_("Unit of measurement (e.g., seconds, count, percentage)"),
-    )
-    min_value = models.FloatField(
-        blank=True,
-        null=True,
-        verbose_name=_("Minimum value"),
-        help_text=_("Minimum acceptable value for this metric"),
-    )
-    max_value = models.FloatField(
-        blank=True,
-        null=True,
-        verbose_name=_("Maximum value"),
-        help_text=_("Maximum acceptable value for this metric"),
     )
     choices_definition = models.JSONField(
         blank=True,

@@ -93,7 +93,7 @@
 		{:else}
 			{#each entries as entry, index (entry.ref_id + '-' + index)}
 				<div
-					class="card bg-white p-4 shadow-sm flex items-center gap-3 cursor-move hover:bg-gray-50 transition-colors"
+					class="card bg-white p-4 shadow-sm flex items-center gap-3 cursor-move hover:bg-gray-50 transition-colors mx-2"
 					class:opacity-50={draggedIndex === index}
 					draggable="true"
 					ondragstart={() => handleDragStart(index)}
@@ -124,7 +124,7 @@
 							<span class="font-medium">{entry.ref_id}</span>
 						</div>
 						<div class="w-2/3">
-							<span class="font-medium">{entry.name}</span>
+							<span class="">{entry.name}</span>
 						</div>
 					</div>
 					<button
