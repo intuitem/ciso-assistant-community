@@ -149,6 +149,8 @@ from serdes.utils import (
     sort_objects_by_self_reference,
 )
 from serdes.serializers import ExportSerializer
+from django.contrib.admin.utils import NestedObjects
+from django.db import router
 from global_settings.utils import ff_is_enabled
 
 import structlog
@@ -590,6 +592,59 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         return super().destroy(request, *args, **kwargs)
+
+    @action(detail=True, methods=["get"], url_path="cascade-info")
+    def cascade_info(self, request, pk=None):
+        """Get cascade delete information for an object.
+        Uses Django's NestedObjects collector (same as admin).
+        Filters out ManyToMany through table entries to show only actual object deletions.
+        Permission check handled by get_object() which uses get_queryset().
+        """
+        instance = self.get_object()
+        collector = NestedObjects(using=router.db_for_write(instance))
+        collector.collect([instance])
+
+        related = []
+        for model, instances in collector.model_objs.items():
+            if model != type(instance):
+                # Skip ManyToMany through tables
+                if model._meta.auto_created:
+                    continue
+
+                # Skip internal/technical models that users don't care about
+                model_name = model.__name__
+                if model_name in ["Token", "AuthToken", "EmailAddress", "Session"]:
+                    continue
+
+                for obj in instances:
+                    # Get user-friendly display name
+                    if model_name == "RoleAssignment":
+                        # For RoleAssignment, show role + user/group
+                        role_name = (
+                            obj.role.name if hasattr(obj, "role") and obj.role else ""
+                        )
+                        if obj.user:
+                            display_name = f"{role_name} → {obj.user.email}"
+                        elif obj.user_group:
+                            display_name = f"{role_name} → {obj.user_group.name}"
+                        else:
+                            display_name = role_name
+                    else:
+                        display_name = (
+                            getattr(obj, "name", None)
+                            or getattr(obj, "email", None)
+                            or str(obj)
+                        )
+
+                    related.append(
+                        {
+                            "model": str(model._meta.verbose_name),
+                            "name": display_name,
+                            "id": str(obj.pk),
+                        }
+                    )
+
+        return Response({"count": len(related), "related_objects": related})
 
     def _get_optimized_object_data(self, queryset):
         """

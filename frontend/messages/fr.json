@@ -545,6 +545,7 @@
 	"deleteModalTitle": "Supprimer",
 	"deleteModalMessage": "Êtes-vous sûr de vouloir supprimer l'objet suivant : {name} ?",
 	"deleteUserMessage": "Êtes-vous sûr de vouloir supprimer l'utilisateur suivant : {name} ?",
+	"cascadeDeleteWarning": "ATTENTION : La suppression de cet objet entraînera également la suppression définitive de {count} objet(s) lié(s) :",
 	"download": "Télécharger",
 	"loading": "Chargement",
 	"open": "Ouvert",
