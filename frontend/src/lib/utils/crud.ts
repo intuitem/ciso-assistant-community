@@ -1660,15 +1660,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
 		],
-		reverseForeignKeyFields: [
-			{
-				field: 'evidence',
-				urlModel: 'evidences',
-				endpointUrl: './evidences',
-				disableCreate: true,
-				disableDelete: true
-			}
-		],
 		detailViewFields: [
 			{ field: 'task_template' },
 			{ field: 'folder' },

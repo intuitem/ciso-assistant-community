@@ -2,13 +2,10 @@
 	import { page } from '$app/state';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
-	import { type ModelMapEntry, getModelInfo } from '$lib/utils/crud';
+	import type { ModelMapEntry } from '$lib/utils/crud';
 	import type { urlModel } from '$lib/utils/types';
-	import { superValidate } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import { type AnyZodObject } from 'zod';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { modelSchema } from '$lib/utils/schemas';
+	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { AnyZodObject } from 'zod';
 
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -171,33 +168,6 @@
 			editURL
 	);
 	let displayDelete = $derived(canDeleteObject && deleteForm !== null);
-
-	async function modalRevisionCreate(row: Record<string, any>): Promise<void> {
-		const model = getModelInfo('evidence-revisions');
-		const createSchema = modelSchema(model.urlModel);
-		const initialData = {
-			evidence: row.meta.id,
-			folder: row.meta.folder?.id
-		};
-		const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
-		let modalComponent: ModalComponent = {
-			ref: CreateModal,
-			props: {
-				form: createForm,
-				model: model,
-				debug: false,
-				customNameDescription: false,
-				formAction: `/${model.urlModel}?/create`
-			}
-		};
-		let modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			// Data
-			title: m.addEvidenceRevision()
-		};
-		modalStore.trigger(modal);
-	}
 </script>
 
 <span class={baseClass}>
@@ -220,20 +190,6 @@
 				stopPropagation
 				class="unstyled cursor-pointer hover:text-primary-500"
 				data-testid="tablerow-edit-button"><i class="fa-solid fa-project-diagram"></i></Anchor
-			>
-		{/if}
-		{#if URLModel === 'evidences' && user.permissions['add_evidencerevision']}
-			<button
-				aria-label="add-revision"
-				onclick={(e) => {
-					modalRevisionCreate(row);
-					stopPropagation(e);
-				}}
-				title={m.addEvidenceRevision()}
-				class="unstyled cursor-pointer hover:text-primary-500"
-				data-testid="tablerow-add-revision-button"
-				><i class="fa-solid fa-file-circle-plus text-secondary-400-600 hover:text-secondary-300-700"
-				></i></button
 			>
 		{/if}
 		{#if displayEdit}
