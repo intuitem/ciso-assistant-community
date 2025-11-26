@@ -47,6 +47,20 @@ class EntityWriteSerializer(BaseModelSerializer):
         model = Entity
         exclude = ["owned_folders"]
 
+    def to_internal_value(self, data):
+        """Convert None to empty string for CharField DORA fields before validation"""
+        dora_char_fields = [
+            "country",
+            "currency",
+            "dora_entity_type",
+            "dora_entity_hierarchy",
+            "dora_provider_person_type",
+        ]
+        for field in dora_char_fields:
+            if field in data and data[field] is None:
+                data[field] = ""
+        return super().to_internal_value(data)
+
     def validate_legal_identifiers(self, value):
         """
         Validate legal identifiers, ensuring LEI is exactly 20 characters if provided.
@@ -331,6 +345,26 @@ class SolutionReadSerializer(BaseModelSerializer):
 
 
 class SolutionWriteSerializer(BaseModelSerializer):
+    def to_internal_value(self, data):
+        """Convert None to empty string for CharField DORA fields before validation"""
+        dora_char_fields = [
+            "dora_ict_service_type",
+            "data_location_storage",
+            "data_location_processing",
+            "dora_data_sensitiveness",
+            "dora_reliance_level",
+            "dora_substitutability",
+            "dora_non_substitutability_reason",
+            "dora_has_exit_plan",
+            "dora_reintegration_possibility",
+            "dora_discontinuing_impact",
+            "dora_alternative_providers_identified",
+        ]
+        for field in dora_char_fields:
+            if field in data and data[field] is None:
+                data[field] = ""
+        return super().to_internal_value(data)
+
     class Meta:
         model = Solution
         exclude = ["recipient_entity"]
