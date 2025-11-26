@@ -2577,7 +2577,8 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     assigned_to = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
-    expected_evidence = FieldsRelatedField(many=True)
+    expected_evidence = FieldsRelatedField(["folder", "id"], many=True)
+    evidence_revisions = serializers.SerializerMethodField()
     applied_controls = FieldsRelatedField(many=True)
     compliance_assessments = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
@@ -2586,6 +2587,12 @@ class TaskNodeReadSerializer(BaseModelSerializer):
 
     def get_name(self, obj):
         return obj.task_template.name if obj.task_template else ""
+    
+    def get_evidence_revisions(self, obj):
+        revisions = []
+        for evidence in obj.expected_evidence:
+            revisions.extend(evidence.revisions.all())
+        return EvidenceRevisionReadSerializer(revisions, many=True).data
 
     class Meta:
         model = TaskNode

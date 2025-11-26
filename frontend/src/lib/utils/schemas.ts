@@ -478,6 +478,7 @@ export const EvidenceSchema = z.object({
 export const EvidenceRevisionSchema = z.object({
 	folder: z.string().uuid(),
 	evidence: z.string().uuid(),
+	task_node: z.string().uuid(),
 	version: z.number().optional(),
 	attachment: z.any().optional().nullable(),
 	link: z

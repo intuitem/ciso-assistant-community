@@ -31,4 +31,8 @@ export const load: PageServerLoad = async (event) => {
 	return data;
 };
 
-export const actions: Actions = {};
+export const actions: Actions = {
+    create: async (event) => {
+            return nestedWriteFormAction({ event, action: 'create' });
+        }
+};
