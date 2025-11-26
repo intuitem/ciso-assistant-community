@@ -27,6 +27,17 @@ export const navData = {
 					]
 				},
 				{
+					name: 'reports',
+					fa_icon: 'fas fa-file-invoice',
+					href: '/reports',
+					permissions: [
+						'view_perimeter',
+						'view_riskscenario',
+						'view_referencecontrol',
+						'view_riskassessment'
+					]
+				},
+				{
 					name: 'myAssignments',
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',
@@ -186,6 +197,12 @@ export const navData = {
 					href: '/risk-acceptances'
 				},
 				{
+					name: 'validationFlows',
+					fa_icon: 'fa-solid fa-clipboard-check',
+					href: '/validation-flows',
+					permissions: ['view_validationflow']
+				},
+				{
 					name: 'securityExceptions',
 					fa_icon: 'fa-solid fa-circle-exclamation',
 					href: '/security-exceptions'
@@ -264,7 +281,7 @@ export const navData = {
 					name: 'tprmOverview',
 					fa_icon: 'fa-solid fa-gauge',
 					href: '/analytics/tprm',
-					permissions: ['view_entity', 'view_solution', 'view_entityassessment']
+					permissions: ['view_entity', 'view_solution', 'view_contract', 'view_entityassessment']
 				},
 				{
 					name: 'entities',
@@ -280,6 +297,11 @@ export const navData = {
 					name: 'solutions',
 					fa_icon: 'fa-solid fa-box',
 					href: '/solutions'
+				},
+				{
+					name: 'contracts',
+					fa_icon: 'fa-solid fa-file-contract',
+					href: '/contracts'
 				},
 				{
 					name: 'entityAssessments',

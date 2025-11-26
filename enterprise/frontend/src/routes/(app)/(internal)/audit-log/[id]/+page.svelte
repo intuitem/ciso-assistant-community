@@ -19,9 +19,11 @@
 		fields={['actor', 'action', 'object_repr', 'timestamp', 'folder']}
 	/>
 
-	<div class="card shadow-lg bg-white p-4">
-		<div class="flex w-full">
-			<RecursiveLogEntryChanges log={data.log} />
+	{#if Object.keys(data.log.changes ?? {}).length > 0}
+		<div class="card shadow-lg bg-white p-4">
+			<div class="flex w-full">
+				<RecursiveLogEntryChanges log={data.log} />
+			</div>
 		</div>
-	</div>
+	{/if}
 </main>

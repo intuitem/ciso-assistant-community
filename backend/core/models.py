@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List
+from typing import Self, Union, List, Optional
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -52,6 +52,7 @@ from .validators import (
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
+from . import dora
 from collections import defaultdict, deque
 
 logger = get_logger(__name__)
@@ -243,6 +244,10 @@ class StoredLibrary(LibraryMixin):
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
     content = models.JSONField()
+    autoload = models.BooleanField(
+        default=False,
+        help_text="If set to true, the library will be automatically loaded on migrate.",
+    )
 
     REQUIRED_FIELDS = {"urn", "name", "version", "objects"}
     FIELDS_VERIFIERS = {}
@@ -340,6 +345,12 @@ class StoredLibrary(LibraryMixin):
             builtin=builtin,
             hash_checksum=hash_checksum,
             content=library_objects,
+            autoload=bool(
+                library_objects.get(
+                    "requirement_mapping_set",
+                    library_objects.get("requirement_mapping_sets"),
+                )
+            ),  # autoload is true if the library contains requirement mapping sets
         )
 
     @classmethod
@@ -923,7 +934,13 @@ class LoadedLibrary(LibraryMixin):
             )
             .distinct()
             .count()
-            + LoadedLibrary.objects.filter(dependencies=self).distinct().count()
+            + LoadedLibrary.objects.filter(
+                objects_meta__requirement_mapping_sets__isnull=True,
+                objects_meta__requirement_mapping_set__isnull=True,
+                dependencies=self,
+            )
+            .distinct()
+            .count()
         )
 
     @property
@@ -962,7 +979,7 @@ class LoadedLibrary(LibraryMixin):
             )
         super(LoadedLibrary, self).delete(*args, **kwargs)
         StoredLibrary.objects.filter(urn=self.urn, locale=self.locale).update(
-            is_loaded=False
+            is_loaded=False, autoload=False
         )
 
 
@@ -2148,6 +2165,34 @@ class Asset(
     )
     is_published = models.BooleanField(_("published"), default=True)
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+
+    is_business_function = models.BooleanField("is_business_function", default=False)
+    dora_licenced_activity = models.CharField(
+        max_length=50,
+        choices=dora.DORA_LICENSED_ACTIVITY_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name=_("DORA Licensed Activity"),
+    )
+    dora_criticality_assessment = models.CharField(
+        max_length=50,
+        choices=dora.DORA_FUNCTION_CRITICALITY_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name=_("DORA Criticality Assessment"),
+    )
+    dora_criticality_justification = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("DORA Criticality Justification"),
+    )
+    dora_discontinuing_impact = models.CharField(
+        max_length=50,
+        choices=dora.DORA_DISCONTINUING_IMPACT_CHOICES,
+        blank=True,
+        null=True,
+        verbose_name=_("DORA Discontinuing Impact"),
+    )
 
     fields_to_check = ["name"]
 
@@ -3904,41 +3949,55 @@ class AppliedControl(
 
         return annual_cost
 
+    @staticmethod
+    def _stringify_cost(cost: float, currency: str) -> str:
+        match currency:
+            case "$":
+                return f"${cost}"
+            case "€":
+                return f"{cost}€"
+            case "£":
+                return f"£{cost}"
+            case "A$":
+                return f"A${cost}"
+            case "NZ$":
+                return f"NZ${cost}"
+            case "C$":
+                return f"C${cost}"
+            case "¥":
+                return f"¥{cost}"
+
+        logger.error("Unknown currency detected", currency=currency)
+        return f"{cost} *"
+
     @property
-    def display_cost(self):
+    def display_cost(self) -> str:
         """Returns a human-readable cost display string"""
         if not self.cost:
             return ""
 
         currency = self.cost.get("currency", "")
-        parts = []
+        string_parts: list[str] = []
 
-        build_cost = self.cost.get("build", {})
-        run_cost = self.cost.get("run", {})
+        for cost_type in ["build", "run"]:
+            if (cost_data := self.cost.get(cost_type)) is None:
+                continue
 
-        if build_cost:
-            build_fixed = build_cost.get("fixed_cost", 0)
-            build_people = build_cost.get("people_days", 0)
-            if build_fixed > 0 or build_people > 0:
-                build_parts = []
-                if build_fixed > 0:
-                    build_parts.append(f"{build_fixed}{currency}")
-                if build_people > 0:
-                    build_parts.append(f"{build_people} people days")
-                parts.append(f"Build: {', '.join(build_parts)}")
+            if (cost := cost_data.get("fixed_cost", 0)) == 0:
+                continue
 
-        if run_cost:
-            run_fixed = run_cost.get("fixed_cost", 0)
-            run_people = run_cost.get("people_days", 0)
-            if run_fixed > 0 or run_people > 0:
-                run_parts = []
-                if run_fixed > 0:
-                    run_parts.append(f"{run_fixed}{currency}")
-                if run_people > 0:
-                    run_parts.append(f"{run_people} people days")
-                parts.append(f"Run: {', '.join(run_parts)}")
+            people_days = cost_data.get("people_days", 0)
+            cost_parts: list[str] = []
 
-        return " | ".join(parts) if parts else ""
+            stringified_cost = self._stringify_cost(cost, currency)
+            cost_parts.append(stringified_cost)
+            if people_days > 0:
+                cost_parts.append(f"{people_days} people days")
+
+            cost_string = ", ".join(cost_parts)
+            string_parts.append(f"{cost_type.capitalize()}: {cost_string}")
+
+        return " | ".join(string_parts)
 
     def get_ranking_score(self):
         value = 0
@@ -4734,6 +4793,15 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("RiskAssessment"),
         related_name="risk_scenarios",
     )
+    operational_scenario = models.ForeignKey(
+        "ebios_rm.OperationalScenario",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Operational scenario"),
+        related_name="risk_scenarios",
+        help_text=_("EBIOS RM operational scenario that generated this risk scenario"),
+    )
     assets = models.ManyToManyField(
         Asset,
         verbose_name=_("Assets"),
@@ -4873,7 +4941,7 @@ class RiskScenario(NameDescriptionMixin):
     #     risk_matrix = self.risk_assessment.risk_matrix.parse_json()
     #     return [(k, v) for k, v in risk_matrix.fields[field].items()]
 
-    def get_folder_full_path(self, include_root: bool = False) -> list[Folder]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
         return self.risk_assessment.get_folder_full_path(include_root=include_root)
 
     @property
@@ -5004,6 +5072,15 @@ class RiskScenario(NameDescriptionMixin):
     def __str__(self):
         return str(self.parent_perimeter()) + _(": ") + str(self.name)
 
+    def delete(self, *args, **kwargs):
+        risk_assessment_id = self.risk_assessment.id
+        result = super(RiskScenario, self).delete(*args, **kwargs)
+        # Update parent risk assessment's updated_at timestamp (bypass save to avoid recursion)
+        RiskAssessment.objects.filter(id=risk_assessment_id).update(
+            updated_at=timezone.now()
+        )
+        return result
+
     def save(self, *args, **kwargs):
         if self.inherent_proba >= 0 and self.inherent_impact >= 0:
             self.inherent_level = risk_scoring(
@@ -5030,6 +5107,10 @@ class RiskScenario(NameDescriptionMixin):
         else:
             self.residual_level = -1
         super(RiskScenario, self).save(*args, **kwargs)
+        # Update parent risk assessment's updated_at timestamp (bypass save to avoid recursion)
+        RiskAssessment.objects.filter(id=self.risk_assessment.id).update(
+            updated_at=timezone.now()
+        )
         self.risk_assessment.upsert_daily_metrics()
 
 
@@ -6713,9 +6794,196 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     def risk_assessments(self):
         return self.task_template.risk_assessments.all()
 
+    @property
+    def findings_assessment(self):
+        return self.task_template.findings_assessment.all()
+
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"
+
+
+class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
+    class Status(models.TextChoices):
+        SUBMITTED = "submitted", "Submitted"
+        ACCEPTED = "accepted", "Accepted"
+        REJECTED = "rejected", "Rejected"
+        REVOKED = "revoked", "Revoked"
+        EXPIRED = "expired", "Expired"
+        DROPPED = "dropped", "Dropped"
+        CHANGE_REQUESTED = "change_requested", "Change requested"
+
+    compliance_assessments = models.ManyToManyField(
+        ComplianceAssessment,
+        blank=True,
+    )
+    risk_assessments = models.ManyToManyField(
+        RiskAssessment,
+        blank=True,
+    )
+    business_impact_analysis = models.ManyToManyField(
+        "resilience.BusinessImpactAnalysis",
+        blank=True,
+    )
+    crq_studies = models.ManyToManyField(
+        "crq.QuantitativeRiskStudy",
+        blank=True,
+    )
+
+    ebios_studies = models.ManyToManyField(
+        "ebios_rm.EbiosRMStudy",
+        blank=True,
+    )
+    entity_assessments = models.ManyToManyField(
+        "tprm.EntityAssessment",
+        blank=True,
+    )
+    findings_assessments = models.ManyToManyField(
+        FindingsAssessment,
+        blank=True,
+    )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+    )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+    )
+
+    policies = models.ManyToManyField(
+        Policy,
+        blank=True,
+    )
+    request_notes = models.TextField(null=True, blank=True)
+    requester = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="validation_requests",
+        verbose_name=_("Requester"),
+    )
+    approver = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
+    ref_id = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        unique=True,
+        verbose_name=_("Reference ID"),
+    )
+    status = models.CharField(
+        choices=Status.choices,
+        default=Status.SUBMITTED,
+        max_length=20,
+    )
+    validation_deadline = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name=_("Validation deadline"),
+    )
+
+    class Meta:
+        verbose_name = "Validation flow"
+        verbose_name_plural = "Validation flows"
+
+    def save(self, *args, **kwargs):
+        from django.db import IntegrityError, transaction
+
+        if not self.ref_id:
+            max_retries = 3
+            for attempt in range(max_retries):
+                self.ref_id = self.get_default_ref_id()
+                try:
+                    with transaction.atomic():
+                        super().save(*args, **kwargs)
+                        return  # Success
+                except IntegrityError:
+                    if attempt == max_retries - 1:
+                        raise  # Final attempt failed, propagate error
+                    self.ref_id = None
+        else:
+            super().save(*args, **kwargs)
+
+    @classmethod
+    def get_default_ref_id(cls) -> str:
+        """Return globally unique ref_id for validation flow (VAL.NNNNNN format)"""
+        last = cls.objects.filter(ref_id__startswith="VAL.").order_by("-ref_id").first()
+        if not last or not last.ref_id:
+            return "VAL.000001"
+        try:
+            suffix = int(last.ref_id.split(".")[1])
+        except (IndexError, ValueError):
+            # Fallback if existing data is malformed
+            suffix = 0
+        return f"VAL.{suffix + 1:06d}"
+
+    @property
+    def linked_models(self) -> list[str]:
+        """Return list of model types that have linked objects"""
+        linked = []
+        model_fields = [
+            "compliance_assessments",
+            "risk_assessments",
+            "business_impact_analysis",
+            "crq_studies",
+            "ebios_studies",
+            "entity_assessments",
+            "findings_assessments",
+            "evidences",
+            "security_exceptions",
+            "policies",
+        ]
+        for field in model_fields:
+            if getattr(self, field).exists():
+                linked.append(field)
+        return linked
+
+    def __str__(self) -> str:
+        return self.ref_id
+
+
+class FlowEvent(AbstractBaseModel, FolderMixin):
+    validation_flow = models.ForeignKey(
+        ValidationFlow,
+        on_delete=models.CASCADE,
+        related_name="events",
+        verbose_name=_("Validation flow"),
+    )
+    event_type = models.CharField(
+        max_length=50,
+        verbose_name=_("Event type"),
+    )
+    event_actor = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Event actor"),
+    )
+    event_notes = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_("Event notes"),
+    )
+    is_tainted = models.BooleanField(
+        default=False,
+        verbose_name=_("Is tainted"),
+    )
+    # created_at is already covered on the abstract model
+
+    class Meta:
+        verbose_name = _("Flow event")
+        verbose_name_plural = _("Flow events")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.validation_flow.ref_id} - {self.event_type} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 common_exclude = ["created_at", "updated_at"]
@@ -6773,10 +7041,6 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 auditlog.register(
-    Folder,
-    exclude_fields=common_exclude,
-)
-auditlog.register(
     Perimeter,
     exclude_fields=common_exclude,
 )
@@ -6803,6 +7067,34 @@ auditlog.register(
 )
 auditlog.register(
     TimelineEntry,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Terminology,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    EvidenceRevision,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OrganisationIssue,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    OrganisationObjective,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Campaign,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TaskNode,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    TaskTemplate,
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete

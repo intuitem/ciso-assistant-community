@@ -981,6 +981,7 @@
 	"samlCertificateHelpText": "U kunt uw eigen certificaat opgeven of de applicatie laten genereren.",
 	"samlAuthnRequestSignedHelpText": "Wanneer ingeschakeld, wordt het SAML-authenticatieverzoek ondertekend met de privésleutel hieronder. Het bijbehorende openbare certificaat wordt naar de identiteitsprovider verzonden, zodat deze de handtekening kan verifiëren.",
 	"downloadCertificate": "Certificaat downloaden",
-	"viewMore": "Afficher plus",
-	"viewLess": "Afficher moins"
+	"loginFailed": "Login mislukt",
+	"viewMore": "Meer weergeven",
+	"viewLess": "Minder weergeven"
 }
