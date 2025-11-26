@@ -1036,6 +1036,7 @@ export const StrategicScenarioSchema = z.object({
 
 export const AttackPathSchema = z.object({
 	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
 	ebios_rm_study: z.string(),
 	strategic_scenario: z.string().uuid(),
 	stakeholders: z.string().uuid().optional().array().optional(),
