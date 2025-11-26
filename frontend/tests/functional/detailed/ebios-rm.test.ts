@@ -10,8 +10,8 @@ const workshopStepsNames = {
 	13: 'Identify feared events',
 	14: 'Determine the security foundation',
 	21: 'Identify risk origins and targeted objectives',
-	22: 'Evaluate RS/TO pairs',
-	23: 'Select RS/TO pairs',
+	22: 'Evaluate RO/TO pairs',
+	23: 'Select RO/TO pairs',
 	31: 'Map the ecosystem',
 	32: 'Develop strategic scenarios',
 	33: 'Define security measures for the ecosystem',
@@ -268,7 +268,7 @@ test('ebios rm study', async ({
 		await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 		await page
 			.getByRole('listitem')
-			.filter({ hasText: 'Step 2 Evaluate RS/TO pairs' })
+			.filter({ hasText: 'Step 2 Evaluate RO/TO pairs' })
 			.getByTestId('sidebar-more-btn')
 			.click();
 		await page.getByRole('button', { name: 'Mark as done' }).click();
@@ -289,7 +289,7 @@ test('ebios rm study', async ({
 		await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 		await page
 			.getByRole('listitem')
-			.filter({ hasText: 'Step 3 Select RS/TO pairs' })
+			.filter({ hasText: 'Step 3 Select RO/TO pairs' })
 			.getByTestId('sidebar-more-btn')
 			.click();
 		await page.getByRole('button', { name: 'Mark as done' }).click();
