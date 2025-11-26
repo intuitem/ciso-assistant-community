@@ -243,32 +243,12 @@ test('third-party representative can fill their assigned audit', async ({
 
 		await test.step('third party respondent can fill questionnaire', async () => {
 			await expect(assessableRequirements).not.toHaveCount(0);
-			await assessableRequirements.first().locator('.text-base').first().click();
-			await assessableRequirements
-				.first()
-				.locator('li:nth-child(2) > .control > .p-1 > label:nth-child(2) > .text-base')
-				.first()
-				.click();
-			await assessableRequirements
-				.first()
-				.locator('li:nth-child(3) > .control > .p-1 > label > .text-base')
-				.first()
-				.click();
-			await assessableRequirements
-				.first()
-				.locator('li:nth-child(4) > .control > .p-1 > label > .text-base')
-				.first()
-				.click();
-			await assessableRequirements
-				.first()
-				.locator('li:nth-child(5) > .control > .p-1 > label:nth-child(3) > .text-base')
-				.first()
-				.click();
-			await assessableRequirements
-				.first()
-				.locator('li:nth-child(6) > .control > .p-1 > label:nth-child(3) > .text-base')
-				.first()
-				.click();
+			await page.getByRole('button', { name: 'Yes' }).first().click();
+			await page.getByRole('button', { name: 'No' }).nth(1).click();
+			await page.getByRole('button', { name: 'N/A' }).nth(2).click();
+			await page.getByRole('button', { name: 'Yes' }).nth(3).click();
+			await page.getByRole('button', { name: 'No' }).nth(4).click();
+			await page.getByRole('button', { name: 'N/A' }).nth(5).click();
 		});
 
 		await test.step('third party respondent can create evidence', async () => {
@@ -308,24 +288,24 @@ test('third-party representative can fill their assigned audit', async ({
 			);
 			editedRequirementAssessment.content.click();
 			await page.waitForURL('/requirement-assessments/**');
-			await expect(
-				page.locator('li:nth-child(1) > .control > .p-1 > label:nth-child(1)')
-			).toHaveClass(/.*preset-filled-primary-500.*/);
-			await expect(
-				page.locator('li:nth-child(2) > .control > .p-1 > label:nth-child(2)')
-			).toHaveClass(/.*preset-filled-primary-500.*/);
-			await expect(
-				page.locator('li:nth-child(3) > .control > .p-1 > label:nth-child(1)')
-			).toHaveClass(/.*preset-filled-primary-500.*/);
-			await expect(
-				page.locator('li:nth-child(4) > .control > .p-1 > label:nth-child(1)')
-			).toHaveClass(/.*preset-filled-primary-500.*/);
-			await expect(
-				page.locator('li:nth-child(5) > .control > .p-1 > label:nth-child(3)')
-			).toHaveClass(/.*preset-filled-primary-500.*/);
-			await expect(
-				page.locator('li:nth-child(6) > .control > .p-1 > label:nth-child(3)')
-			).toHaveClass(/.*preset-filled-primary-500.*/);
+			await expect(page.getByRole('button', { name: 'Yes' }).first()).toHaveClass(
+				/.*preset-filled.*/
+			);
+			await expect(page.getByRole('button', { name: 'No' }).nth(1)).toHaveClass(
+				/.*preset-filled.*/
+			);
+			await expect(page.getByRole('button', { name: 'N/A' }).nth(2)).toHaveClass(
+				/.*preset-filled.*/
+			);
+			await expect(page.getByRole('button', { name: 'Yes' }).nth(3)).toHaveClass(
+				/.*preset-filled.*/
+			);
+			await expect(page.getByRole('button', { name: 'No' }).nth(4)).toHaveClass(
+				/.*preset-filled.*/
+			);
+			await expect(page.getByRole('button', { name: 'N/A' }).nth(5)).toHaveClass(
+				/.*preset-filled.*/
+			);
 		});
 	});
 });
