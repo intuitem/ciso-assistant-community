@@ -159,8 +159,16 @@ class FinishACSView(SAMLViewMixin, View):
             emails = [auth.get_attribute(x) or [] for x in email_attributes]
             emails = [x for xs in emails for x in xs]  # flatten
             user = User.objects.filter(email__iexact=auth.get_nameid()).first()
-            if not user:
-                user = User.objects.filter(email__iexact=emails[0]).first()
+            if not user and emails:
+                logger.info(
+                    "User not found by NameID, trying email lookup",
+                    nameid=auth.get_nameid(),
+                    emails=emails,
+                )
+                try:
+                    user = User.objects.get(email__iexact=emails[0])
+                except User.DoesNotExist:
+                    raise User.DoesNotExist()
             idp_first_names = auth.get_attribute(
                 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
             )
