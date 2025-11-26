@@ -144,7 +144,6 @@
 	bind:cachedValue={formDataCache['type']}
 />
 <AutocompleteSelect
-	hidden={data.type === 'PR'}
 	multiple
 	{form}
 	optionsEndpoint="assets"
@@ -169,7 +168,7 @@
 <AutocompleteSelect
 	multiple
 	{form}
-	optionsEndpoint="assets?type=SP"
+	optionsEndpoint="assets"
 	optionsInfoFields={{
 		fields: [
 			{
@@ -240,6 +239,55 @@
 		</div>
 	</Dropdown>
 {/if}
+{#if data.type === 'PR'}
+	<Dropdown
+		open={false}
+		style="hover:text-purple-700"
+		icon="fa-solid fa-building-columns"
+		header={m.doraSpecific()}
+	>
+		<Checkbox
+			{form}
+			field="is_business_function"
+			label={m.isBusinessFunction()}
+			cacheLock={cacheLocks['is_business_function']}
+			bind:cachedValue={formDataCache['is_business_function']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['dora_licenced_activity']}
+			field="dora_licenced_activity"
+			label={m.doraLicencedActivity()}
+			cacheLock={cacheLocks['dora_licenced_activity']}
+			bind:cachedValue={formDataCache['dora_licenced_activity']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['dora_criticality_assessment']}
+			field="dora_criticality_assessment"
+			label={m.doraCriticalityAssessment()}
+			cacheLock={cacheLocks['dora_criticality_assessment']}
+			bind:cachedValue={formDataCache['dora_criticality_assessment']}
+			disableDoubleDash={true}
+		/>
+		<TextField
+			{form}
+			field="dora_criticality_justification"
+			label={m.doraCriticalityJustification()}
+			cacheLock={cacheLocks['dora_criticality_justification']}
+			bind:cachedValue={formDataCache['dora_criticality_justification']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['dora_discontinuing_impact']}
+			field="dora_discontinuing_impact"
+			label={m.doraDiscontinuingImpact()}
+			cacheLock={cacheLocks['dora_discontinuing_impact']}
+			bind:cachedValue={formDataCache['dora_discontinuing_impact']}
+			disableDoubleDash={true}
+		/>
+	</Dropdown>
+{/if}
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<TextField
 		{form}
@@ -248,6 +296,16 @@
 		helpText={m.linkHelpText()}
 		cacheLock={cacheLocks['reference_link']}
 		bind:cachedValue={formDataCache['reference_link']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="security-exceptions"
+		optionsLabelField="auto"
+		field="security_exceptions"
+		cacheLock={cacheLocks['security_exceptions']}
+		bind:cachedValue={formDataCache['security_exceptions']}
+		label={m.securityExceptions()}
 	/>
 	<AutocompleteSelect
 		multiple
@@ -280,6 +338,18 @@
 		helpText={m.observationHelpText()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="solutions"
+		optionsLabelField="auto"
+		optionsExtraFields={[['provider_entity', 'str']]}
+		field="solutions"
+		cacheLock={cacheLocks['solutions']}
+		bind:cachedValue={formDataCache['solutions']}
+		label={m.solutions()}
+		helpText={m.solutionsLinkedToAssetHelpText()}
 	/>
 </Dropdown>
 {#if initialData.ebios_rm_studies}

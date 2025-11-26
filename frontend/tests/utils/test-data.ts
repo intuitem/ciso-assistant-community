@@ -28,6 +28,12 @@ export default {
 		firstName: 'Test',
 		lastName: 'User'
 	},
+	thirdPartyUser: {
+		email: 'third-party@tests.com',
+		password: 'pass123wordTest',
+		firstName: 'Third',
+		lastName: 'Party'
+	},
 	usergroups: {
 		// this lists needs to be updated when updating permissions in apps.py in order to avoid test failures
 		analyst: {
@@ -592,6 +598,11 @@ export default {
 		name: 'International standard ISO/IEC 27001:2022',
 		ref: 'ISO/IEC 27001:2022',
 		urn: 'urn:intuitem:risk:library:iso27001-2022'
+	},
+	questionnaire: {
+		name: 'CMMC version 2.0',
+		ref: 'CMMC-2.0',
+		urn: 'urn:intuitem:risk:framework:cmmc-2.0'
 	},
 	matrix: {
 		name: 'Critical risk matrix 5x5',

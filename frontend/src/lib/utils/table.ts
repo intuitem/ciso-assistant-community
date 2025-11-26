@@ -476,6 +476,28 @@ export const APPROVER_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const REQUESTER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'requester',
+		optionsEndpoint: 'users',
+		optionsLabelField: 'email',
+		multiple: true
+	}
+};
+
+export const LINKED_MODELS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'linkedModels',
+		optionsEndpoint: 'validation-flows/linked_models',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const RISK_ASSESSMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -576,6 +598,17 @@ export const SOLUTION_CRITICALITY_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'criticality',
 		options: SOLUTION_CRITICALITY_OPTIONS,
+		multiple: true
+	}
+};
+
+export const SOLUTION_OWNER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'owner',
+		optionsLabelField: 'email',
+		optionsValueField: 'id',
+		optionsEndpoint: 'solutions/owner',
 		multiple: true
 	}
 };
@@ -708,6 +741,31 @@ export const ENTITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const PROVIDER_ENTITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'providerEntity',
+		optionsEndpoint: 'entities',
+		multiple: true
+	}
+};
+export const BENEFICIARY_ENTITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'beneficiaryEntity',
+		optionsEndpoint: 'entities',
+		multiple: true
+	}
+};
+export const SOLUTION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'solution',
+		optionsEndpoint: 'solutions',
+		multiple: true
+	}
+};
+
 export const ENTITY_RELATIONSHIP_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -830,6 +888,15 @@ export const ASSET_CLASS_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'asset_class',
 		optionsEndpoint: 'assets/asset_class',
+		multiple: true
+	}
+};
+
+const ASSET_IS_BUSINESS_FUNCTION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_business_function',
+		options: YES_NO_OPTIONS,
 		multiple: true
 	}
 };
@@ -1007,6 +1074,18 @@ export const EVIDENCE_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const CONTRACT_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'status',
+		optionsEndpoint: 'contracts/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1093,8 +1172,16 @@ export const listViewFields = {
 		}
 	},
 	'risk-assessments': {
-		head: ['ref_id', 'name', 'riskMatrix', 'status', 'riskScenarios', 'perimeter'],
-		body: ['ref_id', 'str', 'risk_matrix', 'status', 'risk_scenarios_count', 'perimeter'],
+		head: ['ref_id', 'name', 'riskMatrix', 'status', 'riskScenarios', 'perimeter', 'updatedAt'],
+		body: [
+			'ref_id',
+			'str',
+			'risk_matrix',
+			'status',
+			'risk_scenarios_count',
+			'perimeter',
+			'updated_at'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1127,9 +1214,7 @@ export const listViewFields = {
 			'extraAppliedControls',
 			'residualLevel',
 			'treatment',
-			'riskAssessment',
-			'control_impact',
-			'effort'
+			'riskAssessment'
 		],
 		body: [
 			'ref_id',
@@ -1142,9 +1227,7 @@ export const listViewFields = {
 			'applied_controls',
 			'residual_level',
 			'treatment',
-			'risk_assessment',
-			'control_impact',
-			'effort'
+			'risk_assessment'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1169,8 +1252,62 @@ export const listViewFields = {
 			approver: APPROVER_FILTER
 		}
 	},
+	'validation-flows': {
+		head: [
+			'ref_id',
+			'status',
+			'createdAt',
+			'requester',
+			'validationDeadline',
+			'approver',
+			'linkedModels',
+			'labels',
+			'domain'
+		],
+		body: [
+			'ref_id',
+			'status',
+			'created_at',
+			'requester',
+			'validation_deadline',
+			'approver',
+			'linked_models',
+			'filtering_labels',
+			'folder'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'validation-flows/status',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'status',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			requester: REQUESTER_FILTER,
+			approver: APPROVER_FILTER,
+			linked_models: LINKED_MODELS_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
 	'applied-controls': {
-		head: ['ref_id', 'name', 'priority', 'status', 'category', 'eta', 'domain', 'owner', 'labels'],
+		head: [
+			'ref_id',
+			'name',
+			'priority',
+			'status',
+			'category',
+			'eta',
+			'domain',
+			'owner',
+			'controlImpact',
+			'effort',
+			'labels'
+		],
 		body: [
 			'ref_id',
 			'name',
@@ -1180,6 +1317,8 @@ export const listViewFields = {
 			'eta',
 			'folder',
 			'owner',
+			'control_impact',
+			'effort',
 			'filtering_labels'
 		],
 		filters: {
@@ -1286,7 +1425,8 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			type: ASSET_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER,
-			asset_class: ASSET_CLASS_FILTER
+			asset_class: ASSET_CLASS_FILTER,
+			is_business_function: ASSET_IS_BUSINESS_FUNCTION_FILTER
 		}
 	},
 	'asset-class': {
@@ -1300,6 +1440,7 @@ export const listViewFields = {
 			'lastName',
 			'userGroups',
 			'isActive',
+			'expiryDate',
 			'keep_local_login',
 			'is_third_party',
 			'hasMfaEnabled'
@@ -1310,6 +1451,7 @@ export const listViewFields = {
 			'last_name',
 			'user_groups',
 			'is_active',
+			'expiry_date',
 			'keep_local_login',
 			'is_third_party',
 			'has_mfa_enabled'
@@ -1460,10 +1602,27 @@ export const listViewFields = {
 		}
 	},
 	entities: {
-		head: ['name', 'description', 'domain', 'relationship', 'ownedFolders'],
-		body: ['name', 'description', 'folder', 'relationship', 'owned_folders'],
+		head: [
+			'refId',
+			'name',
+			'description',
+			'domain',
+			'parentEntity',
+			'relationship',
+			'defaultCriticality'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'folder',
+			'parent_entity',
+			'relationship',
+			'default_criticality'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
+			parent_entity: ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER
 		}
 	},
@@ -1479,11 +1638,42 @@ export const listViewFields = {
 		}
 	},
 	solutions: {
-		head: ['name', 'description', 'providerEntity', 'recipientEntity', 'criticality'],
-		body: ['name', 'description', 'provider_entity', 'recipient_entity', 'criticality'],
+		head: ['refId', 'name', 'description', 'providerEntity', 'criticality', 'labels'],
+		body: ['ref_id', 'name', 'description', 'provider_entity', 'criticality', 'filtering_labels'],
 		filters: {
 			provider_entity: ENTITY_FILTER,
-			criticality: SOLUTION_CRITICALITY_FILTER
+			criticality: SOLUTION_CRITICALITY_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	contracts: {
+		head: [
+			'refId',
+			'name',
+			'description',
+			'status',
+			'startDate',
+			'endDate',
+			'providerEntity',
+			'beneficiaryEntity',
+			'solution'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'status',
+			'start_date',
+			'end_date',
+			'provider_entity',
+			'beneficiary_entity',
+			'solution'
+		],
+		filters: {
+			status: CONTRACT_STATUS_FILTER,
+			provider_entity: PROVIDER_ENTITY_FILTER,
+			beneficiary_entity: BENEFICIARY_ENTITY_FILTER,
+			solution: SOLUTION_FILTER
 		}
 	},
 	representatives: {
@@ -1495,7 +1685,12 @@ export const listViewFields = {
 	},
 	'business-impact-analysis': {
 		head: ['name', 'perimeter', 'status'],
-		body: ['name', 'perimeter', 'status']
+		body: ['name', 'perimeter', 'status'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			perimeter: PERIMETER_FILTER,
+			status: RISK_ASSESSMENT_STATUS_FILTER
+		}
 	},
 	'asset-assessments': {
 		head: [
@@ -1675,8 +1870,8 @@ export const listViewFields = {
 		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
 	},
 	'ebios-rm': {
-		head: ['name', 'description', 'domain', 'quotationMethod'],
-		body: ['name', 'description', 'folder', 'quotation_method'],
+		head: ['name', 'description', 'domain', 'quotationMethod', 'createdAt', 'updatedAt'],
+		body: ['name', 'description', 'folder', 'quotation_method', 'created_at', 'updated_at'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}
@@ -1758,6 +1953,7 @@ export const listViewFields = {
 	'operational-scenarios': {
 		head: [
 			'is_selected',
+			'strategicScenario',
 			'attackPath',
 			'operatingModes',
 			'operatingModesDescription',
@@ -1765,6 +1961,7 @@ export const listViewFields = {
 		],
 		body: [
 			'is_selected',
+			'strategic_scenario',
 			'attack_path',
 			'operating_modes',
 			'operating_modes_description',

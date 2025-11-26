@@ -39,8 +39,13 @@ type Fixtures = {
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
 	campaignsPage: PageContent;
+	entitiesPage: PageContent;
+	solutionsPage: PageContent;
+	representativesPage: PageContent;
+	entityAssessmentsPage: PageContent;
 	settingsPage: PageContent;
 	logedPage: LoginPage;
+	thirdPartyAuthenticatedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
 };
@@ -83,6 +88,7 @@ export const test = base.extend<Fixtures>({
 			assetAssessmentsPage,
 			threatsPage,
 			campaignsPage,
+			entitiesPage,
 			usersPage
 		},
 		use
@@ -108,6 +114,7 @@ export const test = base.extend<Fixtures>({
 			assetAssessmentsPage,
 			threatsPage,
 			campaignsPage,
+			entitiesPage,
 			usersPage
 		});
 	},
@@ -374,6 +381,52 @@ export const test = base.extend<Fixtures>({
 		]);
 		await use(cPage);
 	},
+	entitiesPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/entities', /Entit(y|ies)/, [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(ePage);
+	},
+
+	solutionsPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/solutions', 'Solutions', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'assets', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
+		]);
+		await use(ePage);
+	},
+
+	representativesPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/representatives', 'Representatives', [
+			{ name: 'description', type: type.TEXT },
+			{ name: 'email', type: type.TEXT },
+			{ name: 'create_user', type: type.CHECKBOX },
+			{ name: 'entity', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'first_name', type: type.TEXT },
+			{ name: 'last_name', type: type.TEXT },
+			{ name: 'phone', type: type.TEXT },
+			{ name: 'role', type: type.TEXT }
+		]);
+		await use(ePage);
+	},
+
+	entityAssessmentsPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/entity-assessments', 'Entity assessments', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'create_audit', type: type.CHECKBOX },
+			{ name: 'framework', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'solutions', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'due_date', type: type.DATE },
+			{ name: 'representatives', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'conclusion', type: type.SELECT }
+		]);
+		await use(ePage);
+	},
 
 	usersPage: async ({ page }, use) => {
 		const uPage = new PageContent(page, '/users', 'Users', [
@@ -393,6 +446,14 @@ export const test = base.extend<Fixtures>({
 		await loginPage.goto();
 		await loginPage.login();
 		await loginPage.skipWelcome();
+		await use(loginPage);
+	},
+
+	thirdPartyAuthenticatedPage: async ({ page }, use) => {
+		const loginPage = new LoginPage(page);
+		await loginPage.goto();
+		await loginPage.login(testData.thirdPartyUser.email, testData.thirdPartyUser.password);
+		await loginPage.skipWelcome(/^.*\/compliance-assessments$/);
 		await use(loginPage);
 	},
 
@@ -795,7 +856,15 @@ export class TestContent {
 					name: vars.campaignName,
 					description: vars.description,
 					perimeters: [vars.folderName + '/' + vars.perimeterName],
-					frameworks: [vars.framework.name],
+					frameworks: [vars.framework.name]
+				}
+			},
+			entitiesPage: {
+				displayName: 'Entities',
+				modelName: 'entity',
+				build: {
+					name: 'Test Entity',
+					description: 'Test description',
 					folder: vars.folderName
 				},
 				editParams: {

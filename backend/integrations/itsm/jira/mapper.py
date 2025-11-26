@@ -36,11 +36,11 @@ class JiraFieldMapper(BaseFieldMapper):
     # Status mappings
 
     STATUS_MAP_FROM_JIRA = {
-        "To Do": "to_do",
-        "In Progress": "in_progress",
-        "On Hold": "on_hold",
-        "Active": "active",
-        "Closed": "deprecated",
+        "to do": "to_do",
+        "in progress": "in_progress",
+        "on hold": "on_hold",
+        "active": "active",
+        "closed": "deprecated",
     }
     STATUS_MAP_TO_JIRA = {v: k for k, v in STATUS_MAP_FROM_JIRA.items()}
 
@@ -161,7 +161,7 @@ class JiraFieldMapper(BaseFieldMapper):
         if field == "status":
             # Value is the Jira status object: {'name': 'In Progress', ...}
             if isinstance(value, dict):
-                status_name = value.get("name")
+                status_name = value.get("name").lower()
                 local_status = self.STATUS_MAP_FROM_JIRA.get(status_name)
                 if local_status:
                     return local_status

@@ -10,7 +10,7 @@
 
 	import { Switch, ProgressRing, Popover } from '@skeletonlabs/skeleton-svelte';
 
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 
 	import {} from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
@@ -23,7 +23,7 @@
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
 	import type { Node } from './types';
 
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -38,6 +38,7 @@
 	import { derived } from 'svelte/store';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 
 	interface Props {
 		data: PageData;
@@ -46,13 +47,15 @@
 
 	let { data, form }: Props = $props();
 
+	const compliance_assessment = $derived(data.compliance_assessment);
+
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
 		model: model.name,
-		domain: data.compliance_assessment.folder.id
+		domain: compliance_assessment.folder.id
 	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
 	const canEditRequirementAssessment: boolean =
@@ -289,6 +292,27 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	function modalRequestValidation(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.validationFlowForm,
+				model: getModelInfo('validation-flows'),
+				formAction: '/validation-flows?/create',
+				invalidateAll: true,
+				onConfirm: async () => {
+					await invalidateAll();
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.requestValidation()
+		};
+		modalStore.trigger(modal);
+	}
 	let syncingToActionsIsLoading = $state(false);
 	async function modalConfirmSyncToActions(
 		id: string,
@@ -482,6 +506,11 @@
 					<div class="font-medium">{m.createdAt()}</div>
 					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
 				</div>
+				{#if page.data?.featureflags?.validation_flows}
+					{#key compliance_assessment.validation_flows}
+						<ValidationFlowsSection validationFlows={compliance_assessment.validation_flows} />
+					{/key}
+				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
 				<div class="flex w-1/3 relative">
@@ -576,6 +605,12 @@
 									>
 									<a
 										href="/compliance-assessments/{data.compliance_assessment
+											.id}/action-plan/export/xlsx"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asXLSX()}</a
+									>
+									<a
+										href="/compliance-assessments/{data.compliance_assessment
 											.id}/action-plan/export/pdf"
 										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 										>... {m.asPDF()}</a
@@ -599,6 +634,7 @@
 						href={`${page.url.pathname}/action-plan`}
 						class="btn preset-filled-primary-500 h-fit"
 						breadcrumbAction="push"
+						data-testid="action-plan-button"
 						><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 					>
 					<Anchor
@@ -614,6 +650,7 @@
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/flash-mode`}
 						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+						data-testid="flash-mode-button"
 						><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 					>
 				{/if}
@@ -622,6 +659,7 @@
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/table-mode`}
 						class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
+						data-testid="table-mode-button"
 						><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
 					>
 				{/if}
@@ -639,16 +677,27 @@
 						><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
 					</button>
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-orange-500 to-red-500 h-fit"
+						class="btn text-gray-100 bg-linear-to-r from-rose-500 to-pink-500 h-fit"
 						onclick={() => modalCompareAudit()}
 						data-testid="compare-audit-button"
 						><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
 					</button>
+					{#if page.data?.featureflags?.validation_flows}
+						<button
+							class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+							onclick={() => modalRequestValidation()}
+							data-testid="request-validation-button"
+						>
+							<i class="fa-solid fa-check-circle mr-2"></i>
+							{m.requestValidation()}
+						</button>
+					{/if}
 				{/if}
 
 				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
 					<button
 						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						data-testid="sync-to-actions-button"
 						onclick={async () => {
 							await modalConfirmSyncToActions(
 								data.compliance_assessment.id,
@@ -701,12 +750,12 @@
 				{/if}
 				{#if has_threats && !page.data.user.is_third_party}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-amber-500 to-orange-500 h-fit"
+						class="btn text-gray-100 bg-linear-to-r from-yellow-500 to-red-600 h-fit"
 						onclick={openThreatsDialog}
 					>
 						<div class="flex items-center space-x-2">
-							<i class="fa-solid fa-triangle-exclamation text-red-700"></i>
-							<span class="text-red-700 font-bold">{data.threats.total_unique_threats}</span>
+							<i class="fa-solid fa-triangle-exclamation text-white"></i>
+							<span class="text-white font-bold">{data.threats.total_unique_threats}</span>
 							<span>{m.potentialThreats()}</span>
 						</div>
 					</button>
