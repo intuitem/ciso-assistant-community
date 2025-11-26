@@ -372,7 +372,6 @@ export const test = base.extend<Fixtures>({
 		const ePage = new PageContent(page, '/entities', /Entit(y|ies)/, [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
-			{ name: 'mission', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(ePage);
@@ -840,13 +839,11 @@ export class TestContent {
 				build: {
 					name: 'Test Entity',
 					description: 'Test description',
-					mission: 'Test mission',
 					folder: vars.folderName
 				},
 				editParams: {
 					name: '',
-					description: '',
-					mission: ''
+					description: ''
 				}
 			}
 		};
