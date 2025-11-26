@@ -4,6 +4,7 @@
 	import SuperDebug from 'sveltekit-superforms';
 	import { getModalStore, type ModalStore } from './stores';
 	import { superForm } from 'sveltekit-superforms';
+	import { onMount } from 'svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -36,7 +37,7 @@
 	let cascadeInfo: any = $state(null);
 	let loading = $state(true);
 
-	async function fetchCascadeInfo() {
+	onMount(async () => {
 		try {
 			const response = await fetch(`/fe-api/cascade-info/${URLModel}/${id}`);
 			if (response.ok) {
@@ -47,10 +48,6 @@
 		} finally {
 			loading = false;
 		}
-	}
-
-	$effect(() => {
-		fetchCascadeInfo();
 	});
 </script>
 

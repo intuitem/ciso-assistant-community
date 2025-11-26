@@ -2,6 +2,7 @@
 	import type { urlModel } from '$lib/utils/types';
 
 	import { m } from '$paraglide/messages';
+	import { onMount } from 'svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -50,7 +51,7 @@
 	let cascadeInfo: any = $state(null);
 	let loading = $state(true);
 
-	async function fetchCascadeInfo() {
+	onMount(async () => {
 		if (!URLModel || !id) {
 			loading = false;
 			return;
@@ -65,10 +66,6 @@
 		} finally {
 			loading = false;
 		}
-	}
-
-	$effect(() => {
-		fetchCascadeInfo();
 	});
 </script>
 
