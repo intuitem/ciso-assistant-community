@@ -160,7 +160,11 @@ class FinishACSView(SAMLViewMixin, View):
             emails = [x for xs in emails for x in xs]  # flatten
             user = User.objects.filter(email__iexact=auth.get_nameid()).first()
             if not user and emails:
-                logger.info("User not found by NameID, trying email lookup", nameid=auth.get_nameid(), emails=emails)
+                logger.info(
+                    "User not found by NameID, trying email lookup",
+                    nameid=auth.get_nameid(),
+                    emails=emails,
+                )
                 try:
                     user = User.objects.get(email__iexact=emails[0])
                 except User.DoesNotExist:
