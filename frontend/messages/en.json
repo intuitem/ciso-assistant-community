@@ -2792,5 +2792,8 @@
 	"qualitative": "Qualitative",
 	"quantitative": "Quantitative",
 	"choices": "choices",
-	"number": "Number"
+	"number": "Number",
+	"choiceLevel": "Choice Level",
+	"noDataAvailable": "No data available",
+	"sampleTimeline": "Sample Timeline"
 }

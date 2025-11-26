@@ -775,7 +775,15 @@
 		{:else if URLModel === 'metric-definitions'}
 			<MetricDefinitionForm {form} {model} {cacheLocks} {formDataCache} {initialData} {data} {...rest} />
 		{:else if URLModel === 'metric-instances'}
-			<MetricInstanceForm {form} {model} {cacheLocks} {formDataCache} {initialData} {data} {...rest} />
+			<MetricInstanceForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{...rest}
+			/>
 		{:else if URLModel === 'metric-samples'}
 			<MetricSampleForm
 				{form}

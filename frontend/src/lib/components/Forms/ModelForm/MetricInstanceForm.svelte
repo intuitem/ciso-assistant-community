@@ -13,6 +13,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		data?: any;
+		debug?: boolean;
 	}
 
 	let {
@@ -21,20 +22,28 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		data = {}
+		data = {},
+		debug = false
 	}: Props = $props();
 </script>
 
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="folders?content_type=DO"
-	field="folder"
-	pathField="path"
-	cacheLock={cacheLocks['folder']}
-	bind:cachedValue={formDataCache['folder']}
-	label={m.domain()}
-	hidden={initialData.folder}
-/>
+{#if debug}
+	<!-- Debug section -->
+	<div class="card bg-yellow-50 p-4 my-4 border-2 border-yellow-300">
+		<h4 class="font-semibold mb-2">Debug Info:</h4>
+		<div class="text-xs space-y-2">
+			<div>
+				<strong>initialData:</strong>
+				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(initialData, null, 2)}</pre>
+			</div>
+			<div>
+				<strong>formDataCache:</strong>
+				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(formDataCache, null, 2)}</pre>
+			</div>
+		</div>
+	</div>
+{/if}
+
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="metric-definitions"
@@ -44,6 +53,16 @@
 	cacheLock={cacheLocks['metric_definition']}
 	bind:cachedValue={formDataCache['metric_definition']}
 	label={m.metricDefinition()}
+	disabled={!!initialData.metric_definition}
+/>
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="folders?content_type=DO"
+	field="folder"
+	pathField="path"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
 />
 <TextField
 	{form}

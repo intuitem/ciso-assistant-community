@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import MetricSampleChart from '$lib/components/Chart/MetricSampleChart.svelte';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -12,6 +13,9 @@
 	const metricInstance = $derived(data.data);
 	const metricDefinition = $derived(metricInstance?.metric_definition);
 	const isQualitative = $derived(metricDefinition?.category === 'qualitative');
+
+	// Get samples from relatedModels
+	const samples = $derived(data.relatedModels?.['metric-samples']?.table?.meta || []);
 </script>
 
 <DetailView {data} {form}>
@@ -69,6 +73,12 @@
 						</div>
 					{/if}
 				</div>
+			</div>
+
+			<!-- Sample Timeline Chart -->
+			<div class="card p-4 bg-white shadow-sm">
+				<h3 class="text-lg font-semibold mb-3">{m.sampleTimeline()}</h3>
+				<MetricSampleChart {samples} {metricDefinition} height="h-80" />
 			</div>
 		</div>
 	{/snippet}

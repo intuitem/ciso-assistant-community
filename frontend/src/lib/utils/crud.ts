@@ -2003,6 +2003,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [{ field: 'category' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'metric_definition',
+				urlModel: 'metric-instances'
+			}
+		],
 		filters: [{ field: 'folder' }, { field: 'category' }, { field: 'library' }, { field: 'provider' }]
 	},
 	'metric-instances': {
