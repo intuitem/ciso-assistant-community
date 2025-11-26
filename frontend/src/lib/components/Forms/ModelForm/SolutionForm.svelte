@@ -103,6 +103,7 @@
 		label={m.doraIctServiceType()}
 		cacheLock={cacheLocks['dora_ict_service_type']}
 		bind:cachedValue={formDataCache['dora_ict_service_type']}
+		nullable
 	/>
 	<Checkbox
 		{form}
@@ -119,6 +120,7 @@
 		label={m.dataLocationStorage()}
 		cacheLock={cacheLocks['data_location_storage']}
 		bind:cachedValue={formDataCache['data_location_storage']}
+		nullable
 	/>
 	<AutocompleteSelect
 		{form}
@@ -127,6 +129,7 @@
 		label={m.dataLocationProcessing()}
 		cacheLock={cacheLocks['data_location_processing']}
 		bind:cachedValue={formDataCache['data_location_processing']}
+		nullable
 	/>
 	<AutocompleteSelect
 		{form}
@@ -135,6 +138,7 @@
 		label={m.doraDataSensitiveness()}
 		cacheLock={cacheLocks['dora_data_sensitiveness']}
 		bind:cachedValue={formDataCache['dora_data_sensitiveness']}
+		nullable
 	/>
 	<AutocompleteSelect
 		{form}
@@ -143,6 +147,7 @@
 		label={m.doraRelianceLevel()}
 		cacheLock={cacheLocks['dora_reliance_level']}
 		bind:cachedValue={formDataCache['dora_reliance_level']}
+		nullable
 	/>
 	<AutocompleteSelect
 		{form}
@@ -151,6 +156,7 @@
 		label={m.doraSubstitutability()}
 		cacheLock={cacheLocks['dora_substitutability']}
 		bind:cachedValue={formDataCache['dora_substitutability']}
+		nullable
 	/>
 	<AutocompleteSelect
 		{form}
@@ -159,6 +165,7 @@
 		label={m.doraNonSubstitutabilityReason()}
 		cacheLock={cacheLocks['dora_non_substitutability_reason']}
 		bind:cachedValue={formDataCache['dora_non_substitutability_reason']}
+		nullable
 	/>
 	<AutocompleteSelect
 		{form}
@@ -167,6 +174,7 @@
 		label={m.doraHasExitPlan()}
 		cacheLock={cacheLocks['dora_has_exit_plan']}
 		bind:cachedValue={formDataCache['dora_has_exit_plan']}
+		nullable
 	/>
 	<AutocompleteSelect
 		{form}
@@ -175,6 +183,7 @@
 		label={m.doraReintegrationPossibility()}
 		cacheLock={cacheLocks['dora_reintegration_possibility']}
 		bind:cachedValue={formDataCache['dora_reintegration_possibility']}
+		nullable
 	/>
 	<AutocompleteSelect
 		{form}
@@ -183,6 +192,7 @@
 		label={m.doraDiscontinuingImpact()}
 		cacheLock={cacheLocks['dora_discontinuing_impact']}
 		bind:cachedValue={formDataCache['dora_discontinuing_impact']}
+		nullable
 	/>
 	<AutocompleteSelect
 		{form}
@@ -191,6 +201,7 @@
 		label={m.doraAlternativeProvidersIdentified()}
 		cacheLock={cacheLocks['dora_alternative_providers_identified']}
 		bind:cachedValue={formDataCache['dora_alternative_providers_identified']}
+		nullable
 	/>
 	<TextField
 		{form}
