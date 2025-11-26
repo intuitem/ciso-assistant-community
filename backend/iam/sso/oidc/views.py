@@ -48,3 +48,8 @@ def login(request, provider_id):
         return view(request)
     except SocialApp.DoesNotExist:
         raise Http404
+    except Exception as e:
+        logger.error(
+            "SSO login error", provider=provider_id, error=str(e), exc_info=True
+        )
+        return render_authentication_error(request, None, error=AuthError.FAILED_SSO)
