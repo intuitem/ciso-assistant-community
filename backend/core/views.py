@@ -577,10 +577,32 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
-        if request.data.get("filtering_labels"):
-            request.data["filtering_labels"] = self._process_labels(
-                request.data["filtering_labels"]
-            )
+
+        # NOTE: Handle filtering_labels field - SvelteKit SuperForms behavior inconsistency:
+        # Forms with file inputs (like Evidence attachments) use dataType="form" and omit empty fields
+        # Forms without file inputs use dataType="json" and send empty arrays []
+        # When the field is missing, we need to explicitly clear the labels by passing empty list to serializer
+        if hasattr(self.model, "_meta") and "filtering_labels" in [
+            f.name for f in self.model._meta.get_fields()
+        ]:
+            if "filtering_labels" in request.data:
+                labels = request.data.get("filtering_labels")
+                if labels:
+                    # Make request.data mutable if needed (e.g., for multipart/form-data)
+                    if hasattr(request.data, "_mutable"):
+                        request.data._mutable = True
+                    request.data["filtering_labels"] = self._process_labels(labels)
+            else:
+                # Field is missing entirely - add empty list to clear labels
+                # Make request.data mutable if needed (e.g., for multipart/form-data)
+                if hasattr(request.data, "_mutable"):
+                    request.data._mutable = True
+                # Use setlist() for QueryDict to properly set an empty list
+                if hasattr(request.data, "setlist"):
+                    request.data.setlist("filtering_labels", [])
+                else:
+                    request.data["filtering_labels"] = []
+
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
