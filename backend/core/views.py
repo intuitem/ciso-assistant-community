@@ -248,21 +248,24 @@ class CustomOrderingFilter(filters.OrderingFilter):
         if ordering_list is None:
             return None
 
-        mapping = getattr(self, "ordering_mapping", None)
+        mapping = getattr(view, "ordering_mapping", None) or getattr(
+            self, "ordering_mapping", None
+        )
+
         if mapping is None:
             return ordering_list
 
         new_ordering_list = []
-        for ordering_term in ordering_list:
-            field_name = ordering_term.lstrip("-")
+        for order in ordering_list:
+            field_name = order.lstrip("-")
 
             if (new_field := mapping.get(field_name)) is None:
-                new_ordering_list.append(ordering_term)
+                new_ordering_list.append(order)
                 continue
 
-            is_desc = ordering_term.startswith("-")
-            new_ordering_term = f"-{new_field}" if is_desc else new_field
-            new_ordering_list.append(new_ordering_term)
+            is_desc = order.startswith("-")
+            new_order = f"-{new_field}" if is_desc else new_field
+            new_ordering_list.append(new_order)
 
         return new_ordering_list
 

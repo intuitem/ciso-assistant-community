@@ -457,10 +457,6 @@ class RoToViewSet(BaseModelViewSet):
         return Response(dict(RoTo.Pertinence.choices))
 
 
-class StakeholderOrderingFilter(CustomOrderingFilter):
-    ordering_mapping = {"entity": "entity__name"}
-
-
 class NumberInFilter(df.BaseInFilter, df.NumberFilter):
     pass
 
@@ -491,11 +487,14 @@ class StakeholderFilter(df.FilterSet):
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
     filterset_class = StakeholderFilter
+    search_fields = ["entity__name", "category__name"]
+
+    ordering_mapping = {"entity": "entity__name"}
 
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        StakeholderOrderingFilter,
+        CustomOrderingFilter,
     ]
 
     @action(detail=False, name="Get category choices")
