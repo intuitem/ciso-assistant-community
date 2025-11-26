@@ -9,7 +9,7 @@ const workshopStepsNames = {
 	12: 'Define business and technical perimeter',
 	13: 'Identify feared events',
 	14: 'Determine the security foundation',
-	21: 'Identify risk sources and targeted objectives',
+	21: 'Identify risk origins and targeted objectives',
 	22: 'Evaluate RS/TO pairs',
 	23: 'Select RS/TO pairs',
 	31: 'Map the ecosystem',
@@ -249,7 +249,7 @@ test('ebios rm study', async ({
 		await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 		await page
 			.getByRole('listitem')
-			.filter({ hasText: 'Step 1 Identify risk sources' })
+			.filter({ hasText: 'Step 1 Identify Risk Origins' })
 			.getByTestId('sidebar-more-btn')
 			.click();
 		await page.getByRole('button', { name: 'Mark as done' }).click();
