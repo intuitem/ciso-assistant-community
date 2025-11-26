@@ -13,9 +13,7 @@
 	const metricInstance = $derived(data.data);
 	const metricDefinition = $derived(metricInstance?.metric_definition);
 	const isQualitative = $derived(metricDefinition?.category === 'qualitative');
-
-	// Get samples from relatedModels
-	const samples = $derived(data.relatedModels?.['metric-samples']?.table?.meta || []);
+	const samples = $derived(data.samples || []);
 </script>
 
 <DetailView {data} {form}>

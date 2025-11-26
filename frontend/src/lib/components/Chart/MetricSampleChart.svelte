@@ -84,19 +84,21 @@
 				name: isQualitative ? m.choiceLevel() : unitName,
 				nameLocation: 'middle',
 				nameGap: 50,
-				boundaryGap: [0, '5%'],
 				...(isQualitative && choiceNames.length > 0
 					? {
 							min: 0,
 							max: choiceNames.length - 1,
 							interval: 1,
+							boundaryGap: false,
 							axisLabel: {
 								formatter: function (value) {
 									return choiceNames[value] || value;
 								}
 							}
 						}
-					: {})
+					: {
+							boundaryGap: [0, '5%']
+						})
 			},
 			series: [
 				{
@@ -105,21 +107,20 @@
 					smooth: true,
 					symbol: 'circle',
 					symbolSize: 8,
-					areaStyle: isQualitative
-						? undefined
-						: {
-								opacity: 0.3,
-								color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-									{
-										offset: 0,
-										color: 'rgb(59, 130, 246)'
-									},
-									{
-										offset: 1,
-										color: 'rgba(59, 130, 246, 0.1)'
-									}
-								])
+					areaStyle: {
+						opacity: 0.3,
+						origin: 'start',
+						color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+							{
+								offset: 0,
+								color: 'rgb(59, 130, 246)'
 							},
+							{
+								offset: 1,
+								color: 'rgba(59, 130, 246, 0.1)'
+							}
+						])
+					},
 					lineStyle: {
 						width: 2,
 						color: 'rgb(59, 130, 246)'

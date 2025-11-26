@@ -2651,8 +2651,8 @@
 	"metricDefinition": "Metric definition",
 	"metricDefinitions": "Metric definitions",
 	"addMetricDefinition": "Add metric definition",
-	"metricInstance": "Metric",
-	"metricInstances": "Metrics",
+	"metricInstance": "Metric Instance",
+	"metricInstances": "Metrics Instances",
 	"addMetricInstance": "Add a metric instance",
 	"metricSample": "Metric sample",
 	"metricSamples": "Metric samples",
@@ -2794,6 +2794,5 @@
 	"choices": "choices",
 	"number": "Number",
 	"choiceLevel": "Choice Level",
-	"noDataAvailable": "No data available",
-	"sampleTimeline": "Sample Timeline"
+	"sampleTimeline": "Timeline"
 }
