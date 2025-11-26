@@ -634,6 +634,7 @@
 						href={`${page.url.pathname}/action-plan`}
 						class="btn preset-filled-primary-500 h-fit"
 						breadcrumbAction="push"
+						data-testid="action-plan-button"
 						><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 					>
 					<Anchor
@@ -649,6 +650,7 @@
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/flash-mode`}
 						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+						data-testid="flash-mode-button"
 						><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 					>
 				{/if}
@@ -657,6 +659,7 @@
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/table-mode`}
 						class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
+						data-testid="table-mode-button"
 						><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
 					>
 				{/if}
@@ -694,6 +697,7 @@
 				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
 					<button
 						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						data-testid="sync-to-actions-button"
 						onclick={async () => {
 							await modalConfirmSyncToActions(
 								data.compliance_assessment.id,
