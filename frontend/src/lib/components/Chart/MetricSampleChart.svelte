@@ -46,7 +46,9 @@
 			.sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime());
 
 		// Get choice names for qualitative metrics
-		const choiceNames = isQualitative ? metricDefinition?.choices_definition?.map((c) => c.name) : [];
+		const choiceNames = isQualitative
+			? metricDefinition?.choices_definition?.map((c) => c.name)
+			: [];
 
 		const option = {
 			grid: {
@@ -62,8 +64,8 @@
 					const value = params[0].value[1];
 					let displayValue = value;
 
-					if (isQualitative && choiceNames && choiceNames[value]) {
-						displayValue = `${choiceNames[value]} (${value})`;
+					if (isQualitative && choiceNames && choiceNames[value - 1]) {
+						displayValue = `${value}. ${choiceNames[value - 1]}`;
 					} else if (!isQualitative && unitName) {
 						displayValue = `${value} ${unitName}`;
 					}
@@ -86,18 +88,17 @@
 				nameGap: 50,
 				...(isQualitative && choiceNames.length > 0
 					? {
-							min: 0,
-							max: choiceNames.length - 1,
+							min: 1,
+							max: choiceNames.length,
 							interval: 1,
-							boundaryGap: false,
 							axisLabel: {
 								formatter: function (value) {
-									return choiceNames[value] || value;
+									return choiceNames[value - 1] ? `${value}. ${choiceNames[value - 1]}` : '';
 								}
 							}
 						}
 					: {
-							boundaryGap: [0, '5%']
+							min: 0
 						})
 			},
 			series: [
@@ -109,7 +110,6 @@
 					symbolSize: 8,
 					areaStyle: {
 						opacity: 0.3,
-						origin: 'start',
 						color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
 							{
 								offset: 0,

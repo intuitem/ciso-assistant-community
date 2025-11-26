@@ -1352,6 +1352,15 @@ export const MetricSampleSchema = z.object({
 	value: jsonSchema
 });
 
+export const DashboardSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	metric_instances: z.array(z.string().uuid().optional()).optional(),
+	dashboard_definition: jsonSchema.default({}),
+	filtering_labels: z.string().optional().array().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1423,7 +1432,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	accreditations: AccreditationSchema,
 	'metric-definitions': MetricDefinitionSchema,
 	'metric-instances': MetricInstanceSchema,
-	'metric-samples': MetricSampleSchema
+	'metric-samples': MetricSampleSchema,
+	dashboards: DashboardSchema
 };
 
 export const modelSchema = (model: string) => {

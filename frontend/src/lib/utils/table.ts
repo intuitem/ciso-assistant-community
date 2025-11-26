@@ -2292,8 +2292,8 @@ export const listViewFields = {
 		}
 	},
 	'metric-instances': {
-		head: ['ref_id', 'name', 'metric_definition', 'status', 'folder'],
-		body: ['ref_id', 'name', 'metric_definition', 'status', 'folder'],
+		head: ['ref_id', 'name', 'metric_definition', 'current_value', 'status', 'folder'],
+		body: ['ref_id', 'name', 'metric_definition', 'current_value', 'status', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			metric_definition: {
@@ -2328,8 +2328,8 @@ export const listViewFields = {
 		}
 	},
 	'metric-samples': {
-		head: ['metric_instance', 'timestamp', 'value'],
-		body: ['metric_instance', 'timestamp', 'value'],
+		head: ['metric_instance', 'timestamp', 'display_value'],
+		body: ['metric_instance', 'timestamp', 'display_value'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			metric_instance: {
@@ -2340,6 +2340,22 @@ export const listViewFields = {
 					multiple: true
 				}
 			}
+		}
+	},
+	dashboards: {
+		head: ['ref_id', 'name', 'description', 'folder'],
+		body: ['ref_id', 'name', 'description', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			metric_instances: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/metric-instances',
+					label: 'metricInstances',
+					multiple: true
+				}
+			},
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	extra: {

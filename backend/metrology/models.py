@@ -11,6 +11,8 @@ from core.models import (
 )
 from iam.models import FolderMixin, PublishInRootFolderMixin, User
 
+import json
+
 
 class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):
     class Category(models.TextChoices):
@@ -147,6 +149,16 @@ class MetricInstance(
         """Returns the most recent sample for this metric instance"""
         return self.samples.first()  # ordering is important
 
+    def current_value(self):
+        """
+        Returns the current value as a human-readable string.
+        This is the display_value of the most recent sample.
+        """
+        latest_sample = self.get_latest_sample()
+        if latest_sample:
+            return latest_sample.display_value()
+        return "N/A"
+
     def is_stale(self):
         """
         Checks if the metric instance is stale based on collection_frequency.
@@ -210,3 +222,84 @@ class MetricSample(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"{self.metric_instance} - {self.timestamp}"
+
+    def display_value(self):
+        """
+        Returns a human-readable display value based on the metric definition type
+        """
+        if not self.value:
+            return "N/A"
+
+        # Parse value if it's a string
+        if isinstance(self.value, str):
+            try:
+                value_dict = json.loads(self.value)
+            except (json.JSONDecodeError, TypeError):
+                return "N/A"
+        else:
+            value_dict = self.value
+
+        metric_definition = self.metric_instance.metric_definition
+
+        # For qualitative metrics, show the choice name
+        if metric_definition.category == MetricDefinition.Category.QUALITATIVE:
+            choice_index = value_dict.get("choice_index")
+            if (
+                choice_index is not None
+                and metric_definition.choices_definition
+                and isinstance(metric_definition.choices_definition, list)
+            ):
+                # Convert 1-based index to 0-based for array access
+                array_index = choice_index - 1
+                if 0 <= array_index < len(metric_definition.choices_definition):
+                    choice = metric_definition.choices_definition[array_index]
+                    choice_name = choice.get("name", "")
+                    return f"[{choice_index}] {choice_name}"
+            return str(choice_index) if choice_index is not None else "N/A"
+
+        # For quantitative metrics, show the result with unit
+        elif metric_definition.category == MetricDefinition.Category.QUANTITATIVE:
+            result = value_dict.get("result")
+            if result is not None:
+                if metric_definition.unit:
+                    unit = metric_definition.unit.name
+                    if metric_definition.unit.name == "percentage":
+                        unit = "%"
+                    if metric_definition.unit.name == "request_per_second":
+                        unit = "RPS"
+                    return f"{result} {unit}"
+                return str(result)
+            return "N/A"
+
+        return "N/A"
+
+    def save(self, *args, **kwargs):
+        """Override save to update the parent metric instance's updated_at timestamp"""
+        super().save(*args, **kwargs)
+        # Touch the parent metric instance to update its updated_at field
+        self.metric_instance.save(update_fields=["updated_at"])
+
+    def delete(self, *args, **kwargs):
+        """Override delete to update the parent metric instance's updated_at timestamp"""
+        metric_instance = self.metric_instance
+        result = super().delete(*args, **kwargs)
+        # Touch the parent metric instance to update its updated_at field
+        metric_instance.save(update_fields=["updated_at"])
+        return result
+
+
+class Dashboard(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
+    metric_instances = models.ManyToManyField(
+        MetricInstance,
+        blank=True,
+        related_name="dashboards",
+    )
+    dashboard_definition = models.JSONField(default=dict)
+
+    class Meta:
+        verbose_name = _("Dashboard")
+        verbose_name_plural = _("Dashboards")
+        ordering = ["name"]

@@ -54,8 +54,8 @@
 		if (!isQualitative || !metricDefinition?.choices_definition) return [];
 
 		return metricDefinition.choices_definition.map((choice: any, index: number) => ({
-			label: choice.name,
-			value: index.toString()
+			label: `${index + 1}. ${choice.name}`,
+			value: (index + 1).toString() // Store 1-based indices
 		}));
 	});
 
@@ -94,6 +94,13 @@
 			$valueFieldProxy = JSON.stringify({ result: numValue });
 		}
 	}
+
+	// Get current datetime for max attribute (prevent future timestamps)
+	const maxTimestamp = $derived(() => {
+		const now = new Date();
+		now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+		return now.toISOString().slice(0, 16);
+	});
 </script>
 
 <AutocompleteSelect
@@ -129,6 +136,7 @@
 	cacheLock={cacheLocks['timestamp']}
 	bind:cachedValue={formDataCache['timestamp']}
 	disabled={object.id}
+	max={maxTimestamp()}
 />
 
 {#if debug}
@@ -137,11 +145,16 @@
 		<h4 class="font-semibold mb-2">Debug Info:</h4>
 		<div class="text-xs space-y-2">
 			<div>
-				<strong>initialData.metric_instance:</strong> {initialData.metric_instance || 'null'}
+				<strong>initialData.metric_instance:</strong>
+				{initialData.metric_instance || 'null'}
 			</div>
 			<div>
 				<strong>initialData._metric_definition:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(initialData._metric_definition, null, 2)}</pre>
+				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(
+						initialData._metric_definition,
+						null,
+						2
+					)}</pre>
 			</div>
 			<div>
 				<strong>metricInstanceCache:</strong>
@@ -152,7 +165,8 @@
 				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(metricDefinition, null, 2)}</pre>
 			</div>
 			<div>
-				<strong>isQualitative:</strong> {isQualitative}
+				<strong>isQualitative:</strong>
+				{isQualitative}
 			</div>
 			<div>
 				<strong>choiceOptions:</strong>

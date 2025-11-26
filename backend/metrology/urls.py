@@ -5,6 +5,7 @@ from metrology.views import (
     MetricDefinitionViewSet,
     MetricInstanceViewSet,
     MetricSampleViewSet,
+    DashboardViewSet,
 )
 
 router = routers.DefaultRouter()
@@ -13,5 +14,6 @@ router.register(
 )
 router.register(r"metric-instances", MetricInstanceViewSet, basename="metric-instances")
 router.register(r"metric-samples", MetricSampleViewSet, basename="metric-samples")
+router.register(r"dashboards", DashboardViewSet, basename="dashboards")
 
 urlpatterns = router.urls

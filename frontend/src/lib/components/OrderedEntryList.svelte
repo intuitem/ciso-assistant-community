@@ -160,8 +160,11 @@
 	{#if debug}
 		<div class="card bg-white p-4 shadow-sm">
 			<h3 class="text-lg font-semibold mb-2">{m.orderedEntryListDebugTitle()}</h3>
-			<pre
-				class="bg-gray-100 p-3 rounded text-xs overflow-x-auto font-mono">{JSON.stringify(entries, null, 2)}</pre>
+			<pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto font-mono">{JSON.stringify(
+					entries,
+					null,
+					2
+				)}</pre>
 		</div>
 	{/if}
 </div>

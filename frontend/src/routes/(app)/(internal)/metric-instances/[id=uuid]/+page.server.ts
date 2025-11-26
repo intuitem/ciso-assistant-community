@@ -6,6 +6,9 @@ import { type Actions } from '@sveltejs/kit';
 import { nestedDeleteFormAction } from '$lib/utils/actions';
 
 export const load: PageServerLoad = async (event) => {
+	// Add dependency for cache invalidation
+	event.depends('metric-instance:samples');
+
 	const detailData = await loadDetail({
 		event,
 		model: getModelInfo('metric-instances'),

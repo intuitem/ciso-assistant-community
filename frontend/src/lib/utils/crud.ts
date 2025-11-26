@@ -2009,7 +2009,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'metric-instances'
 			}
 		],
-		filters: [{ field: 'folder' }, { field: 'category' }, { field: 'library' }, { field: 'provider' }]
+		filters: [
+			{ field: 'folder' },
+			{ field: 'category' },
+			{ field: 'library' },
+			{ field: 'provider' }
+		]
 	},
 	'metric-instances': {
 		name: 'metricinstance',
@@ -2052,6 +2057,20 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'metric_instance', urlModel: 'metric-instances' }
 		],
 		filters: [{ field: 'folder' }, { field: 'metric_instance' }]
+	},
+	dashboards: {
+		name: 'dashboard',
+		localName: 'dashboard',
+		localNamePlural: 'dashboards',
+		verboseName: 'Dashboard',
+		verboseNamePlural: 'Dashboards',
+		endpointUrl: 'metrology/dashboards',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'metric_instances', urlModel: 'metric-instances' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		filters: [{ field: 'folder' }, { field: 'metric_instances' }]
 	}
 };
 

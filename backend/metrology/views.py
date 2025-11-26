@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.views import BaseModelViewSet, LONG_CACHE_TTL
-from metrology.models import MetricDefinition, MetricInstance, MetricSample
+from metrology.models import MetricDefinition, MetricInstance, MetricSample, Dashboard
 
 
 class MetricDefinitionViewSet(BaseModelViewSet):
@@ -69,3 +69,14 @@ class MetricSampleViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "metric_instance"]
     search_fields = []
     ordering = ["-timestamp"]  # Most recent first
+
+
+class DashboardViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows dashboards to be viewed or edited.
+    """
+
+    model = Dashboard
+    serializers_module = "metrology.serializers"
+    filterset_fields = ["folder", "metric_instances", "filtering_labels"]
+    search_fields = ["name", "description", "ref_id"]

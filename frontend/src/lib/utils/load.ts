@@ -114,7 +114,7 @@ export const loadDetail = async ({ event, model, id }) => {
 
 					// Pass additional nested data for specific models
 					if (e.fieldForInitialData) {
-						e.fieldForInitialData.forEach(fieldPath => {
+						e.fieldForInitialData.forEach((fieldPath) => {
 							const parts = fieldPath.split('.');
 							let value = data;
 							for (const part of parts) {
