@@ -2764,7 +2764,7 @@
 	"purposesDescription": "Data processing purposes (GDPR)",
 	"rightRequestsDescription": "Data subject rights requests (GDPR)",
 	"dataBreachesDescription": "Data breach incidents and notifications",
-	"globalEvidences": "Global Evidence",
+	"expectedEvidence": "Expected Evidence",
 	"taskNodeLegacyEvidence": "This field is deprecated. Evidence are now globally linked to the task and spread to occurences",
 	"taskNodeNewEvidence": "Evidence globally linked to the task and spread to occurences. You can add a revision in the 'Evidences' tab below",
 	"newSemiColon": "New:",

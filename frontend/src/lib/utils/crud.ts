@@ -1651,7 +1651,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'task_template', urlModel: 'task-templates' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'global_evidences', urlModel: 'evidences' },
+			{ field: 'expected_evidence', urlModel: 'evidences' },
 			{ field: 'assigned_to', urlModel: 'users' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
@@ -1667,7 +1667,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assigned_to' },
 			{ field: 'evidences', tooltip: 'taskNodeLegacyEvidence' },
 			{ field: 'is_recurrent' },
-			{ field: 'global_evidences', tooltip: 'taskNodeNewEvidence' },
+			{ field: 'expected_evidence', tooltip: 'taskNodeNewEvidence' },
 			{ field: 'applied_controls' },
 			{ field: 'compliance_assessments' },
 			{ field: 'assets' },

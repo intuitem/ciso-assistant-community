@@ -2577,7 +2577,7 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     assigned_to = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
-    global_evidences = FieldsRelatedField(many=True)
+    expected_evidence = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
     compliance_assessments = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)

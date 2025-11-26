@@ -6785,7 +6785,7 @@ class TaskNode(AbstractBaseModel, FolderMixin):
         return self.task_template.assigned_to
 
     @property
-    def global_evidences(self):
+    def expected_evidence(self):
         return self.task_template.evidences.all()
 
     @property
