@@ -45,13 +45,13 @@ def dispatch_webhook_event(instance, action, serializer=None):
             if endpoint.payload_format == WebhookEndpoint.PayloadFormats.FULL
             else None
         )
-        payloads[endpoint.id] = config.get_payload(instance, _serializer)
+        payloads[str(endpoint.id)] = config.get_payload(instance, _serializer)
 
     # Enqueue tasks
     for endpoint in endpoints:
         transaction.on_commit(
             (
-                lambda e_id=endpoint.id: send_webhook_request.schedule(
+                lambda e_id=str(endpoint.id): send_webhook_request.schedule(
                     args=(e_id, event_type, payloads[e_id]), delay=1
                 )
             )

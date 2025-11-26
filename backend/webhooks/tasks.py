@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 
 import requests
 from huey.contrib.djhuey import db_task
+from django.core.serializers.json import DjangoJSONEncoder
 
 from .models import WebhookEndpoint
 
@@ -37,7 +38,9 @@ def send_webhook_request(endpoint_id, event_type, data_payload):
     }
 
     # Send minified JSON, as recommended
-    json_payload = json.dumps(full_payload, separators=(",", ":"))
+    json_payload = json.dumps(
+        full_payload, separators=(",", ":"), cls=DjangoJSONEncoder
+    )
 
     # Generate headers & signature
     webhook_id = f"msg_{secrets.token_hex(16)}"
