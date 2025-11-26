@@ -167,6 +167,12 @@ export const navData = {
 					name: 'tasks',
 					fa_icon: 'fa-solid fa-note-sticky',
 					href: '/task-templates'
+				},
+				{
+					name: 'metricInstances',
+					fa_icon: 'fa-solid fa-chart-line',
+					href: '/metric-instances',
+					permissions: ['view_metricinstance']
 				}
 			]
 		},
@@ -217,12 +223,6 @@ export const navData = {
 					name: 'followUp',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/findings-assessments'
-				},
-				{
-					name: 'metricInstances',
-					fa_icon: 'fa-solid fa-chart-line',
-					href: '/metric-instances',
-					permissions: ['view_metricinstance']
 				}
 			]
 		},

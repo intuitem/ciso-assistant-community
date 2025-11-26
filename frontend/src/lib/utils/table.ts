@@ -2292,30 +2292,14 @@ export const listViewFields = {
 		}
 	},
 	'metric-instances': {
-		head: [
-			'ref_id',
-			'name',
-			'metric_definition',
-			'status',
-			'collection_frequency',
-			'target_value',
-			'folder'
-		],
-		body: [
-			'ref_id',
-			'name',
-			'metric_definition',
-			'status',
-			'collection_frequency',
-			'target_value',
-			'folder'
-		],
+		head: ['ref_id', 'name', 'metric_definition', 'status', 'folder'],
+		body: ['ref_id', 'name', 'metric_definition', 'status', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			metric_definition: {
 				component: AutocompleteSelect,
 				props: {
-					optionsEndpoint: 'metrology/metric-definitions',
+					optionsEndpoint: 'metric-definitions',
 					label: 'metricDefinition',
 					multiple: true
 				}
@@ -2323,21 +2307,10 @@ export const listViewFields = {
 			status: {
 				component: AutocompleteSelect,
 				props: {
-					optionsEndpoint: 'metrology/metric-instances/status',
+					optionsEndpoint: 'metric-instances/status',
 					optionsLabelField: 'label',
 					optionsValueField: 'value',
 					label: 'status',
-					browserCache: 'force-cache',
-					multiple: true
-				}
-			},
-			collection_frequency: {
-				component: AutocompleteSelect,
-				props: {
-					optionsEndpoint: 'metrology/metric-instances/collection_frequency',
-					optionsLabelField: 'label',
-					optionsValueField: 'value',
-					label: 'collectionFrequency',
 					browserCache: 'force-cache',
 					multiple: true
 				}
