@@ -32,7 +32,7 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
-    create: async (event) => {
-            return nestedWriteFormAction({ event, action: 'create' });
-        }
+	addEvidenceRevision: async (event) => {
+		return nestedWriteFormAction({ event, action: 'create' });
+	}
 };

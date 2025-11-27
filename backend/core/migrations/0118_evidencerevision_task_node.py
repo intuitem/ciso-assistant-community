@@ -5,15 +5,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0117_tasktemplate_evidences'),
+        ("core", "0117_tasktemplate_evidences"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='evidencerevision',
-            name='task_node',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='evidence_revisions', to='core.tasknode', verbose_name='Task Node'),
+            model_name="evidencerevision",
+            name="task_node",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="evidence_revisions",
+                to="core.tasknode",
+                verbose_name="Task Node",
+            ),
         ),
     ]

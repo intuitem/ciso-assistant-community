@@ -18,7 +18,6 @@
 	}
 
 	let { data, form }: Props = $props();
-	console.log('data in task node detail page:', data);
 
 	const modalStore: ModalStore = getModalStore();
 	async function modalRevisionCreate(evidence): void {
@@ -37,7 +36,7 @@
 				model: model,
 				debug: false,
 				customNameDescription: false,
-				formAction: `?/create`
+				formAction: `?/addEvidenceRevision`
 			}
 		};
 		let modal: ModalSettings = {
@@ -49,18 +48,12 @@
 		modalStore.trigger(modal);
 	}
 
-	const taskNode = data.data;
+	let taskNode = $derived(data.data);
 
-	let revisions_task_node_id = $state(new Set<string>());
-
-	for (let rev of data.data.evidence_revisions) {
-		revisions_task_node_id.add(rev.task_node);
-	}
-
-	$inspect(data)
+	$inspect(taskNode);
 </script>
 
-{#key data.data}
+
 <div class="bg-white p-4 m-4 shadow-sm rounded-lg space-y-6">
 	<!-- HEADER COMPACT -->
 	<div class="grid grid-cols-3 gap-4 items-center">
@@ -92,7 +85,7 @@
 		<div class="flex flex-wrap gap-1 justify-end">
 			<button
 				class="px-4 py-0.5 rounded text-md border
-                {taskNode.status === 'pending'
+			{taskNode.status === 'pending'
 					? 'bg-blue-500 text-white border-blue-600'
 					: 'bg-white border-gray-300 text-gray-700 hover:bg-blue-50'}"
 			>
@@ -101,7 +94,7 @@
 
 			<button
 				class="px-4 py-0.5 rounded text-md border
-                {taskNode.status === 'in_progress'
+			{taskNode.status === 'in_progress'
 					? 'bg-yellow-500 text-white border-yellow-600'
 					: 'bg-white border-gray-300 text-gray-700 hover:bg-yellow-50'}"
 			>
@@ -110,7 +103,7 @@
 
 			<button
 				class="px-4 py-0.5 rounded text-md border
-                {taskNode.status === 'cancelled'
+			{taskNode.status === 'cancelled'
 					? 'bg-red-500 text-white border-red-600'
 					: 'bg-white border-gray-300 text-gray-700 hover:bg-red-50'}"
 			>
@@ -119,7 +112,7 @@
 
 			<button
 				class="px-4 py-0.5 rounded text-md border
-                {taskNode.status === 'completed'
+			{taskNode.status === 'completed'
 					? 'bg-green-500 text-white border-green-600'
 					: 'bg-white border-gray-300 text-gray-700 hover:bg-green-50'}"
 			>
@@ -133,46 +126,51 @@
 		{#if taskNode.expected_evidence.length > 0}
 			<div>
 				<p class="text-gray-700 text-md font-medium mb-1">
-					{m.expectedEvidence()}<span class="badge bg-primary-50 ml-1"
-						>{taskNode.expected_evidence.length}</span
-					>
+					{m.expectedEvidence()}
+					{#if taskNode.expected_evidence.length - taskNode.evidence_reviewed.length > 0}<span
+							class="badge bg-amber-100 text-amber-700"
+							>{taskNode.expected_evidence.length - taskNode.evidence_reviewed.length}
+							{m.pending()}</span
+						>{/if}
+					{#if taskNode.evidence_reviewed.length > 0}<span
+							class="badge bg-success-50 text-success-700"
+							>{taskNode.evidence_reviewed.length} {m.done()}</span
+						>{/if}
 				</p>
-				{#key data}
-					{#each taskNode.expected_evidence as evidence}
-						{#key data}
-							{#if revisions_task_node_id.has(taskNode.id)}
-								<Anchor
-									href={`/evidences/${evidence.id}/`}
-									class="p-2 px-10 bg-green-50 border border-green-200 rounded flex flex-col items-center justify-center hover:bg-green-100 transition"
-								>
-									<span class="text-green-700">{evidence.str}</span>
-									<span class="font-light text-gray-400 italic text-sm">{m.done()}</span>
-									<i class="fa-solid fa-circle-check text-green-700 ml-2"></i>
-								</Anchor>
-							{:else}
-								{#if page.data.user.permissions['add_evidencerevision']}
-									<button
-										class="p-2 px-10 bg-red-50 border border-red-200 rounded flex flex-col items-center justify-center hover:bg-red-100 transition"
-										onclick={() => modalRevisionCreate(evidence)}
-									>
-										<span class="text-red-700">{evidence.str}</span>
-										<span class="font-light text-gray-400 italic text-sm">{m.toDo()}</span>
-										<i class="fa-solid fa-file-circle-plus text-red-700"></i>
-									</button>
+					<div class="flex flex-col p-2 space-y-2">
+						{#each taskNode.expected_evidence as evidence}
+								{#if !taskNode.evidence_reviewed.includes(evidence.id)}
+									{#if page.data.user.permissions['add_evidencerevision']}
+										<div class="flex flex-row items-center">
+											<i class="fa-solid fa-hourglass-half mr-2 text-amber-700"></i>
+											<span class="">{evidence.str}</span>
+											<button
+												class="flex flex-row items-center"
+												onclick={() => modalRevisionCreate(evidence)}
+											>
+												<i class="fa-solid fa-file-circle-plus ml-2 text-primary-500"></i>
+											</button>
+										</div>
+									{:else}
+										<Anchor
+											href={`/evidences/${evidence.id}/`}
+											class="flex flex-row items-center"
+										>
+											<i class="fa-solid fa-hourglass-half mr-2 text-amber-700"></i>
+											<span class="">{evidence.str}</span>
+										</Anchor>
+									{/if}
 								{:else}
-									<Anchor
-										href={`/evidences/${evidence.id}/`}
-										class="p-2 px-10 bg-red-50 border border-red-200 rounded flex flex-col items-center justify-center hover:bg-red-100 transition"
-									>
-										<span class="text-red-700">{evidence.str}</span>
-										<span class="font-light text-gray-400 italic text-sm">{m.toDo()}</span>
-										<i class="fa-solid fa-circle-minus text-red-700 ml-2"></i>
-									</Anchor>
+									<div class="flex flex-row items-center">
+										<i class="fa-solid fa-check mr-2 text-success-700"></i>
+										<span class="">{evidence.str}</span>
+										<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
+											<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
+										</Anchor>
+									</div>
 								{/if}
-							{/if}
-						{/key}
-					{/each}
-				{/key}
+						{/each}
+					</div>
 			</div>
 		{:else}
 			<span>{m.noEvidences()}</span>
@@ -187,4 +185,3 @@
 		</div>
 	</div>
 </div>
-{/key}
