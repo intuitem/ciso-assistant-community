@@ -9,6 +9,7 @@ import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
+import { m } from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
@@ -78,7 +79,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const circularRadarRes = await fetch(circularRadarEndpoint);
 	const circularRadar = await circularRadarRes.json();
 
-	return { createForm, deleteForm, model, URLModel, table, radar, circularRadar };
+	return { createForm, deleteForm, model, URLModel, table, radar, circularRadar, title: m.studyTheEcosystem() };
 };
 
 export const actions: Actions = {

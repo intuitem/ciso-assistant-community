@@ -11,6 +11,7 @@ import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
+import { m } from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
 import { listViewFields } from '$lib/utils/table';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
@@ -84,7 +85,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: []
 	};
 
-	return { createForm, deleteForm, model, URLModel, table };
+	return { createForm, deleteForm, model, URLModel, table, title: m.operationalScenarios() };
 };
 
 export const actions: Actions = {
