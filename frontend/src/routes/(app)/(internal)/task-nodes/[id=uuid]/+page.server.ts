@@ -34,5 +34,89 @@ export const load: PageServerLoad = async (event) => {
 export const actions: Actions = {
 	addEvidenceRevision: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create' });
+	},
+	pending: async ({ request, fetch, params, cookies }) => {
+		const updateData = {
+			status: 'pending'
+		};
+
+		const response = await fetch(`${BASE_API_URL}/task-nodes/${params.id}/`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(updateData)
+		});
+
+		if (response.ok) {
+			setFlash({ type: 'success', message: m.statusUpdatedSuccessfully() }, cookies);
+			return { success: true };
+		} else {
+			const error = await response.json();
+			return fail(400, { error });
+		}
+	},
+	inProgress: async ({ request, fetch, params, cookies }) => {
+		const updateData = {
+			status: 'in_progress'
+		};
+
+		const response = await fetch(`${BASE_API_URL}/task-nodes/${params.id}/`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(updateData)
+		});
+
+		if (response.ok) {
+			setFlash({ type: 'success', message: m.statusUpdatedSuccessfully() }, cookies);
+			return { success: true };
+		} else {
+			const error = await response.json();
+			return fail(400, { error });
+		}
+	},
+	cancelled: async ({ request, fetch, params, cookies }) => {
+		const updateData = {
+			status: 'cancelled'
+		};
+
+		const response = await fetch(`${BASE_API_URL}/task-nodes/${params.id}/`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(updateData)
+		});
+
+		if (response.ok) {
+			setFlash({ type: 'success', message: m.statusUpdatedSuccessfully() }, cookies);
+			return { success: true };
+		} else {
+			const error = await response.json();
+			return fail(400, { error });
+		}
+	},
+	completed: async ({ request, fetch, params, cookies }) => {
+		const updateData = {
+			status: 'completed'
+		};
+
+		const response = await fetch(`${BASE_API_URL}/task-nodes/${params.id}/`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(updateData)
+		});
+
+		if (response.ok) {
+			setFlash({ type: 'success', message: m.statusUpdatedSuccessfully() }, cookies);
+			return { success: true };
+		} else {
+			const error = await response.json();
+			return fail(400, { error });
+		}
 	}
 };

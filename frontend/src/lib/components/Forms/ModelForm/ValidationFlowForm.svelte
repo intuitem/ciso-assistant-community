@@ -59,7 +59,7 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="users?is_approver=true&exclude_current=true"
+	optionsEndpoint="users?is_approver=true"
 	optionsLabelField="email"
 	field="approver"
 	cacheLock={cacheLocks['approver']}

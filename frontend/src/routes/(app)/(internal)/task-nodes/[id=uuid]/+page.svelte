@@ -11,6 +11,7 @@
 	import { getModelInfo } from '$lib/utils/crud';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import { page } from '$app/state';
+	import { invalidateAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -50,9 +51,17 @@
 
 	let taskNode = $derived(data.data);
 
-	$inspect(taskNode);
-</script>
+	async function submitStatusChange(status: string): void {
+		const formData = new FormData();
+		formData.append('status', status);
 
+		const response = await fetch(`?/${status}`, {
+			method: 'POST',
+			body: formData
+		});
+		invalidateAll();
+	}
+</script>
 
 <div class="bg-white p-4 m-4 shadow-sm rounded-lg space-y-6">
 	<!-- HEADER COMPACT -->
@@ -82,43 +91,57 @@
 		</div>
 
 		<!-- Status (compact buttons) -->
-		<div class="flex flex-wrap gap-1 justify-end">
-			<button
-				class="px-4 py-0.5 rounded text-md border
+		{#key taskNode}
+			<div class="flex flex-wrap gap-1 justify-end">
+				<button
+					onclick={() => {
+						submitStatusChange('pending');
+					}}
+					class="px-4 py-0.5 rounded text-md border
 			{taskNode.status === 'pending'
-					? 'bg-blue-500 text-white border-blue-600'
-					: 'bg-white border-gray-300 text-gray-700 hover:bg-blue-50'}"
-			>
-				{m.pending()}
-			</button>
+						? 'bg-blue-500 text-white border-blue-600'
+						: 'bg-white border-gray-300 text-gray-700 hover:bg-blue-50'}"
+				>
+					{m.pending()}
+				</button>
 
-			<button
-				class="px-4 py-0.5 rounded text-md border
+				<button
+					onclick={() => {
+						submitStatusChange('inProgress');
+					}}
+					class="px-4 py-0.5 rounded text-md border
 			{taskNode.status === 'in_progress'
-					? 'bg-yellow-500 text-white border-yellow-600'
-					: 'bg-white border-gray-300 text-gray-700 hover:bg-yellow-50'}"
-			>
-				{m.inProgress()}
-			</button>
+						? 'bg-yellow-500 text-white border-yellow-600'
+						: 'bg-white border-gray-300 text-gray-700 hover:bg-yellow-50'}"
+				>
+					{m.inProgress()}
+				</button>
 
-			<button
-				class="px-4 py-0.5 rounded text-md border
+				<button
+					onclick={() => {
+						submitStatusChange('cancelled');
+					}}
+					class="px-4 py-0.5 rounded text-md border
 			{taskNode.status === 'cancelled'
-					? 'bg-red-500 text-white border-red-600'
-					: 'bg-white border-gray-300 text-gray-700 hover:bg-red-50'}"
-			>
-				{m.cancelled()}
-			</button>
+						? 'bg-red-500 text-white border-red-600'
+						: 'bg-white border-gray-300 text-gray-700 hover:bg-red-50'}"
+				>
+					{m.cancelled()}
+				</button>
 
-			<button
-				class="px-4 py-0.5 rounded text-md border
+				<button
+					onclick={() => {
+						submitStatusChange('completed');
+					}}
+					class="px-4 py-0.5 rounded text-md border
 			{taskNode.status === 'completed'
-					? 'bg-green-500 text-white border-green-600'
-					: 'bg-white border-gray-300 text-gray-700 hover:bg-green-50'}"
-			>
-				{m.completed()}
-			</button>
-		</div>
+						? 'bg-green-500 text-white border-green-600'
+						: 'bg-white border-gray-300 text-gray-700 hover:bg-green-50'}"
+				>
+					{m.completed()}
+				</button>
+			</div>
+		{/key}
 	</div>
 
 	<!-- GRID VERY COMPACT -->
@@ -137,40 +160,37 @@
 							>{taskNode.evidence_reviewed.length} {m.done()}</span
 						>{/if}
 				</p>
-					<div class="flex flex-col p-2 space-y-2">
-						{#each taskNode.expected_evidence as evidence}
-								{#if !taskNode.evidence_reviewed.includes(evidence.id)}
-									{#if page.data.user.permissions['add_evidencerevision']}
-										<div class="flex flex-row items-center">
-											<i class="fa-solid fa-hourglass-half mr-2 text-amber-700"></i>
-											<span class="">{evidence.str}</span>
-											<button
-												class="flex flex-row items-center"
-												onclick={() => modalRevisionCreate(evidence)}
-											>
-												<i class="fa-solid fa-file-circle-plus ml-2 text-primary-500"></i>
-											</button>
-										</div>
-									{:else}
-										<Anchor
-											href={`/evidences/${evidence.id}/`}
-											class="flex flex-row items-center"
-										>
-											<i class="fa-solid fa-hourglass-half mr-2 text-amber-700"></i>
-											<span class="">{evidence.str}</span>
-										</Anchor>
-									{/if}
-								{:else}
-									<div class="flex flex-row items-center">
-										<i class="fa-solid fa-check mr-2 text-success-700"></i>
-										<span class="">{evidence.str}</span>
-										<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
-											<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
-										</Anchor>
-									</div>
-								{/if}
-						{/each}
-					</div>
+				<div class="flex flex-col p-2 space-y-2">
+					{#each taskNode.expected_evidence as evidence}
+						{#if !taskNode.evidence_reviewed.includes(evidence.id)}
+							{#if page.data.user.permissions['add_evidencerevision']}
+								<div class="flex flex-row items-center">
+									<i class="fa-solid fa-hourglass-half mr-2 text-amber-700"></i>
+									<span class="">{evidence.str}</span>
+									<button
+										class="flex flex-row items-center"
+										onclick={() => modalRevisionCreate(evidence)}
+									>
+										<i class="fa-solid fa-file-circle-plus ml-2 text-primary-500"></i>
+									</button>
+								</div>
+							{:else}
+								<Anchor href={`/evidences/${evidence.id}/`} class="flex flex-row items-center">
+									<i class="fa-solid fa-hourglass-half mr-2 text-amber-700"></i>
+									<span class="">{evidence.str}</span>
+								</Anchor>
+							{/if}
+						{:else}
+							<div class="flex flex-row items-center">
+								<i class="fa-solid fa-check mr-2 text-success-700"></i>
+								<span class="">{evidence.str}</span>
+								<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
+									<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
+								</Anchor>
+							</div>
+						{/if}
+					{/each}
+				</div>
 			</div>
 		{:else}
 			<span>{m.noEvidences()}</span>
