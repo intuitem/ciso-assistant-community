@@ -1,0 +1,36 @@
+[Unit]
+Description=CISO Assistant Backend API (Django/Gunicorn)
+Documentation=https://github.com/intuitem/ciso-assistant-community
+After=network.target
+
+[Service]
+Type=notify
+User=ciso-assistant
+Group=ciso-assistant
+WorkingDirectory=/opt/ciso-assistant/backend
+EnvironmentFile=/etc/ciso-assistant/backend.env
+
+# Use bundled Python virtualenv
+ExecStart=/opt/ciso-assistant/venv/bin/gunicorn \
+    --bind 127.0.0.1:8000 \
+    --workers 4 \
+    --timeout 120 \
+    --access-logfile - \
+    --error-logfile - \
+    ciso_assistant.wsgi:application
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/ciso-assistant/backend/db /opt/ciso-assistant/backend/media
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitBurst=5
+StartLimitIntervalSec=300
+
+[Install]
+WantedBy=multi-user.target
