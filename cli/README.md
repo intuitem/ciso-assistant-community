@@ -205,6 +205,66 @@ Asset Management Policy,Documented asset management procedures
 Security Audit Report,Annual security assessment results
 ```
 
+#### `import_audit`
+
+Imports compliance assessment (audit) data from a CSV file. This command creates a compliance assessment and updates requirement assessments with compliance results, progress status, observations, and optional scores.
+
+```bash
+python clica.py import-audit \
+  --file sample_audit.csv \
+  --folder "DEMO" \
+  --perimeter "Smart Fridge" \
+  --framework "ISO 27001:2026" \
+  --name "Q1 2024 Compliance Assessment"
+```
+
+**Parameters:**
+
+- `--file`: Path to the CSV file containing audit/compliance data (required)
+- `--folder`: Target folder name in CISO Assistant (required)
+- `--perimeter`: Perimeter name to associate with the assessment (required)
+- `--framework`: Framework name for the assessment (e.g., "ISO 27001:2022", "NIST CSF") (required)
+- `--name`: Name for the compliance assessment (optional, auto-generated if not provided)
+
+**CSV Format:**
+
+The CSV file must contain either a `ref_id` or `urn` column to identify requirements, plus the following columns:
+
+```csv
+urn;ref_id;name;description;compliance_result;requirement_progress;score;observations
+urn:intuitem:risk:req_node:nist-csf-2.0:gv;GV;GOVERN;The organization's cybersecurity risk management strategy, expectations, and policy are established, communicated, and monitored;;;;
+urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc;GV.OC;Organizational Context;The circumstances - mission, ;;;;
+urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01;GV.OC-01;;The organizational mission is understood and  management;partially_compliant;in_progress;2;
+
+```
+
+**Column Descriptions:**
+
+- `ref_id`: Requirement reference ID from the framework (use this OR urn)
+- `urn`: Universal requirement identifier (use this OR ref_id)
+- `assessable`: Boolean indicating if this requirement should be assessed (True/False)
+- `compliance_result`: Compliance status - values: `compliant`, `non_compliant`, `partially_compliant`, `not_applicable`, `not_assessed`
+- `requirement_progress`: Progress status - values: `to_do`, `in_progress`, `in_review`, `done`
+- `observations`: Text observations/notes about the requirement assessment
+- `score`: Optional numerical score for the requirement
+
+**Features:**
+
+- Automatically creates a compliance assessment with requirement assessments
+- Updates existing requirement assessments with compliance data
+- Skips non-assessable items (where assessable=False)
+- Supports both ref_id and urn for requirement identification
+- Handles optional scoring
+- Provides detailed progress feedback during import
+- Reports success/failure counts at completion
+
+**Important Notes:**
+
+- The framework must already exist in CISO Assistant with loaded requirements
+- The compliance assessment will automatically generate requirement assessments based on the framework
+- Only rows with `assessable=True` will be processed
+- The CSV must use comma (`,` or `;`) as delimiter
+
 ### File Upload Commands
 
 #### `upload_attachment`
@@ -297,6 +357,31 @@ The CLI supports the following risk treatment options:
 - `avoid`: Eliminate the risk by avoiding the activity
 - `transfer`: Transfer risk to a third party (e.g., insurance)
 
+### Audit/Compliance Assessment CSV Format
+
+The audit CSV file uses comma (`,` or `;`) as delimiter and must include either `ref_id` or `urn` for requirement identification:
+
+**Required Columns:**
+- `assessable`: Boolean (True/False) indicating if the requirement should be assessed
+- `ref_id` OR `urn`: Identifier to match requirements in the framework
+
+**Optional Columns:**
+- `compliance_result`: Compliance status (compliant, non_compliant, partially_compliant, not_applicable, not_assessed)
+- `requirement_progress`: Progress status (to_do, in_progress, in_review, done)
+- `observations`: Text notes and observations
+- `score`: Numerical score (integer)
+
+**Example:**
+```csv
+ref_id,urn,assessable,compliance_result,requirement_progress,observations,score
+A.5.1,,True,compliant,done,"Policy documented and approved",
+A.5.2,,True,partially_compliant,in_progress,"Implementation in progress",
+A.5.3,,True,non_compliant,to_do,"Needs to be addressed",
+A.6,,False,,,,"Non-assessable section header",
+```
+
+The CSV format matches the Data Wizard import format, ensuring consistency across import methods.
+
 ## MCP Integration
 
 CLICA includes Model Context Protocol (MCP) integration for use with Claude Desktop and other MCP-compatible clients.
@@ -367,6 +452,29 @@ python clica.py import-evidences --file evidences.csv
 python clica.py upload-attachment \
   --file "security_policy.pdf" \
   --name "Information Security Policy"
+```
+
+### Import Audit/Compliance Assessment
+
+```bash
+# First, check available folders, perimeters, and frameworks
+python clica.py get-folders
+python clica.py get-perimeters
+
+# Import compliance assessment data
+python clica.py import-audit \
+  --file sample_audit.csv \
+  --folder "Business Unit 1" \
+  --perimeter "IT Infrastructure" \
+  --framework "ISO 27001:2022" \
+  --name "2024 Q1 ISO 27001 Assessment"
+
+# Import without specifying name (auto-generated timestamp)
+python clica.py import-audit \
+  --file audit_results.csv \
+  --folder "Global" \
+  --perimeter "Organization-wide" \
+  --framework "NIST CSF"
 ```
 
 ### Clone Instance for Backup or Testing

@@ -447,6 +447,229 @@ def upload_attachment(file, name):
     rprint(res.text)
 
 
+@click.command()
+@click.option("--file", required=True, help="Path of the CSV file with audit data")
+@click.option(
+    "--folder", required=True, help="Folder name where the audit will be created"
+)
+@click.option("--perimeter", required=True, help="Perimeter name for the audit")
+@click.option("--framework", required=True, help="Framework name for the audit")
+@click.option(
+    "--name",
+    required=False,
+    help="Name for the compliance assessment (optional, will be auto-generated if not provided)",
+)
+def import_audit(file, folder, perimeter, framework, name):
+    """Import audit (compliance assessment) from CSV. Expected columns: urn, ref_id, name, description, compliance_result, requirement_progress, observations, score (optional)."""
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    # Read CSV file - try semicolon first, then comma
+    try:
+        df = pd.read_csv(file, delimiter=";")
+        # Check if parsing worked by verifying we have expected columns
+        if "urn" not in df.columns and "ref_id" not in df.columns:
+            df = pd.read_csv(file)  # Try comma delimiter
+    except:
+        df = pd.read_csv(file)  # Fallback to comma delimiter
+
+    # Validate required columns
+    if "ref_id" not in df.columns and "urn" not in df.columns:
+        print(
+            "❌ Error: CSV must contain either 'ref_id' or 'urn' column",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+    }
+
+    # Get folder, perimeter, and framework IDs
+    folder_id = ids_map("folders").get(folder)
+    if not folder_id:
+        print(f"❌ Error: Folder '{folder}' not found", file=sys.stderr)
+        sys.exit(1)
+
+    perimeter_id = ids_map("perimeters", folder=folder).get(perimeter)
+    if not perimeter_id:
+        print(
+            f"❌ Error: Perimeter '{perimeter}' not found in folder '{folder}'",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    # Get framework ID
+    frameworks_url = f"{API_URL}/frameworks/"
+    res = requests.get(frameworks_url, headers=headers, verify=VERIFY_CERTIFICATE)
+    if res.status_code != 200:
+        print("❌ Error: Could not fetch frameworks", file=sys.stderr)
+        sys.exit(1)
+
+    framework_id = None
+    for fw in res.json().get("results", []):
+        if fw.get("name") == framework:
+            framework_id = fw.get("id")
+            break
+
+    if not framework_id:
+        print(f"❌ Error: Framework '{framework}' not found", file=sys.stderr)
+        sys.exit(1)
+
+    # Generate assessment name if not provided
+    if not name:
+        from datetime import datetime
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        name = f"Assessment_{timestamp}"
+
+    # Create compliance assessment
+    assessment_data = {
+        "name": name,
+        "perimeter": perimeter_id,
+        "framework": framework_id,
+        "folder": folder_id,
+    }
+
+    if click.confirm(
+        f"Create compliance assessment '{name}' with {len(df)} requirement updates?"
+    ):
+        res = requests.post(
+            f"{API_URL}/compliance-assessments/",
+            json=assessment_data,
+            headers=headers,
+            verify=VERIFY_CERTIFICATE,
+        )
+
+        if res.status_code != 201:
+            print("❌ Error creating compliance assessment", file=sys.stderr)
+            rprint(res.json())
+            sys.exit(1)
+
+        assessment_id = res.json().get("id")
+        rprint(f"✅ Created compliance assessment: {name} (ID: {assessment_id})")
+
+        # Process requirement assessments
+        successful = 0
+        failed = 0
+        skipped = 0
+
+        for idx, row in df.iterrows():
+            ref_id = row.get("ref_id", "")
+            urn = row.get("urn", "")
+
+            if not ref_id and not urn:
+                print(f"⚠️  Row {idx + 1}: Skipping - no ref_id or urn provided")
+                skipped += 1
+                continue
+
+            # Skip if no assessment data provided (compliance_result, requirement_progress, observations, score all empty)
+            has_data = False
+            if (
+                pd.notna(row.get("compliance_result"))
+                and str(row.get("compliance_result")).strip()
+            ):
+                has_data = True
+            if (
+                pd.notna(row.get("requirement_progress"))
+                and str(row.get("requirement_progress")).strip()
+            ):
+                has_data = True
+            if (
+                pd.notna(row.get("observations"))
+                and str(row.get("observations")).strip()
+            ):
+                has_data = True
+            if pd.notna(row.get("score")) and str(row.get("score")).strip():
+                has_data = True
+
+            if not has_data:
+                print(
+                    f"⚠️  Row {idx + 1}: Skipping - no assessment data to import (ref_id={ref_id})"
+                )
+                skipped += 1
+                continue
+
+            # Find the requirement assessment
+            req_assessments_url = f"{API_URL}/requirement-assessments/"
+            params = {
+                "compliance_assessment": assessment_id,
+            }
+
+            # Try to find by ref_id first
+            if ref_id:
+                params["requirement__ref_id"] = ref_id
+            elif urn:
+                params["requirement__urn"] = urn
+
+            res = requests.get(
+                req_assessments_url,
+                headers=headers,
+                params=params,
+                verify=VERIFY_CERTIFICATE,
+            )
+
+            if res.status_code != 200 or not res.json().get("results"):
+                print(
+                    f"⚠️  Row {idx + 1}: Requirement not found (ref_id={ref_id}, urn={urn})"
+                )
+                failed += 1
+                continue
+
+            req_assessment_id = res.json()["results"][0]["id"]
+
+            # Prepare update data
+            update_data = {
+                "result": row.get("compliance_result", "not_assessed")
+                if pd.notna(row.get("compliance_result"))
+                and row.get("compliance_result") != ""
+                else "not_assessed",
+                "status": row.get("requirement_progress", "to_do")
+                if pd.notna(row.get("requirement_progress"))
+                and row.get("requirement_progress") != ""
+                else "to_do",
+                "observation": row.get("observations", "")
+                if pd.notna(row.get("observations"))
+                else "",
+            }
+
+            # Add score if provided
+            if pd.notna(row.get("score")) and row.get("score") != "":
+                try:
+                    update_data["score"] = int(row.get("score"))
+                    update_data["is_scored"] = True
+                except (ValueError, TypeError):
+                    pass
+
+            # Update the requirement assessment
+            res = requests.patch(
+                f"{API_URL}/requirement-assessments/{req_assessment_id}/",
+                json=update_data,
+                headers=headers,
+                verify=VERIFY_CERTIFICATE,
+            )
+
+            if res.status_code == 200:
+                successful += 1
+                print(
+                    f"✅ Row {idx + 1}: Updated requirement (ref_id={ref_id}, urn={urn})"
+                )
+            else:
+                failed += 1
+                print(
+                    f"❌ Row {idx + 1}: Failed to update requirement (ref_id={ref_id}, urn={urn})"
+                )
+                rprint(res.json())
+
+        print(
+            f"\n📊 Import complete: {successful} successful, {failed} failed, {skipped} skipped"
+        )
+
+
 cli.add_command(get_folders)
 cli.add_command(get_perimeters)
 cli.add_command(import_assets)
@@ -454,6 +677,7 @@ cli.add_command(import_controls)
 cli.add_command(import_evidences)
 cli.add_command(upload_attachment)
 cli.add_command(import_risk_assessment)
+cli.add_command(import_audit)
 cli.add_command(get_matrices)
 if __name__ == "__main__":
     cli()

@@ -1,0 +1,7 @@
+urn;ref_id;name;description;compliance_result;requirement_progress;score;observations
+urn:f-2.0:gv;GV;GOVERN;The organization's cybersecurity risk management ;;;;
+urn:f-2.0:gv.oc;GV.OC;Organizational Context;The circumstances - mission, ;;;;
+urn:f-2.0:gv.oc-01;GV.OC-01;;The organizational mission is understood and;partially_compliant;in_progress;2;
+urn:f-2.0:gv.oc-02;GV.OC-02;;Internal and external stakeholders are undeidered;compliant;in_review;;
+urn:f-2.0:gv.oc-03;GV.OC-03;;Legal, regulatory, and contractual aged;compliant;done;;
+urn:f-2.0:gv.oc-04;GV.OC-04;;Critical objectives, capabilities, municated;partially_compliant;in_review;;
