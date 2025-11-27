@@ -571,10 +571,12 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         instance = serializer.save()
         dispatch_webhook_event(instance, "created", serializer=serializer)
+        return instance
 
     def perform_update(self, serializer):
         instance = serializer.save()
         dispatch_webhook_event(instance, "updated", serializer=serializer)
+        return instance
 
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
@@ -1048,15 +1050,6 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             )
             if content.get("value") is not None and content.get("value") > 0
         ]
-
-    def _perform_write(self, serializer):
-        serializer.save()
-
-    def perform_create(self, serializer):
-        return self._perform_write(serializer)
-
-    def perform_update(self, serializer):
-        return self._perform_write(serializer)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get type choices")
@@ -4775,6 +4768,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                         "The approver is not allowed to approve this risk acceptance"
                     )
         risk_acceptance = serializer.save()
+        dispatch_webhook_event(risk_acceptance, "updated", serializer)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get state choices")
@@ -10295,8 +10289,9 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return Response(dict(TimelineEntry.EntryType.get_manual_entry_types()))
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-        return
+        instance = serializer.save(author=self.request.user)
+        dispatch_webhook_event(instance, "created", serializer)
+        return instance
 
     def perform_destroy(self, instance):
         if instance.entry_type in [
