@@ -1920,8 +1920,8 @@ export const listViewFields = {
 		}
 	},
 	'strategic-scenarios': {
-		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'attackPaths', 'gravity'],
-		body: ['ref_id', 'name', 'description', 'ro_to_couple', 'attack_paths', 'gravity'],
+		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'fearedEvents', 'attackPaths', 'gravity'],
+		body: ['ref_id', 'name', 'description', 'ro_to_couple', 'feared_events', 'attack_paths', 'gravity'],
 		filters: {
 			gravity: RISK_IMPACT_FILTER
 		}
