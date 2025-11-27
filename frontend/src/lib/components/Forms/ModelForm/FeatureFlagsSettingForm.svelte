@@ -21,6 +21,7 @@
 		{ field: 'scoring_assistant', label: m.scoringAssistant() },
 		{ field: 'vulnerabilities', label: m.vulnerabilities() },
 		{ field: 'compliance', label: m.compliance() },
+		{ field: 'campaigns', label: m.campaigns() },
 		{ field: 'tprm', label: m.thirdParty() },
 		{ field: 'privacy', label: m.privacy() },
 		{ field: 'experimental', label: m.experimental() },
