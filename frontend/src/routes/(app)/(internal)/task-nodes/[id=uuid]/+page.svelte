@@ -99,8 +99,8 @@
 					}}
 					class="px-4 py-0.5 rounded text-md border
 			{taskNode.status === 'pending'
-						? 'bg-blue-500 text-white border-blue-600'
-						: 'bg-white border-gray-300 text-gray-700 hover:bg-blue-50'}"
+						? 'bg-amber-500 text-white border-amber-600'
+						: 'bg-white border-gray-300 text-gray-700 hover:bg-amber-50'}"
 				>
 					{m.pending()}
 				</button>
@@ -111,8 +111,8 @@
 					}}
 					class="px-4 py-0.5 rounded text-md border
 			{taskNode.status === 'in_progress'
-						? 'bg-yellow-500 text-white border-yellow-600'
-						: 'bg-white border-gray-300 text-gray-700 hover:bg-yellow-50'}"
+						? 'bg-blue-500 text-white border-blue-600'
+						: 'bg-white border-gray-300 text-gray-700 hover:bg-blue-50'}"
 				>
 					{m.inProgress()}
 				</button>
@@ -165,7 +165,7 @@
 						{#if !taskNode.evidence_reviewed.includes(evidence.id)}
 							{#if page.data.user.permissions['add_evidencerevision']}
 								<div class="flex flex-row items-center">
-									<i class="fa-solid fa-hourglass-half mr-2 text-amber-700"></i>
+									<i class="fa-solid fa-clock mr-2 text-amber-700"></i>
 									<span class="">{evidence.str}</span>
 									<button
 										class="flex flex-row items-center"
@@ -176,7 +176,7 @@
 								</div>
 							{:else}
 								<Anchor href={`/evidences/${evidence.id}/`} class="flex flex-row items-center">
-									<i class="fa-solid fa-hourglass-half mr-2 text-amber-700"></i>
+									<i class="fa-solid fa-clock mr-2 text-amber-700"></i>
 									<span class="">{evidence.str}</span>
 								</Anchor>
 							{/if}
