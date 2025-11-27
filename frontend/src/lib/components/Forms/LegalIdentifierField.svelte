@@ -167,7 +167,7 @@
 						onclick={() => removeIdentifier(type)}
 						title={m.removeIdentifier()}
 					>
-						✕
+						<i class="fa-solid fa-trash"></i>
 					</button>
 				</div>
 			</div>
