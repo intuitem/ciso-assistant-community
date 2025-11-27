@@ -118,5 +118,29 @@ export const actions: Actions = {
 			const error = await response.json();
 			return fail(400, { error });
 		}
+	},
+	updateObservation: async ({ request, fetch, params, cookies }) => {
+		const formData = await request.formData();
+		const observation = formData.get('observation') as string;
+
+		const updateData = {
+			observation
+		};
+
+		const response = await fetch(`${BASE_API_URL}/task-nodes/${params.id}/`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(updateData)
+		});
+
+		if (response.ok) {
+			setFlash({ type: 'success', message: m.observationUpdatedSuccessfully() }, cookies);
+			return { success: true };
+		} else {
+			const error = await response.json();
+			return fail(400, { error });
+		}
 	}
 };

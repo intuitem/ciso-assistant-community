@@ -61,6 +61,17 @@
 		});
 		invalidateAll();
 	}
+
+	async function submitObservationChange(observation: string): void {
+		const formData = new FormData();
+		formData.append('observation', observation);
+
+		const response = await fetch(`?/updateObservation`, {
+			method: 'POST',
+			body: formData
+		});
+		invalidateAll();
+	}
 </script>
 
 <div class="bg-white p-4 m-4 shadow-sm rounded-lg space-y-6">
@@ -201,7 +212,10 @@
 	<div class="space-y-1">
 		<p class="text-gray-700 text-md font-medium">{m.observation()}</p>
 		<div class="p-2 bg-gray-50 border border-gray-200 rounded">
-			<TableMarkdownField bind:value={taskNode.observation} />
+			<TableMarkdownField bind:value={taskNode.observation} 
+			onSave={async (observation) => {
+				submitObservationChange(observation)
+			}}/>
 		</div>
 	</div>
 </div>
