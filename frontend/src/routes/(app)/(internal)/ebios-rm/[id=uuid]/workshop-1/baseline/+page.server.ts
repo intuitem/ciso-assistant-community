@@ -67,7 +67,17 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: []
 	};
 
-	return { createForm, deleteForm, model, URLModel, table, updateForm, updatedModel, object, title: m.baseline() };
+	return {
+		createForm,
+		deleteForm,
+		model,
+		URLModel,
+		table,
+		updateForm,
+		updatedModel,
+		object,
+		title: m.ebiosRmBaseline()
+	};
 };
 
 export const actions: Actions = {
