@@ -107,6 +107,7 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	detailUrlParams?: string[]; // To prepare possible fetch for foreign keys with detail in generic views
 	disableCreate?: boolean;
 	disableDelete?: boolean;
+	disableEdit?: boolean;
 	folderPermsNeeded?: { action: 'add' | 'view' | 'change' | 'delete'; model: string }[]; // Permissions needed on the folder to display this reverse foreign key field
 }
 
@@ -1638,7 +1639,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'task_template', urlModel: 'task-nodes', disableCreate: true, disableDelete: true }
+			{ field: 'task_template', urlModel: 'task-nodes', disableCreate: true, disableDelete: true, disableEdit: true }
 		]
 	},
 	'task-nodes': {

@@ -5,7 +5,6 @@
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
-	import { type AnyZodObject } from 'zod';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { modelSchema } from '$lib/utils/schemas';
 	import { getModelInfo } from '$lib/utils/crud';
@@ -72,19 +71,52 @@
 		});
 		invalidateAll();
 	}
+
+	const categories = [
+		{
+			label: m.taskTemplate(),
+			items: [taskNode.task_template],
+			baseUrl: "/task-templates"
+		},
+		{
+			label: m.appliedControls(),
+			items: taskNode.applied_controls,
+			baseUrl: "/applied-controls"
+		},
+		{
+			label: m.complianceAssessments(),
+			items: taskNode.compliance_assessments,
+			baseUrl: "/compliance-assessments"
+		},
+		{
+			label: m.assets(),
+			items: taskNode.assets,
+			baseUrl: "/assets"
+		},
+		{
+			label: m.riskAssessments(),
+			items: taskNode.risk_assessments,
+			baseUrl: "/risk-assessments"
+		},
+		{
+			label: m.findingsAssessments(),
+			items: taskNode.finding_assessments,
+			baseUrl: "/finding-assessments"
+		}
+	];
 </script>
 
 <div class="bg-white p-4 m-4 shadow-sm rounded-lg space-y-6">
 	<!-- HEADER COMPACT -->
-	<div class="grid grid-cols-3 gap-4 items-center">
+	<div class="flex flex-row justify-between">
 		<!-- Assigned to -->
 		<div class="space-y-1">
 			<p class="text-gray-700 text-md font-medium tracking-wide">
 				{m.assignedTo()}
 			</p>
-			<div class="flex flex-wrap gap-1">
+			<div class="flex flex-col">
 				{#each taskNode.assigned_to as user}
-					<Anchor class="text-md bg-gray-100 hover:bg-gray-200 px-1.5 py-0.5 rounded anchor">
+					<Anchor class="text-md px-1.5 py-0.5 rounded anchor font-semibold hover:underline">
 						{user.str}
 					</Anchor>
 				{/each}
@@ -96,14 +128,14 @@
 			<p class="text-gray-700 text-md font-medium tracking-wide">
 				{m.dueDate()}
 			</p>
-			<p class="font-semibold text-sm">
+			<p class="text-md px-1.5 py-0.5 font-semibold">
 				{taskNode.due_date}
 			</p>
 		</div>
 
 		<!-- Status (compact buttons) -->
 		{#key taskNode}
-			<div class="flex flex-wrap gap-1 justify-end">
+			<div class="flex flex-wrap gap-1 justify-end p-1">
 				<button
 					onclick={() => {
 						submitStatusChange('pending');
@@ -134,8 +166,8 @@
 					}}
 					class="px-4 py-0.5 rounded text-md border
 			{taskNode.status === 'cancelled'
-						? 'bg-red-500 text-white border-red-600'
-						: 'bg-white border-gray-300 text-gray-700 hover:bg-red-50'}"
+						? 'bg-error-500 text-white border-error-600'
+						: 'bg-white border-gray-300 text-gray-700 hover:bg-error-50'}"
 				>
 					{m.cancelled()}
 				</button>
@@ -146,13 +178,34 @@
 					}}
 					class="px-4 py-0.5 rounded text-md border
 			{taskNode.status === 'completed'
-						? 'bg-green-500 text-white border-green-600'
-						: 'bg-white border-gray-300 text-gray-700 hover:bg-green-50'}"
+						? 'bg-success-500 text-white border-success-600'
+						: 'bg-white border-gray-300 text-gray-700 hover:bg-success-50'}"
 				>
 					{m.completed()}
 				</button>
 			</div>
 		{/key}
+	</div>
+
+	<div class="grid grid-cols-3 gap-6">
+		{#each categories as cat}
+			{#if cat.items?.length}
+				<div class="flex flex-col space-y-1">
+					<p class="text-gray-700 text-md font-medium tracking-wide">
+						{cat.label}
+					</p>
+
+					{#each cat.items as item}
+						<Anchor
+							class="text-md px-1.5 py-0.5 anchor font-semibold"
+							href="{cat.baseUrl}/{item.id}"
+						>
+							{item.str}
+						</Anchor>
+					{/each}
+				</div>
+			{/if}
+		{/each}
 	</div>
 
 	<!-- GRID VERY COMPACT -->
@@ -177,7 +230,7 @@
 							{#if page.data.user.permissions['add_evidencerevision']}
 								<div class="flex flex-row items-center">
 									<i class="fa-solid fa-clock mr-2 text-amber-700"></i>
-									<span class="">{evidence.str}</span>
+									<span class="font-semibold">{evidence.str}</span>
 									<button
 										class="flex flex-row items-center"
 										onclick={() => modalRevisionCreate(evidence)}
@@ -188,13 +241,13 @@
 							{:else}
 								<Anchor href={`/evidences/${evidence.id}/`} class="flex flex-row items-center">
 									<i class="fa-solid fa-clock mr-2 text-amber-700"></i>
-									<span class="">{evidence.str}</span>
+									<span class="font-semibold">{evidence.str}</span>
 								</Anchor>
 							{/if}
 						{:else}
 							<div class="flex flex-row items-center">
 								<i class="fa-solid fa-check mr-2 text-success-700"></i>
-								<span class="">{evidence.str}</span>
+								<span class="font-semibold">{evidence.str}</span>
 								<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
 									<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
 								</Anchor>
