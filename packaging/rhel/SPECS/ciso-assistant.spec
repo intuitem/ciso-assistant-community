@@ -148,7 +148,7 @@ fi
 %config(noreplace) /etc/ciso-assistant/frontend.env
 
 %changelog
-* Wed Nov 27 2024 CISO Assistant Team <team@intuitem.com>
+* Wed Nov 27 2025 CISO Assistant Team <hello@intuitem.com>
 - Initial RPM package for air-gapped deployment
 - Includes bundled Python 3.12, Node.js 22, and all dependencies
 - SQLite database for simplified deployment
