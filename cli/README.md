@@ -242,7 +242,6 @@ urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01;GV.OC-01;;The organizational mi
 
 - `ref_id`: Requirement reference ID from the framework (use this OR urn)
 - `urn`: Universal requirement identifier (use this OR ref_id)
-- `assessable`: Boolean indicating if this requirement should be assessed (True/False)
 - `compliance_result`: Compliance status - values: `compliant`, `non_compliant`, `partially_compliant`, `not_applicable`, `not_assessed`
 - `requirement_progress`: Progress status - values: `to_do`, `in_progress`, `in_review`, `done`
 - `observations`: Text observations/notes about the requirement assessment
@@ -252,7 +251,6 @@ urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01;GV.OC-01;;The organizational mi
 
 - Automatically creates a compliance assessment with requirement assessments
 - Updates existing requirement assessments with compliance data
-- Skips non-assessable items (where assessable=False)
 - Supports both ref_id and urn for requirement identification
 - Handles optional scoring
 - Provides detailed progress feedback during import
@@ -262,7 +260,6 @@ urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-01;GV.OC-01;;The organizational mi
 
 - The framework must already exist in CISO Assistant with loaded requirements
 - The compliance assessment will automatically generate requirement assessments based on the framework
-- Only rows with `assessable=True` will be processed
 - The CSV must use comma (`,` or `;`) as delimiter
 
 ### File Upload Commands
@@ -362,9 +359,7 @@ The CLI supports the following risk treatment options:
 The audit CSV file uses comma (`,` or `;`) as delimiter and must include either `ref_id` or `urn` for requirement identification:
 
 **Required Columns:**
-- `assessable`: Boolean (True/False) indicating if the requirement should be assessed
 - `ref_id` OR `urn`: Identifier to match requirements in the framework
-
 **Optional Columns:**
 - `compliance_result`: Compliance status (compliant, non_compliant, partially_compliant, not_applicable, not_assessed)
 - `requirement_progress`: Progress status (to_do, in_progress, in_review, done)
@@ -373,11 +368,13 @@ The audit CSV file uses comma (`,` or `;`) as delimiter and must include either 
 
 **Example:**
 ```csv
-ref_id,urn,assessable,compliance_result,requirement_progress,observations,score
-A.5.1,,True,compliant,done,"Policy documented and approved",
-A.5.2,,True,partially_compliant,in_progress,"Implementation in progress",
-A.5.3,,True,non_compliant,to_do,"Needs to be addressed",
-A.6,,False,,,,"Non-assessable section header",
+urn;ref_id;name;description;compliance_result;requirement_progress;score;observations
+urn:f-2.0:gv;GV;GOVERN;The organization's cybersecurity risk management ;;;;
+urn:f-2.0:gv.oc;GV.OC;Organizational Context;The circumstances - mission, ;;;;
+urn:f-2.0:gv.oc-01;GV.OC-01;;The organizational mission is understood and;partially_compliant;in_progress;2;
+urn:f-2.0:gv.oc-02;GV.OC-02;;Internal and external stakeholders are undeidered;compliant;in_review;;
+urn:f-2.0:gv.oc-03;GV.OC-03;;Legal, regulatory, and contractual aged;compliant;done;;
+urn:f-2.0:gv.oc-04;GV.OC-04;;Critical objectives, capabilities, municated;partially_compliant;in_review;;
 ```
 
 The CSV format matches the Data Wizard import format, ensuring consistency across import methods.

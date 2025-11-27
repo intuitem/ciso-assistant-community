@@ -503,18 +503,20 @@ def import_audit(file, folder, perimeter, framework, name):
         )
         sys.exit(1)
 
-    # Get framework ID
-    frameworks_url = f"{API_URL}/frameworks/"
-    res = requests.get(frameworks_url, headers=headers, verify=VERIFY_CERTIFICATE)
-    if res.status_code != 200:
-        print("❌ Error: Could not fetch frameworks", file=sys.stderr)
-        sys.exit(1)
-
+    # Get framework ID with pagination handling
     framework_id = None
-    for fw in res.json().get("results", []):
-        if fw.get("name") == framework:
-            framework_id = fw.get("id")
-            break
+    next_url = f"{API_URL}/frameworks/"
+    while next_url and not framework_id:
+        res = requests.get(next_url, headers=headers, verify=VERIFY_CERTIFICATE)
+        if res.status_code != 200:
+            print("❌ Error: Could not fetch frameworks", file=sys.stderr)
+            sys.exit(1)
+        data = res.json()
+        for fw in data.get("results", []):
+            if fw.get("name") == framework:
+                framework_id = fw.get("id")
+                break
+        next_url = data.get("next")
 
     if not framework_id:
         print(f"❌ Error: Framework '{framework}' not found", file=sys.stderr)
