@@ -1993,7 +1993,8 @@ export const listViewFields = {
 			'status',
 			'expiration_date',
 			'domain',
-			'associatedObjectsCount'
+			'associatedObjectsCount',
+			'created_at'
 		],
 		body: [
 			'ref_id',
@@ -2002,7 +2003,8 @@ export const listViewFields = {
 			'status',
 			'expiration_date',
 			'folder',
-			'associated_objects_count'
+			'associated_objects_count',
+			'created_at'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
