@@ -96,7 +96,8 @@ export const load: PageServerLoad = async ({ params, fetch, url }) => {
 		table,
 		lastRiskAssessment,
 		riskAssessmentToSync,
-		title: m.riskAnalyses()
+		title: m.riskAnalyses(),
+		modelVerboseName: m.ebiosRmRiskAnalysesSubtitle()
 	};
 };
 

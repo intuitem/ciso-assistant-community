@@ -76,7 +76,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		updateForm,
 		updatedModel,
 		object,
-		title: m.ebiosRmBaseline()
+		title: m.ebiosRmBaseline(),
+		modelVerboseName: m.ebiosRmBaselineSubtitle()
 	};
 };
 

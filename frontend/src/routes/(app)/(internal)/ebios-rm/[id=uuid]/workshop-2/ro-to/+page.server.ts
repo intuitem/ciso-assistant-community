@@ -67,7 +67,15 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: []
 	};
 
-	return { createForm, deleteForm, model, URLModel, table, title: m.roToCouples() };
+	return {
+		createForm,
+		deleteForm,
+		model,
+		URLModel,
+		table,
+		title: m.roToCouples(),
+		modelVerboseName: m.ebiosRmRoToSubtitle()
+	};
 };
 
 export const actions: Actions = {

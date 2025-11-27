@@ -79,7 +79,17 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const circularRadarRes = await fetch(circularRadarEndpoint);
 	const circularRadar = await circularRadarRes.json();
 
-	return { createForm, deleteForm, model, URLModel, table, radar, circularRadar, title: m.studyTheEcosystem() };
+	return {
+		createForm,
+		deleteForm,
+		model,
+		URLModel,
+		table,
+		radar,
+		circularRadar,
+		title: m.studyTheEcosystem(),
+		modelVerboseName: m.ebiosRmEcosystemSubtitle()
+	};
 };
 
 export const actions: Actions = {

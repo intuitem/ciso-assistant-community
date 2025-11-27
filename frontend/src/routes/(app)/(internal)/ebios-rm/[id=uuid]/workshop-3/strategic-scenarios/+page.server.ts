@@ -77,7 +77,16 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: []
 	};
 
-	return { createForm, deleteForm, model, URLModel, table, scenariosWithoutAttackPath, title: m.strategicScenarios() };
+	return {
+		createForm,
+		deleteForm,
+		model,
+		URLModel,
+		table,
+		scenariosWithoutAttackPath,
+		title: m.strategicScenarios(),
+		modelVerboseName: m.ebiosRmStrategicScenariosSubtitle()
+	};
 };
 
 export const actions: Actions = {
