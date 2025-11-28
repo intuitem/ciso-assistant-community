@@ -218,6 +218,8 @@ def add_unset_option(choices):
     else:
         # For list of tuples like [(value, label), ...]
         return [("--", "--")] + list(choices)
+
+
 def get_mapping_max_depth():
     """Get mapping max depth from general settings at runtime; safe during migrations."""
     try:
