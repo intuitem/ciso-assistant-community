@@ -390,11 +390,11 @@
 						</span>
 					</span>
 					<div class="h-2"></div>
-					{#if requirementAssessment.description || requirementAssessment.assessable}
+					{#if requirementAssessment.requirement.description || requirementAssessment.assessable}
 						<div
 							class="flex flex-col items-center justify-center border px-4 py-2 shadow-sm rounded-xl space-y-2"
 						>
-							{#if requirementAssessment.description}
+							{#if requirementAssessment.requirement.description}
 								<div
 									class="card w-full font-light text-lg p-4 preset-tonal-primary"
 									data-testid="description"
@@ -404,7 +404,7 @@
 											<i class="fa-solid fa-file-lines mr-2"></i>{m.description()}
 										</div>
 									</h2>
-									<MarkdownRenderer content={requirementAssessment.description} />
+									<MarkdownRenderer content={requirementAssessment.requirement.description} />
 								</div>
 							{/if}
 							{#if requirementAssessment.assessable}
