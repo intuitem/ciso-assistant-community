@@ -194,6 +194,7 @@ INSTALLED_APPS = [
     "privacy",
     "resilience",
     "crq",
+    "metrology",
     "core",
     "cal",
     "django_filters",

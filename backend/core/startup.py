@@ -968,6 +968,23 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "add_metricdefinition",
+    "change_metricdefinition",
+    "delete_metricdefinition",
+    "view_metricinstance",
+    "add_metricinstance",
+    "change_metricinstance",
+    "delete_metricinstance",
+    "view_metricsample",
+    "add_metricsample",
+    "change_metricsample",
+    "delete_metricsample",
+    "view_dashboard",
+    "add_dashboard",
+    "change_dashboard",
+    "delete_dashboard",
     # roles,
     "add_role",
     "view_role",
@@ -1182,6 +1199,11 @@ def startup(sender: AppConfig, **kwargs):
         Terminology.create_default_entity_relationships()
     except Exception as e:
         logger.error("Error creating default Entity Relationships", exc_info=True)
+
+    try:
+        Terminology.create_default_metric_units()
+    except Exception as e:
+        logger.error("Error creating default Metric Units", exc_info=True)
 
     # Init integration providers
 
