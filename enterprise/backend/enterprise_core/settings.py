@@ -193,6 +193,7 @@ INSTALLED_APPS = [
     "library",
     "serdes",
     "integrations",
+    "webhooks",
     "rest_framework",
     "knox",
     "drf_spectacular",
@@ -515,3 +516,7 @@ HUEY = {
 }
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
+
+WEBHOOK_ALLOW_PRIVATE_IPS = (
+    os.environ.get("WEBHOOK_ALLOW_PRIVATE_IPS", "False") == "True"
+)

@@ -11,6 +11,9 @@ class CoreConfig(AppConfig):
     verbose_name = "Core"
 
     def ready(self):
+        # This import runs the @webhook_registry.register decorator
+        import core.webhooks
+
         # avoid post_migrate handler if we are in the main, as it interferes with restore
         if not os.environ.get("RUN_MAIN"):
             post_migrate.connect(startup, sender=self)

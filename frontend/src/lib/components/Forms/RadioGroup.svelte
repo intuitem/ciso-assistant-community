@@ -40,7 +40,7 @@
 		labelKey = 'label'
 	}: Props = $props();
 
-	const { value } = form ? formFieldProxy(form, valuePath) : {};
+	const { value, errors } = form ? formFieldProxy(form, valuePath) : {};
 
 	let internalValue = $state(value ? $value : initialValue);
 	let lastExternalValue = $state(value ? $value : undefined);
@@ -86,6 +86,13 @@
 	{#if label}
 		<label class="text-sm font-semibold" for={field}>{label}</label><br />
 	{/if}
+	{#if $errors}
+		<div>
+			{#each $errors as error}
+				<p class="text-error-500 text-xs font-medium">{error}</p>
+			{/each}
+		</div>
+	{/if}
 	<div
 		class="p-1 inline-flex gap-1 grow flex-wrap items-center bg-gray-200 border border-gray-400 rounded-md {classes} {disabledClasses}"
 	>
@@ -104,6 +111,7 @@
 								internalValue = option[key];
 								onChange(internalValue);
 							}}
+							value={option[key]}
 							{disabled}
 						/>
 					</div>
