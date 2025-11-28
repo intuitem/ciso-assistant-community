@@ -527,7 +527,8 @@ export const FeatureFlagsSchema = z.object({
 	project_management: z.boolean().optional(),
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
-	validation_flows: z.boolean().optional()
+	validation_flows: z.boolean().optional(),
+	outgoing_webhooks: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -1399,4 +1400,14 @@ export const modelSchema = (model: string) => {
 
 export const composerSchema = z.object({
 	risk_assessments: z.array(z.string().uuid())
+});
+
+export const webhookEndpointSchema = z.object({
+	...NameDescriptionMixin,
+	url: z.string().url(),
+	event_types: z.string().array().nonempty(),
+	is_active: z.boolean().default(true),
+	secret: z.string().min(1).optional(),
+	target_folders: z.string().uuid().optional().array().optional(),
+	payload_format: z.enum(['thin', 'full']).default('full')
 });

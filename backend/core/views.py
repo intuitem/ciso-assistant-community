@@ -60,6 +60,7 @@ from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from integrations.registry import IntegrationRegistry
 from library.serializers import StoredLibrarySerializer
+from webhooks.service import dispatch_webhook_event
 from .generators import gen_audit_context
 
 from django.utils import timezone
@@ -567,6 +568,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True, context=context)
         return Response(serializer.data)
 
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        dispatch_webhook_event(instance, "created", serializer=serializer)
+        return instance
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        dispatch_webhook_event(instance, "updated", serializer=serializer)
+        return instance
+
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         if request.data.get("filtering_labels"):
@@ -611,6 +622,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+        instance = self.get_object()
+        try:
+            dispatch_webhook_event(instance, "deleted")
+        except Exception:
+            logger.error("Webhook dispatch failed on delete", exc_info=True)
         return super().destroy(request, *args, **kwargs)
 
     def _get_optimized_object_data(self, queryset):
@@ -1056,15 +1072,6 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             )
             if content.get("value") is not None and content.get("value") > 0
         ]
-
-    def _perform_write(self, serializer):
-        serializer.save()
-
-    def perform_create(self, serializer):
-        return self._perform_write(serializer)
-
-    def perform_update(self, serializer):
-        return self._perform_write(serializer)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get type choices")
@@ -4783,6 +4790,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                         "The approver is not allowed to approve this risk acceptance"
                     )
         risk_acceptance = serializer.save()
+        dispatch_webhook_event(risk_acceptance, "updated", serializer)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get state choices")
@@ -10304,8 +10312,9 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return Response(dict(TimelineEntry.EntryType.get_manual_entry_types()))
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-        return
+        instance = serializer.save(author=self.request.user)
+        dispatch_webhook_event(instance, "created", serializer)
+        return instance
 
     def perform_destroy(self, instance):
         if instance.entry_type in [
