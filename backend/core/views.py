@@ -9810,6 +9810,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "detection",
         "owners",
         "entities",
+        "assets",
     ]
 
     export_config = {
