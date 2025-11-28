@@ -1570,6 +1570,9 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
             models.Max("version")
         )["version__max"]
         validated_data["version"] = (max_version or 0) + 1
+        # Update evidence status to in_review when a new revision is submitted
+        evidence.status = Evidence.Status.IN_REVIEW
+        evidence.save()
         return super().create(validated_data)
 
 
