@@ -15,7 +15,7 @@
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
 
-	import { Tabs, Tooltip } from '@skeletonlabs/skeleton-svelte';
+	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	import { onMount } from 'svelte';
 
@@ -283,6 +283,37 @@
 	let group = $state(
 		Object.keys(data?.relatedModels ?? {}).length > 0 ? getSortedRelatedModels()[0][0] : undefined
 	);
+
+	// Modèle actif pour la navigation latérale
+	let activeEntry = $derived(
+		relatedModels.length > 0
+			? (relatedModels.find(([urlmodel]) => urlmodel === group) ?? relatedModels[0])
+			: undefined
+	);
+
+	let activeUrlmodel = $derived(activeEntry ? activeEntry[0] : undefined);
+	let activeModel = $derived(activeEntry ? activeEntry[1] : undefined);
+
+	let activeField = $derived(
+		activeUrlmodel
+			? data.model.reverseForeignKeyFields?.find((item) => item.urlModel === activeUrlmodel)
+			: undefined
+	);
+
+	let activeFieldsToUse = $derived(() => {
+		if (!activeUrlmodel || !activeField) return [];
+
+		const listConfig = getListViewFields({
+			key: activeUrlmodel,
+			featureFlags: page.data?.featureflags
+		});
+
+		if (activeField.tableFields) {
+			return activeField.tableFields;
+		}
+		return listConfig.body.filter((v) => v !== activeField.field);
+	});
+
 	$effect(() => {
 		const newRelatedModelsNames = new Set(relatedModels.map((model) => model[0]));
 
@@ -694,74 +725,104 @@
 
 {#if relatedModels.length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-white">
-		<Tabs
-			value={group}
-			onValueChange={(e) => (group = e.value)}
-			listJustify="justify-center"
-			listClasses="flex flex-wrap"
-		>
-			{#snippet list()}
-				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Control value={urlmodel}>
-						{safeTranslate(model.info.localNamePlural)}
-						{#if model.table.body.length > 0}
-							<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
-						{/if}
-					</Tabs.Control>
-				{/each}
-			{/snippet}
-			{#snippet content()}
-				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Panel value={urlmodel}>
-						{#key urlmodel}
-							<div class="flex flex-row justify-between px-4 py-2">
-								<h4 class="font-semibold lowercase capitalize-first my-auto">
-									{safeTranslate('associated-' + model.info.localNamePlural)}
-								</h4>
-							</div>
-							{@const field = data.model.reverseForeignKeyFields.find(
-								(item) => item.urlModel === urlmodel
-							)}
-							{@const fieldsToUse =
-								field?.tableFields ||
-								getListViewFields({
-									key: urlmodel,
-									featureFlags: page.data?.featureflags
-								}).body.filter((v) => v !== field.field)}
-							{#if model.table}
-								<ModelTable
-									baseEndpoint={getReverseForeignKeyEndpoint({
-										parentModel: data.model,
-										targetUrlModel: urlmodel,
-										field: field.field,
-										id: data.data.id,
-										endpointUrl: field.endpointUrl
-									})}
-									source={model.table}
-									disableCreate={disableCreate || model.disableCreate}
-									disableEdit={disableEdit || model.disableEdit}
-									disableDelete={disableDelete || model.disableDelete}
-									deleteForm={model.deleteForm}
-									URLModel={urlmodel}
-									fields={fieldsToUse}
-									defaultFilters={field.defaultFilters || {}}
-								>
-									{#snippet addButton()}
-										<button
-											class="btn preset-filled-primary-500 self-end my-auto"
-											data-testid="add-button"
-											onclick={(_) => modalCreateForm(model)}
-											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
-												'add-' + model.info.localName
-											)}</button
-										>
-									{/snippet}
-								</ModelTable>
+		<div class="flex flex-col md:flex-row">
+
+			<!-- NAV LATERALE STICKY -->
+			<nav
+				class="md:w-64 md:sticky md:top-[80px] md:h-[calc(100vh-120px)] md:overflow-y-auto bg-surface-50 border-b md:border-b-0 md:border-r border-gray-200 pt-4"
+			>
+				<h3 class="px-4 pb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+					{safeTranslate('associated-objects')}
+				</h3>
+
+				<ul class="pb-4 space-y-1">
+					{#each relatedModels as [urlmodel, model]}
+						{@const isActive = group === urlmodel}
+						<li>
+							<button
+								type="button"
+								class={`
+									w-full flex items-center justify-between px-4 py-2 text-left text-sm transition rounded-r-lg
+									${isActive
+										? 'bg-primary-50 text-primary-800 border-l-4 border-primary-500 font-semibold shadow-sm'
+										: 'hover:bg-gray-50 text-gray-700 border-l-4 border-transparent'}
+								`}
+								onclick={() => (group = urlmodel)}
+							>
+								<div class="flex items-center gap-2">
+									<span class="lowercase capitalize-first">
+										{safeTranslate(model.info.localNamePlural)}
+									</span>
+								</div>
+								{#if model.table?.body?.length > 0}
+									<span class="badge preset-tonal-secondary">
+										{model.table.body.length}
+									</span>
+								{/if}
+							</button>
+						</li>
+					{/each}
+				</ul>
+			</nav>
+
+			<!-- CONTENU DE LA SECTION ACTIVE -->
+			<div class="flex-1 px-4 py-4 overflow-x-auto">
+				{#if activeModel && activeUrlmodel && activeField}
+					<div class="max-w-full rounded-xl border border-gray-100 shadow-sm p-4">
+
+						<div class="flex flex-row justify-between items-center mb-3">
+							<h4 class="font-semibold lowercase capitalize-first">
+								{safeTranslate('associated-' + activeModel.info.localNamePlural)}
+							</h4>
+							{#if activeModel.table?.body?.length > 0}
+								<span class="text-xs text-gray-500">
+									{activeModel.table.body.length}
+									&nbsp;{safeTranslate(activeModel.info.localNamePlural)}
+								</span>
 							{/if}
-						{/key}
-					</Tabs.Panel>
-				{/each}
-			{/snippet}
-		</Tabs>
+						</div>
+
+						{#if activeModel.table}
+							<ModelTable
+								baseEndpoint={getReverseForeignKeyEndpoint({
+									parentModel: data.model,
+									targetUrlModel: activeUrlmodel,
+									field: activeField.field,
+									id: data.data.id,
+									endpointUrl: activeField.endpointUrl
+								})}
+								source={activeModel.table}
+								disableCreate={disableCreate || activeModel.disableCreate}
+								disableEdit={disableEdit || activeModel.disableEdit}
+								disableDelete={disableDelete || activeModel.disableDelete}
+								deleteForm={activeModel.deleteForm}
+								URLModel={activeUrlmodel}
+								fields={activeFieldsToUse}
+								defaultFilters={activeField.defaultFilters || {}}
+							>
+								{#snippet addButton()}
+									<button
+										class="btn preset-filled-primary-500 self-end my-auto"
+										data-testid="add-button"
+										onclick={(_) => modalCreateForm(activeModel)}
+									>
+										<i class="fa-solid fa-plus mr-2 lowercase"></i>
+										{safeTranslate('add-' + activeModel.info.localName)}
+									</button>
+								{/snippet}
+							</ModelTable>
+						{:else}
+							<p class="text-sm text-gray-500">
+								{m.noDataAvailable()}
+							</p>
+						{/if}
+					</div>
+				{:else}
+					<p class="text-sm text-gray-500 px-4">
+						{m.noDataAvailable()}
+					</p>
+				{/if}
+			</div>
+		</div>
 	</div>
 {/if}
