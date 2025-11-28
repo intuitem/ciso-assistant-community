@@ -27,6 +27,7 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		page.getByTestId('form-input-severity').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-severity').selectOption('4');
 
+		await page.getByTestId('accordion').click();
 		page.getByTestId('form-input-qualifications').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-qualifications').click();
 		await page.getByRole('option', { name: 'authenticity' }).click();
