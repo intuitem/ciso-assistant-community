@@ -1920,8 +1920,24 @@ export const listViewFields = {
 		}
 	},
 	'strategic-scenarios': {
-		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'attackPaths', 'gravity'],
-		body: ['ref_id', 'name', 'description', 'ro_to_couple', 'attack_paths', 'gravity'],
+		head: [
+			'ref_id',
+			'name',
+			'description',
+			'ro_to_couple',
+			'fearedEvents',
+			'attackPaths',
+			'gravity'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'ro_to_couple',
+			'feared_events',
+			'attack_paths',
+			'gravity'
+		],
 		filters: {
 			gravity: RISK_IMPACT_FILTER
 		}
@@ -1993,7 +2009,8 @@ export const listViewFields = {
 			'status',
 			'expiration_date',
 			'domain',
-			'associatedObjectsCount'
+			'associatedObjectsCount',
+			'created_at'
 		],
 		body: [
 			'ref_id',
@@ -2002,7 +2019,8 @@ export const listViewFields = {
 			'status',
 			'expiration_date',
 			'folder',
-			'associated_objects_count'
+			'associated_objects_count',
+			'created_at'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,

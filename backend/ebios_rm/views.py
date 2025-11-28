@@ -635,6 +635,13 @@ class StrategicScenarioViewSet(BaseModelViewSet):
         "attack_paths": ["exact", "isnull"],
     }
 
+    def get_queryset(self):
+        """Optimize queryset to prefetch feared events from ro_to_couple"""
+        queryset = super().get_queryset()
+        return queryset.select_related("ro_to_couple").prefetch_related(
+            "ro_to_couple__feared_events"
+        )
+
 
 class AttackPathFilter(GenericFilterSet):
     used = df.BooleanFilter(method="is_used", label="Used")
@@ -659,6 +666,15 @@ class AttackPathViewSet(BaseModelViewSet):
     model = AttackPath
 
     filterset_class = AttackPathFilter
+
+    def perform_create(self, serializer):
+        if not serializer.validated_data.get(
+            "ref_id"
+        ) and serializer.validated_data.get("strategic_scenario"):
+            strategic_scenario = serializer.validated_data["strategic_scenario"]
+            ref_id = AttackPath.get_default_ref_id(strategic_scenario)
+            serializer.validated_data["ref_id"] = ref_id
+        serializer.save()
 
 
 class OperationalScenarioViewSet(BaseModelViewSet):

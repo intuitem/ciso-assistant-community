@@ -1317,6 +1317,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Strategic scenarios',
 		foreignKeyFields: [
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
+			{ field: 'feared_events', urlModel: 'feared-events' },
 			{
 				field: 'ro_to_couple',
 				urlModel: 'ro-to',
@@ -1337,6 +1338,17 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'attack-paths',
 				endpointUrl: 'ebios-rm/attack-paths'
 			}
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'feared_events', urlModel: 'feared-events' },
+			{ field: 'ro_to_couple' },
+			{ field: 'gravity' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'ebios_rm_study' }
 		]
 	},
 	'attack-paths': {
@@ -1363,6 +1375,18 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlParams: 'ebios_rm_study=',
 				detail: true
 			}
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'ref_id' },
+			{ field: 'form_display_name' },
+			{ field: 'description' },
+			{ field: 'strategic_scenario' },
+			{ field: 'ro_to_couple' },
+			{ field: 'is_selected' },
+			{ field: 'stakeholders' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'ebios_rm_study' }
 		]
 	},
 	'operational-scenarios': {
