@@ -42,7 +42,6 @@ jobs:
             rpm-build \
             rpmdevtools \
             rsync \
-            curl \
             wget \
             gcc \
             gcc-c++ \
