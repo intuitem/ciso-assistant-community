@@ -1762,7 +1762,7 @@
 	"isTemplate": "Recurrent",
 	"taskNode": "Task occurrence",
 	"taskNodes": "Tasks occurrences",
-	"associatedTaskNodes": "Associated occurences",
+	"associatedTaskNodes": "Associated occurrences",
 	"nextOccurrence": "Next occurrence",
 	"taskTemplate": "Task",
 	"taskTemplates": "Tasks",
