@@ -273,6 +273,28 @@ class StrategicScenarioReadSerializer(BaseModelSerializer):
     ro_to_couple = FieldsRelatedField()
     gravity = serializers.JSONField(source="get_gravity_display")
     attack_paths = FieldsRelatedField(many=True)
+    feared_events = serializers.SerializerMethodField()
+
+    def get_feared_events(self, obj):
+        """Get feared events from the RoTo couple with their gravity"""
+        feared_events_data = []
+        for feared_event in obj.ro_to_couple.feared_events.all():
+            # Build display string with name and gravity
+            gravity_display = feared_event.get_gravity_display()
+            display_str = f"{feared_event.name} ({gravity_display['name']})"
+
+            feared_events_data.append(
+                {
+                    "id": str(feared_event.id),
+                    "str": display_str,
+                    "name": feared_event.name,
+                    "description": feared_event.description,
+                    "ref_id": feared_event.ref_id,
+                    "gravity": gravity_display,
+                    "is_selected": feared_event.is_selected,
+                }
+            )
+        return feared_events_data
 
     class Meta:
         model = StrategicScenario
