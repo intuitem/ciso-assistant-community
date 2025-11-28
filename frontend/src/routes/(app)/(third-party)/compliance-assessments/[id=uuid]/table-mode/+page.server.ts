@@ -131,7 +131,8 @@ export const actions: Actions = {
 		return { status: res.status, body: await res.json() };
 	},
 	createEvidence: async (event) => {
-		return nestedWriteFormAction({ event, action: 'create' });
+		const result = await nestedWriteFormAction({ event, action: 'create' });
+		return { form: result.form, newEvidence: result.form.message.object };
 	},
 	createAppliedControl: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create' });
