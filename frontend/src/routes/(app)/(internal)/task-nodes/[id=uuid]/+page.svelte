@@ -200,7 +200,7 @@
 		</div>
 	{/if}
 
-	<!-- GRID VERY COMPACT -->
+	<!-- EXPECTED EVIDENCE TABLE -->
 	<p class="text-gray-700 text-md font-medium mb-1">
 		{m.expectedEvidence()}
 		{#if taskNode.expected_evidence.length - taskNode.evidence_reviewed.length > 0}<span
@@ -212,43 +212,46 @@
 				>{taskNode.evidence_reviewed.length} {m.done()}</span
 			>{/if}
 	</p>
-	<div class="grid grid-cols-3 gap-3">
-		{#if taskNode.expected_evidence.length > 0}
-			<div class="flex flex-col p-2 space-y-2">
+	{#if taskNode.expected_evidence.length > 0}
+		<table class="ml-2">
+			<tbody>
 				{#each taskNode.expected_evidence as evidence}
-					{#if !taskNode.evidence_reviewed.includes(evidence.id)}
-						{#if page.data.user.permissions['add_evidencerevision']}
-							<div class="flex flex-row items-center">
-								<i class="fa-solid fa-clock mr-2 text-amber-700"></i>
-								<span class="font-semibold">{evidence.folder.str}/{evidence.str}</span>
-								<button
-									class="flex flex-row items-center"
-									onclick={() => modalRevisionCreate(evidence)}
-								>
-									<i class="fa-solid fa-file-circle-plus ml-2 text-primary-500"></i>
-								</button>
-							</div>
-						{:else}
-							<Anchor href={`/evidences/${evidence.id}/`} class="flex flex-row items-center">
-								<i class="fa-solid fa-clock mr-2 text-amber-700"></i>
-								<span class="font-semibold">{evidence.folder.str}/{evidence.str}</span>
-							</Anchor>
-						{/if}
-					{:else}
-						<div class="flex flex-row items-center">
-							<i class="fa-solid fa-check mr-2 text-success-700"></i>
-							<span class="font-semibold">{evidence.folder.str}/{evidence.str}</span>
-							<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
-								<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
-							</Anchor>
-						</div>
-					{/if}
+					<tr>
+						<td class="py-1 pr-2 w-8 text-center">
+							{#if !taskNode.evidence_reviewed.includes(evidence.id)}
+								<i class="fa-solid fa-clock text-amber-700"></i>
+							{:else}
+								<i class="fa-solid fa-check text-success-700"></i>
+							{/if}
+						</td>
+						<td class="py-1 font-semibold">
+							<a href={`/evidences/${evidence.id}/`} class="hover:underline">
+								{evidence.folder.str}/{evidence.str}
+							</a>
+						</td>
+						<td class="py-1 pl-2 w-8 text-center">
+							{#if !taskNode.evidence_reviewed.includes(evidence.id)}
+								{#if page.data.user.permissions['add_evidencerevision']}
+									<button
+										onclick={() => modalRevisionCreate(evidence)}
+										class="text-primary-500 hover:text-primary-700"
+									>
+										<i class="fa-solid fa-file-circle-plus"></i>
+									</button>
+								{/if}
+							{:else}
+								<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
+									<i class="fa-solid fa-eye text-primary-500"></i>
+								</Anchor>
+							{/if}
+						</td>
+					</tr>
 				{/each}
-			</div>
-		{:else}
-			<span class="text-md px-1.5 py-0.5 font-light italic text-gray-500">{m.noEvidences()}</span>
-		{/if}
-	</div>
+			</tbody>
+		</table>
+	{:else}
+		<span class="text-md px-1.5 py-0.5 font-light italic text-gray-500">{m.noEvidences()}</span>
+	{/if}
 
 	<!-- OBSERVATION COMPACT -->
 	<div class="space-y-1">
