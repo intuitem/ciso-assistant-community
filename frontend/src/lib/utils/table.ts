@@ -948,6 +948,30 @@ export const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const APPLIED_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'category',
+		optionsEndpoint: 'applied-controls/category',
+		multiple: true,
+		optionsLabelField: 'label',
+		browserCache: 'force-cache',
+		optionsValueField: 'value'
+	}
+};
+
+export const APPLIED_CONTROL_CSF_FUNCTION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'applied-controls/csf_function',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'csfFunction',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1324,8 +1348,8 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
-			category: REFERENCE_CONTROL_CATEGORY_FILTER,
-			csf_function: CSF_FUNCTION_FILTER,
+			category: APPLIED_CONTROL_CATEGORY_FILTER,
+			csf_function: APPLIED_CONTROL_CSF_FUNCTION_FILTER,
 			priority: PRIORITY_FILTER,
 			effort: EFFORT_FILTER,
 			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
@@ -1920,8 +1944,24 @@ export const listViewFields = {
 		}
 	},
 	'strategic-scenarios': {
-		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'attackPaths', 'gravity'],
-		body: ['ref_id', 'name', 'description', 'ro_to_couple', 'attack_paths', 'gravity'],
+		head: [
+			'ref_id',
+			'name',
+			'description',
+			'ro_to_couple',
+			'fearedEvents',
+			'attackPaths',
+			'gravity'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'ro_to_couple',
+			'feared_events',
+			'attack_paths',
+			'gravity'
+		],
 		filters: {
 			gravity: RISK_IMPACT_FILTER
 		}
@@ -1993,7 +2033,8 @@ export const listViewFields = {
 			'status',
 			'expiration_date',
 			'domain',
-			'associatedObjectsCount'
+			'associatedObjectsCount',
+			'created_at'
 		],
 		body: [
 			'ref_id',
@@ -2002,7 +2043,8 @@ export const listViewFields = {
 			'status',
 			'expiration_date',
 			'folder',
-			'associated_objects_count'
+			'associated_objects_count',
+			'created_at'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,

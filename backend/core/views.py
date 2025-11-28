@@ -60,6 +60,7 @@ from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from integrations.registry import IntegrationRegistry
 from library.serializers import StoredLibrarySerializer
+from webhooks.service import dispatch_webhook_event
 from .generators import gen_audit_context
 
 from django.utils import timezone
@@ -164,6 +165,60 @@ MAPPING_MAX_DEPTH = 3
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
+
+
+class NullableChoiceFilter(df.MultipleChoiceFilter):
+    """
+    A filter that supports filtering for null values using '--' as a special value.
+    When '--' is in the filter values, it matches records where the field is null.
+    """
+
+    def __init__(self, *args, **kwargs):
+        # Add "--" to the choices
+        if "choices" in kwargs:
+            original_choices = kwargs["choices"]
+            # Add ("--", "--") to the beginning of choices
+            kwargs["choices"] = [("--", "--")] + list(original_choices)
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        if not value:
+            return qs
+
+        # Convert single value to list if needed
+        if not isinstance(value, list):
+            value = [value]
+
+        # Separate "--" (null) from other actual values
+        has_null = "--" in value
+        real_values = [v for v in value if v != "--"]
+
+        if has_null and real_values:
+            # Both null and specific values: OR condition
+            return qs.filter(
+                Q(**{f"{self.field_name}__isnull": True})
+                | Q(**{f"{self.field_name}__in": real_values})
+            )
+        elif has_null:
+            # Only null values
+            return qs.filter(**{f"{self.field_name}__isnull": True})
+        elif real_values:
+            # Only real values - filter by those values
+            return qs.filter(**{f"{self.field_name}__in": real_values})
+        else:
+            # No valid values, return empty queryset
+            return qs.none()
+
+
+def add_unset_option(choices):
+    """Add '--' (unset) option to choices dictionary or list"""
+    # Handle both dict and list of tuples format
+    if isinstance(choices, dict):
+        # For dict format {value: label}, prepend with "--": "--"
+        return {"--": "--", **choices}
+    else:
+        # For list of tuples like [(value, label), ...]
+        return [("--", "--")] + list(choices)
 
 
 def get_mapping_max_depth():
@@ -567,6 +622,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True, context=context)
         return Response(serializer.data)
 
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        dispatch_webhook_event(instance, "created", serializer=serializer)
+        return instance
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        dispatch_webhook_event(instance, "updated", serializer=serializer)
+        return instance
+
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         if request.data.get("filtering_labels"):
@@ -611,6 +676,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+        instance = self.get_object()
+        try:
+            dispatch_webhook_event(instance, "deleted")
+        except Exception:
+            logger.error("Webhook dispatch failed on delete", exc_info=True)
         return super().destroy(request, *args, **kwargs)
 
     def _get_optimized_object_data(self, queryset):
@@ -1056,15 +1126,6 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             )
             if content.get("value") is not None and content.get("value") > 0
         ]
-
-    def _perform_write(self, serializer):
-        serializer.save()
-
-    def perform_create(self, serializer):
-        return self._perform_write(serializer)
-
-    def perform_update(self, serializer):
-        return self._perform_write(serializer)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get type choices")
@@ -3104,6 +3165,12 @@ class AppliedControlFilterSet(GenericFilterSet):
         choices=AppliedControl.Status.choices, lookup_expr="icontains"
     )
     is_assigned = df.BooleanFilter(method="filter_is_assigned")
+    # Nullable choice filters that support filtering for unset values using "--"
+    category = NullableChoiceFilter(choices=AppliedControl.CATEGORY)
+    csf_function = NullableChoiceFilter(choices=AppliedControl.CSF_FUNCTION)
+    priority = NullableChoiceFilter(choices=AppliedControl.PRIORITY)
+    effort = NullableChoiceFilter(choices=AppliedControl.EFFORT)
+    control_impact = NullableChoiceFilter(choices=AppliedControl.IMPACT)
 
     def filter_findings_assessments(self, queryset, name, value):
         if value:
@@ -3174,12 +3241,8 @@ class AppliedControlFilterSet(GenericFilterSet):
         fields = {
             "name": ["exact"],
             "folder": ["exact"],
-            "category": ["exact"],
-            "csf_function": ["exact"],
-            "priority": ["exact"],
+            # category, csf_function, priority, effort, control_impact use NullableChoiceFilter (defined above)
             "reference_control": ["exact", "isnull"],
-            "effort": ["exact"],
-            "control_impact": ["exact"],
             "filtering_labels": ["exact"],
             "risk_scenarios": ["exact"],
             "risk_scenarios_e": ["exact"],
@@ -3407,27 +3470,27 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
-        return Response(dict(AppliedControl.CATEGORY))
+        return Response(add_unset_option(dict(AppliedControl.CATEGORY)))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get csf_function choices")
     def csf_function(self, request):
-        return Response(dict(AppliedControl.CSF_FUNCTION))
+        return Response(add_unset_option(dict(AppliedControl.CSF_FUNCTION)))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get priority choices")
     def priority(self, request):
-        return Response(dict(AppliedControl.PRIORITY))
+        return Response(add_unset_option(dict(AppliedControl.PRIORITY)))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get effort choices")
     def effort(self, request):
-        return Response(dict(AppliedControl.EFFORT))
+        return Response(add_unset_option(dict(AppliedControl.EFFORT)))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get impact choices")
     def control_impact(self, request):
-        return Response(dict(AppliedControl.IMPACT))
+        return Response(add_unset_option(dict(AppliedControl.IMPACT)))
 
     @action(detail=False, name="Get all applied controls owners")
     def owner(self, request):
@@ -4783,6 +4846,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                         "The approver is not allowed to approve this risk acceptance"
                     )
         risk_acceptance = serializer.save()
+        dispatch_webhook_event(risk_acceptance, "updated", serializer)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get state choices")
@@ -9810,6 +9874,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "detection",
         "owners",
         "entities",
+        "assets",
     ]
 
     export_config = {
@@ -10303,8 +10368,9 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return Response(dict(TimelineEntry.EntryType.get_manual_entry_types()))
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-        return
+        instance = serializer.save(author=self.request.user)
+        dispatch_webhook_event(instance, "created", serializer)
+        return instance
 
     def perform_destroy(self, instance):
         if instance.entry_type in [
