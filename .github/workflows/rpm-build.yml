@@ -34,6 +34,10 @@ jobs:
 
       - name: Install Build Dependencies
         run: |
+          # Enable CRB repository for development packages
+          dnf install -y dnf-plugins-core
+          dnf config-manager --set-enabled crb
+
           dnf install -y \
             rpm-build \
             rpmdevtools \
