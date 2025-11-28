@@ -7,11 +7,14 @@ import sys
 import pandas as pd
 from pathlib import Path
 
+
 def clean_line(line):
     return line.strip()
 
+
 def is_page_marker(line):
     return re.match(r"--- PAGE \d+ ---", line.strip())
+
 
 def is_useless_line(line):
     stripped = line.strip()
@@ -21,23 +24,25 @@ def is_useless_line(line):
         or re.match(r"^\d+$", stripped)
     )
 
+
 def format_text(text):
     # Handle the specific case '; and  ' (Square Bullet)
     text = re.sub(r"; and\s+\s+", r"; and\n        * ", text)
 
     # Handle sub-bullets starting with '' (Square Bullet) after :, ; or .
     text = re.sub(r"(?<=[:;.\)])\s+\s+", r"\n        * ", text)
-    
+
     # Handle the specific case '; and o '
     text = re.sub(r"; and o\s+", r"; and\n    o ", text, flags=re.IGNORECASE)
-    
+
     # Handle sub-bullets starting with 'o' after :, ; or .
     text = re.sub(r"(?<=[:;.\)])\s+o\s+", r"\n    o ", text)
-    
+
     # Add line break before each bullet point
     text = re.sub(r"•", r"\n•", text)
-    
+
     return text
+
 
 def append_footnotes_to_cell(text, footnotes_dict):
     if not text:
@@ -45,7 +50,7 @@ def append_footnotes_to_cell(text, footnotes_dict):
     matches = re.findall(r"\((\d+)\)", text)
     added_notes = set()
     first_add = True
-    
+
     for num in matches:
         if num in footnotes_dict and num not in added_notes:
             if first_add:
@@ -55,6 +60,7 @@ def append_footnotes_to_cell(text, footnotes_dict):
             added_notes.add(num)
             del footnotes_dict[num]
     return text
+
 
 def extract_records(lines):
     records = []
@@ -85,7 +91,7 @@ def extract_records(lines):
             tips_wrote_for_guidance = False
             tips_wrote_for_evidence = False
 
-            if ref_id.count('.') == 2:
+            if ref_id.count(".") == 2:
                 # case X.X.X (unchanged)
                 in_tips = False
                 i += 1
@@ -100,24 +106,28 @@ def extract_records(lines):
                         # Begin collecting footnotes until next page marker
                         in_footnotes = True
                         current_number = None
-                        
+
                         while i < len(lines):
                             line = clean_line(lines[i])
                             if is_page_marker(line):
                                 if current_number:
-                                    footnotes[current_number] = format_text(footnotes[current_number])
+                                    footnotes[current_number] = format_text(
+                                        footnotes[current_number]
+                                    )
                                 in_footnotes = False
                                 current_number = None
                                 break  # stop reading footnotes at page marker
-                            
+
                             if re.match(r"^\d+$", line):
                                 i += 1
                                 continue  # IGNORE lines with only a number
-                            
+
                             match = re.match(r"^\((\d+)\)\s*(.*)", line)
                             if match:
                                 if current_number:
-                                    footnotes[current_number] = format_text(footnotes[current_number])
+                                    footnotes[current_number] = format_text(
+                                        footnotes[current_number]
+                                    )
                                 current_number = match.group(1)
                                 content = match.group(2)
                                 footnotes[current_number] = content.strip()
@@ -125,7 +135,6 @@ def extract_records(lines):
                                 footnotes[current_number] += " " + line
                             i += 1
                         continue
-
 
                     if line.startswith("GUIDANCE"):
                         mode = "guidance"
@@ -156,23 +165,27 @@ def extract_records(lines):
                         else:
                             current_evidence += " " + line
                     i += 1
-                    
+
                 # Apply formatting at the end, on the full accumulated text
                 current_annotation = format_text(current_annotation)
                 current_evidence = format_text(current_evidence)
 
-                records.append({
-                    "ref_id": current_ref,
-                    "annotation": current_annotation.strip(),
-                    "typical_evidence": current_evidence.strip()
-                })
+                records.append(
+                    {
+                        "ref_id": current_ref,
+                        "annotation": current_annotation.strip(),
+                        "typical_evidence": current_evidence.strip(),
+                    }
+                )
                 continue  # don't increment i again
 
-            elif ref_id.count('.') == 1:
+            elif ref_id.count(".") == 1:
                 # New case : ref_id = X.X and NOT followed by X.X.X.
                 # Peek next non-useless line to check if starts with X.X.X.
                 peek_i = i + 1
-                while peek_i < len(lines) and is_useless_line(clean_line(lines[peek_i])):
+                while peek_i < len(lines) and is_useless_line(
+                    clean_line(lines[peek_i])
+                ):
                     peek_i += 1
 
                 if peek_i < len(lines):
@@ -192,31 +205,35 @@ def extract_records(lines):
                                 # Begin collecting footnotes until next page marker
                                 in_footnotes = True
                                 current_number = None
-                                
+
                                 while i < len(lines):
                                     line = clean_line(lines[i])
                                     if is_page_marker(line):
                                         if current_number:
-                                            footnotes[current_number] = format_text(footnotes[current_number])
+                                            footnotes[current_number] = format_text(
+                                                footnotes[current_number]
+                                            )
                                         in_footnotes = False
                                         current_number = None
                                         break  # stop reading footnotes at page marker
-                                    
+
                                     if re.match(r"^\d+$", line):
                                         i += 1
                                         continue  # IGNORE lines with only a number
-                                    
+
                                     match = re.match(r"^\((\d+)\)\s*(.*)", line)
                                     if match:
                                         if current_number:
-                                            footnotes[current_number] = format_text(footnotes[current_number])
+                                            footnotes[current_number] = format_text(
+                                                footnotes[current_number]
+                                            )
                                         current_number = match.group(1)
                                         content = match.group(2)
                                         footnotes[current_number] = content.strip()
                                     elif current_number:
                                         footnotes[current_number] += " " + line
                                     i += 1
-                                    
+
                                 continue
 
                             if line.startswith("GUIDANCE"):
@@ -252,42 +269,49 @@ def extract_records(lines):
                         current_annotation = format_text(current_annotation)
                         current_evidence = format_text(current_evidence)
 
-                        records.append({
-                            "ref_id": current_ref,
-                            "annotation": current_annotation.strip(),
-                            "typical_evidence": current_evidence.strip()
-                        })
+                        records.append(
+                            {
+                                "ref_id": current_ref,
+                                "annotation": current_annotation.strip(),
+                                "typical_evidence": current_evidence.strip(),
+                            }
+                        )
                         continue  # don't increment i again
                     else:
                         # next line is X.X.X, treat as simple X.X ref (no inner blocks)
-                        records.append({
-                            "ref_id": current_ref,
-                            "annotation": "",
-                            "typical_evidence": ""
-                        })
+                        records.append(
+                            {
+                                "ref_id": current_ref,
+                                "annotation": "",
+                                "typical_evidence": "",
+                            }
+                        )
                 else:
                     # no next line, treat as simple X.X ref
-                    records.append({
-                        "ref_id": current_ref,
-                        "annotation": "",
-                        "typical_evidence": ""
-                    })
+                    records.append(
+                        {
+                            "ref_id": current_ref,
+                            "annotation": "",
+                            "typical_evidence": "",
+                        }
+                    )
             else:
                 # simple reference X. or others without inner blocks
-                records.append({
-                    "ref_id": current_ref,
-                    "annotation": "",
-                    "typical_evidence": ""
-                })
+                records.append(
+                    {"ref_id": current_ref, "annotation": "", "typical_evidence": ""}
+                )
 
         i += 1
 
     # Add footnotes
     for record in records:
         record["annotation"] = append_footnotes_to_cell(record["annotation"], footnotes)
-        record["typical_evidence"] = append_footnotes_to_cell(record["typical_evidence"], footnotes)
+        record["typical_evidence"] = append_footnotes_to_cell(
+            record["typical_evidence"], footnotes
+        )
 
     return records
+
 
 def main():
     if len(sys.argv) != 2:
@@ -308,6 +332,7 @@ def main():
     output_file = input_file.with_name("NIS2_guidance_evidence_output.xlsx")
     df.to_excel(output_file, index=False)
     print(f"✅ Excel file saved to: {output_file}")
+
 
 if __name__ == "__main__":
     main()

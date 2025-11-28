@@ -10,7 +10,6 @@ Usage:
     python prepare_mapping_v2.py source.yaml target.yaml
 """
 
-
 import openpyxl
 import argparse
 import yaml
@@ -18,14 +17,13 @@ import os
 import sys
 
 
-
 def load_and_validate_yaml(path, label):
     """Load a YAML file and ensure required structure exists."""
-    
+
     if not os.path.exists(path):
-        raise FileNotFoundError(f"{label} file not found: \"{path}\"")
+        raise FileNotFoundError(f'{label} file not found: "{path}"')
     if not os.path.isfile(path):
-        raise IsADirectoryError(f"{label} path is not a file: \"{path}\"")
+        raise IsADirectoryError(f'{label} path is not a file: "{path}"')
 
     with open(path, "r", encoding="utf-8") as f:
         try:
@@ -38,9 +36,9 @@ def load_and_validate_yaml(path, label):
 
     # Basic structure check
     if "urn" not in data:
-        raise KeyError(f"{label} file is missing the \"urn\" field.")
+        raise KeyError(f'{label} file is missing the "urn" field.')
     if "objects" not in data or "framework" not in data["objects"]:
-        raise KeyError(f"{label} file is missing the \"objects.framework\" structure.")
+        raise KeyError(f'{label} file is missing the "objects.framework" structure.')
     if "locale" not in data:
         raise KeyError(f'{label} file is missing the "locale" field.')
 
@@ -48,10 +46,11 @@ def load_and_validate_yaml(path, label):
 
 
 def generate_mapping_excel(source_yaml, target_yaml):
-
     packager = "intuitem"
 
-    print(f"⌛ Parsing \"{os.path.basename(source_yaml)}\" and \"{os.path.basename(target_yaml)}\"...")
+    print(
+        f'⌛ Parsing "{os.path.basename(source_yaml)}" and "{os.path.basename(target_yaml)}"...'
+    )
 
     # Load and validate YAML files
     source = load_and_validate_yaml(source_yaml, "Source")
@@ -117,13 +116,15 @@ def generate_mapping_excel(source_yaml, target_yaml):
 
     # === Sheet: mappings_content (formerly "mappings") ===
     ws_mappings = wb_output.create_sheet("mappings_content")
-    ws_mappings.append([
-        "source_node_id",
-        "target_node_id",
-        "relationship",
-        "rationale",
-        "strength_of_relationship",
-    ])
+    ws_mappings.append(
+        [
+            "source_node_id",
+            "target_node_id",
+            "relationship",
+            "rationale",
+            "strength_of_relationship",
+        ]
+    )
     # Populate source node IDs for mapping rows (initially only source side filled)
     for node in source_framework["requirement_nodes"]:
         if node["assessable"]:
@@ -140,7 +141,9 @@ def generate_mapping_excel(source_yaml, target_yaml):
     ws_guidelines.append(["", "equal"])
     ws_guidelines.append(["", "superset"])
     ws_guidelines.append(["", "not_related"])
-    ws_guidelines.append(["rationale", "use one of the following values (or leave empty)"])
+    ws_guidelines.append(
+        ["rationale", "use one of the following values (or leave empty)"]
+    )
     ws_guidelines.append(["", "syntactic"])
     ws_guidelines.append(["", "semantic"])
     ws_guidelines.append(["", "functional"])
@@ -150,42 +153,56 @@ def generate_mapping_excel(source_yaml, target_yaml):
     ws_source = wb_output.create_sheet("source")
     ws_source.append(["node_id", "assessable", "urn", "ref_id", "name", "description"])
     for node in source_framework["requirement_nodes"]:
-        node_id = node["urn"].split(source_node_base_urn + ":")[-1] if node["assessable"] else ""
-        ws_source.append([
-            node_id,
-            node["assessable"],
-            node["urn"],
-            node.get("ref_id"),
-            node.get("name"),
-            node.get("description"),
-        ])
+        node_id = (
+            node["urn"].split(source_node_base_urn + ":")[-1]
+            if node["assessable"]
+            else ""
+        )
+        ws_source.append(
+            [
+                node_id,
+                node["assessable"],
+                node["urn"],
+                node.get("ref_id"),
+                node.get("name"),
+                node.get("description"),
+            ]
+        )
 
     # === Sheet: target (target framework requirements) ===
     ws_target = wb_output.create_sheet("target")
     ws_target.append(["node_id", "assessable", "urn", "ref_id", "name", "description"])
     for node in target_framework["requirement_nodes"]:
-        node_id = node["urn"].split(target_node_base_urn + ":")[-1] if node["assessable"] else ""
-        ws_target.append([
-            node_id,
-            node["assessable"],
-            node["urn"],
-            node.get("ref_id"),
-            node.get("name"),
-            node.get("description"),
-        ])
+        node_id = (
+            node["urn"].split(target_node_base_urn + ":")[-1]
+            if node["assessable"]
+            else ""
+        )
+        ws_target.append(
+            [
+                node_id,
+                node["assessable"],
+                node["urn"],
+                node.get("ref_id"),
+                node.get("name"),
+                node.get("description"),
+            ]
+        )
 
     # Save the workbook to disk
     try:
         wb_output.save(output_file_name)
     except Exception as e:
-        raise IOError(f"Failed to save Excel file \"{output_file_name}\"\n\t   {e}")
-    
-    print(f"✅ Excel file created successfully: \"{output_file_name}\"")
+        raise IOError(f'Failed to save Excel file "{output_file_name}"\n\t   {e}')
+
+    print(f'✅ Excel file created successfully: "{output_file_name}"')
 
 
 def main():
-
-    parser = argparse.ArgumentParser(prog="prepare_mapping_v2.py", description="Prepare a mapping Excel file for CISO Assistant")
+    parser = argparse.ArgumentParser(
+        prog="prepare_mapping_v2.py",
+        description="Prepare a mapping Excel file for CISO Assistant",
+    )
     parser.add_argument("source_yaml", help="Source YAML file")
     parser.add_argument("target_yaml", help="Target YAML file")
     args = parser.parse_args()

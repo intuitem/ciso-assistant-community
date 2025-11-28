@@ -2,7 +2,6 @@
 Script that numbers the requirement names correctly in the Excel framework file.
 """
 
-
 from openpyxl import load_workbook
 
 # Load the Excel file
@@ -39,4 +38,3 @@ for row in range(2, ws.max_row + 1):
 
 # Save the modified file
 wb.save("nist-sp-800-66-rev2_v2.xlsx")
-

@@ -179,9 +179,11 @@ questions = []
 risk_matrix = {}
 requirement_mappings = []
 
+
 def error(message):
     print("Error:", message)
     exit(1)
+
 
 def read_header(row):
     """
@@ -200,6 +202,7 @@ def read_header(row):
         i += 1
     return header
 
+
 def get_translations(header, row):
     """read available translations"""
     result = {}
@@ -211,6 +214,7 @@ def get_translations(header, row):
                 result[lang] = {}
             result[lang][v] = row[i].value
     return result
+
 
 def get_translations_content(library_vars, prefix):
     """read available translations in library_vars"""
@@ -225,12 +229,14 @@ def get_translations_content(library_vars, prefix):
             result[lang][k2] = v
     return result
 
+
 # https://gist.github.com/Mike-Honey/b36e651e9a7f1d2e1d60ce1c63b9b633
 from colorsys import rgb_to_hls, hls_to_rgb
 
 RGBMAX = 0xFF  # Corresponds to 255
 HLSMAX = 240  # MS excel's tint function expects that HLS is base 240. see:
 # https://social.msdn.microsoft.com/Forums/en-US/e9d8c136-6d62-4098-9b1b-dac786149f43/excel-color-tint-algorithm-incorrect?forum=os_binaryfile#d3c2ac95-52e0-476b-86f1-e2a697f24969
+
 
 def rgb_to_ms_hls(red, green=None, blue=None):
     """Converts rgb values in range (0,1) or a hex string of the form '[#aa]rrggbb' to HLSMAX based HLS, (alpha values are ignored)"""
@@ -246,11 +252,13 @@ def rgb_to_ms_hls(red, green=None, blue=None):
     h, l, s = rgb_to_hls(red, green, blue)
     return (int(round(h * HLSMAX)), int(round(l * HLSMAX)), int(round(s * HLSMAX)))
 
+
 def ms_hls_to_rgb(hue, lightness=None, saturation=None):
     """Converts HLSMAX based HLS values to rgb values in the range (0,1)"""
     if lightness is None:
         hue, lightness, saturation = hue
     return hls_to_rgb(hue / HLSMAX, lightness / HLSMAX, saturation / HLSMAX)
+
 
 def rgb_to_hex(red, green=None, blue=None):
     """Converts (0,1) based RGB values to a hex string 'rrggbb'"""
@@ -264,6 +272,7 @@ def rgb_to_hex(red, green=None, blue=None):
             int(round(blue * RGBMAX)),
         )
     ).upper()
+
 
 def get_theme_colors(wb):
     """Gets theme colors from the workbook"""
@@ -299,6 +308,7 @@ def get_theme_colors(wb):
 
     return colors
 
+
 def tint_luminance(tint, lum):
     """Tints a HLSMAX based luminance"""
     # See: http://ciintelligence.blogspot.co.uk/2012/02/converting-excel-theme-color-and-tint.html
@@ -307,11 +317,13 @@ def tint_luminance(tint, lum):
     else:
         return int(round(lum * (1.0 - tint) + (HLSMAX - HLSMAX * (1.0 - tint))))
 
+
 def theme_and_tint_to_rgb(wb, theme, tint):
     """Given a workbook, a theme number and a tint return a hex based rgb"""
     rgb = get_theme_colors(wb)[theme]
     h, l, s = rgb_to_ms_hls(rgb)
     return rgb_to_hex(ms_hls_to_rgb(h, tint_luminance(tint, l), s))
+
 
 def get_color(wb, cell):
     """get cell color; None for no fill"""
@@ -323,6 +335,7 @@ def get_color(wb, cell):
     tint = cell.fill.start_color.tint
     color = theme_and_tint_to_rgb(wb, theme, tint)
     return "#" + color
+
 
 def build_reference_control_ids_set():
     """
@@ -423,8 +436,8 @@ def get_answers(tab):
                     else []
                 )
                 if "question_choices" in header
-                    else None
-                )
+                else None
+            )
             choices = []
             for line in choices_lines:
                 if line.startswith("|"):
@@ -438,12 +451,14 @@ def get_answers(tab):
 
     return found_answers
 
+
 ################################################################
 def build_ids_set(tab_name):
     output = set()
     raw = dataframe[tab_name]["A"]
     output = {cell.value for cell in raw if cell.value is not None}
     return output
+
 
 for tab in dataframe:
     print("parsing tab", tab.title)
@@ -613,7 +628,9 @@ for tab in dataframe:
                 )
                 if len(answer) != 1 and len(answer) != len(questions):
                     print("error: answer and questions mismatch on requirement", urn)
-                    print("hint: please check at least one answer is defined for all questions or each question has an answer")
+                    print(
+                        "hint: please check at least one answer is defined for all questions or each question has an answer"
+                    )
                     exit(1)
                 threat_urns = []
                 function_urns = []
@@ -639,13 +656,19 @@ for tab in dataframe:
                 if answer and questions:
                     req_node["questions"] = {
                         f"{req_node['urn']}:question:{i + 1}": {
-                            "type": answers[answer[i]]["type"] if len(answer) > 1 else answers[answer[0]]["type"],
+                            "type": answers[answer[i]]["type"]
+                            if len(answer) > 1
+                            else answers[answer[0]]["type"],
                             "choices": [
                                 {
                                     "urn": f"{req_node['urn']}:question:{i + 1}:choice:{j + 1}",
-                                    "value": choice["value"]
+                                    "value": choice["value"],
                                 }
-                                for j, choice in enumerate(answers[answer[i] or answer[0]]["choices"] if len(answer) > 1 else answers[answer[0]]["choices"])
+                                for j, choice in enumerate(
+                                    answers[answer[i] or answer[0]]["choices"]
+                                    if len(answer) > 1
+                                    else answers[answer[0]]["choices"]
+                                )
                             ],
                             "text": question,
                         }
@@ -893,8 +916,12 @@ for tab in dataframe:
                     print(
                         f"WARNING: this target node id: {tgt_node_id} is not recognized. Fix it and try again before uploading your file."
                     )
-                source_requirement_urn = source_prefix + ":" + src_node_id.lower().replace(" ", "-")
-                target_requirement_urn = target_prefix + ":" + tgt_node_id.lower().replace(" ", "-")
+                source_requirement_urn = (
+                    source_prefix + ":" + src_node_id.lower().replace(" ", "-")
+                )
+                target_requirement_urn = (
+                    target_prefix + ":" + tgt_node_id.lower().replace(" ", "-")
+                )
                 relationship = row[header["relationship"]].value
                 rationale = (
                     row[header["rationale"]].value if "rationale" in header else None
@@ -932,7 +959,7 @@ lib_date = library_vars.get("library_publication_date", datetime.datetime.now())
 if type(lib_date) == datetime.datetime:
     lib_date = lib_date.date()
 
-convert_library_version = f"v1 ; Compat Mode: [{args.compat}]"    
+convert_library_version = f"v1 ; Compat Mode: [{args.compat}]"
 
 library = {
     "convert_library_version": convert_library_version,

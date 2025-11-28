@@ -8,6 +8,7 @@ import sys
 import argparse
 from openpyxl.utils.exceptions import InvalidFileException
 
+
 def pretify_content(content):
     res = None
     stop_join = False
@@ -50,9 +51,8 @@ except InvalidFileException:
     print(f'❌ [ERROR] The file is not a valid Excel file: "{input_file_name}"')
     sys.exit(1)
 except Exception as e:
-    print(f'❌ [ERROR] Unexpected error while loading Excel file: {e}')
+    print(f"❌ [ERROR] Unexpected error while loading Excel file: {e}")
     sys.exit(1)
-
 
 
 output_table = []
@@ -140,7 +140,7 @@ ws1.append(
         "description",
         "implementation_groups",
         "questions",
-        "answer"
+        "answer",
     ]
 )
 for row in output_table:
@@ -170,7 +170,9 @@ try:
     print(f'✅ Excel file saved successfully: "{output_file_name}"')
     sys.exit(0)
 except PermissionError:
-    print(f'❌ [ERROR] Permission denied. The file may be open or locked: "{output_file_name}"')
+    print(
+        f'❌ [ERROR] Permission denied. The file may be open or locked: "{output_file_name}"'
+    )
     sys.exit(1)
 except FileNotFoundError:
     print(f'❌ [ERROR] Invalid path. Cannot save to: "{output_file_name}"')

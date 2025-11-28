@@ -8,6 +8,7 @@ import shutil
 from pathlib import Path
 from openpyxl import load_workbook
 
+
 def transfer_columns(source_path, dest_path):
     # Load the source Excel file
     src_wb = load_workbook(source_path)
@@ -30,10 +31,7 @@ def transfer_columns(source_path, dest_path):
         ref_id = str(row[src_ref_idx]).strip()
         if ref_id in ref_mapping:
             raise Exception(f"Duplicate 'ref_id' found in source file: {ref_id}")
-        ref_mapping[ref_id] = (
-            row[src_annotation_idx],
-            row[src_evidence_idx]
-        )
+        ref_mapping[ref_id] = (row[src_annotation_idx], row[src_evidence_idx])
 
     # Load the destination Excel file
     dest_wb = load_workbook(dest_path)
@@ -42,7 +40,9 @@ def transfer_columns(source_path, dest_path):
     dest_ws = dest_wb["req_content"]
 
     # Read headers from the destination file
-    dest_headers = [cell.value for cell in next(dest_ws.iter_rows(min_row=1, max_row=1))]
+    dest_headers = [
+        cell.value for cell in next(dest_ws.iter_rows(min_row=1, max_row=1))
+    ]
 
     try:
         ref_col_idx = dest_headers.index("ref_id")
@@ -70,10 +70,17 @@ def transfer_columns(source_path, dest_path):
     dest_wb.save(dest_path)
     print(f"Transfer completed successfully. Output saved to '{dest_path}'.")
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Transfer 'annotation' and 'typical_evidence' columns based on matching 'ref_id'")
+    parser = argparse.ArgumentParser(
+        description="Transfer 'annotation' and 'typical_evidence' columns based on matching 'ref_id'"
+    )
     parser.add_argument("source", help="Path to the source Excel file")
-    parser.add_argument("destination", nargs="?", help="Path to the destination Excel file (optional). If not provided, 'output.xlsx' will be created.")
+    parser.add_argument(
+        "destination",
+        nargs="?",
+        help="Path to the destination Excel file (optional). If not provided, 'output.xlsx' will be created.",
+    )
     args = parser.parse_args()
 
     source_path = Path(args.source)
@@ -82,6 +89,8 @@ if __name__ == "__main__":
     else:
         destination_path = Path("output.xlsx")
         shutil.copy(source_path, destination_path)
-        print(f"No destination provided. Using '{destination_path}' as the output file.")
+        print(
+            f"No destination provided. Using '{destination_path}' as the output file."
+        )
 
     transfer_columns(str(source_path), str(destination_path))

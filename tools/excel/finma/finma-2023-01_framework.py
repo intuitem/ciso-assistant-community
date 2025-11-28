@@ -16,22 +16,36 @@ Final review and manual adjustments are strongly recommended
 to ensure data quality and correct structure before any further use.
 """
 
-
 import fitz
 import re
 from openpyxl import Workbook
 
-REF_ID_PREFIX = 'Rz'
+REF_ID_PREFIX = "Rz"
 
-def is_chapter(line): return re.match(r"^[IVX]+\.$", line.strip())
-def is_subchapter(line): return re.match(r"^[A-Z]\.$", line.strip())
-def is_section(line): return re.match(r"^[a-z]\)$", line.strip())
-def is_paragraph_start(line): return re.match(r"^[a-z]\.", line.strip()) or line.strip().startswith("•")
-def clean_text(text): return ' '.join(text.strip().split())
+
+def is_chapter(line):
+    return re.match(r"^[IVX]+\.$", line.strip())
+
+
+def is_subchapter(line):
+    return re.match(r"^[A-Z]\.$", line.strip())
+
+
+def is_section(line):
+    return re.match(r"^[a-z]\)$", line.strip())
+
+
+def is_paragraph_start(line):
+    return re.match(r"^[a-z]\.", line.strip()) or line.strip().startswith("•")
+
+
+def clean_text(text):
+    return " ".join(text.strip().split())
+
 
 def extract_annotations(text):
     annotations = {}
-    lines = text.strip().split('\n')
+    lines = text.strip().split("\n")
     current_num = None
     current_lines = []
 
@@ -59,6 +73,7 @@ def extract_annotations(text):
 
     return annotations
 
+
 def join_lines_with_hyphen(lines):
     result = ""
     for i, line in enumerate(lines):
@@ -72,6 +87,7 @@ def join_lines_with_hyphen(lines):
                 result += " "
     return result
 
+
 # Exceptions pour titres multi-lignes
 title_exceptions = {
     "chapter": {"VI.": 3, "VII.": 1},
@@ -79,10 +95,10 @@ title_exceptions = {
     "section": {
         "IV.B.a)": 1,
         "IV.B.b)": 1,
-    }
+    },
 }
 
-merge_page_paragraphs = {13+1}
+merge_page_paragraphs = {13 + 1}
 
 wb = Workbook()
 ws = wb.active
@@ -109,7 +125,7 @@ for i in range(2, 15):
     for b in blocks:
         text = b[4]
         if text.strip():
-            lines.extend(text.strip().split('\n'))
+            lines.extend(text.strip().split("\n"))
 
     j = 0
     paragraph_lines = []
@@ -129,7 +145,8 @@ for i in range(2, 15):
             num_lines = title_exceptions["chapter"].get(key, 2)
             for _ in range(num_lines - 1):
                 j += 1
-                if j < len(lines): title_lines.append(clean_text(lines[j]))
+                if j < len(lines):
+                    title_lines.append(clean_text(lines[j]))
             full_title = join_lines_with_hyphen(title_lines)
             context = {"chapter": full_title, "subchapter": None, "section": None}
             current_depth = 1
@@ -144,7 +161,8 @@ for i in range(2, 15):
             num_lines = title_exceptions["subchapter"].get(parent_key, 2)
             for _ in range(num_lines - 1):
                 j += 1
-                if j < len(lines): title_lines.append(clean_text(lines[j]))
+                if j < len(lines):
+                    title_lines.append(clean_text(lines[j]))
             full_title = join_lines_with_hyphen(title_lines)
             context["subchapter"] = full_title
             context["section"] = None
@@ -159,7 +177,8 @@ for i in range(2, 15):
             num_lines = title_exceptions["section"].get(key, 2)
             for _ in range(num_lines - 1):
                 j += 1
-                if j < len(lines): title_lines.append(clean_text(lines[j]))
+                if j < len(lines):
+                    title_lines.append(clean_text(lines[j]))
             full_title = join_lines_with_hyphen(title_lines)
             context["section"] = full_title
             current_depth = 3
@@ -189,12 +208,23 @@ for i in range(2, 15):
             ref_id = f"{REF_ID_PREFIX} {paragraph_counter}"
 
             annotation_set = set()
-            for word, num in re.findall(r"([^\W\d_]+)(\d+)(?!\w)", full_paragraph, re.UNICODE):
+            for word, num in re.findall(
+                r"([^\W\d_]+)(\d+)(?!\w)", full_paragraph, re.UNICODE
+            ):
                 if num in annotations:
                     annotation_set.add(f"[{num}] {annotations[num]}")
             annotation_str = "\n".join(sorted(annotation_set))
 
-            ws.append([assessable, current_depth + 1, "", ref_id, full_paragraph, annotation_str])
+            ws.append(
+                [
+                    assessable,
+                    current_depth + 1,
+                    "",
+                    ref_id,
+                    full_paragraph,
+                    annotation_str,
+                ]
+            )
             previous_paragraph_row = ws.max_row
             paragraph_counter += 1
             continue
@@ -207,7 +237,9 @@ for i in range(2, 15):
             ref_id = f"{REF_ID_PREFIX} {paragraph_counter}"
 
             annotation_set = set()
-            for word, num in re.findall(r"([^\W\d_]+)(\d+)(?!\w)", full_paragraph, re.UNICODE):
+            for word, num in re.findall(
+                r"([^\W\d_]+)(\d+)(?!\w)", full_paragraph, re.UNICODE
+            ):
                 if num in annotations:
                     annotation_set.add(f"[{num}] {annotations[num]}")
             annotation_str = "\n".join(sorted(annotation_set))
@@ -217,13 +249,24 @@ for i in range(2, 15):
                 previous_cell.value = previous_cell.value.strip() + " " + full_paragraph
                 if annotation_str:
                     ann_cell = ws.cell(row=previous_paragraph_row, column=6)
-                    existing = ann_cell.value.strip().split("\n") if ann_cell.value else []
+                    existing = (
+                        ann_cell.value.strip().split("\n") if ann_cell.value else []
+                    )
                     for new_ann in sorted(annotation_set):
                         if new_ann not in existing:
                             existing.append(new_ann)
                     ann_cell.value = "\n".join(existing)
             else:
-                ws.append([assessable, current_depth + 1, "", ref_id, full_paragraph, annotation_str])
+                ws.append(
+                    [
+                        assessable,
+                        current_depth + 1,
+                        "",
+                        ref_id,
+                        full_paragraph,
+                        annotation_str,
+                    ]
+                )
                 previous_paragraph_row = ws.max_row
                 paragraph_counter += 1
 
@@ -241,6 +284,8 @@ if paragraph_lines:
         if num in annotations:
             annotation_set.add(f"[{num}] {annotations[num]}")
     annotation_str = "\n".join(sorted(annotation_set))
-    ws.append([assessable, current_depth + 1, "", ref_id, full_paragraph, annotation_str])
+    ws.append(
+        [assessable, current_depth + 1, "", ref_id, full_paragraph, annotation_str]
+    )
 
 wb.save("finma_framework_final_DE.xlsx")

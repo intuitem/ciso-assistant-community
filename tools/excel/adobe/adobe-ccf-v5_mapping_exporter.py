@@ -10,10 +10,12 @@ import re
 
 # === Configurable parameters ===
 source_file = "Open_Source_CCF_INFO.xlsx"
-destination_file = "part_mapping_adobe-ccf-v5-to-pcidss-4_0.xlsx"  # <--- You can change this
+destination_file = (
+    "part_mapping_adobe-ccf-v5-to-pcidss-4_0.xlsx"  # <--- You can change this
+)
 source_sheet = "CCF Open Source v5"
 destination_sheet = "mappings"
-target_column_name = "PCI-DSS V4 Ref #"   # <--- You can change this
+target_column_name = "PCI-DSS V4 Ref #"  # <--- You can change this
 
 # Load the Excel sheet (header is row 2, i.e., index 1)
 df = pd.read_excel(source_file, sheet_name=source_sheet, header=1)
@@ -30,13 +32,14 @@ for _, row in df.iterrows():
         continue
 
     # Split on both newlines and commas, then clean
-    refs = [str(ref).strip().lower() for ref in re.split(r'[\n,]+', str(soc2_raw)) if str(ref).strip()]
-    
+    refs = [
+        str(ref).strip().lower()
+        for ref in re.split(r"[\n,]+", str(soc2_raw))
+        if str(ref).strip()
+    ]
+
     for ref in refs:
-        results.append({
-            "source_node_id": str(ccf_id),
-            "target_node_id": str(ref)
-        })
+        results.append({"source_node_id": str(ccf_id), "target_node_id": str(ref)})
 
 # Create DataFrame and force string type
 df_result = pd.DataFrame(results, dtype=str)
@@ -45,4 +48,4 @@ df_result = pd.DataFrame(results, dtype=str)
 with pd.ExcelWriter(destination_file, engine="openpyxl") as writer:
     df_result.to_excel(writer, sheet_name=destination_sheet, index=False)
 
-print(f"✅ Conversion complete: \"{destination_file}\"")
+print(f'✅ Conversion complete: "{destination_file}"')

@@ -13,7 +13,11 @@ source_file = "Cisco-CCFv3-Public_INFO.xlsx"
 destination_file = "part_mapping.xlsx"  # <--- You can change this
 source_sheet = "CCF V3"
 destination_sheet = "mappings"
-target_column_names = ["SOC TSC Common Criteria 2022", "SOC TSC Availability 2022", "SOC TSC Confidentiality 2022"]  # <--- You can add more columns here
+target_column_names = [
+    "SOC TSC Common Criteria 2022",
+    "SOC TSC Availability 2022",
+    "SOC TSC Confidentiality 2022",
+]  # <--- You can add more columns here
 rows_to_ignore = [6, 367]  # 1-based row indices to ignore
 
 # Load the Excel sheet (header is row 5, i.e., index 4)
@@ -37,7 +41,11 @@ for column_name in target_column_names:
             continue
 
         # Split on both newlines and commas, then clean
-        refs = [str(ref).strip().lower() for ref in re.split(r'[\n,]+', str(soc2_raw)) if str(ref).strip()]
+        refs = [
+            str(ref).strip().lower()
+            for ref in re.split(r"[\n,]+", str(soc2_raw))
+            if str(ref).strip()
+        ]
 
         for i, ref in enumerate(refs):
             pair = (ccf_id, ref)
@@ -45,10 +53,7 @@ for column_name in target_column_names:
                 continue  # Skip duplicates
             seen_pairs.add(pair)
 
-            row_data = {
-                "source_node_id": str(ccf_id),
-                "target_node_id": str(ref)
-            }
+            row_data = {"source_node_id": str(ccf_id), "target_node_id": str(ref)}
             if first_entry:
                 row_data["Col Name"] = column_name
                 first_entry = False
@@ -61,4 +66,4 @@ df_result = pd.DataFrame(results, dtype=str)
 with pd.ExcelWriter(destination_file, engine="openpyxl") as writer:
     df_result.to_excel(writer, sheet_name=destination_sheet, index=False)
 
-print(f"✅ Conversion complete: \"{destination_file}\"")
+print(f'✅ Conversion complete: "{destination_file}"')

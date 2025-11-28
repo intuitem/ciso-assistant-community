@@ -60,10 +60,14 @@ for tab in dataframe:
                 # Cleaning and adding questions
                 if sample_questions and isinstance(sample_questions, str):
                     # Add line breaks after each "?" followed by text
-                    sample_questions = re.sub(r'\?(?=\s*\S)', '?\n', sample_questions)
+                    sample_questions = re.sub(r"\?(?=\s*\S)", "?\n", sample_questions)
 
                     # Cleaning and cutting questions
-                    cleaned_lines = [line.strip() for line in sample_questions.splitlines() if line.strip()]
+                    cleaned_lines = [
+                        line.strip()
+                        for line in sample_questions.splitlines()
+                        if line.strip()
+                    ]
                     cleaned_questions = "\n".join(cleaned_lines)
                     current_row.append(cleaned_questions)
 
@@ -74,9 +78,15 @@ for tab in dataframe:
 
                         if re.match(r"^(when|since when|as of when)\b", lowered):
                             answers.append("DATE")
-                        elif re.match(r"^(how|what|which|who|whose|explain|describe|provide|detail)\b", lowered):
+                        elif re.match(
+                            r"^(how|what|which|who|whose|explain|describe|provide|detail)\b",
+                            lowered,
+                        ):
                             answers.append("TEXT")
-                        elif re.match(r"^(is|are|do|does|can|could|should|will|would|has|have|had)\b", lowered):
+                        elif re.match(
+                            r"^(is|are|do|does|can|could|should|will|would|has|have|had)\b",
+                            lowered,
+                        ):
                             answers.append("YNNA")
                         else:
                             answers.append("TEXT")  # By Default
@@ -126,7 +136,18 @@ ws.append(["tab", "imp_grp", "implementation_groups"])
 
 # ===== Sheet: controls =====
 ws1 = wb_output.create_sheet("controls")
-ws1.append(["assessable", "depth", "ref_id", "name", "description", "questions", "answer", "implementation_groups"])
+ws1.append(
+    [
+        "assessable",
+        "depth",
+        "ref_id",
+        "name",
+        "description",
+        "questions",
+        "answer",
+        "implementation_groups",
+    ]
+)
 
 for row in output_table:
     ws1.append(row)
