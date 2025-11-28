@@ -82,11 +82,6 @@
 
 	const categories = [
 		{
-			label: m.taskTemplate(),
-			items: [taskNode.task_template],
-			baseUrl: '/task-templates'
-		},
-		{
 			label: m.appliedControls(),
 			items: taskNode.applied_controls,
 			baseUrl: '/applied-controls'
@@ -117,6 +112,16 @@
 <div class="bg-white p-4 m-4 shadow-sm rounded-lg space-y-6">
 	<!-- HEADER COMPACT -->
 	<div class="flex flex-row justify-between">
+		<!-- Task -->
+		<div class="space-y-1">
+			<p class="text-gray-700 text-md font-medium tracking-wide">
+				{m.taskTemplate()}
+			</p>
+			<Anchor class="text-md px-1.5 py-0.5 rounded anchor font-semibold hover:underline">
+				{taskNode.task_template.str}
+			</Anchor>
+		</div>
+
 		<!-- Assigned to -->
 		<div class="space-y-1">
 			<p class="text-gray-700 text-md font-medium tracking-wide">
@@ -136,86 +141,38 @@
 		<!-- Due date -->
 		<div class="space-y-1">
 			<p class="text-gray-700 text-md font-medium tracking-wide">
-				{m.dueDate()}
+				{m.occurrenceDueDate()}
 			</p>
 			<p class="text-md px-1.5 py-0.5 font-semibold">
 				{taskNode.due_date}
 			</p>
 		</div>
-
-		<!-- Status (compact buttons) -->
-		{#key taskNode}
-			<div class="flex flex-wrap gap-1 justify-end p-1">
-				<button
-					onclick={() => {
-						submitStatusChange('pending');
-					}}
-					class="px-4 py-0.5 rounded text-md border
-			{taskNode.status === 'pending'
-						? 'bg-amber-500 text-white border-amber-600'
-						: 'bg-white border-gray-300 text-gray-700 hover:bg-amber-50'}"
-				>
-					{m.pending()}
-				</button>
-
-				<button
-					onclick={() => {
-						submitStatusChange('inProgress');
-					}}
-					class="px-4 py-0.5 rounded text-md border
-			{taskNode.status === 'in_progress'
-						? 'bg-blue-500 text-white border-blue-600'
-						: 'bg-white border-gray-300 text-gray-700 hover:bg-blue-50'}"
-				>
-					{m.inProgress()}
-				</button>
-
-				<button
-					onclick={() => {
-						submitStatusChange('cancelled');
-					}}
-					class="px-4 py-0.5 rounded text-md border
-			{taskNode.status === 'cancelled'
-						? 'bg-error-500 text-white border-error-600'
-						: 'bg-white border-gray-300 text-gray-700 hover:bg-error-50'}"
-				>
-					{m.cancelled()}
-				</button>
-
-				<button
-					onclick={() => {
-						submitStatusChange('completed');
-					}}
-					class="px-4 py-0.5 rounded text-md border
-			{taskNode.status === 'completed'
-						? 'bg-success-500 text-white border-success-600'
-						: 'bg-white border-gray-300 text-gray-700 hover:bg-success-50'}"
-				>
-					{m.completed()}
-				</button>
-			</div>
-		{/key}
 	</div>
 
-	<div class="grid grid-cols-3 gap-6">
-		{#each categories as cat}
-			{#if cat.items?.length}
-				<div class="flex flex-col space-y-1">
-					<p class="text-gray-700 text-md font-medium tracking-wide">
-						{cat.label}
-					</p>
+	<div>
+		<p class="text-gray-700 text-md font-medium mb-2">
+			{m.relatedTo()}
+		</p>
+		<div class="grid grid-cols-2 gap-6 border rounded-lg p-4 bg-gray-50 place-items-center">
+			{#each categories as cat}
+				{#if cat.items?.length}
+					<div class="flex flex-col space-y-1">
+						<p class="text-gray-700 text-md font-medium tracking-wide">
+							{cat.label}
+						</p>
 
-					{#each cat.items as item}
-						<Anchor
-							class="text-md px-1.5 py-0.5 anchor font-semibold"
-							href="{cat.baseUrl}/{item.id}"
-						>
-							{item.str}
-						</Anchor>
-					{/each}
-				</div>
-			{/if}
-		{/each}
+						{#each cat.items as item}
+							<Anchor
+								class="text-md px-1.5 py-0.5 anchor font-semibold"
+								href="{cat.baseUrl}/{item.id}"
+							>
+								{item.str}
+							</Anchor>
+						{/each}
+					</div>
+				{/if}
+			{/each}
+		</div>
 	</div>
 
 	<!-- GRID VERY COMPACT -->
@@ -281,4 +238,73 @@
 			/>
 		</div>
 	</div>
+
+	<!-- Status (compact buttons) -->
+	<div class="flex space-y-1 flex-col justify-self-end">
+		<p class="text-gray-700 text-md font-medium">{m.status()}</p>
+		{#key taskNode}
+			<div class="flex flex-wrap gap-1">
+				<button
+					onclick={() => {
+						submitStatusChange('pending');
+					}}
+					class="px-4 py-0.5 rounded-lg text-md border
+			{taskNode.status === 'pending'
+						? 'bg-amber-500 text-white border-amber-600'
+						: 'bg-white border-gray-300 text-gray-700 hover:bg-amber-50'}"
+				>
+					{m.pending()}
+				</button>
+
+				<button
+					onclick={() => {
+						submitStatusChange('inProgress');
+					}}
+					class="px-4 py-0.5 rounded-lg text-md border
+			{taskNode.status === 'in_progress'
+						? 'bg-blue-500 text-white border-blue-600'
+						: 'bg-white border-gray-300 text-gray-700 hover:bg-blue-50'}"
+				>
+					{m.inProgress()}
+				</button>
+
+				<button
+					onclick={() => {
+						submitStatusChange('cancelled');
+					}}
+					class="px-4 py-0.5 rounded-lg text-md border
+			{taskNode.status === 'cancelled'
+						? 'bg-error-500 text-white border-error-600'
+						: 'bg-white border-gray-300 text-gray-700 hover:bg-error-50'}"
+				>
+					{m.cancelled()}
+				</button>
+
+				<button
+					onclick={() => {
+						submitStatusChange('completed');
+					}}
+					class="px-4 py-0.5 rounded-lg text-md border
+			{taskNode.status === 'completed'
+						? 'bg-success-500 text-white border-success-600'
+						: 'bg-white border-gray-300 text-gray-700 hover:bg-success-50'}"
+				>
+					{m.completed()}
+				</button>
+			</div>
+		{/key}
+	</div>
+</div>
+<div class="bg-white p-4 m-4 shadow-sm rounded-lg space-y-6">
+	<span class="text-gray-700 text-md font-medium mb-1">{m.legacyEvidenceField()}</span>
+	<p class="text-sm font-light text-gray-500 block mb-4 whitespace-pre-line">
+		{m.taskNodeLegacyEvidence()}
+	</p>
+	{#each taskNode.evidences as evidence}
+		<div class="flex flex-row items-center justify-between border-b pb-2 mb-2">
+			<Anchor href={`/evidences/${evidence.id}/`} class="font-semibold text-md anchor">
+				{evidence.str}
+			</Anchor>
+		</div>
+	{/each}
 </div>

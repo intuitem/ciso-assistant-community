@@ -2604,7 +2604,7 @@ class TaskNodeReadSerializer(BaseModelSerializer):
 class TaskNodeWriteSerializer(BaseModelSerializer):
     class Meta:
         model = TaskNode
-        exclude = ["task_template"]
+        exclude = ["task_template", "evidences"]
 
 
 class TerminologyReadSerializer(BaseModelSerializer):

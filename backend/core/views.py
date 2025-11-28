@@ -556,7 +556,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         new_evidences = []
         for evidence in evidences:
             try:
-                uuid.UUID(evidence, version=4)
+                Evidence.objects.get(id=evidence)
                 new_evidences.append(evidence)
             except ValueError:
                 new_evidence = Evidence(name=evidence, folder=folder)
@@ -592,7 +592,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         if request.data.get("evidences"):
             folder = Folder.objects.get(id=request.data.get("folder"))
             request.data["evidences"] = self._process_evidences(
-                request.data["evidences"], folder=folder
+                request.data.get("evidences"), folder=folder
             )
         return super().create(request, *args, **kwargs)
 

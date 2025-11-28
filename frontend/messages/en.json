@@ -2779,7 +2779,7 @@
 	"rightRequestsDescription": "Data subject rights requests (GDPR)",
 	"dataBreachesDescription": "Data breach incidents and notifications",
 	"expectedEvidence": "Expected Evidence",
-	"taskNodeLegacyEvidence": "This field is deprecated. Evidence are now globally linked to the task and spread to occurences",
+	"taskNodeLegacyEvidence": "This previous evidence field is now deprecated. They are now globally linked to the task and spread to occurences waiting for revisions.\n You can moovethem",
 	"taskNodeNewEvidence": "Evidence globally linked to the task and spread to occurences. You can add a revision in the 'Evidences' tab below",
 	"newSemiColon": "New:",
 	"evidenceRevisionAnnouncement": "Evidence revision can now be added from the table with the button",
@@ -2787,5 +2787,8 @@
 	"observationUpdatedSuccessfully": "Observation updated successfully",
 	"taskTemplateEvidenceHelpText": "👉 Expected Evidence for this task.\n This will be linked to all occurrences so that you can submit revisions for each one directly.",
 	"unassigned": "Unassigned",
-	"addEvidenceRevisionFor": "Add revision for {evidenceName}"
+	"addEvidenceRevisionFor": "Add revision for {evidenceName}",
+	"occurrenceDueDate": "Occurrence due date",
+	"relatedTo": "Related to",
+	"legacyEvidenceField": "Legacy Evidence"
 }
