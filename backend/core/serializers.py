@@ -2580,6 +2580,7 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
     expected_evidence = FieldsRelatedField(["folder", "id"], many=True)
     evidence_reviewed = serializers.SerializerMethodField()
+    evidence_revisions_map = serializers.SerializerMethodField()
     applied_controls = FieldsRelatedField(["folder", "id"], many=True)
     compliance_assessments = FieldsRelatedField(["folder", "id"], many=True)
     assets = FieldsRelatedField(["folder", "id"], many=True)
@@ -2596,6 +2597,20 @@ class TaskNodeReadSerializer(BaseModelSerializer):
             if last_revision and last_revision.task_node == obj:
                 evidence_reviewed.append(evidence.id)
         return evidence_reviewed
+
+    def get_evidence_revisions_map(self, obj):
+        """Returns a mapping of evidence ID to revision ID for this task node"""
+        from core.models import EvidenceRevision
+
+        evidence_revisions = {}
+        for evidence in obj.expected_evidence:
+            # Find revisions for this evidence that belong to this task node
+            revision = EvidenceRevision.objects.filter(
+                evidence=evidence, task_node=obj
+            ).first()
+            if revision:
+                evidence_revisions[str(evidence.id)] = str(revision.id)
+        return evidence_revisions
 
     class Meta:
         model = TaskNode

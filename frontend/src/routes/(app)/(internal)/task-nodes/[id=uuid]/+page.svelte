@@ -240,7 +240,13 @@
 									</button>
 								{/if}
 							{:else}
-								<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
+								{@const revisionId = taskNode.evidence_revisions_map?.[evidence.id]}
+								<Anchor
+									href={revisionId
+										? `/evidence-revisions/${revisionId}/`
+										: `/evidences/${evidence.id}/`}
+									label={evidence.str}
+								>
 									<i class="fa-solid fa-eye text-primary-500"></i>
 								</Anchor>
 							{/if}

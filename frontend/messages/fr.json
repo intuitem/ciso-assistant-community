@@ -2780,7 +2780,7 @@
 	"observationUpdatedSuccessfully": "Observation mise à jour avec succès",
 	"taskTemplateEvidenceHelpText": "👉 Preuves attendues pour cette tâche.\n Cela sera lié à toutes les occurrences afin que vous puissiez soumettre des révisions pour chacune directement.",
 	"unassigned": "Non assigné",
-	"addEvidenceRevisionFor": "Ajouter une révision pour {evidenceName}",
+	"addEvidenceRevisionFor": "Ajouter une révision pour :\n{evidenceName}",
 	"occurrenceDueDate": "Date d'échéance de l'occurrence",
 	"relatedTo": "Relatif à",
 	"legacyEvidenceField": "Champ de preuve obsolète"

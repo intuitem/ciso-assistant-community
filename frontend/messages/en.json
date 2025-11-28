@@ -2806,7 +2806,7 @@
 	"observationUpdatedSuccessfully": "Observation updated successfully",
 	"taskTemplateEvidenceHelpText": "👉 Expected Evidence for this task.\n This will be linked to all occurrences so that you can submit revisions for each one directly.",
 	"unassigned": "Unassigned",
-	"addEvidenceRevisionFor": "Add revision for {evidenceName}",
+	"addEvidenceRevisionFor": "Add revision for:\n{evidenceName}",
 	"occurrenceDueDate": "Occurrence due date",
 	"relatedTo": "Related to",
 	"legacyEvidenceField": "Legacy Evidence"
