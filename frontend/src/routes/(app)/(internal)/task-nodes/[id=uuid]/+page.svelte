@@ -43,7 +43,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.addEvidenceRevisionFor({evidenceName: `${evidence.folder.str}/${evidence.str}`})
+			title: m.addEvidenceRevisionFor({ evidenceName: `${evidence.folder.str}/${evidence.str}` })
 		};
 		modalStore.trigger(modal);
 	}
@@ -75,6 +75,20 @@
 		});
 		if (!response.ok) {
 			console.error('Failed to update observation');
+			return;
+		}
+		invalidateAll();
+	}
+
+	async function moveEvidence(id: string): void {
+		const formData = new FormData();
+		formData.append('evidenceId', id);
+		const response = await fetch(`?/moveEvidence`, {
+			method: 'POST',
+			body: formData
+		});
+		if (!response.ok) {
+			console.error('Failed to moove legacy evidence');
 			return;
 		}
 		invalidateAll();
@@ -176,15 +190,14 @@
 	</div>
 
 	<!-- GRID VERY COMPACT -->
-	 <p class="text-gray-700 text-md font-medium mb-1">
+	<p class="text-gray-700 text-md font-medium mb-1">
 		{m.expectedEvidence()}
 		{#if taskNode.expected_evidence.length - taskNode.evidence_reviewed.length > 0}<span
 				class="badge bg-amber-100 text-amber-700"
 				>{taskNode.expected_evidence.length - taskNode.evidence_reviewed.length}
 				{m.pending()}</span
 			>{/if}
-		{#if taskNode.evidence_reviewed.length > 0}<span
-				class="badge bg-success-50 text-success-700"
+		{#if taskNode.evidence_reviewed.length > 0}<span class="badge bg-success-50 text-success-700"
 				>{taskNode.evidence_reviewed.length} {m.done()}</span
 			>{/if}
 	</p>
@@ -295,7 +308,7 @@
 		{/key}
 	</div>
 </div>
-{#if taskNode.evidences}
+{#if taskNode.evidences.length > 0}
 	<div class="bg-white p-4 m-4 shadow-sm rounded-lg space-y-6">
 		<span class="text-gray-700 text-md font-medium mb-1">{m.legacyEvidenceField()}</span>
 		<p class="text-sm font-light text-gray-500 block mb-4 whitespace-pre-line">
@@ -309,7 +322,9 @@
 				<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
 					<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
 				</Anchor>
-				<button class="text-primary-500"><i class="fa-solid fa-square-arrow-up-right"></i></button>
+				<button class="text-primary-500" onclick={(_) => moveEvidence(evidence.id)}>
+					<i class="fa-solid fa-square-arrow-up-right"></i>
+				</button>
 			</div>
 		{/each}
 	</div>

@@ -10635,6 +10635,15 @@ class TaskNodeViewSet(BaseModelViewSet):
     def status(srlf, request):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
 
+    @action(detail=True, name="Move evidence to expected evidence", methods=["post"])
+    def move_evidence(self, request, pk):
+        task_node = TaskNode.objects.get(id=pk)
+        evidence_id = request.data.get("evidence_id")
+        evidence = Evidence.objects.get(id=evidence_id)
+        task_node.evidences.remove(evidence)
+        task_node.task_template.evidences.add(evidence)
+        return Response(status=status.HTTP_200_OK)
+
     def perform_create(self, serializer):
         instance: TaskNode = serializer.save()
         instance.save()

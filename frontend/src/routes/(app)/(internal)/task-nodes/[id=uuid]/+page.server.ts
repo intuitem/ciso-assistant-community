@@ -85,5 +85,30 @@ export const actions: Actions = {
 			const error = await response.json();
 			return fail(400, { error });
 		}
+	},
+	moveEvidence: async (event) => {
+		const formData = await event.request.formData();
+		const evidenceId = formData.get('evidenceId');
+
+		if (typeof evidenceId !== 'string') {
+			return fail(400, { error: 'Invalid evidence ID' });
+		}
+
+		const response = await event.fetch(
+			`${BASE_API_URL}/task-nodes/${event.params.id}/move_evidence/`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ evidence_id: evidenceId })
+			}
+		);
+
+		if (response.ok) {
+			return { success: true };
+		}
+		const error = await response.json();
+		return fail(400, { error });
 	}
 };
