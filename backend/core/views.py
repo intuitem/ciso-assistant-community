@@ -613,7 +613,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             try:
                 Evidence.objects.get(id=evidence)
                 new_evidences.append(evidence)
-            except ValueError:
+            except Exception:
                 new_evidence = Evidence(name=evidence, folder=folder)
                 new_evidence.full_clean()
                 new_evidence.save()
