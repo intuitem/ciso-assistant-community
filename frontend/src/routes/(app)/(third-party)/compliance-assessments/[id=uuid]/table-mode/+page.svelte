@@ -432,7 +432,9 @@
 														{m.annotation()}
 													</p>
 													<div class="py-1">
-														<MarkdownRenderer content={requirementAssessment.requirement.annotation} />
+														<MarkdownRenderer
+															content={requirementAssessment.requirement.annotation}
+														/>
 													</div>
 												</div>
 											{/if}
@@ -443,7 +445,9 @@
 														{m.typicalEvidence()}
 													</p>
 													<div class="py-1">
-														<MarkdownRenderer content={requirementAssessment.requirement.typical_evidence} />
+														<MarkdownRenderer
+															content={requirementAssessment.requirement.typical_evidence}
+														/>
 													</div>
 												</div>
 											{/if}
