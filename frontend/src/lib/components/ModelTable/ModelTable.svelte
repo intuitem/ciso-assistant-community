@@ -78,6 +78,7 @@
 		fields?: string[];
 		canSelectObject?: boolean;
 		overrideFilters?: { [key: string]: any[] };
+		defaultFilters?: { [key: string]: any[] };
 		hideFilters?: boolean;
 		tableFilters?: Record<string, ListViewFilterConfig>;
 		folderId?: string;
@@ -127,6 +128,7 @@
 		fields = [],
 		canSelectObject = false,
 		overrideFilters = {},
+		defaultFilters = {},
 		hideFilters = $bindable(false),
 		tableFilters = URLModel &&
 		listViewFields[URLModel] &&
@@ -276,10 +278,11 @@
 	const filteredFields = Object.keys(filters);
 	const filterValues: { [key: string]: any } = $state(
 		Object.fromEntries(
-			filteredFields.map((field: string) => [
-				field,
-				page.url.searchParams.getAll(field).map((value) => ({ value }))
-			])
+			filteredFields.map((field: string) => {
+				const urlValues = page.url.searchParams.getAll(field).map((value) => ({ value }));
+				const defaultValue = defaultFilters[field] || [];
+				return [field, urlValues.length > 0 ? urlValues : defaultValue];
+			})
 		)
 	);
 
@@ -316,10 +319,16 @@
 	});
 
 	const filterInitialData: Record<string, string[]> = {};
-	// convert URL search params to filter initial data
+	// convert URL search params and default filters to filter initial data
 	for (const [key, value] of page.url.searchParams) {
 		filterInitialData[key] ??= [];
 		filterInitialData[key].push(value);
+	}
+	// Add default filter values if no URL params exist for that field
+	for (const field of filteredFields) {
+		if (!filterInitialData[field] && filterValues[field]?.length > 0) {
+			filterInitialData[field] = filterValues[field].map((v: Record<string, any>) => v.value);
+		}
 	}
 	const zodFiltersObject = {};
 	Object.keys(filters).forEach((k) => {
