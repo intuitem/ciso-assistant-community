@@ -2116,7 +2116,6 @@ objects:
       - urn:intuitem:risk:function:doc-pol:tech.vpn
       - urn:intuitem:risk:function:doc-pol:pol.work
       - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
-      - urn:intuitem:risk:function:doc-pol:tech.vpn
       translations:
         en:
           name: Secure the network connection of devices used in a mobile working
