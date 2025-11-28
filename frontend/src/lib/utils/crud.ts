@@ -701,7 +701,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Evidence revision',
 		verboseNamePlural: 'Evidence revisions',
 		fileFields: ['attachment'],
-		foreignKeyFields: [{ field: 'evidence', urlModel: 'evidences' }]
+		foreignKeyFields: [
+			{ field: 'evidence', urlModel: 'evidences' },
+			{ field: 'task_node', urlModel: 'task-nodes' }
+		]
 	},
 	'compliance-assessments': {
 		name: 'complianceassessment',
