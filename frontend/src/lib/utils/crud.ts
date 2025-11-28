@@ -1617,10 +1617,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Incident',
 		verboseNamePlural: 'Incidents',
 		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
-			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'owners', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'qualifications', urlModel: 'terminologies' },
 			{ field: 'entities', urlModel: 'entities' }
 		],
