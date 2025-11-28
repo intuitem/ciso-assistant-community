@@ -604,6 +604,19 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 new_labels.append(str(new_label.id))
         return new_labels
 
+    def _process_evidences(self, evidences, folder):
+        new_evidences = []
+        for value in evidences or []:
+            try:
+                uuid.UUID(str(value), version=4)
+                new_evidences.append(str(value))
+            except ValueError:
+                new_evidence = Evidence(name=value, folder=folder)
+                new_evidence.full_clean()
+                new_evidence.save()
+                new_evidences.append(str(new_evidence.id))
+        return new_evidences
+
     def list(self, request, *args, **kwargs):
         """
         Override the list method to inject optimized data into the serializer context.
@@ -638,10 +651,19 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
             )
+        if request.data.get("evidences"):
+            folder = Folder.objects.get(id=request.data.get("folder"))
+            request.data["evidences"] = self._process_evidences(
+                request.data.get("evidences"), folder=folder
+            )
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
-        self._process_request_data(request)
+        if request.data.get("evidences"):
+            folder = Folder.objects.get(id=request.data.get("folder"))
+            request.data["evidences"] = self._process_evidences(
+                request.data["evidences"], folder=folder
+            )
 
         # NOTE: Handle filtering_labels field - SvelteKit SuperForms behavior inconsistency:
         # Forms with file inputs (like Evidence attachments) use dataType="form" and omit empty fields
@@ -10399,6 +10421,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "applied_controls",
             "last_occurrence_status",
             "next_occurrence_status",
+            "evidences",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
@@ -10428,7 +10451,13 @@ class TaskTemplateFilter(GenericFilterSet):
 
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
-    filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls"]
+    filterset_fields = [
+        "assigned_to",
+        "is_recurrent",
+        "folder",
+        "applied_controls",
+        "evidences",
+    ]
     filterset_class = TaskTemplateFilter
 
     def get_queryset(self):
@@ -10676,10 +10705,76 @@ class TaskNodeViewSet(BaseModelViewSet):
     def status(srlf, request):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
 
+    @action(
+        detail=True, name="Remove/Move evidence to expected evidence", methods=["post"]
+    )
+    def remove_evidence(self, request, pk):
+        task_node = TaskNode.objects.get(id=pk)
+        evidence_id = request.data.get("evidence_id")
+        to_move = request.data.get("move", False)
+        evidence = Evidence.objects.get(id=evidence_id)
+        task_node.evidences.remove(evidence)
+        if to_move:
+            task_node.task_template.evidences.add(evidence)
+        return Response(status=status.HTTP_200_OK)
+
     def perform_create(self, serializer):
         instance: TaskNode = serializer.save()
         instance.save()
         return super().perform_create(serializer)
+
+
+class TaskNodeEvidenceList(generics.ListAPIView):
+    serializer_class = EvidenceReadSerializer
+    filterset_fields = {
+        "folder": ["exact"],
+        "status": ["exact"],
+        "owner": ["exact"],
+        "name": ["icontains"],
+        "expiry_date": ["exact", "lte", "gte"],
+        "created_at": ["exact", "lte", "gte"],
+        "updated_at": ["exact", "lte", "gte"],
+    }
+    search_fields = ["name", "description"]
+    ordering_fields = ["name", "status", "updated_at", "expiry_date"]
+    ordering = ["name"]
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"pk": self.kwargs["pk"]})
+        return context
+
+    def get_queryset(self):
+        """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
+        task_node_id = self.kwargs["pk"]
+
+        if not RoleAssignment.is_object_readable(
+            self.request.user,
+            TaskNode,
+            task_node_id,
+        ):
+            raise PermissionDenied()
+
+        task_node = TaskNode.objects.get(id=task_node_id)
+
+        # Get task node's template
+        task_template = task_node.task_template
+
+        # Get visible evidences to filter result
+        viewable_evidences, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, Evidence
+        )
+        return Evidence.objects.filter(
+            id__in=task_template.evidences.filter(
+                id__in=viewable_evidences
+            ).values_list("id", flat=True)
+        )
 
 
 class TerminologyViewSet(BaseModelViewSet):

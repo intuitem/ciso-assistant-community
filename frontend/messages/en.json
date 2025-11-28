@@ -2798,5 +2798,16 @@
 	"thin": "Thin",
 	"payloadFormat": "Payload Format",
 	"payloadFormatHelpText": "Select the format of the webhook payload.",
-	"vulnerability": "Vulnerability"
+	"vulnerability": "Vulnerability",
+	"expectedEvidence": "Expected Evidences",
+	"taskNodeLegacyEvidence": "The old evidence field is deprecated. Evidence is now task-level and shared across occurrences waiting for revisions.\n To move them to expected evidence or remove them from the occurrence, use the buttons",
+	"taskNodeNewEvidence": "Evidence globally linked to the task and spread to occurrences. You can add a revision in the 'Evidences' tab below",
+	"statusUpdatedSuccessfully": "Status updated successfully",
+	"observationUpdatedSuccessfully": "Observation updated successfully",
+	"taskTemplateEvidenceHelpText": "👉 Expected Evidence for this task.\n This will be linked to all occurrences so that you can submit revisions for each one directly.",
+	"unassigned": "Unassigned",
+	"addEvidenceRevisionFor": "Add revision for:\n{evidenceName}",
+	"occurrenceDueDate": "Occurrence due date",
+	"relatedTo": "Related to",
+	"legacyEvidenceField": "Legacy Evidence"
 }
