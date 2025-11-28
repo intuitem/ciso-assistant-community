@@ -8,6 +8,8 @@ from django.db.models import Count
 from itertools import chain
 from collections import defaultdict
 
+from iam.models import Folder, RoleAssignment
+
 from .models import (
     ProcessingNature,
     Purpose,
@@ -188,27 +190,71 @@ class ProcessingViewSet(BaseModelViewSet):
 
     @action(detail=False, name="aggregated metrics")
     def agg_metrics(self, request):
-        pd_categories = PersonalData.get_categories_count()
-        total_categories = len(pd_categories)
-        processings_count = Processing.objects.all().count()
+        (viewable_processings, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Processing,
+        )
+        (viewable_data_contractors, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataContractor,
+        )
+        (viewable_data_transfers, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataTransfer,
+        )
+        (viewable_right_requests, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=RightRequest,
+        )
+        (viewable_data_breaches, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataBreach,
+        )
+        (viewable_personal_data, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=PersonalData,
+        )
+        processings_count = Processing.objects.filter(
+            id__in=viewable_processings
+        ).count()
 
+        pd_categories = PersonalData.get_categories_count(
+            filters={"id__in": viewable_personal_data}
+        )
+        total_categories = len(pd_categories)
         # Count distinct entities from data contractors and data transfers
         contractor_entities = (
-            DataContractor.objects.filter(entity__isnull=False)
+            DataContractor.objects.filter(
+                id__in=viewable_data_contractors, entity__isnull=False
+            )
             .values_list("entity", flat=True)
             .distinct()
         )
         transfer_entities = (
-            DataTransfer.objects.filter(entity__isnull=False)
+            DataTransfer.objects.filter(
+                id__in=viewable_data_transfers, entity__isnull=False
+            )
             .values_list("entity", flat=True)
             .distinct()
         )
         recipients_count = len(set(list(contractor_entities) + list(transfer_entities)))
 
-        open_right_requests_count = RightRequest.objects.exclude(status="done").count()
-        open_data_breaches_count = DataBreach.objects.exclude(
-            status="privacy_closed"
-        ).count()
+        open_right_requests_count = (
+            RightRequest.objects.filter(id__in=viewable_right_requests)
+            .exclude(status="done")
+            .count()
+        )
+        open_data_breaches_count = (
+            DataBreach.objects.filter(id__in=viewable_data_breaches)
+            .exclude(status="privacy_closed")
+            .count()
+        )
 
         # Aggregate data breaches by breach type
         breach_types = DataBreach.objects.values("breach_type").annotate(
@@ -237,7 +283,7 @@ class ProcessingViewSet(BaseModelViewSet):
         personal_data = (
             PersonalData.objects.select_related("processing")
             .prefetch_related("processing__purposes", "processing__data_transfers")
-            .all()
+            .filter(id__in=viewable_personal_data)
         )
 
         for pd in personal_data:
