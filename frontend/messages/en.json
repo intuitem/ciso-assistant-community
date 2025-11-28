@@ -2726,6 +2726,7 @@
 	"doraAttributes": "DORA Attributes",
 	"doraAssessment": "DORA Assessment",
 	"moreOnTerminologiesHelpText": "Hint: more options can be defined through terminologies",
+	"selectPlaceholder": "Select...",
 	"ebiosRmSyncModalTitle": "Risk Assessment Options",
 	"ebiosRmSyncModalBody": "A risk assessment already exists for this EBIOS RM study: \"{name}\"\n\nWould you like to:",
 	"ebiosRmSyncExisting": "Sync Existing",
