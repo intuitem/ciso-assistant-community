@@ -8,7 +8,12 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { modelSchema } from '$lib/utils/schemas';
 	import { getModelInfo } from '$lib/utils/crud';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import {
+		getModalStore,
+		type ModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
 	import { page } from '$app/state';
 	import { invalidateAll } from '$app/navigation';
 

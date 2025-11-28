@@ -605,16 +605,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return new_labels
 
     def _process_evidences(self, evidences, folder):
-        """
-        Creates a Evidence and replaces the value with the ID of the newly created evidence.
-        """
         new_evidences = []
-        for evidence in evidences:
+        for value in evidences or []:
             try:
-                Evidence.objects.get(id=evidence)
-                new_evidences.append(evidence)
-            except Exception:
-                new_evidence = Evidence(name=evidence, folder=folder)
+                uuid.UUID(str(value), version=4)
+                new_evidences.append(str(value))
+            except ValueError:
+                new_evidence = Evidence(name=value, folder=folder)
                 new_evidence.full_clean()
                 new_evidence.save()
                 new_evidences.append(str(new_evidence.id))
