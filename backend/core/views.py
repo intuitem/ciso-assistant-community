@@ -10711,10 +10711,10 @@ class TaskNodeViewSet(BaseModelViewSet):
     def remove_evidence(self, request, pk):
         task_node = TaskNode.objects.get(id=pk)
         evidence_id = request.data.get("evidence_id")
-        to_moove = request.data.get("moove", False)
+        to_move = request.data.get("move", False)
         evidence = Evidence.objects.get(id=evidence_id)
         task_node.evidences.remove(evidence)
-        if to_moove:
+        if to_move:
             task_node.task_template.evidences.add(evidence)
         return Response(status=status.HTTP_200_OK)
 
