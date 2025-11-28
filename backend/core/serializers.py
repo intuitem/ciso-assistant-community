@@ -1445,6 +1445,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     owner = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
     link = serializers.SerializerMethodField()
+    
 
     def get_attachment(self, obj):
         last_revision = obj.last_revision
@@ -1552,6 +1553,7 @@ class EvidenceRevisionReadSerializer(BaseModelSerializer):
     evidence = FieldsRelatedField()
     folder = FieldsRelatedField()
     str = serializers.CharField(source="__str__")
+    task_node = FieldsRelatedField()
 
     class Meta:
         model = EvidenceRevision
