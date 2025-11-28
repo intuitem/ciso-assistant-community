@@ -1305,8 +1305,8 @@ def create_library(
                     if node.get("assessable", False) is False and node.get(
                         "annotation", ""
                     ):
-                        raise ValueError(
-                            f"Requirement(with name={repr(node.get('name'))}) can't have a non-empty 'annotation' because it is not an assessable requirement."
+                        print(
+                            f"💬 ⚠️  [WARNING] Requirement {repr(node.get('name'))} have a non-empty annotation while being not assessable."
                         )
 
                     all_urns.add(node.get("urn"))
