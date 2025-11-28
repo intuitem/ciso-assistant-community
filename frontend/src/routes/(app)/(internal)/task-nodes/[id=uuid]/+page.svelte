@@ -172,31 +172,33 @@
 		</div>
 	</div>
 
-	<div>
-		<p class="text-gray-700 text-md font-medium mb-2">
-			{m.relatedTo()}
-		</p>
-		<div class="grid grid-cols-2 gap-6 border rounded-lg p-4 bg-gray-50 place-items-center">
-			{#each categories as cat}
-				{#if cat.items?.length}
-					<div class="flex flex-col space-y-1">
-						<p class="text-gray-700 text-md font-medium tracking-wide">
-							{cat.label}
-						</p>
+	{#if categories.some((cat) => cat.items?.length > 0)}
+		<div>
+			<p class="text-gray-700 text-md font-medium mb-2">
+				{m.relatedTo()}
+			</p>
+			<div class="grid grid-cols-2 gap-6 border rounded-lg p-4 bg-gray-50 place-items-center">
+				{#each categories as cat}
+					{#if cat.items?.length}
+						<div class="flex flex-col space-y-1">
+							<p class="text-gray-700 text-md font-medium tracking-wide">
+								{cat.label}
+							</p>
 
-						{#each cat.items as item}
-							<Anchor
-								class="text-md px-1.5 py-0.5 anchor font-semibold"
-								href="{cat.baseUrl}/{item.id}"
-							>
-								{item.folder.str}/{item.str}
-							</Anchor>
-						{/each}
-					</div>
-				{/if}
-			{/each}
+							{#each cat.items as item}
+								<Anchor
+									class="text-md px-1.5 py-0.5 anchor font-semibold"
+									href="{cat.baseUrl}/{item.id}"
+								>
+									{item.folder.str}/{item.str}
+								</Anchor>
+							{/each}
+						</div>
+					{/if}
+				{/each}
+			</div>
 		</div>
-	</div>
+	{/if}
 
 	<!-- GRID VERY COMPACT -->
 	<p class="text-gray-700 text-md font-medium mb-1">
