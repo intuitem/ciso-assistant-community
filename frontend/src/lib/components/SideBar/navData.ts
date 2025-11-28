@@ -402,6 +402,17 @@ export const navData = {
 					permissions: ['change_globalsettings']
 				}
 			]
+		},
+		{
+			name: 'administration',
+			items: [
+				{
+					name: 'clientAccounts',
+					fa_icon: 'fa-solid fa-building-columns',
+					href: '/client-accounts',
+					superuserOnly: true
+				}
+			]
 		}
 	]
 };

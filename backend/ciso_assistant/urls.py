@@ -23,6 +23,7 @@ from drf_spectacular.views import (
 
 # beware of the order of url patterns, this can change de behavior in case of multiple matches and avoid giving identical paths that could cause conflicts
 urlpatterns = [
+    path("api/accounts/", include("accounts.urls")),
     path("api/webhooks/", include("webhooks.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(

@@ -187,6 +187,7 @@ INSTALLED_APPS = [
     "auditlog",
     "tailwind",
     "iam",
+    "accounts",
     "global_settings",
     "pmbok",
     "ebios_rm",
@@ -227,6 +228,7 @@ MIDDLEWARE = [
     "django_structlog.middlewares.RequestMiddleware",
     "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "accounts.middleware.AccountValidationMiddleware",
 ]
 # MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
 ROOT_URLCONF = "ciso_assistant.urls"

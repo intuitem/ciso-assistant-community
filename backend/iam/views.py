@@ -49,6 +49,43 @@ class LoginView(KnoxLoginView):
         serializer = AuthTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
+
+        # Check if user's account is valid (skip for superusers)
+        if not user.is_superuser:
+            from accounts.middleware import get_user_account
+            account = get_user_account(user)
+            if account:
+                if account.status == "suspended":
+                    logger.warning(
+                        "Login blocked - account suspended",
+                        user=user.email,
+                        account=account.name,
+                    )
+                    return Response(
+                        {
+                            "error": "account_suspended",
+                            "message": "Your account has been suspended. Please contact support.",
+                            "account_name": account.name,
+                        },
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+                if account.status == "expired" or account.is_expired:
+                    logger.warning(
+                        "Login blocked - account expired",
+                        user=user.email,
+                        account=account.name,
+                        expiry_date=str(account.subscription_end),
+                    )
+                    return Response(
+                        {
+                            "error": "account_expired",
+                            "message": "Your subscription has expired. Please renew to continue.",
+                            "account_name": account.name,
+                            "expiry_date": str(account.subscription_end),
+                        },
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+
         login(request, user)
         return super(LoginView, self).post(request, format=None)
 

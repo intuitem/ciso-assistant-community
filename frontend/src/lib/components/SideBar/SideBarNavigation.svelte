@@ -14,6 +14,10 @@
 		.map((item) => {
 			// Check and filter the sub-items based on user permissions
 			const filteredSubItems = item.items.filter((subItem) => {
+				// Check superuser-only items first
+				if (subItem.superuserOnly) {
+					return user?.is_admin === true;
+				}
 				if (subItem.exclude) {
 					return subItem.exclude.some((role) => user?.roles && !user.roles.includes(role));
 				} else if (subItem.permissions) {
