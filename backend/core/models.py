@@ -869,6 +869,18 @@ class LoadedLibrary(LibraryMixin):
         "self", blank=True, verbose_name=_("Dependencies"), symmetrical=False
     )
 
+    def save(self, *args, **kwargs):
+        from core.mappings.engine import engine
+
+        super(LoadedLibrary, self).save(*args, **kwargs)
+        if (
+            self.objects_meta.requirement_mapping_sets
+            or self.objects_meta.requirement_mapping_set
+        ):
+            transaction.on_commit(lambda: engine.load_rms_data())
+        if self.objects_meta.frameworks or self.objects_meta.frameworks:
+            transaction.on_commit(lambda: engine.load_frameworks())
+
     @transaction.atomic
     def update(self) -> Union[str, None]:
         new_libraries = [
