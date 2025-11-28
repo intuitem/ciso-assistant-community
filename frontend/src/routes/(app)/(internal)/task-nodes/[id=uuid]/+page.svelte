@@ -295,16 +295,22 @@
 		{/key}
 	</div>
 </div>
-<div class="bg-white p-4 m-4 shadow-sm rounded-lg space-y-6">
-	<span class="text-gray-700 text-md font-medium mb-1">{m.legacyEvidenceField()}</span>
-	<p class="text-sm font-light text-gray-500 block mb-4 whitespace-pre-line">
-		{m.taskNodeLegacyEvidence()}
-	</p>
-	{#each taskNode.evidences as evidence}
-		<div class="flex flex-row items-center justify-between border-b pb-2 mb-2">
-			<Anchor href={`/evidences/${evidence.id}/`} class="font-semibold text-md anchor">
-				{evidence.str}
-			</Anchor>
-		</div>
-	{/each}
-</div>
+{#if taskNode.evidences}
+	<div class="bg-white p-4 m-4 shadow-sm rounded-lg space-y-6">
+		<span class="text-gray-700 text-md font-medium mb-1">{m.legacyEvidenceField()}</span>
+		<p class="text-sm font-light text-gray-500 block mb-4 whitespace-pre-line">
+			{m.taskNodeLegacyEvidence()} <i class="fa-solid fa-square-arrow-up-right"></i>
+		</p>
+		{#each taskNode.evidences as evidence}
+			<div class="flex flex-row items-center justify-start space-x-2 border-b pb-2 mb-2">
+				<span class="font-semibold text-md">
+					{evidence.folder.str}/{evidence.str}
+				</span>
+				<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
+					<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
+				</Anchor>
+				<button class="text-primary-500"><i class="fa-solid fa-square-arrow-up-right"></i></button>
+			</div>
+		{/each}
+	</div>
+{/if}
