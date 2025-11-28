@@ -1,6 +1,7 @@
 import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
+import type { urlModel } from './types';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
 import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
@@ -2368,3 +2369,9 @@ export function getListViewFields({
 		body
 	};
 }
+
+export const headData = (model: urlModel) =>
+	listViewFields[model].body.reduce((obj, key, index) => {
+		obj[key] = listViewFields[model].head[index];
+		return obj;
+	}, {});
