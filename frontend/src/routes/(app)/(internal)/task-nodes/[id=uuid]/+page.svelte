@@ -85,16 +85,16 @@
 		invalidateAll();
 	}
 
-	async function removeEvidence(id: string, moove: boolean): void {
+	async function removeEvidence(id: string, move: boolean): void {
 		const formData = new FormData();
 		formData.append('evidenceId', id);
-		formData.append('moove', moove);
+		formData.append('move', move);
 		const response = await fetch(`?/removeEvidence`, {
 			method: 'POST',
 			body: formData
 		});
 		if (!response.ok) {
-			console.error('Failed to moove legacy evidence');
+			console.error('Failed to move legacy evidence');
 			return;
 		}
 		invalidateAll();

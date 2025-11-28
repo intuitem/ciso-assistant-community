@@ -89,7 +89,7 @@ export const actions: Actions = {
 	removeEvidence: async (event) => {
 		const formData = await event.request.formData();
 		const evidenceId = formData.get('evidenceId');
-		const moove = formData.get('moove');
+		const move = formData.get('move');
 
 		if (typeof evidenceId !== 'string') {
 			return fail(400, { error: 'Invalid evidence ID' });
@@ -102,7 +102,7 @@ export const actions: Actions = {
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ evidence_id: evidenceId, moove: moove === 'true' })
+				body: JSON.stringify({ evidence_id: evidenceId, move: move === 'true' })
 			}
 		);
 
