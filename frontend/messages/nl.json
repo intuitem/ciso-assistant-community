@@ -983,5 +983,16 @@
 	"downloadCertificate": "Certificaat downloaden",
 	"loginFailed": "Login mislukt",
 	"viewMore": "Meer weergeven",
-	"viewLess": "Minder weergeven"
+	"viewLess": "Minder weergeven",
+	"expectedEvidence": "Verwacht bewijs",
+	"taskNodeLegacyEvidence": "Het oude bewijsveld is verouderd. Bewijs is nu taakniveau en gedeeld over herhalingen die wachten op herzieningen.\n Om ze naar verwacht bewijs te verplaatsen of uit de herhaling te verwijderen, gebruik de knoppen",
+	"taskNodeNewEvidence": "Bewijs globaal gekoppeld aan de taak en verspreid over herhalingen. U kunt een herziening toevoegen in het tabblad 'Bewijzen' hieronder",
+	"statusUpdatedSuccessfully": "Status succesvol bijgewerkt",
+	"observationUpdatedSuccessfully": "Observatie succesvol bijgewerkt",
+	"taskTemplateEvidenceHelpText": "👉 Verwacht bewijs voor deze taak.\n Dit zal aan alle herhalingen worden gekoppeld, zodat u rechtstreeks herzieningen kunt indienen voor elke herhaling.",
+	"unassigned": "Niet toegewezen",
+	"addEvidenceRevisionFor": "Herziening toevoegen voor {evidenceName}",
+	"occurrenceDueDate": "Vervaldatum herhaling",
+	"relatedTo": "Gerelateerd aan",
+	"legacyEvidenceField": "Verouderd bewijsveld"
 }

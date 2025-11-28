@@ -1260,5 +1260,16 @@
 	"downloadCertificate": "Download certifikat",
 	"viewMore": "Se mere",
 	"viewLess": "Se mindre",
-	"loginFailed": "Login mislykket"
+	"loginFailed": "Login mislykkedes",
+	"expectedEvidence": "Forventet bevis",
+	"taskNodeLegacyEvidence": "Det gamle bevisfelt er udfaset. Bevis er nu opgavebaseret og delt over forekomster, der venter på revisioner.\n For at flytte dem til forventet bevis eller fjerne dem fra forekomsten, skal du bruge knapperne",
+	"taskNodeNewEvidence": "Bevis globalt knyttet til opgaven og spredt over forekomster. Du kan tilføje en revision i fanen 'Beviser' nedenfor",
+	"statusUpdatedSuccessfully": "Status opdateret med succes",
+	"observationUpdatedSuccessfully": "Observation opdateret med succes",
+	"taskTemplateEvidenceHelpText": "👉 Forventet bevis for denne opgave.\n Dette vil blive knyttet til alle forekomster, så du kan indsende revisioner for hver enkelt direkte.",
+	"unassigned": "Ikke tildelt",
+	"addEvidenceRevisionFor": "Tilføj revision for {evidenceName}",
+	"occurrenceDueDate": "Forventet afslutningsdato for forekomst",
+	"relatedTo": "Relateret til",
+	"legacyEvidenceField": "Gammelt bevisfelt"
 }

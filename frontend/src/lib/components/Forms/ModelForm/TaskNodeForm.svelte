@@ -45,9 +45,11 @@
 />
 <AutocompleteSelect
 	multiple
+	disabled
 	{form}
 	optionsEndpoint="evidences"
 	optionsExtraFields={[['folder', 'str']]}
+	helpText={m.taskNodeLegacyEvidence()}
 	optionsLabelField="auto"
 	field="evidences"
 	label={m.evidences()}

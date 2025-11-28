@@ -2262,8 +2262,8 @@ export const listViewFields = {
 		}
 	},
 	'task-nodes': {
-		head: ['due_date', 'status', 'evidences'],
-		body: ['due_date', 'status', 'evidences'],
+		head: ['due_date', 'status'],
+		body: ['due_date', 'status'],
 		filters: {
 			status: TASK_STATUS_FILTER
 		}
