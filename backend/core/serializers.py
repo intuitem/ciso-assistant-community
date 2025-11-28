@@ -2571,7 +2571,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
 class TaskNodeReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
-    task_template = FieldsRelatedField()
+    task_template = FieldsRelatedField(["folder", "id"])
     folder = FieldsRelatedField()
     name = serializers.SerializerMethodField()
     assigned_to = FieldsRelatedField(many=True)
@@ -2579,11 +2579,11 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
     expected_evidence = FieldsRelatedField(["folder", "id"], many=True)
     evidence_reviewed = serializers.SerializerMethodField()
-    applied_controls = FieldsRelatedField(many=True)
-    compliance_assessments = FieldsRelatedField(many=True)
-    assets = FieldsRelatedField(many=True)
-    risk_assessments = FieldsRelatedField(many=True)
-    findings_assessment = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(["folder", "id"], many=True)
+    compliance_assessments = FieldsRelatedField(["folder", "id"], many=True)
+    assets = FieldsRelatedField(["folder", "id"], many=True)
+    risk_assessments = FieldsRelatedField(["folder", "id"], many=True)
+    findings_assessment = FieldsRelatedField(["folder", "id"], many=True)
 
     def get_name(self, obj):
         return obj.task_template.name if obj.task_template else ""

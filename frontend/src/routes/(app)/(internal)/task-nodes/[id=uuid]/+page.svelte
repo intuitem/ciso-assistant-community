@@ -80,10 +80,11 @@
 		invalidateAll();
 	}
 
-	async function moveEvidence(id: string): void {
+	async function removeEvidence(id: string, moove: boolean): void {
 		const formData = new FormData();
 		formData.append('evidenceId', id);
-		const response = await fetch(`?/moveEvidence`, {
+		formData.append('moove', moove);
+		const response = await fetch(`?/removeEvidence`, {
 			method: 'POST',
 			body: formData
 		});
@@ -131,8 +132,11 @@
 			<p class="text-gray-700 text-md font-medium tracking-wide">
 				{m.taskTemplate()}
 			</p>
-			<Anchor class="text-md px-1.5 py-0.5 rounded anchor font-semibold hover:underline">
-				{taskNode.task_template.str}
+			<Anchor
+				class="text-md px-1.5 py-0.5 rounded anchor font-semibold hover:underline"
+				href={`/task-templates/${taskNode.task_template.id}/`}
+			>
+				{taskNode.task_template.folder.str}/{taskNode.task_template.str}
 			</Anchor>
 		</div>
 
@@ -180,7 +184,7 @@
 								class="text-md px-1.5 py-0.5 anchor font-semibold"
 								href="{cat.baseUrl}/{item.id}"
 							>
-								{item.str}
+								{item.folder.str}/{item.str}
 							</Anchor>
 						{/each}
 					</div>
@@ -209,7 +213,7 @@
 						{#if page.data.user.permissions['add_evidencerevision']}
 							<div class="flex flex-row items-center">
 								<i class="fa-solid fa-clock mr-2 text-amber-700"></i>
-								<span class="font-semibold">{evidence.str}</span>
+								<span class="font-semibold">{evidence.folder.str}/{evidence.str}</span>
 								<button
 									class="flex flex-row items-center"
 									onclick={() => modalRevisionCreate(evidence)}
@@ -220,13 +224,13 @@
 						{:else}
 							<Anchor href={`/evidences/${evidence.id}/`} class="flex flex-row items-center">
 								<i class="fa-solid fa-clock mr-2 text-amber-700"></i>
-								<span class="font-semibold">{evidence.str}</span>
+								<span class="font-semibold">{evidence.folder.str}/{evidence.str}</span>
 							</Anchor>
 						{/if}
 					{:else}
 						<div class="flex flex-row items-center">
 							<i class="fa-solid fa-check mr-2 text-success-700"></i>
-							<span class="font-semibold">{evidence.str}</span>
+							<span class="font-semibold">{evidence.folder.str}/{evidence.str}</span>
 							<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
 								<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
 							</Anchor>
@@ -312,7 +316,9 @@
 	<div class="bg-white p-4 m-4 shadow-sm rounded-lg space-y-6">
 		<span class="text-gray-700 text-md font-medium mb-1">{m.legacyEvidenceField()}</span>
 		<p class="text-sm font-light text-gray-500 block mb-4 whitespace-pre-line">
-			{m.taskNodeLegacyEvidence()} <i class="fa-solid fa-square-arrow-up-right"></i>
+			{m.taskNodeLegacyEvidence()}
+			<i class="fa-solid fa-square-arrow-up-right"></i>
+			<i class="fa-solid fa-square-minus"></i>
 		</p>
 		{#each taskNode.evidences as evidence}
 			<div class="flex flex-row items-center justify-start space-x-2 border-b pb-2 mb-2">
@@ -322,8 +328,11 @@
 				<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
 					<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
 				</Anchor>
-				<button class="text-primary-500" onclick={(_) => moveEvidence(evidence.id)}>
+				<button class="text-primary-500" onclick={(_) => removeEvidence(evidence.id, true)}>
 					<i class="fa-solid fa-square-arrow-up-right"></i>
+				</button>
+				<button class="text-error-500" onclick={(_) => removeEvidence(evidence.id, false)}>
+					<i class="fa-solid fa-square-minus"></i>
 				</button>
 			</div>
 		{/each}
