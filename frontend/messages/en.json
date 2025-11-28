@@ -2785,5 +2785,7 @@
 	"evidenceRevisionAnnouncement": "Evidence revision can now be added from the table with the button",
 	"statusUpdatedSuccessfully": "Status updated successfully",
 	"observationUpdatedSuccessfully": "Observation updated successfully",
-	"taskTemplateEvidenceHelpText": "👉 Expected Evidence for this task.\n This will be linked to all occurrences so that you can submit revisions for each one directly."
+	"taskTemplateEvidenceHelpText": "👉 Expected Evidence for this task.\n This will be linked to all occurrences so that you can submit revisions for each one directly.",
+	"unassigned": "Unassigned",
+	"addEvidenceRevisionFor": "Add revision for {evidenceName}"
 }

@@ -2575,7 +2575,7 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     name = serializers.SerializerMethodField()
     assigned_to = FieldsRelatedField(many=True)
-    evidences = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(["folder", "id"], many=True)
     is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
     expected_evidence = FieldsRelatedField(["folder", "id"], many=True)
     evidence_reviewed = serializers.SerializerMethodField()
@@ -2591,7 +2591,8 @@ class TaskNodeReadSerializer(BaseModelSerializer):
     def get_evidence_reviewed(self, obj):
         evidence_reviewed = []
         for evidence in obj.expected_evidence:
-            if evidence.last_revision.task_node == obj:
+            last_revision = evidence.last_revision
+            if last_revision and last_revision.task_node == obj:
                 evidence_reviewed.append(evidence.id)
         return evidence_reviewed
 

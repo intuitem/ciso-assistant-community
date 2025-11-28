@@ -8,7 +8,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { modelSchema } from '$lib/utils/schemas';
 	import { getModelInfo } from '$lib/utils/crud';
-	import { getModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import { page } from '$app/state';
 	import { invalidateAll } from '$app/navigation';
 
@@ -43,7 +43,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.addEvidenceRevision()
+			title: m.addEvidenceRevisionFor({evidenceName: `${evidence.folder.str}/${evidence.str}`})
 		};
 		modalStore.trigger(modal);
 	}
@@ -58,6 +58,10 @@
 			method: 'POST',
 			body: formData
 		});
+		if (!response.ok) {
+			console.error('Failed to update status');
+			return;
+		}
 		invalidateAll();
 	}
 
@@ -69,6 +73,10 @@
 			method: 'POST',
 			body: formData
 		});
+		if (!response.ok) {
+			console.error('Failed to update observation');
+			return;
+		}
 		invalidateAll();
 	}
 
@@ -100,7 +108,7 @@
 		},
 		{
 			label: m.findingsAssessments(),
-			items: taskNode.finding_assessments,
+			items: taskNode.findings_assessment,
 			baseUrl: '/finding-assessments'
 		}
 	];
@@ -119,6 +127,8 @@
 					<Anchor class="text-md px-1.5 py-0.5 rounded anchor font-semibold hover:underline">
 						{user.str}
 					</Anchor>
+				{:else}
+					<p class="text-md px-1.5 py-0.5 font-light italic text-gray-500">{m.unassigned()}</p>
 				{/each}
 			</div>
 		</div>
@@ -209,55 +219,53 @@
 	</div>
 
 	<!-- GRID VERY COMPACT -->
+	 <p class="text-gray-700 text-md font-medium mb-1">
+		{m.expectedEvidence()}
+		{#if taskNode.expected_evidence.length - taskNode.evidence_reviewed.length > 0}<span
+				class="badge bg-amber-100 text-amber-700"
+				>{taskNode.expected_evidence.length - taskNode.evidence_reviewed.length}
+				{m.pending()}</span
+			>{/if}
+		{#if taskNode.evidence_reviewed.length > 0}<span
+				class="badge bg-success-50 text-success-700"
+				>{taskNode.evidence_reviewed.length} {m.done()}</span
+			>{/if}
+	</p>
 	<div class="grid grid-cols-3 gap-3">
 		{#if taskNode.expected_evidence.length > 0}
-			<div>
-				<p class="text-gray-700 text-md font-medium mb-1">
-					{m.expectedEvidence()}
-					{#if taskNode.expected_evidence.length - taskNode.evidence_reviewed.length > 0}<span
-							class="badge bg-amber-100 text-amber-700"
-							>{taskNode.expected_evidence.length - taskNode.evidence_reviewed.length}
-							{m.pending()}</span
-						>{/if}
-					{#if taskNode.evidence_reviewed.length > 0}<span
-							class="badge bg-success-50 text-success-700"
-							>{taskNode.evidence_reviewed.length} {m.done()}</span
-						>{/if}
-				</p>
-				<div class="flex flex-col p-2 space-y-2">
-					{#each taskNode.expected_evidence as evidence}
-						{#if !taskNode.evidence_reviewed.includes(evidence.id)}
-							{#if page.data.user.permissions['add_evidencerevision']}
-								<div class="flex flex-row items-center">
-									<i class="fa-solid fa-clock mr-2 text-amber-700"></i>
-									<span class="font-semibold">{evidence.str}</span>
-									<button
-										class="flex flex-row items-center"
-										onclick={() => modalRevisionCreate(evidence)}
-									>
-										<i class="fa-solid fa-file-circle-plus ml-2 text-primary-500"></i>
-									</button>
-								</div>
-							{:else}
-								<Anchor href={`/evidences/${evidence.id}/`} class="flex flex-row items-center">
-									<i class="fa-solid fa-clock mr-2 text-amber-700"></i>
-									<span class="font-semibold">{evidence.str}</span>
-								</Anchor>
-							{/if}
-						{:else}
+			<div class="flex flex-col p-2 space-y-2">
+				{#each taskNode.expected_evidence as evidence}
+					{#if !taskNode.evidence_reviewed.includes(evidence.id)}
+						{#if page.data.user.permissions['add_evidencerevision']}
 							<div class="flex flex-row items-center">
-								<i class="fa-solid fa-check mr-2 text-success-700"></i>
+								<i class="fa-solid fa-clock mr-2 text-amber-700"></i>
 								<span class="font-semibold">{evidence.str}</span>
-								<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
-									<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
-								</Anchor>
+								<button
+									class="flex flex-row items-center"
+									onclick={() => modalRevisionCreate(evidence)}
+								>
+									<i class="fa-solid fa-file-circle-plus ml-2 text-primary-500"></i>
+								</button>
 							</div>
+						{:else}
+							<Anchor href={`/evidences/${evidence.id}/`} class="flex flex-row items-center">
+								<i class="fa-solid fa-clock mr-2 text-amber-700"></i>
+								<span class="font-semibold">{evidence.str}</span>
+							</Anchor>
 						{/if}
-					{/each}
-				</div>
+					{:else}
+						<div class="flex flex-row items-center">
+							<i class="fa-solid fa-check mr-2 text-success-700"></i>
+							<span class="font-semibold">{evidence.str}</span>
+							<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
+								<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
+							</Anchor>
+						</div>
+					{/if}
+				{/each}
 			</div>
 		{:else}
-			<span>{m.noEvidences()}</span>
+			<span class="text-md px-1.5 py-0.5 font-light italic text-gray-500">{m.noEvidences()}</span>
 		{/if}
 	</div>
 

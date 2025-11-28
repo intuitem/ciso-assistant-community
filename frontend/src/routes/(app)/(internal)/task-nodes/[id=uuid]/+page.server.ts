@@ -31,97 +31,40 @@ export const load: PageServerLoad = async (event) => {
 	return data;
 };
 
+const updateStatus = async (status: string, { fetch, params, cookies }) => {
+	const updateData = { status };
+	const response = await fetch(`${BASE_API_URL}/task-nodes/${params.id}/`, {
+		method: 'PATCH',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(updateData)
+	});
+	if (response.ok) {
+		setFlash({ type: 'success', message: m.statusUpdatedSuccessfully() }, cookies);
+		return { success: true };
+	} else {
+		try {
+			const error = await response.json();
+			return fail(400, { error });
+		} catch {
+			return fail(400, { error: 'Failed to update status' });
+		}
+	}
+};
+
 export const actions: Actions = {
 	addEvidenceRevision: async (event) => {
 		return nestedWriteFormAction({ event, action: 'create' });
 	},
-	pending: async ({ request, fetch, params, cookies }) => {
-		const updateData = {
-			status: 'pending'
-		};
-
-		const response = await fetch(`${BASE_API_URL}/task-nodes/${params.id}/`, {
-			method: 'PATCH',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(updateData)
-		});
-
-		if (response.ok) {
-			setFlash({ type: 'success', message: m.statusUpdatedSuccessfully() }, cookies);
-			return { success: true };
-		} else {
-			const error = await response.json();
-			return fail(400, { error });
-		}
-	},
-	inProgress: async ({ request, fetch, params, cookies }) => {
-		const updateData = {
-			status: 'in_progress'
-		};
-
-		const response = await fetch(`${BASE_API_URL}/task-nodes/${params.id}/`, {
-			method: 'PATCH',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(updateData)
-		});
-
-		if (response.ok) {
-			setFlash({ type: 'success', message: m.statusUpdatedSuccessfully() }, cookies);
-			return { success: true };
-		} else {
-			const error = await response.json();
-			return fail(400, { error });
-		}
-	},
-	cancelled: async ({ request, fetch, params, cookies }) => {
-		const updateData = {
-			status: 'cancelled'
-		};
-
-		const response = await fetch(`${BASE_API_URL}/task-nodes/${params.id}/`, {
-			method: 'PATCH',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(updateData)
-		});
-
-		if (response.ok) {
-			setFlash({ type: 'success', message: m.statusUpdatedSuccessfully() }, cookies);
-			return { success: true };
-		} else {
-			const error = await response.json();
-			return fail(400, { error });
-		}
-	},
-	completed: async ({ request, fetch, params, cookies }) => {
-		const updateData = {
-			status: 'completed'
-		};
-
-		const response = await fetch(`${BASE_API_URL}/task-nodes/${params.id}/`, {
-			method: 'PATCH',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(updateData)
-		});
-
-		if (response.ok) {
-			setFlash({ type: 'success', message: m.statusUpdatedSuccessfully() }, cookies);
-			return { success: true };
-		} else {
-			const error = await response.json();
-			return fail(400, { error });
-		}
-	},
+	pending: async (event) => updateStatus('pending', event),
+	inProgress: async (event) => updateStatus('in_progress', event),
+	cancelled: async (event) => updateStatus('cancelled', event),
+	completed: async (event) => updateStatus('completed', event),
 	updateObservation: async ({ request, fetch, params, cookies }) => {
 		const formData = await request.formData();
-		const observation = formData.get('observation') as string;
+		const observation = formData.get('observation');
+		if (typeof observation !== 'string') {
+			return fail(400, { error: 'Invalid observation value' });
+		}
 
 		const updateData = {
 			observation
