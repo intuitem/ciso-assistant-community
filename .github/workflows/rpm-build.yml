@@ -78,6 +78,7 @@ jobs:
       - name: Build RPM
         env:
           VERSION: ${{ steps.version.outputs.version }}
+          PATH: /root/.local/bin:${{ env.PATH }}
         run: |
           cd packaging/rhel
           bash build-rpm.sh
