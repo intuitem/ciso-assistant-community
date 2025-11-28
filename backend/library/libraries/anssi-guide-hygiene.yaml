@@ -8,7 +8,7 @@ description: "Renforcer la s\xE9curit\xE9 de son syst\xE8me d\u2019information e
   \ 42 mesures\n https://cyber.gouv.fr/sites/default/files/2017/01/guide_hygiene_informatique_anssi.pdf"
 copyright: Licence Ouverte/Open Licence (Etalab - V1)
 version: 3
-publication_date: 2025-11-27
+publication_date: 2025-11-28
 provider: ANSSI
 packager: intuitem
 translations:
@@ -508,7 +508,6 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
       - urn:intuitem:risk:function:doc-pol:pol.accept
-      - urn:intuitem:risk:function:doc-pol:pol.network
       translations:
         en:
           name: Only allow controlled devices to connect to the network of the organization
@@ -2193,7 +2192,6 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.work
       - urn:intuitem:risk:function:doc-pol:pol.accept
       - urn:intuitem:risk:function:doc-pol:tech.uem
-      - urn:intuitem:risk:function:doc-pol:pol.work
       translations:
         en:
           name: Adopt security policies dedicated to mobile devices
