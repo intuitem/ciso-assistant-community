@@ -873,12 +873,20 @@ class LoadedLibrary(LibraryMixin):
         from core.mappings.engine import engine
 
         super(LoadedLibrary, self).save(*args, **kwargs)
-        if (
-            self.objects_meta.requirement_mapping_sets
-            or self.objects_meta.requirement_mapping_set
-        ):
+
+        objects_meta = self.objects_meta or {}
+
+        has_rms = bool(
+            objects_meta.get("requirement_mapping_sets")
+            or objects_meta.get("requirement_mapping_set")
+        )
+        if has_rms:
             transaction.on_commit(lambda: engine.load_rms_data())
-        if self.objects_meta.frameworks or self.objects_meta.frameworks:
+
+        has_frameworks = bool(
+            objects_meta.get("frameworks") or objects_meta.get("framework")
+        )
+        if has_frameworks:
             transaction.on_commit(lambda: engine.load_frameworks())
 
     @transaction.atomic
