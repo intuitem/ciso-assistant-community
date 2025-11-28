@@ -548,6 +548,22 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 new_label.save()
                 new_labels.append(str(new_label.id))
         return new_labels
+    
+    def _process_evidences(self, evidences, folder):
+        """
+        Creates a Evidence and replaces the value with the ID of the newly created evidence.
+        """
+        new_evidences = []
+        for evidence in evidences:
+            try:
+                uuid.UUID(evidence, version=4)
+                new_evidences.append(evidence)
+            except ValueError:
+                new_evidence = Evidence(name=evidence, folder=folder)
+                new_evidence.full_clean()
+                new_evidence.save()
+                new_evidences.append(str(new_evidence.id))
+        return new_evidences
 
     def list(self, request, *args, **kwargs):
         """
@@ -573,6 +589,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
             )
+        if request.data.get("evidences"):
+            folder = Folder.objects.get(id=request.data.get("folder"))
+            request.data["evidences"] = self._process_evidences(
+                request.data["evidences"], folder=folder
+            )
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
@@ -580,6 +601,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         if request.data.get("filtering_labels"):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
+            )
+        if request.data.get("evidences"):
+            folder = Folder.objects.get(id=request.data.get("folder"))
+            request.data["evidences"] = self._process_evidences(
+                request.data["evidences"], folder=folder
             )
         return super().update(request, *args, **kwargs)
 

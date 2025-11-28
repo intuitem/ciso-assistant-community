@@ -219,6 +219,18 @@
 	/>
 {/if}
 <AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
+	helpText={m.taskTemplateEvidenceHelpText()}
+	field="evidences"
+	label={m.evidences()}
+	allowUserOptions="append"
+	translateOptions={false}
+/>
+<AutocompleteSelect
 	{form}
 	multiple
 	optionsEndpoint="users?is_third_party=false"
@@ -235,15 +247,6 @@
 		label={m.refId()}
 		cacheLock={cacheLocks['ref_id']}
 		bind:cachedValue={formDataCache['ref_id']}
-	/>
-	<AutocompleteSelect
-		multiple
-		{form}
-		optionsEndpoint="evidences"
-		optionsExtraFields={[['folder', 'str']]}
-		optionsLabelField="auto"
-		field="evidences"
-		label={m.evidences()}
 	/>
 	<AutocompleteSelect
 		multiple
