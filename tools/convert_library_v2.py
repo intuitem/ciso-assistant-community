@@ -661,6 +661,15 @@ def create_library(
         "provider": library_meta.get("provider"),
         "packager": library_meta.get("packager"),
     }
+    
+    # Labels Addition
+    labels_cell = library_meta.get("labels")
+    if labels_cell:
+        library["labels"] = list(set([
+            label.upper()
+            for label in re.split(r'[\s,\n]+', labels_cell.strip())
+            if label
+        ]))
 
     translations = extract_translations_from_metadata(library_meta, "library")
     if translations:

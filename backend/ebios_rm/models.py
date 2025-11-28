@@ -782,6 +782,23 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         )
         return result
 
+    @classmethod
+    def get_default_ref_id(cls, strategic_scenario):
+        attack_paths_ref_ids = list(
+            strategic_scenario.attack_paths.values_list("ref_id", flat=True)
+        )
+        nb_attack_paths = len(attack_paths_ref_ids) + 1
+        candidates = [f"AP.{i:02d}" for i in range(1, nb_attack_paths + 1)]
+        return next(x for x in candidates if x not in attack_paths_ref_ids)
+
+    @property
+    def form_display_name(self):
+        """Returns attack path name with strategic scenario for form dropdown display"""
+        base_name = self.name or f"Attack Path {str(self.id)[:8]}"
+        if self.strategic_scenario:
+            return f"{base_name} ({self.strategic_scenario.name})"
+        return base_name
+
     @property
     def ro_to_couple(self):
         return self.strategic_scenario.ro_to_couple

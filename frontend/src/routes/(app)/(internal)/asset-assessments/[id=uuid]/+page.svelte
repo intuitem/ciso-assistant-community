@@ -12,9 +12,25 @@
 	}
 
 	let { data }: Props = $props();
+	const asset_assessment = data.data;
+	const isBiaLocked = asset_assessment.bia?.is_locked || false;
 </script>
 
-<DetailView {data}>
+{#if isBiaLocked}
+	<div
+		class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm mx-4 mt-4"
+	>
+		<div class="flex items-center">
+			<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
+			<span class="font-medium">{m.lockedAssessment()}</span>
+			<span class="ml-2 text-sm"
+				>{m.parentAssessmentLocked({ parent: asset_assessment.bia.name })}</span
+			>
+		</div>
+	</div>
+{/if}
+
+<DetailView {data} disableEdit={isBiaLocked} disableDelete={isBiaLocked}>
 	{#snippet widgets()}
 		<div class="h-full flex flex-col space-y-4">
 			<div class="card p-4 bg-gray-50 shadow-xs grow">
