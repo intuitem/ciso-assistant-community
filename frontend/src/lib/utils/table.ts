@@ -7,6 +7,7 @@ import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeSta
 import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
 import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
 import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeStatus.svelte';
+import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
@@ -1053,6 +1054,15 @@ export const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'isAssigned',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
+export const PAST_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'past',
 		options: YES_NO_OPTIONS,
 		multiple: true
 	}
@@ -2238,6 +2248,7 @@ export const listViewFields = {
 			'name',
 			'is_recurrent',
 			'assigned_to',
+			'startDate',
 			'lastOccurrenceStatus',
 			'nextOccurrence',
 			'nextOccurrenceStatus',
@@ -2248,6 +2259,7 @@ export const listViewFields = {
 			'name',
 			'is_recurrent',
 			'assigned_to',
+			'task_date',
 			'last_occurrence_status',
 			'next_occurrence',
 			'next_occurrence_status',
@@ -2265,7 +2277,8 @@ export const listViewFields = {
 		head: ['due_date', 'status'],
 		body: ['due_date', 'status'],
 		filters: {
-			status: TASK_STATUS_FILTER
+			status: TASK_STATUS_FILTER,
+			past: PAST_FILTER
 		}
 	},
 	qualifications: {
@@ -2326,6 +2339,7 @@ export const contextMenuActions = {
 		{ component: ChangePriority, props: {} }
 	],
 	evidences: [{ component: EvidenceChangeStatus, props: {} }],
+	'task-nodes': [{ component: TaskNodeChangeStatus, props: {} }],
 	'feared-events': [{ component: SelectObject, props: {} }],
 	'ro-to': [{ component: SelectObject, props: {} }],
 	stakeholders: [{ component: SelectObject, props: {} }],

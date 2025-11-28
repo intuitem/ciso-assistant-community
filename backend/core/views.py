@@ -10695,9 +10695,29 @@ class TaskTemplateViewSet(BaseModelViewSet):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
 
 
+class TaskNodeFilterSet(GenericFilterSet):
+    past = df.BooleanFilter(method="filter_past")
+
+    def filter_past(self, queryset, name, value):
+        if value is True:
+            return queryset.filter(due_date__lt=date.today()).order_by("due_date")
+        elif value is False:
+            return queryset.filter(due_date__gte=date.today()).order_by("due_date")
+        return queryset
+
+    class Meta:
+        model = TaskNode
+        fields = {
+            "status": ["exact"],
+            "task_template": ["exact"],
+            "due_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
+        }
+
+
 class TaskNodeViewSet(BaseModelViewSet):
     model = TaskNode
-    filterset_fields = ["status", "task_template"]
+    filterset_class = TaskNodeFilterSet
+    search_fields = ["observation"]
     ordering = ["due_date"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
