@@ -1639,7 +1639,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'task_template', urlModel: 'task-nodes', disableCreate: true, disableDelete: true, disableEdit: true }
+			{
+				field: 'task_template',
+				urlModel: 'task-nodes',
+				disableCreate: true,
+				disableDelete: true,
+				disableEdit: true
+			}
 		]
 	},
 	'task-nodes': {

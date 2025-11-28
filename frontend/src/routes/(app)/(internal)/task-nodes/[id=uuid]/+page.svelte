@@ -76,32 +76,32 @@
 		{
 			label: m.taskTemplate(),
 			items: [taskNode.task_template],
-			baseUrl: "/task-templates"
+			baseUrl: '/task-templates'
 		},
 		{
 			label: m.appliedControls(),
 			items: taskNode.applied_controls,
-			baseUrl: "/applied-controls"
+			baseUrl: '/applied-controls'
 		},
 		{
 			label: m.complianceAssessments(),
 			items: taskNode.compliance_assessments,
-			baseUrl: "/compliance-assessments"
+			baseUrl: '/compliance-assessments'
 		},
 		{
 			label: m.assets(),
 			items: taskNode.assets,
-			baseUrl: "/assets"
+			baseUrl: '/assets'
 		},
 		{
 			label: m.riskAssessments(),
 			items: taskNode.risk_assessments,
-			baseUrl: "/risk-assessments"
+			baseUrl: '/risk-assessments'
 		},
 		{
 			label: m.findingsAssessments(),
 			items: taskNode.finding_assessments,
-			baseUrl: "/finding-assessments"
+			baseUrl: '/finding-assessments'
 		}
 	];
 </script>
@@ -265,10 +265,12 @@
 	<div class="space-y-1">
 		<p class="text-gray-700 text-md font-medium">{m.observation()}</p>
 		<div class="p-2 bg-gray-50 border border-gray-200 rounded">
-			<TableMarkdownField bind:value={taskNode.observation} 
-			onSave={async (observation) => {
-				submitObservationChange(observation)
-			}}/>
+			<TableMarkdownField
+				bind:value={taskNode.observation}
+				onSave={async (observation) => {
+					submitObservationChange(observation);
+				}}
+			/>
 		</div>
 	</div>
 </div>

@@ -548,7 +548,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 new_label.save()
                 new_labels.append(str(new_label.id))
         return new_labels
-    
+
     def _process_evidences(self, evidences, folder):
         """
         Creates a Evidence and replaces the value with the ID of the newly created evidence.
