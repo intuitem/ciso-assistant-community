@@ -217,16 +217,19 @@
 		bind:cachedValue={formDataCache['status']}
 		disableDoubleDash={true}
 	/>
-	<AutocompleteSelect
-		multiple
-		{form}
-		optionsEndpoint="evidences"
-		optionsExtraFields={[['folder', 'str']]}
-		optionsLabelField="auto"
-		field="evidences"
-		label={m.evidences()}
-	/>
 {/if}
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
+	helpText={m.taskTemplateEvidenceHelpText()}
+	field="evidences"
+	label={m.evidences()}
+	allowUserOptions="append"
+	translateOptions={false}
+/>
 <AutocompleteSelect
 	{form}
 	multiple

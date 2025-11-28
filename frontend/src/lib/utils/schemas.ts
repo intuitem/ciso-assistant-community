@@ -478,6 +478,7 @@ export const EvidenceSchema = z.object({
 export const EvidenceRevisionSchema = z.object({
 	folder: z.string().uuid(),
 	evidence: z.string().uuid(),
+	task_node: z.string().uuid(),
 	version: z.number().optional(),
 	attachment: z.any().optional().nullable(),
 	link: z
@@ -1173,7 +1174,7 @@ export const TaskTemplateSchema = z.object({
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
-	evidences: z.string().uuid().optional().array().optional(),
+	evidences: z.union([z.string().uuid(), z.string()]).optional().array().optional(), // Allow both UUIDs and strings for evidences created from the form
 	schedule: z
 		.object({
 			interval: z.number().min(1).positive().optional(),

@@ -1720,5 +1720,16 @@
 	"downloadCertificate": "Pobierz certyfikat",
 	"loginFailed": "Logowanie nieudane",
 	"viewMore": "Pokaż więcej",
-	"viewLess": "Pokaż mniej"
+	"viewLess": "Zobacz mniej",
+	"expectedEvidence": "Oczekiwane dowody",
+	"taskNodeLegacyEvidence": "Stare pole dowodów jest przestarzałe. Dowody są teraz na poziomie zadania i są współdzielone między wystąpieniami oczekującymi na rewizje.\nAby przenieść je do oczekiwanych dowodów lub usunąć je z wystąpienia, użyj przycisków",
+	"taskNodeNewEvidence": "Dowody globalnie powiązane z zadaniem i rozprzestrzenione na wystąpienia. Możesz dodać rewizję w zakładce 'Dowody' poniżej",
+	"statusUpdatedSuccessfully": "Status zaktualizowany pomyślnie",
+	"observationUpdatedSuccessfully": "Obserwacja zaktualizowana pomyślnie",
+	"taskTemplateEvidenceHelpText": "👉 Oczekiwane dowody dla tego zadania.\nBędą one powiązane ze wszystkimi wystąpieniami, abyś mógł przesyłać rewizje dla każdego z nich bezpośrednio.",
+	"unassigned": "Nieprzypisany",
+	"addEvidenceRevisionFor": "Dodaj rewizję dla {evidenceName}",
+	"occurrenceDueDate": "Termin wystąpienia",
+	"relatedTo": "Powiązane z",
+	"legacyEvidenceField": "Stare pole dowodów"
 }

@@ -2772,5 +2772,16 @@
 	"purposesDescription": "Finalités des traitements de données (RGPD)",
 	"rightRequestsDescription": "Demandes d'exercice de droits des personnes concernées (RGPD)",
 	"dataBreachesDescription": "Incidents de violations de données et notifications",
-	"userLinkedToRepresentative": "Un utilisateur est déjà lié à ce représentant."
+	"userLinkedToRepresentative": "Un utilisateur est déjà lié à ce représentant.",
+	"expectedEvidence": "Preuves attendues",
+	"taskNodeLegacyEvidence": "L'ancien champ preuve est obsolète. Les preuves sont maintenant au niveau de la tâche et partagées entre les occurrences en attente de révision.\n Pour les déplacer vers les preuves attendues ou les supprimer de l'occurrence, utilisez les boutons",
+	"taskNodeNewEvidence": "Preuves liées globalement à la tâche et partagées entre les occurrences. Vous pouvez ajouter une révision dans l'onglet 'Preuves' ci-dessous",
+	"statusUpdatedSuccessfully": "Statut mis à jour avec succès",
+	"observationUpdatedSuccessfully": "Observation mise à jour avec succès",
+	"taskTemplateEvidenceHelpText": "👉 Preuves attendues pour cette tâche.\n Cela sera lié à toutes les occurrences afin que vous puissiez soumettre des révisions pour chacune directement.",
+	"unassigned": "Non assigné",
+	"addEvidenceRevisionFor": "Ajouter une révision pour :\n{evidenceName}",
+	"occurrenceDueDate": "Date d'échéance de l'occurrence",
+	"relatedTo": "Relatif à",
+	"legacyEvidenceField": "Champ de preuve obsolète"
 }

@@ -987,5 +987,16 @@
 	"downloadCertificate": "Zertifikat herunterladen",
 	"viewMore": "Mehr anzeigen",
 	"viewLess": "Weniger anzeigen",
-	"loginFailed": "Anmeldung fehlgeschlagen"
+	"loginFailed": "Anmeldung fehlgeschlagen",
+	"expectedEvidence": "Erwartete Beweise",
+	"taskNodeLegacyEvidence": "Das alte Beweisfeld ist veraltet. Beweise sind jetzt auf Ebene der Aufgabe und werden für alle Vorkommen freigegeben, die auf Überarbeitungen warten.\n Um sie zu erwarteten Beweisen zu verschieben oder aus dem Vorkommen zu entfernen, verwenden Sie die Schaltflächen",
+	"taskNodeNewEvidence": "Beweise, die global mit der Aufgabe verknüpft sind und an Vorkommen weitergegeben werden. Sie können eine Überarbeitung im Register 'Beweise' unten hinzufügen",
+	"statusUpdatedSuccessfully": "Status erfolgreich aktualisiert",
+	"observationUpdatedSuccessfully": "Beobachtung erfolgreich aktualisiert",
+	"taskTemplateEvidenceHelpText": "👉 Erwartete Beweise für diese Aufgabe.\n Diese werden mit allen Vorkommen verknüpft, sodass Sie für jedes eine Überarbeitung einreichen können.",
+	"unassigned": "Nicht zugewiesen",
+	"addEvidenceRevisionFor": "Überarbeitung für {evidenceName} hinzufügen",
+	"occurrenceDueDate": "Fälligkeitsdatum des Vorkommens",
+	"relatedTo": "Verwandt mit",
+	"legacyEvidenceField": "Veraltetes Beweisfeld"
 }

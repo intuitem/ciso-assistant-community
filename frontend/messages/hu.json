@@ -980,5 +980,16 @@
 	"downloadCertificate": "Tanúsítvány letöltése",
 	"viewMore": "Megtekintés több",
 	"viewLess": "Megtekintés kevesebb",
-	"loginFailed": "Sikertelen bejelentkezés"
+	"loginFailed": "Sikertelen bejelentkezés",
+	"expectedEvidence": "Várt bizonyíték",
+	"taskNodeLegacyEvidence": "A régi bizonyíték mező elavult. A bizonyíték most feladat-szintű és megosztott az áttekintésre váró előfordulások között.\n A mozgatásuk a várható bizonyítékok közé vagy az eltávolításuk az előfordulásból a gombok segítségével történik.",
+	"taskNodeNewEvidence": "A feladathoz globálisan kapcsolódó bizonyítékok, amelyek elosztottak az előfordulások között. Áttekintést adhat hozzá a 'Bizonyítékok' fülön lent.",
+	"statusUpdatedSuccessfully": "Az állapot sikeresen frissítve",
+	"observationUpdatedSuccessfully": "A megfigyelés sikeresen frissítve",
+	"taskTemplateEvidenceHelpText": "👉 Várt bizonyíték ehhez a feladathoz.\n Ez minden előforduláshoz kapcsolódik, így közvetlenül áttekintéseket adhatsz hozzá.",
+	"unassigned": "Nem rendelt",
+	"addEvidenceRevisionFor": "Áttekintés hozzáadása ehhez: {evidenceName}",
+	"occurrenceDueDate": "Előfordulás határideje",
+	"relatedTo": "Kapcsolódó",
+	"legacyEvidenceField": "Elavult bizonyíték mező"
 }

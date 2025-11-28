@@ -1165,5 +1165,16 @@
 	"downloadCertificate": "Unduh sertifikat",
 	"viewMore": "Lihat lebih banyak",
 	"viewLess": "Lihat lebih sedikit",
-	"loginFailed": "Login gagal"
+	"loginFailed": "Gagal masuk",
+	"expectedEvidence": "Bukti yang Diharapkan",
+	"taskNodeLegacyEvidence": "Bidang bukti lama sudah usang. Bukti sekarang tingkat tugas dan dibagikan di seluruh kejadian yang menunggu revisi.\n Untuk memindahkannya ke bukti yang diharapkan atau menghapusnya dari kejadian, gunakan tombol",
+	"taskNodeNewEvidence": "Bukti yang terhubung secara global dengan tugas dan tersebar ke kejadian. Anda dapat menambahkan revisi di tab 'Bukti' di bawah ini",
+	"statusUpdatedSuccessfully": "Status berhasil diperbarui",
+	"observationUpdatedSuccessfully": "Observasi berhasil diperbarui",
+	"taskTemplateEvidenceHelpText": "👉 Bukti yang Diharapkan untuk tugas ini.\n Ini akan terhubung dengan semua kejadian sehingga Anda dapat mengirimkan revisi untuk masing-masing langsung.",
+	"unassigned": "Tidak ditugaskan",
+	"addEvidenceRevisionFor": "Tambahkan revisi untuk {evidenceName}",
+	"occurrenceDueDate": "Tanggal jatuh tempo kejadian",
+	"relatedTo": "Terkait dengan",
+	"legacyEvidenceField": "Bidang Bukti Usang"
 }
