@@ -6787,7 +6787,7 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     )
 
     to_delete = models.BooleanField(default=False)
-    
+
     def __str__(self):
         return f"{self.task_template.name} ({self.due_date})"
 

@@ -10451,7 +10451,13 @@ class TaskTemplateFilter(GenericFilterSet):
 
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
-    filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls", "evidences"]
+    filterset_fields = [
+        "assigned_to",
+        "is_recurrent",
+        "folder",
+        "applied_controls",
+        "evidences",
+    ]
     filterset_class = TaskTemplateFilter
 
     def get_queryset(self):
