@@ -109,6 +109,7 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	disableDelete?: boolean;
 	disableEdit?: boolean;
 	folderPermsNeeded?: { action: 'add' | 'view' | 'change' | 'delete'; model: string }[]; // Permissions needed on the folder to display this reverse foreign key field
+	defaultFilters?: { [key: string]: any[] }; // Default filters to initialize the table with (user can change/remove them)
 }
 
 interface Field {
@@ -1692,7 +1693,10 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'task-nodes',
 				disableCreate: true,
 				disableDelete: true,
-				disableEdit: true
+				disableEdit: true,
+				defaultFilters: {
+					past: [{ value: 'false' }]
+				}
 			}
 		]
 	},

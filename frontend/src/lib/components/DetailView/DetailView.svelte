@@ -744,6 +744,7 @@
 									deleteForm={model.deleteForm}
 									URLModel={urlmodel}
 									fields={fieldsToUse}
+									defaultFilters={field.defaultFilters || {}}
 								>
 									{#snippet addButton()}
 										<button
