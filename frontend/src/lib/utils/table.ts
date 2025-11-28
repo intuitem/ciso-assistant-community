@@ -1058,6 +1058,15 @@ export const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const PAST_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'past',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
 export const FIELD_PATH_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2265,7 +2274,8 @@ export const listViewFields = {
 		head: ['due_date', 'status'],
 		body: ['due_date', 'status'],
 		filters: {
-			status: TASK_STATUS_FILTER
+			status: TASK_STATUS_FILTER,
+			past: PAST_FILTER
 		}
 	},
 	qualifications: {
