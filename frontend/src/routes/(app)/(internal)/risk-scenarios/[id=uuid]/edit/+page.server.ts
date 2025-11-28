@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
-import { listViewFields } from '$lib/utils/table';
+import { headData } from '$lib/utils/table';
 import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { fail, type Actions } from '@sveltejs/kit';
@@ -37,7 +37,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			const response = await fetch(keyEndpoint);
 			if (response.ok) {
 				const table: TableSource = {
-					head: listViewFields[key].head,
+					head: headData(key),
 					body: [],
 					meta: []
 				};
