@@ -533,7 +533,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{ field: 'assets', urlModel: 'vulnerabilities' },
 			{ field: 'assets', urlModel: 'solutions', disableCreate: true, disableDelete: true },
-			{ field: 'assets', urlModel: 'personal-data', disableCreate: true, disableDelete: true }
+			{ field: 'assets', urlModel: 'personal-data', disableCreate: true, disableDelete: true },
+			{ field: 'assets', urlModel: 'incidents' }
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
@@ -1616,10 +1617,11 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Incident',
 		verboseNamePlural: 'Incidents',
 		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
-			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'owners', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'qualifications', urlModel: 'terminologies' },
 			{ field: 'entities', urlModel: 'entities' }
 		],
@@ -1628,6 +1630,24 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'severity', valueType: 'number' },
 			{ field: 'status' },
 			{ field: 'detection' }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'reported_at' },
+			{ field: 'qualifications' },
+			{ field: 'status' },
+			{ field: 'severity' },
+			{ field: 'detection' },
+			{ field: 'assets' },
+			{ field: 'owners' },
+			{ field: 'entities' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' },
+			{ field: 'link' }
 		]
 	},
 	'timeline-entries': {
