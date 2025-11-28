@@ -166,9 +166,6 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     compliance = serializers.BooleanField(
         source="value.compliance", required=False, default=True
     )
-    campaigns = serializers.BooleanField(
-        source="value.campaigns", required=False, default=True
-    )
     tprm = serializers.BooleanField(source="value.tprm", required=False, default=True)
     privacy = serializers.BooleanField(
         source="value.privacy", required=False, default=True
@@ -218,7 +215,6 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "scoring_assistant",
             "vulnerabilities",
             "compliance",
-            "campaigns",
             "tprm",
             "privacy",
             "experimental",
