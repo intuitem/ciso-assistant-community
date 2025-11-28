@@ -2785,5 +2785,5 @@
 	"evidenceRevisionAnnouncement": "Evidence revision can now be added from the table with the button",
 	"statusUpdatedSuccessfully": "Status updated successfully",
 	"observationUpdatedSuccessfully": "Observation updated successfully",
-	"taskTemplateEvidenceHelpText": "Evidence will be distributed across all occurrences of the task, and revisions can be added directly from each occurrence"
+	"taskTemplateEvidenceHelpText": "👉 Expected Evidence for this task.\n This will be linked to all occurrences so that you can submit revisions for each one directly."
 }
