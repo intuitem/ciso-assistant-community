@@ -408,7 +408,7 @@
 								</div>
 							{/if}
 							{#if requirementAssessment.assessable}
-								{#if data.requirements[i].annotation || data.requirements[i].typical_evidence || requirementAssessment.mapping_inference?.result}
+								{#if requirementAssessment.requirement.annotation || requirementAssessment.requirement.typical_evidence || requirementAssessment.mapping_inference?.result}
 									<div
 										class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto w-full"
 									>
@@ -425,25 +425,25 @@
 											</button>
 										</h2>
 										{#if !hideSuggestionHashmap[requirementAssessment.id]}
-											{#if data.requirements[i].annotation}
+											{#if requirementAssessment.requirement.annotation}
 												<div class="my-2">
 													<p class="font-medium">
 														<i class="fa-solid fa-pencil"></i>
 														{m.annotation()}
 													</p>
 													<div class="py-1">
-														<MarkdownRenderer content={data.requirements[i].annotation} />
+														<MarkdownRenderer content={requirementAssessment.requirement.annotation} />
 													</div>
 												</div>
 											{/if}
-											{#if data.requirements[i].typical_evidence}
+											{#if requirementAssessment.requirement.typical_evidence}
 												<div class="my-2">
 													<p class="font-medium">
 														<i class="fa-solid fa-pencil"></i>
 														{m.typicalEvidence()}
 													</p>
 													<div class="py-1">
-														<MarkdownRenderer content={data.requirements[i].typical_evidence} />
+														<MarkdownRenderer content={requirementAssessment.requirement.typical_evidence} />
 													</div>
 												</div>
 											{/if}
