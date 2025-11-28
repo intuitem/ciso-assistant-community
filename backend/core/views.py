@@ -10421,6 +10421,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "applied_controls",
             "last_occurrence_status",
             "next_occurrence_status",
+            "evidences",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
@@ -10450,7 +10451,7 @@ class TaskTemplateFilter(GenericFilterSet):
 
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
-    filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls"]
+    filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls", "evidences"]
     filterset_class = TaskTemplateFilter
 
     def get_queryset(self):
@@ -10704,10 +10705,10 @@ class TaskNodeViewSet(BaseModelViewSet):
     def remove_evidence(self, request, pk):
         task_node = TaskNode.objects.get(id=pk)
         evidence_id = request.data.get("evidence_id")
-        to_move = request.data.get("move", False)
+        to_moove = request.data.get("moove", False)
         evidence = Evidence.objects.get(id=evidence_id)
         task_node.evidences.remove(evidence)
-        if to_move:
+        if to_moove:
             task_node.task_template.evidences.add(evidence)
         return Response(status=status.HTTP_200_OK)
 
