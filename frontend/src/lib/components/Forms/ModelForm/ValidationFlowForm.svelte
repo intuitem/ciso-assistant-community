@@ -8,6 +8,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -39,6 +40,12 @@
 		initialData.entity_assessments ||
 		initialData.findings_assessments;
 
+	// Determine the approver endpoint based on allow_self_validation setting
+	const allowSelfValidation = $derived(page.data?.settings?.allow_self_validation ?? false);
+	const approverEndpoint = $derived(
+		allowSelfValidation ? 'users?is_approver=true' : 'users?is_approver=true&exclude_current=true'
+	);
+
 	async function fetchDefaultRefId() {
 		try {
 			const response = await fetch(`/validation-flows/default-ref-id/`);
@@ -59,7 +66,7 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="users?is_approver=true&exclude_current=true"
+	optionsEndpoint={approverEndpoint}
 	optionsLabelField="email"
 	field="approver"
 	cacheLock={cacheLocks['approver']}
