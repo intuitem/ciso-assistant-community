@@ -41,9 +41,7 @@
 		initialData.findings_assessments;
 
 	// Determine the approver endpoint based on allow_self_validation setting
-	const allowSelfValidation = $derived(
-		page.data?.settings?.allow_self_validation ?? false
-	);
+	const allowSelfValidation = $derived(page.data?.settings?.allow_self_validation ?? false);
 	const approverEndpoint = $derived(
 		allowSelfValidation ? 'users?is_approver=true' : 'users?is_approver=true&exclude_current=true'
 	);
