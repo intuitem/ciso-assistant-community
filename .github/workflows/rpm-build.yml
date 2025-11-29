@@ -63,11 +63,6 @@ jobs:
           dnf install -y nodejs
           npm install -g pnpm
 
-      - name: Install Poetry
-        run: |
-          pip3 install poetry
-          poetry --version
-
       - name: Generate Version
         id: version
         run: |
