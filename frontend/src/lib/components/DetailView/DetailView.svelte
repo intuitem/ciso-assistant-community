@@ -239,7 +239,7 @@
 		endpointUrl?: string;
 	}) {
 		if (endpointUrl?.startsWith('./')) {
-			return `/${parentModel.urlmodel}/${id}/${endpointUrl.slice(2)}`;
+			return `/${parentModel.urlModel}/${id}/${endpointUrl.slice(2)}`;
 		}
 		return `/${targetUrlModel}?${field}=${id}`;
 	}
@@ -552,12 +552,6 @@
 							<h4 class="font-semibold lowercase capitalize-first">
 								{safeTranslate('associated-' + activeModel.info.localNamePlural)}
 							</h4>
-							{#if activeModel.table?.body?.length > 0}
-								<span class="text-xs text-gray-500">
-									{activeModel.table.body.length}
-									&nbsp;{safeTranslate(activeModel.info.localNamePlural)}
-								</span>
-							{/if}
 						</div>
 					{/if}
 
@@ -648,9 +642,9 @@
 											{safeTranslate(model.info.localNamePlural)}
 										</span>
 									</div>
-									{#if model.table?.body?.length > 0}
+									{#if model.table?.meta?.count > 0}
 										<span class="badge preset-tonal-secondary">
-											{model.table.body.length}
+											{model.table.meta.count}
 										</span>
 									{/if}
 								</button>
