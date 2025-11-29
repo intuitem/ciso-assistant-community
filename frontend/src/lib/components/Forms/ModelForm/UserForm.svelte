@@ -65,14 +65,28 @@
 {#if shape.is_active}
 	<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 {/if}
+{#if shape.is_third_party}
+	<Checkbox {form} field="is_third_party" label={m.isThirdParty()} />
+{/if}
 
-{#if context !== 'create'}
-	<Checkbox
-		{form}
-		field="keep_local_login"
-		label={m.keepLocalLogin()}
-		helpText={m.keepLocalLoginHelpText()}
-	/>
+{#if shape.keep_local_login}
+	{#if context === 'create'}
+		{#if formDataCache['is_third_party']}
+			<Checkbox
+				{form}
+				field="keep_local_login"
+				label={m.keepLocalLogin()}
+				helpText={m.keepLocalLoginHelpText()}
+			/>
+		{/if}
+	{:else if !page.data.object?.is_third_party}
+		<Checkbox
+			{form}
+			field="keep_local_login"
+			label={m.keepLocalLogin()}
+			helpText={m.keepLocalLoginHelpText()}
+		/>
+	{/if}
 {/if}
 {#if shape.expiry_date && !page.data.object?.is_superuser}
 	<TextField
