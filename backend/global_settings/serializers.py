@@ -16,6 +16,7 @@ GENERAL_SETTINGS_KEYS = [
     "currency",
     "daily_rate",
     "mapping_max_depth",
+    "allow_self_validation",
 ]
 
 
