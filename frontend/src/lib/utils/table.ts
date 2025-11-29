@@ -1,11 +1,13 @@
 import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
+import type { urlModel } from './types';
 
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
 import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
 import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
 import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeStatus.svelte';
+import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
@@ -948,6 +950,30 @@ export const CSF_FUNCTION_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const APPLIED_CONTROL_CATEGORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'category',
+		optionsEndpoint: 'applied-controls/category',
+		multiple: true,
+		optionsLabelField: 'label',
+		browserCache: 'force-cache',
+		optionsValueField: 'value'
+	}
+};
+
+export const APPLIED_CONTROL_CSF_FUNCTION_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'applied-controls/csf_function',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'csfFunction',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1028,6 +1054,15 @@ export const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'isAssigned',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
+export const PAST_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'past',
 		options: YES_NO_OPTIONS,
 		multiple: true
 	}
@@ -1324,8 +1359,8 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
-			category: REFERENCE_CONTROL_CATEGORY_FILTER,
-			csf_function: CSF_FUNCTION_FILTER,
+			category: APPLIED_CONTROL_CATEGORY_FILTER,
+			csf_function: APPLIED_CONTROL_CSF_FUNCTION_FILTER,
 			priority: PRIORITY_FILTER,
 			effort: EFFORT_FILTER,
 			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
@@ -1920,8 +1955,24 @@ export const listViewFields = {
 		}
 	},
 	'strategic-scenarios': {
-		head: ['ref_id', 'name', 'description', 'ro_to_couple', 'attackPaths', 'gravity'],
-		body: ['ref_id', 'name', 'description', 'ro_to_couple', 'attack_paths', 'gravity'],
+		head: [
+			'ref_id',
+			'name',
+			'description',
+			'ro_to_couple',
+			'fearedEvents',
+			'attackPaths',
+			'gravity'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'ro_to_couple',
+			'feared_events',
+			'attack_paths',
+			'gravity'
+		],
 		filters: {
 			gravity: RISK_IMPACT_FILTER
 		}
@@ -1993,7 +2044,8 @@ export const listViewFields = {
 			'status',
 			'expiration_date',
 			'domain',
-			'associatedObjectsCount'
+			'associatedObjectsCount',
+			'created_at'
 		],
 		body: [
 			'ref_id',
@@ -2002,7 +2054,8 @@ export const listViewFields = {
 			'status',
 			'expiration_date',
 			'folder',
-			'associated_objects_count'
+			'associated_objects_count',
+			'created_at'
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2195,6 +2248,7 @@ export const listViewFields = {
 			'name',
 			'is_recurrent',
 			'assigned_to',
+			'startDate',
 			'lastOccurrenceStatus',
 			'nextOccurrence',
 			'nextOccurrenceStatus',
@@ -2205,6 +2259,7 @@ export const listViewFields = {
 			'name',
 			'is_recurrent',
 			'assigned_to',
+			'task_date',
 			'last_occurrence_status',
 			'next_occurrence',
 			'next_occurrence_status',
@@ -2219,10 +2274,11 @@ export const listViewFields = {
 		}
 	},
 	'task-nodes': {
-		head: ['due_date', 'status', 'evidences'],
-		body: ['due_date', 'status', 'evidences'],
+		head: ['due_date', 'status'],
+		body: ['due_date', 'status'],
 		filters: {
-			status: TASK_STATUS_FILTER
+			status: TASK_STATUS_FILTER,
+			past: PAST_FILTER
 		}
 	},
 	qualifications: {
@@ -2283,6 +2339,7 @@ export const contextMenuActions = {
 		{ component: ChangePriority, props: {} }
 	],
 	evidences: [{ component: EvidenceChangeStatus, props: {} }],
+	'task-nodes': [{ component: TaskNodeChangeStatus, props: {} }],
 	'feared-events': [{ component: SelectObject, props: {} }],
 	'ro-to': [{ component: SelectObject, props: {} }],
 	stakeholders: [{ component: SelectObject, props: {} }],
@@ -2326,3 +2383,9 @@ export function getListViewFields({
 		body
 	};
 }
+
+export const headData = (model: urlModel) =>
+	listViewFields[model].body.reduce((obj, key, index) => {
+		obj[key] = listViewFields[model].head[index];
+		return obj;
+	}, {});
