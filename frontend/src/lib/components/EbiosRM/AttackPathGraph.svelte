@@ -2,11 +2,12 @@
 	import { VisSingleContainer, VisGraph } from '@unovis/svelte';
 	import { GraphLayoutType, GraphNodeShape, GraphLinkArrowStyle } from '@unovis/ts';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	type NodeDatum = {
 		id: string;
 		label: string;
-		type: 'ro' | 'stakeholder' | 'asset' | 'feared_event';
+		type: 'ro' | 'to' | 'stakeholder' | 'asset' | 'feared_event';
 		size?: number;
 		shape?: GraphNodeShape;
 	};
@@ -58,7 +59,7 @@
 	let {
 		attackPaths,
 		fearedEvents = [],
-		height = '600px',
+		height = '700px',
 		maxLineLength = 20,
 		disableZoom = false
 	}: {
@@ -80,7 +81,7 @@
 			if (path.risk_origin && !nodeIds.has(`ro-${path.risk_origin}`)) {
 				nodes.push({
 					id: `ro-${path.risk_origin}`,
-					label: path.risk_origin,
+					label: safeTranslate(path.risk_origin),
 					type: 'ro',
 					shape: GraphNodeShape.Circle,
 					size: 70
@@ -89,7 +90,29 @@
 			}
 		});
 
-		// Column 2: Add Stakeholder (Ecosystem) nodes
+		// Column 2: Add Target Objective nodes
+		attackPaths.forEach((path) => {
+			if (path.target_objective && !nodeIds.has(`to-${path.target_objective}`)) {
+				nodes.push({
+					id: `to-${path.target_objective}`,
+					label: safeTranslate(path.target_objective),
+					type: 'to',
+					shape: GraphNodeShape.Hexagon,
+					size: 70
+				});
+				nodeIds.add(`to-${path.target_objective}`);
+			}
+
+			// Link RO → TO
+			if (path.risk_origin && path.target_objective) {
+				links.push({
+					source: `ro-${path.risk_origin}`,
+					target: `to-${path.target_objective}`
+				});
+			}
+		});
+
+		// Column 3: Add Stakeholder (Ecosystem) nodes
 		attackPaths.forEach((path) => {
 			path.stakeholders?.forEach((stakeholder) => {
 				const nodeId = `stakeholder-${stakeholder.id}`;
@@ -109,12 +132,12 @@
 					nodeIds.add(nodeId);
 				}
 
-				// Link RO → Stakeholder
-				if (path.risk_origin) {
-					const linkId = `${path.risk_origin}-${stakeholder.id}`;
+				// Link TO → Stakeholder
+				if (path.target_objective) {
+					const linkId = `${path.target_objective}-${stakeholder.id}`;
 					if (!links.find((l) => `${l.source}-${l.target}` === linkId)) {
 						links.push({
-							source: `ro-${path.risk_origin}`,
+							source: `to-${path.target_objective}`,
 							target: nodeId
 						});
 					}
@@ -122,9 +145,8 @@
 			});
 		});
 
-		// Column 3: Add Asset nodes and Feared Event nodes
+		// Column 4: Add Feared Event nodes
 		fearedEvents.forEach((fearedEvent) => {
-			// Add feared event node
 			const feNodeId = `fe-${fearedEvent.id}`;
 			if (!nodeIds.has(feNodeId)) {
 				nodes.push({
@@ -138,8 +160,40 @@
 				});
 				nodeIds.add(feNodeId);
 			}
+		});
 
-			// Add asset nodes
+		// Link Stakeholders → Feared Events OR TO → Feared Events (if no stakeholders)
+		attackPaths.forEach((path) => {
+			if (path.stakeholders && path.stakeholders.length > 0) {
+				// If there are stakeholders: Stakeholders → Feared Events
+				path.stakeholders.forEach((stakeholder) => {
+					fearedEvents.forEach((fearedEvent) => {
+						const linkId = `${stakeholder.id}-${fearedEvent.id}`;
+						if (!links.find((l) => `${l.source}-${l.target}` === linkId)) {
+							links.push({
+								source: `stakeholder-${stakeholder.id}`,
+								target: `fe-${fearedEvent.id}`
+							});
+						}
+					});
+				});
+			} else if (path.target_objective) {
+				// If NO stakeholders: TO → Feared Events directly
+				fearedEvents.forEach((fearedEvent) => {
+					const linkId = `to-${path.target_objective}-${fearedEvent.id}`;
+					if (!links.find((l) => `${l.source}-${l.target}` === linkId)) {
+						links.push({
+							source: `to-${path.target_objective}`,
+							target: `fe-${fearedEvent.id}`
+						});
+					}
+				});
+			}
+		});
+
+		// Column 5: Add Asset nodes
+		const assetIds = new Set<string>();
+		fearedEvents.forEach((fearedEvent) => {
 			fearedEvent.assets?.forEach((asset) => {
 				const assetNodeId = `asset-${asset.id}`;
 				if (!nodeIds.has(assetNodeId)) {
@@ -151,28 +205,13 @@
 						size: 55
 					});
 					nodeIds.add(assetNodeId);
+					assetIds.add(asset.id);
 				}
 
-				// Link Feared Event → Asset
+				// Link Feared Events → Assets
 				links.push({
-					source: feNodeId,
+					source: `fe-${fearedEvent.id}`,
 					target: assetNodeId
-				});
-			});
-		});
-
-		// Link Stakeholders → Feared Events
-		// All stakeholders can potentially lead to all feared events in the strategic scenario
-		attackPaths.forEach((path) => {
-			path.stakeholders?.forEach((stakeholder) => {
-				fearedEvents.forEach((fearedEvent) => {
-					const linkId = `${stakeholder.id}-${fearedEvent.id}`;
-					if (!links.find((l) => `${l.source}-${l.target}` === linkId)) {
-						links.push({
-							source: `stakeholder-${stakeholder.id}`,
-							target: `fe-${fearedEvent.id}`
-						});
-					}
 				});
 			});
 		});
@@ -180,12 +219,12 @@
 		return { nodes, links };
 	});
 
-	// Build panels for layout with 3 columns
+	// Build panels for layout with 5 columns
 	const panels = $derived([
 		{
 			label: m.riskOrigins(),
 			nodes: graphData.nodes.filter((n) => n.type === 'ro').map((n) => n.id),
-			padding: { top: 60, right: 80, bottom: 60, left: 80 },
+			padding: { top: 60, right: 60, bottom: 60, left: 60 },
 			dashedOutline: true,
 			borderColor: '#dc2626',
 			sideIconSymbol: '&#xf071;',
@@ -193,9 +232,19 @@
 			sideIconSymbolColor: '#dc2626'
 		},
 		{
+			label: m.targetObjectives(),
+			nodes: graphData.nodes.filter((n) => n.type === 'to').map((n) => n.id),
+			padding: { top: 60, right: 60, bottom: 60, left: 60 },
+			dashedOutline: true,
+			borderColor: '#a855f7',
+			sideIconSymbol: '&#xf140;',
+			sideIconShape: 'circle',
+			sideIconSymbolColor: '#a855f7'
+		},
+		{
 			label: m.studyTheEcosystem(),
 			nodes: graphData.nodes.filter((n) => n.type === 'stakeholder').map((n) => n.id),
-			padding: { top: 60, right: 80, bottom: 60, left: 80 },
+			padding: { top: 60, right: 60, bottom: 60, left: 60 },
 			dashedOutline: true,
 			borderColor: '#f59e0b',
 			sideIconSymbol: '&#xf0c0;',
@@ -203,16 +252,24 @@
 			sideIconSymbolColor: '#f59e0b'
 		},
 		{
-			label: `${m.assets()} & ${m.fearedEvents()}`,
-			nodes: graphData.nodes
-				.filter((n) => n.type === 'asset' || n.type === 'feared_event')
-				.map((n) => n.id),
-			padding: { top: 60, right: 80, bottom: 60, left: 80 },
+			label: m.fearedEvents(),
+			nodes: graphData.nodes.filter((n) => n.type === 'feared_event').map((n) => n.id),
+			padding: { top: 60, right: 60, bottom: 60, left: 60 },
 			dashedOutline: true,
 			borderColor: '#16a34a',
 			sideIconSymbol: '&#xf530;',
 			sideIconShape: 'circle',
 			sideIconSymbolColor: '#16a34a'
+		},
+		{
+			label: m.assets(),
+			nodes: graphData.nodes.filter((n) => n.type === 'asset').map((n) => n.id),
+			padding: { top: 60, right: 60, bottom: 60, left: 60 },
+			dashedOutline: true,
+			borderColor: '#0891b2',
+			sideIconSymbol: '&#xf1b2;',
+			sideIconShape: 'circle',
+			sideIconSymbolColor: '#0891b2'
 		}
 	]);
 
@@ -278,12 +335,14 @@
 		switch (node.type) {
 			case 'ro':
 				return '#dc2626'; // red
+			case 'to':
+				return '#a855f7'; // purple
 			case 'stakeholder':
 				return '#f59e0b'; // amber
-			case 'feared_event':
-				return '#16a34a'; // green
 			case 'asset':
 				return '#0891b2'; // cyan
+			case 'feared_event':
+				return '#16a34a'; // green
 			default:
 				return '#6b7280'; // gray
 		}
@@ -298,8 +357,8 @@
 	const linkFlow = true;
 	const linkBandWidth = 6;
 	const layoutType = GraphLayoutType.Parallel;
-	const layoutParallelGroupSpacing = 250;
-	const layoutParallelNodesPerColumn = 10;
+	const layoutParallelGroupSpacing = 200;
+	const layoutParallelNodesPerColumn = 8;
 
 	// Custom function to add labels after default rendering
 	const onRenderComplete = (g, nodes, links, config) => {

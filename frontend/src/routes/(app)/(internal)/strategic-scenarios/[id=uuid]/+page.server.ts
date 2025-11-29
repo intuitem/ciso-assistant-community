@@ -16,7 +16,9 @@ export const load: PageServerLoad = async (event) => {
 	const attackPathsResponse = await event.fetch(
 		`${BASE_API_URL}/ebios-rm/attack-paths/?strategic_scenario=${event.params.id}`
 	);
-	const attackPathsData = attackPathsResponse.ok ? await attackPathsResponse.json() : { results: [] };
+	const attackPathsData = attackPathsResponse.ok
+		? await attackPathsResponse.json()
+		: { results: [] };
 
 	// Fetch feared events for this strategic scenario
 	const fearedEventsIds = detailData.data.feared_events?.map((fe: any) => fe.id) || [];
