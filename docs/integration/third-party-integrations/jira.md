@@ -78,8 +78,7 @@ This is only useful if you wish to enable incoming sync on CISO Assistant. Incom
 4. Configure incoming sync
    1.  Enter the following information:
 
-       *   **Webhook secret:** The webhook secret you have generated when configuring your outgoing webhook on Jira.\
-
+       *   **Webhook secret:** The webhook secret you have generated when configuring your outgoing webhook on Jira.<br>
 
            <figure><img src="../../.gitbook/assets/image (44).png" alt=""><figcaption></figcaption></figure>
        * **URL:** This is the URL where CISO Assistant will receive incoming webhooks from Jira. It is of the following form: `<API_URL/api/integrations/webhook/<INTEGRATION_CONFIG_ID>/` . You can find your webhook URL on the bottom of CISO Assistant's Jira integration settings, located in **Extra > Settings > Integrations > Jira**

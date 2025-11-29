@@ -46,8 +46,7 @@ Go into your **Keycloak admin console**
 10. Go into **Realm settings > General**, you will find the <mark style="color:purple;">**Metadata URL**</mark>
 
     <figure><img src="../../../.gitbook/assets/Screenshot 2024-08-20 11.14.57.png" alt=""><figcaption></figcaption></figure>
-11. You'll find inside the **Metadata URL** the <mark style="color:purple;">**Entity ID**</mark>\
-
+11. You'll find inside the **Metadata URL** the <mark style="color:purple;">**Entity ID**</mark><br>
 
     <figure><img src="../../../.gitbook/assets/Screenshot 2024-08-20 11.15.46.png" alt=""><figcaption></figcaption></figure>
 

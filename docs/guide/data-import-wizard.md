@@ -235,9 +235,7 @@ Supported fields:
 * residual\_impact
 * residual\_proba
 
-{% file src="../.gitbook/assets/sample06.xlsx" %}
-
-
+{% file src="../.gitbook/assets/risk_assessment_template.xlsx" %}
 
 ### ⚙️  Elementary actions
 
@@ -325,7 +323,6 @@ Reference controls can be bundled also as a library.
 
 ### Third parties ecosystems
 
-Adding entities, solutions and contracts go through the same file to be able to keep consistent relationships. Each concept needs to be on a separate tab of the excel sheet.\
+Adding entities, solutions and contracts go through the same file to be able to keep consistent relationships. Each concept needs to be on a separate tab of the excel sheet.<br>
 
-
-{% file src="../.gitbook/assets/third_parties_ecosystem_template.xlsx" %}
+{% file src="../.gitbook/assets/third_parties_ecosystem_template (1).xlsx" %}

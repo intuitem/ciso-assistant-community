@@ -7,8 +7,7 @@
 1. **Hardware Requirements:**
    1. CPU:  4 cores&#x20;
    2. RAM: Minimum 8 GB&#x20;
-   3. Storage: Minimum 10 GB (consider more for evidences)\
-
+   3. Storage: Minimum 10 GB (consider more for evidences)<br>
 
 You can start with lower specs of course for testing.
 

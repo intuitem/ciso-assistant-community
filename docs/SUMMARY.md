@@ -86,6 +86,7 @@
 
 ## Integration
 
+* [Integration overview](integration/integration-overview.md)
 * [Generating a PAT](integration/generating-a-pat.md)
 * [API usage](integration/api-documentation.md)
 * [Third-party integrations](integration/third-party-integrations/README.md)

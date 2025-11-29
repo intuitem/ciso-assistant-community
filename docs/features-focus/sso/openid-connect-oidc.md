@@ -2,8 +2,7 @@
 
 ### Configure CISO Assistant with OpenID Connect (OIDC)
 
-Once you've retrieved the IdP Entity ID, the Metadata URL and the Entity ID from your provider (see the list of providers for specific details), the configuration on CISO Assistant is pretty simple.\
-
+Once you've retrieved the IdP Entity ID, the Metadata URL and the Entity ID from your provider (see the list of providers for specific details), the configuration on CISO Assistant is pretty simple.<br>
 
 1.  Log in into CISO Assistant as an **administrator > Extra > Settings**
 

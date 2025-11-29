@@ -143,7 +143,6 @@ It supports complex organizations while remaining readable, scalable, and compli
 
 
 
-Multiple objects of CISO Assistant support a built-in flag called is\_published that controls wether an object is visible by affiliated domais ins. This flag is set by default tochildren'sd quite useful to be able to benefit children domains from some controls or evidence covered on their parent domains.\
-
+Multiple objects of CISO Assistant support a built-in flag called is\_published that controls wether an object is visible by affiliated domais ins. This flag is set by default tochildren'sd quite useful to be able to benefit children domains from some controls or evidence covered on their parent domains.<br>
 
 It's expected by Q2/26 to be able to control the behaviour of inheritance in a more fine-grained manner, such as preventing it or managing it between domains with no direct affiliation.

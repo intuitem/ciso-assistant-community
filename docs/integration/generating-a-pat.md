@@ -86,4 +86,4 @@ Complete the process by clicking 'Done' to save your settings and exit the token
 
 This guide walked you through generating a Personal Access Token for CISO Assistant. Make sure that you save it and use it using secure channels/tools and be cautious of its impact as it inherents your permissions on the app.
 
-Once created, the value cannot be seen nor edited. You'll have to generate a new one to do so. \
+Once created, the value cannot be seen nor edited. You'll have to generate a new one to do so. <br>

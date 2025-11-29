@@ -15,4 +15,4 @@ You can contribute to interface translations using a tool called [fink](https://
     <figure><img src="../../.gitbook/assets/image (8) (1).png" alt=""><figcaption></figcaption></figure>
 8. When your translations are ready, [submit a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork) on [https://github.com/intuitem/ciso-assistant-community](https://github.com/intuitem/ciso-assistant-community).
 
-Read [fink's user guide](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributetranslationswithfink) for more information.\
+Read [fink's user guide](https://inlang.com/g/6ddyhpoi/guide-nilsjacobsen-contributetranslationswithfink) for more information.<br>

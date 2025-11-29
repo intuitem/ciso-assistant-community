@@ -35,4 +35,4 @@ Based on [OWASP Risk Rating Methodology](https://owasp.org/www-community/OWASP_R
 ## Glossary
 
 This is the end of the basic tutorial to start with CISO Assistant :clapper:\
-You can go further by exploring its [glossary](broken-reference), or checking the [data model](https://github.com/intuitem/ciso-assistant-community/blob/main/documentation/architecture/data-model.md) directly on GitHub.
+You can go further by exploring its [glossary](/broken/pages/mWBW6khux5VvLG0mZfk5), or checking the [data model](https://github.com/intuitem/ciso-assistant-community/blob/main/documentation/architecture/data-model.md) directly on GitHub.

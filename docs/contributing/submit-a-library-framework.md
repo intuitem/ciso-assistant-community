@@ -2,7 +2,7 @@
 description: How to submit a framework, matrix or catalog to the community repository
 ---
 
-# Submit a library (Framework)
+# Submit a library
 
 **If you are familiar with Github and Git, the submission is pretty straightforward:**
 
@@ -15,8 +15,7 @@ and we'll take it from there :thumbsup:
 
 
 
-**If you're not familiar with Github and the handling Git, you can follow these simplified steps using just the UI :**\
-
+**If you're not familiar with Github and the handling Git, you can follow these simplified steps using just the UI :**<br>
 
 * create your excel sheet based on one of the samples in `tools` folder
 * convert it to yaml using the `convert_library.py` tool
