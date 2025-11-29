@@ -240,7 +240,8 @@
 						{ label: 'Japanese Yen (¥)', value: '¥' },
 						{ label: 'Canadian Dollar (C$)', value: 'C$' },
 						{ label: 'Australian Dollar (A$)', value: 'A$' },
-						{ label: 'New Zealand Dollar (NZ$)', value: 'NZ$' }
+						{ label: 'New Zealand Dollar (NZ$)', value: 'NZ$' },
+						{ label: 'Swiss Franc (CHF)', value: 'CHF' }
 					]}
 					label={m.currency()}
 					helpText={m.currencyHelpText()}
