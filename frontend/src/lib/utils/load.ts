@@ -12,7 +12,7 @@ import { z, type AnyZodObject } from 'zod';
 import { canPerformAction } from './access-control';
 
 const GLOBAL_DOMAIN_SKIPPED_REVERSE_FKS: urlModel[] = [
-	'perimeters', 
+	'perimeters',
 	'business-impact-analysis',
 	'incidents',
 	'findings-assessments',
@@ -22,7 +22,7 @@ const GLOBAL_DOMAIN_SKIPPED_REVERSE_FKS: urlModel[] = [
 	'ebios-rm',
 	'compliance-assessments',
 	'entity-assessments'
-];	
+];
 
 export const loadDetail = async ({ event, model, id }) => {
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/`;
@@ -66,9 +66,12 @@ export const loadDetail = async ({ event, model, id }) => {
 						})
 				)
 				.map(async (e) => {
-					const shouldSkipForGlobalDomain =
-						GLOBAL_DOMAIN_SKIPPED_REVERSE_FKS.includes(e.urlModel);
-					if (shouldSkipForGlobalDomain && model.urlModel === 'folders' && data.content_type === 'GLOBAL')
+					const shouldSkipForGlobalDomain = GLOBAL_DOMAIN_SKIPPED_REVERSE_FKS.includes(e.urlModel);
+					if (
+						shouldSkipForGlobalDomain &&
+						model.urlModel === 'folders' &&
+						data.content_type === 'GLOBAL'
+					)
 						return;
 					const tableFieldsRef = listViewFields[e.urlModel];
 					const tableFields = {

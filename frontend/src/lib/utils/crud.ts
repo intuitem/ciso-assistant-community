@@ -153,94 +153,94 @@ type ModelMap = {
 	[key: string]: ModelMapEntry;
 };
 
-	export const URL_MODEL_MAP: ModelMap = {
-		folders: {
-			name: 'folder',
-			localName: 'domain',
-			localNamePlural: 'domains',
-			verboseName: 'Domain',
-			verboseNamePlural: 'Domains',
-			listViewUrlParams: '?content_type=DO&content_type=GL',
-			foreignKeyFields: [
-				{ field: 'parent_folder', urlModel: 'folders' },
-				{ field: 'filtering_labels', urlModel: 'filtering-labels' }
-			],
-			reverseForeignKeyFields: [
-				{ field: 'folder', urlModel: 'perimeters' },
-				{
-					field: 'folder',
-					urlModel: 'users',
-					detail: true,
-					disableCreate: true,
-					disableDelete: true,
-					endpointUrl: './users',
-					folderPermsNeeded: [{ model: 'folder', action: 'change' }],
-					tableFields: ['email', 'first_name', 'last_name', 'is_active', 'roles']
-				},
-				{ field: 'folder', urlModel: 'user-groups' },
-				{ field: 'folder', urlModel: 'threats' },
-				{ field: 'folder', urlModel: 'reference-controls' },
-				{ field: 'folder', urlModel: 'assets' },
-				{ field: 'folder', urlModel: 'business-impact-analysis' },
-				{ field: 'folder', urlModel: 'applied-controls' },
-				{ field: 'folder', urlModel: 'incidents' },
-				{ field: 'folder', urlModel: 'task-templates' },
-				{ field: 'folder', urlModel: 'policies' },
-				{ field: 'folder', urlModel: 'organisation-issues' },
-				{ field: 'folder', urlModel: 'organisation-objectives' },
-				{ field: 'folder', urlModel: 'risk-acceptances' },
-				{ field: 'folder', urlModel: 'security-exceptions' },
-				{ field: 'folder', urlModel: 'findings-assessments' },
-				{ field: 'folder', urlModel: 'risk-assessments' },
-				{ field: 'folder', urlModel: 'ebios-rm' },
-				{ field: 'folder', urlModel: 'quantitative-risk-studies' },
-				{ field: 'folder', urlModel: 'risk-scenarios' },
-				{ field: 'folder', urlModel: 'vulnerabilities' },
-				{ field: 'folder', urlModel: 'compliance-assessments' },
-				{ field: 'folder', urlModel: 'evidences' },
-				{ field: 'folder', urlModel: 'entities' },
-				{ field: 'folder', urlModel: 'representatives' },
-				{ field: 'folder', urlModel: 'contracts' },
-				{ field: 'folder', urlModel: 'entity-assessments' },
-				{ field: 'folder', urlModel: 'processings' },
-				{ field: 'folder', urlModel: 'personal-data' },
-				{ field: 'folder', urlModel: 'purposes' },
-				{ field: 'folder', urlModel: 'right-requests' },
-				{ field: 'folder', urlModel: 'data-breaches' },
-				{ field: 'folder', urlModel: 'generic-collections' },
-				{ field: 'folder', urlModel: 'accreditations' }			
-			]
-		},
-		perimeters: {
-			name: 'perimeter',
-			localName: 'perimeter',
-			localNamePlural: 'perimeters',
-			verboseName: 'Perimeter',
-			verboseNamePlural: 'Perimeters',
-			foreignKeyFields: [
-				{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
-				{ field: 'default_assignee', urlModel: 'users' }
-			],
-			selectFields: [{ field: 'lc_status' }],
-			reverseForeignKeyFields: [
-				{ field: 'perimeter', urlModel: 'compliance-assessments' },
-				{ field: 'perimeter', urlModel: 'risk-assessments' },
-				{ field: 'perimeter', urlModel: 'entity-assessments' },
-				{ field: 'perimeters', urlModel: 'campaigns' }
-			],
-			filters: [{ field: 'lc_status' }, { field: 'folder' }, { field: 'campaigns' }]
-		},
-		'risk-matrices': {
-			name: 'riskmatrix',
-			localName: 'riskMatrix',
-			localNamePlural: 'riskMatrices',
-			verboseName: 'Risk matrix',
-			verboseNamePlural: 'Risk matrices',
-			foreignKeyFields: [
-				{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-				{ field: 'library', urlModel: 'libraries' }
-			]
-		},
+export const URL_MODEL_MAP: ModelMap = {
+	folders: {
+		name: 'folder',
+		localName: 'domain',
+		localNamePlural: 'domains',
+		verboseName: 'Domain',
+		verboseNamePlural: 'Domains',
+		listViewUrlParams: '?content_type=DO&content_type=GL',
+		foreignKeyFields: [
+			{ field: 'parent_folder', urlModel: 'folders' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'folder', urlModel: 'perimeters' },
+			{
+				field: 'folder',
+				urlModel: 'users',
+				detail: true,
+				disableCreate: true,
+				disableDelete: true,
+				endpointUrl: './users',
+				folderPermsNeeded: [{ model: 'folder', action: 'change' }],
+				tableFields: ['email', 'first_name', 'last_name', 'is_active', 'roles']
+			},
+			{ field: 'folder', urlModel: 'user-groups' },
+			{ field: 'folder', urlModel: 'threats' },
+			{ field: 'folder', urlModel: 'reference-controls' },
+			{ field: 'folder', urlModel: 'assets' },
+			{ field: 'folder', urlModel: 'business-impact-analysis' },
+			{ field: 'folder', urlModel: 'applied-controls' },
+			{ field: 'folder', urlModel: 'incidents' },
+			{ field: 'folder', urlModel: 'task-templates' },
+			{ field: 'folder', urlModel: 'policies' },
+			{ field: 'folder', urlModel: 'organisation-issues' },
+			{ field: 'folder', urlModel: 'organisation-objectives' },
+			{ field: 'folder', urlModel: 'risk-acceptances' },
+			{ field: 'folder', urlModel: 'security-exceptions' },
+			{ field: 'folder', urlModel: 'findings-assessments' },
+			{ field: 'folder', urlModel: 'risk-assessments' },
+			{ field: 'folder', urlModel: 'ebios-rm' },
+			{ field: 'folder', urlModel: 'quantitative-risk-studies' },
+			{ field: 'folder', urlModel: 'risk-scenarios' },
+			{ field: 'folder', urlModel: 'vulnerabilities' },
+			{ field: 'folder', urlModel: 'compliance-assessments' },
+			{ field: 'folder', urlModel: 'evidences' },
+			{ field: 'folder', urlModel: 'entities' },
+			{ field: 'folder', urlModel: 'representatives' },
+			{ field: 'folder', urlModel: 'contracts' },
+			{ field: 'folder', urlModel: 'entity-assessments' },
+			{ field: 'folder', urlModel: 'processings' },
+			{ field: 'folder', urlModel: 'personal-data' },
+			{ field: 'folder', urlModel: 'purposes' },
+			{ field: 'folder', urlModel: 'right-requests' },
+			{ field: 'folder', urlModel: 'data-breaches' },
+			{ field: 'folder', urlModel: 'generic-collections' },
+			{ field: 'folder', urlModel: 'accreditations' }
+		]
+	},
+	perimeters: {
+		name: 'perimeter',
+		localName: 'perimeter',
+		localNamePlural: 'perimeters',
+		verboseName: 'Perimeter',
+		verboseNamePlural: 'Perimeters',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'default_assignee', urlModel: 'users' }
+		],
+		selectFields: [{ field: 'lc_status' }],
+		reverseForeignKeyFields: [
+			{ field: 'perimeter', urlModel: 'compliance-assessments' },
+			{ field: 'perimeter', urlModel: 'risk-assessments' },
+			{ field: 'perimeter', urlModel: 'entity-assessments' },
+			{ field: 'perimeters', urlModel: 'campaigns' }
+		],
+		filters: [{ field: 'lc_status' }, { field: 'folder' }, { field: 'campaigns' }]
+	},
+	'risk-matrices': {
+		name: 'riskmatrix',
+		localName: 'riskMatrix',
+		localNamePlural: 'riskMatrices',
+		verboseName: 'Risk matrix',
+		verboseNamePlural: 'Risk matrices',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'libraries' }
+		]
+	},
 	'risk-assessments': {
 		name: 'riskassessment',
 		localName: 'riskAssessment',
