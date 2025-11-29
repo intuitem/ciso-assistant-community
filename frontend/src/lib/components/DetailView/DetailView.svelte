@@ -29,6 +29,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { fade } from 'svelte/transition';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -723,106 +724,124 @@
 	</div>
 </div>
 
-{#if relatedModels.length > 0 && displayModelTable}
-	<div class="card shadow-lg mt-8 bg-white">
-		<div class="flex flex-col md:flex-row">
 
-			<!-- NAV LATERALE STICKY -->
-			<nav
-				class="md:w-64 md:sticky md:top-[80px] md:h-[calc(100vh-120px)] md:overflow-y-auto bg-surface-50 border-b md:border-b-0 md:border-r border-gray-200 pt-4"
-			>
-				<h3 class="px-4 pb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
-					{safeTranslate('associated-objects')}
-				</h3>
-
-				<ul class="pb-4 space-y-1">
-					{#each relatedModels as [urlmodel, model]}
-						{@const isActive = group === urlmodel}
-						<li>
-							<button
-								type="button"
-								class={`
-									w-full flex items-center justify-between px-4 py-2 text-left text-sm transition rounded-r-lg
-									${isActive
-										? 'bg-primary-50 text-primary-800 border-l-4 border-primary-500 font-semibold shadow-sm'
-										: 'hover:bg-gray-50 text-gray-700 border-l-4 border-transparent'}
-								`}
-								onclick={() => (group = urlmodel)}
-							>
-								<div class="flex items-center gap-2">
-									<span class="lowercase capitalize-first">
-										{safeTranslate(model.info.localNamePlural)}
-									</span>
-								</div>
-								{#if model.table?.body?.length > 0}
-									<span class="badge preset-tonal-secondary">
-										{model.table.body.length}
-									</span>
-								{/if}
-							</button>
-						</li>
-					{/each}
-				</ul>
-			</nav>
-
-			<!-- CONTENU DE LA SECTION ACTIVE -->
-			<div class="flex-1 px-4 py-4 overflow-x-auto">
-				{#if activeModel && activeUrlmodel && activeField}
-					<div class="max-w-full rounded-xl border border-gray-100 shadow-sm p-4">
-
-						<div class="flex flex-row justify-between items-center mb-3">
-							<h4 class="font-semibold lowercase capitalize-first">
-								{safeTranslate('associated-' + activeModel.info.localNamePlural)}
-							</h4>
-							{#if activeModel.table?.body?.length > 0}
-								<span class="text-xs text-gray-500">
-									{activeModel.table.body.length}
-									&nbsp;{safeTranslate(activeModel.info.localNamePlural)}
-								</span>
-							{/if}
-						</div>
-
-						{#if activeModel.table}
-							<ModelTable
-								baseEndpoint={getReverseForeignKeyEndpoint({
-									parentModel: data.model,
-									targetUrlModel: activeUrlmodel,
-									field: activeField.field,
-									id: data.data.id,
-									endpointUrl: activeField.endpointUrl
-								})}
-								source={activeModel.table}
-								disableCreate={disableCreate || activeModel.disableCreate}
-								disableEdit={disableEdit || activeModel.disableEdit}
-								disableDelete={disableDelete || activeModel.disableDelete}
-								deleteForm={activeModel.deleteForm}
-								URLModel={activeUrlmodel}
-								fields={activeFieldsToUse}
-								defaultFilters={activeField.defaultFilters || {}}
-							>
-								{#snippet addButton()}
-									<button
-										class="btn preset-filled-primary-500 self-end my-auto"
-										data-testid="add-button"
-										onclick={(_) => modalCreateForm(activeModel)}
-									>
-										<i class="fa-solid fa-plus mr-2 lowercase"></i>
-										{safeTranslate('add-' + activeModel.info.localName)}
-									</button>
-								{/snippet}
-							</ModelTable>
-						{:else}
-							<p class="text-sm text-gray-500">
-								{m.noDataAvailable()}
-							</p>
+{#snippet RelatedModelContent()}
+	{#key activeUrlmodel}
+		<div in:fade={{ duration: 150 }}>
+			{#if activeModel && activeUrlmodel && activeField}
+				<div class="max-w-full rounded-xl border border-gray-100 shadow-sm p-4">
+					<div class="flex flex-row justify-between items-center mb-3">
+						<h4 class="font-semibold lowercase capitalize-first">
+							{safeTranslate('associated-' + activeModel.info.localNamePlural)}
+						</h4>
+						{#if activeModel.table?.body?.length > 0}
+							<span class="text-xs text-gray-500">
+								{activeModel.table.body.length}
+								&nbsp;{safeTranslate(activeModel.info.localNamePlural)}
+							</span>
 						{/if}
 					</div>
-				{:else}
-					<p class="text-sm text-gray-500 px-4">
-						{m.noDataAvailable()}
-					</p>
-				{/if}
+
+					{#if activeModel.table}
+						<ModelTable
+							baseEndpoint={getReverseForeignKeyEndpoint({
+								parentModel: data.model,
+								targetUrlModel: activeUrlmodel,
+								field: activeField.field,
+								id: data.data.id,
+								endpointUrl: activeField.endpointUrl
+							})}
+							source={activeModel.table}
+							disableCreate={disableCreate || activeModel.disableCreate}
+							disableEdit={disableEdit || activeModel.disableEdit}
+							disableDelete={disableDelete || activeModel.disableDelete}
+							deleteForm={activeModel.deleteForm}
+							URLModel={activeUrlmodel}
+							fields={activeFieldsToUse}
+							defaultFilters={activeField.defaultFilters || {}}
+						>
+							{#snippet addButton()}
+								<button
+									class="btn preset-filled-primary-500 self-end my-auto"
+									data-testid="add-button"
+									onclick={(_) => modalCreateForm(activeModel)}
+								>
+									<i class="fa-solid fa-plus mr-2 lowercase"></i>
+									{safeTranslate('add-' + activeModel.info.localName)}
+								</button>
+							{/snippet}
+						</ModelTable>
+					{:else}
+						<p class="text-sm text-gray-500">
+							{m.noDataAvailable()}
+						</p>
+					{/if}
+				</div>
+			{:else}
+				<p class="text-sm text-gray-500">
+					{m.noDataAvailable()}
+				</p>
+			{/if}
+		</div>
+	{/key}
+{/snippet}
+
+{#if relatedModels.length > 0 && displayModelTable}
+	{#if relatedModels.length === 1}
+		<!-- Single link: no side menu -->
+		<div class="card shadow-lg mt-8 bg-white">
+			<div class="px-4 py-4 overflow-x-auto">
+				{@render RelatedModelContent()}
 			</div>
 		</div>
-	</div>
+	{:else}
+		<!-- General case with side menu -->
+		<div class="card shadow-lg mt-8 bg-white">
+			<div class="flex flex-col md:flex-row">
+				<!-- sticky side bar -->
+				<nav
+					class="md:w-64 md:sticky md:top-[80px] md:h-[calc(100vh-120px)] md:overflow-y-auto
+						bg-surface-50 border-b md:border-b-0 md:border-r border-gray-200
+						pt-4"
+				>
+					<h3 class="px-4 pb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+						{safeTranslate('associated-objects')}
+					</h3>
+
+					<ul class="pb-4 space-y-1">
+						{#each relatedModels as [urlmodel, model]}
+							{@const isActive = group === urlmodel}
+							<li>
+								<button
+									type="button"
+									class={`
+										w-full flex items-center justify-between px-4 py-2 text-left text-sm transition rounded-r-lg
+										${isActive
+											? 'bg-primary-50 text-primary-800 border-l-4 border-primary-500 font-semibold shadow-sm'
+											: 'hover:bg-gray-50 text-gray-700 border-l-4 border-transparent'}
+									`}
+									onclick={() => (group = urlmodel)}
+								>
+									<div class="flex items-center gap-2">
+										<span class="lowercase capitalize-first">
+											{safeTranslate(model.info.localNamePlural)}
+										</span>
+									</div>
+									{#if model.table?.body?.length > 0}
+										<span class="badge preset-tonal-secondary">
+											{model.table.body.length}
+										</span>
+									{/if}
+								</button>
+							</li>
+						{/each}
+					</ul>
+				</nav>
+				<!-- active section -->
+				<div class="flex-1 px-4 py-4 overflow-x-auto">
+					{@render RelatedModelContent()}
+				</div>
+			</div>
+		</div>
+	{/if}
 {/if}

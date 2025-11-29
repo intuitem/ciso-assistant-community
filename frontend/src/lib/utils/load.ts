@@ -11,6 +11,19 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z, type AnyZodObject } from 'zod';
 import { canPerformAction } from './access-control';
 
+const GLOBAL_DOMAIN_SKIPPED_REVERSE_FKS: urlModel[] = [
+	'perimeters', 
+	'business-impact-analysis',
+	'incidents',
+	'findings-assessments',
+	'risk-assessments',
+	'quantitative-risk-studies',
+	'risk-scenarios',
+	'ebios-rm',
+	'compliance-assessments',
+	'entity-assessments'
+];	
+
 export const loadDetail = async ({ event, model, id }) => {
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/`;
 
@@ -53,11 +66,9 @@ export const loadDetail = async ({ event, model, id }) => {
 						})
 				)
 				.map(async (e) => {
-					if (
-						e.urlModel === 'perimeters' &&
-						model.urlModel === 'folders' &&
-						data.content_type === 'GLOBAL'
-					)
+					const shouldSkipForGlobalDomain =
+						GLOBAL_DOMAIN_SKIPPED_REVERSE_FKS.includes(e.urlModel);
+					if (shouldSkipForGlobalDomain && model.urlModel === 'folders' && data.content_type === 'GLOBAL')
 						return;
 					const tableFieldsRef = listViewFields[e.urlModel];
 					const tableFields = {
