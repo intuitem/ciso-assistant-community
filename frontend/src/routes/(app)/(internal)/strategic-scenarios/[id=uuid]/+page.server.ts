@@ -1,11 +1,45 @@
 import { getModelInfo } from '$lib/utils/crud';
 import { loadDetail } from '$lib/utils/load';
+import { BASE_API_URL } from '$lib/utils/constants';
+import type { Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { nestedDeleteFormAction } from '$lib/utils/actions';
 
 export const load: PageServerLoad = async (event) => {
-	return await loadDetail({
+	const detailData = await loadDetail({
 		event,
 		model: getModelInfo('strategic-scenarios'),
 		id: event.params.id
 	});
+
+	// Fetch attack paths for this strategic scenario
+	const attackPathsResponse = await event.fetch(
+		`${BASE_API_URL}/ebios-rm/attack-paths/?strategic_scenario=${event.params.id}`
+	);
+	const attackPathsData = attackPathsResponse.ok ? await attackPathsResponse.json() : { results: [] };
+
+	// Fetch feared events for this strategic scenario
+	const fearedEventsIds = detailData.data.feared_events?.map((fe: any) => fe.id) || [];
+	const fearedEventsData = [];
+
+	if (fearedEventsIds.length > 0) {
+		for (const feId of fearedEventsIds) {
+			const feResponse = await event.fetch(`${BASE_API_URL}/ebios-rm/feared-events/${feId}/`);
+			if (feResponse.ok) {
+				fearedEventsData.push(await feResponse.json());
+			}
+		}
+	}
+
+	return {
+		...detailData,
+		attackPaths: attackPathsData.results || [],
+		fearedEventsWithAssets: fearedEventsData
+	};
+};
+
+export const actions: Actions = {
+	delete: async (event) => {
+		return nestedDeleteFormAction({ event });
+	}
 };
