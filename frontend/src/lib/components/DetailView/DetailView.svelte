@@ -396,21 +396,17 @@
 	<!-- Main content area with collapsible object details -->
 	<div class="card shadow-lg bg-white">
 		<div class="px-4 pt-4 pb-4">
-			<!-- Wrapper pour positionner l’icône sans ajouter une ligne -->
 			<div class="relative">
-				<!-- Bouton œil / œil barré, flottant en haut à droite -->
 				<button
 					type="button"
 					class="absolute top-0 right-0 inline-flex items-center p-1 rounded-full"
 					onclick={() => (detailsCollapsed = !detailsCollapsed)}
 					aria-label="toggle-details"
 				>
-					<i class={`fa-solid ${detailsCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'} text-lg`}
-					></i>
+					<i class={`fa-solid ${detailsCollapsed ? 'fa-plus' : 'fa-minus'} text-lg`}></i>
 				</button>
 
 				{#if !detailsCollapsed}
-					<!-- On laisse un peu de marge en haut pour que l’œil ne chevauche pas le contenu -->
 					<div class="pt-2" in:fade={{ duration: 150 }} out:fade={{ duration: 100 }}>
 						{#each data.data?.sync_mappings as syncMapping}
 							<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
@@ -528,7 +524,7 @@
 			</div>
 		</div>
 
-		<!-- Bottom row for action buttons (toujours visible) -->
+		<!-- Bottom row for action buttons (always visible) -->
 		<div class="flex flex-row justify-end mt-4 gap-2 px-4 pb-4 border-t border-gray-100">
 			{#if mailing}
 				<!-- ... tes boutons existants ... -->
@@ -544,22 +540,24 @@
 	</div>
 </div>
 
-{#snippet RelatedModelContent()}
+{#snippet RelatedModelContent(showHeader = true)}
 	{#key activeUrlmodel}
 		<div in:fade={{ duration: 150 }}>
 			{#if activeModel && activeUrlmodel && activeField}
 				<div class="max-w-full rounded-xl border border-gray-100 shadow-sm p-4">
-					<div class="flex flex-row justify-between items-center mb-3">
-						<h4 class="font-semibold lowercase capitalize-first">
-							{safeTranslate('associated-' + activeModel.info.localNamePlural)}
-						</h4>
-						{#if activeModel.table?.body?.length > 0}
-							<span class="text-xs text-gray-500">
-								{activeModel.table.body.length}
-								&nbsp;{safeTranslate(activeModel.info.localNamePlural)}
-							</span>
-						{/if}
-					</div>
+					{#if showHeader}
+						<div class="flex flex-row justify-between items-center mb-3">
+							<h4 class="font-semibold lowercase capitalize-first">
+								{safeTranslate('associated-' + activeModel.info.localNamePlural)}
+							</h4>
+							{#if activeModel.table?.body?.length > 0}
+								<span class="text-xs text-gray-500">
+									{activeModel.table.body.length}
+									&nbsp;{safeTranslate(activeModel.info.localNamePlural)}
+								</span>
+							{/if}
+						</div>
+					{/if}
 
 					{#if activeModel.table}
 						<ModelTable
@@ -610,7 +608,7 @@
 		<!-- Single link: no side menu -->
 		<div class="card shadow-lg mt-8 bg-white">
 			<div class="px-4 py-4 overflow-x-auto">
-				{@render RelatedModelContent()}
+				{@render RelatedModelContent(true)}
 			</div>
 		</div>
 	{:else}
@@ -660,7 +658,7 @@
 				</nav>
 				<!-- active section -->
 				<div class="flex-1 px-4 py-4 overflow-x-auto">
-					{@render RelatedModelContent()}
+					{@render RelatedModelContent(false)}
 				</div>
 			</div>
 		</div>
