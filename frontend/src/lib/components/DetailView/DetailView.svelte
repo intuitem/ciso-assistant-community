@@ -394,148 +394,150 @@
 	{/if}
 
 	<!-- Main content area with collapsible object details -->
-	<div class="card shadow-lg bg-white">
-		<div class="px-4 pt-4 pb-4">
-			<div class="relative">
-				<button
-					type="button"
-					class="absolute top-0 right-0 inline-flex items-center p-1 rounded-full"
-					onclick={() => (detailsCollapsed = !detailsCollapsed)}
-					aria-label="toggle-details"
-				>
-					<i class={`fa-solid ${detailsCollapsed ? 'fa-plus' : 'fa-minus'} text-lg`}></i>
-				</button>
+	<div class="card shadow-lg bg-white mt-2">
+		<div class={`relative ${detailsCollapsed ? 'py-3' : 'py-3'}`}>
+			<button
+				type="button"
+				class="absolute left-1/2 -translate-x-1/2 -bottom-3 inline-flex items-center justify-center
+				w-7 h-7 rounded-full border border-gray-300 bg-white shadow-sm text-gray-500
+				hover:text-gray-700 hover:bg-gray-50"
+				onclick={() => (detailsCollapsed = !detailsCollapsed)}
+				aria-label="toggle-details"
+			>
+				<i class={`fa-solid ${detailsCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'}`}></i>
+			</button>
 
-				{#if !detailsCollapsed}
-					<div class="pt-2" in:fade={{ duration: 150 }} out:fade={{ duration: 100 }}>
-						{#each data.data?.sync_mappings as syncMapping}
-							<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
-								<h3 class="font-semibold text-secondary-800 mb-2">
-									{m.syncedWith({
-										integrationName: syncMapping.provider?.toUpperCase() ?? 'UNKNOWN'
-									})}
-								</h3>
+			{#if !detailsCollapsed}
+				<div class="px-4 pt-4 pb-4" in:fade={{ duration: 150 }} out:fade={{ duration: 100 }}>
+					{#each data.data?.sync_mappings as syncMapping}
+						<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
+							<h3 class="font-semibold text-secondary-800 mb-2">
+								{m.syncedWith({
+									integrationName: syncMapping.provider?.toUpperCase() ?? 'UNKNOWN'
+								})}
+							</h3>
 
-								<dl class="grid grid-cols-1 gap-1 sm:grid-cols-2 text-secondary-700">
-									<dt class="font-medium">{m.remoteId()}</dt>
-									<dd>{syncMapping.remote_id}</dd>
+							<dl class="grid grid-cols-1 gap-1 sm:grid-cols-2 text-secondary-700">
+								<dt class="font-medium">{m.remoteId()}</dt>
+								<dd>{syncMapping.remote_id}</dd>
 
-									<dt class="font-medium">{m.lastSynced()}</dt>
-									<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
+								<dt class="font-medium">{m.lastSynced()}</dt>
+								<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
 
-									<dt class="font-medium">{m.status()}</dt>
-									<dd>{safeTranslate(syncMapping.sync_status)}</dd>
-								</dl>
-							</div>
-						{/each}
+								<dt class="font-medium">{m.status()}</dt>
+								<dd>{safeTranslate(syncMapping.sync_status)}</dd>
+							</dl>
+						</div>
+					{/each}
 
-						<div class={hasWidgets ? 'flex flex-row flex-wrap gap-4' : 'w-full'}>
-							<!-- Left side - Details (conditional width) -->
-							<div
-								class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs {hasWidgets
-									? 'flex-1 min-w-[300px]'
-									: 'w-full'}"
-							>
-								<dl class="-my-3 divide-y divide-gray-100 text-sm">
-									{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
-										<div
-											class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-5 sm:gap-4 {index >=
-												MAX_ROWS && !expandedTable
-												? 'hidden'
-												: ''}"
+					<div class={hasWidgets ? 'flex flex-row flex-wrap gap-4' : 'w-full'}>
+						<!-- Left side - Details (conditional width) -->
+						<div
+							class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs {hasWidgets
+								? 'flex-1 min-w-[300px]'
+								: 'w-full'}"
+						>
+							<dl class="-my-3 divide-y divide-gray-100 text-sm">
+								{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
+									<div
+										class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-5 sm:gap-4 {index >=
+											MAX_ROWS && !expandedTable
+											? 'hidden'
+											: ''}"
+									>
+										<dt
+											class="font-medium text-gray-900 flex items-center gap-2"
+											data-testid="{key.replace('_', '-')}-field-title"
 										>
-											<dt
-												class="font-medium text-gray-900 flex items-center gap-2"
-												data-testid="{key.replace('_', '-')}-field-title"
-											>
-												<span>{safeTranslate(key)}</span>
-												{#if getFieldConfig(key)?.tooltip}
-													{@const tooltipKey = getFieldConfig(key)?.tooltip}
-													{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
-													<Tooltip
-														positioning={{ placement: 'right' }}
-														contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
-														openDelay={200}
-														closeDelay={100}
-														arrow
-														arrowBase="arrow bg-gray-800 border border-gray-700"
-													>
-														{#snippet trigger()}
-															<i
-																class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
-															></i>
-														{/snippet}
-														{#snippet content()}
-															<p class="text-sm">{tooltipText}</p>
-														{/snippet}
-													</Tooltip>
-												{/if}
-											</dt>
-											<dd class="text-gray-700 sm:col-span-4">
-												<ul>
-													<li
-														class="list-none whitespace-pre-line"
-														data-testid={!(value instanceof Array)
-															? key.replace('_', '-') + '-field-value'
-															: null}
-													>
-														{#if value !== null && value !== undefined && value !== ''}
-															{#if key === 'asset_class'}
-																<!-- ... ton code existant ... -->
-															{:else if key === 'library'}
-																<!-- ... -->
-															{:else if Array.isArray(value)}
-																<!-- ... -->
-															{:else}
-																{(value.str || value.name) ?? value}
-															{/if}
+											<span>{safeTranslate(key)}</span>
+											{#if getFieldConfig(key)?.tooltip}
+												{@const tooltipKey = getFieldConfig(key)?.tooltip}
+												{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
+												<Tooltip
+													positioning={{ placement: 'right' }}
+													contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
+													openDelay={200}
+													closeDelay={100}
+													arrow
+													arrowBase="arrow bg-gray-800 border border-gray-700"
+												>
+													{#snippet trigger()}
+														<i
+															class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
+														></i>
+													{/snippet}
+													{#snippet content()}
+														<p class="text-sm">{tooltipText}</p>
+													{/snippet}
+												</Tooltip>
+											{/if}
+										</dt>
+										<dd class="text-gray-700 sm:col-span-4">
+											<ul>
+												<li
+													class="list-none whitespace-pre-line"
+													data-testid={!(value instanceof Array)
+														? key.replace('_', '-') + '-field-value'
+														: null}
+												>
+													{#if value !== null && value !== undefined && value !== ''}
+														{#if key === 'asset_class'}
+															<!-- ton code existant -->
+														{:else if key === 'library'}
+															<!-- ton code existant -->
+														{:else if Array.isArray(value)}
+															<!-- ton code existant -->
 														{:else}
-															--
+															{(value.str || value.name) ?? value}
 														{/if}
-													</li>
-												</ul>
-											</dd>
-										</div>
-									{/each}
-								</dl>
-							</div>
-
-							<!-- Right side - Widgets area (only if widgets exist) -->
-							{#if hasWidgets}
-								<div class="flex-1 min-w-[300px] flex flex-col">
-									<div class="h-full">
-										{@render widgets?.()}
+													{:else}
+														--
+													{/if}
+												</li>
+											</ul>
+										</dd>
 									</div>
-								</div>
-							{/if}
+								{/each}
+							</dl>
 						</div>
 
-						{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
-							<button
-								onclick={() => (expandedTable = !expandedTable)}
-								class="m-5 text-blue-800"
-								aria-expanded={expandedTable}
-							>
-								<i class="{expandedTable ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"></i>
-							</button>
+						{#if hasWidgets}
+							<div class="flex-1 min-w-[300px] flex flex-col">
+								<div class="h-full">
+									{@render widgets?.()}
+								</div>
+							</div>
 						{/if}
 					</div>
-				{/if}
-			</div>
-		</div>
 
-		<!-- Bottom row for action buttons (always visible) -->
-		<div class="flex flex-row justify-end mt-4 gap-2 px-4 pb-4 border-t border-gray-100">
-			{#if mailing}
-				<!-- ... tes boutons existants ... -->
+					{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
+						<button
+							onclick={() => (expandedTable = !expandedTable)}
+							class="m-5 text-blue-800"
+							aria-expanded={expandedTable}
+						>
+							<i class="{expandedTable ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"></i>
+						</button>
+					{/if}
+				</div>
+
+				<!-- Bottom row for action buttons (visibles seulement quand ouvert) -->
+				<div class="flex flex-row justify-end gap-2 px-4 pb-4 border-t border-gray-100">
+					{#if mailing}
+						<!-- tes boutons mailing existants -->
+					{/if}
+
+					{#if data.data.state === 'Submitted' && canEditObject}
+						<!-- bouton draft -->
+					{/if}
+
+					{#if displayEditButton()}
+						<!-- boutons submit / edit / duplicate -->
+					{/if}
+
+					{@render actions?.()}
+				</div>
 			{/if}
-			{#if data.data.state === 'Submitted' && canEditObject}
-				<!-- ... -->
-			{/if}
-			{#if displayEditButton()}
-				<!-- ... -->
-			{/if}
-			{@render actions?.()}
 		</div>
 	</div>
 </div>
