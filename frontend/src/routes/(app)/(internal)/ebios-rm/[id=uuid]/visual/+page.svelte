@@ -5,6 +5,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		data: PageData;
@@ -25,6 +26,19 @@
 		'#9a60b4'
 	];
 	const zoom = 1.5;
+
+	// Translate edge values and node names in the graph data
+	const translatedGraphData = $derived({
+		...data.data.graph,
+		nodes: data.data.graph.nodes.map((node: any) => ({
+			...node,
+			name: safeTranslate(node.name)
+		})),
+		links: data.data.graph.links.map((link: any) => ({
+			...link,
+			value: safeTranslate(link.value)
+		}))
+	});
 </script>
 
 <div class="flex items-center justify-between mb-4">
@@ -42,7 +56,7 @@
 	<div class="w-full h-screen">
 		<GraphExplorer
 			title="Visual Analysis (beta)"
-			data={data.data.graph}
+			data={translatedGraphData}
 			edgeLength={150}
 			{color}
 			{zoom}
