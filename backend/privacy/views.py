@@ -151,12 +151,16 @@ class DataTransferViewSet(BaseModelViewSet):
         return Response(dict(LEGAL_BASIS_CHOICES))
 
 
-def agg_countries():
-    transfer_countries = DataTransfer.objects.values("country").annotate(
-        count=Count("id")
+def agg_countries(viewable_data_transfers, viewable_data_contractors):
+    transfer_countries = (
+        DataTransfer.objects.filter(id__in=viewable_data_transfers)
+        .values("country")
+        .annotate(count=Count("id"))
     )
-    contractor_countries = DataContractor.objects.values("country").annotate(
-        count=Count("id")
+    contractor_countries = (
+        DataContractor.objects.filter(id__in=viewable_data_contractors)
+        .values("country")
+        .annotate(count=Count("id"))
     )
     country_counts = defaultdict(int)
     for item in chain(transfer_countries, contractor_countries):
@@ -257,8 +261,10 @@ class ProcessingViewSet(BaseModelViewSet):
         )
 
         # Aggregate data breaches by breach type
-        breach_types = DataBreach.objects.values("breach_type").annotate(
-            count=Count("id")
+        breach_types = (
+            DataBreach.objects.filter(id__in=viewable_data_breaches)
+            .values("breach_type")
+            .annotate(count=Count("id"))
         )
         breach_type_data = [
             {"name": item["breach_type"], "value": item["count"]}
@@ -266,8 +272,10 @@ class ProcessingViewSet(BaseModelViewSet):
         ]
 
         # Aggregate right requests by request type
-        request_types = RightRequest.objects.values("request_type").annotate(
-            count=Count("id")
+        request_types = (
+            RightRequest.objects.filter(id__in=viewable_right_requests)
+            .values("request_type")
+            .annotate(count=Count("id"))
         )
         request_type_data = [
             {"name": item["request_type"], "value": item["count"]}
@@ -368,7 +376,9 @@ class ProcessingViewSet(BaseModelViewSet):
 
         return Response(
             {
-                "countries": agg_countries(),
+                "countries": agg_countries(
+                    viewable_data_transfers, viewable_data_contractors
+                ),
                 "processings_count": processings_count,
                 "recipients_count": recipients_count,
                 "pd_categories": pd_categories,
