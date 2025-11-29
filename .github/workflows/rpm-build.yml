@@ -66,6 +66,8 @@ jobs:
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
+          export PATH="/root/.local/bin:$PATH"
+          poetry --version
           echo "/root/.local/bin" >> $GITHUB_PATH
 
       - name: Generate Version
@@ -78,8 +80,9 @@ jobs:
       - name: Build RPM
         env:
           VERSION: ${{ steps.version.outputs.version }}
-          PATH: /root/.local/bin:${{ env.PATH }}
         run: |
+          export PATH="/root/.local/bin:$PATH"
+          poetry --version
           cd packaging/rhel
           bash build-rpm.sh
 
