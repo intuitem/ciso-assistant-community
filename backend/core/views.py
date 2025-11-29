@@ -8828,11 +8828,16 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         source_framework = source_framework_lib.content["framework"]
         target_framework = target_framework_lib.content["framework"]
 
+        # Only include assessable requirements in node dictionaries
         source_nodes_dict = {
-            n.get("urn"): n for n in source_framework["requirement_nodes"]
+            n.get("urn"): n
+            for n in source_framework["requirement_nodes"]
+            if n.get("assessable", True)
         }
         target_nodes_dict = {
-            n.get("urn"): n for n in target_framework["requirement_nodes"]
+            n.get("urn"): n
+            for n in target_framework["requirement_nodes"]
+            if n.get("assessable", True)
         }
 
         nodes = []
@@ -8849,6 +8854,9 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         ]
         N = 0
         for req in source_framework["requirement_nodes"]:
+            # Only include assessable requirements
+            if not req.get("assessable", True):
+                continue
             nodes.append(
                 {
                     "name": req.get("ref_id"),
@@ -8860,6 +8868,9 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             N += 1
 
         for req in target_framework["requirement_nodes"]:
+            # Only include assessable requirements
+            if not req.get("assessable", True):
+                continue
             nodes.append(
                 {
                     "name": req.get("ref_id"),
