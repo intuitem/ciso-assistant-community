@@ -8,6 +8,7 @@
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import EcosystemCircularRadarChart from '$lib/components/Chart/EcosystemCircularRadarChart.svelte';
 	import GraphComponent from '../../../operating-modes/[id=uuid]/graph/OperatingModeGraph.svelte';
+	import AttackPathFlowText from '$lib/components/EbiosRM/AttackPathFlowText.svelte';
 	import type { PageData } from './$types';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -566,7 +567,7 @@
 	{#if reportData.strategic_scenarios.length > 0}
 		<section class="mb-6 strategic-scenarios-section">
 			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
-				{m.strategicScenarios()} & {m.attackPaths()}
+				{m.strategicScenarios()}
 			</h2>
 			<div class="space-y-6">
 				{#each reportData.strategic_scenarios as scenario}
@@ -601,166 +602,20 @@
 							</div>
 						</div>
 
-						<!-- Attack Paths -->
+						<!-- Attack Path Flow Text -->
 						{#if scenarioAttackPaths.length > 0}
-							<div class="ml-6 space-y-4">
-								{#each scenarioAttackPaths as attackPath}
-									{@const operationalScenario = reportData.operational_scenarios.find(
-										(os) => os.attack_path.id === attackPath.id
-									)}
-									<div class="border border-teal-200 rounded-lg p-4 bg-teal-50">
-										<!-- Attack Path -->
-										<h4 class="text-md font-semibold text-teal-900 mb-2">
-											<i class="fa-solid fa-route mr-2"></i>{attackPath.name}
-										</h4>
-										{#if attackPath.description}
-											<p class="text-gray-700 text-sm mb-3">{attackPath.description}</p>
-										{/if}
-										<div class="flex flex-wrap gap-4 text-sm mb-2">
-											<div>
-												<span class="font-semibold text-gray-700">{m.riskOrigin()}:</span>
-												<span class="ml-2">{safeTranslate(attackPath.risk_origin)}</span>
-											</div>
-											<div>
-												<span class="font-semibold text-gray-700">{m.targetObjective()}:</span>
-												<span class="ml-2">{attackPath.target_objective}</span>
-											</div>
-											{#if attackPath.ref_id}
-												<div>
-													<span class="font-semibold text-gray-700">{m.refId()}:</span>
-													<span class="ml-2">{attackPath.ref_id}</span>
-												</div>
-											{/if}
-										</div>
-										{#if attackPath.stakeholders.length > 0}
-											<div class="mt-2 text-sm">
-												<span class="font-semibold text-gray-700">{m.stakeholders()}:</span>
-												<span class="ml-2 text-gray-700">
-													{attackPath.stakeholders
-														.map((s) => {
-															const stakeholderData = reportData.stakeholders.find(
-																(st) => st.id === s.id
-															);
-															return stakeholderData
-																? `${stakeholderData.entity.str} (${safeTranslate(stakeholderData.category)})`
-																: s.str;
-														})
-														.join(', ')}
-												</span>
-											</div>
-										{/if}
-
-										<!-- Operational Scenario -->
-										{#if operationalScenario}
-											{@const opModes =
-												reportData.operating_modes?.filter(
-													(om) => om.operational_scenario.id === operationalScenario.id
-												) || []}
-											<div
-												class="ml-6 mt-4 border-l-4 border-yellow-400 pl-4 bg-yellow-50 p-3 rounded"
-											>
-												<h5 class="text-sm font-semibold text-yellow-900 mb-2">
-													<i class="fa-solid fa-gears mr-2"></i>{m.operationalScenario()}
-												</h5>
-												{#if operationalScenario.operating_modes_description && opModes.length === 0}
-													<div class="text-sm mb-2">
-														<span class="font-semibold text-gray-700"
-															>{m.operatingModesDescription()}:</span
-														>
-														<p class="ml-2 text-gray-700 mt-1">
-															{operationalScenario.operating_modes_description}
-														</p>
-													</div>
-												{/if}
-												<div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm mt-2">
-													<div>
-														<span class="font-semibold text-gray-700">{m.likelihood()}:</span>
-														<span
-															class="ml-2 px-2 py-1 rounded"
-															style="background-color: {operationalScenario.likelihood.hexcolor}"
-														>
-															{safeTranslate(operationalScenario.likelihood.name)}
-														</span>
-													</div>
-													<div>
-														<span class="font-semibold text-gray-700">{m.gravity()}:</span>
-														<span
-															class="ml-2 px-2 py-1 rounded"
-															style="background-color: {operationalScenario.gravity.hexcolor}"
-														>
-															{safeTranslate(operationalScenario.gravity.name)}
-														</span>
-													</div>
-													<div>
-														<span class="font-semibold text-gray-700">{m.riskLevel()}:</span>
-														<span
-															class="ml-2 px-2 py-1 rounded"
-															style="background-color: {operationalScenario.risk_level.hexcolor ||
-																'#f9fafb'}"
-														>
-															{safeTranslate(operationalScenario.risk_level.name)}
-														</span>
-													</div>
-												</div>
-												{#if operationalScenario.threats.length > 0}
-													<div class="mt-2 text-sm">
-														<span class="font-semibold text-gray-700">{m.threats()}:</span>
-														<span class="ml-2 text-gray-700"
-															>{operationalScenario.threats.map((t) => t.str).join(', ')}</span
-														>
-													</div>
-												{/if}
-
-												<!-- Operating Modes -->
-												{#if opModes.length > 0}
-													<div class="mt-3 space-y-2">
-														<h6 class="text-sm font-semibold text-gray-800">
-															<i class="fa-solid fa-list-check mr-1"></i>{m.operatingModes()}
-															({opModes.length})
-														</h6>
-														{#each opModes as mode}
-															<div class="bg-white border border-gray-200 rounded p-2 text-sm">
-																<div class="font-medium text-gray-900">
-																	{#if mode.ref_id}
-																		<span class="text-gray-500">{mode.ref_id}:</span>
-																	{/if}
-																	{mode.name}
-																</div>
-																{#if mode.description}
-																	<p class="text-gray-600 text-xs mt-1">{mode.description}</p>
-																{/if}
-																<div class="flex flex-wrap gap-3 mt-2">
-																	<div>
-																		<span class="font-semibold text-gray-700"
-																			>{m.likelihood()}:</span
-																		>
-																		<span
-																			class="ml-1 px-2 py-0.5 rounded text-xs"
-																			style="background-color: {mode.likelihood.hexcolor}"
-																		>
-																			{safeTranslate(mode.likelihood.name)}
-																		</span>
-																	</div>
-																	{#if mode.elementary_actions.length > 0}
-																		<div>
-																			<span class="font-semibold text-gray-700"
-																				>{m.elementaryActions()}:</span
-																			>
-																			<span class="ml-1 text-gray-600"
-																				>{mode.elementary_actions.length}</span
-																			>
-																		</div>
-																	{/if}
-																</div>
-															</div>
-														{/each}
-													</div>
-												{/if}
-											</div>
-										{/if}
-									</div>
-								{/each}
-							</div>
+							<h4 class="text-md font-semibold text-gray-800 mb-3">
+								<i class="fa-solid fa-route mr-2"></i>{m.attackPaths()}
+							</h4>
+							<AttackPathFlowText
+								attackPaths={scenarioAttackPaths}
+								fearedEvents={reportData.feared_events.filter((fe) =>
+									scenario.feared_events?.some((sFe) => sFe.id === fe.id)
+								)}
+								fearedEventsWithAssets={reportData.feared_events.filter((fe) =>
+									scenario.feared_events?.some((sFe) => sFe.id === fe.id)
+								)}
+							/>
 						{/if}
 					</div>
 				{/each}
@@ -796,11 +651,25 @@
 						reportData.operating_modes?.filter(
 							(om) => om.operational_scenario.id === opScenario.id
 						) || []}
+					{@const attackPath = reportData.attack_paths.find(
+						(ap) => ap.id === opScenario.attack_path?.id
+					)}
+					{@const strategicScenario = attackPath
+						? reportData.strategic_scenarios.find(
+								(ss) => ss.id === attackPath.strategic_scenario?.id
+							)
+						: null}
 					<div class="border-2 border-yellow-200 rounded-lg p-4 bg-yellow-50">
 						<div class="mb-4">
 							<h3 class="text-lg font-semibold text-yellow-900 mb-2">
 								<i class="fa-solid fa-gears mr-2"></i>{opScenario.ref_id || m.operationalScenario()}
 							</h3>
+							{#if strategicScenario}
+								<div class="text-sm mb-3">
+									<span class="font-semibold text-gray-700">{m.strategicScenario()}:</span>
+									<span class="ml-2 text-gray-700">{strategicScenario.name}</span>
+								</div>
+							{/if}
 							{#if opScenario.attack_path}
 								<div class="text-sm mb-3">
 									<span class="font-semibold text-gray-700">{m.attackPath()}:</span>
@@ -1097,7 +966,7 @@
 	{/if}
 
 	<!-- Treatment Plan Section -->
-	{#if reportData.compliance_action_plans?.length > 0 || reportData.risk_action_plan}
+	{#if reportData.compliance_action_plans?.length > 0 || reportData.risk_action_plan || reportData.stakeholders?.some((s) => s.applied_controls?.length > 0)}
 		<section class="mb-6 page-break-section">
 			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
 				{m.treatmentPlan()}
@@ -1142,7 +1011,14 @@
 										<tbody class="divide-y divide-gray-200">
 											{#each actionPlan.applied_controls as control}
 												<tr class="hover:bg-gray-50">
-													<td class="px-3 py-2 text-sm text-gray-900">{control.name}</td>
+													<td class="px-3 py-2 text-sm text-gray-900">
+														<Anchor
+															href="/applied-controls/{control.id}"
+															class="text-primary-600 hover:text-primary-800 hover:underline"
+														>
+															{control.name}
+														</Anchor>
+													</td>
 													<td class="px-3 py-2 text-sm">
 														{#if control.priority}
 															<span class="px-2 py-1 rounded text-xs font-medium"
@@ -1182,6 +1058,88 @@
 				</div>
 			{/if}
 
+			<!-- Stakeholder Action Plans (Workshop 3) -->
+			{#if reportData.stakeholders && reportData.stakeholders.some((s) => s.applied_controls?.length > 0)}
+				<div class="space-y-6 mt-6">
+					{#each reportData.stakeholders.filter((s) => s.applied_controls?.length > 0) as stakeholder}
+						<div class="border border-teal-200 rounded-lg p-4 bg-teal-50">
+							<h3 class="text-lg font-semibold text-teal-900 mb-3">
+								<i class="fa-solid fa-users mr-2"></i>
+								{stakeholder.entity.str}
+								<span class="text-sm font-normal text-teal-700">
+									({safeTranslate(stakeholder.category)})
+								</span>
+							</h3>
+							<div class="overflow-x-auto">
+								<table class="min-w-full divide-y divide-gray-200 bg-white rounded border">
+									<thead class="bg-gray-50">
+										<tr>
+											<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+												>{m.name()}</th
+											>
+											<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+												>{m.priority()}</th
+											>
+											<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+												>{m.status()}</th
+											>
+											<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+												>{m.owner()}</th
+											>
+											<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+												>{m.eta()}</th
+											>
+										</tr>
+									</thead>
+									<tbody class="divide-y divide-gray-200">
+										{#each stakeholder.applied_controls as control}
+											<tr class="hover:bg-gray-50">
+												<td class="px-3 py-2 text-sm text-gray-900">
+													<Anchor
+														href="/applied-controls/{control.id}"
+														class="text-primary-600 hover:text-primary-800 hover:underline"
+													>
+														{control.str}
+													</Anchor>
+												</td>
+												<td class="px-3 py-2 text-sm">
+													{#if control.priority}
+														<span class="px-2 py-1 rounded text-xs font-medium"
+															>{safeTranslate(control.priority)}</span
+														>
+													{:else}
+														--
+													{/if}
+												</td>
+												<td class="px-3 py-2 text-sm">
+													{#if control.status}
+														<span class="px-2 py-1 rounded text-xs font-medium"
+															>{safeTranslate(control.status)}</span
+														>
+													{:else}
+														--
+													{/if}
+												</td>
+												<td class="px-3 py-2 text-sm">
+													{#if control.owner}
+														{control.owner.str}
+													{:else}
+														--
+													{/if}
+												</td>
+												<td class="px-3 py-2 text-sm">
+													{control.eta ? formatDateOrDateTime(control.eta) : '--'}
+												</td>
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					{/each}
+				</div>
+			{/if}
+
 			<!-- Risk Assessment Action Plan -->
 			{#if reportData.risk_action_plan && reportData.risk_action_plan.applied_controls.length > 0}
 				<div class="border border-red-200 rounded-lg p-4 bg-red-50 mt-6">
@@ -1214,7 +1172,14 @@
 							<tbody class="divide-y divide-gray-200">
 								{#each reportData.risk_action_plan.applied_controls as control}
 									<tr class="hover:bg-gray-50">
-										<td class="px-3 py-2 text-sm text-gray-900">{control.name}</td>
+										<td class="px-3 py-2 text-sm text-gray-900">
+											<Anchor
+												href="/applied-controls/{control.id}"
+												class="text-primary-600 hover:text-primary-800 hover:underline"
+											>
+												{control.name}
+											</Anchor>
+										</td>
 										<td class="px-3 py-2 text-sm">
 											{#if control.priority}
 												<span class="px-2 py-1 rounded text-xs font-medium"
