@@ -57,20 +57,19 @@ rm -rf "$PYTHON_BUILD_DIR"
 
 # Create Python virtualenv with backend dependencies
 echo "[3/8] Installing Python dependencies..."
+
+# Install poetry into the bundled Python
+"$SOURCES_DIR/venv/bin/pip3" install --no-cache-dir --upgrade pip poetry
+
+# Configure poetry to use the bundled venv
+"$SOURCES_DIR/venv/bin/poetry" config virtualenvs.create false
+
+# Install dependencies using poetry
 cd "$PROJECT_ROOT/backend"
+"$SOURCES_DIR/venv/bin/poetry" install --no-root --only main
 
-# Export poetry dependencies to requirements.txt
-if command -v poetry &> /dev/null; then
-    poetry export -f requirements.txt --output "$BUILD_DIR/requirements.txt" --without-hashes
-else
-    echo "ERROR: Poetry not found. Please install poetry to build RPM."
-    exit 1
-fi
-
-# Install dependencies into the bundled Python
-"$SOURCES_DIR/venv/bin/pip" install --upgrade pip setuptools wheel
-"$SOURCES_DIR/venv/bin/pip" install -r "$BUILD_DIR/requirements.txt"
-"$SOURCES_DIR/venv/bin/pip" install gunicorn
+# Install gunicorn
+"$SOURCES_DIR/venv/bin/pip3" install gunicorn
 
 # Copy backend application code
 echo "[4/8] Copying backend application..."
