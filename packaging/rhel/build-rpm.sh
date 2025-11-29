@@ -59,7 +59,7 @@ rm -rf "$PYTHON_BUILD_DIR"
 echo "[3/8] Installing Python dependencies..."
 
 # Install poetry into the bundled Python
-"$SOURCES_DIR/venv/bin/pip" install --no-cache-dir --upgrade pip poetry
+"$SOURCES_DIR/venv/bin/pip3" install --no-cache-dir --upgrade pip poetry
 
 # Configure poetry to use the bundled venv
 "$SOURCES_DIR/venv/bin/poetry" config virtualenvs.create false
@@ -69,7 +69,7 @@ cd "$PROJECT_ROOT/backend"
 "$SOURCES_DIR/venv/bin/poetry" install --no-root --only main
 
 # Install gunicorn
-"$SOURCES_DIR/venv/bin/pip" install gunicorn
+"$SOURCES_DIR/venv/bin/pip3" install gunicorn
 
 # Copy backend application code
 echo "[4/8] Copying backend application..."
