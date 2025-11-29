@@ -478,6 +478,7 @@ export const EvidenceSchema = z.object({
 export const EvidenceRevisionSchema = z.object({
 	folder: z.string().uuid(),
 	evidence: z.string().uuid(),
+	task_node: z.string().uuid().nullable(),
 	version: z.number().optional(),
 	attachment: z.any().optional().nullable(),
 	link: z
@@ -528,7 +529,8 @@ export const FeatureFlagsSchema = z.object({
 	project_management: z.boolean().optional(),
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
-	validation_flows: z.boolean().optional()
+	validation_flows: z.boolean().optional(),
+	outgoing_webhooks: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -1173,7 +1175,7 @@ export const TaskTemplateSchema = z.object({
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
-	evidences: z.string().uuid().optional().array().optional(),
+	evidences: z.union([z.string().uuid(), z.string()]).optional().array().optional(), // Allow both UUIDs and strings for evidences created from the form
 	schedule: z
 		.object({
 			interval: z.number().min(1).positive().optional(),
@@ -1400,4 +1402,14 @@ export const modelSchema = (model: string) => {
 
 export const composerSchema = z.object({
 	risk_assessments: z.array(z.string().uuid())
+});
+
+export const webhookEndpointSchema = z.object({
+	...NameDescriptionMixin,
+	url: z.string().url(),
+	event_types: z.string().array().nonempty(),
+	is_active: z.boolean().default(true),
+	secret: z.string().min(1).optional(),
+	target_folders: z.string().uuid().optional().array().optional(),
+	payload_format: z.enum(['thin', 'full']).default('full')
 });
