@@ -251,9 +251,10 @@ class PersonalData(NameDescriptionFolderMixin):
             self.processing.save(update_fields=["has_sensitive_personal_data"])
 
     @classmethod
-    def get_categories_count(cls):
+    def get_categories_count(cls, filters: dict = {}):
         categories = (
-            cls.objects.values("category")
+            cls.objects.filter(**filters)
+            .values("category")
             .annotate(count=Count("id"))
             .order_by("-count")
         )
