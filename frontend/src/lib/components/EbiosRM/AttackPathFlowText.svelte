@@ -4,6 +4,7 @@
 
 	type AttackPath = {
 		id: string;
+		name?: string;
 		risk_origin?: string;
 		target_objective?: string;
 		stakeholders?: Array<{
@@ -18,11 +19,12 @@
 
 	type FearedEvent = {
 		id: string;
-		str: string;
+		name: string;
 	};
 
 	type FearedEventWithAssets = {
 		id: string;
+		name: string;
 		assets: Array<{
 			id: string;
 			str: string;
@@ -40,9 +42,11 @@
 
 <!-- Text-based attack path flows -->
 <div class="mb-4 space-y-3 bg-white p-4 rounded-lg border border-gray-200">
-	<h4 class="text-sm font-semibold text-gray-700 mb-3">Attack Path Flows:</h4>
 	{#each attackPaths as path}
 		<div class="text-sm border-l-4 border-primary-500 pl-3 py-2">
+			{#if path.name}
+				<div class="font-semibold text-gray-700 mb-2">{path.name}</div>
+			{/if}
 			<div class="flex flex-wrap items-center gap-2 font-mono text-xs">
 				<span class="px-2 py-1 bg-red-100 text-red-800 rounded font-semibold">
 					{safeTranslate(path.risk_origin) || 'Unknown RO'}
@@ -76,8 +80,8 @@
 				{#if fearedEvents && fearedEvents.length > 0}
 					<div class="flex flex-wrap items-center gap-2">
 						{#each fearedEvents as fe}
-							<span class="px-2 py-1 bg-green-100 text-green-800 rounded">
-								{fe.str}
+							<span class="px-2 py-1 bg-orange-100 text-orange-800 rounded">
+								{fe.name}
 							</span>
 							{#if fe !== fearedEvents[fearedEvents.length - 1]}
 								<span class="text-gray-300">|</span>
@@ -105,14 +109,14 @@
 
 <!-- Legend -->
 <div class="mb-6 bg-white p-3 rounded-lg border border-gray-200">
-	<h4 class="text-xs font-semibold text-gray-600 mb-2">Legend:</h4>
+	<h4 class="text-xs font-semibold text-gray-600 mb-2">{m.legend()}:</h4>
 	<div class="flex flex-wrap gap-3 text-xs">
 		<span class="px-2 py-1 bg-red-100 text-red-800 rounded font-semibold">{m.riskOrigin()}</span>
 		<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded font-semibold"
 			>{m.targetObjective()}</span
 		>
 		<span class="px-2 py-1 bg-amber-100 text-amber-800 rounded">{m.stakeholder()}</span>
-		<span class="px-2 py-1 bg-green-100 text-green-800 rounded">{m.fearedEvent()}</span>
+		<span class="px-2 py-1 bg-orange-100 text-orange-800 rounded">{m.fearedEvent()}</span>
 		<span class="px-2 py-1 bg-cyan-100 text-cyan-800 rounded">{m.asset()}</span>
 	</div>
 </div>

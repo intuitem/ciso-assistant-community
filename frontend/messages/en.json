@@ -2332,6 +2332,7 @@
 	"hideAll": "Hide All",
 	"required": "required",
 	"legendNotes": "Legend & Notes",
+	"legend": "Legend",
 	"aleTimelineChartDebugInfo": "ALE Timeline Chart Debug Info",
 	"scenariosWithCurrentLevel": "Scenarios with current_level:",
 	"scenariosWithResidualLevel": "Scenarios with residual_level:",

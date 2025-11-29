@@ -2298,6 +2298,7 @@
 	"hideAll": "Tout masquer",
 	"required": "requis",
 	"legendNotes": "Légende et notes",
+	"legend": "Légende",
 	"aleTimelineChartDebugInfo": "Infos de débogage du graphique chronologique ALE",
 	"scenariosWithCurrentLevel": "Scénarios avec niveau actuel :",
 	"scenariosWithResidualLevel": "Scénarios avec niveau résiduel :",
