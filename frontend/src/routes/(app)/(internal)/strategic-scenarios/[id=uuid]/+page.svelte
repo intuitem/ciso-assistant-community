@@ -23,7 +23,7 @@
 				{#key data.attackPaths}
 					{#if data.attackPaths && data.attackPaths.length > 0}
 						<!-- Text-based attack path flows -->
-						<div class="mb-6 space-y-3 bg-white p-4 rounded-lg border border-gray-200">
+						<div class="mb-4 space-y-3 bg-white p-4 rounded-lg border border-gray-200">
 							<h4 class="text-sm font-semibold text-gray-700 mb-3">Attack Path Flows:</h4>
 							{#each data.attackPaths as path}
 								<div class="text-sm border-l-4 border-primary-500 pl-3 py-2">
@@ -85,6 +85,22 @@
 									</div>
 								</div>
 							{/each}
+						</div>
+
+						<!-- Legend -->
+						<div class="mb-6 bg-white p-3 rounded-lg border border-gray-200">
+							<h4 class="text-xs font-semibold text-gray-600 mb-2">Legend:</h4>
+							<div class="flex flex-wrap gap-3 text-xs">
+								<span class="px-2 py-1 bg-red-100 text-red-800 rounded font-semibold"
+									>{m.riskOrigin()}</span
+								>
+								<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded font-semibold"
+									>{m.targetObjective()}</span
+								>
+								<span class="px-2 py-1 bg-amber-100 text-amber-800 rounded">{m.stakeholder()}</span>
+								<span class="px-2 py-1 bg-cyan-100 text-cyan-800 rounded">{m.asset()}</span>
+								<span class="px-2 py-1 bg-green-100 text-green-800 rounded">{m.fearedEvent()}</span>
+							</div>
 						</div>
 
 						<!-- Graph visualization -->
