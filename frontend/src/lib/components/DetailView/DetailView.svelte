@@ -86,8 +86,8 @@
 	exclude = [...exclude, ...defaultExcludes];
 
 	const getRelatedModelIndex = (model: ModelMapEntry, relatedModel: Record<string, string>) => {
-		if (!model.relatedFields) return -1;
-		return model.relatedFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
+		if (!model.reverseForeignKeyFields) return -1;
+		return model.reverseForeignKeyFields.findIndex((o) => o.urlModel === relatedModel.urlModel);
 	};
 
 	let filteredData = $derived(
@@ -719,28 +719,24 @@
 									{safeTranslate('associated-' + model.info.localNamePlural)}
 								</h4>
 							</div>
-							{@const relatedField =
-								data.model.relatedFields?.find((item) => item.urlModel === urlmodel)}
-							{@const defaultListViewFields = getListViewFields({
-								key: urlmodel,
-								featureFlags: page.data?.featureflags
-							}).body}
+							{@const field = data.model.reverseForeignKeyFields.find(
+								(item) => item.urlModel === urlmodel
+							)}
 							{@const fieldsToUse =
-								relatedField?.tableFields ||
-								(relatedField
-									? defaultListViewFields.filter((v) => v !== relatedField.field)
-									: defaultListViewFields)}
+								field?.tableFields ||
+								getListViewFields({
+									key: urlmodel,
+									featureFlags: page.data?.featureflags
+								}).body.filter((v) => v !== field.field)}
 							{#if model.table}
 								<ModelTable
-									baseEndpoint={relatedField
-										? getReverseForeignKeyEndpoint({
-												parentModel: data.model,
-												targetUrlModel: urlmodel,
-												field: relatedField.field,
-												id: data.data.id,
-												endpointUrl: relatedField.endpointUrl
-											})
-										: `/${urlmodel}`}
+									baseEndpoint={getReverseForeignKeyEndpoint({
+										parentModel: data.model,
+										targetUrlModel: urlmodel,
+										field: field.field,
+										id: data.data.id,
+										endpointUrl: field.endpointUrl
+									})}
 									source={model.table}
 									disableCreate={disableCreate || model.disableCreate}
 									disableEdit={disableEdit || model.disableEdit}
@@ -748,7 +744,7 @@
 									deleteForm={model.deleteForm}
 									URLModel={urlmodel}
 									fields={fieldsToUse}
-									defaultFilters={relatedField?.defaultFilters || {}}
+									defaultFilters={field.defaultFilters || {}}
 								>
 									{#snippet addButton()}
 										<button
