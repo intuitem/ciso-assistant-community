@@ -3,6 +3,8 @@
 	import { m } from '$paraglide/messages';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 
+	import { page } from '$app/state';
+
 	interface Props {
 		form: SuperValidated<any>;
 	}
@@ -21,6 +23,7 @@
 		{ field: 'scoring_assistant', label: m.scoringAssistant() },
 		{ field: 'vulnerabilities', label: m.vulnerabilities() },
 		{ field: 'compliance', label: m.compliance() },
+		{ field: 'campaigns', label: m.campaigns() },
 		{ field: 'tprm', label: m.thirdParty() },
 		{ field: 'privacy', label: m.privacy() },
 		{ field: 'experimental', label: m.experimental() },
@@ -35,7 +38,7 @@
 		{ field: 'reports', label: m.reports() },
 		{ field: 'validation_flows', label: m.validationFlows() },
 		{ field: 'outgoing_webhooks', label: m.webhooks() }
-	];
+	].filter(({ field }) => field in page.data.featureFlagSettings);
 </script>
 
 <div

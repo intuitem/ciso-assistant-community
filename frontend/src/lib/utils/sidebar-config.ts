@@ -9,6 +9,7 @@ type SidebarBackendKeys = {
 	scoring_assistant: boolean;
 	vulnerabilities: boolean;
 	compliance: boolean;
+	campaigns: boolean;
 	tprm: boolean;
 	privacy: boolean;
 	experimental: boolean;
@@ -34,6 +35,7 @@ type SidebarFrontendKeys = {
 	scoringAssistant: boolean;
 	vulnerabilities: boolean;
 	compliance: boolean;
+	campaigns: boolean;
 	thirdPartyCategory: boolean;
 	privacy: boolean;
 	experimental: boolean;
@@ -62,6 +64,7 @@ export function getSidebarVisibleItems(
 		scoringAssistant: featureFlags?.scoring_assistant ?? false,
 		vulnerabilities: featureFlags?.vulnerabilities ?? false,
 		compliance: featureFlags?.compliance ?? false,
+		campaigns: featureFlags?.campaigns ?? false,
 		thirdPartyCategory: featureFlags?.tprm ?? false,
 		privacy: featureFlags?.privacy ?? false,
 		experimental: featureFlags?.experimental ?? false,
