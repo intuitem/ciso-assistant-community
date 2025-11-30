@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
 	import { run } from 'svelte/legacy';
+	import { createEventDispatcher } from 'svelte';
 
 	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -93,6 +94,8 @@
 		actionsHead?: import('svelte').Snippet;
 		tail?: import('svelte').Snippet;
 	}
+
+	const dispatch = createEventDispatcher<{ rowcount: number }>();
 
 	let {
 		source = { head: [], body: [] },
@@ -226,6 +229,8 @@
 		}
 	);
 	const rows = handler.getRows();
+	const rowCountStore = handler.getRowCount();
+	let lastDispatchedRowCount = -1;
 	let invalidateTable = $state(false);
 
 	$tableHandlers[baseEndpoint] = handler;
@@ -358,6 +363,15 @@
 			handler.invalidate();
 			_goto(page.url);
 			invalidateTable = false;
+		}
+	});
+
+	$effect(() => {
+		const totalRows =
+			$rowCountStore?.total ?? source.meta?.count ?? source.body?.length ?? 0;
+		if (totalRows !== lastDispatchedRowCount) {
+			lastDispatchedRowCount = totalRows;
+			dispatch('rowcount', lastDispatchedRowCount);
 		}
 	});
 

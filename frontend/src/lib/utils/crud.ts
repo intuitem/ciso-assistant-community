@@ -167,8 +167,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'folder', urlModel: 'perimeters' },
-			{ field: 'folder', urlModel: 'entities' },
-			{ field: 'folder', urlModel: 'assets' },
 			{
 				field: 'folder',
 				urlModel: 'users',
@@ -178,7 +176,39 @@ export const URL_MODEL_MAP: ModelMap = {
 				endpointUrl: './users',
 				folderPermsNeeded: [{ model: 'folder', action: 'change' }],
 				tableFields: ['email', 'first_name', 'last_name', 'is_active', 'roles']
-			}
+			},
+			{ field: 'folder', urlModel: 'user-groups' },
+			{ field: 'folder', urlModel: 'threats' },
+			{ field: 'folder', urlModel: 'reference-controls' },
+			{ field: 'folder', urlModel: 'assets' },
+			{ field: 'folder', urlModel: 'business-impact-analysis' },
+			{ field: 'folder', urlModel: 'applied-controls' },
+			{ field: 'folder', urlModel: 'incidents' },
+			{ field: 'folder', urlModel: 'task-templates' },
+			{ field: 'folder', urlModel: 'policies' },
+			{ field: 'folder', urlModel: 'organisation-issues' },
+			{ field: 'folder', urlModel: 'organisation-objectives' },
+			{ field: 'folder', urlModel: 'risk-acceptances' },
+			{ field: 'folder', urlModel: 'security-exceptions' },
+			{ field: 'folder', urlModel: 'findings-assessments' },
+			{ field: 'folder', urlModel: 'risk-assessments' },
+			{ field: 'folder', urlModel: 'ebios-rm' },
+			{ field: 'folder', urlModel: 'quantitative-risk-studies' },
+			{ field: 'folder', urlModel: 'risk-scenarios' },
+			{ field: 'folder', urlModel: 'vulnerabilities' },
+			{ field: 'folder', urlModel: 'compliance-assessments' },
+			{ field: 'folder', urlModel: 'evidences' },
+			{ field: 'folder', urlModel: 'entities' },
+			{ field: 'folder', urlModel: 'representatives' },
+			{ field: 'folder', urlModel: 'contracts' },
+			{ field: 'folder', urlModel: 'entity-assessments' },
+			{ field: 'folder', urlModel: 'processings' },
+			{ field: 'folder', urlModel: 'personal-data' },
+			{ field: 'folder', urlModel: 'purposes' },
+			{ field: 'folder', urlModel: 'right-requests' },
+			{ field: 'folder', urlModel: 'data-breaches' },
+			{ field: 'folder', urlModel: 'generic-collections' },
+			{ field: 'folder', urlModel: 'accreditations' }
 		]
 	},
 	perimeters: {
@@ -427,7 +457,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'label',
 		localNamePlural: 'labels',
 		verboseName: 'Label',
-		verboseNamePlural: 'Labels'
+		verboseNamePlural: 'Labels',
+		foreignKeyFields: [{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }]
 	},
 	'risk-acceptances': {
 		name: 'riskacceptance',
