@@ -961,6 +961,9 @@ class ThreatViewSet(BaseModelViewSet):
 
 
 class AssetFilter(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
+
     exclude_children = df.ModelChoiceFilter(
         queryset=Asset.objects.all(),
         method="filter_exclude_children",
@@ -984,7 +987,6 @@ class AssetFilter(GenericFilterSet):
         model = Asset
         fields = [
             "name",
-            "folder",
             "type",
             "parent_assets",
             "exclude_children",
@@ -994,7 +996,6 @@ class AssetFilter(GenericFilterSet):
             "security_exceptions",
             "applied_controls",
             "filtering_labels",
-            "asset_class",
             "personal_data",
             "is_business_function",
             "dora_licenced_activity",
@@ -1918,6 +1919,11 @@ class FilteringLabelViewSet(BaseModelViewSet):
 
 
 class RiskAssessmentFilterSet(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    perimeter = df.ModelMultipleChoiceFilter(queryset=Perimeter.objects.all())
+    risk_matrix = df.ModelMultipleChoiceFilter(queryset=RiskMatrix.objects.all())
+    ebios_rm_study = df.ModelMultipleChoiceFilter(queryset=EbiosRMStudy.objects.all())
+
     status = df.MultipleChoiceFilter(
         choices=RiskAssessment.get_status_choices(), method="filter_status"
     )
@@ -1927,12 +1933,7 @@ class RiskAssessmentFilterSet(GenericFilterSet):
         fields = {
             "name": ["exact"],
             "ref_id": ["exact"],
-            "perimeter": ["exact"],
-            "folder": ["exact"],
             "authors": ["exact"],
-            "risk_matrix": ["exact"],
-            "status": ["exact"],
-            "ebios_rm_study": ["exact"],
             "reviewers": ["exact"],
             "genericcollection": ["exact"],
         }
@@ -3169,6 +3170,11 @@ def convert_date_to_timestamp(date):
 
 
 class AppliedControlFilterSet(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    reference_control = df.ModelMultipleChoiceFilter(
+        queryset=ReferenceControl.objects.all()
+    )
+
     todo = df.BooleanFilter(method="filter_todo")
     to_review = df.BooleanFilter(method="filter_to_review")
     compliance_assessments = df.ModelMultipleChoiceFilter(
@@ -3262,9 +3268,12 @@ class AppliedControlFilterSet(GenericFilterSet):
         model = AppliedControl
         fields = {
             "name": ["exact"],
-            "folder": ["exact"],
+            "category": ["exact"],
+            "csf_function": ["exact"],
+            "priority": ["exact"],
+            "effort": ["exact"],
+            "control_impact": ["exact"],
             # category, csf_function, priority, effort, control_impact use NullableChoiceFilter (defined above)
-            "reference_control": ["exact", "isnull"],
             "filtering_labels": ["exact"],
             "risk_scenarios": ["exact"],
             "risk_scenarios_e": ["exact"],
@@ -4371,6 +4380,9 @@ class PolicyViewSet(AppliedControlViewSet):
 
 
 class RiskScenarioFilter(GenericFilterSet):
+    risk_assessment = df.ModelMultipleChoiceFilter(
+        queryset=RiskAssessment.objects.all()
+    )
     # Aliased filters for user-friendly query params
     folder = df.UUIDFilter(
         field_name="risk_assessment__perimeter__folder", label="Folder ID"
@@ -4415,7 +4427,6 @@ class RiskScenarioFilter(GenericFilterSet):
         # Only include actual model fields here
         fields = {
             "name": ["exact"],
-            "risk_assessment": ["exact"],
             "current_impact": ["exact"],
             "current_proba": ["exact"],
             "current_level": ["exact"],
@@ -4722,6 +4733,9 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
 
 
 class RiskAcceptanceFilterSet(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    approver = df.ModelMultipleChoiceFilter(queryset=User.objects.all())
+
     to_review = df.BooleanFilter(method="filter_to_review")
 
     def filter_to_review(self, queryset, name, value):
@@ -4737,9 +4751,7 @@ class RiskAcceptanceFilterSet(GenericFilterSet):
     class Meta:
         model = RiskAcceptance
         fields = {
-            "folder": ["exact"],
             "state": ["exact"],
-            "approver": ["exact"],
             "risk_scenarios": ["exact"],
             "expiry_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
         }
@@ -4921,6 +4933,10 @@ class UserFilter(GenericFilterSet):
 
 
 class ValidationFlowFilterSet(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    requester = df.ModelMultipleChoiceFilter(queryset=User.objects.all())
+    approver = df.ModelMultipleChoiceFilter(queryset=User.objects.all())
+
     linked_models = df.CharFilter(method="filter_linked_models", label="Linked models")
 
     def filter_linked_models(self, queryset, name, value):
@@ -4944,10 +4960,7 @@ class ValidationFlowFilterSet(GenericFilterSet):
     class Meta:
         model = ValidationFlow
         fields = [
-            "folder",
             "status",
-            "requester",
-            "approver",
             "filtering_labels",
             "compliance_assessments",
             "risk_assessments",
@@ -5142,6 +5155,8 @@ class RoleAssignmentViewSet(BaseModelViewSet):
 
 
 class FolderFilter(GenericFilterSet):
+    parent_folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+
     owned = df.BooleanFilter(method="get_owned_folders", label="owned")
     content_type = df.MultipleChoiceFilter(
         choices=Folder.ContentType, lookup_expr="icontains"
@@ -5160,7 +5175,6 @@ class FolderFilter(GenericFilterSet):
         model = Folder
         fields = [
             "name",
-            "parent_folder",
             "content_type",
             "owner",
             "owned",
@@ -6474,6 +6488,8 @@ def get_composer_data(request):
 
 
 class FrameworkFilter(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+
     baseline = df.ModelChoiceFilter(
         queryset=ComplianceAssessment.objects.all(),
         method="filter_framework",
@@ -6494,7 +6510,7 @@ class FrameworkFilter(GenericFilterSet):
 
     class Meta:
         model = Framework
-        fields = ["folder", "baseline", "provider"]
+        fields = ["provider"]
 
 
 class FrameworkViewSet(BaseModelViewSet):
@@ -10404,6 +10420,8 @@ class TimelineEntryViewSet(BaseModelViewSet):
 
 
 class TaskTemplateFilter(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+
     next_occurrence_status = df.MultipleChoiceFilter(
         choices=TaskNode.TASK_STATUS_CHOICES, method="filter_next_occurrence_status"
     )
@@ -10417,7 +10435,6 @@ class TaskTemplateFilter(GenericFilterSet):
             "name",
             "assigned_to",
             "is_recurrent",
-            "folder",
             "applied_controls",
             "last_occurrence_status",
             "next_occurrence_status",
