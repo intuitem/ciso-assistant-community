@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { browser } from '$app/environment';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
@@ -289,11 +290,10 @@
 	let activeUrlmodel = $derived(activeEntry ? activeEntry[0] : undefined);
 	let activeModel = $derived(activeEntry ? activeEntry[1] : undefined);
 
-	let activeField = $derived(
-		activeUrlmodel
-			? data.model.reverseForeignKeyFields?.find((item) => item.urlModel === activeUrlmodel)
-			: undefined
-	);
+	const getReverseFieldConfig = (urlmodel?: string) =>
+		urlmodel ? data.model.reverseForeignKeyFields?.find((item) => item.urlModel === urlmodel) : undefined;
+
+	let activeField = $derived(getReverseFieldConfig(activeUrlmodel));
 
 	let activeFieldsToUse = $derived(() => {
 		if (!activeUrlmodel || !activeField) return [];
@@ -333,6 +333,73 @@
 
 	// NEW: collapse / expand object details
 	let detailsCollapsed = $state(false);
+
+	let relatedModelRowCounts: Record<string, number> = $state({});
+
+	function updateRelatedModelRowCount(urlmodel: string | undefined, count: number) {
+		if (!urlmodel) return;
+		relatedModelRowCounts = { ...relatedModelRowCounts, [urlmodel]: count };
+	}
+
+	const getRelatedModelBadgeCount = (urlmodel: string, fallback = 0) =>
+		relatedModelRowCounts[urlmodel] ?? fallback;
+
+	let relatedModelCountController: AbortController | undefined;
+
+	async function preloadRelatedModelCounts() {
+		if (!browser || typeof window === 'undefined') return;
+		relatedModelCountController?.abort();
+		const controller = new AbortController();
+		relatedModelCountController = controller;
+
+		await Promise.allSettled(
+			relatedModels.map(async ([urlmodel]) => {
+				const fieldConfig = getReverseFieldConfig(urlmodel);
+				if (!fieldConfig) return;
+
+				try {
+					const endpoint = getReverseForeignKeyEndpoint({
+						parentModel: data.model,
+						targetUrlModel: urlmodel,
+						field: fieldConfig.field,
+						id: data.data.id,
+						endpointUrl: fieldConfig.endpointUrl
+					});
+					const url = new URL(endpoint, window.location.origin);
+					url.searchParams.set('limit', '1');
+					url.searchParams.set('offset', '0');
+
+					const response = await fetch(url.toString(), { signal: controller.signal });
+					if (!response.ok) {
+						throw new Error(`Failed to load ${urlmodel} count`);
+					}
+					const payload = await response.json();
+					const count = payload?.count ?? payload?.results?.length ?? 0;
+					updateRelatedModelRowCount(urlmodel, count);
+				} catch (error) {
+					if (error instanceof DOMException && error.name === 'AbortError') {
+						return;
+					}
+					console.error('Unable to preload related model count', urlmodel, error);
+				}
+			})
+		);
+	}
+
+	onMount(() => {
+		void preloadRelatedModelCounts();
+		return () => {
+			relatedModelCountController?.abort();
+		};
+	});
+
+	$effect(() => {
+		const dependencyKey =
+			(data?.data?.id ?? '') + ':' + relatedModels.map(([urlmodel]) => urlmodel).join(',');
+		void dependencyKey;
+		if (!browser) return;
+		void preloadRelatedModelCounts();
+	});
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -572,6 +639,8 @@
 							URLModel={activeUrlmodel}
 							fields={activeFieldsToUse}
 							defaultFilters={activeField.defaultFilters || {}}
+							on:rowcount={(event) =>
+								updateRelatedModelRowCount(activeUrlmodel, event.detail)}
 						>
 							{#snippet addButton()}
 								<button
@@ -621,37 +690,39 @@
 						{safeTranslate('associated-objects')}
 					</h3>
 
-					<ul class="pb-4 space-y-1">
-						{#each relatedModels as [urlmodel, model]}
-							{@const isActive = group === urlmodel}
-							<li>
-								<button
-									type="button"
-									class={`
+						<ul class="pb-4 space-y-1">
+							{#each relatedModels as [urlmodel, model]}
+								{@const fallbackCount = model.table?.meta?.count ?? model.table?.body?.length ?? 0}
+								{@const badgeCount = getRelatedModelBadgeCount(urlmodel, fallbackCount)}
+								{@const isActive = group === urlmodel}
+								<li>
+									<button
+										type="button"
+										class={`
 										w-full flex items-center justify-between px-4 py-2 text-left text-sm transition rounded-r-lg
 										${
 											isActive
 												? 'bg-primary-50 text-primary-800 border-l-4 border-primary-500 font-semibold shadow-sm'
 												: 'hover:bg-gray-50 text-gray-700 border-l-4 border-transparent'
 										}
-									`}
-									onclick={() => (group = urlmodel)}
-								>
-									<div class="flex items-center gap-2">
-										<span class="lowercase capitalize-first">
-											{safeTranslate(model.info.localNamePlural)}
-										</span>
-									</div>
-									{#if model.table?.meta?.count > 0}
-										<span class="badge preset-tonal-secondary">
-											{model.table.meta.count}
-										</span>
-									{/if}
+										`}
+										onclick={() => (group = urlmodel)}
+									>
+										<div class="flex items-center gap-2">
+											<span class="lowercase capitalize-first">
+												{safeTranslate(model.info.localNamePlural)}
+											</span>
+										</div>
+										{#if badgeCount > 0}
+											<span class="badge preset-tonal-secondary">
+												{badgeCount}
+											</span>
+										{/if}
 								</button>
 							</li>
 						{/each}
 					</ul>
-				</nav>
+					</nav>
 				<!-- active section -->
 				<div class="flex-1 px-4 py-4 overflow-x-auto">
 					{@render RelatedModelContent(false)}
