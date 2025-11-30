@@ -35,7 +35,6 @@ Output:
         * implementation_groups
 """
 
-
 from warnings import deprecated
 from xml.etree.ElementTree import tostring
 import pandas as pd
@@ -54,7 +53,7 @@ columns_to_use = [
     "SCF Control Question",
     "SCRM Focus\n\nTIER 1\nSTRATEGIC",
     "SCRM Focus\n\nTIER 2\nOPERATIONAL",
-    "SCRM Focus\n\nTIER 3\nTACTICAL"
+    "SCRM Focus\n\nTIER 3\nTACTICAL",
 ]
 
 # Load the source file
@@ -71,15 +70,17 @@ for _, row in df.iterrows():
 
     # If the domain has changed, add a depth=1 row
     if pd.notna(current_domain) and current_domain != previous_domain:
-        rows.append({
-            "assessable": "",
-            "depth": 1,
-            "ref_id": str(row.get("SCF #", "")).split("-")[0],
-            "name": current_domain,
-            "description": "",
-            "annotation": "",
-            "implementation_groups": ""
-        })
+        rows.append(
+            {
+                "assessable": "",
+                "depth": 1,
+                "ref_id": str(row.get("SCF #", "")).split("-")[0],
+                "name": current_domain,
+                "description": "",
+                "annotation": "",
+                "implementation_groups": "",
+            }
+        )
         previous_domain = current_domain
 
     # Determine implementation groups
@@ -94,28 +95,44 @@ for _, row in df.iterrows():
 
     # Add a depth=2 row for the control
     is_deprecated = (
-        True if str(row.get("Secure Controls Framework (SCF)\nControl Description", ""))
-                .strip().lower().startswith("[deprecated")
+        True
+        if str(row.get("Secure Controls Framework (SCF)\nControl Description", ""))
+        .strip()
+        .lower()
+        .startswith("[deprecated")
         else False
     )
-    
-    rows.append({
-        "assessable": ("x" if is_deprecated is False else ""),
-        "depth": 2,
-        "ref_id": row.get("SCF #", ""),
-        "name": row.get("SCF Control", ""),
-        "description": row.get("Secure Controls Framework (SCF)\nControl Description", ""),
-        "annotation": row.get("SCF Control Question", ""),
-        "implementation_groups": tier_str
-    })
+
+    rows.append(
+        {
+            "assessable": ("x" if is_deprecated is False else ""),
+            "depth": 2,
+            "ref_id": row.get("SCF #", ""),
+            "name": row.get("SCF Control", ""),
+            "description": row.get(
+                "Secure Controls Framework (SCF)\nControl Description", ""
+            ),
+            "annotation": row.get("SCF Control Question", ""),
+            "implementation_groups": tier_str,
+        }
+    )
 
 # Create the final DataFrame
-df_result = pd.DataFrame(rows, columns=[
-    "assessable", "depth", "ref_id", "name", "description", "annotation", "implementation_groups"
-])
+df_result = pd.DataFrame(
+    rows,
+    columns=[
+        "assessable",
+        "depth",
+        "ref_id",
+        "name",
+        "description",
+        "annotation",
+        "implementation_groups",
+    ],
+)
 
 # Write to the destination Excel file
 with pd.ExcelWriter(destination_file, engine="openpyxl") as writer:
     df_result.to_excel(writer, sheet_name="scf", index=False)
 
-print(f"✅ Destination file created: \"{destination_file}\"")
+print(f'✅ Destination file created: "{destination_file}"')

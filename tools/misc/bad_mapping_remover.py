@@ -28,7 +28,6 @@ Example:
     python bad_mapping_remover.py my_mapping.xlsx my_custom_sheet
 """
 
-
 import openpyxl
 import sys
 from collections import Counter
@@ -50,31 +49,31 @@ def load_node_ids(sheet):
 def main(file_path, mapping_sheet_name="mappings_content"):
     input_path = Path(file_path)
     if not input_path.exists():
-        print(f"❌ [ERROR] File not found: \"{file_path}\"")
+        print(f'❌ [ERROR] File not found: "{file_path}"')
         sys.exit(1)
 
     wb = openpyxl.load_workbook(file_path)
     sheets = wb.sheetnames
 
     if "source" not in sheets:
-        print("❌ [ERROR] Sheet \"source\" not found")
+        print('❌ [ERROR] Sheet "source" not found')
         sys.exit(1)
     if "target" not in sheets:
-        print("❌ [ERROR] Sheet \"target\" not found")
+        print('❌ [ERROR] Sheet "target" not found')
         sys.exit(1)
 
     source_ids, source_ok = load_node_ids(wb["source"])
     if not source_ok:
-        print("❌ [ERROR] \"node_id\" column not found in \"source\" sheet header")
+        print('❌ [ERROR] "node_id" column not found in "source" sheet header')
         sys.exit(1)
 
     target_ids, target_ok = load_node_ids(wb["target"])
     if not target_ok:
-        print("❌ [ERROR] \"node_id\" column not found in \"target\" sheet header")
+        print('❌ [ERROR] "node_id" column not found in "target" sheet header')
         sys.exit(1)
 
     if mapping_sheet_name not in sheets:
-        print(f"❌ [ERROR] Sheet \"{mapping_sheet_name}\" not found")
+        print(f'❌ [ERROR] Sheet "{mapping_sheet_name}" not found')
         sys.exit(1)
 
     sheet = wb[mapping_sheet_name]
@@ -82,7 +81,9 @@ def main(file_path, mapping_sheet_name="mappings_content"):
     rows = list(sheet.iter_rows(min_row=2))
 
     if "source_node_id" not in header or "target_node_id" not in header:
-        print("❌ [ERROR] Missing \"source_node_id\" or \"target_node_id\" column in mapping sheet")
+        print(
+            '❌ [ERROR] Missing "source_node_id" or "target_node_id" column in mapping sheet'
+        )
         sys.exit(1)
 
     src_idx = header.index("source_node_id")
@@ -104,7 +105,7 @@ def main(file_path, mapping_sheet_name="mappings_content"):
             removed_source_count[source_val] += 1
         if missing_target:
             removed_target_count[target_val] += 1
-            
+
         if missing_source or missing_target:
             amount_removed_lines += 1
 
@@ -113,21 +114,27 @@ def main(file_path, mapping_sheet_name="mappings_content"):
 
     # Output report
     for sid in removed_source_count:
-        print(f"🗑️  [REMOVED] source_node_id \"{sid}\" not found in sheet \"source\"")
+        print(f'🗑️  [REMOVED] source_node_id "{sid}" not found in sheet "source"')
     for tid in removed_target_count:
-        print(f"🗑️  [REMOVED] target_node_id \"{tid}\" not found in sheet \"target\"")
+        print(f'🗑️  [REMOVED] target_node_id "{tid}" not found in sheet "target"')
 
     for sid, count in removed_source_count.items():
         if count > 1:
-            print(f"🔁 [DUPLICATE] source_node_id \"{sid}\" was removed {count} times from mappings")
+            print(
+                f'🔁 [DUPLICATE] source_node_id "{sid}" was removed {count} times from mappings'
+            )
     for tid, count in removed_target_count.items():
         if count > 1:
-            print(f"🔁 [DUPLICATE] target_node_id \"{tid}\" was removed {count} times from mappings")
+            print(
+                f'🔁 [DUPLICATE] target_node_id "{tid}" was removed {count} times from mappings'
+            )
 
     # total_removed = sum(removed_source_count.values()) + sum(removed_target_count.values())
     if amount_removed_lines > 0:
-        print(f"📜 [SUMMARY] Removed {amount_removed_lines} mapping(s) due to missing node IDs\
-              \n             - Missing source: {sum(removed_source_count.values())}, target: {sum(removed_target_count.values())} -")
+        print(
+            f"📜 [SUMMARY] Removed {amount_removed_lines} mapping(s) due to missing node IDs\
+              \n             - Missing source: {sum(removed_source_count.values())}, target: {sum(removed_target_count.values())} -"
+        )
 
     # Save cleaned Excel file
     new_wb = openpyxl.Workbook()
@@ -144,7 +151,7 @@ def main(file_path, mapping_sheet_name="mappings_content"):
 
     output_file = input_path.with_stem(input_path.stem + "_filtered")
     new_wb.save(str(output_file))
-    print(f"✅ Cleaned Excel file saved as: \"{output_file.name}\"")
+    print(f'✅ Cleaned Excel file saved as: "{output_file.name}"')
 
 
 if __name__ == "__main__":

@@ -22,8 +22,9 @@ import pandas as pd
 IGNORE_PATTERNS = [
     "ELI: http://data.europa.eu/eli/reg_del/2024/1774/oj",
     "FR",
-    "JO L du 25.6.2024"
+    "JO L du 25.6.2024",
 ]
+
 
 def is_ignored(line: str) -> bool:
     line = line.strip()
@@ -34,6 +35,7 @@ def is_ignored(line: str) -> bool:
     if re.match(r"^\d+/\d+$", line):  # motif x/y
         return True
     return False
+
 
 def parse_txt_to_excel(input_file: str, output_file: str):
     debug_val = True
@@ -47,10 +49,10 @@ def parse_txt_to_excel(input_file: str, output_file: str):
         "w": None,
         "article_depth": None,
         "y_depth": None,
-        "in_a_chapter" : False,
+        "in_a_chapter": False,
         "section_depth": None,
         "anon_depth": None,  # pour suivre le niveau des points sans numéro
-        "previous_letter" : None
+        "previous_letter": None,
     }
 
     with open(input_file, "r", encoding="utf-8") as f:
@@ -67,16 +69,20 @@ def parse_txt_to_excel(input_file: str, output_file: str):
         if line.startswith("TITRE"):
             desc_lines = []
             i += 1
-            while i < len(lines) and not re.match(r"^(TITRE|CHAPITRE|Section|Article)", lines[i].strip()):
+            while i < len(lines) and not re.match(
+                r"^(TITRE|CHAPITRE|Section|Article)", lines[i].strip()
+            ):
                 if not is_ignored(lines[i]):
                     desc_lines.append(lines[i].strip())
                 i += 1
-            rows.append({
-                "depth": "1",
-                "ref_id": line,
-                "name": line,
-                "description": " ".join(desc_lines).strip()
-            })
+            rows.append(
+                {
+                    "depth": "1",
+                    "ref_id": line,
+                    "name": line,
+                    "description": " ".join(desc_lines).strip(),
+                }
+            )
             current_context["depth"] = 1
             current_context["in_a_chapter"] = False
             continue
@@ -85,16 +91,20 @@ def parse_txt_to_excel(input_file: str, output_file: str):
         if line.startswith("CHAPITRE"):
             desc_lines = []
             i += 1
-            while i < len(lines) and not re.match(r"^(TITRE|CHAPITRE|Section|Article)", lines[i].strip()):
+            while i < len(lines) and not re.match(
+                r"^(TITRE|CHAPITRE|Section|Article)", lines[i].strip()
+            ):
                 if not is_ignored(lines[i]):
                     desc_lines.append(lines[i].strip())
                 i += 1
-            rows.append({
-                "depth": "2",
-                "ref_id": line,
-                "name": line,
-                "description": " ".join(desc_lines).strip()
-            })
+            rows.append(
+                {
+                    "depth": "2",
+                    "ref_id": line,
+                    "name": line,
+                    "description": " ".join(desc_lines).strip(),
+                }
+            )
             current_context["depth"] = 2
             current_context["in_a_chapter"] = True
             current_context["section_depth"] = None
@@ -104,17 +114,21 @@ def parse_txt_to_excel(input_file: str, output_file: str):
         if line.startswith("Section"):
             desc_lines = []
             i += 1
-            while i < len(lines) and not re.match(r"^(TITRE|CHAPITRE|Section|Article)", lines[i].strip()):
+            while i < len(lines) and not re.match(
+                r"^(TITRE|CHAPITRE|Section|Article)", lines[i].strip()
+            ):
                 if not is_ignored(lines[i]):
                     desc_lines.append(lines[i].strip())
                 i += 1
-            depth = (3 if current_context["in_a_chapter"] == True else 2)
-            rows.append({
-                "depth": str(depth),
-                "ref_id": line,
-                "name": line,
-                "description": " ".join(desc_lines).strip()
-            })
+            depth = 3 if current_context["in_a_chapter"] == True else 2
+            rows.append(
+                {
+                    "depth": str(depth),
+                    "ref_id": line,
+                    "name": line,
+                    "description": " ".join(desc_lines).strip(),
+                }
+            )
             current_context["depth"] = depth
             current_context["section_depth"] = depth
             continue
@@ -122,17 +136,16 @@ def parse_txt_to_excel(input_file: str, output_file: str):
         # Article
         if line.startswith("Article"):
             current_context["article"] = re.sub(r"Article\s+", "", line)
-            depth = str((current_context["section_depth"] or current_context["depth"]) + 1)
+            depth = str(
+                (current_context["section_depth"] or current_context["depth"]) + 1
+            )
             desc = ""
             if i + 1 < len(lines):
-                desc = lines[i+1].strip()
+                desc = lines[i + 1].strip()
                 i += 1
-            rows.append({
-                "depth": depth,
-                "ref_id": line,
-                "name": line,
-                "description": desc
-            })
+            rows.append(
+                {"depth": depth, "ref_id": line, "name": line, "description": desc}
+            )
             current_context["depth"] = int(depth)
             current_context["anon_depth"] = None  # reset des points sans numéro
             current_context["previous_letter"] = None
@@ -154,12 +167,14 @@ def parse_txt_to_excel(input_file: str, output_file: str):
                 i += 1
             if i < len(lines):
                 desc_lines.append(lines[i].strip())
-            rows.append({
-                "depth": str(current_context["depth"] + 1),
-                "ref_id": f"{current_context['article']}.{y_num}",
-                "name": None,
-                "description": " ".join(desc_lines).strip()
-            })
+            rows.append(
+                {
+                    "depth": str(current_context["depth"] + 1),
+                    "ref_id": f"{current_context['article']}.{y_num}",
+                    "name": None,
+                    "description": " ".join(desc_lines).strip(),
+                }
+            )
             current_context["anon_depth"] = None
             current_context["previous_letter"] = None
             current_context["y_depth"] = int(depth)
@@ -167,11 +182,17 @@ def parse_txt_to_excel(input_file: str, output_file: str):
             continue
 
         # Z) (lettre)
-        if re.match(r"^[a-z]\)$", line) :
+        if re.match(r"^[a-z]\)$", line):
             z_letter = line.replace(")", "")
-            
-            if not z_letter.startswith("i") or (z_letter.startswith("i") and current_context["previous_letter"].startswith("h")) :
-                if not z_letter.startswith("v") or (z_letter.startswith("v") and current_context["previous_letter"].startswith("u")) :
+
+            if not z_letter.startswith("i") or (
+                z_letter.startswith("i")
+                and current_context["previous_letter"].startswith("h")
+            ):
+                if not z_letter.startswith("v") or (
+                    z_letter.startswith("v")
+                    and current_context["previous_letter"].startswith("u")
+                ):
                     current_context["z"] = z_letter
                     desc_lines = []
                     i += 1
@@ -181,20 +202,25 @@ def parse_txt_to_excel(input_file: str, output_file: str):
                         i += 1
                     if i < len(lines):
                         desc_lines.append(lines[i].strip())
-                    
+
                     depth = (
-                        current_context["anon_depth"] + 1 if current_context["anon_depth"] is not None
+                        current_context["anon_depth"] + 1
+                        if current_context["anon_depth"] is not None
                         else (
-                            current_context["y_depth"] + 1 if current_context["y_depth"] is not None else current_context["article_depth"] + 1
+                            current_context["y_depth"] + 1
+                            if current_context["y_depth"] is not None
+                            else current_context["article_depth"] + 1
                         )
                     )
-                    
-                    rows.append({
-                        "depth": str(depth),
-                        "ref_id": f"{current_context['article']}.{current_context['y'] + "." if current_context['y'] is not None else ""}{z_letter}",
-                        "name": None,
-                        "description": " ".join(desc_lines).strip()
-                    })
+
+                    rows.append(
+                        {
+                            "depth": str(depth),
+                            "ref_id": f"{current_context['article']}.{current_context['y'] + '.' if current_context['y'] is not None else ''}{z_letter}",
+                            "name": None,
+                            "description": " ".join(desc_lines).strip(),
+                        }
+                    )
                     current_context["depth"] = depth
                     current_context["previous_letter"] = z_letter
                     i += 1
@@ -212,15 +238,21 @@ def parse_txt_to_excel(input_file: str, output_file: str):
                 i += 1
             if i < len(lines):
                 desc_lines.append(lines[i].strip())
-            
-            depth = (current_context["anon_depth"] + 2 if current_context["anon_depth"] is not None else current_context["depth"] + 1)
-            
-            rows.append({
-                "depth": str(depth),
-                "ref_id": f"{current_context['article']}.{current_context['y'] + "." if current_context['y'] is not None else ""}{current_context['z']}.{w_roman}",
-                "name": None,
-                "description": " ".join(desc_lines).strip()
-            })
+
+            depth = (
+                current_context["anon_depth"] + 2
+                if current_context["anon_depth"] is not None
+                else current_context["depth"] + 1
+            )
+
+            rows.append(
+                {
+                    "depth": str(depth),
+                    "ref_id": f"{current_context['article']}.{current_context['y'] + '.' if current_context['y'] is not None else ''}{current_context['z']}.{w_roman}",
+                    "name": None,
+                    "description": " ".join(desc_lines).strip(),
+                }
+            )
             i += 1
             continue
 
@@ -240,9 +272,8 @@ def parse_txt_to_excel(input_file: str, output_file: str):
                 desc_lines.append(first_text)
 
             if not re.search(r"[.:;]$", first_text.strip()):
-                
                 i += 1
-                
+
                 while i < len(lines) and not re.search(r"[.:;]$", lines[i].strip()):
                     if not is_ignored(lines[i]):
                         desc_lines.append(lines[i].strip())
@@ -250,20 +281,23 @@ def parse_txt_to_excel(input_file: str, output_file: str):
                 if i < len(lines):
                     desc_lines.append(lines[i].strip())
 
-            depth = (current_context["anon_depth"] + 2 
-                    if current_context["anon_depth"] is not None 
-                    else current_context["depth"] + 1)
+            depth = (
+                current_context["anon_depth"] + 2
+                if current_context["anon_depth"] is not None
+                else current_context["depth"] + 1
+            )
 
-            rows.append({
-                "depth": str(depth),
-                "ref_id": f"{current_context['article']}.{current_context['y'] + "." if current_context['y'] is not None else ""}{current_context['z']}.{current_context['w']}.{t_num}",
-                "name": None,
-                "description": " ".join(desc_lines).strip()
-            })
+            rows.append(
+                {
+                    "depth": str(depth),
+                    "ref_id": f"{current_context['article']}.{current_context['y'] + '.' if current_context['y'] is not None else ''}{current_context['z']}.{current_context['w']}.{t_num}",
+                    "name": None,
+                    "description": " ".join(desc_lines).strip(),
+                }
+            )
             i += 1
             continue
 
-        
         # Nouveau cas : ligne avec texte direct (point sans numéro)
         if line and not is_ignored(line):
             # si on a déjà rencontré un point sans numéro, garder le même niveau
@@ -274,7 +308,7 @@ def parse_txt_to_excel(input_file: str, output_file: str):
                 current_context["anon_depth"] = depth
 
             desc_lines = [line]
-            
+
             if not re.search(r"[.:;]$", line.strip()):
                 i += 1
                 while i < len(lines) and not re.search(r"[.:;]$", lines[i].strip()):
@@ -284,12 +318,14 @@ def parse_txt_to_excel(input_file: str, output_file: str):
                 if i < len(lines):
                     desc_lines.append(lines[i].strip())
 
-            rows.append({
-                "depth": str(depth),
-                "ref_id": None,
-                "name": None,
-                "description": " ".join(desc_lines).strip()
-            })
+            rows.append(
+                {
+                    "depth": str(depth),
+                    "ref_id": None,
+                    "name": None,
+                    "description": " ".join(desc_lines).strip(),
+                }
+            )
             i += 1
             continue
 
@@ -298,5 +334,9 @@ def parse_txt_to_excel(input_file: str, output_file: str):
     df = pd.DataFrame(rows, columns=["depth", "ref_id", "name", "description"])
     df.to_excel(output_file, index=False)
 
+
 if __name__ == "__main__":
-    parse_txt_to_excel('./RTS-DORA-ICT-risk-management_OJ_L_202401774_FR_TXT_extracted.txt', "destination.xlsx")
+    parse_txt_to_excel(
+        "./RTS-DORA-ICT-risk-management_OJ_L_202401774_FR_TXT_extracted.txt",
+        "destination.xlsx",
+    )
