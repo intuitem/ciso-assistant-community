@@ -1000,6 +1000,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # webhooks
+    "add_webhookendpoint",
+    "view_webhookendpoint",
+    "change_webhookendpoint",
+    "delete_webhookendpoint",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -1217,6 +1222,7 @@ def startup(sender: AppConfig, **kwargs):
 
     call_command("storelibraries")
     call_command("autoloadlibraries")
+    call_command("sync_event_types")
 
     # add administrators group to superusers (for resiliency)
     administrators = UserGroup.objects.get(

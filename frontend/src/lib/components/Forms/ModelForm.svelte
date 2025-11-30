@@ -475,7 +475,15 @@
 		{:else if URLModel === 'contracts'}
 			<ContractsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'representatives'}
-			<RepresentativesForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
+			<RepresentativesForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{object}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'frameworks'}
 			<FrameworksForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
 		{:else if URLModel === 'users'}

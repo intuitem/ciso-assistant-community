@@ -201,6 +201,10 @@ urlpatterns = [
     ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
     path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),
+    path(
+        "task-nodes/<uuid:pk>/evidences/",
+        TaskNodeEvidenceList.as_view(),
+    ),
 ]
 
 # Additional modules take precedence over the default modules

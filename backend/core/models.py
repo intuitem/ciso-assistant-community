@@ -3437,6 +3437,14 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     evidence = models.ForeignKey(
         Evidence, on_delete=models.CASCADE, related_name="revisions"
     )
+    task_node = models.ForeignKey(
+        "TaskNode",
+        on_delete=models.SET_NULL,
+        related_name="evidence_revisions",
+        blank=True,
+        null=True,
+        verbose_name=_("Task Node"),
+    )
     version = models.IntegerField(
         default=1,
         verbose_name=_("version number"),
@@ -6686,6 +6694,12 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
     assigned_to = models.ManyToManyField(
         User, verbose_name="Assigned to", blank=True, related_name="task_templates"
     )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        help_text="Evidences related to the task",
+        related_name="task_templates",
+    )
     assets = models.ManyToManyField(
         Asset,
         verbose_name="Related assets",
@@ -6823,9 +6837,16 @@ class TaskNode(AbstractBaseModel, FolderMixin):
 
     to_delete = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"{self.task_template.name} ({self.due_date})"
+
     @property
     def assigned_to(self):
         return self.task_template.assigned_to
+
+    @property
+    def expected_evidence(self):
+        return self.task_template.evidences.all()
 
     @property
     def assets(self):
