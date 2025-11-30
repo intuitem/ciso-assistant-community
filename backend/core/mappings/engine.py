@@ -1,4 +1,3 @@
-from ctypes import sizeof
 from django.db.models import Q
 from icecream import ic
 from core.models import (
