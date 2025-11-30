@@ -1325,6 +1325,46 @@ export const AccreditationSchema = z.object({
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
 });
 
+// Metrology
+export const MetricDefinitionSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	category: z.string().default('quantitative'),
+	unit: z.string().optional().nullable(),
+	choices_definition: jsonSchema.optional().nullable(),
+	provider: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
+});
+
+export const MetricInstanceSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	metric_definition: z.string().uuid(),
+	status: z.string().default('draft'),
+	owner: z.array(z.string().uuid().optional()).optional(),
+	target_value: z.coerce.number().optional().nullable(),
+	collection_frequency: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
+});
+
+export const MetricSampleSchema = z.object({
+	folder: z.string(),
+	metric_instance: z.string().uuid(),
+	timestamp: z.string().datetime(),
+	value: jsonSchema
+});
+
+export const DashboardSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	metric_instances: z.array(z.string().uuid().optional()).optional(),
+	dashboard_definition: jsonSchema.default({}),
+	filtering_labels: z.string().optional().array().optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1393,7 +1433,11 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	terminologies: TerminologySchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
-	accreditations: AccreditationSchema
+	accreditations: AccreditationSchema,
+	'metric-definitions': MetricDefinitionSchema,
+	'metric-instances': MetricInstanceSchema,
+	'metric-samples': MetricSampleSchema,
+	dashboards: DashboardSchema
 };
 
 export const modelSchema = (model: string) => {
