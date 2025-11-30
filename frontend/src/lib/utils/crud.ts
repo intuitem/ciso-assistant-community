@@ -457,7 +457,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'label',
 		localNamePlural: 'labels',
 		verboseName: 'Label',
-		verboseNamePlural: 'Labels'
+		verboseNamePlural: 'Labels',
+		foreignKeyFields: [{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }]
 	},
 	'risk-acceptances': {
 		name: 'riskacceptance',
