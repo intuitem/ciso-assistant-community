@@ -35,10 +35,12 @@ export const loadDetail = async ({ event, model, id }) => {
 
 	const relatedModels = {} as RelatedModels;
 
-	if (model.reverseForeignKeyFields) {
+	const relationFields = model.relatedFields ?? model.reverseForeignKeyFields;
+
+	if (relationFields && relationFields.length > 0) {
 		const initialData = {};
 		await Promise.all(
-			model.reverseForeignKeyFields
+			relationFields
 				.filter(
 					(m) =>
 						!m?.folderPermsNeeded ||

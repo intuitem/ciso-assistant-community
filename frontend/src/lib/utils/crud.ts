@@ -102,7 +102,15 @@ export interface ForeignKeyField {
 	tableFields?: string[];
 }
 
-export interface ReverseForeignKeyField extends ForeignKeyField {
+type RelationDirection = 'direct' | 'reverse';
+
+export interface RelatedField extends ForeignKeyField {
+	/**
+	 * 'reverse' (par défaut) : l’autre modèle pointe vers "moi" via `field`
+	 * 'direct' : c’est "moi" qui pointe vers l’autre modèle via `field`
+	 */
+	relationDirection?: RelationDirection;
+
 	detail?: boolean;
 	detailUrlParams?: string[]; // To prepare possible fetch for foreign keys with detail in generic views
 	disableCreate?: boolean;
@@ -111,6 +119,10 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	folderPermsNeeded?: { action: 'add' | 'view' | 'change' | 'delete'; model: string }[]; // Permissions needed on the folder to display this reverse foreign key field
 	defaultFilters?: { [key: string]: any[] }; // Default filters to initialize the table with (user can change/remove them)
 }
+
+// Optionnel : si tu veux garder le type pour ne pas casser les imports existants
+// mais sans l’utiliser dans URL_MODEL_MAP.
+export interface ReverseForeignKeyField extends RelatedField {} // legacy
 
 interface Field {
 	keyNameOverride?: string;
@@ -140,7 +152,13 @@ export interface ModelMapEntry {
 	flaggedFields?: Record<string, FeatureFlag>;
 	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
-	reverseForeignKeyFields?: ReverseForeignKeyField[];
+
+	// 👉 ce qui sert à construire les tabs de relations
+	relatedFields?: RelatedField[];
+
+	// plus besoin d'en parler ici
+	// relatedFields?: ReverseForeignKeyField[];
+
 	selectFields?: SelectField[];
 	fileFields?: string[];
 	filters?: SelectField[];
@@ -165,7 +183,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'parent_folder', urlModel: 'folders' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{ field: 'folder', urlModel: 'perimeters' },
 			{ field: 'folder', urlModel: 'entities' },
 			{ field: 'folder', urlModel: 'assets' },
@@ -192,7 +210,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'default_assignee', urlModel: 'users' }
 		],
 		selectFields: [{ field: 'lc_status' }],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{ field: 'perimeter', urlModel: 'compliance-assessments' },
 			{ field: 'perimeter', urlModel: 'risk-assessments' },
 			{ field: 'perimeter', urlModel: 'entity-assessments' },
@@ -226,7 +244,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' },
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' }
 		],
-		reverseForeignKeyFields: [{ field: 'risk_assessment', urlModel: 'risk-scenarios' }],
+		relatedFields: [{ field: 'risk_assessment', urlModel: 'risk-scenarios' }],
 		selectFields: [{ field: 'status' }, { field: 'risk_tolerance', valueType: 'number' }],
 		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }]
 	},
@@ -322,7 +340,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'quantitative_risk_scenarios', urlModel: 'quantitative-risk-scenarios' },
 			{ field: 'assets', urlModel: 'assets' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{ field: 'applied_controls', urlModel: 'evidences' },
 			{ field: 'applied_controls', urlModel: 'task-templates' },
 			{
@@ -343,7 +361,14 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
-			{ field: 'applied_controls', urlModel: 'assets', disableCreate: true, disableDelete: true }
+			{ field: 'applied_controls', urlModel: 'assets', disableCreate: true, disableDelete: true },
+			{
+				field: 'reference_control',
+				urlModel: 'reference-controls',
+				relationDirection: 'direct',
+				disableCreate: true,
+				disableDelete: true
+			}
 		],
 		selectFields: [
 			{ field: 'status' },
@@ -387,7 +412,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'users' }
 		],
-		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
+		relatedFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
 		selectFields: [
 			{ field: 'status' },
 			{ field: 'csf_function' },
@@ -487,7 +512,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'reference_control',
 				urlModel: 'applied-controls',
@@ -526,7 +551,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'solutions' },
 			{ field: 'observation' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'assets',
 				urlModel: 'compliance-assessments',
@@ -602,7 +627,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'user_groups',
 				urlModel: 'users',
@@ -652,7 +677,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings_assessments', urlModel: 'findings-assessments' },
 			{ field: 'owner', urlModel: 'users' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{ field: 'evidence', urlModel: 'evidence-revisions' },
 			{
 				field: 'evidences',
@@ -817,7 +842,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'branches' },
 			{ field: 'reference_link' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{ field: 'entity', urlModel: 'entity-assessments' },
 			{ field: 'entity', urlModel: 'representatives' },
 			{ field: 'provider_entity', urlModel: 'solutions' },
@@ -868,7 +893,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'solutions',
 		verboseName: 'Solution',
 		verboseNamePlural: 'Solutions',
-		reverseForeignKeyFields: [{ field: 'solution', urlModel: 'contracts', disableDelete: true }],
+		relatedFields: [{ field: 'solution', urlModel: 'contracts', disableDelete: true }],
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
@@ -897,7 +922,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'contracts',
 		verboseName: 'Contract',
 		verboseNamePlural: 'Contracts',
-		reverseForeignKeyFields: [{ field: 'contracts', urlModel: 'evidences', disableDelete: true }],
+		relatedFields: [{ field: 'contracts', urlModel: 'evidences', disableDelete: true }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'owner', urlModel: 'users' },
@@ -940,7 +965,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' }
 		],
-		reverseForeignKeyFields: [{ field: 'bia', urlModel: 'asset-assessments' }],
+		relatedFields: [{ field: 'bia', urlModel: 'asset-assessments' }],
 		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }],
 		detailViewFields: [
@@ -963,7 +988,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'assetAssessments',
 		verboseName: 'assetassessment',
 		verboseNamePlural: 'assetassessments',
-		reverseForeignKeyFields: [{ field: 'asset_assessment', urlModel: 'escalation-thresholds' }],
+		relatedFields: [{ field: 'asset_assessment', urlModel: 'escalation-thresholds' }],
 		foreignKeyFields: [
 			{ field: 'asset', urlModel: 'assets' },
 			{ field: 'folder', urlModel: 'folders' },
@@ -1027,7 +1052,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assigned_to', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{ field: 'processing', urlModel: 'personal-data' },
 			{ field: 'processing', urlModel: 'data-subjects' },
 			{ field: 'processing', urlModel: 'purposes' },
@@ -1166,7 +1191,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' },
 			{ field: 'assets', urlModel: 'assets', endpointUrl: 'assets' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{ field: 'personal_data', urlModel: 'assets', disableCreate: true, disableDelete: true }
 		],
 		detailViewFields: [
@@ -1248,7 +1273,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'reference_entity', urlModel: 'entities' }
 		],
-		reverseForeignKeyFields: [{ field: 'ebios_rm_studies', urlModel: 'assets' }],
+		relatedFields: [{ field: 'ebios_rm_studies', urlModel: 'assets' }],
 		selectFields: [{ field: 'quotation_method' }]
 	},
 	'feared-events': {
@@ -1307,7 +1332,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlParams: 'field_path=entity.relationship&is_visible=true'
 			}
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'stakeholders',
 				urlModel: 'applied-controls'
@@ -1338,7 +1363,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				endpointUrl: 'ebios-rm/attack-paths'
 			}
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'strategic_scenario',
 				urlModel: 'attack-paths',
@@ -1419,7 +1444,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				endpointUrl: 'ebios-rm/strategic-scenarios'
 			}
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'operational_scenario',
 				urlModel: 'operating-modes',
@@ -1467,7 +1492,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'operating_modes',
 				urlModel: 'elementary-actions',
@@ -1517,7 +1542,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'security_exceptions',
 				urlModel: 'applied-controls',
@@ -1564,7 +1589,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{ field: 'findings_assessment', urlModel: 'findings' },
 			{ field: 'findings_assessments', urlModel: 'evidences' }
 		],
@@ -1594,7 +1619,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			// 	{ field: 'findings', urlModel: 'vulnerabilities' },
 			// 	{ field: 'findings', urlModel: 'reference-controls' },
 			{ field: 'findings', urlModel: 'applied-controls' },
@@ -1632,7 +1657,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'qualifications', urlModel: 'terminologies' },
 			{ field: 'entities', urlModel: 'entities' }
 		],
-		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
+		relatedFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
 		selectFields: [
 			{ field: 'severity', valueType: 'number' },
 			{ field: 'status' },
@@ -1669,7 +1694,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'entry_type' }],
-		reverseForeignKeyFields: [{ field: 'timeline_entries', urlModel: 'evidences' }]
+		relatedFields: [{ field: 'timeline_entries', urlModel: 'evidences' }]
 	},
 	'task-templates': {
 		name: 'tasktemplate',
@@ -1688,7 +1713,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'task_template',
 				urlModel: 'task-nodes',
@@ -1752,7 +1777,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'perimeters', urlModel: 'perimeters' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'campaign',
 				urlModel: 'compliance-assessments',
@@ -1794,7 +1819,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'tasks', urlModel: 'task-templates' },
 			{ field: 'assigned_to', urlModel: 'users' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'objectives',
 				urlModel: 'applied-controls',
@@ -1815,7 +1840,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'assets', urlModel: 'assets' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'issues',
 				urlModel: 'organisation-objectives',
@@ -1837,7 +1862,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'quantitative_risk_study',
 				urlModel: 'quantitative-risk-scenarios',
@@ -1900,7 +1925,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'observation' },
 			{ field: 'is_selected' }
 		],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{
 				field: 'quantitative_risk_scenario',
 				urlModel: 'quantitative-risk-hypotheses',
@@ -2016,7 +2041,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at', type: 'datetime' }
 		],
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
-		reverseForeignKeyFields: [
+		relatedFields: [
 			{ field: 'genericcollection', urlModel: 'compliance-assessments' },
 			{ field: 'genericcollection', urlModel: 'risk-assessments' },
 			{ field: 'genericcollection', urlModel: 'quantitative-risk-studies' },
@@ -2292,3 +2317,13 @@ export function processObject(
 		}
 	}
 }
+
+export const getRelatedFields = (model: string): RelatedField[] => {
+	const modelInfo = getModelInfo(model);
+
+	// On normalise juste : si pas de relationDirection, on considère 'reverse'
+	return (modelInfo.relatedFields ?? []).map((rel) => ({
+		...rel,
+		relationDirection: rel.relationDirection ?? 'reverse'
+	}));
+};
