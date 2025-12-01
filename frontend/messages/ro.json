@@ -977,5 +977,16 @@
 	"downloadCertificate": "Descărcați certificatul",
 	"viewMore": "Vizualizați mai mult",
 	"viewLess": "Vizualizați mai puțin",
-	"loginFailed": "Autentificare eșuată"
+	"loginFailed": "Autentificare eșuată",
+	"expectedEvidence": "Dovadă așteptată",
+	"taskNodeLegacyEvidence": "Câmpul de dovadă vechi este depreciat. Dovezile sunt acum la nivel de sarcină și sunt partajate între apariții așteptând revizuiri.\n Pentru a le muta la dovezi așteptate sau pentru a le elimina din apariție, utilizați butoanele",
+	"taskNodeNewEvidence": "Dovezi legate global de sarcina și extinse la apariții. Puteți adăuga o revizuire în fila 'Dovezi' de mai jos",
+	"statusUpdatedSuccessfully": "Starea a fost actualizată cu succes",
+	"observationUpdatedSuccessfully": "Observația a fost actualizată cu succes",
+	"taskTemplateEvidenceHelpText": "👉 Dovezi așteptate pentru această sarcină.\n Acestea vor fi legate de toate aparițiile astfel încât să puteți trimite revizuiri pentru fiecare direct.",
+	"unassigned": "Neatribuit",
+	"addEvidenceRevisionFor": "Adăugați revizuire pentru {evidenceName}",
+	"occurrenceDueDate": "Data limită a apariției",
+	"relatedTo": "Legat de",
+	"legacyEvidenceField": "Câmp de dovadă vechi"
 }

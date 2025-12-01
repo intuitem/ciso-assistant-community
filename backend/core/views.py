@@ -60,6 +60,7 @@ from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from integrations.registry import IntegrationRegistry
 from library.serializers import StoredLibrarySerializer
+from webhooks.service import dispatch_webhook_event
 from .generators import gen_audit_context
 
 from django.utils import timezone
@@ -166,6 +167,60 @@ MAPPING_MAX_DEPTH = 3
 
 SETTINGS_MODULE = __import__(os.environ.get("DJANGO_SETTINGS_MODULE"))
 MODULE_PATHS = SETTINGS_MODULE.settings.MODULE_PATHS
+
+
+class NullableChoiceFilter(df.MultipleChoiceFilter):
+    """
+    A filter that supports filtering for null values using '--' as a special value.
+    When '--' is in the filter values, it matches records where the field is null.
+    """
+
+    def __init__(self, *args, **kwargs):
+        # Add "--" to the choices
+        if "choices" in kwargs:
+            original_choices = kwargs["choices"]
+            # Add ("--", "--") to the beginning of choices
+            kwargs["choices"] = [("--", "--")] + list(original_choices)
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        if not value:
+            return qs
+
+        # Convert single value to list if needed
+        if not isinstance(value, list):
+            value = [value]
+
+        # Separate "--" (null) from other actual values
+        has_null = "--" in value
+        real_values = [v for v in value if v != "--"]
+
+        if has_null and real_values:
+            # Both null and specific values: OR condition
+            return qs.filter(
+                Q(**{f"{self.field_name}__isnull": True})
+                | Q(**{f"{self.field_name}__in": real_values})
+            )
+        elif has_null:
+            # Only null values
+            return qs.filter(**{f"{self.field_name}__isnull": True})
+        elif real_values:
+            # Only real values - filter by those values
+            return qs.filter(**{f"{self.field_name}__in": real_values})
+        else:
+            # No valid values, return empty queryset
+            return qs.none()
+
+
+def add_unset_option(choices):
+    """Add '--' (unset) option to choices dictionary or list"""
+    # Handle both dict and list of tuples format
+    if isinstance(choices, dict):
+        # For dict format {value: label}, prepend with "--": "--"
+        return {"--": "--", **choices}
+    else:
+        # For list of tuples like [(value, label), ...]
+        return [("--", "--")] + list(choices)
 
 
 def get_mapping_max_depth():
@@ -551,6 +606,19 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 new_labels.append(str(new_label.id))
         return new_labels
 
+    def _process_evidences(self, evidences, folder):
+        new_evidences = []
+        for value in evidences or []:
+            try:
+                uuid.UUID(str(value), version=4)
+                new_evidences.append(str(value))
+            except ValueError:
+                new_evidence = Evidence(name=value, folder=folder)
+                new_evidence.full_clean()
+                new_evidence.save()
+                new_evidences.append(str(new_evidence.id))
+        return new_evidences
+
     def list(self, request, *args, **kwargs):
         """
         Override the list method to inject optimized data into the serializer context.
@@ -569,20 +637,61 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True, context=context)
         return Response(serializer.data)
 
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        dispatch_webhook_event(instance, "created", serializer=serializer)
+        return instance
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        dispatch_webhook_event(instance, "updated", serializer=serializer)
+        return instance
+
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         if request.data.get("filtering_labels"):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
             )
+        if request.data.get("evidences"):
+            folder = Folder.objects.get(id=request.data.get("folder"))
+            request.data["evidences"] = self._process_evidences(
+                request.data.get("evidences"), folder=folder
+            )
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
-        self._process_request_data(request)
-        if request.data.get("filtering_labels"):
-            request.data["filtering_labels"] = self._process_labels(
-                request.data["filtering_labels"]
+        if request.data.get("evidences"):
+            folder = Folder.objects.get(id=request.data.get("folder"))
+            request.data["evidences"] = self._process_evidences(
+                request.data["evidences"], folder=folder
             )
+
+        # NOTE: Handle filtering_labels field - SvelteKit SuperForms behavior inconsistency:
+        # Forms with file inputs (like Evidence attachments) use dataType="form" and omit empty fields
+        # Forms without file inputs use dataType="json" and send empty arrays []
+        # When the field is missing, we need to explicitly clear the labels by passing empty list to serializer
+        if hasattr(self.model, "_meta") and "filtering_labels" in [
+            f.name for f in self.model._meta.get_fields()
+        ]:
+            if "filtering_labels" in request.data:
+                labels = request.data.get("filtering_labels")
+                if labels:
+                    # Make request.data mutable if needed (e.g., for multipart/form-data)
+                    if hasattr(request.data, "_mutable"):
+                        request.data._mutable = True
+                    request.data["filtering_labels"] = self._process_labels(labels)
+            else:
+                # Field is missing entirely - add empty list to clear labels
+                # Make request.data mutable if needed (e.g., for multipart/form-data)
+                if hasattr(request.data, "_mutable"):
+                    request.data._mutable = True
+                # Use setlist() for QueryDict to properly set an empty list
+                if hasattr(request.data, "setlist"):
+                    request.data.setlist("filtering_labels", [])
+                else:
+                    request.data["filtering_labels"] = []
+
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
@@ -591,6 +700,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
+        instance = self.get_object()
+        try:
+            dispatch_webhook_event(instance, "deleted")
+        except Exception:
+            logger.error("Webhook dispatch failed on delete", exc_info=True)
         return super().destroy(request, *args, **kwargs)
 
     @action(detail=True, methods=["get"], url_path="cascade-info")
@@ -1140,15 +1254,6 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             )
             if content.get("value") is not None and content.get("value") > 0
         ]
-
-    def _perform_write(self, serializer):
-        serializer.save()
-
-    def perform_create(self, serializer):
-        return self._perform_write(serializer)
-
-    def perform_update(self, serializer):
-        return self._perform_write(serializer)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get type choices")
@@ -3188,6 +3293,12 @@ class AppliedControlFilterSet(GenericFilterSet):
         choices=AppliedControl.Status.choices, lookup_expr="icontains"
     )
     is_assigned = df.BooleanFilter(method="filter_is_assigned")
+    # Nullable choice filters that support filtering for unset values using "--"
+    category = NullableChoiceFilter(choices=AppliedControl.CATEGORY)
+    csf_function = NullableChoiceFilter(choices=AppliedControl.CSF_FUNCTION)
+    priority = NullableChoiceFilter(choices=AppliedControl.PRIORITY)
+    effort = NullableChoiceFilter(choices=AppliedControl.EFFORT)
+    control_impact = NullableChoiceFilter(choices=AppliedControl.IMPACT)
 
     def filter_findings_assessments(self, queryset, name, value):
         if value:
@@ -3258,12 +3369,8 @@ class AppliedControlFilterSet(GenericFilterSet):
         fields = {
             "name": ["exact"],
             "folder": ["exact"],
-            "category": ["exact"],
-            "csf_function": ["exact"],
-            "priority": ["exact"],
+            # category, csf_function, priority, effort, control_impact use NullableChoiceFilter (defined above)
             "reference_control": ["exact", "isnull"],
-            "effort": ["exact"],
-            "control_impact": ["exact"],
             "filtering_labels": ["exact"],
             "risk_scenarios": ["exact"],
             "risk_scenarios_e": ["exact"],
@@ -3491,27 +3598,27 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
-        return Response(dict(AppliedControl.CATEGORY))
+        return Response(add_unset_option(dict(AppliedControl.CATEGORY)))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get csf_function choices")
     def csf_function(self, request):
-        return Response(dict(AppliedControl.CSF_FUNCTION))
+        return Response(add_unset_option(dict(AppliedControl.CSF_FUNCTION)))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get priority choices")
     def priority(self, request):
-        return Response(dict(AppliedControl.PRIORITY))
+        return Response(add_unset_option(dict(AppliedControl.PRIORITY)))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get effort choices")
     def effort(self, request):
-        return Response(dict(AppliedControl.EFFORT))
+        return Response(add_unset_option(dict(AppliedControl.EFFORT)))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get impact choices")
     def control_impact(self, request):
-        return Response(dict(AppliedControl.IMPACT))
+        return Response(add_unset_option(dict(AppliedControl.IMPACT)))
 
     @action(detail=False, name="Get all applied controls owners")
     def owner(self, request):
@@ -4867,6 +4974,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                         "The approver is not allowed to approve this risk acceptance"
                     )
         risk_acceptance = serializer.save()
+        dispatch_webhook_event(risk_acceptance, "updated", serializer)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get state choices")
@@ -9894,6 +10002,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "detection",
         "owners",
         "entities",
+        "assets",
     ]
 
     export_config = {
@@ -10387,8 +10496,9 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return Response(dict(TimelineEntry.EntryType.get_manual_entry_types()))
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-        return
+        instance = serializer.save(author=self.request.user)
+        dispatch_webhook_event(instance, "created", serializer)
+        return instance
 
     def perform_destroy(self, instance):
         if instance.entry_type in [
@@ -10417,6 +10527,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "applied_controls",
             "last_occurrence_status",
             "next_occurrence_status",
+            "evidences",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
@@ -10446,7 +10557,13 @@ class TaskTemplateFilter(GenericFilterSet):
 
 class TaskTemplateViewSet(BaseModelViewSet):
     model = TaskTemplate
-    filterset_fields = ["assigned_to", "is_recurrent", "folder", "applied_controls"]
+    filterset_fields = [
+        "assigned_to",
+        "is_recurrent",
+        "folder",
+        "applied_controls",
+        "evidences",
+    ]
     filterset_class = TaskTemplateFilter
 
     def get_queryset(self):
@@ -10684,9 +10801,29 @@ class TaskTemplateViewSet(BaseModelViewSet):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
 
 
+class TaskNodeFilterSet(GenericFilterSet):
+    past = df.BooleanFilter(method="filter_past")
+
+    def filter_past(self, queryset, name, value):
+        if value is True:
+            return queryset.filter(due_date__lt=date.today()).order_by("due_date")
+        elif value is False:
+            return queryset.filter(due_date__gte=date.today()).order_by("due_date")
+        return queryset
+
+    class Meta:
+        model = TaskNode
+        fields = {
+            "status": ["exact"],
+            "task_template": ["exact"],
+            "due_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
+        }
+
+
 class TaskNodeViewSet(BaseModelViewSet):
     model = TaskNode
-    filterset_fields = ["status", "task_template"]
+    filterset_class = TaskNodeFilterSet
+    search_fields = ["observation"]
     ordering = ["due_date"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -10694,10 +10831,76 @@ class TaskNodeViewSet(BaseModelViewSet):
     def status(srlf, request):
         return Response(dict(TaskNode.TASK_STATUS_CHOICES))
 
+    @action(
+        detail=True, name="Remove/Move evidence to expected evidence", methods=["post"]
+    )
+    def remove_evidence(self, request, pk):
+        task_node = TaskNode.objects.get(id=pk)
+        evidence_id = request.data.get("evidence_id")
+        to_move = request.data.get("move", False)
+        evidence = Evidence.objects.get(id=evidence_id)
+        task_node.evidences.remove(evidence)
+        if to_move:
+            task_node.task_template.evidences.add(evidence)
+        return Response(status=status.HTTP_200_OK)
+
     def perform_create(self, serializer):
         instance: TaskNode = serializer.save()
         instance.save()
         return super().perform_create(serializer)
+
+
+class TaskNodeEvidenceList(generics.ListAPIView):
+    serializer_class = EvidenceReadSerializer
+    filterset_fields = {
+        "folder": ["exact"],
+        "status": ["exact"],
+        "owner": ["exact"],
+        "name": ["icontains"],
+        "expiry_date": ["exact", "lte", "gte"],
+        "created_at": ["exact", "lte", "gte"],
+        "updated_at": ["exact", "lte", "gte"],
+    }
+    search_fields = ["name", "description"]
+    ordering_fields = ["name", "status", "updated_at", "expiry_date"]
+    ordering = ["name"]
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"pk": self.kwargs["pk"]})
+        return context
+
+    def get_queryset(self):
+        """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
+        task_node_id = self.kwargs["pk"]
+
+        if not RoleAssignment.is_object_readable(
+            self.request.user,
+            TaskNode,
+            task_node_id,
+        ):
+            raise PermissionDenied()
+
+        task_node = TaskNode.objects.get(id=task_node_id)
+
+        # Get task node's template
+        task_template = task_node.task_template
+
+        # Get visible evidences to filter result
+        viewable_evidences, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, Evidence
+        )
+        return Evidence.objects.filter(
+            id__in=task_template.evidences.filter(
+                id__in=viewable_evidences
+            ).values_list("id", flat=True)
+        )
 
 
 class TerminologyViewSet(BaseModelViewSet):
