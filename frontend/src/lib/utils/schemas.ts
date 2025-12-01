@@ -177,7 +177,7 @@ export const AppliedControlSchema = z.object({
 	control_impact: z.number().optional().nullable(),
 	cost: z
 		.object({
-			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
+			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
 			amortization_period: z.number().min(1).max(50).default(1),
 			build: z
 				.object({
@@ -478,6 +478,7 @@ export const EvidenceSchema = z.object({
 export const EvidenceRevisionSchema = z.object({
 	folder: z.string().uuid(),
 	evidence: z.string().uuid(),
+	task_node: z.string().uuid().nullable(),
 	version: z.number().optional(),
 	attachment: z.any().optional().nullable(),
 	link: z
@@ -499,9 +500,10 @@ export const GeneralSettingsSchema = z.object({
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
 	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
-	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
+	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
 	daily_rate: z.number().default(500).optional(),
-	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional()
+	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
+	allow_self_validation: z.boolean().default(false).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -1174,7 +1176,7 @@ export const TaskTemplateSchema = z.object({
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
-	evidences: z.string().uuid().optional().array().optional(),
+	evidences: z.union([z.string().uuid(), z.string()]).optional().array().optional(), // Allow both UUIDs and strings for evidences created from the form
 	schedule: z
 		.object({
 			interval: z.number().min(1).positive().optional(),
