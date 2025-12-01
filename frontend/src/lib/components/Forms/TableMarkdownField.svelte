@@ -47,12 +47,12 @@
 			placeholder="You can use markdown formatting here..."
 			bind:value={editValue}
 		></textarea>
-		<div class="flex justify-between items-center">
-			<button type="button" class="btn btn-sm variant-filled-primary" onclick={preview}>
-				<i class="fas fa-eye mr-1"></i>
-				Preview
-			</button>
+		<div class="flex justify-end items-center">
 			<div class="flex space-x-2">
+				<button type="button" class="btn btn-sm variant-filled-primary" onclick={preview}>
+					<i class="fas fa-eye mr-1"></i>
+					Preview
+				</button>
 				<button class="btn btn-sm variant-filled-success" onclick={saveChanges} type="button">
 					<i class="fa-solid fa-check mr-1"></i>
 					Save
@@ -86,7 +86,7 @@
 				<p class="text-gray-500 italic">{placeholder}</p>
 			{/if}
 		</div>
-		<div class="flex justify-between items-center">
+		<div class="flex justify-end items-center">
 			<button type="button" class="btn btn-sm variant-soft" onclick={startEdit}>
 				<i class="fas fa-edit mr-1"></i>
 				Edit
