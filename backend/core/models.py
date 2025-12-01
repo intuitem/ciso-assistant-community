@@ -3662,6 +3662,7 @@ class AppliedControl(
         null=True,
         blank=True,
         verbose_name=_("Reference Control"),
+        related_name="applied_controls",
     )
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")

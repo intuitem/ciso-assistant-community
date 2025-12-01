@@ -373,7 +373,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
-			{ field: 'applied_controls', urlModel: 'assets', disableCreate: true, disableDelete: true }
+			{ field: 'applied_controls', urlModel: 'assets', disableCreate: true, disableDelete: true },
+			{ field: 'applied_controls', urlModel: 'reference-controls'}
 		],
 		selectFields: [
 			{ field: 'status' },

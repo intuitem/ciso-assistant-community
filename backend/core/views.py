@@ -1594,6 +1594,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
         "provider",
         "findings",
         "filtering_labels",
+        "applied_controls",
     ]
     search_fields = ["name", "description", "provider"]
 
