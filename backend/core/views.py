@@ -10684,6 +10684,81 @@ class TaskTemplateViewSet(BaseModelViewSet):
             ).data
         )
 
+    @action(detail=False, name="Yearly tasks review")
+    def yearly_review(self, request):
+        """Get recurrent task templates grouped by folder for yearly review."""
+        # Get current year date range
+        current_year = timezone.now().year
+        year_start = date(current_year, 1, 1)
+        year_end = date(current_year, 12, 31)
+
+        # Get all viewable recurrent task templates
+        task_templates = (
+            self.get_queryset()
+            .filter(
+                is_recurrent=True,
+                enabled=True,
+            )
+            .select_related("folder")
+            .prefetch_related("assigned_to")
+        )
+
+        # Group by folder
+        folders_dict = defaultdict(list)
+        for template in task_templates:
+            folder_id = str(template.folder.id)
+            folder_name = str(template.folder)
+
+            # Use TaskTemplateReadSerializer for proper serialization
+            template_data = TaskTemplateReadSerializer(template).data
+            # Add schedule field (excluded by default in read serializer)
+            template_data["schedule"] = template.schedule
+
+            # Get TaskNodes for this template in the current year
+            task_nodes = TaskNode.objects.filter(
+                task_template=template, due_date__gte=year_start, due_date__lte=year_end
+            ).values("due_date", "status")
+
+            # Group by month and determine status
+            monthly_status = {}
+            for month in range(1, 13):
+                month_nodes = [
+                    node for node in task_nodes if node["due_date"].month == month
+                ]
+
+                if not month_nodes:
+                    monthly_status[str(month)] = None
+                else:
+                    # Simple aggregation logic
+                    statuses = [node["status"] for node in month_nodes]
+                    # If all completed, show completed (green)
+                    if all(s == "completed" for s in statuses):
+                        monthly_status[str(month)] = "completed"
+                    # If any in_progress or mix of statuses, show in_progress (orange)
+                    elif "in_progress" in statuses or "completed" in statuses:
+                        monthly_status[str(month)] = "in_progress"
+                    # If all pending, show pending (red)
+                    elif "pending" in statuses:
+                        monthly_status[str(month)] = "pending"
+                    else:
+                        monthly_status[str(month)] = statuses[0] if statuses else None
+
+            template_data["monthly_status"] = monthly_status
+
+            if folder_id not in folders_dict:
+                folders_dict[folder_id] = {
+                    "folder_id": folder_id,
+                    "folder_name": folder_name,
+                    "tasks": [],
+                }
+            folders_dict[folder_id]["tasks"].append(template_data)
+
+        # Convert to list and sort by folder name
+        result = list(folders_dict.values())
+        result.sort(key=lambda x: x["folder_name"])
+
+        return Response(result)
+
     @action(detail=False, name="Task templates per status")
     def per_status(self, request):
         data = task_template_per_status(request.user)
