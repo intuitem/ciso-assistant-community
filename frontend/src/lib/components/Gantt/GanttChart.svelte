@@ -27,11 +27,10 @@
 
 	let { entries, folders = [], onItemSelect, itemUrlBuilder }: Props = $props();
 
-	type ZoomLevel = 'day' | 'week' | 'month' | 'year';
+	type ZoomLevel = 'week' | 'month' | 'year';
 
 	// Margin configuration per zoom level (before earliest and after latest event)
 	const ZOOM_MARGINS = {
-		day: { days: 3 }, // 3 days before/after
 		week: { days: 7 }, // 1 week before/after
 		month: { months: 1 }, // 1 month before/after
 		year: { months: 3 } // 3 months (1 quarter) before/after
@@ -39,7 +38,6 @@
 
 	// View duration per zoom level (what's shown in the viewport)
 	const ZOOM_VIEW_DURATION = {
-		day: { days: 7 }, // Shows 7 days
 		week: { days: 56 }, // Shows 8 weeks
 		month: { months: 6 }, // Shows 6 months
 		year: { years: 2 } // Shows 2 years
@@ -150,8 +148,6 @@
 		const days = Math.ceil((range.max.getTime() - range.min.getTime()) / (1000 * 60 * 60 * 24));
 
 		switch (zoom) {
-			case 'day':
-				return Math.max(840, (days / 7) * 840);
 			case 'week':
 				const weeks = Math.ceil(days / 7);
 				return Math.max(1200, (weeks / 8) * 1200);
@@ -186,13 +182,9 @@
 		const newDate = new Date(viewStartDate);
 		const viewDuration = ZOOM_VIEW_DURATION[zoomLevel];
 
-		// Slide by the full view duration for day, half for others
+		// Slide by half the view duration
 		if ('days' in viewDuration) {
-			if (zoomLevel === 'day') {
-				newDate.setDate(newDate.getDate() - viewDuration.days);
-			} else {
-				newDate.setDate(newDate.getDate() - Math.floor(viewDuration.days / 2));
-			}
+			newDate.setDate(newDate.getDate() - Math.floor(viewDuration.days / 2));
 		} else if ('months' in viewDuration) {
 			newDate.setMonth(newDate.getMonth() - Math.floor(viewDuration.months / 2));
 		} else if ('years' in viewDuration) {
@@ -210,13 +202,9 @@
 		const newDate = new Date(viewStartDate);
 		const viewDuration = ZOOM_VIEW_DURATION[zoomLevel];
 
-		// Slide by the full view duration for day, half for others
+		// Slide by half the view duration
 		if ('days' in viewDuration) {
-			if (zoomLevel === 'day') {
-				newDate.setDate(newDate.getDate() + viewDuration.days);
-			} else {
-				newDate.setDate(newDate.getDate() + Math.floor(viewDuration.days / 2));
-			}
+			newDate.setDate(newDate.getDate() + Math.floor(viewDuration.days / 2));
 		} else if ('months' in viewDuration) {
 			newDate.setMonth(newDate.getMonth() + Math.floor(viewDuration.months / 2));
 		} else if ('years' in viewDuration) {
@@ -336,12 +324,6 @@
 	// Format date for display based on zoom level
 	function formatDate(date: Date): string {
 		switch (zoomLevel) {
-			case 'day':
-				return date.toLocaleDateString('en-US', {
-					month: 'short',
-					day: 'numeric',
-					year: 'numeric'
-				});
 			case 'week':
 				return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 			case 'month':
@@ -366,9 +348,6 @@
 			});
 
 			switch (zoomLevel) {
-				case 'day':
-					current.setDate(current.getDate() + 1);
-					break;
 				case 'week':
 					current.setDate(current.getDate() + 7);
 					break;
@@ -423,16 +402,6 @@
 		<div>
 			<label class="block text-sm font-medium text-gray-900 mb-1">Zoom</label>
 			<div class="flex gap-1">
-				<button
-					type="button"
-					class="btn btn-sm {zoomLevel === 'day' ? 'preset-filled' : 'preset-outlined'}"
-					onclick={() => {
-						zoomLevel = 'day';
-						resetToToday();
-					}}
-				>
-					Day
-				</button>
 				<button
 					type="button"
 					class="btn btn-sm {zoomLevel === 'week' ? 'preset-filled' : 'preset-outlined'}"
