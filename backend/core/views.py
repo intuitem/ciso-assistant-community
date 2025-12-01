@@ -8833,6 +8833,8 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         ]
         N = 0
         for req in source_framework["requirement_nodes"]:
+            if not req.get("assessable", False):
+                continue
             nodes.append(
                 {
                     "name": req.get("ref_id"),
@@ -8844,6 +8846,8 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             N += 1
 
         for req in target_framework["requirement_nodes"]:
+            if not req.get("assessable", False):
+                continue
             nodes.append(
                 {
                     "name": req.get("ref_id"),
