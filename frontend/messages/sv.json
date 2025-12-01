@@ -971,5 +971,16 @@
 	"downloadCertificate": "Ladda ner certifikat",
 	"viewMore": "Visa mer",
 	"viewLess": "Visa mindre",
-	"loginFailed": "Inloggning misslyckad"
+	"loginFailed": "Inloggning misslyckades",
+	"expectedEvidence": "Förväntat bevis",
+	"taskNodeLegacyEvidence": "Det gamla bevisfältet är föråldrat. Bevis är nu uppgift-nivå och delas över förekomster som väntar på revisioner.\n För att flytta dem till förväntat bevis eller ta bort dem från förekomsten, använd knapparna",
+	"taskNodeNewEvidence": "Bevis globalt länkat till uppgiften och spridda till förekomster. Du kan lägga till en revision i fliken 'Bevis' nedan",
+	"statusUpdatedSuccessfully": "Status uppdaterades framgångsrikt",
+	"observationUpdatedSuccessfully": "Observation uppdaterades framgångsrikt",
+	"taskTemplateEvidenceHelpText": "👉 Förväntat bevis för denna uppgift.\n Detta kommer att länkas till alla förekomster så att du kan skicka in revisioner för var och en direkt.",
+	"unassigned": "Ej tilldelad",
+	"addEvidenceRevisionFor": "Lägg till revision för {evidenceName}",
+	"occurrenceDueDate": "Förfallodatum för förekomst",
+	"relatedTo": "Relaterad till",
+	"legacyEvidenceField": "Föråldrat bevisfält"
 }

@@ -1555,6 +1555,7 @@ class EvidenceRevisionReadSerializer(BaseModelSerializer):
     evidence = FieldsRelatedField()
     folder = FieldsRelatedField()
     str = serializers.CharField(source="__str__")
+    task_node = FieldsRelatedField()
 
     class Meta:
         model = EvidenceRevision
@@ -1572,6 +1573,9 @@ class EvidenceRevisionWriteSerializer(BaseModelSerializer):
             models.Max("version")
         )["version__max"]
         validated_data["version"] = (max_version or 0) + 1
+        # Update evidence status to in_review when a new revision is submitted
+        evidence.status = Evidence.Status.IN_REVIEW
+        evidence.save()
         return super().create(validated_data)
 
 
@@ -2402,6 +2406,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
 class TaskTemplateReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    evidences = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
     compliance_assessments = FieldsRelatedField(many=True)
@@ -2420,7 +2425,6 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
     # Expose task_node fields directly
     status = serializers.SerializerMethodField()
     observation = serializers.SerializerMethodField()
-    evidences = serializers.SerializerMethodField()
 
     class Meta:
         model = TaskTemplate
@@ -2442,20 +2446,11 @@ class TaskTemplateReadSerializer(BaseModelSerializer):
         task_node = self.get_task_node(obj)
         return task_node.observation if task_node else ""
 
-    def get_evidences(self, obj):
-        task_node = self.get_task_node(obj)
-        if task_node:
-            return [{"id": e.id, "str": e.name} for e in task_node.evidences.all()]
-        return []
-
 
 class TaskTemplateWriteSerializer(BaseModelSerializer):
     status = serializers.CharField(required=False)
     observation = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
-    )
-    evidences = serializers.PrimaryKeyRelatedField(
-        queryset=Evidence.objects.all(), many=True, required=False
     )
 
     class Meta:
@@ -2473,11 +2468,9 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
             if task_node:
                 data["status"] = task_node.status
                 data["observation"] = task_node.observation
-                data["evidences"] = [e.id for e in task_node.evidences.all()]
             else:
                 data["status"] = None
                 data["observation"] = ""
-                data["evidences"] = []
         return data
 
     def create(self, validated_data):
@@ -2542,7 +2535,6 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
         return {
             "status": validated_data.pop("status", None),
             "observation": validated_data.pop("observation", None),
-            "evidences": validated_data.pop("evidences", []),
         }
 
     def _sync_task_node(
@@ -2583,27 +2575,48 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
             task_node.observation = tasknode_data["observation"]
         task_node.save()
 
-        evidences = tasknode_data.get("evidences")
-        if evidences is not None:
-            task_node.evidences.set(evidences)
-
 
 class TaskNodeReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
-    task_template = FieldsRelatedField()
+    task_template = FieldsRelatedField(["folder", "id"])
     folder = FieldsRelatedField()
     name = serializers.SerializerMethodField()
     assigned_to = FieldsRelatedField(many=True)
-    evidences = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(["folder", "id"], many=True)
     is_recurrent = serializers.BooleanField(source="task_template.is_recurrent")
-    applied_controls = FieldsRelatedField(many=True)
-    compliance_assessments = FieldsRelatedField(many=True)
-    assets = FieldsRelatedField(many=True)
-    risk_assessments = FieldsRelatedField(many=True)
-    findings_assessment = FieldsRelatedField(many=True)
+    expected_evidence = FieldsRelatedField(["folder", "id"], many=True)
+    evidence_reviewed = serializers.SerializerMethodField()
+    evidence_revisions_map = serializers.SerializerMethodField()
+    applied_controls = FieldsRelatedField(["folder", "id"], many=True)
+    compliance_assessments = FieldsRelatedField(["folder", "id"], many=True)
+    assets = FieldsRelatedField(["folder", "id"], many=True)
+    risk_assessments = FieldsRelatedField(["folder", "id"], many=True)
+    findings_assessment = FieldsRelatedField(["folder", "id"], many=True)
 
     def get_name(self, obj):
         return obj.task_template.name if obj.task_template else ""
+
+    def get_evidence_reviewed(self, obj):
+        evidence_reviewed = []
+        for evidence in obj.expected_evidence:
+            last_revision = evidence.last_revision
+            if last_revision and last_revision.task_node == obj:
+                evidence_reviewed.append(evidence.id)
+        return evidence_reviewed
+
+    def get_evidence_revisions_map(self, obj):
+        """Returns a mapping of evidence ID to revision ID for this task node"""
+        from core.models import EvidenceRevision
+
+        evidence_revisions = {}
+        for evidence in obj.expected_evidence:
+            # Find revisions for this evidence that belong to this task node
+            revision = EvidenceRevision.objects.filter(
+                evidence=evidence, task_node=obj
+            ).first()
+            if revision:
+                evidence_revisions[str(evidence.id)] = str(revision.id)
+        return evidence_revisions
 
     class Meta:
         model = TaskNode
@@ -2613,7 +2626,7 @@ class TaskNodeReadSerializer(BaseModelSerializer):
 class TaskNodeWriteSerializer(BaseModelSerializer):
     class Meta:
         model = TaskNode
-        exclude = ["task_template"]
+        exclude = ["task_template", "evidences"]
 
 
 class TerminologyReadSerializer(BaseModelSerializer):
