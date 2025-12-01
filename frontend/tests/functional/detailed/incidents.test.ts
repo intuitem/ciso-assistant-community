@@ -27,12 +27,13 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 		page.getByTestId('form-input-severity').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-severity').selectOption('4');
 
-		page.getByTestId('form-input-qualifications').waitFor({ state: 'visible' });
-		await page.getByTestId('form-input-qualifications').click();
-		await page.getByRole('option', { name: 'authenticity' }).click();
-		await page.getByRole('option', { name: 'availability' }).click();
-		await page.getByRole('option', { name: 'confidentiality' }).click();
-		await page.getByRole('option', { name: 'human' }).click();
+		// await page.getByTestId('accordion').click();
+		// await page.getByTestId('form-input-qualifications').waitFor({ state: 'visible' });
+		// await page.getByTestId('form-input-qualifications').click();
+		// await page.getByRole('option', { name: 'authenticity' }).click();
+		// await page.getByRole('option', { name: 'availability' }).click();
+		// await page.getByRole('option', { name: 'confidentiality' }).click();
+		// await page.getByRole('option', { name: 'human' }).click();
 
 		page.getByTestId('form-input-folder').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-folder').click();

@@ -987,5 +987,16 @@
 	"downloadCertificate": "Descargar certificado",
 	"viewMore": "Ver más",
 	"viewLess": "Ver menos",
-	"loginFailed": "Inicio fallido"
+	"loginFailed": "Inicio de sesión fallido",
+	"expectedEvidence": "Evidencia esperada",
+	"taskNodeLegacyEvidence": "El campo de evidencia anterior está obsoleto. La evidencia ahora es a nivel de tarea y compartida entre ocurrencias en espera de revisiones.\n Para moverlas a evidencia esperada o eliminarlas de la ocurrencia, use los botones",
+	"taskNodeNewEvidence": "Evidencia vinculada globalmente a la tarea y extendida a las ocurrencias. Puede agregar una revisión en la pestaña 'Evidencias' a continuación",
+	"statusUpdatedSuccessfully": "Estado actualizado con éxito",
+	"observationUpdatedSuccessfully": "Observación actualizada con éxito",
+	"taskTemplateEvidenceHelpText": "👉 Evidencia esperada para esta tarea.\n Esto se vinculará a todas las ocurrencias para que pueda enviar revisiones para cada una directamente.",
+	"unassigned": "Sin asignar",
+	"addEvidenceRevisionFor": "Agregar revisión para {evidenceName}",
+	"occurrenceDueDate": "Fecha de vencimiento de la ocurrencia",
+	"relatedTo": "Relacionado con",
+	"legacyEvidenceField": "Campo de evidencia heredado"
 }
