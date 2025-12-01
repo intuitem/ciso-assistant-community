@@ -34,17 +34,36 @@
 
 	const { form, enhance } = superForm(_form, { invalidateAll });
 
-	let cascadeInfo: any = $state(null);
+	type Group = { model: string; verbose_name?: string; objects: { id: string; name: string }[] };
+	let cascadeInfo: {
+		count: number;
+		grouped_objects: Group[];
+		second_order_info?: string[];
+	} | null = $state(null);
 	let loading = $state(true);
+	let errorMsg = $state<string | null>(null);
+
+	let expanded = $state<Set<string>>(new Set());
+
+	function toggle(key: string) {
+		if (expanded.has(key)) expanded.delete(key);
+		else expanded.add(key);
+		expanded = new Set(expanded); // trigger reactivity
+	}
 
 	onMount(async () => {
 		try {
-			const response = await fetch(`/fe-api/cascade-info/${URLModel}/${id}`);
-			if (response.ok) {
-				cascadeInfo = await response.json();
-			}
-		} catch (error) {
-			console.error('Failed to fetch cascade info:', error);
+			const res = await fetch(`/fe-api/cascade-info/${URLModel}/${id}`);
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			cascadeInfo = await res.json();
+			// Auto-expand small groups
+			cascadeInfo.grouped_objects?.forEach((g) => {
+				if (g.objects.length <= 5) expanded.add(g.model);
+			});
+			expanded = new Set(expanded);
+		} catch (e) {
+			errorMsg = m.errorFetching();
+			console.error(e);
 		} finally {
 			loading = false;
 		}
@@ -52,16 +71,27 @@
 </script>
 
 {#if $modalStore[0]}
-	<div class="modal-example-form {cBase}">
-		<header class={cHeader} data-testid="modal-title">
+	<div
+		class="modal-example-form {cBase}"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="modal-title"
+	>
+		<header id="modal-title" class={cHeader} data-testid="modal-title">
 			{$modalStore[0].title ?? '(title missing)'}
 		</header>
 		<article>{$modalStore[0].body ?? '(body missing)'}</article>
 
 		{#if loading}
-			<div class="flex items-center gap-2 text-sm text-surface-600">
-				<span class="animate-spin">⏳</span>
-				<span>{m.loading()}</span>
+			<!-- Skeleton -->
+			<div class="space-y-2" aria-busy="true">
+				<div class="h-4 w-2/3 animate-pulse bg-surface-200 rounded"></div>
+				<div class="h-3 w-full animate-pulse bg-surface-200 rounded"></div>
+				<div class="h-3 w-5/6 animate-pulse bg-surface-200 rounded"></div>
+			</div>
+		{:else if errorMsg}
+			<div class="p-3 bg-error-50 border-l-3 border-error-500 rounded-md text-error-800">
+				{errorMsg}
 			</div>
 		{:else if cascadeInfo && cascadeInfo.count > 0}
 			<div
@@ -73,6 +103,7 @@
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
+						aria-hidden="true"
 					>
 						<path
 							stroke-linecap="round"
@@ -85,19 +116,53 @@
 						<div class="font-semibold text-warning-900 dark:text-warning-100 mb-2">
 							{m.cascadeDeleteWarning({ count: cascadeInfo.count })}
 						</div>
-						<ul
-							class="text-sm space-y-1 text-warning-800 dark:text-warning-200 max-h-48 overflow-y-auto"
-						>
-							{#each cascadeInfo.related_objects as obj}
-								<li class="flex items-center gap-2">
-									<span class="text-warning-600">•</span>
-									<span class="font-medium">{obj.model}:</span>
-									<span>{obj.name}</span>
-								</li>
+						{#if cascadeInfo.second_order_info}
+							<ul class="mb-3 text-sm text-warning-900 dark:text-warning-200 list-disc list-inside">
+								{#each cascadeInfo.second_order_info as info}
+									<li>{info}</li>
+								{/each}
+							</ul>
+						{/if}
+						<!-- Grouped accordion -->
+						<div class="max-h-64 overflow-y-auto pr-1 space-y-2">
+							{#each cascadeInfo.grouped_objects as group (group.model)}
+								<section class="border rounded-md">
+									<button
+										type="button"
+										class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100 focus:outline-none focus:ring"
+										aria-controls={`grp-${group.model}`}
+										aria-expanded={expanded.has(group.model)}
+										on:click={() => toggle(group.model)}
+									>
+										<span class="font-medium">
+											{group.verbose_name ?? group.model}
+										</span>
+										<span
+											class="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-warning-100 text-warning-800"
+										>
+											{group.objects.length}
+										</span>
+									</button>
+
+									{#if expanded.has(group.model)}
+										<ul id={`grp-${group.model}`} class="px-3 pb-2 text-sm space-y-1">
+											{#each group.objects as o (o.id)}
+												<li class="flex items-center gap-2">
+													<span class="text-warning-600">•</span>
+													<span class="truncate" title={o.name}>{o.name}</span>
+												</li>
+											{/each}
+										</ul>
+									{/if}
+								</section>
 							{/each}
-						</ul>
+						</div>
 					</div>
 				</div>
+			</div>
+		{:else}
+			<div class="p-3 bg-surface-100 rounded-md text-surface-700">
+				{m.nothingToDelete()}
 			</div>
 		{/if}
 
@@ -107,18 +172,23 @@
 					type="button"
 					class="btn {parent.buttonNeutral}"
 					data-testid="delete-cancel-button"
-					onclick={parent.onClose}>{m.cancel()}</button
+					on:click={parent.onClose}
 				>
+					{m.cancel()}
+				</button>
 				<input type="hidden" name="urlmodel" value={URLModel} />
 				<input type="hidden" name="id" value={id} />
 				<button
 					class="btn preset-filled-error-500"
 					data-testid="delete-confirm-button"
 					type="submit"
-					onclick={parent.onClose}>{m.submit()}</button
+					on:click={parent.onClose}
 				>
+					{m.submit()}
+				</button>
 			</footer>
 		</form>
+
 		{#if debug === true}
 			<SuperDebug data={$form} />
 		{/if}

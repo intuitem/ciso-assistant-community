@@ -595,56 +595,107 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="cascade-info")
     def cascade_info(self, request, pk=None):
-        """Get cascade delete information for an object.
-        Uses Django's NestedObjects collector (same as admin).
-        Filters out ManyToMany through table entries to show only actual object deletions.
-        Permission check handled by get_object() which uses get_queryset().
+        """
+        Get cascade delete information for an object.
+
+        - Uses Django's NestedObjects (same mechanism the admin uses)
+        - Hides M2M through tables and a small set of technical/auto-managed models
+        - Groups related objects by model (deterministic order)
+        - Detects and reports 2nd-order relationships summary for AppliedControl
+        - get_object() enforces permissions via get_queryset()
         """
         instance = self.get_object()
         collector = NestedObjects(using=router.db_for_write(instance))
         collector.collect([instance])
 
-        related = []
+        # -- Skip technical/hidden models.
+        skip_model_names = {
+            "Token",
+            "AuthToken",
+            "EmailAddress",
+            "Session",
+            "RequirementAssessment",  # auto-managed via ComplianceAssessment
+        }
+        grouped = {}
+        second_order_relations = set()
+
         for model, instances in collector.model_objs.items():
-            if model != type(instance):
-                # Skip ManyToMany through tables
-                if model._meta.auto_created:
-                    continue
+            # Skip the root instance model itself
+            if model is type(instance):
+                continue
 
-                # Skip internal/technical models that users don't care about
+            # Skip M2M through tables
+            if getattr(model._meta, "auto_created", False):
+                continue
+
+            # Skip by class (if configured) or by name
+            if model.__name__ in skip_model_names:
+                continue
+
+            verbose_name = str(model._meta.verbose_name)
+            model_key = model.__name__  # stable identifier for frontend
+
+            # Prepare the group if not present
+            if model_key not in grouped:
+                grouped[model_key] = {
+                    "model": model_key,
+                    "verbose_name": verbose_name,
+                    "objects": [],
+                }
+            # Build a display name
+            for obj in instances:
                 model_name = model.__name__
-                if model_name in ["Token", "AuthToken", "EmailAddress", "Session"]:
-                    continue
-
-                for obj in instances:
-                    # Get user-friendly display name
-                    if model_name == "RoleAssignment":
-                        # For RoleAssignment, show role + user/group
-                        role_name = (
-                            obj.role.name if hasattr(obj, "role") and obj.role else ""
-                        )
-                        if obj.user:
-                            display_name = f"{role_name} → {obj.user.email}"
-                        elif obj.user_group:
-                            display_name = f"{role_name} → {obj.user_group.name}"
-                        else:
-                            display_name = role_name
-                    else:
+                if model_name == "RoleAssignment":
+                    role_name = getattr(getattr(obj, "role", None), "name", "") or ""
+                    if getattr(obj, "user", None):
+                        display_name = f"{role_name} → {getattr(obj.user, 'email', '')}"
+                    elif getattr(obj, "user_group", None):
                         display_name = (
-                            getattr(obj, "name", None)
-                            or getattr(obj, "email", None)
-                            or str(obj)
+                            f"{role_name} → {getattr(obj.user_group, 'name', '')}"
                         )
-
-                    related.append(
-                        {
-                            "model": str(model._meta.verbose_name),
-                            "name": display_name,
-                            "id": str(obj.pk),
-                        }
+                    else:
+                        display_name = role_name
+                else:
+                    display_name = (
+                        getattr(obj, "name", None)
+                        or getattr(obj, "email", None)
+                        or str(obj)
                     )
 
-        return Response({"count": len(related), "related_objects": related})
+                grouped[model_key]["objects"].append(
+                    {"name": display_name, "id": str(getattr(obj, "pk", ""))}
+                )
+
+        # Sort objects inside each group by name for deterministic output
+        for group in grouped.values():
+            group["objects"].sort(key=lambda o: (o["name"] or "").lower())
+
+        # Sort groups by verbose name (fallback to model key)
+        grouped_list = sorted(
+            grouped.values(),
+            key=lambda g: (g.get("verbose_name") or g["model"]).lower(),
+        )
+
+        # Count total related (flattened)
+        total_count = sum(len(g["objects"]) for g in grouped_list)
+
+        # ✨ Also provide a flattened list for simple UIs, if you still need it
+        flattened = [
+            {"model": g["verbose_name"] or g["model"], "name": o["name"], "id": o["id"]}
+            for g in grouped_list
+            for o in g["objects"]
+        ]
+
+        return Response(
+            {
+                "count": total_count,
+                "grouped_objects": grouped_list,  # [{model, verbose_name, objects:[{id,name}]}]
+                "related_objects": flattened,  # optional convenience field
+                "second_order_info": sorted(second_order_relations)
+                if second_order_relations
+                else None,
+            }
+        )
 
     def _get_optimized_object_data(self, queryset):
         """
