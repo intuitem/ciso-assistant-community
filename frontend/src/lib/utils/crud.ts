@@ -1406,6 +1406,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'ro_to_couple', urlModel: 'ro-to' },
 			{
 				field: 'strategic_scenario',
 				urlModel: 'strategic-scenarios',

@@ -177,7 +177,7 @@ export const AppliedControlSchema = z.object({
 	control_impact: z.number().optional().nullable(),
 	cost: z
 		.object({
-			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
+			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
 			amortization_period: z.number().min(1).max(50).default(1),
 			build: z
 				.object({
@@ -500,9 +500,10 @@ export const GeneralSettingsSchema = z.object({
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
 	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
-	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
+	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
 	daily_rate: z.number().default(500).optional(),
-	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional()
+	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
+	allow_self_validation: z.boolean().default(false).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
