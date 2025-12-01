@@ -65,7 +65,7 @@
 		optionsSelf?: any;
 		optionsSelfSelect?: boolean;
 		allowUserOptions?: boolean | 'append';
-		onChange: (value: any) => void;
+		onChange?: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
 		cachedOptions?: any[] | undefined;

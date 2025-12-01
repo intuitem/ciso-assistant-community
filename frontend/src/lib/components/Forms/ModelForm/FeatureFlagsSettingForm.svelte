@@ -33,7 +33,8 @@
 		{ field: 'project_management', label: m.projectManagement() },
 		{ field: 'contracts', label: m.contracts() },
 		{ field: 'reports', label: m.reports() },
-		{ field: 'validation_flows', label: m.validationFlows() }
+		{ field: 'validation_flows', label: m.validationFlows() },
+		{ field: 'outgoing_webhooks', label: m.webhooks() }
 	];
 </script>
 

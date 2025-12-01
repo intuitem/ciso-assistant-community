@@ -980,5 +980,16 @@
 	"downloadCertificate": "Baixar certificado",
 	"viewMore": "Ver mais",
 	"viewLess": "Ver menos",
-	"loginFailed": "Falha no login"
+	"loginFailed": "Falha no login",
+	"expectedEvidence": "Evidência esperada",
+	"taskNodeLegacyEvidence": "O campo de evidência antigo está obsoleto. A evidência agora é de nível de tarefa e compartilhada entre ocorrências aguardando revisões.\n Para movê-las para evidência esperada ou removê-las da ocorrência, use os botões",
+	"taskNodeNewEvidence": "Evidência vinculada globalmente à tarefa e distribuída para ocorrências. Você pode adicionar uma revisão na guia 'Evidências' abaixo",
+	"statusUpdatedSuccessfully": "Status atualizado com sucesso",
+	"observationUpdatedSuccessfully": "Observação atualizada com sucesso",
+	"taskTemplateEvidenceHelpText": "👉 Evidência esperada para esta tarefa.\n Isso será vinculado a todas as ocorrências para que você possa enviar revisões para cada uma diretamente.",
+	"unassigned": "Não atribuído",
+	"addEvidenceRevisionFor": "Adicionar revisão para {evidenceName}",
+	"occurrenceDueDate": "Data de vencimento da ocorrência",
+	"relatedTo": "Relacionado a",
+	"legacyEvidenceField": "Campo de evidência legado"
 }
