@@ -1945,5 +1945,16 @@
 	"samlPrivateKeyHelpText": "Samo za pisanje: koristite ovo polje samo ako trebate unijeti vlastiti privatni ključ/certifikat. U suprotnom, aplikacija će ga generirati.",
 	"samlCertificateHelpText": "Možete navesti vlastiti certifikat ili pustiti aplikaciju da ga generira.",
 	"samlAuthnRequestSignedHelpText": "Kada je omogućeno, zahtjev za SAML autentifikaciju potpisuje se privatnim ključem ispod. Odgovarajući javni certifikat šalje se Identity Provideru kako bi mogao provjeriti potpis.",
-	"downloadCertificate": "Preuzmi certifikat"
+	"downloadCertificate": "Preuzmi certifikat",
+	"expectedEvidence": "Očekivano dokazivanje",
+	"taskNodeLegacyEvidence": "Staro polje za dokazivanje je zastarjelo. Dokazivanje je sada na razini zadatka i dijeli se među događajima koji čekaju revizije.\n Za premještanje u očekivano dokazivanje ili uklanjanje iz događaja, koristite gumbove",
+	"taskNodeNewEvidence": "Dokazivanje globalno povezano s zadatkom i širi se na događaje. Možete dodati reviziju u kartici 'Dokazivanja' ispod",
+	"statusUpdatedSuccessfully": "Status uspješno ažuriran",
+	"observationUpdatedSuccessfully": "Napomena uspješno ažurirana",
+	"taskTemplateEvidenceHelpText": "👉 Očekivano dokazivanje za ovaj zadatak.\n Ovo će biti povezano sa svim događajima kako biste mogli predati revizije za svaki od njih direktno.",
+	"unassigned": "Nedodijeljeno",
+	"addEvidenceRevisionFor": "Dodaj reviziju za {evidenceName}",
+	"occurrenceDueDate": "Rok događaja",
+	"relatedTo": "Povezano sa",
+	"legacyEvidenceField": "Zastarjelo dokazivanje"
 }

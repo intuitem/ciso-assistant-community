@@ -1713,5 +1713,16 @@
 	"downloadCertificate": "Sertifikayı indir",
 	"viewMore": "Daha fazla görüntüle",
 	"viewLess": "Daha az görüntüle",
-	"loginFailed": "Giriş başarısız"
+	"loginFailed": "Giriş başarısız",
+	"expectedEvidence": "Beklenen Kanıt",
+	"taskNodeLegacyEvidence": "Eski kanıt alanı kullanımdan kaldırıldı. Kanıt şimdi görev düzeyinde ve revizyonlar için beklenilen kanıtlar arasında paylaşılır.\n Bunları beklenilen kanıtlara taşımak veya gerçekleşmeden kaldırmak için aşağıdaki düğmeleri kullanın",
+	"taskNodeNewEvidence": "Göreve genel olarak bağlı kanıtlar ve gerçekleşmelere yayılan kanıtlar. Aşağıdaki 'Kanıtlar' sekmesinde bir revizyon ekleyebilirsiniz",
+	"statusUpdatedSuccessfully": "Durum başarıyla güncellendi",
+	"observationUpdatedSuccessfully": "Gözlem başarıyla güncellendi",
+	"taskTemplateEvidenceHelpText": "👉 Bu görev için Beklenen Kanıt.\n Bu, tüm gerçekleşmelere bağlı olacak ve her birine doğrudan revizyon göndermeyi sağlayacaktır.",
+	"unassigned": "Atanmamış",
+	"addEvidenceRevisionFor": "{evidenceName} için revizyon ekle",
+	"occurrenceDueDate": "Gerçekleşme son tarihi",
+	"relatedTo": "İlişkili",
+	"legacyEvidenceField": "Eski Kanıt Alanı"
 }
