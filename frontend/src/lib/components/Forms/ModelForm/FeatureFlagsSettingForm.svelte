@@ -11,6 +11,8 @@
 
 	let { form }: Props = $props();
 
+	const featureFlagSettings = page.data.featureFlagSettings ?? {};
+
 	// Config for feature flags
 	const featureFlagFields = [
 		{ field: 'xrays', label: m.xRays() },
@@ -38,7 +40,7 @@
 		{ field: 'reports', label: m.reports() },
 		{ field: 'validation_flows', label: m.validationFlows() },
 		{ field: 'outgoing_webhooks', label: m.webhooks() }
-	].filter(({ field }) => field in page.data.featureFlagSettings);
+	].filter(({ field }) => Object.hasOwn(featureFlagSettings, field));
 </script>
 
 <div
