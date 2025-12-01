@@ -48,11 +48,7 @@
 			bind:value={editValue}
 		></textarea>
 		<div class="flex justify-between items-center">
-			<button
-				type="button"
-				class="btn btn-sm variant-filled-primary"
-				onclick={preview}
-			>
+			<button type="button" class="btn btn-sm variant-filled-primary" onclick={preview}>
 				<i class="fas fa-eye mr-1"></i>
 				Preview
 			</button>
