@@ -2817,5 +2817,6 @@
 	"addEvidenceRevisionFor": "Add revision for:\n{evidenceName}",
 	"occurrenceDueDate": "Occurrence due date",
 	"relatedTo": "Related to",
-	"legacyEvidenceField": "Legacy Evidence"
+	"legacyEvidenceField": "Legacy Evidence",
+	"errorFetching": "Error fetching data"
 }

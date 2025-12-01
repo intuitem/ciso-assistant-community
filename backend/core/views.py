@@ -715,7 +715,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         - Uses Django's NestedObjects (same mechanism the admin uses)
         - Hides M2M through tables and a small set of technical/auto-managed models
         - Groups related objects by model (deterministic order)
-        - Detects and reports 2nd-order relationships summary for AppliedControl
+        - TODO: Detects and reports 2nd-order relationships summary for AppliedControl
         - get_object() enforces permissions via get_queryset()
         """
         instance = self.get_object()

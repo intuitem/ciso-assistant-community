@@ -2792,5 +2792,6 @@
 	"addEvidenceRevisionFor": "Ajouter une révision pour :\n{evidenceName}",
 	"occurrenceDueDate": "Date d'échéance de l'occurrence",
 	"relatedTo": "Relatif à",
-	"legacyEvidenceField": "Champ de preuve obsolète"
+	"legacyEvidenceField": "Champ de preuve obsolète",
+	"errorFetching": "Erreur lors de la récupération des données"
 }

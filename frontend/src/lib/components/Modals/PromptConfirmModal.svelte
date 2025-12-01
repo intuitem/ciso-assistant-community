@@ -71,7 +71,7 @@
 	});
 
 	const yes = m.yes().toLowerCase();
-	const canConfirm = $derived(() => !!userInput && userInput.trim().toLowerCase() === yes);
+	const canConfirm = $derived(!!userInput && userInput.trim().toLowerCase() === yes);
 </script>
 
 {#if $modalStore[0]}
@@ -140,7 +140,7 @@
 		{#if sf}
 			<form method="POST" action={formAction} use:formEnhance class="modal-form {cForm}">
 				<footer class="modal-footer {parent.regionFooter}">
-					<button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}>
+					<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>
 						{m.cancel()}
 					</button>
 					<input type="hidden" name="urlmodel" value={URLModel} />
@@ -149,7 +149,7 @@
 						class="btn preset-filled-error-500"
 						type="submit"
 						data-testid="delete-prompt-confirm-button"
-						on:click={parent.onConfirm}
+						onclick={parent.onConfirm}
 						disabled={!canConfirm}
 					>
 						{m.submit()}
@@ -161,13 +161,13 @@
 			{/if}
 		{:else}
 			<footer class="modal-footer {parent.regionFooter}">
-				<button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}>
+				<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>
 					{m.cancel()}
 				</button>
 				<button
 					class="btn preset-filled-error-500"
 					type="button"
-					on:click={parent.onConfirm}
+					onclick={parent.onConfirm}
 					disabled={!canConfirm}
 				>
 					{m.submit()}

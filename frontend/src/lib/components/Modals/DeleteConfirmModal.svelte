@@ -132,7 +132,7 @@
 										class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100 focus:outline-none focus:ring"
 										aria-controls={`grp-${group.model}`}
 										aria-expanded={expanded.has(group.model)}
-										on:click={() => toggle(group.model)}
+										onclick={() => toggle(group.model)}
 									>
 										<span class="font-medium">
 											{group.verbose_name ?? group.model}
@@ -160,10 +160,6 @@
 					</div>
 				</div>
 			</div>
-		{:else}
-			<div class="p-3 bg-surface-100 rounded-md text-surface-700">
-				{m.nothingToDelete()}
-			</div>
 		{/if}
 
 		<form method="POST" action={formAction} use:enhance class="modal-form {cForm}">
@@ -172,7 +168,7 @@
 					type="button"
 					class="btn {parent.buttonNeutral}"
 					data-testid="delete-cancel-button"
-					on:click={parent.onClose}
+					onclick={parent.onClose}
 				>
 					{m.cancel()}
 				</button>
@@ -182,7 +178,7 @@
 					class="btn preset-filled-error-500"
 					data-testid="delete-confirm-button"
 					type="submit"
-					on:click={parent.onClose}
+					onclick={parent.onClose}
 				>
 					{m.submit()}
 				</button>
