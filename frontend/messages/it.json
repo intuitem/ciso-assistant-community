@@ -1357,5 +1357,16 @@
 	"downloadCertificate": "Scarica certificato",
 	"viewMore": "Vedi di più",
 	"viewLess": "Vedi meno",
-	"loginFailed": "Accesso fallito"
+	"loginFailed": "Login fallito",
+	"expectedEvidence": "Evidenze attese",
+	"taskNodeLegacyEvidence": "Il campo di evidenza precedente è obsoleto. Le evidenze sono ora a livello di attività e condivise tra le occorrenze in attesa di revisioni.\n Per spostarle nelle evidenze attese o rimuoverle dall'occorrenza, usa i pulsanti",
+	"taskNodeNewEvidence": "Evidenze collegate globalmente all'attività e diffuse tra le occorrenze. Puoi aggiungere una revisione nella scheda 'Evidenze' qui sotto",
+	"statusUpdatedSuccessfully": "Stato aggiornato con successo",
+	"observationUpdatedSuccessfully": "Osservazione aggiornata con successo",
+	"taskTemplateEvidenceHelpText": "👉 Evidenze attese per questa attività.\n Saranno collegate a tutte le occorrenze in modo che tu possa inviare revisioni per ciascuna direttamente.",
+	"unassigned": "Non assegnato",
+	"addEvidenceRevisionFor": "Aggiungi revisione per {evidenceName}",
+	"occurrenceDueDate": "Scadenza occorrenza",
+	"relatedTo": "Relativo a",
+	"legacyEvidenceField": "Campo di evidenza obsoleto"
 }

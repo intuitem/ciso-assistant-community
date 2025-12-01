@@ -120,6 +120,7 @@
 		label={m.country()}
 		cacheLock={cacheLocks['country']}
 		bind:cachedValue={formDataCache['country']}
+		nullable
 	/>
 	<AutocompleteSelect
 		{form}
@@ -128,6 +129,7 @@
 		label={m.currency()}
 		cacheLock={cacheLocks['currency']}
 		bind:cachedValue={formDataCache['currency']}
+		nullable
 	/>
 	<AutocompleteSelect
 		{form}
@@ -136,6 +138,7 @@
 		label={m.doraProviderPersonType()}
 		cacheLock={cacheLocks['dora_provider_person_type']}
 		bind:cachedValue={formDataCache['dora_provider_person_type']}
+		nullable
 	/>
 	<TextField
 		{form}
@@ -174,6 +177,7 @@
 		label={m.doraEntityType()}
 		cacheLock={cacheLocks['dora_entity_type']}
 		bind:cachedValue={formDataCache['dora_entity_type']}
+		nullable
 	/>
 	<AutocompleteSelect
 		{form}
@@ -182,6 +186,7 @@
 		label={m.doraEntityHierarchy()}
 		cacheLock={cacheLocks['dora_entity_hierarchy']}
 		bind:cachedValue={formDataCache['dora_entity_hierarchy']}
+		nullable
 	/>
 	<NumberField
 		{form}
