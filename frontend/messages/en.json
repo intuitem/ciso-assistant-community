@@ -2816,5 +2816,11 @@
 	"addEvidenceRevisionFor": "Add revision for:\n{evidenceName}",
 	"occurrenceDueDate": "Occurrence due date",
 	"relatedTo": "Related to",
-	"legacyEvidenceField": "Legacy Evidence"
+	"legacyEvidenceField": "Legacy Evidence",
+	"yearlyTasksReview": "Yearly Tasks Review",
+	"reviewRecurrentTasksStatusByMonth": "Review recurrent tasks status by month",
+	"allFolders": "All Folders",
+	"apply": "Apply",
+	"reset": "Reset",
+	"noRecurrentTasksFound": "No recurrent tasks found"
 }

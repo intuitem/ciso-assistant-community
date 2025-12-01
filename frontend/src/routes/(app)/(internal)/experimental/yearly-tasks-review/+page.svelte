@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { pageTitle } from '$lib/utils/stores';
 	import { goto } from '$app/navigation';
+	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -8,7 +9,7 @@
 	}
 
 	let { data }: Props = $props();
-	pageTitle.set('Yearly Periodic Tasks Review');
+	pageTitle.set(m.yearlyTasksReview());
 
 	const months = [
 		'Jan',
@@ -56,15 +57,17 @@
 
 <div class="bg-white p-8 space-y-8">
 	<div>
-		<h1 class="text-3xl font-bold mb-2">Yearly Tasks Review - {selectedYear}</h1>
-		<p class="text-gray-600">Review recurrent tasks status by month</p>
+		<h1 class="text-3xl font-bold mb-2">{m.yearlyTasksReview()} - {selectedYear}</h1>
+		<p class="text-gray-600">{m.reviewRecurrentTasksStatusByMonth()}</p>
 	</div>
 
 	<!-- Filters -->
 	<div class="bg-gray-50 p-4 rounded-lg border">
 		<div class="flex gap-4 items-end flex-wrap">
 			<div class="flex-1 min-w-[200px]">
-				<label for="year-filter" class="block text-sm font-medium text-gray-700 mb-1"> Year </label>
+				<label for="year-filter" class="block text-sm font-medium text-gray-700 mb-1">
+					{m.year()}
+				</label>
 				<select
 					id="year-filter"
 					bind:value={selectedYear}
@@ -78,14 +81,14 @@
 
 			<div class="flex-1 min-w-[200px]">
 				<label for="folder-filter" class="block text-sm font-medium text-gray-700 mb-1">
-					Folder
+					{m.folder()}
 				</label>
 				<select
 					id="folder-filter"
 					bind:value={selectedFolder}
 					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 				>
-					<option value="">All Folders</option>
+					<option value="">{m.allFolders()}</option>
 					{#each data.allFolders as folder}
 						<option value={folder.id}>{folder.name}</option>
 					{/each}
@@ -97,13 +100,13 @@
 					onclick={applyFilters}
 					class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
 				>
-					Apply
+					{m.apply()}
 				</button>
 				<button
 					onclick={resetFilters}
 					class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
 				>
-					Reset
+					{m.reset()}
 				</button>
 			</div>
 		</div>
@@ -122,9 +125,10 @@
 							<tr class="border-b bg-gray-50">
 								<th
 									class="px-4 py-3 text-left font-semibold min-w-[200px] sticky left-0 bg-gray-50 z-10"
-									>Task</th
 								>
-								<th class="px-2 py-3 text-center font-semibold w-16">Freq</th>
+									{m.tasks()}
+								</th>
+								<th class="px-2 py-3 text-center font-semibold w-16">{m.frequency()}</th>
 								{#each months as month}
 									<th class="px-2 py-3 text-center font-semibold w-16">{month}</th>
 								{/each}
@@ -143,6 +147,12 @@
 										{#if task.assigned_to && task.assigned_to.length > 0}
 											<div class="text-xs text-gray-500 mt-1">
 												{task.assigned_to.map((user) => user.str).join(', ')}
+											</div>
+										{/if}
+										{#if task.applied_controls && task.applied_controls.length > 0}
+											<div class="text-xs text-gray-700 mt-2">
+												<span class="font-medium">{m.appliedControls()}:</span>
+												{task.applied_controls.map((control) => control.str).join(', ')}
 											</div>
 										{/if}
 									</td>
@@ -167,26 +177,26 @@
 				</div>
 			</div>
 		{:else}
-			<div class="text-center py-12 text-gray-500">No recurrent tasks found</div>
+			<div class="text-center py-12 text-gray-500">{m.noRecurrentTasksFound()}</div>
 		{/each}
 	</div>
 
 	<div class="flex gap-6 justify-center text-sm">
 		<div class="flex items-center gap-2">
 			<div class="w-6 h-6 bg-green-200 rounded border"></div>
-			<span>Completed</span>
+			<span>{m.completed()}</span>
 		</div>
 		<div class="flex items-center gap-2">
 			<div class="w-6 h-6 bg-orange-200 rounded border"></div>
-			<span>In Progress</span>
+			<span>{m.inProgress()}</span>
 		</div>
 		<div class="flex items-center gap-2">
 			<div class="w-6 h-6 bg-red-200 rounded border"></div>
-			<span>Pending</span>
+			<span>{m.pending()}</span>
 		</div>
 		<div class="flex items-center gap-2">
 			<div class="w-6 h-6 bg-white rounded border"></div>
-			<span>No Data</span>
+			<span>{m.noData()}</span>
 		</div>
 	</div>
 </div>
