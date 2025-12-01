@@ -10687,20 +10687,34 @@ class TaskTemplateViewSet(BaseModelViewSet):
     @action(detail=False, name="Yearly tasks review")
     def yearly_review(self, request):
         """Get recurrent task templates grouped by folder for yearly review."""
-        # Get current year date range
-        current_year = timezone.now().year
+        # Get year from query params or use current year
+        year_param = request.query_params.get("year")
+        if year_param:
+            try:
+                current_year = int(year_param)
+            except ValueError:
+                current_year = timezone.now().year
+        else:
+            current_year = timezone.now().year
+
         year_start = date(current_year, 1, 1)
         year_end = date(current_year, 12, 31)
 
+        # Get folder filter from query params
+        folder_id = request.query_params.get("folder")
+
         # Get all viewable recurrent task templates
-        task_templates = (
-            self.get_queryset()
-            .filter(
-                is_recurrent=True,
-                enabled=True,
-            )
-            .select_related("folder")
-            .prefetch_related("assigned_to")
+        queryset = self.get_queryset().filter(
+            is_recurrent=True,
+            enabled=True,
+        )
+
+        # Apply folder filter if provided
+        if folder_id:
+            queryset = queryset.filter(folder_id=folder_id)
+
+        task_templates = queryset.select_related("folder").prefetch_related(
+            "assigned_to"
         )
 
         # Group by folder
