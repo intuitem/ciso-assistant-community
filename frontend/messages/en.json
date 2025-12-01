@@ -2817,7 +2817,7 @@
 	"occurrenceDueDate": "Occurrence due date",
 	"relatedTo": "Related to",
 	"legacyEvidenceField": "Legacy Evidence",
-	"yearlyTasksReview": "Yearly Tasks Review",
+	"yearlyTasksReview": "Aggregated Tasks Review",
 	"reviewRecurrentTasksStatusByMonth": "Review recurrent tasks status by month",
 	"allFolders": "All Folders",
 	"apply": "Apply",

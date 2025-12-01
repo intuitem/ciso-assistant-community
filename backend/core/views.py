@@ -10687,18 +10687,29 @@ class TaskTemplateViewSet(BaseModelViewSet):
     @action(detail=False, name="Yearly tasks review")
     def yearly_review(self, request):
         """Get recurrent task templates grouped by folder for yearly review."""
-        # Get year from query params or use current year
-        year_param = request.query_params.get("year")
-        if year_param:
-            try:
-                current_year = int(year_param)
-            except ValueError:
-                current_year = timezone.now().year
-        else:
-            current_year = timezone.now().year
+        # Get date range from query params or use current year
+        current_year = timezone.now().year
 
-        year_start = date(current_year, 1, 1)
-        year_end = date(current_year, 12, 31)
+        try:
+            start_month = int(request.query_params.get("start_month", 1))
+            start_year = int(request.query_params.get("start_year", current_year))
+            end_month = int(request.query_params.get("end_month", 12))
+            end_year = int(request.query_params.get("end_year", current_year))
+        except ValueError:
+            # Default to current year if any parsing fails
+            start_month, start_year = 1, current_year
+            end_month, end_year = 12, current_year
+
+        # Validate month values
+        start_month = max(1, min(12, start_month))
+        end_month = max(1, min(12, end_month))
+
+        year_start = date(start_year, start_month, 1)
+        # Get last day of end_month
+        if end_month == 12:
+            year_end = date(end_year, 12, 31)
+        else:
+            year_end = date(end_year, end_month + 1, 1) - timedelta(days=1)
 
         # Get folder filter from query params
         folder_id = request.query_params.get("folder")
@@ -10735,27 +10746,42 @@ class TaskTemplateViewSet(BaseModelViewSet):
 
             # Group by month and determine status
             monthly_status = {}
-            for month in range(1, 13):
+            # Generate list of (year, month) tuples for the date range
+            months_in_range = []
+            current = date(start_year, start_month, 1)
+            end = date(end_year, end_month, 1)
+            while current <= end:
+                months_in_range.append((current.year, current.month))
+                if current.month == 12:
+                    current = date(current.year + 1, 1, 1)
+                else:
+                    current = date(current.year, current.month + 1, 1)
+
+            for year, month in months_in_range:
+                # Create a unique key for year-month combination
+                key = f"{year}-{month:02d}"
                 month_nodes = [
-                    node for node in task_nodes if node["due_date"].month == month
+                    node
+                    for node in task_nodes
+                    if node["due_date"].year == year and node["due_date"].month == month
                 ]
 
                 if not month_nodes:
-                    monthly_status[str(month)] = None
+                    monthly_status[key] = None
                 else:
                     # Simple aggregation logic
                     statuses = [node["status"] for node in month_nodes]
                     # If all completed, show completed (green)
                     if all(s == "completed" for s in statuses):
-                        monthly_status[str(month)] = "completed"
+                        monthly_status[key] = "completed"
                     # If any in_progress or mix of statuses, show in_progress (orange)
                     elif "in_progress" in statuses or "completed" in statuses:
-                        monthly_status[str(month)] = "in_progress"
+                        monthly_status[key] = "in_progress"
                     # If all pending, show pending (red)
                     elif "pending" in statuses:
-                        monthly_status[str(month)] = "pending"
+                        monthly_status[key] = "pending"
                     else:
-                        monthly_status[str(month)] = statuses[0] if statuses else None
+                        monthly_status[key] = statuses[0] if statuses else None
 
             template_data["monthly_status"] = monthly_status
 
@@ -10771,7 +10797,16 @@ class TaskTemplateViewSet(BaseModelViewSet):
         result = list(folders_dict.values())
         result.sort(key=lambda x: x["folder_name"])
 
-        return Response(result)
+        # Include date range metadata in response
+        return Response(
+            {
+                "folders": result,
+                "start_month": start_month,
+                "start_year": start_year,
+                "end_month": end_month,
+                "end_year": end_year,
+            }
+        )
 
     @action(detail=False, name="Task templates per status")
     def per_status(self, request):

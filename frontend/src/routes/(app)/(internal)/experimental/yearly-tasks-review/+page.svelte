@@ -11,7 +11,7 @@
 	let { data }: Props = $props();
 	pageTitle.set(m.yearlyTasksReview());
 
-	const months = [
+	const monthNames = [
 		'Jan',
 		'Feb',
 		'Mar',
@@ -30,8 +30,32 @@
 	const currentYear = new Date().getFullYear();
 	const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
 
-	let selectedYear = $state(data.selectedYear);
+	let startMonth = $state(data.startMonth);
+	let startYear = $state(data.startYear);
+	let endMonth = $state(data.endMonth);
+	let endYear = $state(data.endYear);
 	let selectedFolder = $state(data.selectedFolder);
+
+	// Generate the list of months to display based on date range
+	function getMonthsInRange() {
+		const result: Array<{ year: number; month: number; label: string }> = [];
+		let current = new Date(startYear, startMonth - 1, 1);
+		const end = new Date(endYear, endMonth - 1, 1);
+
+		while (current <= end) {
+			const year = current.getFullYear();
+			const month = current.getMonth() + 1;
+			const label = monthNames[month - 1];
+			result.push({ year, month, label });
+
+			// Move to next month
+			current.setMonth(current.getMonth() + 1);
+		}
+
+		return result;
+	}
+
+	let monthsToDisplay = $derived(getMonthsInRange());
 
 	function getStatusColor(status: string | null): string {
 		if (!status) return 'bg-white';
@@ -43,13 +67,19 @@
 
 	function applyFilters() {
 		const params = new URLSearchParams();
-		if (selectedYear) params.set('year', selectedYear);
+		params.set('start_month', startMonth.toString());
+		params.set('start_year', startYear.toString());
+		params.set('end_month', endMonth.toString());
+		params.set('end_year', endYear.toString());
 		if (selectedFolder) params.set('folder', selectedFolder);
 		goto(`/experimental/yearly-tasks-review?${params.toString()}`);
 	}
 
 	function resetFilters() {
-		selectedYear = currentYear.toString();
+		startMonth = 1;
+		startYear = currentYear;
+		endMonth = 12;
+		endYear = currentYear;
 		selectedFolder = '';
 		goto('/experimental/yearly-tasks-review');
 	}
@@ -57,28 +87,82 @@
 
 <div class="bg-white p-8 space-y-8">
 	<div>
-		<h1 class="text-3xl font-bold mb-2">{m.yearlyTasksReview()} - {selectedYear}</h1>
+		<h1 class="text-3xl font-bold mb-2">
+			{m.yearlyTasksReview()} - {monthNames[startMonth - 1]}
+			{startYear} to {monthNames[endMonth - 1]}
+			{endYear}
+		</h1>
 		<p class="text-gray-600">{m.reviewRecurrentTasksStatusByMonth()}</p>
 	</div>
 
 	<!-- Filters -->
 	<div class="bg-gray-50 p-4 rounded-lg border">
 		<div class="flex gap-4 items-end flex-wrap">
-			<div class="flex-1 min-w-[200px]">
-				<label for="year-filter" class="block text-sm font-medium text-gray-700 mb-1">
-					{m.year()}
-				</label>
-				<select
-					id="year-filter"
-					bind:value={selectedYear}
-					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-				>
-					{#each yearOptions as year}
-						<option value={year.toString()}>{year}</option>
-					{/each}
-				</select>
+			<!-- Start Date -->
+			<div class="flex gap-2">
+				<div class="min-w-[120px]">
+					<label for="start-month-filter" class="block text-sm font-medium text-gray-700 mb-1">
+						Start Month
+					</label>
+					<select
+						id="start-month-filter"
+						bind:value={startMonth}
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+					>
+						{#each Array.from({ length: 12 }, (_, i) => i + 1) as month}
+							<option value={month}>{monthNames[month - 1]}</option>
+						{/each}
+					</select>
+				</div>
+				<div class="min-w-[100px]">
+					<label for="start-year-filter" class="block text-sm font-medium text-gray-700 mb-1">
+						Start Year
+					</label>
+					<select
+						id="start-year-filter"
+						bind:value={startYear}
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+					>
+						{#each yearOptions as year}
+							<option value={year}>{year}</option>
+						{/each}
+					</select>
+				</div>
 			</div>
 
+			<!-- End Date -->
+			<div class="flex gap-2">
+				<div class="min-w-[120px]">
+					<label for="end-month-filter" class="block text-sm font-medium text-gray-700 mb-1">
+						End Month
+					</label>
+					<select
+						id="end-month-filter"
+						bind:value={endMonth}
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+					>
+						{#each Array.from({ length: 12 }, (_, i) => i + 1) as month}
+							<option value={month}>{monthNames[month - 1]}</option>
+						{/each}
+					</select>
+				</div>
+				<div class="min-w-[100px]">
+					<label for="end-year-filter" class="block text-sm font-medium text-gray-700 mb-1">
+						End Year
+					</label>
+					<select
+						id="end-year-filter"
+						bind:value={endYear}
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+					>
+						{#each yearOptions as year}
+							<option value={year}>{year}</option>
+						{/each}
+					</select>
+				</div>
+			</div>
+
+			<!-- Folder Filter -->
 			<div class="flex-1 min-w-[200px]">
 				<label for="folder-filter" class="block text-sm font-medium text-gray-700 mb-1">
 					{m.folder()}
@@ -95,6 +179,7 @@
 				</select>
 			</div>
 
+			<!-- Action Buttons -->
 			<div class="flex gap-2">
 				<button
 					onclick={applyFilters}
@@ -129,8 +214,13 @@
 									{m.tasks()}
 								</th>
 								<th class="px-2 py-3 text-center font-semibold w-16">{m.frequency()}</th>
-								{#each months as month}
-									<th class="px-2 py-3 text-center font-semibold w-16">{month}</th>
+								{#each monthsToDisplay as monthInfo}
+									<th class="px-2 py-3 text-center font-semibold w-16">
+										{monthInfo.label}
+										{#if monthsToDisplay.length > 12 || startYear !== endYear}
+											<div class="text-xs text-gray-500">{monthInfo.year}</div>
+										{/if}
+									</th>
 								{/each}
 							</tr>
 						</thead>
@@ -163,9 +253,9 @@
 											</span>
 										{/if}
 									</td>
-									{#each months as _, idx}
-										{@const monthNum = String(idx + 1)}
-										{@const status = task.monthly_status?.[monthNum]}
+									{#each monthsToDisplay as monthInfo}
+										{@const key = `${monthInfo.year}-${String(monthInfo.month).padStart(2, '0')}`}
+										{@const status = task.monthly_status?.[key]}
 										<td class="px-2 py-3 text-center border-l">
 											<div class="w-full h-8 rounded {getStatusColor(status)}"></div>
 										</td>

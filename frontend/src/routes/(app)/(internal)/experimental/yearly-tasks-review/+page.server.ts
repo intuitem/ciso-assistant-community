@@ -2,13 +2,23 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
-	// Get query parameters
-	const year = url.searchParams.get('year') || new Date().getFullYear().toString();
+	// Get current date for defaults
+	const now = new Date();
+	const currentYear = now.getFullYear();
+
+	// Get query parameters with defaults (full current year)
+	const startMonth = url.searchParams.get('start_month') || '1';
+	const startYear = url.searchParams.get('start_year') || currentYear.toString();
+	const endMonth = url.searchParams.get('end_month') || '12';
+	const endYear = url.searchParams.get('end_year') || currentYear.toString();
 	const folder = url.searchParams.get('folder') || '';
 
 	// Build endpoint with filters
 	const params = new URLSearchParams();
-	if (year) params.append('year', year);
+	params.append('start_month', startMonth);
+	params.append('start_year', startYear);
+	params.append('end_month', endMonth);
+	params.append('end_year', endYear);
 	if (folder) params.append('folder', folder);
 
 	const endpoint = `${BASE_API_URL}/task-templates/yearly_review/?${params.toString()}`;
@@ -22,9 +32,12 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const allFolders = foldersData.results || foldersData;
 
 	return {
-		folders: data,
+		folders: data.folders || [],
 		allFolders,
-		selectedYear: year,
+		startMonth: parseInt(startMonth),
+		startYear: parseInt(startYear),
+		endMonth: parseInt(endMonth),
+		endYear: parseInt(endYear),
 		selectedFolder: folder
 	};
 };
