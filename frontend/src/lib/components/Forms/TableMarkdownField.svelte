@@ -31,6 +31,11 @@
 		editValue = value;
 		isEditing = false;
 	}
+
+	function preview() {
+		value = editValue;
+		isEditing = false;
+	}
 </script>
 
 <div class="space-y-2">
@@ -46,7 +51,7 @@
 			<button
 				type="button"
 				class="btn btn-sm variant-filled-primary"
-				onclick={() => (isEditing = false)}
+				onclick={preview}
 			>
 				<i class="fas fa-eye mr-1"></i>
 				Preview
