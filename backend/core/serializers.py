@@ -805,7 +805,6 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
             "threats",
             "vulnerabilities",
             "assets",
-            "existing_controls",
             "existing_applied_controls",
             "applied_controls",
             "current_proba",

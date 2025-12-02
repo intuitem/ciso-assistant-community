@@ -2468,7 +2468,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "threats",
                 "name",
                 "description",
-                "existing_controls",
+                "existing_applied_controls",
                 "current_impact",
                 "current_proba",
                 "current_risk",
@@ -2480,10 +2480,16 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "strength_of_knowledge",
             ]
             if ff_is_enabled("inherent_risk"):
-                # insert inherent_risk just before existing_controls
-                columns.insert(columns.index("existing_controls"), "inherent_impact")
-                columns.insert(columns.index("existing_controls"), "inherent_proba")
-                columns.insert(columns.index("existing_controls"), "inherent_level")
+                # insert inherent_risk just before existing_applied_controls
+                columns.insert(
+                    columns.index("existing_applied_controls"), "inherent_impact"
+                )
+                columns.insert(
+                    columns.index("existing_applied_controls"), "inherent_proba"
+                )
+                columns.insert(
+                    columns.index("existing_applied_controls"), "inherent_level"
+                )
             writer.writerow(columns)
 
             for scenario in risk_assessment.risk_scenarios.all().order_by("ref_id"):
@@ -2556,7 +2562,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             "threats",
             "name",
             "description",
-            "existing_controls",
+            "existing_applied_controls",
             "current_impact",
             "current_proba",
             "current_risk",
@@ -2569,10 +2575,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         ]
 
         if ff_is_enabled("inherent_risk"):
-            # insert inherent_risk columns just before existing_controls
-            columns.insert(columns.index("existing_controls"), "inherent_impact")
-            columns.insert(columns.index("existing_controls"), "inherent_proba")
-            columns.insert(columns.index("existing_controls"), "inherent_level")
+            # insert inherent_risk columns just before existing_applied_controls
+            columns.insert(
+                columns.index("existing_applied_controls"), "inherent_impact"
+            )
+            columns.insert(columns.index("existing_applied_controls"), "inherent_proba")
+            columns.insert(columns.index("existing_applied_controls"), "inherent_level")
 
         scenarios = risk_assessment.risk_scenarios.prefetch_related(
             "applied_controls",
@@ -2602,7 +2610,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "threats": threats,
                 "name": escape_excel_formula(scenario.name),
                 "description": escape_excel_formula(scenario.description),
-                "existing_controls": existing_controls,
+                "existing_applied_controls": existing_controls,
                 "current_impact": scenario.get_current_impact()["name"],
                 "current_proba": scenario.get_current_proba()["name"],
                 "current_risk": scenario.get_current_risk()["name"],
@@ -2636,7 +2644,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             wrap_columns = [
                 "name",
                 "description",
-                "existing_controls",
+                "existing_applied_controls",
                 "additional_controls",
             ]
             wrap_indices = [
@@ -2797,7 +2805,6 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     risk_assessment=duplicate_risk_assessment,
                     name=scenario.name,
                     description=scenario.description,
-                    existing_controls=scenario.existing_controls,
                     treatment=scenario.treatment,
                     current_proba=scenario.current_proba,
                     current_impact=scenario.current_impact,
