@@ -119,13 +119,17 @@
 				onOpenChange={(e) => (popupHoverX[j].open = e.open)}
 				openDelay={0}
 				closeDelay={100}
+				zIndex="9999"
 			>
 				{#snippet content()}
 					<div
-						class="card bg-black p-4 z-20 shadow-lg rounded-sm max-w-xl"
-						style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
+						class="card bg-black p-4 shadow-lg rounded-sm w-max"
+						style="color: {xHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
 					>
-						<p data-testid="x-header-description" class="font-semibold">
+						<p
+							data-testid="x-header-description"
+							class="font-semibold whitespace-pre-line break-words"
+						>
 							{xHeader.description}
 						</p>
 						<div class="arrow bg-black"></div>
@@ -183,13 +187,17 @@
 						openDelay={0}
 						closeDelay={100}
 						positioning={{ placement: 'bottom-end' }}
+						zIndex="9999"
 					>
 						{#snippet content()}
 							<div
-								class="card bg-black p-4 z-20 shadow-lg rounded-sm max-w-xl"
-								style="color: {yHeader.hexcolor ?? '#FFFFFF'}"
+								class="card bg-black p-4 shadow-lg rounded-sm w-max"
+								style="color: {yHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
 							>
-								<p data-testid="y-header-description" class="font-semibold">
+								<p
+									data-testid="y-header-description"
+									class="font-semibold whitespace-pre-line break-words"
+								>
 									{yHeader.description}
 								</p>
 								<div class="arrow bg-black"></div>
