@@ -53,7 +53,6 @@ ALLOWED_PERMISSION_APPS = (
     "tprm",
     "privacy",
     "resilience",
-    "iam",
     "crq",
     "pmbok",
 )
@@ -986,7 +985,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             elif class_name == "permission":
                 # Permissions have no folder, so we don't filter them, we just rely on view_permission
                 objects_ids = Permission.objects.filter(
-                    content_type__app_label__in=ALLOWED_PERMISSION_APPS
+                    Q(content_type__app_label__in=ALLOWED_PERMISSION_APPS) |
+                    Q(content_type__model="folder")
                 ).values_list("id", flat=True)
             else:
                 raise NotImplementedError("type not supported")
