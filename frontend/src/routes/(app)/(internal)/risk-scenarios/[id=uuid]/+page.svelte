@@ -521,5 +521,19 @@
 				{/if}
 			</p>
 		</div>
+		{#if data.scenario.filtering_labels && data.scenario.filtering_labels.length > 0}
+			<div>
+				<p class="text-sm font-semibold text-gray-400">{m.labels()}</p>
+				<div class="flex flex-wrap gap-2 mt-1">
+					{#each data.scenario.filtering_labels as label}
+						<Anchor href="/filtering-labels/{label.id}" class="anchor">
+							<span class="badge preset-tonal-primary px-2 py-1 rounded text-xs">
+								{label.str}
+							</span>
+						</Anchor>
+					{/each}
+				</div>
+			</div>
+		{/if}
 	</div>
 </div>

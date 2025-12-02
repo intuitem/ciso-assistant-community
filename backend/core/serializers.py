@@ -776,6 +776,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(many=True)
 
     within_tolerance = serializers.CharField()
 
