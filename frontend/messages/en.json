@@ -118,6 +118,8 @@
 	"workflows": "Workflows",
 	"allowSelfValidation": "Allow self-validation",
 	"allowSelfValidationHelpText": "When enabled, users can approve their own validation requests",
+	"showWarningExternalLinks": "Show warning for external links",
+	"showWarningExternalLinksHelpText": "When enabled, users will see a warning before opening external links",
 	"eventsHistory": "Events history",
 	"linkedModels": "Associated objects",
 	"notes": "notes",

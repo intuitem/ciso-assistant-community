@@ -113,6 +113,8 @@
 	"workflows": "Workflows",
 	"allowSelfValidation": "Autoriser l'auto-validation",
 	"allowSelfValidationHelpText": "Lorsqu'activé, les utilisateurs peuvent approuver leurs propres demandes de validation",
+	"showWarningExternalLinks": "Afficher un avertissement pour les liens externes",
+	"showWarningExternalLinksHelpText": "Lorsqu'activé, les utilisateurs verront un avertissement avant d'ouvrir des liens externes",
 	"eventsHistory": "Historique des événements",
 	"linkedModels": "Objets associés",
 	"complianceAssessments": "Audits",
