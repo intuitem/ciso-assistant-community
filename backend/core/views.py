@@ -651,7 +651,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
             )
-        if request.data.get("evidences"):
+        # Experimental: process evidences on TaskTemplate creation
+        if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
             request.data["evidences"] = self._process_evidences(
                 request.data.get("evidences"), folder=folder
@@ -659,7 +660,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
-        if request.data.get("evidences"):
+        # Experimental: process evidences on TaskTemplate update
+        if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
             request.data["evidences"] = self._process_evidences(
                 request.data["evidences"], folder=folder
