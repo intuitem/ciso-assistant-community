@@ -10,9 +10,9 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
-	const cHeader = 'text-2xl font-bold';
-	const cForm = 'p-4 space-y-4 rounded-container';
+	const cBase = 'card bg-white p-6 w-modal space-y-6';
+	const cHeader = 'text-xl font-medium text-gray-900';
+	const cForm = 'space-y-4';
 
 	interface Props {
 		parent: any;
@@ -44,14 +44,31 @@
 	const formEnhance = sf ? enhance : undefined;
 
 	let userInput = $state('');
-	type Group = { model: string; verbose_name?: string; objects: { id: string; name: string }[] };
-	let cascadeInfo: {
+	type Obj = { id: string; name: string };
+	type Group = { model: string; verbose_name?: string; objects: Obj[] };
+	type Bucket = {
 		count: number;
 		grouped_objects: Group[];
-		second_order_info?: string[];
-	} | null = $state(null);
+		related_objects?: Obj[];
+		message?: string;
+		level?: string;
+	};
+
+	let cascadeInfo: { deleted: Bucket; affected: Bucket } | null = $state(null);
 	let loading = $state(true);
 	let errorMsg = $state<string | null>(null);
+
+	// expand/collapse state per-group (deleted/affected buckets share keys, so prefix)
+	let expanded = $state<Set<string>>(new Set());
+	function keyFor(bucket: 'deleted' | 'affected', groupKey: string) {
+		return `${bucket}:${groupKey}`;
+	}
+	function toggle(bucket: 'deleted' | 'affected', groupKey: string) {
+		const k = keyFor(bucket, groupKey);
+		if (expanded.has(k)) expanded.delete(k);
+		else expanded.add(k);
+		expanded = new Set(expanded); // trigger reactivity
+	}
 
 	onMount(async () => {
 		if (!URLModel || !id) {
@@ -62,6 +79,14 @@
 			const res = await fetch(`/fe-api/cascade-info/${URLModel}/${id}`);
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			cascadeInfo = await res.json();
+			// Auto-expand small groups in both buckets
+			for (const bucketName of ['deleted', 'affected'] as const) {
+				const groups = cascadeInfo?.[bucketName]?.grouped_objects ?? [];
+				groups.forEach((g) => {
+					if (g.objects.length <= 2) expanded.add(keyFor(bucketName, g.model));
+				});
+			}
+			expanded = new Set(expanded);
 		} catch (e) {
 			errorMsg = m.errorFetching();
 			console.error(e);
@@ -80,73 +105,116 @@
 		<article>{$modalStore[0].body ?? '(body missing)'}</article>
 
 		{#if loading}
-			<div class="space-y-2" aria-busy="true">
-				<div class="h-4 w-2/3 animate-pulse bg-surface-200 rounded"></div>
-				<div class="h-3 w-full animate-pulse bg-surface-200 rounded"></div>
-			</div>
+			<div class="text-sm text-gray-500">Loading...</div>
 		{:else if errorMsg}
-			<div class="p-3 bg-error-50 border-l-3 border-error-500 rounded-md text-error-800">
+			<div class="p-4 bg-red-50 text-red-900 text-sm">
 				{errorMsg}
 			</div>
-		{:else if cascadeInfo && cascadeInfo.count > 0}
-			<div
-				class="p-3 bg-warning-50 dark:bg-warning-950/30 border-l-3 border-warning-500 rounded-md"
-			>
-				<div class="font-semibold text-warning-900 dark:text-warning-100 mb-2">
-					{m.cascadeDeleteWarning({ count: cascadeInfo.count })}
-				</div>
+		{:else if cascadeInfo}
+			{#if cascadeInfo.deleted?.count > 0}
+				<div class="p-4 bg-orange-50 border-l-2 border-orange-400">
+					<div class="text-sm font-medium text-gray-900 mb-3">
+						{m.cascadeDeleteWarning({ count: cascadeInfo.deleted.count })}
+					</div>
 
-				{#if cascadeInfo.second_order_info}
-					<ul class="mb-3 text-sm text-warning-900 dark:text-warning-200 list-disc list-inside">
-						{#each cascadeInfo.second_order_info as info}
-							<li>{info}</li>
+					<div class="max-h-64 overflow-y-auto space-y-1">
+						{#each cascadeInfo.deleted.grouped_objects as group (group.model)}
+							<section class="border-t border-gray-200">
+								<button
+									type="button"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 text-sm"
+									aria-controls={`del-${group.model}`}
+									aria-expanded={expanded.has(keyFor('deleted', group.model))}
+									onclick={() => toggle('deleted', group.model)}
+								>
+									<span class="font-medium text-gray-900">{group.verbose_name ?? group.model}</span>
+									<span class="text-xs text-gray-600">
+										{group.objects.length}
+									</span>
+								</button>
+
+								{#if expanded.has(keyFor('deleted', group.model))}
+									<ul id={`del-${group.model}`} class="px-3 pb-2 text-sm space-y-0.5 bg-gray-50">
+										{#each group.objects as o (o.id)}
+											<li class="flex items-center justify-between py-1">
+												<span class="truncate text-gray-700" title={o.name}>{o.name}</span>
+											</li>
+										{/each}
+									</ul>
+								{/if}
+							</section>
 						{/each}
-					</ul>
-				{/if}
-
-				<div class="max-h-56 overflow-y-auto pr-1 space-y-2">
-					{#each cascadeInfo.grouped_objects as group (group.model)}
-						<details class="border rounded-md">
-							<summary class="px-3 py-2 cursor-pointer hover:bg-surface-100">
-								<span class="font-medium">{group.verbose_name ?? group.model}</span>
-								<span class="ml-2 text-xs px-2 py-0.5 rounded-full bg-warning-100 text-warning-800">
-									{group.objects.length}
-								</span>
-							</summary>
-							<ul class="px-3 pb-2 text-sm space-y-1">
-								{#each group.objects as o (o.id)}
-									<li class="flex items-center gap-2">
-										<span class="text-warning-600">•</span>
-										<span class="truncate" title={o.name}>{o.name}</span>
-									</li>
-								{/each}
-							</ul>
-						</details>
-					{/each}
+					</div>
 				</div>
-			</div>
+			{/if}
+
+			{#if cascadeInfo.affected?.count > 0}
+				<div class="p-4 bg-blue-50 border-l-2 border-blue-400">
+					<div class="text-sm font-medium text-gray-900 mb-1">
+						{m.cascadeAffectedNotice({ count: cascadeInfo.affected.count })}
+					</div>
+					<p class="text-xs text-gray-600 mb-3">
+						{m.cascadeAffectedHint()}
+					</p>
+
+					<div class="max-h-64 overflow-y-auto space-y-1">
+						{#each cascadeInfo.affected.grouped_objects as group (group.model)}
+							<section class="border-t border-gray-200">
+								<button
+									type="button"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 text-sm"
+									aria-controls={`aff-${group.model}`}
+									aria-expanded={expanded.has(keyFor('affected', group.model))}
+									onclick={() => toggle('affected', group.model)}
+								>
+									<span class="font-medium text-gray-900">{group.verbose_name ?? group.model}</span>
+									<span class="text-xs text-gray-600">
+										{group.objects.length}
+									</span>
+								</button>
+
+								{#if expanded.has(keyFor('affected', group.model))}
+									<ul id={`aff-${group.model}`} class="px-3 pb-2 text-sm space-y-0.5 bg-gray-50">
+										{#each group.objects as o (o.id)}
+											<li class="flex items-center justify-between py-1">
+												<span class="truncate text-gray-700" title={o.name}>{o.name}</span>
+											</li>
+										{/each}
+									</ul>
+								{/if}
+							</section>
+						{/each}
+					</div>
+				</div>
+			{/if}
 		{/if}
 
-		<p class="text-error-600 font-semibold mt-2">{m.confirmYes()}</p>
-		<input
-			type="text"
-			data-testid="delete-prompt-confirm-textfield"
-			bind:value={userInput}
-			placeholder={m.confirmYesPlaceHolder()}
-			class="w-full mt-2 p-2 border border-surface-300 rounded-sm focus:outline-none focus:ring"
-			aria-label={m.confirmYes()}
-		/>
+		<div>
+			<p class="text-sm font-medium text-red-600 mb-2">{m.confirmYes()}</p>
+			<input
+				type="text"
+				data-testid="delete-prompt-confirm-textfield"
+				bind:value={userInput}
+				placeholder={m.confirmYesPlaceHolder()}
+				class="w-full px-3 py-2 text-sm border border-surface-300 focus:outline-none focus:ring"
+				aria-label={m.confirmYes()}
+			/>
+		</div>
 
 		{#if sf}
 			<form method="POST" action={formAction} use:formEnhance class="modal-form {cForm}">
-				<footer class="modal-footer {parent.regionFooter}">
-					<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>
+				<footer class="flex gap-3 justify-end pt-4 border-t border-gray-200">
+					<button
+						type="button"
+						class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+						onclick={parent.onClose}
+					>
 						{m.cancel()}
 					</button>
 					<input type="hidden" name="urlmodel" value={URLModel} />
 					<input type="hidden" name="id" value={id} />
 					<button
-						class="btn preset-filled-error-500"
+						class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 						type="submit"
 						data-testid="delete-prompt-confirm-button"
 						onclick={parent.onConfirm}
@@ -160,12 +228,16 @@
 				<SuperDebug data={sf?.form} />
 			{/if}
 		{:else}
-			<footer class="modal-footer {parent.regionFooter}">
-				<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>
+			<footer class="flex gap-3 justify-end pt-4 border-t border-gray-200">
+				<button
+					type="button"
+					class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+					onclick={parent.onClose}
+				>
 					{m.cancel()}
 				</button>
 				<button
-					class="btn preset-filled-error-500"
+					class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 					type="button"
 					onclick={parent.onConfirm}
 					disabled={!canConfirm}

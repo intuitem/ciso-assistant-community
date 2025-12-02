@@ -2818,5 +2818,18 @@
 	"occurrenceDueDate": "Occurrence due date",
 	"relatedTo": "Related to",
 	"legacyEvidenceField": "Legacy Evidence",
-	"errorFetching": "Error fetching data"
+	"errorFetching": "Unable to load cascade information. Please try again.",
+	"nothingToDelete": "Nothing else will be deleted.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "No other objects will be impacted.",
+				"countPlural=one": "{count} related object will not be deleted but will lose one or more relationships.",
+				"countPlural=other": "{count} related objects will not be deleted but will lose one or more relationships."
+			}
+		}
+	],
+	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed."
 }

@@ -30,6 +30,7 @@ from django.db.models import (
     When,
     Case,
     Exists,
+    ForeignKey,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -710,106 +711,179 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"], url_path="cascade-info")
     def cascade_info(self, request, pk=None):
         """
-        Get cascade delete information for an object.
-
-        - Uses Django's NestedObjects (same mechanism the admin uses)
-        - Hides M2M through tables and a small set of technical/auto-managed models
-        - Groups related objects by model (deterministic order)
-        - TODO: Detects and reports 2nd-order relationships summary for AppliedControl
-        - get_object() enforces permissions via get_queryset()
+        Cascade preview:
+        - deleted: concrete objects actually deleted by cascade
+        - affected: concrete objects NOT deleted but whose relationship(s) will be removed
+        - hides M2M through rows in the output while still traversing them
+        - deterministic sorting and dedupe
         """
         instance = self.get_object()
         collector = NestedObjects(using=router.db_for_write(instance))
         collector.collect([instance])
 
-        # -- Skip technical/hidden models.
+        # Hide purely technical models from end users
         skip_model_names = {
             "Token",
             "AuthToken",
             "EmailAddress",
             "Session",
-            "RequirementAssessment",  # auto-managed via ComplianceAssessment
+            "RequirementAssessment",
         }
-        grouped = {}
-        second_order_relations = set()
+        skip_model_classes = set()
 
-        for model, instances in collector.model_objs.items():
-            # Skip the root instance model itself
+        def is_hidden_model(model):
+            return (skip_model_classes and model in skip_model_classes) or (
+                not skip_model_classes and model.__name__ in skip_model_names
+            )
+
+        # Index all actually-deleted objects for quick membership checks
+        deleted_index = set()
+        for model, objs in collector.model_objs.items():
             if model is type(instance):
                 continue
-
-            # Skip M2M through tables
             if getattr(model._meta, "auto_created", False):
+                # through rows are deleted, yes, but we'll represent their *endpoints* instead
                 continue
+            for o in objs:
+                deleted_index.add((model.__name__, str(getattr(o, "pk", ""))))
 
-            # Skip by class (if configured) or by name
-            if model.__name__ in skip_model_names:
-                continue
+        # helpers to build grouped buckets with dedupe + sorting
+        def add_grouped(bucket, obj):
+            model = obj.__class__
+            if is_hidden_model(model):
+                return
+            key = model.__name__
+            pk = str(getattr(obj, "pk", "")) or ""
 
-            verbose_name = str(model._meta.verbose_name)
-            model_key = model.__name__  # stable identifier for frontend
+            if (key, pk) in bucket["_seen"]:
+                return
 
-            # Prepare the group if not present
-            if model_key not in grouped:
-                grouped[model_key] = {
-                    "model": model_key,
-                    "verbose_name": verbose_name,
-                    "objects": [],
-                }
-            # Build a display name
-            for obj in instances:
-                model_name = model.__name__
-                if model_name == "RoleAssignment":
-                    role_name = getattr(getattr(obj, "role", None), "name", "") or ""
-                    if getattr(obj, "user", None):
-                        display_name = f"{role_name} → {getattr(obj.user, 'email', '')}"
-                    elif getattr(obj, "user_group", None):
-                        display_name = (
-                            f"{role_name} → {getattr(obj.user_group, 'name', '')}"
-                        )
-                    else:
-                        display_name = role_name
+            # nice display names
+            if key == "RoleAssignment":
+                role_name = getattr(getattr(obj, "role", None), "name", "") or ""
+                if getattr(obj, "user", None):
+                    display = f"{role_name} → {getattr(obj.user, 'email', '')}"
+                elif getattr(obj, "user_group", None):
+                    display = f"{role_name} → {getattr(obj.user_group, 'name', '')}"
                 else:
-                    display_name = (
-                        getattr(obj, "name", None)
-                        or getattr(obj, "email", None)
-                        or str(obj)
-                    )
-
-                grouped[model_key]["objects"].append(
-                    {"name": display_name, "id": str(getattr(obj, "pk", ""))}
+                    display = role_name
+            else:
+                display = (
+                    getattr(obj, "name", None)
+                    or getattr(obj, "email", None)
+                    or str(obj)
                 )
 
-        # Sort objects inside each group by name for deterministic output
-        for group in grouped.values():
-            group["objects"].sort(key=lambda o: (o["name"] or "").lower())
+            group = bucket["by_model"].setdefault(
+                key,
+                {
+                    "model": key,
+                    "verbose_name": str(model._meta.verbose_name),
+                    "objects": [],
+                },
+            )
+            group["objects"].append({"id": pk, "name": display})
+            bucket["_seen"].add((key, pk))
 
-        # Sort groups by verbose name (fallback to model key)
-        grouped_list = sorted(
-            grouped.values(),
-            key=lambda g: (g.get("verbose_name") or g["model"]).lower(),
-        )
+        deleted_bucket = {"by_model": {}, "_seen": set()}
+        affected_bucket = {"by_model": {}, "_seen": set()}
 
-        # Count total related (flattened)
-        total_count = sum(len(g["objects"]) for g in grouped_list)
+        # 1) Add all concrete (non-through) actually-deleted objects to deleted bucket
+        through_rows = []  # (through_model, [instances])
+        for model, instances in collector.model_objs.items():
+            if model is type(instance):
+                continue
+            if getattr(model._meta, "auto_created", False):
+                through_rows.append((model, list(instances)))
+                continue
+            if is_hidden_model(model):
+                continue
+            for obj in instances:
+                add_grouped(deleted_bucket, obj)
 
-        # ✨ Also provide a flattened list for simple UIs, if you still need it
-        flattened = [
-            {"model": g["verbose_name"] or g["model"], "name": o["name"], "id": o["id"]}
-            for g in grouped_list
-            for o in g["objects"]
-        ]
+        # 2) Process through rows → bubble endpoints.
+        #    If an endpoint is in deleted_index, keep it under "deleted".
+        #    Else, it is *affected* (won't be deleted but will lose its link).
+        for through_model, t_instances in through_rows:
+            # discover FK endpoints on the through model
+            fk_fields = [
+                f
+                for f in through_model._meta.fields
+                if isinstance(f, ForeignKey) and getattr(f, "remote_field", None)
+            ]
+            if len(fk_fields) < 2:
+                continue  # nothing interesting
 
-        return Response(
-            {
-                "count": total_count,
-                "grouped_objects": grouped_list,  # [{model, verbose_name, objects:[{id,name}]}]
-                "related_objects": flattened,  # optional convenience field
-                "second_order_info": sorted(second_order_relations)
-                if second_order_relations
-                else None,
-            }
-        )
+            # human hint for reason
+            reason = (
+                f"Relationship via {through_model._meta.verbose_name} will be removed"
+            )
+
+            for t in t_instances:
+                endpoints = []
+                for fk in fk_fields:
+                    try:
+                        rel_obj = getattr(t, fk.name, None)
+                    except Exception:
+                        rel_obj = None
+                    if not rel_obj:
+                        continue
+                    # ignore root instance type; ignore through-on-through
+                    if isinstance(rel_obj, type(instance)):
+                        continue
+                    if getattr(rel_obj._meta, "auto_created", False):
+                        continue
+                    endpoints.append(rel_obj)
+
+                for ep in endpoints:
+                    key = ep.__class__.__name__
+                    pk = str(getattr(ep, "pk", "")) or ""
+                    if (key, pk) in deleted_index:
+                        add_grouped(deleted_bucket, ep)
+                    else:
+                        add_grouped(affected_bucket, ep)
+
+        # 3) Sort deterministically
+        def finalize(bucket):
+            groups = list(bucket["by_model"].values())
+            for g in groups:
+                g["objects"].sort(key=lambda o: (o["name"] or "").lower())
+            groups.sort(key=lambda g: (g.get("verbose_name") or g["model"]).lower())
+            count = sum(len(g["objects"]) for g in groups)
+            return groups, count
+
+        deleted_groups, deleted_count = finalize(deleted_bucket)
+        affected_groups, affected_count = finalize(affected_bucket)
+
+        # Optional flattened lists for simple UIs
+        def flatten(groups):
+            return [
+                {
+                    "model": g["verbose_name"] or g["model"],
+                    "name": o["name"],
+                    "id": o["id"],
+                }
+                for g in groups
+                for o in g["objects"]
+            ]
+
+        payload = {
+            "deleted": {
+                "count": deleted_count,
+                "grouped_objects": deleted_groups,
+                "related_objects": flatten(deleted_groups),
+                "message": "The following objects will be permanently deleted.",
+                "level": "warning",
+            },
+            "affected": {
+                "count": affected_count,
+                "grouped_objects": affected_groups,
+                "related_objects": flatten(affected_groups),
+                "message": "These objects will NOT be deleted but will lose one or more relationships.",
+                "level": "info",
+            },
+        }
+        return Response(payload)
 
     def _get_optimized_object_data(self, queryset):
         """
