@@ -4388,6 +4388,10 @@ class RiskScenarioFilter(GenericFilterSet):
         method="filter_applied_controls",
         queryset=AppliedControl.objects.all(),
     )
+    exclude = df.UUIDFilter(
+        method="filter_exclude",
+        label="Exclude scenario",
+    )
 
     def filter_within_tolerance(self, queryset, name, value):
         if value == "YES":
@@ -4410,6 +4414,12 @@ class RiskScenarioFilter(GenericFilterSet):
             return queryset.filter(
                 Q(applied_controls__in=value) | Q(existing_applied_controls__in=value)
             ).distinct()
+        return queryset
+
+    def filter_exclude(self, queryset, name, value):
+        """Exclude a specific scenario from the queryset"""
+        if value:
+            return queryset.exclude(id=value)
         return queryset
 
     class Meta:

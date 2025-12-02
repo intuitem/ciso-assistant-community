@@ -241,6 +241,39 @@
 				/>
 			</div>
 		</div>
+
+		<div class="flex flex-row space-x-2">
+			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+				<AutocompleteSelect
+					form={_form}
+					optionsEndpoint="terminologies?field_path=ro_to.risk_origin&is_visible=true"
+					optionsLabelField="translated_name"
+					field="risk_origin"
+					label={m.riskOrigin()}
+					helpText={m.riskOriginHelpText()}
+				/>
+			</div>
+			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+				<AutocompleteSelect
+					form={_form}
+					multiple
+					optionsEndpoint="risk-scenarios"
+					optionsExtraFields={[
+						['risk_assessment', 'str'],
+						['ref_id', 'str']
+					]}
+					optionsDetailedUrlParameters={[
+						['risk_assessment', data.scenario.risk_assessment.id],
+						['exclude', data.scenario.id]
+					]}
+					optionsLabelField="auto"
+					field="antecedent_scenarios"
+					label={m.antecedentScenarios()}
+					helpText={m.antecedentScenariosHelpText()}
+				/>
+			</div>
+		</div>
+
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
 
 		{#if page.data?.featureflags?.inherent_risk}
@@ -456,6 +489,18 @@
 				</div>
 			</div>
 			<MarkdownField form={_form} field="justification" label={m.justification()} />
+			<AutocompleteSelect
+				multiple
+				form={_form}
+				createFromSelection={true}
+				optionsEndpoint="filtering-labels"
+				optionsLabelField="label"
+				field="filtering_labels"
+				helpText={m.labelsHelpText()}
+				label={m.labels()}
+				translateOptions={false}
+				allowUserOptions="append"
+			/>
 		</div>
 		<div class="flex flex-row justify-between space-x-4">
 			<button
