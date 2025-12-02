@@ -246,6 +246,7 @@
 			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
 				<AutocompleteSelect
 					form={_form}
+					nullable
 					optionsEndpoint="terminologies?field_path=ro_to.risk_origin&is_visible=true"
 					optionsLabelField="translated_name"
 					field="risk_origin"
@@ -262,10 +263,7 @@
 						['risk_assessment', 'str'],
 						['ref_id', 'str']
 					]}
-					optionsDetailedUrlParameters={[
-						['risk_assessment', data.scenario.risk_assessment.id],
-						['exclude', data.scenario.id]
-					]}
+					optionsDetailedUrlParameters={[['exclude', data.scenario.id]]}
 					optionsLabelField="auto"
 					field="antecedent_scenarios"
 					label={m.antecedentScenarios()}

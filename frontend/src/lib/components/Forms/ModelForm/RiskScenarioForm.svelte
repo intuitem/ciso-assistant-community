@@ -100,6 +100,15 @@
 />
 <AutocompleteSelect
 	{form}
+	optionsEndpoint="terminologies?field_path=ro_to.risk_origin&is_visible=true"
+	optionsLabelField="translated_name"
+	field="risk_origin"
+	cacheLock={cacheLocks['risk_origin']}
+	bind:cachedValue={formDataCache['risk_origin']}
+	label={m.riskOrigin()}
+/>
+<AutocompleteSelect
+	{form}
 	multiple
 	optionsEndpoint="threats"
 	optionsExtraFields={[['folder', 'str']]}
@@ -111,38 +120,4 @@
 	cacheLock={cacheLocks['threats']}
 	bind:cachedValue={formDataCache['threats']}
 	label={m.threats()}
-/>
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="terminologies"
-	optionsParameters={[
-		['field_path', 'ro_to.risk_origin'],
-		['is_visible', 'true']
-	]}
-	field="risk_origin"
-	cacheLock={cacheLocks['risk_origin']}
-	bind:cachedValue={formDataCache['risk_origin']}
-	label={m.riskOrigin()}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="risk-scenarios"
-	optionsExtraFields={[
-		['risk_assessment', 'str'],
-		['ref_id', 'str']
-	]}
-	optionsLabelField="auto"
-	optionsParameters={object?.risk_assessment?.id
-		? [['risk_assessment', object.risk_assessment.id]]
-		: []}
-	filterOptions={(options) => {
-		if (!object?.id) return options;
-		return options.filter((opt) => opt.value !== object.id);
-	}}
-	field="antecedent_scenarios"
-	cacheLock={cacheLocks['antecedent_scenarios']}
-	bind:cachedValue={formDataCache['antecedent_scenarios']}
-	label={m.antecedentScenarios()}
-	helpText={m.antecedentScenariosHelpText()}
 />

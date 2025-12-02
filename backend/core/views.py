@@ -2239,6 +2239,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 )
                 risk_scenario.description = build_description(operational_scenario)
 
+                risk_scenario.risk_origin = operational_scenario.ro_to.risk_origin
+
                 # Update inherent or current probability/impact based on feature flag
                 if ff_is_enabled("inherent_risk"):
                     risk_scenario.inherent_proba = operational_scenario.likelihood
@@ -2276,6 +2278,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     if operational_scenario.ref_id
                     else RiskScenario.get_default_ref_id(risk_assessment),
                     description=build_description(operational_scenario),
+                    risk_origin=operational_scenario.ro_to.risk_origin,
                 )
                 if ff_is_enabled("inherent_risk"):
                     risk_scenario.inherent_proba = operational_scenario.likelihood
