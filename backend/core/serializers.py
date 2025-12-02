@@ -416,6 +416,11 @@ class AssetWriteSerializer(BaseModelSerializer):
         queryset=SecurityException.objects.all(),
         required=False,
     )
+    applied_controls = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=AppliedControl.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = Asset
@@ -443,18 +448,22 @@ class AssetWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         parent_assets = validated_data.pop("parent_assets", None)
         child_assets = validated_data.pop("child_assets", None)
+        applied_controls = validated_data.pop("applied_controls", None)
         asset = super().create(validated_data)
 
         if parent_assets is not None:
             asset.parent_assets.set(parent_assets)
         if child_assets is not None:
             asset.child_assets.set(child_assets)
+        if applied_controls is not None:
+            asset.applied_controls.set(applied_controls)
 
         return asset
 
     def update(self, instance, validated_data):
         parent_assets = validated_data.pop("parent_assets", None)
         child_assets = validated_data.pop("child_assets", None)
+        applied_controls = validated_data.pop("applied_controls", None)
 
         instance = super().update(instance, validated_data)
 
@@ -463,6 +472,8 @@ class AssetWriteSerializer(BaseModelSerializer):
             instance.parent_assets.set(parent_assets)
         if child_assets is not None:
             instance.child_assets.set(child_assets)
+        if applied_controls is not None:
+            instance.applied_controls.set(applied_controls)
 
         return instance
 
@@ -480,6 +491,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     asset_class = FieldsRelatedField(["name"])
     overridden_children_capabilities = FieldsRelatedField(many=True)
     solutions = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
 
     children_assets = serializers.SerializerMethodField()
     security_objectives = serializers.SerializerMethodField()

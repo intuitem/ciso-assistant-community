@@ -74,6 +74,7 @@
 	"referenceControls": "Mesures de référence",
 	"referenceControlsColon": "Mesures de référence :",
 	"appliedControls": "Mesures appliquées",
+	"appliedControlsLinkedToAssetHelpText": "Mesures de sécurité mises en place pour cet actif",
 	"appliedControlsDistribution": "Distribution des Mesures Appliquées",
 	"planningTip": "Astuce : mettez à jour la date de début et la progression de vos mesures appliquées pour les voir ici.",
 	"existingAppliedControls": "Mesures existantes",
