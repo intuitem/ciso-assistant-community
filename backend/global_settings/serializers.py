@@ -17,6 +17,7 @@ GENERAL_SETTINGS_KEYS = [
     "daily_rate",
     "mapping_max_depth",
     "allow_self_validation",
+    "show_warning_external_links",
 ]
 
 
