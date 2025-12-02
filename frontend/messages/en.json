@@ -2831,9 +2831,11 @@
 	"relatedTo": "Related to",
 	"legacyEvidenceField": "Legacy Evidence",
 	"yearlyTasksReview": "Aggregated Tasks Review",
-	"reviewRecurrentTasksStatusByMonth": "Review recurrent tasks status by month",
+	"startPeriod": "Start period",
+	"endPeriod": "End period",
 	"allFolders": "All domains",
-	"apply": "Apply",
+	"refresh": "Refresh",
 	"reset": "Reset",
+	"periodTo": "to",
 	"noRecurrentTasksFound": "No recurrent tasks found"
 }

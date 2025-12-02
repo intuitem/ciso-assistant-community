@@ -11,20 +11,24 @@
 	let { data }: Props = $props();
 	pageTitle.set(m.yearlyTasksReview());
 
-	const monthNames = [
-		'Jan',
-		'Feb',
-		'Mar',
-		'Apr',
-		'May',
-		'Jun',
-		'Jul',
-		'Aug',
-		'Sep',
-		'Oct',
-		'Nov',
-		'Dec'
-	];
+	// Function to get translated short month names
+	function getMonthName(monthIndex: number): string {
+		const monthNames = [
+			m.januaryShort(),
+			m.februaryShort(),
+			m.marchShort(),
+			m.aprilShort(),
+			m.mayShort(),
+			m.juneShort(),
+			m.julyShort(),
+			m.augustShort(),
+			m.septemberShort(),
+			m.octoberShort(),
+			m.novemberShort(),
+			m.decemberShort()
+		];
+		return monthNames[monthIndex];
+	}
 
 	// Convert month/year to YYYY-MM format for month input
 	function toMonthFormat(year: number, month: number): string {
@@ -52,7 +56,7 @@
 		while (current <= endDate) {
 			const year = current.getFullYear();
 			const month = current.getMonth() + 1;
-			const label = monthNames[month - 1];
+			const label = getMonthName(month - 1);
 			result.push({ year, month, label });
 
 			// Move to next month
@@ -67,12 +71,12 @@
 	// Derived values for display
 	let startFormatted = $derived.by(() => {
 		const { year, month } = parseMonthFormat(startPeriod);
-		return { year, month, label: monthNames[month - 1] };
+		return { year, month, label: getMonthName(month - 1) };
 	});
 
 	let endFormatted = $derived.by(() => {
 		const { year, month } = parseMonthFormat(endPeriod);
-		return { year, month, label: monthNames[month - 1] };
+		return { year, month, label: getMonthName(month - 1) };
 	});
 
 	function getStatusColor(status: string | null): string {
@@ -107,11 +111,15 @@
 <div class="bg-white p-8 space-y-8">
 	<div>
 		<h1 class="text-3xl font-bold mb-2">
-			{m.yearlyTasksReview()} - {startFormatted.label}
-			{startFormatted.year} to {endFormatted.label}
-			{endFormatted.year}
+			{m.yearlyTasksReview()}
 		</h1>
-		<p class="text-gray-600">{m.reviewRecurrentTasksStatusByMonth()}</p>
+		<p class="text-gray-600">
+			{startFormatted.label}
+			{startFormatted.year}
+			{m.periodTo()}
+			{endFormatted.label}
+			{endFormatted.year}
+		</p>
 	</div>
 
 	<!-- Filters -->
@@ -120,7 +128,7 @@
 			<!-- Start Period -->
 			<div class="min-w-[160px]">
 				<label for="start-period-filter" class="block text-sm font-medium text-gray-700 mb-1">
-					Start Period
+					{m.startPeriod()}
 				</label>
 				<input
 					id="start-period-filter"
@@ -133,7 +141,7 @@
 			<!-- End Period -->
 			<div class="min-w-[160px]">
 				<label for="end-period-filter" class="block text-sm font-medium text-gray-700 mb-1">
-					End Period
+					{m.endPeriod()}
 				</label>
 				<input
 					id="end-period-filter"
@@ -166,7 +174,7 @@
 					onclick={applyFilters}
 					class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
 				>
-					{m.apply()}
+					{m.refresh()}
 				</button>
 				<button
 					onclick={resetFilters}
