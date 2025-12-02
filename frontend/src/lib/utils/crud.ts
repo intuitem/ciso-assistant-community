@@ -568,7 +568,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'vulnerabilities' },
 			{ field: 'assets', urlModel: 'solutions', disableCreate: true, disableDelete: true },
 			{ field: 'assets', urlModel: 'personal-data', disableCreate: true, disableDelete: true },
-			{ field: 'assets', urlModel: 'incidents' }
+			{ field: 'assets', urlModel: 'incidents' },
+			{ field: 'assets', urlModel: 'applied-controls', disableDelete: true }
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
