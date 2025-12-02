@@ -2816,5 +2816,6 @@
 	"addEvidenceRevisionFor": "Add revision for:\n{evidenceName}",
 	"occurrenceDueDate": "Occurrence due date",
 	"relatedTo": "Related to",
-	"legacyEvidenceField": "Legacy Evidence"
+	"legacyEvidenceField": "Legacy Evidence",
+	"dueDateUpdatedSuccessfully": "Due date updated successfully"
 }
