@@ -652,15 +652,32 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 request.data["filtering_labels"]
             )
         if request.data.get("evidences"):
-            folder = Folder.objects.get(id=request.data.get("folder"))
-            request.data["evidences"] = self._process_evidences(
-                request.data.get("evidences"), folder=folder
-            )
+            folder = None
+            folder_id = request.data.get("folder")
+            if folder_id:
+                folder = Folder.objects.get(id=folder_id)
+            elif findings_assessment_id := request.data.get("findings_assessment"):
+                # Get folder from findings_assessment for Finding model
+                findings_assessment = FindingsAssessment.objects.get(
+                    id=findings_assessment_id
+                )
+                folder = findings_assessment.folder
+
+            if folder:
+                request.data["evidences"] = self._process_evidences(
+                    request.data.get("evidences"), folder=folder
+                )
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         if request.data.get("evidences"):
-            folder = Folder.objects.get(id=request.data.get("folder"))
+            folder_id = request.data.get("folder")
+            if not folder_id:
+                # Get folder from instance when not in request data
+                instance = self.get_object()
+                folder = instance.folder
+            else:
+                folder = Folder.objects.get(id=folder_id)
             request.data["evidences"] = self._process_evidences(
                 request.data["evidences"], folder=folder
             )
