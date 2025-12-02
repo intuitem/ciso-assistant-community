@@ -26,23 +26,30 @@
 		'Dec'
 	];
 
-	// Generate year options (current year ± 5 years)
-	const currentYear = new Date().getFullYear();
-	const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
+	// Convert month/year to YYYY-MM format for month input
+	function toMonthFormat(year: number, month: number): string {
+		return `${year}-${String(month).padStart(2, '0')}`;
+	}
 
-	let startMonth = $state(data.startMonth);
-	let startYear = $state(data.startYear);
-	let endMonth = $state(data.endMonth);
-	let endYear = $state(data.endYear);
+	// Parse YYYY-MM format to month and year
+	function parseMonthFormat(value: string): { year: number; month: number } {
+		const [year, month] = value.split('-').map(Number);
+		return { year, month };
+	}
+
+	let startPeriod = $state(toMonthFormat(data.startYear, data.startMonth));
+	let endPeriod = $state(toMonthFormat(data.endYear, data.endMonth));
 	let selectedFolder = $state(data.selectedFolder);
 
 	// Generate the list of months to display based on date range
 	function getMonthsInRange() {
 		const result: Array<{ year: number; month: number; label: string }> = [];
-		let current = new Date(startYear, startMonth - 1, 1);
-		const end = new Date(endYear, endMonth - 1, 1);
+		const start = parseMonthFormat(startPeriod);
+		const end = parseMonthFormat(endPeriod);
+		let current = new Date(start.year, start.month - 1, 1);
+		const endDate = new Date(end.year, end.month - 1, 1);
 
-		while (current <= end) {
+		while (current <= endDate) {
 			const year = current.getFullYear();
 			const month = current.getMonth() + 1;
 			const label = monthNames[month - 1];
@@ -57,6 +64,17 @@
 
 	let monthsToDisplay = $derived(getMonthsInRange());
 
+	// Derived values for display
+	let startFormatted = $derived.by(() => {
+		const { year, month } = parseMonthFormat(startPeriod);
+		return { year, month, label: monthNames[month - 1] };
+	});
+
+	let endFormatted = $derived.by(() => {
+		const { year, month } = parseMonthFormat(endPeriod);
+		return { year, month, label: monthNames[month - 1] };
+	});
+
 	function getStatusColor(status: string | null): string {
 		if (!status) return 'bg-white';
 		if (status === 'completed') return 'bg-green-200';
@@ -66,20 +84,21 @@
 	}
 
 	function applyFilters() {
+		const start = parseMonthFormat(startPeriod);
+		const end = parseMonthFormat(endPeriod);
 		const params = new URLSearchParams();
-		params.set('start_month', startMonth.toString());
-		params.set('start_year', startYear.toString());
-		params.set('end_month', endMonth.toString());
-		params.set('end_year', endYear.toString());
+		params.set('start_month', start.month.toString());
+		params.set('start_year', start.year.toString());
+		params.set('end_month', end.month.toString());
+		params.set('end_year', end.year.toString());
 		if (selectedFolder) params.set('folder', selectedFolder);
 		goto(`/experimental/yearly-tasks-review?${params.toString()}`);
 	}
 
 	function resetFilters() {
-		startMonth = 1;
-		startYear = currentYear;
-		endMonth = 12;
-		endYear = currentYear;
+		const currentYear = new Date().getFullYear();
+		startPeriod = toMonthFormat(currentYear, 1);
+		endPeriod = toMonthFormat(currentYear, 12);
 		selectedFolder = '';
 		goto('/experimental/yearly-tasks-review');
 	}
@@ -88,9 +107,9 @@
 <div class="bg-white p-8 space-y-8">
 	<div>
 		<h1 class="text-3xl font-bold mb-2">
-			{m.yearlyTasksReview()} - {monthNames[startMonth - 1]}
-			{startYear} to {monthNames[endMonth - 1]}
-			{endYear}
+			{m.yearlyTasksReview()} - {startFormatted.label}
+			{startFormatted.year} to {endFormatted.label}
+			{endFormatted.year}
 		</h1>
 		<p class="text-gray-600">{m.reviewRecurrentTasksStatusByMonth()}</p>
 	</div>
@@ -98,68 +117,30 @@
 	<!-- Filters -->
 	<div class="bg-gray-50 p-4 rounded-lg border">
 		<div class="flex gap-4 items-end flex-wrap">
-			<!-- Start Date -->
-			<div class="flex gap-2">
-				<div class="min-w-[120px]">
-					<label for="start-month-filter" class="block text-sm font-medium text-gray-700 mb-1">
-						Start Month
-					</label>
-					<select
-						id="start-month-filter"
-						bind:value={startMonth}
-						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-					>
-						{#each Array.from({ length: 12 }, (_, i) => i + 1) as month}
-							<option value={month}>{monthNames[month - 1]}</option>
-						{/each}
-					</select>
-				</div>
-				<div class="min-w-[100px]">
-					<label for="start-year-filter" class="block text-sm font-medium text-gray-700 mb-1">
-						Start Year
-					</label>
-					<select
-						id="start-year-filter"
-						bind:value={startYear}
-						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-					>
-						{#each yearOptions as year}
-							<option value={year}>{year}</option>
-						{/each}
-					</select>
-				</div>
+			<!-- Start Period -->
+			<div class="min-w-[160px]">
+				<label for="start-period-filter" class="block text-sm font-medium text-gray-700 mb-1">
+					Start Period
+				</label>
+				<input
+					id="start-period-filter"
+					type="month"
+					bind:value={startPeriod}
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+				/>
 			</div>
 
-			<!-- End Date -->
-			<div class="flex gap-2">
-				<div class="min-w-[120px]">
-					<label for="end-month-filter" class="block text-sm font-medium text-gray-700 mb-1">
-						End Month
-					</label>
-					<select
-						id="end-month-filter"
-						bind:value={endMonth}
-						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-					>
-						{#each Array.from({ length: 12 }, (_, i) => i + 1) as month}
-							<option value={month}>{monthNames[month - 1]}</option>
-						{/each}
-					</select>
-				</div>
-				<div class="min-w-[100px]">
-					<label for="end-year-filter" class="block text-sm font-medium text-gray-700 mb-1">
-						End Year
-					</label>
-					<select
-						id="end-year-filter"
-						bind:value={endYear}
-						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-					>
-						{#each yearOptions as year}
-							<option value={year}>{year}</option>
-						{/each}
-					</select>
-				</div>
+			<!-- End Period -->
+			<div class="min-w-[160px]">
+				<label for="end-period-filter" class="block text-sm font-medium text-gray-700 mb-1">
+					End Period
+				</label>
+				<input
+					id="end-period-filter"
+					type="month"
+					bind:value={endPeriod}
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+				/>
 			</div>
 
 			<!-- Folder Filter -->
@@ -217,7 +198,7 @@
 								{#each monthsToDisplay as monthInfo}
 									<th class="px-2 py-3 text-center font-semibold w-16">
 										{monthInfo.label}
-										{#if monthsToDisplay.length > 12 || startYear !== endYear}
+										{#if monthsToDisplay.length > 12 || startFormatted.year !== endFormatted.year}
 											<div class="text-xs text-gray-500">{monthInfo.year}</div>
 										{/if}
 									</th>

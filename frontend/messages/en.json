@@ -2832,7 +2832,7 @@
 	"legacyEvidenceField": "Legacy Evidence",
 	"yearlyTasksReview": "Aggregated Tasks Review",
 	"reviewRecurrentTasksStatusByMonth": "Review recurrent tasks status by month",
-	"allFolders": "All Folders",
+	"allFolders": "All domains",
 	"apply": "Apply",
 	"reset": "Reset",
 	"noRecurrentTasksFound": "No recurrent tasks found"
