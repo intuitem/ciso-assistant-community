@@ -55,6 +55,17 @@ ALLOWED_PERMISSION_APPS = (
     "resilience",
     "crq",
     "pmbok",
+    "iam",
+)
+
+DISALLOWED_PERMISSION_MODELS = (
+    "personalaccesstoken",
+    "role",
+    "roleassignment",
+    "usergroup",
+    "ssosettings",
+    "user",
+    "historicalmetric"
 )
 
 
@@ -985,9 +996,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             elif class_name == "permission":
                 # Permissions have no folder, so we don't filter them, we just rely on view_permission
                 objects_ids = Permission.objects.filter(
-                    Q(content_type__app_label__in=ALLOWED_PERMISSION_APPS) |
-                    Q(content_type__model="folder")
-                ).values_list("id", flat=True)
+                    content_type__app_label__in=ALLOWED_PERMISSION_APPS
+                ).exclude(content_type__model__in=DISALLOWED_PERMISSION_MODELS).values_list("id", flat=True)
             else:
                 raise NotImplementedError("type not supported")
             if permission_view in result_folders[f]:
