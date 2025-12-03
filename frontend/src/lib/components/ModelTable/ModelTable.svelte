@@ -672,6 +672,12 @@
 																	{m.accept()}
 																</span>
 															</div>
+														{:else if (key === 'name' || key === 'str') && row.meta?.is_locked}
+															<div class="flex items-center space-x-2">
+																<i class="fa-solid fa-lock text-yellow-600" title={m.isLocked()}
+																></i>
+																<span class="text-yellow-600">{safeTranslate(value ?? '-')}</span>
+															</div>
 														{:else if key === 'icon_fa_class'}
 															<i class="text-lg fa {value}"></i>
 														{:else if value && value.name}
