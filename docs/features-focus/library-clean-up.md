@@ -8,4 +8,4 @@ If you want to delete a load library, make sure it's not used anywhere (for fram
 
 If the item is not used, it will show as "deletable" as below:
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (38).png" alt=""><figcaption></figcaption></figure>

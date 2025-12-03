@@ -53,7 +53,7 @@ Then you can use with any rest client or within your application or script:
 
 
 
-<figure><img src="../.gitbook/assets/image (38).png" alt="Example with Bruno (Postman alternative)"><figcaption><p>Example with Bruno (Postman alternative)</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (38) (1).png" alt="Example with Bruno (Postman alternative)"><figcaption><p>Example with Bruno (Postman alternative)</p></figcaption></figure>
 
 Or with curl:<br>
 

@@ -48,6 +48,7 @@
 * [🏛️ Governance](model/governance.md)
 * [💣 Risk](model/risk.md)
 * [📋 Compliance](model/compliance.md)
+* [Domain export/import](model/domain-export-import.md)
 
 ## Deployment
 
