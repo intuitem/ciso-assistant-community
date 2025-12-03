@@ -724,6 +724,28 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 "⚠️ Cannot modify the risk scenario when the risk assessment is locked."
             )
+
+        antecedent_scenarios = attrs.get("antecedent_scenarios", [])
+        consequent_scenarios = attrs.get("consequent_scenarios", [])
+
+        # Check that the scenario graph will not contain cycles
+        myset = set()
+        if self.instance:
+            myset = set([self.instance])
+
+        if antecedent_scenarios:
+            # Add all consequent scenarios to the set
+            if self.instance:
+                myset = myset | set(self.instance.consequent_scenarios.all())
+
+            for scenario in antecedent_scenarios:
+                if myset & set(scenario.ancestors_plus_self()):
+                    raise serializers.ValidationError(
+                        {
+                            "antecedent_scenarios": "errorRiskScenarioGraphMustNotContainCycles"
+                        }
+                    )
+
         return super().validate(attrs)
 
     class Meta:
@@ -742,6 +764,10 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     threats = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
+    risk_origin = FieldsRelatedField(["id", "name", "description"])
+    antecedent_scenarios = FieldsRelatedField(
+        many=True, fields=["id", "ref_id", "name"]
+    )
 
     treatment = serializers.CharField()
 
@@ -762,6 +788,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(many=True)
 
     within_tolerance = serializers.CharField()
 
@@ -790,7 +817,6 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
             "threats",
             "vulnerabilities",
             "assets",
-            "existing_controls",
             "existing_applied_controls",
             "applied_controls",
             "current_proba",
