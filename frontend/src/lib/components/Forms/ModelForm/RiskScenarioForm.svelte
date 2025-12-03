@@ -100,6 +100,15 @@
 />
 <AutocompleteSelect
 	{form}
+	optionsEndpoint="terminologies?field_path=ro_to.risk_origin&is_visible=true"
+	optionsLabelField="translated_name"
+	field="risk_origin"
+	cacheLock={cacheLocks['risk_origin']}
+	bind:cachedValue={formDataCache['risk_origin']}
+	label={m.riskOrigin()}
+/>
+<AutocompleteSelect
+	{form}
 	multiple
 	optionsEndpoint="threats"
 	optionsExtraFields={[['folder', 'str']]}
