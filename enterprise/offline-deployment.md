@@ -8,6 +8,8 @@ You'll use an **online workstation** to download dependencies and build the appl
 
 **Assumption:** The online workstation and offline server have the same architecture and OS.
 
+**Note:** This guide covers both Community and Enterprise editions. Enterprise-specific steps are clearly marked.
+
 ## Prerequisites
 
 **On the online workstation:**
@@ -22,6 +24,7 @@ You'll use an **online workstation** to download dependencies and build the appl
 - Node 22+
 - yaml-cpp library
 - Reverse proxy (Caddy or Traefik recommended)
+- **Enterprise only:** Additional system packages: `build-essential`, `python3-dev`, `python3-numpy`, `libjpeg-dev`, `libmagic1`
 
 ## Step 1: Prepare on Online Workstation
 
@@ -45,10 +48,19 @@ source venv/bin/activate
 poetry install --only main
 ```
 
+**For Enterprise Edition:**
+
+After installing backend dependencies, copy the enterprise core module:
+
+```bash
+# From the repository root
+cp -r enterprise/backend/enterprise_core backend/
+```
+
 ### Build Frontend
 
 ```bash
-cd ../frontend
+cd frontend
 
 # Install dependencies
 pnpm install
@@ -60,10 +72,21 @@ PUBLIC_BACKEND_API_URL=https://your-domain/api pnpm run build
 pnpm prune --prod
 ```
 
+**For Enterprise Edition:**
+
+Before building, overlay the enterprise frontend files:
+
+```bash
+# From the repository root
+cp -r enterprise/frontend/* frontend/
+# Then proceed with pnpm install and build
+```
+
 ## Step 2: Transfer to Offline Server
 
 Transfer the entire `ciso-assistant-community` directory to the offline server, including:
 - `backend/venv/` directory (complete virtual environment)
+- **Enterprise only:** `backend/enterprise_core/` directory (if copied during build)
 - `frontend/build/` directory (built frontend for SSR)
 - `frontend/server/` directory (Node.js server)
 - `frontend/node_modules/` directory (production dependencies)
@@ -75,6 +98,8 @@ Transfer the entire `ciso-assistant-community` directory to the offline server, 
 ### Configure Environment
 
 Create `backend/.env` file:
+
+**For Community Edition:**
 
 ```bash
 DJANGO_DEBUG=False
@@ -91,6 +116,45 @@ EMAIL_HOST_PASSWORD=your-password
 # Gunicorn configuration (optional)
 GUNICORN_WORKERS=4
 GUNICORN_TIMEOUT=120
+```
+
+**For Enterprise Edition:**
+
+Add these additional variables to the `.env` file:
+
+```bash
+# Enterprise settings
+DJANGO_SETTINGS_MODULE=enterprise_core.settings
+
+# License configuration
+LICENSE_SEATS=50
+LICENSE_EXPIRATION=2025-12-31
+
+# S3 Storage (optional)
+# USE_S3=True
+# AWS_ACCESS_KEY_ID=your-access-key
+# AWS_SECRET_ACCESS_KEY=your-secret-key
+# AWS_STORAGE_BUCKET_NAME=ciso-assistant-bucket
+# AWS_S3_ENDPOINT_URL=https://s3.your-domain.com
+
+# Email rescue (backup email server)
+# EMAIL_HOST_RESCUE=your-backup-smtp-host
+# EMAIL_PORT_RESCUE=587
+# EMAIL_HOST_USER_RESCUE=your-backup-email
+# EMAIL_HOST_PASSWORD_RESCUE=your-backup-password
+# EMAIL_USE_TLS_RESCUE=True
+
+# Audit log configuration
+AUDITLOG_RETENTION_DAYS=90
+AUDITLOG_MAX_RECORDS=50000
+
+# Webhook configuration
+# WEBHOOK_ALLOW_PRIVATE_IPS=False
+
+# Logging
+# LOG_LEVEL=INFO
+# LOG_FORMAT=json
+# LOG_OUTFILE=True
 ```
 
 ### Create Superuser
@@ -335,7 +399,8 @@ sudo systemctl status ciso-assistant-frontend
 To update an offline deployment:
 
 1. On online workstation: Pull latest code, rebuild venv and frontend (including `pnpm prune --prod`)
-2. Transfer updated files to offline server
-3. Restart services: `sudo systemctl restart ciso-assistant ciso-assistant-huey ciso-assistant-frontend`
+2. **Enterprise only:** Re-copy enterprise modules (`enterprise_core` and enterprise frontend files)
+3. Transfer updated files to offline server
+4. Restart services: `sudo systemctl restart ciso-assistant ciso-assistant-huey ciso-assistant-frontend`
 
 **Note:** The `startup.sh` script automatically runs migrations on startup, so no manual migration step is needed.
