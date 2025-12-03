@@ -79,6 +79,7 @@
 	"referenceControlsColon": "Reference controls:",
 	"planningTip": "Tip: update the start date and progress of your applied controls to see them here.",
 	"appliedControls": "Applied controls",
+	"appliedControlsLinkedToAssetHelpText": "Security controls implemented for this asset",
 	"appliedControlsDistribution": "Applied Controls Distribution",
 	"existingAppliedControls": "Existing controls",
 	"extraAppliedControls": "Extra controls",
@@ -121,6 +122,8 @@
 	"workflows": "Workflows",
 	"allowSelfValidation": "Allow self-validation",
 	"allowSelfValidationHelpText": "When enabled, users can approve their own validation requests",
+	"showWarningExternalLinks": "Show warning for external links",
+	"showWarningExternalLinksHelpText": "When enabled, users will see a warning before opening external links",
 	"eventsHistory": "Events history",
 	"linkedModels": "Associated objects",
 	"notes": "notes",
@@ -2833,5 +2836,13 @@
 	"addEvidenceRevisionFor": "Add revision for:\n{evidenceName}",
 	"occurrenceDueDate": "Occurrence due date",
 	"relatedTo": "Related to",
-	"legacyEvidenceField": "Legacy Evidence"
+	"legacyEvidenceField": "Legacy Evidence",
+	"yearlyTasksReview": "Aggregated Tasks Review",
+	"startPeriod": "Start period",
+	"endPeriod": "End period",
+	"allFolders": "All domains",
+	"refresh": "Refresh",
+	"reset": "Reset",
+	"periodTo": "to",
+	"noRecurrentTasksFound": "No recurrent tasks found"
 }
