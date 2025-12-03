@@ -44,6 +44,9 @@ cd backend
 python3 -m venv venv
 source venv/bin/activate
 
+# Install poetry in the venv (required by startup.sh)
+pip install poetry
+
 # Install dependencies
 poetry install --only main
 ```
