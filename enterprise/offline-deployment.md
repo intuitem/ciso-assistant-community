@@ -66,11 +66,13 @@ cd frontend
 pnpm install
 
 # Build for production
-PUBLIC_BACKEND_API_URL=https://your-domain/api pnpm run build
+NODE_OPTIONS="--max-old-space-size=8192" pnpm run build
 
 # Prune to production dependencies only
-pnpm prune --prod
+pnpm prune
 ```
+
+**Note:** `PUBLIC_BACKEND_API_URL` is not required during build because the frontend uses SvelteKit's dynamic environment variables, which are read at runtime. You'll configure this when setting up the frontend service on the offline server.
 
 **For Enterprise Edition:**
 
@@ -84,14 +86,9 @@ cp -r enterprise/frontend/* frontend/
 
 ## Step 2: Transfer to Offline Server
 
-Transfer the entire `ciso-assistant-community` directory to the offline server, including:
-- `backend/venv/` directory (complete virtual environment)
-- **Enterprise only:** `backend/enterprise_core/` directory (if copied during build)
-- `frontend/build/` directory (built frontend for SSR)
-- `frontend/server/` directory (Node.js server)
-- `frontend/node_modules/` directory (production dependencies)
-- `frontend/package.json`
-- All source code
+Transfer the following to the offline server:
+- `backend/` directory (including `venv/` with complete virtual environment)
+- `frontend/` directory (including `build/`, `server/`, `node_modules/`, and `package.json`)
 
 ## Step 3: Deploy on Offline Server
 
@@ -112,6 +109,13 @@ EMAIL_HOST=your-smtp-host
 EMAIL_PORT=587
 EMAIL_HOST_USER=your-email
 EMAIL_HOST_PASSWORD=your-password
+
+# PostgreSQL configuration (optional, defaults to SQLite)
+# POSTGRES_NAME=ciso-assistant
+# POSTGRES_USER=ciso-assistant-user
+# POSTGRES_PASSWORD=your-password
+# POSTGRES_HOST=localhost
+# POSTGRES_PORT=5432
 
 # Gunicorn configuration (optional)
 GUNICORN_WORKERS=4
@@ -157,23 +161,34 @@ AUDITLOG_MAX_RECORDS=50000
 # LOG_OUTFILE=True
 ```
 
-### Create Superuser
+### Initial Setup
 
-After the first startup, create a superuser account:
+Before starting the services, run migrations and create a superuser account:
 
 ```bash
 cd /path/to/ciso-assistant-community/backend
 source venv/bin/activate
+
+# Run database migrations
+python manage.py migrate
+
+# Create superuser account
 python manage.py createsuperuser
 ```
 
-### Set Up Gunicorn Service
+### Set Up Backend Service
 
-Create `/etc/systemd/system/ciso-assistant.service`:
+**Note:** In the following service configurations, update these values to match your offline server setup:
+- Replace `/path/to/ciso-assistant-community` with the actual installation path
+- Replace `your-domain` with your actual domain name
+- Replace `ciso-assistant` user/group with your actual system user
+- Update binary paths (e.g., `/usr/bin/node`, `/usr/bin/bash`) if they're located elsewhere on your system
+
+Create `/etc/systemd/system/ciso-assistant-backend.service`:
 
 ```ini
 [Unit]
-Description=CISO Assistant Gunicorn Service
+Description=CISO Assistant Backend Service
 After=network.target
 
 [Service]
@@ -189,11 +204,7 @@ ExecStart=/usr/bin/bash startup.sh
 WantedBy=multi-user.target
 ```
 
-**Note:** The `startup.sh` script automatically:
-- Waits for database to be ready
-- Runs migrations
-- Loads security frameworks with `storelibraries`
-- Starts gunicorn with optimal settings
+**Note:** The `startup.sh` script automatically handles database migrations, library loading, and starts Gunicorn.
 
 ### Set Up Huey Service
 
@@ -247,15 +258,15 @@ WantedBy=multi-user.target
 ```bash
 # Enable and start services
 sudo systemctl daemon-reload
-sudo systemctl enable ciso-assistant
+sudo systemctl enable ciso-assistant-backend
 sudo systemctl enable ciso-assistant-huey
 sudo systemctl enable ciso-assistant-frontend
-sudo systemctl start ciso-assistant
+sudo systemctl start ciso-assistant-backend
 sudo systemctl start ciso-assistant-huey
 sudo systemctl start ciso-assistant-frontend
 
 # Check status
-sudo systemctl status ciso-assistant
+sudo systemctl status ciso-assistant-backend
 sudo systemctl status ciso-assistant-huey
 sudo systemctl status ciso-assistant-frontend
 ```
@@ -372,12 +383,12 @@ sudo systemctl reload apache2
 
 ```bash
 # View logs
-sudo journalctl -u ciso-assistant -f
+sudo journalctl -u ciso-assistant-backend -f
 sudo journalctl -u ciso-assistant-huey -f
 sudo journalctl -u ciso-assistant-frontend -f
 
 # Check service status
-sudo systemctl status ciso-assistant
+sudo systemctl status ciso-assistant-backend
 sudo systemctl status ciso-assistant-huey
 sudo systemctl status ciso-assistant-frontend
 ```
@@ -386,9 +397,9 @@ sudo systemctl status ciso-assistant-frontend
 
 - Ensure Python 3.12+ and Node 22+ are installed
 - Verify yaml-cpp library is installed
-- Check all services are running: `sudo systemctl status ciso-assistant ciso-assistant-huey ciso-assistant-frontend`
+- Check all services are running: `sudo systemctl status ciso-assistant-backend ciso-assistant-huey ciso-assistant-frontend`
 - Review logs for errors:
-  - Backend: `sudo journalctl -u ciso-assistant -n 100`
+  - Backend: `sudo journalctl -u ciso-assistant-backend -n 100`
   - Frontend: `sudo journalctl -u ciso-assistant-frontend -n 100`
   - Huey: `sudo journalctl -u ciso-assistant-huey -n 100`
 - Ensure `.env` file has correct permissions (600)
@@ -398,9 +409,16 @@ sudo systemctl status ciso-assistant-frontend
 
 To update an offline deployment:
 
-1. On online workstation: Pull latest code, rebuild venv and frontend (including `pnpm prune --prod`)
+1. On online workstation: Pull latest code, rebuild venv and frontend (including `pnpm prune`)
 2. **Enterprise only:** Re-copy enterprise modules (`enterprise_core` and enterprise frontend files)
 3. Transfer updated files to offline server
-4. Restart services: `sudo systemctl restart ciso-assistant ciso-assistant-huey ciso-assistant-frontend`
+4. Restart services: `sudo systemctl restart ciso-assistant-backend ciso-assistant-huey ciso-assistant-frontend`
 
-**Note:** The `startup.sh` script automatically runs migrations on startup, so no manual migration step is needed.
+**Important:**
+- The `startup.sh` script automatically runs migrations on startup, so no manual migration step is needed.
+- **⚠️ WARNING:** Always preserve and backup the `backend/db/` folder on the offline server before updating. This folder contains:
+  - The SQLite database (if not using PostgreSQL)
+  - Uploaded evidence files and attachments
+  - Other critical application data
+
+  Never overwrite this folder when transferring updated files.
