@@ -248,13 +248,17 @@ Group=ciso-assistant
 WorkingDirectory=/path/to/ciso-assistant-community/frontend
 Environment="NODE_ENV=production"
 Environment="BODY_SIZE_LIMIT=25000000"
-Environment="ORIGIN=https://your-domain"
+Environment="ORIGIN=http://localhost:3000"
 Environment="PUBLIC_BACKEND_API_URL=http://localhost:8000/api"
 ExecStart=/usr/bin/node server
 
 [Install]
 WantedBy=multi-user.target
 ```
+
+**Important environment variables:**
+- `ORIGIN`: Must match the URL users will access in their browser. The default is `http://localhost:3000`. For production with a reverse proxy, change this to your actual domain (e.g., `https://your-domain` or `https://your-domain:8443`). Pay attention to the protocol (http/https) and port.
+- `PUBLIC_BACKEND_API_URL`: Points to the backend API. Use `http://localhost:8000/api` for internal communication between frontend and backend services.
 
 ### Start Services
 
