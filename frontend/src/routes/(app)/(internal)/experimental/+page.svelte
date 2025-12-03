@@ -29,6 +29,6 @@
 		title="Yearly Tasks Review"
 		desc="Review all recurrent tasks grouped by folder for yearly planning"
 		link="/experimental/yearly-tasks-review"
-		tags={['tasks', 'planning', 'review']}
+		tags={['tasks', 'planning', 'review', 'PRO']}
 	/>
 </div>
