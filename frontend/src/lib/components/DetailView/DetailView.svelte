@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { browser } from '$app/environment';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
@@ -14,8 +15,9 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
+	import SelectRelatedObjectsModal from '$lib/components/Modals/SelectRelatedObjectsModal.svelte';
 
-	import { Tabs, Tooltip } from '@skeletonlabs/skeleton-svelte';
+	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	import { onMount } from 'svelte';
 
@@ -29,6 +31,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { fade } from 'svelte/transition';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -107,7 +110,7 @@
 			// Return entries in the order specified by detailViewFields
 			return data.model.detailViewFields
 				.map((fieldConfig) => [fieldConfig.field, data.data[fieldConfig.field]])
-				.filter(([key, value]) => value !== undefined);
+				.filter(([, value]) => value !== undefined);
 		} else {
 			// Fall back to original order from data object
 			return Object.entries(filteredData);
@@ -124,7 +127,6 @@
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return;
-		// Check if the pressed key is 'e' and the edit button should be displayed
 
 		if (event.key === 'e' && displayEditButton()) {
 			event.preventDefault();
@@ -133,17 +135,15 @@
 	}
 
 	onMount(() => {
-		// Add event listener to the document
 		document.addEventListener('keydown', handleKeydown);
 
-		// Cleanup function to remove event listener
 		return () => {
 			document.removeEventListener('keydown', handleKeydown);
 		};
 	});
 
 	function modalCreateForm(model: Record<string, any>): void {
-		let modalComponent: ModalComponent = {
+		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
 				form: model.createForm,
@@ -153,10 +153,9 @@
 				formAction: `/${model.urlModel}?/create`
 			}
 		};
-		let modal: ModalSettings = {
+		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: safeTranslate('add-' + model.info.localName)
 		};
 		modalStore.trigger(modal);
@@ -177,12 +176,78 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: m.confirmModalTitle(),
 			body: `${m.confirmModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
 	}
+
+	function buildSingleFieldForm(originalForm: any, fieldName: string) {
+		if (!originalForm) return originalForm;
+
+		const data = originalForm.data ?? originalForm;
+		const errors = originalForm.errors ?? {};
+		const constraints = originalForm.constraints ?? {};
+
+		const filtered = {
+			...originalForm,
+			data: {
+				[fieldName]: data[fieldName] ?? []
+			},
+			errors: {
+				[fieldName]: errors[fieldName] ?? undefined
+			},
+			constraints: {
+				[fieldName]: constraints[fieldName] ?? undefined
+			}
+		};
+
+		return filtered;
+	}
+
+	function modalSelectRelatedObjects() {
+		if (!activeModel || !activeUrlmodel || !activeField) {
+			console.error('Missing active model/urlmodel/field for selection modal');
+			return;
+		}
+
+		const relationField = getRelationFieldName(activeField);
+
+		// Valeurs actuellement liées (pour pré-cocher les cases)
+		const currentValue = data.data[relationField] ?? [];
+		const initialSelectedIds: string[] = Array.isArray(currentValue)
+			? currentValue.map((v) => (typeof v === 'object' ? v.id : v))
+			: [];
+
+		// Endpoint pour lister les objets sélectionnables
+		// Tu peux ajuster : filtres, pagination, etc.
+		const listEndpoint =
+			activeField.endpointUrl && !activeField.endpointUrl.startsWith('./')
+				? activeField.endpointUrl
+				: `/${activeUrlmodel}`;
+
+		const modalComponent: ModalComponent = {
+			ref: SelectRelatedObjectsModal,
+			props: {
+				parentModel: data.model,
+				parentObject: data.data,
+				relatedModel: activeModel,
+				relatedUrlModel: activeUrlmodel,
+				relationField,
+				listEndpoint,
+				initialSelectedIds
+			}
+		};
+
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('select-' + activeModel.info.localNamePlural)
+		};
+
+		modalStore.trigger(modal);
+	}
+
 
 	function modalAppliedControlDuplicateForm(): void {
 		const modalComponent: ModalComponent = {
@@ -223,7 +288,6 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: m.confirmModalTitle(),
 			body: m.sureToSendQuestionnaire({ questionnaire: name })
 		};
@@ -283,10 +347,47 @@
 	let group = $state(
 		Object.keys(data?.relatedModels ?? {}).length > 0 ? getSortedRelatedModels()[0][0] : undefined
 	);
+
+	// Modèle actif pour la navigation latérale
+	let activeEntry = $derived(
+		relatedModels.length > 0
+			? (relatedModels.find(([urlmodel]) => urlmodel === group) ?? relatedModels[0])
+			: undefined
+	);
+
+	let activeUrlmodel = $derived(activeEntry ? activeEntry[0] : undefined);
+	let activeModel = $derived(activeEntry ? activeEntry[1] : undefined);
+
+	const getReverseFieldConfig = (urlmodel?: string) =>
+		urlmodel ? data.model.reverseForeignKeyFields?.find((item) => item.urlModel === urlmodel) : undefined;
+
+	const getRelationFieldName = (fieldConfig: any) => {
+		// Si un jour tu veux être plus explicite côté backend,
+		// tu peux ajouter `.relationField` dans reverseForeignKeyFields.
+		// Pour l'instant, on tombe par défaut sur `field`.
+		return fieldConfig?.relationField ?? fieldConfig?.field;
+	};
+
+
+	let activeField = $derived(getReverseFieldConfig(activeUrlmodel));
+
+	let activeFieldsToUse = $derived(() => {
+		if (!activeUrlmodel || !activeField) return [];
+
+		const listConfig = getListViewFields({
+			key: activeUrlmodel,
+			featureFlags: page.data?.featureflags
+		});
+
+		if (activeField.tableFields) {
+			return activeField.tableFields;
+		}
+		return listConfig.body.filter((v) => v !== activeField.field);
+	});
+
 	$effect(() => {
 		const newRelatedModelsNames = new Set(relatedModels.map((model) => model[0]));
 
-		// Check if the sets are actually different
 		const setsAreDifferent =
 			relatedModelsNames.size !== newRelatedModelsNames.size ||
 			[...newRelatedModelsNames].some((name) => !relatedModelsNames.has(name));
@@ -305,6 +406,76 @@
 
 	let expandedTable = $state(false);
 	const MAX_ROWS = 10;
+
+	// NEW: collapse / expand object details
+	let detailsCollapsed = $state(false);
+
+	let relatedModelRowCounts: Record<string, number> = $state({});
+
+	function updateRelatedModelRowCount(urlmodel: string | undefined, count: number) {
+		if (!urlmodel) return;
+		relatedModelRowCounts = { ...relatedModelRowCounts, [urlmodel]: count };
+	}
+
+	const getRelatedModelBadgeCount = (urlmodel: string, fallback = 0) =>
+		relatedModelRowCounts[urlmodel] ?? fallback;
+
+	let relatedModelCountController: AbortController | undefined;
+
+	async function preloadRelatedModelCounts() {
+		if (!browser || typeof window === 'undefined') return;
+		relatedModelCountController?.abort();
+		const controller = new AbortController();
+		relatedModelCountController = controller;
+
+		await Promise.allSettled(
+			relatedModels.map(async ([urlmodel]) => {
+				const fieldConfig = getReverseFieldConfig(urlmodel);
+				if (!fieldConfig) return;
+
+				try {
+					const endpoint = getReverseForeignKeyEndpoint({
+						parentModel: data.model,
+						targetUrlModel: urlmodel,
+						field: fieldConfig.field,
+						id: data.data.id,
+						endpointUrl: fieldConfig.endpointUrl
+					});
+					const url = new URL(endpoint, window.location.origin);
+					url.searchParams.set('limit', '1');
+					url.searchParams.set('offset', '0');
+
+					const response = await fetch(url.toString(), { signal: controller.signal });
+					if (!response.ok) {
+						throw new Error(`Failed to load ${urlmodel} count`);
+					}
+					const payload = await response.json();
+					const count = payload?.count ?? payload?.results?.length ?? 0;
+					updateRelatedModelRowCount(urlmodel, count);
+				} catch (error) {
+					if (error instanceof DOMException && error.name === 'AbortError') {
+						return;
+					}
+					console.error('Unable to preload related model count', urlmodel, error);
+				}
+			})
+		);
+	}
+
+	onMount(() => {
+		void preloadRelatedModelCounts();
+		return () => {
+			relatedModelCountController?.abort();
+		};
+	});
+
+	$effect(() => {
+		const dependencyKey =
+			(data?.data?.id ?? '') + ':' + relatedModels.map(([urlmodel]) => urlmodel).join(',');
+		void dependencyKey;
+		if (!browser) return;
+		void preloadRelatedModelCounts();
+	});
 </script>
 
 <div class="flex flex-col space-y-2">
@@ -365,403 +536,481 @@
 		</div>
 	{/if}
 
-	<!-- Main content area - modified to use conditional flex layout -->
-	<div class="card shadow-lg bg-white p-4">
-		{#each data.data?.sync_mappings as syncMapping}
-			<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
-				<h3 class="font-semibold text-secondary-800 mb-2">
-					{m.syncedWith({ integrationName: syncMapping.provider?.toUpperCase() ?? 'UNKNOWN' })}
-				</h3>
-
-				<dl class="grid grid-cols-1 gap-1 sm:grid-cols-2 text-secondary-700">
-					<dt class="font-medium">{m.remoteId()}</dt>
-					<dd>{syncMapping.remote_id}</dd>
-
-					<dt class="font-medium">{m.lastSynced()}</dt>
-					<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
-
-					<dt class="font-medium">{m.status()}</dt>
-					<dd>{safeTranslate(syncMapping.sync_status)}</dd>
-				</dl>
-			</div>
-		{/each}
-		<div class={hasWidgets ? 'flex flex-row flex-wrap gap-4' : 'w-full'}>
-			<!-- Left side - Details (conditional width) -->
-			<div
-				class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs {hasWidgets
-					? 'flex-1 min-w-[300px]'
-					: 'w-full'}"
+	<!-- Main content area with collapsible object details -->
+	<div class="card shadow-lg bg-white mt-2">
+		<div class={`relative ${detailsCollapsed ? 'py-3' : 'py-3'}`}>
+			<button
+				type="button"
+				class="absolute left-1/2 -translate-x-1/2 -bottom-3 inline-flex items-center justify-center
+				w-7 h-7 rounded-full border border-gray-300 bg-white shadow-sm text-gray-500
+				hover:text-gray-700 hover:bg-gray-50"
+				onclick={() => (detailsCollapsed = !detailsCollapsed)}
+				aria-label="toggle-details"
 			>
-				<dl class="-my-3 divide-y divide-gray-100 text-sm">
-					{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
-						<div
-							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-5 sm:gap-4 {index >=
-								MAX_ROWS && !expandedTable
-								? 'hidden'
-								: ''}"
-						>
-							<dt
-								class="font-medium text-gray-900 flex items-center gap-2"
-								data-testid="{key.replace('_', '-')}-field-title"
-							>
-								<span>{safeTranslate(key)}</span>
-								{#if getFieldConfig(key)?.tooltip}
-									{@const tooltipKey = getFieldConfig(key)?.tooltip}
-									{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
-									<Tooltip
-										positioning={{ placement: 'right' }}
-										contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
-										openDelay={200}
-										closeDelay={100}
-										arrow
-										arrowBase="arrow bg-gray-800 border border-gray-700"
-									>
-										{#snippet trigger()}
-											<i
-												class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
-											></i>
-										{/snippet}
-										{#snippet content()}
-											<p class="text-sm">{tooltipText}</p>
-										{/snippet}
-									</Tooltip>
-								{/if}
-							</dt>
-							<dd class="text-gray-700 sm:col-span-4">
-								<ul class="">
-									<li
-										class="list-none whitespace-pre-line"
-										data-testid={!(value instanceof Array)
-											? key.replace('_', '-') + '-field-value'
-											: null}
-									>
-										{#if value !== null && value !== undefined && value !== ''}
-											{#if key === 'asset_class'}
-												<!-- Special case for asset_class - Always translate the value -->
-												{#if typeof value === 'object' && (value.str || value.name)}
-													{safeTranslate(value.str || value.name)}
-												{:else}
-													{safeTranslate(value)}
-												{/if}
-											{:else if key === 'library'}
-												{@const itemHref = `/loaded-libraries/${value.id}`}
-												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-													>{value.name}</Anchor
-												>
-											{:else if key === 'severity' && data.urlModel !== 'incidents'}
-												<!-- We must add translations for the following severity levels -->
-												<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
-												{@const stringifiedSeverity = !value
-													? '--'
-													: (safeTranslate(value) ?? m.undefined())}
-												{stringifiedSeverity}
-											{:else if key === 'children_assets'}
-												{#if Object.keys(value).length > 0}
-													<ul class="inline-flex flex-wrap space-x-4">
-														{#each value as val}
-															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if val.str && val.id}
-																	{@const itemHref = `/${
-																		data.model?.foreignKeyFields?.find((item) => item.field === key)
-																			?.urlModel
-																	}/${val.id}`}
-																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
-																		{truncateString(val.str)}</Anchor
-																	>
-																{:else if val.str}
-																	{safeTranslate(val.str)}
-																{:else}
-																	{value}
-																{/if}
-															</li>
-														{/each}
-													</ul>
-												{:else}
-													--
-												{/if}
-											{:else if key === 'translations'}
-												{#if Object.keys(value).length > 0}
-													<div class="flex flex-col gap-2">
-														{#each Object.entries(value) as [lang, translation]}
-															<div class="flex flex-row gap-2">
-																<strong>{lang}:</strong>
-																<span>{safeTranslate(translation)}</span>
-															</div>
-														{/each}
-													</div>
-												{:else}
-													--
-												{/if}
-											{:else if Array.isArray(value)}
-												{#if Object.keys(value).length > 0}
-													<ul>
-														{#each value.sort((a, b) => {
-															if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
-															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
-														}) as val}
-															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if key === 'security_objectives' || key === 'security_capabilities'}
-																	{@const [securityObjectiveName, securityObjectiveValue] =
-																		Object.entries(val)[0]}
-																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
-																	{@const itemHref = `/${
-																		data.model?.foreignKeyFields?.find((item) => item.field === key)
-																			?.urlModel
-																	}/${val.id}`}
-																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																		>{val.str}</Anchor
-																	>
-																{:else if val.str}
-																	{safeTranslate(val.str)}
-																{:else}
-																	{value}
-																{/if}
-															</li>
-														{/each}
-													</ul>
-												{:else}
-													--
-												{/if}
-											{:else if value.id && !value.hexcolor}
-												{@const itemHref = `/${
-													data.model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel
-												}/${value.id}`}
-												{#if key === 'ro_to_couple'}
-													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-														>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
-															'-'
-														)[1]}</Anchor
-													>
-												{:else}
-													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-														>{value.str || value.name}</Anchor
-													>
-												{/if}
-												<!-- Shortcut before DetailView refactoring -->
-											{:else if value === 'P1'}
-												<li class="fa-solid fa-flag text-red-500"></li>
-												{m.p1()}
-											{:else if value === 'P2'}
-												<li class="fa-solid fa-flag text-orange-500"></li>
-												{m.p2()}
-											{:else if value === 'P3'}
-												<li class="fa-solid fa-flag text-blue-500"></li>
-												{m.p3()}
-											{:else if value === 'P4'}
-												<li class="fa-solid fa-flag text-gray-500"></li>
-												{m.p4()}
-											{:else if key === 'icon'}
-												<i class="text-lg fa {data.data.icon_fa_class}"></i>
-												{safeTranslate((value.str || value.name) ?? value)}
-											{:else if isURL(value) && !value.startsWith('urn')}
-												<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
-													>{value}</Anchor
-												>
-											{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
-												{formatDateOrDateTime(value, getLocale())}
-											{:else if key === 'description' || key === 'observation' || key === 'annotation'}
-												<MarkdownRenderer content={value} />
-											{:else if m[toCamelCase(value.str || value.name)]}
-												{safeTranslate((value.str || value.name) ?? value)}
-											{:else}
-												{(value.str || value.name) ?? value}
-											{/if}
-										{:else}
-											--
-										{/if}
-									</li>
-								</ul>
-							</dd>
+				<i class={`fa-solid ${detailsCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'}`}></i>
+			</button>
+
+			{#if !detailsCollapsed}
+				<div class="px-4 pt-4 pb-4" in:fade={{ duration: 150 }} out:fade={{ duration: 100 }}>
+					{#each data.data?.sync_mappings as syncMapping}
+						<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
+							<h3 class="font-semibold text-secondary-800 mb-2">
+								{m.syncedWith({
+									integrationName: syncMapping.provider?.toUpperCase() ?? 'UNKNOWN'
+								})}
+							</h3>
+
+							<dl class="grid grid-cols-1 gap-1 sm:grid-cols-2 text-secondary-700">
+								<dt class="font-medium">{m.remoteId()}</dt>
+								<dd>{syncMapping.remote_id}</dd>
+
+								<dt class="font-medium">{m.lastSynced()}</dt>
+								<dd>{new Date(syncMapping.last_synced_at).toLocaleString(getLocale())}</dd>
+
+								<dt class="font-medium">{m.status()}</dt>
+								<dd>{safeTranslate(syncMapping.sync_status)}</dd>
+							</dl>
 						</div>
 					{/each}
-				</dl>
-			</div>
-			<!-- Right side - Widgets area (only if widgets exist) -->
-			{#if hasWidgets}
-				<div class="flex-1 min-w-[300px] flex flex-col">
-					<!-- Slot for widgets and metrics -->
-					<div class="h-full">
-						{@render widgets?.()}
+
+					<div class={hasWidgets ? 'flex flex-row flex-wrap gap-4' : 'w-full'}>
+						<!-- Left side - Details (conditional width) -->
+						<div
+							class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs {hasWidgets
+								? 'flex-1 min-w-[300px]'
+								: 'w-full'}"
+						>
+							<dl class="-my-3 divide-y divide-gray-100 text-sm">
+								{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
+									<div
+										class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-5 sm:gap-4 {index >=
+											MAX_ROWS && !expandedTable
+											? 'hidden'
+											: ''}"
+									>
+										<dt
+											class="font-medium text-gray-900 flex items-center gap-2"
+											data-testid="{key.replace('_', '-')}-field-title"
+										>
+											<span>{safeTranslate(key)}</span>
+											{#if getFieldConfig(key)?.tooltip}
+												{@const tooltipKey = getFieldConfig(key)?.tooltip}
+												{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
+												<Tooltip
+													positioning={{ placement: 'right' }}
+													contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
+													openDelay={200}
+													closeDelay={100}
+													arrow
+													arrowBase="arrow bg-gray-800 border border-gray-700"
+												>
+													{#snippet trigger()}
+														<i
+															class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
+														></i>
+													{/snippet}
+													{#snippet content()}
+														<p class="text-sm">{tooltipText}</p>
+													{/snippet}
+												</Tooltip>
+											{/if}
+										</dt>
+										<dd class="text-gray-700 sm:col-span-4">
+											<ul>
+												<li
+													class="list-none whitespace-pre-line"
+													data-testid={!(value instanceof Array)
+														? key.replace('_', '-') + '-field-value'
+														: null}
+												>
+													{#if value !== null && value !== undefined && value !== ''}
+														{#if key === 'asset_class'}
+															<!-- Special case for asset_class - Always translate the value -->
+															{#if typeof value === 'object' && (value.str || value.name)}
+																{safeTranslate(value.str || value.name)}
+															{:else}
+																{safeTranslate(value)}
+															{/if}
+														{:else if key === 'library'}
+															{@const itemHref = `/loaded-libraries/${value.id}`}
+															<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																>{value.name}</Anchor
+															>
+														{:else if key === 'severity' && data.urlModel !== 'incidents'}
+															{@const stringifiedSeverity = !value
+																? '--'
+																: (safeTranslate(value) ?? m.undefined())}
+															{stringifiedSeverity}
+														{:else if key === 'children_assets'}
+															{#if Object.keys(value).length > 0}
+																<ul class="inline-flex flex-wrap space-x-4">
+																	{#each value as val}
+																		<li data-testid={key.replace('_', '-') + '-field-value'}>
+																			{#if val.str && val.id}
+																				{@const itemHref = `/${data.model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${val.id}`}
+																				<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
+																					{truncateString(val.str)}</Anchor
+																				>
+																			{:else if val.str}
+																				{safeTranslate(val.str)}
+																			{:else}
+																				{value}
+																			{/if}
+																		</li>
+																	{/each}
+																</ul>
+															{:else}
+																--
+															{/if}
+														{:else if key === 'translations'}
+															{#if Object.keys(value).length > 0}
+																<div class="flex flex-col gap-2">
+																	{#each Object.entries(value) as [lang, translation]}
+																		<div class="flex flex-row gap-2">
+																			<strong>{lang}:</strong>
+																			<span>{safeTranslate(translation)}</span>
+																		</div>
+																	{/each}
+																</div>
+															{:else}
+																--
+															{/if}
+														{:else if Array.isArray(value)}
+															{#if Object.keys(value).length > 0}
+																<ul>
+																	{#each value.sort((a, b) => {
+																		if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object'))
+																			return 0;
+																		return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+																	}) as val}
+																		<li data-testid={key.replace('_', '-') + '-field-value'}>
+																			{#if key === 'security_objectives' || key === 'security_capabilities'}
+																				{@const [securityObjectiveName, securityObjectiveValue] = Object.entries(val)[0]}
+																				{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
+																				{@const itemHref = `/${data.model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${val.id}`}
+																				<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																					>{val.str}</Anchor
+																				>
+																			{:else if val.str}
+																				{safeTranslate(val.str)}
+																			{:else}
+																				{value}
+																			{/if}
+																		</li>
+																	{/each}
+																</ul>
+															{:else}
+																--
+															{/if}
+														{:else if value.id && !value.hexcolor}
+															{@const itemHref = `/${data.model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
+															{#if key === 'ro_to_couple'}
+																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																	>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split('-')[1]}</Anchor
+																>
+															{:else}
+																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																	>{value.str || value.name}</Anchor
+																>
+															{/if}
+														{:else if value === 'P1'}
+															<li class="fa-solid fa-flag text-red-500"></li>
+															{m.p1()}
+														{:else if value === 'P2'}
+															<li class="fa-solid fa-flag text-orange-500"></li>
+															{m.p2()}
+														{:else if value === 'P3'}
+															<li class="fa-solid fa-flag text-blue-500"></li>
+															{m.p3()}
+														{:else if value === 'P4'}
+															<li class="fa-solid fa-flag text-gray-500"></li>
+															{m.p4()}
+														{:else if key === 'icon'}
+															<i class="text-lg fa {data.data.icon_fa_class}"></i>
+															{safeTranslate((value.str || value.name) ?? value)}
+														{:else if isURL(value) && !value.startsWith('urn')}
+															<Anchor breadcrumbAction="push" href={value} target="_blank" class="anchor"
+																>{value}</Anchor
+															>
+														{:else if ISO_8601_REGEX.test(value) && dateFieldsToFormat.includes(key)}
+															{formatDateOrDateTime(value, getLocale())}
+														{:else if key === 'description' || key === 'observation' || key === 'annotation'}
+															<MarkdownRenderer content={value} />
+														{:else if m[toCamelCase(value.str || value.name)]}
+															{safeTranslate((value.str || value.name) ?? value)}
+														{:else}
+															{(value.str || value.name) ?? value}
+														{/if}
+													{:else}
+														--
+													{/if}
+												</li>
+											</ul>
+										</dd>
+									</div>
+								{/each}
+							</dl>
+						</div>
+
+						{#if hasWidgets}
+							<div class="flex-1 min-w-[300px] flex flex-col">
+								<div class="h-full">
+									{@render widgets?.()}
+								</div>
+							</div>
+						{/if}
 					</div>
+
+					{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
+						<button
+							onclick={() => (expandedTable = !expandedTable)}
+							class="m-5 text-blue-800"
+							aria-expanded={expandedTable}
+						>
+							<i class="{expandedTable ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"></i>
+						</button>
+					{/if}
+				</div>
+
+				<!-- Bottom row for action buttons (visibles seulement quand ouvert) -->
+				<div class="flex flex-row justify-end gap-2 px-4 pb-4 border-t border-gray-100">
+					{#if mailing}
+						<button
+							class="btn preset-filled-primary-500 h-fit"
+							onclick={(_) => {
+								modalMailConfirm(
+									data.data.compliance_assessment.id,
+									data.data.compliance_assessment.str,
+									'?/mailing'
+								);
+							}}
+							onkeydown={(_) =>
+								modalMailConfirm(
+									data.data.compliance_assessment.id,
+									data.data.compliance_assessment.str,
+									'?/mailing'
+								)}
+						>
+							<i class="fas fa-paper-plane mr-2"></i>
+							{m.sendQuestionnaire()}
+						</button>
+					{/if}
+
+					{#if data.data.state === 'Submitted' && canEditObject}
+						<button
+							onclick={(_) => {
+								modalConfirm(data.data.id, data.data.name, '?/draft');
+							}}
+							onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/draft')}
+							class="btn preset-filled-primary-500"
+							disabled={!data.data.approver}
+						>
+							<i class="fas fa-arrow-alt-circle-left mr-2"></i> {m.draft()}</button
+						>
+					{/if}
+
+					{#if displayEditButton()}
+						{#if data.data.state === 'Created'}
+							<Tooltip
+								open={openStateRA && !data.data.approver}
+								onOpenChange={(e) => (openStateRA = e.open)}
+								positioning={{ placement: 'top' }}
+								contentBase="card preset-tonal-error p-4"
+								openDelay={200}
+								closeDelay={100}
+								arrow
+								arrowBase="arrow preset-tonal-surface border border-error-100"
+								onclick={() => {
+									if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
+								}}
+								onkeydown={(_: any) => {
+									if (data.data.approver) return modalConfirm(data.data.id, data.data.name, '?/submit');
+								}}
+								triggerBase={data.data.approver
+									? 'btn preset-filled-primary-500 *:pointer-events-none'
+									: 'btn preset-filled-primary-500 opacity-50 *:pointer-events-none cursor-not-allowed'}
+								disabled={data.data.approver}
+							>
+								{#snippet trigger()}
+									<i class="fas fa-paper-plane mr-2"></i>
+									{m.submit()}
+								{/snippet}
+								{#snippet content()}
+									<p>{m.riskAcceptanceMissingApproverMessage()}</p>
+								{/snippet}
+							</Tooltip>
+						{/if}
+
+						<Anchor
+							breadcrumbAction="push"
+							href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
+							label={m.edit()}
+							class="btn preset-filled-primary-500 h-fit"
+							><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"
+							></i>{m.edit()}</Anchor
+						>
+
+						{#if data.urlModel === 'applied-controls'}
+							<button
+								class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+								onclick={(_) => modalAppliedControlDuplicateForm()}
+								data-testid="duplicate-button"
+							>
+								<i class="fa-solid fa-copy mr-2"></i>
+								{m.duplicate()}</button
+							>
+						{/if}
+					{/if}
+
+					{@render actions?.()}
 				</div>
 			{/if}
-		</div>
-		{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
-			<button
-				onclick={() => (expandedTable = !expandedTable)}
-				class="m-5 text-blue-800"
-				aria-expanded={expandedTable}
-			>
-				<i class="{expandedTable ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"></i>
-				{expandedTable ? m.viewLess() : m.viewMore()}
-			</button>
-		{/if}
-
-		<!-- Bottom row for action buttons -->
-		<div class="flex flex-row justify-end mt-4 gap-2">
-			{#if mailing}
-				<button
-					class="btn preset-filled-primary-500 h-fit"
-					onclick={(_) => {
-						modalMailConfirm(
-							data.data.compliance_assessment.id,
-							data.data.compliance_assessment.str,
-							'?/mailing'
-						);
-					}}
-					onkeydown={(_) =>
-						modalMailConfirm(
-							data.data.compliance_assessment.id,
-							data.data.compliance_assessment.str,
-							'?/mailing'
-						)}
-				>
-					<i class="fas fa-paper-plane mr-2"></i>
-					{m.sendQuestionnaire()}
-				</button>
-			{/if}
-
-			{#if data.data.state === 'Submitted' && canEditObject}
-				<button
-					onclick={(_) => {
-						modalConfirm(data.data.id, data.data.name, '?/draft');
-					}}
-					onkeydown={(_) => modalConfirm(data.data.id, data.data.name, '?/draft')}
-					class="btn preset-filled-primary-500"
-					disabled={!data.data.approver}
-				>
-					<i class="fas fa-arrow-alt-circle-left mr-2"></i> {m.draft()}</button
-				>
-			{/if}
-
-			{#if displayEditButton()}
-				{#if data.data.state === 'Created'}
-					<Tooltip
-						open={openStateRA && !data.data.approver}
-						onOpenChange={(e) => (openStateRA = e.open)}
-						positioning={{ placement: 'top' }}
-						contentBase="card preset-tonal-error p-4"
-						openDelay={200}
-						closeDelay={100}
-						arrow
-						arrowBase="arrow preset-tonal-surface border border-error-100"
-						onclick={() => {
-							if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
-						}}
-						onkeydown={(_: any) => {
-							if (data.data.approver) return modalConfirm(data.data.id, data.data.name, '?/submit');
-						}}
-						triggerBase={data.data.approver
-							? 'btn preset-filled-primary-500 *:pointer-events-none'
-							: 'btn preset-filled-primary-500 opacity-50 *:pointer-events-none cursor-not-allowed'}
-						disabled={data.data.approver}
-					>
-						{#snippet trigger()}
-							<i class="fas fa-paper-plane mr-2"></i>
-							{m.submit()}
-						{/snippet}
-						{#snippet content()}
-							<p>{m.riskAcceptanceMissingApproverMessage()}</p>
-						{/snippet}
-					</Tooltip>
-				{/if}
-
-				<Anchor
-					breadcrumbAction="push"
-					href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
-					label={m.edit()}
-					class="btn preset-filled-primary-500 h-fit"
-					><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"
-					></i>{m.edit()}</Anchor
-				>
-
-				{#if data.urlModel === 'applied-controls'}
-					<button
-						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
-						onclick={(_) => modalAppliedControlDuplicateForm()}
-						data-testid="duplicate-button"
-					>
-						<i class="fa-solid fa-copy mr-2"></i>
-						{m.duplicate()}</button
-					>
-				{/if}
-			{/if}
-			{@render actions?.()}
 		</div>
 	</div>
 </div>
 
-{#if relatedModels.length > 0 && displayModelTable}
-	<div class="card shadow-lg mt-8 bg-white">
-		<Tabs
-			value={group}
-			onValueChange={(e) => (group = e.value)}
-			listJustify="justify-center"
-			listClasses="flex flex-wrap"
-		>
-			{#snippet list()}
-				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Control value={urlmodel}>
-						{safeTranslate(model.info.localNamePlural)}
-						{#if model.table.body.length > 0}
-							<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
-						{/if}
-					</Tabs.Control>
-				{/each}
-			{/snippet}
-			{#snippet content()}
-				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Panel value={urlmodel}>
-						{#key urlmodel}
-							<div class="flex flex-row justify-between px-4 py-2">
-								<h4 class="font-semibold lowercase capitalize-first my-auto">
-									{safeTranslate('associated-' + model.info.localNamePlural)}
-								</h4>
-							</div>
-							{@const field = data.model.reverseForeignKeyFields.find(
-								(item) => item.urlModel === urlmodel
-							)}
-							{@const fieldsToUse =
-								field?.tableFields ||
-								getListViewFields({
-									key: urlmodel,
-									featureFlags: page.data?.featureflags
-								}).body.filter((v) => v !== field.field)}
-							{#if model.table}
-								<ModelTable
-									baseEndpoint={getReverseForeignKeyEndpoint({
-										parentModel: data.model,
-										targetUrlModel: urlmodel,
-										field: field.field,
-										id: data.data.id,
-										endpointUrl: field.endpointUrl
-									})}
-									source={model.table}
-									disableCreate={disableCreate || model.disableCreate}
-									disableEdit={disableEdit || model.disableEdit}
-									disableDelete={disableDelete || model.disableDelete}
-									deleteForm={model.deleteForm}
-									URLModel={urlmodel}
-									fields={fieldsToUse}
-									defaultFilters={field.defaultFilters || {}}
-								>
-									{#snippet addButton()}
+{#snippet RelatedModelContent(showHeader = true)}
+	{#key activeUrlmodel}
+		<div in:fade={{ duration: 150 }}>
+			{#if activeModel && activeUrlmodel && activeField}
+				<div class="max-w-full rounded-xl border border-gray-100 shadow-sm p-4">
+					{#if showHeader}
+						<div class="flex flex-row justify-between items-center mb-3">
+							<h4 class="font-semibold lowercase capitalize-first">
+								{safeTranslate('associated-' + activeModel.info.localNamePlural)}
+							</h4>
+						</div>
+					{/if}
+
+					{#if activeModel.table}
+						<ModelTable
+							baseEndpoint={getReverseForeignKeyEndpoint({
+								parentModel: data.model,
+								targetUrlModel: activeUrlmodel,
+								field: activeField.field,
+								id: data.data.id,
+								endpointUrl: activeField.endpointUrl
+							})}
+							source={activeModel.table}
+							disableCreate={disableCreate || activeModel.disableCreate}
+							disableEdit={disableEdit || activeModel.disableEdit}
+							disableDelete={disableDelete || activeModel.disableDelete}
+							deleteForm={activeModel.deleteForm}
+							URLModel={activeUrlmodel}
+							fields={activeFieldsToUse}
+							defaultFilters={activeField.defaultFilters || {}}
+							canSelectObject={canEditObject}
+							on:rowcount={(event) =>
+								updateRelatedModelRowCount(activeUrlmodel, event.detail)}
+						>
+							{#snippet selectButton()}
+								<div>
+									<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 										<button
-											class="btn preset-filled-primary-500 self-end my-auto"
-											data-testid="add-button"
-											onclick={(_) => modalCreateForm(model)}
-											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
-												'add-' + model.info.localName
-											)}</button
+											class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+											data-testid="select-related-button"
+											title={safeTranslate('select-' + activeModel.info.localNamePlural)}
+											type="button"
+											onclick={(_) => modalSelectRelatedObjects()}
 										>
-									{/snippet}
-								</ModelTable>
-							{/if}
-						{/key}
-					</Tabs.Panel>
-				{/each}
-			{/snippet}
-		</Tabs>
-	</div>
+											<i class="fa-solid fa-hand-pointer"></i>
+										</button>
+									</span>
+								</div>
+							{/snippet}
+
+							{#snippet addButton()}
+								<div>
+									<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+										<button
+											class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+											data-testid="add-button"
+											title={safeTranslate('add-' + activeModel.info.localName)}
+											type="button"
+											onclick={(_) => modalCreateForm(activeModel)}
+										>
+											<i class="fa-solid fa-file-circle-plus"></i>
+										</button>
+									</span>
+								</div>
+							{/snippet}
+						</ModelTable>
+					{:else}
+						<p class="text-sm text-gray-500">
+							{m.noDataAvailable()}
+						</p>
+					{/if}
+				</div>
+			{:else}
+				<p class="text-sm text-gray-500">
+					{m.noDataAvailable()}
+				</p>
+			{/if}
+		</div>
+	{/key}
+{/snippet}
+
+{#if relatedModels.length > 0 && displayModelTable}
+	{#if relatedModels.length === 1}
+		<!-- Single link: no side menu -->
+		<div class="card shadow-lg mt-8 bg-white">
+			<div class="px-4 py-4 overflow-x-auto">
+				{@render RelatedModelContent(true)}
+			</div>
+		</div>
+	{:else}
+		<!-- General case with side menu -->
+		<div class="card shadow-lg mt-8 bg-white">
+			<div class="flex flex-col md:flex-row">
+				<!-- sticky side bar -->
+				<nav
+					class="md:w-64 md:sticky md:top-[80px] md:h-[calc(100vh-120px)] md:overflow-y-auto
+						bg-surface-50 border-b md:border-b-0 md:border-r border-gray-200
+						pt-4"
+				>
+					<h3 class="px-4 pb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+						{safeTranslate('associated-objects')}
+					</h3>
+
+						<ul class="pb-4 space-y-1">
+							{#each relatedModels as [urlmodel, model]}
+								{@const fallbackCount = model.table?.meta?.count ?? model.table?.body?.length ?? 0}
+								{@const badgeCount = getRelatedModelBadgeCount(urlmodel, fallbackCount)}
+								{@const isActive = group === urlmodel}
+								<li>
+									<button
+										type="button"
+										class={`
+										w-full flex items-center justify-between px-4 py-2 text-left text-sm transition rounded-r-lg
+										${
+											isActive
+												? 'bg-primary-50 text-primary-800 border-l-4 border-primary-500 font-semibold shadow-sm'
+												: 'hover:bg-gray-50 text-gray-700 border-l-4 border-transparent'
+										}
+										`}
+										onclick={() => (group = urlmodel)}
+									>
+										<div class="flex items-center gap-2">
+											<span class="lowercase capitalize-first">
+												{safeTranslate(model.info.localNamePlural)}
+											</span>
+										</div>
+										{#if badgeCount > 0}
+											<span class="badge preset-tonal-secondary">
+												{badgeCount}
+											</span>
+										{/if}
+								</button>
+							</li>
+						{/each}
+					</ul>
+					</nav>
+				<!-- active section -->
+				<div class="flex-1 px-4 py-4 overflow-x-auto">
+					{@render RelatedModelContent(false)}
+				</div>
+			</div>
+		</div>
+	{/if}
 {/if}
