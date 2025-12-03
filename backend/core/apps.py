@@ -15,5 +15,7 @@ class CoreConfig(AppConfig):
         import core.webhooks
 
         # avoid post_migrate handler if we are in the main, as it interferes with restore
+        import core.signals
+
         if not os.environ.get("RUN_MAIN"):
             post_migrate.connect(startup, sender=self)
