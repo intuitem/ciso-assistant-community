@@ -4836,6 +4836,15 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
         blank=True,
         related_name="risk_scenarios",
     )
+    # DEPRECATED field existing_controls - remove when dummy data are cleaned up and we're resilient to dropping the field on all import capabilities
+    existing_controls = models.TextField(
+        max_length=2000,
+        help_text=_(
+            "The existing controls to manage this risk. Edit the risk scenario to add extra applied controls."
+        ),
+        blank=True,
+        verbose_name=_("Existing controls"),
+    )
     risk_origin = models.ForeignKey(
         Terminology,
         on_delete=models.PROTECT,
