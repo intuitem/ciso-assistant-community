@@ -311,28 +311,30 @@ Create `docker-compose.yml` for Traefik or configure via static/dynamic configur
 ```yaml
 http:
   routers:
-    ciso-assistant:
-      rule: "Host(`your-domain`)"
-      service: ciso-assistant
+    ciso-assistant-api:
+      rule: "Host(`your-domain`) && PathPrefix(`/api`)"
+      service: ciso-assistant-backend
+      priority: 10
       tls:
         certResolver: letsencrypt
-      middlewares:
-        - ciso-assistant-headers
+
+    ciso-assistant-frontend:
+      rule: "Host(`your-domain`)"
+      service: ciso-assistant-frontend
+      tls:
+        certResolver: letsencrypt
 
   services:
-    ciso-assistant:
+    ciso-assistant-backend:
       loadBalancer:
         servers:
           - url: "http://127.0.0.1:8000"
 
-  middlewares:
-    ciso-assistant-headers:
-      headers:
-        customRequestHeaders:
-          X-Forwarded-Proto: "https"
+    ciso-assistant-frontend:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:3000"
 ```
-
-Configure static file serving separately or use a file server alongside Traefik.
 
 **Option 3: Apache**
 
@@ -378,6 +380,8 @@ sudo a2ensite ciso-assistant
 sudo apache2ctl configtest
 sudo systemctl reload apache2
 ```
+
+**Important:** After configuring your reverse proxy with your actual domain, update the `ORIGIN` environment variable in the frontend service configuration (`/etc/systemd/system/ciso-assistant-frontend.service`) to match your domain (e.g., `https://your-domain`), then restart the frontend service: `sudo systemctl restart ciso-assistant-frontend`.
 
 ## Post-Deployment
 
