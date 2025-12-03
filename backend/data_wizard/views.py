@@ -1385,7 +1385,7 @@ class LoadFileView(APIView):
             # Process controls first - collect all unique control names
             all_controls = set()
             for record in records:
-                existing_controls = record.get("existing_controls", "").strip()
+                existing_controls = record.get("existing_applied_controls", "").strip()
                 additional_controls = record.get("additional_controls", "").strip()
 
                 if existing_controls:
@@ -1613,7 +1613,6 @@ class LoadFileView(APIView):
                 "current_proba": current_proba,
                 "residual_impact": residual_impact,
                 "residual_proba": residual_proba,
-                "existing_controls": record.get("existing_controls", ""),
             }
 
             # Create the risk scenario
@@ -1632,7 +1631,7 @@ class LoadFileView(APIView):
             # Link existing controls
             self._link_controls_to_scenario(
                 risk_scenario,
-                record.get("existing_controls", ""),
+                record.get("existing_applied_controls", ""),
                 control_mapping,
                 "existing_applied_controls",
             )

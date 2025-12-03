@@ -151,6 +151,9 @@ export const RiskScenarioSchema = z.object({
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	risk_origin: z.string().uuid().optional().nullable(),
+	antecedent_scenarios: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
 	ref_id: z.string().max(100).optional()
 });
 
