@@ -17,6 +17,12 @@ class Command(BaseCommand):
             help="Number of one-time tasks to create (default: 50)",
         )
         parser.add_argument(
+            "--periodic",
+            type=int,
+            default=20,
+            help="Number of periodic tasks to create (default: 20)",
+        )
+        parser.add_argument(
             "--clean",
             action="store_true",
             help="Delete all TEST- prefixed tasks (does not create new data)",
@@ -200,21 +206,167 @@ class Command(BaseCommand):
             self.style.SUCCESS(f"Successfully created {num_tasks} one-time tasks")
         )
 
+        # Create periodic tasks (recurrent tasks with multiple occurrences)
+        num_periodic = options["periodic"]
+        self.stdout.write(f"\nCreating {num_periodic} test periodic tasks...")
+        periodic_tasks_created = []
+
+        # Frequency options with their configurations
+        frequency_configs = [
+            {
+                "frequency": "DAILY",
+                "interval": 1,
+                "days_interval": 1,
+            },
+            {
+                "frequency": "WEEKLY",
+                "interval": 1,
+                "days_of_week": [1, 3, 5],  # Monday, Wednesday, Friday
+                "days_interval": 7,
+            },
+            {
+                "frequency": "WEEKLY",
+                "interval": 2,
+                "days_of_week": [2],  # Every other Tuesday
+                "days_interval": 14,
+            },
+            {
+                "frequency": "MONTHLY",
+                "interval": 1,
+                "days_interval": 30,  # Approximate for scheduling
+            },
+            {
+                "frequency": "MONTHLY",
+                "interval": 3,
+                "days_interval": 90,  # Quarterly
+            },
+            {
+                "frequency": "YEARLY",
+                "interval": 1,
+                "months_of_year": [1, 7],  # January and July
+                "days_interval": 180,
+            },
+        ]
+
+        for i in range(num_periodic):
+            # Generate unique task name
+            task_type = random.choice(task_name_templates)
+            context = random.choice(context_suffixes)
+            name = f"TEST-{task_type} - {context} (Periodic #{i + 1})"
+
+            # Generate description
+            description = (
+                f"This is a periodic test task created for demonstration purposes. "
+                f"This task involves recurring {task_type.lower()} for {context.lower()}. "
+                f"Automatically generated and should be used for testing only."
+            )
+
+            # Select a random frequency configuration
+            config = random.choice(frequency_configs)
+
+            # Build schedule JSON
+            schedule = {
+                "interval": config["interval"],
+                "frequency": config["frequency"],
+            }
+
+            # Add optional fields based on frequency type
+            if "days_of_week" in config:
+                schedule["days_of_week"] = config["days_of_week"]
+            if "months_of_year" in config:
+                schedule["months_of_year"] = config["months_of_year"]
+
+            # Create task template (recurrent)
+            template = TaskTemplate.objects.create(
+                name=name,
+                description=description,
+                folder=root_folder,
+                ref_id=f"TEST-PERIODIC-{i + 1:04d}",
+                is_recurrent=True,
+                enabled=True,
+                schedule=schedule,
+            )
+
+            # Randomly assign users (0-3 users)
+            if users:
+                num_assignees = random.randint(0, min(3, len(users)))
+                if num_assignees > 0:
+                    assignees = random.sample(users, num_assignees)
+                    template.assigned_to.set(assignees)
+
+            # Generate TaskNode occurrences for the current year
+            days_interval = config.get("days_interval", 30)
+            current_date = year_start
+            nodes_created = 0
+
+            while (
+                current_date <= year_end and nodes_created < 50
+            ):  # Limit to 50 nodes max
+                # Determine status based on weights
+                status = random.choices(status_choices, weights=status_weights)[0]
+
+                # Generate observation for some nodes (20% chance)
+                observation = ""
+                if random.random() < 0.2:
+                    observation_templates = [
+                        "Task progressing as planned.",
+                        "Waiting for dependencies to be resolved.",
+                        "Completed ahead of schedule.",
+                        "Requires additional resources.",
+                        "Risk identified and mitigated.",
+                    ]
+                    observation = random.choice(observation_templates)
+
+                # Create task node (occurrence)
+                node = TaskNode.objects.create(
+                    task_template=template,
+                    folder=root_folder,
+                    due_date=current_date,
+                    status=status,
+                    observation=observation,
+                )
+
+                nodes_created += 1
+
+                # Move to next occurrence based on interval
+                current_date = current_date + timedelta(days=days_interval)
+
+            periodic_tasks_created.append((template, nodes_created))
+
+            # Progress indicator
+            if (i + 1) % 10 == 0:
+                self.stdout.write(f"  Created {i + 1}/{num_periodic} periodic tasks...")
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Successfully created {num_periodic} periodic tasks with "
+                f"{sum(count for _, count in periodic_tasks_created)} total occurrences"
+            )
+        )
+
         # Print summary statistics
         self.stdout.write("\n" + "=" * 60)
         self.stdout.write("SUMMARY:")
         self.stdout.write("=" * 60)
 
-        self.stdout.write(f"\nTotal Tasks Created: {len(tasks_created)}")
+        total_templates = len(tasks_created) + len(periodic_tasks_created)
+        total_nodes = len(tasks_created) + sum(
+            count for _, count in periodic_tasks_created
+        )
 
-        self.stdout.write(f"\nTasks by Status:")
+        self.stdout.write(f"\nTotal Task Templates Created: {total_templates}")
+        self.stdout.write(f"  - One-time tasks: {len(tasks_created)}")
+        self.stdout.write(f"  - Periodic tasks: {len(periodic_tasks_created)}")
+        self.stdout.write(f"\nTotal Task Nodes (occurrences): {total_nodes}")
+
+        self.stdout.write(f"\nTask Nodes by Status:")
         for status_val, status_label in TaskNode.TASK_STATUS_CHOICES:
             count = TaskNode.objects.filter(
                 status=status_val, task_template__name__startswith="TEST-"
             ).count()
             self.stdout.write(f"  {status_label}: {count}")
 
-        self.stdout.write(f"\nTasks by Quarter:")
+        self.stdout.write(f"\nTask Nodes by Quarter:")
         for quarter in range(1, 5):
             if quarter == 1:
                 start_month, end_month = 1, 3
@@ -239,5 +391,16 @@ class Command(BaseCommand):
             self.stdout.write(
                 f"  Q{quarter} ({quarter_start} to {quarter_end}): {count}"
             )
+
+        # Show frequency breakdown for periodic tasks
+        self.stdout.write(f"\nPeriodic Tasks by Frequency:")
+        for freq in ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]:
+            count = TaskTemplate.objects.filter(
+                name__startswith="TEST-",
+                is_recurrent=True,
+                schedule__frequency=freq,
+            ).count()
+            if count > 0:
+                self.stdout.write(f"  {freq}: {count}")
 
         self.stdout.write("=" * 60)
