@@ -103,6 +103,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "risk_matrix_labels": "ISO",
             "mapping_max_depth": 3,
             "allow_self_validation": False,
+            "show_warning_external_links": True,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
