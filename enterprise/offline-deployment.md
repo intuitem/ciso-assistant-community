@@ -249,7 +249,7 @@ WorkingDirectory=/path/to/ciso-assistant-community/frontend
 Environment="NODE_ENV=production"
 Environment="BODY_SIZE_LIMIT=25000000"
 Environment="ORIGIN=https://your-domain"
-Environment="PUBLIC_BACKEND_API_URL=https://your-domain/api"
+Environment="PUBLIC_BACKEND_API_URL=http://localhost:8000/api"
 ExecStart=/usr/bin/node server
 
 [Install]
