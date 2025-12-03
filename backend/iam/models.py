@@ -58,13 +58,12 @@ ALLOWED_PERMISSION_APPS = (
     "iam",
 )
 
-DISALLOWED_PERMISSION_MODELS = (
+IGNORED_PERMISSION_MODELS = (
     "personalaccesstoken",
     "role",
     "roleassignment",
     "usergroup",
     "ssosettings",
-    "user",
     "historicalmetric",
 )
 
@@ -999,7 +998,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     Permission.objects.filter(
                         content_type__app_label__in=ALLOWED_PERMISSION_APPS
                     )
-                    .exclude(content_type__model__in=DISALLOWED_PERMISSION_MODELS)
+                    .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
                     .values_list("id", flat=True)
                 )
             else:
