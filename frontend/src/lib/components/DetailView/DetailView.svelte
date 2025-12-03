@@ -15,6 +15,7 @@
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
+	import SelectRelatedObjectsModal from '$lib/components/Modals/SelectRelatedObjectsModal.svelte';
 
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
 
@@ -181,6 +182,73 @@
 		modalStore.trigger(modal);
 	}
 
+	function buildSingleFieldForm(originalForm: any, fieldName: string) {
+		if (!originalForm) return originalForm;
+
+		const data = originalForm.data ?? originalForm;
+		const errors = originalForm.errors ?? {};
+		const constraints = originalForm.constraints ?? {};
+
+		const filtered = {
+			...originalForm,
+			data: {
+				[fieldName]: data[fieldName] ?? []
+			},
+			errors: {
+				[fieldName]: errors[fieldName] ?? undefined
+			},
+			constraints: {
+				[fieldName]: constraints[fieldName] ?? undefined
+			}
+		};
+
+		return filtered;
+	}
+
+	function modalSelectRelatedObjects() {
+		if (!activeModel || !activeUrlmodel || !activeField) {
+			console.error('Missing active model/urlmodel/field for selection modal');
+			return;
+		}
+
+		const relationField = getRelationFieldName(activeField);
+
+		// Valeurs actuellement liées (pour pré-cocher les cases)
+		const currentValue = data.data[relationField] ?? [];
+		const initialSelectedIds: string[] = Array.isArray(currentValue)
+			? currentValue.map((v) => (typeof v === 'object' ? v.id : v))
+			: [];
+
+		// Endpoint pour lister les objets sélectionnables
+		// Tu peux ajuster : filtres, pagination, etc.
+		const listEndpoint =
+			activeField.endpointUrl && !activeField.endpointUrl.startsWith('./')
+				? activeField.endpointUrl
+				: `/${activeUrlmodel}`;
+
+		const modalComponent: ModalComponent = {
+			ref: SelectRelatedObjectsModal,
+			props: {
+				parentModel: data.model,
+				parentObject: data.data,
+				relatedModel: activeModel,
+				relatedUrlModel: activeUrlmodel,
+				relationField,
+				listEndpoint,
+				initialSelectedIds
+			}
+		};
+
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('select-' + activeModel.info.localNamePlural)
+		};
+
+		modalStore.trigger(modal);
+	}
+
+
 	function modalAppliedControlDuplicateForm(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -292,6 +360,14 @@
 
 	const getReverseFieldConfig = (urlmodel?: string) =>
 		urlmodel ? data.model.reverseForeignKeyFields?.find((item) => item.urlModel === urlmodel) : undefined;
+
+	const getRelationFieldName = (fieldConfig: any) => {
+		// Si un jour tu veux être plus explicite côté backend,
+		// tu peux ajouter `.relationField` dans reverseForeignKeyFields.
+		// Pour l'instant, on tombe par défaut sur `field`.
+		return fieldConfig?.relationField ?? fieldConfig?.field;
+	};
+
 
 	let activeField = $derived(getReverseFieldConfig(activeUrlmodel));
 
@@ -824,18 +900,40 @@
 							URLModel={activeUrlmodel}
 							fields={activeFieldsToUse}
 							defaultFilters={activeField.defaultFilters || {}}
+							canSelectObject={canEditObject}
 							on:rowcount={(event) =>
 								updateRelatedModelRowCount(activeUrlmodel, event.detail)}
 						>
+							{#snippet selectButton()}
+								<div>
+									<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+										<button
+											class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+											data-testid="select-related-button"
+											title={safeTranslate('select-' + activeModel.info.localNamePlural)}
+											type="button"
+											onclick={(_) => modalSelectRelatedObjects()}
+										>
+											<i class="fa-solid fa-hand-pointer"></i>
+										</button>
+									</span>
+								</div>
+							{/snippet}
+
 							{#snippet addButton()}
-								<button
-									class="btn preset-filled-primary-500 self-end my-auto"
-									data-testid="add-button"
-									onclick={(_) => modalCreateForm(activeModel)}
-								>
-									<i class="fa-solid fa-plus mr-2 lowercase"></i>
-									{safeTranslate('add-' + activeModel.info.localName)}
-								</button>
+								<div>
+									<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+										<button
+											class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+											data-testid="add-button"
+											title={safeTranslate('add-' + activeModel.info.localName)}
+											type="button"
+											onclick={(_) => modalCreateForm(activeModel)}
+										>
+											<i class="fa-solid fa-file-circle-plus"></i>
+										</button>
+									</span>
+								</div>
 							{/snippet}
 						</ModelTable>
 					{:else}
