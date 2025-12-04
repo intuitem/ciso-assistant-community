@@ -27,7 +27,11 @@
 	} from '$lib/components/Modals/stores';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
-	import { interceptExternalLinks, setGlobalModalStore } from '$lib/utils/external-links';
+	import {
+		interceptExternalLinks,
+		setGlobalModalStore,
+		setShowWarningExternalLinks
+	} from '$lib/utils/external-links';
 
 	let sidebarOpen = $state(true);
 
@@ -105,6 +109,9 @@
 	$effect(() => {
 		if (browser) {
 			setGlobalModalStore(modalStore);
+			// Set the warning preference from settings (default to true if not set)
+			const showWarning = data?.settings?.show_warning_external_links ?? true;
+			setShowWarningExternalLinks(showWarning);
 			interceptExternalLinks();
 		}
 	});
