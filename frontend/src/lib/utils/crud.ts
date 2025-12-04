@@ -1053,6 +1053,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'applied-controls',
 				disableCreate: true,
 				disableDelete: true
+			},
+			{
+				field: 'processings',
+				urlModel: 'evidences',
+				disableCreate: true,
+				disableDelete: true
 			}
 		],
 		detailViewFields: [

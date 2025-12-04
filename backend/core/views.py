@@ -6898,6 +6898,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "status",
         "expiry_date",
         "contracts",
+        "processings",
     ]
 
     @action(detail=False, name="Get all evidences owners")
