@@ -766,6 +766,7 @@ export const processingSchema = z.object({
 	has_sensitive_personal_data: z.boolean().optional(),
 	nature: z.string().optional().array().optional(),
 	associated_controls: z.array(z.string().optional()).optional(),
+	evidences: z.string().optional().array().optional(),
 	assigned_to: z.string().uuid().optional().array().optional()
 });
 

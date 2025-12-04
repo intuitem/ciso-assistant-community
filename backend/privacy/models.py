@@ -1,7 +1,7 @@
 from django.db import models
 from iam.models import User, FolderMixin
 from tprm.models import Entity
-from core.models import AppliedControl, Asset, Incident
+from core.models import AppliedControl, Asset, Evidence, Incident
 from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
@@ -125,6 +125,13 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         User,
         verbose_name="Assigned to",
         blank=True,
+    )
+
+    evidences = models.ManyToManyField(
+        Evidence,
+        verbose_name="Evidences",
+        blank=True,
+        related_name="processings",
     )
 
     def update_sensitive_data_flag(self):
