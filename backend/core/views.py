@@ -657,7 +657,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             request.data["filtering_labels"] = self._process_labels(
                 request.data["filtering_labels"]
             )
-        if request.data.get("evidences"):
+        # Experimental: process evidences on TaskTemplate creation
+        if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
             request.data["evidences"] = self._process_evidences(
                 request.data.get("evidences"), folder=folder
@@ -665,7 +666,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
-        if request.data.get("evidences"):
+        # Experimental: process evidences on TaskTemplate update
+        if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
             request.data["evidences"] = self._process_evidences(
                 request.data["evidences"], folder=folder
@@ -2476,6 +2478,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 )
                 risk_scenario.description = build_description(operational_scenario)
 
+                risk_scenario.risk_origin = operational_scenario.ro_to.risk_origin
+
                 # Update inherent or current probability/impact based on feature flag
                 if ff_is_enabled("inherent_risk"):
                     risk_scenario.inherent_proba = operational_scenario.likelihood
@@ -2513,6 +2517,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     if operational_scenario.ref_id
                     else RiskScenario.get_default_ref_id(risk_assessment),
                     description=build_description(operational_scenario),
+                    risk_origin=operational_scenario.ro_to.risk_origin,
                 )
                 if ff_is_enabled("inherent_risk"):
                     risk_scenario.inherent_proba = operational_scenario.likelihood
@@ -2705,7 +2710,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "threats",
                 "name",
                 "description",
-                "existing_controls",
+                "existing_applied_controls",
                 "current_impact",
                 "current_proba",
                 "current_risk",
@@ -2717,10 +2722,16 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "strength_of_knowledge",
             ]
             if ff_is_enabled("inherent_risk"):
-                # insert inherent_risk just before existing_controls
-                columns.insert(columns.index("existing_controls"), "inherent_impact")
-                columns.insert(columns.index("existing_controls"), "inherent_proba")
-                columns.insert(columns.index("existing_controls"), "inherent_level")
+                # insert inherent_risk just before existing_applied_controls
+                columns.insert(
+                    columns.index("existing_applied_controls"), "inherent_impact"
+                )
+                columns.insert(
+                    columns.index("existing_applied_controls"), "inherent_proba"
+                )
+                columns.insert(
+                    columns.index("existing_applied_controls"), "inherent_level"
+                )
             writer.writerow(columns)
 
             for scenario in risk_assessment.risk_scenarios.all().order_by("ref_id"):
@@ -2793,7 +2804,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             "threats",
             "name",
             "description",
-            "existing_controls",
+            "existing_applied_controls",
             "current_impact",
             "current_proba",
             "current_risk",
@@ -2806,10 +2817,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         ]
 
         if ff_is_enabled("inherent_risk"):
-            # insert inherent_risk columns just before existing_controls
-            columns.insert(columns.index("existing_controls"), "inherent_impact")
-            columns.insert(columns.index("existing_controls"), "inherent_proba")
-            columns.insert(columns.index("existing_controls"), "inherent_level")
+            # insert inherent_risk columns just before existing_applied_controls
+            columns.insert(
+                columns.index("existing_applied_controls"), "inherent_impact"
+            )
+            columns.insert(columns.index("existing_applied_controls"), "inherent_proba")
+            columns.insert(columns.index("existing_applied_controls"), "inherent_level")
 
         scenarios = risk_assessment.risk_scenarios.prefetch_related(
             "applied_controls",
@@ -2839,7 +2852,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "threats": threats,
                 "name": escape_excel_formula(scenario.name),
                 "description": escape_excel_formula(scenario.description),
-                "existing_controls": existing_controls,
+                "existing_applied_controls": existing_controls,
                 "current_impact": scenario.get_current_impact()["name"],
                 "current_proba": scenario.get_current_proba()["name"],
                 "current_risk": scenario.get_current_risk()["name"],
@@ -2873,7 +2886,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             wrap_columns = [
                 "name",
                 "description",
-                "existing_controls",
+                "existing_applied_controls",
                 "additional_controls",
             ]
             wrap_indices = [
@@ -3034,7 +3047,6 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     risk_assessment=duplicate_risk_assessment,
                     name=scenario.name,
                     description=scenario.description,
-                    existing_controls=scenario.existing_controls,
                     treatment=scenario.treatment,
                     current_proba=scenario.current_proba,
                     current_impact=scenario.current_impact,
@@ -4625,6 +4637,10 @@ class RiskScenarioFilter(GenericFilterSet):
         method="filter_applied_controls",
         queryset=AppliedControl.objects.all(),
     )
+    exclude = df.UUIDFilter(
+        method="filter_exclude",
+        label="Exclude scenario",
+    )
 
     def filter_within_tolerance(self, queryset, name, value):
         if value == "YES":
@@ -4647,6 +4663,12 @@ class RiskScenarioFilter(GenericFilterSet):
             return queryset.filter(
                 Q(applied_controls__in=value) | Q(existing_applied_controls__in=value)
             ).distinct()
+        return queryset
+
+    def filter_exclude(self, queryset, name, value):
+        """Exclude a specific scenario from the queryset"""
+        if value:
+            return queryset.exclude(id=value)
         return queryset
 
     class Meta:
@@ -9072,6 +9094,8 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         ]
         N = 0
         for req in source_framework["requirement_nodes"]:
+            if not req.get("assessable", False):
+                continue
             nodes.append(
                 {
                     "name": req.get("ref_id"),
@@ -9083,6 +9107,8 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
             N += 1
 
         for req in target_framework["requirement_nodes"]:
+            if not req.get("assessable", False):
+                continue
             nodes.append(
                 {
                     "name": req.get("ref_id"),
@@ -10921,6 +10947,130 @@ class TaskTemplateViewSet(BaseModelViewSet):
                 User.objects.filter(task_templates__isnull=False).distinct(),
                 many=True,
             ).data
+        )
+
+    @action(detail=False, name="Yearly tasks review")
+    def yearly_review(self, request):
+        """Get recurrent task templates grouped by folder for yearly review."""
+        # Get date range from query params or use current year
+        current_year = timezone.now().year
+
+        try:
+            start_month = int(request.query_params.get("start_month", 1))
+            start_year = int(request.query_params.get("start_year", current_year))
+            end_month = int(request.query_params.get("end_month", 12))
+            end_year = int(request.query_params.get("end_year", current_year))
+        except ValueError:
+            # Default to current year if any parsing fails
+            start_month, start_year = 1, current_year
+            end_month, end_year = 12, current_year
+
+        # Validate month values
+        start_month = max(1, min(12, start_month))
+        end_month = max(1, min(12, end_month))
+
+        year_start = date(start_year, start_month, 1)
+        # Get last day of end_month
+        if end_month == 12:
+            year_end = date(end_year, 12, 31)
+        else:
+            year_end = date(end_year, end_month + 1, 1) - timedelta(days=1)
+
+        # Get folder filter from query params
+        folder_id = request.query_params.get("folder")
+
+        # Get all viewable recurrent task templates
+        queryset = self.get_queryset().filter(
+            is_recurrent=True,
+            enabled=True,
+        )
+
+        # Apply folder filter if provided
+        if folder_id:
+            queryset = queryset.filter(folder_id=folder_id)
+
+        task_templates = queryset.select_related("folder").prefetch_related(
+            "assigned_to"
+        )
+
+        # Group by folder
+        folders_dict = defaultdict(list)
+        for template in task_templates:
+            folder_id = str(template.folder.id)
+            folder_name = str(template.folder)
+
+            # Use TaskTemplateReadSerializer for proper serialization
+            template_data = TaskTemplateReadSerializer(template).data
+            # Add schedule field (excluded by default in read serializer)
+            template_data["schedule"] = template.schedule
+
+            # Get TaskNodes for this template in the current year
+            task_nodes = TaskNode.objects.filter(
+                task_template=template, due_date__gte=year_start, due_date__lte=year_end
+            ).values("due_date", "status")
+
+            # Group by month and determine status
+            monthly_status = {}
+            # Generate list of (year, month) tuples for the date range
+            months_in_range = []
+            current = date(start_year, start_month, 1)
+            end = date(end_year, end_month, 1)
+            while current <= end:
+                months_in_range.append((current.year, current.month))
+                if current.month == 12:
+                    current = date(current.year + 1, 1, 1)
+                else:
+                    current = date(current.year, current.month + 1, 1)
+
+            for year, month in months_in_range:
+                # Create a unique key for year-month combination
+                key = f"{year}-{month:02d}"
+                month_nodes = [
+                    node
+                    for node in task_nodes
+                    if node["due_date"].year == year and node["due_date"].month == month
+                ]
+
+                if not month_nodes:
+                    monthly_status[key] = None
+                else:
+                    # Simple aggregation logic
+                    statuses = [node["status"] for node in month_nodes]
+                    # If all completed, show completed (green)
+                    if all(s == "completed" for s in statuses):
+                        monthly_status[key] = "completed"
+                    # If any in_progress or mix of statuses, show in_progress (orange)
+                    elif "in_progress" in statuses or "completed" in statuses:
+                        monthly_status[key] = "in_progress"
+                    # If all pending, show pending (red)
+                    elif "pending" in statuses:
+                        monthly_status[key] = "pending"
+                    else:
+                        monthly_status[key] = statuses[0] if statuses else None
+
+            template_data["monthly_status"] = monthly_status
+
+            if folder_id not in folders_dict:
+                folders_dict[folder_id] = {
+                    "folder_id": folder_id,
+                    "folder_name": folder_name,
+                    "tasks": [],
+                }
+            folders_dict[folder_id]["tasks"].append(template_data)
+
+        # Convert to list and sort by folder name
+        result = list(folders_dict.values())
+        result.sort(key=lambda x: x["folder_name"])
+
+        # Include date range metadata in response
+        return Response(
+            {
+                "folders": result,
+                "start_month": start_month,
+                "start_year": start_year,
+                "end_month": end_month,
+                "end_year": end_year,
+            }
         )
 
     @action(detail=False, name="Task templates per status")

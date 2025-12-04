@@ -291,4 +291,19 @@
 			</div>
 		{/snippet}
 	</Accordion.Item>
+	<Accordion.Item value="security">
+		{#snippet control()}
+			<i class="fa-solid fa-shield-halved mr-2"></i>{m.security()}
+		{/snippet}
+		{#snippet panel()}
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="show_warning_external_links"
+					label={m.showWarningExternalLinks()}
+					helpText={m.showWarningExternalLinksHelpText()}
+				/>
+			</div>
+		{/snippet}
+	</Accordion.Item>
 </Accordion>

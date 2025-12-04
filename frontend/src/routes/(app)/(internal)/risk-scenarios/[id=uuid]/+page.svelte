@@ -308,6 +308,36 @@
 		/>
 	</div>
 
+	<div class="flex flex-row space-x-2">
+		<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+			<h4 class="h4 font-semibold">{m.riskOrigin()}</h4>
+			{#if data.scenario.risk_origin}
+				<p class="font-semibold text-gray-600">{safeTranslate(data.scenario.risk_origin.name)}</p>
+				{#if data.scenario.risk_origin.description}
+					<p class="text-sm text-gray-500 mt-1">{data.scenario.risk_origin.description}</p>
+				{/if}
+			{:else}
+				<p class="text-gray-400 italic text-sm">{m.undefined()}</p>
+			{/if}
+		</div>
+		<div class="card px-4 py-2 bg-white shadow-lg w-1/2 max-h-96 overflow-y-auto">
+			<h4 class="h4 font-semibold">{m.antecedentScenarios()}</h4>
+			{#if data.scenario.antecedent_scenarios && data.scenario.antecedent_scenarios.length > 0}
+				<ul class="space-y-1">
+					{#each data.scenario.antecedent_scenarios as antecedent}
+						<li>
+							<Anchor class="anchor text-sm font-semibold" href="/risk-scenarios/{antecedent.id}">
+								{antecedent.ref_id ? `${antecedent.ref_id} - ` : ''}{antecedent.name}
+							</Anchor>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<p class="text-gray-400 italic text-sm">{m.noAntecedentScenarios()}</p>
+			{/if}
+		</div>
+	</div>
+
 	{#if page.data?.featureflags?.inherent_risk}
 		<div class="flex flex-row space-x-4 card px-4 py-2 bg-white shadow-lg justify-between">
 			<div class="flex flex-col w-1/2">
@@ -491,5 +521,19 @@
 				{/if}
 			</p>
 		</div>
+		{#if data.scenario.filtering_labels && data.scenario.filtering_labels.length > 0}
+			<div>
+				<p class="text-sm font-semibold text-gray-400">{m.labels()}</p>
+				<div class="flex flex-wrap gap-2 mt-1">
+					{#each data.scenario.filtering_labels as label}
+						<Anchor href="/filtering-labels/{label.id}" class="anchor">
+							<span class="badge preset-tonal-primary px-2 py-1 rounded text-xs">
+								{label.str}
+							</span>
+						</Anchor>
+					{/each}
+				</div>
+			</div>
+		{/if}
 	</div>
 </div>
