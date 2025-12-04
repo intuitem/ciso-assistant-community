@@ -807,10 +807,35 @@ class LoadFileView(APIView):
                                 else "to_do",
                                 "observation": record.get("observations", ""),
                             }
-                            if record.get("score") != "":
+                            if (
+                                record.get("implementation_score") != ""
+                                and record.get("documentation_score") != ""
+                            ):
+                                if not compliance_assessment.show_documentation_score:
+                                    compliance_assessment.show_documentation_score = (
+                                        True
+                                    )
+                                    compliance_assessment.save(
+                                        update_fields=["show_documentation_score"]
+                                    )
+                                requirement_data.update(
+                                    {
+                                        "score": record.get("implementation_score"),
+                                        "documentation_score": record.get(
+                                            "documentation_score"
+                                        ),
+                                        "is_scored": True,
+                                    }
+                                )
+                            elif (
+                                record.get("score") != ""
+                                and record.get("score") is not None
+                            ):
                                 requirement_data.update(
                                     {"score": record.get("score"), "is_scored": True}
                                 )
+                            else:
+                                requirement_data.update({"is_scored": False})
                             # Use the serializer for validation and saving
                             req_serializer = RequirementAssessmentWriteSerializer(
                                 instance=requirement_assessment,
