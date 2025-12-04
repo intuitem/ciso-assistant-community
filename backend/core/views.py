@@ -10627,9 +10627,9 @@ class TaskTemplateViewSet(BaseModelViewSet):
         if task_template.is_recurrent:
             with transaction.atomic():
                 # Soft-delete all existing TaskNode instances associated with this TaskTemplate
-                TaskNode.objects.filter(task_template=task_template, due_date__gte=date.today()).update(
-                    to_delete=True
-                )
+                TaskNode.objects.filter(
+                    task_template=task_template, due_date__gte=date.today()
+                ).update(to_delete=True)
                 # Determine the end date based on the frequency
                 start_date = task_template.task_date
                 if task_template.is_recurrent:
