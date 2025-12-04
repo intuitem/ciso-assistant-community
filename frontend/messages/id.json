@@ -1222,5 +1222,5 @@
 	"deleteQuantitativeRiskStudy": "Hapus studi kuantifikasi risiko",
 	"viewQuantitativeRiskStudy": "Lihat studi kuantifikasi risiko",
 	"dueDateUpdatedSuccessfully": "Tanggal jatuh tempo berhasil diperbarui",
-	"taskScheduleInfo": "Kejadian yang lalu dilindungi dari perubahan jadwal, hanya tugas yang lebih awal atau mendatang yang akan dihitung ulang."
+	"taskScheduleInfo": "Kejadian yang lalu dilindungi dari perubahan jadwal. Hanya tugas mendatang yang akan dihitung ulang."
 }

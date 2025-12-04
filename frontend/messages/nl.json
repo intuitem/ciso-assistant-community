@@ -1040,5 +1040,5 @@
 	"deleteQuantitativeRiskStudy": "Kwantitatieve risicostudie verwijderen",
 	"viewQuantitativeRiskStudy": "Kwantitatieve risicostudie bekijken",
 	"dueDateUpdatedSuccessfully": "Vervaldatum succesvol bijgewerkt",
-	"taskScheduleInfo": "Afgelopen herhalingen zijn beschermd tegen wijzigingen in de planning, alleen eerdere of toekomstige taken worden herberekend."
+	"taskScheduleInfo": "Afgelopen herhalingen zijn beschermd tegen wijzigingen in de planning. Alleen toekomstige taken worden herberekend."
 }

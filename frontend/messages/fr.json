@@ -2876,5 +2876,5 @@
 	"deleteQuantitativeRiskStudy": "Supprimer une étude quantitative",
 	"viewQuantitativeRiskStudy": "Voir une étude quantitative",
 	"dueDateUpdatedSuccessfully": "Date d'échéance mise à jour avec succès",
-	"taskScheduleInfo": "Les occurrences passées sont protégées des modifications de planification, seules les tâches antérieures ou à venir seront recalculées."
+	"taskScheduleInfo": "Les occurrences passées sont protégées des modifications de planification. Seules les tâches à venir seront recalculées."
 }

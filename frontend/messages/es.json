@@ -1044,5 +1044,5 @@
 	"deleteQuantitativeRiskStudy": "Eliminar estudio de cuantificación de riesgos",
 	"viewQuantitativeRiskStudy": "Ver estudio de cuantificación de riesgos",
 	"dueDateUpdatedSuccessfully": "Fecha de vencimiento actualizada con éxito",
-	"taskScheduleInfo": "Las ocurrencias pasadas están protegidas de cambios en el horario, solo las tareas anteriores o próximas se recalcularán."
+	"taskScheduleInfo": "Las ocurrencias pasadas están protegidas de cambios en el horario. Solo las tareas próximas se recalcularán."
 }

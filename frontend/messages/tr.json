@@ -1770,5 +1770,5 @@
 	"deleteQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını sil",
 	"viewQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını görüntüle",
 	"dueDateUpdatedSuccessfully": "Son tarih başarıyla güncellendi",
-	"taskScheduleInfo": "Geçmiş gerçekleşmeler program değişikliklerinden korunur, sadece daha erken veya yaklaşan görevler yeniden hesaplanır."
+	"taskScheduleInfo": "Geçmiş gerçekleşmeler program değişikliklerinden korunur. Sadece yaklaşan görevler yeniden hesaplanır."
 }

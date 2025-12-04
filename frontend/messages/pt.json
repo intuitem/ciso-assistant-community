@@ -1037,5 +1037,5 @@
 	"deleteQuantitativeRiskStudy": "Excluir estudo de quantificação de risco",
 	"viewQuantitativeRiskStudy": "Ver estudo de quantificação de risco",
 	"dueDateUpdatedSuccessfully": "Data de vencimento atualizada com sucesso",
-	"taskScheduleInfo": "Ocorrências passadas estão protegidas de alterações de agendamento, apenas tarefas anteriores ou futuras serão recalculadas."
+	"taskScheduleInfo": "Ocorrências passadas estão protegidas de alterações de agendamento. Apenas tarefas futuras serão recalculadas."
 }

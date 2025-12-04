@@ -2890,5 +2890,5 @@
 	"deleteQuantitativeRiskStudy": "Delete risk quantification study",
 	"viewQuantitativeRiskStudy": "View risk quantification study",
 	"dueDateUpdatedSuccessfully": "Due date updated successfully",
-	"taskScheduleInfo": "Past occurences are protected from schedule changes, only earlier or upcoming tasks will be recalculated."
+	"taskScheduleInfo": "Past occurences are protected from schedule changes. Only upcoming tasks will be recalculated."
 }

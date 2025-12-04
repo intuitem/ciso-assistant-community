@@ -1025,5 +1025,5 @@
 	"deleteQuantitativeRiskStudy": "Smazat kvantitativní studii rizika",
 	"viewQuantitativeRiskStudy": "Zobrazit kvantitativní studii rizika",
 	"dueDateUpdatedSuccessfully": "Termín byl úspěšně aktualizován",
-	"taskScheduleInfo": "Minulé výskyty jsou chráněny před změnami plánu, pouze dřívější nebo nadcházející úlohy budou přepočítány."
+	"taskScheduleInfo": "Minulé výskyty jsou chráněny před změnami plánu. Pouze nadcházející úlohy budou přepočítány."
 }

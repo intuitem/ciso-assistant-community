@@ -1037,5 +1037,5 @@
 	"deleteQuantitativeRiskStudy": "Kockázati kvantifikációs tanulmány törlése",
 	"viewQuantitativeRiskStudy": "Kockázati kvantifikációs tanulmány megtekintése",
 	"dueDateUpdatedSuccessfully": "Határidő sikeresen frissítve",
-	"taskScheduleInfo": "A múltbéli előfordulások védettek az ütemezési változásokkal szemben, csak korábbi vagy jövőbeli feladatok kerülnek újraszámításra."
+	"taskScheduleInfo": "A múltbéli előfordulások védettek az ütemezési változásokkal szemben. Csak jövőbeli feladatok kerülnek újraszámításra."
 }

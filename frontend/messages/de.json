@@ -1044,5 +1044,5 @@
 	"deleteQuantitativeRiskStudy": "Risikoquantifizierungsstudie löschen",
 	"viewQuantitativeRiskStudy": "Risikoquantifizierungsstudie anzeigen",
 	"dueDateUpdatedSuccessfully": "Fälligkeitsdatum erfolgreich aktualisiert",
-	"taskScheduleInfo": "Vergangene Vorkommen sind vor Planänderungen geschützt, nur frühere oder anstehende Aufgaben werden neu berechnet."
+	"taskScheduleInfo": "Vergangene Vorkommen sind vor Planänderungen geschützt. Nur anstehende Aufgaben werden neu berechnet."
 }

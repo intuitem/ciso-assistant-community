@@ -2002,5 +2002,5 @@
 	"deleteQuantitativeRiskStudy": "Obriši kvantitativno istraživanje rizika",
 	"viewQuantitativeRiskStudy": "Pogledaj kvantitativno istraživanje rizika",
 	"dueDateUpdatedSuccessfully": "Rok ažuriran uspješno",
-	"taskScheduleInfo": "Prošle pojave su zaštićene od promjena rasporeda, samo ranije ili nadolazeće zadatke će se ponovo izračunati."
+	"taskScheduleInfo": "Prošle pojave su zaštićene od promjena rasporeda. Samo nadolazeće zadatke će se ponovo izračunati."
 }

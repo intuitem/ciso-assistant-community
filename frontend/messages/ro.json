@@ -1034,5 +1034,5 @@
 	"deleteQuantitativeRiskStudy": "Șterge studiul de risc cantitativ",
 	"viewQuantitativeRiskStudy": "Vizualizați studiul de risc cantitativ",
 	"dueDateUpdatedSuccessfully": "Data limită a fost actualizată cu succes",
-	"taskScheduleInfo": "Aparițiile trecute sunt protejate împotriva schimbărilor de programare, doar sarcinile anterioare sau viitoare vor fi recalculate."
+	"taskScheduleInfo": "Aparițiile trecute sunt protejate împotriva schimbărilor de programare. Doar sarcinile viitoare vor fi recalculate."
 }
