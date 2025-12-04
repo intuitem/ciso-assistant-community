@@ -111,5 +111,32 @@ export const actions: Actions = {
 		}
 		const error = await response.json();
 		return fail(400, { error });
+	},
+	updateDueDate: async ({ request, fetch, params, cookies }) => {
+		const formData = await request.formData();
+		const dueDate = formData.get('due_date');
+		if (typeof dueDate !== 'string') {
+			return fail(400, { error: 'Invalid due date value' });
+		}
+
+		const updateData = {
+			due_date: dueDate
+		};
+
+		const response = await fetch(`${BASE_API_URL}/task-nodes/${params.id}/`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(updateData)
+		});
+
+		if (response.ok) {
+			setFlash({ type: 'success', message: m.dueDateUpdatedSuccessfully() }, cookies);
+			return { success: true };
+		} else {
+			const error = await response.json();
+			return fail(400, { error });
+		}
 	}
 };

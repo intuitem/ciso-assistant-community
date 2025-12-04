@@ -1581,7 +1581,6 @@
 	"probabilityISO": "Vjerojatnost",
 	"probabilityEBIOS": "Vjerojatnost",
 	"iso27005": "ISO 27005",
-	"taskScheduleWarning": "Svi zadaci koji nisu dio rasporeda će biti trajno obrisani",
 	"create": "Kreiraj",
 	"update": "Ažuriraj",
 	"delete": "Obriši",
@@ -2001,5 +2000,7 @@
 	"viewQuantitativeRiskScenario": "Pogledaj scenarij",
 	"changeQuantitativeRiskStudy": "Promijeni kvantitativno istraživanje rizika",
 	"deleteQuantitativeRiskStudy": "Obriši kvantitativno istraživanje rizika",
-	"viewQuantitativeRiskStudy": "Pogledaj kvantitativno istraživanje rizika"
+	"viewQuantitativeRiskStudy": "Pogledaj kvantitativno istraživanje rizika",
+	"dueDateUpdatedSuccessfully": "Rok ažuriran uspješno",
+	"taskScheduleInfo": "Prošle pojave su zaštićene od promjena rasporeda. Samo nadolazeće zadatke će se ponovo izračunati."
 }

@@ -1780,7 +1780,6 @@
 	"probabilityISO": "Vraisemblance",
 	"probabilityEBIOS": "Vraisemblance",
 	"iso27005": "ISO 27005",
-	"taskScheduleWarning": "Toutes les tâches qui ne font pas partie du nouveau programme seront supprimées de manière permanente",
 	"bia": "BIA",
 	"businessImpactAnalysis": "Bilan d'Impact sur l'Activité",
 	"addBusinessImpactAnalysis": "Démarrer un BIA",
@@ -2875,7 +2874,9 @@
 	"changeQuantitativeRiskScenario": "Modifier le scénario",
 	"deleteQuantitativeRiskScenario": "Supprimer le scénario",
 	"viewQuantitativeRiskScenario": "Voir le scénario",
-	"changeQuantitativeRiskStudy": "Modifier une étude de quantificative",
-	"deleteQuantitativeRiskStudy": "Supprimer une étude de quantificative",
-	"viewQuantitativeRiskStudy": "Voir une étude de quantificative"
+	"changeQuantitativeRiskStudy": "Modifier une étude quantitative",
+	"deleteQuantitativeRiskStudy": "Supprimer une étude quantitative",
+	"viewQuantitativeRiskStudy": "Voir une étude quantitative",
+	"dueDateUpdatedSuccessfully": "Date d'échéance mise à jour avec succès",
+	"taskScheduleInfo": "Les occurrences passées sont protégées des modifications de planification. Seules les tâches à venir seront recalculées."
 }
