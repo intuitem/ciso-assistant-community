@@ -1546,7 +1546,6 @@
 	"probabilityISO": "Πιθανότητα",
 	"probabilityEBIOS": "Πιθανότητα",
 	"iso27005": "ISO 27005",
-	"taskScheduleWarning": "Εργασίες εκτός νέου προγράμματος θα διαγραφούν οριστικά",
 	"create": "Δημιουργία",
 	"update": "Ενημέρωση",
 	"delete": "Διαγραφή",
@@ -1733,5 +1732,7 @@
 	"viewQuantitativeRiskScenario": "Προβολή σεναρίου",
 	"changeQuantitativeRiskStudy": "Αλλαγή ποσοτικής μελέτης κινδύνου",
 	"deleteQuantitativeRiskStudy": "Διαγραφή ποσοτικής μελέτης κινδύνου",
-	"viewQuantitativeRiskStudy": "Προβολή ποσοτικής μελέτης κινδύνου"
+	"viewQuantitativeRiskStudy": "Προβολή ποσοτικής μελέτης κινδύνου",
+	"dueDateUpdatedSuccessfully": "Η ημερομηνία λήξης ενημερώθηκε επιτυχώς",
+	"taskScheduleInfo": "Οι προηγούμενες εμφανίσεις προστατεύονται από αλλαγές προγραμματισμού. Μόνο οι επερχόμενες εργασίες θα επανυπολογιστούν."
 }

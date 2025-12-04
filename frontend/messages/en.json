@@ -1841,7 +1841,6 @@
 	"probabilityISO": "Likelihood",
 	"probabilityEBIOS": "Likelihood",
 	"iso27005": "ISO 27005",
-	"taskScheduleWarning": "Any tasks that are not part of the new schedule will be permanently deleted",
 	"create": "Create",
 	"update": "Update",
 	"delete": "Delete",
@@ -2890,5 +2889,7 @@
 	"viewQuantitativeRiskScenario": "View scenario",
 	"changeQuantitativeRiskStudy": "Change risk quantification study",
 	"deleteQuantitativeRiskStudy": "Delete risk quantification study",
-	"viewQuantitativeRiskStudy": "View risk quantification study"
+	"viewQuantitativeRiskStudy": "View risk quantification study",
+	"dueDateUpdatedSuccessfully": "Due date updated successfully",
+	"taskScheduleInfo": "Past occurences are protected from schedule changes. Only upcoming tasks will be recalculated."
 }
