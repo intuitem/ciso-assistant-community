@@ -917,7 +917,6 @@
 	"author": "Szerző",
 	"timestampCannotBeInTheFuture": "Az időbélyeg nem lehet a jövőben",
 	"youCanSetPasswordHere": "Itt állíthatja be a jelszavát.",
-	"taskScheduleWarning": "A nem az új ütemezés részét képező feladatok véglegesen törlődnek",
 	"userIsNotSSO": "Az SSO bejelentkezés jelenleg le van tiltva a fiókjához.",
 	"enableSSOHelpText": "Engedélyezze az SSO-t bejelentkezési lehetőségként minden felhasználó számára.",
 	"keepLocalLogin": "Kizárás a kényszerített SSO-ból",
@@ -1036,5 +1035,7 @@
 	"viewQuantitativeRiskScenario": "Forgatókönyv megtekintése",
 	"changeQuantitativeRiskStudy": "Kockázati kvantifikációs tanulmány módosítása",
 	"deleteQuantitativeRiskStudy": "Kockázati kvantifikációs tanulmány törlése",
-	"viewQuantitativeRiskStudy": "Kockázati kvantifikációs tanulmány megtekintése"
+	"viewQuantitativeRiskStudy": "Kockázati kvantifikációs tanulmány megtekintése",
+	"dueDateUpdatedSuccessfully": "Határidő sikeresen frissítve",
+	"taskScheduleInfo": "A múltbéli előfordulások védettek az ütemezési változásokkal szemben, csak korábbi vagy jövőbeli feladatok kerülnek újraszámításra."
 }

@@ -1101,7 +1101,6 @@
 	"selectEvidence": "Pilih bukti",
 	"timestampCannotBeInTheFuture": "Timestamp tidak boleh di masa depan",
 	"riskAcceptanceReviewMessage": "Penerimaan risiko ini menunggu untuk diproses. Ingat untuk meninjau sebelum memvalidasi atau menolak, karena Anda tidak dapat kembali.",
-	"taskScheduleWarning": "Apa pun tugas yang tidak menjadi bagian dari jadwal baru akan dihapus secara permanen",
 	"failedToContactProvider": "Gagal menghubungi penyedia",
 	"userIsNotSSO": "Login SSO saat ini dinonaktifkan untuk akun Anda.",
 	"enableSSOHelpText": "Aktifkan SSO sebagai opsi login untuk semua pengguna.",
@@ -1221,5 +1220,7 @@
 	"viewQuantitativeRiskScenario": "Lihat skenario",
 	"changeQuantitativeRiskStudy": "Ubah studi kuantifikasi risiko",
 	"deleteQuantitativeRiskStudy": "Hapus studi kuantifikasi risiko",
-	"viewQuantitativeRiskStudy": "Lihat studi kuantifikasi risiko"
+	"viewQuantitativeRiskStudy": "Lihat studi kuantifikasi risiko",
+	"dueDateUpdatedSuccessfully": "Tanggal jatuh tempo berhasil diperbarui",
+	"taskScheduleInfo": "Kejadian yang lalu dilindungi dari perubahan jadwal, hanya tugas yang lebih awal atau mendatang yang akan dihitung ulang."
 }

@@ -1205,7 +1205,6 @@
 	"forceSSOLogin": "Tving SSO-login",
 	"forceSSOLoginHelpText": "Kræv SSO for alle brugere og nulstil alle gemte adgangskoder. Brugere med 'Udeluk fra tvungen SSO' aktiveret vil bevare adgang med adgangskode som en fallback.",
 	"forceSSOLoginHelpText2": "Sørg for, at din SSO fungerer, eller at du har en fallback-konto, før du aktiverer denne mulighed.",
-	"taskScheduleWarning": "Alle opgaver, der ikke er en del af den nye tidsplan, vil blive permanent slettet",
 	"mappingSuggested": "Forslag til kortlægning",
 	"mappingSuggestedHelpText": "Forslag til kortlægning baseret på indlæste rammeværk",
 	"mappingSuggestionTeasing": "Kortlægninger foreslås nu! Du kan bruge filtrene til at udforske forslag baseret på indlæste rammeværk.",
@@ -1316,5 +1315,7 @@
 	"viewQuantitativeRiskScenario": "Se scenarie",
 	"changeQuantitativeRiskStudy": "Ændre risiko kvantitativ studie",
 	"deleteQuantitativeRiskStudy": "Slet risiko kvantitativ studie",
-	"viewQuantitativeRiskStudy": "Se risiko kvantitativ studie"
+	"viewQuantitativeRiskStudy": "Vis risiko kvantitativ studie",
+	"dueDateUpdatedSuccessfully": "Forventet afslutningsdato opdateret med succes",
+	"taskScheduleInfo": "Tidligere forekomster er beskyttet mod ændringer i planlægning, kun tidligere eller kommende opgaver vil blive genberegnet."
 }

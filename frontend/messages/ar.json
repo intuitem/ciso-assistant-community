@@ -892,7 +892,6 @@
 	"forceSSOLoginHelpText": "يتطلب SSO لجميع المستخدمين ويعيد تعيين أي كلمات مرور محفوظة. سيحتفظ المستخدمون الذين لديهم 'استبعاد من SSO الإجباري' مفعلًا بإمكانية الوصول الاحتياطي عبر كلمة المرور.",
 	"forceSSOLoginHelpText2": "تأكد من أن SSO الخاص بك يعمل أو أن لديك حسابًا احتياطيًا قبل تفعيل هذا الخيار.",
 	"youCanSetPasswordHere": "يمكنك تعيين كلمة المرور هنا",
-	"taskScheduleWarning": "سيتم حذف جميع المهام التي لا تكون جزءًا من الجدول الزمني الجديد بشكل دائم",
 	"mappingSuggested": "تم اقتراح رسم الخرائط",
 	"mappingSuggestedHelpText": "اقتراحات رسم الخرائط بناءً على الأطر المحملة",
 	"mappingSuggestionTeasing": "تم اقتراح خرائط! يمكنك استخدام المرشحات لاستكشاف الاقتراحات بناءً على الأطر المحملة.",
@@ -1004,5 +1003,7 @@
 	"viewQuantitativeRiskScenario": "عرض السيناريو",
 	"changeQuantitativeRiskStudy": "تغيير دراسة الكمية المخاطر",
 	"deleteQuantitativeRiskStudy": "حذف دراسة الكمية المخاطر",
-	"viewQuantitativeRiskStudy": "عرض دراسة الكمية المخاطر"
+	"viewQuantitativeRiskStudy": "عرض دراسة المخاطر الكمية",
+	"dueDateUpdatedSuccessfully": "تم تحديث تاريخ الاستحقاق بنجاح",
+	"taskScheduleInfo": "يتم حماية الحدوثات الماضية من التغييرات في الجدول الزمني، فقط المهام السابقة أو القادمة سيتم إعادة حسابها."
 }

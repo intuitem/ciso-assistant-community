@@ -1547,7 +1547,6 @@
 	"probabilityISO": "Olasılık",
 	"probabilityEBIOS": "Olasılık",
 	"iso27005": "ISO 27005",
-	"taskScheduleWarning": "Yeni programa dahil olmayan herhangi bir görev kalıcı olarak silinecektir",
 	"create": "Oluştur",
 	"update": "Güncelle",
 	"delete": "Sil",
@@ -1769,5 +1768,7 @@
 	"viewQuantitativeRiskScenario": "Senaryoyu görüntüle",
 	"changeQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını değiştir",
 	"deleteQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını sil",
-	"viewQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını görüntüle"
+	"viewQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını görüntüle",
+	"dueDateUpdatedSuccessfully": "Son tarih başarıyla güncellendi",
+	"taskScheduleInfo": "Geçmiş gerçekleşmeler program değişikliklerinden korunur, sadece daha erken veya yaklaşan görevler yeniden hesaplanır."
 }

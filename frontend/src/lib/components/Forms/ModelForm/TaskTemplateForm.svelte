@@ -203,8 +203,8 @@
 			cacheLock={cacheLocks['end_date']}
 			bind:cachedValue={formDataCache['end_date']}
 		/>
-		{#if context == 'edit' && isScheduleTainted}<span class="text-orange-500 italic text-sm"
-				><i class="fa-solid fa-circle-exclamation mr-1"></i>{m.taskScheduleWarning()}</span
+		{#if context == 'edit' && isScheduleTainted}<span class="text-secondary-500 italic text-sm"
+				><i class="fa-solid fa-circle-info mr-1"></i>{m.taskScheduleInfo()}</span
 			>{/if}
 	</Dropdown>
 {:else}

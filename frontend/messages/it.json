@@ -1302,7 +1302,6 @@
 	"forceSSOLogin": "Forza accesso SSO",
 	"forceSSOLoginHelpText": "Richiedi SSO per tutti gli utenti e reimposta eventuali password salvate. Gli utenti con 'Escludi dal SSO forzato' abilitato manterranno l'accesso di fallback basato su password.",
 	"forceSSOLoginHelpText2": "Assicurati che il tuo SSO sia funzionante o che tu abbia un account di fallback prima di abilitare questa opzione.",
-	"taskScheduleWarning": "Qualsiasi attività che non fa parte del nuovo programma verrà eliminata in modo permanente",
 	"mappingSuggested": "Mappatura suggerita",
 	"mappingSuggestedHelpText": "Suggerimenti di mappatura basati sui framework caricati",
 	"mappingSuggestionTeasing": "Le mappature sono ora suggerite! Puoi usare i filtri per esplorare i suggerimenti basati sui framework caricati.",
@@ -1413,5 +1412,7 @@
 	"viewQuantitativeRiskScenario": "Visualizza scenario",
 	"changeQuantitativeRiskStudy": "Cambia studio di quantificazione del rischio",
 	"deleteQuantitativeRiskStudy": "Elimina studio di quantificazione del rischio",
-	"viewQuantitativeRiskStudy": "Visualizza studio di quantificazione del rischio"
+	"viewQuantitativeRiskStudy": "Visualizza studio di quantificazione del rischio",
+	"dueDateUpdatedSuccessfully": "Data di scadenza aggiornata con successo",
+	"taskScheduleInfo": "Le occorrenze passate sono protette da modifiche alla pianificazione, solo le attività precedenti o future verranno ricalcolate."
 }
