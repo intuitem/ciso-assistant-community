@@ -65,14 +65,6 @@
 			const res = await fetch(`/fe-api/cascade-info/${URLModel}/${id}`);
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			cascadeInfo = await res.json();
-			// Auto-expand small groups in both buckets
-			for (const bucketName of ['deleted', 'affected'] as const) {
-				const groups = cascadeInfo?.[bucketName]?.grouped_objects ?? [];
-				groups.forEach((g) => {
-					if (g.objects.length <= 2) expanded.add(keyFor(bucketName, g.model));
-				});
-			}
-			expanded = new Set(expanded);
 		} catch (e) {
 			errorMsg = m.errorFetching();
 			console.error(e);

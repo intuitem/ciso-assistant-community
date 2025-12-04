@@ -31,6 +31,9 @@ from django.db.models import (
     Case,
     Exists,
     ForeignKey,
+    OneToOneField,
+    ManyToManyField,
+    QuerySet,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -712,16 +715,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def cascade_info(self, request, pk=None):
         """
         Cascade preview:
-        - deleted: concrete objects actually deleted by cascade
-        - affected: concrete objects NOT deleted but whose relationship(s) will be removed
-        - hides M2M through rows in the output while still traversing them
-        - deterministic sorting and dedupe
+        - deleted: objects actually deleted by cascade
+        - affected: objects not deleted but whose relationships will be removed (through rows, SET_NULL, local links)
         """
         instance = self.get_object()
         collector = NestedObjects(using=router.db_for_write(instance))
         collector.collect([instance])
 
-        # Hide purely technical models from end users
         skip_model_names = {
             "Token",
             "AuthToken",
@@ -736,29 +736,25 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 not skip_model_classes and model.__name__ in skip_model_names
             )
 
-        # Index all actually-deleted objects for quick membership checks
+        # Build index of concrete objects that will be deleted
         deleted_index = set()
         for model, objs in collector.model_objs.items():
             if model is type(instance):
                 continue
             if getattr(model._meta, "auto_created", False):
-                # through rows are deleted, yes, but we'll represent their *endpoints* instead
-                continue
+                continue  # skip through rows here; we will bubble endpoints separately
             for o in objs:
                 deleted_index.add((model.__name__, str(getattr(o, "pk", ""))))
 
-        # helpers to build grouped buckets with dedupe + sorting
         def add_grouped(bucket, obj):
             model = obj.__class__
             if is_hidden_model(model):
                 return
             key = model.__name__
             pk = str(getattr(obj, "pk", "")) or ""
-
             if (key, pk) in bucket["_seen"]:
                 return
 
-            # nice display names
             if key == "RoleAssignment":
                 role_name = getattr(getattr(obj, "role", None), "name", "") or ""
                 if getattr(obj, "user", None):
@@ -785,11 +781,19 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             group["objects"].append({"id": pk, "name": display})
             bucket["_seen"].add((key, pk))
 
+        def finalize(bucket):
+            groups = list(bucket["by_model"].values())
+            for g in groups:
+                g["objects"].sort(key=lambda o: (o["name"] or "").lower())
+            groups.sort(key=lambda g: (g.get("verbose_name") or g["model"]).lower())
+            count = sum(len(g["objects"]) for g in groups)
+            return groups, count
+
         deleted_bucket = {"by_model": {}, "_seen": set()}
         affected_bucket = {"by_model": {}, "_seen": set()}
 
-        # 1) Add all concrete (non-through) actually-deleted objects to deleted bucket
-        through_rows = []  # (through_model, [instances])
+        # 1) Concrete deletions
+        through_rows = []
         for model, instances in collector.model_objs.items():
             if model is type(instance):
                 continue
@@ -801,23 +805,16 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             for obj in instances:
                 add_grouped(deleted_bucket, obj)
 
-        # 2) Process through rows → bubble endpoints.
-        #    If an endpoint is in deleted_index, keep it under "deleted".
-        #    Else, it is *affected* (won't be deleted but will lose its link).
+        # 2) Bubble endpoints from through rows (M2M join tables)
         for through_model, t_instances in through_rows:
-            # discover FK endpoints on the through model
+            # Join tables have ≥2 FKs; skip others
             fk_fields = [
                 f
                 for f in through_model._meta.fields
                 if isinstance(f, ForeignKey) and getattr(f, "remote_field", None)
             ]
             if len(fk_fields) < 2:
-                continue  # nothing interesting
-
-            # human hint for reason
-            reason = (
-                f"Relationship via {through_model._meta.verbose_name} will be removed"
-            )
+                continue
 
             for t in t_instances:
                 endpoints = []
@@ -828,7 +825,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                         rel_obj = None
                     if not rel_obj:
                         continue
-                    # ignore root instance type; ignore through-on-through
                     if isinstance(rel_obj, type(instance)):
                         continue
                     if getattr(rel_obj._meta, "auto_created", False):
@@ -843,19 +839,82 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     else:
                         add_grouped(affected_bucket, ep)
 
-        # 3) Sort deterministically
-        def finalize(bucket):
-            groups = list(bucket["by_model"].values())
-            for g in groups:
-                g["objects"].sort(key=lambda o: (o["name"] or "").lower())
-            groups.sort(key=lambda g: (g.get("verbose_name") or g["model"]).lower())
-            count = sum(len(g["objects"]) for g in groups)
-            return groups, count
+        # 2b) Incoming updates (SET_NULL/DEFAULT) from Django's plan
+        updates = getattr(collector, "field_updates", {})
 
+        def _iter_objs(maybe_iter):
+            if maybe_iter is None:
+                return
+            if isinstance(maybe_iter, QuerySet):
+                for x in maybe_iter.iterator():
+                    yield x
+            else:
+                for x in maybe_iter:
+                    yield x
+
+        for key, ops in updates.items():
+            # Shape A: (field, value) -> [objs, ...]
+            if isinstance(key, tuple) and len(key) == 2:
+                field, value = key
+                for objs in ops or []:
+                    for o in _iter_objs(objs):
+                        model = field.model  # model whose rows will be updated
+                        pair = (model.__name__, str(getattr(o, "pk", "")) or "")
+                        if pair not in deleted_index:
+                            # If you want only SET_NULL cases: if value is None: ...
+                            add_grouped(affected_bucket, o)
+            # Shape B: model -> [(field, value, objs) ...]
+            elif isinstance(ops, (list, tuple)) and ops and isinstance(ops[0], tuple):
+                for item in ops:
+                    if len(item) == 3:
+                        field, value, objs = item
+                    elif len(item) == 2:
+                        field, objs = item
+                        value = None
+                    else:
+                        continue
+                    for o in _iter_objs(objs):
+                        model = field.model
+                        pair = (model.__name__, str(getattr(o, "pk", "")) or "")
+                        if pair not in deleted_index:
+                            add_grouped(affected_bucket, o)
+            else:
+                # Unknown shape; ignore safely
+                pass
+
+        # 2c) Outgoing links from the instance (FK/O2O/M2M)
+        for f in instance._meta.get_fields():
+            if getattr(f, "auto_created", False):
+                continue  # skip reverse relations
+
+            # Local FK/O2O targets: will remain but lose the link to this instance.
+            if isinstance(f, (ForeignKey, OneToOneField)):
+                try:
+                    rel_obj = getattr(instance, f.name, None)
+                except Exception:
+                    rel_obj = None
+                if rel_obj:
+                    key = rel_obj.__class__.__name__
+                    pk = str(getattr(rel_obj, "pk", "")) or ""
+                    if (key, pk) not in deleted_index:
+                        add_grouped(affected_bucket, rel_obj)
+
+            # Local M2M targets: will remain; join rows are removed.
+            elif isinstance(f, ManyToManyField):
+                try:
+                    manager = getattr(instance, f.name)
+                    for rel_obj in manager.all():
+                        key = rel_obj.__class__.__name__
+                        pk = str(getattr(rel_obj, "pk", "")) or ""
+                        if (key, pk) not in deleted_index:
+                            add_grouped(affected_bucket, rel_obj)
+                except Exception:
+                    pass
+
+        # 3) Sort and respond
         deleted_groups, deleted_count = finalize(deleted_bucket)
         affected_groups, affected_count = finalize(affected_bucket)
 
-        # Optional flattened lists for simple UIs
         def flatten(groups):
             return [
                 {
