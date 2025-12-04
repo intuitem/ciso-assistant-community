@@ -1548,7 +1548,6 @@
 	"probabilityISO": "Prawdopodobieństwo",
 	"probabilityEBIOS": "Prawdopodobieństwo",
 	"iso27005": "ISO 27005",
-	"taskScheduleWarning": "Wszystkie zadania, które nie będą częścią nowego harmonogramu, zostaną trwale usunięte",
 	"create": "Tworzyć",
 	"update": "Aktualizacja",
 	"delete": "Usuwać",
@@ -1776,5 +1775,7 @@
 	"viewQuantitativeRiskScenario": "Zobacz scenariusz",
 	"changeQuantitativeRiskStudy": "Zmień badanie ilościowe ryzyka",
 	"deleteQuantitativeRiskStudy": "Usuń badanie ilościowe ryzyka",
-	"viewQuantitativeRiskStudy": "Zobacz badanie ilościowe ryzyka"
+	"viewQuantitativeRiskStudy": "Zobacz badanie ilościowe ryzyka",
+	"dueDateUpdatedSuccessfully": "Termin zaktualizowany pomyślnie",
+	"taskScheduleInfo": "Wcześniejsze wystąpienia są chronione przed zmianami harmonogramu. Tylko nadchodzące zadania zostaną przeliczone."
 }
