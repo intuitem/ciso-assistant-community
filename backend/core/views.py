@@ -730,6 +730,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             "EmailAddress",
             "Session",
             "RequirementAssessment",
+            "LogEntry",
+            "Folder",
+            "Permission",
         }
         skip_model_classes = set()
 
