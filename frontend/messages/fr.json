@@ -2754,6 +2754,8 @@
 	"terminationReason": "Motif de résiliation",
 	"testConnection": "Tester la connexion",
 	"userGroup": "Groupe d'utilisateurs",
+	"webhooks": "Webhooks",
+	"webhooksDescription": "Intégration avec les systèmes externes via webhooks",
 	"webhookEndpointUrl": "URL du point de terminaison webhook",
 	"webhookEndpointUrlHelpText": "L'URL où l'application recevra les webhooks entrants du service tiers.",
 	"webhookSecret": "Secret webhook",
