@@ -29,12 +29,14 @@
 
 	async function changeEffort(newEffort: string) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/effort`;
+		// Convert '--' to empty string to clear the field
+		const effortValue = newEffort === '--' ? '' : newEffort;
 		const requestInit = {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ effort: newEffort })
+			body: JSON.stringify({ effort: effortValue })
 		};
 		try {
 			const response = await fetch(endpoint, requestInit);

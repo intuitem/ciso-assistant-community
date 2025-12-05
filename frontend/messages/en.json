@@ -1848,6 +1848,7 @@
 	"changeImpact": "... impact",
 	"changeEffort": "... effort",
 	"changePriority": "... priority",
+	"changeCsfFunction": "... CSF function",
 	"logEntryRepr": "{timestamp} - {actor} - {action} - {object}",
 	"auditLog": "Audit log",
 	"actor": "Actor",
