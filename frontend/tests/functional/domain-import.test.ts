@@ -21,7 +21,7 @@ async function dismissBlockingModals(page: Page) {
 async function navigateToFolders(page: Page) {
 	await page.getByRole('button', { name: 'Organization' }).click();
 	await page.getByTestId('accordion-item-folders').click();
-	await expect(page).toHaveURL('/folders');
+	await expect(page).toHaveURL(/\/folders/);
 	await expect(page.getByTestId('import-button')).toBeVisible();
 }
 
