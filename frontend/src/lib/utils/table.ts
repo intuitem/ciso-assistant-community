@@ -762,7 +762,7 @@ export const BENEFICIARY_ENTITY_FILTER: ListViewFilterConfig = {
 export const SOLUTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'solution',
+		label: 'solutions',
 		optionsEndpoint: 'solutions',
 		multiple: true
 	}
@@ -1691,7 +1691,7 @@ export const listViewFields = {
 			'endDate',
 			'providerEntity',
 			'beneficiaryEntity',
-			'solution'
+			'solutions'
 		],
 		body: [
 			'ref_id',
@@ -1702,13 +1702,13 @@ export const listViewFields = {
 			'end_date',
 			'provider_entity',
 			'beneficiary_entity',
-			'solution'
+			'solutions'
 		],
 		filters: {
 			status: CONTRACT_STATUS_FILTER,
 			provider_entity: PROVIDER_ENTITY_FILTER,
 			beneficiary_entity: BENEFICIARY_ENTITY_FILTER,
-			solution: SOLUTION_FILTER
+			solutions: SOLUTION_FILTER
 		}
 	},
 	representatives: {

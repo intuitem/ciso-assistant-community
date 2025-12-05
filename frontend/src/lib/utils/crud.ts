@@ -912,7 +912,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'beneficiary_entity', urlModel: 'entities' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'solution', urlModel: 'solutions' },
+			{ field: 'solutions', urlModel: 'solutions' },
 			{ field: 'overarching_contract', urlModel: 'contracts' }
 		],
 		selectFields: [

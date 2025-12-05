@@ -205,7 +205,7 @@ class EntityViewSet(BaseModelViewSet):
         # (b_02.02, b_07.01, b_99.01)
         related_solution_ids = set(related_solutions.values_list("id", flat=True))
         business_function_contracts = contracts.filter(
-            solution__id__in=related_solution_ids
+            solutions__id__in=related_solution_ids
         )
 
         # Calculate folder name for the ZIP structure (without .zip extension)
@@ -347,8 +347,10 @@ class EntityViewSet(BaseModelViewSet):
         solutions = Solution.objects.filter(id__in=viewable_solutions).select_related(
             "provider_entity"
         )
-        contracts = Contract.objects.filter(id__in=viewable_contracts).select_related(
-            "provider_entity", "beneficiary_entity", "solution"
+        contracts = (
+            Contract.objects.filter(id__in=viewable_contracts)
+            .select_related("provider_entity", "beneficiary_entity")
+            .prefetch_related("solutions")
         )
         assets = Asset.objects.filter(id__in=viewable_assets)
 
@@ -454,15 +456,16 @@ class EntityViewSet(BaseModelViewSet):
                     }
                 )
 
-            # Link contract to solution
-            if contract.solution and contract.solution.id in solution_node_map:
-                links.append(
-                    {
-                        "source": node_index,
-                        "target": solution_node_map[contract.solution.id],
-                        "value": "frames",
-                    }
-                )
+            # Link contract to solutions
+            for solution in contract.solutions.all():
+                if solution.id in solution_node_map:
+                    links.append(
+                        {
+                            "source": node_index,
+                            "target": solution_node_map[solution.id],
+                            "value": "frames",
+                        }
+                    )
 
             node_index += 1
 
@@ -887,7 +890,7 @@ class ContractViewSet(BaseModelViewSet):
         "folder",
         "provider_entity",
         "beneficiary_entity",
-        "solution",
+        "solutions",
         "status",
         "owner",
         "dora_contractual_arrangement",
