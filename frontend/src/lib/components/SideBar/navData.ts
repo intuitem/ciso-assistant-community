@@ -57,7 +57,7 @@ export const navData = {
 				{
 					name: 'domains',
 					fa_icon: 'fa-solid fa-sitemap',
-					href: '/folders',
+					href: '/folders?content_type=GL&content_type=DO',
 					exclude: ['BI-RL-TPR']
 				},
 				{
