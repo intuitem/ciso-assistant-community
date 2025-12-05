@@ -569,6 +569,7 @@
 	"deleteModalTitle": "Supprimer",
 	"deleteModalMessage": "Êtes-vous sûr de vouloir supprimer l'objet suivant : {name} ?",
 	"deleteUserMessage": "Êtes-vous sûr de vouloir supprimer l'utilisateur suivant : {name} ?",
+	"cascadeDeleteWarning": "ATTENTION : La suppression de cet objet entraînera également la suppression définitive de {count} objet(s) lié(s) :",
 	"download": "Télécharger",
 	"loading": "Chargement",
 	"open": "Ouvert",
@@ -2824,6 +2825,20 @@
 	"occurrenceDueDate": "Date d'échéance de l'occurrence",
 	"relatedTo": "Relatif à",
 	"legacyEvidenceField": "Champ de preuve obsolète",
+	"errorFetching": "Erreur lors de la récupération des données",
+	"nothingToDelete": "Aucun autre élément ne sera supprimé.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Aucun autre objet ne sera impacté.",
+				"countPlural=one": "{count} objet lié ne sera pas supprimé, mais perdra une ou plusieurs relations.",
+				"countPlural=other": "{count} objets liés ne seront pas supprimés, mais perdront une ou plusieurs relations."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Les éléments ci-dessous resteront dans le système, mais leurs liens avec cet objet seront supprimés.",
 	"yearlyTasksReview": "Revue aggrégée des tâches",
 	"startPeriod": "Départ",
 	"endPeriod": "Fin",
