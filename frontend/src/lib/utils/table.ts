@@ -57,6 +57,13 @@ const ENTITY_CRITICALITY_OPTIONS = [
 	{ label: '3', value: '3' },
 	{ label: '4', value: '4' }
 ];
+
+const CONTENT_TYPE_OPTIONS = [
+	{ label: 'DOMAIN', value: 'DO' },
+	{ label: 'GLOBAL', value: 'GL' },
+	{ label: 'ENCLAVE', value: 'EN' }
+];
+
 const YES_NO_UNSET_OPTIONS = [
 	{ label: 'YES', value: 'YES' },
 	{ label: 'NO', value: 'NO' },
@@ -117,6 +124,15 @@ export const LABELS_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'filtering-labels',
 		label: 'filtering_labels',
 		optionsLabelField: 'label',
+		multiple: true
+	}
+};
+
+export const CONTENT_TYPE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'contentType',
+		options: CONTENT_TYPE_OPTIONS,
 		multiple: true
 	}
 };
@@ -1159,9 +1175,10 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'parentDomain', 'labels'],
-		body: ['name', 'description', 'parent_folder', 'filtering_labels'],
+		head: ['name', 'description', 'contentType', 'parentDomain', 'labels'],
+		body: ['name', 'description', 'content_type', 'parent_folder', 'filtering_labels'],
 		filters: {
+			content_type: CONTENT_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
