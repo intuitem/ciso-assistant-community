@@ -7243,14 +7243,30 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if best_results:
                 framework = Framework.objects.filter(urn=dest_urn).first()
                 if framework and str(framework) not in str(data):
-                    assessable_requirements_count = framework.requirement_nodes.filter(
-                        assessable=True
-                    ).count()
+                    # Get assessable requirement URNs from target framework
+                    assessable_urns = set(
+                        framework.requirement_nodes.filter(assessable=True).values_list(
+                            "urn", flat=True
+                        )
+                    )
+
+                    # Filter mapped results to only include assessable requirements
+                    filtered_results = best_results.copy()
+                    if "requirement_assessments" in filtered_results:
+                        filtered_results["requirement_assessments"] = {
+                            urn: assessment
+                            for urn, assessment in best_results[
+                                "requirement_assessments"
+                            ].items()
+                            if urn in assessable_urns
+                        }
+
+                    assessable_requirements_count = len(assessable_urns)
                     data.append(
                         {
                             "id": framework.id,
                             "str": str(framework),
-                            "results": engine.summary_results(best_results),
+                            "results": engine.summary_results(filtered_results),
                             "assessable_requirements_count": assessable_requirements_count,
                         }
                     )
@@ -8835,11 +8851,16 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         source_framework = source_framework_lib.content["framework"]
         target_framework = target_framework_lib.content["framework"]
 
+        # Only include assessable requirements in node dictionaries
         source_nodes_dict = {
-            n.get("urn"): n for n in source_framework["requirement_nodes"]
+            n.get("urn"): n
+            for n in source_framework["requirement_nodes"]
+            if n.get("assessable", True)
         }
         target_nodes_dict = {
-            n.get("urn"): n for n in target_framework["requirement_nodes"]
+            n.get("urn"): n
+            for n in target_framework["requirement_nodes"]
+            if n.get("assessable", True)
         }
 
         nodes = []
