@@ -534,9 +534,17 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true
 			},
 			{ field: 'assets', urlModel: 'vulnerabilities' },
+			{ field: 'assets', urlModel: 'risk-scenarios', disableCreate: true, disableDelete: true },
+			{
+				field: 'assets',
+				urlModel: 'quantitative-risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			},
 			{ field: 'assets', urlModel: 'solutions', disableCreate: true, disableDelete: true },
 			{ field: 'assets', urlModel: 'personal-data', disableCreate: true, disableDelete: true },
-			{ field: 'assets', urlModel: 'incidents' }
+			{ field: 'assets', urlModel: 'incidents' },
+			{ field: 'assets', urlModel: 'applied-controls', disableDelete: true }
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
@@ -1043,6 +1051,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'processings',
 				urlModel: 'applied-controls',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'processings',
+				urlModel: 'evidences',
 				disableCreate: true,
 				disableDelete: true
 			}

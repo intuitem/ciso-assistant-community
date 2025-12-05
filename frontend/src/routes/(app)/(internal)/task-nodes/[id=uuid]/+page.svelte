@@ -85,6 +85,21 @@
 		invalidateAll();
 	}
 
+	async function submitDueDateChange(due_date: string): Promise<void> {
+		const formData = new FormData();
+		formData.append('due_date', due_date);
+
+		const response = await fetch(`?/updateDueDate`, {
+			method: 'POST',
+			body: formData
+		});
+		if (!response.ok) {
+			console.error('Failed to update due date');
+			return;
+		}
+		invalidateAll();
+	}
+
 	async function removeEvidence(id: string, move: boolean): void {
 		const formData = new FormData();
 		formData.append('evidenceId', id);
@@ -166,9 +181,12 @@
 			<p class="text-gray-700 text-md font-medium tracking-wide">
 				{m.occurrenceDueDate()}
 			</p>
-			<p class="text-md px-1.5 py-0.5 font-semibold">
-				{taskNode.due_date}
-			</p>
+			<input
+				type="date"
+				class="px-2 py-1 border rounded text-md font-semibold"
+				bind:value={taskNode.due_date}
+				onchange={(e) => submitDueDateChange(e.target.value)}
+			/>
 		</div>
 	</div>
 

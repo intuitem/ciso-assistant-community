@@ -151,6 +151,9 @@ export const RiskScenarioSchema = z.object({
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	risk_origin: z.string().uuid().optional().nullable(),
+	antecedent_scenarios: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
 	ref_id: z.string().max(100).optional()
 });
 
@@ -326,6 +329,7 @@ export const AssetSchema = z.object({
 	observation: z.string().optional().nullable(),
 	overridden_children_capabilities: z.string().uuid().optional().array().optional(),
 	solutions: z.string().uuid().optional().array().optional(),
+	applied_controls: z.string().uuid().optional().array().optional(),
 	is_business_function: z.boolean().default(false),
 	dora_licenced_activity: z.string().optional().nullable(),
 	dora_criticality_assessment: z.string().default('eba_BT:x21'),
@@ -503,7 +507,8 @@ export const GeneralSettingsSchema = z.object({
 	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
-	allow_self_validation: z.boolean().default(false).optional()
+	allow_self_validation: z.boolean().default(false).optional(),
+	show_warning_external_links: z.boolean().default(true).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -761,6 +766,7 @@ export const processingSchema = z.object({
 	has_sensitive_personal_data: z.boolean().optional(),
 	nature: z.string().optional().array().optional(),
 	associated_controls: z.array(z.string().optional()).optional(),
+	evidences: z.string().optional().array().optional(),
 	assigned_to: z.string().uuid().optional().array().optional()
 });
 
