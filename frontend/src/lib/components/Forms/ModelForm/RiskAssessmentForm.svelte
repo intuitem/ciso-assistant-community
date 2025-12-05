@@ -51,10 +51,13 @@
 					if (riskMatrix && riskMatrix.json_definition) {
 						const jsonDefinition = JSON.parse(riskMatrix.json_definition);
 						const riskLevels = jsonDefinition.risk || [];
-						riskToleranceChoices = riskLevels.map((level, index) => ({
-							label: level.name,
-							value: level.id ?? index
-						}));
+						riskToleranceChoices = [
+							{ label: '--', value: -1 },
+							...riskLevels.map((level, index) => ({
+								label: level.name,
+								value: level.id ?? index
+							}))
+						];
 					}
 				}
 			} catch (error) {
@@ -119,6 +122,7 @@
 		<Select
 			{form}
 			translateOptions={false}
+			disableDoubleDash
 			options={riskToleranceChoices}
 			field="risk_tolerance"
 			cacheLock={cacheLocks['risk_tolerance']}
