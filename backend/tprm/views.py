@@ -715,7 +715,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             else:
                 logger.warning(
                     "Compliance assessment folder is not an Enclave, skipping deletion",
-                    folder,
+                    folder=folder,
                 )
 
         return super().destroy(request, *args, **kwargs)
