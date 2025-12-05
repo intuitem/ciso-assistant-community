@@ -8,7 +8,7 @@ description: Usual documents, policies, procedures, training and technical contr
   recommended by intuitem
 copyright: "\xA9 intuitem - 2026"
 version: 5
-publication_date: 2025-12-04
+publication_date: 2025-12-05
 provider: intuitem
 packager: intuitem
 translations:
@@ -306,6 +306,7 @@ objects:
           Examen des incidents de s\xE9curit\xE9\nExamen de la gestion des vuln\xE9\
           rabilit\xE9s\nExamen des non-conformit\xE9s"
       de:
+        name: "Dokumentierter Plan f\xFCr die Managementbewertung"
         description: "\xDCberpr\xFCfung der Risiken\n\xDCberpr\xFCfung der Sicherheitsziele\n\
           \xDCberpr\xFCfung von Sicherheitsvorf\xE4llen\n\xDCberpr\xFCfung des Schwachstellenmanagements\n\
           \xDCberpr\xFCfung der Nichtkonformit\xE4ten"
@@ -532,7 +533,7 @@ objects:
       de:
         name: "Register f\xFCr privilegierte Zugangskonten"
   - urn: urn:intuitem:risk:function:doc-pol:doc.incident_register
-    ref_id: DOC.INCIDENT_REGiSTER
+    ref_id: DOC.INCIDENT_REGISTER
     name: Security Incident Register
     category: process
     csf_function: respond
@@ -1023,9 +1024,9 @@ objects:
     csf_function: govern
     description: 'classification
 
-      protection and handling of information
+      Protection and handling of information
 
-      Poritection and handling of PII
+      Protection and handling of PII
 
       clear desk
 
