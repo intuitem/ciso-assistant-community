@@ -31,8 +31,7 @@ export abstract class BasePage {
 
 	async goto() {
 		await this.page.goto(this.url);
-		// Allow query parameters by checking pathname starts with expected URL
-		await this.page.waitForURL((url) => url.pathname.startsWith(this.url));
+		await this.page.waitForURL(this.url);
 	}
 
 	async hasTitle(title: string | RegExp = this.name) {
