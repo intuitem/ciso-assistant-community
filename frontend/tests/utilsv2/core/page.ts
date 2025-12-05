@@ -25,7 +25,8 @@ export class Page {
 
 	/** Check if the browser's URL match the expected endpoint. */
 	async checkSelf(expect: Expect) {
-		await expect(this._self).toHaveURL(this._endpoint);
+		// Allow query parameters by checking URL starts with expected endpoint
+		await expect(this._self).toHaveURL(new RegExp('^' + this._endpoint.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 	}
 
 	/** Goto the page (by using the endpoint given to its constructor). */
