@@ -2889,5 +2889,6 @@
 	"viewQuantitativeRiskScenario": "View scenario",
 	"changeQuantitativeRiskStudy": "Change risk quantification study",
 	"deleteQuantitativeRiskStudy": "Delete risk quantification study",
-	"viewQuantitativeRiskStudy": "View risk quantification study"
+	"viewQuantitativeRiskStudy": "View risk quantification study",
+	"approverFieldIsDeprecated": " This field is deprecated, we recommend to use a validation workflow instead"
 }
