@@ -195,5 +195,15 @@
 			multiple
 			disabled={initialData.findings_assessments}
 		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="security-exceptions"
+			optionsExtraFields={[['folder', 'str']]}
+			field="security_exceptions"
+			cacheLock={cacheLocks['security_exceptions']}
+			label={m.securityExceptions()}
+			bind:cachedValue={formDataCache['security_exceptions']}
+			multiple
+		/>
 	</Dropdown>
 {/if}
