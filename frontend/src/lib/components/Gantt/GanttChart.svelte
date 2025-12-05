@@ -560,7 +560,9 @@
 							{/if}
 							{#if selectedEntry.end_date}
 								<div>
-									<span class="font-medium">{selectedEntry.type === 'milestone' ? 'Date' : 'End'}:</span>
+									<span class="font-medium"
+										>{selectedEntry.type === 'milestone' ? 'Date' : 'End'}:</span
+									>
 									{new Date(selectedEntry.end_date).toLocaleDateString('en-US', {
 										year: 'numeric',
 										month: 'short',
@@ -614,9 +616,7 @@
 			<div class="flex items-start">
 				<!-- Fixed column for names -->
 				<div class="w-64 flex-shrink-0 pr-4">
-					<div class="font-semibold text-sm text-gray-600 mb-4 h-10 flex items-end pb-1">
-						Name
-					</div>
+					<div class="font-semibold text-sm text-gray-600 mb-4 h-10 flex items-end pb-1">Name</div>
 					<div class="space-y-2">
 						{#each filteredEntries as entry (entry.id)}
 							<div class="h-10 flex items-center border-b pb-2">
@@ -659,7 +659,10 @@
 
 							<!-- Today marker -->
 							{#if todayPosition !== null}
-								<div class="absolute top-0 h-full w-0.5 bg-red-500 z-10" style="left: {todayPosition}%;">
+								<div
+									class="absolute top-0 h-full w-0.5 bg-red-500 z-10"
+									style="left: {todayPosition}%;"
+								>
 									<div
 										class="absolute -top-1 left-1/2 transform -translate-x-1/2 text-xs font-semibold text-red-500 whitespace-nowrap"
 									>
@@ -702,7 +705,9 @@
 												)}%; transform: translateX(-50%);"
 												onclick={() => handleItemClick(entry.id)}
 											>
-												<div class="w-4 h-4 bg-green-500 rotate-45 border-2 border-white shadow"></div>
+												<div
+													class="w-4 h-4 bg-green-500 rotate-45 border-2 border-white shadow"
+												></div>
 											</button>
 										{:else if entry.type === 'task'}
 											<!-- Task -->
@@ -718,8 +723,16 @@
 											></button>
 										{:else if entry.type === 'activity'}
 											<!-- Control Implementation -->
-											{@const leftPos = getDatePosition(entry.start_date, dateRange.min, dateRange.max)}
-											{@const rightPos = getDatePosition(entry.end_date, dateRange.min, dateRange.max)}
+											{@const leftPos = getDatePosition(
+												entry.start_date,
+												dateRange.min,
+												dateRange.max
+											)}
+											{@const rightPos = getDatePosition(
+												entry.end_date,
+												dateRange.min,
+												dateRange.max
+											)}
 											{@const width = rightPos - leftPos}
 											<button
 												type="button"

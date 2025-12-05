@@ -25,7 +25,7 @@
 		link="/experimental/batch-create"
 		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
 	/>
-  	<Article
+	<Article
 		title="Yearly Tasks Review"
 		desc="Review all recurrent tasks grouped by folder for yearly planning"
 		link="/experimental/yearly-tasks-review"
@@ -36,6 +36,5 @@
 		desc="Visualize applied controls on a timeline with milestones, tasks, and control implementations"
 		link="/experimental/gantt"
 		tags={['visualization', 'timeline', 'controls', 'planning']}
-  />
-
+	/>
 </div>
