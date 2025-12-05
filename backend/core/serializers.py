@@ -1541,11 +1541,20 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         return evidence
 
     def update(self, instance, validated_data):
+        # Track old folder before update
+        old_folder_id = instance.folder_id
+
         # Handle properly owner field cleaning
         owners = validated_data.get("owner", None)
         instance = super().update(instance, validated_data)
         if not owners:
             instance.owner.set([])
+
+        # Update all EvidenceRevisions' folder if the Evidence's folder changed
+        if old_folder_id != instance.folder_id:
+            EvidenceRevision.objects.filter(evidence=instance).update(
+                folder=instance.folder
+            )
 
         return instance
 
@@ -2526,11 +2535,20 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
         # Track old assigned users before update
         old_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
 
+        # Track old folder before update
+        old_folder_id = instance.folder_id
+
         was_recurrent = instance.is_recurrent  # Store the previous state
         tasknode_data = self._extract_tasknode_fields(validated_data)
         instance = super().update(instance, validated_data)
         now_recurrent = instance.is_recurrent
         self._sync_task_node(instance, tasknode_data, was_recurrent, now_recurrent)
+
+        # Update all TaskNodes' folder if the TaskTemplate's folder changed
+        if old_folder_id != instance.folder_id:
+            TaskNode.objects.filter(task_template=instance).update(
+                folder=instance.folder
+            )
 
         # Get new assigned users after update
         new_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
