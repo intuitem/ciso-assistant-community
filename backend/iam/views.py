@@ -277,14 +277,29 @@ class PasswordResetView(views.APIView):
         if EMAIL_HOST or EMAIL_HOST_RESCUE:
             if associated_user is not None and associated_user.is_local:
                 try:
+                    logger.info(
+                        "Attempting to send password reset email", recipient=email
+                    )
                     associated_user.mailing(
                         email_template_name="registration/password_reset_email.html",
                         subject=_("CISO Assistant: Password Reset"),
                     )
-                    print("Sending reset mail to", email)
+                    logger.info(
+                        "Password reset email request processed", recipient=email
+                    )
                 except Exception as e:
-                    print(e)
+                    logger.error(
+                        "Failed to send password reset email",
+                        recipient=email,
+                        error=str(e),
+                    )
+            else:
+                logger.info(
+                    "Password reset requested for non-local or non-existent user",
+                    email=email,
+                )
             return Response(status=HTTP_202_ACCEPTED)
+        logger.warning("Password reset requested but email server not configured")
         return Response(
             data={
                 "error": "Email server not configured, please contact your administrator"
