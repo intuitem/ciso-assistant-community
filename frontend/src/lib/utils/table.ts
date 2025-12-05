@@ -762,7 +762,7 @@ export const BENEFICIARY_ENTITY_FILTER: ListViewFilterConfig = {
 export const SOLUTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'solution',
+		label: 'solutions',
 		optionsEndpoint: 'solutions',
 		multiple: true
 	}
