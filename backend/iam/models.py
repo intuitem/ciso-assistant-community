@@ -663,13 +663,15 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 fail_silently=False,
                 html_message=email,
             )
-            logger.info("email sent", recipient=self.email, subject=subject)
+            logger.info(
+                "Email sent successfully", recipient=self.email, subject=subject
+            )
         except Exception as primary_exception:
             logger.error(
-                "primary mailer failure, trying rescue",
+                "Primary mail server failure, trying rescue",
                 recipient=self.email,
                 subject=subject,
-                error=primary_exception,
+                error=str(primary_exception),
                 email_host=EMAIL_HOST,
                 email_port=EMAIL_PORT,
                 email_host_user=EMAIL_HOST_USER,
@@ -691,13 +693,17 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                             [self.email],
                             connection=new_connection,
                         ).send()
-                    logger.info("email sent", recipient=self.email, subject=subject)
-                except Exception as rescue_exception:
-                    logger.error(
-                        "rescue mailer failure",
+                    logger.info(
+                        "Email sent via rescue server",
                         recipient=self.email,
                         subject=subject,
-                        error=rescue_exception,
+                    )
+                except Exception as rescue_exception:
+                    logger.error(
+                        "Rescue mail server failure",
+                        recipient=self.email,
+                        subject=subject,
+                        error=str(rescue_exception),
                         email_host=EMAIL_HOST_RESCUE,
                         email_port=EMAIL_PORT_RESCUE,
                         email_username=EMAIL_HOST_USER_RESCUE,
