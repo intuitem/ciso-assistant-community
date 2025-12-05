@@ -1032,6 +1032,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'owner', urlModel: 'users' },
+			{ field: 'purposes', urlModel: 'purposes' },
 			{ field: 'assigned_to', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
@@ -1072,6 +1073,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'dpia_required' },
 			{ field: 'dpia_reference' },
 			{ field: 'nature' },
+			{ field: 'purposes' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
 			{ field: 'filtering_labels' }
