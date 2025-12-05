@@ -1445,7 +1445,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		],
 		selectFields: [
-			{ field: 'likelihood', valueType: 'number', detail: true, endpointUrl: 'ebios-rm/studies' }
+			{
+				field: 'likelihood',
+				valueType: 'number',
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
+			}
 		]
 	},
 	'elementary-actions': {
@@ -1484,7 +1490,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'elementary_actions', urlModel: 'elementary-actions' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
-		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }],
+		selectFields: [
+			{
+				field: 'likelihood',
+				valueType: 'number',
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
+			}
+		],
 		reverseForeignKeyFields: [
 			{
 				field: 'operating_modes',
