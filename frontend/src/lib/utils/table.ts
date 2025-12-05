@@ -6,6 +6,7 @@ import type { urlModel } from './types';
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
 import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
 import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
+import ChangeCsfFunction from '$lib/components/ContextMenu/applied-controls/ChangeCsfFunction.svelte';
 import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeStatus.svelte';
 import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo } from './crud';
@@ -1336,6 +1337,7 @@ export const listViewFields = {
 			'priority',
 			'status',
 			'category',
+			'csfFunction',
 			'eta',
 			'domain',
 			'owner',
@@ -1349,6 +1351,7 @@ export const listViewFields = {
 			'priority',
 			'status',
 			'category',
+			'csf_function',
 			'eta',
 			'folder',
 			'owner',
@@ -2336,7 +2339,8 @@ export const contextMenuActions = {
 		{ component: ChangeStatus, props: {} },
 		{ component: ChangeImpact, props: {} },
 		{ component: ChangeEffort, props: {} },
-		{ component: ChangePriority, props: {} }
+		{ component: ChangePriority, props: {} },
+		{ component: ChangeCsfFunction, props: {} }
 	],
 	evidences: [{ component: EvidenceChangeStatus, props: {} }],
 	'task-nodes': [{ component: TaskNodeChangeStatus, props: {} }],
