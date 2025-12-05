@@ -26,7 +26,7 @@ export class Page {
 	/** Check if the browser's URL match the expected endpoint. */
 	async checkSelf(expect: Expect) {
 		// Allow query parameters by checking pathname starts with expected endpoint
-		await expect(this._self).toHaveURL(url => url.pathname.startsWith(this._endpoint));
+		await expect(this._self).toHaveURL((url) => url.pathname.startsWith(this._endpoint));
 	}
 
 	/** Goto the page (by using the endpoint given to its constructor). */
