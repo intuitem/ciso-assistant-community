@@ -94,12 +94,13 @@
 />
 <AutocompleteSelect
 	{form}
+	multiple
 	optionsEndpoint="solutions"
 	optionsExtraFields={[['provider_entity', 'str']]}
-	field="solution"
-	cacheLock={cacheLocks['solution']}
-	bind:cachedValue={formDataCache['solution']}
-	label={m.solution()}
+	field="solutions"
+	cacheLock={cacheLocks['solutions']}
+	bind:cachedValue={formDataCache['solutions']}
+	label={m.solutions()}
 />
 <AutocompleteSelect
 	{form}

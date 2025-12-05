@@ -693,7 +693,7 @@ export const contractSchema = z.object({
 	provider_entity: z.string().optional(),
 	beneficiary_entity: z.string().optional(),
 	evidences: z.array(z.string().optional()).optional(),
-	solution: z.string().optional(),
+	solutions: z.array(z.string().optional()).optional(),
 	status: z.string().optional().default('draft'),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	end_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
