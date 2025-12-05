@@ -273,7 +273,7 @@ class PasswordResetView(views.APIView):
     @method_decorator(ensure_csrf_cookie)
     def post(self, request):
         email = request.data["email"]  # type: ignore
-        associated_user = User.objects.filter(email=email).first()
+        associated_user = User.objects.filter(email__iexact=email).first()
         if EMAIL_HOST or EMAIL_HOST_RESCUE:
             if associated_user is not None and associated_user.is_local:
                 try:
