@@ -1555,6 +1555,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'risk-scenarios',
 				disableCreate: true,
 				disableDelete: true
+			},
+			{
+				field: 'security_exceptions',
+				urlModel: 'validation-flows',
+				disableCreate: true,
+				disableDelete: true
 			}
 		]
 	},
