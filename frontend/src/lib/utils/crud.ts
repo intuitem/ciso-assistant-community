@@ -1294,10 +1294,14 @@ export const URL_MODEL_MAP: ModelMap = {
 				endpointUrl: 'ebios-rm/feared-events',
 				urlParams: 'is_selected=true&ebios_rm_study=',
 				detail: true
+			},
+			{
+				field: 'risk_origin',
+				urlModel: 'terminologies',
+				urlParams: 'field_path=ro_to.risk_origin&is_visible=true'
 			}
 		],
 		selectFields: [
-			{ field: 'risk-origin' },
 			{ field: 'motivation', valueType: 'number' },
 			{ field: 'resources', valueType: 'number' },
 			{ field: 'activity', valueType: 'number' }
