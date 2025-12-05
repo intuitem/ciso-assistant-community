@@ -417,7 +417,9 @@ def generate_b_02_02_ict_services(
         for solution in contract.solutions.all():
             # Get business functions associated with this solution (directly or through children)
             if business_function_asset_ids:
-                business_functions = solution.assets.filter(is_business_function=True)
+                business_functions = solution.assets.filter(
+                    id__in=business_function_asset_ids, is_business_function=True
+                )
             else:
                 business_functions = solution.assets.filter(is_business_function=True)
 
