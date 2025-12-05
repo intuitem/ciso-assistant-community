@@ -378,7 +378,7 @@ class ContractReadSerializer(BaseModelSerializer):
     provider_entity = FieldsRelatedField()
     beneficiary_entity = FieldsRelatedField()
     evidences = FieldsRelatedField(many=True)
-    solution = FieldsRelatedField()
+    solutions = FieldsRelatedField(many=True)
     overarching_contract = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
 

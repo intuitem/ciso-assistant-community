@@ -417,14 +417,12 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name=_("Evidences"),
         help_text=_("Supporting evidence for this contract"),
     )
-    solution = models.ForeignKey(
+    solutions = models.ManyToManyField(
         "tprm.Solution",
-        on_delete=models.SET_NULL,
         blank=True,
-        null=True,
         related_name="contracts",
-        verbose_name=_("Solution"),
-        help_text=_("Solution covered by this contract"),
+        verbose_name=_("Solutions"),
+        help_text=_("Solutions covered by this contract"),
     )
     status = models.CharField(
         max_length=20,
