@@ -27,6 +27,7 @@ from rest_framework.status import (
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
+from global_settings.models import GlobalSettings
 from .models import Folder, PersonalAccessToken, Role, RoleAssignment
 from .serializers import (
     ChangePasswordSerializer,
@@ -294,10 +295,40 @@ class PasswordResetView(views.APIView):
                         error=str(e),
                     )
             else:
-                logger.info(
-                    "Password reset requested for non-local or non-existent user",
-                    email=email,
-                )
+                # Provide detailed logging about why password reset was not sent
+                if associated_user is None:
+                    logger.info(
+                        "Password reset requested for non-existent user",
+                        email=email,
+                    )
+                elif not associated_user.is_active:
+                    logger.info(
+                        "Password reset requested for inactive user",
+                        email=email,
+                        user_id=associated_user.id,
+                    )
+                else:
+                    # User exists and is active but is_local is False
+                    # Check why is_local is False
+
+                    try:
+                        sso_settings = GlobalSettings.objects.get(
+                            name=GlobalSettings.Names.SSO
+                        ).value
+                    except GlobalSettings.DoesNotExist:
+                        sso_settings = {}
+
+                    sso_enabled = sso_settings.get("is_enabled", False)
+                    sso_forced = sso_settings.get("force_sso", False)
+
+                    logger.info(
+                        "Password reset requested for non-local user",
+                        email=email,
+                        user_id=associated_user.id,
+                        keep_local_login=associated_user.keep_local_login,
+                        sso_enabled=sso_enabled,
+                        sso_forced=sso_forced,
+                    )
             return Response(status=HTTP_202_ACCEPTED)
         logger.warning("Password reset requested but email server not configured")
         return Response(
