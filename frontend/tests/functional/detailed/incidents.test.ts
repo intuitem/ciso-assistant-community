@@ -192,7 +192,7 @@ test('Cleanup - delete the folder', async ({ page }) => {
 
 	await expect(page.locator('#page-title')).toHaveText('Domains');
 
-	await expect(page).toHaveURL(/\/folders/);
+	await expect(page).toHaveURL(/^\/folders/);
 
 	const folderRow = page.getByRole('row', { name: /incidents-folder/i });
 

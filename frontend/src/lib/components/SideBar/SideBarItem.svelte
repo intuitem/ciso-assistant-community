@@ -26,7 +26,7 @@
 			class="unstyled flex whitespace-nowrap items-center py-2 text-sm font-normal rounded-base {classesActive(
 				item.href ?? ''
 			)}"
-			data-testid={'accordion-item-' + item.href.substring(1)}
+			data-testid={'accordion-item-' + item.href.split('?')[0].substring(1)}
 		>
 			<span
 				class="px-4 flex items-center w-full space-x-2 text-xs"
