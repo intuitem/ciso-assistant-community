@@ -126,6 +126,7 @@ class ProcessingReadSerializer(BaseModelSerializer):
     nature = FieldsRelatedField(["name"], many=True)
     associated_controls = FieldsRelatedField(["name"], many=True)
     assigned_to = FieldsRelatedField(many=True)
+    purposes = FieldsRelatedField(["name", "id", "legal_basis"], many=True)
 
     class Meta:
         model = Processing
