@@ -912,7 +912,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'beneficiary_entity', urlModel: 'entities' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'solution', urlModel: 'solutions' },
+			{ field: 'solutions', urlModel: 'solutions' },
 			{ field: 'overarching_contract', urlModel: 'contracts' }
 		],
 		selectFields: [
@@ -1032,6 +1032,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'owner', urlModel: 'users' },
+			{ field: 'purposes', urlModel: 'purposes' },
 			{ field: 'assigned_to', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
@@ -1072,6 +1073,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'dpia_required' },
 			{ field: 'dpia_reference' },
 			{ field: 'nature' },
+			{ field: 'purposes' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
 			{ field: 'filtering_labels' }
@@ -1294,10 +1296,14 @@ export const URL_MODEL_MAP: ModelMap = {
 				endpointUrl: 'ebios-rm/feared-events',
 				urlParams: 'is_selected=true&ebios_rm_study=',
 				detail: true
+			},
+			{
+				field: 'risk_origin',
+				urlModel: 'terminologies',
+				urlParams: 'field_path=ro_to.risk_origin&is_visible=true'
 			}
 		],
 		selectFields: [
-			{ field: 'risk-origin' },
 			{ field: 'motivation', valueType: 'number' },
 			{ field: 'resources', valueType: 'number' },
 			{ field: 'activity', valueType: 'number' }
@@ -1441,7 +1447,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		],
 		selectFields: [
-			{ field: 'likelihood', valueType: 'number', detail: true, endpointUrl: 'ebios-rm/studies' }
+			{
+				field: 'likelihood',
+				valueType: 'number',
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
+			}
 		]
 	},
 	'elementary-actions': {
@@ -1480,7 +1492,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'elementary_actions', urlModel: 'elementary-actions' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
-		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }],
+		selectFields: [
+			{
+				field: 'likelihood',
+				valueType: 'number',
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
+			}
+		],
 		reverseForeignKeyFields: [
 			{
 				field: 'operating_modes',
