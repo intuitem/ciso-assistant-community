@@ -705,9 +705,8 @@ export const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'risk_origin',
-		optionsEndpoint: 'ro-to/risk-origin',
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
+		optionsEndpoint: 'terminologies?field_path=ro_to.risk_origin&is_visible=true',
+		optionsLabelField: 'translated_name',
 		browserCache: 'force-cache',
 		multiple: true
 	}
