@@ -71,22 +71,15 @@
 		allowedExtensions={'*'}
 	/>
 {/if}
-{#if !(initialData.applied_controls || initialData.requirement_assessments)}
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="folders"
-		field="folder"
-		pathField="path"
-		cacheLock={cacheLocks['folder']}
-		bind:cachedValue={formDataCache['folder']}
-		label={m.domain()}
-		hidden={initialData.applied_controls ||
-			initialData.requirement_assessments ||
-			initialData.folder}
-	/>
-{:else}
-	<HiddenInput {form} field="folder" />
-{/if}
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="folders"
+	field="folder"
+	pathField="path"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+/>
 {#if context !== 'edit'}
 	<TextField
 		{form}
