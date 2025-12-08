@@ -2904,5 +2904,19 @@
 	"deleteQuantitativeRiskStudy": "Delete risk quantification study",
 	"viewQuantitativeRiskStudy": "View risk quantification study",
 	"dueDateUpdatedSuccessfully": "Due date updated successfully",
-	"taskScheduleInfo": "Past occurences are protected from schedule changes. Only upcoming tasks will be recalculated."
+	"taskScheduleInfo": "Past occurences are protected from schedule changes. Only upcoming tasks will be recalculated.",
+	"cascadeDeleteWarning": "Warning: Deleting this will also permanently delete {count} related object(s):",
+	"errorFetching": "Unable to load cascade information. Please try again.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "No other objects will be impacted.",
+				"countPlural=one": "{count} related object will not be deleted but will lose one or more relationships.",
+				"countPlural=other": "{count} related objects will not be deleted but will lose one or more relationships."
+			}
+		}
+	],
+	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed."
 }

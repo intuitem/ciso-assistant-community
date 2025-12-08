@@ -1034,5 +1034,19 @@
 	"deleteQuantitativeRiskStudy": "Șterge studiul de risc cantitativ",
 	"viewQuantitativeRiskStudy": "Vizualizați studiul de risc cantitativ",
 	"dueDateUpdatedSuccessfully": "Data limită a fost actualizată cu succes",
-	"taskScheduleInfo": "Aparițiile trecute sunt protejate împotriva schimbărilor de programare. Doar sarcinile viitoare vor fi recalculate."
+	"taskScheduleInfo": "Aparițiile trecute sunt protejate împotriva schimbărilor de programare. Doar sarcinile viitoare vor fi recalculate.",
+	"cascadeDeleteWarning": "Avertizare: Ștergerea acestuia va șterge și {count} obiect(e) asociat(e):",
+	"errorFetching": "Nu se poate încărca informația în cascadă. Vă rugăm să încercați din nou.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Niciun alt obiect nu va fi afectat.",
+				"countPlural=one": "{count} obiect asociat nu va fi șters, dar va pierde una sau mai multe relații.",
+				"countPlural=other": "{count} obiecte asociate nu vor fi șterse, dar vor pierde una sau mai multe relații."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Obiectele de mai jos rămân în sistem, dar legăturile lor cu acest obiect vor fi eliminate."
 }
