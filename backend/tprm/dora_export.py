@@ -294,10 +294,10 @@ def generate_b_02_01_contracts(
     # Filter contracts: only those with solutions linked to business function assets
     filtered_contracts = (
         contracts.filter(
-            solution__isnull=False, solution__assets__is_business_function=True
+            solutions__isnull=False, solutions__assets__is_business_function=True
         )
         .distinct()
-        .select_related("solution", "overarching_contract")
+        .select_related("overarching_contract")
     )
 
     # Write contract data
@@ -393,134 +393,145 @@ def generate_b_02_02_ict_services(
     if business_function_asset_ids:
         filtered_contracts = (
             contracts.filter(
-                solution__isnull=False,
-                solution__assets__id__in=business_function_asset_ids,
+                solutions__isnull=False,
+                solutions__assets__id__in=business_function_asset_ids,
             )
             .distinct()
-            .select_related("solution", "provider_entity", "beneficiary_entity")
-            .prefetch_related("solution__assets")
+            .select_related("provider_entity", "beneficiary_entity")
+            .prefetch_related("solutions__assets")
         )
     else:
         # Fallback to old behavior if business_function_asset_ids not provided
         filtered_contracts = (
             contracts.filter(
-                solution__isnull=False, solution__assets__is_business_function=True
+                solutions__isnull=False, solutions__assets__is_business_function=True
             )
             .distinct()
-            .select_related("solution", "provider_entity", "beneficiary_entity")
-            .prefetch_related("solution__assets")
+            .select_related("provider_entity", "beneficiary_entity")
+            .prefetch_related("solutions__assets")
         )
 
     # Write contract-solution-function data
     for contract in filtered_contracts:
-        solution = contract.solution
+        # Iterate through all solutions in this contract
+        for solution in contract.solutions.all():
+            # Get business functions associated with this solution (directly or through children)
+            if business_function_asset_ids:
+                business_functions = solution.assets.filter(
+                    id__in=business_function_asset_ids, is_business_function=True
+                )
+            else:
+                business_functions = solution.assets.filter(is_business_function=True)
 
-        # Get business functions associated with this solution (directly or through children)
-        if business_function_asset_ids:
-            business_functions = solution.assets.filter(is_business_function=True)
-        else:
-            business_functions = solution.assets.filter(is_business_function=True)
+            for function in business_functions:
+                # c0010: Contract reference
+                contract_ref = contract.ref_id or str(contract.id)
 
-        for function in business_functions:
-            # c0010: Contract reference
-            contract_ref = contract.ref_id or str(contract.id)
+                # c0020: LEI of entity using the service (beneficiary entity)
+                entity_lei = ""
+                if contract.beneficiary_entity:
+                    entity_lei, _ = get_entity_identifier(
+                        contract.beneficiary_entity, priority=["LEI"]
+                    )
 
-            # c0020: LEI of entity using the service (beneficiary entity)
-            entity_lei = ""
-            if contract.beneficiary_entity:
-                entity_lei, _ = get_entity_identifier(
-                    contract.beneficiary_entity, priority=["LEI"]
+                # c0030, c0040: Provider identification
+                provider_code, provider_code_type = "", ""
+                if contract.provider_entity:
+                    provider_code, provider_code_type = get_entity_identifier(
+                        contract.provider_entity,
+                        priority=["LEI", "EUID", "VAT", "DUNS"],
+                    )
+
+                # c0050: Function identifier
+                function_id = function.ref_id or str(function.id)
+
+                # c0060: Type of ICT services
+                ict_service_type = solution.dora_ict_service_type or ""
+
+                # c0070: Start date
+                start_date = (
+                    format_date(contract.start_date) if contract.start_date else ""
                 )
 
-            # c0030, c0040: Provider identification
-            provider_code, provider_code_type = "", ""
-            if contract.provider_entity:
-                provider_code, provider_code_type = get_entity_identifier(
-                    contract.provider_entity, priority=["LEI", "EUID", "VAT", "DUNS"]
+                # c0080: End date (use placeholder if not set)
+                end_date = (
+                    format_date(contract.end_date)
+                    if contract.end_date
+                    else "2999-12-31"
                 )
 
-            # c0050: Function identifier
-            function_id = function.ref_id or str(function.id)
+                # c0090: Termination reason
+                termination_reason = contract.termination_reason or ""
 
-            # c0060: Type of ICT services
-            ict_service_type = solution.dora_ict_service_type or ""
+                # c0100: Notice period for entity (days)
+                notice_period_entity = (
+                    contract.notice_period_entity
+                    if contract.notice_period_entity is not None
+                    else ""
+                )
 
-            # c0070: Start date
-            start_date = format_date(contract.start_date) if contract.start_date else ""
+                # c0110: Notice period for provider (days)
+                notice_period_provider = (
+                    contract.notice_period_provider
+                    if contract.notice_period_provider is not None
+                    else ""
+                )
 
-            # c0080: End date (use placeholder if not set)
-            end_date = (
-                format_date(contract.end_date) if contract.end_date else "2999-12-31"
-            )
+                # c0120: Country of governing law
+                governing_law_country = ""
+                if contract.governing_law_country:
+                    governing_law_country = f"eba_GA:{contract.governing_law_country}"
 
-            # c0090: Termination reason
-            termination_reason = contract.termination_reason or ""
+                # c0130: Country of provision of ICT services (provider country)
+                provider_country = ""
+                if contract.provider_entity and contract.provider_entity.country:
+                    provider_country = f"eba_GA:{contract.provider_entity.country}"
 
-            # c0100: Notice period for entity (days)
-            notice_period_entity = (
-                contract.notice_period_entity
-                if contract.notice_period_entity is not None
-                else ""
-            )
+                # c0140: Storage of data (Yes/No)
+                storage_of_data = (
+                    "eba_BT:x28" if solution.storage_of_data else "eba_BT:x29"
+                )
 
-            # c0110: Notice period for provider (days)
-            notice_period_provider = (
-                contract.notice_period_provider
-                if contract.notice_period_provider is not None
-                else ""
-            )
+                # c0150: Location of data at rest
+                data_location_storage = ""
+                if solution.data_location_storage:
+                    data_location_storage = f"eba_GA:{solution.data_location_storage}"
 
-            # c0120: Country of governing law
-            governing_law_country = ""
-            if contract.governing_law_country:
-                governing_law_country = f"eba_GA:{contract.governing_law_country}"
+                # c0160: Location of data processing
+                data_location_processing = ""
+                if solution.data_location_processing:
+                    data_location_processing = (
+                        f"eba_GA:{solution.data_location_processing}"
+                    )
 
-            # c0130: Country of provision of ICT services (provider country)
-            provider_country = ""
-            if contract.provider_entity and contract.provider_entity.country:
-                provider_country = f"eba_GA:{contract.provider_entity.country}"
+                # c0170: Data sensitiveness
+                data_sensitiveness = solution.dora_data_sensitiveness or ""
 
-            # c0140: Storage of data (Yes/No)
-            storage_of_data = "eba_BT:x28" if solution.storage_of_data else "eba_BT:x29"
+                # c0180: Level of reliance
+                reliance_level = solution.dora_reliance_level or ""
 
-            # c0150: Location of data at rest
-            data_location_storage = ""
-            if solution.data_location_storage:
-                data_location_storage = f"eba_GA:{solution.data_location_storage}"
-
-            # c0160: Location of data processing
-            data_location_processing = ""
-            if solution.data_location_processing:
-                data_location_processing = f"eba_GA:{solution.data_location_processing}"
-
-            # c0170: Data sensitiveness
-            data_sensitiveness = solution.dora_data_sensitiveness or ""
-
-            # c0180: Level of reliance
-            reliance_level = solution.dora_reliance_level or ""
-
-            csv_writer.writerow(
-                [
-                    contract_ref,
-                    entity_lei,
-                    provider_code,
-                    provider_code_type,
-                    function_id,
-                    ict_service_type,
-                    start_date,
-                    end_date,
-                    termination_reason,
-                    notice_period_entity,
-                    notice_period_provider,
-                    governing_law_country,
-                    provider_country,
-                    storage_of_data,
-                    data_location_storage,
-                    data_location_processing,
-                    data_sensitiveness,
-                    reliance_level,
-                ]
-            )
+                csv_writer.writerow(
+                    [
+                        contract_ref,
+                        entity_lei,
+                        provider_code,
+                        provider_code_type,
+                        function_id,
+                        ict_service_type,
+                        start_date,
+                        end_date,
+                        termination_reason,
+                        notice_period_entity,
+                        notice_period_provider,
+                        governing_law_country,
+                        provider_country,
+                        storage_of_data,
+                        data_location_storage,
+                        data_location_processing,
+                        data_sensitiveness,
+                        reliance_level,
+                    ]
+                )
 
     path = (
         f"{folder_prefix}/reports/b_02.02.csv"
@@ -944,47 +955,53 @@ def generate_b_05_02_supply_chains(
         ]
     )
 
-    # Get contracts with both provider and solution
-    supply_chain_contracts = contracts.filter(
-        is_intragroup=False,
-        provider_entity__isnull=False,
-        solution__isnull=False,
-    ).select_related("provider_entity", "solution", "beneficiary_entity")
+    # Get contracts with both provider and solutions
+    supply_chain_contracts = (
+        contracts.filter(
+            is_intragroup=False,
+            provider_entity__isnull=False,
+            solutions__isnull=False,
+        )
+        .select_related("provider_entity", "beneficiary_entity")
+        .prefetch_related("solutions")
+    )
 
     # Write supply chain data
     for contract in supply_chain_contracts:
-        # c0010: Contract reference
-        contract_ref = contract.ref_id or str(contract.id)
+        # Iterate through all solutions in this contract
+        for solution in contract.solutions.all():
+            # c0010: Contract reference
+            contract_ref = contract.ref_id or str(contract.id)
 
-        # c0020: ICT service type
-        ict_service_type = contract.solution.dora_ict_service_type or ""
+            # c0020: ICT service type
+            ict_service_type = solution.dora_ict_service_type or ""
 
-        # c0030, c0040: Provider identification
-        provider_code, provider_code_type = get_entity_identifier(
-            contract.provider_entity
-        )
-
-        # c0050: Rank (criticality)
-        rank = contract.solution.criticality if contract.solution.criticality else ""
-
-        # c0060, c0070: Recipient identification (beneficiary entity)
-        recipient_code, recipient_code_type = "", ""
-        if contract.beneficiary_entity:
-            recipient_code, recipient_code_type = get_entity_identifier(
-                contract.beneficiary_entity
+            # c0030, c0040: Provider identification
+            provider_code, provider_code_type = get_entity_identifier(
+                contract.provider_entity
             )
 
-        csv_writer.writerow(
-            [
-                contract_ref,
-                ict_service_type,
-                provider_code,
-                provider_code_type,
-                rank,
-                recipient_code,
-                recipient_code_type,
-            ]
-        )
+            # c0050: Rank (criticality)
+            rank = solution.criticality if solution.criticality else ""
+
+            # c0060, c0070: Recipient identification (beneficiary entity)
+            recipient_code, recipient_code_type = "", ""
+            if contract.beneficiary_entity:
+                recipient_code, recipient_code_type = get_entity_identifier(
+                    contract.beneficiary_entity
+                )
+
+            csv_writer.writerow(
+                [
+                    contract_ref,
+                    ict_service_type,
+                    provider_code,
+                    provider_code_type,
+                    rank,
+                    recipient_code,
+                    recipient_code_type,
+                ]
+            )
 
     path = (
         f"{folder_prefix}/reports/b_05.02.csv"
@@ -1111,52 +1128,59 @@ def generate_b_07_01_assessment(
         ]
     )
 
-    # Get contracts with both provider and solution
-    assessment_contracts = contracts.filter(
-        is_intragroup=False,
-        provider_entity__isnull=False,
-        solution__isnull=False,
-    ).select_related("provider_entity", "solution")
+    # Get contracts with both provider and solutions
+    assessment_contracts = (
+        contracts.filter(
+            is_intragroup=False,
+            provider_entity__isnull=False,
+            solutions__isnull=False,
+        )
+        .select_related("provider_entity")
+        .prefetch_related("solutions")
+    )
 
     # Write assessment data
     for contract in assessment_contracts:
-        contract_ref = contract.ref_id or str(contract.id)
+        # Iterate through all solutions in this contract
+        for solution in contract.solutions.all():
+            contract_ref = contract.ref_id or str(contract.id)
 
-        provider_code, provider_code_type = get_entity_identifier(
-            contract.provider_entity
-        )
+            provider_code, provider_code_type = get_entity_identifier(
+                contract.provider_entity
+            )
 
-        solution = contract.solution
-        ict_service_type = solution.dora_ict_service_type or ""
-        substitutability = solution.dora_substitutability or ""
-        non_substitutability_reason = solution.dora_non_substitutability_reason or ""
-        last_audit_date = (
-            format_date(solution.updated_at) if solution.updated_at else ""
-        )
-        exit_plan = solution.dora_has_exit_plan or ""
-        reintegration_possibility = solution.dora_reintegration_possibility or ""
-        discontinuing_impact = solution.dora_discontinuing_impact or ""
-        alternative_providers_identified = (
-            solution.dora_alternative_providers_identified or ""
-        )
-        alternative_providers = solution.dora_alternative_providers or ""
+            ict_service_type = solution.dora_ict_service_type or ""
+            substitutability = solution.dora_substitutability or ""
+            non_substitutability_reason = (
+                solution.dora_non_substitutability_reason or ""
+            )
+            last_audit_date = (
+                format_date(solution.updated_at) if solution.updated_at else ""
+            )
+            exit_plan = solution.dora_has_exit_plan or ""
+            reintegration_possibility = solution.dora_reintegration_possibility or ""
+            discontinuing_impact = solution.dora_discontinuing_impact or ""
+            alternative_providers_identified = (
+                solution.dora_alternative_providers_identified or ""
+            )
+            alternative_providers = solution.dora_alternative_providers or ""
 
-        csv_writer.writerow(
-            [
-                contract_ref,
-                provider_code,
-                provider_code_type,
-                ict_service_type,
-                substitutability,
-                non_substitutability_reason,
-                last_audit_date,
-                exit_plan,
-                reintegration_possibility,
-                discontinuing_impact,
-                alternative_providers_identified,
-                alternative_providers,
-            ]
-        )
+            csv_writer.writerow(
+                [
+                    contract_ref,
+                    provider_code,
+                    provider_code_type,
+                    ict_service_type,
+                    substitutability,
+                    non_substitutability_reason,
+                    last_audit_date,
+                    exit_plan,
+                    reintegration_possibility,
+                    discontinuing_impact,
+                    alternative_providers_identified,
+                    alternative_providers,
+                ]
+            )
 
     path = (
         f"{folder_prefix}/reports/b_07.01.csv"

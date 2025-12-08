@@ -103,6 +103,11 @@
 					description: m.riskAcceptancesDescription()
 				},
 				{
+					field: 'exceptions',
+					label: m.securityExceptions(),
+					description: m.securityExceptionsDescription()
+				},
+				{
 					field: 'inherent_risk',
 					label: m.inherentRisk(),
 					description: m.inherentRiskLevelHelpText()
@@ -142,6 +147,11 @@
 					field: 'terminologies',
 					label: m.terminologies(),
 					description: m.riskOriginHelpText()
+				},
+				{
+					field: 'outgoing_webhooks',
+					label: m.webhooks(),
+					description: m.webhooksDescription()
 				},
 				{
 					field: 'experimental',
