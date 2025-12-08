@@ -935,7 +935,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'provider_entity' },
 			{ field: 'beneficiary_entity' },
-			{ field: 'provider_entity' },
 			{ field: 'start_date' },
 			{ field: 'end_date' },
 			{ field: 'overarching_contract' },
