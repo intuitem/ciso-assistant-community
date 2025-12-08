@@ -1777,5 +1777,19 @@
 	"deleteQuantitativeRiskStudy": "Usuń badanie ilościowe ryzyka",
 	"viewQuantitativeRiskStudy": "Zobacz badanie ilościowe ryzyka",
 	"dueDateUpdatedSuccessfully": "Termin zaktualizowany pomyślnie",
-	"taskScheduleInfo": "Wcześniejsze wystąpienia są chronione przed zmianami harmonogramu. Tylko nadchodzące zadania zostaną przeliczone."
+	"taskScheduleInfo": "Wcześniejsze wystąpienia są chronione przed zmianami harmonogramu. Tylko nadchodzące zadania zostaną przeliczone.",
+	"cascadeDeleteWarning": "Uwaga: Usunięcie tego spowoduje również trwałe usunięcie {count} powiązanych obiektów:",
+	"errorFetching": "Nie można załadować informacji o kaskadzie. Spróbuj ponownie.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Żadne inne obiekty nie będą dotknięte.",
+				"countPlural=one": "{count} powiązany obiekt nie zostanie usunięty, ale straci jedno lub więcej relacji.",
+				"countPlural=other": "{count} powiązanych obiektów nie zostanie usuniętych, ale stracią jedno lub więcej relacji."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Poniższe elementy pozostają w systemie, ale ich linki do tego obiektu zostaną usunięte."
 }

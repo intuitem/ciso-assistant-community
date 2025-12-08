@@ -1005,5 +1005,19 @@
 	"deleteQuantitativeRiskStudy": "خطرہ کی مقدار کی تحقیق حذف کریں",
 	"viewQuantitativeRiskStudy": "خطرہ کی مقدار کی تحقیق دیکھیں",
 	"dueDateUpdatedSuccessfully": "فہرست کی تاریخ کامیابی کے ساتھ اپ ڈیٹ کی گئی",
-	"taskScheduleInfo": "پچھلے واقعات شیڈول کی تبدیلیوں سے محفوظ ہیں۔ صرف آئندہ ٹاسک دوبارہ حساب کیے جائیں گے۔"
+	"taskScheduleInfo": "تغییرات شیڈول کے پچھلے واقعات محفوظ ہیں۔ صرف آئندہ ٹاسک دوبارہ حساب کیے جائیں گے۔",
+	"cascadeDeleteWarning": "انتباہ: اس کو حذف کرنے سے {count} متعلقہ اشیاء کو بھی مستقل طور پر حذف کر دیا جائے گا:",
+	"errorFetching": "کاسکیڈ کی معلومات لوڈ کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "کوئی دوسری اشیاء متاثر نہیں ہوں گی۔",
+				"countPlural=one": "{count} متعلقہ اشیاء حذف نہیں کی جائیں گی لیکن ان کی ایک یا زیادہ رشتے کھو دیں گی۔",
+				"countPlural=other": "{count} متعلقہ اشیاء حذف نہیں کی جائیں گی لیکن ان کی ایک یا زیادہ رشتے کھو دیں گی۔"
+			}
+		}
+	],
+	"cascadeAffectedHint": "نیچے دیے گئے اشیاء نظام میں باقی ہیں لیکن ان کی اس اشیاء سے لنکس ہٹا دیے جائیں گے۔"
 }

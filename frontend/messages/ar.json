@@ -1005,5 +1005,19 @@
 	"deleteQuantitativeRiskStudy": "حذف دراسة الكمية المخاطر",
 	"viewQuantitativeRiskStudy": "عرض دراسة المخاطر الكمية",
 	"dueDateUpdatedSuccessfully": "تم تحديث تاريخ الاستحقاق بنجاح",
-	"taskScheduleInfo": "يتم حماية الحدوثات الماضية من التغييرات في الجدول الزمني. فقط المهام القادمة سيتم إعادة حسابها."
+	"taskScheduleInfo": "يتم حماية الحدوثات الماضية من التغييرات في الجدول الزمني. فقط المهام القادمة سيتم إعادة حسابها.",
+	"cascadeDeleteWarning": "تحذير: حذف هذا العنصر سيؤدي أيضًا إلى حذف {count} كائن(أ) مرتبط(ة) بشكل دائم:",
+	"errorFetching": "تعذر تحميل معلومات التسلسل. يرجى المحاولة مرة أخرى.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "لا سيؤثر على أي كائنات أخرى.",
+				"countPlural=one": "سيتم حذف {count} كائن(أ) مرتبط(ة) ولكنهم سيخسرون أحد أو أكثر من العلاقات.",
+				"countPlural=other": "سيتم حذف {count} كائن(أ) مرتبط(ة) ولكنهم سيخسرون أحد أو أكثر من العلاقات."
+			}
+		}
+	],
+	"cascadeAffectedHint": "البنود أدناه تبقى في النظام ولكن روابطها بهذا العنصر ستتم إزالتها."
 }
