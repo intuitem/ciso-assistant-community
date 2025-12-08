@@ -1770,5 +1770,19 @@
 	"deleteQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını sil",
 	"viewQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını görüntüle",
 	"dueDateUpdatedSuccessfully": "Son tarih başarıyla güncellendi",
-	"taskScheduleInfo": "Geçmiş gerçekleşmeler program değişikliklerinden korunur. Sadece yaklaşan görevler yeniden hesaplanır."
+	"taskScheduleInfo": "Geçmiş gerçekleşmeler program değişikliklerinden korunur. Sadece yaklaşan görevler yeniden hesaplanır.",
+	"cascadeDeleteWarning": "Uyarı: Bu, ayrıca {count} ilgili nesneyi kalıcı olarak silecektir:",
+	"errorFetching": "Kaskat bilgileri yüklenemiyor. Lütfen tekrar deneyin.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Diğer nesneler etkilenmeyecek.",
+				"countPlural=one": "{count} ilgili nesne silinmeyecek ancak bir veya daha fazla ilişkiyi kaybedecek.",
+				"countPlural=other": "{count} ilgili nesne silinmeyecek ancak bir veya daha fazla ilişkiyi kaybedecek."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Aşağıdaki öğeler sistemde kalacak ancak bu nesneye olan bağlantılar kaldırılacaktır."
 }
