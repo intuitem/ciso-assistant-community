@@ -876,7 +876,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'solutions',
 		verboseName: 'Solution',
 		verboseNamePlural: 'Solutions',
-		reverseForeignKeyFields: [{ field: 'solution', urlModel: 'contracts', disableDelete: true }],
+		reverseForeignKeyFields: [{ field: 'solutions', urlModel: 'contracts', disableDelete: true }],
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
@@ -905,7 +905,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'contracts',
 		verboseName: 'Contract',
 		verboseNamePlural: 'Contracts',
-		reverseForeignKeyFields: [{ field: 'contracts', urlModel: 'evidences', disableDelete: true }],
+		reverseForeignKeyFields: [
+			{ field: 'contracts', urlModel: 'evidences', disableDelete: true },
+			{ field: 'contracts', urlModel: 'solutions', disableDelete: true, disableCreate: true }
+		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'owner', urlModel: 'users' },
@@ -921,6 +924,30 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'dora_contractual_arrangement' },
 			{ field: 'termination_reason' },
 			{ field: 'governing_law_country' }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'ref_id' },
+			{ field: 'description' },
+			{ field: 'folder' },
+			{ field: 'owner' },
+			{ field: 'status' },
+			{ field: 'provider_entity' },
+			{ field: 'beneficiary_entity' },
+			{ field: 'start_date' },
+			{ field: 'end_date' },
+			{ field: 'overarching_contract' },
+			{ field: 'annual_expense' },
+			{ field: 'currency' },
+			{ field: 'dora_contractual_arrangement' },
+			{ field: 'governing_law_country' },
+			{ field: 'notice_period_entity' },
+			{ field: 'notice_period_provider' },
+			{ field: 'is_intragroup' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'filtering_labels' }
 		]
 	},
 	representatives: {
