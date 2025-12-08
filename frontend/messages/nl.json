@@ -2903,5 +2903,19 @@
 	"year": "Jaar",
 	"yearlyTasksReview": "Geaggregeerde takenbeoordeling",
 	"yellowZoneRadius": "Gele zone radius",
-	"yes": "Ja"
+	"yes": "Ja",
+	"cascadeDeleteWarning": "Waarschuwing: Het verwijderen van dit item leidt ook tot de permanente verwijdering van {count} gerelateerd(e) object(en):",
+	"errorFetching": "Kan de kaskade-informatie niet laden. Probeer het opnieuw.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Geen andere objecten worden beïnvloed.",
+				"countPlural=one": "{count} gerelateerd object wordt niet verwijderd maar verliest een of meer relaties.",
+				"countPlural=other": "{count} gerelateerde objecten worden niet verwijderd maar verliezen een of meer relaties."
+			}
+		}
+	],
+	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd."
 }
