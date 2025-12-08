@@ -500,7 +500,20 @@
 															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if key === 'security_objectives' || key === 'security_capabilities'}
+																{#if key === 'purposes'}
+																	{@const itemHref = `/${
+																		data.model?.foreignKeyFields?.find((item) => item.field === key)
+																			?.urlModel ?? 'purposes'
+																	}/${val.id}`}
+																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																		>{val.name}</Anchor
+																	>
+																	{#if val.legal_basis}
+																		<span class="text-gray-600">
+																			- {safeTranslate(val.legal_basis)}
+																		</span>
+																	{/if}
+																{:else if key === 'security_objectives' || key === 'security_capabilities'}
 																	{@const [securityObjectiveName, securityObjectiveValue] =
 																		Object.entries(val)[0]}
 																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}

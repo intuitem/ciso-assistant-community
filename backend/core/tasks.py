@@ -264,7 +264,12 @@ def send_notification_email_expired_eta(owner_email, controls):
 @task()
 def send_notification_email(subject, message, owner_email):
     try:
-        logger.debug("Sending notification email", subject=subject, message=message)
+        logger.debug(
+            "Sending notification email",
+            subject=subject,
+            message=message,
+            recipient=owner_email,
+        )
         send_mail(
             subject=subject,
             message=message,
@@ -272,9 +277,18 @@ def send_notification_email(subject, message, owner_email):
             recipient_list=[owner_email],
             fail_silently=False,
         )
-        logger.info(f"Successfully sent notification email to {owner_email}")
+        logger.info(
+            "Notification email sent successfully",
+            recipient=owner_email,
+            subject=subject,
+        )
     except Exception as e:
-        logger.error(f"Failed to send notification email to {owner_email}: {str(e)}")
+        logger.error(
+            "Failed to send notification email",
+            recipient=owner_email,
+            subject=subject,
+            error=str(e),
+        )
 
 
 @task()
