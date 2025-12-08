@@ -2002,5 +2002,19 @@
 	"deleteQuantitativeRiskStudy": "Obriši kvantitativno istraživanje rizika",
 	"viewQuantitativeRiskStudy": "Pogledaj kvantitativno istraživanje rizika",
 	"dueDateUpdatedSuccessfully": "Rok ažuriran uspješno",
-	"taskScheduleInfo": "Prošle pojave su zaštićene od promjena rasporeda. Samo nadolazeće zadatke će se ponovo izračunati."
+	"taskScheduleInfo": "Prošle pojave su zaštićene od promjena rasporeda. Samo nadolazeće zadatke će se ponovo izračunati.",
+	"cascadeDeleteWarning": "Upozorenje: Brisanjem ovog objekta također ćete trajno obrisati {count} povezanih objekata:",
+	"errorFetching": "Nije moguće učitati informacije o kaskadnom brisanju. Pokušajte ponovno.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Nijedan drugi objekt neće biti pogođen.",
+				"countPlural=one": "{count} povezanog objekta neće biti obrisan, ali će izgubiti jednu ili više veza.",
+				"countPlural=other": "{count} povezanih objekata neće biti obrisani, ali će izgubiti jednu ili više veza."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Stavke ispod ostaju u sustavu, ali njihovi linkovi na ovaj objekt će biti uklonjeni."
 }

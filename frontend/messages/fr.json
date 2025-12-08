@@ -2904,5 +2904,19 @@
 	"webhookSharedSecretShownOnce": "Le secret partagé n'est affiché qu'une seule fois lors de la création. Assurez-vous de le copier et de le stocker dans un endroit sûr.",
 	"workshopFive": "Atelier 5",
 	"workshopThree": "Atelier 3",
-	"workshopTwo": "Atelier 2"
+	"workshopTwo": "Atelier 2",
+	"cascadeDeleteWarning": "Attention : La suppression de cet élément entraînera également la suppression définitive de {count} objet(s) associé(s) :",
+	"errorFetching": "Impossible de charger les informations de cascade. Veuillez réessayer.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Aucun autre objet ne sera impacté.",
+				"countPlural=one": "{count} objet associé ne sera pas supprimé mais perdra une ou plusieurs relations.",
+				"countPlural=other": "{count} objets associés ne seront pas supprimés mais perdront une ou plusieurs relations."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Les éléments ci-dessous restent dans le système mais leurs liens avec cet objet seront supprimés."
 }

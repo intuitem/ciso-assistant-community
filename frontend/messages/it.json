@@ -1414,5 +1414,19 @@
 	"deleteQuantitativeRiskStudy": "Elimina studio di quantificazione del rischio",
 	"viewQuantitativeRiskStudy": "Visualizza studio di quantificazione del rischio",
 	"dueDateUpdatedSuccessfully": "Data di scadenza aggiornata con successo",
-	"taskScheduleInfo": "Le occorrenze passate sono protette da modifiche alla pianificazione. Solo le attività future verranno ricalcolate."
+	"taskScheduleInfo": "Le occorrenze passate sono protette da modifiche alla pianificazione. Solo le attività future verranno ricalcolate.",
+	"cascadeDeleteWarning": "Attenzione: L'eliminazione di questo elemento comporterà anche l'eliminazione permanente di {count} oggetto/i correlato/i:",
+	"errorFetching": "Impossibile caricare le informazioni di cascata. Riprova.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Nessun altro oggetto sarà influenzato.",
+				"countPlural=one": "{count} oggetto correlato non verrà eliminato ma perderà una o più relazioni.",
+				"countPlural=other": "{count} oggetti correlati non verranno eliminati ma perderanno una o più relazioni."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Gli elementi seguenti rimangono nel sistema ma i loro collegamenti con questo oggetto verranno rimossi."
 }

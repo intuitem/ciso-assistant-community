@@ -1037,5 +1037,19 @@
 	"deleteQuantitativeRiskStudy": "Excluir estudo de quantificação de risco",
 	"viewQuantitativeRiskStudy": "Ver estudo de quantificação de risco",
 	"dueDateUpdatedSuccessfully": "Data de vencimento atualizada com sucesso",
-	"taskScheduleInfo": "Ocorrências passadas estão protegidas de alterações de agendamento. Apenas tarefas futuras serão recalculadas."
+	"taskScheduleInfo": "As ocorrências passadas estão protegidas de alterações de agendamento. Apenas tarefas futuras serão recalculadas.",
+	"cascadeDeleteWarning": "Aviso: Excluir isso também excluirá permanentemente {count} objeto(s) relacionado(s):",
+	"errorFetching": "Não foi possível carregar as informações de cascata. Por favor, tente novamente.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Nenhum outro objeto será impactado.",
+				"countPlural=one": "{count} objeto relacionado não será excluído, mas perderá um ou mais relacionamentos.",
+				"countPlural=other": "{count} objetos relacionados não serão excluídos, mas perderão um ou mais relacionamentos."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Os itens abaixo permanecem no sistema, mas seus links para este objeto serão removidos."
 }

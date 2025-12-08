@@ -2903,5 +2903,19 @@
 	"year": "Jahr",
 	"yearlyTasksReview": "Aggregierte Aufgabenübersicht",
 	"yellowZoneRadius": "Gelbzonenradius",
-	"yes": "Ja"
+	"yes": "Ja",
+	"cascadeDeleteWarning": "Warnung: Löschen dieses Elements wird auch {count} verknüpfte Objekte dauerhaft löschen:",
+	"errorFetching": "Kaskadeninformationen können nicht geladen werden. Bitte versuchen Sie es erneut.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Keine anderen Objekte werden betroffen sein.",
+				"countPlural=one": "{count} verknüpftes Objekt wird nicht gelöscht, aber eine oder mehrere Beziehungen werden verloren gehen.",
+				"countPlural=other": "{count} verknüpfte Objekte werden nicht gelöscht, aber eine oder mehrere Beziehungen werden verloren gehen."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Die unten aufgeführten Elemente bleiben im System, aber ihre Verknüpfungen zu diesem Objekt werden entfernt."
 }
