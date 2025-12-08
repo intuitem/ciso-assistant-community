@@ -8358,12 +8358,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             score_different = base_ra.score != compare_ra.score
 
             if result_different or score_different:
+                # Use safe_display_str for smart fallback: name → ref_id → description → URN
+                req_name = base_ra.requirement.safe_display_str
+
                 differences.append(
                     {
                         "requirement": {
                             "id": str(base_ra.requirement.id),
                             "ref_id": base_ra.requirement.ref_id,
-                            "name": base_ra.requirement.name,
+                            "name": req_name,
                             "description": base_ra.requirement.description,
                         },
                         "base": {
