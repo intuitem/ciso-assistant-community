@@ -14,11 +14,11 @@
 
 <DetailView {data} {form}>
 	{#snippet actions()}
-		<a href="/dashboards/{dashboard.id}/view" class="btn preset-filled-primary-500">
+		<a href="/dashboards/{dashboard.id}/view" class="btn preset-filled-success-500">
 			<i class="fa-solid fa-chart-line"></i>
 			{m.viewDashboard()}
 		</a>
-		<a href="/dashboards/{dashboard.id}/layout" class="btn preset-tonal">
+		<a href="/dashboards/{dashboard.id}/layout" class="btn preset-filled-warning-500">
 			<i class="fa-solid fa-grip"></i>
 			{m.editLayout()}
 		</a>
