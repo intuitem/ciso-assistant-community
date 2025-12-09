@@ -25,11 +25,11 @@
 				<!-- Action buttons -->
 				<div class="flex flex-wrap gap-2">
 					<a href="/dashboards/{dashboard.id}/view" class="btn preset-filled-primary-500">
-						<iconify-icon icon="mdi:view-dashboard" class="text-xl"></iconify-icon>
+						<i class="fa-solid fa-chart-line"></i>
 						{m.viewDashboard()}
 					</a>
 					<a href="/dashboards/{dashboard.id}/edit" class="btn preset-tonal">
-						<iconify-icon icon="mdi:pencil" class="text-xl"></iconify-icon>
+						<i class="fa-solid fa-pencil"></i>
 						{m.editLayout()}
 					</a>
 				</div>
@@ -40,16 +40,13 @@
 						{#each dashboardWidgets as widget (widget.id)}
 							<div class="card p-3 bg-white shadow-sm flex items-center justify-between">
 								<div class="flex items-center gap-3">
-									<iconify-icon
-										icon={widget.chart_type === 'kpi_card' ? 'mdi:card-text' :
-											  widget.chart_type === 'bar' ? 'mdi:chart-bar' :
-											  widget.chart_type === 'gauge' ? 'mdi:gauge' :
-											  widget.chart_type === 'sparkline' ? 'mdi:chart-timeline-variant' :
-											  widget.chart_type === 'table' ? 'mdi:table' :
-											  widget.chart_type === 'area' ? 'mdi:chart-areaspline' :
-											  'mdi:chart-line'}
-										class="text-2xl text-gray-400"
-									></iconify-icon>
+									<i class="text-2xl text-gray-400 fa-solid {widget.chart_type === 'kpi_card' ? 'fa-square-poll-vertical' :
+											  widget.chart_type === 'bar' ? 'fa-chart-bar' :
+											  widget.chart_type === 'gauge' ? 'fa-gauge-high' :
+											  widget.chart_type === 'sparkline' ? 'fa-chart-area' :
+											  widget.chart_type === 'table' ? 'fa-table' :
+											  widget.chart_type === 'area' ? 'fa-chart-area' :
+											  'fa-chart-line'}"></i>
 									<div>
 										<p class="font-medium text-sm">
 											{widget.display_title || widget.title || widget.metric_instance?.name}
@@ -64,14 +61,14 @@
 									class="btn btn-sm preset-tonal"
 									title={m.edit()}
 								>
-									<iconify-icon icon="mdi:pencil" class="text-sm"></iconify-icon>
+									<i class="fa-solid fa-pencil text-sm"></i>
 								</a>
 							</div>
 						{/each}
 					</div>
 				{:else}
 					<div class="card p-6 bg-gray-50 text-center">
-						<iconify-icon icon="mdi:view-dashboard-outline" class="text-4xl text-gray-300 mb-2"></iconify-icon>
+						<i class="fa-solid fa-chart-line text-4xl text-gray-300 mb-2"></i>
 						<p class="text-gray-500 text-sm">{m.noWidgetsYet()}</p>
 					</div>
 				{/if}

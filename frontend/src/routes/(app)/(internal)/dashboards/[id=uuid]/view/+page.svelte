@@ -80,7 +80,7 @@
 	<div class="flex justify-between items-center">
 		<div class="flex items-center gap-4">
 			<a href="/dashboards/{dashboard.id}" class="btn preset-tonal">
-				<iconify-icon icon="mdi:arrow-left" class="text-xl"></iconify-icon>
+				<i class="fa-solid fa-arrow-left"></i>
 				{m.back()}
 			</a>
 			<h1 class="text-2xl font-bold">{dashboard.name}</h1>
@@ -90,11 +90,11 @@
 		</div>
 		<div class="flex items-center gap-2">
 			<a href="/dashboards/{dashboard.id}/edit" class="btn preset-tonal">
-				<iconify-icon icon="mdi:pencil" class="text-xl"></iconify-icon>
+				<i class="fa-solid fa-pencil"></i>
 				{m.editLayout()}
 			</a>
 			<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>
-				<iconify-icon icon="mdi:plus" class="text-xl"></iconify-icon>
+				<i class="fa-solid fa-plus"></i>
 				{m.addWidget()}
 			</button>
 		</div>
@@ -111,22 +111,13 @@
 					class="card p-4 bg-white shadow-sm flex flex-col"
 					style={getWidgetStyle(widget)}
 				>
-					<div class="flex justify-between items-start mb-3">
-						<div>
-							<h4 class="font-semibold text-base">
-								{widget.display_title || widget.title || widget.metric_instance?.name}
-							</h4>
-							<p class="text-xs text-gray-500">
-								{widget.chart_type_display} | {widget.time_range_display}
-							</p>
-						</div>
-						<a
-							href="/dashboard-widgets/{widget.id}/edit"
-							class="btn btn-sm preset-tonal opacity-50 hover:opacity-100"
-							title={m.edit()}
-						>
-							<iconify-icon icon="mdi:pencil" class="text-sm"></iconify-icon>
-						</a>
+					<div class="mb-3">
+						<h4 class="font-semibold text-base">
+							{widget.display_title || widget.title || widget.metric_instance?.name}
+						</h4>
+						<p class="text-xs text-gray-500">
+							{widget.chart_type_display} | {widget.time_range_display}
+						</p>
 					</div>
 
 					<!-- Chart based on widget type -->
@@ -143,10 +134,10 @@
 		</div>
 	{:else}
 		<div class="card p-12 bg-gray-50 text-center">
-			<iconify-icon icon="mdi:view-dashboard-outline" class="text-8xl text-gray-300 mb-6"></iconify-icon>
+			<i class="fa-solid fa-chart-line text-8xl text-gray-300 mb-6"></i>
 			<p class="text-gray-500 text-lg mb-6">{m.noWidgetsYet()}</p>
 			<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>
-				<iconify-icon icon="mdi:plus" class="text-xl"></iconify-icon>
+				<i class="fa-solid fa-plus"></i>
 				{m.addFirstWidget()}
 			</button>
 		</div>

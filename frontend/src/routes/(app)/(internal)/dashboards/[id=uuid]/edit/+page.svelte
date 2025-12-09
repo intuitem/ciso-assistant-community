@@ -171,14 +171,14 @@
 	<div class="flex justify-between items-center">
 		<div class="flex items-center gap-4">
 			<a href="/dashboards/{dashboard.id}" class="btn preset-tonal">
-				<iconify-icon icon="mdi:arrow-left" class="text-xl"></iconify-icon>
+				<i class="fa-solid fa-arrow-left"></i>
 				{m.back()}
 			</a>
 			<h1 class="text-2xl font-bold">{m.edit()}: {dashboard.name}</h1>
 		</div>
 		<div class="flex items-center gap-2">
 			<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>
-				<iconify-icon icon="mdi:plus" class="text-xl"></iconify-icon>
+				<i class="fa-solid fa-plus"></i>
 				{m.addWidget()}
 			</button>
 			{#if hasChanges}
@@ -212,9 +212,9 @@
 						disabled={isSaving}
 					>
 						{#if isSaving}
-							<iconify-icon icon="mdi:loading" class="text-xl animate-spin"></iconify-icon>
+							<i class="fa-solid fa-spinner fa-spin"></i>
 						{:else}
-							<iconify-icon icon="mdi:content-save" class="text-xl"></iconify-icon>
+							<i class="fa-solid fa-save"></i>
 						{/if}
 						{m.save()}
 					</button>
@@ -225,7 +225,7 @@
 
 	<!-- Instructions -->
 	<div class="card p-3 bg-blue-50 text-blue-800 text-sm">
-		<iconify-icon icon="mdi:information" class="text-lg mr-2"></iconify-icon>
+		<i class="fa-solid fa-circle-info mr-2"></i>
 		{m.dashboardEditorInstructions()}
 	</div>
 
@@ -281,30 +281,27 @@
 									class="btn btn-sm preset-tonal p-1"
 									title={m.edit()}
 								>
-									<iconify-icon icon="mdi:pencil" class="text-sm"></iconify-icon>
+									<i class="fa-solid fa-pencil text-sm"></i>
 								</a>
 								<button
 									class="btn btn-sm preset-filled-error-500 p-1"
 									onclick={() => confirmDeleteWidget(widget)}
 									title={m.delete()}
 								>
-									<iconify-icon icon="mdi:delete" class="text-sm"></iconify-icon>
+									<i class="fa-solid fa-trash text-sm"></i>
 								</button>
 							</div>
 						</div>
 
 						<!-- Widget Preview -->
 						<div class="flex-1 bg-gray-50 rounded flex items-center justify-center text-gray-400 min-h-[60px]">
-							<iconify-icon
-								icon={widget.chart_type === 'kpi_card' ? 'mdi:card-text' :
-									  widget.chart_type === 'bar' ? 'mdi:chart-bar' :
-									  widget.chart_type === 'gauge' ? 'mdi:gauge' :
-									  widget.chart_type === 'sparkline' ? 'mdi:chart-timeline-variant' :
-									  widget.chart_type === 'table' ? 'mdi:table' :
-									  widget.chart_type === 'area' ? 'mdi:chart-areaspline' :
-									  'mdi:chart-line'}
-								class="text-4xl"
-							></iconify-icon>
+							<i class="text-4xl fa-solid {widget.chart_type === 'kpi_card' ? 'fa-square-poll-vertical' :
+									  widget.chart_type === 'bar' ? 'fa-chart-bar' :
+									  widget.chart_type === 'gauge' ? 'fa-gauge-high' :
+									  widget.chart_type === 'sparkline' ? 'fa-chart-area' :
+									  widget.chart_type === 'table' ? 'fa-table' :
+									  widget.chart_type === 'area' ? 'fa-chart-area' :
+									  'fa-chart-line'}"></i>
 						</div>
 
 						<!-- Position info -->
@@ -353,10 +350,10 @@
 			</div>
 		{:else}
 			<div class="flex flex-col items-center justify-center h-[400px] text-gray-500">
-				<iconify-icon icon="mdi:view-dashboard-outline" class="text-6xl mb-4"></iconify-icon>
+				<i class="fa-solid fa-chart-line text-6xl mb-4"></i>
 				<p class="mb-4">{m.noWidgetsYet()}</p>
 				<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>
-					<iconify-icon icon="mdi:plus" class="text-xl"></iconify-icon>
+					<i class="fa-solid fa-plus"></i>
 					{m.addFirstWidget()}
 				</button>
 			</div>
