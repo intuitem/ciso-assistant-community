@@ -506,6 +506,32 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         requirement_nodes = framework.requirement_nodes.all()
         return Response(get_sorted_requirement_nodes(requirement_nodes, None, None))
 
+    @action(detail=True, methods=["get"], url_path="related-objects")
+    def related_objects(self, request, pk):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="view_loadedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
+
+        key = "urn" if pk.startswith("urn:") else "id"
+        lib = LoadedLibrary.objects.filter(**{key: pk}).first()
+        if lib is None:
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+
+        related_objects = lib.get_related_objects()
+        serialized_related_objects = [
+            {"type": type(obj).__name__, "id": obj.id, "name": obj.name}
+            for obj in related_objects
+        ]
+        return Response(
+            {
+                "count": len(serialized_related_objects),
+                "objects": serialized_related_objects,
+            }
+        )
+
     @action(detail=True, methods=["get"], url_path="update")
     def _update(self, request, pk):
         if not RoleAssignment.is_access_allowed(
