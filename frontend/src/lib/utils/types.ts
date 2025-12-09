@@ -128,7 +128,8 @@ export const URL_MODEL = [
 	'metric-definitions',
 	'metric-instances',
 	'metric-samples',
-	'dashboards'
+	'dashboards',
+	'dashboard-widgets'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = [

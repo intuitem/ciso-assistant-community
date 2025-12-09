@@ -74,6 +74,7 @@
 	import MetricInstanceForm from './ModelForm/MetricInstanceForm.svelte';
 	import MetricSampleForm from './ModelForm/MetricSampleForm.svelte';
 	import DashboardForm from './ModelForm/DashboardForm.svelte';
+	import DashboardWidgetForm from './ModelForm/DashboardWidgetForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -820,6 +821,17 @@
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
 				{data}
+				{...rest}
+			/>
+		{:else if URLModel === 'dashboard-widgets'}
+			<DashboardWidgetForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{object}
 				{...rest}
 			/>
 		{/if}

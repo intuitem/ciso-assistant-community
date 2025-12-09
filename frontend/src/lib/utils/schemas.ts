@@ -1366,9 +1366,25 @@ export const DashboardSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
-	metric_instances: z.array(z.string().uuid().optional()).optional(),
 	dashboard_definition: jsonSchema.default({}),
 	filtering_labels: z.string().optional().array().optional()
+});
+
+export const DashboardWidgetSchema = z.object({
+	folder: z.string(),
+	dashboard: z.string().uuid(),
+	metric_instance: z.string().uuid(),
+	title: z.string().optional().nullable(),
+	position_x: z.coerce.number().min(0).max(11).default(0),
+	position_y: z.coerce.number().min(0).default(0),
+	width: z.coerce.number().min(1).max(12).default(6),
+	height: z.coerce.number().min(1).default(2),
+	chart_type: z.string().default('line'),
+	time_range: z.string().default('last_30_days'),
+	aggregation: z.string().default('none'),
+	show_target: z.boolean().default(true),
+	show_legend: z.boolean().default(true),
+	widget_config: jsonSchema.default({})
 });
 
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
@@ -1443,7 +1459,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'metric-definitions': MetricDefinitionSchema,
 	'metric-instances': MetricInstanceSchema,
 	'metric-samples': MetricSampleSchema,
-	dashboards: DashboardSchema
+	dashboards: DashboardSchema,
+	'dashboard-widgets': DashboardWidgetSchema
 };
 
 export const modelSchema = (model: string) => {

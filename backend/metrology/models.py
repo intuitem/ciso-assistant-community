@@ -292,14 +292,175 @@ class Dashboard(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
-    metric_instances = models.ManyToManyField(
-        MetricInstance,
+    # Global dashboard settings (time range, refresh interval, layout type)
+    dashboard_definition = models.JSONField(
+        default=dict,
         blank=True,
-        related_name="dashboards",
+        help_text=_(
+            "Global dashboard configuration. "
+            "Format: {'layout': {'columns': 12, 'row_height': 100}, "
+            "'global_filters': {'time_range': 'last_30_days', 'refresh_interval': 300}}"
+        ),
     )
-    dashboard_definition = models.JSONField(default=dict)
 
     class Meta:
         verbose_name = _("Dashboard")
         verbose_name_plural = _("Dashboards")
         ordering = ["name"]
+
+    @property
+    def widget_count(self):
+        """Returns the number of widgets in this dashboard"""
+        return self.widgets.count()
+
+
+class DashboardWidget(AbstractBaseModel, FolderMixin):
+    """
+    Individual widget configuration for dashboards.
+    Each widget displays a single metric instance with customizable visualization.
+    """
+
+    class ChartType(models.TextChoices):
+        LINE = "line", _("Line Chart")
+        BAR = "bar", _("Bar Chart")
+        AREA = "area", _("Area Chart")
+        GAUGE = "gauge", _("Gauge")
+        KPI_CARD = "kpi_card", _("KPI Card")
+        SPARKLINE = "sparkline", _("Sparkline")
+        TABLE = "table", _("Table")
+
+    class TimeRange(models.TextChoices):
+        LAST_HOUR = "last_hour", _("Last Hour")
+        LAST_24_HOURS = "last_24_hours", _("Last 24 Hours")
+        LAST_7_DAYS = "last_7_days", _("Last 7 Days")
+        LAST_30_DAYS = "last_30_days", _("Last 30 Days")
+        LAST_90_DAYS = "last_90_days", _("Last 90 Days")
+        LAST_YEAR = "last_year", _("Last Year")
+        ALL_TIME = "all_time", _("All Time")
+        CUSTOM = "custom", _("Custom Range")
+
+    class Aggregation(models.TextChoices):
+        NONE = "none", _("None (Raw Data)")
+        AVG = "avg", _("Average")
+        SUM = "sum", _("Sum")
+        MIN = "min", _("Minimum")
+        MAX = "max", _("Maximum")
+        COUNT = "count", _("Count")
+        LAST = "last", _("Last Value")
+
+    dashboard = models.ForeignKey(
+        Dashboard,
+        on_delete=models.CASCADE,
+        related_name="widgets",
+        verbose_name=_("Dashboard"),
+    )
+    metric_instance = models.ForeignKey(
+        MetricInstance,
+        on_delete=models.CASCADE,
+        related_name="dashboard_widgets",
+        verbose_name=_("Metric instance"),
+    )
+    title = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        verbose_name=_("Title"),
+        help_text=_(
+            "Custom title for the widget. If empty, uses metric instance name."
+        ),
+    )
+
+    # Grid position (12-column grid layout)
+    position_x = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_("Position X"),
+        help_text=_("Horizontal position in grid (0-11)"),
+    )
+    position_y = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_("Position Y"),
+        help_text=_("Vertical position in grid (row number)"),
+    )
+    width = models.PositiveIntegerField(
+        default=6,
+        verbose_name=_("Width"),
+        help_text=_("Width in grid columns (1-12)"),
+    )
+    height = models.PositiveIntegerField(
+        default=2,
+        verbose_name=_("Height"),
+        help_text=_("Height in grid rows"),
+    )
+
+    # Visualization settings
+    chart_type = models.CharField(
+        max_length=20,
+        choices=ChartType.choices,
+        default=ChartType.LINE,
+        verbose_name=_("Chart type"),
+    )
+    time_range = models.CharField(
+        max_length=20,
+        choices=TimeRange.choices,
+        default=TimeRange.LAST_30_DAYS,
+        verbose_name=_("Time range"),
+    )
+    aggregation = models.CharField(
+        max_length=20,
+        choices=Aggregation.choices,
+        default=Aggregation.NONE,
+        verbose_name=_("Aggregation"),
+    )
+
+    # Display options
+    show_target = models.BooleanField(
+        default=True,
+        verbose_name=_("Show target"),
+        help_text=_("Display target value line if defined on metric instance"),
+    )
+    show_legend = models.BooleanField(
+        default=True,
+        verbose_name=_("Show legend"),
+    )
+
+    # Additional configuration stored as JSON for flexibility
+    widget_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text=_(
+            "Additional widget configuration. "
+            "Format: {'color_scheme': 'default', 'threshold_colors': {...}, 'custom_options': {...}}"
+        ),
+    )
+
+    class Meta:
+        verbose_name = _("Dashboard widget")
+        verbose_name_plural = _("Dashboard widgets")
+        ordering = ["position_y", "position_x"]
+
+    def __str__(self):
+        display_title = self.title or self.metric_instance.name
+        return f"{display_title} ({self.get_chart_type_display()})"
+
+    @property
+    def display_title(self):
+        """Returns the widget title or falls back to metric instance name"""
+        return self.title or self.metric_instance.name
+
+    def clean(self):
+        """Validate widget configuration"""
+        from django.core.exceptions import ValidationError
+
+        # Validate grid position
+        if self.position_x < 0 or self.position_x > 11:
+            raise ValidationError(
+                {"position_x": _("Position X must be between 0 and 11")}
+            )
+        if self.width < 1 or self.width > 12:
+            raise ValidationError({"width": _("Width must be between 1 and 12")})
+        if self.position_x + self.width > 12:
+            raise ValidationError(
+                {"width": _("Widget exceeds grid boundary (position_x + width > 12)")}
+            )
+        if self.height < 1:
+            raise ValidationError({"height": _("Height must be at least 1")})

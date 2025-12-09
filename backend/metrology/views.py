@@ -4,7 +4,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.views import BaseModelViewSet, LONG_CACHE_TTL
-from metrology.models import MetricDefinition, MetricInstance, MetricSample, Dashboard
+from metrology.models import (
+    MetricDefinition,
+    MetricInstance,
+    MetricSample,
+    Dashboard,
+    DashboardWidget,
+)
 
 
 class MetricDefinitionViewSet(BaseModelViewSet):
@@ -78,5 +84,39 @@ class DashboardViewSet(BaseModelViewSet):
 
     model = Dashboard
     serializers_module = "metrology.serializers"
-    filterset_fields = ["folder", "metric_instances", "filtering_labels"]
+    filterset_fields = ["folder", "filtering_labels"]
     search_fields = ["name", "description", "ref_id"]
+
+
+class DashboardWidgetViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows dashboard widgets to be viewed or edited.
+    """
+
+    model = DashboardWidget
+    serializers_module = "metrology.serializers"
+    filterset_fields = [
+        "folder",
+        "dashboard",
+        "metric_instance",
+        "chart_type",
+        "time_range",
+        "aggregation",
+    ]
+    search_fields = ["title"]
+    ordering = ["position_y", "position_x"]
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get chart type choices")
+    def chart_type(self, request):
+        return Response(dict(DashboardWidget.ChartType.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get time range choices")
+    def time_range(self, request):
+        return Response(dict(DashboardWidget.TimeRange.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get aggregation choices")
+    def aggregation(self, request):
+        return Response(dict(DashboardWidget.Aggregation.choices))

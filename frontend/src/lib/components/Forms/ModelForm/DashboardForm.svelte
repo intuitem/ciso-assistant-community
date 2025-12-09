@@ -1,7 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -59,23 +58,6 @@
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="metric-instances"
-	optionsLabelField="auto"
-	field="metric_instances"
-	cacheLock={cacheLocks['metric_instances']}
-	bind:cachedValue={formDataCache['metric_instances']}
-	label={m.metricInstances()}
-/>
-<TextArea
-	{form}
-	field="dashboard_definition"
-	label={m.dashboardDefinition()}
-	cacheLock={cacheLocks['dashboard_definition']}
-	bind:cachedValue={formDataCache['dashboard_definition']}
 />
 <AutocompleteSelect
 	{form}

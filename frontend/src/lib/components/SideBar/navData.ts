@@ -48,6 +48,12 @@ export const navData = {
 						'view_assessment',
 						'view_riskassessment'
 					]
+				},
+				{
+					name: 'dashboards',
+					fa_icon: 'fa-solid fa-chart-bar',
+					href: '/dashboards',
+					permissions: ['view_dashboard']
 				}
 			]
 		},
@@ -173,12 +179,6 @@ export const navData = {
 					fa_icon: 'fa-solid fa-chart-line',
 					href: '/metric-instances',
 					permissions: ['view_metricinstance']
-				},
-				{
-					name: 'dashboards',
-					fa_icon: 'fa-solid fa-chart-bar',
-					href: '/dashboards',
-					permissions: ['view_dashboard']
 				}
 			]
 		},

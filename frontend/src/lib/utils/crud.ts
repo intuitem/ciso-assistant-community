@@ -2208,10 +2208,29 @@ export const URL_MODEL_MAP: ModelMap = {
 		endpointUrl: 'metrology/dashboards',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
-			{ field: 'metric_instances', urlModel: 'metric-instances' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
-		filters: [{ field: 'folder' }, { field: 'metric_instances' }]
+		filters: [{ field: 'folder' }],
+		reverseForeignKeyFields: [{ field: 'widgets', urlModel: 'dashboard-widgets' }]
+	},
+	'dashboard-widgets': {
+		name: 'dashboardwidget',
+		localName: 'dashboardWidget',
+		localNamePlural: 'dashboardWidgets',
+		verboseName: 'Dashboard widget',
+		verboseNamePlural: 'Dashboard widgets',
+		endpointUrl: 'metrology/dashboard-widgets',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'dashboard', urlModel: 'dashboards' },
+			{ field: 'metric_instance', urlModel: 'metric-instances' }
+		],
+		selectFields: [
+			{ field: 'chart_type', valueType: 'string', detail: false },
+			{ field: 'time_range', valueType: 'string', detail: false },
+			{ field: 'aggregation', valueType: 'string', detail: false }
+		],
+		filters: [{ field: 'folder' }, { field: 'dashboard' }, { field: 'metric_instance' }]
 	}
 };
 

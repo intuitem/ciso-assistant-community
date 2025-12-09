@@ -2418,19 +2418,45 @@ export const listViewFields = {
 		}
 	},
 	dashboards: {
-		head: ['ref_id', 'name', 'description', 'folder'],
-		body: ['ref_id', 'name', 'description', 'folder'],
+		head: ['ref_id', 'name', 'description', 'widget_count', 'folder'],
+		body: ['ref_id', 'name', 'description', 'widget_count', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
-			metric_instances: {
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'dashboard-widgets': {
+		head: ['display_title', 'metric_instance', 'chart_type_display', 'time_range_display', 'dashboard'],
+		body: ['display_title', 'metric_instance', 'chart_type_display', 'time_range_display', 'dashboard'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			dashboard: {
 				component: AutocompleteSelect,
 				props: {
-					optionsEndpoint: 'metrology/metric-instances',
-					label: 'metricInstances',
+					optionsEndpoint: 'metrology/dashboards',
+					label: 'dashboard',
 					multiple: true
 				}
 			},
-			filtering_labels: LABELS_FILTER
+			metric_instance: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/metric-instances',
+					label: 'metricInstance',
+					multiple: true
+				}
+			},
+			chart_type: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/dashboard-widgets/chart_type',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'chartType',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			}
 		}
 	},
 	extra: {
