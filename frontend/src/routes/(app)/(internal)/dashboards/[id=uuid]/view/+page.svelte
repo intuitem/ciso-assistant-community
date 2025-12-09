@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import MetricSampleChart from '$lib/components/Chart/MetricSampleChart.svelte';
+	import DashboardWidgetChart from '$lib/components/Chart/DashboardWidgetChart.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { m } from '$paraglide/messages';
 	import { invalidate } from '$app/navigation';
@@ -131,28 +131,12 @@
 
 					<!-- Chart based on widget type -->
 					<div class="flex-1 min-h-0">
-						{#if widget.chart_type === 'kpi_card'}
-							<div class="flex items-center justify-center h-full">
-								<div class="text-center">
-									<div class="text-5xl font-bold text-primary-600">
-										{widget.samples?.[0]?.display_value || 'N/A'}
-									</div>
-									{#if widget.show_target && widget.metric_instance?.target_value}
-										<div class="text-sm text-gray-500 mt-2">
-											{m.target()}: {widget.metric_instance.target_value}
-										</div>
-									{/if}
-								</div>
-							</div>
-						{:else}
-							{#key widget.samples?.length}
-								<MetricSampleChart
-									samples={widget.samples || []}
-									metricDefinition={widget.metric_instance?.metric_definition}
-									height="h-full"
-								/>
-							{/key}
-						{/if}
+						{#key widget.samples?.length}
+							<DashboardWidgetChart
+								{widget}
+								samples={widget.samples || []}
+							/>
+						{/key}
 					</div>
 				</div>
 			{/each}
