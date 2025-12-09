@@ -416,6 +416,11 @@ class AssetWriteSerializer(BaseModelSerializer):
         queryset=SecurityException.objects.all(),
         required=False,
     )
+    applied_controls = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=AppliedControl.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = Asset
@@ -443,18 +448,22 @@ class AssetWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         parent_assets = validated_data.pop("parent_assets", None)
         child_assets = validated_data.pop("child_assets", None)
+        applied_controls = validated_data.pop("applied_controls", None)
         asset = super().create(validated_data)
 
         if parent_assets is not None:
             asset.parent_assets.set(parent_assets)
         if child_assets is not None:
             asset.child_assets.set(child_assets)
+        if applied_controls is not None:
+            asset.applied_controls.set(applied_controls)
 
         return asset
 
     def update(self, instance, validated_data):
         parent_assets = validated_data.pop("parent_assets", None)
         child_assets = validated_data.pop("child_assets", None)
+        applied_controls = validated_data.pop("applied_controls", None)
 
         instance = super().update(instance, validated_data)
 
@@ -463,6 +472,8 @@ class AssetWriteSerializer(BaseModelSerializer):
             instance.parent_assets.set(parent_assets)
         if child_assets is not None:
             instance.child_assets.set(child_assets)
+        if applied_controls is not None:
+            instance.applied_controls.set(applied_controls)
 
         return instance
 
@@ -480,6 +491,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     asset_class = FieldsRelatedField(["name"])
     overridden_children_capabilities = FieldsRelatedField(many=True)
     solutions = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
 
     children_assets = serializers.SerializerMethodField()
     security_objectives = serializers.SerializerMethodField()
@@ -712,6 +724,28 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 "⚠️ Cannot modify the risk scenario when the risk assessment is locked."
             )
+
+        antecedent_scenarios = attrs.get("antecedent_scenarios", [])
+        consequent_scenarios = attrs.get("consequent_scenarios", [])
+
+        # Check that the scenario graph will not contain cycles
+        myset = set()
+        if self.instance:
+            myset = set([self.instance])
+
+        if antecedent_scenarios:
+            # Add all consequent scenarios to the set
+            if self.instance:
+                myset = myset | set(self.instance.consequent_scenarios.all())
+
+            for scenario in antecedent_scenarios:
+                if myset & set(scenario.ancestors_plus_self()):
+                    raise serializers.ValidationError(
+                        {
+                            "antecedent_scenarios": "errorRiskScenarioGraphMustNotContainCycles"
+                        }
+                    )
+
         return super().validate(attrs)
 
     class Meta:
@@ -730,6 +764,10 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     threats = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
+    risk_origin = FieldsRelatedField(["id", "name", "description"])
+    antecedent_scenarios = FieldsRelatedField(
+        many=True, fields=["id", "ref_id", "name"]
+    )
 
     treatment = serializers.CharField()
 
@@ -750,6 +788,7 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
     owner = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(many=True)
 
     within_tolerance = serializers.CharField()
 
@@ -778,7 +817,6 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
             "threats",
             "vulnerabilities",
             "assets",
-            "existing_controls",
             "existing_applied_controls",
             "applied_controls",
             "current_proba",
@@ -1503,11 +1541,20 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         return evidence
 
     def update(self, instance, validated_data):
+        # Track old folder before update
+        old_folder_id = instance.folder_id
+
         # Handle properly owner field cleaning
         owners = validated_data.get("owner", None)
         instance = super().update(instance, validated_data)
         if not owners:
             instance.owner.set([])
+
+        # Update all EvidenceRevisions' folder if the Evidence's folder changed
+        if old_folder_id != instance.folder_id:
+            EvidenceRevision.objects.filter(evidence=instance).update(
+                folder=instance.folder
+            )
 
         return instance
 
@@ -2488,11 +2535,20 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
         # Track old assigned users before update
         old_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
 
+        # Track old folder before update
+        old_folder_id = instance.folder_id
+
         was_recurrent = instance.is_recurrent  # Store the previous state
         tasknode_data = self._extract_tasknode_fields(validated_data)
         instance = super().update(instance, validated_data)
         now_recurrent = instance.is_recurrent
         self._sync_task_node(instance, tasknode_data, was_recurrent, now_recurrent)
+
+        # Update all TaskNodes' folder if the TaskTemplate's folder changed
+        if old_folder_id != instance.folder_id:
+            TaskNode.objects.filter(task_template=instance).update(
+                folder=instance.folder
+            )
 
         # Get new assigned users after update
         new_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))

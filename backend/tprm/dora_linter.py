@@ -911,10 +911,12 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
     # those with solutions linked to business function assets or their children
     b_02_02_contracts = (
         Contract.objects.filter(
-            solution__isnull=False, solution__assets__id__in=business_function_asset_ids
+            solutions__isnull=False,
+            solutions__assets__id__in=business_function_asset_ids,
         )
         .distinct()
-        .select_related("provider_entity", "solution", "beneficiary_entity")
+        .select_related("provider_entity", "beneficiary_entity")
+        .prefetch_related("solutions")
     )
 
     if not b_02_02_contracts.exists():

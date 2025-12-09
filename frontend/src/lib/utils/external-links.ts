@@ -3,9 +3,14 @@ import type { ModalStore, ModalSettings } from '$lib/components/Modals/stores';
 import ExternalLinkConfirmModal from '$lib/components/Modals/ExternalLinkConfirmModal.svelte';
 
 let globalModalStore: ModalStore | null = null;
+let showWarningExternalLinks: boolean = true; // Default to true for safety
 
 export const setGlobalModalStore = (modalStore: ModalStore) => {
 	globalModalStore = modalStore;
+};
+
+export const setShowWarningExternalLinks = (enabled: boolean) => {
+	showWarningExternalLinks = enabled;
 };
 
 const isExternalLink = (url: string): boolean => {
@@ -44,6 +49,11 @@ const showConfirmation = async (url: string): Promise<boolean> => {
 
 const handleLinkClick = async (anchor: HTMLAnchorElement, href: string, event: MouseEvent) => {
 	if (isInternalLink(href) || !isExternalLink(href)) return;
+
+	// If warning is disabled, allow the link to open normally
+	if (!showWarningExternalLinks) {
+		return;
+	}
 
 	event.preventDefault();
 	const confirmed = await showConfirmation(href);
