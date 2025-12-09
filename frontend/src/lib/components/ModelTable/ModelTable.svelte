@@ -364,36 +364,32 @@
 	let fieldComponentMap = $derived(getFieldComponentMap(URLModel));
 	let canCreateObject = $derived(
 		model
-			? page.params.id
-				? canPerformAction({
-						user,
-						action: 'add',
-						model: model.name,
-						domain:
-							folderId ||
-							page.data?.data?.folder?.id ||
-							page.data?.data?.folder ||
-							page.params.id ||
-							user.root_folder_id
-					})
-				: Object.hasOwn(user.permissions, `add_${model.name}`)
+			? canPerformAction({
+					user,
+					action: 'add',
+					model: model.name,
+					domain:
+						folderId ||
+						page.data?.data?.folder?.id ||
+						page.data?.data?.folder ||
+						page.params.id ||
+						user.root_folder_id
+				})
 			: false
 	);
 	let contextMenuCanEditObject = $derived(
 		(model
-			? page.params.id
-				? canPerformAction({
-						user,
-						action: 'change',
-						model: model.name,
-						domain:
-							model.name === 'folder'
-								? contextMenuOpenRow?.meta.id
-								: (contextMenuOpenRow?.meta.folder?.id ??
-									contextMenuOpenRow?.meta.folder ??
-									user.root_folder_id)
-					})
-				: Object.hasOwn(user.permissions, `change_${model.name}`)
+			? canPerformAction({
+					user,
+					action: 'change',
+					model: model.name,
+					domain:
+						model.name === 'folder'
+							? contextMenuOpenRow?.meta.id
+							: (contextMenuOpenRow?.meta.folder?.id ??
+								contextMenuOpenRow?.meta.folder ??
+								user.root_folder_id)
+				})
 			: false) && !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)
 	);
 
@@ -745,7 +741,7 @@
 					</ContextMenu.Trigger>
 				{/each}
 			</tbody>
-			{#if contextMenuDisplayEdit || Object.hasOwn(contextMenuActions, URLModel)}
+			{#if contextMenuDisplayEdit && Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
 					class="z-50 w-full max-w-[229px] outline-hidden card bg-white px-1 py-1.5 shadow-md cursor-default"
 				>
