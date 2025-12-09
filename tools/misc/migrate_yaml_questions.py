@@ -2,7 +2,7 @@
 
 """
 This script processes a YAML file to transform its structure.
-Specifically, it looks for the "question" key, which contains "question_type," "questions," 
+Specifically, it looks for the "question" key, which contains "question_type," "questions,"
 and optionally "question_choices," and converts it into a new format under the "questions" key.
 
 - If the original format includes multiple questions, they are extracted and restructured.
@@ -17,10 +17,11 @@ import sys
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
+
 def convert_question_format(data):
     """
-    Recursively traverses the YAML structure and, if a "question" key 
-    (containing "question_type," "questions," and optionally "question_choices") is found, 
+    Recursively traverses the YAML structure and, if a "question" key
+    (containing "question_type," "questions," and optionally "question_choices") is found,
     it is transformed into the target "questions" format.
 
     Returns True if the conversion was performed.
@@ -37,7 +38,11 @@ def convert_question_format(data):
                 question_list = q["questions"]
                 if isinstance(question_list, list):
                     for question in question_list:
-                        if isinstance(question, dict) and "urn" in question and "text" in question:
+                        if (
+                            isinstance(question, dict)
+                            and "urn" in question
+                            and "text" in question
+                        ):
                             q_urn = question["urn"]
                             new_question_entry = CommentedMap()
                             new_question_entry["type"] = q_type
@@ -56,13 +61,14 @@ def convert_question_format(data):
                 changed = True
     return changed
 
+
 def process_file(filename):
     yaml = YAML()
     yaml.preserve_quotes = True
     yaml.indent(mapping=2, sequence=4, offset=2)
 
     try:
-        with open(filename, 'r', encoding='utf-8') as f:
+        with open(filename, "r", encoding="utf-8") as f:
             data = yaml.load(f)
     except Exception as e:
         print(f"Error loading {filename}: {e}")
@@ -74,7 +80,7 @@ def process_file(filename):
     conversion_happened = convert_question_format(data)
 
     try:
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             yaml.dump(data, f)
         if conversion_happened:
             print(f"File processed: {filename}")
@@ -83,12 +89,14 @@ def process_file(filename):
     except Exception as e:
         print(f"Error writing to {filename}: {e}")
 
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: {} <yaml_file>".format(sys.argv[0]))
         sys.exit(1)
     filename = sys.argv[1]
     process_file(filename)
+
 
 if __name__ == "__main__":
     main()

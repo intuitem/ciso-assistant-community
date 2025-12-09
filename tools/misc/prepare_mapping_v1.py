@@ -50,9 +50,7 @@ ws.append(["library_copyright", packager])
 ws.append(["library_provider", packager])
 ws.append(["library_packager", packager])
 ws.append(["library_dependencies", f"{source_library_urn}, {target_library_urn}"])
-ws.append(
-    ["mapping_urn", f"urn:{packager.lower()}:risk:req_mapping_set:{ref_id}"]
-)
+ws.append(["mapping_urn", f"urn:{packager.lower()}:risk:req_mapping_set:{ref_id}"])
 ws.append(["mapping_ref_id", ref_id])
 ws.append(["mapping_name", name])
 ws.append(["mapping_description", description])
