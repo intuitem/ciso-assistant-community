@@ -89,8 +89,8 @@
 			{/if}
 		</div>
 		<div class="flex items-center gap-2">
-			<a href="/dashboards/{dashboard.id}/edit" class="btn preset-tonal">
-				<i class="fa-solid fa-pencil"></i>
+			<a href="/dashboards/{dashboard.id}/layout" class="btn preset-tonal">
+				<i class="fa-solid fa-grip"></i>
 				{m.editLayout()}
 			</a>
 			<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>

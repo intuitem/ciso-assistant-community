@@ -24,6 +24,7 @@
 	let draggedWidget = $state<any>(null);
 	let isSaving = $state(false);
 	let hasChanges = $state(false);
+	let gridElement: HTMLDivElement | null = $state(null);
 
 	const modalStore = getModalStore();
 	const toastStore = getToastStore();
@@ -31,6 +32,15 @@
 	// Grid configuration
 	const GRID_COLS = 12;
 	const ROW_HEIGHT = 150; // pixels per row unit
+	const GRID_GAP = 8; // gap between cells in pixels
+
+	// Get accurate grid cell dimensions
+	function getGridDimensions() {
+		if (!gridElement) return { colWidth: 80, rowHeight: ROW_HEIGHT };
+		const gridWidth = gridElement.clientWidth;
+		const colWidth = (gridWidth - (GRID_COLS - 1) * GRID_GAP) / GRID_COLS;
+		return { colWidth, rowHeight: ROW_HEIGHT };
+	}
 
 	// Watch for modal close and refresh data
 	let previousModalCount = 0;
@@ -80,13 +90,35 @@
 		});
 	}
 
+	// Convert pixel position to grid coordinates
+	function pixelToGrid(pixelX: number, pixelY: number): { gridX: number; gridY: number } {
+		const { colWidth } = getGridDimensions();
+		const cellWithGap = colWidth + GRID_GAP;
+		const gridX = Math.round(pixelX / cellWithGap);
+		const gridY = Math.round(pixelY / (ROW_HEIGHT + GRID_GAP));
+		return { gridX, gridY };
+	}
+
 	// Drag and drop handlers
+	let dragOffset = { x: 0, y: 0 };
+
 	function handleDragStart(event: DragEvent, widget: any) {
 		isDragging = true;
 		draggedWidget = widget;
+
+		// Calculate offset from widget top-left to mouse position
+		const target = event.currentTarget as HTMLElement;
+		const rect = target.getBoundingClientRect();
+		dragOffset = {
+			x: event.clientX - rect.left,
+			y: event.clientY - rect.top
+		};
+
 		if (event.dataTransfer) {
 			event.dataTransfer.effectAllowed = 'move';
 			event.dataTransfer.setData('text/plain', widget.id);
+			// Set drag image offset for better visual feedback
+			event.dataTransfer.setDragImage(target, dragOffset.x, dragOffset.y);
 		}
 	}
 
@@ -102,17 +134,25 @@
 		}
 	}
 
-	function handleDrop(event: DragEvent, targetX: number, targetY: number) {
+	function handleDrop(event: DragEvent) {
 		event.preventDefault();
-		if (!draggedWidget) return;
+		if (!draggedWidget || !gridElement) return;
 
-		// Update widget position
+		const gridRect = gridElement.getBoundingClientRect();
+		// Calculate position accounting for drag offset
+		const relativeX = event.clientX - gridRect.left - dragOffset.x;
+		const relativeY = event.clientY - gridRect.top - dragOffset.y;
+
+		const { gridX, gridY } = pixelToGrid(relativeX, relativeY);
+
+		// Update widget position with bounds checking
 		const widgetIndex = widgets.findIndex((w: any) => w.id === draggedWidget.id);
 		if (widgetIndex !== -1) {
+			const widgetWidth = widgets[widgetIndex].width || 6;
 			widgets[widgetIndex] = {
 				...widgets[widgetIndex],
-				position_x: Math.max(0, Math.min(targetX, GRID_COLS - (widgets[widgetIndex].width || 6))),
-				position_y: Math.max(0, targetY)
+				position_x: Math.max(0, Math.min(gridX, GRID_COLS - widgetWidth)),
+				position_y: Math.max(0, gridY)
 			};
 			hasChanges = true;
 		}
@@ -122,13 +162,15 @@
 	}
 
 	// Resize handlers
-	function handleResize(widget: any, newWidth: number, newHeight: number) {
-		const widgetIndex = widgets.findIndex((w: any) => w.id === widget.id);
+	function updateWidgetSize(widgetId: string, newWidth: number, newHeight: number) {
+		const widgetIndex = widgets.findIndex((w: any) => w.id === widgetId);
 		if (widgetIndex !== -1) {
+			const widget = widgets[widgetIndex];
+			const maxWidth = GRID_COLS - (widget.position_x || 0);
 			widgets[widgetIndex] = {
-				...widgets[widgetIndex],
-				width: Math.max(1, Math.min(newWidth, GRID_COLS - widget.position_x)),
-				height: Math.max(1, newHeight)
+				...widget,
+				width: Math.max(1, Math.min(Math.round(newWidth), maxWidth)),
+				height: Math.max(1, Math.round(newHeight))
 			};
 			hasChanges = true;
 		}
@@ -244,16 +286,11 @@
 		<!-- Widgets Grid -->
 		{#if widgets.length > 0}
 			<div
+				bind:this={gridElement}
 				class="relative grid gap-2"
 				style="grid-template-columns: repeat({GRID_COLS}, 1fr); grid-template-rows: repeat({maxRow}, {ROW_HEIGHT}px);"
 				ondragover={handleDragOver}
-				ondrop={(e) => {
-					const rect = e.currentTarget.getBoundingClientRect();
-					const cellWidth = rect.width / GRID_COLS;
-					const targetX = Math.floor((e.clientX - rect.left) / cellWidth);
-					const targetY = Math.floor((e.clientY - rect.top) / ROW_HEIGHT);
-					handleDrop(e, targetX, targetY);
-				}}
+				ondrop={handleDrop}
 				role="grid"
 			>
 				{#each widgets as widget (widget.id)}
@@ -311,40 +348,52 @@
 
 						<!-- Resize handle -->
 						<div
-							class="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize opacity-0 group-hover:opacity-100 bg-gray-300 rounded-tl"
+							class="absolute bottom-0 right-0 w-5 h-5 cursor-se-resize opacity-0 group-hover:opacity-100 flex items-center justify-center"
 							onmousedown={(e) => {
 								e.preventDefault();
+								e.stopPropagation();
+
 								const startX = e.clientX;
 								const startY = e.clientY;
 								const startWidth = widget.width || 6;
 								const startHeight = widget.height || 2;
-								// Capture grid width at start of resize
-								const gridElement = (e.currentTarget as HTMLElement).closest('.grid');
-								const gridWidth = gridElement?.clientWidth || 800;
-								const colWidth = gridWidth / GRID_COLS;
+								const widgetId = widget.id;
+
+								// Get grid dimensions at start
+								const { colWidth } = getGridDimensions();
+								const cellWithGap = colWidth + GRID_GAP;
+								const rowWithGap = ROW_HEIGHT + GRID_GAP;
 
 								const onMouseMove = (moveEvent: MouseEvent) => {
+									moveEvent.preventDefault();
 									const deltaX = moveEvent.clientX - startX;
 									const deltaY = moveEvent.clientY - startY;
 
-									const newWidth = Math.round(startWidth + deltaX / colWidth);
-									const newHeight = Math.round(startHeight + deltaY / ROW_HEIGHT);
+									// Calculate new size based on pixel delta
+									const newWidth = startWidth + deltaX / cellWithGap;
+									const newHeight = startHeight + deltaY / rowWithGap;
 
-									handleResize(widget, newWidth, newHeight);
+									updateWidgetSize(widgetId, newWidth, newHeight);
 								};
 
 								const onMouseUp = () => {
 									document.removeEventListener('mousemove', onMouseMove);
 									document.removeEventListener('mouseup', onMouseUp);
+									document.body.style.cursor = '';
+									document.body.style.userSelect = '';
 								};
 
+								document.body.style.cursor = 'se-resize';
+								document.body.style.userSelect = 'none';
 								document.addEventListener('mousemove', onMouseMove);
 								document.addEventListener('mouseup', onMouseUp);
 							}}
 							role="slider"
 							aria-label="Resize widget"
 							tabindex="0"
-						></div>
+						>
+							<i class="fa-solid fa-up-right-and-down-left-from-center text-xs text-gray-400 rotate-90"></i>
+						</div>
 					</div>
 				{/each}
 			</div>
