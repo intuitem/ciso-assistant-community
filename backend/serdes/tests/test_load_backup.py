@@ -53,8 +53,8 @@ def non_backup_user_client(app_config):
     return client
 
 
-# NEW: neutralize auditlog for tests that trigger flush+loaddata
-@pytest.fixture
+# Silence auditlog so flush/loaddata can run in tests
+@pytest.fixture(autouse=True)
 def mute_auditlog():
     # prevent new audit rows and remove existing ones that would FK contenttypes
     post_save.disconnect(add_user_info_to_log_entry, sender=LogEntry)
@@ -146,7 +146,7 @@ def send_backup_to_api(client, backup_data, *, compress=True):
     )
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 class TestEnterpriseBackupInCommunityEdition:
     def test_filters_enterprise_models_in_ce(self, authenticated_client):
         if apps.is_installed("enterprise_core"):
@@ -159,7 +159,7 @@ class TestEnterpriseBackupInCommunityEdition:
         assert resp.status_code == status.HTTP_200_OK
         assert Folder.objects.filter(name="Test Backup Domain").exists()
 
-    # Use the mute_auditlog fixture and keep a safe xfail fallback
+    # This test can xfail if the restore returns a non-200 in some DB setups
     @pytest.mark.django_db(transaction=True)
     def test_filters_enterprise_permissions_via_api_in_ce(
         self, authenticated_client, mute_auditlog
@@ -217,7 +217,7 @@ class TestEnterpriseBackupInCommunityEdition:
         assert Folder.objects.filter(name="Test Backup Domain").exists()
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 class TestBackupVersionValidation:
     def test_rejects_different_version(self, authenticated_client):
         backup = create_mock_backup_data(
@@ -242,7 +242,7 @@ class TestBackupVersionValidation:
         assert resp.status_code == status.HTTP_200_OK
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 class TestBackupRestorePermissions:
     def test_requires_authentication(self, unauthenticated_client):
         backup = create_mock_backup_data(include_enterprise=False)
@@ -269,7 +269,7 @@ class TestBackupRestorePermissions:
         assert resp.data["error"] == "backupLoadNoData"
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 class TestBackupRestoreEdgeCases:
     def test_accepts_empty_objects_list(self, authenticated_client):
         backup = [
