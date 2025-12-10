@@ -14,20 +14,20 @@
 	}: Props = $props();
 
 	let isEditing = $state(false);
-	let editValue = $state(value);
+	let editValue = $state('');
 
 	function startEdit() {
-		isEditing = true;
 		editValue = value;
+		isEditing = true;
 	}
 
 	function saveChanges() {
+		value = editValue;
 		onSave(editValue);
 		isEditing = false;
 	}
 
 	function cancelEdit() {
-		editValue = value;
 		isEditing = false;
 	}
 
