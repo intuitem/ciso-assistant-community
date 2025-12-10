@@ -14,14 +14,15 @@
 	}: Props = $props();
 
 	let isEditing = $state(false);
-	let editValue = $state(value);
+	let editValue = $state(value ?? '');
 
 	function startEdit() {
-		isEditing = true;
 		editValue = value;
+		isEditing = true;
 	}
 
 	function saveChanges() {
+		value = editValue;
 		onSave(editValue);
 		isEditing = false;
 	}
@@ -32,7 +33,6 @@
 	}
 
 	function preview() {
-		value = editValue;
 		isEditing = false;
 	}
 </script>
@@ -79,8 +79,8 @@
 				}
 			}}
 		>
-			{#if value}
-				<MarkdownRenderer content={value} />
+			{#if editValue}
+				<MarkdownRenderer content={editValue} />
 			{:else}
 				<p class="text-gray-500 italic">{placeholder}</p>
 			{/if}
