@@ -105,7 +105,10 @@
 				style="grid-template-columns: repeat({GRID_COLS}, 1fr); grid-template-rows: repeat({maxRow}, {ROW_HEIGHT}px);"
 			>
 				{#each widgets as widget (widget.id)}
-					<div class="card p-4 bg-white dark:bg-surface-900 shadow-sm flex flex-col" style={getWidgetStyle(widget)}>
+					<div
+						class="card p-4 bg-white dark:bg-surface-900 shadow-sm flex flex-col"
+						style={getWidgetStyle(widget)}
+					>
 						<div class="mb-3">
 							<h4 class="font-semibold text-base">
 								{widget.display_title || widget.title || widget.metric_instance?.name}

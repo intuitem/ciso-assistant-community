@@ -35,6 +35,22 @@
 	const ROW_HEIGHT = 150; // pixels per row unit
 	const GRID_GAP = 8; // gap between cells in pixels
 
+	// Minimum dimensions per chart type (width, height in grid units)
+	const MIN_DIMENSIONS: Record<string, { width: number; height: number }> = {
+		kpi_card: { width: 2, height: 1 },
+		sparkline: { width: 3, height: 1 },
+		gauge: { width: 3, height: 2 },
+		line: { width: 4, height: 2 },
+		bar: { width: 4, height: 2 },
+		area: { width: 4, height: 2 },
+		table: { width: 4, height: 2 }
+	};
+
+	// Get minimum dimensions for a widget based on its chart type
+	function getMinDimensions(chartType: string): { width: number; height: number } {
+		return MIN_DIMENSIONS[chartType] || { width: 2, height: 1 };
+	}
+
 	// Get accurate grid cell dimensions
 	function getGridDimensions() {
 		if (!gridElement) return { colWidth: 80, rowHeight: ROW_HEIGHT };
@@ -168,10 +184,11 @@
 		if (widgetIndex !== -1) {
 			const widget = widgets[widgetIndex];
 			const maxWidth = GRID_COLS - (widget.position_x || 0);
+			const minDims = getMinDimensions(widget.chart_type);
 			widgets[widgetIndex] = {
 				...widget,
-				width: Math.max(1, Math.min(Math.round(newWidth), maxWidth)),
-				height: Math.max(1, Math.round(newHeight))
+				width: Math.max(minDims.width, Math.min(Math.round(newWidth), maxWidth)),
+				height: Math.max(minDims.height, Math.round(newHeight))
 			};
 			hasChanges = true;
 		}
@@ -371,8 +388,12 @@
 						<!-- Position info -->
 						<div
 							class="absolute bottom-1 left-1 text-xs text-surface-400 opacity-0 group-hover:opacity-100"
+							title="Position: {widget.position_x},{widget.position_y} | Size: {widget.width}x{widget.height} | Min: {getMinDimensions(
+								widget.chart_type
+							).width}x{getMinDimensions(widget.chart_type).height}"
 						>
-							{widget.position_x},{widget.position_y} ({widget.width}x{widget.height})
+							{widget.width}x{widget.height} (min: {getMinDimensions(widget.chart_type)
+								.width}x{getMinDimensions(widget.chart_type).height})
 						</div>
 
 						<!-- Resize handle -->
