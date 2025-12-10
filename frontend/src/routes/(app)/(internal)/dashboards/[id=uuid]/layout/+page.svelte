@@ -263,20 +263,20 @@
 	</div>
 
 	<!-- Instructions -->
-	<div class="card p-3 bg-blue-50 text-blue-800 text-sm">
+	<div class="card p-3 preset-tonal-primary text-sm">
 		<i class="fa-solid fa-circle-info mr-2"></i>
 		{m.dashboardEditorInstructions()}
 	</div>
 
 	<!-- Grid Editor -->
-	<div class="relative bg-gray-100 rounded-lg p-4 min-h-[600px]">
+	<div class="relative bg-surface-50-950 rounded-lg p-4 min-h-[600px]">
 		<!-- Grid background -->
 		<div
 			class="absolute inset-4 grid gap-2 pointer-events-none opacity-20"
 			style="grid-template-columns: repeat({GRID_COLS}, 1fr); grid-template-rows: repeat({maxRow}, {ROW_HEIGHT}px);"
 		>
 			{#each Array(GRID_COLS * maxRow) as _, i}
-				<div class="border border-dashed border-gray-400 rounded"></div>
+				<div class="border border-dashed border-surface-400 rounded"></div>
 			{/each}
 		</div>
 
@@ -292,7 +292,7 @@
 			>
 				{#each widgets as widget (widget.id)}
 					<div
-						class="card bg-white shadow-md p-3 cursor-move relative group transition-shadow hover:shadow-lg {isDragging &&
+						class="card bg-white dark:bg-surface-900 shadow-md p-3 cursor-move relative group transition-shadow hover:shadow-lg {isDragging &&
 						draggedWidget?.id === widget.id
 							? 'opacity-50'
 							: ''}"
@@ -308,7 +308,7 @@
 								<h4 class="font-semibold text-sm truncate">
 									{widget.display_title || widget.title || widget.metric_instance?.name || 'Widget'}
 								</h4>
-								<p class="text-xs text-gray-500 truncate">
+								<p class="text-xs text-surface-500 truncate">
 									{widget.chart_type_display || widget.chart_type}
 								</p>
 							</div>
@@ -332,7 +332,7 @@
 
 						<!-- Widget Preview -->
 						<div
-							class="flex-1 bg-gray-50 rounded flex items-center justify-center text-gray-400 min-h-[60px]"
+							class="flex-1 bg-surface-100-900 rounded flex items-center justify-center text-surface-400 min-h-[60px]"
 						>
 							<i
 								class="text-4xl fa-solid {widget.chart_type === 'kpi_card'
@@ -353,7 +353,7 @@
 
 						<!-- Position info -->
 						<div
-							class="absolute bottom-1 left-1 text-xs text-gray-400 opacity-0 group-hover:opacity-100"
+							class="absolute bottom-1 left-1 text-xs text-surface-400 opacity-0 group-hover:opacity-100"
 						>
 							{widget.position_x},{widget.position_y} ({widget.width}x{widget.height})
 						</div>
@@ -405,14 +405,14 @@
 							tabindex="0"
 						>
 							<i
-								class="fa-solid fa-up-right-and-down-left-from-center text-xs text-gray-400 rotate-90"
+								class="fa-solid fa-up-right-and-down-left-from-center text-xs text-surface-400 rotate-90"
 							></i>
 						</div>
 					</div>
 				{/each}
 			</div>
 		{:else}
-			<div class="flex flex-col items-center justify-center h-[400px] text-gray-500">
+			<div class="flex flex-col items-center justify-center h-[400px] text-surface-500">
 				<i class="fa-solid fa-chart-line text-6xl mb-4"></i>
 				<p class="mb-4">{m.noWidgetsYet()}</p>
 				<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>

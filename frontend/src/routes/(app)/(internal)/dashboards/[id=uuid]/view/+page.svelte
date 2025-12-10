@@ -82,7 +82,7 @@
 			</a>
 			<h1 class="text-2xl font-bold">{dashboard.name}</h1>
 			{#if dashboard.description}
-				<span class="text-gray-500">- {dashboard.description}</span>
+				<span class="text-surface-500">- {dashboard.description}</span>
 			{/if}
 		</div>
 		<div class="flex items-center gap-2">
@@ -98,39 +98,41 @@
 	</div>
 
 	<!-- Widgets Grid - Full Width -->
-	{#if widgets.length > 0}
-		<div
-			class="grid gap-4"
-			style="grid-template-columns: repeat({GRID_COLS}, 1fr); grid-template-rows: repeat({maxRow}, {ROW_HEIGHT}px);"
-		>
-			{#each widgets as widget (widget.id)}
-				<div class="card p-4 bg-white shadow-sm flex flex-col" style={getWidgetStyle(widget)}>
-					<div class="mb-3">
-						<h4 class="font-semibold text-base">
-							{widget.display_title || widget.title || widget.metric_instance?.name}
-						</h4>
-						<p class="text-xs text-gray-500">
-							{widget.chart_type_display} | {widget.time_range_display}
-						</p>
-					</div>
+	<div class="bg-surface-50-950 rounded-lg p-4 -mx-2">
+		{#if widgets.length > 0}
+			<div
+				class="grid gap-4"
+				style="grid-template-columns: repeat({GRID_COLS}, 1fr); grid-template-rows: repeat({maxRow}, {ROW_HEIGHT}px);"
+			>
+				{#each widgets as widget (widget.id)}
+					<div class="card p-4 bg-white dark:bg-surface-900 shadow-sm flex flex-col" style={getWidgetStyle(widget)}>
+						<div class="mb-3">
+							<h4 class="font-semibold text-base">
+								{widget.display_title || widget.title || widget.metric_instance?.name}
+							</h4>
+							<p class="text-xs text-surface-500">
+								{widget.chart_type_display} | {widget.time_range_display}
+							</p>
+						</div>
 
-					<!-- Chart based on widget type -->
-					<div class="flex-1 min-h-0">
-						{#key widget.samples?.length}
-							<DashboardWidgetChart {widget} samples={widget.samples || []} />
-						{/key}
+						<!-- Chart based on widget type -->
+						<div class="flex-1 min-h-0">
+							{#key widget.samples?.length}
+								<DashboardWidgetChart {widget} samples={widget.samples || []} />
+							{/key}
+						</div>
 					</div>
-				</div>
-			{/each}
-		</div>
-	{:else}
-		<div class="card p-12 bg-gray-50 text-center">
-			<i class="fa-solid fa-chart-line text-8xl text-gray-300 mb-6"></i>
-			<p class="text-gray-500 text-lg mb-6">{m.noWidgetsYet()}</p>
-			<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>
-				<i class="fa-solid fa-plus"></i>
-				{m.addFirstWidget()}
-			</button>
-		</div>
-	{/if}
+				{/each}
+			</div>
+		{:else}
+			<div class="card p-12 bg-white dark:bg-surface-900 text-center">
+				<i class="fa-solid fa-chart-line text-8xl text-surface-300 mb-6"></i>
+				<p class="text-surface-500 text-lg mb-6">{m.noWidgetsYet()}</p>
+				<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>
+					<i class="fa-solid fa-plus"></i>
+					{m.addFirstWidget()}
+				</button>
+			</div>
+		{/if}
+	</div>
 </div>
