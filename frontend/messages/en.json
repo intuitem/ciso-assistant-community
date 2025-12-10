@@ -2723,6 +2723,8 @@
 	"addDashboardWidget": "Add widget",
 	"widgets": "Widgets",
 	"addWidget": "Add widget",
+	"addRow": "Add row",
+	"removeRow": "Remove row",
 	"addFirstWidget": "Add your first widget",
 	"noWidgetsYet": "No widgets configured for this dashboard yet.",
 	"chartType": "Chart type",

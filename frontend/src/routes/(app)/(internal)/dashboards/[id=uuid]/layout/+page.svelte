@@ -25,6 +25,7 @@
 	let isSaving = $state(false);
 	let hasChanges = $state(false);
 	let gridElement: HTMLDivElement | null = $state(null);
+	let extraRows = $state(0);
 
 	const modalStore = getModalStore();
 	const toastStore = getToastStore();
@@ -203,10 +204,26 @@
 		`;
 	}
 
-	// Get max row for grid sizing
-	const maxRow = $derived(
+	// Minimum rows required by widgets
+	const minRequiredRows = $derived(
 		Math.max(4, ...widgets.map((w: any) => (w.position_y || 0) + (w.height || 2)))
 	);
+
+	// Get max row for grid sizing (minimum required, plus any extra rows added by user)
+	const maxRow = $derived(minRequiredRows + extraRows);
+
+	// Can remove a row if there are extra rows beyond what widgets need
+	const canRemoveRow = $derived(extraRows > 0);
+
+	function addRow() {
+		extraRows += 1;
+	}
+
+	function removeRow() {
+		if (extraRows > 0) {
+			extraRows -= 1;
+		}
+	}
 </script>
 
 <div class="p-4 space-y-4">
@@ -421,5 +438,25 @@
 				</button>
 			</div>
 		{/if}
+
+		<!-- Row Controls -->
+		<div class="flex gap-2 mt-2">
+			<button
+				class="flex-1 py-2 border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-lg text-surface-400 hover:border-primary-500 hover:text-primary-500 transition-colors flex items-center justify-center gap-2"
+				onclick={addRow}
+			>
+				<i class="fa-solid fa-plus"></i>
+				{m.addRow()}
+			</button>
+			{#if canRemoveRow}
+				<button
+					class="flex-1 py-2 border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-lg text-surface-400 hover:border-error-500 hover:text-error-500 transition-colors flex items-center justify-center gap-2"
+					onclick={removeRow}
+				>
+					<i class="fa-solid fa-minus"></i>
+					{m.removeRow()}
+				</button>
+			{/if}
+		</div>
 	</div>
 </div>
