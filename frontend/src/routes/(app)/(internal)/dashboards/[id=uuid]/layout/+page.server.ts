@@ -1,4 +1,4 @@
-import { getModelInfo } from '$lib/utils/crud';
+import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
 import { loadDetail } from '$lib/utils/load';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { modelSchema } from '$lib/utils/schemas';
@@ -35,6 +35,26 @@ export const load: PageServerLoad = async (event) => {
 		zod(widgetSchema),
 		{ errors: false }
 	);
+
+	// Fetch selectOptions for widget form
+	const selectFields = urlParamModelSelectFields('dashboard-widgets');
+	const selectOptions: Record<string, any> = {};
+
+	for (const selectField of selectFields) {
+		if (selectField.detail) continue;
+		const url = `${BASE_API_URL}/${widgetModel.endpointUrl}/${selectField.field}/`;
+		const response = await event.fetch(url);
+		if (response.ok) {
+			selectOptions[selectField.field] = await response.json().then((data: Record<string, any>) =>
+				Object.entries(data).map(([key, value]) => ({
+					label: value,
+					value: selectField.valueType === 'number' ? parseInt(key) : key
+				}))
+			);
+		}
+	}
+
+	widgetModel.selectOptions = selectOptions;
 
 	return {
 		...detailData,

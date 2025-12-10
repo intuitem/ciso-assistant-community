@@ -334,15 +334,12 @@
 {#if widget.chart_type === 'kpi_card'}
 	<!-- KPI Card -->
 	<div class="flex items-center justify-center h-full">
-		<div class="text-center">
+		<div class="flex items-baseline gap-3">
+			<!-- Main value -->
 			<div class="text-4xl font-bold text-primary-600">
 				{formatValue(latestValue)}
 			</div>
-			{#if widget.show_target && targetValue}
-				<div class="text-sm text-gray-500 mt-2">
-					{m.target()}: {formatValue(targetValue)}
-				</div>
-			{/if}
+			<!-- Trend indicator -->
 			{#if chartData.length > 1}
 				{@const prevValue = chartData[chartData.length - 2]?.[1]}
 				{@const change = prevValue
@@ -351,7 +348,11 @@
 				{@const isPositiveChange = Number(change) >= 0}
 				{@const isGood = higherIsBetter ? isPositiveChange : !isPositiveChange}
 				{#if change !== null}
-					<div class="text-sm mt-1 {isGood ? 'text-green-600' : 'text-red-600'}">
+					<div
+						class="text-base font-medium px-2 py-0.5 rounded {isGood
+							? 'text-green-700 bg-green-100'
+							: 'text-red-700 bg-red-100'}"
+					>
 						{isPositiveChange ? '↑' : '↓'}
 						{Math.abs(Number(change))}%
 					</div>
@@ -359,6 +360,12 @@
 			{/if}
 		</div>
 	</div>
+	<!-- Target below, centered -->
+	{#if widget.show_target && targetValue}
+		<div class="text-sm text-surface-500 text-center -mt-2">
+			{m.target()}: {formatValue(targetValue)}
+		</div>
+	{/if}
 {:else if widget.chart_type === 'table'}
 	<!-- Table -->
 	<div class="overflow-auto h-full">
