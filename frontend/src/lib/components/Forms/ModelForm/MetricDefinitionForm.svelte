@@ -2,6 +2,7 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Select from '../Select.svelte';
 	import OrderedEntryList from '$lib/components/OrderedEntryList.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -106,6 +107,14 @@
 	label={m.provider()}
 	cacheLock={cacheLocks['provider']}
 	bind:cachedValue={formDataCache['provider']}
+/>
+<Checkbox
+	{form}
+	field="higher_is_better"
+	label={m.higherIsBetter()}
+	helpText={m.higherIsBetterHelpText()}
+	cacheLock={cacheLocks['higher_is_better']}
+	bind:cachedValue={formDataCache['higher_is_better']}
 />
 <AutocompleteSelect
 	{form}

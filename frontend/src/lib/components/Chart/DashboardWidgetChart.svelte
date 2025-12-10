@@ -15,6 +15,7 @@
 	const isQualitative = $derived(metricDefinition?.category === 'qualitative');
 	const unitName = $derived(metricDefinition?.unit?.name || '');
 	const targetValue = $derived(widget.metric_instance?.target_value);
+	const higherIsBetter = $derived(metricDefinition?.higher_is_better ?? true);
 
 	// Prepare chart data from samples
 	const chartData = $derived(
@@ -339,15 +340,17 @@
 			</div>
 			{#if widget.show_target && targetValue}
 				<div class="text-sm text-gray-500 mt-2">
-					{m.target()}: {targetValue}
+					{m.target()}: {formatValue(targetValue)}
 				</div>
 			{/if}
 			{#if chartData.length > 1}
 				{@const prevValue = chartData[chartData.length - 2]?.[1]}
 				{@const change = prevValue ? ((latestValue - prevValue) / prevValue * 100).toFixed(1) : null}
+				{@const isPositiveChange = Number(change) >= 0}
+				{@const isGood = higherIsBetter ? isPositiveChange : !isPositiveChange}
 				{#if change !== null}
-					<div class="text-sm mt-1 {Number(change) >= 0 ? 'text-green-600' : 'text-red-600'}">
-						{Number(change) >= 0 ? '+' : ''}{change}%
+					<div class="text-sm mt-1 {isGood ? 'text-green-600' : 'text-red-600'}">
+						{isPositiveChange ? '↑' : '↓'} {Math.abs(Number(change))}%
 					</div>
 				{/if}
 			{/if}

@@ -41,7 +41,15 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     metric_definition = FieldsRelatedField(
-        ["name", "ref_id", "id", "category", "unit", "choices_definition"]
+        [
+            "name",
+            "ref_id",
+            "id",
+            "category",
+            "unit",
+            "choices_definition",
+            "higher_is_better",
+        ]
     )
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
@@ -143,7 +151,22 @@ class DashboardWidgetReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     dashboard = FieldsRelatedField(["name", "id"])
     metric_instance = FieldsRelatedField(
-        ["name", "ref_id", "id", "metric_definition", "target_value"]
+        [
+            "name",
+            "ref_id",
+            "id",
+            "target_value",
+            {
+                "metric_definition": [
+                    "name",
+                    "id",
+                    "category",
+                    {"unit": ["name", "id"]},
+                    "choices_definition",
+                    "higher_is_better",
+                ]
+            },
+        ]
     )
     display_title = serializers.CharField(read_only=True)
     chart_type_display = serializers.CharField(

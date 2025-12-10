@@ -2418,16 +2418,28 @@ export const listViewFields = {
 		}
 	},
 	dashboards: {
-		head: ['ref_id', 'name', 'description', 'widget_count', 'folder'],
-		body: ['ref_id', 'name', 'description', 'widget_count', 'folder'],
+		head: ['ref_id', 'name', 'description', 'widget_count', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'widget_count', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
 	'dashboard-widgets': {
-		head: ['display_title', 'metric_instance', 'chart_type_display', 'time_range_display', 'dashboard'],
-		body: ['display_title', 'metric_instance', 'chart_type_display', 'time_range_display', 'dashboard'],
+		head: [
+			'display_title',
+			'metric_instance',
+			'chart_type_display',
+			'time_range_display',
+			'dashboard'
+		],
+		body: [
+			'display_title',
+			'metric_instance',
+			'chart_type_display',
+			'time_range_display',
+			'dashboard'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			dashboard: {

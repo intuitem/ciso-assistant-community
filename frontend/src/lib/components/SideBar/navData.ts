@@ -48,12 +48,6 @@ export const navData = {
 						'view_assessment',
 						'view_riskassessment'
 					]
-				},
-				{
-					name: 'dashboards',
-					fa_icon: 'fa-solid fa-chart-bar',
-					href: '/dashboards',
-					permissions: ['view_dashboard']
 				}
 			]
 		},
@@ -115,12 +109,6 @@ export const navData = {
 					name: 'riskMatrices',
 					fa_icon: 'fa-solid fa-table-cells-large',
 					href: '/risk-matrices'
-				},
-				{
-					name: 'metricDefinitions',
-					fa_icon: 'fa-solid fa-ruler',
-					href: '/metric-definitions',
-					permissions: ['view_metricdefinition']
 				}
 			]
 		},
@@ -173,12 +161,6 @@ export const navData = {
 					name: 'tasks',
 					fa_icon: 'fa-solid fa-note-sticky',
 					href: '/task-templates'
-				},
-				{
-					name: 'metricInstances',
-					fa_icon: 'fa-solid fa-chart-line',
-					href: '/metric-instances',
-					permissions: ['view_metricinstance']
 				}
 			]
 		},
@@ -289,6 +271,29 @@ export const navData = {
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/recap',
 					permissions: ['view_perimeter'] //this is temporary workaround to manage 3rd parties
+				}
+			]
+		},
+		{
+			name: 'metrology',
+			items: [
+				{
+					name: 'metricDefinitions',
+					fa_icon: 'fa-solid fa-ruler',
+					href: '/metric-definitions',
+					permissions: ['view_metricdefinition']
+				},
+				{
+					name: 'metricInstances',
+					fa_icon: 'fa-solid fa-chart-line',
+					href: '/metric-instances',
+					permissions: ['view_metricinstance']
+				},
+				{
+					name: 'dashboards',
+					fa_icon: 'fa-solid fa-chart-bar',
+					href: '/dashboards',
+					permissions: ['view_dashboard']
 				}
 			]
 		},

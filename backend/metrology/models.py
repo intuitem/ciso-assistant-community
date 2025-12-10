@@ -56,6 +56,14 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         ),
     )
     is_published = models.BooleanField(default=True, verbose_name=_("Published"))
+    higher_is_better = models.BooleanField(
+        default=True,
+        verbose_name=_("Higher is better"),
+        help_text=_(
+            "If true, an increase in value is considered positive (e.g., compliance score). "
+            "If false, a decrease is considered positive (e.g., number of vulnerabilities)."
+        ),
+    )
 
     fields_to_check = ["ref_id", "name"]
 

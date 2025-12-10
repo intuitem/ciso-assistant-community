@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -84,21 +85,17 @@
 />
 
 <div class="grid grid-cols-2 gap-4">
-	<AutocompleteSelect
+	<Select
 		{form}
-		optionsEndpoint="dashboard-widgets/chart_type"
-		optionsLabelField="label"
-		optionsValueField="value"
+		options={model.selectOptions['chart_type']}
 		field="chart_type"
 		cacheLock={cacheLocks['chart_type']}
 		bind:cachedValue={formDataCache['chart_type']}
 		label={m.chartType()}
 	/>
-	<AutocompleteSelect
+	<Select
 		{form}
-		optionsEndpoint="dashboard-widgets/time_range"
-		optionsLabelField="label"
-		optionsValueField="value"
+		options={model.selectOptions['time_range']}
 		field="time_range"
 		cacheLock={cacheLocks['time_range']}
 		bind:cachedValue={formDataCache['time_range']}
@@ -106,11 +103,9 @@
 	/>
 </div>
 
-<AutocompleteSelect
+<Select
 	{form}
-	optionsEndpoint="dashboard-widgets/aggregation"
-	optionsLabelField="label"
-	optionsValueField="value"
+	options={model.selectOptions['aggregation']}
 	field="aggregation"
 	cacheLock={cacheLocks['aggregation']}
 	bind:cachedValue={formDataCache['aggregation']}
