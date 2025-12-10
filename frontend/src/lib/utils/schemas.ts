@@ -763,6 +763,7 @@ export const processingSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	status: z.string().optional(),
 	dpia_required: z.boolean().optional(),
+	dpia_reference: z.string().optional(),
 	has_sensitive_personal_data: z.boolean().optional(),
 	nature: z.string().optional().array().optional(),
 	associated_controls: z.array(z.string().optional()).optional(),

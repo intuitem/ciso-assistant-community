@@ -40,7 +40,10 @@ from tprm.serializers import (
     SolutionWriteSerializer,
     ContractWriteSerializer,
 )
-from iam.models import RoleAssignment
+from privacy.models import Processing, ProcessingNature
+from privacy.serializers import ProcessingWriteSerializer
+from iam.models import RoleAssignment, User
+from core.models import FilteringLabel
 
 logger = logging.getLogger(__name__)
 
@@ -166,6 +169,8 @@ class LoadFileView(APIView):
             return self._process_threats(request, records, folders_map, folder_id)
         elif model_type == "TPRM":
             return self._process_tprm(request, records, folders_map, folder_id)
+        elif model_type == "Processing":
+            return self._process_processings(request, records, folders_map, folder_id)
         else:
             return {
                 "successful": 0,
@@ -577,6 +582,93 @@ class LoadFileView(APIView):
 
         logger.info(
             f"Reference Control import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
+    def _process_processings(self, request, records, folders_map, folder_id):
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        # Create reverse mapping: display value -> database value
+        status_mapping = {v: k for k, v in Processing.STATUS_CHOICES}
+
+        for record in records:
+            domain = folder_id
+            if record.get("domain") != "":
+                domain = folders_map.get(record.get("domain"), folder_id)
+
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
+                )
+                continue
+
+            status_value = record.get("status", "privacy_draft")
+            if status_value in status_mapping:
+                status_value = status_mapping[status_value]
+
+            processing_data = {
+                "ref_id": record.get("ref_id", ""),
+                "name": record.get("name"),
+                "folder": domain,
+                "description": record.get("description", ""),
+                "status": status_value,
+                "dpia_required": record.get("dpia_required", False),
+                "dpia_reference": record.get("dpia_reference", ""),
+            }
+
+            serializer = ProcessingWriteSerializer(
+                data=processing_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    processing_instance = serializer.save()
+
+                    if record.get("processing_nature"):
+                        nature_names = [
+                            n.strip()
+                            for n in str(record.get("processing_nature")).split(",")
+                            if n.strip()
+                        ]
+                        nature_objects = ProcessingNature.objects.filter(
+                            name__in=nature_names
+                        )
+                        processing_instance.nature.set(nature_objects)
+
+                    if record.get("assigned_to"):
+                        user_emails = [
+                            e.strip()
+                            for e in str(record.get("assigned_to")).split(",")
+                            if e.strip()
+                        ]
+                        user_objects = User.objects.filter(email__in=user_emails)
+                        processing_instance.assigned_to.set(user_objects)
+
+                    if record.get("labels"):
+                        label_names = [
+                            l.strip()
+                            for l in str(record.get("labels")).split(",")
+                            if l.strip()
+                        ]
+                        label_objects = FilteringLabel.objects.filter(
+                            label__in=label_names
+                        )
+                        processing_instance.filtering_labels.set(label_objects)
+
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Error creating processing {record.get('name')}: {str(e)}"
+                )
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+        logger.info(
+            f"Processing import complete. Success: {results['successful']}, Failed: {results['failed']}"
         )
         return results
 

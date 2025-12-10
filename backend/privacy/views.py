@@ -221,6 +221,12 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                     escape_excel_formula(o.label) for o in qs.all()
                 ),
             },
+            "dpia_required": {"source": "dpia_required", "label": "dpia_required"},
+            "dpia_reference": {
+                "source": "dpia_reference",
+                "label": "dpia_reference",
+                "escape": True,
+            },
         },
         "filename": "processings_export",
         "select_related": ["folder"],
