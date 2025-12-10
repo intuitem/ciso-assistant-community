@@ -113,13 +113,16 @@
 	label={m.documents()}
 />
 <AutocompleteSelect
-	{form}
 	multiple
-	field="filtering_labels"
+	{form}
+	createFromSelection={true}
 	optionsEndpoint="filtering-labels"
-	cacheLock={cacheLocks['filtering_labels']}
-	bind:cachedValue={formDataCache['filtering_labels']}
-	label={m.filteringLabels()}
+	optionsLabelField="label"
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
+	translateOptions={false}
+	allowUserOptions="append"
 />
 
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-ellipsis" header={m.more()}>
