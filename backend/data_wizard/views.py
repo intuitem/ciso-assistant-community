@@ -646,9 +646,9 @@ class LoadFileView(APIView):
 
                     if record.get("labels"):
                         label_names = [
-                            l.strip()
-                            for l in str(record.get("labels")).split(",")
-                            if l.strip()
+                            label.strip()
+                            for label in str(record.get("labels")).split(",")
+                            if label.strip()
                         ]
                         label_objects = FilteringLabel.objects.filter(
                             label__in=label_names
