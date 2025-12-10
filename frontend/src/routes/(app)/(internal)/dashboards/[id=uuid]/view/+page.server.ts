@@ -1,10 +1,7 @@
-import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
+import { getModelInfo } from '$lib/utils/crud';
 import { loadDetail } from '$lib/utils/load';
 import { BASE_API_URL } from '$lib/utils/constants';
-import { modelSchema } from '$lib/utils/schemas';
 import type { PageServerLoad } from './$types';
-import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async (event) => {
 	event.depends('dashboard:widgets');
@@ -35,42 +32,8 @@ export const load: PageServerLoad = async (event) => {
 		})
 	);
 
-	// Prepare the widget create form
-	const widgetModel = getModelInfo('dashboard-widgets');
-	const widgetSchema = modelSchema('dashboard-widgets');
-	const widgetCreateForm = await superValidate(
-		{
-			dashboard: event.params.id,
-			folder: detailData.data.folder?.id || detailData.data.folder
-		},
-		zod(widgetSchema),
-		{ errors: false }
-	);
-
-	// Fetch selectOptions for widget form
-	const selectFields = urlParamModelSelectFields('dashboard-widgets');
-	const selectOptions: Record<string, any> = {};
-
-	for (const selectField of selectFields) {
-		if (selectField.detail) continue;
-		const url = `${BASE_API_URL}/${widgetModel.endpointUrl}/${selectField.field}/`;
-		const response = await event.fetch(url);
-		if (response.ok) {
-			selectOptions[selectField.field] = await response.json().then((data: Record<string, any>) =>
-				Object.entries(data).map(([key, value]) => ({
-					label: value,
-					value: selectField.valueType === 'number' ? parseInt(key) : key
-				}))
-			);
-		}
-	}
-
-	widgetModel.selectOptions = selectOptions;
-
 	return {
 		...detailData,
-		widgets: widgetsWithSamples,
-		widgetModel,
-		widgetCreateForm
+		widgets: widgetsWithSamples
 	};
 };

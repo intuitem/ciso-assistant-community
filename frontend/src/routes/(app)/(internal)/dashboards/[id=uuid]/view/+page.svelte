@@ -1,12 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import DashboardWidgetChart from '$lib/components/Chart/DashboardWidgetChart.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { m } from '$paraglide/messages';
-	import { invalidate } from '$app/navigation';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { onMount } from 'svelte';
 
 	interface Props {
 		data: PageData;
@@ -15,42 +10,10 @@
 	let { data }: Props = $props();
 	const dashboard = $derived(data.data);
 	const widgets = $derived(data.widgets || []);
-	const widgetModel = $derived(data.widgetModel);
-	const widgetCreateForm = $derived(data.widgetCreateForm);
-
-	const modalStore = getModalStore();
 
 	// Grid configuration
 	const GRID_COLS = 12;
 	const ROW_HEIGHT = 150;
-
-	// Watch for modal close and refresh data
-	let previousModalCount = 0;
-	onMount(() => {
-		const unsubscribe = modalStore.subscribe((modals) => {
-			if (previousModalCount > 0 && modals.length === 0) {
-				invalidate('dashboard:widgets');
-			}
-			previousModalCount = modals.length;
-		});
-
-		return unsubscribe;
-	});
-
-	function openAddWidgetModal() {
-		modalStore.trigger({
-			type: 'component',
-			component: {
-				ref: CreateModal,
-				props: {
-					form: widgetCreateForm,
-					model: widgetModel,
-					formAction: '/dashboard-widgets?/create'
-				}
-			},
-			title: safeTranslate('addWidget')
-		});
-	}
 
 	// Calculate grid position style
 	function getWidgetStyle(widget: any): string {
@@ -85,16 +48,10 @@
 				<span class="text-surface-500">- {dashboard.description}</span>
 			{/if}
 		</div>
-		<div class="flex items-center gap-2">
-			<a href="/dashboards/{dashboard.id}/layout" class="btn preset-tonal">
-				<i class="fa-solid fa-grip"></i>
-				{m.editLayout()}
-			</a>
-			<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>
-				<i class="fa-solid fa-plus"></i>
-				{m.addWidget()}
-			</button>
-		</div>
+		<a href="/dashboards/{dashboard.id}/layout" class="btn preset-tonal">
+			<i class="fa-solid fa-pen-to-square"></i>
+			{m.editLayout()}
+		</a>
 	</div>
 
 	<!-- Widgets Grid - Full Width -->
@@ -131,10 +88,10 @@
 			<div class="card p-12 bg-white dark:bg-surface-900 text-center">
 				<i class="fa-solid fa-chart-line text-8xl text-surface-300 mb-6"></i>
 				<p class="text-surface-500 text-lg mb-6">{m.noWidgetsYet()}</p>
-				<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>
-					<i class="fa-solid fa-plus"></i>
-					{m.addFirstWidget()}
-				</button>
+				<a href="/dashboards/{dashboard.id}/layout" class="btn preset-filled-primary-500">
+					<i class="fa-solid fa-pen-to-square"></i>
+					{m.editLayout()}
+				</a>
 			</div>
 		{/if}
 	</div>
