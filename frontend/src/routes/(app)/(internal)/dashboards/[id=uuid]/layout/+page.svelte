@@ -177,13 +177,17 @@
 	}
 
 	// Get widgets JSON for form submission
-	const widgetsJson = $derived(JSON.stringify(widgets.map((w: any) => ({
-		id: w.id,
-		position_x: w.position_x,
-		position_y: w.position_y,
-		width: w.width,
-		height: w.height
-	}))));
+	const widgetsJson = $derived(
+		JSON.stringify(
+			widgets.map((w: any) => ({
+				id: w.id,
+				position_x: w.position_x,
+				position_y: w.position_y,
+				width: w.width,
+				height: w.height
+			}))
+		)
+	);
 
 	// Calculate grid position style
 	function getWidgetStyle(widget: any): string {
@@ -201,10 +205,7 @@
 
 	// Get max row for grid sizing
 	const maxRow = $derived(
-		Math.max(
-			4,
-			...widgets.map((w: any) => (w.position_y || 0) + (w.height || 2))
-		)
+		Math.max(4, ...widgets.map((w: any) => (w.position_y || 0) + (w.height || 2)))
 	);
 </script>
 
@@ -248,11 +249,7 @@
 					class="inline"
 				>
 					<input type="hidden" name="widgets" value={widgetsJson} />
-					<button
-						type="submit"
-						class="btn preset-filled-success-500"
-						disabled={isSaving}
-					>
+					<button type="submit" class="btn preset-filled-success-500" disabled={isSaving}>
 						{#if isSaving}
 							<i class="fa-solid fa-spinner fa-spin"></i>
 						{:else}
@@ -295,7 +292,10 @@
 			>
 				{#each widgets as widget (widget.id)}
 					<div
-						class="card bg-white shadow-md p-3 cursor-move relative group transition-shadow hover:shadow-lg {isDragging && draggedWidget?.id === widget.id ? 'opacity-50' : ''}"
+						class="card bg-white shadow-md p-3 cursor-move relative group transition-shadow hover:shadow-lg {isDragging &&
+						draggedWidget?.id === widget.id
+							? 'opacity-50'
+							: ''}"
 						style={getWidgetStyle(widget)}
 						draggable="true"
 						ondragstart={(e) => handleDragStart(e, widget)}
@@ -331,18 +331,30 @@
 						</div>
 
 						<!-- Widget Preview -->
-						<div class="flex-1 bg-gray-50 rounded flex items-center justify-center text-gray-400 min-h-[60px]">
-							<i class="text-4xl fa-solid {widget.chart_type === 'kpi_card' ? 'fa-square-poll-vertical' :
-									  widget.chart_type === 'bar' ? 'fa-chart-bar' :
-									  widget.chart_type === 'gauge' ? 'fa-gauge-high' :
-									  widget.chart_type === 'sparkline' ? 'fa-chart-area' :
-									  widget.chart_type === 'table' ? 'fa-table' :
-									  widget.chart_type === 'area' ? 'fa-chart-area' :
-									  'fa-chart-line'}"></i>
+						<div
+							class="flex-1 bg-gray-50 rounded flex items-center justify-center text-gray-400 min-h-[60px]"
+						>
+							<i
+								class="text-4xl fa-solid {widget.chart_type === 'kpi_card'
+									? 'fa-square-poll-vertical'
+									: widget.chart_type === 'bar'
+										? 'fa-chart-bar'
+										: widget.chart_type === 'gauge'
+											? 'fa-gauge-high'
+											: widget.chart_type === 'sparkline'
+												? 'fa-chart-area'
+												: widget.chart_type === 'table'
+													? 'fa-table'
+													: widget.chart_type === 'area'
+														? 'fa-chart-area'
+														: 'fa-chart-line'}"
+							></i>
 						</div>
 
 						<!-- Position info -->
-						<div class="absolute bottom-1 left-1 text-xs text-gray-400 opacity-0 group-hover:opacity-100">
+						<div
+							class="absolute bottom-1 left-1 text-xs text-gray-400 opacity-0 group-hover:opacity-100"
+						>
 							{widget.position_x},{widget.position_y} ({widget.width}x{widget.height})
 						</div>
 
@@ -392,7 +404,9 @@
 							aria-label="Resize widget"
 							tabindex="0"
 						>
-							<i class="fa-solid fa-up-right-and-down-left-from-center text-xs text-gray-400 rotate-90"></i>
+							<i
+								class="fa-solid fa-up-right-and-down-left-from-center text-xs text-gray-400 rotate-90"
+							></i>
 						</div>
 					</div>
 				{/each}

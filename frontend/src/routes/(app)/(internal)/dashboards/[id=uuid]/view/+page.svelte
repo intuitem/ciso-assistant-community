@@ -68,10 +68,7 @@
 
 	// Get max row for grid sizing
 	const maxRow = $derived(
-		Math.max(
-			2,
-			...widgets.map((w: any) => (w.position_y || 0) + (w.height || 2))
-		)
+		Math.max(2, ...widgets.map((w: any) => (w.position_y || 0) + (w.height || 2)))
 	);
 </script>
 
@@ -107,10 +104,7 @@
 			style="grid-template-columns: repeat({GRID_COLS}, 1fr); grid-template-rows: repeat({maxRow}, {ROW_HEIGHT}px);"
 		>
 			{#each widgets as widget (widget.id)}
-				<div
-					class="card p-4 bg-white shadow-sm flex flex-col"
-					style={getWidgetStyle(widget)}
-				>
+				<div class="card p-4 bg-white shadow-sm flex flex-col" style={getWidgetStyle(widget)}>
 					<div class="mb-3">
 						<h4 class="font-semibold text-base">
 							{widget.display_title || widget.title || widget.metric_instance?.name}
@@ -123,10 +117,7 @@
 					<!-- Chart based on widget type -->
 					<div class="flex-1 min-h-0">
 						{#key widget.samples?.length}
-							<DashboardWidgetChart
-								{widget}
-								samples={widget.samples || []}
-							/>
+							<DashboardWidgetChart {widget} samples={widget.samples || []} />
 						{/key}
 					</div>
 				</div>

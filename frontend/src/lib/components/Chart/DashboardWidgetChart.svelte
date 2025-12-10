@@ -345,12 +345,15 @@
 			{/if}
 			{#if chartData.length > 1}
 				{@const prevValue = chartData[chartData.length - 2]?.[1]}
-				{@const change = prevValue ? ((latestValue - prevValue) / prevValue * 100).toFixed(1) : null}
+				{@const change = prevValue
+					? (((latestValue - prevValue) / prevValue) * 100).toFixed(1)
+					: null}
 				{@const isPositiveChange = Number(change) >= 0}
 				{@const isGood = higherIsBetter ? isPositiveChange : !isPositiveChange}
 				{#if change !== null}
 					<div class="text-sm mt-1 {isGood ? 'text-green-600' : 'text-red-600'}">
-						{isPositiveChange ? '↑' : '↓'} {Math.abs(Number(change))}%
+						{isPositiveChange ? '↑' : '↓'}
+						{Math.abs(Number(change))}%
 					</div>
 				{/if}
 			{/if}
