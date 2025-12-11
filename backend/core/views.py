@@ -1839,7 +1839,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
         "findings",
         "filtering_labels",
     ]
-    search_fields = ["name", "description", "provider"]
+    search_fields = ["name", "description", "provider", "ref_id"]
 
     @action(detail=False, name="Get provider choices")
     def provider(self, request):
@@ -10730,6 +10730,7 @@ class TaskTemplateViewSet(BaseModelViewSet):
         "applied_controls",
         "evidences",
     ]
+    search_fields = ["ref_id", "name"]
     filterset_class = TaskTemplateFilter
 
     def get_queryset(self):
