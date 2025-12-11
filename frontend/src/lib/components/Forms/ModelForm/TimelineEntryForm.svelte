@@ -44,16 +44,16 @@
 		hidden={initialData.incident}
 	/>
 {/if}
-<Select
-	{form}
-	disableDoubleDash
-	options={model.selectOptions['entry_type']}
-	field="entry_type"
-	label={m.entryType()}
-	cacheLock={cacheLocks['entry_type']}
-	bind:cachedValue={formDataCache['entry_type']}
-/>
 {#if !['severity_changed', 'status_changed'].includes($value)}
+	<Select
+		{form}
+		disableDoubleDash
+		options={model.selectOptions['entry_type']}
+		field="entry_type"
+		label={m.entryType()}
+		cacheLock={cacheLocks['entry_type']}
+		bind:cachedValue={formDataCache['entry_type']}
+	/>
 	<TextField
 		{form}
 		field="entry"
