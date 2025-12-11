@@ -551,8 +551,8 @@ class LibraryUpdater:
                         requirement_node.delete()
 
                 involved_library_urns = [*self.dependencies, self.old_library.urn]
-                involved_libraries = set(
-                    LoadedLibrary.objects.filter(urn__in=involved_library_urns)
+                involved_libraries = LoadedLibrary.objects.filter(
+                    urn__in=involved_library_urns
                 )
                 objects_tracked = {}
 
@@ -565,7 +565,9 @@ class LibraryUpdater:
                     objects_tracked[rc.urn.lower()] = rc
 
                 compliance_assessments = [
-                    *ComplianceAssessment.objects.filter(framework=new_framework)
+                    *ComplianceAssessment.objects.filter(
+                        framework=new_framework
+                    ).select_related("folder", "perimeter")
                 ]
 
                 existing_requirement_node_objects = {
@@ -707,7 +709,14 @@ class LibraryUpdater:
                                 RequirementAssessment(
                                     compliance_assessment=ca,
                                     requirement=requirement_node_object,
-                                    folder=ca.perimeter.folder,
+                                    folder=(
+                                        ca.folder
+                                        or (
+                                            ca.perimeter.folder
+                                            if ca.perimeter
+                                            else Folder.get_root_folder()
+                                        )
+                                    ),
                                     answers=transform_questions_to_answers(questions)
                                     if questions
                                     else {},
