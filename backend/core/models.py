@@ -745,46 +745,61 @@ class LibraryUpdater:
                                 ra.compliance_assessment_id, (default_min, default_max)
                             )
 
-                            # Apply the chosen strategy for score transformation
-                            if self.strategy == "reset":
-                                # Strategy 1: Reset all scores to None
-                                ra.score = None
-                                ra.is_scored = False
+                            def transform_value(value):
+                                """
+                                Apply the same transformation logic as for 'score'
+                                to any numerical value (including documentation_score).
+                                Returns the transformed value or the original one.
+                                """
+                                if value is None:
+                                    return None
+
+                                if self.strategy == "reset":
+                                    return None
+
+                                elif self.strategy == "rule_of_three":
+                                    if (
+                                        prev_min is not None
+                                        and prev_max is not None
+                                        and prev_min != prev_max
+                                    ):
+                                        # Normalize to 0-1 range
+                                        normalized = (value - prev_min) / (
+                                            prev_max - prev_min
+                                        )
+                                        # Scale to new range
+                                        scaled = ca_min + (
+                                            normalized * (ca_max - ca_min)
+                                        )
+                                        # Round + clamp
+                                        return max(
+                                            min(int(round(scaled)), ca_max), ca_min
+                                        )
+                                    else:
+                                        # Old range invalid → clamp
+                                        return min(max(value, ca_min), ca_max)
+
+                                else:  # clamp
+                                    return min(max(value, ca_min), ca_max)
+
+                            # -------- Strategy application for main score --------
+                            old_score = ra.score
+                            new_score = transform_value(old_score)
+
+                            if new_score != old_score:
+                                ra.score = new_score
+                                ra.is_scored = (
+                                    new_score is not None and self.strategy != "reset"
+                                )
                                 requirement_assessment_objects_to_update.append(ra)
 
-                            elif self.strategy == "rule_of_three":
-                                # Strategy 2: Proportional scaling (rule of three)
-                                # Convert score from old range to new range
-                                if (
-                                    prev_min is not None
-                                    and prev_max is not None
-                                    and prev_min != prev_max
-                                ):
-                                    # Normalize to 0-1 range based on old boundaries
-                                    normalized = (ra.score - prev_min) / (
-                                        prev_max - prev_min
-                                    )
-                                    # Scale to new range
-                                    scaled = ca_min + (normalized * (ca_max - ca_min))
-                                    # Round to int and clamp into [ca_min, ca_max]
-                                    ra.score = max(
-                                        min(int(round(scaled)), ca_max), ca_min
-                                    )
-                                    requirement_assessment_objects_to_update.append(ra)
-                                else:
-                                    # If old range was invalid, clamp instead
-                                    clamped = min(max(ra.score, ca_min), ca_max)
-                                    if clamped != ra.score:
-                                        ra.score = clamped
-                                        requirement_assessment_objects_to_update.append(
-                                            ra
-                                        )
+                            # -------- Strategy application for documentation_score --------
+                            if hasattr(ra, "documentation_score"):
+                                old_doc_score = ra.documentation_score
+                                new_doc_score = transform_value(old_doc_score)
 
-                            else:  # strategy == 'clamp' or default behavior
-                                # Strategy 3: Clamp to new boundaries (comportement par défaut)
-                                clamped = min(max(ra.score, ca_min), ca_max)
-                                if clamped != ra.score:
-                                    ra.score = clamped
+                                if new_doc_score != old_doc_score:
+                                    ra.documentation_score = new_doc_score
                                     requirement_assessment_objects_to_update.append(ra)
 
                         if not questions:
@@ -909,7 +924,7 @@ class LibraryUpdater:
                 if requirement_assessment_objects_to_update:
                     RequirementAssessment.objects.bulk_update(
                         requirement_assessment_objects_to_update,
-                        ["answers", "score", "is_scored"],
+                        ["answers", "score", "is_scored", "documentation_score"],
                         batch_size=100,
                     )
                     # Keep selected_implementation_groups consistent for dynamic frameworks
