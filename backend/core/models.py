@@ -468,7 +468,10 @@ class LibraryUpdater:
                 if possible_dependency.locale == self.old_library.locale:
                     dependency = possible_dependency
 
-            if (error_msg := dependency.update()) not in [None, "libraryHasNoUpdate"]:
+            if (error_msg := dependency.update(self.strategy)) not in [
+                None,
+                "libraryHasNoUpdate",
+            ]:
                 return error_msg
 
     def update_threats(self):
