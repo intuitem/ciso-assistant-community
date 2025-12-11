@@ -105,7 +105,6 @@
 	/>
 	<AutocompleteSelect
 		{form}
-		disabled={object.id || isLocked}
 		translateOptions={false}
 		disableDoubleDash
 		optionsEndpoint="risk-matrices"
@@ -114,7 +113,6 @@
 		bind:cachedValue={formDataCache['risk_matrix']}
 		label={m.riskMatrix()}
 		helpText={m.riskAssessmentMatrixHelpText()}
-		hidden={initialData.risk_matrix}
 		onChange={async (e) => await handleRiskMatrixChange(e)}
 		mount={async (e) => await handleRiskMatrixChange(e)}
 	/>

@@ -190,6 +190,26 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         ordering = ["created_at"]
 
     def save(self, *args, **kwargs):
+        if self.pk:
+            old_matrix = EbiosRMStudy.objects.get(pk=self.pk).risk_matrix
+            probabilities = []
+            for probs in self.risk_matrix.probability:
+                probabilities.append(probs["id"])
+            impacts = []
+            for imps in self.risk_matrix.impact:
+                impacts.append(imps["id"])
+            if old_matrix != self.risk_matrix:
+                for feared_event in self.feared_events.all():
+                    feared_event.gravity = max(
+                        min(impacts), min(feared_event.gravity, max(impacts))
+                    )
+                    feared_event.save()
+                for operational_scenario in self.operational_scenarios.all():
+                    operational_scenario.likelihood = max(
+                        min(probabilities),
+                        min(operational_scenario.likelihood, max(probabilities)),
+                    )
+                    operational_scenario.save()
         super().save(*args, **kwargs)
         if self.quotation_method == "express":
             for scenario in self.operational_scenarios.all():
@@ -301,6 +321,7 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
         on_delete=models.CASCADE,
+        related_name="feared_events",
     )
     assets = models.ManyToManyField(
         Asset,
