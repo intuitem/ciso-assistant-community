@@ -24,13 +24,20 @@ export const load: PageServerLoad = async (event) => {
 
 	const widgets = widgetsData.results || [];
 
+	// Calculate the first free row (after all existing widgets)
+	const firstFreeRow =
+		widgets.length > 0
+			? Math.max(...widgets.map((w: any) => (w.position_y || 0) + (w.height || 2)))
+			: 0;
+
 	// Prepare the widget create form
 	const widgetModel = getModelInfo('dashboard-widgets');
 	const widgetSchema = modelSchema('dashboard-widgets');
 	const widgetCreateForm = await superValidate(
 		{
 			dashboard: event.params.id,
-			folder: detailData.data.folder?.id || detailData.data.folder
+			folder: detailData.data.folder?.id || detailData.data.folder,
+			position_y: firstFreeRow
 		},
 		zod(widgetSchema),
 		{ errors: false }

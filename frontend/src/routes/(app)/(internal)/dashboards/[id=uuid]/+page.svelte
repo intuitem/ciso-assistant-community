@@ -49,7 +49,10 @@
 			{/if}
 		</div>
 		<div class="flex items-center gap-2">
-			<a href="/dashboards/{dashboard.id}/edit?next=/dashboards/{dashboard.id}" class="btn preset-tonal">
+			<a
+				href="/dashboards/{dashboard.id}/edit?next=/dashboards/{dashboard.id}"
+				class="btn preset-tonal"
+			>
 				<i class="fa-solid fa-pencil"></i>
 				{m.edit()}
 			</a>
