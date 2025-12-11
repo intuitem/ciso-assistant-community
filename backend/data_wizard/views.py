@@ -32,6 +32,7 @@ from core.serializers import (
     RiskScenarioWriteSerializer,
     ReferenceControlWriteSerializer,
     ThreatWriteSerializer,
+    FolderWriteSerializer,
 )
 from ebios_rm.serializers import ElementaryActionWriteSerializer
 from tprm.models import Entity, Solution, Contract
@@ -166,6 +167,8 @@ class LoadFileView(APIView):
             return self._process_threats(request, records, folders_map, folder_id)
         elif model_type == "TPRM":
             return self._process_tprm(request, records, folders_map, folder_id)
+        elif model_type == "Folder":
+            return self._process_folders(request, records)
         else:
             return {
                 "successful": 0,
@@ -626,6 +629,91 @@ class LoadFileView(APIView):
 
         logger.info(
             f"Threat import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
+    def _process_folders(self, request, records):
+        """Process folders (domains) import from Excel"""
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        # Get the global (root) folder as the default parent
+        global_folder = Folder.get_root_folder()
+
+        for record in records:
+            # Check if name is provided as it's mandatory
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
+                )
+                continue
+
+            # Reject import of Global folder to prevent duplicates
+            if record.get("name").strip() == global_folder.name:
+                results["failed"] += 1
+                results["errors"].append(
+                    {
+                        "record": record,
+                        "error": f"Cannot import folder named '{global_folder.name}' - it already exists as the root folder",
+                    }
+                )
+                continue
+
+            # Handle parent folder lookup
+            parent_folder_id = global_folder.id  # Default to global folder
+            parent_folder_name = record.get("parent_folder", "").strip()
+
+            if parent_folder_name:
+                # Try to find the parent folder by name
+                try:
+                    parent_folder = Folder.objects.get(name=parent_folder_name)
+                    parent_folder_id = parent_folder.id
+                except Folder.DoesNotExist:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": f"Parent folder '{parent_folder_name}' not found",
+                        }
+                    )
+                    continue
+                except Folder.MultipleObjectsReturned:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {
+                            "record": record,
+                            "error": f"Multiple folders found with name '{parent_folder_name}'",
+                        }
+                    )
+                    continue
+
+            # Prepare data for serializer
+            folder_data = {
+                "name": record.get("name"),  # Name is mandatory
+                "description": record.get("description", ""),
+                "parent_folder": parent_folder_id,
+            }
+
+            # Use the serializer for validation and saving
+            serializer = FolderWriteSerializer(
+                data=folder_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(f"Error creating folder {record.get('name')}: {str(e)}")
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+
+        logger.info(
+            f"Folder import complete. Success: {results['successful']}, Failed: {results['failed']}"
         )
         return results
 

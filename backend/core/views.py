@@ -5432,7 +5432,7 @@ class FolderFilter(GenericFilterSet):
         ]
 
 
-class FolderViewSet(BaseModelViewSet):
+class FolderViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows folders to be viewed or edited.
     """
@@ -5441,6 +5441,31 @@ class FolderViewSet(BaseModelViewSet):
     filterset_class = FolderFilter
     search_fields = ["name"]
     batch_size = 100  # Configurable batch size for processing domain import
+
+    export_config = {
+        "fields": {
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "parent_folder": {
+                "source": "parent_folder.name",
+                "label": "parent_folder",
+                "escape": True,
+            },
+        },
+        "filename": "folders_export",
+        "select_related": ["parent_folder"],
+    }
+
+    def _get_export_queryset(self):
+        """Get filtered queryset excluding Global folder."""
+        queryset = super()._get_export_queryset()
+        # Exclude the Global (root) folder from exports
+        global_folder = Folder.get_root_folder()
+        return queryset.exclude(id=global_folder.id)
 
     def perform_create(self, serializer):
         """
