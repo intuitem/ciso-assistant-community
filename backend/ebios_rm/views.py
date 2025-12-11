@@ -2,6 +2,7 @@ import django_filters as df
 from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
 from core.models import Terminology
+from iam.models import RoleAssignment
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
     EbiosRMStudy,
@@ -390,6 +391,138 @@ class FearedEventViewSet(BaseModelViewSet):
         choices = undefined | _choices
         return Response(choices)
 
+    @action(detail=False, methods=["post"], url_path="batch-create")
+    def batch_create(self, request):
+        """
+        Batch create multiple feared events from a text list.
+        Expected format:
+        {
+            "feared_events_text": "Feared Event 1\\nFeared Event 2\\nREF-001:Feared Event 3",
+            "ebios_rm_study": "study-uuid"
+        }
+        Lines can optionally have a ref_id prefix (REF-001:Feared Event Name).
+        Feared events with the same name in the study will be skipped.
+        """
+        from rest_framework import status as http_status
+        from ebios_rm.serializers import FearedEventWriteSerializer
+        import structlog
+
+        logger = structlog.get_logger(__name__)
+
+        try:
+            feared_events_text = request.data.get("feared_events_text", "")
+            study_id = request.data.get("ebios_rm_study")
+
+            if not feared_events_text:
+                return Response(
+                    {"error": "feared_events_text is required"},
+                    status=http_status.HTTP_400_BAD_REQUEST,
+                )
+
+            if not study_id:
+                return Response(
+                    {"error": "ebios_rm_study is required"},
+                    status=http_status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Verify study exists and user has access
+            if not RoleAssignment.is_object_readable(
+                request.user, EbiosRMStudy, study_id
+            ):
+                return Response(
+                    {"error": "EBIOS RM Study not found"},
+                    status=http_status.HTTP_404_NOT_FOUND,
+                )
+            study = EbiosRMStudy.objects.get(id=study_id)
+
+            # Parse the feared events text
+            lines = [
+                line.strip() for line in feared_events_text.split("\n") if line.strip()
+            ]
+            created_feared_events = []
+            skipped_feared_events = []
+            errors = []
+
+            for line in lines:
+                # Check for ref_id prefix (REF-001:Feared Event Name)
+                ref_id = ""
+                feared_event_name = line
+
+                if ":" in line:
+                    parts = line.split(":", 1)
+                    if len(parts) == 2 and parts[0].strip():
+                        ref_id = parts[0].strip()
+                        feared_event_name = parts[1].strip()
+
+                if not feared_event_name:
+                    errors.append({"line": line, "error": "Empty feared event name"})
+                    continue
+
+                # Check if feared event already exists in the study
+                existing_feared_event = FearedEvent.objects.filter(
+                    name=feared_event_name, ebios_rm_study=study_id
+                ).first()
+
+                if existing_feared_event:
+                    # Skip existing feared event
+                    skipped_feared_events.append(
+                        {
+                            "id": str(existing_feared_event.id),
+                            "name": existing_feared_event.name,
+                            "ref_id": existing_feared_event.ref_id,
+                        }
+                    )
+                    continue
+
+                # Create new feared event using the serializer to respect IAM
+                feared_event_data = {
+                    "name": feared_event_name,
+                    "ebios_rm_study": study_id,
+                }
+
+                if ref_id:
+                    feared_event_data["ref_id"] = ref_id
+
+                serializer = FearedEventWriteSerializer(
+                    data=feared_event_data, context={"request": request}
+                )
+
+                if serializer.is_valid():
+                    feared_event = serializer.save()
+
+                    created_feared_events.append(
+                        {
+                            "id": str(feared_event.id),
+                            "name": feared_event.name,
+                            "ref_id": feared_event.ref_id,
+                        }
+                    )
+                else:
+                    errors.append(
+                        {
+                            "line": line,
+                            "errors": serializer.errors,
+                        }
+                    )
+
+            return Response(
+                {
+                    "created": len(created_feared_events),
+                    "skipped": len(skipped_feared_events),
+                    "feared_events": created_feared_events,
+                    "skipped_feared_events": skipped_feared_events,
+                    "errors": errors,
+                },
+                status=http_status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            logger.error("Error in batch create feared events", error=str(e))
+            return Response(
+                {"error": f"An error occurred: {str(e)}"},
+                status=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
 
 class RoToFilter(GenericFilterSet):
     # Add the custom ordering filter
@@ -502,6 +635,13 @@ class StrategicScenarioViewSet(BaseModelViewSet):
         "attack_paths": ["exact", "isnull"],
     }
 
+    def get_queryset(self):
+        """Optimize queryset to prefetch feared events from ro_to_couple"""
+        queryset = super().get_queryset()
+        return queryset.select_related("ro_to_couple").prefetch_related(
+            "ro_to_couple__feared_events"
+        )
+
 
 class AttackPathFilter(GenericFilterSet):
     used = df.BooleanFilter(method="is_used", label="Used")
@@ -526,6 +666,15 @@ class AttackPathViewSet(BaseModelViewSet):
     model = AttackPath
 
     filterset_class = AttackPathFilter
+
+    def perform_create(self, serializer):
+        if not serializer.validated_data.get(
+            "ref_id"
+        ) and serializer.validated_data.get("strategic_scenario"):
+            strategic_scenario = serializer.validated_data["strategic_scenario"]
+            ref_id = AttackPath.get_default_ref_id(strategic_scenario)
+            serializer.validated_data["ref_id"] = ref_id
+        serializer.save()
 
 
 class OperationalScenarioViewSet(BaseModelViewSet):

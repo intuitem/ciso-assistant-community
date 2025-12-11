@@ -1,0 +1,14 @@
+# RPM Build Artifacts
+BUILD/
+BUILDROOT/
+RPMS/
+SRPMS/
+SOURCES/
+
+# Downloaded files
+*.tar.xz
+*.tar.gz
+*.tgz
+
+# Logs
+*.log

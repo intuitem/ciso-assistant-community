@@ -1,3 +1,5 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:anssi-guide-hygiene
 locale: fr
 ref_id: ANSSI-GUIDE-HYGIENE
@@ -5,8 +7,8 @@ name: "ANSSI - Guide d'hygi\xE8ne informatique"
 description: "Renforcer la s\xE9curit\xE9 de son syst\xE8me d\u2019information en\
   \ 42 mesures\n https://cyber.gouv.fr/sites/default/files/2017/01/guide_hygiene_informatique_anssi.pdf"
 copyright: Licence Ouverte/Open Licence (Etalab - V1)
-version: 2
-publication_date: 2024-04-18
+version: 3
+publication_date: 2025-11-28
 provider: ANSSI
 packager: intuitem
 translations:
@@ -15,6 +17,8 @@ translations:
     description: 'Strengthen Information System Security in 42 Measures
 
       https://cyber.gouv.fr/sites/default/files/2013/01/guideline-for-a-healthy-information-system-in-42-measures_v2.pdf'
+dependencies:
+- urn:intuitem:risk:library:doc-pol
 objects:
   framework:
     urn: urn:intuitem:risk:framework:anssi-guide-hygiene
@@ -35,14 +39,12 @@ objects:
       translations:
         en:
           name: standard
-          description: null
     - ref_id: R
       name: "renforc\xE9"
       description: null
       translations:
         en:
           name: strengthened
-          description: null
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:i
       assessable: false
@@ -52,7 +54,6 @@ objects:
       translations:
         en:
           name: Raise awareness and train
-          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:1
       assessable: true
       depth: 2
@@ -87,6 +88,18 @@ objects:
         \ externe et notamment les infog\xE9rants."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+      - urn:intuitem:risk:function:doc-pol:doc.educ_register
+      - urn:intuitem:risk:function:doc-pol:train.legal
+      - urn:intuitem:risk:function:doc-pol:train.threat
+      - urn:intuitem:risk:function:doc-pol:train.mcs
+      - urn:intuitem:risk:function:doc-pol:train.iam
+      - urn:intuitem:risk:function:doc-pol:train.hardening
+      - urn:intuitem:risk:function:doc-pol:train.network_security
+      - urn:intuitem:risk:function:doc-pol:train.logging
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
       translations:
         en:
           name: Train the operational teams in information system security
@@ -137,9 +150,14 @@ objects:
         nements suspects, etc. ;\n> les moyens disponibles et participant \xE0 la\
         \ s\xE9curit\xE9 du syst\xE8me : verrouillage syst\xE9matique de la session\
         \ lorsque l\u2019utilisateur quitte son poste, outil de protection des mots\
-        \ de passe, etc. "
+        \ de passe, etc."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.accept
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+      - urn:intuitem:risk:function:doc-pol:doc.educ_register
       translations:
         en:
           name: "Raise users\u2019 awareness about basic information security"
@@ -185,6 +203,8 @@ objects:
         e."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.internal_rules
       translations:
         en:
           name: "Raise users\u2019 awareness about basic information security (strengthened)"
@@ -225,6 +245,11 @@ objects:
         \ sensibles."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
+      - urn:intuitem:risk:function:doc-pol:doc.sap
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
       translations:
         en:
           name: Control outsourced services
@@ -258,13 +283,12 @@ objects:
       translations:
         en:
           name: Know the Information System
-          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:ii
       ref_id: '4'
-      name: " Identifier les informations et serveurs les plus sensibles et maintenir\
+      name: "Identifier les informations et serveurs les plus sensibles et maintenir\
         \ un sch\xE9ma du r\xE9seau"
       description: "Chaque entit\xE9 poss\xE8de des donn\xE9es sensibles. Ces derni\xE8\
         res peuvent porter sur son activit\xE9 propre (propri\xE9t\xE9 intellectuelle,\
@@ -286,6 +310,12 @@ objects:
         tenteurs d\u2019informations sensibles de l\u2019entit\xE9."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.asset
+      - urn:intuitem:risk:function:doc-pol:pol.classif
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:doc.proc_register
+      - urn:intuitem:risk:function:doc-pol:doc.is_map
       translations:
         en:
           name: Identify the most sensitive information and servers and maintain a
@@ -336,6 +366,11 @@ objects:
         \ \nCela facilitera notamment leur revue et la d\xE9tection d\u2019intrusion."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:doc.pam_register
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
+      - urn:intuitem:risk:function:doc-pol:pol.access
       translations:
         en:
           name: Have an exhaustive inventory of privileged accounts and keep it updated
@@ -370,7 +405,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:ii
       ref_id: '6'
-      name: " Organiser les proc\xE9dures d\u2019arriv\xE9e, de d\xE9part et de changement\
+      name: "Organiser les proc\xE9dures d\u2019arriv\xE9e, de d\xE9part et de changement\
         \ de fonction des utilisateurs"
       description: "Les effectifs d\u2019une entit\xE9, qu\u2019elle soit publique\
         \ ou priv\xE9e, \xE9voluent sans cesse : arriv\xE9es, d\xE9parts, mobilit\xE9\
@@ -391,6 +426,12 @@ objects:
         \ codes sur les syst\xE8mes existants)."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.hr_security
+      - urn:intuitem:risk:function:doc-pol:proc.physical_security
+      - urn:intuitem:risk:function:doc-pol:pol.work
+      - urn:intuitem:risk:function:doc-pol:pol.classif
       translations:
         en:
           name: Organise the procedures relating to users joining, departing and changing
@@ -423,12 +464,14 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:ii
       ref_id: 6.R
-      name: " Organiser les proc\xE9dures d\u2019arriv\xE9e, de d\xE9part et de changement\
+      name: "Organiser les proc\xE9dures d\u2019arriv\xE9e, de d\xE9part et de changement\
         \ de fonction des utilisateurs (renforc\xE9)"
       description: "Les proc\xE9dures doivent \xEAtre formalis\xE9es et mises \xE0\
         \ jour en fonction du contexte."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.proc_register
       translations:
         en:
           name: Organise the procedures relating to users joining, departing and changing
@@ -462,6 +505,9 @@ objects:
         \ ou visiteurs."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:pol.accept
       translations:
         en:
           name: Only allow controlled devices to connect to the network of the organization
@@ -492,6 +538,9 @@ objects:
         \ (par exemple \xE0 l\u2019aide du standard 802.1X ou d\u2019un \xE9quivalent)."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.nac
       translations:
         en:
           name: Only allow controlled devices to connect to the network of the organization
@@ -507,7 +556,6 @@ objects:
       translations:
         en:
           name: Authenticate and control accesses
-          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
       assessable: true
       depth: 2
@@ -536,6 +584,10 @@ objects:
         \ condensat de mot de passe sur un environnement plus expos\xE9."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:doc.pam_register
       translations:
         en:
           name: Identify each individual accessing the system by name and distinguish
@@ -571,6 +623,10 @@ objects:
         e."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:tech.access_log
+      - urn:intuitem:risk:function:doc-pol:tech.edr
       translations:
         en:
           name: Identify each individual accessing the system by name and distinguish
@@ -604,6 +660,13 @@ objects:
         s."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:pol.accept
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
       translations:
         en:
           name: "Allocate the appropriate rights to the information system\u2019s\
@@ -646,6 +709,9 @@ objects:
         \ est fondamental."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
       translations:
         en:
           name: Set and verify rules for the choice and size of passwords
@@ -689,6 +755,10 @@ objects:
         \ celui-ci \xE0 retenir."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.password_manager
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
       translations:
         en:
           name: Protect passwords stored on systems
@@ -731,6 +801,8 @@ objects:
         \ vuln\xE9rabilit\xE9 soit corrig\xE9e au plus vite."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
       translations:
         en:
           name: Change the default authentication settings on devices and services
@@ -763,6 +835,8 @@ objects:
         gulier."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
       translations:
         en:
           name: Change the default authentication settings on devices and services
@@ -785,6 +859,8 @@ objects:
         \ (une empreinte biom\xE9trique)."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
       translations:
         en:
           name: Prefer a two-factor authentication when possible
@@ -816,6 +892,8 @@ objects:
         \ de messagerie, authentification sur le poste de travail, etc."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
       translations:
         en:
           name: Prefer a two-factor authentication when possible (strengthened)
@@ -835,7 +913,6 @@ objects:
       translations:
         en:
           name: Secure the devices
-          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
       assessable: true
       depth: 2
@@ -861,6 +938,14 @@ objects:
         \ compatibilit\xE9 par exemple)."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.work
+      - urn:intuitem:risk:function:doc-pol:tech.uem
+      - urn:intuitem:risk:function:doc-pol:pol.malware
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+      - urn:intuitem:risk:function:doc-pol:tech.disk_encryption
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:pol.network
       translations:
         en:
           name: Implement a minimum level of security across the whole IT stock
@@ -895,6 +980,10 @@ objects:
         une somme cons\xE9quente (ran\xE7ongiciel))."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
       translations:
         en:
           name: Implement a minimum level of security across the whole IT stock (strengthened)
@@ -928,6 +1017,9 @@ objects:
         \ inspecter leur contenu par l\u2019antivirus du poste de travail."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.work
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
       translations:
         en:
           name: Protect against threats relating to the use of removable media
@@ -960,6 +1052,9 @@ objects:
         \ sensibles."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+      - urn:intuitem:risk:function:doc-pol:proc.disposal
       translations:
         en:
           name: Protect against threats relating to the use of removable media (strengthened)
@@ -996,6 +1091,8 @@ objects:
         \ en cas de besoin de reconfiguration."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.uem
       translations:
         en:
           name: Use a centralised management tool to standardise security policies
@@ -1033,6 +1130,8 @@ objects:
         \ accessibles sur des serveurs m\xE9tier, etc."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
       translations:
         en:
           name: Activate and configure the firewall on workstations
@@ -1068,6 +1167,10 @@ objects:
         applications ou les tentatives d\u2019intrusion."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      - urn:intuitem:risk:function:doc-pol:tech.edr
       translations:
         en:
           name: Activate and configure the firewall on workstations (strengthened)
@@ -1105,6 +1208,10 @@ objects:
         \ d\xE9faut, par t\xE9l\xE9phone doit \xEAtre privil\xE9gi\xE9e."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.transfer
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:tech.file_encryption
       translations:
         en:
           name: Encrypt sensitive data sent through the Internet
@@ -1132,7 +1239,6 @@ objects:
       translations:
         en:
           name: Secure the network
-          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
       assessable: true
       depth: 2
@@ -1163,6 +1269,11 @@ objects:
         \ d\u2019un renouvellement d\u2019\xE9quipements."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.vlan
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      - urn:intuitem:risk:function:doc-pol:tech.microsegmentation
       translations:
         en:
           name: Segment the network and implement a partitioning between these areas
@@ -1215,6 +1326,11 @@ objects:
         \ : SSID et VLAN distincts, acc\xE8s Internet d\xE9di\xE9)."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vlan
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      - urn:intuitem:risk:function:doc-pol:tech.wifi_sec
+      - urn:intuitem:risk:function:doc-pol:pol.network
       translations:
         en:
           name: Ensure the security of Wi-Fi access networks and that uses are separated
@@ -1264,6 +1380,9 @@ objects:
         \ et RLOGIN."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.transfer
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
       translations:
         en:
           name: Use secure network protocols when they exist
@@ -1300,6 +1419,10 @@ objects:
         \ utilisateurs et la journalisation des requ\xEAtes."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      - urn:intuitem:risk:function:doc-pol:tech.web_proxy
       translations:
         en:
           name: Implement a secure access gateway to the Internet
@@ -1333,6 +1456,11 @@ objects:
         curis\xE9e sur le Web \xE0 travers la passerelle."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.maintenance
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      - urn:intuitem:risk:function:doc-pol:tech.web_proxy
+      - urn:intuitem:risk:function:doc-pol:tech.vpn
       translations:
         en:
           name: Implement a secure access gateway to the Internet (strengthened)
@@ -1373,6 +1501,12 @@ objects:
         \ de s\xE9curit\xE9."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      - urn:intuitem:risk:function:doc-pol:tech.reverse_proxy
+      - urn:intuitem:risk:function:doc-pol:tech.waf
       translations:
         en:
           name: Segregate the services visible from the Internet from the rest of
@@ -1425,6 +1559,13 @@ objects:
         \ h\xE9bergeant les bo\xEEtes aux lettres."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+      - urn:intuitem:risk:function:doc-pol:pol.seg_duty
+      - urn:intuitem:risk:function:doc-pol:pol.accept
+      - urn:intuitem:risk:function:doc-pol:tech.network_antivirus
+      - urn:intuitem:risk:function:doc-pol:pol.transfer
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
       translations:
         en:
           name: Protect your professional email
@@ -1473,6 +1614,9 @@ objects:
         \ DMARC)."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mail_gateway
+      - urn:intuitem:risk:function:doc-pol:proc.email_security
       translations:
         en:
           name: Protect your professional email (strengthened)
@@ -1509,6 +1653,9 @@ objects:
         tre conforme."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vpn
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
       translations:
         en:
           name: Secure the dedicated network interconnections with partners
@@ -1539,6 +1686,10 @@ objects:
         \ r\xE9agir en cas d\u2019incident de s\xE9curit\xE9."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      - urn:intuitem:risk:function:doc-pol:tech.ids
+      - urn:intuitem:risk:function:doc-pol:proc.incident
       translations:
         en:
           name: Secure the dedicated network interconnections with partners (strengthened)
@@ -1579,6 +1730,11 @@ objects:
         \ l\u2019acc\xE8s au r\xE9seau de l\u2019entreprise."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.physical
+      - urn:intuitem:risk:function:doc-pol:proc.physical_security
+      - urn:intuitem:risk:function:doc-pol:proc.hr_security
+      - urn:intuitem:risk:function:doc-pol:pol.network
       translations:
         en:
           name: Control and protect access to the server rooms and technical areas
@@ -1606,7 +1762,6 @@ objects:
       translations:
         en:
           name: Secure administration
-          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
       assessable: true
       depth: 2
@@ -1630,6 +1785,9 @@ objects:
         \ d\u2019administration."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:proc.pam
       translations:
         en:
           name: Prohibit Internet access from devices or servers used by the information
@@ -1660,9 +1818,11 @@ objects:
         \ et non connect\xE9 \xE0 Internet. Ce transfert peut \xEAtre r\xE9alis\xE9\
         \ sur un support amovible d\xE9di\xE9. \nPour des entit\xE9s voulant automatiser\
         \ certaines t\xE2ches, la mise en place d\u2019une zone d\u2019\xE9changes\
-        \ est conseill\xE9e. "
+        \ est conseill\xE9e."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
       translations:
         en:
           name: Prohibit Internet access from devices or servers used by the information
@@ -1695,9 +1855,11 @@ objects:
         \ Ceci permet d\u2019assurer l\u2019int\xE9grit\xE9 et la confidentialit\xE9\
         \ des informations v\xE9hicul\xE9es sur le r\xE9seau d\u2019administration\
         \ vis-\xE0-vis du r\xE9seau bureautique des utilisateurs ;\n> au minimum,\
-        \ de mettre en \u0153uvre un cloisonnement logique par VLAN. "
+        \ de mettre en \u0153uvre un cloisonnement logique par VLAN."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
       translations:
         en:
           name: Use a dedicated and separated network for information system administration
@@ -1726,6 +1888,8 @@ objects:
         senter des co\xFBts et un temps de d\xE9ploiement importants;"
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
       translations:
         en:
           name: Use a dedicated and separated network for information system administration
@@ -1739,7 +1903,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:vi
       ref_id: '29'
-      name: "\_Limiter au strict besoin op\xE9rationnel les droits d\u2019administration\
+      name: "Limiter au strict besoin op\xE9rationnel les droits d\u2019administration\
         \ sur les postes de travail"
       description: "De nombreux utilisateurs, y compris au sommet des hi\xE9rarchies,\
         \ sont tent\xE9s de demander \xE0 leur service informatique de pouvoir disposer,\
@@ -1761,6 +1925,11 @@ objects:
         ch\xE9ance."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.work
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:doc.pam_register
       translations:
         en:
           name: Reduce administration rights on workstations to strictly operational
@@ -1790,13 +1959,12 @@ objects:
       translations:
         en:
           name: Manage mobile working
-          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:vii
       ref_id: '30'
-      name: " Prendre des mesures de s\xE9curisation physique des terminaux nomades"
+      name: "Prendre des mesures de s\xE9curisation physique des terminaux nomades"
       description: "Les terminaux nomades (ordinateurs portables, tablettes, ordiphones)\
         \ sont, par nature, expos\xE9s \xE0 la perte et au vol. Ils peuvent contenir\
         \ localement des informations sensibles pour l\u2019entit\xE9 et constituer\
@@ -1818,6 +1986,12 @@ objects:
         \ positionn\xE9 sur chaque \xE9cran."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.work
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+      - urn:intuitem:risk:function:doc-pol:doc.educ_register
+      - urn:intuitem:risk:function:doc-pol:tech.screen_filter
       translations:
         en:
           name: Take measures to physically secure mobile devices
@@ -1841,14 +2015,16 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:vii
       ref_id: 30.R
-      name: " Prendre des mesures de s\xE9curisation physique des terminaux nomades"
+      name: "Prendre des mesures de s\xE9curisation physique des terminaux nomades"
       description: "Enfin, afin de rendre inutilisable le poste seul, l\u2019utilisation\
         \ d\u2019un support externe compl\xE9mentaire (carte \xE0 puce ou jeton USB\
         \ par exemple) pour conserver des secrets de d\xE9chiffrement ou d\u2019authentification\
         \ peut \xEAtre envisag\xE9e. Dans ce cas il doit \xEAtre conserv\xE9 \xE0\
-        \ part. "
+        \ part."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.disk_encryption
       translations:
         en:
           name: Take measures to physically secure mobile devices (strengthened)
@@ -1883,6 +2059,11 @@ objects:
         \ restauration de suite bureautique, par exemple)."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:tech.disk_encryption
+      - urn:intuitem:risk:function:doc-pol:tech.file_encryption
+      - urn:intuitem:risk:function:doc-pol:tech.disk_encryption
       translations:
         en:
           name: Encrypt sensitive data, in particular on hardware that can potentially
@@ -1931,6 +2112,10 @@ objects:
         \ de confiance."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vpn
+      - urn:intuitem:risk:function:doc-pol:pol.work
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
       translations:
         en:
           name: Secure the network connection of devices used in a mobile working
@@ -1960,9 +2145,11 @@ objects:
         s par exemple), il est pr\xE9f\xE9rable d\u2019avoir recours \xE0 une authentification\
         \ forte, par exemple avec un mot de passe et un certificat stock\xE9 sur un\
         \ support externe (carte \xE0 puce ou jeton USB) ou un m\xE9canisme de mot\
-        \ de passe \xE0 usage unique (One Time Password). "
+        \ de passe \xE0 usage unique (One Time Password)."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
       translations:
         en:
           name: Secure the network connection of devices used in a mobile working
@@ -1977,7 +2164,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:vii
       ref_id: '33'
-      name: " Adopter des politiques de s\xE9curit\xE9 d\xE9di\xE9es aux terminaux\
+      name: "Adopter des politiques de s\xE9curit\xE9 d\xE9di\xE9es aux terminaux\
         \ mobiles"
       description: "Les ordiphones et tablettes font partie de notre quotidien personnel\
         \ et/ou professionnel. La premi\xE8re des recommandations consiste justement\
@@ -2000,6 +2187,10 @@ objects:
         \ est souhaitable."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.work
+      - urn:intuitem:risk:function:doc-pol:pol.accept
+      - urn:intuitem:risk:function:doc-pol:tech.uem
       translations:
         en:
           name: Adopt security policies dedicated to mobile devices
@@ -2023,7 +2214,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:vii
       ref_id: 33.R
-      name: " Adopter des politiques de s\xE9curit\xE9 d\xE9di\xE9es aux terminaux\
+      name: "Adopter des politiques de s\xE9curit\xE9 d\xE9di\xE9es aux terminaux\
         \ mobiles"
       description: "Entre autres usages potentiellement risqu\xE9s, celui d\u2019\
         un assistant vocal int\xE9gr\xE9 augmente sensiblement la surface d\u2019\
@@ -2031,6 +2222,9 @@ objects:
         s. Pour ces raisons, il est donc d\xE9conseill\xE9."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.work
+      - urn:intuitem:risk:function:doc-pol:tech.uem
       translations:
         en:
           name: Adopt security policies dedicated to mobile devices (strengthened)
@@ -2046,13 +2240,12 @@ objects:
       translations:
         en:
           name: Keep the Information System up to date
-          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:viii
       ref_id: '34'
-      name: " D\xE9finir une politique de mise \xE0 jour des composants du syst\xE8\
+      name: "D\xE9finir une politique de mise \xE0 jour des composants du syst\xE8\
         me d\u2019information"
       description: "De nouvelles failles sont r\xE9guli\xE8rement d\xE9couvertes au\
         \ c\u0153ur des syst\xE8mes et logiciels. Ces derni\xE8res sont autant de\
@@ -2074,9 +2267,14 @@ objects:
         s par leurs fabricants doivent \xEAtre isol\xE9s du reste du syst\xE8me. Cette\
         \ recommandation s\u2019applique aussi bien au niveau r\xE9seau par un filtrage\
         \ strict des flux, qu\u2019au niveau des secrets d\u2019authentification qui\
-        \ doivent \xEAtre d\xE9di\xE9s \xE0 ces syst\xE8mes. "
+        \ doivent \xEAtre d\xE9di\xE9s \xE0 ces syst\xE8mes."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.maintenance
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:pol.threat_intel
+      - urn:intuitem:risk:function:doc-pol:pol.network
       translations:
         en:
           name: Define an update policy for the components of the information system
@@ -2138,6 +2336,11 @@ objects:
         \ proc\xE9dure de sauvegarde, proc\xE9dure de migration des donn\xE9es, etc.)."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.file_encryption
+      - urn:intuitem:risk:function:doc-pol:pol.maintenance
+      - urn:intuitem:risk:function:doc-pol:doc.arc_principles
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
       translations:
         en:
           name: Anticipate the software and system end of life/maintenance and limit
@@ -2180,7 +2383,6 @@ objects:
       translations:
         en:
           name: Supervise, audit, react
-          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
       assessable: true
       depth: 2
@@ -2212,6 +2414,14 @@ objects:
         \ NTP) doit \xEAtre identique."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.monitor
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:doc.is_map
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      - urn:intuitem:risk:function:doc-pol:tech.edr
+      - urn:intuitem:risk:function:doc-pol:proc.ntp
       translations:
         en:
           name: Activate and configure the most important component logs
@@ -2255,9 +2465,11 @@ objects:
         \ pourra \xEAtre envisag\xE9e. Cela permet de faciliter la recherche automatis\xE9\
         e d\u2019\xE9v\xE9nements suspects, d\u2019archiver les journaux sur une longue\
         \ dur\xE9e et d\u2019emp\xEAcher un attaquant d\u2019effacer d\u2019\xE9ventuelles\
-        \ traces de son passage sur les \xE9quipements qu\u2019il a compromis. "
+        \ traces de son passage sur les \xE9quipements qu\u2019il a compromis."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
       translations:
         en:
           name: Activate and configure the most important component logs (strengthened)
@@ -2294,6 +2506,10 @@ objects:
         me d\u2019information."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+      - urn:intuitem:risk:function:doc-pol:proc.disposal
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
       translations:
         en:
           name: Define and apply a backup policy for critical components
@@ -2338,10 +2554,11 @@ objects:
         es et de conserver une trace technique des r\xE9sultats."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.bcp
       translations:
         en:
           name: Define and apply a backup policy for critical components (strengthened)
-          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
       assessable: true
       depth: 2
@@ -2370,9 +2587,14 @@ objects:
         \ syst\xE8me d\u2019information en permettant de mettre en \xE9vidence d\u2019\
         \xE9ventuelles vuln\xE9rabilit\xE9s, ils ne constituent jamais une preuve\
         \ de leur absence et ne dispensent donc pas d\u2019autres mesures de contr\xF4\
-        le. "
+        le."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+      - urn:intuitem:risk:function:doc-pol:doc.audit_plan
+      - urn:intuitem:risk:function:doc-pol:doc.nc_log
+      - urn:intuitem:risk:function:doc-pol:pol.main
       translations:
         en:
           name: Undertake regular controls and security audits then apply the associated
@@ -2425,6 +2647,9 @@ objects:
         \ sein de l\u2019organisme."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.raci
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
       translations:
         en:
           name: Designate a point of contact in information system security and make
@@ -2475,6 +2700,10 @@ objects:
         \ \xEAtre d\xE9pos\xE9e aupr\xE8s du service judiciaire comp\xE9tent."
       implementation_groups:
       - S
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:doc.incident_register
       translations:
         en:
           name: Define a security incident management procedure
@@ -2507,7 +2736,6 @@ objects:
       translations:
         en:
           name: To go even further
-          description: null
     - urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
       assessable: true
       depth: 2
@@ -2544,6 +2772,9 @@ objects:
         curit\xE9."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:pol.audit
       translations:
         en:
           name: Carry out a formal risk assessment (strengthened)
@@ -2606,6 +2837,8 @@ objects:
         \ ou \xE0 un prestataire de service d\u2019informatique en nuage (SecNumCloud)."
       implementation_groups:
       - R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
       translations:
         en:
           name: Favour the use of products and services qualified by ANSSI (strengthened)

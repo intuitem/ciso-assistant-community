@@ -807,10 +807,35 @@ class LoadFileView(APIView):
                                 else "to_do",
                                 "observation": record.get("observations", ""),
                             }
-                            if record.get("score") != "":
+                            if (
+                                record.get("implementation_score") != ""
+                                and record.get("documentation_score") != ""
+                            ):
+                                if not compliance_assessment.show_documentation_score:
+                                    compliance_assessment.show_documentation_score = (
+                                        True
+                                    )
+                                    compliance_assessment.save(
+                                        update_fields=["show_documentation_score"]
+                                    )
+                                requirement_data.update(
+                                    {
+                                        "score": record.get("implementation_score"),
+                                        "documentation_score": record.get(
+                                            "documentation_score"
+                                        ),
+                                        "is_scored": True,
+                                    }
+                                )
+                            elif (
+                                record.get("score") != ""
+                                and record.get("score") is not None
+                            ):
                                 requirement_data.update(
                                     {"score": record.get("score"), "is_scored": True}
                                 )
+                            else:
+                                requirement_data.update({"is_scored": False})
                             # Use the serializer for validation and saving
                             req_serializer = RequirementAssessmentWriteSerializer(
                                 instance=requirement_assessment,
@@ -1385,7 +1410,7 @@ class LoadFileView(APIView):
             # Process controls first - collect all unique control names
             all_controls = set()
             for record in records:
-                existing_controls = record.get("existing_controls", "").strip()
+                existing_controls = record.get("existing_applied_controls", "").strip()
                 additional_controls = record.get("additional_controls", "").strip()
 
                 if existing_controls:
@@ -1595,6 +1620,11 @@ class LoadFileView(APIView):
                 record.get("residual_proba", ""), matrix_mappings["probability"]
             )
 
+            logger.debug(
+                f"Risk scenario '{name}': current_proba={current_proba}, current_impact={current_impact}, "
+                f"residual_proba={residual_proba}, residual_impact={residual_impact}"
+            )
+
             # Prepare risk scenario data
             # Note: inherent_level, current_level, and residual_level will be computed automatically
             scenario_data = {
@@ -1608,7 +1638,6 @@ class LoadFileView(APIView):
                 "current_proba": current_proba,
                 "residual_impact": residual_impact,
                 "residual_proba": residual_proba,
-                "existing_controls": record.get("existing_controls", ""),
             }
 
             # Create the risk scenario
@@ -1627,7 +1656,7 @@ class LoadFileView(APIView):
             # Link existing controls
             self._link_controls_to_scenario(
                 risk_scenario,
-                record.get("existing_controls", ""),
+                record.get("existing_applied_controls", ""),
                 control_mapping,
                 "existing_applied_controls",
             )
@@ -1648,15 +1677,26 @@ class LoadFileView(APIView):
 
     def _map_risk_value(self, value, mapping_dict):
         """Map a risk value label to its numeric value using the mapping dictionary"""
-        if not value or not isinstance(value, str):
+        if not value:
             return -1
+
+        # Convert to string if needed (pandas may read Excel cells as numbers, etc.)
+        original_value = value
+        if not isinstance(value, str):
+            value = str(value)
 
         # Try exact match first
         clean_value = value.strip().lower()
         if clean_value in mapping_dict:
-            return mapping_dict[clean_value]
+            mapped_value = mapping_dict[clean_value]
+            logger.debug(f"Mapped risk value '{original_value}' -> {mapped_value}")
+            return mapped_value
 
         # If no match found, return -1 (undefined)
+        logger.warning(
+            f"Failed to map risk value '{original_value}' (type: {type(original_value).__name__}). "
+            f"Available values: {list(mapping_dict.keys())}"
+        )
         return -1
 
     def _link_controls_to_scenario(

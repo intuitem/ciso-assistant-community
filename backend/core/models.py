@@ -3600,6 +3600,14 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     evidence = models.ForeignKey(
         Evidence, on_delete=models.CASCADE, related_name="revisions"
     )
+    task_node = models.ForeignKey(
+        "TaskNode",
+        on_delete=models.SET_NULL,
+        related_name="evidence_revisions",
+        blank=True,
+        null=True,
+        verbose_name=_("Task Node"),
+    )
     version = models.IntegerField(
         default=1,
         verbose_name=_("version number"),
@@ -4960,7 +4968,7 @@ def risk_scoring(probability, impact, risk_matrix: RiskMatrix) -> int:
     return risk_index
 
 
-class RiskScenario(NameDescriptionMixin):
+class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
     TREATMENT_OPTIONS = [
         ("open", _("Open")),
         ("mitigate", _("Mitigate")),
@@ -5005,6 +5013,15 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("RiskAssessment"),
         related_name="risk_scenarios",
     )
+    operational_scenario = models.ForeignKey(
+        "ebios_rm.OperationalScenario",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_("Operational scenario"),
+        related_name="risk_scenarios",
+        help_text=_("EBIOS RM operational scenario that generated this risk scenario"),
+    )
     assets = models.ManyToManyField(
         Asset,
         verbose_name=_("Assets"),
@@ -5031,13 +5048,34 @@ class RiskScenario(NameDescriptionMixin):
         blank=True,
         related_name="risk_scenarios",
     )
+    # DEPRECATED field existing_controls - remove when dummy data are cleaned up and we're resilient to dropping the field on all import capabilities
     existing_controls = models.TextField(
         max_length=2000,
         help_text=_(
             "The existing controls to manage this risk. Edit the risk scenario to add extra applied controls."
         ),
-        verbose_name=_("Existing controls"),
         blank=True,
+        verbose_name=_("Existing controls"),
+    )
+    risk_origin = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        verbose_name=_("Risk origin"),
+        related_name="risk_scenario_risk_origins",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+        null=True,
+        blank=True,
+    )
+    antecedent_scenarios = models.ManyToManyField(
+        "self",
+        symmetrical=False,
+        verbose_name=_("Antecedent scenarios"),
+        blank=True,
+        help_text=_("Risk scenarios that precede this scenario"),
+        related_name="consequent_scenarios",
     )
     existing_applied_controls = models.ManyToManyField(
         AppliedControl,
@@ -5246,6 +5284,33 @@ class RiskScenario(NameDescriptionMixin):
             return self.DEFAULT_SOK_OPTIONS[-1]
         return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
 
+    def ancestors_plus_self(self):
+        """
+        Returns a set containing the scenario itself and all its ancestors (antecedents, transitively).
+        """
+        from collections import deque
+
+        all_links = self.__class__.antecedent_scenarios.through.objects.values_list(
+            "from_riskscenario_id", "to_riskscenario_id"
+        )
+        child_to_parents_map = {}
+        for child_id, parent_id in all_links:
+            if child_id not in child_to_parents_map:
+                child_to_parents_map[child_id] = set()
+            child_to_parents_map[child_id].add(parent_id)
+
+        ancestor_ids = {self.pk}
+        queue = deque([self.pk])
+        while queue:
+            current_id = queue.popleft()
+            parent_ids = child_to_parents_map.get(current_id, set())
+            for parent_id in parent_ids:
+                if parent_id not in ancestor_ids:
+                    ancestor_ids.add(parent_id)
+                    queue.append(parent_id)
+
+        return self.__class__.objects.filter(id__in=ancestor_ids)
+
     def sync_to_applied_controls(self, reset_residual=False, dry_run=True):
         """
         If all extra controls are active, move them to existing controls and reset the residual assessment.
@@ -5275,6 +5340,15 @@ class RiskScenario(NameDescriptionMixin):
     def __str__(self):
         return str(self.parent_perimeter()) + _(": ") + str(self.name)
 
+    def delete(self, *args, **kwargs):
+        risk_assessment_id = self.risk_assessment.id
+        result = super(RiskScenario, self).delete(*args, **kwargs)
+        # Update parent risk assessment's updated_at timestamp (bypass save to avoid recursion)
+        RiskAssessment.objects.filter(id=risk_assessment_id).update(
+            updated_at=timezone.now()
+        )
+        return result
+
     def save(self, *args, **kwargs):
         if self.inherent_proba >= 0 and self.inherent_impact >= 0:
             self.inherent_level = risk_scoring(
@@ -5301,6 +5375,10 @@ class RiskScenario(NameDescriptionMixin):
         else:
             self.residual_level = -1
         super(RiskScenario, self).save(*args, **kwargs)
+        # Update parent risk assessment's updated_at timestamp (bypass save to avoid recursion)
+        RiskAssessment.objects.filter(id=self.risk_assessment.id).update(
+            updated_at=timezone.now()
+        )
         self.risk_assessment.upsert_daily_metrics()
 
 
@@ -6827,6 +6905,12 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
     assigned_to = models.ManyToManyField(
         User, verbose_name="Assigned to", blank=True, related_name="task_templates"
     )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        help_text="Evidences related to the task",
+        related_name="task_templates",
+    )
     assets = models.ManyToManyField(
         Asset,
         verbose_name="Related assets",
@@ -6964,9 +7048,16 @@ class TaskNode(AbstractBaseModel, FolderMixin):
 
     to_delete = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"{self.task_template.name} ({self.due_date})"
+
     @property
     def assigned_to(self):
         return self.task_template.assigned_to
+
+    @property
+    def expected_evidence(self):
+        return self.task_template.evidences.all()
 
     @property
     def assets(self):
@@ -6991,6 +7082,189 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"
+
+
+class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
+    class Status(models.TextChoices):
+        SUBMITTED = "submitted", "Submitted"
+        ACCEPTED = "accepted", "Accepted"
+        REJECTED = "rejected", "Rejected"
+        REVOKED = "revoked", "Revoked"
+        EXPIRED = "expired", "Expired"
+        DROPPED = "dropped", "Dropped"
+        CHANGE_REQUESTED = "change_requested", "Change requested"
+
+    compliance_assessments = models.ManyToManyField(
+        ComplianceAssessment,
+        blank=True,
+    )
+    risk_assessments = models.ManyToManyField(
+        RiskAssessment,
+        blank=True,
+    )
+    business_impact_analysis = models.ManyToManyField(
+        "resilience.BusinessImpactAnalysis",
+        blank=True,
+    )
+    crq_studies = models.ManyToManyField(
+        "crq.QuantitativeRiskStudy",
+        blank=True,
+    )
+
+    ebios_studies = models.ManyToManyField(
+        "ebios_rm.EbiosRMStudy",
+        blank=True,
+    )
+    entity_assessments = models.ManyToManyField(
+        "tprm.EntityAssessment",
+        blank=True,
+    )
+    findings_assessments = models.ManyToManyField(
+        FindingsAssessment,
+        blank=True,
+    )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+    )
+    security_exceptions = models.ManyToManyField(
+        SecurityException,
+        blank=True,
+    )
+
+    policies = models.ManyToManyField(
+        Policy,
+        blank=True,
+    )
+    request_notes = models.TextField(null=True, blank=True)
+    requester = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="validation_requests",
+        verbose_name=_("Requester"),
+    )
+    approver = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
+    ref_id = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        unique=True,
+        verbose_name=_("Reference ID"),
+    )
+    status = models.CharField(
+        choices=Status.choices,
+        default=Status.SUBMITTED,
+        max_length=20,
+    )
+    validation_deadline = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name=_("Validation deadline"),
+    )
+
+    class Meta:
+        verbose_name = "Validation flow"
+        verbose_name_plural = "Validation flows"
+
+    def save(self, *args, **kwargs):
+        from django.db import IntegrityError, transaction
+
+        if not self.ref_id:
+            max_retries = 3
+            for attempt in range(max_retries):
+                self.ref_id = self.get_default_ref_id()
+                try:
+                    with transaction.atomic():
+                        super().save(*args, **kwargs)
+                        return  # Success
+                except IntegrityError:
+                    if attempt == max_retries - 1:
+                        raise  # Final attempt failed, propagate error
+                    self.ref_id = None
+        else:
+            super().save(*args, **kwargs)
+
+    @classmethod
+    def get_default_ref_id(cls) -> str:
+        """Return globally unique ref_id for validation flow (VAL.NNNNNN format)"""
+        last = cls.objects.filter(ref_id__startswith="VAL.").order_by("-ref_id").first()
+        if not last or not last.ref_id:
+            return "VAL.000001"
+        try:
+            suffix = int(last.ref_id.split(".")[1])
+        except (IndexError, ValueError):
+            # Fallback if existing data is malformed
+            suffix = 0
+        return f"VAL.{suffix + 1:06d}"
+
+    @property
+    def linked_models(self) -> list[str]:
+        """Return list of model types that have linked objects"""
+        linked = []
+        model_fields = [
+            "compliance_assessments",
+            "risk_assessments",
+            "business_impact_analysis",
+            "crq_studies",
+            "ebios_studies",
+            "entity_assessments",
+            "findings_assessments",
+            "evidences",
+            "security_exceptions",
+            "policies",
+        ]
+        for field in model_fields:
+            if getattr(self, field).exists():
+                linked.append(field)
+        return linked
+
+    def __str__(self) -> str:
+        return self.ref_id
+
+
+class FlowEvent(AbstractBaseModel, FolderMixin):
+    validation_flow = models.ForeignKey(
+        ValidationFlow,
+        on_delete=models.CASCADE,
+        related_name="events",
+        verbose_name=_("Validation flow"),
+    )
+    event_type = models.CharField(
+        max_length=50,
+        verbose_name=_("Event type"),
+    )
+    event_actor = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Event actor"),
+    )
+    event_notes = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_("Event notes"),
+    )
+    is_tainted = models.BooleanField(
+        default=False,
+        verbose_name=_("Is tainted"),
+    )
+    # created_at is already covered on the abstract model
+
+    class Meta:
+        verbose_name = _("Flow event")
+        verbose_name_plural = _("Flow events")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.validation_flow.ref_id} - {self.event_type} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 common_exclude = ["created_at", "updated_at"]

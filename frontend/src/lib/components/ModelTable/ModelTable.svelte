@@ -78,6 +78,7 @@
 		fields?: string[];
 		canSelectObject?: boolean;
 		overrideFilters?: { [key: string]: any[] };
+		defaultFilters?: { [key: string]: any[] };
 		hideFilters?: boolean;
 		tableFilters?: Record<string, ListViewFilterConfig>;
 		folderId?: string;
@@ -127,6 +128,7 @@
 		fields = [],
 		canSelectObject = false,
 		overrideFilters = {},
+		defaultFilters = {},
 		hideFilters = $bindable(false),
 		tableFilters = URLModel &&
 		listViewFields[URLModel] &&
@@ -276,10 +278,11 @@
 	const filteredFields = Object.keys(filters);
 	const filterValues: { [key: string]: any } = $state(
 		Object.fromEntries(
-			filteredFields.map((field: string) => [
-				field,
-				page.url.searchParams.getAll(field).map((value) => ({ value }))
-			])
+			filteredFields.map((field: string) => {
+				const urlValues = page.url.searchParams.getAll(field).map((value) => ({ value }));
+				const defaultValue = defaultFilters[field] || [];
+				return [field, urlValues.length > 0 ? urlValues : defaultValue];
+			})
 		)
 	);
 
@@ -316,10 +319,16 @@
 	});
 
 	const filterInitialData: Record<string, string[]> = {};
-	// convert URL search params to filter initial data
+	// convert URL search params and default filters to filter initial data
 	for (const [key, value] of page.url.searchParams) {
 		filterInitialData[key] ??= [];
 		filterInitialData[key].push(value);
+	}
+	// Add default filter values if no URL params exist for that field
+	for (const field of filteredFields) {
+		if (!filterInitialData[field] && filterValues[field]?.length > 0) {
+			filterInitialData[field] = filterValues[field].map((v: Record<string, any>) => v.value);
+		}
 	}
 	const zodFiltersObject = {};
 	Object.keys(filters).forEach((k) => {
@@ -407,6 +416,7 @@
 	const MULTI_VALUE_COLUMNS = [
 		'owner',
 		'filtering_labels',
+		'linked_models',
 		'threats',
 		'assets',
 		'applied_controls',
@@ -422,6 +432,23 @@
 			MULTI_VALUE_COLUMNS.includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
+	};
+
+	// Helper function to convert linked_models snake_case to camelCase for translation
+	const convertLinkedModelName = (snakeCaseName: string): string => {
+		const mapping: Record<string, string> = {
+			compliance_assessments: 'complianceAssessments',
+			risk_assessments: 'riskAssessments',
+			business_impact_analysis: 'businessImpactAnalysis',
+			crq_studies: 'quantitativeRiskStudies',
+			ebios_studies: 'ebiosRMStudies',
+			entity_assessments: 'entityAssessments',
+			findings_assessments: 'findingsAssessments',
+			evidences: 'evidences',
+			security_exceptions: 'securityExceptions',
+			policies: 'policies'
+		};
+		return mapping[snakeCaseName] || snakeCaseName;
 	};
 
 	let openState = $state(false);
@@ -565,7 +592,9 @@
 																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 																}) as val}
 																	<li>
-																		{#if key === 'security_objectives' || key === 'security_capabilities'}
+																		{#if key === 'linked_models' && typeof val === 'string'}
+																			{safeTranslate(convertLinkedModelName(val))}
+																		{:else if key === 'security_objectives' || key === 'security_capabilities'}
 																			{@const [securityObjectiveName, securityObjectiveValue] =
 																				Object.entries(val)[0]}
 																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
@@ -604,8 +633,6 @@
 															{:else}
 																{value.str ?? '-'}
 															{/if}
-														{:else if value && value.name}
-															{value.name}
 														{:else if value && value.hexcolor}
 															<p
 																class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
@@ -645,8 +672,16 @@
 																	{m.accept()}
 																</span>
 															</div>
+														{:else if (key === 'name' || key === 'str') && row.meta?.is_locked}
+															<div class="flex items-center space-x-2">
+																<i class="fa-solid fa-lock text-yellow-600" title={m.isLocked()}
+																></i>
+																<span class="text-yellow-600">{safeTranslate(value ?? '-')}</span>
+															</div>
 														{:else if key === 'icon_fa_class'}
 															<i class="text-lg fa {value}"></i>
+														{:else if value && value.name}
+															{value.name}
 														{:else}
 															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
 															{#if value?.length > 300}

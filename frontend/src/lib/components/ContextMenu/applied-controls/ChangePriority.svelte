@@ -29,12 +29,14 @@
 
 	async function changePriority(newPriority: string) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/priority`;
+		// Convert '--' to empty string to clear the field
+		const priorityValue = newPriority === '--' ? '' : newPriority;
 		const requestInit = {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ priority: newPriority })
+			body: JSON.stringify({ priority: priorityValue })
 		};
 		try {
 			const response = await fetch(endpoint, requestInit);

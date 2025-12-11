@@ -1,5 +1,5 @@
 import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
-import { getModelInfo, type ModelMapEntry } from '$lib/utils/crud';
+import { getModelInfo, urlParamModelVerboseName, type ModelMapEntry } from '$lib/utils/crud';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
 import { modelSchema } from '$lib/utils/schemas';
@@ -147,7 +147,8 @@ export const loadDetail = async ({ event, model, id }) => {
 						selectOptions,
 						initialData,
 						disableCreate: e.disableCreate,
-						disableDelete: e.disableDelete
+						disableDelete: e.disableDelete,
+						disableEdit: e.disableEdit
 					};
 				})
 		);
@@ -158,6 +159,7 @@ export const loadDetail = async ({ event, model, id }) => {
 		form,
 		relatedModels,
 		urlModel: model.urlModel as urlModel,
-		model
+		model,
+		modelVerboseName: urlParamModelVerboseName(model.urlModel)
 	};
 };

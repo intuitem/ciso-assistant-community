@@ -15,6 +15,7 @@
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
 	import VulnerabilitiesForm from './ModelForm/VulnerabilitiesForm.svelte';
 	import RiskAcceptancesForm from './ModelForm/RiskAcceptanceForm.svelte';
+	import ValidationFlowForm from './ModelForm/ValidationFlowForm.svelte';
 	import ReferenceControlsForm from './ModelForm/ReferenceControlForm.svelte';
 	import EvidencesForm from './ModelForm/EvidenceForm.svelte';
 	import ComplianceAssessmentsForm from './ModelForm/ComplianceAssessmentForm.svelte';
@@ -395,6 +396,16 @@
 				{$page}
 				{...rest}
 			/>
+		{:else if URLModel === 'validation-flows'}
+			<ValidationFlowForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{object}
+				{initialData}
+				{...rest}
+			/>
 		{:else if URLModel === 'reference-controls'}
 			<ReferenceControlsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'evidences'}
@@ -460,7 +471,15 @@
 		{:else if URLModel === 'contracts'}
 			<ContractsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'representatives'}
-			<RepresentativesForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
+			<RepresentativesForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{object}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'frameworks'}
 			<FrameworksForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
 		{:else if URLModel === 'users'}
