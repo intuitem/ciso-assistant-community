@@ -243,9 +243,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
         loaded_library = library.get_loaded_library()
         if loaded_library is None:
-            return Response(
-                data="Loaded library not found.", status=HTTP_404_NOT_FOUND
-            )
+            return Response(data="Loaded library not found.", status=HTTP_404_NOT_FOUND)
 
         try:
             loaded_library.delete()
