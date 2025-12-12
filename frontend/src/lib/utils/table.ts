@@ -2402,7 +2402,7 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
-	'metric-samples': {
+	'custom-metric-samples': {
 		head: ['metric_instance', 'timestamp', 'display_value'],
 		body: ['metric_instance', 'timestamp', 'display_value'],
 		filters: {

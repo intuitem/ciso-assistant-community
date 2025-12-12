@@ -4433,6 +4433,11 @@ class RiskAssessment(Assessment):
             model=self.__class__.__name__, object_id=self.id, data=data
         )
 
+        # Also update BuiltinMetricSample
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self)
+
     def __str__(self) -> str:
         return f"{self.name} - {self.version}"
 
@@ -5338,6 +5343,11 @@ class ComplianceAssessment(Assessment):
         HistoricalMetric.update_daily_metric(
             model=self.__class__.__name__, object_id=self.id, data=data
         )
+
+        # Also update BuiltinMetricSample
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self)
 
     def save(self, *args, **kwargs) -> None:
         if self.min_score is None:
@@ -6474,6 +6484,16 @@ class FindingsAssessment(Assessment):
             "unresolved_important_count": unresolved_important,
         }
 
+    def upsert_daily_metrics(self):
+        """Update daily metrics for this findings assessment."""
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self)
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        self.upsert_daily_metrics()
+
 
 class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDateMixin):
     class Status(models.TextChoices):
@@ -6560,6 +6580,14 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     @property
     def is_locked(self) -> bool:
         return self.findings_assessment.is_locked
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Update parent findings assessment's updated_at timestamp
+        FindingsAssessment.objects.filter(id=self.findings_assessment.id).update(
+            updated_at=timezone.now()
+        )
+        self.findings_assessment.upsert_daily_metrics()
 
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################

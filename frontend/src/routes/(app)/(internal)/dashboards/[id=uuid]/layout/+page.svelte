@@ -18,6 +18,7 @@
 	const dashboard = $derived(data.data);
 	const widgetModel = $derived(data.widgetModel);
 	const widgetCreateForm = $derived(data.widgetCreateForm);
+	const supportedModels = $derived(data.supportedModels || {});
 
 	let widgets = $state(data.widgets || []);
 	let isDragging = $state(false);
@@ -85,7 +86,9 @@
 				props: {
 					form: widgetCreateForm,
 					model: widgetModel,
-					formAction: '/dashboard-widgets?/create'
+					formAction: '/dashboard-widgets?/create',
+					supportedModels: supportedModels,
+					debug: true
 				}
 			},
 			title: safeTranslate('addWidget')

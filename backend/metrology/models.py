@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel, NameDescriptionMixin
@@ -205,7 +207,12 @@ class MetricInstance(
         return False
 
 
-class MetricSample(AbstractBaseModel, FolderMixin):
+class CustomMetricSample(AbstractBaseModel, FolderMixin):
+    """
+    User-entered metric samples for custom metrics.
+    Stores individual measurements recorded manually or via API.
+    """
+
     metric_instance = models.ForeignKey(
         MetricInstance,
         on_delete=models.CASCADE,
@@ -224,8 +231,8 @@ class MetricSample(AbstractBaseModel, FolderMixin):
     )
 
     class Meta:
-        verbose_name = _("Metric sample")
-        verbose_name_plural = _("Metric samples")
+        verbose_name = _("Custom metric sample")
+        verbose_name_plural = _("Custom metric samples")
         ordering = ["-timestamp"]  # Most recent first
 
     def __str__(self):
@@ -296,6 +303,262 @@ class MetricSample(AbstractBaseModel, FolderMixin):
         return result
 
 
+class BuiltinMetricSample(AbstractBaseModel):
+    """
+    System-computed metric samples for builtin metrics.
+    Stores daily snapshots of computed metrics for various objects
+    (ComplianceAssessment, RiskAssessment, FindingsAssessment, Folder).
+    """
+
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        verbose_name=_("Content type"),
+        help_text=_("The type of object this metric is computed for"),
+    )
+    object_id = models.UUIDField(
+        verbose_name=_("Object ID"),
+        help_text=_("The ID of the object this metric is computed for"),
+        db_index=True,
+    )
+    object = GenericForeignKey("content_type", "object_id")
+
+    date = models.DateField(
+        verbose_name=_("Date"),
+        help_text=_("The date this snapshot was recorded"),
+        db_index=True,
+    )
+    metrics = models.JSONField(
+        default=dict,
+        verbose_name=_("Metrics"),
+        help_text=_(
+            "All computed metrics for this object. "
+            "Format depends on object type (e.g., progress, result_breakdown, etc.)"
+        ),
+    )
+
+    class Meta:
+        verbose_name = _("Builtin metric sample")
+        verbose_name_plural = _("Builtin metric samples")
+        ordering = ["-date"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["content_type", "object_id", "date"],
+                name="unique_builtin_metric_sample_per_object_per_day",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["content_type", "object_id", "date"]),
+        ]
+
+    def __str__(self):
+        return f"{self.content_type.model} {self.object_id} - {self.date}"
+
+    @classmethod
+    def update_or_create_snapshot(cls, obj, date=None):
+        """
+        Update or create a daily metric snapshot for the given object.
+
+        Args:
+            obj: The model instance (ComplianceAssessment, RiskAssessment, etc.)
+            date: Optional date for the snapshot. Defaults to today.
+
+        Returns:
+            Tuple of (BuiltinMetricSample, created)
+        """
+        from django.utils.timezone import now
+
+        if date is None:
+            date = now().date()
+
+        content_type = ContentType.objects.get_for_model(obj)
+        metrics = cls.compute_metrics(obj)
+
+        return cls.objects.update_or_create(
+            content_type=content_type,
+            object_id=obj.id,
+            date=date,
+            defaults={"metrics": metrics},
+        )
+
+    @classmethod
+    def compute_metrics(cls, obj):
+        """
+        Compute metrics for the given object based on its type.
+
+        Args:
+            obj: The model instance
+
+        Returns:
+            Dictionary of computed metrics
+        """
+        model_name = obj.__class__.__name__
+
+        if model_name == "ComplianceAssessment":
+            return cls._compute_compliance_assessment_metrics(obj)
+        elif model_name == "RiskAssessment":
+            return cls._compute_risk_assessment_metrics(obj)
+        elif model_name == "FindingsAssessment":
+            return cls._compute_findings_assessment_metrics(obj)
+        elif model_name == "Folder":
+            return cls._compute_folder_metrics(obj)
+        else:
+            return {}
+
+    @classmethod
+    def _compute_compliance_assessment_metrics(cls, assessment):
+        """Compute metrics for a ComplianceAssessment."""
+        from core.models import RequirementAssessment
+
+        # Get requirement counts by status
+        status_breakdown = {}
+        for item in assessment.get_requirements_status_count():
+            status_breakdown[item[1]] = item[0]
+
+        # Get requirement counts by result
+        result_breakdown = {}
+        for item in assessment.get_requirements_result_count():
+            result_breakdown[item[1]] = item[0]
+
+        total = RequirementAssessment.objects.filter(
+            compliance_assessment=assessment
+        ).count()
+
+        return {
+            "progress": assessment.get_progress(),
+            "score": assessment.get_global_score(),
+            "total_requirements": total,
+            "status_breakdown": status_breakdown,
+            "result_breakdown": result_breakdown,
+        }
+
+    @classmethod
+    def _compute_risk_assessment_metrics(cls, assessment):
+        """Compute metrics for a RiskAssessment."""
+        from core.models import RiskScenario
+        from django.db.models import Count
+
+        scenarios = RiskScenario.objects.filter(risk_assessment=assessment)
+        total = scenarios.count()
+
+        # Treatment breakdown
+        treatment_breakdown = {}
+        for treatment in RiskScenario.TREATMENT_OPTIONS:
+            treatment_breakdown[treatment[0]] = scenarios.filter(
+                treatment=treatment[0]
+            ).count()
+
+        # Current level breakdown
+        current_level_breakdown = dict(
+            scenarios.exclude(current_level=-1)
+            .values("current_level")
+            .annotate(count=Count("id"))
+            .values_list("current_level", "count")
+        )
+
+        # Residual level breakdown
+        residual_level_breakdown = dict(
+            scenarios.exclude(residual_level=-1)
+            .values("residual_level")
+            .annotate(count=Count("id"))
+            .values_list("residual_level", "count")
+        )
+
+        return {
+            "total_scenarios": total,
+            "treatment_breakdown": treatment_breakdown,
+            "current_level_breakdown": current_level_breakdown,
+            "residual_level_breakdown": residual_level_breakdown,
+        }
+
+    @classmethod
+    def _compute_findings_assessment_metrics(cls, assessment):
+        """Compute metrics for a FindingsAssessment."""
+        from core.models import Finding, Severity
+        from django.db.models import Count
+
+        findings = Finding.objects.filter(findings_assessment=assessment)
+        total = findings.count()
+
+        # Severity breakdown
+        severity_breakdown = dict(
+            findings.values("severity")
+            .annotate(count=Count("id"))
+            .values_list("severity", "count")
+        )
+        # Convert severity integers to labels
+        severity_labels = {choice[0]: choice[1] for choice in Severity.choices}
+        severity_breakdown = {
+            severity_labels.get(k, str(k)): v for k, v in severity_breakdown.items()
+        }
+
+        # Status breakdown
+        status_breakdown = dict(
+            findings.values("status")
+            .annotate(count=Count("id"))
+            .values_list("status", "count")
+        )
+
+        return {
+            "total_findings": total,
+            "severity_breakdown": severity_breakdown,
+            "status_breakdown": status_breakdown,
+        }
+
+    @classmethod
+    def _compute_folder_metrics(cls, folder):
+        """Compute metrics for a Folder (domain-level aggregations)."""
+        from core.models import AppliedControl, Incident, Severity
+        from django.db.models import Count
+
+        # Applied controls in this folder
+        controls = AppliedControl.objects.filter(folder=folder)
+        total_controls = controls.count()
+
+        controls_status_breakdown = dict(
+            controls.values("status")
+            .annotate(count=Count("id"))
+            .values_list("status", "count")
+        )
+
+        controls_category_breakdown = dict(
+            controls.values("category")
+            .annotate(count=Count("id"))
+            .values_list("category", "count")
+        )
+
+        # Incidents in this folder
+        incidents = Incident.objects.filter(folder=folder)
+        total_incidents = incidents.count()
+
+        incidents_severity_breakdown = dict(
+            incidents.values("severity")
+            .annotate(count=Count("id"))
+            .values_list("severity", "count")
+        )
+        # Convert severity integers to labels
+        severity_labels = {choice[0]: choice[1] for choice in Severity.choices}
+        incidents_severity_breakdown = {
+            severity_labels.get(k, str(k)): v
+            for k, v in incidents_severity_breakdown.items()
+        }
+
+        incidents_status_breakdown = dict(
+            incidents.values("status")
+            .annotate(count=Count("id"))
+            .values_list("status", "count")
+        )
+
+        return {
+            "total_controls": total_controls,
+            "controls_status_breakdown": controls_status_breakdown,
+            "controls_category_breakdown": controls_category_breakdown,
+            "total_incidents": total_incidents,
+            "incidents_severity_breakdown": incidents_severity_breakdown,
+            "incidents_status_breakdown": incidents_status_breakdown,
+        }
+
+
 class Dashboard(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     ref_id = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("reference id")
@@ -325,7 +588,9 @@ class Dashboard(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
 class DashboardWidget(AbstractBaseModel, FolderMixin):
     """
     Individual widget configuration for dashboards.
-    Each widget displays a single metric instance with customizable visualization.
+    Each widget displays either:
+    - A custom metric (via metric_instance), or
+    - A builtin metric (via target_content_type + target_object_id + metric_key)
     """
 
     class ChartType(models.TextChoices):
@@ -362,19 +627,52 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
         related_name="widgets",
         verbose_name=_("Dashboard"),
     )
+
+    # Option 1: Custom metric (user-defined via MetricInstance)
     metric_instance = models.ForeignKey(
         MetricInstance,
         on_delete=models.CASCADE,
         related_name="dashboard_widgets",
         verbose_name=_("Metric instance"),
+        null=True,
+        blank=True,
+        help_text=_("For custom metrics: the metric instance to display"),
     )
+
+    # Option 2: Builtin metric (system-computed for an object)
+    target_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name=_("Target content type"),
+        help_text=_(
+            "For builtin metrics: the type of object (e.g., ComplianceAssessment)"
+        ),
+    )
+    target_object_id = models.UUIDField(
+        null=True,
+        blank=True,
+        verbose_name=_("Target object ID"),
+        help_text=_("For builtin metrics: the ID of the specific object"),
+    )
+    metric_key = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name=_("Metric key"),
+        help_text=_(
+            "For builtin metrics: which metric to display (e.g., 'progress', 'result_breakdown')"
+        ),
+    )
+
     title = models.CharField(
         max_length=200,
         blank=True,
         null=True,
         verbose_name=_("Title"),
         help_text=_(
-            "Custom title for the widget. If empty, uses metric instance name."
+            "Custom title for the widget. If empty, uses metric instance name or metric key."
         ),
     )
 
@@ -447,17 +745,78 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
         ordering = ["position_y", "position_x"]
 
     def __str__(self):
-        display_title = self.title or self.metric_instance.name
-        return f"{display_title} ({self.get_chart_type_display()})"
+        return f"{self.display_title} ({self.get_chart_type_display()})"
 
     @property
     def display_title(self):
-        """Returns the widget title or falls back to metric instance name"""
-        return self.title or self.metric_instance.name
+        """Returns the widget title or falls back to metric instance name or metric key"""
+        if self.title:
+            return self.title
+        if self.metric_instance:
+            return self.metric_instance.name
+        if self.metric_key:
+            # Format metric_key for display (e.g., "result_breakdown" -> "Result Breakdown")
+            return self.metric_key.replace("_", " ").title()
+        return _("Untitled Widget")
+
+    @property
+    def is_builtin_metric(self):
+        """Returns True if this widget displays a builtin metric"""
+        return self.target_content_type is not None and self.metric_key is not None
+
+    @property
+    def is_custom_metric(self):
+        """Returns True if this widget displays a custom metric"""
+        return self.metric_instance is not None
 
     def clean(self):
         """Validate widget configuration"""
         from django.core.exceptions import ValidationError
+
+        # Validate mutual exclusivity: either custom metric OR builtin metric
+        # For builtin detection, require target_content_type to be set
+        # (target_object_id and metric_key alone don't constitute a builtin metric)
+        has_custom = self.metric_instance is not None
+        has_builtin = self.target_content_type is not None
+
+        if has_custom and has_builtin:
+            raise ValidationError(
+                _(
+                    "A widget cannot have both a custom metric instance and builtin metric fields. "
+                    "Use either metric_instance OR (target_content_type + target_object_id + metric_key)."
+                )
+            )
+
+        if not has_custom and not has_builtin:
+            raise ValidationError(
+                _(
+                    "A widget must have either a custom metric (metric_instance) or "
+                    "a builtin metric (target_content_type + target_object_id + metric_key)."
+                )
+            )
+
+        # If builtin metric, ensure all required fields are present
+        if has_builtin:
+            if not self.target_content_type:
+                raise ValidationError(
+                    {
+                        "target_content_type": _(
+                            "Target content type is required for builtin metrics"
+                        )
+                    }
+                )
+            if not self.target_object_id:
+                raise ValidationError(
+                    {
+                        "target_object_id": _(
+                            "Target object ID is required for builtin metrics"
+                        )
+                    }
+                )
+            if not self.metric_key:
+                raise ValidationError(
+                    {"metric_key": _("Metric key is required for builtin metrics")}
+                )
 
         # Validate grid position
         if self.position_x < 0 or self.position_x > 11:
@@ -472,3 +831,18 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
             )
         if self.height < 1:
             raise ValidationError({"height": _("Height must be at least 1")})
+
+
+def get_builtin_metrics_retention_days():
+    """
+    Returns the retention days for builtin metric samples from global settings.
+    Default is 730 days (2 years), minimum is 1 day.
+    """
+    from global_settings.models import GlobalSettings
+
+    try:
+        settings = GlobalSettings.objects.get(name="general")
+        retention = settings.value.get("builtin_metrics_retention_days", 730)
+        return max(1, int(retention))
+    except (GlobalSettings.DoesNotExist, TypeError, ValueError):
+        return 730

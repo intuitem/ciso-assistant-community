@@ -1357,7 +1357,7 @@ export const MetricInstanceSchema = z.object({
 	filtering_labels: z.string().optional().array().optional()
 });
 
-export const MetricSampleSchema = z.object({
+export const CustomMetricSampleSchema = z.object({
 	folder: z.string(),
 	metric_instance: z.string().uuid(),
 	timestamp: z.string().datetime(),
@@ -1375,7 +1375,13 @@ export const DashboardSchema = z.object({
 export const DashboardWidgetSchema = z.object({
 	folder: z.string(),
 	dashboard: z.string().uuid(),
-	metric_instance: z.string().uuid(),
+	// Custom metric (optional - either this or builtin fields)
+	metric_instance: z.string().uuid().optional().nullable(),
+	// Builtin metric fields (optional - either this or metric_instance)
+	target_model: z.string().optional().nullable(),
+	target_object_id: z.string().uuid().optional().nullable(),
+	metric_key: z.string().optional().nullable(),
+	// Common fields
 	title: z.string().optional().nullable(),
 	position_x: z.coerce.number().min(0).max(11).default(0),
 	position_y: z.coerce.number().min(0).default(0),
@@ -1460,7 +1466,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	accreditations: AccreditationSchema,
 	'metric-definitions': MetricDefinitionSchema,
 	'metric-instances': MetricInstanceSchema,
-	'metric-samples': MetricSampleSchema,
+	'custom-metric-samples': CustomMetricSampleSchema,
 	dashboards: DashboardSchema,
 	'dashboard-widgets': DashboardWidgetSchema
 };

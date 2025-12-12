@@ -86,8 +86,12 @@
 
 						<!-- Chart based on widget type -->
 						<div class="flex-1 min-h-0">
-							{#key widget.samples?.length}
-								<DashboardWidgetChart {widget} samples={widget.samples || []} />
+							{#key widget.samples?.length || widget.builtinSamples?.length}
+								<DashboardWidgetChart
+									{widget}
+									samples={widget.samples || []}
+									builtinSamples={widget.builtinSamples || []}
+								/>
 							{/key}
 						</div>
 					</div>

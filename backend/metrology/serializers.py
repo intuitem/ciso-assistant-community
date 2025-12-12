@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
 from core.serializers import BaseModelSerializer, ReferentialSerializer
@@ -5,10 +6,12 @@ from core.serializer_fields import FieldsRelatedField, PathField
 from metrology.models import (
     MetricDefinition,
     MetricInstance,
-    MetricSample,
+    CustomMetricSample,
+    BuiltinMetricSample,
     Dashboard,
     DashboardWidget,
 )
+from metrology.builtin_metrics import get_available_metrics_for_model
 
 
 # MetricDefinition serializers
@@ -68,10 +71,10 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
         return obj.current_value()
 
 
-# MetricSample serializers
-class MetricSampleWriteSerializer(BaseModelSerializer):
+# CustomMetricSample serializers
+class CustomMetricSampleWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = MetricSample
+        model = CustomMetricSample
         fields = "__all__"
 
     def validate_timestamp(self, value):
@@ -85,13 +88,13 @@ class MetricSampleWriteSerializer(BaseModelSerializer):
         return value
 
 
-class MetricSampleReadSerializer(BaseModelSerializer):
+class CustomMetricSampleReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     metric_instance = FieldsRelatedField(["name", "ref_id", "id"])
     display_value = serializers.SerializerMethodField()
 
     class Meta:
-        model = MetricSample
+        model = CustomMetricSample
         fields = "__all__"
 
     def get_display_value(self, obj):
@@ -119,12 +122,32 @@ class DashboardReadSerializer(BaseModelSerializer):
 
 # DashboardWidget serializers
 class DashboardWidgetWriteSerializer(BaseModelSerializer):
+    # Accept model name and convert to ContentType
+    target_model = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, allow_null=True
+    )
+
     class Meta:
         model = DashboardWidget
         fields = "__all__"
+        extra_kwargs = {
+            "target_content_type": {"required": False},
+            "target_object_id": {"required": False},
+            "metric_key": {"required": False},
+            "metric_instance": {"required": False},
+        }
+
+    def get_fields(self):
+        fields = super().get_fields()
+        # Ensure target_model is included
+        fields["target_model"] = serializers.CharField(
+            write_only=True, required=False, allow_blank=True, allow_null=True
+        )
+        return fields
 
     def validate(self, data):
-        """Validate widget grid positioning"""
+        """Validate widget grid positioning and convert target_model to target_content_type"""
+        print(f"DEBUG DashboardWidgetWriteSerializer.validate data: {data}")
         position_x = data.get("position_x", 0)
         width = data.get("width", 6)
         height = data.get("height", 2)
@@ -143,6 +166,27 @@ class DashboardWidgetWriteSerializer(BaseModelSerializer):
             )
         if height < 1:
             raise serializers.ValidationError({"height": "Height must be at least 1"})
+
+        # Convert target_model to target_content_type
+        target_model = data.pop("target_model", None)
+        if target_model:  # Only process if not empty/null
+            from django.contrib.contenttypes.models import ContentType
+
+            try:
+                content_type = ContentType.objects.get(model=target_model.lower())
+                data["target_content_type"] = content_type
+            except ContentType.DoesNotExist:
+                raise serializers.ValidationError(
+                    {"target_model": f"Unknown model: {target_model}"}
+                )
+
+        # Clean up empty builtin fields to avoid validation issues
+        # If metric_key is empty string, set to None
+        if data.get("metric_key") == "":
+            data["metric_key"] = None
+        # If target_object_id is empty string, set to None
+        if data.get("target_object_id") == "":
+            data["target_object_id"] = None
 
         return data
 
@@ -178,7 +222,90 @@ class DashboardWidgetReadSerializer(BaseModelSerializer):
     aggregation_display = serializers.CharField(
         source="get_aggregation_display", read_only=True
     )
+    is_builtin_metric = serializers.BooleanField(read_only=True)
+    is_custom_metric = serializers.BooleanField(read_only=True)
+    target_content_type_display = serializers.SerializerMethodField()
+    target_object_name = serializers.SerializerMethodField()
 
     class Meta:
         model = DashboardWidget
         fields = "__all__"
+
+    def get_target_content_type_display(self, obj):
+        """Get the content type model name for builtin metrics"""
+        if obj.target_content_type:
+            return obj.target_content_type.model.title()
+        return None
+
+    def get_target_object_name(self, obj):
+        """Get the name of the target object for builtin metrics"""
+        if obj.target_content_type and obj.target_object_id:
+            try:
+                model_class = obj.target_content_type.model_class()
+                target_obj = model_class.objects.get(id=obj.target_object_id)
+                return str(target_obj)
+            except (model_class.DoesNotExist, AttributeError):
+                return None
+        return None
+
+
+# BuiltinMetricSample serializers
+class BuiltinMetricSampleWriteSerializer(BaseModelSerializer):
+    """
+    Write serializer for BuiltinMetricSample.
+    Generally not used directly as samples are system-generated.
+    """
+
+    class Meta:
+        model = BuiltinMetricSample
+        fields = "__all__"
+
+
+class BuiltinMetricSampleReadSerializer(BaseModelSerializer):
+    """Read serializer for BuiltinMetricSample with enriched data."""
+
+    content_type_display = serializers.SerializerMethodField()
+    object_name = serializers.SerializerMethodField()
+    available_metrics = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BuiltinMetricSample
+        fields = [
+            "id",
+            "content_type",
+            "content_type_display",
+            "object_id",
+            "object_name",
+            "date",
+            "metrics",
+            "available_metrics",
+            "created_at",
+            "updated_at",
+        ]
+
+    def get_content_type_display(self, obj):
+        """Get the human-readable content type name"""
+        return obj.content_type.model.title()
+
+    def get_object_name(self, obj):
+        """Get the name of the target object"""
+        try:
+            target_obj = obj.object
+            if target_obj:
+                return str(target_obj)
+        except Exception:
+            pass
+        return None
+
+    def get_available_metrics(self, obj):
+        """Get the list of available metrics for this object type"""
+        model_name = obj.content_type.model_class().__name__
+        metrics = get_available_metrics_for_model(model_name)
+        return {
+            key: {
+                "label": str(meta["label"]),
+                "type": meta["type"],
+                "description": str(meta["description"]),
+            }
+            for key, meta in metrics.items()
+        }

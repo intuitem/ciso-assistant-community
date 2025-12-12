@@ -18,6 +18,7 @@ GENERAL_SETTINGS_KEYS = [
     "mapping_max_depth",
     "allow_self_validation",
     "show_warning_external_links",
+    "builtin_metrics_retention_days",
 ]
 
 
@@ -60,6 +61,14 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
                 raise serializers.ValidationError(f"Invalid key: {key}")
+            # Validate builtin_metrics_retention_days minimum value
+            if key == "builtin_metrics_retention_days":
+                if not isinstance(value, int) or value < 1:
+                    raise serializers.ValidationError(
+                        {
+                            "builtin_metrics_retention_days": "Retention days must be at least 1"
+                        }
+                    )
             setattr(instance, "value", validated_data["value"])
 
         # Get new currency value

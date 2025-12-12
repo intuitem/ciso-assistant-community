@@ -5,19 +5,41 @@
 	interface Props {
 		widget: any;
 		samples?: any[];
+		builtinSamples?: any[]; // For builtin metrics
 		height?: string;
 	}
 
-	let { widget, samples = [], height = 'h-full' }: Props = $props();
+	let { widget, samples = [], builtinSamples = [], height = 'h-full' }: Props = $props();
+
+	// Determine if this is a builtin metric widget
+	const isBuiltinMetric = $derived(widget.is_builtin_metric || !!widget.target_content_type);
 
 	const chartId = $derived(`widget-chart-${widget.id}`);
 	const metricDefinition = $derived(widget.metric_instance?.metric_definition);
-	const isQualitative = $derived(metricDefinition?.category === 'qualitative');
-	const unitName = $derived(metricDefinition?.unit?.name || '');
+	const isQualitative = $derived(isBuiltinMetric ? false : metricDefinition?.category === 'qualitative');
+
+	// For builtin metrics, determine unit based on metric type
+	const builtinMetricType = $derived(
+		isBuiltinMetric ? getBuiltinMetricType(widget.metric_key) : null
+	);
+
+	const unitName = $derived(
+		isBuiltinMetric
+			? (builtinMetricType === 'percentage' ? 'percentage' : '')
+			: (metricDefinition?.unit?.name || '')
+	);
 	// Display symbol for unit (e.g., '%' instead of 'percentage')
 	const unitSymbol = $derived(unitName === 'percentage' ? '%' : unitName);
 	const targetValue = $derived(widget.metric_instance?.target_value);
 	const higherIsBetter = $derived(metricDefinition?.higher_is_better ?? true);
+
+	// Helper to determine builtin metric type
+	function getBuiltinMetricType(metricKey: string): string {
+		if (!metricKey) return 'number';
+		if (metricKey === 'progress') return 'percentage';
+		if (metricKey.endsWith('_breakdown')) return 'breakdown';
+		return 'number';
+	}
 
 	// Format value with unit
 	function formatValueWithUnit(value: number | string): string {
@@ -26,8 +48,8 @@
 		return String(value);
 	}
 
-	// Prepare chart data from samples
-	const chartData = $derived(
+	// Prepare chart data from samples (custom metrics)
+	const customChartData = $derived(
 		samples
 			.map((sample) => {
 				try {
@@ -44,6 +66,27 @@
 			.filter((item) => item[1] !== null)
 			.sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
 	);
+
+	// Prepare chart data from builtin metric samples
+	const builtinChartData = $derived(
+		builtinSamples
+			.map((sample) => {
+				const metricKey = widget.metric_key;
+				const metrics = sample.metrics || {};
+				const value = metrics[metricKey];
+				// For breakdown metrics, we can't display as a single value chart
+				// Instead, return the date and the full breakdown object
+				if (builtinMetricType === 'breakdown') {
+					return [sample.date, value ?? {}];
+				}
+				return [sample.date, value ?? null];
+			})
+			.filter((item) => item[1] !== null)
+			.sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
+	);
+
+	// Combined chart data based on metric type
+	const chartData = $derived(isBuiltinMetric ? builtinChartData : customChartData);
 
 	// Get choice names for qualitative metrics
 	const choiceNames = $derived(
@@ -407,7 +450,7 @@
 			</div>
 		{/if}
 	</div>
-{:else if samples.length > 0}
+{:else if samples.length > 0 || builtinSamples.length > 0}
 	<!-- ECharts -->
 	<div id={chartId} class="w-full {height}"></div>
 {:else}

@@ -72,7 +72,7 @@
 	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
 	import MetricDefinitionForm from './ModelForm/MetricDefinitionForm.svelte';
 	import MetricInstanceForm from './ModelForm/MetricInstanceForm.svelte';
-	import MetricSampleForm from './ModelForm/MetricSampleForm.svelte';
+	import CustomMetricSampleForm from './ModelForm/CustomMetricSampleForm.svelte';
 	import DashboardForm from './ModelForm/DashboardForm.svelte';
 	import DashboardWidgetForm from './ModelForm/DashboardWidgetForm.svelte';
 
@@ -802,8 +802,8 @@
 				{data}
 				{...rest}
 			/>
-		{:else if URLModel === 'metric-samples'}
-			<MetricSampleForm
+		{:else if URLModel === 'custom-metric-samples'}
+			<CustomMetricSampleForm
 				{form}
 				{model}
 				{cacheLocks}

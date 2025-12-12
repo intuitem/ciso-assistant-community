@@ -63,11 +63,17 @@ export const load: PageServerLoad = async (event) => {
 
 	widgetModel.selectOptions = selectOptions;
 
+	// Fetch supported models for builtin metrics
+	const supportedModelsEndpoint = `${BASE_API_URL}/metrology/builtin-metric-samples/supported_models/`;
+	const supportedModelsResponse = await event.fetch(supportedModelsEndpoint);
+	const supportedModels = supportedModelsResponse.ok ? await supportedModelsResponse.json() : {};
+
 	return {
 		...detailData,
 		widgets,
 		widgetModel,
-		widgetCreateForm
+		widgetCreateForm,
+		supportedModels
 	};
 };
 

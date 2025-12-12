@@ -127,7 +127,7 @@ export const URL_MODEL = [
 	// metrology
 	'metric-definitions',
 	'metric-instances',
-	'metric-samples',
+	'custom-metric-samples',
 	'dashboards',
 	'dashboard-widgets'
 ] as const;

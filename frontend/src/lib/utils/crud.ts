@@ -2174,7 +2174,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'metric_instance',
-				urlModel: 'metric-samples',
+				urlModel: 'custom-metric-samples',
 				fieldForInitialData: ['metric_definition']
 			}
 		],
@@ -2186,13 +2186,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'owner' }
 		]
 	},
-	'metric-samples': {
-		name: 'metricsample',
-		localName: 'metricSample',
-		localNamePlural: 'metricSamples',
-		verboseName: 'Metric sample',
-		verboseNamePlural: 'Metric samples',
-		endpointUrl: 'metrology/metric-samples',
+	'custom-metric-samples': {
+		name: 'custommetricsample',
+		localName: 'customMetricSample',
+		localNamePlural: 'customMetricSamples',
+		verboseName: 'Custom metric sample',
+		verboseNamePlural: 'Custom metric samples',
+		endpointUrl: 'metrology/custom-metric-samples',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'metric_instance', urlModel: 'metric-instances' }
