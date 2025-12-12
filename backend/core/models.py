@@ -4425,12 +4425,8 @@ class RiskAssessment(Assessment):
                 super().save(*args, **kwargs)
 
                 if matrix_changed:
-                    probabilities = [p["id"] for p in self.risk_matrix.probability]
-                    impacts = [i["id"] for i in self.risk_matrix.impact]
-                    if not probabilities or not impacts:
-                        raise ValidationError(
-                            _("Risk matrix has empty probability/impact scales")
-                        )
+                    probabilities = list(range(len(self.risk_matrix.probability or [])))
+                    impacts = list(range(len(self.risk_matrix.impact or [])))
 
                     min_prob, max_prob = min(probabilities), max(probabilities)
                     min_impact, max_impact = min(impacts), max(impacts)

@@ -198,10 +198,8 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
             )
 
             if old_matrix_id != self.risk_matrix_id:
-                probabilities = [
-                    p.get("id") for p in (self.risk_matrix.probability or [])
-                ]
-                impacts = [i.get("id") for i in (self.risk_matrix.impact or [])]
+                probabilities = list(range(len(self.risk_matrix.probability or [])))
+                impacts = list(range(len(self.risk_matrix.impact or [])))
                 min_prob, max_prob = min(probabilities), max(probabilities)
                 min_impact, max_impact = min(impacts), max(impacts)
                 for feared_event in self.feared_events.all():
