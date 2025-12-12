@@ -648,25 +648,14 @@ class LoadFileView(APIView):
                 )
                 continue
 
-            # Reject import of Global folder to prevent duplicates
-            if record.get("name").strip() == global_folder.name:
-                results["failed"] += 1
-                results["errors"].append(
-                    {
-                        "record": record,
-                        "error": f"Cannot import folder named '{global_folder.name}' - it already exists as the root folder",
-                    }
-                )
-                continue
-
             # Handle parent folder lookup
             parent_folder_id = global_folder.id  # Default to global folder
-            parent_folder_name = record.get("parent_folder", "").strip()
+            parent_folder_name = record.get("domain", "").strip()
 
             if parent_folder_name:
                 # Try to find the parent folder by name
                 try:
-                    parent_folder = Folder.objects.get(name=parent_folder_name)
+                    parent_folder = Folder.objects.get(name__iexact=parent_folder_name)
                     parent_folder_id = parent_folder.id
                 except Folder.DoesNotExist:
                     results["failed"] += 1
