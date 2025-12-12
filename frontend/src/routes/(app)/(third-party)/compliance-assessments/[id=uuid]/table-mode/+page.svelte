@@ -31,6 +31,7 @@
 	import { generateTocFromElements, type TocItem } from '$lib/utils/toc';
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	interface Props {
 		data: PageData;
@@ -804,10 +805,12 @@
 															{#key addedMeasure}
 																{#each requirementAssessment.applied_controls as ac}
 																	<p class="p-2">
-																		<a
-																			class="text-primary-700 hover:text-primary-500"
+																		<Anchor
+																			class="anchor"
 																			href="/applied-controls/{ac.id}"
-																			><i class="fa-solid fa-fire-extinguisher mr-2"></i>{ac.str}</a
+																			label={ac.str}
+																			><i class="fa-solid fa-fire-extinguisher mr-2"
+																			></i>{ac.str}</Anchor
 																		>
 																	</p>
 																{/each}
@@ -864,11 +867,13 @@
 															{#key addedEvidence}
 																{#each requirementAssessment.evidences as evidence}
 																	<p class="p-2">
-																		<a
-																			class="text-primary-700 hover:text-primary-500"
+																		<Anchor
+																			class="anchor"
 																			href="/evidences/{evidence.id}"
+																			label={evidence.str}
 																			data-testid="evidence-link"
-																			><i class="fa-solid fa-file-lines mr-2"></i>{evidence.str}</a
+																			><i class="fa-solid fa-file-lines mr-2"
+																			></i>{evidence.str}</Anchor
 																		>
 																	</p>
 																{/each}
