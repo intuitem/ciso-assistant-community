@@ -353,7 +353,7 @@
 							</div>
 							<div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 								<a
-									href="/dashboard-widgets/{widget.id}/edit"
+									href="/dashboard-widgets/{widget.id}/edit?next=/dashboards/{dashboard.id}/layout"
 									class="btn btn-sm preset-tonal p-1"
 									title={m.edit()}
 								>

@@ -21,6 +21,8 @@
 	const chart_id = 'metric-sample-chart';
 	const isQualitative = $derived(metricDefinition?.category === 'qualitative');
 	const unitName = $derived(metricDefinition?.unit?.name || '');
+	// Display symbol for unit (e.g., '%' instead of 'percentage')
+	const unitSymbol = $derived(unitName === 'percentage' ? '%' : unitName);
 
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -66,8 +68,8 @@
 
 					if (isQualitative && choiceNames && choiceNames[value - 1]) {
 						displayValue = `${value}. ${choiceNames[value - 1]}`;
-					} else if (!isQualitative && unitName) {
-						displayValue = `${value} ${unitName}`;
+					} else if (!isQualitative && unitSymbol) {
+						displayValue = unitName === 'percentage' ? `${value}%` : `${value} ${unitSymbol}`;
 					}
 
 					return `${date}<br/>${params[0].marker}${params[0].seriesName}: ${displayValue}`;
@@ -83,7 +85,7 @@
 			},
 			yAxis: {
 				type: 'value',
-				name: isQualitative ? m.choiceLevel() : unitName,
+				name: isQualitative ? m.choiceLevel() : unitSymbol,
 				nameLocation: 'middle',
 				nameGap: 50,
 				...(isQualitative && choiceNames.length > 0

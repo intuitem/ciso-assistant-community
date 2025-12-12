@@ -14,8 +14,17 @@
 	const metricDefinition = $derived(widget.metric_instance?.metric_definition);
 	const isQualitative = $derived(metricDefinition?.category === 'qualitative');
 	const unitName = $derived(metricDefinition?.unit?.name || '');
+	// Display symbol for unit (e.g., '%' instead of 'percentage')
+	const unitSymbol = $derived(unitName === 'percentage' ? '%' : unitName);
 	const targetValue = $derived(widget.metric_instance?.target_value);
 	const higherIsBetter = $derived(metricDefinition?.higher_is_better ?? true);
+
+	// Format value with unit
+	function formatValueWithUnit(value: number | string): string {
+		if (unitName === 'percentage') return `${value}%`;
+		if (unitSymbol) return `${value} ${unitSymbol}`;
+		return String(value);
+	}
 
 	// Prepare chart data from samples
 	const chartData = $derived(
@@ -93,8 +102,8 @@
 
 				if (isQualitative && choiceNames && choiceNames[value - 1]) {
 					displayValue = `${value}. ${choiceNames[value - 1]}`;
-				} else if (!isQualitative && unitName) {
-					displayValue = `${value} ${unitName}`;
+				} else if (!isQualitative && unitSymbol) {
+					displayValue = formatValueWithUnit(value);
 				}
 
 				return `${date}<br/>${params[0].marker}${displayValue}`;
@@ -112,7 +121,7 @@
 
 		const baseYAxis = {
 			type: 'value',
-			name: isQualitative ? '' : unitName,
+			name: isQualitative ? '' : unitSymbol,
 			nameLocation: 'middle',
 			nameGap: 40,
 			...(isQualitative && choiceNames.length > 0
@@ -280,7 +289,7 @@
 							},
 							detail: {
 								valueAnimation: true,
-								formatter: unitName ? `{value} ${unitName}` : '{value}',
+								formatter: unitName === 'percentage' ? '{value}%' : unitSymbol ? `{value} ${unitSymbol}` : '{value}',
 								fontSize: 20,
 								offsetCenter: [0, '40%']
 							},
@@ -325,9 +334,7 @@
 		if (isQualitative && choiceNames[value - 1]) {
 			return `[${value}] ${choiceNames[value - 1]}`;
 		}
-		if (unitName === 'percentage') return `${value}%`;
-		if (unitName) return `${value} ${unitName}`;
-		return String(value);
+		return formatValueWithUnit(value);
 	}
 </script>
 
