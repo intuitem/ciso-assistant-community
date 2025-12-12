@@ -241,8 +241,11 @@
 				};
 
 			case 'gauge':
-				const maxValue = targetValue ? targetValue * 1.5 : 100;
+				// For percentage metrics, always use 100 as max; otherwise use target or 100 as fallback
+				const gaugeMax = unitName === 'percentage' ? 100 : (targetValue ?? 100);
 				const gaugeValue = latestValue || 0;
+				// Calculate target position on the gauge (as a ratio from 0 to 1)
+				const targetRatio = widget.show_target && targetValue ? targetValue / gaugeMax : null;
 				return {
 					series: [
 						{
@@ -250,16 +253,12 @@
 							startAngle: 200,
 							endAngle: -20,
 							min: 0,
-							max: maxValue,
+							max: gaugeMax,
 							splitNumber: 5,
 							center: ['50%', '60%'],
 							radius: '90%',
 							itemStyle: {
-								color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-									{ offset: 0, color: 'rgb(59, 130, 246)' },
-									{ offset: 0.5, color: 'rgb(34, 197, 94)' },
-									{ offset: 1, color: 'rgb(239, 68, 68)' }
-								])
+								color: 'rgb(59, 130, 246)'
 							},
 							progress: {
 								show: true,
@@ -273,7 +272,13 @@
 							axisLine: {
 								lineStyle: {
 									width: 20,
-									color: [[1, 'rgba(200, 200, 200, 0.3)']]
+									color: targetRatio !== null
+										? [
+											[targetRatio, 'rgba(200, 200, 200, 0.3)'],
+											[targetRatio + 0.005, 'rgb(234, 88, 12)'], // Orange target marker
+											[1, 'rgba(200, 200, 200, 0.3)']
+										]
+										: [[1, 'rgba(200, 200, 200, 0.3)']]
 								}
 							},
 							axisTick: { show: false },
@@ -296,7 +301,7 @@
 							data: [
 								{
 									value: gaugeValue,
-									name: widget.show_target && targetValue ? `${m.target()}: ${targetValue}` : ''
+									name: widget.show_target && targetValue ? `${m.target()}: ${formatValueWithUnit(targetValue)}` : ''
 								}
 							]
 						}
