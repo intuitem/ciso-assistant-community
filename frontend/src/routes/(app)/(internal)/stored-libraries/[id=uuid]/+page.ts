@@ -9,7 +9,6 @@ export const load: PageLoad = async ({ fetch, params, url }) => {
 
 	if (isExclusivelyLoaded) {
 		const loadedLibraryId = library.loaded_library;
-		console.log('===>', loadedLibraryId);
 
 		if (loadedLibraryId !== null) {
 			endpoint = `/loaded-libraries/${loadedLibraryId}`;
