@@ -807,10 +807,35 @@ class LoadFileView(APIView):
                                 else "to_do",
                                 "observation": record.get("observations", ""),
                             }
-                            if record.get("score") != "":
+                            if (
+                                record.get("implementation_score") != ""
+                                and record.get("documentation_score") != ""
+                            ):
+                                if not compliance_assessment.show_documentation_score:
+                                    compliance_assessment.show_documentation_score = (
+                                        True
+                                    )
+                                    compliance_assessment.save(
+                                        update_fields=["show_documentation_score"]
+                                    )
+                                requirement_data.update(
+                                    {
+                                        "score": record.get("implementation_score"),
+                                        "documentation_score": record.get(
+                                            "documentation_score"
+                                        ),
+                                        "is_scored": True,
+                                    }
+                                )
+                            elif (
+                                record.get("score") != ""
+                                and record.get("score") is not None
+                            ):
                                 requirement_data.update(
                                     {"score": record.get("score"), "is_scored": True}
                                 )
+                            else:
+                                requirement_data.update({"is_scored": False})
                             # Use the serializer for validation and saving
                             req_serializer = RequirementAssessmentWriteSerializer(
                                 instance=requirement_assessment,
@@ -1385,7 +1410,7 @@ class LoadFileView(APIView):
             # Process controls first - collect all unique control names
             all_controls = set()
             for record in records:
-                existing_controls = record.get("existing_controls", "").strip()
+                existing_controls = record.get("existing_applied_controls", "").strip()
                 additional_controls = record.get("additional_controls", "").strip()
 
                 if existing_controls:
@@ -1613,7 +1638,6 @@ class LoadFileView(APIView):
                 "current_proba": current_proba,
                 "residual_impact": residual_impact,
                 "residual_proba": residual_proba,
-                "existing_controls": record.get("existing_controls", ""),
             }
 
             # Create the risk scenario
@@ -1632,7 +1656,7 @@ class LoadFileView(APIView):
             # Link existing controls
             self._link_controls_to_scenario(
                 risk_scenario,
-                record.get("existing_controls", ""),
+                record.get("existing_applied_controls", ""),
                 control_mapping,
                 "existing_applied_controls",
             )

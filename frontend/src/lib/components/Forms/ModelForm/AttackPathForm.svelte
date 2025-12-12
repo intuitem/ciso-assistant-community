@@ -5,6 +5,7 @@
 	import type { SuperForm } from 'sveltekit-superforms';
 	import Checkbox from '../Checkbox.svelte';
 	import TextArea from '../TextArea.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -44,6 +45,13 @@
 	bind:cachedValue={formDataCache['folder']}
 	label={m.folder()}
 	hidden
+/>
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
 />
 <AutocompleteSelect
 	{form}

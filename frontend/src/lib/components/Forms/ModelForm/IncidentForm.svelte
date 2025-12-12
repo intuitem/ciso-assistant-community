@@ -27,10 +27,6 @@
 		initialData = {}
 	}: Props = $props();
 	const disableDoubleDash = true;
-
-	let currentDateTime = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000)
-		.toISOString()
-		.slice(0, 19);
 </script>
 
 <TextField
@@ -46,7 +42,6 @@
 	{form}
 	field="reported_at"
 	label={m.reportedAt()}
-	value={currentDateTime}
 	cacheLock={cacheLocks['reported_at']}
 	bind:cachedValue={formDataCache['reported_at']}
 />
@@ -95,14 +90,6 @@
 	cacheLock={cacheLocks['severity']}
 	bind:cachedValue={formDataCache['severity']}
 />
-<AutocompleteSelect
-	multiple
-	{form}
-	optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
-	field="qualifications"
-	optionsLabelField="translated_name"
-	label={m.qualifications()}
-/>
 <TextField
 	{form}
 	field="link"
@@ -112,6 +99,14 @@
 	bind:cachedValue={formDataCache['link']}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
+		field="qualifications"
+		optionsLabelField="translated_name"
+		label={m.qualifications()}
+	/>
 	<AutocompleteSelect
 		multiple
 		{form}

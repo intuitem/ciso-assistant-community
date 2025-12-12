@@ -305,11 +305,12 @@ def ebios_rm_visual_analysis(study):
         {"name": "Feared Event"},
         {"name": "Risk Origin"},
         {"name": "Target Objective"},
-        {"name": "Ecosystem entity"},
+        {"name": "Entity"},
         {"name": "Strategic scenario"},
         {"name": "Attack Path"},
         {"name": "Operational scenario"},
-        {"name": "Techniques/Unitary actions"},
+        {"name": "Operating Mode"},
+        {"name": "Elementary action"},
     ]
     feared_events = FearedEvent.objects.filter(ebios_rm_study=study).distinct()
     assets = study.assets.all()
@@ -436,11 +437,19 @@ def ebios_rm_visual_analysis(study):
                 )
     operational_scenarios = OperationalScenario.objects.filter(
         ebios_rm_study=study
-    ).prefetch_related("threats", "attack_path")
+    ).prefetch_related(
+        "threats",
+        "attack_path__strategic_scenario",
+        "operating_modes__elementary_actions",
+    )
     for os in operational_scenarios:
+        # Use strategic scenario name + attack path name as display name
+        display_name = (
+            f"{os.attack_path.strategic_scenario.name} - {os.attack_path.name}"
+        )
         nodes.append(
             {
-                "name": f"{wrap_text(os.operating_modes_description)}",
+                "name": f"{wrap_text(display_name)}",
                 "category": 7,
             }
         )
@@ -453,9 +462,45 @@ def ebios_rm_visual_analysis(study):
                 "value": "involves",
             }
         )
+
+        # Add operating modes for this operational scenario
+        for om in os.operating_modes.all():
+            nodes.append(
+                {
+                    "name": f"{wrap_text(om.name)}",
+                    "category": 8,
+                    "symbol": "circle",
+                    "symbolSize": 20,
+                }
+            )
+            nodes_idx[f"{om.id}-OM"] = N
+            N += 1
+            links.append(
+                {
+                    "source": nodes_idx[f"{om.id}-OM"],
+                    "target": nodes_idx[f"{os.id}-OS"],
+                    "value": "part of",
+                }
+            )
+
+            # Link operating mode to its elementary actions
+            for ea in om.elementary_actions.all():
+                if nodes_idx.get(f"{ea.id}-EA") is None:
+                    nodes.append({"name": ea.name, "category": 9, "symbol": "triangle"})
+                    nodes_idx[f"{ea.id}-EA"] = N
+                    N += 1
+                links.append(
+                    {
+                        "source": nodes_idx[f"{om.id}-OM"],
+                        "target": nodes_idx[f"{ea.id}-EA"],
+                        "value": "uses",
+                    }
+                )
+
+        # Also link OS to threats (if not already covered by operating modes)
         for ua in os.threats.all().distinct():
             if nodes_idx.get(f"{ua.id}-UA") is None:
-                nodes.append({"name": ua.name, "category": 8, "symbol": "triangle"})
+                nodes.append({"name": ua.name, "category": 9, "symbol": "triangle"})
                 nodes_idx[f"{ua.id}-UA"] = N
                 N += 1
             links.append(

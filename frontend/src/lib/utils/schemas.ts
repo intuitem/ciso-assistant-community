@@ -151,6 +151,9 @@ export const RiskScenarioSchema = z.object({
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	risk_origin: z.string().uuid().optional().nullable(),
+	antecedent_scenarios: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
 	ref_id: z.string().max(100).optional()
 });
 
@@ -177,7 +180,7 @@ export const AppliedControlSchema = z.object({
 	control_impact: z.number().optional().nullable(),
 	cost: z
 		.object({
-			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
+			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
 			amortization_period: z.number().min(1).max(50).default(1),
 			build: z
 				.object({
@@ -221,6 +224,26 @@ export const RiskAcceptanceSchema = z.object({
 	justification: z.string().optional().nullable(),
 	approver: z.string().optional().nullable(),
 	risk_scenarios: z.array(z.string())
+});
+
+export const ValidationFlowSchema = z.object({
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	status: z.string().default('submitted'),
+	validation_deadline: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	request_notes: z.string().optional().nullable(),
+	approver: z.string(),
+	filtering_labels: z.array(z.string().uuid().optional()).optional(),
+	compliance_assessments: z.array(z.string()).optional(),
+	risk_assessments: z.array(z.string()).optional(),
+	business_impact_analysis: z.array(z.string()).optional(),
+	crq_studies: z.array(z.string()).optional(),
+	ebios_studies: z.array(z.string()).optional(),
+	entity_assessments: z.array(z.string()).optional(),
+	findings_assessments: z.array(z.string()).optional(),
+	evidences: z.array(z.string()).optional(),
+	security_exceptions: z.array(z.string()).optional(),
+	policies: z.array(z.string()).optional()
 });
 
 export const ReferenceControlSchema = z.object({
@@ -306,6 +329,7 @@ export const AssetSchema = z.object({
 	observation: z.string().optional().nullable(),
 	overridden_children_capabilities: z.string().uuid().optional().array().optional(),
 	solutions: z.string().uuid().optional().array().optional(),
+	applied_controls: z.string().uuid().optional().array().optional(),
 	is_business_function: z.boolean().default(false),
 	dora_licenced_activity: z.string().optional().nullable(),
 	dora_criticality_assessment: z.string().default('eba_BT:x21'),
@@ -458,6 +482,7 @@ export const EvidenceSchema = z.object({
 export const EvidenceRevisionSchema = z.object({
 	folder: z.string().uuid(),
 	evidence: z.string().uuid(),
+	task_node: z.string().uuid().nullable(),
 	version: z.number().optional(),
 	attachment: z.any().optional().nullable(),
 	link: z
@@ -479,8 +504,11 @@ export const GeneralSettingsSchema = z.object({
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
 	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
-	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
-	daily_rate: z.number().default(500).optional()
+	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
+	daily_rate: z.number().default(500).optional(),
+	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
+	allow_self_validation: z.boolean().default(false).optional(),
+	show_warning_external_links: z.boolean().default(true).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -505,7 +533,9 @@ export const FeatureFlagsSchema = z.object({
 	bia: z.boolean().optional(),
 	project_management: z.boolean().optional(),
 	contracts: z.boolean().optional(),
-	reports: z.boolean().optional()
+	reports: z.boolean().optional(),
+	validation_flows: z.boolean().optional(),
+	outgoing_webhooks: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -581,13 +611,13 @@ export const EntitiesSchema = z.object({
 		.optional(),
 	relationship: z.string().optional().array().optional(),
 	legal_identifiers: z.record(z.string()).optional(),
-	country: z.string().optional(),
-	currency: z.string().optional(),
-	dora_entity_type: z.string().optional(),
-	dora_entity_hierarchy: z.string().optional(),
+	country: z.string().nullish(),
+	currency: z.string().nullish(),
+	dora_entity_type: z.string().nullish(),
+	dora_entity_hierarchy: z.string().nullish(),
 	dora_assets_value: z.number().optional().nullable(),
 	dora_competent_authority: z.string().optional(),
-	dora_provider_person_type: z.string().optional(),
+	dora_provider_person_type: z.string().nullish(),
 	default_dependency: z.number().optional(),
 	default_penetration: z.number().optional(),
 	default_maturity: z.number().optional(),
@@ -629,18 +659,18 @@ export const solutionSchema = z.object({
 	owner: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
-	dora_ict_service_type: z.string().optional(),
+	dora_ict_service_type: z.string().nullish(),
 	storage_of_data: z.boolean().optional().default(false),
-	data_location_storage: z.string().optional(),
-	data_location_processing: z.string().optional(),
-	dora_data_sensitiveness: z.string().optional(),
-	dora_reliance_level: z.string().optional(),
-	dora_substitutability: z.string().optional(),
-	dora_non_substitutability_reason: z.string().optional(),
-	dora_has_exit_plan: z.string().optional(),
-	dora_reintegration_possibility: z.string().optional(),
-	dora_discontinuing_impact: z.string().optional(),
-	dora_alternative_providers_identified: z.string().optional(),
+	data_location_storage: z.string().nullish(),
+	data_location_processing: z.string().nullish(),
+	dora_data_sensitiveness: z.string().nullish(),
+	dora_reliance_level: z.string().nullish(),
+	dora_substitutability: z.string().nullish(),
+	dora_non_substitutability_reason: z.string().nullish(),
+	dora_has_exit_plan: z.string().nullish(),
+	dora_reintegration_possibility: z.string().nullish(),
+	dora_discontinuing_impact: z.string().nullish(),
+	dora_alternative_providers_identified: z.string().nullish(),
 	dora_alternative_providers: z.string().optional()
 });
 
@@ -663,7 +693,7 @@ export const contractSchema = z.object({
 	provider_entity: z.string().optional(),
 	beneficiary_entity: z.string().optional(),
 	evidences: z.array(z.string().optional()).optional(),
-	solution: z.string().optional(),
+	solutions: z.array(z.string().optional()).optional(),
 	status: z.string().optional().default('draft'),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	end_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -701,7 +731,8 @@ export const BusinessImpactAnalysisSchema = z.object({
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional()
+	reviewers: z.array(z.string().optional()).optional(),
+	is_locked: z.boolean().optional().default(false)
 });
 
 export const AssetAssessmentSchema = z.object({
@@ -735,6 +766,7 @@ export const processingSchema = z.object({
 	has_sensitive_personal_data: z.boolean().optional(),
 	nature: z.string().optional().array().optional(),
 	associated_controls: z.array(z.string().optional()).optional(),
+	evidences: z.string().optional().array().optional(),
 	assigned_to: z.string().uuid().optional().array().optional()
 });
 
@@ -1013,6 +1045,7 @@ export const StrategicScenarioSchema = z.object({
 
 export const AttackPathSchema = z.object({
 	...NameDescriptionMixin,
+	ref_id: z.string().optional(),
 	ebios_rm_study: z.string(),
 	strategic_scenario: z.string().uuid(),
 	stakeholders: z.string().uuid().optional().array().optional(),
@@ -1029,7 +1062,8 @@ export const operationalScenarioSchema = z.object({
 	likelihood: z.number().optional().default(-1),
 	is_selected: z.boolean().default(true),
 	justification: z.string().optional(),
-	folder: z.string()
+	folder: z.string(),
+	strategic_scenario: z.string().optional()
 });
 
 export const SecurityExceptionSchema = z.object({
@@ -1042,7 +1076,8 @@ export const SecurityExceptionSchema = z.object({
 	status: z.string().default('draft'),
 	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	requirement_assessments: z.string().optional().array().optional(),
-	applied_controls: z.string().uuid().optional().array().optional()
+	applied_controls: z.string().uuid().optional().array().optional(),
+	assets: z.string().uuid().optional().array().optional()
 });
 
 export const FindingSchema = z.object({
@@ -1146,7 +1181,7 @@ export const TaskTemplateSchema = z.object({
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
-	evidences: z.string().uuid().optional().array().optional(),
+	evidences: z.union([z.string().uuid(), z.string()]).optional().array().optional(), // Allow both UUIDs and strings for evidences created from the form
 	schedule: z
 		.object({
 			interval: z.number().min(1).positive().optional(),
@@ -1308,6 +1343,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'applied-controls_duplicate': AppliedControlDuplicateSchema,
 	policies: PolicySchema,
 	'risk-acceptances': RiskAcceptanceSchema,
+	'validation-flows': ValidationFlowSchema,
 	'reference-controls': ReferenceControlSchema,
 	assets: AssetSchema,
 	'requirement-assessments': RequirementAssessmentSchema,
@@ -1372,4 +1408,14 @@ export const modelSchema = (model: string) => {
 
 export const composerSchema = z.object({
 	risk_assessments: z.array(z.string().uuid())
+});
+
+export const webhookEndpointSchema = z.object({
+	...NameDescriptionMixin,
+	url: z.string().url(),
+	event_types: z.string().array().nonempty(),
+	is_active: z.boolean().default(true),
+	secret: z.string().min(1).optional(),
+	target_folders: z.string().uuid().optional().array().optional(),
+	payload_format: z.enum(['thin', 'full']).default('full')
 });
