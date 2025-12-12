@@ -112,41 +112,6 @@
 	label={m.aggregation()}
 />
 
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-	<TextField
-		{form}
-		type="number"
-		field="position_x"
-		label={m.positionX()}
-		cacheLock={cacheLocks['position_x']}
-		bind:cachedValue={formDataCache['position_x']}
-	/>
-	<TextField
-		{form}
-		type="number"
-		field="position_y"
-		label={m.positionY()}
-		cacheLock={cacheLocks['position_y']}
-		bind:cachedValue={formDataCache['position_y']}
-	/>
-	<TextField
-		{form}
-		type="number"
-		field="width"
-		label={m.width()}
-		cacheLock={cacheLocks['width']}
-		bind:cachedValue={formDataCache['width']}
-	/>
-	<TextField
-		{form}
-		type="number"
-		field="height"
-		label={m.height()}
-		cacheLock={cacheLocks['height']}
-		bind:cachedValue={formDataCache['height']}
-	/>
-</div>
-
 <div class="flex flex-wrap gap-4">
 	<Checkbox
 		{form}
