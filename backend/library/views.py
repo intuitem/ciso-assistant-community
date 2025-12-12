@@ -244,7 +244,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
         loaded_library = library.get_loaded_library()
         if loaded_library is None:
             return Response(
-                data="No loaded library not found.", status=HTTP_404_NOT_FOUND
+                data="Loaded library not found.", status=HTTP_404_NOT_FOUND
             )
 
         try:
