@@ -30,13 +30,13 @@ export const actions: Actions = {
 			const response = await res.json();
 			console.error('server response:', response);
 			setFlash({ type: 'error', message: safeTranslate(response.error) }, event);
-			return fail(400, { error: m.errorLoadingLibrary() }); // TODO: Change this translation.
-		} // errorUnloadingLibrary : Error unloading library
+			return fail(400, { error: m.errorUnloadingLibrary() });
+		}
 		setFlash(
 			{
 				type: 'success',
-				message: m.librarySuccessfullyLoaded() // TODO: Change this translation.
-			}, // librarySuccessfullyUnloaded : The library has been successfully loaded
+				message: m.librarySuccessfullyUnloaded()
+			},
 			event
 		);
 	}
