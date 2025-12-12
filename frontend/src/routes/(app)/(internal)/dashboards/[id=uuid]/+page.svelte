@@ -54,10 +54,10 @@
 				class="btn preset-tonal"
 			>
 				<i class="fa-solid fa-pencil"></i>
-				{m.edit()}
+				{m.editAttributes()}
 			</a>
 			<a href="/dashboards/{dashboard.id}/layout" class="btn preset-filled-primary-500">
-				<i class="fa-solid fa-pen-to-square"></i>
+				<i class="fa-solid fa-grip"></i>
 				{m.editLayout()}
 			</a>
 		</div>

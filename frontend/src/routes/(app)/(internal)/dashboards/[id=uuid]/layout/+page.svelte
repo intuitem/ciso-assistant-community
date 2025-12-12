@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import { m } from '$paraglide/messages';
 	import { invalidate, goto } from '$app/navigation';
 	import { getModalStore } from '$lib/components/Modals/stores';
@@ -96,14 +96,17 @@
 		modalStore.trigger({
 			type: 'component',
 			component: {
-				ref: ConfirmModal,
+				ref: DeleteConfirmModal,
 				props: {
-					formAction: `/dashboard-widgets/${widget.id}?/delete`,
+					_form: {},
+					formAction: '?/delete',
+					URLModel: 'dashboard-widgets',
+					id: widget.id,
 					invalidateAll: false
 				}
 			},
-			title: m.confirmModalTitle(),
-			body: `${m.confirmModalMessage()}: ${widget.display_title || widget.title || 'Widget'}?`
+			title: m.deleteModalTitle(),
+			body: m.deleteModalMessage({ name: widget.display_title || widget.title || 'Widget' })
 		});
 	}
 
