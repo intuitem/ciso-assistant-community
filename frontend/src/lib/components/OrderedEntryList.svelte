@@ -32,6 +32,13 @@
 		onchange?.(entries);
 	}
 
+	function updateEntry(index: number, field: 'ref_id' | 'name', value: string) {
+		entries = entries.map((entry, i) =>
+			i === index ? { ...entry, [field]: value } : entry
+		);
+		onchange?.(entries);
+	}
+
 	function handleDragStart(index: number) {
 		draggedIndex = index;
 	}
@@ -124,10 +131,20 @@
 					</div>
 					<div class="flex-1 flex gap-4">
 						<div class="w-1/3">
-							<span class="font-medium">{entry.ref_id}</span>
+							<input
+								type="text"
+								value={entry.ref_id}
+								class="input px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 rounded w-full font-medium bg-transparent"
+								onchange={(e) => updateEntry(index, 'ref_id', e.currentTarget.value)}
+							/>
 						</div>
 						<div class="w-2/3">
-							<span class="">{entry.name}</span>
+							<input
+								type="text"
+								value={entry.name}
+								class="input px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 rounded w-full bg-transparent"
+								onchange={(e) => updateEntry(index, 'name', e.currentTarget.value)}
+							/>
 						</div>
 					</div>
 					<button
