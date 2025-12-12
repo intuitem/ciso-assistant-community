@@ -3,9 +3,10 @@ from pathlib import Path
 
 import structlog
 from django.core.management.base import BaseCommand
+from django.db.models import Exists, OuterRef
 
 from ciso_assistant.settings import LIBRARIES_PATH
-from core.models import StoredLibrary
+from core.models import StoredLibrary, LoadedLibrary
 
 logger = structlog.getLogger(__name__)
 
@@ -39,3 +40,32 @@ class Command(BaseCommand):
                     )
             except:
                 logger.error("Invalid library file", filename=fname)
+
+        invisible_libraries = (
+            LoadedLibrary.objects.filter(
+                builtin=False,
+            )
+            .annotate(
+                is_stored=Exists(StoredLibrary.objects.filter(urn=OuterRef("urn")))
+            )
+            .filter(is_stored=False)
+        )
+
+        # If a user loaded a custom library with an urn U and then deleted the stored library with an urn U
+        # Then the user would not be able to see the library in the frontend libraries list view as it fetches from the stored-libraries endpoint, making the library effectively "invisible".
+        # This fixes this problem by recreating a StoredLibrary for every "orphaned" custom library.
+        for library in invisible_libraries:
+            StoredLibrary.objects.create(
+                urn=library.urn,
+                copyright=library.copyright,
+                packager=library.packager,
+                publication_date=library.publication_date,
+                builtin=library.builtin,
+                objects_meta=library.objects_meta,
+                dependencies=library.dependencies,
+                version=library.version,
+                is_loaded=True,
+                hash_checksum="0" * 64,
+                content=dict(),
+                autoload=True,
+            )

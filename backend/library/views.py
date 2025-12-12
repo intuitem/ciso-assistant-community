@@ -3,7 +3,7 @@ import json
 from django.db import IntegrityError
 from django.db.models import F, Q, IntegerField, OuterRef, Subquery
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, viewsets, status
+from rest_framework import filters, generics
 from django.conf import settings
 
 from rest_framework.status import (
@@ -12,6 +12,7 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND,
+    HTTP_409_CONFLICT,
     HTTP_422_UNPROCESSABLE_ENTITY,
 )
 from rest_framework.parsers import FileUploadParser
@@ -78,6 +79,12 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
     mapping_suggested = df.BooleanFilter(
         method="filter_mapping_suggested",
     )
+    is_custom = df.BooleanFilter(
+        method="filter_is_custom",
+    )
+
+    def filter_is_custom(self, queryset, name, value):
+        return queryset.filter(builtin=not value)
 
     def filter_mapping_suggested(self, queryset, name, value):
         """
@@ -158,6 +165,7 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
             "version",
             "packager",
             "provider",
+            "filtering_labels",
             "object_type",
         ]
 
@@ -172,13 +180,6 @@ class StoredLibraryViewSet(BaseModelViewSet):
     queryset = StoredLibrary.objects.all()
 
     search_fields = ["name", "description", "urn", "ref_id"]
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        return qs.filter(
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        )
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -224,6 +225,37 @@ class StoredLibraryViewSet(BaseModelViewSet):
         lib.delete()
         return Response(status=HTTP_204_NO_CONTENT)
 
+    @action(detail=True, methods=["post"])
+    def unload(self, request, pk):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="delete_loadedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
+
+        try:
+            key = "urn" if pk.startswith("urn:") else "id"
+            libraries = StoredLibrary.objects.filter(**{key: pk})
+            library = max(libraries, key=lambda lib: lib.version)
+        except:
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+
+        loaded_library = library.get_loaded_library()
+        if loaded_library is None:
+            return Response(
+                data="No loaded library not found.", status=HTTP_404_NOT_FOUND
+            )
+
+        try:
+            loaded_library.delete()
+        except:
+            return Response(
+                data="Loaded library can't be deleted because it's currently being used.",
+                status=HTTP_409_CONFLICT,
+            )
+        return Response({"status": "success"})
+
     @action(detail=True, methods=["post"], url_path="import")
     def import_library(self, request, pk):
         if not RoleAssignment.is_access_allowed(
@@ -232,6 +264,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             folder=Folder.get_root_folder(),
         ):
             return Response(status=HTTP_403_FORBIDDEN)
+
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             libraries = StoredLibrary.objects.filter(  # The get method raise an exception if multiple objects are found
@@ -268,14 +301,13 @@ class StoredLibraryViewSet(BaseModelViewSet):
         library_objects = lib.content  # We may need caching for this
         if not (framework := library_objects.get("framework")):
             return Response(
-                data="This library does not include a framework.",
+                data="This library doesn't contain any framework.",
                 status=HTTP_400_BAD_REQUEST,
             )
 
         preview = preview_library(framework)
-        return Response(
-            get_sorted_requirement_nodes(preview.get("requirement_nodes"), None, None)
-        )
+        requirement_nodes = preview.get("requirement_nodes")
+        return Response(get_sorted_requirement_nodes(requirement_nodes, None, None))
 
     @action(detail=False, methods=["post"], url_path="upload")
     def upload_library(self, request):
@@ -293,6 +325,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
             try:
                 library = StoredLibrary.store_library_content(content)
+                if library is not None:
+                    library.load()
+
                 return Response(
                     StoredLibrarySerializer(library).data, status=HTTP_201_CREATED
                 )

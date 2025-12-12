@@ -1022,6 +1022,15 @@ export const FIELD_PATH_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const IS_CUSTOM_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_custom',
+		options: YES_NO_OPTIONS,
+		multiple: true
+	}
+};
+
 export const BUILTIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1486,6 +1495,8 @@ export const listViewFields = {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
 			object_type: LIBRARY_TYPE_FILTER,
+			filtering_labels: LABELS_FILTER,
+			is_custom: IS_CUSTOM_FILTER,
 			mapping_suggested: MAPPING_SUGGESTED_FILTER
 		}
 	},

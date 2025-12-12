@@ -976,5 +976,8 @@
 	"samlAuthnRequestSignedHelpText": "Când este activat, cererea de autentificare SAML este semnată cu cheia privată de mai jos. Certificatul public corespunzător este trimis furnizorului de identitate pentru a putea verifica semnătura.",
 	"downloadCertificate": "Descărcați certificatul",
 	"viewMore": "Vizualizați mai mult",
-	"viewLess": "Vizualizați mai puțin"
+	"viewLess": "Vizualizați mai puțin",
+	"isCustom": "Personalizat",
+	"errorUnloadingLibrary": "Eroare la descarcarea bibliotecii",
+	"librarySuccessfullyUnloaded": "Biblioteca a fost descărcată cu succes"
 }

@@ -982,5 +982,8 @@
 	"samlAuthnRequestSignedHelpText": "Wanneer ingeschakeld, wordt het SAML-authenticatieverzoek ondertekend met de privésleutel hieronder. Het bijbehorende openbare certificaat wordt naar de identiteitsprovider verzonden, zodat deze de handtekening kan verifiëren.",
 	"downloadCertificate": "Certificaat downloaden",
 	"viewMore": "Meer weergeven",
-	"viewLess": "Minder weergeven"
+	"viewLess": "Minder weergeven",
+	"isCustom": "Aangepast",
+	"errorUnloadingLibrary": "Fout bij het ontladen van bibliotheek",
+	"librarySuccessfullyUnloaded": "De bibliotheek is succesvol ontladen"
 }

@@ -947,5 +947,8 @@
 	"samlAuthnRequestSignedHelpText": "عند التمكين، يتم توقيع طلب المصادقة SAML بالمفتاح الخاص أدناه. يتم إرسال الشهادة العامة المقابلة إلى موفر الهوية حتى يتمكن من التحقق من التوقيع.",
 	"downloadCertificate": "تنزيل الشهادة",
 	"viewMore": "عرض المزيد",
-	"viewLess": "عرض أقل"
+	"viewLess": "عرض أقل",
+	"isCustom": "مخصص",
+	"errorUnloadingLibrary": "خطأ في تفريغ المكتبة",
+	"librarySuccessfullyUnloaded": "تم إلغاء تحميل المكتبة بنجاح"
 }

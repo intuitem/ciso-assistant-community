@@ -979,5 +979,8 @@
 	"samlAuthnRequestSignedHelpText": "Quando ativado, a solicitação de autenticação SAML é assinada com a chave privada abaixo. O certificado público correspondente é enviado ao Provedor de Identidade para que ele possa verificar a assinatura.",
 	"downloadCertificate": "Baixar certificado",
 	"viewMore": "Ver mais",
-	"viewLess": "Ver menos"
+	"viewLess": "Ver menos",
+	"isCustom": "Personalizado",
+	"errorUnloadingLibrary": "Erro ao descarregar a biblioteca",
+	"librarySuccessfullyUnloaded": "A biblioteca foi descarregada com sucesso"
 }

@@ -2722,5 +2722,8 @@
 	"personalDataDescription": "Inventaire et classification des données personnelles",
 	"purposesDescription": "Finalités des traitements de données (RGPD)",
 	"rightRequestsDescription": "Demandes d'exercice de droits des personnes concernées (RGPD)",
-	"dataBreachesDescription": "Incidents de violations de données et notifications"
+	"dataBreachesDescription": "Incidents de violations de données et notifications",
+	"isCustom": "Personnalisé",
+	"errorUnloadingLibrary": "Erreur lors du déchargement de la bibliothèque",
+	"librarySuccessfullyUnloaded": "La bibliothèque a été déchargée avec succès"
 }

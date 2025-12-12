@@ -1259,5 +1259,8 @@
 	"samlAuthnRequestSignedHelpText": "Når aktiveret, bliver SAML-autentificeringsanmodningen underskrevet med den private nøgle nedenfor. Det tilsvarende offentlige certifikat sendes til Identity Provider, så det kan verificere underskriften.",
 	"downloadCertificate": "Download certifikat",
 	"viewMore": "Se mere",
-	"viewLess": "Se mindre"
+	"viewLess": "Se mindre",
+	"isCustom": "Brugerdefineret",
+	"errorUnloadingLibrary": "Fejl under aflæsning af bibliotek",
+	"librarySuccessfullyUnloaded": "Biblioteket blev afindlæst med succes"
 }

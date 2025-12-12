@@ -1719,5 +1719,8 @@
 	"samlAuthnRequestSignedHelpText": "Gdy włączone, żądanie uwierzytelniania SAML jest podpisywane kluczem prywatnym poniżej. Odpowiedni certyfikat publiczny jest wysyłany do dostawcy tożsamości, aby mógł zweryfikować podpis.",
 	"downloadCertificate": "Pobierz certyfikat",
 	"viewMore": "Pokaż więcej",
-	"viewLess": "Pokaż mniej"
+	"viewLess": "Pokaż mniej",
+	"isCustom": "Niestandardowy",
+	"errorUnloadingLibrary": "Błąd rozładowywania biblioteki",
+	"librarySuccessfullyUnloaded": "Biblioteka została pomyślnie rozładowana"
 }
