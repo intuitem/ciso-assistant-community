@@ -57,13 +57,20 @@ class Command(BaseCommand):
         for library in invisible_libraries:
             StoredLibrary.objects.create(
                 urn=library.urn,
+                locale=library.locale,
+                name=library.name, # is_published
+                description=library.description,
+                annotation=library.annotation,
                 copyright=library.copyright,
+                provider=library.provider,
                 packager=library.packager,
                 publication_date=library.publication_date,
+                translations=library.translations,
                 builtin=library.builtin,
                 objects_meta=library.objects_meta,
                 dependencies=library.dependencies,
                 version=library.version,
+                ref_id=library.ref_id,
                 is_loaded=True,
                 hash_checksum="0" * 64,
                 content=dict(),
