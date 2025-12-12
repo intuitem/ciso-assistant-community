@@ -306,27 +306,29 @@
 	</div>
 
 	<!-- Grid Editor -->
-	<div class="relative bg-surface-50-950 rounded-lg p-4 min-h-[600px]">
-		<!-- Grid background -->
-		<div
-			class="absolute inset-4 grid gap-2 pointer-events-none opacity-20"
-			style="grid-template-columns: repeat({GRID_COLS}, 1fr); grid-template-rows: repeat({maxRow}, {ROW_HEIGHT}px);"
-		>
-			{#each Array(GRID_COLS * maxRow) as _, i}
-				<div class="border border-dashed border-surface-400 rounded"></div>
-			{/each}
-		</div>
-
-		<!-- Widgets Grid -->
+	<div class="bg-surface-50-950 rounded-lg p-4">
 		{#if widgets.length > 0}
-			<div
-				bind:this={gridElement}
-				class="relative grid gap-2"
-				style="grid-template-columns: repeat({GRID_COLS}, 1fr); grid-template-rows: repeat({maxRow}, {ROW_HEIGHT}px);"
-				ondragover={handleDragOver}
-				ondrop={handleDrop}
-				role="grid"
-			>
+			<!-- Grid container with background -->
+			<div class="relative">
+				<!-- Grid background -->
+				<div
+					class="absolute inset-0 grid gap-2 pointer-events-none opacity-20"
+					style="grid-template-columns: repeat({GRID_COLS}, 1fr); grid-template-rows: repeat({maxRow}, {ROW_HEIGHT}px);"
+				>
+					{#each Array(GRID_COLS * maxRow) as _, i}
+						<div class="border border-dashed border-surface-400 rounded"></div>
+					{/each}
+				</div>
+
+				<!-- Widgets Grid -->
+				<div
+					bind:this={gridElement}
+					class="relative grid gap-2"
+					style="grid-template-columns: repeat({GRID_COLS}, 1fr); grid-template-rows: repeat({maxRow}, {ROW_HEIGHT}px);"
+					ondragover={handleDragOver}
+					ondrop={handleDrop}
+					role="grid"
+				>
 				{#each widgets as widget (widget.id)}
 					<div
 						class="card bg-white dark:bg-surface-900 shadow-md p-3 cursor-move relative group transition-shadow hover:shadow-lg {isDragging &&
@@ -451,9 +453,30 @@
 						</div>
 					</div>
 				{/each}
+				</div>
+			</div>
+
+			<!-- Row Controls -->
+			<div class="flex gap-2 mt-2">
+				<button
+					class="flex-1 py-2 border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-lg text-surface-400 hover:border-primary-500 hover:text-primary-500 transition-colors flex items-center justify-center gap-2"
+					onclick={addRow}
+				>
+					<i class="fa-solid fa-plus"></i>
+					{m.addRow()}
+				</button>
+				{#if canRemoveRow}
+					<button
+						class="flex-1 py-2 border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-lg text-surface-400 hover:border-error-500 hover:text-error-500 transition-colors flex items-center justify-center gap-2"
+						onclick={removeRow}
+					>
+						<i class="fa-solid fa-minus"></i>
+						{m.removeRow()}
+					</button>
+				{/if}
 			</div>
 		{:else}
-			<div class="flex flex-col items-center justify-center h-[400px] text-surface-500">
+			<div class="flex flex-col items-center justify-center min-h-[400px] text-surface-500">
 				<i class="fa-solid fa-chart-line text-6xl mb-4"></i>
 				<p class="mb-4">{m.noWidgetsYet()}</p>
 				<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>
@@ -462,25 +485,5 @@
 				</button>
 			</div>
 		{/if}
-
-		<!-- Row Controls -->
-		<div class="flex gap-2 mt-2">
-			<button
-				class="flex-1 py-2 border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-lg text-surface-400 hover:border-primary-500 hover:text-primary-500 transition-colors flex items-center justify-center gap-2"
-				onclick={addRow}
-			>
-				<i class="fa-solid fa-plus"></i>
-				{m.addRow()}
-			</button>
-			{#if canRemoveRow}
-				<button
-					class="flex-1 py-2 border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-lg text-surface-400 hover:border-error-500 hover:text-error-500 transition-colors flex items-center justify-center gap-2"
-					onclick={removeRow}
-				>
-					<i class="fa-solid fa-minus"></i>
-					{m.removeRow()}
-				</button>
-			{/if}
-		</div>
 	</div>
 </div>
