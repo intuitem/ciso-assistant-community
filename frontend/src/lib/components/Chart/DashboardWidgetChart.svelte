@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		widget: any;
@@ -23,6 +24,9 @@
 		isBuiltinMetric ? getBuiltinMetricType(widget.metric_key) : null
 	);
 
+	// Check if this is a breakdown metric
+	const isBreakdownMetric = $derived(builtinMetricType === 'breakdown');
+
 	const unitName = $derived(
 		isBuiltinMetric
 			? (builtinMetricType === 'percentage' ? 'percentage' : '')
@@ -39,6 +43,29 @@
 		if (metricKey === 'progress') return 'percentage';
 		if (metricKey.endsWith('_breakdown')) return 'breakdown';
 		return 'number';
+	}
+
+	// Color palette for breakdown charts
+	const BREAKDOWN_COLORS = [
+		'#3b82f6', // blue
+		'#22c55e', // green
+		'#f59e0b', // amber
+		'#ef4444', // red
+		'#8b5cf6', // violet
+		'#06b6d4', // cyan
+		'#f97316', // orange
+		'#ec4899', // pink
+		'#6366f1', // indigo
+		'#84cc16'  // lime
+	];
+
+	// Format breakdown key for display (e.g., 'non_compliant' -> 'Non Compliant')
+	function formatBreakdownKey(key: string): string {
+		// Try to translate the key first
+		const translated = safeTranslate(key);
+		if (translated !== key) return translated;
+		// Fall back to formatting the key
+		return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 	}
 
 	// Format value with unit
@@ -96,11 +123,64 @@
 	// Get latest value for KPI/Gauge
 	const latestValue = $derived(chartData.length > 0 ? chartData[chartData.length - 1][1] : null);
 
+	// For breakdown metrics, get the latest breakdown data
+	const latestBreakdown = $derived(
+		isBreakdownMetric && chartData.length > 0
+			? chartData[chartData.length - 1][1]
+			: null
+	);
+
+	// Get all unique keys from breakdown data (for consistent legend/series)
+	const breakdownKeys = $derived(() => {
+		if (!isBreakdownMetric) return [];
+		const keys = new Set<string>();
+		for (const [, breakdown] of chartData) {
+			if (breakdown && typeof breakdown === 'object') {
+				Object.keys(breakdown).forEach(k => keys.add(k));
+			}
+		}
+		return Array.from(keys).sort();
+	});
+
+	// Prepare pie chart data from latest breakdown
+	const pieChartData = $derived(
+		latestBreakdown && typeof latestBreakdown === 'object'
+			? Object.entries(latestBreakdown).map(([key, value], index) => ({
+					name: formatBreakdownKey(key),
+					value: value as number,
+					itemStyle: { color: BREAKDOWN_COLORS[index % BREAKDOWN_COLORS.length] }
+				}))
+			: []
+	);
+
+	// Prepare stacked bar/area data for breakdown time series
+	const breakdownTimeSeriesData = $derived(() => {
+		if (!isBreakdownMetric) return { categories: [], series: [] };
+		const keys = breakdownKeys();
+		const categories = chartData.map(([date]) => new Date(date).toLocaleDateString());
+		const series = keys.map((key, index) => ({
+			name: formatBreakdownKey(key),
+			type: widget.chart_type === 'area' ? 'line' : 'bar',
+			stack: 'total',
+			areaStyle: widget.chart_type === 'area' ? {} : undefined,
+			data: chartData.map(([, breakdown]) =>
+				(breakdown && typeof breakdown === 'object') ? (breakdown[key] || 0) : 0
+			),
+			itemStyle: { color: BREAKDOWN_COLORS[index % BREAKDOWN_COLORS.length] }
+		}));
+		return { categories, series };
+	});
+
 	let chartInstance: any = null;
 
 	onMount(async () => {
-		if (widget.chart_type === 'kpi_card' || widget.chart_type === 'table') {
-			return; // These don't use ECharts
+		// Skip ECharts for KPI/table with scalar values, but allow for breakdown metrics
+		if ((widget.chart_type === 'kpi_card' || widget.chart_type === 'table') && !isBreakdownMetric) {
+			return; // These don't use ECharts for scalar values
+		}
+		// For breakdown table, we don't need ECharts
+		if (widget.chart_type === 'table' && isBreakdownMetric) {
+			return;
 		}
 
 		const echarts = await import('echarts');
@@ -180,6 +260,79 @@
 					}
 				: { min: 0 })
 		};
+
+		// For breakdown metrics, render as stacked bar or pie
+		if (isBreakdownMetric) {
+			const tsData = breakdownTimeSeriesData();
+
+			// For bar/line/area with breakdown, use stacked chart
+			if (widget.chart_type === 'bar' || widget.chart_type === 'line' || widget.chart_type === 'area') {
+				return {
+					grid: { ...baseGrid, right: 100 },
+					tooltip: {
+						trigger: 'axis',
+						axisPointer: { type: 'shadow' }
+					},
+					legend: {
+						show: widget.show_legend !== false,
+						orient: 'vertical',
+						right: 10,
+						top: 'center',
+						type: 'scroll'
+					},
+					xAxis: {
+						type: 'category',
+						data: tsData.categories,
+						axisLabel: { rotate: 45 }
+					},
+					yAxis: { type: 'value', min: 0 },
+					series: tsData.series
+				};
+			}
+
+			// For pie/donut/gauge/kpi_card with breakdown, use pie chart
+			if (widget.chart_type === 'pie' || widget.chart_type === 'donut' || widget.chart_type === 'gauge' || widget.chart_type === 'kpi_card') {
+				const isDonut = widget.chart_type === 'donut' || widget.chart_type === 'gauge' || widget.chart_type === 'kpi_card';
+				return {
+					tooltip: {
+						trigger: 'item',
+						formatter: '{b}: {c} ({d}%)'
+					},
+					legend: {
+						show: widget.show_legend !== false,
+						orient: 'vertical',
+						right: 10,
+						top: 'center',
+						type: 'scroll'
+					},
+					series: [
+						{
+							type: 'pie',
+							radius: isDonut ? ['40%', '70%'] : ['0%', '70%'],
+							center: ['40%', '50%'],
+							avoidLabelOverlap: true,
+							itemStyle: {
+								borderRadius: 4,
+								borderColor: '#fff',
+								borderWidth: 2
+							},
+							label: {
+								show: false
+							},
+							emphasis: {
+								label: {
+									show: true,
+									fontSize: 14,
+									fontWeight: 'bold'
+								}
+							},
+							labelLine: { show: false },
+							data: pieChartData
+						}
+					]
+				};
+			}
+		}
 
 		switch (widget.chart_type) {
 			case 'line':
@@ -371,6 +524,53 @@
 					]
 				};
 
+			case 'pie':
+			case 'donut':
+				// For percentage metrics, show as actual vs remaining
+				const pieValue = latestValue || 0;
+				const maxValue = unitName === 'percentage' ? 100 : (targetValue || 100);
+				const remaining = Math.max(0, maxValue - pieValue);
+				const isPieDonut = widget.chart_type === 'donut';
+				return {
+					tooltip: {
+						trigger: 'item',
+						formatter: '{b}: {c} ({d}%)'
+					},
+					legend: {
+						show: widget.show_legend !== false,
+						orient: 'horizontal',
+						bottom: 10
+					},
+					series: [
+						{
+							type: 'pie',
+							radius: isPieDonut ? ['40%', '70%'] : ['0%', '70%'],
+							center: ['50%', '45%'],
+							avoidLabelOverlap: true,
+							itemStyle: {
+								borderRadius: 4,
+								borderColor: '#fff',
+								borderWidth: 2
+							},
+							label: {
+								show: false
+							},
+							emphasis: {
+								label: {
+									show: true,
+									fontSize: 14,
+									fontWeight: 'bold'
+								}
+							},
+							labelLine: { show: false },
+							data: [
+								{ value: pieValue, name: m.actual(), itemStyle: { color: '#3b82f6' } },
+								{ value: remaining, name: m.remaining(), itemStyle: { color: '#e5e7eb' } }
+							]
+						}
+					]
+				};
+
 			default:
 				return {};
 		}
@@ -386,8 +586,8 @@
 	}
 </script>
 
-{#if widget.chart_type === 'kpi_card'}
-	<!-- KPI Card -->
+{#if widget.chart_type === 'kpi_card' && !isBreakdownMetric}
+	<!-- KPI Card for scalar values -->
 	<div class="flex items-center justify-center h-full">
 		<div class="flex items-baseline gap-3">
 			<!-- Main value -->
@@ -421,8 +621,17 @@
 			{m.target()}: {formatValue(targetValue)}
 		</div>
 	{/if}
-{:else if widget.chart_type === 'table'}
-	<!-- Table -->
+{:else if widget.chart_type === 'kpi_card' && isBreakdownMetric}
+	<!-- KPI Card for breakdown - show as pie chart using ECharts -->
+	{#if pieChartData.length > 0}
+		<div id={chartId} class="w-full {height}"></div>
+	{:else}
+		<div class="flex items-center justify-center h-full bg-gray-50 rounded-lg">
+			<p class="text-gray-400 text-sm">{m.noDataAvailable()}</p>
+		</div>
+	{/if}
+{:else if widget.chart_type === 'table' && !isBreakdownMetric}
+	<!-- Table for scalar values -->
 	<div class="overflow-auto h-full">
 		<table class="w-full text-sm">
 			<thead class="bg-gray-50 sticky top-0">
@@ -445,6 +654,40 @@
 			</tbody>
 		</table>
 		{#if chartData.length === 0}
+			<div class="flex items-center justify-center h-32 text-gray-400">
+				{m.noDataAvailable()}
+			</div>
+		{/if}
+	</div>
+{:else if widget.chart_type === 'table' && isBreakdownMetric}
+	<!-- Table for breakdown - show latest breakdown as category/count table -->
+	<div class="overflow-auto h-full">
+		{#if latestBreakdown && typeof latestBreakdown === 'object'}
+			<table class="w-full text-sm">
+				<thead class="bg-gray-50 sticky top-0">
+					<tr>
+						<th class="px-3 py-2 text-left font-medium text-gray-600">{m.category()}</th>
+						<th class="px-3 py-2 text-right font-medium text-gray-600">{m.count()}</th>
+					</tr>
+				</thead>
+				<tbody class="divide-y divide-gray-100">
+					{#each Object.entries(latestBreakdown) as [key, count], index}
+						<tr class="hover:bg-gray-50">
+							<td class="px-3 py-2 text-gray-600 flex items-center gap-2">
+								<span
+									class="w-3 h-3 rounded-full"
+									style="background-color: {BREAKDOWN_COLORS[index % BREAKDOWN_COLORS.length]}"
+								></span>
+								{formatBreakdownKey(key)}
+							</td>
+							<td class="px-3 py-2 text-right font-medium">
+								{count}
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		{:else}
 			<div class="flex items-center justify-center h-32 text-gray-400">
 				{m.noDataAvailable()}
 			</div>

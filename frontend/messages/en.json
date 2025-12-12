@@ -2746,6 +2746,10 @@
 	"showLegend": "Show legend",
 	"widgetConfig": "Widget configuration",
 	"target": "Target",
+	"actual": "Actual",
+	"remaining": "Remaining",
+	"pieChart": "Pie Chart",
+	"donutChart": "Donut Chart",
 	"widgetTitle": "Widget title",
 	"editLayout": "Widgets",
 	"editAttributes": "Attributes",
@@ -2993,5 +2997,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed."
+	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed.",
+	"count": "Count"
 }

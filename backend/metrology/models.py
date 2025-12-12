@@ -597,6 +597,8 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
         LINE = "line", _("Line Chart")
         BAR = "bar", _("Bar Chart")
         AREA = "area", _("Area Chart")
+        PIE = "pie", _("Pie Chart")
+        DONUT = "donut", _("Donut Chart")
         GAUGE = "gauge", _("Gauge")
         KPI_CARD = "kpi_card", _("KPI Card")
         SPARKLINE = "sparkline", _("Sparkline")

@@ -87,8 +87,7 @@
 					form: widgetCreateForm,
 					model: widgetModel,
 					formAction: '/dashboard-widgets?/create',
-					supportedModels: supportedModels,
-					debug: true
+					supportedModels: supportedModels
 				}
 			},
 			title: safeTranslate('addWidget')
