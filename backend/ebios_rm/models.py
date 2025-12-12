@@ -190,27 +190,26 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         ordering = ["created_at"]
 
     def save(self, *args, **kwargs):
-        if self.pk:
+        if EbiosRMStudy.objects.filter(pk=self.pk).exists():
             old_matrix = EbiosRMStudy.objects.get(pk=self.pk).risk_matrix
-            probabilities = []
-            for probs in self.risk_matrix.probability:
-                probabilities.append(probs["id"])
-            impacts = []
-            for imps in self.risk_matrix.impact:
-                impacts.append(imps["id"])
+
+            probabilities = [p["id"] for p in self.risk_matrix.probability]
+            impacts = [i["id"] for i in self.risk_matrix.impact]
+
+            min_prob, max_prob = min(probabilities), max(probabilities)
+            min_impact, max_impact = min(impacts), max(impacts)
+
             if old_matrix != self.risk_matrix:
                 for feared_event in self.feared_events.all():
-                    feared_event.gravity = max(
-                        min(impacts), min(feared_event.gravity, max(impacts))
-                    )
+                    feared_event.gravity = max(min_impact, min(feared_event.gravity, max_impact))
                     feared_event.save()
+
                 for operational_scenario in self.operational_scenarios.all():
-                    operational_scenario.likelihood = max(
-                        min(probabilities),
-                        min(operational_scenario.likelihood, max(probabilities)),
-                    )
+                    operational_scenario.likelihood = max(min_prob, min(operational_scenario.likelihood, max_prob))
                     operational_scenario.save()
+
         super().save(*args, **kwargs)
+
         if self.quotation_method == "express":
             for scenario in self.operational_scenarios.all():
                 scenario.update_likelihood_from_operating_modes()

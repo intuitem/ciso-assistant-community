@@ -4409,38 +4409,31 @@ class RiskAssessment(Assessment):
         return changed_scenarios
 
     def save(self, *args, **kwargs) -> None:
-        if self.pk:
+        if RiskAssessment.objects.filter(pk=self.pk).exists():
             old_matrix = RiskAssessment.objects.get(pk=self.pk).risk_matrix
-            probabilities = []
-            for probs in self.risk_matrix.probability:
-                probabilities.append(probs["id"])
-            impacts = []
-            for imps in self.risk_matrix.impact:
-                impacts.append(imps["id"])
+
+            probabilities = [p["id"] for p in self.risk_matrix.probability]
+            impacts = [i["id"] for i in self.risk_matrix.impact]
+
+            min_prob, max_prob = min(probabilities), max(probabilities)
+            min_impact, max_impact = min(impacts), max(impacts)
+            
             if old_matrix != self.risk_matrix:
+                fields = [
+                    ("current_proba", min_prob, max_prob),
+                    ("current_impact", min_impact, max_impact),
+                    ("residual_proba", min_prob, max_prob),
+                    ("residual_impact", min_impact, max_impact),
+                    ("inherent_proba", min_prob, max_prob),
+                    ("inherent_impact", min_impact, max_impact),
+                ]
+
                 for scenario in self.risk_scenarios.all():
-                    scenario.current_proba = max(
-                        min(probabilities),
-                        min(scenario.current_proba, max(probabilities)),
-                    )
-                    scenario.current_impact = max(
-                        min(impacts), min(scenario.current_impact, max(impacts))
-                    )
-                    scenario.residual_proba = max(
-                        min(probabilities),
-                        min(scenario.residual_proba, max(probabilities)),
-                    )
-                    scenario.residual_impact = max(
-                        min(impacts), min(scenario.residual_impact, max(impacts))
-                    )
-                    scenario.inherent_proba = max(
-                        min(probabilities),
-                        min(scenario.inherent_proba, max(probabilities)),
-                    )
-                    scenario.inherent_impact = max(
-                        min(impacts), min(scenario.inherent_impact, max(impacts))
-                    )
+                    for field_name, min_val, max_val in fields:
+                        value = getattr(scenario, field_name)
+                        setattr(scenario, field_name, max(min_val, min(value, max_val)))
                     scenario.save()
+
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
 
