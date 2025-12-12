@@ -4417,7 +4417,7 @@ class RiskAssessment(Assessment):
 
             min_prob, max_prob = min(probabilities), max(probabilities)
             min_impact, max_impact = min(impacts), max(impacts)
-            
+
             if old_matrix != self.risk_matrix:
                 fields = [
                     ("current_proba", min_prob, max_prob),

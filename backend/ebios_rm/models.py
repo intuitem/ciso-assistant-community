@@ -201,11 +201,15 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
             if old_matrix != self.risk_matrix:
                 for feared_event in self.feared_events.all():
-                    feared_event.gravity = max(min_impact, min(feared_event.gravity, max_impact))
+                    feared_event.gravity = max(
+                        min_impact, min(feared_event.gravity, max_impact)
+                    )
                     feared_event.save()
 
                 for operational_scenario in self.operational_scenarios.all():
-                    operational_scenario.likelihood = max(min_prob, min(operational_scenario.likelihood, max_prob))
+                    operational_scenario.likelihood = max(
+                        min_prob, min(operational_scenario.likelihood, max_prob)
+                    )
                     operational_scenario.save()
 
         super().save(*args, **kwargs)

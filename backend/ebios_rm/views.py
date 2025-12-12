@@ -60,7 +60,6 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         ebios_rm_study = self.get_object()
         return Response(RiskMatrixReadSerializer(ebios_rm_study.risk_matrix).data)
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get gravity choices")
     def gravity(self, request, pk):
         ebios_rm_study: EbiosRMStudy = self.get_object()
