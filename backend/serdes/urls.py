@@ -9,4 +9,14 @@ urlpatterns = [
         views.LoadBackupView.as_view(),
         name="load-backup",
     ),
+    path(
+        "export-attachments/",
+        views.ExportAttachmentsView.as_view(),
+        name="export-attachments",
+    ),
+    path(
+        "full-restore/",
+        views.FullRestoreView.as_view(),
+        name="full-restore",
+    ),
 ]

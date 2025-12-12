@@ -222,43 +222,75 @@ python clica.py upload-attachment \
 - `--file`: Path to the file to upload
 - `--name`: Name of the existing evidence record to attach the file to
 
-### Instance Management Commands
+### Backup and Restore Commands
 
-#### `clone_instance`
+#### `backup_full`
 
-Creates a complete clone of a CISO Assistant instance by copying both the SQLite database and evidence attachments directory. This is useful for creating backups, testing environments, or migrating instances.
+Creates a complete backup of your CISO Assistant instance, including both the database and all evidence attachments.
 
 ```bash
-python clica.py clone-instance \
-  --dest-db /path/to/backup/ciso-assistant.sqlite3 \
-  --dest-attachments /path/to/backup/attachments
+python clica.py backup-full --dest-dir /path/to/backup/directory
 ```
 
 **Parameters:**
 
-- `--source-db`: Path to source SQLite database (default: `../backend/db/ciso-assistant.sqlite3`)
-- `--dest-db`: Path to destination SQLite database (required)
-- `--source-attachments`: Path to source attachments directory (default: `../backend/db/attachments`)
-- `--dest-attachments`: Path to destination attachments directory (required)
-- `--force`: Overwrite destination files if they exist without prompting (optional)
+- `--dest-dir`: Destination directory where backup files will be saved (directory will be created if it doesn't exist)
 
-**Features:**
+**Output:**
 
-- Validates source database is a valid SQLite file before cloning
-- Calculates and displays total size of data to be copied
-- Shows detailed summary before proceeding
-- Requires confirmation before starting the clone operation
-- Verifies copied database integrity after cloning
-- Provides detailed progress feedback
-- Creates necessary destination directories automatically
-- Handles permission errors and edge cases gracefully
+- `backup.json.gz`: Compressed database backup
+- `attachments.zip`: ZIP archive containing all evidence attachments (only created if attachments exist)
 
-**Important Notes:**
+**Notes:**
 
-- The clone operation does not require API authentication (no TOKEN needed)
-- After cloning, update your CISO Assistant configuration to use the new database and attachments paths
-- For production use, consider stopping the CISO Assistant service before cloning to ensure data consistency
-- The cloned instance is a complete snapshot and can be used independently
+- Requires `has_backup_permission` flag in your user profile
+- If no attachments are present in the instance, only the database backup will be created
+- Backup files can be large depending on the number of attachments
+
+#### `restore_full`
+
+Restores a complete backup of your CISO Assistant instance, including both the database and all evidence attachments.
+
+```bash
+python clica.py restore-full --src-dir /path/to/backup/directory
+```
+
+**Parameters:**
+
+- `--src-dir`: Source directory containing the backup files (`backup.json.gz` and optionally `attachments.zip`)
+
+**Requirements:**
+
+- The source directory must contain `backup.json.gz`
+- If `attachments.zip` is present, attachments will be restored automatically
+- Requires `has_backup_permission` flag in your user profile
+
+**Notes:**
+
+- The restore process happens in a **single atomic request**, avoiding authentication token invalidation issues
+- Both database and attachments are restored together, ensuring data consistency
+- The process will report the number of attachments successfully restored and any errors encountered
+- If some attachments fail to restore, the command will complete with partial success and display error details
+
+**How it works:**
+
+The `restore-full` command uses a combo endpoint (`/serdes/full-restore/`) that processes both the database backup and attachments in a single HTTP request. This approach solves the authentication token invalidation problem that would occur if database and attachments were restored separately:
+
+1. The endpoint verifies your authentication token once at the beginning
+2. Restores the database backup (which replaces all data including tokens)
+3. Immediately restores attachments using the same authenticated request
+4. Since everything happens in one request, the token remains valid throughout
+
+After the restore completes, you'll need to generate a new Personal Access Token since the database was replaced.
+
+> [!WARNING]
+> Restoring a backup will **replace all existing data** in your CISO Assistant instance. Make sure you have a current backup before performing a restore operation.
+
+> [!TIP]
+> Use `backup-full` regularly to maintain disaster recovery capabilities, especially before major configuration changes or upgrades.
+
+### Instance Management Commands
+
 
 ## Data Formats
 
@@ -369,27 +401,21 @@ python clica.py upload-attachment \
   --name "Information Security Policy"
 ```
 
-### Clone Instance for Backup or Testing
+### Backup and Restore Operations
 
 ```bash
-# Create a complete backup of your instance
-python clica.py clone-instance \
-  --dest-db /backups/ciso-assistant-backup-$(date +%Y%m%d).sqlite3 \
-  --dest-attachments /backups/attachments-backup-$(date +%Y%m%d)
+# Create a full backup with timestamp
+BACKUP_DATE=$(date +%Y-%m-%d_%H-%M-%S)
+python clica.py backup-full --dest-dir "./backups/backup-$BACKUP_DATE"
 
-# Clone to a test environment
-python clica.py clone-instance \
-  --source-db /prod/db/ciso-assistant.sqlite3 \
-  --source-attachments /prod/db/attachments \
-  --dest-db /test/db/ciso-assistant.sqlite3 \
-  --dest-attachments /test/db/attachments
-```
-# Force database and attachments directory overwrite without prompts
-```bash
-python clica.py clone-instance \
-  --dest-db /backup/ciso-assistant.sqlite3 \
-  --dest-attachments /backup/attachments \
-  --force
+# List backups
+ls -lh ./backups/
+
+# Restore from a specific backup
+python clica.py restore-full --src-dir "./backups/backup-2024-01-15_10-30-00"
+
+# Automated daily backup (can be added to cron)
+python clica.py backup-full --dest-dir "/var/backups/ciso-assistant/$(date +%Y-%m-%d)"
 ```
 
 ## Troubleshooting
