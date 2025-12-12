@@ -517,7 +517,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(**{key: pk})
-        except:
+        except Exception:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib._objects)
 
@@ -528,7 +528,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(**{key: pk})
-        except:
+        except Exception:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         if not lib.frameworks.exists():
