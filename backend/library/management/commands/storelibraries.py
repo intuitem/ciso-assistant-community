@@ -58,8 +58,9 @@ class Command(BaseCommand):
             StoredLibrary.objects.create(
                 urn=library.urn,
                 locale=library.locale,
-                name=library.name,  # is_published
+                name=library.name,
                 description=library.description,
+                is_published=True,
                 annotation=library.annotation,
                 copyright=library.copyright,
                 provider=library.provider,
