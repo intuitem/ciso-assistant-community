@@ -377,7 +377,6 @@ class FearedEventViewSet(BaseModelViewSet):
         feared_event = self.get_object()
         return Response(RiskMatrixReadSerializer(feared_event.risk_matrix).data)
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get gravity choices")
     def gravity(self, request, pk):
         feared_event: FearedEvent = self.get_object()
@@ -687,7 +686,6 @@ class OperationalScenarioViewSet(BaseModelViewSet):
         attack_path = self.get_object()
         return Response(RiskMatrixReadSerializer(attack_path.risk_matrix).data)
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get likelihood choices")
     def likelihood(self, request, pk):
         attack_path: AttackPath = self.get_object()
