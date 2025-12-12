@@ -190,27 +190,32 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         ordering = ["created_at"]
 
     def save(self, *args, **kwargs):
-        if EbiosRMStudy.objects.filter(pk=self.pk).exists():
-            old_matrix = EbiosRMStudy.objects.get(pk=self.pk).risk_matrix
+        if self.pk:
+            old_matrix_id = (
+                EbiosRMStudy.objects.filter(pk=self.pk)
+                .values_list("risk_matrix_id", flat=True)
+                .first()
+            )
 
-            probabilities = [p["id"] for p in self.risk_matrix.probability]
-            impacts = [i["id"] for i in self.risk_matrix.impact]
-
-            min_prob, max_prob = min(probabilities), max(probabilities)
-            min_impact, max_impact = min(impacts), max(impacts)
-
-            if old_matrix != self.risk_matrix:
+            if old_matrix_id != self.risk_matrix_id:
+                probabilities = [
+                    p.get("id") for p in (self.risk_matrix.probability or [])
+                ]
+                impacts = [i.get("id") for i in (self.risk_matrix.impact or [])]
+                min_prob, max_prob = min(probabilities), max(probabilities)
+                min_impact, max_impact = min(impacts), max(impacts)
                 for feared_event in self.feared_events.all():
-                    feared_event.gravity = max(
-                        min_impact, min(feared_event.gravity, max_impact)
-                    )
-                    feared_event.save()
-
+                    if feared_event.gravity >= 0:
+                        feared_event.gravity = max(
+                            min_impact, min(feared_event.gravity, max_impact)
+                        )
+                        feared_event.save(update_fields=["gravity"])
                 for operational_scenario in self.operational_scenarios.all():
-                    operational_scenario.likelihood = max(
-                        min_prob, min(operational_scenario.likelihood, max_prob)
-                    )
-                    operational_scenario.save()
+                    if operational_scenario.likelihood >= 0:
+                        operational_scenario.likelihood = max(
+                            min_prob, min(operational_scenario.likelihood, max_prob)
+                        )
+                        operational_scenario.save(update_fields=["likelihood"])
 
         super().save(*args, **kwargs)
 

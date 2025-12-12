@@ -4409,32 +4409,51 @@ class RiskAssessment(Assessment):
         return changed_scenarios
 
     def save(self, *args, **kwargs) -> None:
-        if RiskAssessment.objects.filter(pk=self.pk).exists():
-            old_matrix = RiskAssessment.objects.get(pk=self.pk).risk_matrix
+        old_matrix_id = None
+        if self.pk:
+            old_matrix_id = (
+                RiskAssessment.objects.filter(pk=self.pk)
+                .values_list("risk_matrix_id", flat=True)
+                .first()
+            )
 
-            probabilities = [p["id"] for p in self.risk_matrix.probability]
-            impacts = [i["id"] for i in self.risk_matrix.impact]
+            matrix_changed = (
+                old_matrix_id is not None and old_matrix_id != self.risk_matrix_id
+            )
 
-            min_prob, max_prob = min(probabilities), max(probabilities)
-            min_impact, max_impact = min(impacts), max(impacts)
+            with transaction.atomic():
+                super().save(*args, **kwargs)
 
-            if old_matrix != self.risk_matrix:
-                fields = [
-                    ("current_proba", min_prob, max_prob),
-                    ("current_impact", min_impact, max_impact),
-                    ("residual_proba", min_prob, max_prob),
-                    ("residual_impact", min_impact, max_impact),
-                    ("inherent_proba", min_prob, max_prob),
-                    ("inherent_impact", min_impact, max_impact),
-                ]
+                if matrix_changed:
+                    probabilities = [p["id"] for p in self.risk_matrix.probability]
+                    impacts = [i["id"] for i in self.risk_matrix.impact]
+                    if not probabilities or not impacts:
+                        raise ValidationError(
+                            _("Risk matrix has empty probability/impact scales")
+                        )
 
-                for scenario in self.risk_scenarios.all():
-                    for field_name, min_val, max_val in fields:
-                        value = getattr(scenario, field_name)
-                        setattr(scenario, field_name, max(min_val, min(value, max_val)))
-                    scenario.save()
+                    min_prob, max_prob = min(probabilities), max(probabilities)
+                    min_impact, max_impact = min(impacts), max(impacts)
 
-        super().save(*args, **kwargs)
+                    fields = [
+                        ("current_proba", min_prob, max_prob),
+                        ("current_impact", min_impact, max_impact),
+                        ("residual_proba", min_prob, max_prob),
+                        ("residual_impact", min_impact, max_impact),
+                        ("inherent_proba", min_prob, max_prob),
+                        ("inherent_impact", min_impact, max_impact),
+                    ]
+
+                    for scenario in self.risk_scenarios.all():
+                        for field_name, min_val, max_val in fields:
+                            value = getattr(scenario, field_name)
+                            if value < 0:  # keep “not rated”
+                                continue
+                            setattr(
+                                scenario, field_name, max(min_val, min(value, max_val))
+                            )
+                        scenario.save()
+
         self.upsert_daily_metrics()
 
     @property
