@@ -2739,7 +2739,7 @@
 	"widgetConfig": "Widget configuration",
 	"target": "Target",
 	"widgetTitle": "Widget title",
-	"editLayout": "Layout",
+	"editLayout": "Widgets",
 	"editAttributes": "Attributes",
 	"viewDashboard": "View dashboard",
 	"dashboardEditorInstructions": "Drag widgets to reposition. Use the resize handles to change size. Click save to persist changes.",

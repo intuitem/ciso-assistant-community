@@ -332,7 +332,7 @@
 	function formatValue(value: any): string {
 		if (value === null || value === undefined) return 'N/A';
 		if (isQualitative && choiceNames[value - 1]) {
-			return `[${value}] ${choiceNames[value - 1]}`;
+			return choiceNames[value - 1];
 		}
 		return formatValueWithUnit(value);
 	}
@@ -343,7 +343,7 @@
 	<div class="flex items-center justify-center h-full">
 		<div class="flex items-baseline gap-3">
 			<!-- Main value -->
-			<div class="text-4xl font-bold text-primary-600">
+			<div class="text-4xl font-bold text-primary-600 capitalize">
 				{formatValue(latestValue)}
 			</div>
 			<!-- Trend indicator -->
