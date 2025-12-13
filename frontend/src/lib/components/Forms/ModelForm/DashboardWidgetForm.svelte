@@ -36,9 +36,7 @@
 	const { value: metricKeyValue } = formFieldProxy(form, 'metric_key');
 
 	// State for metric type selection
-	let metricType = $state<'custom' | 'builtin'>(
-		object?.target_content_type ? 'builtin' : 'custom'
-	);
+	let metricType = $state<'custom' | 'builtin'>(object?.target_content_type ? 'builtin' : 'custom');
 
 	// State for builtin metric options - use local state for UI
 	let selectedModel = $state<string>(object?.target_content_type_display || '');
@@ -59,7 +57,10 @@
 			);
 			availableMetrics = metrics;
 			// Set first metric as default if none selected or current selection is invalid
-			if (metrics.length > 0 && (!selectedMetricKey || !metrics.find(m => m.value === selectedMetricKey))) {
+			if (
+				metrics.length > 0 &&
+				(!selectedMetricKey || !metrics.find((m) => m.value === selectedMetricKey))
+			) {
 				selectedMetricKey = metrics[0].value;
 			}
 		} else {
@@ -187,13 +188,7 @@
 	</label>
 	<div class="flex gap-4">
 		<label class="flex items-center gap-2 cursor-pointer">
-			<input
-				type="radio"
-				name="metric_type"
-				value="custom"
-				bind:group={metricType}
-				class="radio"
-			/>
+			<input type="radio" name="metric_type" value="custom" bind:group={metricType} class="radio" />
 			<span>{m.customMetric()}</span>
 		</label>
 		<label class="flex items-center gap-2 cursor-pointer">
@@ -228,11 +223,7 @@
 
 		<div>
 			<label class="text-sm font-semibold" for="target_model_select">{m.targetObjectType()}</label>
-			<select
-				id="target_model_select"
-				class="select"
-				bind:value={selectedModel}
-			>
+			<select id="target_model_select" class="select" bind:value={selectedModel}>
 				{#each modelOptions as option}
 					<option value={option.value}>{option.label}</option>
 				{/each}
@@ -268,12 +259,7 @@
 		{#if availableMetrics.length > 0}
 			<div>
 				<label class="text-sm font-semibold" for="metric_key">{m.metric()}</label>
-				<select
-					id="metric_key"
-					name="metric_key"
-					class="select"
-					bind:value={selectedMetricKey}
-				>
+				<select id="metric_key" name="metric_key" class="select" bind:value={selectedMetricKey}>
 					{#each availableMetrics as option}
 						<option value={option.value}>{option.label}</option>
 					{/each}

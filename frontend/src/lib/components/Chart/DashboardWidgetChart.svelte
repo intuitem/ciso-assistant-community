@@ -17,7 +17,9 @@
 
 	const chartId = $derived(`widget-chart-${widget.id}`);
 	const metricDefinition = $derived(widget.metric_instance?.metric_definition);
-	const isQualitative = $derived(isBuiltinMetric ? false : metricDefinition?.category === 'qualitative');
+	const isQualitative = $derived(
+		isBuiltinMetric ? false : metricDefinition?.category === 'qualitative'
+	);
 
 	// For builtin metrics, determine unit based on metric type
 	const builtinMetricType = $derived(
@@ -29,8 +31,10 @@
 
 	const unitName = $derived(
 		isBuiltinMetric
-			? (builtinMetricType === 'percentage' ? 'percentage' : '')
-			: (metricDefinition?.unit?.name || '')
+			? builtinMetricType === 'percentage'
+				? 'percentage'
+				: ''
+			: metricDefinition?.unit?.name || ''
 	);
 	// Display symbol for unit (e.g., '%' instead of 'percentage')
 	const unitSymbol = $derived(unitName === 'percentage' ? '%' : unitName);
@@ -114,9 +118,7 @@
 
 	// For breakdown metrics, get the latest breakdown data
 	const latestBreakdown = $derived(
-		isBreakdownMetric && chartData.length > 0
-			? chartData[chartData.length - 1][1]
-			: null
+		isBreakdownMetric && chartData.length > 0 ? chartData[chartData.length - 1][1] : null
 	);
 
 	// Get all unique keys from breakdown data (for consistent legend/series)
@@ -125,7 +127,7 @@
 		const keys = new Set<string>();
 		for (const [, breakdown] of chartData) {
 			if (breakdown && typeof breakdown === 'object') {
-				Object.keys(breakdown).forEach(k => keys.add(k));
+				Object.keys(breakdown).forEach((k) => keys.add(k));
 			}
 		}
 		return Array.from(keys).sort();
@@ -152,7 +154,7 @@
 			stack: 'total',
 			areaStyle: widget.chart_type === 'area' ? {} : undefined,
 			data: chartData.map(([, breakdown]) =>
-				(breakdown && typeof breakdown === 'object') ? (breakdown[key] || 0) : 0
+				breakdown && typeof breakdown === 'object' ? breakdown[key] || 0 : 0
 			)
 		}));
 		return { categories, series };
@@ -279,7 +281,11 @@
 			}
 
 			// For donut/gauge/kpi_card with breakdown, use donut chart
-			if (widget.chart_type === 'donut' || widget.chart_type === 'gauge' || widget.chart_type === 'kpi_card') {
+			if (
+				widget.chart_type === 'donut' ||
+				widget.chart_type === 'gauge' ||
+				widget.chart_type === 'kpi_card'
+			) {
 				return {
 					tooltip: {
 						trigger: 'item',
@@ -427,13 +433,14 @@
 							axisLine: {
 								lineStyle: {
 									width: 20,
-									color: targetRatio !== null
-										? [
-											[targetRatio, 'rgba(200, 200, 200, 0.3)'],
-											[targetRatio + 0.005, 'rgb(234, 88, 12)'], // Orange target marker
-											[1, 'rgba(200, 200, 200, 0.3)']
-										]
-										: [[1, 'rgba(200, 200, 200, 0.3)']]
+									color:
+										targetRatio !== null
+											? [
+													[targetRatio, 'rgba(200, 200, 200, 0.3)'],
+													[targetRatio + 0.005, 'rgb(234, 88, 12)'], // Orange target marker
+													[1, 'rgba(200, 200, 200, 0.3)']
+												]
+											: [[1, 'rgba(200, 200, 200, 0.3)']]
 								}
 							},
 							axisTick: { show: false },
@@ -449,14 +456,22 @@
 							},
 							detail: {
 								valueAnimation: true,
-								formatter: unitName === 'percentage' ? '{value}%' : unitSymbol ? `{value} ${unitSymbol}` : '{value}',
+								formatter:
+									unitName === 'percentage'
+										? '{value}%'
+										: unitSymbol
+											? `{value} ${unitSymbol}`
+											: '{value}',
 								fontSize: 20,
 								offsetCenter: [0, '40%']
 							},
 							data: [
 								{
 									value: gaugeValue,
-									name: widget.show_target && targetValue ? `${m.target()}: ${formatValueWithUnit(targetValue)}` : ''
+									name:
+										widget.show_target && targetValue
+											? `${m.target()}: ${formatValueWithUnit(targetValue)}`
+											: ''
 								}
 							]
 						}
@@ -486,7 +501,7 @@
 			case 'donut':
 				// For percentage metrics, show as actual vs remaining
 				const donutValue = latestValue || 0;
-				const maxValue = unitName === 'percentage' ? 100 : (targetValue || 100);
+				const maxValue = unitName === 'percentage' ? 100 : targetValue || 100;
 				const remaining = Math.max(0, maxValue - donutValue);
 				return {
 					tooltip: {

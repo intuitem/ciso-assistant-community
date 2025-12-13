@@ -331,130 +331,133 @@
 					ondrop={handleDrop}
 					role="grid"
 				>
-				{#each widgets as widget (widget.id)}
-					<div
-						class="card bg-white dark:bg-surface-900 shadow-md p-3 cursor-move relative group transition-shadow hover:shadow-lg {isDragging &&
-						draggedWidget?.id === widget.id
-							? 'opacity-50'
-							: ''}"
-						style={getWidgetStyle(widget)}
-						draggable="true"
-						ondragstart={(e) => handleDragStart(e, widget)}
-						ondragend={handleDragEnd}
-						role="gridcell"
-					>
-						<!-- Widget Header -->
-						<div class="flex justify-between items-start mb-2">
-							<div class="flex-1 min-w-0">
-								<h4 class="font-semibold text-sm truncate">
-									{widget.display_title || widget.title || widget.metric_instance?.name || 'Widget'}
-								</h4>
-								<p class="text-xs text-surface-500 truncate">
-									{widget.chart_type_display || widget.chart_type}
-								</p>
+					{#each widgets as widget (widget.id)}
+						<div
+							class="card bg-white dark:bg-surface-900 shadow-md p-3 cursor-move relative group transition-shadow hover:shadow-lg {isDragging &&
+							draggedWidget?.id === widget.id
+								? 'opacity-50'
+								: ''}"
+							style={getWidgetStyle(widget)}
+							draggable="true"
+							ondragstart={(e) => handleDragStart(e, widget)}
+							ondragend={handleDragEnd}
+							role="gridcell"
+						>
+							<!-- Widget Header -->
+							<div class="flex justify-between items-start mb-2">
+								<div class="flex-1 min-w-0">
+									<h4 class="font-semibold text-sm truncate">
+										{widget.display_title ||
+											widget.title ||
+											widget.metric_instance?.name ||
+											'Widget'}
+									</h4>
+									<p class="text-xs text-surface-500 truncate">
+										{widget.chart_type_display || widget.chart_type}
+									</p>
+								</div>
+								<div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+									<a
+										href="/dashboard-widgets/{widget.id}/edit?next=/dashboards/{dashboard.id}/layout"
+										class="btn btn-sm preset-tonal p-1"
+										title={m.edit()}
+									>
+										<i class="fa-solid fa-pencil text-sm"></i>
+									</a>
+									<button
+										class="btn btn-sm preset-filled-error-500 p-1"
+										onclick={() => confirmDeleteWidget(widget)}
+										title={m.delete()}
+									>
+										<i class="fa-solid fa-trash text-sm"></i>
+									</button>
+								</div>
 							</div>
-							<div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-								<a
-									href="/dashboard-widgets/{widget.id}/edit?next=/dashboards/{dashboard.id}/layout"
-									class="btn btn-sm preset-tonal p-1"
-									title={m.edit()}
-								>
-									<i class="fa-solid fa-pencil text-sm"></i>
-								</a>
-								<button
-									class="btn btn-sm preset-filled-error-500 p-1"
-									onclick={() => confirmDeleteWidget(widget)}
-									title={m.delete()}
-								>
-									<i class="fa-solid fa-trash text-sm"></i>
-								</button>
+
+							<!-- Widget Preview -->
+							<div
+								class="flex-1 bg-surface-100-900 rounded flex items-center justify-center text-surface-400 min-h-[60px]"
+							>
+								<i
+									class="text-4xl fa-solid {widget.chart_type === 'kpi_card'
+										? 'fa-square-poll-vertical'
+										: widget.chart_type === 'bar'
+											? 'fa-chart-bar'
+											: widget.chart_type === 'gauge'
+												? 'fa-gauge-high'
+												: widget.chart_type === 'sparkline'
+													? 'fa-chart-area'
+													: widget.chart_type === 'table'
+														? 'fa-table'
+														: widget.chart_type === 'area'
+															? 'fa-chart-area'
+															: 'fa-chart-line'}"
+								></i>
+							</div>
+
+							<!-- Position info -->
+							<div
+								class="absolute bottom-1 left-1 text-xs text-surface-400 opacity-0 group-hover:opacity-100"
+								title="Position: {widget.position_x},{widget.position_y} | Size: {widget.width}x{widget.height} | Min: {getMinDimensions(
+									widget.chart_type
+								).width}x{getMinDimensions(widget.chart_type).height}"
+							>
+								{widget.width}x{widget.height} (min: {getMinDimensions(widget.chart_type)
+									.width}x{getMinDimensions(widget.chart_type).height})
+							</div>
+
+							<!-- Resize handle -->
+							<div
+								class="absolute bottom-0 right-0 w-5 h-5 cursor-se-resize opacity-0 group-hover:opacity-100 flex items-center justify-center"
+								onmousedown={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+
+									const startX = e.clientX;
+									const startY = e.clientY;
+									const startWidth = widget.width || 6;
+									const startHeight = widget.height || 2;
+									const widgetId = widget.id;
+
+									// Get grid dimensions at start
+									const { colWidth } = getGridDimensions();
+									const cellWithGap = colWidth + GRID_GAP;
+									const rowWithGap = ROW_HEIGHT + GRID_GAP;
+
+									const onMouseMove = (moveEvent: MouseEvent) => {
+										moveEvent.preventDefault();
+										const deltaX = moveEvent.clientX - startX;
+										const deltaY = moveEvent.clientY - startY;
+
+										// Calculate new size based on pixel delta
+										const newWidth = startWidth + deltaX / cellWithGap;
+										const newHeight = startHeight + deltaY / rowWithGap;
+
+										updateWidgetSize(widgetId, newWidth, newHeight);
+									};
+
+									const onMouseUp = () => {
+										document.removeEventListener('mousemove', onMouseMove);
+										document.removeEventListener('mouseup', onMouseUp);
+										document.body.style.cursor = '';
+										document.body.style.userSelect = '';
+									};
+
+									document.body.style.cursor = 'se-resize';
+									document.body.style.userSelect = 'none';
+									document.addEventListener('mousemove', onMouseMove);
+									document.addEventListener('mouseup', onMouseUp);
+								}}
+								role="slider"
+								aria-label="Resize widget"
+								tabindex="0"
+							>
+								<i
+									class="fa-solid fa-up-right-and-down-left-from-center text-xs text-surface-400 rotate-90"
+								></i>
 							</div>
 						</div>
-
-						<!-- Widget Preview -->
-						<div
-							class="flex-1 bg-surface-100-900 rounded flex items-center justify-center text-surface-400 min-h-[60px]"
-						>
-							<i
-								class="text-4xl fa-solid {widget.chart_type === 'kpi_card'
-									? 'fa-square-poll-vertical'
-									: widget.chart_type === 'bar'
-										? 'fa-chart-bar'
-										: widget.chart_type === 'gauge'
-											? 'fa-gauge-high'
-											: widget.chart_type === 'sparkline'
-												? 'fa-chart-area'
-												: widget.chart_type === 'table'
-													? 'fa-table'
-													: widget.chart_type === 'area'
-														? 'fa-chart-area'
-														: 'fa-chart-line'}"
-							></i>
-						</div>
-
-						<!-- Position info -->
-						<div
-							class="absolute bottom-1 left-1 text-xs text-surface-400 opacity-0 group-hover:opacity-100"
-							title="Position: {widget.position_x},{widget.position_y} | Size: {widget.width}x{widget.height} | Min: {getMinDimensions(
-								widget.chart_type
-							).width}x{getMinDimensions(widget.chart_type).height}"
-						>
-							{widget.width}x{widget.height} (min: {getMinDimensions(widget.chart_type)
-								.width}x{getMinDimensions(widget.chart_type).height})
-						</div>
-
-						<!-- Resize handle -->
-						<div
-							class="absolute bottom-0 right-0 w-5 h-5 cursor-se-resize opacity-0 group-hover:opacity-100 flex items-center justify-center"
-							onmousedown={(e) => {
-								e.preventDefault();
-								e.stopPropagation();
-
-								const startX = e.clientX;
-								const startY = e.clientY;
-								const startWidth = widget.width || 6;
-								const startHeight = widget.height || 2;
-								const widgetId = widget.id;
-
-								// Get grid dimensions at start
-								const { colWidth } = getGridDimensions();
-								const cellWithGap = colWidth + GRID_GAP;
-								const rowWithGap = ROW_HEIGHT + GRID_GAP;
-
-								const onMouseMove = (moveEvent: MouseEvent) => {
-									moveEvent.preventDefault();
-									const deltaX = moveEvent.clientX - startX;
-									const deltaY = moveEvent.clientY - startY;
-
-									// Calculate new size based on pixel delta
-									const newWidth = startWidth + deltaX / cellWithGap;
-									const newHeight = startHeight + deltaY / rowWithGap;
-
-									updateWidgetSize(widgetId, newWidth, newHeight);
-								};
-
-								const onMouseUp = () => {
-									document.removeEventListener('mousemove', onMouseMove);
-									document.removeEventListener('mouseup', onMouseUp);
-									document.body.style.cursor = '';
-									document.body.style.userSelect = '';
-								};
-
-								document.body.style.cursor = 'se-resize';
-								document.body.style.userSelect = 'none';
-								document.addEventListener('mousemove', onMouseMove);
-								document.addEventListener('mouseup', onMouseUp);
-							}}
-							role="slider"
-							aria-label="Resize widget"
-							tabindex="0"
-						>
-							<i
-								class="fa-solid fa-up-right-and-down-left-from-center text-xs text-surface-400 rotate-90"
-							></i>
-						</div>
-					</div>
-				{/each}
+					{/each}
 				</div>
 			</div>
 

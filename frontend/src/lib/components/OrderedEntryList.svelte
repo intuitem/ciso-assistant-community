@@ -33,9 +33,7 @@
 	}
 
 	function updateEntry(index: number, field: 'ref_id' | 'name', value: string) {
-		entries = entries.map((entry, i) =>
-			i === index ? { ...entry, [field]: value } : entry
-		);
+		entries = entries.map((entry, i) => (i === index ? { ...entry, [field]: value } : entry));
 		onchange?.(entries);
 	}
 
