@@ -434,7 +434,7 @@
 	"residual": "المتبقي",
 	"jumpToRiskAssessment": "انتقل إلى تقييم المخاطر",
 	"additionalMeasures": "إجراءات إضافية",
-	"riskAssessmentMatrixHelpText": "تحذير: لن تتمكن من تغيير مصفوفة المخاطر بعد إنشاء تقييم المخاطر",
+	"riskAssessmentMatrixHelpText": "تحذير: تغيير مصفوفة المخاطر يضبط القيم تلقائيًا وفقًا للمقياس الجديد. راجع النتائج بعد ذلك وصححها إذا لزم الأمر.",
 	"etaHelpText": "الوقت المقدر للوصول",
 	"dueDateHelpText": "تاريخ الاستحقاق لإكمال التقييم",
 	"expiryDateHelpText": "التاريخ الذي لم يعد فيه الكائن صالحًا",

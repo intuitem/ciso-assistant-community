@@ -436,7 +436,7 @@
 	"residual": "Residuo",
 	"jumpToRiskAssessment": "Vai alla valutazione del rischio",
 	"additionalMeasures": "Misure aggiuntive",
-	"riskAssessmentMatrixHelpText": "ATTENZIONE: Non potrai modificare la matrice di rischio dopo aver creato la valutazione",
+	"riskAssessmentMatrixHelpText": "ATTENZIONE: Modificando la matrice dei rischi i valori vengono regolati automaticamente in base alla nuova scala. Ricontrolla i risultati in seguito e correggili se necessario.",
 	"etaHelpText": "Tempo stimato di arrivo (ETA)",
 	"dueDateHelpText": "Data entro cui la valutazione deve essere completata",
 	"expiryDateHelpText": "Data dopo la quale l'oggetto non è più valido",

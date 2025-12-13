@@ -435,7 +435,7 @@
 	"residual": "Rest",
 	"jumpToRiskAssessment": "Hoppa till riskbedömning",
 	"additionalMeasures": "Ytterligare åtgärder",
-	"riskAssessmentMatrixHelpText": "VARNING: Du kommer inte att kunna ändra riskmatrisen efter att riskbedömningen har skapats",
+	"riskAssessmentMatrixHelpText": "VARNING: Att ändra riskmatrisen justerar automatiskt värdena enligt den nya skalan. Granska resultaten efteråt och korrigera dem vid behov.",
 	"etaHelpText": "Beräknad ankomsttid",
 	"dueDateHelpText": "Datum då bedömningen måste slutföras",
 	"expiryDateHelpText": "Datum då objektet inte längre är giltigt",

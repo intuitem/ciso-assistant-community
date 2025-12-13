@@ -436,7 +436,7 @@
 	"residual": "Residu",
 	"jumpToRiskAssessment": "Lompat ke penilaian risiko",
 	"additionalMeasures": "Kontrol tambahan",
-	"riskAssessmentMatrixHelpText": "PERINGATAN: Anda tidak dapat mengubah matriks risiko setelah penilaian risiko dibuat",
+	"riskAssessmentMatrixHelpText": "PERINGATAN: Mengubah matriks risiko akan menyesuaikan nilai secara otomatis sesuai skala baru. Tinjau hasilnya setelahnya dan koreksi bila diperlukan.",
 	"etaHelpText": "Perkiraan waktu kedatangan",
 	"dueDateHelpText": "Tanggal batas waktu penyelesaian penilaian",
 	"expiryDateHelpText": "Tanggal di mana objek tidak lagi berlaku",
