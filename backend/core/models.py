@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List, Optional
+from typing import Self, Union, List, Tuple, Optional
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -263,11 +263,15 @@ class StoredLibrary(LibraryMixin):
     @classmethod
     def store_library_content(
         cls, library_content: bytes, builtin: bool = False
-    ) -> "StoredLibrary | None":
+    ) -> Tuple[None, None] | Tuple["StoredLibrary", Optional["LoadedLibrary"]]:
+        """Return a tuple `(library, outdated_library)` such that:
+        - `library`: The newly created `StoredLibrary` object on success, otherwise False
+        - `outdated_library`: The `LoadedLibrary` which `library` can update.
+        """
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             # We do not store the library if its hash checksum is in the database.
-            return None
+            return None, None
         try:
             library_data = yaml.safe_load(library_content)
             if not isinstance(library_data, dict):
@@ -302,10 +306,10 @@ class StoredLibrary(LibraryMixin):
             logger.info("update hash", urn=urn)
             same_version_lib.hash_checksum = hash_checksum
             same_version_lib.save()
-            return None
+            return None, None
 
         if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
-            return None  # We do not accept to store outdated libraries
+            return None, None  # We do not accept to store outdated libraries
 
         # This code allows adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
         for outdated_library in StoredLibrary.objects.filter(
@@ -322,8 +326,16 @@ class StoredLibrary(LibraryMixin):
             "dependencies", []
         )  # I don't want whitespaces in URN anymore nontheless
 
+        outdated_loaded_library = LoadedLibrary.objects.filter(
+            urn=urn, version__lt=version
+        ).first()
         library_objects = library_data["objects"]
-        return StoredLibrary.objects.create(
+        autoload = len(library_objects) == 1 and next(iter(library_objects)) in [
+            "requirement_mapping_set",
+            "requirement_mapping_sets",
+        ]
+
+        new_library = StoredLibrary.objects.create(
             name=library_data["name"],
             is_published=True,
             urn=urn,
@@ -345,13 +357,9 @@ class StoredLibrary(LibraryMixin):
             builtin=builtin,
             hash_checksum=hash_checksum,
             content=library_objects,
-            autoload=bool(
-                library_objects.get(
-                    "requirement_mapping_set",
-                    library_objects.get("requirement_mapping_sets"),
-                )
-            ),  # autoload is true if the library contains requirement mapping sets
+            autoload=autoload,
         )
+        return new_library, outdated_loaded_library
 
     @classmethod
     def store_library_file(
@@ -360,7 +368,8 @@ class StoredLibrary(LibraryMixin):
         with open(fname, "rb") as f:
             library_content = f.read()
 
-        return StoredLibrary.store_library_content(library_content, builtin)
+        new_library, _ = StoredLibrary.store_library_content(library_content, builtin)
+        return new_library
 
     def load(self) -> Union[str, None]:
         from library.utils import LibraryImporter
@@ -1650,16 +1659,6 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
     def __str__(self) -> str:
         return f"{self.provider} - {self.name}"
 
-    def save(self, *args, **kwargs):
-        from core.mappings.engine import engine
-
-        obj = super().save(*args, **kwargs)
-
-        if self.urn not in engine.frameworks:
-            transaction.on_commit(lambda: engine.load_frameworks())
-
-        return obj
-
 
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     class Importance(models.TextChoices):
@@ -1773,11 +1772,6 @@ class RequirementMappingSet(ReferentialObjectMixin):
         verbose_name=_("Target framework"),
         related_name="target_framework",
     )
-
-    def save(self, *args, **kwargs) -> None:
-        if self.source_framework == self.target_framework:
-            raise ValidationError(_("Source and related frameworks must be different"))
-        return super().save(*args, **kwargs)
 
 
 class RequirementMapping(models.Model):
