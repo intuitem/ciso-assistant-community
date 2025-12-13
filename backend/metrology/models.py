@@ -789,10 +789,11 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
 
         if not has_custom and not has_builtin:
             raise ValidationError(
-                _(
-                    "A widget must have either a custom metric (metric_instance) or "
-                    "a builtin metric (target_content_type + target_object_id + metric_key)."
-                )
+                {
+                    "metric_instance": _(
+                        "A metric instance is required for custom metric widgets."
+                    )
+                }
             )
 
         # If builtin metric, ensure all required fields are present

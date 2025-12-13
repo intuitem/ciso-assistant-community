@@ -187,6 +187,37 @@ class DashboardWidgetWriteSerializer(BaseModelSerializer):
         if data.get("target_object_id") == "":
             data["target_object_id"] = None
 
+        # Validate metric configuration: must have either custom or builtin metric
+        has_custom = data.get("metric_instance") is not None
+        has_builtin = data.get("target_content_type") is not None
+
+        if has_custom and has_builtin:
+            raise serializers.ValidationError(
+                {
+                    "metric_instance": "A widget cannot have both a custom metric instance and builtin metric fields."
+                }
+            )
+
+        if not has_custom and not has_builtin:
+            raise serializers.ValidationError(
+                {
+                    "metric_instance": "A metric instance is required for custom metric widgets."
+                }
+            )
+
+        # If builtin metric, ensure all required fields are present
+        if has_builtin:
+            if not data.get("target_object_id"):
+                raise serializers.ValidationError(
+                    {
+                        "target_object_id": "Target object is required for builtin metrics."
+                    }
+                )
+            if not data.get("metric_key"):
+                raise serializers.ValidationError(
+                    {"metric_key": "Metric key is required for builtin metrics."}
+                )
+
         return data
 
 
