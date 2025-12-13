@@ -151,6 +151,9 @@ export const RiskScenarioSchema = z.object({
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	risk_origin: z.string().uuid().optional().nullable(),
+	antecedent_scenarios: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
 	ref_id: z.string().max(100).optional()
 });
 
@@ -163,6 +166,7 @@ export const AppliedControlSchema = z.object({
 	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
 	objectives: z.string().optional().array().optional(),
+	requirement_assessments: z.string().optional().array().optional(),
 	assets: z.string().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -690,7 +694,7 @@ export const contractSchema = z.object({
 	provider_entity: z.string().optional(),
 	beneficiary_entity: z.string().optional(),
 	evidences: z.array(z.string().optional()).optional(),
-	solution: z.string().optional(),
+	solutions: z.array(z.string().optional()).optional(),
 	status: z.string().optional().default('draft'),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	end_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -760,9 +764,11 @@ export const processingSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	status: z.string().optional(),
 	dpia_required: z.boolean().optional(),
+	dpia_reference: z.string().optional(),
 	has_sensitive_personal_data: z.boolean().optional(),
 	nature: z.string().optional().array().optional(),
 	associated_controls: z.array(z.string().optional()).optional(),
+	evidences: z.string().optional().array().optional(),
 	assigned_to: z.string().uuid().optional().array().optional()
 });
 

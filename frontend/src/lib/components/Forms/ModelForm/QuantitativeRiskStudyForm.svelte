@@ -9,6 +9,7 @@
 	import { m } from '$paraglide/messages';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 
 	let displayCurrency = $derived(page.data?.settings?.currency ?? '€'); // Default to Euro
 
@@ -36,6 +37,73 @@
 
 	// Declare form store at top level
 	const formStore = form.form;
+
+	// Local state for percentage display (0-100) for tolerance points
+	let point1ProbabilityPercent = $state<number | undefined>(undefined);
+	let point2ProbabilityPercent = $state<number | undefined>(undefined);
+
+	// Initialize percentages from existing form data on mount
+	onMount(() => {
+		const riskTolerance = $formStore.risk_tolerance;
+		const point1Prob = riskTolerance?.points?.point1?.probability;
+		const point2Prob = riskTolerance?.points?.point2?.probability;
+
+		if (point1Prob !== undefined && point1Prob !== null && typeof point1Prob === 'number') {
+			point1ProbabilityPercent = Math.round(point1Prob * 10000) / 100; // Convert 0-1 to 0-100
+		}
+		if (point2Prob !== undefined && point2Prob !== null && typeof point2Prob === 'number') {
+			point2ProbabilityPercent = Math.round(point2Prob * 10000) / 100; // Convert 0-1 to 0-100
+		}
+	});
+
+	// Sync percentage to probability when user changes the input
+	function updatePoint1Probability() {
+		// Ensure risk_tolerance structure exists
+		if (!$formStore.risk_tolerance) {
+			$formStore.risk_tolerance = { points: { point1: {}, point2: {} } };
+		}
+		if (!$formStore.risk_tolerance.points) {
+			$formStore.risk_tolerance.points = { point1: {}, point2: {} };
+		}
+		if (!$formStore.risk_tolerance.points.point1) {
+			$formStore.risk_tolerance.points.point1 = {};
+		}
+
+		if (
+			point1ProbabilityPercent !== undefined &&
+			point1ProbabilityPercent !== null &&
+			typeof point1ProbabilityPercent === 'number'
+		) {
+			$formStore.risk_tolerance.points.point1.probability =
+				Math.round(point1ProbabilityPercent * 100) / 10000; // Convert 0-100 to 0-1
+		} else {
+			$formStore.risk_tolerance.points.point1.probability = undefined;
+		}
+	}
+
+	function updatePoint2Probability() {
+		// Ensure risk_tolerance structure exists
+		if (!$formStore.risk_tolerance) {
+			$formStore.risk_tolerance = { points: { point1: {}, point2: {} } };
+		}
+		if (!$formStore.risk_tolerance.points) {
+			$formStore.risk_tolerance.points = { point1: {}, point2: {} };
+		}
+		if (!$formStore.risk_tolerance.points.point2) {
+			$formStore.risk_tolerance.points.point2 = {};
+		}
+
+		if (
+			point2ProbabilityPercent !== undefined &&
+			point2ProbabilityPercent !== null &&
+			typeof point2ProbabilityPercent === 'number'
+		) {
+			$formStore.risk_tolerance.points.point2.probability =
+				Math.round(point2ProbabilityPercent * 100) / 10000; // Convert 0-100 to 0-1
+		} else {
+			$formStore.risk_tolerance.points.point2.probability = undefined;
+		}
+	}
 </script>
 
 <AutocompleteSelect
@@ -109,15 +177,28 @@
 		<div class="space-y-2">
 			<h5 class="font-medium text-gray-600 my-2 py-2">Risk Tolerance Points</h5>
 			<div class="grid grid-cols-2 gap-4">
-				<NumberField
-					{form}
-					field="risk_tolerance.points.point1.probability"
-					label="Point 1 - Probability"
-					min={0.01}
-					max={0.99}
-					step={0.01}
-					helpText="Probability value (0.01-0.99). You can start with 0.99 for the most frequent acceptable issues"
-				/>
+				<!-- Point 1 Probability as Percentage -->
+				<div class="form-control">
+					<label class="label" for="point1_probability_percent">
+						<span class="label-text">Point 1 - Probability (%)</span>
+					</label>
+					<input
+						type="number"
+						id="point1_probability_percent"
+						class="input input-bordered w-full"
+						bind:value={point1ProbabilityPercent}
+						oninput={updatePoint1Probability}
+						step="0.1"
+						min="1"
+						max="99"
+					/>
+					<label class="label" for="point1_probability_percent">
+						<span class="label-text-alt text-surface-500"
+							>Probability percentage (1-99%). You can start with 99% for the most frequent
+							acceptable issues</span
+						>
+					</label>
+				</div>
 				<NumberField
 					{form}
 					field="risk_tolerance.points.point1.acceptable_loss"
@@ -128,15 +209,28 @@
 				/>
 			</div>
 			<div class="grid grid-cols-2 gap-4">
-				<NumberField
-					{form}
-					field="risk_tolerance.points.point2.probability"
-					label="Point 2 - Probability"
-					min={0.01}
-					max={0.99}
-					step={0.01}
-					helpText="Probability value (0.01-0.99), You can close with 0.01 for the most rare acceptable cases"
-				/>
+				<!-- Point 2 Probability as Percentage -->
+				<div class="form-control">
+					<label class="label" for="point2_probability_percent">
+						<span class="label-text">Point 2 - Probability (%)</span>
+					</label>
+					<input
+						type="number"
+						id="point2_probability_percent"
+						class="input input-bordered w-full"
+						bind:value={point2ProbabilityPercent}
+						oninput={updatePoint2Probability}
+						step="0.1"
+						min="1"
+						max="99"
+					/>
+					<label class="label" for="point2_probability_percent">
+						<span class="label-text-alt text-surface-500"
+							>Probability percentage (1-99%). You can close with 1% for the most rare acceptable
+							cases</span
+						>
+					</label>
+				</div>
 				<NumberField
 					{form}
 					field="risk_tolerance.points.point2.acceptable_loss"

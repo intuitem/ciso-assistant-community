@@ -214,6 +214,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 81. Cloud Sovereignty Framework - 1.2.1 - Oct 2025 🇪🇺
 82. ISO 22301:2019 outline - Business continuity management systems 🌐
 83. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
+84. Vendor Due Diligence - simple baseline - intuitem 🌐
+85. Points de contrôle Active Directory (AD) - ANSSI 🇫🇷
 
 ### Community contributions
 

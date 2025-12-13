@@ -434,7 +434,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
             # Existing controls from current hypothesis
             if current_hypothesis:
-                scenario_info["existing_controls"] = [
+                scenario_info["existing_applied_controls"] = [
                     {
                         "id": str(control.id),
                         "name": control.name,
@@ -446,7 +446,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                     for control in current_hypothesis.existing_applied_controls.all()
                 ]
             else:
-                scenario_info["existing_controls"] = []
+                scenario_info["existing_applied_controls"] = []
 
             # Additional controls from selected residual hypothesis
             if selected_residual_hypothesis:

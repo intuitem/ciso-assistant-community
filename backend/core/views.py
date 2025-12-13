@@ -30,6 +30,10 @@ from django.db.models import (
     When,
     Case,
     Exists,
+    ForeignKey,
+    OneToOneField,
+    ManyToManyField,
+    QuerySet,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -150,6 +154,8 @@ from serdes.utils import (
     sort_objects_by_self_reference,
 )
 from serdes.serializers import ExportSerializer
+from django.contrib.admin.utils import NestedObjects
+from django.db import router
 from global_settings.utils import ff_is_enabled
 
 import structlog
@@ -707,6 +713,242 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             logger.error("Webhook dispatch failed on delete", exc_info=True)
         return super().destroy(request, *args, **kwargs)
 
+    @action(detail=True, methods=["get"], url_path="cascade-info")
+    def cascade_info(self, request, pk=None):
+        """
+        Cascade preview:
+        - deleted: objects actually deleted by cascade
+        - affected: objects not deleted but whose relationships will be removed (through rows, SET_NULL, local links)
+        """
+        instance = self.get_object()
+        collector = NestedObjects(using=router.db_for_write(instance))
+        collector.collect([instance])
+
+        skip_model_names = {
+            "Token",
+            "AuthToken",
+            "EmailAddress",
+            "Session",
+            "RequirementAssessment",
+            "LogEntry",
+            "Folder",
+            "Permission",
+        }
+        skip_model_classes = set()
+
+        def is_hidden_model(model):
+            return (skip_model_classes and model in skip_model_classes) or (
+                not skip_model_classes and model.__name__ in skip_model_names
+            )
+
+        # Build index of concrete objects that will be deleted
+        deleted_index = set()
+        for model, objs in collector.model_objs.items():
+            if model is type(instance):
+                continue
+            if getattr(model._meta, "auto_created", False):
+                continue  # skip through rows here; we will bubble endpoints separately
+            for o in objs:
+                deleted_index.add((model.__name__, str(getattr(o, "pk", ""))))
+
+        def add_grouped(bucket, obj):
+            model = obj.__class__
+            if is_hidden_model(model):
+                return
+            key = model.__name__
+            pk = str(getattr(obj, "pk", "")) or ""
+            if (key, pk) in bucket["_seen"]:
+                return
+
+            if key == "RoleAssignment":
+                role_name = getattr(getattr(obj, "role", None), "name", "") or ""
+                if getattr(obj, "user", None):
+                    display = f"{role_name} → {getattr(obj.user, 'email', '')}"
+                elif getattr(obj, "user_group", None):
+                    display = f"{role_name} → {getattr(obj.user_group, 'name', '')}"
+                else:
+                    display = role_name
+            else:
+                display = (
+                    getattr(obj, "name", None)
+                    or getattr(obj, "email", None)
+                    or str(obj)
+                )
+
+            group = bucket["by_model"].setdefault(
+                key,
+                {
+                    "model": key,
+                    "verbose_name": str(model._meta.verbose_name),
+                    "objects": [],
+                },
+            )
+            group["objects"].append({"id": pk, "name": display})
+            bucket["_seen"].add((key, pk))
+
+        def finalize(bucket):
+            groups = list(bucket["by_model"].values())
+            for g in groups:
+                g["objects"].sort(key=lambda o: (o["name"] or "").lower())
+            groups.sort(key=lambda g: (g.get("verbose_name") or g["model"]).lower())
+            count = sum(len(g["objects"]) for g in groups)
+            return groups, count
+
+        deleted_bucket = {"by_model": {}, "_seen": set()}
+        affected_bucket = {"by_model": {}, "_seen": set()}
+
+        # 1) Concrete deletions
+        through_rows = []
+        for model, instances in collector.model_objs.items():
+            if model is type(instance):
+                continue
+            if getattr(model._meta, "auto_created", False):
+                through_rows.append((model, list(instances)))
+                continue
+            if is_hidden_model(model):
+                continue
+            for obj in instances:
+                add_grouped(deleted_bucket, obj)
+
+        # 2) Bubble endpoints from through rows (M2M join tables)
+        for through_model, t_instances in through_rows:
+            # Join tables have ≥2 FKs; skip others
+            fk_fields = [
+                f
+                for f in through_model._meta.fields
+                if isinstance(f, ForeignKey) and getattr(f, "remote_field", None)
+            ]
+            if len(fk_fields) < 2:
+                continue
+
+            for t in t_instances:
+                endpoints = []
+                for fk in fk_fields:
+                    try:
+                        rel_obj = getattr(t, fk.name, None)
+                    except Exception:
+                        rel_obj = None
+                    if not rel_obj:
+                        continue
+                    if isinstance(rel_obj, type(instance)):
+                        continue
+                    if getattr(rel_obj._meta, "auto_created", False):
+                        continue
+                    endpoints.append(rel_obj)
+
+                for ep in endpoints:
+                    key = ep.__class__.__name__
+                    pk = str(getattr(ep, "pk", "")) or ""
+                    if (key, pk) in deleted_index:
+                        add_grouped(deleted_bucket, ep)
+                    else:
+                        add_grouped(affected_bucket, ep)
+
+        # 2b) Incoming updates (SET_NULL/DEFAULT) from Django's plan
+        updates = getattr(collector, "field_updates", {})
+
+        def _iter_objs(maybe_iter):
+            if maybe_iter is None:
+                return
+            if isinstance(maybe_iter, QuerySet):
+                for x in maybe_iter.iterator():
+                    yield x
+            else:
+                for x in maybe_iter:
+                    yield x
+
+        for key, ops in updates.items():
+            # Shape A: (field, value) -> [objs, ...]
+            if isinstance(key, tuple) and len(key) == 2:
+                field, value = key
+                for objs in ops or []:
+                    for o in _iter_objs(objs):
+                        model = field.model  # model whose rows will be updated
+                        pair = (model.__name__, str(getattr(o, "pk", "")) or "")
+                        if pair not in deleted_index:
+                            # If you want only SET_NULL cases: if value is None: ...
+                            add_grouped(affected_bucket, o)
+            # Shape B: model -> [(field, value, objs) ...]
+            elif isinstance(ops, (list, tuple)) and ops and isinstance(ops[0], tuple):
+                for item in ops:
+                    if len(item) == 3:
+                        field, value, objs = item
+                    elif len(item) == 2:
+                        field, objs = item
+                        value = None
+                    else:
+                        continue
+                    for o in _iter_objs(objs):
+                        model = field.model
+                        pair = (model.__name__, str(getattr(o, "pk", "")) or "")
+                        if pair not in deleted_index:
+                            add_grouped(affected_bucket, o)
+            else:
+                # Unknown shape; ignore safely
+                pass
+
+        # 2c) Outgoing links from the instance (FK/O2O/M2M)
+        for f in instance._meta.get_fields():
+            if getattr(f, "auto_created", False):
+                continue  # skip reverse relations
+
+            # Local FK/O2O targets: will remain but lose the link to this instance.
+            if isinstance(f, (ForeignKey, OneToOneField)):
+                try:
+                    rel_obj = getattr(instance, f.name, None)
+                except Exception:
+                    rel_obj = None
+                if rel_obj:
+                    key = rel_obj.__class__.__name__
+                    pk = str(getattr(rel_obj, "pk", "")) or ""
+                    if (key, pk) not in deleted_index:
+                        add_grouped(affected_bucket, rel_obj)
+
+            # Local M2M targets: will remain; join rows are removed.
+            elif isinstance(f, ManyToManyField):
+                try:
+                    manager = getattr(instance, f.name)
+                    for rel_obj in manager.all():
+                        key = rel_obj.__class__.__name__
+                        pk = str(getattr(rel_obj, "pk", "")) or ""
+                        if (key, pk) not in deleted_index:
+                            add_grouped(affected_bucket, rel_obj)
+                except Exception:
+                    pass
+
+        # 3) Sort and respond
+        deleted_groups, deleted_count = finalize(deleted_bucket)
+        affected_groups, affected_count = finalize(affected_bucket)
+
+        def flatten(groups):
+            return [
+                {
+                    "model": g["verbose_name"] or g["model"],
+                    "name": o["name"],
+                    "id": o["id"],
+                }
+                for g in groups
+                for o in g["objects"]
+            ]
+
+        payload = {
+            "deleted": {
+                "count": deleted_count,
+                "grouped_objects": deleted_groups,
+                "related_objects": flatten(deleted_groups),
+                "message": "The following objects will be permanently deleted.",
+                "level": "warning",
+            },
+            "affected": {
+                "count": affected_count,
+                "grouped_objects": affected_groups,
+                "related_objects": flatten(affected_groups),
+                "message": "These objects will NOT be deleted but will lose one or more relationships.",
+                "level": "info",
+            },
+        }
+        return Response(payload)
+
     def _get_optimized_object_data(self, queryset):
         """
         Calculate folder full paths for objects in the queryset in 1 DB request.
@@ -963,6 +1205,9 @@ class ThreatViewSet(BaseModelViewSet):
 
 
 class AssetFilter(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    asset_class = df.ModelMultipleChoiceFilter(queryset=AssetClass.objects.all())
+
     exclude_children = df.ModelChoiceFilter(
         queryset=Asset.objects.all(),
         method="filter_exclude_children",
@@ -986,7 +1231,6 @@ class AssetFilter(GenericFilterSet):
         model = Asset
         fields = [
             "name",
-            "folder",
             "type",
             "parent_assets",
             "exclude_children",
@@ -996,7 +1240,6 @@ class AssetFilter(GenericFilterSet):
             "security_exceptions",
             "applied_controls",
             "filtering_labels",
-            "asset_class",
             "personal_data",
             "is_business_function",
             "dora_licenced_activity",
@@ -1597,7 +1840,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
         "findings",
         "filtering_labels",
     ]
-    search_fields = ["name", "description", "provider"]
+    search_fields = ["name", "description", "provider", "ref_id"]
 
     @action(detail=False, name="Get provider choices")
     def provider(self, request):
@@ -1920,6 +2163,11 @@ class FilteringLabelViewSet(BaseModelViewSet):
 
 
 class RiskAssessmentFilterSet(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    perimeter = df.ModelMultipleChoiceFilter(queryset=Perimeter.objects.all())
+    risk_matrix = df.ModelMultipleChoiceFilter(queryset=RiskMatrix.objects.all())
+    ebios_rm_study = df.ModelMultipleChoiceFilter(queryset=EbiosRMStudy.objects.all())
+
     status = df.MultipleChoiceFilter(
         choices=RiskAssessment.get_status_choices(), method="filter_status"
     )
@@ -1929,12 +2177,7 @@ class RiskAssessmentFilterSet(GenericFilterSet):
         fields = {
             "name": ["exact"],
             "ref_id": ["exact"],
-            "perimeter": ["exact"],
-            "folder": ["exact"],
             "authors": ["exact"],
-            "risk_matrix": ["exact"],
-            "status": ["exact"],
-            "ebios_rm_study": ["exact"],
             "reviewers": ["exact"],
             "genericcollection": ["exact"],
         }
@@ -2239,6 +2482,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 )
                 risk_scenario.description = build_description(operational_scenario)
 
+                risk_scenario.risk_origin = operational_scenario.ro_to.risk_origin
+
                 # Update inherent or current probability/impact based on feature flag
                 if ff_is_enabled("inherent_risk"):
                     risk_scenario.inherent_proba = operational_scenario.likelihood
@@ -2276,6 +2521,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     if operational_scenario.ref_id
                     else RiskScenario.get_default_ref_id(risk_assessment),
                     description=build_description(operational_scenario),
+                    risk_origin=operational_scenario.ro_to.risk_origin,
                 )
                 if ff_is_enabled("inherent_risk"):
                     risk_scenario.inherent_proba = operational_scenario.likelihood
@@ -2468,7 +2714,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "threats",
                 "name",
                 "description",
-                "existing_controls",
+                "existing_applied_controls",
                 "current_impact",
                 "current_proba",
                 "current_risk",
@@ -2480,10 +2726,16 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "strength_of_knowledge",
             ]
             if ff_is_enabled("inherent_risk"):
-                # insert inherent_risk just before existing_controls
-                columns.insert(columns.index("existing_controls"), "inherent_impact")
-                columns.insert(columns.index("existing_controls"), "inherent_proba")
-                columns.insert(columns.index("existing_controls"), "inherent_level")
+                # insert inherent_risk just before existing_applied_controls
+                columns.insert(
+                    columns.index("existing_applied_controls"), "inherent_impact"
+                )
+                columns.insert(
+                    columns.index("existing_applied_controls"), "inherent_proba"
+                )
+                columns.insert(
+                    columns.index("existing_applied_controls"), "inherent_level"
+                )
             writer.writerow(columns)
 
             for scenario in risk_assessment.risk_scenarios.all().order_by("ref_id"):
@@ -2556,7 +2808,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             "threats",
             "name",
             "description",
-            "existing_controls",
+            "existing_applied_controls",
             "current_impact",
             "current_proba",
             "current_risk",
@@ -2569,10 +2821,12 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         ]
 
         if ff_is_enabled("inherent_risk"):
-            # insert inherent_risk columns just before existing_controls
-            columns.insert(columns.index("existing_controls"), "inherent_impact")
-            columns.insert(columns.index("existing_controls"), "inherent_proba")
-            columns.insert(columns.index("existing_controls"), "inherent_level")
+            # insert inherent_risk columns just before existing_applied_controls
+            columns.insert(
+                columns.index("existing_applied_controls"), "inherent_impact"
+            )
+            columns.insert(columns.index("existing_applied_controls"), "inherent_proba")
+            columns.insert(columns.index("existing_applied_controls"), "inherent_level")
 
         scenarios = risk_assessment.risk_scenarios.prefetch_related(
             "applied_controls",
@@ -2602,7 +2856,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "threats": threats,
                 "name": escape_excel_formula(scenario.name),
                 "description": escape_excel_formula(scenario.description),
-                "existing_controls": existing_controls,
+                "existing_applied_controls": existing_controls,
                 "current_impact": scenario.get_current_impact()["name"],
                 "current_proba": scenario.get_current_proba()["name"],
                 "current_risk": scenario.get_current_risk()["name"],
@@ -2636,7 +2890,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             wrap_columns = [
                 "name",
                 "description",
-                "existing_controls",
+                "existing_applied_controls",
                 "additional_controls",
             ]
             wrap_indices = [
@@ -2797,7 +3051,6 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     risk_assessment=duplicate_risk_assessment,
                     name=scenario.name,
                     description=scenario.description,
-                    existing_controls=scenario.existing_controls,
                     treatment=scenario.treatment,
                     current_proba=scenario.current_proba,
                     current_impact=scenario.current_impact,
@@ -3171,6 +3424,11 @@ def convert_date_to_timestamp(date):
 
 
 class AppliedControlFilterSet(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    reference_control = df.ModelMultipleChoiceFilter(
+        queryset=ReferenceControl.objects.all()
+    )
+
     todo = df.BooleanFilter(method="filter_todo")
     to_review = df.BooleanFilter(method="filter_to_review")
     compliance_assessments = df.ModelMultipleChoiceFilter(
@@ -3264,9 +3522,12 @@ class AppliedControlFilterSet(GenericFilterSet):
         model = AppliedControl
         fields = {
             "name": ["exact"],
-            "folder": ["exact"],
+            "category": ["exact"],
+            "csf_function": ["exact"],
+            "priority": ["exact"],
+            "effort": ["exact"],
+            "control_impact": ["exact"],
             # category, csf_function, priority, effort, control_impact use NullableChoiceFilter (defined above)
-            "reference_control": ["exact", "isnull"],
             "filtering_labels": ["exact"],
             "risk_scenarios": ["exact"],
             "risk_scenarios_e": ["exact"],
@@ -4373,6 +4634,9 @@ class PolicyViewSet(AppliedControlViewSet):
 
 
 class RiskScenarioFilter(GenericFilterSet):
+    risk_assessment = df.ModelMultipleChoiceFilter(
+        queryset=RiskAssessment.objects.all()
+    )
     # Aliased filters for user-friendly query params
     folder = df.UUIDFilter(
         field_name="risk_assessment__perimeter__folder", label="Folder ID"
@@ -4387,6 +4651,10 @@ class RiskScenarioFilter(GenericFilterSet):
     applied_controls = df.ModelMultipleChoiceFilter(
         method="filter_applied_controls",
         queryset=AppliedControl.objects.all(),
+    )
+    exclude = df.UUIDFilter(
+        method="filter_exclude",
+        label="Exclude scenario",
     )
 
     def filter_within_tolerance(self, queryset, name, value):
@@ -4412,12 +4680,17 @@ class RiskScenarioFilter(GenericFilterSet):
             ).distinct()
         return queryset
 
+    def filter_exclude(self, queryset, name, value):
+        """Exclude a specific scenario from the queryset"""
+        if value:
+            return queryset.exclude(id=value)
+        return queryset
+
     class Meta:
         model = RiskScenario
         # Only include actual model fields here
         fields = {
             "name": ["exact"],
-            "risk_assessment": ["exact"],
             "current_impact": ["exact"],
             "current_proba": ["exact"],
             "current_level": ["exact"],
@@ -4724,6 +4997,9 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
 
 
 class RiskAcceptanceFilterSet(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    approver = df.ModelMultipleChoiceFilter(queryset=User.objects.all())
+
     to_review = df.BooleanFilter(method="filter_to_review")
 
     def filter_to_review(self, queryset, name, value):
@@ -4739,9 +5015,7 @@ class RiskAcceptanceFilterSet(GenericFilterSet):
     class Meta:
         model = RiskAcceptance
         fields = {
-            "folder": ["exact"],
             "state": ["exact"],
-            "approver": ["exact"],
             "risk_scenarios": ["exact"],
             "expiry_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
         }
@@ -4923,6 +5197,10 @@ class UserFilter(GenericFilterSet):
 
 
 class ValidationFlowFilterSet(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    requester = df.ModelMultipleChoiceFilter(queryset=User.objects.all())
+    approver = df.ModelMultipleChoiceFilter(queryset=User.objects.all())
+
     linked_models = df.CharFilter(method="filter_linked_models", label="Linked models")
 
     def filter_linked_models(self, queryset, name, value):
@@ -4946,10 +5224,7 @@ class ValidationFlowFilterSet(GenericFilterSet):
     class Meta:
         model = ValidationFlow
         fields = [
-            "folder",
             "status",
-            "requester",
-            "approver",
             "filtering_labels",
             "compliance_assessments",
             "risk_assessments",
@@ -5144,6 +5419,8 @@ class RoleAssignmentViewSet(BaseModelViewSet):
 
 
 class FolderFilter(GenericFilterSet):
+    parent_folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+
     owned = df.BooleanFilter(method="get_owned_folders", label="owned")
     content_type = df.MultipleChoiceFilter(
         choices=Folder.ContentType, lookup_expr="icontains"
@@ -5162,7 +5439,6 @@ class FolderFilter(GenericFilterSet):
         model = Folder
         fields = [
             "name",
-            "parent_folder",
             "content_type",
             "owner",
             "owned",
@@ -6288,6 +6564,10 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def get_accessible_objects(self, request):
+        """
+        Return the list of folders, perimeters, frameworks and risk matrices
+        the current user can access, based on their role assignments.
+        """
         (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Folder
         )
@@ -6476,6 +6756,8 @@ def get_composer_data(request):
 
 
 class FrameworkFilter(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+
     baseline = df.ModelChoiceFilter(
         queryset=ComplianceAssessment.objects.all(),
         method="filter_framework",
@@ -6496,7 +6778,7 @@ class FrameworkFilter(GenericFilterSet):
 
     class Meta:
         model = Framework
-        fields = ["folder", "baseline", "provider"]
+        fields = ["provider"]
 
 
 class FrameworkViewSet(BaseModelViewSet):
@@ -6878,6 +7160,7 @@ class EvidenceViewSet(BaseModelViewSet):
         "status",
         "expiry_date",
         "contracts",
+        "processings",
     ]
 
     @action(detail=False, name="Get all evidences owners")
@@ -8353,12 +8636,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             score_different = base_ra.score != compare_ra.score
 
             if result_different or score_different:
+                # Use safe_display_str for smart fallback: name → ref_id → description → URN
+                req_name = base_ra.requirement.safe_display_str
+
                 differences.append(
                     {
                         "requirement": {
                             "id": str(base_ra.requirement.id),
                             "ref_id": base_ra.requirement.ref_id,
-                            "name": base_ra.requirement.name,
+                            "name": req_name,
                             "description": base_ra.requirement.description,
                         },
                         "base": {
@@ -10431,6 +10717,8 @@ class TimelineEntryViewSet(BaseModelViewSet):
 
 
 class TaskTemplateFilter(GenericFilterSet):
+    folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+
     next_occurrence_status = df.MultipleChoiceFilter(
         choices=TaskNode.TASK_STATUS_CHOICES, method="filter_next_occurrence_status"
     )
@@ -10444,7 +10732,6 @@ class TaskTemplateFilter(GenericFilterSet):
             "name",
             "assigned_to",
             "is_recurrent",
-            "folder",
             "applied_controls",
             "last_occurrence_status",
             "next_occurrence_status",
@@ -10485,6 +10772,7 @@ class TaskTemplateViewSet(BaseModelViewSet):
         "applied_controls",
         "evidences",
     ]
+    search_fields = ["ref_id", "name"]
     filterset_class = TaskTemplateFilter
 
     def get_queryset(self):
@@ -10628,9 +10916,9 @@ class TaskTemplateViewSet(BaseModelViewSet):
         if task_template.is_recurrent:
             with transaction.atomic():
                 # Soft-delete all existing TaskNode instances associated with this TaskTemplate
-                TaskNode.objects.filter(task_template=task_template).update(
-                    to_delete=True
-                )
+                TaskNode.objects.filter(
+                    task_template=task_template, due_date__gt=date.today()
+                ).update(to_delete=True)
                 # Determine the end date based on the frequency
                 start_date = task_template.task_date
                 if task_template.is_recurrent:

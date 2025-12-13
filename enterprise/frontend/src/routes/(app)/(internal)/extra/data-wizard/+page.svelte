@@ -25,6 +25,38 @@
 	let files: FileList | null = $state(null); // Fixed: Changed from HTMLInputElement to FileList
 	let selectedModel = $state('Asset'); // Default selection
 
+	// Model configuration
+	const modelOptions = [
+		{ id: 'Asset', label: m.assets(), description: '' },
+		{ id: 'User', label: m.users(), description: '' },
+		{ id: 'AppliedControl', label: m.appliedControls(), description: '' },
+		{ id: 'Perimeter', label: m.perimeters(), description: '' },
+		{ id: 'ComplianceAssessment', label: m.complianceAssessment(), description: '' },
+		{
+			id: 'FindingsAssessment',
+			label: m.findingsAssessment(),
+			description: m.dataWizardFindingsAssessmentDescription()
+		},
+		{
+			id: 'RiskAssessment',
+			label: m.riskAssessment(),
+			description: m.dataWizardRiskAssessmentDescription()
+		},
+		{
+			id: 'ElementaryAction',
+			label: m.elementaryActions(),
+			description: m.dataWizardElementaryActionDescription()
+		},
+		{ id: 'ReferenceControl', label: m.referenceControls(), description: '' },
+		{ id: 'Threat', label: m.threats(), description: '' },
+		{ id: 'Processing', label: m.processings(), description: '' },
+		{
+			id: 'TPRM',
+			label: 'TPRM (Third-Party Risk Management)',
+			description: 'Import entities, solutions, and contracts from a multi-sheet Excel file'
+		}
+	];
+
 	function modalConfirm(): void {
 		const modalComponent: ModalComponent = {
 			ref: PromptConfirmModal
@@ -50,23 +82,28 @@
 	let isDomainDisabled = $derived(
 		selectedModel === 'ComplianceAssessment' ||
 			selectedModel === 'FindingsAssessment' ||
-			selectedModel === 'RiskAssessment'
+			selectedModel === 'RiskAssessment' ||
+			selectedModel === 'Folder'
 	);
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
 
 	let isMatrixDisabled = $derived(selectedModel !== 'RiskAssessment');
 
+	// Models that don't need perimeter selection
+	const modelsWithoutPerimeter = [
+		'Asset',
+		'AppliedControl',
+		'Perimeter',
+		'ElementaryAction',
+		'ReferenceControl',
+		'Threat',
+		'Processing',
+		'TPRM'
+	];
+
 	// Determine if perimeter selection should be disabled
-	let isPerimeterDisabled = $derived(
-		selectedModel === 'Asset' ||
-			selectedModel === 'AppliedControl' ||
-			selectedModel === 'Perimeter' ||
-			selectedModel === 'ElementaryAction' ||
-			selectedModel === 'ReferenceControl' ||
-			selectedModel === 'Threat' ||
-			selectedModel === 'TPRM'
-	);
+	let isPerimeterDisabled = $derived(modelsWithoutPerimeter.includes(selectedModel));
 
 	// Fixed: Check files correctly
 	let uploadButtonStyles = $derived(files && files.length > 0 ? '' : 'chip-disabled');
@@ -147,231 +184,31 @@
 				<fieldset class="space-y-4">
 					<legend class="sr-only">{m.object()}</legend>
 
-					<div>
-						<label
-							for="Asset"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
-						>
-							<div>
-								<p class="text-gray-700">{m.assets()}</p>
-							</div>
+					{#each modelOptions as model, index}
+						<div>
+							<label
+								for={model.id}
+								class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
+							>
+								<div>
+									<p class="text-gray-700">{model.label}</p>
+									{#if model.description}
+										<p class="text-gray-500 text-xs">{model.description}</p>
+									{/if}
+								</div>
 
-							<input
-								type="radio"
-								name="model"
-								value="Asset"
-								id="Asset"
-								class="size-5 border-gray-300 text-blue-500"
-								checked
-								bind:group={selectedModel}
-							/>
-						</label>
-					</div>
-
-					<div>
-						<label
-							for="User"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
-						>
-							<div>
-								<p class="text-gray-700">{m.users()}</p>
-							</div>
-
-							<input
-								type="radio"
-								name="model"
-								value="User"
-								id="User"
-								class="size-5 border-gray-300 text-blue-500"
-								bind:group={selectedModel}
-							/>
-						</label>
-					</div>
-					<div>
-						<label
-							for="AppliedControl"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
-						>
-							<div>
-								<p class="text-gray-700">{m.appliedControls()}</p>
-							</div>
-
-							<input
-								type="radio"
-								name="model"
-								value="AppliedControl"
-								id="AppliedControl"
-								class="size-5 border-gray-300 text-blue-500"
-								bind:group={selectedModel}
-							/>
-						</label>
-					</div>
-
-					<div>
-						<label
-							for="Perimeter"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
-						>
-							<div>
-								<p class="text-gray-700">{m.perimeters()}</p>
-							</div>
-
-							<input
-								type="radio"
-								name="model"
-								value="Perimeter"
-								id="Perimeter"
-								class="size-5 border-gray-300 text-blue-500"
-								bind:group={selectedModel}
-							/>
-						</label>
-					</div>
-
-					<div>
-						<label
-							for="ComplianceAssessment"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
-						>
-							<div>
-								<p class="text-gray-700">{m.complianceAssessment()}</p>
-							</div>
-
-							<input
-								type="radio"
-								name="model"
-								value="ComplianceAssessment"
-								id="ComplianceAssessment"
-								class="size-5 border-gray-300 text-blue-500"
-								bind:group={selectedModel}
-							/>
-						</label>
-					</div>
-
-					<div>
-						<label
-							for="FindingsAssessment"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
-						>
-							<div>
-								<p class="text-gray-700">{m.findingsAssessment()}</p>
-								<p class="text-gray-500 text-xs">{m.dataWizardFindingsAssessmentDescription()}</p>
-							</div>
-
-							<input
-								type="radio"
-								name="model"
-								value="FindingsAssessment"
-								id="FindingsAssessment"
-								class="size-5 border-gray-300 text-blue-500"
-								bind:group={selectedModel}
-							/>
-						</label>
-					</div>
-
-					<div>
-						<label
-							for="RiskAssessment"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
-						>
-							<div>
-								<p class="text-gray-700">{m.riskAssessment()}</p>
-								<p class="text-gray-500 text-xs">{m.dataWizardRiskAssessmentDescription()}</p>
-							</div>
-
-							<input
-								type="radio"
-								name="model"
-								value="RiskAssessment"
-								id="RiskAssessment"
-								class="size-5 border-gray-300 text-blue-500"
-								bind:group={selectedModel}
-							/>
-						</label>
-					</div>
-
-					<div>
-						<label
-							for="ElementaryAction"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
-						>
-							<div>
-								<p class="text-gray-700">{m.elementaryActions()}</p>
-								<p class="text-gray-500 text-xs">{m.dataWizardElementaryActionDescription()}</p>
-							</div>
-
-							<input
-								type="radio"
-								name="model"
-								value="ElementaryAction"
-								id="ElementaryAction"
-								class="size-5 border-gray-300 text-blue-500"
-								bind:group={selectedModel}
-							/>
-						</label>
-					</div>
-
-					<div>
-						<label
-							for="ReferenceControl"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
-						>
-							<div>
-								<p class="text-gray-700">{m.referenceControls()}</p>
-							</div>
-
-							<input
-								type="radio"
-								name="model"
-								value="ReferenceControl"
-								id="ReferenceControl"
-								class="size-5 border-gray-300 text-blue-500"
-								bind:group={selectedModel}
-							/>
-						</label>
-					</div>
-
-					<div>
-						<label
-							for="Threat"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
-						>
-							<div>
-								<p class="text-gray-700">{m.threats()}</p>
-							</div>
-
-							<input
-								type="radio"
-								name="model"
-								value="Threat"
-								id="Threat"
-								class="size-5 border-gray-300 text-blue-500"
-								bind:group={selectedModel}
-							/>
-						</label>
-					</div>
-
-					<div>
-						<label
-							for="TPRM"
-							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
-						>
-							<div>
-								<p class="text-gray-700">TPRM (Third-Party Risk Management)</p>
-								<p class="text-gray-500 text-xs">
-									Import entities, solutions, and contracts from a multi-sheet Excel file
-								</p>
-							</div>
-
-							<input
-								type="radio"
-								name="model"
-								value="TPRM"
-								id="TPRM"
-								class="size-5 border-gray-300 text-blue-500"
-								bind:group={selectedModel}
-							/>
-						</label>
-					</div>
+								<input
+									type="radio"
+									name="model"
+									value={model.id}
+									id={model.id}
+									class="size-5 border-gray-300 text-blue-500"
+									checked={index === 0}
+									bind:group={selectedModel}
+								/>
+							</label>
+						</div>
+					{/each}
 				</fieldset>
 			</div>
 
