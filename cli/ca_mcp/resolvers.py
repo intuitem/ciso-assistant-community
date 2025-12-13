@@ -321,3 +321,33 @@ def resolve_library_id(library_urn_or_id: str) -> str:
         )
 
     return str(libraries[0]["id"])
+
+
+def resolve_task_template_id(task_name_or_id: str) -> str:
+    """Helper function to resolve task template name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    # Check if it's already a UUID
+    if "-" in task_name_or_id and len(task_name_or_id) == 36:
+        return task_name_or_id
+
+    # Otherwise, look up by name
+    res = make_get_request("/task-templates/", params={"name": task_name_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Task template '{task_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    tasks = get_paginated_results(data)
+
+    if not tasks:
+        raise ValueError(f"Task template '{task_name_or_id}' not found")
+
+    if len(tasks) > 1:
+        raise ValueError(
+            f"Ambiguous task template name '{task_name_or_id}', found {len(tasks)}"
+        )
+
+    return tasks[0]["id"]

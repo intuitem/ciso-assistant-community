@@ -3,6 +3,7 @@
 .env
 .venv
 venv
+cli/.mcp.env
 **/node_modules/
 .vscode
 *.sqlite3
