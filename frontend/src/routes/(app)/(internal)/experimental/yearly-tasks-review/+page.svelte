@@ -217,6 +217,11 @@
 							{#each folder.tasks as task}
 								<tr class="border-b hover:bg-gray-50">
 									<td class="px-4 py-3 sticky left-0 bg-white z-10">
+										{#if task.ref_id}
+											<div class="">
+												<span class="text-xs bg-slate-200 p-1 rounded">{task.ref_id}</span>
+											</div>
+										{/if}
 										<a
 											href="/task-templates/{task.id}"
 											class="font-medium text-blue-600 hover:text-blue-800 hover:underline"
