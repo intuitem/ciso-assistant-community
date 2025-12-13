@@ -436,7 +436,7 @@
 	"residual": "Maradvány",
 	"jumpToRiskAssessment": "Ugrás a kockázatértékeléshez",
 	"additionalMeasures": "További intézkedések",
-	"riskAssessmentMatrixHelpText": "FIGYELEM: A kockázati mátrixot a kockázatértékelés létrehozása után már nem lehet módosítani",
+	"riskAssessmentMatrixHelpText": "FIGYELMEZTETÉS: A kockázati mátrix megváltoztatásakor az értékek automatikusan igazodnak az új skálához. Ellenőrizd utána az eredményeket, és szükség esetén javítsd őket.",
 	"etaHelpText": "Becsült befejezési idő",
 	"dueDateHelpText": "A dátum, ameddig az értékelést be kell fejezni",
 	"expiryDateHelpText": "A dátum, amikortól az objektum már nem érvényes",

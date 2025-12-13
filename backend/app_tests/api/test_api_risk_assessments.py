@@ -1,6 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
-from core.models import Perimeter, RiskAssessment, RiskMatrix
+from core.models import Perimeter, RiskAssessment, RiskMatrix, StoredLibrary
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
@@ -139,7 +139,13 @@ class TestRiskAssessmentAuthenticated:
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         perimeter = Perimeter.objects.create(name="test", folder=test.folder)
-        risk_matrix = RiskMatrix.objects.all()[0]
+        risk_matrix_library = StoredLibrary.objects.get(
+            urn="urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm"
+        )
+        risk_matrix_library.load()
+        risk_matrix = RiskMatrix.objects.get(
+            urn="urn:intuitem:risk:matrix:risk-matrix-4x4-ebios-rm"
+        )
 
         EndpointTestsQueries.Auth.create_object(
             test.client,
@@ -176,8 +182,20 @@ class TestRiskAssessmentAuthenticated:
         perimeter2 = Perimeter.objects.create(
             name="test2", folder=Folder.objects.create(name="test2")
         )
-        risk_matrix = RiskMatrix.objects.all()[0]
-        risk_matrix2 = RiskMatrix.objects.all()[1]
+        risk_matrix_library = StoredLibrary.objects.get(
+            urn="urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm"
+        )
+        risk_matrix_library.load()
+        risk_matrix = RiskMatrix.objects.get(
+            urn="urn:intuitem:risk:matrix:risk-matrix-4x4-ebios-rm"
+        )
+        risk_matrix_library2 = StoredLibrary.objects.get(
+            urn="urn:intuitem:risk:library:risk-matrix-5x5-iso27005"
+        )
+        risk_matrix_library2.load()
+        risk_matrix2 = RiskMatrix.objects.get(
+            urn="urn:intuitem:risk:matrix:5x5-iso27005"
+        )
 
         EndpointTestsQueries.Auth.update_object(
             test.client,

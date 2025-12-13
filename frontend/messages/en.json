@@ -564,7 +564,7 @@
 	"residual": "Residual",
 	"jumpToRiskAssessment": "Jump to risk assessment",
 	"additionalMeasures": "Additional measures",
-	"riskAssessmentMatrixHelpText": "WARNING: You will not be able to change the risk matrix after the risk assessment is created",
+	"riskAssessmentMatrixHelpText": "WARNING: Changing the risk matrix automatically adjusts values according to the new scale. Review the results afterwards and correct them if needed.",
 	"etaHelpText": "Estimated time of arrival",
 	"dueDateHelpText": "Date by which this must be completed",
 	"expiryDateHelpText": "Date by which the object is no longer valid",

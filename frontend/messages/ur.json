@@ -434,7 +434,7 @@
 	"residual": "باقی",
 	"jumpToRiskAssessment": "خطرے کی تشخیص پر جائیں",
 	"additionalMeasures": "اضافی اقدامات",
-	"riskAssessmentMatrixHelpText": "انتباہ: آپ خطرے کی تشخیص بننے کے بعد خطرے کی میٹرکس کو تبدیل نہیں کر سکیں گے",
+	"riskAssessmentMatrixHelpText": "انتباہ: خطرے کی میٹرکس بدلنے سے اقدار نئے سکیل کے مطابق خود بخود ایڈجسٹ ہو جاتی ہیں۔ بعد میں نتائج کا جائزہ لیں اور ضرورت ہو تو درست کریں۔",
 	"etaHelpText": "متوقع آمد کا وقت",
 	"dueDateHelpText": "وہ تاریخ جس تک تشخیص مکمل کرنا ضروری ہے",
 	"expiryDateHelpText": "جس تاریخ تک شے اب درست نہیں ہوگی",

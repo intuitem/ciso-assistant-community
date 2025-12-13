@@ -484,7 +484,7 @@
 	"residual": "Preostalo",
 	"jumpToRiskAssessment": "Idi na procjenu rizika",
 	"additionalMeasures": "Dodatne mjere",
-	"riskAssessmentMatrixHelpText": "UPOZORENJE: Nećete moći promijeniti matricu rizika nakon kreiranja procjene rizika",
+	"riskAssessmentMatrixHelpText": "UPOZORENJE: Promjena matrice rizika automatski prilagođava vrijednosti prema novoj skali. Nakon toga pregledajte rezultate i po potrebi ih ispravite.",
 	"etaHelpText": "Procijenjeno vrijeme",
 	"dueDateHelpText": "Krajnji rok za provedbu procjene",
 	"expiryDateHelpText": "Datum nakon kojeg objekt više ne vrijedi",
