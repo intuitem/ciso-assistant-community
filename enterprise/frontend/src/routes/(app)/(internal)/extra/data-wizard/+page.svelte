@@ -50,7 +50,8 @@
 	let isDomainDisabled = $derived(
 		selectedModel === 'ComplianceAssessment' ||
 			selectedModel === 'FindingsAssessment' ||
-			selectedModel === 'RiskAssessment'
+			selectedModel === 'RiskAssessment' ||
+			selectedModel === 'Folder'
 	);
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
@@ -65,7 +66,8 @@
 			selectedModel === 'ElementaryAction' ||
 			selectedModel === 'ReferenceControl' ||
 			selectedModel === 'Threat' ||
-			selectedModel === 'TPRM'
+			selectedModel === 'TPRM' ||
+			selectedModel === 'Folder'
 	);
 
 	// Fixed: Check files correctly
@@ -344,6 +346,26 @@
 								name="model"
 								value="Threat"
 								id="Threat"
+								class="size-5 border-gray-300 text-blue-500"
+								bind:group={selectedModel}
+							/>
+						</label>
+					</div>
+
+					<div>
+						<label
+							for="Folder"
+							class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
+						>
+							<div>
+								<p class="text-gray-700">{m.domains()}</p>
+							</div>
+
+							<input
+								type="radio"
+								name="model"
+								value="Folder"
+								id="Folder"
 								class="size-5 border-gray-300 text-blue-500"
 								bind:group={selectedModel}
 							/>
