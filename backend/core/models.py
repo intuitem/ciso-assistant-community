@@ -240,7 +240,7 @@ class Severity(models.IntegerChoices):
     CRITICAL = 4, "critical"
 
 
-class StoredLibrary(LibraryMixin):
+class StoredLibrary(LibraryMixin, FilteringLabelMixin):
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
     content = models.JSONField()
@@ -307,51 +307,60 @@ class StoredLibrary(LibraryMixin):
         if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
             return None  # We do not accept to store outdated libraries
 
-        # This code allows adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
-        for outdated_library in StoredLibrary.objects.filter(
-            urn=urn, locale=locale, version__lt=version
-        ):
-            outdated_library.delete()
+        with transaction.atomic():
+            # This code allows adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
+            for outdated_library in StoredLibrary.objects.filter(
+                urn=urn, locale=locale, version__lt=version
+            ):
+                outdated_library.delete()
 
-        objects_meta = {
-            key: (1 if key == "framework" else len(value))
-            for key, value in library_data["objects"].items()
-        }
+            objects_meta = {
+                key: (1 if key == "framework" else len(value))
+                for key, value in library_data["objects"].items()
+            }
 
-        dependencies = library_data.get(
-            "dependencies", []
-        )  # I don't want whitespaces in URN anymore nontheless
+            dependencies = library_data.get(
+                "dependencies", []
+            )  # I don't want whitespaces in URN anymore nontheless
 
-        library_objects = library_data["objects"]
-        return StoredLibrary.objects.create(
-            name=library_data["name"],
-            is_published=True,
-            urn=urn,
-            locale=locale,
-            version=version,
-            ref_id=library_data["ref_id"],
-            default_locale=False,  # We don't care about this value yet.
-            description=library_data.get("description"),
-            annotation=library_data.get("annotation"),
-            copyright=library_data.get("copyright"),
-            provider=library_data.get("provider"),
-            packager=library_data.get("packager"),
-            publication_date=library_data.get("publication_date"),
-            translations=library_data.get("translations", {}),
-            objects_meta=objects_meta,
-            dependencies=dependencies,
-            is_loaded=is_loaded,
-            # We have to add a "builtin: true" line to every builtin library file.
-            builtin=builtin,
-            hash_checksum=hash_checksum,
-            content=library_objects,
-            autoload=bool(
-                library_objects.get(
-                    "requirement_mapping_set",
-                    library_objects.get("requirement_mapping_sets"),
-                )
-            ),  # autoload is true if the library contains requirement mapping sets
-        )
+            label_names = library_data.get("filtering_labels", [])
+            filtering_labels = [
+                FilteringLabel.objects.get_or_create(label=label_name)[0]
+                for label_name in label_names
+            ]
+
+            library_objects = library_data["objects"]
+            new_library = StoredLibrary.objects.create(
+                name=library_data["name"],
+                is_published=True,
+                urn=urn,
+                locale=locale,
+                version=version,
+                ref_id=library_data["ref_id"],
+                default_locale=False,  # We don't care about this value yet.
+                description=library_data.get("description"),
+                annotation=library_data.get("annotation"),
+                copyright=library_data.get("copyright"),
+                provider=library_data.get("provider"),
+                packager=library_data.get("packager"),
+                publication_date=library_data.get("publication_date"),
+                translations=library_data.get("translations", {}),
+                objects_meta=objects_meta,
+                dependencies=dependencies,
+                is_loaded=is_loaded,
+                # We have to add a "builtin: true" line to every builtin library file.
+                builtin=builtin,
+                hash_checksum=hash_checksum,
+                content=library_objects,
+                autoload=bool(
+                    library_objects.get(
+                        "requirement_mapping_set",
+                        library_objects.get("requirement_mapping_sets"),
+                    )
+                ),  # autoload is true if the library contains requirement mapping sets
+            )
+            new_library.filtering_labels.set(filtering_labels)
+            return new_library
 
     @classmethod
     def store_library_file(
@@ -362,10 +371,25 @@ class StoredLibrary(LibraryMixin):
 
         return StoredLibrary.store_library_content(library_content, builtin)
 
+    def get_loaded_library(self) -> Optional["LoadedLibrary"]:
+        if not self.is_loaded:
+            return
+        return LoadedLibrary.objects.filter(urn=self.urn).first()
+
+    @property
+    def is_update(self) -> bool:
+        loaded_library = self.get_loaded_library()
+        return loaded_library is not None and loaded_library.has_update
+
+    @property
+    def reference_count(self) -> int:
+        loaded_library = self.get_loaded_library()
+        return loaded_library.reference_count if loaded_library is not None else 0
+
     def load(self) -> Union[str, None]:
         from library.utils import LibraryImporter
 
-        if LoadedLibrary.objects.filter(urn=self.urn, locale=self.locale):
+        if LoadedLibrary.objects.filter(urn=self.urn, locale=self.locale).exists():
             return "This library has already been loaded."
 
         library_importer = LibraryImporter(self)

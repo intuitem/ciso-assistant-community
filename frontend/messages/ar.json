@@ -1019,5 +1019,8 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "البنود أدناه تبقى في النظام ولكن روابطها بهذا العنصر ستتم إزالتها."
+	"cascadeAffectedHint": "البنود أدناه تبقى في النظام ولكن روابطها بهذا العنصر ستتم إزالتها.",
+	"isCustom": "مخصص",
+	"errorUnloadingLibrary": "خطأ في تفريغ المكتبة",
+	"librarySuccessfullyUnloaded": "تم إلغاء تحميل المكتبة بنجاح"
 }

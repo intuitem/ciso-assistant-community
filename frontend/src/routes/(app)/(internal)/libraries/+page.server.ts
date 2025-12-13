@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 
-import { nestedDeleteFormAction } from '$lib/utils/actions';
+import { defaultDeleteFormAction } from '$lib/utils/actions';
 import { safeTranslate } from '$lib/utils/i18n';
 import { LibraryUploadSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
@@ -129,6 +129,6 @@ export const actions: Actions = {
 		}
 	},
 	delete: async (event) => {
-		return nestedDeleteFormAction({ event });
+		return defaultDeleteFormAction({ event, urlModel: 'stored-libraries' });
 	}
 };
