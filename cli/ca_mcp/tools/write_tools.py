@@ -943,7 +943,7 @@ async def create_task_template(
         link: Link to evidence (e.g. Jira ticket)
         assigned_to: Array of user UUIDs
         assets: Array of asset UUIDs
-        applied_controls: Array of applied control UUIDs
+        applied_controls: List of applied control IDs/names
         compliance_assessments: Array of compliance assessment UUIDs
         risk_assessments: Array of risk assessment UUIDs
         findings_assessment: Array of finding assessment UUIDs
@@ -1006,4 +1006,3 @@ async def create_task_template(
             return f"Error creating task template: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_task_template: {str(e)}"
-    
