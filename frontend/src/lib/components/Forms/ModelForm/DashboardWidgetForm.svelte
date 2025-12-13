@@ -51,14 +51,20 @@
 	// Update available metrics when model selection changes
 	$effect(() => {
 		if (selectedModel && supportedModels[selectedModel]) {
-			availableMetrics = Object.entries(supportedModels[selectedModel]).map(
+			const metrics = Object.entries(supportedModels[selectedModel]).map(
 				([key, meta]: [string, any]) => ({
 					value: key,
 					label: meta.label
 				})
 			);
+			availableMetrics = metrics;
+			// Set first metric as default if none selected or current selection is invalid
+			if (metrics.length > 0 && (!selectedMetricKey || !metrics.find(m => m.value === selectedMetricKey))) {
+				selectedMetricKey = metrics[0].value;
+			}
 		} else {
 			availableMetrics = [];
+			selectedMetricKey = '';
 		}
 	});
 
@@ -83,18 +89,31 @@
 				$metricKeyValue = null;
 				formDataCache['target_object_id'] = undefined;
 			} else {
-				// Clear custom field when switching to builtin
+				// Clear custom field and set default model when switching to builtin
 				formDataCache['metric_instance'] = undefined;
+				// Set first model as default if none selected
+				const modelNames = Object.keys(supportedModels);
+				if (modelNames.length > 0 && !selectedModel) {
+					selectedModel = modelNames[0];
+				}
 			}
 		}
 		previousMetricType = metricType;
 	});
 
+	// Map model names to translation keys
+	const modelTranslationKeys: Record<string, () => string> = {
+		ComplianceAssessment: m.complianceAssessment,
+		RiskAssessment: m.riskAssessment,
+		FindingsAssessment: m.findingsAssessment,
+		Folder: m.domain
+	};
+
 	// Model options for the select dropdown
 	const modelOptions = $derived(
 		Object.keys(supportedModels).map((name) => ({
 			value: name,
-			label: name.replace(/([A-Z])/g, ' $1').trim() // Add spaces before capitals
+			label: modelTranslationKeys[name]?.() || name
 		}))
 	);
 
@@ -214,7 +233,6 @@
 				class="select"
 				bind:value={selectedModel}
 			>
-				<option value="">--</option>
 				{#each modelOptions as option}
 					<option value={option.value}>{option.label}</option>
 				{/each}
@@ -222,15 +240,29 @@
 		</div>
 
 		{#if selectedModel && targetObjectEndpoint}
-			<AutocompleteSelect
-				{form}
-				optionsEndpoint={targetObjectEndpoint}
-				optionsLabelField="auto"
-				field="target_object_id"
-				cacheLock={cacheLocks['target_object_id']}
-				bind:cachedValue={formDataCache['target_object_id']}
-				label={m.targetObject()}
-			/>
+			{#key selectedModel}
+				<AutocompleteSelect
+					{form}
+					optionsEndpoint={targetObjectEndpoint}
+					optionsLabelField="auto"
+					field="target_object_id"
+					cacheLock={cacheLocks['target_object_id']}
+					bind:cachedValue={formDataCache['target_object_id']}
+					label={m.targetObject()}
+					optionsInfoFields={selectedModel === 'Folder'
+						? undefined
+						: {
+								fields: [
+									{ field: 'version', translate: true },
+									{ field: 'perimeter', path: 'str', translate: false },
+									{ field: 'status', translate: true }
+								],
+								position: 'suffix',
+								separator: ' • ',
+								classes: 'text-surface-500'
+							}}
+				/>
+			{/key}
 		{/if}
 
 		{#if availableMetrics.length > 0}
@@ -242,7 +274,6 @@
 					class="select"
 					bind:value={selectedMetricKey}
 				>
-					<option value="">--</option>
 					{#each availableMetrics as option}
 						<option value={option.value}>{option.label}</option>
 					{/each}

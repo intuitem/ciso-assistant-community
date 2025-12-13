@@ -217,7 +217,7 @@ class DashboardWidgetWriteSerializer(BaseModelSerializer):
         if not has_custom and not has_builtin:
             raise serializers.ValidationError(
                 {
-                    "metric_instance": "A metric instance is required for custom metric widgets."
+                    "non_field_errors": "Please select either a custom metric instance or a builtin metric (object type, target object, and metric)."
                 }
             )
 
