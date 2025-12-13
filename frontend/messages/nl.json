@@ -436,7 +436,7 @@
 	"residual": "Rest",
 	"jumpToRiskAssessment": "Spring naar risicobeoordeling",
 	"additionalMeasures": "Aanvullende maatregelen",
-	"riskAssessmentMatrixHelpText": "WAARSCHUWING: Je zult de risicomatrix niet kunnen wijzigen nadat de risicobeoordeling is gemaakt",
+	"riskAssessmentMatrixHelpText": "WAARSCHUWING: Bij het wijzigen van de risicomatrix worden de waarden automatisch aangepast aan de nieuwe schaal. Controleer daarna de resultaten en corrigeer ze indien nodig.",
 	"etaHelpText": "Geschatte aankomsttijd",
 	"dueDateHelpText": "Datum waarop de beoordeling voltooid moet zijn",
 	"expiryDateHelpText": "Datum waarop het object niet langer geldig is",

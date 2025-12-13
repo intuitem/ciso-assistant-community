@@ -436,7 +436,7 @@
 	"residual": "Restrisiko",
 	"jumpToRiskAssessment": "Zur Risikobewertung springen",
 	"additionalMeasures": "Zusätzliche Maßnahmen",
-	"riskAssessmentMatrixHelpText": "WARNUNG: Sie können die Risikomatrix nach der Erstellung der Risikobewertung nicht mehr ändern",
+	"riskAssessmentMatrixHelpText": "WARNUNG: Beim Ändern der Risikomatrix werden die Werte automatisch an die neue Skala angepasst. Überprüfen Sie anschließend die Ergebnisse und korrigieren Sie sie bei Bedarf.",
 	"etaHelpText": "Geschätzte Ankunftszeit",
 	"dueDateHelpText": "Datum, bis zu dem die Bewertung abgeschlossen sein muss",
 	"expiryDateHelpText": "Datum, ab dem das Objekt nicht mehr gültig ist",

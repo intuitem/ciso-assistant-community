@@ -112,7 +112,7 @@
 		cacheLock={cacheLocks['risk_matrix']}
 		bind:cachedValue={formDataCache['risk_matrix']}
 		label={m.riskMatrix()}
-		helpText={m.riskAssessmentMatrixHelpText()}
+		helpText={object?.id ? m.riskAssessmentMatrixHelpText() : ''}
 		onChange={async (e) => await handleRiskMatrixChange(e)}
 		mount={async (e) => await handleRiskMatrixChange(e)}
 	/>

@@ -473,7 +473,7 @@
 	"residual": "Resztkowy",
 	"jumpToRiskAssessment": "Przejdź do oceny ryzyka",
 	"additionalMeasures": "Dodatkowe środki",
-	"riskAssessmentMatrixHelpText": "OSTRZEŻENIE: Po utworzeniu oceny ryzyka nie będzie można zmienić macierzy ryzyka",
+	"riskAssessmentMatrixHelpText": "OSTRZEŻENIE: Zmiana macierzy ryzyka automatycznie dostosowuje wartości do nowej skali. Po zmianie przejrzyj wyniki i w razie potrzeby je popraw.",
 	"etaHelpText": "Szacowany czas przybycia",
 	"dueDateHelpText": "Termin ukończenia oceny",
 	"expiryDateHelpText": "Data, do której obiekt jest ważny",

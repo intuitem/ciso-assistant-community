@@ -435,7 +435,7 @@
 	"residual": "Rezidual",
 	"jumpToRiskAssessment": "Sari la evaluarea riscului",
 	"additionalMeasures": "Măsuri suplimentare",
-	"riskAssessmentMatrixHelpText": "ATENȚIE: Nu veți putea schimba matricea de risc după ce evaluarea riscului a fost creată",
+	"riskAssessmentMatrixHelpText": "ATENȚIE: Modificarea matricei de risc ajustează automat valorile conform noii scale. Revizuiți apoi rezultatele și corectați-le dacă este nevoie.",
 	"etaHelpText": "Ora estimată de sosire",
 	"dueDateHelpText": "Data la care trebuie finalizată evaluarea",
 	"expiryDateHelpText": "Data la care obiectul nu mai este valabil",
