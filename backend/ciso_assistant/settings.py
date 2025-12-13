@@ -67,6 +67,11 @@ LOGGING = {
             "level": "WARNING",
             "propagate": False,
         },
+        "django_structlog.middlewares.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
     },
 }
 
