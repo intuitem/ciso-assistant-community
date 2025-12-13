@@ -38,6 +38,15 @@
 		field="evidences"
 		label={m.evidences()}
 	/>
+{:else if context === 'selectAppliedControls'}
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="applied-controls"
+		optionsExtraFields={[['folder', 'str']]}
+		field="applied_controls"
+		label={m.appliedControls()}
+	/>
 {:else}
 	<Select
 		{form}

@@ -31,6 +31,7 @@
 	import { generateTocFromElements, type TocItem } from '$lib/utils/toc';
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	interface Props {
 		data: PageData;
@@ -147,6 +148,26 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	function modalMeasureCreateForm(createform: SuperForm<any>): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: createform,
+				formAction: `${actionPath}?/createAppliedControl`,
+				invalidateAll: invalidateAllBool,
+				model: data.measureModel,
+				debug: false
+				// suggestions: { reference_control: referenceControls }
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('add-' + data.measureModel.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
 	function modalEvidenceCreateForm(createform: SuperForm<any>): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -166,6 +187,7 @@
 		modalStore.trigger(modal);
 	}
 
+	let addedMeasure = $state(0);
 	let addedEvidence = $state(0);
 
 	const requirementAssessmentScores = Object.fromEntries(
@@ -196,7 +218,7 @@
 		}, 500); // There must be 500ms without a score change for a request to be sent and modify the score of the RequirementAsessment in the backend
 	}
 
-	function modalUpdateForm(requirementAssessment: Record<string, any>): void {
+	function modalUpdateForm(requirementAssessment: Record<string, any>, context: string): void {
 		const modalComponent: ModalComponent = {
 			ref: UpdateModal,
 			props: {
@@ -204,7 +226,7 @@
 				model: requirementAssessment.updatedModel,
 				object: requirementAssessment.object,
 				formAction: '?/update&id=' + requirementAssessment.id,
-				context: 'selectEvidences'
+				context
 			}
 		};
 		const modal: ModalSettings = {
@@ -745,6 +767,63 @@
 													{/snippet}
 												</Accordion.Item>
 											{/if}
+
+											{#if requirementAssessment.applied_controls.length === 0 && shallow}
+												<p class="text-gray-400 italic">{m.noAppliedControlYet()}</p>
+											{:else}
+												<Accordion.Item value="appliedControl">
+													{#snippet control()}
+														<p class="flex items-center space-x-2">
+															<span>{m.appliedControl()}</span>
+															{#key addedMeasure}
+																{#if requirementAssessment.applied_controls != null}
+																	<span class="badge preset-tonal-primary"
+																		>{requirementAssessment.applied_controls.length}</span
+																	>
+																{/if}
+															{/key}
+														</p>
+													{/snippet}
+													{#snippet panel()}
+														<div class="flex flex-row space-x-2 items-center">
+															{#if !shallow}
+																<button
+																	class="btn preset-filled-primary-500 self-start"
+																	onclick={() =>
+																		modalMeasureCreateForm(requirementAssessment.measureCreateForm)}
+																	type="button"
+																	><i class="fa-solid fa-plus mr-2"
+																	></i>{m.addAppliedControl()}</button
+																>
+																<button
+																	class="btn preset-filled-secondary-500 self-start"
+																	type="button"
+																	onclick={() =>
+																		modalUpdateForm(requirementAssessment, 'selectAppliedControls')}
+																	><i class="fa-solid fa-hand-pointer mr-2"
+																	></i>{m.selectAppliedControls()}
+																</button>
+															{/if}
+														</div>
+														<div class="flex flex-wrap space-x-2 items-center">
+															{#key addedMeasure}
+																{#each requirementAssessment.applied_controls as ac}
+																	<p class="p-2">
+																		<Anchor
+																			class="anchor"
+																			href="/applied-controls/{ac.id}"
+																			label={ac.str}
+																			><i class="fa-solid fa-fire-extinguisher mr-2"
+																			></i>{ac.str}</Anchor
+																		>
+																	</p>
+																{/each}
+															{/key}
+														</div>
+													{/snippet}
+												</Accordion.Item>
+											{/if}
+
 											{#if requirementAssessment.evidences.length === 0 && shallow}
 												<p class="text-gray-400 italic" data-testid="no-evidence">
 													{m.noEvidences()}
@@ -782,7 +861,8 @@
 																	class="btn preset-filled-secondary-500 self-start"
 																	type="button"
 																	data-testid="select-evidence-button"
-																	onclick={() => modalUpdateForm(requirementAssessment)}
+																	onclick={() =>
+																		modalUpdateForm(requirementAssessment, 'selectEvidences')}
 																	><i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
 																</button>
 															{/if}
@@ -791,11 +871,13 @@
 															{#key addedEvidence}
 																{#each requirementAssessment.evidences as evidence}
 																	<p class="p-2">
-																		<a
-																			class="text-primary-700 hover:text-primary-500"
+																		<Anchor
+																			class="anchor"
 																			href="/evidences/{evidence.id}"
+																			label={evidence.str}
 																			data-testid="evidence-link"
-																			><i class="fa-solid fa-file mr-2"></i>{evidence.str}</a
+																			><i class="fa-solid fa-file-lines mr-2"
+																			></i>{evidence.str}</Anchor
 																		>
 																	</p>
 																{/each}
