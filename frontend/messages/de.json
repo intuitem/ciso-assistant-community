@@ -936,51 +936,35 @@
 	"mappingSuggestionTeasing": "Zuordnungen werden jetzt vorgeschlagen! Verwenden Sie die Filter, um Vorschläge basierend auf geladenen Frameworks zu erkunden.",
 	"associatedFindingsAssessments": "Zugehörige Nachverfolgungen",
 	"hourCount": [
-    {
-    	"declarations": [
-      	"input count",
-      	"local countPlural = count: plural"
-      ],
-    	"selectors": [
-      	"count",
-      	"countPlural"
-      ],
-    	"match": {
-      	"countPlural=one": "{count} Stunde",
-      	"countPlural=other": "{count} Stunden"
-      }
-    }
-  ],
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Stunde",
+				"countPlural=other": "{count} Stunden"
+			}
+		}
+	],
 	"minuteCount": [
-    {
-    	"declarations": [
-      	"input count",
-      	"local countPlural = count: plural"
-      ],
-    	"selectors": [
-      	"countPlural"
-      ],
-    	"match": {
-      	"countPlural=one": "{count} Minute",
-      	"countPlural=other": "{count} Minuten"
-      }
-    }
-  ],
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minute",
+				"countPlural=other": "{count} Minuten"
+			}
+		}
+	],
 	"dayCount": [
-    {
-    	"declarations": [
-      	"input count",
-      	"local countPlural = count: plural"
-      ],
-    	"selectors": [
-      	"countPlural"
-      ],
-    	"match": {
-      	"countPlural=one": "{count} Tag",
-      	"countPlural=other": "{count} Tage"
-      }
-    }
-  ],
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Tag",
+				"countPlural=other": "{count} Tage"
+			}
+		}
+	],
 	"matchingScenarios": "Übereinstimmende Szenarien",
 	"select": "Auswählen",
 	"deselect": "Abwählen",
@@ -2924,21 +2908,15 @@
 	"cascadeDeleteWarning": "Warnung: Das Löschen dieses Elements entfernt auch {count} verknüpfte Objekte dauerhaft:",
 	"errorFetching": "Kaskadeninformationen konnten nicht geladen werden. Bitte erneut versuchen.",
 	"cascadeAffectedNotice": [
-    {
-    	"declarations": [
-      	"input count",
-      	"local countPlural = count: plural"
-      ],
-    	"selectors": [
-      	"count",
-      	"countPlural"
-      ],
-    	"match": {
-      	"count=0": "Keine anderen Objekte werden betroffen sein.",
-      	"countPlural=one": "{count} verknüpftes Objekt wird nicht gelöscht, jedoch gehen eine oder mehrere Beziehungen verloren.",
-      	"countPlural=other": "{count} verknüpfte Objekte werden nicht gelöscht, jedoch gehen eine oder mehrere Beziehungen verloren."
-      }
-    }
-  ],
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Keine anderen Objekte werden betroffen sein.",
+				"countPlural=one": "{count} verknüpftes Objekt wird nicht gelöscht, jedoch gehen eine oder mehrere Beziehungen verloren.",
+				"countPlural=other": "{count} verknüpfte Objekte werden nicht gelöscht, jedoch gehen eine oder mehrere Beziehungen verloren."
+			}
+		}
+	],
 	"cascadeAffectedHint": "Die unten aufgeführten Elemente bleiben bestehen, aber ihre Verknüpfungen zu diesem Objekt werden entfernt."
 }
