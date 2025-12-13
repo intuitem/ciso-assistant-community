@@ -268,6 +268,7 @@
 		cacheLock={cacheLocks['chart_type']}
 		bind:cachedValue={formDataCache['chart_type']}
 		label={m.chartType()}
+		disableDoubleDash={true}
 	/>
 	<Select
 		{form}
@@ -279,14 +280,8 @@
 	/>
 </div>
 
-<Select
-	{form}
-	options={model.selectOptions['aggregation']}
-	field="aggregation"
-	cacheLock={cacheLocks['aggregation']}
-	bind:cachedValue={formDataCache['aggregation']}
-	label={m.aggregation()}
-/>
+<!-- Aggregation hidden for now -->
+<input type="hidden" name="aggregation" value={formDataCache['aggregation'] || 'none'} />
 
 <div class="flex flex-wrap gap-4">
 	<Checkbox

@@ -45,19 +45,8 @@
 		return 'number';
 	}
 
-	// Color palette for breakdown charts
-	const BREAKDOWN_COLORS = [
-		'#3b82f6', // blue
-		'#22c55e', // green
-		'#f59e0b', // amber
-		'#ef4444', // red
-		'#8b5cf6', // violet
-		'#06b6d4', // cyan
-		'#f97316', // orange
-		'#ec4899', // pink
-		'#6366f1', // indigo
-		'#84cc16'  // lime
-	];
+	// Color palette for breakdown charts (will be replaced with risk/compliance palette later)
+	const BREAKDOWN_COLORS: string[] = [];
 
 	// Format breakdown key for display (e.g., 'non_compliant' -> 'Non Compliant')
 	function formatBreakdownKey(key: string): string {
@@ -142,31 +131,29 @@
 		return Array.from(keys).sort();
 	});
 
-	// Prepare pie chart data from latest breakdown
+	// Prepare pie chart data from latest breakdown (uses ECharts default colors)
 	const pieChartData = $derived(
 		latestBreakdown && typeof latestBreakdown === 'object'
-			? Object.entries(latestBreakdown).map(([key, value], index) => ({
+			? Object.entries(latestBreakdown).map(([key, value]) => ({
 					name: formatBreakdownKey(key),
-					value: value as number,
-					itemStyle: { color: BREAKDOWN_COLORS[index % BREAKDOWN_COLORS.length] }
+					value: value as number
 				}))
 			: []
 	);
 
-	// Prepare stacked bar/area data for breakdown time series
+	// Prepare stacked bar/area data for breakdown time series (uses ECharts default colors)
 	const breakdownTimeSeriesData = $derived(() => {
 		if (!isBreakdownMetric) return { categories: [], series: [] };
 		const keys = breakdownKeys();
 		const categories = chartData.map(([date]) => new Date(date).toLocaleDateString());
-		const series = keys.map((key, index) => ({
+		const series = keys.map((key) => ({
 			name: formatBreakdownKey(key),
 			type: widget.chart_type === 'area' ? 'line' : 'bar',
 			stack: 'total',
 			areaStyle: widget.chart_type === 'area' ? {} : undefined,
 			data: chartData.map(([, breakdown]) =>
 				(breakdown && typeof breakdown === 'object') ? (breakdown[key] || 0) : 0
-			),
-			itemStyle: { color: BREAKDOWN_COLORS[index % BREAKDOWN_COLORS.length] }
+			)
 		}));
 		return { categories, series };
 	});
@@ -335,34 +322,6 @@
 		}
 
 		switch (widget.chart_type) {
-			case 'line':
-				return {
-					grid: baseGrid,
-					tooltip: baseTooltip,
-					xAxis: baseXAxis,
-					yAxis: baseYAxis,
-					series: [
-						{
-							type: 'line',
-							smooth: true,
-							symbol: 'circle',
-							symbolSize: 6,
-							lineStyle: { width: 2, color: 'rgb(59, 130, 246)' },
-							itemStyle: { color: 'rgb(59, 130, 246)' },
-							data: chartData,
-							...(widget.show_target && targetValue
-								? {
-										markLine: {
-											data: [{ yAxis: targetValue, name: m.target() }],
-											lineStyle: { color: 'rgb(34, 197, 94)', type: 'dashed' },
-											label: { formatter: `${m.target()}: ${targetValue}` }
-										}
-									}
-								: {})
-						}
-					]
-				};
-
 			case 'area':
 				return {
 					grid: baseGrid,
@@ -524,13 +483,11 @@
 					]
 				};
 
-			case 'pie':
 			case 'donut':
 				// For percentage metrics, show as actual vs remaining
-				const pieValue = latestValue || 0;
+				const donutValue = latestValue || 0;
 				const maxValue = unitName === 'percentage' ? 100 : (targetValue || 100);
-				const remaining = Math.max(0, maxValue - pieValue);
-				const isPieDonut = widget.chart_type === 'donut';
+				const remaining = Math.max(0, maxValue - donutValue);
 				return {
 					tooltip: {
 						trigger: 'item',
@@ -544,7 +501,7 @@
 					series: [
 						{
 							type: 'pie',
-							radius: isPieDonut ? ['40%', '70%'] : ['0%', '70%'],
+							radius: ['40%', '70%'],
 							center: ['50%', '45%'],
 							avoidLabelOverlap: true,
 							itemStyle: {
@@ -564,7 +521,7 @@
 							},
 							labelLine: { show: false },
 							data: [
-								{ value: pieValue, name: m.actual(), itemStyle: { color: '#3b82f6' } },
+								{ value: donutValue, name: m.actual(), itemStyle: { color: '#3b82f6' } },
 								{ value: remaining, name: m.remaining(), itemStyle: { color: '#e5e7eb' } }
 							]
 						}

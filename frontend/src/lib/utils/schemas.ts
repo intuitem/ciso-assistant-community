@@ -1387,7 +1387,7 @@ export const DashboardWidgetSchema = z.object({
 	position_y: z.coerce.number().min(0).default(0),
 	width: z.coerce.number().min(1).max(12).default(6),
 	height: z.coerce.number().min(1).default(2),
-	chart_type: z.string().default('line'),
+	chart_type: z.string().default('kpi_card'),
 	time_range: z.string().default('last_30_days'),
 	aggregation: z.string().default('none'),
 	show_target: z.boolean().default(true),

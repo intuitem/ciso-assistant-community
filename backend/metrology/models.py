@@ -594,13 +594,11 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
     """
 
     class ChartType(models.TextChoices):
-        LINE = "line", _("Line Chart")
+        KPI_CARD = "kpi_card", _("KPI Card")
+        DONUT = "donut", _("Donut Chart")
         BAR = "bar", _("Bar Chart")
         AREA = "area", _("Area Chart")
-        PIE = "pie", _("Pie Chart")
-        DONUT = "donut", _("Donut Chart")
         GAUGE = "gauge", _("Gauge")
-        KPI_CARD = "kpi_card", _("KPI Card")
         SPARKLINE = "sparkline", _("Sparkline")
         TABLE = "table", _("Table")
 
@@ -704,7 +702,7 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
     chart_type = models.CharField(
         max_length=20,
         choices=ChartType.choices,
-        default=ChartType.LINE,
+        default=ChartType.KPI_CARD,
         verbose_name=_("Chart type"),
     )
     time_range = models.CharField(
