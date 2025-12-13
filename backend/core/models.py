@@ -2402,13 +2402,14 @@ class Asset(
 
     @classmethod
     def _aggregate_dro_objectives(cls, primary_ancestors: set) -> dict:
-        """Aggregates DRO objectives from primary ancestors (lowest value wins)."""
+        """Aggregates DRO objectives from primary ancestors (lowest non-zero value wins)."""
         agg_obj = {}
         for asset in primary_ancestors:
             objectives = asset.disaster_recovery_objectives.get("objectives", {})
             for key, content in objectives.items():
                 value = content.get("value")
-                if value is None:
+                # Skip None or 0 values (treat as "not set")
+                if not value:
                     continue
 
                 current_value = agg_obj.get(key, {}).get("value")
@@ -2608,13 +2609,16 @@ class Asset(
             for key, content in asset.disaster_recovery_objectives.get(
                 "objectives", {}
             ).items():
+                value = content.get("value")
+                # Skip None or 0 values (treat as "not set")
+                if not value:
+                    continue
                 if key not in disaster_recovery_objectives:
-                    disaster_recovery_objectives[key] = content
+                    disaster_recovery_objectives[key] = content.copy()
                 else:
-                    disaster_recovery_objectives[key]["value"] = min(
-                        disaster_recovery_objectives[key].get("value", 0),
-                        content.get("value", 0),
-                    )
+                    current_value = disaster_recovery_objectives[key].get("value")
+                    if current_value is None or value < current_value:
+                        disaster_recovery_objectives[key]["value"] = value
 
         return {"objectives": disaster_recovery_objectives}
 
