@@ -82,7 +82,8 @@
 	let isDomainDisabled = $derived(
 		selectedModel === 'ComplianceAssessment' ||
 			selectedModel === 'FindingsAssessment' ||
-			selectedModel === 'RiskAssessment'
+			selectedModel === 'RiskAssessment' ||
+			selectedModel === 'Folder'
 	);
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
@@ -108,7 +109,7 @@
 	let uploadButtonStyles = $derived(files && files.length > 0 ? '' : 'chip-disabled');
 
 	// Helper to check if the form has been processed (form action has run)
-	let formSubmitted = $derived(form !== null && form !== undefined);
+	let formSubmitted = $derived(form !== null && form !== 	undefined);
 
 	const authorizedExtensions = ['.xls', '.xlsx'];
 </script>
