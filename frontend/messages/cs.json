@@ -1025,5 +1025,19 @@
 	"deleteQuantitativeRiskStudy": "Smazat kvantitativní studii rizika",
 	"viewQuantitativeRiskStudy": "Zobrazit kvantitativní studii rizika",
 	"dueDateUpdatedSuccessfully": "Termín byl úspěšně aktualizován",
-	"taskScheduleInfo": "Minulé výskyty jsou chráněny před změnami plánu. Pouze nadcházející úlohy budou přepočítány."
+	"taskScheduleInfo": "Předchozí výskyty jsou chráněny před změnami plánu. Pouze nadcházející úlohy budou přepočítány.",
+	"cascadeDeleteWarning": "Varování: Smazáním tohoto objektu budou také trvale smazány {count} související objekty:",
+	"errorFetching": "Nelze načíst informace o kaskádě. Zkuste to prosím znovu.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Žádné další objekty nebudou ovlivněny.",
+				"countPlural=one": "{count} související objekt nebude smazán, ale ztratí jedno nebo více vztahů.",
+				"countPlural=other": "{count} souvisejících objektů nebude smazáno, ale ztratí jedno nebo více vztahů."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Níže uvedené položky zůstávají v systému, ale jejich odkazy na tento objekt budou odstraněny."
 }

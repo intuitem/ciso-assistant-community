@@ -1006,5 +1006,19 @@
 	"deleteQuantitativeRiskStudy": "जोखिम सांख्यिकी अध्ययन हटाएं",
 	"viewQuantitativeRiskStudy": "जोखिम सांख्यिकी अध्ययन देखें",
 	"dueDateUpdatedSuccessfully": "देय तिथि सफलतापूर्वक अपडेट की गई",
-	"taskScheduleInfo": "पिछले घटनाएँ शेड्यूल परिवर्तनों से सुरक्षित हैं। केवल आने वाले कार्य पुनः गणना किए जाएंगे।"
+	"taskScheduleInfo": "पिछले घटनाएँ शेड्यूल परिवर्तनों से सुरक्षित हैं। केवल आने वाले कार्य पुनः गणना किए जाएंगे।",
+	"cascadeDeleteWarning": "चेतावनी: इसको हटाने से {count} संबंधित वस्तुओं को स्थायी रूप से हटा दिया जाएगा:",
+	"errorFetching": "कास्केड जानकारी लोड करने में असमर्थ। कृपया पुनः प्रयास करें।",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "कोई अन्य वस्तुएँ प्रभावित नहीं होंगी।",
+				"countPlural=one": "{count} संबंधित वस्तु हटाई नहीं जाएगी लेकिन एक या अधिक संबंध खो देगी।",
+				"countPlural=other": "{count} संबंधित वस्तुएँ हटाई नहीं जाएंगी लेकिन एक या अधिक संबंध खो देंगी।"
+			}
+		}
+	],
+	"cascadeAffectedHint": "नीचे दिए गए आइटम सिस्टम में बने रहेंगे लेकिन इस वस्तु से उनके लिंक हटा दिए जाएंगे।"
 }

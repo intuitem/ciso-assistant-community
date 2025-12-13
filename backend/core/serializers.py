@@ -1185,6 +1185,16 @@ class PolicyWriteSerializer(AppliedControlWriteSerializer):
 
 class PolicyReadSerializer(AppliedControlReadSerializer):
     path = PathField(read_only=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = Policy

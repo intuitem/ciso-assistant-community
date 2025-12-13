@@ -1037,5 +1037,19 @@
 	"deleteQuantitativeRiskStudy": "Kockázati kvantifikációs tanulmány törlése",
 	"viewQuantitativeRiskStudy": "Kockázati kvantifikációs tanulmány megtekintése",
 	"dueDateUpdatedSuccessfully": "Határidő sikeresen frissítve",
-	"taskScheduleInfo": "A múltbéli előfordulások védettek az ütemezési változásokkal szemben. Csak jövőbeli feladatok kerülnek újraszámításra."
+	"taskScheduleInfo": "A múltbéli előfordulások védettek az ütemezési változásokkal szemben. Csak jövőbeli feladatok kerülnek újraszámításra.",
+	"cascadeDeleteWarning": "Figyelmeztetés: A törlés véglegesen törölni fogja {count} kapcsolódó objektumot:",
+	"errorFetching": "Nem sikerült betölteni a láncolt információkat. Kérjük, próbálja újra.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Egyéb objektumok nem lesznek érintve.",
+				"countPlural=one": "{count} kapcsolódó objektum nem lesz törölve, de elveszíti egy vagy több kapcsolatot.",
+				"countPlural=other": "{count} kapcsolódó objektum nem lesz törölve, de elveszíti egy vagy több kapcsolatot."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Az alábbi elemek a rendszerben maradnak, de a kapcsolataik ebben az objektumban törlődnek."
 }
