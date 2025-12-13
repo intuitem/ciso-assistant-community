@@ -472,7 +472,7 @@
 	"residual": "Kalan",
 	"jumpToRiskAssessment": "Risk değerlendirmesine atla",
 	"additionalMeasures": "Ek önlemler",
-	"riskAssessmentMatrixHelpText": "UYARI: Risk değerlendirmesi oluşturulduktan sonra risk matrisini değiştiremezsiniz",
+	"riskAssessmentMatrixHelpText": "UYARI: Risk matrisini değiştirmek değerleri yeni ölçeğe göre otomatik olarak ayarlar. Sonrasında sonuçları gözden geçirip gerekirse düzeltin.",
 	"etaHelpText": "Tahmini tamamlanma zamanı",
 	"dueDateHelpText": "Değerlendirmenin tamamlanması gereken tarih",
 	"expiryDateHelpText": "Nesnenin artık geçerli olmadığı tarih",

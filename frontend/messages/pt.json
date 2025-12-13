@@ -436,7 +436,7 @@
 	"residual": "Residual",
 	"jumpToRiskAssessment": "Ir para a avaliação de risco",
 	"additionalMeasures": "Controles adicionais",
-	"riskAssessmentMatrixHelpText": "AVISO: Você não poderá alterar a matriz de risco após a criação da avaliação de risco",
+	"riskAssessmentMatrixHelpText": "AVISO: Alterar a matriz de riscos ajusta automaticamente os valores de acordo com a nova escala. Revise os resultados depois e corrija-os se necessário.",
 	"etaHelpText": "Tempo estimado de chegada",
 	"dueDateHelpText": "Data em que a avaliação deve ser concluída",
 	"expiryDateHelpText": "Data em que o objeto não é mais válido",

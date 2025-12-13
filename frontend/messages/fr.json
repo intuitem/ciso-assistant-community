@@ -523,7 +523,7 @@
 	"residual": "Résiduel",
 	"jumpToRiskAssessment": "Passer à l'évaluation des risques",
 	"additionalMeasures": "Mesures supplémentaires",
-	"riskAssessmentMatrixHelpText": "ATTENTION : Vous ne pourrez pas changer la matrice de risque une fois l'évaluation de risque créée.",
+	"riskAssessmentMatrixHelpText": "ATTENTION : changer la matrice de risque ajuste automatiquement les valeurs selon la nouvelle échelle. Pensez à vérifier les résultats et à les corriger au besoin.",
 	"etaHelpText": "Date d'arrivée estimée",
 	"dueDateHelpText": "Date à laquelle ceci doit être complété",
 	"expiryDateHelpText": "Date à laquelle l'objet n'est plus valide",
