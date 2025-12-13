@@ -447,6 +447,159 @@ def upload_attachment(file, name):
     rprint(res.text)
 
 
+@click.command()
+@click.option(
+    "--dest-dir",
+    required=True,
+    help="Destination directory to save backup files",
+    type=click.Path(file_okay=False, dir_okay=True),
+)
+def backup_full(dest_dir):
+    """Create a full backup including database and attachments"""
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    headers = {"Authorization": f"Token {TOKEN}"}
+    dest_path = Path(dest_dir)
+    dest_path.mkdir(parents=True, exist_ok=True)
+
+    rprint("[bold blue]Exporting database backup...[/bold blue]")
+    url = f"{API_URL}/serdes/dump-db/"
+    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+
+    if res.status_code != 200:
+        rprint(
+            f"[bold red]Error exporting database: {res.status_code}[/bold red]",
+            file=sys.stderr,
+        )
+        rprint(res.text, file=sys.stderr)
+        sys.exit(1)
+
+    backup_file = dest_path / "backup.json.gz"
+    with open(backup_file, "wb") as f:
+        f.write(res.content)
+    rprint(f"[green]✓ Database backup saved to {backup_file}[/green]")
+
+    rprint("[bold blue]Exporting attachments...[/bold blue]")
+    url = f"{API_URL}/serdes/export-attachments/"
+    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+
+    if res.status_code == 404:
+        rprint("[yellow]No attachments found, skipping attachments backup[/yellow]")
+    elif res.status_code != 200:
+        rprint(
+            f"[bold red]Error exporting attachments: {res.status_code}[/bold red]",
+            file=sys.stderr,
+        )
+        rprint(res.text, file=sys.stderr)
+        sys.exit(1)
+    else:
+        attachments_file = dest_path / "attachments.zip"
+        with open(attachments_file, "wb") as f:
+            f.write(res.content)
+        rprint(f"[green]✓ Attachments backup saved to {attachments_file}[/green]")
+
+    rprint("[bold green]Full backup completed successfully![/bold green]")
+
+
+@click.command()
+@click.option(
+    "--src-dir",
+    required=True,
+    help="Source directory containing backup files",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+)
+def restore_full(src_dir):
+    """Restore a full backup including database and attachments"""
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    headers = {"Authorization": f"Token {TOKEN}"}
+    src_path = Path(src_dir)
+
+    # Check for required backup file
+    backup_file = src_path / "backup.json.gz"
+    if not backup_file.exists():
+        rprint(
+            f"[bold red]Error: backup.json.gz not found in {src_dir}[/bold red]",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    attachments_file = src_path / "attachments.zip"
+    has_attachments = attachments_file.exists()
+
+    rprint("[bold blue]Starting full restore (database + attachments)...[/bold blue]")
+
+    # Prepare multipart form data
+    files = {
+        "backup": ("backup.json.gz", open(backup_file, "rb"), "application/gzip"),
+    }
+
+    if has_attachments:
+        files["attachments"] = (
+            "attachments.zip",
+            open(attachments_file, "rb"),
+            "application/zip",
+        )
+        rprint("[dim]Including attachments in restore[/dim]")
+    else:
+        rprint("[yellow]No attachments.zip found, restoring database only[/yellow]")
+
+    url = f"{API_URL}/serdes/full-restore/"
+    try:
+        res = requests.post(
+            url, headers=headers, files=files, verify=VERIFY_CERTIFICATE
+        )
+    finally:
+        for file_tuple in files.values():
+            file_tuple[1].close()
+
+    if res.status_code != 200:
+        rprint(
+            f"[bold red]Error during restore: {res.status_code}[/bold red]",
+            file=sys.stderr,
+        )
+        try:
+            error_data = res.json()
+            rprint(f"[red]{error_data}[/red]", file=sys.stderr)
+        except:
+            rprint(res.text, file=sys.stderr)
+        sys.exit(1)
+
+    result = res.json()
+
+    rprint(f"[green]✓ Database restored successfully[/green]")
+
+    if has_attachments:
+        if "attachments_restored" in result:
+            restored = result["attachments_restored"]
+            processed = result.get("attachments_processed", restored)
+            rprint(
+                f"[green]✓ Attachments restored: {restored} of {processed} processed[/green]"
+            )
+
+            if result.get("attachment_errors"):
+                rprint("[yellow]Errors encountered:[/yellow]")
+                for error in result["attachment_errors"]:
+                    rprint(f"  - {error}")
+
+    if result.get("status") == "partial_success":
+        rprint("[bold yellow]Full restore completed with warnings[/bold yellow]")
+    else:
+        rprint("[bold green]Full restore completed successfully![/bold green]")
+
+    rprint("[dim]Note: You may need to regenerate your Personal Access Token[/dim]")
+
+
 cli.add_command(get_folders)
 cli.add_command(get_perimeters)
 cli.add_command(import_assets)
@@ -455,5 +608,7 @@ cli.add_command(import_evidences)
 cli.add_command(upload_attachment)
 cli.add_command(import_risk_assessment)
 cli.add_command(get_matrices)
+cli.add_command(backup_full)
+cli.add_command(restore_full)
 if __name__ == "__main__":
     cli()
