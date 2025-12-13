@@ -64,6 +64,8 @@
 	"governance": "Gouvernance",
 	"risk": "Risque",
 	"compliance": "Conformité",
+	"metrology": "Métrologie",
+	"metrologyDescription": "Suivez les métriques, KPIs, et visualisez-les sur des tableaux de bord personnalisables",
 	"organization": "Organisation",
 	"extra": "Extra",
 	"extraDescription": "Fonctionnalités supplémentaires et expérimentales.",
@@ -2918,5 +2920,28 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Les éléments ci-dessous restent dans le système mais leurs liens avec cet objet seront supprimés."
+	"cascadeAffectedHint": "Les éléments ci-dessous restent dans le système mais leurs liens avec cet objet seront supprimés.",
+	"higherIsBetter": "Plus élevé est mieux",
+	"higherIsBetterHelpText": "Si coché, une augmentation de la valeur est positive (ex : score de conformité). Si décoché, une diminution est positive (ex : nombre de vulnérabilités).",
+	"choicesDefinition": "Définition des choix",
+	"collectionFrequency": "Fréquence de collecte",
+	"targetValue": "Valeur cible",
+	"unit": "Unité",
+	"chartType": "Type de graphique",
+	"timeRange": "Plage de temps",
+	"aggregation": "Agrégation",
+	"positionX": "Position X",
+	"positionY": "Position Y",
+	"width": "Largeur",
+	"height": "Hauteur",
+	"showTarget": "Afficher la cible",
+	"showLegend": "Afficher la légende",
+	"widgetTitle": "Titre du widget",
+	"editLayout": "Modifier la disposition",
+	"viewDashboard": "Voir le tableau de bord",
+	"addWidget": "Ajouter un widget",
+	"addFirstWidget": "Ajouter un premier widget",
+	"noWidgetsYet": "Aucun widget pour le moment",
+	"layoutSaved": "Disposition enregistrée avec succès",
+	"dashboardEditorInstructions": "Faites glisser les widgets pour les repositionner. Utilisez les poignées de redimensionnement pour modifier la taille. Cliquez sur enregistrer pour conserver les modifications."
 }
