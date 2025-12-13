@@ -1,12 +1,14 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:doc-pol
 locale: en
 ref_id: usual-controls
 name: Usual reference controls
 description: Usual documents, policies, procedures, training and technical controls
   recommended by intuitem
-copyright: "\xA9 intuitem - 2024"
-version: 4
-publication_date: 2024-02-11
+copyright: "\xA9 intuitem - 2026"
+version: 5
+publication_date: 2025-12-05
 provider: intuitem
 packager: intuitem
 translations:
@@ -14,6 +16,10 @@ translations:
     name: "Mesures de r\xE9f\xE9rence courantes"
     description: "Documents, politiques, proc\xE9dures, formations et mesures techniques\
       \ recommand\xE9s par intuitem"
+  de:
+    name: "\xDCbliche Referenzkontrollen"
+    description: "\xDCbliche Dokumente, Richtlinien, Verfahren, Schulungen und technischen\
+      \ Kontrollen, die von intuitem empfohlen werden"
 objects:
   reference_controls:
   - urn: urn:intuitem:risk:function:doc-pol:doc.overview
@@ -38,6 +44,17 @@ objects:
         name: "Pr\xE9sentation de l\u2019organisation"
         description: "Objectifs organisationnels\nOrganigramme\nObjectifs de l\u2019\
           ISMS\nResponsabilit\xE9s du RSSI\nExamen de la direction du SMSI"
+      de:
+        name: "Dokument zur Organisations\xFCbersicht"
+        description: 'Ziele der Organisation
+
+          Organigramm
+
+          ISMS-Ziele
+
+          Verantwortlichkeiten des CISO
+
+          Managementbewertung des ISMS'
   - urn: urn:intuitem:risk:function:doc-pol:doc.context
     ref_id: DOC.CONTEXT
     name: Context of organization document
@@ -60,6 +77,9 @@ objects:
         name: Contexte de l'organisation
         description: "Parties prenantes\nAutorit\xE9s\nGroupes d\u2019int\xE9r\xEA\
           ts"
+      de:
+        name: Dokument zum Kontext der Organisation
+        description: "Interessierte Parteien\nBeh\xF6rden\nFach- und Interessengruppen"
   - urn: urn:intuitem:risk:function:doc-pol:doc.scope
     ref_id: DOC.SCOPE
     name: ISMS Scope document
@@ -93,6 +113,12 @@ objects:
           \ d\u2019entreprise\nVue de l\u2019architecture des donn\xE9es\nVue de l\u2019\
           architecture d\u2019application\nVue de l\u2019architecture technologique\n\
           Vue r\xE9seau\n\xC9nonc\xE9 du champ d\u2019application"
+      de:
+        name: Dokument zum Geltungsbereich des ISMS
+        description: "Produkte und Dienstleistungen\nProdukte und Dienstleistungen\
+          \ mit Zertifizierungspflicht\nStandorte\nOrganisationssicht\nSicht der Gesch\xE4\
+          ftsarchitektur\nSicht der Datenarchitektur\nSicht der Applikationsarchitektur\n\
+          Sicht der Technologiearchitektur\nNetzwerksicht\nBeschreibung des Geltungsbereichs"
   - urn: urn:intuitem:risk:function:doc-pol:doc.legal
     ref_id: DOC.LEGAL
     name: legal register
@@ -114,6 +140,11 @@ objects:
         description: "Exigences l\xE9gales \nExigences l\xE9gales \nExigences r\xE9\
           glementaires \nExigences contractuelles \nDroits de propri\xE9t\xE9 intellectuelle\n\
           Contrats de travail\nNDA"
+      de:
+        name: Rechtskataster
+        description: "Gesetzliche Anforderungen\nBeh\xF6rdliche bzw. gesetzliche Vorgaben\n\
+          Regulatorische Anforderungen\nVertragliche Anforderungen\nRechte an geistigem\
+          \ Eigentum\nArbeitsvertr\xE4ge\nGeheimhaltungsvereinbarungen (NDAs)"
   - urn: urn:intuitem:risk:function:doc-pol:doc.soa
     ref_id: DOC.SOA
     name: Statement of Applicabilty document
@@ -122,7 +153,8 @@ objects:
     translations:
       fr:
         name: "D\xE9claration d'applicabilit\xE9"
-        description: null
+      de:
+        name: "Dokument zur Geltungsbereichserkl\xE4rung (SoA)"
   - urn: urn:intuitem:risk:function:doc-pol:doc.controls
     ref_id: DOC.CONTROLS
     name: Controls accountability matrix
@@ -132,7 +164,8 @@ objects:
     translations:
       fr:
         name: "Matrice de responsabilit\xE9 des mesures"
-        description: null
+      de:
+        name: "Verantwortlichkeitsmatrix f\xFCr Kontrollen"
   - urn: urn:intuitem:risk:function:doc-pol:doc.audit_plan
     ref_id: DOC.AUDIT_PLAN
     name: Audit plan document
@@ -167,6 +200,11 @@ objects:
           Soutien\nOp\xE9ration\n\xC9valuation des performances\nAm\xE9lioration\n\
           Contr\xF4les organisationnels\nContr\xF4les du personnel\nContr\xF4les physiques\n\
           Contr\xF4les technologiques"
+      de:
+        name: Auditplan-Dokument
+        description: "Kontext der Organisation\nF\xFChrung\nPlanung\nUnterst\xFCtzung\n\
+          Betrieb\nLeistungsbewertung\nVerbesserung\nOrganisatorische Kontrollen\n\
+          Personenbezogene Kontrollen\nPhysische Kontrollen\nTechnologische Kontrollen"
   - urn: urn:intuitem:risk:function:doc-pol:doc.competency
     ref_id: DOC.COMPETENCY
     name: Competency matrix
@@ -176,7 +214,8 @@ objects:
     translations:
       fr:
         name: "Matrice de comp\xE9tence"
-        description: null
+      de:
+        name: Kompetenzmatrix
   - urn: urn:intuitem:risk:function:doc-pol:doc.raci
     ref_id: DOC.RACI
     name: Responsibility matrix
@@ -187,6 +226,9 @@ objects:
       fr:
         name: "Matrice de responsabilit\xE9"
         description: RACI du SMSI
+      de:
+        name: Verantwortlichkeitsmatrix
+        description: "RACI f\xFCr das ISMS"
   - urn: urn:intuitem:risk:function:doc-pol:doc.com
     ref_id: DOC.COM
     name: Communication plan document
@@ -196,7 +238,8 @@ objects:
     translations:
       fr:
         name: Plan de communication
-        description: null
+      de:
+        name: Kommunikationsplan-Dokument
   - urn: urn:intuitem:risk:function:doc-pol:doc.risk_register
     ref_id: DOC.RISK_REGISTER
     name: Risk register
@@ -218,13 +261,18 @@ objects:
 
       Mitigations - recommended security measures'
     annotation: "6.1\n6.1.2.c.2 \n6.1.2.d.1 \n6.1.2.d.2\n6.1.2.d.3 \n6.1.2.e.1 \n\
-      6.1.2.e.2 \n6.1.3.a \n6.1.3.b "
+      6.1.2.e.2 \n6.1.3.a \n6.1.3.b"
     translations:
       fr:
         name: Registre des risques
         description: "Propri\xE9taire du risque\nImpact\nVraisemblance\nNiveau de\
           \ risque\n\xC9valuation\nPriorit\xE9\nOption de traitement\nMesures d\u2019\
           att\xE9nuation - mesures de s\xE9curit\xE9 recommand\xE9es"
+      de:
+        name: Risikoregister
+        description: "Risiko-Verantwortlicher\nAuswirkung\nEintrittswahrscheinlichkeit\n\
+          Risikostufe\nBewertung\nPriorit\xE4t\nBehandlungsoption\nMinderungsma\xDF\
+          nahmen \u2013 empfohlene Sicherheitsma\xDFnahmen"
   - urn: urn:intuitem:risk:function:doc-pol:doc.so_register
     ref_id: DOC.SO_REGISTER
     name: Security objectives register
@@ -234,7 +282,8 @@ objects:
     translations:
       fr:
         name: "registre des objectifs de s\xE9curit\xE9"
-        description: null
+      de:
+        name: "Register f\xFCr Sicherheitsziele"
   - urn: urn:intuitem:risk:function:doc-pol:doc.mgmt_review
     ref_id: DOC.MGMT_REVIEW
     name: Management review plan document
@@ -256,6 +305,11 @@ objects:
         description: "Examen des risques\nExamen des objectifs de s\xE9curit\xE9\n\
           Examen des incidents de s\xE9curit\xE9\nExamen de la gestion des vuln\xE9\
           rabilit\xE9s\nExamen des non-conformit\xE9s"
+      de:
+        name: "Dokumentierter Plan f\xFCr die Managementbewertung"
+        description: "\xDCberpr\xFCfung der Risiken\n\xDCberpr\xFCfung der Sicherheitsziele\n\
+          \xDCberpr\xFCfung von Sicherheitsvorf\xE4llen\n\xDCberpr\xFCfung des Schwachstellenmanagements\n\
+          \xDCberpr\xFCfung der Nichtkonformit\xE4ten"
   - urn: urn:intuitem:risk:function:doc-pol:doc.educ_register
     ref_id: DOC.EDUC_REGISTER
     name: Training and awareness register
@@ -267,7 +321,8 @@ objects:
     translations:
       fr:
         name: Registre de formation et sensibilisation
-        description: null
+      de:
+        name: Schulungs- und Bewusstseinsregister
   - urn: urn:intuitem:risk:function:doc-pol:doc.doc_register
     ref_id: DOC.DOC_REGISTER
     name: Document register
@@ -286,6 +341,10 @@ objects:
         name: Registre des documents
         description: "R\xE8gles d\u2019\xE9dition et de maintenance\nContr\xF4le de\
           \ version\nRegistre\nAm\xE9lioration continue"
+      de:
+        name: Dokumentenregister
+        description: "Regeln f\xFCr Erstellung und Pflege\nVersionskontrolle\nRegister\n\
+          Kontinuierliche Verbesserung"
   - urn: urn:intuitem:risk:function:doc-pol:doc.proc_register
     ref_id: DOC.PROC_REGISTER
     name: Operational procedures register
@@ -295,7 +354,8 @@ objects:
     translations:
       fr:
         name: "Registre des proc\xE9dures op\xE9rationnelles"
-        description: null
+      de:
+        name: "Register f\xFCr operative Verfahren"
   - urn: urn:intuitem:risk:function:doc-pol:doc.nc_log
     ref_id: DOC.NC_LOG
     name: Log of non-conformities
@@ -309,6 +369,10 @@ objects:
         name: "Registre des non-conformit\xE9s"
         description: "Liste des non-conformit\xE9s (incident, probl\xE8mes, ...)\n\
           Mesures correctives prises"
+      de:
+        name: "Protokoll der Nichtkonformit\xE4ten"
+        description: "Liste der Nichtkonformit\xE4ten (Vorfall, Probleme, \u2026)\n\
+          Ergriffene Korrekturma\xDFnahmen"
   - urn: urn:intuitem:risk:function:doc-pol:doc.internal_rules
     ref_id: DOC.INTERNAL_RULES
     name: Rules of procedure document
@@ -318,7 +382,8 @@ objects:
     translations:
       fr:
         name: "R\xE8glement int\xE9rieur"
-        description: null
+      de:
+        name: Verfahrensregelwerk
   - urn: urn:intuitem:risk:function:doc-pol:doc.asset_register
     ref_id: DOC.ASSET_REGISTER
     name: Registry of assets
@@ -328,7 +393,8 @@ objects:
     translations:
       fr:
         name: Registre des biens
-        description: null
+      de:
+        name: Asset-Register
   - urn: urn:intuitem:risk:function:doc-pol:doc.supplier_register
     ref_id: DOC.SUPPLIER_REGISTER
     name: Registry of suppliers
@@ -339,6 +405,9 @@ objects:
       fr:
         name: Registre des fournisseurs
         description: Gestion des risques
+      de:
+        name: Lieferantenregister
+        description: Risikomanagement
   - urn: urn:intuitem:risk:function:doc-pol:doc.educ_plan
     ref_id: DOC.EDUC_PLAN
     name: Information security awareness and training plan
@@ -389,21 +458,33 @@ objects:
           \ (ex. : RGPD, ISO 27001) et conserver des dossiers pour audits.\nAm\xE9\
           lioration Continue : Mettre \xE0 jour en fonction des retours et des menaces\
           \ \xE9mergentes."
+      de:
+        name: "Plan f\xFCr Informationssicherheitsbewusstsein und Schulungen"
+        description: "Zielsetzung: Sensibilisierung aller Mitarbeitenden sowie gezielte\
+          \ Schulungen f\xFCr relevante Rollen, um sicheres Verhalten zu f\xF6rdern,\
+          \ Compliance sicherzustellen und Risiken zu reduzieren.\nGeltungsbereich:\
+          \ Sensibilisierung f\xFCr alle Mitarbeitenden und Auftragnehmer; zielgerichtete\
+          \ Schulungen f\xFCr spezifische Teams (z. B. IT, Sicherheit, Zugriffsadministration).\n\
+          Rollen und Verantwortlichkeiten: Verantwortung wird IT-, HR- und Sicherheitsteams\
+          \ zugewiesen.\nSchulungsanforderungen: Festlegung verpflichtender Themen\
+          \ (z. B. Zugriffsmanagement, sichere Konfigurationen) und H\xE4ufigkeiten\
+          \ (z. B. j\xE4hrlich, Onboarding).\nBereitstellungsmethoden: Sensibilisierung\
+          \ \xFCber E-Learning und Kampagnen; Schulungen \xFCber praxisorientierte\
+          \ Workshops und Simulationen.\nEvaluation: Nachverfolgung der Teilnahmequoten,\
+          \ Quiz-Ergebnisse und Phishing-Testresultate.\nCompliance: Ausrichtung an\
+          \ relevanten Vorschriften (z. B. DSGVO, ISO 27001) und Aufrechterhaltung\
+          \ pr\xFCfbereiter Nachweise.\nKontinuierliche Verbesserung: Aktualisierung\
+          \ auf Basis von Feedback und neuen Bedrohungen."
   - urn: urn:intuitem:risk:function:doc-pol:doc.sap
     ref_id: DOC.SAP
     name: Security Assurance Plan
     category: process
     csf_function: govern
-    description: 'A document provided by suppliers outlining security measures, compliance
+    description: A document provided by suppliers outlining security measures, compliance
       with standards (e.g., ISO 27001), and testing procedures to ensure the security
       of their products, services, or systems. It demonstrates their commitment to
       maintaining a secure environment and provides evidence of compliance and security
       practices.
-
-
-
-
-      '
     annotation: A.5.19
     translations:
       fr:
@@ -414,6 +495,13 @@ objects:
           \ de leurs produits, services ou syst\xE8mes. Il d\xE9montre leur engagement\
           \ \xE0 maintenir un environnement s\xE9curis\xE9 et fournit des preuves\
           \ de conformit\xE9 et de bonnes pratiques de s\xE9curit\xE9."
+      de:
+        name: Sicherheitsnachweisplan
+        description: "Ein von Lieferanten bereitgestelltes Dokument, das Sicherheitsma\xDF\
+          nahmen, die Einhaltung von Standards (z. B. ISO 27001) und Pr\xFCfverfahren\
+          \ beschreibt, um die Sicherheit ihrer Produkte, Dienstleistungen oder Systeme\
+          \ sicherzustellen. Es zeigt das Engagement f\xFCr eine sichere Umgebung\
+          \ und liefert Nachweise zur Einhaltung und Umsetzung von Sicherheitspraktiken."
   - urn: urn:intuitem:risk:function:doc-pol:doc.is_map
     ref_id: DOC.IS_MAP
     name: Information System Mapping
@@ -428,6 +516,11 @@ objects:
         description: "Repr\xE9sentation visuelle des composants d\u2019un syst\xE8\
           me d\u2019information et de leurs interactions pour am\xE9liorer la gestion\
           \ et la s\xE9curit\xE9."
+      de:
+        name: Systemabbild der Informationssysteme
+        description: Eine visuelle Darstellung der Komponenten des Informationssystems
+          einer Organisation und ihrer Wechselwirkungen zur Verbesserung von Verwaltung
+          und Sicherheit.
   - urn: urn:intuitem:risk:function:doc-pol:doc.pam_register
     ref_id: DOC.PAM_REGISTER
     name: Register of privileged access accounts
@@ -437,9 +530,10 @@ objects:
     translations:
       fr:
         name: "Registre des acc\xE8s \xE0 privil\xE8ges"
-        description: null
+      de:
+        name: "Register f\xFCr privilegierte Zugangskonten"
   - urn: urn:intuitem:risk:function:doc-pol:doc.incident_register
-    ref_id: DOC.INCIDENT_REGiSTER
+    ref_id: DOC.INCIDENT_REGISTER
     name: Security Incident Register
     category: process
     csf_function: respond
@@ -447,7 +541,8 @@ objects:
     translations:
       fr:
         name: "Registre des incidents de s\xE9curit\xE9"
-        description: null
+      de:
+        name: "Register f\xFCr Sicherheitsvorf\xE4lle"
   - urn: urn:intuitem:risk:function:doc-pol:doc.flow_matrix
     ref_id: DOC.FLOW_MATRIX
     name: Flow Matrix
@@ -462,6 +557,11 @@ objects:
         description: "Document cartographiant les flux de donn\xE9es autoris\xE9s\
           \ entre syst\xE8mes, applications ou zones r\xE9seau pour garantir des communications\
           \ s\xE9curis\xE9es et conformes."
+      de:
+        name: Flussmatrix
+        description: "Ein Dokument, das autorisierte Datenfl\xFCsse zwischen Systemen,\
+          \ Anwendungen oder Netzwerkanwendungsbereichen abbildet, um eine sichere\
+          \ und regelkonforme Kommunikation sicherzustellen."
   - urn: urn:intuitem:risk:function:doc-pol:doc.arc_principles
     ref_id: DOC.ARC_PRINCIPLES
     name: Security Architecture Principles
@@ -471,7 +571,8 @@ objects:
     translations:
       fr:
         name: "Principes d'architecture s\xE9curit\xE9"
-        description: null
+      de:
+        name: "Grunds\xE4tze der Sicherheitsarchitektur"
   - urn: urn:intuitem:risk:function:doc-pol:proc.pam
     ref_id: PROC.PAM
     name: Privileged Access Management Procedure
@@ -492,6 +593,13 @@ objects:
           \ les utilisateurs autoris\xE9s ont acc\xE8s aux syst\xE8mes et donn\xE9\
           es critiques. Elle inclut des mesures telles que la surveillance, l'audit,\
           \ et l'acc\xE8s limit\xE9 dans le temps pour r\xE9duire les risques."
+      de:
+        name: "Verfahren zum Management privilegierter Zug\xE4nge"
+        description: "Ein Dokument, das die Prozesse und Kontrollen zur Verwaltung\
+          \ und Sicherung privilegierter Konten beschreibt und sicherstellt, dass\
+          \ nur autorisierte Benutzer Zugang zu kritischen Systemen und Daten haben;\
+          \ einschlie\xDFlich Ma\xDFnahmen wie Monitoring, Audits und zeitlich begrenzten\
+          \ Zugriffsrechten zur Minimierung von Risiken."
   - urn: urn:intuitem:risk:function:doc-pol:proc.recertification
     ref_id: PROC.RECERTIFICATION
     name: Account recertification procedure
@@ -505,12 +613,20 @@ objects:
     translations:
       fr:
         name: "Proc\xE9dure de recertification des acc\xE8s"
-        description: "\nDocument d\xE9crivant le processus de r\xE9vision et de validation\
+        description: "Document d\xE9crivant le processus de r\xE9vision et de validation\
           \ r\xE9guli\xE8res des droits d'acc\xE8s des utilisateurs, des certifications\
           \ des syst\xE8mes ou de la conformit\xE9 aux normes. Il garantit que seuls\
           \ les utilisateurs et syst\xE8mes autoris\xE9s conservent leurs acc\xE8\
           s ou certifications, et aide \xE0 identifier et r\xE9voquer les autorisations\
           \ obsol\xE8tes ou inutiles."
+      de:
+        name: Verfahren zur Rezertifizierung von Benutzerkonten
+        description: "Ein Dokument, das den Prozess zur regelm\xE4\xDFigen \xDCberpr\xFC\
+          fung und Validierung von Benutzerzugriffsrechten, Systemzertifizierungen\
+          \ oder der Einhaltung von Standards beschreibt. Es stellt sicher, dass nur\
+          \ autorisierte Benutzer und Systeme Zugriff oder Zertifizierungen behalten\
+          \ und unterst\xFCtzt dabei, veraltete oder unn\xF6tige Berechtigungen zu\
+          \ identifizieren und zu widerrufen."
   - urn: urn:intuitem:risk:function:doc-pol:proc.hr_security
     ref_id: PROC.HR_SECURITY
     name: HR Security Procedure
@@ -537,6 +653,14 @@ objects:
           \ et de s\xE9curit\xE9. Il inclut les proc\xE9dures de recrutement, d'int\xE9\
           gration, de changement de r\xF4le, de formation et de d\xE9part afin de\
           \ prot\xE9ger les informations et les actifs de l'organisation."
+      de:
+        name: HR-Sicherheitsverfahren
+        description: "Ein Dokument, das Prozesse und Kontrollen zur Verwaltung personalbezogener\
+          \ Sicherheitsaspekte innerhalb der Organisation beschreibt und die Einhaltung\
+          \ gesetzlicher, regulatorischer und sicherheitsrelevanter Standards sicherstellt.\
+          \ Es umfasst Verfahren zu Rekrutierung, Onboarding, Rollen\xE4nderungen,\
+          \ Schulungen und Austrittsprozessen, um Informationen und Verm\xF6genswerte\
+          \ der Organisation zu sch\xFCtzen."
   - urn: urn:intuitem:risk:function:doc-pol:proc.physical_security
     ref_id: PROC.PHYSICAL_SECURITY
     name: Physical Security Procedure
@@ -572,6 +696,16 @@ objects:
           \ l'enregistrement et l'accompagnement des visiteurs dans les zones s\xE9\
           curis\xE9es.\nR\xE9ponse aux incidents : \xC9tapes pour traiter les violations\
           \ de s\xE9curit\xE9 physique ou les situations d'urgence."
+      de:
+        name: Physisches Sicherheitsverfahren
+        description: "Zugangskontrolle: Verfahren zur Gew\xE4hrung, zum Widerruf und\
+          \ zur \xDCberwachung physischen Zugangs zu gesicherten Bereichen.\nSchutz\
+          \ von Verm\xF6genswerten: Richtlinien zum Schutz kritischer Assets (z. B.\
+          \ Server, Speichersysteme).\n\xDCberwachung: Einsatz von Kameras, Alarm-\
+          \ und \xDCberwachungssystemen zur Erkennung und Verhinderung von Sicherheitsverletzungen.\n\
+          Besuchermanagement: Richtlinien zur Registrierung und Begleitung von Besuchern\
+          \ in gesicherten Bereichen.\nReaktion auf Vorf\xE4lle: Vorgehensweisen zur\
+          \ Behandlung physischer Sicherheitsvorf\xE4lle oder Notf\xE4lle."
   - urn: urn:intuitem:risk:function:doc-pol:proc.gpo
     ref_id: PROC.GPO
     name: Group Policy Objects Procedure
@@ -590,6 +724,13 @@ objects:
           \ syst\xE8me et les politiques utilisateur dans un environnement Windows.\
           \ Cela garantit une mise en \u0153uvre coh\xE9rente des politiques organisationnelles\
           \ pour des op\xE9rations informatiques s\xE9curis\xE9es et conformes."
+      de:
+        name: "Verfahren f\xFCr Gruppenrichtlinienobjekte (GPO)"
+        description: "Beschreibt, wie Gruppenrichtlinienobjekte erstellt, konfiguriert\
+          \ und verwaltet werden, um Sicherheitseinstellungen, Systemkonfigurationen\
+          \ und Benutzerregeln in einer Windows-Umgebung durchzusetzen. Es stellt\
+          \ eine konsistente Umsetzung organisatorischer Richtlinien f\xFCr einen\
+          \ sicheren und regelkonformen IT-Betrieb sicher."
   - urn: urn:intuitem:risk:function:doc-pol:proc.update
     ref_id: PROC.UPDATE
     name: Update management procedure
@@ -615,6 +756,11 @@ objects:
         description: "R\xF4les et responsabilit\xE9s\nClassification des mises \xE0\
           \ jour\nPlanification des mises \xE0 jour\nTests et validation\nProcessus\
           \ de d\xE9ploiement\nSuivi et v\xE9rification\nDocumentation et rapports"
+      de:
+        name: "Verfahren f\xFCr Update-Management"
+        description: "Rollen und Verantwortlichkeiten\nKlassifizierung von Updates\n\
+          Planung von Updates\nTests und Validierung\nBereitstellungsprozess\n\xDC\
+          berwachung und Verifikation\nDokumentation und Berichterstattung"
   - urn: urn:intuitem:risk:function:doc-pol:proc.incident
     ref_id: PROC.INCIDENT
     name: Incident Management Procedure
@@ -634,6 +780,9 @@ objects:
       fr:
         name: "Proc\xE9dure de gestion des incidents"
         description: "Impl\xE9mentation pratique de la politique de gestion des incidents"
+      de:
+        name: Verfahren zum Incident-Management
+        description: Praktische Umsetzung der Richtlinie zum Incident-Management
   - urn: urn:intuitem:risk:function:doc-pol:proc.disposal
     ref_id: PROC.DISPOSAL
     name: Secure Disposal Procedure
@@ -660,14 +809,27 @@ objects:
           \ mettre au rebut\nM\xE9thodes de mise au rebut s\xE9curis\xE9e\nEffacement\
           \ des donn\xE9es\nConformit\xE9 aux exigences l\xE9gales et r\xE9glementaires\n\
           Documentation et tenue des registres\nV\xE9rification et audit"
+      de:
+        name: Verfahren zur sicheren Entsorgung
+        description: 'Rollen und Verantwortlichkeiten
+
+          Identifikation von Assets zur Entsorgung
+
+          Methoden zur sicheren Entsorgung
+
+          Datenbereinigung (Data Sanitization)
+
+          Einhaltung gesetzlicher und regulatorischer Anforderungen
+
+          Dokumentation und Aufbewahrung von Nachweisen
+
+          Verifikation und Audit'
   - urn: urn:intuitem:risk:function:doc-pol:proc.ntp
     ref_id: PROC.NTP
     name: Time Synchronization Procedure
     category: procedure
     csf_function: protect
-    description: '
-
-      Time Source: Use reliable external sources (e.g., NTP servers).
+    description: 'Time Source: Use reliable external sources (e.g., NTP servers).
 
       Configuration: Define synchronization intervals and fallback mechanisms.
 
@@ -680,6 +842,12 @@ objects:
           \ NTP).\nConfiguration : D\xE9finir les intervalles de synchronisation et\
           \ les m\xE9canismes de secours.\nSurveillance : V\xE9rifier r\xE9guli\xE8\
           rement l\u2019\xE9tat de la synchronisation temporelle."
+      de:
+        name: Verfahren zur Zeitsynchronisation
+        description: "Zeitquelle: Verwendung zuverl\xE4ssiger externer Quellen (z.\
+          \ B. NTP-Server).\nKonfiguration: Festlegung von Synchronisationsintervallen\
+          \ und Fallback-Mechanismen.\n\xDCberwachung: Regelm\xE4\xDFige \xDCberpr\xFC\
+          fung des Status der Zeitsynchronisation."
   - urn: urn:intuitem:risk:function:doc-pol:proc.email_security
     ref_id: PROC.EMAIL_SECURITY
     name: Email Security Configuration Procedure
@@ -706,6 +874,12 @@ objects:
           \ bas\xE9e sur le domaine\nContr\xF4les anti-malware et anti-spam\nChiffrement\
           \ et communication s\xE9curis\xE9e\nContr\xF4le d\u2019acc\xE8s et surveillance\n\
           Sauvegarde et r\xE9cup\xE9ration\nSensibilisation et formation des utilisateurs"
+      de:
+        name: Verfahren zur E-Mail-Sicherheitskonfiguration
+        description: "Konfiguration des E-Mail-Servers\nDom\xE4nenbasierter E-Mail-Schutz\n\
+          Anti-Malware- und Anti-Spam-Kontrollen\nVerschl\xFCsselung und sichere Kommunikation\n\
+          Zugriffskontrolle und \xDCberwachung\nBackup und Wiederherstellung\nSensibilisierung\
+          \ und Schulung der Benutzer"
   - urn: urn:intuitem:risk:function:doc-pol:proc.logging
     ref_id: PROC.LOGGING
     name: Logging procedure
@@ -723,6 +897,13 @@ objects:
         description: "Collecte et cat\xE9gorisation des journaux\nStockage s\xE9curis\xE9\
           \ et politiques de r\xE9tention\nAnalyse pour la d\xE9tection d'anomalies\
           \ et la r\xE9ponse aux incidents"
+      de:
+        name: Verfahren zum Logging
+        description: 'Erfassung und Kategorisierung von Logdaten
+
+          Sichere Speicherung und Aufbewahrungsrichtlinien
+
+          Analyse zur Anomalieerkennung und Incident Response'
   - urn: urn:intuitem:risk:function:doc-pol:pol.main
     ref_id: POL.MAIN
     name: Main policy
@@ -752,6 +933,11 @@ objects:
         description: "Objectifs de s\xE9curit\xE9 de l\u2019information\nengagement\n\
           Revue de direction\nPolitiques applicables\nGestion des non-conformit\xE9\
           s\nAm\xE9lioration continue"
+      de:
+        name: Informationssicherheitsrichtlinie
+        description: "Ziele der Informationssicherheit\nVerpflichtung (Commitment)\n\
+          Managementbewertung\nAnwendbare Richtlinien\nUmgang mit Nichtkonformit\xE4\
+          ten\nKontinuierliche Verbesserung"
   - urn: urn:intuitem:risk:function:doc-pol:pol.educ
     ref_id: POL.EDUC
     name: Information security awareness and training policy
@@ -773,6 +959,13 @@ objects:
           \ de l\u2019information"
         description: "cons\xE9quences du non-respect\nRapports sur les \xE9v\xE9nements\
           \ de s\xE9curit\xE9\nAm\xE9lioration continue"
+      de:
+        name: "Richtlinie f\xFCr Informationssicherheitsbewusstsein und Schulungen"
+        description: 'Auswirkungen bei Nichteinhaltung
+
+          Meldung von Sicherheitsereignissen
+
+          Kontinuierliche Verbesserung'
   - urn: urn:intuitem:risk:function:doc-pol:pol.work
     ref_id: POL.WORK
     name: Workstations and teleworking policy
@@ -801,6 +994,10 @@ objects:
         name: "Politique des postes de travail et de t\xE9l\xE9travail"
         description: "Postes\nAppareils mobiles\nT\xE9l\xE9travail\nGestion des mots\
           \ de passe\nRestitution des avoirs\nAm\xE9lioration continue"
+      de:
+        name: "Richtlinie f\xFCr Arbeitsstationen und Telearbeit"
+        description: "Arbeitsstationen\nMobile Ger\xE4te\nTelearbeit\nPasswortverwaltung\n\
+          R\xFCckgabe von Assets\nKontinuierliche Verbesserung"
   - urn: urn:intuitem:risk:function:doc-pol:pol.crypto
     ref_id: POL.CRYPTO
     name: Cryptographic policy
@@ -816,6 +1013,10 @@ objects:
       fr:
         name: Politique cryptographique
         description: "Gestion des cl\xE9s\nChiffrement\nAm\xE9lioration continue"
+      de:
+        name: Kryptografierichtlinie
+        description: "Schl\xFCsselmanagement\nVerschl\xFCsselung\nKontinuierliche\
+          \ Verbesserung"
   - urn: urn:intuitem:risk:function:doc-pol:pol.classif
     ref_id: POL.CLASSIF
     name: Information classification and handling policy
@@ -823,9 +1024,9 @@ objects:
     csf_function: govern
     description: 'classification
 
-      protection and handling of information
+      Protection and handling of information
 
-      Poritection and handling of PII
+      Protection and handling of PII
 
       clear desk
 
@@ -854,6 +1055,25 @@ objects:
           Conservation et traitement des PII\nbureau d\xE9gag\xE9\n\xE9cran clair\n\
           Protection des registres\nR\xE8gles de conservation\nUtilisation des informations\
           \ de test\nAm\xE9lioration continue"
+      de:
+        name: Richtlinie zur Informationsklassifizierung und -handhabung
+        description: 'Klassifizierung
+
+          Schutz und Handhabung von Informationen
+
+          Schutz und Handhabung personenbezogener Daten (PII)
+
+          Clean Desk
+
+          Clean Screen
+
+          Schutz von Aufzeichnungen
+
+          Aufbewahrungsregeln
+
+          Nutzung von Testinformationen
+
+          Kontinuierliche Verbesserung'
   - urn: urn:intuitem:risk:function:doc-pol:pol.audit
     ref_id: POL.AUDIT
     name: Internal and external audit policy
@@ -865,6 +1085,9 @@ objects:
       fr:
         name: "Politique d\u2019audit interne et externe"
         description: "Protection des informations d\u2019audit"
+      de:
+        name: Interne und externe Auditrichtlinie
+        description: Schutz von Auditinformationen
   - urn: urn:intuitem:risk:function:doc-pol:pol.bcp
     ref_id: POL.BCP
     name: Business continuity policy
@@ -873,7 +1096,8 @@ objects:
     translations:
       fr:
         name: "Politique de continuit\xE9 d\u2019activit\xE9"
-        description: null
+      de:
+        name: "Notfall- und Gesch\xE4ftskontinuit\xE4tsrichtlinie"
   - urn: urn:intuitem:risk:function:doc-pol:pol.seg_duty
     ref_id: POL.SEG_DUTY
     name: Segregation of duties policy
@@ -883,7 +1107,8 @@ objects:
     translations:
       fr:
         name: "Politique sur la s\xE9paration des t\xE2ches"
-        description: null
+      de:
+        name: Richtlinie zur Funktionstrennung
   - urn: urn:intuitem:risk:function:doc-pol:pol.access
     ref_id: POL.ACCESS
     name: Access control policy
@@ -922,6 +1147,13 @@ objects:
           RBAC\nR\xE9vision des droits d\u2019acc\xE8s\nFourniture\nSortants\nAcc\xE8\
           s \xE0 distance\nGestion des acc\xE8s \xE0 privil\xE8ges\nAcc\xE8s par des\
           \ tiers\nSurveillance et rapports\nAm\xE9lioration continue"
+      de:
+        name: Zugriffskontrollrichtlinie
+        description: "Identifikation\nAuthentifizierung\nPasswortmanagement\nRBAC\
+          \ (rollenbasierte Zugriffskontrolle)\n\xDCberpr\xFCfung von Zugriffsrechten\n\
+          Provisionierung\nAustritte (Leavers)\nRemote Access\nManagement privilegierter\
+          \ Zug\xE4nge\nZugriff durch Dritte\n\xDCberwachung und Berichterstattung\n\
+          Kontinuierliche Verbesserung"
   - urn: urn:intuitem:risk:function:doc-pol:pol.malware
     ref_id: POL.MALWARE
     name: Malware protection policy
@@ -936,6 +1168,11 @@ objects:
         description: 'antivirus
 
           EDR'
+      de:
+        name: Richtlinie zum Schutz vor Schadsoftware
+        description: 'Antivirus
+
+          EDR (Endpoint Detection and Response)'
   - urn: urn:intuitem:risk:function:doc-pol:pol.risk
     ref_id: POL.RISK
     name: Risk management policy
@@ -980,6 +1217,14 @@ objects:
           Traitement des risques (att\xE9nuation, acceptation, transfert)\n\xC9valuation\
           \ des risques\nUtilisation des commandes ISO27002\nGestion des droits d\u2019\
           acc\xE8s\nAm\xE9lioration continue"
+      de:
+        name: Risikomanagement-Richtlinie
+        description: "Definition des Risikomanagements\nRisikobereitschaft (Risk Appetite)\n\
+          Kriterien zur Risikoakzeptanz\nKriterien f\xFCr die Risikobeurteilung\n\
+          Risikoidentifikation\nRisikobeurteilung\nCIAP-Ansatz\nRisikoberichterstattung\n\
+          Risiko\xFCberpr\xFCfung\nRisikobehandlung (Risikominderung, Akzeptanz, Transfer)\n\
+          Risikobewertung\nVerwendung der ISO-27002-Kontrollen\nVerwaltung von Zugriffsrechten\n\
+          Kontinuierliche Verbesserung"
   - urn: urn:intuitem:risk:function:doc-pol:pol.asset
     ref_id: POL.ASSET
     name: Asset management policy
@@ -988,7 +1233,8 @@ objects:
     translations:
       fr:
         name: "Politique de gestion d\u2019actifs"
-        description: null
+      de:
+        name: Asset-Management-Richtlinie
   - urn: urn:intuitem:risk:function:doc-pol:pol.backup
     ref_id: POL.BACKUP
     name: Backup and restore policy
@@ -997,7 +1243,8 @@ objects:
     translations:
       fr:
         name: Politique de sauvegarde et de restauration
-        description: null
+      de:
+        name: Richtlinie zur Sicherung von Backups und Wiederherstellung
   - urn: urn:intuitem:risk:function:doc-pol:pol.supplier
     ref_id: POL.SUPPLIER
     name: Third party supplier security policy
@@ -1007,7 +1254,8 @@ objects:
     translations:
       fr:
         name: "Politique de s\xE9curit\xE9 des fournisseurs tiers"
-        description: null
+      de:
+        name: "Sicherheitsrichtlinie f\xFCr Lieferanten und Dritte"
   - urn: urn:intuitem:risk:function:doc-pol:pol.monitor
     ref_id: POL.MONITOR
     name: Logging and monitoring policy
@@ -1019,6 +1267,8 @@ objects:
       fr:
         name: Politique de journalisation et de surveillance
         description: Journalisation
+      de:
+        name: Richtlinie zu Logging und Monitoring
   - urn: urn:intuitem:risk:function:doc-pol:pol.transfer
     ref_id: POL.TRANSFER
     name: Information transfer policy
@@ -1028,7 +1278,8 @@ objects:
     translations:
       fr:
         name: "Politique de transfert d\u2019informations"
-        description: null
+      de:
+        name: Richtlinie zum Informationsaustausch
   - urn: urn:intuitem:risk:function:doc-pol:pol.secdev
     ref_id: POL.SECDEV
     name: Secure development policy
@@ -1037,7 +1288,8 @@ objects:
     translations:
       fr:
         name: "Politique de d\xE9veloppement s\xE9curis\xE9"
-        description: null
+      de:
+        name: "Richtlinie f\xFCr sichere Software- und Systementwicklung"
   - urn: urn:intuitem:risk:function:doc-pol:pol.physical
     ref_id: POL.PHYSICAL
     name: Physical security policy
@@ -1064,6 +1316,11 @@ objects:
           es\nContr\xF4le d\u2019acc\xE8s des employ\xE9s\nContr\xF4le d\u2019acc\xE8\
           s des visiteurs\nGestion des livraisons\nS\xE9curit\xE9 du c\xE2blage\n\
           Am\xE9lioration continue"
+      de:
+        name: Physische Sicherheitsrichtlinie
+        description: "Physische Sicherheitsgrenzen\nSicherheitsbereiche\nZugangskontrolle\
+          \ f\xFCr Mitarbeitende\nZugangskontrolle f\xFCr Besucher\nManagement von\
+          \ Lieferungen\nSicherung der Verkabelung\nKontinuierliche Verbesserung"
   - urn: urn:intuitem:risk:function:doc-pol:pol.network
     ref_id: POL.NETWORK
     name: Network security management policy
@@ -1072,7 +1329,8 @@ objects:
     translations:
       fr:
         name: "Politique de gestion de la s\xE9curit\xE9 du r\xE9seau"
-        description: null
+      de:
+        name: Richtlinie zum Management der Netzwerksicherheit
   - urn: urn:intuitem:risk:function:doc-pol:pol.accept
     ref_id: POL.ACCEPT
     name: Acceptable use policy
@@ -1096,6 +1354,13 @@ objects:
           s permises et proscrites, obligations de s\xE9curit\xE9.\nConfidentialit\xE9\
           \ : Protection des donn\xE9es sensibles.\nConformit\xE9 : Surveillance,\
           \ sanctions en cas de non-respect."
+      de:
+        name: Richtlinie zur akzeptablen Nutzung (Acceptable Use Policy)
+        description: "Zielsetzung: Definition der erlaubten und verbotenen Nutzung\
+          \ von Ressourcen.\nGeltungsbereich: Alle Benutzer der Informationssysteme.\n\
+          Regeln: Erlaubte und verbotene Aktivit\xE4ten, Sicherheitsverpflichtungen.\n\
+          Vertraulichkeit: Schutz sensibler Daten.\nCompliance: \xDCberwachung, Sanktionen\
+          \ bei Nichtkonformit\xE4t."
   - urn: urn:intuitem:risk:function:doc-pol:pol.project
     ref_id: POL.PROJECT
     name: IS project integration policy
@@ -1108,6 +1373,10 @@ objects:
         name: "Politique d\u2019int\xE9gration de projets SI"
         description: "R\xE8gles d'int\xE9gration de la s\xE9curit\xE9 dans les projets\
           \ SI"
+      de:
+        name: Richtlinie zur Integration von Sicherheit in IS-Projekte
+        description: "Regeln f\xFCr die Integration von Sicherheitsanforderungen in\
+          \ IS-Projekten"
   - urn: urn:intuitem:risk:function:doc-pol:pol.threat_intel
     ref_id: POL.THREAT_INTEL
     name: Threat intelligence policy
@@ -1124,6 +1393,10 @@ objects:
         name: Politique de renseignement sur les menaces
         description: "Vuln\xE9rabilit\xE9s exploit\xE9es connues\nActivit\xE9 des\
           \ acteurs de la menace\nAm\xE9lioration continue"
+      de:
+        name: Threat-Intelligence-Richtlinie
+        description: "Bekannte ausgenutzte Schwachstellen\nAktivit\xE4ten von Bedrohungsakteuren\n\
+          Kontinuierliche Verbesserung"
   - urn: urn:intuitem:risk:function:doc-pol:pol.incident
     ref_id: POL.INCIDENT
     name: IS incident management policy
@@ -1158,6 +1431,13 @@ objects:
           \ de r\xE9ponse aux incidents\nAnalyse des causes et retours d'exp\xE9rience\n\
           Documentation et communication\nR\xF4les et responsabilit\xE9s\nRevue et\
           \ mises \xE0 jour"
+      de:
+        name: "Richtlinie zum Management von Sicherheitsvorf\xE4llen (IS Incident\
+          \ Management Policy)"
+        description: "Klassifizierung von Sicherheitsvorf\xE4llen\nMeldung von Sicherheitsvorf\xE4\
+          llen\nAblauf zur Incident Response\nUrsachenanalyse und Lessons Learned\n\
+          Dokumentation und Kommunikation\nRollen und Verantwortlichkeiten\n\xDCberpr\xFC\
+          fung und Aktualisierung"
   - urn: urn:intuitem:risk:function:doc-pol:pol.maintenance
     ref_id: POL.MAINTENANCE
     name: Maintenance policy
@@ -1176,6 +1456,9 @@ objects:
         name: Politique de maintenance
         description: "Gestion de l\u2019obsolescence\nContrats de maintenance\nGestion\
           \ du changement"
+      de:
+        name: Wartungsrichtlinie
+        description: "Management von Obsoleszenz\nWartungsvertr\xE4ge\n\xC4nderungsmanagement"
   - urn: urn:intuitem:risk:function:doc-pol:pol.vulnerability
     ref_id: POL.VULNERABILITY
     name: Vulnerability management policy
@@ -1192,6 +1475,11 @@ objects:
         name: "Politique de gestion des vuln\xE9rabilit\xE9s"
         description: "D\xE9tection et gestion des vuln\xE9rabilit\xE9s\nGestion des\
           \ mises \xE0 jour"
+      de:
+        name: Richtlinie zum Schwachstellenmanagement
+        description: 'Erkennung und Management von Schwachstellen
+
+          Patch-Management'
   - urn: urn:intuitem:risk:function:doc-pol:train.legal
     ref_id: TRAIN.LEGAL
     name: Legal and regulatory training
@@ -1218,6 +1506,13 @@ objects:
           \ RGPD), gestion des donn\xE9es, risques de non-conformit\xE9.\nM\xE9thodes\
           \ : E-learning, ateliers, \xE9tudes de cas.\n\xC9valuation : Quiz et tests\
           \ bas\xE9s sur des sc\xE9narios."
+      de:
+        name: Schulung zu gesetzlichen und regulatorischen Anforderungen
+        description: "Zielsetzung: Sicherstellung des Bewusstseins f\xFCr gesetzliche\
+          \ und regulatorische Compliance.\nZielgruppe: Alle Mitarbeitenden; spezifische\
+          \ Inhalte je nach Rolle.\nThemen: Wichtige Gesetze (z. B. DSGVO), Umgang\
+          \ mit Daten, Risiken bei Nichtkonformit\xE4t.\nMethoden: E-Learning, Workshops,\
+          \ Fallstudien.\nBewertung: Tests und szenariobasierte Pr\xFCfungen."
   - urn: urn:intuitem:risk:function:doc-pol:train.threat
     ref_id: TRAIN.THREAT
     name: Threat landscape training
@@ -1245,6 +1540,14 @@ objects:
           \ \xE9tudes de cas, discussions bas\xE9es sur des sc\xE9narios.\nR\xE9sultat\
           \ : Sensibilisation accrue et meilleure pr\xE9paration face aux menaces\
           \ \xE9volutives."
+      de:
+        name: Schulung zur Bedrohungslage (Threat Landscape Training)
+        description: "Zielsetzung: Verst\xE4ndnis aktueller Cyberbedrohungen und geeigneter\
+          \ Gegenma\xDFnahmen.\nZielgruppe: IT-Personal, Sicherheitsteams und Entscheidungstr\xE4\
+          ger.\nThemen: Neue Bedrohungen, Angriffstechniken, Verteidigungsmechanismen.\n\
+          Methoden: Pr\xE4sentationen, Fallstudien, szenariobasierte Diskussionen.\n\
+          Ergebnis: Verbesserte Sensibilisierung und Bereitschaft, auf sich entwickelnde\
+          \ Bedrohungen zu reagieren."
   - urn: urn:intuitem:risk:function:doc-pol:train.iam
     ref_id: TRAIN.IAM
     name: IAM (Identity and Access Management) training
@@ -1277,6 +1580,16 @@ objects:
           \ OAuth, Active Directory, etc.).\nM\xE9thodes : Ateliers pratiques, cas\
           \ d\u2019usage, d\xE9monstrations.\nR\xE9sultat : Capacit\xE9s renforc\xE9\
           es pour s\xE9curiser et g\xE9rer les acc\xE8s efficacement."
+      de:
+        name: Schulung zu Identity & Access Management (IAM-Training)
+        description: "Zielsetzung: Identit\xE4ts- und Zugriffsmanagement verstehen\
+          \ und sicher beherrschen.\nZielgruppe: IT-Administratoren, Sicherheitsteams,\
+          \ Access-Manager.\nThemen:\n- Grundkonzepte (Identit\xE4t, Authentifizierung,\
+          \ Autorisierung, RBAC/ABAC-Modelle)\n- IAM-Best Practices (Rechtemanagement,\
+          \ Provisionierung, Audits)\n- Standards und Werkzeuge (SAML, OAuth, Active\
+          \ Directory usw.)\nMethoden: Praktische Workshops, Use Cases, Demonstrationen.\n\
+          Ergebnis: Verbesserte F\xE4higkeiten zur sicheren und effizienten Verwaltung\
+          \ von Zugriffsrechten."
   - urn: urn:intuitem:risk:function:doc-pol:train.network_security
     ref_id: TRAIN.NETWORK_SECURITY
     name: Network security training
@@ -1319,8 +1632,20 @@ objects:
           \ interactifs, simulations et exercices pratiques.\nR\xE9sultat : Capacit\xE9\
           s renforc\xE9es pour prot\xE9ger et surveiller les environnements r\xE9\
           seau."
+      de:
+        name: Schulung zur Netzwerksicherheit
+        description: "Zielsetzung: Vermittlung bew\xE4hrter Verfahren zur Absicherung\
+          \ der Netzwerkinfrastruktur und zur Abwehr von Cyberangriffen.\nZielgruppe:\
+          \ IT-Administratoren, Netzwerkingenieure, Sicherheitsexperten.\nThemen:\n\
+          - Prinzipien der Netzwerksegmentierung\n- Konfiguration und \xDCberwachung\
+          \ von Firewalls\n- Systeme zur Erkennung/Verhinderung von Angriffen (IDS/IPS/NDR)\n\
+          - Netzwerksegmentierung und Zugriffskontrolle\n- Sichere Protokolle (z.\
+          \ B. HTTPS, VPN, SSH)\n- Bedrohungsabwehr (z. B. DDoS, Malware)\nMethoden:\
+          \ Interaktive Labore, Simulationen, praktische \xDCbungen.\nErgebnis: Verbesserte\
+          \ F\xE4higkeit, Netzwerkumgebungen zu sch\xFCtzen und zu \xFCberwachen."
   - urn: urn:intuitem:risk:function:doc-pol:train.mcs
     ref_id: TRAIN.MCS
+    name: Security Condition Maintenance Training (SCM)
     category: process
     csf_function: govern
     description: 'Objective: Build expertise in maintaining secure IT systems through
@@ -1365,6 +1690,20 @@ objects:
           \ de s\xE9curit\xE9.\nR\xE9sultat attendu : Capacit\xE9 renforc\xE9e \xE0\
           \ s\xE9curiser en continu les environnements IT, \xE0 att\xE9nuer les risques\
           \ et \xE0 garantir la conformit\xE9."
+      de:
+        name: Schulung zur Aufrechterhaltung des sicheren Betriebs (MCS)
+        description: "Zielsetzung: Aufbau von Fachwissen zur Sicherung von IT-Systemen\
+          \ durch Monitoring, Patch-Management, Compliance und Incident Response.\n\
+          Zielgruppe: IT-Sicherheitsfachkr\xE4fte, Systemadministratoren, Compliance-Beauftragte\
+          \ und Incident-Response-Teams.\nThemen:\n- Grundprinzipien der Aufrechterhaltung\
+          \ von Sicherheit und deren Bedeutung in der Cybersicherheit.\n- Werkzeuge\
+          \ und Techniken f\xFCr Sicherheitsmonitoring (z. B. SIEM, IDS).\n- Patch-Management\
+          \ und sichere Systemkonfigurationen.\n- Erkennung von Sicherheitsvorf\xE4\
+          llen, Planung der Reaktion und Durchf\xFChrung.\n- Einhaltung von Sicherheitsrichtlinien\
+          \ und regulatorischen Anforderungen.\nMethoden: Praktische Labore, simulierte\
+          \ Szenarien und Fallstudien zur Aufrechterhaltung sicherer Systemzust\xE4\
+          nde.\nErgebnis: Erweiterte F\xE4higkeit, IT-Umgebungen kontinuierlich zu\
+          \ sichern, Risiken zu reduzieren und Compliance sicherzustellen."
   - urn: urn:intuitem:risk:function:doc-pol:train.logging
     ref_id: TRAIN.LOGGING
     name: Logging and Monitoring Training
@@ -1379,7 +1718,7 @@ objects:
       \ \n   - Incident response based on log insights.  \n4. Methods: Hands-on labs,\
       \ real-world scenarios, and log analysis exercises.  \n5. Outcome: Improved\
       \ ability to collect, analyze, and act on log data to prevent and respond to\
-      \ incidents.  "
+      \ incidents."
     annotation: '7.2
 
       7.12
@@ -1410,6 +1749,19 @@ objects:
           \ et exercices d'analyse des journaux.\nR\xE9sultat : Capacit\xE9 renforc\xE9\
           e \xE0 collecter, analyser et exploiter les donn\xE9es de journaux pour\
           \ pr\xE9venir et g\xE9rer les incidents."
+      de:
+        name: Schulung zu Logging und Monitoring
+        description: "1. Zielsetzung: Vermittlung effektiver Protokollierungs- und\
+          \ \xDCberwachungstechniken zur Verbesserung der Sicherheit und Incident\
+          \ Response.\n2. Zielgruppe: IT-Administratoren, Sicherheitsteams und SOC-Analysten.\n\
+          3. Themen:\n   - Bedeutung der Protokollierung und Compliance-Anforderungen.\n\
+          \   - Konfiguration und Verwaltung von Log-Quellen (z. B. Server, Firewalls,\
+          \ Anwendungen).\n   - Zentrale Logging-Systeme (z. B. SIEM, ELK-Stack).\n\
+          \   - Erkennung von Anomalien und Analyse von Logdaten.\n   - Incident Response\
+          \ auf Basis von Log-Informationen.\n4. Methoden: Praktische \xDCbungen,\
+          \ realistische Szenarien und Aufgaben zur Log-Analyse.\n5. Ergebnis: Verbesserte\
+          \ F\xE4higkeit, Logdaten zu erfassen, zu analysieren und sicherheitsrelevante\
+          \ Ma\xDFnahmen abzuleiten."
   - urn: urn:intuitem:risk:function:doc-pol:train.hardening
     ref_id: TRAIN.HARDENING
     name: Hardening and Secure Configuration Training
@@ -1468,6 +1820,19 @@ objects:
           sultat : Les participants ma\xEEtriseront la mise en \u0153uvre de configurations\
           \ s\xE9curis\xE9es et l'am\xE9lioration de la r\xE9silience des syst\xE8\
           mes."
+      de:
+        name: Schulung zu Hardening und sicherer Konfiguration
+        description: "Zielsetzung: Vermittlung von Wissen zur Umsetzung sicherer Konfigurationen\
+          \ und zur H\xE4rtung von Systemen, um Schwachstellen zu reduzieren.\nZielgruppe:\
+          \ IT-Administratoren, Systemingenieure, Sicherheitsexperten.\nThemen:\n\
+          - Grundprinzipien der Systemh\xE4rtung.\n- H\xE4rtung von Betriebssystemen\
+          \ (Windows, Linux).\n- Sicherung von Datenbanken (z. B. MySQL, PostgreSQL).\n\
+          - H\xE4rtung von Netzwerkger\xE4ten (Firewalls, Router, Switches).\n- Anwendung\
+          \ von CIS-Benchmarks und ANSSI-Richtlinien.\n- Werkzeuge f\xFCr Automatisierung\
+          \ (z. B. Ansible, Puppet, Chef).\nMethoden:\n- Praktische \xDCbungen zur\
+          \ H\xE4rtung von Betriebssystemen und Anwendungen.\n- Fallstudien zu H\xE4\
+          rtungsfehlern und deren L\xF6sungen.\nErgebnis: Teilnehmende k\xF6nnen sichere\
+          \ Konfigurationen implementieren und die allgemeine Systemresilienz verbessern."
   - urn: urn:intuitem:risk:function:doc-pol:tech.nac
     ref_id: TECH.NAC
     name: Network Access Control (802.1X)
@@ -1486,6 +1851,14 @@ objects:
           \ r\xE9seau. Elle garantit un acc\xE8s s\xE9curis\xE9 aux r\xE9seaux filaires\
           \ et sans fil en utilisant des protocoles comme 802.1X et RADIUS pour valider\
           \ les identifiants et appliquer les politiques d'acc\xE8s."
+      de:
+        name: Network Access Control (802.1X)
+        description: "Eine Funktion, die sicherstellt, dass Ger\xE4te oder Benutzer\
+          \ vor der Gew\xE4hrung von Netzwerkzugang authentifiziert und autorisiert\
+          \ werden. Sie erm\xF6glicht sicheren Zugriff auf kabelgebundene und drahtlose\
+          \ Netzwerke, indem Protokolle wie 802.1X und RADIUS zur Validierung von\
+          \ Anmeldedaten und zur Durchsetzung von Zugriffskontrollrichtlinien verwendet\
+          \ werden."
   - urn: urn:intuitem:risk:function:doc-pol:tech.access_log
     ref_id: TECH.ACCESS_LOG
     name: Access Logging
@@ -1497,7 +1870,8 @@ objects:
     translations:
       fr:
         name: "Journalisation des acc\xE8s"
-        description: null
+      de:
+        name: Access Logging
   - urn: urn:intuitem:risk:function:doc-pol:tech.edr
     ref_id: TECH.EDR
     name: Event Detection and Response (EDR) Capacity
@@ -1509,7 +1883,8 @@ objects:
     translations:
       fr:
         name: "Capacit\xE9 de d\xE9tection et de traitement des \xE9v\xE9nements (EDR)"
-        description: null
+      de:
+        name: "Event-Detection- und Response-Kapazit\xE4t (EDR)"
   - urn: urn:intuitem:risk:function:doc-pol:tech.password_manager
     ref_id: TECH.PASSWORD_MANAGER
     name: Password Management Capacity
@@ -1528,6 +1903,13 @@ objects:
           \ les applications et les comptes. Elle r\xE9duit le risque d'acc\xE8s non\
           \ autoris\xE9 en appliquant des politiques de mots de passe robustes et\
           \ en garantissant une gestion s\xE9curis\xE9e des identifiants."
+      de:
+        name: "Kapazit\xE4t f\xFCr Passwortmanagement"
+        description: "Eine Funktion, die die sichere Erstellung, Speicherung, Verwaltung\
+          \ und Nutzung von Passw\xF6rtern f\xFCr Systeme, Anwendungen und Konten\
+          \ erm\xF6glicht. Sie reduziert das Risiko unbefugter Zugriffe durch die\
+          \ Durchsetzung starker Passwortrichtlinien und eine sichere Handhabung von\
+          \ Zugangsdaten."
   - urn: urn:intuitem:risk:function:doc-pol:tech.uem
     ref_id: TECH.UEM
     name: Unified Endpoint Management Capacity
@@ -1547,19 +1929,30 @@ objects:
           \ unique. Elle garantit une configuration s\xE9curis\xE9e, l'application\
           \ des politiques, la gestion des applications et la surveillance de l'\xE9\
           cosyst\xE8me des terminaux de l'organisation."
+      de:
+        name: "Unified Endpoint Management (UEM) \u2013 F\xE4higkeit"
+        description: "Eine F\xE4higkeit, die zentrale Steuerung und Verwaltung aller\
+          \ Endger\xE4te erm\xF6glicht, einschlie\xDFlich Desktop-Systemen, Laptops,\
+          \ Mobilger\xE4ten und IoT-Ger\xE4ten, \xFCber eine einheitliche Plattform.\
+          \ Sie gew\xE4hrleistet sichere Konfigurationen, Richtlinienerzwingung, Anwendungsverwaltung\
+          \ sowie umfassendes Monitoring der gesamten Endger\xE4teumgebung einer Organisation."
   - urn: urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
     ref_id: TECH.ENDPOINT_PROTECTION
     name: Host antivirus, firewall and USB control
     category: technical
     csf_function: detect
-    description: "Integrated solutions for securing endpoints, including antivirus,\
-      \ firewall, and USB port control\_"
+    description: Integrated solutions for securing endpoints, including antivirus,
+      firewall, and USB port control
     annotation: A.8.7
     translations:
       fr:
         name: Antivirus et pare-feu pour poste de travail
         description: "Solutions int\xE9gr\xE9es pour s\xE9curiser les terminaux, incluant\
           \ antivirus, pare-feu et gestion des ports USB"
+      de:
+        name: "Schutzma\xDFnahmen f\xFCr Endger\xE4te (Antivirus, Firewall und USB-Kontrolle)"
+        description: "Integrierte L\xF6sungen zur Absicherung von Endger\xE4ten, einschlie\xDF\
+          lich Antivirus-Schutz, Firewall-Kontrolle und Steuerung der USB-Ports."
   - urn: urn:intuitem:risk:function:doc-pol:tech.disk_encryption
     ref_id: TECH.DISK_ENCRYPTION
     name: Disk Encryption Capacity
@@ -1571,6 +1964,9 @@ objects:
       fr:
         name: "Capacit\xE9 de chiffrement de disque"
         description: Chiffrement de disque complet pour les postes de travail
+      de:
+        name: "Festplattenverschl\xFCsselung"
+        description: "Vollst\xE4ndige Festplattenverschl\xFCsselung f\xFCr Arbeitsstationen."
   - urn: urn:intuitem:risk:function:doc-pol:tech.immutable_backup
     ref_id: TECH.IMMUTABLE_BACKUP
     name: Immutable backup capacity
@@ -1586,6 +1982,11 @@ objects:
           \ \xEAtre modifi\xE9es, supprim\xE9es ou \xE9cras\xE9es, assurant l\u2019\
           int\xE9grit\xE9 des donn\xE9es contre les ransomwares et les acc\xE8s non\
           \ autoris\xE9s."
+      de:
+        name: "Unver\xE4nderliche Backup-Kapazit\xE4t (Immutable Backups)"
+        description: "Eine F\xE4higkeit, die sicherstellt, dass Backups nicht ver\xE4\
+          ndert, gel\xF6scht oder \xFCberschrieben werden k\xF6nnen, um die Datenintegrit\xE4\
+          t gegen Ransomware und unbefugten Zugriff zu sch\xFCtzen."
   - urn: urn:intuitem:risk:function:doc-pol:tech.file_encryption
     ref_id: TECH.FILE_ENCRYPTION
     name: File encryption capacity
@@ -1597,6 +1998,9 @@ objects:
       fr:
         name: "Capacit\xE9 de chiffrement de fichiers"
         description: Utilitaire de chiffrement de fichier comme 7zip.
+      de:
+        name: "Dateiverschl\xFCsselungs-Kapazit\xE4t"
+        description: "Dateiverschl\xFCsselungswerkzeuge wie 7zip."
   - urn: urn:intuitem:risk:function:doc-pol:tech.cmdb
     ref_id: TECH.CMDB
     name: Configuration Management DataBase (CMDB)
@@ -1611,23 +2015,30 @@ objects:
         description: "R\xE9f\xE9rentiel centralis\xE9 qui stocke et g\xE8re les informations\
           \ sur les actifs IT, leurs configurations et leurs relations pour une gestion\
           \ IT efficace."
+      de:
+        name: Configuration Management Database (CMDB)
+        description: "Ein zentrales Repository, das Informationen \xFCber IT-Assets,\
+          \ deren Konfigurationen und Beziehungen speichert und verwaltet, um ein\
+          \ effektives IT-Management zu unterst\xFCtzen."
   - urn: urn:intuitem:risk:function:doc-pol:tech.siem
     ref_id: TECH.SIEM
     name: Security Information and Event Management (SIEM)
     category: technical
     csf_function: detect
-    description: 'A system that collects, analyzes, and correlates security data from
+    description: A system that collects, analyzes, and correlates security data from
       multiple sources to detect and respond to threats.
-
-      '
     annotation: A.5.12
     translations:
       fr:
         name: "Gestion des informations et des \xE9v\xE9nements de s\xE9curit\xE9\
-          \ (SIEM) "
+          \ (SIEM)"
         description: "Syst\xE8me qui collecte, analyse et corr\xE8le les donn\xE9\
           es de s\xE9curit\xE9 provenant de multiples sources pour d\xE9tecter et\
           \ r\xE9pondre aux menaces."
+      de:
+        name: Security Information and Event Management (SIEM)
+        description: Ein System, das Sicherheitsdaten aus mehreren Quellen sammelt,
+          analysiert und korreliert, um Bedrohungen zu erkennen und darauf zu reagieren.
   - urn: urn:intuitem:risk:function:doc-pol:tech.screen_filter
     ref_id: TECH.SCREEN_FILTER
     name: Screen Filter
@@ -1642,6 +2053,11 @@ objects:
         description: "Filtre physique ou num\xE9rique qui limite la visibilit\xE9\
           \ de l'\xE9cran aux utilisateurs autoris\xE9s, r\xE9duisant le risque de\
           \ divulgation visuelle de donn\xE9es."
+      de:
+        name: Blickschutzfilter (Screen Filter)
+        description: "Ein physischer oder digitaler Filter, der die Sichtbarkeit von\
+          \ Bildschirminhalten f\xFCr unbefugte Personen einschr\xE4nkt und das Risiko\
+          \ visueller Datenlecks reduziert."
   - urn: urn:intuitem:risk:function:doc-pol:tech.network_firewall
     ref_id: TECH.NETWORK_FIREWALL
     name: Network Firewall
@@ -1655,6 +2071,10 @@ objects:
         name: "Pare-feu r\xE9seau"
         description: "Syst\xE8me de s\xE9curit\xE9 qui surveille et contr\xF4le le\
           \ trafic r\xE9seau entrant et sortant selon des r\xE8gles pr\xE9d\xE9finies"
+      de:
+        name: Netzwerk-Firewall
+        description: "Ein Sicherheitssystem, das auf Basis definierter Regeln eingehenden\
+          \ und ausgehenden Netzwerkverkehr \xFCberwacht und steuert."
   - urn: urn:intuitem:risk:function:doc-pol:tech.mail_gateway
     ref_id: TECH.MAIL_GATEWAY
     name: Secure Mail Gateway
@@ -1669,6 +2089,10 @@ objects:
         description: "Syst\xE8me qui filtre, surveille et prot\xE8ge les communications\
           \ par email contre le spam, les logiciels malveillants et les acc\xE8s non\
           \ autoris\xE9s."
+      de:
+        name: Sicheres Mail-Gateway
+        description: "Ein System, das E-Mail-Kommunikation filtert, \xFCberwacht und\
+          \ vor Spam, Malware und unbefugtem Zugriff sch\xFCtzt."
   - urn: urn:intuitem:risk:function:doc-pol:tech.network_antivirus
     ref_id: TECH.NETWORK_ANTIVIRUS
     name: Network Antivirus
@@ -1681,6 +2105,9 @@ objects:
         name: "Antivirus r\xE9seau"
         description: "Prot\xE8ge les emails et le trafic web \xE0 la p\xE9riph\xE9\
           rie du r\xE9seau contre les malwares"
+      de:
+        name: Netzwerk-Antivirus
+        description: "Sch\xFCtzt E-Mail- und Web-Verkehr am Netzwerkrand vor Malware."
   - urn: urn:intuitem:risk:function:doc-pol:tech.vlan
     ref_id: TECH.VLAN
     name: VLAN
@@ -1694,6 +2121,10 @@ objects:
         name: VLAN
         description: "Les VLAN isolent et segmentent le trafic r\xE9seau pour renforcer\
           \ la s\xE9curit\xE9 et optimiser les performances."
+      de:
+        name: VLAN
+        description: "VLANs isolieren und segmentieren Netzwerkverkehr, um Sicherheit\
+          \ und Leistungsf\xE4higkeit zu verbessern."
   - urn: urn:intuitem:risk:function:doc-pol:tech.microsegmentation
     ref_id: TECH.MICROSEGMENTATION
     name: Microsegmentation
@@ -1710,6 +2141,12 @@ objects:
           \ qui cr\xE9e des politiques granulaires et contextuelles pour isoler des\
           \ charges de travail ou des applications sp\xE9cifiques dans un r\xE9seau,\
           \ limitant les mouvements lat\xE9raux et contenant les violations"
+      de:
+        name: Mikrosegmentierung
+        description: "Eine Sicherheitsstrategie, die fein granulare, kontextbezogene\
+          \ Richtlinien erstellt, um einzelne Workloads oder Anwendungen innerhalb\
+          \ eines Netzwerks zu isolieren, laterale Bewegungen einzuschr\xE4nken und\
+          \ Sicherheitsvorf\xE4lle einzud\xE4mmen."
   - urn: urn:intuitem:risk:function:doc-pol:tech.wifi_sec
     ref_id: TECH.WIFI_SEC
     name: Wi-Fi Security
@@ -1730,6 +2167,12 @@ objects:
           \ robuste et \xE0 des m\xE9canismes de contr\xF4le d'acc\xE8s avanc\xE9\
           s. Bien que WPA2 Enterprise soit acceptable, il est fortement recommand\xE9\
           \ de passer \xE0 WPA3 pour une s\xE9curit\xE9 renforc\xE9e."
+      de:
+        name: WLAN-Sicherheit
+        description: "WLAN-Sicherheit stellt gesch\xFCtzte drahtlose Kommunikation\
+          \ sicher, u. a. durch WPA3-Enterprise-Verschl\xFCsselung, starke Authentifizierung\
+          \ und erweiterte Zugriffskontrollen. Obwohl WPA2-Enterprise weiterhin akzeptabel\
+          \ ist, wird der Umstieg auf WPA3 f\xFCr erh\xF6hte Sicherheit dringend empfohlen."
   - urn: urn:intuitem:risk:function:doc-pol:tech.reverse_proxy
     ref_id: TECH.REVERSE_PROXY
     name: Reverse Proxy
@@ -1744,6 +2187,10 @@ objects:
         description: "Un proxy inverse transf\xE8re les requ\xEAtes des clients vers\
           \ les serveurs backend, am\xE9liorant la s\xE9curit\xE9, l'\xE9quilibrage\
           \ de charge et les performances"
+      de:
+        name: Reverse Proxy
+        description: Ein Reverse Proxy leitet Client-Anfragen an Backend-Server weiter
+          und verbessert dadurch Sicherheit, Lastverteilung und Performance.
   - urn: urn:intuitem:risk:function:doc-pol:tech.waf
     ref_id: TECH.WAF
     name: Web Application Firewall (WAF)
@@ -1758,6 +2205,11 @@ objects:
         description: "Un pare-feu pour applications web (WAF) prot\xE8ge les applications\
           \ web en filtrant et surveillant le trafic HTTP pour bloquer les activit\xE9\
           s malveillantes."
+      de:
+        name: Web Application Firewall (WAF)
+        description: "Eine Web Application Firewall (WAF) sch\xFCtzt Webanwendungen,\
+          \ indem sie HTTP-Datenverkehr filtert und \xFCberwacht, um b\xF6sartige\
+          \ Aktivit\xE4ten zu blockieren."
   - urn: urn:intuitem:risk:function:doc-pol:tech.ids
     ref_id: TECH.IDS
     name: Intrusion Detection System (IDS)
@@ -1772,6 +2224,11 @@ objects:
         description: "Un syst\xE8me de d\xE9tection d'intrusion (IDS) surveille le\
           \ trafic r\xE9seau pour d\xE9tecter et alerter sur les menaces de s\xE9\
           curit\xE9 potentielles ou les activit\xE9s non autoris\xE9es."
+      de:
+        name: Intrusion Detection System (IDS)
+        description: "Ein Intrusion Detection System \xFCberwacht Netzwerkverkehr,\
+          \ um potenzielle Sicherheitsbedrohungen oder unbefugte Aktivit\xE4ten zu\
+          \ erkennen und zu melden."
   - urn: urn:intuitem:risk:function:doc-pol:tech.web_proxy
     ref_id: TECH.WEB_PROXY
     name: Web Proxy
@@ -1786,6 +2243,11 @@ objects:
         description: "Un proxy web filtre et surveille le trafic web, applique des\
           \ politiques de s\xE9curit\xE9 et prend en charge l'authentification des\
           \ utilisateurs pour contr\xF4ler et s\xE9curiser l'acc\xE8s \xE0 Internet."
+      de:
+        name: Web-Proxy
+        description: "Ein Web-Proxy filtert und \xFCberwacht Web-Verkehr, erzwingt\
+          \ Sicherheitsrichtlinien und unterst\xFCtzt Benutzer-Authentifizierung zur\
+          \ Kontrolle und Absicherung des Internetzugangs."
   - urn: urn:intuitem:risk:function:doc-pol:tech.vpn
     ref_id: TECH.VPN
     name: VPN
@@ -1804,6 +2266,11 @@ objects:
           \ des donn\xE9es en chiffrant le trafic gr\xE2ce \xE0 des protocoles comme\
           \ IPSec, garantissant la confidentialit\xE9 et la protection contre les\
           \ interceptions."
+      de:
+        name: VPN (Virtual Private Network)
+        description: "Ein Virtual Private Network (VPN) sch\xFCtzt Daten\xFCbertragungen\
+          \ durch Verschl\xFCsselung mittels Protokollen wie IPSec und gew\xE4hrleistet\
+          \ Privatsph\xE4re sowie Schutz vor Abfangversuchen."
   - urn: urn:intuitem:risk:function:doc-pol:tech.mfa
     ref_id: TECH.MFA
     name: Multi-Factor Authentication (MFA)
@@ -1822,3 +2289,9 @@ objects:
           rentes : ce que vous savez (ex. : un mot de passe), ce que vous poss\xE9\
           dez (ex. : un jeton ou un smartphone) et ce que vous \xEAtes (ex. : une\
           \ empreinte digitale ou une reconnaissance faciale)"
+      de:
+        name: Multi-Faktor-Authentifizierung (MFA)
+        description: "Die Multi-Faktor-Authentifizierung erh\xF6ht die Sicherheit,\
+          \ indem zwei oder mehr Verifizierungsfaktoren aus verschiedenen Kategorien\
+          \ verlangt werden: Wissen (z. B. Passwort), Besitz (z. B. Token oder Smartphone)\
+          \ und Biometrie (z. B. Fingerabdruck oder Gesichtserkennung)."
