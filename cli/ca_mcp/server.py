@@ -25,6 +25,8 @@ from .tools.read_tools import (
     get_quantitative_risk_studies,
     get_quantitative_risk_scenarios,
     get_quantitative_risk_hypotheses,
+    get_task_templates,
+    get_task_template_details,
 )
 
 from .tools.analysis_tools import (
@@ -52,6 +54,7 @@ from .tools.write_tools import (
     create_quantitative_risk_scenario,
     create_quantitative_risk_hypothesis,
     refresh_quantitative_risk_study_simulations,
+    create_task_template,
 )
 
 from .tools.update_tools import (
@@ -62,6 +65,8 @@ from .tools.update_tools import (
     update_quantitative_risk_study,
     update_quantitative_risk_scenario,
     update_quantitative_risk_hypothesis,
+    update_task_template,
+    delete_task_template,
 )
 
 # Register all tools with MCP decorators
@@ -83,6 +88,8 @@ mcp.tool()(get_requirement_assessments)
 mcp.tool()(get_quantitative_risk_studies)
 mcp.tool()(get_quantitative_risk_scenarios)
 mcp.tool()(get_quantitative_risk_hypotheses)
+mcp.tool()(get_task_templates)
+mcp.tool()(get_task_template_details)
 
 mcp.tool()(get_all_audits_with_metrics)
 mcp.tool()(get_audit_gap_analysis)
@@ -104,6 +111,7 @@ mcp.tool()(create_quantitative_risk_study)
 mcp.tool()(create_quantitative_risk_scenario)
 mcp.tool()(create_quantitative_risk_hypothesis)
 mcp.tool()(refresh_quantitative_risk_study_simulations)
+mcp.tool()(create_task_template)
 
 mcp.tool()(update_asset)
 mcp.tool()(update_risk_scenario)
@@ -112,6 +120,8 @@ mcp.tool()(update_requirement_assessment)
 mcp.tool()(update_quantitative_risk_study)
 mcp.tool()(update_quantitative_risk_scenario)
 mcp.tool()(update_quantitative_risk_hypothesis)
+mcp.tool()(update_task_template)
+mcp.tool()(delete_task_template)
 
 
 def run_server():
