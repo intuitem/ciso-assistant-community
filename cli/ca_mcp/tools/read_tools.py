@@ -1080,7 +1080,9 @@ async def get_quantitative_risk_hypotheses(scenario_id_or_name: str = None):
         return f"Error in get_quantitative_risk_hypotheses: {str(e)}"
 
 
-async def get_task_templates(limit: int = None, offset: int = None, ordering: str = None, search: str = None):
+async def get_task_templates(
+    limit: int = None, offset: int = None, ordering: str = None, search: str = None
+):
     """List task templates with IDs, names, and details
 
     Args:
@@ -1091,7 +1093,7 @@ async def get_task_templates(limit: int = None, offset: int = None, ordering: st
     """
     try:
         params = {}
-        
+
         if limit is not None:
             params["limit"] = limit
         if offset is not None:
@@ -1149,6 +1151,7 @@ async def get_task_template_details(task_id: str):
 
         # Create result
         result = f"|ID|Name|Description|Ref ID|Status|Task Date|Recurrent|Enabled|Published|Link|Folder|Path|Observation|Evidences|Created|Updated|Assets|Applied Controls|Compliance Assessment|Risk Assessment|Assign To|\n"
+        result += "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
         result += f"|{task.get('id', 'N/A')}|{task.get('name', 'N/A')}"
         result += f"|{task.get('description', 'N/A')}"
         result += f"|{task.get('ref_id', 'N/A')}"
@@ -1170,7 +1173,7 @@ async def get_task_template_details(task_id: str):
         result += f"|{task.get('risk_assessments', [])}"
         result += f"|{task.get('assigned_to', [])}"
         result += "|\n"
-        
+
         return result
     except Exception as e:
         return f"Error in get_task_template_details: {str(e)}"
