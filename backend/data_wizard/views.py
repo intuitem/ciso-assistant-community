@@ -41,24 +41,24 @@ from tprm.serializers import (
     SolutionWriteSerializer,
     ContractWriteSerializer,
 )
-from iam.models import RoleAssignment
+from privacy.models import Processing, ProcessingNature
+from privacy.serializers import ProcessingWriteSerializer
+from iam.models import RoleAssignment, User
+from core.models import FilteringLabel
 
 logger = logging.getLogger(__name__)
 
 
-def get_accessible_objects(user):
+def get_accessible_folders_map(user):
+    """
+    Build a map of folder names to IDs that the provided user can access.
+    Used by the data wizard import flow to validate targets.
+    """
     (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, Folder
     )
-    (viewable_perimeters_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Perimeter
-    )
-    (viewable_frameworks_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Framework
-    )
-
     folders_map = {
-        f.name: f.id for f in Folder.objects.filter(id__in=viewable_folders_ids)
+        f.name.lower(): f.id for f in Folder.objects.filter(id__in=viewable_folders_ids)
     }
     return folders_map
 
@@ -87,7 +87,7 @@ class LoadFileView(APIView):
         try:
             # Special handling for TPRM multi-sheet import
             if model_type == "TPRM":
-                folders_map = get_accessible_objects(request.user)
+                folders_map = get_accessible_folders_map(request.user)
                 res = self._process_tprm_file(
                     request, excel_data, folders_map, folder_id
                 )
@@ -127,7 +127,7 @@ class LoadFileView(APIView):
         matrix_id=None,
     ):
         records = dataframe.to_dict(orient="records")
-        folders_map = get_accessible_objects(request.user)
+        folders_map = get_accessible_folders_map(request.user)
 
         # Dispatch to appropriate handler
         if model_type == "Asset":
@@ -167,6 +167,8 @@ class LoadFileView(APIView):
             return self._process_threats(request, records, folders_map, folder_id)
         elif model_type == "TPRM":
             return self._process_tprm(request, records, folders_map, folder_id)
+        elif model_type == "Processing":
+            return self._process_processings(request, records, folders_map, folder_id)
         elif model_type == "Folder":
             return self._process_folders(request, records)
         else:
@@ -222,7 +224,7 @@ class LoadFileView(APIView):
             # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
             domain = folder_id
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
             # Check if name is provided as it's mandatory
             if not record.get("name"):
                 results["failed"] += 1
@@ -267,7 +269,7 @@ class LoadFileView(APIView):
         for record in records:
             domain = folder_id
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
 
             # Handle priority conversion with error checking
             priority = None
@@ -330,7 +332,7 @@ class LoadFileView(APIView):
             # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
             domain = folder_id
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
             # Check if name is provided as it's mandatory
             if not record.get("name"):
                 results["failed"] += 1
@@ -431,7 +433,7 @@ class LoadFileView(APIView):
             # Get domain from record or use fallback
             domain = folder_id
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
 
             # Check if name is provided as it's mandatory
             if not record.get("name"):
@@ -522,7 +524,7 @@ class LoadFileView(APIView):
             # Get domain from record or use fallback
             domain = folder_id
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
 
             # Check if name is provided as it's mandatory
             if not record.get("name"):
@@ -583,6 +585,96 @@ class LoadFileView(APIView):
         )
         return results
 
+    def _process_processings(self, request, records, folders_map, folder_id):
+        results = {"successful": 0, "failed": 0, "errors": []}
+
+        # Create reverse mapping: display value -> database value
+        status_mapping = {v: k for k, v in Processing.STATUS_CHOICES}
+
+        for record in records:
+            domain_id = folder_id
+
+            if record.get("domain") != "":
+                domain_id = folders_map.get(
+                    str(record.get("domain")).lower(), folder_id
+                )
+
+            if not record.get("name"):
+                results["failed"] += 1
+                results["errors"].append(
+                    {"record": record, "error": "Name field is mandatory"}
+                )
+                continue
+
+            status_value = record.get("status", "privacy_draft")
+            if status_value in status_mapping:
+                status_value = status_mapping[status_value]
+
+            processing_data = {
+                "ref_id": record.get("ref_id", ""),
+                "name": record.get("name"),
+                "folder": domain_id,
+                "description": record.get("description", ""),
+                "status": status_value,
+                "dpia_required": record.get("dpia_required", False),
+                "dpia_reference": record.get("dpia_reference", ""),
+            }
+
+            serializer = ProcessingWriteSerializer(
+                data=processing_data, context={"request": request}
+            )
+            try:
+                if serializer.is_valid(raise_exception=True):
+                    processing_instance = serializer.save()
+
+                    if record.get("processing_nature"):
+                        nature_names = [
+                            n.strip()
+                            for n in str(record.get("processing_nature")).split(",")
+                            if n.strip()
+                        ]
+                        nature_objects = ProcessingNature.objects.filter(
+                            name__in=nature_names
+                        )
+                        processing_instance.nature.set(nature_objects)
+
+                    if record.get("assigned_to"):
+                        user_emails = [
+                            e.strip()
+                            for e in str(record.get("assigned_to")).split(",")
+                            if e.strip()
+                        ]
+                        user_objects = User.objects.filter(email__in=user_emails)
+                        processing_instance.assigned_to.set(user_objects)
+
+                    if record.get("labels"):
+                        label_names = [
+                            label.strip()
+                            for label in str(record.get("labels")).split(",")
+                            if label.strip()
+                        ]
+                        label_objects = FilteringLabel.objects.filter(
+                            label__in=label_names
+                        )
+                        processing_instance.filtering_labels.set(label_objects)
+
+                    results["successful"] += 1
+                else:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "errors": serializer.errors}
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Error creating processing {record.get('name')}: {str(e)}"
+                )
+                results["failed"] += 1
+                results["errors"].append({"record": record, "error": str(e)})
+        logger.info(
+            f"Processing import complete. Success: {results['successful']}, Failed: {results['failed']}"
+        )
+        return results
+
     def _process_threats(self, request, records, folders_map, folder_id):
         """Process threats import from Excel"""
         results = {"successful": 0, "failed": 0, "errors": []}
@@ -591,7 +683,7 @@ class LoadFileView(APIView):
             # Get domain from record or use fallback
             domain = folder_id
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
 
             # Check if name is provided as it's mandatory
             if not record.get("name"):
@@ -1088,7 +1180,9 @@ class LoadFileView(APIView):
                 # Get domain from record or use fallback
                 domain = folder_id
                 if record.get("domain") != "":
-                    domain = folders_map.get(record.get("domain"), folder_id)
+                    domain = folders_map.get(
+                        str(record.get("domain")).lower(), folder_id
+                    )
 
                 # Prepare entity data
                 entity_data = {
@@ -1319,7 +1413,9 @@ class LoadFileView(APIView):
                 # Get domain from record or use fallback
                 domain = folder_id
                 if record.get("domain") != "":
-                    domain = folders_map.get(record.get("domain"), folder_id)
+                    domain = folders_map.get(
+                        str(record.get("domain")).lower(), folder_id
+                    )
 
                 # Prepare contract data
                 contract_data = {
