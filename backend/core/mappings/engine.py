@@ -1,5 +1,6 @@
 from ctypes import sizeof
 from django.db.models import Q
+
 from icecream import ic
 from core.models import (
     Framework,
@@ -11,6 +12,7 @@ from collections import defaultdict, deque
 from typing import Optional
 import json
 import zlib
+import time
 
 
 class MappingEngine:
@@ -39,7 +41,6 @@ class MappingEngine:
             "applied_controls",
             "security_exceptions",
             "evidences",
-            "mapping_inference",
         ]
 
     # --- Compression helpers ---
@@ -316,6 +317,7 @@ class MappingEngine:
                                     existing_result, new_result
                                 )
                             )
+
                     else:
                         target_audit["requirement_assessments"][dst] = (
                             src_assessment.copy()
@@ -435,6 +437,26 @@ class MappingEngine:
                         target_audit["requirement_assessments"][dst]["result"] = (
                             "partially_compliant"
                         )
+
+            # Add the mapping inference
+            src_id = source_audit["requirement_assessments"][src].get("id")
+            target_audit["requirement_assessments"][dst]["mapping_inference"] = {
+                "result": target_audit["requirement_assessments"][dst].get(
+                    "result", ""
+                ),
+                "source_requirement_assessment": {
+                    "id": src_id,
+                    "str": source_audit["requirement_assessments"][src].get("str"),
+                    "coverage": "full" if rel in {"equal", "superset"} else "partial",
+                    "score": source_audit["requirement_assessments"][src].get("score"),
+                    "is_scored": source_audit["requirement_assessments"][src].get(
+                        "is_scored", False
+                    ),
+                },
+                "annotation": source_audit["requirement_assessments"][src]
+                .get("mapping_inference", {})
+                .get("annotation", ""),
+            }
         return target_audit
 
     def _most_restrictive_result(self, result1, result2):
@@ -475,7 +497,6 @@ class MappingEngine:
         paths = self.all_paths_between(source_urn, dest_urn, max_depth)
         inferences = {}
         best_path = []
-
         for path in paths:
             tmp_inferences = source_audit.copy()
             tmp_urn = source_urn
@@ -505,7 +526,8 @@ class MappingEngine:
         Returns:
             A dictionary mapping requirement URNs to their requested fields.
         """
-        fields = self.fields_to_map
+
+        fields = self.fields_to_map + ["id"]
         all_ra = audit.get_requirement_assessments(include_non_assessable=False)
         audit_results = {
             "min_score": audit.min_score,
@@ -516,6 +538,9 @@ class MappingEngine:
             audit_results["requirement_assessments"][ra.requirement.urn] = {
                 field: getattr(ra, field) for field in fields
             }
+            audit_results["requirement_assessments"][ra.requirement.urn]["str"] = (
+                ra.requirement.display_short
+            )
             for m2m_field in self.m2m_fields:
                 attr = getattr(ra, m2m_field)
                 if isinstance(attr, QuerySet) or hasattr(attr, "all"):
