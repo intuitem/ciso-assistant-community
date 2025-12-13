@@ -30,6 +30,7 @@
 		{ id: 'Asset', label: m.assets(), description: '' },
 		{ id: 'User', label: m.users(), description: '' },
 		{ id: 'AppliedControl', label: m.appliedControls(), description: '' },
+		{ id: 'Folder', label: m.domains(), description: '' },
 		{ id: 'Perimeter', label: m.perimeters(), description: '' },
 		{ id: 'ComplianceAssessment', label: m.complianceAssessment(), description: '' },
 		{
