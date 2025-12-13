@@ -6308,6 +6308,10 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def get_accessible_objects(self, request):
+        """
+        Return the list of folders, perimeters, frameworks and risk matrices
+        the current user can access, based on their role assignments.
+        """
         (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Folder
         )

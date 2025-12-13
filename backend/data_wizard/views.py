@@ -48,19 +48,16 @@ from core.models import FilteringLabel
 logger = logging.getLogger(__name__)
 
 
-def get_accessible_objects(user):
+def get_accessible_folders_map(user):
+    """
+    Build a map of folder names to IDs that the provided user can access.
+    Used by the data wizard import flow to validate targets.
+    """
     (viewable_folders_ids, _, _) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, Folder
     )
-    (viewable_perimeters_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Perimeter
-    )
-    (viewable_frameworks_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Framework
-    )
-
     folders_map = {
-        f.name: f.id for f in Folder.objects.filter(id__in=viewable_folders_ids)
+        f.name.lower(): f.id for f in Folder.objects.filter(id__in=viewable_folders_ids)
     }
     return folders_map
 
@@ -89,7 +86,7 @@ class LoadFileView(APIView):
         try:
             # Special handling for TPRM multi-sheet import
             if model_type == "TPRM":
-                folders_map = get_accessible_objects(request.user)
+                folders_map = get_accessible_folders_map(request.user)
                 res = self._process_tprm_file(
                     request, excel_data, folders_map, folder_id
                 )
@@ -129,7 +126,7 @@ class LoadFileView(APIView):
         matrix_id=None,
     ):
         records = dataframe.to_dict(orient="records")
-        folders_map = get_accessible_objects(request.user)
+        folders_map = get_accessible_folders_map(request.user)
 
         # Dispatch to appropriate handler
         if model_type == "Asset":
@@ -224,7 +221,7 @@ class LoadFileView(APIView):
             # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
             domain = folder_id
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
             # Check if name is provided as it's mandatory
             if not record.get("name"):
                 results["failed"] += 1
@@ -269,7 +266,7 @@ class LoadFileView(APIView):
         for record in records:
             domain = folder_id
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
 
             # Handle priority conversion with error checking
             priority = None
@@ -332,7 +329,7 @@ class LoadFileView(APIView):
             # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
             domain = folder_id
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
             # Check if name is provided as it's mandatory
             if not record.get("name"):
                 results["failed"] += 1
@@ -433,7 +430,7 @@ class LoadFileView(APIView):
             # Get domain from record or use fallback
             domain = folder_id
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
 
             # Check if name is provided as it's mandatory
             if not record.get("name"):
@@ -524,7 +521,7 @@ class LoadFileView(APIView):
             # Get domain from record or use fallback
             domain = folder_id
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
 
             # Check if name is provided as it's mandatory
             if not record.get("name"):
@@ -592,9 +589,12 @@ class LoadFileView(APIView):
         status_mapping = {v: k for k, v in Processing.STATUS_CHOICES}
 
         for record in records:
-            domain = folder_id
+            domain_id = folder_id
+
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain_id = folders_map.get(
+                    str(record.get("domain")).lower(), folder_id
+                )
 
             if not record.get("name"):
                 results["failed"] += 1
@@ -610,7 +610,7 @@ class LoadFileView(APIView):
             processing_data = {
                 "ref_id": record.get("ref_id", ""),
                 "name": record.get("name"),
-                "folder": domain,
+                "folder": domain_id,
                 "description": record.get("description", ""),
                 "status": status_value,
                 "dpia_required": record.get("dpia_required", False),
@@ -680,7 +680,7 @@ class LoadFileView(APIView):
             # Get domain from record or use fallback
             domain = folder_id
             if record.get("domain") != "":
-                domain = folders_map.get(record.get("domain"), folder_id)
+                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
 
             # Check if name is provided as it's mandatory
             if not record.get("name"):
@@ -1103,7 +1103,9 @@ class LoadFileView(APIView):
                 # Get domain from record or use fallback
                 domain = folder_id
                 if record.get("domain") != "":
-                    domain = folders_map.get(record.get("domain"), folder_id)
+                    domain = folders_map.get(
+                        str(record.get("domain")).lower(), folder_id
+                    )
 
                 # Prepare entity data
                 entity_data = {
@@ -1334,7 +1336,9 @@ class LoadFileView(APIView):
                 # Get domain from record or use fallback
                 domain = folder_id
                 if record.get("domain") != "":
-                    domain = folders_map.get(record.get("domain"), folder_id)
+                    domain = folders_map.get(
+                        str(record.get("domain")).lower(), folder_id
+                    )
 
                 # Prepare contract data
                 contract_data = {
