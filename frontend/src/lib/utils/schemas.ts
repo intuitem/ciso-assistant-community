@@ -1342,6 +1342,7 @@ export const MetricDefinitionSchema = z.object({
 	choices_definition: jsonSchema.optional().nullable(),
 	provider: z.string().optional().nullable(),
 	higher_is_better: z.boolean().default(true),
+	default_target: z.number().optional().nullable(),
 	filtering_labels: z.string().optional().array().optional()
 });
 

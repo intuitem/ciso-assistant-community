@@ -2764,6 +2764,8 @@
 	"choicesDefinition": "Choices definition",
 	"higherIsBetter": "Higher is better",
 	"higherIsBetterHelpText": "If checked, an increase in value is positive (e.g., compliance score). If unchecked, a decrease is positive (e.g., vulnerabilities count).",
+	"defaultTarget": "Default target",
+	"defaultTargetHelpText": "Default target value for metric instances. Can be overridden at instance level.",
 	"mappingLibraries": "Mapping Libraries",
 	"importedFrameworks": "Imported Frameworks",
 	"notImportedFrameworks": "Not Imported Frameworks",

@@ -100,6 +100,15 @@
 		cacheLock={cacheLocks['unit']}
 		bind:cachedValue={formDataCache['unit']}
 	/>
+	<TextField
+		{form}
+		type="number"
+		field="default_target"
+		label={m.defaultTarget()}
+		helpText={m.defaultTargetHelpText()}
+		cacheLock={cacheLocks['default_target']}
+		bind:cachedValue={formDataCache['default_target']}
+	/>
 {/if}
 <TextField
 	{form}

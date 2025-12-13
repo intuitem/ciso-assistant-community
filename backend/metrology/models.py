@@ -66,6 +66,14 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
             "If false, a decrease is considered positive (e.g., number of vulnerabilities)."
         ),
     )
+    default_target = models.FloatField(
+        blank=True,
+        null=True,
+        verbose_name=_("Default target"),
+        help_text=_(
+            "Default target value for metric instances. Can be overridden at instance level."
+        ),
+    )
 
     fields_to_check = ["ref_id", "name"]
 
@@ -154,6 +162,13 @@ class MetricInstance(
 
     def __str__(self):
         return f"{self.name} ({self.get_status_display()})"
+
+    def save(self, *args, **kwargs):
+        # Inherit default_target from metric_definition if target_value is not set
+        if self.target_value is None and self.metric_definition_id:
+            if self.metric_definition.default_target is not None:
+                self.target_value = self.metric_definition.default_target
+        super().save(*args, **kwargs)
 
     def get_latest_sample(self):
         """Returns the most recent sample for this metric instance"""
