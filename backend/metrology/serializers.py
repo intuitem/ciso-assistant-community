@@ -188,8 +188,24 @@ class DashboardWidgetWriteSerializer(BaseModelSerializer):
             data["target_object_id"] = None
 
         # Validate metric configuration: must have either custom or builtin metric
-        has_custom = data.get("metric_instance") is not None
-        has_builtin = data.get("target_content_type") is not None
+        # For partial updates (PATCH), check existing instance values if not in data
+        instance = getattr(self, "instance", None)
+
+        # Determine metric_instance value (from data or existing instance)
+        if "metric_instance" in data:
+            has_custom = data.get("metric_instance") is not None
+        elif instance:
+            has_custom = instance.metric_instance is not None
+        else:
+            has_custom = False
+
+        # Determine target_content_type value (from data or existing instance)
+        if "target_content_type" in data:
+            has_builtin = data.get("target_content_type") is not None
+        elif instance:
+            has_builtin = instance.target_content_type is not None
+        else:
+            has_builtin = False
 
         if has_custom and has_builtin:
             raise serializers.ValidationError(
@@ -207,13 +223,30 @@ class DashboardWidgetWriteSerializer(BaseModelSerializer):
 
         # If builtin metric, ensure all required fields are present
         if has_builtin:
-            if not data.get("target_object_id"):
+            # Check target_object_id (from data or existing instance)
+            if "target_object_id" in data:
+                has_target_object = bool(data.get("target_object_id"))
+            elif instance:
+                has_target_object = bool(instance.target_object_id)
+            else:
+                has_target_object = False
+
+            if not has_target_object:
                 raise serializers.ValidationError(
                     {
                         "target_object_id": "Target object is required for builtin metrics."
                     }
                 )
-            if not data.get("metric_key"):
+
+            # Check metric_key (from data or existing instance)
+            if "metric_key" in data:
+                has_metric_key = bool(data.get("metric_key"))
+            elif instance:
+                has_metric_key = bool(instance.metric_key)
+            else:
+                has_metric_key = False
+
+            if not has_metric_key:
                 raise serializers.ValidationError(
                     {"metric_key": "Metric key is required for builtin metrics."}
                 )

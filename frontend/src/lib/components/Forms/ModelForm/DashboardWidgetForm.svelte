@@ -283,19 +283,10 @@
 <!-- Aggregation hidden for now -->
 <input type="hidden" name="aggregation" value={formDataCache['aggregation'] || 'none'} />
 
-<div class="flex flex-wrap gap-4">
-	<Checkbox
-		{form}
-		field="show_target"
-		label={m.showTarget()}
-		cacheLock={cacheLocks['show_target']}
-		bind:cachedValue={formDataCache['show_target']}
-	/>
-	<Checkbox
-		{form}
-		field="show_legend"
-		label={m.showLegend()}
-		cacheLock={cacheLocks['show_legend']}
-		bind:cachedValue={formDataCache['show_legend']}
-	/>
-</div>
+<Checkbox
+	{form}
+	field="show_target"
+	label={m.showTarget()}
+	cacheLock={cacheLocks['show_target']}
+	bind:cachedValue={formDataCache['show_target']}
+/>

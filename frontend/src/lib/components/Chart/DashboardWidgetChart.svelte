@@ -199,7 +199,7 @@
 		const baseGrid = {
 			top: 30,
 			right: 20,
-			bottom: 40,
+			bottom: 60,
 			left: 50
 		};
 
@@ -225,7 +225,8 @@
 			axisLabel: {
 				formatter: function (value: number) {
 					return new Date(value).toLocaleDateString();
-				}
+				},
+				rotate: 45
 			}
 		};
 
@@ -252,8 +253,8 @@
 		if (isBreakdownMetric) {
 			const tsData = breakdownTimeSeriesData();
 
-			// For bar/line/area with breakdown, use stacked chart
-			if (widget.chart_type === 'bar' || widget.chart_type === 'line' || widget.chart_type === 'area') {
+			// For bar/area with breakdown, use stacked chart
+			if (widget.chart_type === 'bar' || widget.chart_type === 'area') {
 				return {
 					grid: { ...baseGrid, right: 100 },
 					tooltip: {
@@ -277,9 +278,8 @@
 				};
 			}
 
-			// For pie/donut/gauge/kpi_card with breakdown, use pie chart
-			if (widget.chart_type === 'pie' || widget.chart_type === 'donut' || widget.chart_type === 'gauge' || widget.chart_type === 'kpi_card') {
-				const isDonut = widget.chart_type === 'donut' || widget.chart_type === 'gauge' || widget.chart_type === 'kpi_card';
+			// For donut/gauge/kpi_card with breakdown, use donut chart
+			if (widget.chart_type === 'donut' || widget.chart_type === 'gauge' || widget.chart_type === 'kpi_card') {
 				return {
 					tooltip: {
 						trigger: 'item',
@@ -295,7 +295,7 @@
 					series: [
 						{
 							type: 'pie',
-							radius: isDonut ? ['40%', '70%'] : ['0%', '70%'],
+							radius: ['40%', '70%'],
 							center: ['40%', '50%'],
 							avoidLabelOverlap: true,
 							itemStyle: {
