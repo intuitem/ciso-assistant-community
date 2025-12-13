@@ -436,7 +436,7 @@
 	"residual": "Zbytkový",
 	"jumpToRiskAssessment": "Přejít na hodnocení rizika",
 	"additionalMeasures": "Další opatření",
-	"riskAssessmentMatrixHelpText": "UPOZORNĚNÍ: Po vytvoření hodnocení rizika již nebudete moci změnit rizikovou matici",
+	"riskAssessmentMatrixHelpText": "UPOZORNĚNÍ: Změna matice rizik automaticky upraví hodnoty podle nové škály. Poté výsledky zkontrolujte a v případě potřeby je opravte.",
 	"etaHelpText": "Předpokládaný čas doručení",
 	"dueDateHelpText": "Datum, do kterého musí být hodnocení dokončeno",
 	"expiryDateHelpText": "Datum, kdy objekt přestane být platný",
