@@ -566,6 +566,13 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true
 			},
 			{ field: 'assets', urlModel: 'vulnerabilities' },
+			{ field: 'assets', urlModel: 'risk-scenarios', disableCreate: true, disableDelete: true },
+			{
+				field: 'assets',
+				urlModel: 'quantitative-risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			},
 			{ field: 'assets', urlModel: 'solutions', disableCreate: true, disableDelete: true },
 			{ field: 'assets', urlModel: 'personal-data', disableCreate: true, disableDelete: true },
 			{ field: 'assets', urlModel: 'incidents' },
@@ -901,7 +908,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'solutions',
 		verboseName: 'Solution',
 		verboseNamePlural: 'Solutions',
-		reverseForeignKeyFields: [{ field: 'solution', urlModel: 'contracts', disableDelete: true }],
+		reverseForeignKeyFields: [{ field: 'solutions', urlModel: 'contracts', disableDelete: true }],
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
@@ -930,14 +937,17 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'contracts',
 		verboseName: 'Contract',
 		verboseNamePlural: 'Contracts',
-		reverseForeignKeyFields: [{ field: 'contracts', urlModel: 'evidences', disableDelete: true }],
+		reverseForeignKeyFields: [
+			{ field: 'contracts', urlModel: 'evidences', disableDelete: true },
+			{ field: 'contracts', urlModel: 'solutions', disableDelete: true, disableCreate: true }
+		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'beneficiary_entity', urlModel: 'entities' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'solution', urlModel: 'solutions' },
+			{ field: 'solutions', urlModel: 'solutions' },
 			{ field: 'overarching_contract', urlModel: 'contracts' }
 		],
 		selectFields: [
@@ -946,6 +956,30 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'dora_contractual_arrangement' },
 			{ field: 'termination_reason' },
 			{ field: 'governing_law_country' }
+		],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'name' },
+			{ field: 'ref_id' },
+			{ field: 'description' },
+			{ field: 'folder' },
+			{ field: 'owner' },
+			{ field: 'status' },
+			{ field: 'provider_entity' },
+			{ field: 'beneficiary_entity' },
+			{ field: 'start_date' },
+			{ field: 'end_date' },
+			{ field: 'overarching_contract' },
+			{ field: 'annual_expense' },
+			{ field: 'currency' },
+			{ field: 'dora_contractual_arrangement' },
+			{ field: 'governing_law_country' },
+			{ field: 'notice_period_entity' },
+			{ field: 'notice_period_provider' },
+			{ field: 'is_intragroup' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'filtering_labels' }
 		]
 	},
 	representatives: {
@@ -1057,6 +1091,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'owner', urlModel: 'users' },
+			{ field: 'purposes', urlModel: 'purposes' },
 			{ field: 'assigned_to', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
@@ -1078,6 +1113,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'applied-controls',
 				disableCreate: true,
 				disableDelete: true
+			},
+			{
+				field: 'processings',
+				urlModel: 'evidences',
+				disableCreate: true,
+				disableDelete: true
 			}
 		],
 		detailViewFields: [
@@ -1091,6 +1132,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'dpia_required' },
 			{ field: 'dpia_reference' },
 			{ field: 'nature' },
+			{ field: 'purposes' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
 			{ field: 'filtering_labels' }
@@ -1313,10 +1355,14 @@ export const URL_MODEL_MAP: ModelMap = {
 				endpointUrl: 'ebios-rm/feared-events',
 				urlParams: 'is_selected=true&ebios_rm_study=',
 				detail: true
+			},
+			{
+				field: 'risk_origin',
+				urlModel: 'terminologies',
+				urlParams: 'field_path=ro_to.risk_origin&is_visible=true'
 			}
 		],
 		selectFields: [
-			{ field: 'risk-origin' },
 			{ field: 'motivation', valueType: 'number' },
 			{ field: 'resources', valueType: 'number' },
 			{ field: 'activity', valueType: 'number' }
@@ -1460,7 +1506,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			}
 		],
 		selectFields: [
-			{ field: 'likelihood', valueType: 'number', detail: true, endpointUrl: 'ebios-rm/studies' }
+			{
+				field: 'likelihood',
+				valueType: 'number',
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
+			}
 		]
 	},
 	'elementary-actions': {
@@ -1499,7 +1551,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'elementary_actions', urlModel: 'elementary-actions' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
-		selectFields: [{ field: 'likelihood', valueType: 'number', detail: true }],
+		selectFields: [
+			{
+				field: 'likelihood',
+				valueType: 'number',
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
+			}
+		],
 		reverseForeignKeyFields: [
 			{
 				field: 'operating_modes',

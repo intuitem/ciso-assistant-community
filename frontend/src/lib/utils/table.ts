@@ -6,6 +6,7 @@ import type { urlModel } from './types';
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
 import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
 import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
+import ChangeCsfFunction from '$lib/components/ContextMenu/applied-controls/ChangeCsfFunction.svelte';
 import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeStatus.svelte';
 import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo } from './crud';
@@ -56,6 +57,13 @@ const ENTITY_CRITICALITY_OPTIONS = [
 	{ label: '3', value: '3' },
 	{ label: '4', value: '4' }
 ];
+
+const CONTENT_TYPE_OPTIONS = [
+	{ label: 'DOMAIN', value: 'DO' },
+	{ label: 'GLOBAL', value: 'GL' },
+	{ label: 'ENCLAVE', value: 'EN' }
+];
+
 const YES_NO_UNSET_OPTIONS = [
 	{ label: 'YES', value: 'YES' },
 	{ label: 'NO', value: 'NO' },
@@ -116,6 +124,15 @@ export const LABELS_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'filtering-labels',
 		label: 'filtering_labels',
 		optionsLabelField: 'label',
+		multiple: true
+	}
+};
+
+export const CONTENT_TYPE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'contentType',
+		options: CONTENT_TYPE_OPTIONS,
 		multiple: true
 	}
 };
@@ -705,9 +722,8 @@ export const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'risk_origin',
-		optionsEndpoint: 'ro-to/risk-origin',
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
+		optionsEndpoint: 'terminologies?field_path=ro_to.risk_origin&is_visible=true',
+		optionsLabelField: 'translated_name',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -762,7 +778,7 @@ export const BENEFICIARY_ENTITY_FILTER: ListViewFilterConfig = {
 export const SOLUTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'solution',
+		label: 'solutions',
 		optionsEndpoint: 'solutions',
 		multiple: true
 	}
@@ -1158,9 +1174,10 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'parentDomain', 'labels'],
-		body: ['name', 'description', 'parent_folder', 'filtering_labels'],
+		head: ['name', 'description', 'contentType', 'parentDomain', 'labels'],
+		body: ['name', 'description', 'content_type', 'parent_folder', 'filtering_labels'],
 		filters: {
+			content_type: CONTENT_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -1336,6 +1353,7 @@ export const listViewFields = {
 			'priority',
 			'status',
 			'category',
+			'csfFunction',
 			'eta',
 			'domain',
 			'owner',
@@ -1349,6 +1367,7 @@ export const listViewFields = {
 			'priority',
 			'status',
 			'category',
+			'csf_function',
 			'eta',
 			'folder',
 			'owner',
@@ -1691,7 +1710,7 @@ export const listViewFields = {
 			'endDate',
 			'providerEntity',
 			'beneficiaryEntity',
-			'solution'
+			'solutions'
 		],
 		body: [
 			'ref_id',
@@ -1702,13 +1721,13 @@ export const listViewFields = {
 			'end_date',
 			'provider_entity',
 			'beneficiary_entity',
-			'solution'
+			'solutions'
 		],
 		filters: {
 			status: CONTRACT_STATUS_FILTER,
 			provider_entity: PROVIDER_ENTITY_FILTER,
 			beneficiary_entity: BENEFICIARY_ENTITY_FILTER,
-			solution: SOLUTION_FILTER
+			solutions: SOLUTION_FILTER
 		}
 	},
 	representatives: {
@@ -2336,7 +2355,8 @@ export const contextMenuActions = {
 		{ component: ChangeStatus, props: {} },
 		{ component: ChangeImpact, props: {} },
 		{ component: ChangeEffort, props: {} },
-		{ component: ChangePriority, props: {} }
+		{ component: ChangePriority, props: {} },
+		{ component: ChangeCsfFunction, props: {} }
 	],
 	evidences: [{ component: EvidenceChangeStatus, props: {} }],
 	'task-nodes': [{ component: TaskNodeChangeStatus, props: {} }],

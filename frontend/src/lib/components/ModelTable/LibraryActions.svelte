@@ -4,6 +4,12 @@
 	import { page } from '$app/state';
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { tableHandlers } from '$lib/utils/stores';
+	import ChoicesModal from '$lib/components/Modals/ChoicesModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		meta: any;
@@ -14,6 +20,25 @@
 	let { meta, actionsURLModel }: Props = $props();
 	let library = $derived(meta);
 	let loading = $state({ form: false, library: '' });
+
+	const modalStore = getModalStore();
+	function choicesModal(choices: object[]): void {
+		const modalComponent: ModalComponent = {
+			ref: ChoicesModal,
+			props: {
+				parent: null,
+				formAction: `/loaded-libraries/${library.id}?/update`,
+				choices: choices,
+				title: m.scoreChangeDetected(),
+				message: m.scoreChangeDetectedDescription()
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
 </script>
 
 {#if actionsURLModel === 'stored-libraries' && Object.hasOwn(library, 'is_loaded') && !library.is_loaded}
@@ -92,14 +117,19 @@
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/loaded-libraries/{library.id}?/update"
+				action={`/loaded-libraries/${library.id}?/update`}
 				use:enhance={() => {
 					loading.form = true;
 					loading.library = library.urn;
-					return async ({ update }) => {
+					return async ({ result, update }) => {
 						loading.form = false;
 						loading.library = '';
-						await update();
+						if (result.type !== 'error') {
+							await update();
+						}
+						if (result.type === 'failure' && result.data?.error === 'score_change_detected') {
+							choicesModal(result.data.choices);
+						}
 						Object.values($tableHandlers).forEach((handler) => {
 							handler.invalidate();
 						});
@@ -107,7 +137,7 @@
 				}}
 			>
 				<button title={m.updateThisLibrary()} onclick={(e) => e.stopPropagation()}>
-					<i class="fa-solid fa-circle-up"></i>
+					<i class="fa-solid fa-circle-up text-success-700-300 hover:text-success-600-400"></i>
 				</button>
 			</form>
 		</span>

@@ -23,6 +23,59 @@ const GLOBAL_DOMAIN_SKIPPED_REVERSE_FKS: urlModel[] = [
 	'compliance-assessments',
 	'entity-assessments'
 ];
+interface LoadValidationFlowFormDataParams {
+	event: { fetch: typeof fetch };
+	folderId: string;
+	targetField: string;
+	targetIds: string[];
+}
+
+/**
+ * Load validation flow form data with preset values and select options.
+ * This utility extracts the common pattern used across detail pages that support validation flows.
+ */
+export const loadValidationFlowFormData = async ({
+	event,
+	folderId,
+	targetField,
+	targetIds
+}: LoadValidationFlowFormDataParams) => {
+	const validationFlowSchema = modelSchema('validation-flows');
+	const validationFlowInitialData = {
+		folder: folderId,
+		[targetField]: targetIds,
+		ref_id: ''
+	};
+	const validationFlowForm = await superValidate(
+		validationFlowInitialData,
+		zod(validationFlowSchema),
+		{ errors: false }
+	);
+	const validationFlowModel = getModelInfo('validation-flows');
+
+	const validationFlowSelectOptions: Record<string, any> = {};
+	if (validationFlowModel.selectFields) {
+		await Promise.all(
+			validationFlowModel.selectFields.map(async (selectField) => {
+				const url = `${BASE_API_URL}/validation-flows/${selectField.field}/`;
+				const response = await event.fetch(url);
+				if (response.ok) {
+					validationFlowSelectOptions[selectField.field] = await response.json().then((data) =>
+						Object.entries(data).map(([key, value]) => ({
+							label: value,
+							value: selectField.valueType === 'number' ? parseInt(key) : key
+						}))
+					);
+				} else {
+					console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
+				}
+			})
+		);
+	}
+	validationFlowModel.selectOptions = validationFlowSelectOptions;
+
+	return { validationFlowForm, validationFlowModel };
+};
 
 export const loadDetail = async ({ event, model, id }) => {
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/`;
