@@ -149,46 +149,28 @@ def combine_iso_strm_data(
     print(f"  ISO 27001 mappings: {len(iso27001_df)}")
     print(f"  ISO 27002 mappings: {len(iso27002_df)}")
 
-    # Create a simplified relationship mapping
-    relationship_df = combined_df[
-        [
-            "FDE #",
-            "FDE Name",
-            "SCF #",
-            "SCF Control",
-            "STRM Relationship",
-            "Strength",
-            "Source",
-        ]
-    ].copy()
+    # Create a simplified relationship mapping with required columns only
+    relationship_df = combined_df[["FDE #", "SCF #", "STRM Relationship"]].copy()
 
-    # Rename for clarity
-    relationship_df.columns = [
-        "iso_ref",
-        "iso_name",
-        "scf_ref",
-        "scf_name",
-        "relationship",
-        "strength",
-        "source",
-    ]
+    # Rename to required column names
+    relationship_df.columns = ["source_node_id", "target_node_id", "relationship"]
 
-    # Sort by ISO reference
-    relationship_df = relationship_df.sort_values(["source", "iso_ref", "scf_ref"])
+    # Uppercase the SCF ref_id (target_node_id)
+    relationship_df["target_node_id"] = relationship_df["target_node_id"].str.upper()
+
+    # Sort by source then target
+    relationship_df = relationship_df.sort_values(["source_node_id", "target_node_id"])
 
     # Show summary statistics
     print("\n" + "-" * 50)
     print("SUMMARY STATISTICS")
     print("-" * 50)
     print(f"Total mappings: {len(relationship_df)}")
-    print(f"Unique ISO controls: {relationship_df['iso_ref'].nunique()}")
-    print(f"Unique SCF controls: {relationship_df['scf_ref'].nunique()}")
+    print(f"Unique source nodes (ISO): {relationship_df['source_node_id'].nunique()}")
+    print(f"Unique target nodes (SCF): {relationship_df['target_node_id'].nunique()}")
 
     print("\nRelationship type distribution:")
     print(relationship_df["relationship"].value_counts())
-
-    print("\nStrength distribution:")
-    print(relationship_df["strength"].value_counts())
 
     # Save to CSV
     print(f"\nSaving to {output_csv}...")
@@ -196,7 +178,7 @@ def combine_iso_strm_data(
 
     # Save to Excel with formatting
     print(f"Saving to {output_xlsx}...")
-    save_to_excel(relationship_df, combined_df, output_xlsx)
+    save_to_excel(relationship_df, output_xlsx)
 
     print("\n" + "=" * 70)
     print("COMPLETE")
@@ -208,11 +190,9 @@ def combine_iso_strm_data(
     return relationship_df
 
 
-def save_to_excel(
-    relationship_df: pd.DataFrame, full_df: pd.DataFrame, output_path: Path
-):
+def save_to_excel(relationship_df: pd.DataFrame, output_path: Path):
     """
-    Save to Excel with multiple sheets and formatting.
+    Save to Excel with formatting.
     """
     try:
         from openpyxl import Workbook
@@ -223,10 +203,8 @@ def save_to_excel(
         return
 
     wb = Workbook()
-
-    # Sheet 1: Relationship mapping (simplified)
-    ws1 = wb.active
-    ws1.title = "Relationships"
+    ws = wb.active
+    ws.title = "Mapping"
 
     # Header styling
     header_fill = PatternFill(
@@ -234,74 +212,23 @@ def save_to_excel(
     )
     header_font = Font(bold=True, color="FFFFFF")
 
-    # Write relationship data
+    # Write data
     for r_idx, row in enumerate(
         dataframe_to_rows(relationship_df, index=False, header=True), 1
     ):
         for c_idx, value in enumerate(row, 1):
-            cell = ws1.cell(row=r_idx, column=c_idx, value=value)
+            cell = ws.cell(row=r_idx, column=c_idx, value=value)
             if r_idx == 1:
                 cell.font = header_font
                 cell.fill = header_fill
-            cell.alignment = Alignment(wrap_text=True, vertical="top")
+            cell.alignment = Alignment(vertical="top")
 
     # Adjust column widths
-    col_widths = [12, 50, 12, 50, 15, 10, 15]
+    col_widths = [20, 15, 12]
     for col, width in enumerate(col_widths, 1):
-        ws1.column_dimensions[chr(64 + col)].width = width
+        ws.column_dimensions[chr(64 + col)].width = width
 
-    ws1.freeze_panes = "A2"
-
-    # Sheet 2: Full STRM data
-    ws2 = wb.create_sheet("Full STRM Data")
-
-    for r_idx, row in enumerate(
-        dataframe_to_rows(full_df, index=False, header=True), 1
-    ):
-        for c_idx, value in enumerate(row, 1):
-            cell = ws2.cell(row=r_idx, column=c_idx, value=value)
-            if r_idx == 1:
-                cell.font = header_font
-                cell.fill = header_fill
-            cell.alignment = Alignment(wrap_text=True, vertical="top")
-
-    ws2.freeze_panes = "A2"
-
-    # Sheet 3: Summary pivot
-    ws3 = wb.create_sheet("Summary")
-
-    # Create summary stats
-    summary_data = [
-        ["ISO 27001/27002 to SCF STRM Mapping Summary", ""],
-        ["", ""],
-        ["Total Mappings", len(relationship_df)],
-        ["Unique ISO Controls", relationship_df["iso_ref"].nunique()],
-        ["Unique SCF Controls", relationship_df["scf_ref"].nunique()],
-        ["", ""],
-        ["By Source:", ""],
-        [
-            "ISO 27001:2022",
-            len(relationship_df[relationship_df["source"] == "ISO 27001:2022"]),
-        ],
-        [
-            "ISO 27002:2022",
-            len(relationship_df[relationship_df["source"] == "ISO 27002:2022"]),
-        ],
-        ["", ""],
-        ["By Relationship Type:", ""],
-    ]
-
-    for rel_type, count in relationship_df["relationship"].value_counts().items():
-        summary_data.append([rel_type, count])
-
-    for r_idx, row in enumerate(summary_data, 1):
-        for c_idx, value in enumerate(row, 1):
-            cell = ws3.cell(row=r_idx, column=c_idx, value=value)
-            if r_idx == 1:
-                cell.font = Font(bold=True, size=14)
-
-    ws3.column_dimensions["A"].width = 30
-    ws3.column_dimensions["B"].width = 15
+    ws.freeze_panes = "A2"
 
     wb.save(output_path)
 
