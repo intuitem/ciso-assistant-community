@@ -28,11 +28,31 @@ def get_section_number(fde_ref) -> float:
         return 0
 
 
+def strip_parenthetical(ref: str) -> str:
+    """
+    Remove parenthetical suffixes from a reference.
+
+    Examples:
+        5.3(b) -> 5.3
+        6.1.1(a) -> 6.1.1
+        6.1.1(e)(1) -> 6.1.1
+        A.5.1(a) -> A.5.1
+    """
+    if not ref:
+        return ref
+    # Find first '(' and strip everything from there
+    paren_idx = ref.find("(")
+    if paren_idx > 0:
+        return ref[:paren_idx]
+    return ref
+
+
 def clean_fde_reference(fde_ref: str, prefix_annex_a: bool = False) -> str:
     """
     Clean and normalize FDE reference.
 
     For ISO 27002 controls, add 'A.' prefix to make them Annex A references.
+    Strips parenthetical suffixes like (a), (b)(1), etc.
     """
     if pd.isna(fde_ref):
         return None
@@ -41,6 +61,9 @@ def clean_fde_reference(fde_ref: str, prefix_annex_a: bool = False) -> str:
 
     if not fde_ref:
         return None
+
+    # Strip parenthetical suffixes
+    fde_ref = strip_parenthetical(fde_ref)
 
     # For ISO 27002 controls, prefix with 'A.' if not already
     if prefix_annex_a:
@@ -155,8 +178,13 @@ def combine_iso_strm_data(
     # Rename to required column names
     relationship_df.columns = ["source_node_id", "target_node_id", "relationship"]
 
-    # Uppercase the SCF ref_id (target_node_id)
-    relationship_df["target_node_id"] = relationship_df["target_node_id"].str.upper()
+    # Lowercase the SCF ref_id (target_node_id)
+    relationship_df["target_node_id"] = relationship_df["target_node_id"].str.lower()
+
+    # Remove duplicates (since stripping parentheticals creates duplicates)
+    before_dedup = len(relationship_df)
+    relationship_df = relationship_df.drop_duplicates()
+    print(f"  Deduplicated: {before_dedup} -> {len(relationship_df)}")
 
     # Sort by source then target
     relationship_df = relationship_df.sort_values(["source_node_id", "target_node_id"])
