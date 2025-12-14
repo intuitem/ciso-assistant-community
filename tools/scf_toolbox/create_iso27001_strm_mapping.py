@@ -111,7 +111,8 @@ def load_strm_csv(
         min_section: Minimum section number to include (4 for ISO 27001, 5 for ISO 27002)
     """
     print(f"Loading: {csv_path.name}...")
-    df = pd.read_csv(csv_path)
+    # Read FDE # as string to preserve values like 5.10 (otherwise pandas reads as 5.1 float)
+    df = pd.read_csv(csv_path, dtype={"FDE #": str})
 
     print(f"  Loaded {len(df)} rows")
 
@@ -177,6 +178,14 @@ def combine_iso_strm_data(
 
     # Rename to required column names
     relationship_df.columns = ["source_node_id", "target_node_id", "relationship"]
+
+    # Remove spaces from reference IDs (PDF conversion artifacts)
+    relationship_df["source_node_id"] = relationship_df["source_node_id"].str.replace(
+        " ", "", regex=False
+    )
+    relationship_df["target_node_id"] = relationship_df["target_node_id"].str.replace(
+        " ", "", regex=False
+    )
 
     # Lowercase the SCF ref_id (target_node_id)
     relationship_df["target_node_id"] = relationship_df["target_node_id"].str.lower()
