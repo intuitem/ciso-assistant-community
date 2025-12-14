@@ -20,8 +20,14 @@ except ImportError:
 
 
 def extract_strm_from_pdf(pdf_path):
-    """Extract STRM mapping rows from a PDF file."""
+    """Extract STRM mapping rows from a PDF file.
+
+    Handles multi-target rows where FDE # is only in the first row
+    and continuation rows have FDE # = None but still have SCF # values.
+    """
     rows = []
+    current_fde = None  # Track the current FDE # for continuation rows
+    current_fde_data = None  # Track columns 0-5 for continuation rows
 
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
@@ -29,23 +35,50 @@ def extract_strm_from_pdf(pdf_path):
             for table in tables:
                 for row in table:
                     # Skip header rows and metadata rows
-                    if not row[0]:
-                        continue
-                    if row[0].startswith("FDE #"):
-                        continue
-                    if "NIST IR 8477" in row[0] or "Reference Document" in row[0]:
-                        continue
-                    # Must have FDE # and SCF #
+                    if row[0]:
+                        if row[0].startswith("FDE #"):
+                            continue
+                        if "NIST IR 8477" in row[0] or "Reference Document" in row[0]:
+                            continue
+
+                    # Must have SCF # to be a valid mapping row
                     if not row[6]:
                         continue
 
-                    # Clean up the row
+                    # If FDE # is present, this is a new source row
+                    if row[0]:
+                        current_fde = row[0]
+                        # Store the first 6 columns (FDE #, Name, Description, Rationale, Relationship, SCF Control)
+                        current_fde_data = row[:6]
+
+                    # Skip if we don't have a current FDE (shouldn't happen after header)
+                    if not current_fde:
+                        continue
+
+                    # Build the clean row
                     clean_row = []
-                    for cell in row[:10]:
-                        if cell is None:
-                            clean_row.append("")
-                        else:
-                            clean_row.append(str(cell).replace("\n", " ").strip())
+
+                    # Use current FDE data for first 6 columns if this is a continuation row
+                    if row[0]:
+                        # This is a primary row with FDE #
+                        for cell in row[:10]:
+                            if cell is None:
+                                clean_row.append("")
+                            else:
+                                clean_row.append(str(cell).replace("\n", " ").strip())
+                    else:
+                        # This is a continuation row - use stored FDE data + current row's target columns
+                        for cell in current_fde_data:
+                            if cell is None:
+                                clean_row.append("")
+                            else:
+                                clean_row.append(str(cell).replace("\n", " ").strip())
+                        # Add columns 6-9 (SCF #, SCF Control Description, Strength, Notes)
+                        for cell in row[6:10]:
+                            if cell is None:
+                                clean_row.append("")
+                            else:
+                                clean_row.append(str(cell).replace("\n", " ").strip())
 
                     rows.append(clean_row)
 
