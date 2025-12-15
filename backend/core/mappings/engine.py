@@ -1,4 +1,5 @@
 from ctypes import sizeof
+from uuid import UUID
 from django.db.models import Q
 from icecream import ic
 from core.models import (
@@ -39,7 +40,7 @@ class MappingEngine:
             "applied_controls",
             "security_exceptions",
             "evidences",
-            "mapping_inference",
+            "id",
         ]
 
     # --- Compression helpers ---
@@ -435,6 +436,25 @@ class MappingEngine:
                         target_audit["requirement_assessments"][dst]["result"] = (
                             "partially_compliant"
                         )
+
+            target_audit["requirement_assessments"][dst]["mapping_inference"] = {
+                "result": target_audit["requirement_assessments"][dst].get(
+                    "result", ""
+                ),
+                "source_requirement_assessment": {
+                    "id": source_audit["requirement_assessments"][src].get("id"),
+                    "str": source_audit["requirement_assessments"][src].get("name"),
+                    "coverage": "full" if rel in ("equal", "superset") else "partial",
+                    "score": source_audit["requirement_assessments"][src].get("score"),
+                    "is_scored": source_audit["requirement_assessments"][src].get(
+                        "is_scored"
+                    ),
+                },
+                "annotation": source_audit["requirement_assessments"][src]
+                .get("mapping_inference", {})
+                .get("annotation", ""),
+            }
+
         return target_audit
 
     def _most_restrictive_result(self, result1, result2):
@@ -516,6 +536,9 @@ class MappingEngine:
             audit_results["requirement_assessments"][ra.requirement.urn] = {
                 field: getattr(ra, field) for field in fields
             }
+            audit_results["requirement_assessments"][ra.requirement.urn]["name"] = str(
+                ra
+            )
             for m2m_field in self.m2m_fields:
                 attr = getattr(ra, m2m_field)
                 if isinstance(attr, QuerySet) or hasattr(attr, "all"):
@@ -523,6 +546,10 @@ class MappingEngine:
                         m2m_field
                     ] = attr.all().values_list("id", flat=True)
                 else:
+                    if (
+                        type(attr) is UUID
+                    ):  # Handle the case of the RA's id to avoid error when merging m2m_fields
+                        attr = str(attr)
                     audit_results["requirement_assessments"][ra.requirement.urn][
                         m2m_field
                     ] = attr
