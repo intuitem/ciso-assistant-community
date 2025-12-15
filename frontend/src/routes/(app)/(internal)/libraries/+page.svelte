@@ -14,18 +14,7 @@
 
 	let { data, ...rest } = $props();
 
-	let group: 'stored' | 'loaded' = $state(
-		data.loadedLibrariesTable.meta.count > 0 ? 'stored' : 'loaded'
-	);
-
 	let fileResetSignal = $state(false);
-
-	let availableUpdatesCount = $derived(data?.updatableLibraries?.length);
-
-	$effect(() => {
-		if (data.loadedLibrariesTable.meta.count === 0) group = 'stored';
-	});
-	let mappingSuggestedCount = $derived(data?.mappingSuggested?.length);
 
 	interface QuickFilters {
 		object_type: Set<string>;
@@ -74,7 +63,7 @@
 		{/snippet}
 	</ModelTable>
 </div>
-{#if group === 'stored' && page.data.user.is_admin}
+{#if page.data.user.is_admin}
 	<div class="card bg-white p-4 mt-4 shadow-sm">
 		{#await superValidate(zod(LibraryUploadSchema))}
 			<h1>{m.loadingLibraryUploadButton()}...</h1>

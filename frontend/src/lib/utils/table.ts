@@ -1055,7 +1055,7 @@ export const IS_LOADED_FILTER: ListViewFilterConfig = {
 	}
 };
 
-export const HAS_UPDATE_FILTER: ListViewFilterConfig = {
+export const IS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'updateAvailable',
@@ -1662,26 +1662,7 @@ export const listViewFields = {
 			is_custom: IS_CUSTOM_FILTER,
 			mapping_suggested: MAPPING_SUGGESTED_FILTER,
 			filtering_labels: LIBRARY_LABELS_FILTER,
-			is_update: HAS_UPDATE_FILTER // TODO: Rename this to IS_UPDATE_FILTER once the listViewFields['loaded-libraries'] key is deleted.
-		}
-	},
-	'loaded-libraries': {
-		// This loaded-libraries section is now dead code right ?
-		head: ['provider', 'ref_id', 'name', 'description', 'language', 'overview', 'publication_date'],
-		body: [
-			'provider',
-			'ref_id',
-			'name',
-			'description',
-			'locales',
-			'objects_meta',
-			'publication_date'
-		],
-		filters: {
-			locale: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER,
-			object_type: LIBRARY_TYPE_FILTER,
-			has_update: HAS_UPDATE_FILTER
+			is_update: IS_UPDATE_FILTER
 		}
 	},
 	'sso-settings': {
