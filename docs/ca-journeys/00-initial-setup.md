@@ -4,7 +4,7 @@
 
 {% embed url="https://app.guidde.com/share/playbooks/ePGKrmy5kVfGgH1Fpb97JX" %}
 
-Start your journey with CISO Assistant by setting up your organization’s domains, perimeters, and users
+Start your journey with CISO Assistant by setting up your organization (domains, perimeters, and users) and then import some basic libraries to get started with compliance and risk assessment.
 
 #### Go to [your-ciso-assistant-instance](https://your-ciso-assistant-instance)
 
