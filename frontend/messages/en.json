@@ -2920,5 +2920,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed."
+	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed.",
+	"libraryFilteringLabels": "Library labels"
 }

@@ -1431,5 +1431,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Gli elementi seguenti rimangono nel sistema ma i loro collegamenti con questo oggetto verranno rimossi."
+	"cascadeAffectedHint": "Gli elementi seguenti rimangono nel sistema ma i loro collegamenti con questo oggetto verranno rimossi.",
+	"libraryFilteringLabels": "Etichette della biblioteca"
 }

@@ -9,8 +9,8 @@ from core.serializers import BaseModelSerializer, ReferentialSerializer
 
 class StoredLibrarySerializer(ReferentialSerializer):
     locales = serializers.ListField(source="get_locales", read_only=True)
-    filtering_labels = FieldsRelatedField(many=True, fields=["label"])
     loaded_library = serializers.SerializerMethodField()
+    filtering_labels = FieldsRelatedField(many=True, fields=["label"])
 
     def get_loaded_library(self, obj) -> Optional[str]:
         loaded_library = obj.get_loaded_library()
@@ -28,6 +28,7 @@ class StoredLibrarySerializer(ReferentialSerializer):
             "version",
             "packager",
             "provider",
+            "filtering_labels",
             "publication_date",
             "builtin",
             "objects_meta",
@@ -35,7 +36,6 @@ class StoredLibrarySerializer(ReferentialSerializer):
             "is_loaded",
             "is_update",
             "locales",
-            "filtering_labels",
             "loaded_library",
             "copyright",
         ]

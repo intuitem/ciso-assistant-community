@@ -1719,11 +1719,10 @@
 	"downloadCertificate": "Pobierz certyfikat",
 	"loginFailed": "Logowanie nieudane",
 	"viewMore": "Pokaż więcej",
-	"viewLess": "Pokaż mniej",
+	"viewLess": "Zobacz mniej",
 	"isCustom": "Niestandardowy",
 	"errorUnloadingLibrary": "Błąd rozładowywania biblioteki",
 	"librarySuccessfullyUnloaded": "Biblioteka została pomyślnie rozładowana",
-	"viewLess": "Zobacz mniej",
 	"expectedEvidence": "Oczekiwane dowody",
 	"taskNodeLegacyEvidence": "Stare pole dowodów jest przestarzałe. Dowody są teraz na poziomie zadania i są współdzielone między wystąpieniami oczekującymi na rewizje.\nAby przenieść je do oczekiwanych dowodów lub usunąć je z wystąpienia, użyj przycisków",
 	"taskNodeNewEvidence": "Dowody globalnie powiązane z zadaniem i rozprzestrzenione na wystąpienia. Możesz dodać rewizję w zakładce 'Dowody' poniżej",
@@ -1795,5 +1794,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Poniższe elementy pozostają w systemie, ale ich linki do tego obiektu zostaną usunięte."
+	"cascadeAffectedHint": "Poniższe elementy pozostają w systemie, ale ich linki do tego obiektu zostaną usunięte.",
+	"libraryFilteringLabels": "Etykiety biblioteki"
 }

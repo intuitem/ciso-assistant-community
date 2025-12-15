@@ -1045,5 +1045,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Objekten nedan förblir i systemet men deras länkar till detta objekt kommer att tas bort."
+	"cascadeAffectedHint": "Objekten nedan förblir i systemet men deras länkar till detta objekt kommer att tas bort.",
+	"libraryFilteringLabels": "Biblioteksetiketter"
 }

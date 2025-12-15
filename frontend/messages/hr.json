@@ -2019,5 +2019,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Stavke ispod ostaju u sustavu, ali njihovi linkovi na ovaj objekt će biti uklonjeni."
+	"cascadeAffectedHint": "Stavke ispod ostaju u sustavu, ali njihovi linkovi na ovaj objekt će biti uklonjeni.",
+	"libraryFilteringLabels": "Oznake knjižnice"
 }

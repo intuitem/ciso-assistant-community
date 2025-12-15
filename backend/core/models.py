@@ -198,6 +198,37 @@ class FilteringLabelMixin(models.Model):
         abstract = True
 
 
+class LibraryFilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
+    @property
+    def reference_count(self) -> int:
+        return self.stored_libraries.count()
+
+    def garbage_collect(self) -> bool:
+        """Delete the object if it's not being used (self.reference_count == 0).
+        Return True if the object was deleted, otherwise return false."""
+        if self.reference_count > 0:
+            return False
+        self.delete()
+        return True
+
+    label = models.CharField(
+        max_length=100,
+        verbose_name=_("Label"),
+        validators=[
+            RegexValidator(
+                regex=r"^[\w-]{1,36}$",
+                message="invalidLabel",
+                code="invalid_label",
+            )
+        ],
+    )
+
+    def __str__(self) -> str:
+        return self.label
+
+    fields_to_check = ["label"]
+
+
 class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
     class Meta:
         abstract = True
@@ -240,7 +271,8 @@ class Severity(models.IntegerChoices):
     CRITICAL = 4, "critical"
 
 
-class StoredLibrary(LibraryMixin, FilteringLabelMixin):
+class StoredLibrary(LibraryMixin):
+    filtering_labels = models.ManyToManyField(LibraryFilteringLabel, blank=True, verbose_name=_("Labels"), related_name="stored_libraries")
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
     content = models.JSONField()
@@ -323,13 +355,12 @@ class StoredLibrary(LibraryMixin, FilteringLabelMixin):
                 "dependencies", []
             )  # I don't want whitespaces in URN anymore nontheless
 
+            library_objects = library_data["objects"]
             label_names = library_data.get("filtering_labels", [])
             filtering_labels = [
-                FilteringLabel.objects.get_or_create(label=label_name)[0]
+                LibraryFilteringLabel.objects.get_or_create(label=label_name)[0]
                 for label_name in label_names
             ]
-
-            library_objects = library_data["objects"]
             new_library = StoredLibrary.objects.create(
                 name=library_data["name"],
                 is_published=True,
@@ -399,6 +430,12 @@ class StoredLibrary(LibraryMixin, FilteringLabelMixin):
             self.save()
         return error_msg
 
+    def delete(self, *args, **kwargs):
+        library_filtering_labels = list(self.filtering_labels.all())
+        super().delete(*args, **kwargs)
+
+        for library_label in library_filtering_labels:
+            library_label.garbage_collect()
 
 class LibraryUpdater:
     def __init__(self, old_library: "LoadedLibrary", new_library: StoredLibrary):

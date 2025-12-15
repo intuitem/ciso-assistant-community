@@ -54,6 +54,8 @@ class Command(BaseCommand):
         # If a user loaded a custom library with an urn U and then deleted the stored library with an urn U
         # Then the user would not be able to see the library in the frontend libraries list view as it fetches from the stored-libraries endpoint, making the library effectively "invisible".
         # This fixes this problem by recreating a StoredLibrary for every "orphaned" custom library.
+        # The library will fail to be reloaded if the user ever unloads it (because content is empty(== dict()))
+        # In that case the user will have to delete it and reupload it again to get back a sane version of the StoredLibrary.
         for library in invisible_libraries:
             StoredLibrary.objects.create(
                 urn=library.urn,
@@ -69,7 +71,7 @@ class Command(BaseCommand):
                 translations=library.translations,
                 builtin=library.builtin,
                 objects_meta=library.objects_meta,
-                dependencies=library.dependencies,
+                dependencies=[dependency.urn for dependency in library.dependencies.all()],
                 version=library.version,
                 ref_id=library.ref_id,
                 is_loaded=True,

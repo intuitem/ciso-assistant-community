@@ -1,7 +1,8 @@
 from itertools import chain
 import json
 from django.db import IntegrityError
-from django.db.models import F, Q, IntegerField, OuterRef, Subquery
+from django.db.models import F, Q, IntegerField, OuterRef, Subquery, Exists
+from django.db import models
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics
 from django.conf import settings
@@ -79,12 +80,33 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
     mapping_suggested = df.BooleanFilter(
         method="filter_mapping_suggested",
     )
+    is_loaded = df.BooleanFilter(
+        method="filter_is_loaded",
+    )
     is_custom = df.BooleanFilter(
         method="filter_is_custom",
     )
+    is_update = df.BooleanFilter(
+        method="filter_is_update",
+    )
+
+    def filter_is_loaded(self, queryset, name, value):
+        return queryset.filter(is_loaded=value)
 
     def filter_is_custom(self, queryset, name, value):
         return queryset.filter(builtin=not value)
+
+    def filter_is_update(self, queryset, name, value):
+        return queryset.annotate(
+            _is_update=Exists(
+                LoadedLibrary.objects.filter(
+                    urn=OuterRef("urn"),
+                    version__lt=OuterRef("version")
+                )
+            )
+        ).filter(
+            _is_update=value
+        )
 
     def filter_mapping_suggested(self, queryset, name, value):
         """
@@ -133,7 +155,7 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
 
         for (
             library
-        ) in queryset_with_mappings.iterator():  # Use iterator for memory efficiency
+        ) in queryset_with_mappings.iterator(chunk_size=1000):  # Use iterator for memory efficiency
             requirement_mappings = _extract_requirement_mappings(library.content)
 
             if _has_matching_source_framework(
@@ -165,8 +187,8 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
             "version",
             "packager",
             "provider",
-            "filtering_labels",
             "object_type",
+            "filtering_labels",
         ]
 
 
@@ -180,6 +202,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
     queryset = StoredLibrary.objects.all()
 
     search_fields = ["name", "description", "urn", "ref_id"]
+
+    def get_queryset(self) -> models.query.QuerySet:
+        return super().get_queryset().prefetch_related("filtering_labels")
 
     def get_serializer_class(self):
         if self.action == "list":

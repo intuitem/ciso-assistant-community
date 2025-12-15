@@ -1239,5 +1239,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Item-item di bawah ini tetap berada di sistem tetapi tautan mereka ke objek ini akan dihapus."
+	"cascadeAffectedHint": "Item-item di bawah ini tetap berada di sistem tetapi tautan mereka ke objek ini akan dihapus.",
+	"libraryFilteringLabels": "Label perpustakaan"
 }

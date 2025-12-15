@@ -14,6 +14,7 @@
 	let { meta, actionsURLModel }: Props = $props();
 	let library = $derived(meta);
 	let loading = $state({ form: false, library: '' });
+	let updating = $state({ form: false, library: '' });
 </script>
 
 {#snippet loadingSpinner()}
@@ -79,7 +80,7 @@
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/loaded-libraries/{library.id}?/update"
+				action="/loaded-libraries/{library.loaded_library}?/update"
 				use:enhance={() => {
 					loading.form = true;
 					loading.library = library.urn;
@@ -102,7 +103,7 @@
 {/if}
 
 {#if page.data.user.is_admin && library.is_loaded && library.reference_count === 0}
-	{#if loading.form && loading.library === library.urn}
+	{#if updating.form && updating.library === library.urn}
 		{@render loadingSpinner()}
 	{:else}
 		<span class="hover:text-primary-500">
@@ -110,11 +111,11 @@
 				method="post"
 				action="/stored-libraries/{library.id}?/unload"
 				use:enhance={() => {
-					loading.form = true;
-					loading.library = library.urn;
+					updating.form = true;
+					updating.library = library.urn;
 					return async ({ update }) => {
-						loading.form = false;
-						loading.library = '';
+						updating.form = false;
+						updating.library = '';
 						await update();
 						Object.values($tableHandlers).forEach((handler) => {
 							handler.invalidate();
@@ -125,9 +126,10 @@
 				<button
 					type="submit"
 					data-testid="tablerow-unload-button"
+					class="hover:text-red-500"
 					onclick={(e) => e.stopPropagation()}
 				>
-					<i class="fa-solid fa-minus"></i>
+					<i class="fa-solid fa-file-circle-minus"></i>
 				</button>
 			</form>
 		</span>

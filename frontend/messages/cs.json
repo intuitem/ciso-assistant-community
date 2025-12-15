@@ -1042,5 +1042,6 @@
 	"cascadeAffectedHint": "Níže uvedené položky zůstávají v systému, ale jejich odkazy na tento objekt budou odstraněny.",
 	"isCustom": "Vlastní",
 	"errorUnloadingLibrary": "Chyba při uvolňování knihovny",
-	"librarySuccessfullyUnloaded": "Knihovna byla úspěšně uvolněna"
+	"librarySuccessfullyUnloaded": "Knihovna byla úspěšně uvolněna",
+	"libraryFilteringLabels": "Štítky knihovny"
 }

@@ -2920,5 +2920,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Los elementos a continuación permanecen en el sistema pero se eliminarán sus enlaces a este objeto."
+	"cascadeAffectedHint": "Los elementos a continuación permanecen en el sistema pero se eliminarán sus enlaces a este objeto.",
+	"libraryFilteringLabels": "Etiquetas de la biblioteca"
 }

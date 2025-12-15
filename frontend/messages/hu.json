@@ -977,13 +977,11 @@
 	"samlCertificateHelpText": "Saját tanúsítványt adhat meg, vagy az alkalmazás generálhatja.",
 	"samlAuthnRequestSignedHelpText": "Ha engedélyezve van, a SAML hitelesítési kérelem aláírva lesz az alábbi privát kulccsal. A megfelelő nyilvános tanúsítvány elküldve lesz az Azonosítószolgáltatónak, hogy ellenőrizhesse az aláírást.",
 	"downloadCertificate": "Tanúsítvány letöltése",
-	"viewMore": "Több megjelenítése",
-	"viewLess": "Kevesebb megjelenítése",
+	"viewMore": "Megtekintés több",
+	"viewLess": "Megtekintés kevesebb",
 	"isCustom": "Egyedi",
 	"errorUnloadingLibrary": "Hiba a könyvtár kiürítésekor",
 	"librarySuccessfullyUnloaded": "A könyvtár sikeresen ki lett töltve",
-	"viewMore": "Megtekintés több",
-	"viewLess": "Megtekintés kevesebb",
 	"loginFailed": "Sikertelen bejelentkezés",
 	"expectedEvidence": "Várt bizonyíték",
 	"taskNodeLegacyEvidence": "A régi bizonyíték mező elavult. A bizonyíték most feladat-szintű és megosztott az áttekintésre váró előfordulások között.\n A mozgatásuk a várható bizonyítékok közé vagy az eltávolításuk az előfordulásból a gombok segítségével történik.",
@@ -1056,5 +1054,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Az alábbi elemek a rendszerben maradnak, de a kapcsolataik ebben az objektumban törlődnek."
+	"cascadeAffectedHint": "Az alábbi elemek a rendszerben maradnak, de a kapcsolataik ebben az objektumban törlődnek.",
+	"libraryFilteringLabels": "Könyvtári címkék"
 }
