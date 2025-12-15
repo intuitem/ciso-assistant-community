@@ -126,6 +126,8 @@ class DashboardWidgetWriteSerializer(BaseModelSerializer):
     target_model = serializers.CharField(
         write_only=True, required=False, allow_blank=True, allow_null=True
     )
+    # Read-only field for edit form to display current model
+    target_content_type_display = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = DashboardWidget
@@ -136,6 +138,15 @@ class DashboardWidgetWriteSerializer(BaseModelSerializer):
             "metric_key": {"required": False},
             "metric_instance": {"required": False},
         }
+
+    def get_target_content_type_display(self, obj):
+        """Get the content type model name for builtin metrics"""
+        if obj.target_content_type:
+            # Return the actual model class name (PascalCase) to match BUILTIN_METRICS keys
+            model_class = obj.target_content_type.model_class()
+            if model_class:
+                return model_class.__name__
+        return None
 
     def get_fields(self):
         fields = super().get_fields()
@@ -297,7 +308,10 @@ class DashboardWidgetReadSerializer(BaseModelSerializer):
     def get_target_content_type_display(self, obj):
         """Get the content type model name for builtin metrics"""
         if obj.target_content_type:
-            return obj.target_content_type.model.title()
+            # Return the actual model class name (PascalCase) to match BUILTIN_METRICS keys
+            model_class = obj.target_content_type.model_class()
+            if model_class:
+                return model_class.__name__
         return None
 
     def get_target_object_name(self, obj):
