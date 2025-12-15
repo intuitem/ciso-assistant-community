@@ -5,10 +5,10 @@ locale: en
 ref_id: mapping-cis-controls-v8-and-scf-2025.2.2
 name: CIS-Controls-v8 <-> scf-2025.2.2
 description: 'Mapping between CIS Controls v8 and SCF: Secure Controls Framework (2025.2.2)'
-copyright: intuitem
+copyright: SCF - CC BY-ND 4.0
 version: 1
 publication_date: 2025-12-15
-provider: intuitem
+provider: SCF
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:cis-controls-v8

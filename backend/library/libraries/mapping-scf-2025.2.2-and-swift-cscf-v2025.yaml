@@ -6,10 +6,10 @@ ref_id: mapping-scf-2025.2.2-and-swift-cscf-v2025
 name: scf-2025.2.2 <-> swift-cscf-v2025
 description: 'Mapping between SCF: Secure Controls Framework (2025.2.2) and Swift
   Customer Security Controls Framework v2025'
-copyright: intuitem
+copyright: SCF - CC BY-ND 4.0
 version: 1
-publication_date: 2025-12-14
-provider: intuitem
+publication_date: 2025-12-15
+provider: SCF
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:scf-2025.2.2

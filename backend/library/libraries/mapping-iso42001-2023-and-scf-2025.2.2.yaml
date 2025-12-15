@@ -6,10 +6,10 @@ ref_id: mapping-iso42001-2023-and-scf-2025.2.2
 name: iso42001-2023 <-> scf-2025.2.2
 description: "Mapping between ISO 42001-2023 \u2014 Artificial intelligence  \u2014\
   \ Requirements and Controls outline and SCF: Secure Controls Framework (2025.2.2)"
-copyright: intuitem
+copyright: SCF - CC BY-ND 4.0
 version: 1
 publication_date: 2025-12-15
-provider: intuitem
+provider: SCF
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:iso42001-2023
