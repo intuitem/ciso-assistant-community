@@ -1,0 +1,1097 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:india-dpdpa-2023
+locale: en
+ref_id: india-dpdpa-2023
+name: India Digital Personal Data Protection Act 2023
+description: 'The Digital Personal Data Protection Act, 2023 (No. 22 of 2023) provides
+  for the processing of digital personal data in a manner that recognises both the
+  right of individuals to protect their personal data and the need to process such
+  personal data for lawful purposes.
+
+  Reference: https://www.meity.gov.in/static/uploads/2024/06/2bf1f0e9f04e6fb4f8fef35e82c42aa5.pdf'
+copyright: Ministry of Law and Justice, Government of India
+version: 1
+publication_date: 2023-08-11
+provider: MINISTRY OF LAW AND JUSTICE INDIA
+packager: INTUITEM
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:india-dpdpa-2023
+    ref_id: india-dpdpa-2023
+    name: India DPDPA 2023
+    description: India Digital Personal Data Protection Act 2023
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-1
+      assessable: false
+      depth: 1
+      ref_id: chapter-1
+      name: Preliminary
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-1
+      ref_id: '3'
+      name: Applications of Act
+      description: "Subject to the provisions of this Act, it shall\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3
+      ref_id: 3(a)
+      description: "apply to the processing of digital personal data within the territory\
+        \ of India where the personal data is collected\u2013\u2013"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(a)(i)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(a)
+      ref_id: 3(a)(i)
+      description: in digital form; or
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(a)(ii)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(a)
+      ref_id: 3(a)(ii)
+      description: in non-digital form and digitised subsequently;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3
+      ref_id: 3(b)
+      description: also apply to processing of digital personal data outside the territory
+        of India, if such processing is in connection with any activity related to
+        offering of goods or services to Data Principals within the territory of India;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(c)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3
+      ref_id: 3(c)
+      description: "not apply to\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(c)(i)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(c)
+      ref_id: 3(c)(i)
+      description: personal data processed by an individual for any personal or domestic
+        purpose; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(c)(ii)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(c)
+      ref_id: 3(c)(ii)
+      description: "personal data that is made or caused to be made publicly available\
+        \ by\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(c)(ii)(a)
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(c)(ii)
+      ref_id: 3(c)(ii)(A)
+      description: the Data Principal to whom such personal data relates; or
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(c)(ii)(b)
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:3(c)(ii)
+      ref_id: 3(c)(ii)(B)
+      description: any other person who is under an obligation under any law for the
+        time being in force in India to make such personal data publicly available.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-2
+      assessable: false
+      depth: 1
+      ref_id: chapter-2
+      name: Obligations of Data Fiduciary
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-2
+      ref_id: '4'
+      name: Grounds for Processing Personal Data
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4(1)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4
+      ref_id: 4(1)
+      description: "A person may process the personal data of a Data Principal only\
+        \ in accordance with the provisions of this Act and for a lawful purpose,\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4(1)(a)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4(1)
+      ref_id: 4(1)(a)
+      description: for which the Data Principal has given her consent; or
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4(1)(b)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4(1)
+      ref_id: 4(1)(b)
+      description: for certain legitimate uses.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4(2)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4
+      ref_id: 4(2)
+      description: "For the purposes of this section, the expression \u201Clawful\
+        \ purpose\u201D means any purpose which is not expressly forbidden by law."
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-2
+      ref_id: '5'
+      name: Notice
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5
+      ref_id: 5(1)
+      description: "Every request made to a Data Principal under section 6 for consent\
+        \ shall be accompanied or preceded by a notice given by the Data Fiduciary\
+        \ to the Data Principal, informing her,\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)(i)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)
+      ref_id: 5(1)(i)
+      description: the personal data and the purpose for which the same is proposed
+        to be processed;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)(ii)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)
+      ref_id: 5(1)(ii)
+      description: the manner in which she may exercise her rights under sub-section
+        (4) of section 6 and section 13; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)(iii)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)
+      ref_id: 5(1)(iii)
+      description: the manner in which the Data Principal may make a complaint to
+        the Board, in such manner and as may be prescribed.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5
+      ref_id: 5(2)
+      description: "Where a Data Principal has given her consent for the processing\
+        \ of her personal data before the date of commencement of this Act,\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)
+      ref_id: 5(2)(a)
+      description: "the Data Fiduciary shall, as soon as it is reasonably practicable,\
+        \ give to the Data Principal a notice informing her,\u2013\u2013"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)(i)
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)
+      ref_id: 5(2)(a)(i)
+      description: the personal data and the purpose for which the same has been processed;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)(ii)
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)
+      ref_id: 5(2)(a)(ii)
+      description: the manner in which she may exercise her rights under sub-section
+        (4) of section 6 and section 13; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)(iii)
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)
+      ref_id: 5(2)(a)(iii)
+      description: the manner in which the Data Principal may make a complaint to
+        the Board,
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(b)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)
+      ref_id: 5(2)(b)
+      description: the Data Fiduciary may continue to process the personal data until
+        and unless the Data Principal withdraws her consent.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(3)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5
+      ref_id: 5(3)
+      description: The Data Fiduciary shall give the Data Principal the option to
+        access the contents of the notice referred to in sub-sections (1) and (2)
+        in English or any language specified in the Eighth Schedule to the Constitution.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-2
+      ref_id: '6'
+      name: Consent
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(1)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6
+      ref_id: 6(1)
+      description: The consent given by the Data Principal shall be free, specific,
+        informed, unconditional and unambiguous with a clear affirmative action, and
+        shall signify an agreement to the processing of her personal data for the
+        specified purpose and be limited to such personal data as is necessary for
+        such specified purpose.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(2)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6
+      ref_id: 6(2)
+      description: Any part of consent referred in sub-section (1) which constitutes
+        an infringement of the provisions of this Act or the rules made thereunder
+        or any other law for the time being in force shall be invalid to the extent
+        of such infringement.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(3)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6
+      ref_id: 6(3)
+      description: Every request for consent under the provisions of this Act or the
+        rules made thereunder shall be presented to the Data Principal in a clear
+        and plain language, giving her the option to access such request in English
+        or any language specified in the Eighth Schedule to the Constitution and providing
+        the contact details of a Data Protection Officer, where applicable, or of
+        any other person authorised by the Data Fiduciary to respond to any communication
+        from the Data Principal for the purpose of exercise of her rights under the
+        provisions of this Act.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(4)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6
+      ref_id: 6(4)
+      description: Where consent given by the Data Principal is the basis of processing
+        of personal data, such Data Principal shall have the right to withdraw her
+        consent at any time, with the ease of doing so being comparable to the ease
+        with which such consent was given.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(5)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6
+      ref_id: 6(5)
+      description: The consequences of the withdrawal referred to in sub-section (4)
+        shall be borne by the Data Principal, and such withdrawal shall not affect
+        the legality of processing of the personal data based on consent before its
+        withdrawal.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(6)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6
+      ref_id: 6(6)
+      description: If a Data Principal withdraws her consent to the processing of
+        personal data under sub- section (5), the Data Fiduciary shall, within a reasonable
+        time, cease and cause its Data Processors to cease processing the personal
+        data of such Data Principal unless such processing without her consent is
+        required or authorised under the provisions of this Act or the rules made
+        thereunder or any other law for the time being in force in India.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(7)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6
+      ref_id: 6(7)
+      description: The Data Principal may give, manage, review or withdraw her consent
+        to the Data Fiduciary through a Consent Manager.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(8)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6
+      ref_id: 6(8)
+      description: The Consent Manager shall be accountable to the Data Principal
+        and shall act on her behalf in such manner and subject to such obligations
+        as may be prescribed.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(9)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6
+      ref_id: 6(9)
+      description: Every Consent Manager shall be registered with the Board in such
+        manner and subject to such technical, operational, financial and other conditions
+        as may be prescribed.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(10)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6
+      ref_id: 6(10)
+      description: Where a consent given by the Data Principal is the basis of processing
+        of personal data and a question arises in this regard in a proceeding, the
+        Data Fiduciary shall be obliged to prove that a notice was given by her to
+        the Data Principal and consent was given by such Data Principal to the Data
+        Fiduciary in accordance with the provisions of this Act and the rules made
+        thereunder.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-2
+      ref_id: '7'
+      name: Certain Legitimate Uses
+      description: "A Data Fiduciary may process personal data of a Data Principal\
+        \ for any of following uses, namely:\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7
+      ref_id: 7(a)
+      description: for the specified purpose for which the Data Principal has voluntarily
+        provided her personal data to the Data Fiduciary, and in respect of which
+        she has not indicated to the Data Fiduciary that she does not consent to the
+        use of her personal data.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7
+      ref_id: 7(b)
+      description: "for the State and any of its instrumentalities to provide or issue\
+        \ to the Data Principal such subsidy, benefit, service, certificate, licence\
+        \ or permit as may be prescribed, where\u2013\u2013 subject to standards followed\
+        \ for processing being in accordance with the policy issued by the Central\
+        \ Government or any law for the time being in force for governance of personal\
+        \ data."
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(b)(i)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(b)
+      ref_id: 7(b)(i)
+      description: she has previously consented to the processing of her personal
+        data by the State or any of its instrumentalities for any subsidy, benefit,
+        service, certificate, licence or permit; or
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(b)(ii)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(b)
+      ref_id: 7(b)(ii)
+      description: such personal data is available in digital form in, or in non-digital
+        form and digitised subsequently from, any database, register, book or other
+        document which is maintained by the State or any of its instrumentalities
+        and is notified by the Central Government,
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7
+      ref_id: 7(c)
+      description: for the performance by the State or any of its instrumentalities
+        of any function under any law for the time being in force in India or in the
+        interest of sovereignty and integrity of India or security of the State;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7
+      ref_id: 7(d)
+      description: for fulfilling any obligation under any law for the time being
+        in force in India on any person to disclose any information to the State or
+        any of its instrumentalities, subject to such processing being in accordance
+        with the provisions regarding disclosure of such information in any other
+        law for the time being in force;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7
+      ref_id: 7(e)
+      description: for compliance with any judgment or decree or order issued under
+        any law for the time being in force in India, or any judgment or order relating
+        to claims of a contractual or civil nature under any law for the time being
+        in force outside India;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7
+      ref_id: 7(f)
+      description: for responding to a medical emergency involving a threat to the
+        life or immediate threat to the health of the Data Principal or any other
+        individual;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(g)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7
+      ref_id: 7(g)
+      description: for taking measures to provide medical treatment or health services
+        to any individual during an epidemic, outbreak of disease, or any other threat
+        to public health;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(h)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7
+      ref_id: 7(h)
+      description: for taking measures to ensure safety of, or provide assistance
+        or services to, any individual during any disaster, or any breakdown of public
+        order.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(i)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7
+      ref_id: 7(i)
+      description: for the purposes of employment or those related to safeguarding
+        the employer from loss or liability, such as prevention of corporate espionage,
+        maintenance of confidentiality of trade secrets, intellectual property, classified
+        information or provision of any service or benefit sought by a Data Principal
+        who is an employee.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-2
+      ref_id: '8'
+      name: General Obligations of Data Fiduciary
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(1)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8
+      ref_id: 8(1)
+      description: A Data Fiduciary shall, irrespective of any agreement to the contrary
+        or failure of a Data Principal to carry out the duties provided under this
+        Act, be responsible for complying with the provisions of this Act and the
+        rules made thereunder in respect of any processing undertaken by it or on
+        its behalf by a Data Processor.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(2)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8
+      ref_id: 8(2)
+      description: A Data Fiduciary may engage, appoint, use or otherwise involve
+        a Data Processor to process personal data on its behalf for any activity related
+        to offering of goods or services to Data Principals only under a valid contract.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(3)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8
+      ref_id: 8(3)
+      description: "Where personal data processed by a Data Fiduciary is likely to\
+        \ be\u2014 the Data Fiduciary processing such personal data shall ensure its\
+        \ completeness, accuracy and consistency."
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(3)(a)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(3)
+      ref_id: 8(3)(a)
+      description: used to make a decision that affects the Data Principal; or
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(3)(b)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(3)
+      ref_id: 8(3)(b)
+      description: disclosed to another Data Fiduciary,
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(4)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8
+      ref_id: 8(4)
+      description: A Data Fiduciary shall implement appropriate technical and organisational
+        measures to ensure effective observance of the provisions of this Act and
+        the rules made thereunder.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(5)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8
+      ref_id: 8(5)
+      description: A Data Fiduciary shall protect personal data in its possession
+        or under its control, including in respect of any processing undertaken by
+        it or on its behalf by a Data Processor, by taking reasonable security safeguards
+        to prevent personal data breach.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(6)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8
+      ref_id: 8(6)
+      description: In the event of a personal data breach, the Data Fiduciary shall
+        give the Board and each affected Data Principal, intimation of such breach
+        in such form and manner as may be prescribed.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8
+      ref_id: 8(7)
+      description: "A Data Fiduciary shall, unless retention is necessary for compliance\
+        \ with any law for the time being in force,\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(a)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)
+      ref_id: 8(7)(a)
+      description: erase personal data, upon the Data Principal withdrawing her consent
+        or as soon as it is reasonable to assume that the specified purpose is no
+        longer being served, whichever is earlier; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(b)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)
+      ref_id: 8(7)(b)
+      description: cause its Data Processor to erase any personal data that was made
+        available by the Data Fiduciary for processing to such Data Processor.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8
+      ref_id: 8(8)
+      description: "The purpose referred to in clause (a) of sub-section (7) shall\
+        \ be deemed to no longer be served, if the Data Principal does not\u2013\u2013\
+        \ for such time period as may be prescribed, and different time periods may\
+        \ be prescribed for different classes of Data Fiduciaries and for different\
+        \ purposes."
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)(a)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)
+      ref_id: 8(8)(a)
+      description: the Data Fiduciary for the performance of the specified purpose;
+        and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)(b)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)
+      ref_id: 8(8)(b)
+      description: exercise any of her rights in relation to such processing,
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(9)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8
+      ref_id: 8(9)
+      description: A Data Fiduciary shall publish, in such manner as may be prescribed,
+        the business contact information of a Data Protection Officer, if applicable,
+        or a person who is able to answer on behalf of the Data Fiduciary, the questions,
+        if any, raised by the Data Principal about the processing of her personal
+        data.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(10)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8
+      ref_id: 8(10)
+      description: A Data Fiduciary shall establish an effective mechanism to redress
+        the grievances of Data Principals.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(11)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8
+      ref_id: 8(11)
+      description: For the purposes of this section, it is hereby clarified that a
+        Data Principal shall be considered as not having approached the Data Fiduciary
+        for the performance of the specified purpose, in any period during which she
+        has not initiated contact with the Data Fiduciary for such performance, in
+        person or by way of communication in electronic or physical form.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-2
+      ref_id: '9'
+      name: Processing of Personal Data of Children
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9(1)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9
+      ref_id: 9(1)
+      description: The Data Fiduciary shall, before processing any personal data of
+        a child or a person with disability who has a lawful guardian obtain verifiable
+        consent of the parent of such child or the lawful guardian, as the case may
+        be, in such manner as may be prescribed.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9(2)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9
+      ref_id: 9(2)
+      description: A Data Fiduciary shall not undertake such processing of personal
+        data that is likely to cause any detrimental effect on the well-being of a
+        child.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9(3)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9
+      ref_id: 9(3)
+      description: A Data Fiduciary shall not undertake tracking or behavioural monitoring
+        of children or targeted advertising directed at children.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9(4)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9
+      ref_id: 9(4)
+      description: The provisions of sub-sections (1) and (3) shall not be applicable
+        to processing of personal data of a child by such classes of Data Fiduciaries
+        or for such purposes, and subject to such conditions, as may be prescribed.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9(5)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9
+      ref_id: 9(5)
+      description: The Central Government may, if satisfied that a Data Fiduciary
+        has ensured that its processing of personal data of children is done in a
+        manner that is verifiably safe, notify for such processing by such Data Fiduciary
+        the age above which that Data Fiduciary shall be exempt from the applicability
+        of all or any of the obligations under sub-sections (1) and (3) in respect
+        of processing by that Data Fiduciary as the notification may specify.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-2
+      ref_id: '10'
+      name: Additional Obligations of Significant Data Fiduciary
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10
+      ref_id: 10(1)
+      description: "The Central Government may notify any Data Fiduciary or class\
+        \ of Data Fiduciaries as Significant Data Fiduciary, on the basis of an assessment\
+        \ of such relevant factors as it may determine, including\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)(a)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)
+      ref_id: 10(1)(a)
+      description: the volume and sensitivity of personal data processed;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)(b)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)
+      ref_id: 10(1)(b)
+      description: risk to the rights of Data Principal;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)(c)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)
+      ref_id: 10(1)(c)
+      description: potential impact on the sovereignty and integrity of India;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)(d)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)
+      ref_id: 10(1)(d)
+      description: risk to electoral democracy;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)(e)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)
+      ref_id: 10(1)(e)
+      description: security of the State; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)(f)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(1)
+      ref_id: 10(1)(f)
+      description: public order.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10
+      ref_id: 10(2)
+      description: "The Significant Data Fiduciary shall\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)
+      ref_id: 10(2)(a)
+      description: "appoint a Data Protection Officer who shall\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(i)
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)
+      ref_id: 10(2)(a)(i)
+      description: represent the Significant Data Fiduciary under the provisions of
+        this Act;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(ii)
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)
+      ref_id: 10(2)(a)(ii)
+      description: be based in India;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(iii)
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)
+      ref_id: 10(2)(a)(iii)
+      description: be an individual responsible to the Board of Directors or similar
+        governing body of the Significant Data Fiduciary; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(iv)
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)
+      ref_id: 10(2)(a)(iv)
+      description: be the point of contact for the grievance redressal mechanism under
+        the provisions of this Act;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(b)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)
+      ref_id: 10(2)(b)
+      description: appoint an independent data auditor to carry out data audit, who
+        shall evaluate the compliance of the Significant Data Fiduciary in accordance
+        with the provisions of this Act; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)
+      ref_id: 10(2)(c)
+      description: "undertake the following other measures, namely:\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)(i)
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)
+      ref_id: 10(2)(c)(i)
+      description: periodic Data Protection Impact Assessment, which shall be a process
+        comprising a description of the rights of Data Principals and the purpose
+        of processing of their personal data, assessment and management of the risk
+        to the rights of the Data Principals, and such other matters regarding such
+        process as may be prescribed;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)(ii)
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)
+      ref_id: 10(2)(c)(ii)
+      description: periodic audit; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)(iii)
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)
+      ref_id: 10(2)(c)(iii)
+      description: such other measures, consistent with the provisions of this Act,
+        as may be prescribed.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-3
+      assessable: false
+      depth: 1
+      ref_id: chapter-3
+      name: Rights and Duties of Data Principal
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-3
+      ref_id: '11'
+      name: Right to Access Information About Personal Data
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11
+      ref_id: 11(1)
+      description: "The Data Principal shall have the right to obtain from the Data\
+        \ Fiduciary to whom she has previously given consent, including consent as\
+        \ referred to in clause (a) of section 7 (hereinafter referred to as the said\
+        \ Data Fiduciary), for processing of personal data, upon making to it a request\
+        \ in such manner as may be prescribed,\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)(a)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)
+      ref_id: 11(1)(a)
+      description: a summary of personal data which is being processed by such Data
+        Fiduciary and the processing activities undertaken by that Data Fiduciary
+        with respect to such personal data;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)(b)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)
+      ref_id: 11(1)(b)
+      description: the identities of all other Data Fiduciaries and Data Processors
+        with whom the personal data has been shared by such Data Fiduciary, along
+        with a description of the personal data so shared; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)(c)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)
+      ref_id: 11(1)(c)
+      description: any other information related to the personal data of such Data
+        Principal and its processing, as may be prescribed.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(2)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11
+      ref_id: 11(2)
+      description: Nothing contained in clause (b) or clause (c) of sub-section (1)
+        shall apply in respect of the sharing of any personal data by the said Data
+        Fiduciary with any other Data Fiduciary authorised by law to obtain such personal
+        data, where such sharing is pursuant to a request made in writing by such
+        other Data Fiduciary for the purpose of prevention or detection or investigation
+        of offences or cyber incidents, or for prosecution or punishment of offences.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-3
+      ref_id: '12'
+      name: Right to Correction and Erasure of Personal Data
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(1)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12
+      ref_id: 12(1)
+      description: A Data Principal shall have the right to correction, completion,
+        updating and erasure of her personal data for the processing of which she
+        has previously given consent, including consent as referred to in clause (a)
+        of section 7, in accordance with any requirement or procedure under any law
+        for the time being in force.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12
+      ref_id: 12(2)
+      description: "A Data Fiduciary shall, upon receiving a request for correction,\
+        \ completion or updating from a Data Principal,\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)(a)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)
+      ref_id: 12(2)(a)
+      description: correct the inaccurate or misleading personal data;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)(b)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)
+      ref_id: 12(2)(b)
+      description: complete the incomplete personal data; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)(c)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)
+      ref_id: 12(2)(c)
+      description: update the personal data.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(3)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12
+      ref_id: 12(3)
+      description: A Data Principal shall make a request in such manner as may be
+        prescribed to the Data Fiduciary for erasure of her personal data, and upon
+        receipt of such a request, the Data Fiduciary shall erase her personal data
+        unless retention of the same is necessary for the specified purpose or for
+        compliance with any law for the time being in force.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-3
+      ref_id: '13'
+      name: Right of Grievance Redressal
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:13(1)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:13
+      ref_id: 13(1)
+      description: A Data Principal shall have the right to have readily available
+        means of grievance redressal provided by a Data Fiduciary or Consent Manager
+        in respect of any act or omission of such Data Fiduciary or Consent Manager
+        regarding the performance of its obligations in relation to the personal data
+        of such Data Principal or the exercise of her rights under the provisions
+        of this Act and the rules made thereunder.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:13(2)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:13
+      ref_id: 13(2)
+      description: The Data Fiduciary or Consent Manager shall respond to any grievances
+        referred to in sub-section (1) within such period as may be prescribed from
+        the date of its receipt for all or any class of Data Fiduciaries.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:13(3)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:13
+      ref_id: 13(3)
+      description: The Data Principal shall exhaust the opportunity of redressing
+        her grievance under this section before approaching the Board.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-3
+      ref_id: '14'
+      name: Right to Nominate
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:14(1)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:14
+      ref_id: 14(1)
+      description: A Data Principal shall have the right to nominate, in such manner
+        as may be prescribed, any other individual, who shall, in the event of death
+        or incapacity of the Data Principal, exercise the rights of the Data Principal
+        in accordance with the provisions of this Act and the rules made thereunder.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:14(2)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:14
+      ref_id: 14(2)
+      description: "For the purposes of this section, the expression \u201Cincapacity\u201D\
+        \ means inability to exercise the rights of the Data Principal under the provisions\
+        \ of this Act or the rules made thereunder due to unsoundness of mind or infirmity\
+        \ of body."
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-3
+      ref_id: '15'
+      name: Duties of Data Principle
+      description: "A Data Principal shall perform the following duties, namely:\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:15(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:15
+      ref_id: 15(a)
+      description: comply with the provisions of all applicable laws for the time
+        being in force while exercising rights under the provisions of this Act;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:15(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:15
+      ref_id: 15(b)
+      description: to ensure not to impersonate another person while providing her
+        personal data for a specified purpose;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:15(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:15
+      ref_id: 15(c)
+      description: to ensure not to suppress any material information while providing
+        her personal data for any document, unique identifier, proof of identity or
+        proof of address issued by the State or any of its instrumentalities;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:15(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:15
+      ref_id: 15(d)
+      description: to ensure not to register a false or frivolous grievance or complaint
+        with a Data Fiduciary or the Board; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:15(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:15
+      ref_id: 15(e)
+      description: to furnish only such information as is verifiably authentic, while
+        exercising the right to correction or erasure under the provisions of this
+        Act or the rules made thereunder.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-4
+      assessable: false
+      depth: 1
+      ref_id: chapter-4
+      name: Special Provisions
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-4
+      ref_id: '16'
+      name: Processing of Personal Data Outside of India
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:16(1)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:16
+      ref_id: 16(1)
+      description: The Central Government may, by notification, restrict the transfer
+        of personal data by a Data Fiduciary for processing to such country or territory
+        outside India as may be so notified.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:16(2)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:16
+      ref_id: 16(2)
+      description: Nothing contained in this section shall restrict the applicability
+        of any law for the time being in force in India that provides for a higher
+        degree of protection for or restriction on transfer of personal data by a
+        Data Fiduciary outside India in relation to any personal data or Data Fiduciary
+        or class thereof.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:chapter-4
+      ref_id: '17'
+      name: Exemptions
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17
+      ref_id: 17(1)
+      description: "The provisions of Chapter II, except sub-sections (1) and (5)\
+        \ of section 8, and those of Chapter III and section 16 shall not apply where\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)(a)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)
+      ref_id: 17(1)(a)
+      description: the processing of personal data is necessary for enforcing any
+        legal right or claim;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)(b)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)
+      ref_id: 17(1)(b)
+      description: the processing of personal data by any court or tribunal or any
+        other body in India which is entrusted by law with the performance of any
+        judicial or quasi-judicial or regulatory or supervisory function, where such
+        processing is necessary for the performance of such function;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)(c)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)
+      ref_id: 17(1)(c)
+      description: personal data is processed in the interest of prevention, detection,
+        investigation or prosecution of any offence or contravention of any law for
+        the time being in force in India;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)(d)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)
+      ref_id: 17(1)(d)
+      description: personal data of Data Principals not within the territory of India
+        is processed pursuant to any contract entered into with any person outside
+        the territory of India by any person based in India;
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)(e)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)
+      ref_id: 17(1)(e)
+      description: the processing is necessary for a scheme of compromise or arrangement
+        or merger or amalgamation of two or more companies or a reconstruction by
+        way of demerger or otherwise of a company, or transfer of undertaking of one
+        or more company to another company, or involving division of one or more companies,
+        approved by a court or tribunal or other authority competent to do so by any
+        law for the time being in force; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)(f)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(1)
+      ref_id: 17(1)(f)
+      description: the processing is for the purpose of ascertaining the financial
+        information and assets and liabilities of any person who has defaulted in
+        payment due on account of a loan or advance taken from a financial institution,
+        subject to such processing being in accordance with the provisions regarding
+        disclosure of information or data in any other law for the time being in force.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(2)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17
+      ref_id: 17(2)
+      description: "The provisions of this Act shall not apply in respect of the processing\
+        \ of personal data\u2014"
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(2)(a)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(2)
+      ref_id: 17(2)(a)
+      description: by such instrumentality of the State as the Central Government
+        may notify, in the interests of sovereignty and integrity of India, security
+        of the State, friendly relations with foreign States, maintenance of public
+        order or preventing incitement to any cognizable offence relating to any of
+        these, and the processing by the Central Government of any personal data that
+        such instrumentality may furnish to it; and
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(2)(b)
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(2)
+      ref_id: 17(2)(b)
+      description: necessary for research, archiving or statistical purposes if the
+        personal data is not to be used to take any decision specific to a Data Principal
+        and such processing is carried on in accordance with such standards as may
+        be prescribed.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(3)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17
+      ref_id: 17(3)
+      description: The Central Government may, having regard to the volume and nature
+        of personal data processed, notify certain Data Fiduciaries or class of Data
+        Fiduciaries, including startups, as Data Fiduciaries to whom the provisions
+        of section 5, sub-sections (3) and (7) of section 8 and sections 10 and 11
+        shall not apply.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(4)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17
+      ref_id: 17(4)
+      description: In respect of processing by the State or any instrumentality of
+        the State, the provisions of sub-section (7) of section 8 and sub-section
+        (3) of section 12 and, where such processing is for a purpose that does not
+        include making of a decision that affects the Data Principal, sub-section
+        (2) of section 12 shall not apply.
+    - urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17(5)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:17
+      ref_id: 17(5)
+      description: The Central Government may, before expiry of five years from the
+        date of commencement of this Act, by notification, declare that any provision
+        of this Act shall not apply to such Data Fiduciary or classes of Data Fiduciaries
+        for such period as may be specified in the notification.
