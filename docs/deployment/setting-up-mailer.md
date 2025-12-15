@@ -38,6 +38,7 @@ entrypoint:
   - -c
   - |
     update-ca-certificates
+    poetry run bash ./startup.sh
 ```
 
 > There's already an entrypoint for huey, you can modify it like this:
