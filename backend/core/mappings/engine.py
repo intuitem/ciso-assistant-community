@@ -530,9 +530,17 @@ class MappingEngine:
         return audit_results
 
     def summary_results(
-        self, audit_results: dict[str, dict[str, str]]
+        self,
+        audit_results: dict[str, dict[str, str]],
+        filter_urns: Optional[set[str]] = None,
     ) -> dict[str, int]:
-        """Summarizes audit result counts by status."""
+        """Summarizes audit result counts by status.
+
+        Args:
+            audit_results: The audit results dictionary.
+            filter_urns: Optional set of URNs to filter results by. If provided,
+                only requirements with URNs in this set will be counted.
+        """
         res = defaultdict(int)
         if (
             isinstance(audit_results, dict)
@@ -542,7 +550,9 @@ class MappingEngine:
         else:
             iterable = getattr(audit_results, "items", lambda: [])()
 
-        for _, audit in iterable:
+        for urn, audit in iterable:
+            if filter_urns is not None and urn not in filter_urns:
+                continue
             result = audit.get("result")
             if result is None:
                 continue
