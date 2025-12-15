@@ -19,6 +19,7 @@ from django.contrib.auth import get_user_model
 from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
+from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.db.models import F, Q, OuterRef, Subquery
 from django.forms.models import model_to_dict
@@ -3406,6 +3407,14 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         verbose_name=_("Attachment"),
         validators=[validate_file_size, validate_file_name],
     )
+    attachment_hash = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        db_index=True,
+        verbose_name=_("Attachment SHA256 Hash"),
+        help_text=_("SHA256 hash of the attachment file for integrity verification"),
+    )
     link = models.URLField(
         blank=True,
         null=True,
@@ -3425,6 +3434,55 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
             self.folder = self.evidence.folder
 
         self.is_published = self.evidence.is_published
+
+        # Compute attachment hash if attachment exists and has changed
+        if self.attachment:
+            # Check if this is a new attachment or if it has changed
+            should_compute_hash = False
+
+            if self.pk:  # Existing record
+                try:
+                    old_instance = EvidenceRevision.objects.get(pk=self.pk)
+                    # Check if attachment changed
+                    if old_instance.attachment != self.attachment:
+                        should_compute_hash = True
+                except EvidenceRevision.DoesNotExist:
+                    should_compute_hash = True
+            else:  # New record
+                should_compute_hash = True
+
+            if should_compute_hash:
+                try:
+                    # Compute SHA256 hash using chunked reading to avoid OOM
+                    hash_obj = hashlib.sha256()
+                    if default_storage.exists(self.attachment.name):
+                        with default_storage.open(self.attachment.name, "rb") as f:
+                            for chunk in iter(
+                                lambda: f.read(1024 * 1024), b""
+                            ):  # 1MB chunks
+                                hash_obj.update(chunk)
+                        self.attachment_hash = hash_obj.hexdigest()
+                    else:
+                        # File not yet saved to storage, try reading from UploadedFile
+                        if hasattr(self.attachment, "chunks"):
+                            for chunk in self.attachment.chunks(chunk_size=1024 * 1024):
+                                hash_obj.update(chunk)
+                            self.attachment_hash = hash_obj.hexdigest()
+                            # Reset file position for subsequent operations
+                            if hasattr(self.attachment, "seek"):
+                                self.attachment.seek(0)
+                except Exception as e:
+                    logger = get_logger(__name__)
+                    logger.warning(
+                        "Failed to compute attachment hash",
+                        revision_id=self.pk,
+                        error=str(e),
+                    )
+                    # Don't fail the save if hash computation fails
+                    self.attachment_hash = None
+        else:
+            # No attachment, clear the hash
+            self.attachment_hash = None
 
         super().save(*args, **kwargs)
 

@@ -164,15 +164,26 @@ class AttachmentImporter:
                             stats["restored"] += 1
 
                     except Exception as e:
+                        logger.error(
+                            "Error processing file path",
+                            file_path=file_path,
+                            error=str(e),
+                            exc_info=True,
+                        )
                         stats["errors"].append(
-                            f"Error processing {file_path}: {str(e)}"
+                            f"Error processing {os.path.basename(file_path)}"
                         )
                         continue
 
         except zipfile.BadZipFile:
             stats["errors"].append("Invalid ZIP file")
         except Exception as e:
-            stats["errors"].append(f"Unexpected error: {str(e)}")
+            logger.error(
+                "Unexpected error during attachment import",
+                error=str(e),
+                exc_info=True,
+            )
+            stats["errors"].append("Unexpected error occurred during import")
 
         logger.info(
             "Attachment import completed",

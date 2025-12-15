@@ -19,4 +19,20 @@ urlpatterns = [
         views.FullRestoreView.as_view(),
         name="full-restore",
     ),
+    # New streaming batch endpoints
+    path(
+        "attachment-metadata/",
+        views.AttachmentMetadataView.as_view(),
+        name="attachment-metadata",
+    ),
+    path(
+        "batch-download-attachments/",
+        views.BatchDownloadAttachmentsView.as_view(),
+        name="batch-download-attachments",
+    ),
+    path(
+        "batch-upload-attachments/",
+        views.BatchUploadAttachmentsView.as_view(),
+        name="batch-upload-attachments",
+    ),
 ]

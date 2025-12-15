@@ -226,68 +226,115 @@ python clica.py upload-attachment \
 
 #### `backup_full`
 
-Creates a complete backup of your CISO Assistant instance, including both the database and all evidence attachments.
+Creates a complete backup of your CISO Assistant instance using a memory-efficient streaming approach. Supports resume capability for interrupted backups.
 
 ```bash
-python clica.py backup-full --dest-dir /path/to/backup/directory
+python clica.py backup-full --dest-dir ./db --batch-size 200 --resume
 ```
 
 **Parameters:**
 
-- `--dest-dir`: Destination directory where backup files will be saved (directory will be created if it doesn't exist)
+- `--dest-dir`: Destination directory to save backup files (default: `./db`)
+- `--batch-size`: Number of files to download per batch (default: 200)
+- `--resume/--no-resume`: Resume from existing manifest if backup was interrupted (default: True)
 
 **Output:**
 
 - `backup.json.gz`: Compressed database backup
-- `attachments.zip`: ZIP archive containing all evidence attachments (only created if attachments exist)
+- `backup-manifest.jsonl`: JSON Lines manifest tracking all downloaded files with hashes
+- `attachments/evidence-revisions/`: Directory containing all attachment files with naming pattern `{evidence_id}_v{version}_{filename}`
+
+**How it works:**
+
+1. **Database Backup**: Downloads the database backup as `backup.json.gz`
+2. **Metadata Fetch**: Retrieves metadata for all attachments (pagination handled automatically)
+3. **Resume Logic**: Compares server metadata with local manifest to identify missing/changed files (based on SHA256 hash comparison)
+4. **Batch Download**: Downloads files in configurable batches using custom streaming protocol
+5. **Manifest Update**: Appends each successfully downloaded file to manifest (crash-safe, append-only)
+
+**Advantages:**
+
+- **No ZIP Processing**: Avoids loading large ZIP files into memory
+- **Resume Capability**: Can continue interrupted backups without re-downloading existing files
+- **Hash Verification**: Uses SHA256 hashes to detect file changes and skip unchanged files
+- **Memory Efficient**: Streams files in 1MB chunks, never loads full files in memory
+- **Progress Tracking**: Shows batch progress and total data downloaded
 
 **Notes:**
 
 - Requires `has_backup_permission` flag in your user profile
-- If no attachments are present in the instance, only the database backup will be created
-- Backup files can be large depending on the number of attachments
+- If backup is interrupted, simply run the same command again with `--resume` (default)
+- The manifest file tracks which files have been downloaded with their hashes
+- Files are only re-downloaded if their hash changes on the server
 
 #### `restore_full`
 
-Restores a complete backup of your CISO Assistant instance, including both the database and all evidence attachments.
+Restores a complete backup of your CISO Assistant instance using a memory-efficient streaming approach. Supports resume capability for interrupted restores.
 
 ```bash
-python clica.py restore-full --src-dir /path/to/backup/directory
+python clica.py restore-full --src-dir ./db --batch-size 200 --resume --verify-hashes
 ```
 
 **Parameters:**
 
-- `--src-dir`: Source directory containing the backup files (`backup.json.gz` and optionally `attachments.zip`)
+- `--src-dir`: Source directory containing backup files (default: `./db`)
+- `--batch-size`: Number of files to upload per batch (default: 200)
+- `--resume/--no-resume`: Resume from existing manifest if restore was interrupted (default: True)
+- `--verify-hashes/--no-verify-hashes`: Verify local file hashes before upload (default: True)
 
 **Requirements:**
 
 - The source directory must contain `backup.json.gz`
-- If `attachments.zip` is present, attachments will be restored automatically
+- The source directory must contain `backup-manifest.jsonl` (for attachments restore)
+- Attachments should be in `attachments/evidence-revisions/` directory
 - Requires `has_backup_permission` flag in your user profile
-
-**Notes:**
-
-- The restore process happens in a **single atomic request**, avoiding authentication token invalidation issues
-- Both database and attachments are restored together, ensuring data consistency
-- The process will report the number of attachments successfully restored and any errors encountered
-- If some attachments fail to restore, the command will complete with partial success and display error details
 
 **How it works:**
 
-The `restore-full` command uses a combo endpoint (`/serdes/full-restore/`) that processes both the database backup and attachments in a single HTTP request. This approach solves the authentication token invalidation problem that would occur if database and attachments were restored separately:
+1. **Database Restore**: Uploads and restores the database backup
+2. **Manifest Load**: Reads the backup manifest to identify files to upload
+3. **Hash Verification** (optional): Verifies local file hashes match manifest entries
+4. **Resume Logic**: Skips files already marked as uploaded in the manifest
+5. **Batch Upload**: Uploads files in configurable batches using custom streaming protocol
+6. **Server-Side Deduplication**: Server skips files if hash matches existing attachment (idempotent)
+7. **Manifest Update**: Marks successfully uploaded files in manifest after each batch
 
-1. The endpoint verifies your authentication token once at the beginning
-2. Restores the database backup (which replaces all data including tokens)
-3. Immediately restores attachments using the same authenticated request
-4. Since everything happens in one request, the token remains valid throughout
+**Advantages:**
 
-After the restore completes, you'll need to generate a new Personal Access Token since the database was replaced.
+- **No ZIP Processing**: Avoids creating large ZIP files in memory
+- **Resume Capability**: Can continue interrupted restores without re-uploading existing files
+- **Hash Verification**: Validates file integrity before upload
+- **Idempotent**: Server skips files that already match (safe to re-run)
+- **Memory Efficient**: Streams files in batches, never loads all files in memory
+- **Partial Success Handling**: Continues processing even if some files fail, reports errors
+
+**Notes:**
+
+- The restore process happens in **two separate steps** (database first, then attachments)
+- After database restore, you'll need to regenerate your Personal Access Token
+- If restore is interrupted, run the same command again with `--resume` (default)
+- Files with hash mismatches (detected during `--verify-hashes`) are skipped and reported
+- Server validates uploaded file hashes and skips if they match existing attachments
 
 > [!WARNING]
 > Restoring a backup will **replace all existing data** in your CISO Assistant instance. Make sure you have a current backup before performing a restore operation.
 
 > [!TIP]
-> Use `backup-full` regularly to maintain disaster recovery capabilities, especially before major configuration changes or upgrades.
+> **Best Practices:**
+> - Run `backup-full` regularly to maintain disaster recovery capabilities
+> - Use `--batch-size` to tune performance based on your network and file sizes
+> - Keep the manifest file safe - it enables resume functionality
+> - After restore completes, regenerate your Personal Access Token immediately
+
+**Technical Details:**
+
+The backup/restore system uses a custom binary streaming protocol to avoid memory issues:
+
+- **Format**: Each file is transmitted as `[4-byte length][JSON header][file bytes]`
+- **Hashing**: SHA256 hashes computed using 1MB chunks (no full file in memory)
+- **Deduplication**: Files are skipped if their hash matches (both client and server-side)
+- **Manifest**: JSON Lines format allows incremental append (crash-safe)
+- **Batch Processing**: Configurable batch sizes balance efficiency vs memory usage
 
 ### Instance Management Commands
 

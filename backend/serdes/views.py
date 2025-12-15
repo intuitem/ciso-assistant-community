@@ -1,6 +1,7 @@
 import gzip
 import io
 import json
+import struct
 import sys
 from datetime import datetime
 
@@ -8,13 +9,15 @@ from serdes.export_utils import AttachmentExporter, AttachmentImporter
 import structlog
 from django.core import management
 from django.core.management.commands import dumpdata
-from django.http import HttpResponse
+from django.core.files.storage import default_storage
+from django.http import HttpResponse, StreamingHttpResponse
 from rest_framework import status
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework.pagination import LimitOffsetPagination
 from ciso_assistant.settings import SCHEMA_VERSION, VERSION
+from core.models import EvidenceRevision
 from core.utils import compare_schema_versions
 from serdes.serializers import LoadBackupSerializer
 
@@ -22,8 +25,10 @@ from auditlog.models import LogEntry
 from django.db.models.signals import post_save
 from core.custom_middleware import add_user_info_to_log_entry
 from django.apps import apps
-
+from django.conf import settings
 from auditlog.context import disable_auditlog
+from django.core.files.base import ContentFile
+import hashlib
 
 logger = structlog.get_logger(__name__)
 
@@ -341,12 +346,18 @@ class LoadAttachmentsView(APIView):
             )
 
             if stats["errors"]:
+                logger.error(
+                    "Attachment import encountered errors",
+                    user=getattr(request.user, "username", None),
+                    errors=stats["errors"],
+                )
                 return Response(
                     {
                         "status": "partial_success",
                         "processed": stats["processed"],
                         "restored": stats["restored"],
-                        "errors": stats["errors"],
+                        "errors_count": len(stats["errors"]),
+                        "message": "Some attachments could not be imported. Check server logs for details.",
                     },
                     status=status.HTTP_207_MULTI_STATUS,
                 )
@@ -374,6 +385,16 @@ class LoadAttachmentsView(APIView):
 
 
 class FullRestoreView(APIView):
+    """
+    POST endpoint for atomic database + attachments restore.
+    Accepts multipart form data with:
+    - backup: database backup file (required)
+    - attachments: streaming binary data in custom format (optional)
+
+    This ensures both operations happen in a single authenticated request,
+    avoiding token invalidation issues.
+    """
+
     def post(self, request, *args, **kwargs):
         if not request.user.has_backup_permission:
             logger.error("Unauthorized full restore attempt", user=request.user)
@@ -386,7 +407,7 @@ class FullRestoreView(APIView):
 
         # Get uploaded files from multipart form data
         backup_file = request.FILES.get("backup")
-        attachments_file = request.FILES.get("attachments")
+        attachments_data = request.FILES.get("attachments")
 
         if not backup_file:
             return Response(
@@ -473,42 +494,189 @@ class FullRestoreView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        # Step 2: Restore attachments if provided
+        # Step 2: Restore attachments if provided (using streaming format)
         attachment_stats = None
-        if attachments_file:
-            logger.info("Step 2/2: Restoring attachments")
-
-            if not attachments_file.name.endswith(".zip"):
-                return Response(
-                    {"error": "InvalidAttachmentFileType"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+        if attachments_data:
+            logger.info("Step 2/2: Restoring attachments from streaming data")
 
             try:
-                importer = AttachmentImporter()
-                attachment_stats = importer.extract_attachments_from_zip(
-                    attachments_file, dry_run=False
-                )
+                # Read the uploaded file data (it's already in memory from multipart)
+                body = attachments_data.read()
 
+                stats = {
+                    "processed": 0,
+                    "restored": 0,
+                    "skipped": 0,
+                    "errors": [],
+                }
+
+                offset = 0
+                while offset < len(body):
+                    try:
+                        # Read 4-byte length prefix
+                        if offset + 4 > len(body):
+                            break
+
+                        total_size = struct.unpack(">I", body[offset : offset + 4])[0]
+                        offset += 4
+
+                        if offset + total_size > len(body):
+                            stats["errors"].append(
+                                {
+                                    "error": "Incomplete data block",
+                                    "offset": offset,
+                                }
+                            )
+                            break
+
+                        # Extract the data block
+                        block_data = body[offset : offset + total_size]
+                        offset += total_size
+
+                        # Parse JSON header
+                        header = None
+                        header_end = 0
+
+                        for i in range(1, min(1024, len(block_data))):
+                            try:
+                                header = json.loads(block_data[:i].decode("utf-8"))
+                                header_end = i
+                                break
+                            except (json.JSONDecodeError, UnicodeDecodeError):
+                                continue
+
+                        if not header:
+                            stats["errors"].append(
+                                {
+                                    "error": "Invalid JSON header in block",
+                                }
+                            )
+                            stats["processed"] += 1
+                            continue
+
+                        file_bytes = block_data[header_end:]
+                        stats["processed"] += 1
+
+                        # Validate header
+                        revision_id = header.get("id")
+                        expected_hash = header.get("hash")
+                        filename = header.get("filename")
+
+                        if not revision_id or not filename:
+                            stats["errors"].append(
+                                {
+                                    "revision_id": revision_id,
+                                    "filename": filename,
+                                    "error": "Missing required fields in header",
+                                }
+                            )
+                            continue
+
+                        # Verify file hash
+                        actual_hash = hashlib.sha256(file_bytes).hexdigest()
+
+                        if expected_hash and actual_hash != expected_hash:
+                            stats["errors"].append(
+                                {
+                                    "revision_id": revision_id,
+                                    "filename": filename,
+                                    "error": "Hash mismatch",
+                                }
+                            )
+                            continue
+
+                        # Find the revision
+                        try:
+                            revision = EvidenceRevision.objects.get(id=revision_id)
+                        except EvidenceRevision.DoesNotExist:
+                            stats["errors"].append(
+                                {
+                                    "revision_id": revision_id,
+                                    "filename": filename,
+                                    "error": "Revision not found",
+                                }
+                            )
+                            continue
+
+                        # Check if attachment already exists with same hash
+                        if (
+                            revision.attachment
+                            and revision.attachment_hash
+                            and revision.attachment_hash == actual_hash
+                            and default_storage.exists(revision.attachment.name)
+                        ):
+                            stats["skipped"] += 1
+                            logger.debug(
+                                "Skipping attachment with matching hash",
+                                revision_id=revision_id,
+                                hash=actual_hash,
+                            )
+                            continue
+
+                        # Save the attachment
+                        evidence_id = header.get("evidence_id", revision.evidence_id)
+                        version = header.get("version", revision.version)
+
+                        storage_path = (
+                            f"evidence-revisions/{evidence_id}/v{version}/{filename}"
+                        )
+
+                        # Delete old attachment if exists
+                        if revision.attachment:
+                            try:
+                                default_storage.delete(revision.attachment.name)
+                            except Exception as e:
+                                logger.warning(
+                                    "Failed to delete old attachment",
+                                    revision_id=revision_id,
+                                    error=str(e),
+                                )
+
+                        # Save new attachment
+                        saved_path = default_storage.save(
+                            storage_path, ContentFile(file_bytes)
+                        )
+
+                        revision.attachment = saved_path
+                        revision.attachment_hash = actual_hash
+                        revision.save(update_fields=["attachment", "attachment_hash"])
+
+                        stats["restored"] += 1
+
+                    except Exception as e:
+                        logger.error(
+                            "Error processing block",
+                            offset=offset,
+                            error=str(e),
+                            exc_info=True,
+                        )
+                        stats["errors"].append(
+                            {
+                                "error": f"Error processing block",
+                                "offset": offset,
+                            }
+                        )
+
+                attachment_stats = stats
                 logger.info(
                     "Attachments restored successfully",
                     processed=attachment_stats["processed"],
                     restored=attachment_stats["restored"],
+                    skipped=attachment_stats["skipped"],
                     errors_count=len(attachment_stats["errors"]),
                 )
 
             except Exception as e:
-                logger.error("Attachment restore failed", exc_info=e)
+                logger.error("Attachment restore failed", exc_info=True)
                 return Response(
                     {
                         "error": "AttachmentRestoreFailed",
-                        "message": "Database restored but attachments failed",
-                        "details": str(e),
+                        "message": "Database restored but attachments failed. Check server logs for details.",
                     },
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
         else:
-            logger.info("No attachments file provided, skipping attachment restore")
+            logger.info("No attachments data provided, skipping attachment restore")
 
         # Build response
         response_data = {
@@ -519,14 +687,445 @@ class FullRestoreView(APIView):
         if attachment_stats:
             response_data["attachments_restored"] = attachment_stats["restored"]
             response_data["attachments_processed"] = attachment_stats["processed"]
+            response_data["attachments_skipped"] = attachment_stats["skipped"]
             if attachment_stats["errors"]:
-                response_data["attachment_errors"] = attachment_stats["errors"]
+                response_data["attachment_errors_count"] = len(
+                    attachment_stats["errors"]
+                )
                 response_data["status"] = "partial_success"
 
         logger.info(
             "Full restore completed successfully",
             user=request.user.username,
-            has_attachments=bool(attachments_file),
+            has_attachments=bool(attachments_data),
         )
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+class AttachmentMetadataView(APIView):
+    """
+    GET endpoint that returns paginated metadata for all attachments.
+    Supports filtering by folder, created_after, and created_before.
+    """
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.has_backup_permission:
+            logger.warning(
+                "Unauthorized attachment metadata request",
+                user=request.user.username,
+            )
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        logger.info(
+            "Fetching attachment metadata",
+            user=request.user.username,
+        )
+
+        # Build queryset with filters
+        queryset = (
+            EvidenceRevision.objects.filter(attachment__isnull=False)
+            .exclude(attachment="")
+            .select_related("evidence", "folder")
+        )
+
+        folder_id = request.query_params.get("folder")
+        if folder_id:
+            queryset = queryset.filter(folder_id=folder_id)
+
+        created_after = request.query_params.get("created_after")
+        if created_after:
+            queryset = queryset.filter(created_at__gte=created_after)
+
+        created_before = request.query_params.get("created_before")
+        if created_before:
+            queryset = queryset.filter(created_at__lte=created_before)
+
+        queryset = queryset.order_by("created_at", "id")
+        paginator = LimitOffsetPagination()
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
+
+        results = []
+        for revision in paginated_queryset:
+            try:
+                file_size = None
+                if revision.attachment and default_storage.exists(
+                    revision.attachment.name
+                ):
+                    file_size = default_storage.size(revision.attachment.name)
+
+                results.append(
+                    {
+                        "id": str(revision.id),
+                        "evidence_id": str(revision.evidence_id),
+                        "version": revision.version,
+                        "filename": revision.filename()
+                        if revision.attachment
+                        else None,
+                        "size": file_size,
+                        "attachment_hash": revision.attachment_hash,
+                        "created_at": revision.created_at.isoformat()
+                        if revision.created_at
+                        else None,
+                    }
+                )
+            except Exception as e:
+                logger.warning(
+                    "Error building metadata for revision",
+                    revision_id=revision.id,
+                    error=str(e),
+                )
+                continue
+
+        response_data = {
+            "count": queryset.count(),
+            "next": paginator.get_next_link(),
+            "previous": paginator.get_previous_link(),
+            "results": results,
+        }
+
+        logger.info(
+            "Attachment metadata fetched successfully",
+            count=len(results),
+            total=response_data["count"],
+        )
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+class BatchDownloadAttachmentsView(APIView):
+    """
+    POST endpoint that streams multiple attachments in a custom binary format.
+    Request body: {"revision_ids": ["id1", "id2", ...]}
+    Response format: for each file: [4-byte length][JSON header][file bytes]
+    """
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.has_backup_permission:
+            logger.warning(
+                "Unauthorized batch download attempt",
+                user=request.user.username,
+            )
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        revision_ids = request.data.get("revision_ids", [])
+
+        if not revision_ids:
+            return Response(
+                {"error": "NoRevisionIDsProvided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Check batch size limit
+        max_batch_size = getattr(settings, "BACKUP_BATCH_SIZE", 200)
+
+        if len(revision_ids) > max_batch_size:
+            return Response(
+                {
+                    "error": "BatchTooLarge",
+                    "message": f"Maximum batch size is {max_batch_size} files",
+                    "requested": len(revision_ids),
+                    "max": max_batch_size,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        logger.info(
+            "Starting batch download",
+            user=request.user.username,
+            revision_count=len(revision_ids),
+        )
+
+        def stream_attachments():
+            """Generator that yields attachment data in custom binary format."""
+            processed = 0
+            errors = 0
+
+            for revision_id in revision_ids:
+                try:
+                    revision = EvidenceRevision.objects.select_related("evidence").get(
+                        id=revision_id
+                    )
+
+                    if not revision.attachment or not default_storage.exists(
+                        revision.attachment.name
+                    ):
+                        errors += 1
+                        logger.warning(
+                            "Attachment not found for revision",
+                            revision_id=revision_id,
+                        )
+                        continue
+
+                    header = {
+                        "id": str(revision.id),
+                        "evidence_id": str(revision.evidence_id),
+                        "version": revision.version,
+                        "filename": revision.filename(),
+                        "hash": revision.attachment_hash,
+                        "size": default_storage.size(revision.attachment.name),
+                    }
+                    header_bytes = json.dumps(header).encode("utf-8")
+
+                    # Read file in chunks
+                    file_buffer = io.BytesIO()
+                    with default_storage.open(revision.attachment.name, "rb") as f:
+                        for chunk in iter(lambda: f.read(10240 * 1024), b""):
+                            file_buffer.write(chunk)
+
+                    file_bytes = file_buffer.getvalue()
+
+                    # Calculate total size: header_length + header + file
+                    total_size = len(header_bytes) + len(file_bytes)
+
+                    # Yield: [4-byte total size][header bytes][file bytes]
+                    yield struct.pack(">I", total_size)
+                    yield header_bytes
+                    yield file_bytes
+
+                    processed += 1
+
+                except EvidenceRevision.DoesNotExist:
+                    errors += 1
+                    logger.warning(
+                        "Revision not found",
+                        revision_id=revision_id,
+                    )
+                except Exception as e:
+                    errors += 1
+                    logger.error(
+                        "Error streaming attachment",
+                        revision_id=revision_id,
+                        error=str(e),
+                        exc_info=True,
+                    )
+
+            logger.info(
+                "Batch download completed",
+                processed=processed,
+                errors=errors,
+            )
+
+        response = StreamingHttpResponse(
+            stream_attachments(),
+            content_type="application/octet-stream",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="attachments-batch-{datetime.now().strftime("%Y%m%d-%H%M%S")}.dat"'
+        )
+
+        return response
+
+
+class BatchUploadAttachmentsView(APIView):
+    """
+    POST endpoint that accepts multiple attachments in custom binary format.
+    Request body: same format as batch download (4-byte length, JSON header, file bytes)
+    Response: {"processed": N, "restored": N, "skipped": N, "errors": [...]}
+    """
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.has_backup_permission:
+            logger.warning(
+                "Unauthorized batch upload attempt",
+                user=request.user.username,
+            )
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        logger.info(
+            "Starting batch upload",
+            user=request.user.username,
+        )
+
+        stats = {
+            "processed": 0,
+            "restored": 0,
+            "skipped": 0,
+            "errors": [],
+        }
+
+        try:
+            # Read the entire body
+            body = request.body
+            offset = 0
+
+            while offset < len(body):
+                try:
+                    # Read 4-byte length prefix
+                    if offset + 4 > len(body):
+                        break
+
+                    total_size = struct.unpack(">I", body[offset : offset + 4])[0]
+                    offset += 4
+
+                    if offset + total_size > len(body):
+                        stats["errors"].append(
+                            {
+                                "error": "Incomplete data block",
+                                "offset": offset,
+                            }
+                        )
+                        break
+
+                    # Extract the data block
+                    block_data = body[offset : offset + total_size]
+                    offset += total_size
+
+                    # Find the boundary between JSON header and file bytes
+                    # The header is UTF-8 JSON, we need to parse it first
+                    # Try to decode as much JSON as possible
+                    header = None
+                    header_end = 0
+
+                    for i in range(
+                        1, min(1024, len(block_data))
+                    ):  # Header should be < 1KB
+                        try:
+                            header = json.loads(block_data[:i].decode("utf-8"))
+                            header_end = i
+                            break
+                        except (json.JSONDecodeError, UnicodeDecodeError):
+                            continue
+
+                    if not header:
+                        stats["errors"].append(
+                            {
+                                "error": "Invalid JSON header in block",
+                            }
+                        )
+                        stats["processed"] += 1
+                        continue
+
+                    file_bytes = block_data[header_end:]
+                    stats["processed"] += 1
+
+                    # Validate header
+                    revision_id = header.get("id")
+                    expected_hash = header.get("hash")
+                    filename = header.get("filename")
+
+                    if not revision_id or not filename:
+                        stats["errors"].append(
+                            {
+                                "revision_id": revision_id,
+                                "filename": filename,
+                                "error": "Missing required fields in header",
+                            }
+                        )
+                        continue
+
+                    # Verify file hash
+
+                    actual_hash = hashlib.sha256(file_bytes).hexdigest()
+
+                    if expected_hash and actual_hash != expected_hash:
+                        stats["errors"].append(
+                            {
+                                "revision_id": revision_id,
+                                "filename": filename,
+                                "error": "Hash mismatch",
+                            }
+                        )
+                        continue
+
+                    # Find the revision
+                    try:
+                        revision = EvidenceRevision.objects.get(id=revision_id)
+                    except EvidenceRevision.DoesNotExist:
+                        stats["errors"].append(
+                            {
+                                "revision_id": revision_id,
+                                "filename": filename,
+                                "error": "Revision not found",
+                            }
+                        )
+                        continue
+
+                    # Check if attachment already exists with same hash (skip if identical)
+                    # IMPORTANT: Also verify the file actually exists in storage
+                    if (
+                        revision.attachment
+                        and revision.attachment_hash
+                        and revision.attachment_hash == actual_hash
+                        and default_storage.exists(revision.attachment.name)
+                    ):
+                        stats["skipped"] += 1
+                        logger.debug(
+                            "Skipping attachment with matching hash",
+                            revision_id=revision_id,
+                            hash=actual_hash,
+                        )
+                        continue
+
+                    # Save the attachment
+                    evidence_id = header.get("evidence_id", revision.evidence_id)
+                    version = header.get("version", revision.version)
+
+                    storage_path = (
+                        f"evidence-revisions/{evidence_id}/v{version}/{filename}"
+                    )
+
+                    # Delete old attachment if exists
+                    if revision.attachment:
+                        try:
+                            default_storage.delete(revision.attachment.name)
+                        except Exception as e:
+                            logger.warning(
+                                "Failed to delete old attachment",
+                                revision_id=revision_id,
+                                error=str(e),
+                            )
+
+                    # Save new attachment
+
+                    saved_path = default_storage.save(
+                        storage_path, ContentFile(file_bytes)
+                    )
+
+                    revision.attachment = saved_path
+                    revision.attachment_hash = actual_hash
+                    revision.save(update_fields=["attachment", "attachment_hash"])
+
+                    stats["restored"] += 1
+
+                except Exception as e:
+                    logger.error(
+                        "Error processing block",
+                        offset=offset,
+                        error=str(e),
+                        exc_info=True,
+                    )
+                    stats["errors"].append(
+                        {
+                            "error": f"Error processing block: {str(e)}",
+                            "offset": offset,
+                        }
+                    )
+
+        except Exception as e:
+            logger.error(
+                "Batch upload failed",
+                user=request.user.username,
+                error=str(e),
+                exc_info=True,
+            )
+            return Response(
+                {"error": "BatchUploadFailed", "message": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        logger.info(
+            "Batch upload completed",
+            processed=stats["processed"],
+            restored=stats["restored"],
+            skipped=stats["skipped"],
+            errors_count=len(stats["errors"]),
+        )
+
+        response_status = status.HTTP_200_OK
+        if stats["errors"] and stats["restored"] == 0:
+            response_status = status.HTTP_400_BAD_REQUEST
+        elif stats["errors"]:
+            response_status = status.HTTP_207_MULTI_STATUS
+
+        return Response(stats, status=response_status)
