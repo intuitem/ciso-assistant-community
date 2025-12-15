@@ -1627,18 +1627,36 @@ def create_library(
                         f'⚠️  [WARNING] target_node_id "{tid}" not found in sheet "target"'
                     )
 
-            # Then print duplicate counts (only for missing IDs)
+            # Check for duplicate (source, target) pairs in mappings
+            mapping_pairs = [
+                (
+                    m["source_requirement_urn"].split(":")[-1],
+                    m["target_requirement_urn"].split(":")[-1],
+                )
+                for m in requirement_mappings
+            ]
+            duplicate_pairs = Counter(mapping_pairs)
+            duplicates_found = {
+                pair: count for pair, count in duplicate_pairs.items() if count > 1
+            }
+            if duplicates_found:
+                for (sid, tid), count in duplicates_found.items():
+                    print(
+                        f'🔁 [DUPLICATE] mapping "{sid}" -> "{tid}" appears {count} times'
+                    )
+
+            # Print info about missing IDs that are referenced multiple times
             if source_sheet_available:
                 for sid, count in source_missing_counts.items():
                     if count > 1:
                         print(
-                            f'🔁 [DUPLICATE] source_node_id "{sid}" appears {count} times in mappings'
+                            f'ℹ️  [INFO] missing source_node_id "{sid}" is referenced {count} times in mappings'
                         )
             if target_sheet_available:
                 for tid, count in target_missing_counts.items():
                     if count > 1:
                         print(
-                            f'🔁 [DUPLICATE] target_node_id "{tid}" appears {count} times in mappings'
+                            f'ℹ️  [INFO] missing target_node_id "{tid}" is referenced {count} times in mappings'
                         )
 
             # Final summary
