@@ -71,7 +71,9 @@ class Command(BaseCommand):
                 translations=library.translations,
                 builtin=library.builtin,
                 objects_meta=library.objects_meta,
-                dependencies=[dependency.urn for dependency in library.dependencies.all()],
+                dependencies=[
+                    dependency.urn for dependency in library.dependencies.all()
+                ],
                 version=library.version,
                 ref_id=library.ref_id,
                 is_loaded=True,

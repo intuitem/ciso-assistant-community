@@ -272,7 +272,12 @@ class Severity(models.IntegerChoices):
 
 
 class StoredLibrary(LibraryMixin):
-    filtering_labels = models.ManyToManyField(LibraryFilteringLabel, blank=True, verbose_name=_("Labels"), related_name="stored_libraries")
+    filtering_labels = models.ManyToManyField(
+        LibraryFilteringLabel,
+        blank=True,
+        verbose_name=_("Labels"),
+        related_name="stored_libraries",
+    )
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
     content = models.JSONField()
@@ -436,6 +441,7 @@ class StoredLibrary(LibraryMixin):
 
         for library_label in library_filtering_labels:
             library_label.garbage_collect()
+
 
 class LibraryUpdater:
     class ScoreChangeDetected(Exception):

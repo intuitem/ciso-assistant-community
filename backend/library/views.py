@@ -100,13 +100,10 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
         return queryset.annotate(
             _is_update=Exists(
                 LoadedLibrary.objects.filter(
-                    urn=OuterRef("urn"),
-                    version__lt=OuterRef("version")
+                    urn=OuterRef("urn"), version__lt=OuterRef("version")
                 )
             )
-        ).filter(
-            _is_update=value
-        )
+        ).filter(_is_update=value)
 
     def filter_mapping_suggested(self, queryset, name, value):
         """
@@ -153,9 +150,9 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
         # Extract libraries with matching source frameworks
         matching_library_pks = []
 
-        for (
-            library
-        ) in queryset_with_mappings.iterator(chunk_size=1000):  # Use iterator for memory efficiency
+        for library in queryset_with_mappings.iterator(
+            chunk_size=1000
+        ):  # Use iterator for memory efficiency
             requirement_mappings = _extract_requirement_mappings(library.content)
 
             if _has_matching_source_framework(

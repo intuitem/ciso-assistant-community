@@ -8,30 +8,72 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0118_riskscenario_antecedent_scenarios_and_more'),
-        ('iam', '0016_folder_filtering_labels'),
+        ("core", "0118_riskscenario_antecedent_scenarios_and_more"),
+        ("iam", "0016_folder_filtering_labels"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='LibraryFilteringLabel',
+            name="LibraryFilteringLabel",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated at')),
-                ('is_published', models.BooleanField(default=False, verbose_name='published')),
-                ('label', models.CharField(max_length=100, validators=[django.core.validators.RegexValidator(code='invalid_label', message='invalidLabel', regex='^[\\w-]{1,36}$')], verbose_name='Label')),
-                ('folder', models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Created at"),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Updated at"),
+                ),
+                (
+                    "is_published",
+                    models.BooleanField(default=False, verbose_name="published"),
+                ),
+                (
+                    "label",
+                    models.CharField(
+                        max_length=100,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                code="invalid_label",
+                                message="invalidLabel",
+                                regex="^[\\w-]{1,36}$",
+                            )
+                        ],
+                        verbose_name="Label",
+                    ),
+                ),
+                (
+                    "folder",
+                    models.ForeignKey(
+                        default=iam.models.Folder.get_root_folder_id,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="%(class)s_folder",
+                        to="iam.folder",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.AddField(
-            model_name='storedlibrary',
-            name='filtering_labels',
-            field=models.ManyToManyField(blank=True, related_name='stored_libraries', to='core.libraryfilteringlabel', verbose_name='Labels'),
+            model_name="storedlibrary",
+            name="filtering_labels",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="stored_libraries",
+                to="core.libraryfilteringlabel",
+                verbose_name="Labels",
+            ),
         ),
     ]
