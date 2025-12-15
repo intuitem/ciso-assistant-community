@@ -1,4 +1,4 @@
-# Overview
+# 01 - basic audit
 
 ## [CISO Assistant: starting an audit](https://app.guidde.com/playbooks/68qUXmai1HgEMzMooV7g6b)
 
@@ -44,13 +44,7 @@ Select the domain you just created to begin setting up its security perimeter.
 
 ![Click 'Save'](https://static.guidde.com/v0/qg%2FJ0RVKao966SmT5uQXRHVpcgc2yd2%2F68qUXmai1HgEMzMooV7g6b%2Fm9wYgBQ4X76Z6egBNgbyk3_doc.png?alt=media\&token=5e585ecd-b8e7-452b-89c2-fc05a49d927f)
 
-#### 7. Click "2"
-
-Open the domain details to configure its security boundaries.
-
-![Click '2'](https://static.guidde.com/v0/qg%2FJ0RVKao966SmT5uQXRHVpcgc2yd2%2F68qUXmai1HgEMzMooV7g6b%2FqwWFSmWYCP4djjcf9wgMLZ_doc.png?alt=media\&token=a49138f5-4e45-48c7-b100-f4d464ce138b)
-
-#### 8. Click "explainer"
+#### 8. Pick "explainer" domain
 
 Start adding a new security perimeter to define the domain's protective scope.
 
