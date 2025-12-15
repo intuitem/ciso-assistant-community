@@ -22,7 +22,7 @@ When using Docker Compose, **avoid spaces around the `=` sign** in environment v
 
 An issue you may encounter when setting up your mailer is that your local CA certificates might not be included inside your Docker container. This could cause problems when sending emails.
 
-To address this, we need to apply some modifications to the compose file in the <mark style="color:$primary;">backend</mark> and <mark style="color:$primary;">huey</mark> services:
+To address this, we need to apply some modifications to the compose file in the backend and huey services:
 
 * **This volumes** (replace /your/ca-certificate/path/example\_CA.crt by the pass and the name of your ca-certificate) **:**
 
