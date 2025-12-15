@@ -1,0 +1,796 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:iso42001-2023
+locale: en
+ref_id: iso42001-2023
+name: "ISO 42001-2023 \u2014 Artificial intelligence  \u2014 Requirements and Controls\
+  \ outline"
+description: 'Outline of ISO 42001-2023 -  Artificial intelligence Management system
+  with Appendix A for reference controls.
+
+  You can purchase the standard for full details.'
+copyright: ISO - You can purchase the standard for full details.
+version: 1
+publication_date: 2025-12-15
+provider: ISO
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:iso42001-2023
+    ref_id: iso42001-2023
+    name: "ISO 42001-2023 \u2014 Artificial intelligence  \u2014 Requirements and\
+      \ Controls outline"
+    description: 'Outline of ISO 42001-2023 -  Artificial intelligence Management
+      system with Appendix A for reference controls.
+
+      You can purchase the standard for full details.'
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: clauses
+      name: Clauses
+      description: null
+    - ref_id: controls
+      name: Controls
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Context of the organization
+      description: Requirements for establishing the organizational context for AI
+        management.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:4
+      ref_id: '4.1'
+      name: Understanding the organization and its context
+      description: Identify internal and external factors relevant to AI system development
+        and use.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:4
+      ref_id: '4.2'
+      name: Understanding the needs and expectations of interested parties
+      description: Determine stakeholder requirements and expectations for AI systems.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:4
+      ref_id: '4.3'
+      name: Determining the scope of the AI management system
+      description: Define boundaries and applicability of the AI management system.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:4
+      ref_id: '4.4'
+      name: AI management system
+      description: Establish, implement, maintain and improve the AI management system.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Leadership
+      description: Requirements for leadership commitment and organizational direction.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:5
+      ref_id: '5.1'
+      name: Leadership and commitment
+      description: Demonstrate commitment to AI governance through active leadership
+        involvement.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:5
+      ref_id: '5.2'
+      name: AI policy
+      description: Establish an AI policy appropriate to organizational purpose and
+        objectives.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:5
+      ref_id: '5.3'
+      name: Roles, responsibilities and authorities
+      description: Assign and communicate AI-related roles, responsibilities and authorities.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Planning
+      description: Requirements for planning AI management activities.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:6
+      ref_id: '6.1'
+      name: Actions to address risks and opportunities
+      description: Identify and address AI-related risks and opportunities.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:6
+      ref_id: '6.2'
+      name: AI objectives and planning to achieve them
+      description: Establish measurable AI objectives and plans to achieve them.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:6
+      ref_id: '6.3'
+      name: Planning of changes
+      description: Plan and manage changes to the AI management system.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Support
+      description: Requirements for supporting resources and capabilities.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7
+      ref_id: '7.1'
+      name: Resources
+      description: Determine and provide resources needed for AI management.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7
+      ref_id: '7.2'
+      name: Competence
+      description: Ensure personnel have necessary competence for AI-related activities.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7
+      ref_id: '7.3'
+      name: Awareness
+      description: Ensure awareness of AI policy, roles and system implications.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7
+      ref_id: '7.4'
+      name: Communication
+      description: Determine internal and external communication requirements for
+        AI.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7
+      ref_id: '7.5'
+      name: Documented information
+      description: Requirements for managing documented information.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5
+      ref_id: 7.5.1
+      name: General
+      description: Include required documented information in the AI management system.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5
+      ref_id: 7.5.2
+      name: Creating and updating documented information
+      description: Ensure proper identification, format and review of documentation.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5
+      ref_id: 7.5.3
+      name: Control of documented information
+      description: Control availability, distribution and protection of documentation.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Operation
+      description: Requirements for operational implementation of AI management.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:8
+      ref_id: '8.1'
+      name: Operational planning and control
+      description: Plan, implement and control processes for AI system operations.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:8
+      ref_id: '8.2'
+      name: AI risk assessment
+      description: Conduct risk assessments for AI systems considering impacts and
+        likelihood.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:8.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:8
+      ref_id: '8.3'
+      name: AI risk treatment
+      description: Select and implement appropriate AI risk treatment options.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:8.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:8
+      ref_id: '8.4'
+      name: AI system impact assessment
+      description: Assess potential impacts of AI systems on individuals and society.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Performance evaluation
+      description: Requirements for evaluating AI management performance.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9
+      ref_id: '9.1'
+      name: Monitoring, measurement, analysis and evaluation
+      description: Monitor, measure, analyze and evaluate AI system performance.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9
+      ref_id: '9.2'
+      name: Internal audit
+      description: Requirements for conducting internal audits.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2
+      ref_id: 9.2.1
+      name: General
+      description: Conduct internal audits at planned intervals.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2
+      ref_id: 9.2.2
+      name: Internal audit programme
+      description: Plan, establish and maintain an internal audit programme.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9
+      ref_id: '9.3'
+      name: Management review
+      description: Requirements for management review of the AI management system.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3
+      ref_id: 9.3.1
+      name: General
+      description: Review the AI management system at planned intervals.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3
+      ref_id: 9.3.2
+      name: Management review inputs
+      description: Include specified inputs in management reviews.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3
+      ref_id: 9.3.3
+      name: Management review results
+      description: Document decisions and actions from management reviews.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: Improvement
+      description: Requirements for continual improvement of AI management.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:10
+      ref_id: '10.1'
+      name: Continual improvement
+      description: Continually improve suitability, adequacy and effectiveness of
+        AI management.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:10
+      ref_id: '10.2'
+      name: Nonconformity and corrective action
+      description: React to nonconformities and take corrective action.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.2
+      assessable: false
+      depth: 1
+      ref_id: A.2
+      name: Policies related to AI
+      description: Controls for establishing AI-related policies.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2
+      ref_id: A.2.2
+      name: AI policy
+      description: Define and communicate the organization's AI policy.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2
+      ref_id: A.2.3
+      name: Alignment with other organizational policies
+      description: Ensure AI policy aligns with other organizational policies.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2
+      ref_id: A.2.4
+      name: Review of the AI policy
+      description: Review AI policy at defined intervals or upon significant changes.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.3
+      assessable: false
+      depth: 1
+      ref_id: A.3
+      name: Internal organization
+      description: Controls for internal AI governance structure.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3
+      ref_id: A.3.2
+      name: AI roles and responsibilities
+      description: Define roles and responsibilities for AI system activities.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3
+      ref_id: A.3.3
+      name: Reporting of concerns
+      description: Establish processes for reporting AI-related concerns.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.4
+      assessable: false
+      depth: 1
+      ref_id: A.4
+      name: Resources for AI systems
+      description: Controls for AI system resource management.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4
+      ref_id: A.4.2
+      name: Resource documentation
+      description: Document resources required for AI system development and operation.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4
+      ref_id: A.4.3
+      name: Data resources
+      description: Manage data resources used in AI systems.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4
+      ref_id: A.4.4
+      name: Tooling resources
+      description: Manage tools used for AI system development and operation.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4
+      ref_id: A.4.5
+      name: System and computing resources
+      description: Manage computing infrastructure for AI systems.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4
+      ref_id: A.4.6
+      name: Human resources
+      description: Manage human resources involved in AI activities.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.5
+      assessable: false
+      depth: 1
+      ref_id: A.5
+      name: Assessing impacts of AI systems
+      description: Controls for AI impact assessment.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5
+      ref_id: A.5.2
+      name: AI system impact assessment process
+      description: Establish processes for assessing AI system impacts.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5
+      ref_id: A.5.3
+      name: Documentation of AI system impact assessments
+      description: Document AI system impact assessments.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5
+      ref_id: A.5.4
+      name: Assessing AI system impact on individuals or groups of individuals
+      description: Assess impacts on individuals or groups affected by AI systems.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5
+      ref_id: A.5.5
+      name: Assessing societal impacts of AI systems
+      description: Assess broader societal impacts of AI systems.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.6
+      assessable: false
+      depth: 1
+      ref_id: A.6
+      name: AI system life cycle
+      description: Controls for AI system development and operation lifecycle.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6
+      ref_id: A.6.1
+      name: Management guidance for AI system development
+      description: Management guidance for responsible AI development.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1
+      ref_id: A.6.1.2
+      name: Objectives for responsible development of AI system
+      description: Define objectives for responsible AI system development.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1
+      ref_id: A.6.1.3
+      name: Processes for responsible AI system design and development
+      description: Establish processes for responsible AI design and development.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6
+      ref_id: A.6.2
+      name: AI system life cycle
+      description: Controls across AI system lifecycle stages.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2
+      ref_id: A.6.2.2
+      name: AI system requirements and specification
+      description: Define and document AI system requirements and specifications.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2
+      ref_id: A.6.2.3
+      name: Documentation of AI system design and development
+      description: Document AI system design and development activities.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2
+      ref_id: A.6.2.4
+      name: AI system verification and validation
+      description: Verify and validate AI systems against requirements.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2
+      ref_id: A.6.2.5
+      name: AI system deployment
+      description: Control deployment of AI systems into production.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2
+      ref_id: A.6.2.6
+      name: AI system operation and monitoring
+      description: Monitor AI system operation and performance.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2
+      ref_id: A.6.2.7
+      name: AI system technical documentation
+      description: Maintain technical documentation for AI systems.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2
+      ref_id: A.6.2.8
+      name: AI system recording of event logs
+      description: Record event logs for AI system activities.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.7
+      assessable: false
+      depth: 1
+      ref_id: A.7
+      name: Data for AI systems
+      description: Controls for data management in AI systems.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7
+      ref_id: A.7.2
+      name: Data for development and enhancement of AI system
+      description: Manage data used for AI system development and enhancement.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7
+      ref_id: A.7.3
+      name: Acquisition of data
+      description: Control acquisition of data for AI systems.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7
+      ref_id: A.7.4
+      name: Quality of data for AI systems
+      description: Ensure data quality meets AI system requirements.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7
+      ref_id: A.7.5
+      name: Data provenance
+      description: Track and document data origin and lineage.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7
+      ref_id: A.7.6
+      name: Data preparation
+      description: Control data preparation processes for AI systems.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.8
+      assessable: false
+      depth: 1
+      ref_id: A.8
+      name: Information for interested parties of AI systems
+      description: Controls for stakeholder information and communication.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8
+      ref_id: A.8.2
+      name: System documentation and information for users
+      description: Provide system documentation and user information.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8
+      ref_id: A.8.3
+      name: External reporting
+      description: Report externally on AI system activities as required.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8
+      ref_id: A.8.4
+      name: Communication of incidents
+      description: Communicate AI-related incidents to relevant parties.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8
+      ref_id: A.8.5
+      name: Information for interested parties
+      description: Provide information to interested parties about AI systems.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.9
+      assessable: false
+      depth: 1
+      ref_id: A.9
+      name: Use of AI systems
+      description: Controls for responsible use of AI systems.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9
+      ref_id: A.9.2
+      name: Processes for responsible use of AI systems
+      description: Establish processes for responsible AI system use.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9
+      ref_id: A.9.3
+      name: Objectives for responsible use of AI system
+      description: Define objectives for responsible use of AI systems.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9
+      ref_id: A.9.4
+      name: Intended use of the AI system
+      description: Document and communicate intended use of AI systems.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      assessable: false
+      depth: 1
+      ref_id: A.10
+      name: Third-party and customer relationships
+      description: Controls for third-party and customer relationships.
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      ref_id: A.10.2
+      name: Allocating responsibilities
+      description: Allocate AI-related responsibilities between parties.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      ref_id: A.10.3
+      name: Suppliers
+      description: Manage suppliers involved in AI system activities.
+      implementation_groups:
+      - controls
+    - urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      ref_id: A.10.4
+      name: Customers
+      description: Manage customer relationships for AI systems.
+      implementation_groups:
+      - controls
