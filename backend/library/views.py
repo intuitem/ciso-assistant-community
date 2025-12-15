@@ -22,7 +22,7 @@ from django.http import HttpResponse
 
 import django_filters as df
 from core.helpers import get_sorted_requirement_nodes
-from core.models import StoredLibrary, LoadedLibrary, Framework
+from core.models import StoredLibrary, LoadedLibrary, Framework, LibraryUpdater
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
@@ -307,7 +307,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     status=HTTP_400_BAD_REQUEST,
                 )  # This can cause translation issues
             return Response({"status": "success"})
-        except Exception:
+        except Exception as e:
+            logger.error("Failed to load library", error=e)
             return Response(
                 {"error": "Failed to load library"},  # This must translated
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
@@ -574,6 +575,14 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             folder=Folder.get_root_folder(),
         ):
             return Response(status=HTTP_403_FORBIDDEN)
+        strategy = request.query_params.get("action")
+        if strategy and strategy not in ["rule_of_three", "reset", "clamp"]:
+            return Response(
+                {
+                    "error": "Invalid strategy. Must be one of 'rule_of_three', 'reset', 'clamp'."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             library = LoadedLibrary.objects.get(**{key: pk})
@@ -581,13 +590,35 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             return Response(
                 data="libraryNotFound", status=HTTP_404_NOT_FOUND
             )  # Error messages could be returned as JSON instead
-
-        error_msg = library.update()
+        try:
+            error_msg = library.update(strategy=strategy)
+        except LibraryUpdater.ScoreChangeDetected as e:
+            # Score boundaries changed - need user decision
+            return Response(
+                {
+                    "error": "score_change_detected",
+                    "framework_urn": e.framework_urn,
+                    "prev_scores": e.prev_scores,
+                    "new_scores": e.new_scores,
+                    "affected_assessments": e.affected_assessments,
+                    "strategies": e.strategies,
+                    "message": "Score boundaries have changed. Please choose a strategy.",
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+        except Exception as e:
+            logger.error("Failed to update library", error=e)
+            return Response(
+                {"error": "libraryUpdateFailed"},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
         if error_msg is None:
-            return Response(status=HTTP_204_NO_CONTENT)
-        return Response(
-            error_msg, status=HTTP_422_UNPROCESSABLE_ENTITY
-        )  # We must make at least one error message
+            return Response({"status": "success"})
+        else:
+            return Response(
+                {"status": "error", "error": error_msg},
+                status=HTTP_400_BAD_REQUEST,
+            )
 
     @action(methods=("get",), detail=False, url_path="available-updates")
     def available_updates(self, request):
