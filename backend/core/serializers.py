@@ -1600,7 +1600,6 @@ class EvidenceImportExportSerializer(BaseModelSerializer):
             "description",
             "created_at",
             "updated_at",
-            "owner",
             "status",
             "expiry_date",
         ]
