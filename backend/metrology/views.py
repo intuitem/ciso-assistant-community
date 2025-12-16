@@ -40,6 +40,17 @@ class MetricDefinitionViewSet(BaseModelViewSet):
     def category(self, request):
         return Response(dict(MetricDefinition.Category.choices))
 
+    @action(detail=False, name="Get provider choices")
+    def provider(self, request):
+        providers = (
+            MetricDefinition.objects.exclude(provider__isnull=True)
+            .exclude(provider="")
+            .values_list("provider", flat=True)
+            .distinct()
+            .order_by("provider")
+        )
+        return Response({p: p for p in providers})
+
 
 class MetricInstanceViewSet(BaseModelViewSet):
     """

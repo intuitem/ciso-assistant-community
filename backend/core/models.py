@@ -1691,8 +1691,14 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     @property
     def get_name_translated(self) -> str:
         translations = self.translations if self.translations else {}
-        locale_translation = translations.get(get_language(), "")
-        return locale_translation.capitalize() or self.name.capitalize()
+        locale_translation = translations.get(get_language(), {})
+        if isinstance(locale_translation, dict):
+            locale_translation = locale_translation.get("name", "")
+        return (
+            locale_translation.capitalize()
+            if locale_translation
+            else self.name.capitalize()
+        )
 
     def __str__(self) -> str:
         return (

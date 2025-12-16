@@ -2333,14 +2333,14 @@ export const listViewFields = {
 		}
 	},
 	'metric-definitions': {
-		head: ['ref_id', 'name', 'description', 'category', 'provider', 'labels', 'folder'],
-		body: ['ref_id', 'name', 'description', 'category', 'provider', 'filtering_labels', 'folder'],
+		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			category: {
 				component: AutocompleteSelect,
 				props: {
-					optionsEndpoint: 'metrology/metric-definitions/category',
+					optionsEndpoint: 'metric-definitions/category',
 					optionsLabelField: 'label',
 					optionsValueField: 'value',
 					label: 'category',
@@ -2360,7 +2360,7 @@ export const listViewFields = {
 				...PROVIDER_FILTER,
 				props: {
 					...PROVIDER_FILTER.props,
-					optionsEndpoint: 'metrology/metric-definitions/provider'
+					optionsEndpoint: 'metric-definitions/provider'
 				}
 			},
 			filtering_labels: LABELS_FILTER

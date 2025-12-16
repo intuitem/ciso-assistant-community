@@ -49,7 +49,7 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
             "ref_id",
             "id",
             "category",
-            "unit",
+            {"unit": ["name", "id"]},
             "choices_definition",
             "higher_is_better",
         ]
@@ -61,6 +61,7 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
         source="get_collection_frequency_display", read_only=True
     )
     current_value = serializers.SerializerMethodField()
+    unit = serializers.SerializerMethodField()
 
     class Meta:
         model = MetricInstance
@@ -69,6 +70,15 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
     def get_current_value(self, obj):
         """Get the current value from the latest sample"""
         return obj.current_value()
+
+    def get_unit(self, obj):
+        """Get the unit from the metric definition"""
+        if obj.metric_definition and obj.metric_definition.unit:
+            return {
+                "id": str(obj.metric_definition.unit.id),
+                "name": obj.metric_definition.unit.name,
+            }
+        return None
 
 
 # CustomMetricSample serializers

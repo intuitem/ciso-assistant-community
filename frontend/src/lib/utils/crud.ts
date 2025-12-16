@@ -2167,10 +2167,28 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'metric_definition', urlModel: 'metric-definitions' },
+			{ field: 'unit', urlModel: 'terminologies' },
 			{ field: 'owner', urlModel: 'users' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'collection_frequency' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'folder' },
+			{ field: 'metric_definition' },
+			{ field: 'unit' },
+			{ field: 'owner' },
+			{ field: 'status' },
+			{ field: 'collection_frequency' },
+			{ field: 'target_value' },
+			{ field: 'current_value' },
+			{ field: 'filtering_labels' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
 		reverseForeignKeyFields: [
 			{
 				field: 'metric_instance',
