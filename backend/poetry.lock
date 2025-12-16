@@ -816,30 +816,35 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-allauth"
-version = "65.0.2"
+version = "65.13.0"
 description = "Integrated set of Django applications addressing authentication, registration, account management as well as 3rd party (social) account authentication."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "django_allauth-65.0.2.tar.gz", hash = "sha256:6b5b3a7a65b1c28078b6eb0dd234310b58a44e8addfd187dc30437b0b2bc41a5"},
+    {file = "django_allauth-65.13.0-py3-none-any.whl", hash = "sha256:119c0cf1cc2e0d1a0fe2f13588f30951d64989256084de2d60f13ab9308f9fa0"},
+    {file = "django_allauth-65.13.0.tar.gz", hash = "sha256:7d7b7e7ad603eb3864c142f051e2cce7be2f9a9c6945a51172ec83d48c6c843b"},
 ]
 
 [package.dependencies]
-Django = ">=4.2"
-fido2 = {version = ">=1.1.2", optional = true, markers = "extra == \"mfa\""}
-pyjwt = {version = ">=1.7", extras = ["crypto"], optional = true, markers = "extra == \"socialaccount\""}
+asgiref = ">=3.8.1"
+Django = ">=4.2.16"
+fido2 = {version = ">=1.1.2,<3", optional = true, markers = "extra == \"mfa\""}
+oauthlib = {version = ">=3.3.0,<4", optional = true, markers = "extra == \"socialaccount\""}
+pyjwt = {version = ">=2.0,<3", extras = ["crypto"], optional = true, markers = "extra == \"socialaccount\""}
 python3-saml = {version = ">=1.15.0,<2.0.0", optional = true, markers = "extra == \"saml\""}
-qrcode = {version = ">=7.0.0", optional = true, markers = "extra == \"mfa\""}
-requests = {version = ">=2.0.0", optional = true, markers = "extra == \"socialaccount\""}
-requests-oauthlib = {version = ">=0.3.0", optional = true, markers = "extra == \"socialaccount\""}
+qrcode = {version = ">=7.0.0,<9", optional = true, markers = "extra == \"mfa\""}
+requests = {version = ">=2.0.0,<3", optional = true, markers = "extra == \"socialaccount\""}
 
 [package.extras]
-mfa = ["fido2 (>=1.1.2)", "qrcode (>=7.0.0)"]
-openid = ["python3-openid (>=3.0.8)"]
+headless = ["pyjwt[crypto] (>=2.0,<3)"]
+headless-spec = ["PyYAML (>=6,<7)"]
+idp-oidc = ["oauthlib (>=3.3.0,<4)", "pyjwt[crypto] (>=2.0,<3)"]
+mfa = ["fido2 (>=1.1.2,<3)", "qrcode (>=7.0.0,<9)"]
+openid = ["python3-openid (>=3.0.8,<4)"]
 saml = ["python3-saml (>=1.15.0,<2.0.0)"]
-socialaccount = ["pyjwt[crypto] (>=1.7)", "requests (>=2.0.0)", "requests-oauthlib (>=0.3.0)"]
-steam = ["python3-openid (>=3.0.8)"]
+socialaccount = ["oauthlib (>=3.3.0,<4)", "pyjwt[crypto] (>=2.0,<3)", "requests (>=2.0.0,<3)"]
+steam = ["python3-openid (>=3.0.8,<4)"]
 
 [[package]]
 name = "django-auditlog"
@@ -1934,14 +1939,14 @@ files = [
 
 [[package]]
 name = "oauthlib"
-version = "3.2.2"
+version = "3.3.1"
 description = "A generic, spec-compliant, thorough implementation of the OAuth request-signing logic"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "oauthlib-3.2.2-py3-none-any.whl", hash = "sha256:8139f29aac13e25d502680e9e19963e83f16838d48a0d71c287fe40e7067fbca"},
-    {file = "oauthlib-3.2.2.tar.gz", hash = "sha256:9859c40929662bec5d64f34d01c99e093149682a3f38915dc0655d5a633dd918"},
+    {file = "oauthlib-3.3.1-py3-none-any.whl", hash = "sha256:88119c938d2b8fb88561af5f6ee0eec8cc8d552b7bb1f712743136eb7523b7a1"},
+    {file = "oauthlib-3.3.1.tar.gz", hash = "sha256:0f0f8aa759826a193cf66c12ea1af1637f87b9b4622d46e866952bb022e538c9"},
 ]
 
 [package.extras]
@@ -3429,4 +3434,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "83e775d1d085b2d63e89a52842221af9b8c8d00fc8bb2a2bf09756cf09e401b6"
+content-hash = "f960e1d7a97bd7ff637fb021912bb56c40b9c649855b73220833fe03efbf8541"
