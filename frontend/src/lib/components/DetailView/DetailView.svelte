@@ -658,7 +658,7 @@
 							modalSendInvitation(
 								data.data.id,
 								data.data.email,
-								'/representatives/send-invitation'
+								`/representatives/${data.data.id}/send-invitation`
 							)}
 						data-testid="send-invitation-button"
 					>

@@ -268,19 +268,19 @@ class SessionTokenView(views.APIView):
 
 
 class SendInvitationView(views.APIView):
-     permission_classes = [permissions.AllowAny]
-     @method_decorator(ensure_csrf_cookie)
-     def post(self, request):
-        email = request.data.get("email")  # type: ignore[assignment]
-        if not email:
+    permission_classes = [permissions.AllowAny]
+
+    @method_decorator(ensure_csrf_cookie)
+    def post(self, request):
+        id = request.data.get("id")
+        if not id:
             return Response(
-                data={"error": "emailRequired"},
+                data={"error": "idRequired"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        associated_user = User.objects.filter(email=email).first()
+        associated_user = User.objects.filter(id=id).first()
 
-        # Do not leak whether the user exists / is local; match PasswordResetView semantics.
         if not (associated_user and associated_user.is_local):
             return Response(status=HTTP_202_ACCEPTED)
 
@@ -297,15 +297,23 @@ class SendInvitationView(views.APIView):
                 email_template_name="registration/first_connexion_email.html",
                 subject=_("CISO Assistant: Invitation"),
             )
-            logger.info("invitation email sent", email=email, user_id=associated_user.id)
+            logger.info(
+                "invitation email sent", email=email, user_id=associated_user.id
+            )
         except Exception as e:
-            logger.error("invitation email failed", email=email, user_id=associated_user.id, error=e)
+            logger.error(
+                "invitation email failed",
+                email=email,
+                user_id=associated_user.id,
+                error=e,
+            )
             return Response(
                 data={"error": "An error occurred while sending the email"},
                 status=HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
         return Response(status=HTTP_202_ACCEPTED)
+
 
 class PasswordResetView(views.APIView):
     permission_classes = [permissions.AllowAny]
