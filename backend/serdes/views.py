@@ -1097,7 +1097,7 @@ class BatchUploadAttachmentsView(APIView):
                     )
                     stats["errors"].append(
                         {
-                            "error": f"Error processing block: {str(e)}",
+                            "error": "Error processing block",
                             "offset": offset,
                         }
                     )
@@ -1110,7 +1110,10 @@ class BatchUploadAttachmentsView(APIView):
                 exc_info=True,
             )
             return Response(
-                {"error": "BatchUploadFailed", "message": str(e)},
+                {
+                    "error": "BatchUploadFailed",
+                    "message": "An internal error has occurred.",
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 

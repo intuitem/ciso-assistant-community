@@ -157,9 +157,7 @@ class AttachmentImporter:
                                     f"evidence_id={evidence_id}, version={version}"
                                 )
                             except Exception as e:
-                                stats["errors"].append(
-                                    f"Failed to restore {filename}: {str(e)}"
-                                )
+                                stats["errors"].append(f"Failed to restore {filename}")
                         else:
                             stats["restored"] += 1
 
