@@ -113,7 +113,7 @@
 			cacheLock={cacheLocks['risk_matrix']}
 			bind:cachedValue={formDataCache['risk_matrix']}
 			label={m.riskMatrix()}
-			helpText={m.ebiosRmMatrixHelpText()}
+			helpText={m.ebiosRmMatrixHelpText() + '\n' + m.riskAssessmentMatrixHelpText()}
 		/>
 		<MarkdownField
 			{form}
