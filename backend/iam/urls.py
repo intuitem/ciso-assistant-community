@@ -9,7 +9,7 @@ from .views import (
     LoginView,
     PasswordResetView,
     ResetPasswordConfirmView,
-    SendInvtationView,
+    SendInvitationView,
     SessionTokenView,
     SetPasswordView,
 )
@@ -26,7 +26,7 @@ urlpatterns = [
         ResetPasswordConfirmView.as_view(),
         name="password-reset-confirm",
     ),
-    path("send-invitation/", SendInvtationView.as_view(), name="send-invitation"),
+    path("send-invitation/", SendInvitationView.as_view(), name="send-invitation"),
     path("set-password/", SetPasswordView.as_view(), name="set-password"),
     path("sso/", include("iam.sso.urls")),
     path(

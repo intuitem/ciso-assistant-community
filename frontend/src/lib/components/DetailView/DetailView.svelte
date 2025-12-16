@@ -220,7 +220,6 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: m.confirmModalTitle(),
 			body: m.sureToSendQuestionnaire({ questionnaire: name })
 		};
