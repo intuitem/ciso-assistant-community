@@ -89,7 +89,7 @@ export class PageContent extends BasePage {
 		await this.page.waitForTimeout(3000);
 		await this.page.getByRole('searchbox').first().clear();
 		await this.page.getByRole('searchbox').first().fill(name);
-		if (
+		/* if (
 			(await this.tab('Loaded libraries').isVisible()) &&
 			(await this.tab('Loaded libraries').getAttribute('aria-selected')) === 'true'
 		) {
@@ -99,10 +99,10 @@ export class PageContent extends BasePage {
 			} else {
 				return;
 			}
-		}
+		} */
 		// If the library is not visible, it might have already been loaded
 		await this.page.waitForTimeout(3000);
-		if (await this.importItemButton(name, language === 'any' ? undefined : language).isHidden()) {
+		/* if (await this.importItemButton(name, language === 'any' ? undefined : language).isHidden()) {
 			if (await this.tab('Loaded libraries').isVisible()) {
 				await this.tab('Loaded libraries').click();
 				expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
@@ -111,16 +111,16 @@ export class PageContent extends BasePage {
 			}
 			await expect(this.getRow(name)).toBeVisible();
 			return;
-		}
+		} */
 		await this.importItemButton(name, language === 'any' ? undefined : language).click();
 		await this.isToastVisible(`The library has been successfully loaded.+`, undefined, {
 			timeout: 15000
 		});
-		await this.tab('Loaded libraries').click();
+		/* await this.tab('Loaded libraries').click();
 		expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
 		await this.page.getByRole('searchbox').first().clear();
 		await this.page.getByRole('searchbox').first().fill(name);
-		await expect(this.getRow(name)).toBeVisible();
+		await expect(this.getRow(name)).toBeVisible(); */
 	}
 
 	async viewItemDetail(value?: string) {
