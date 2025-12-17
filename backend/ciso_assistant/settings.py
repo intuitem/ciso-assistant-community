@@ -97,6 +97,7 @@ if LOG_OUTFILE:
         "class": "logging.handlers.WatchedFileHandler",
         "filename": "ciso-assistant.log",
         "formatter": "json",
+        "filters": ["ignore_api_build"],
     }
     LOGGING["loggers"][""]["handlers"].append("file")
 
