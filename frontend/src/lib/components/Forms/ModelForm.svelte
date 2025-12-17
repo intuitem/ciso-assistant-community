@@ -75,6 +75,8 @@
 	import CustomMetricSampleForm from './ModelForm/CustomMetricSampleForm.svelte';
 	import DashboardForm from './ModelForm/DashboardForm.svelte';
 	import DashboardWidgetForm from './ModelForm/DashboardWidgetForm.svelte';
+	import DashboardTextWidgetForm from './ModelForm/DashboardTextWidgetForm.svelte';
+	import DashboardBuiltinWidgetForm from './ModelForm/DashboardBuiltinWidgetForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -825,6 +827,27 @@
 			/>
 		{:else if URLModel === 'dashboard-widgets'}
 			<DashboardWidgetForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{object}
+				{...rest}
+			/>
+		{:else if URLModel === 'dashboard-text-widgets'}
+			<DashboardTextWidgetForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{object}
+			/>
+		{:else if URLModel === 'dashboard-builtin-widgets'}
+			<DashboardBuiltinWidgetForm
 				{form}
 				{model}
 				{cacheLocks}

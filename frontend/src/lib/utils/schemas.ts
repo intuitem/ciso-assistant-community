@@ -1384,6 +1384,8 @@ export const DashboardWidgetSchema = z.object({
 	target_model: z.string().optional().nullable(),
 	target_object_id: z.string().uuid().optional().nullable(),
 	metric_key: z.string().optional().nullable(),
+	// Text widget content (for chart_type='text')
+	text_content: z.string().optional().nullable(),
 	// Common fields
 	title: z.string().optional().nullable(),
 	position_x: z.coerce.number().min(0).max(11).default(0),
@@ -1471,7 +1473,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'metric-instances': MetricInstanceSchema,
 	'custom-metric-samples': CustomMetricSampleSchema,
 	dashboards: DashboardSchema,
-	'dashboard-widgets': DashboardWidgetSchema
+	'dashboard-widgets': DashboardWidgetSchema,
+	'dashboard-text-widgets': DashboardWidgetSchema,
+	'dashboard-builtin-widgets': DashboardWidgetSchema
 };
 
 export const modelSchema = (model: string) => {

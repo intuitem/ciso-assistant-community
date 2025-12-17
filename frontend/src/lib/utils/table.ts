@@ -2334,7 +2334,16 @@ export const listViewFields = {
 	},
 	'metric-definitions': {
 		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'labels', 'folder'],
-		body: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'filtering_labels', 'folder'],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'unit',
+			'provider',
+			'filtering_labels',
+			'folder'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			category: {
@@ -2466,6 +2475,36 @@ export const listViewFields = {
 					optionsValueField: 'value',
 					label: 'chartType',
 					browserCache: 'force-cache',
+					multiple: true
+				}
+			}
+		}
+	},
+	'dashboard-text-widgets': {
+		head: ['display_title', 'dashboard'],
+		body: ['display_title', 'dashboard'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			dashboard: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/dashboards',
+					label: 'dashboard',
+					multiple: true
+				}
+			}
+		}
+	},
+	'dashboard-builtin-widgets': {
+		head: ['display_title', 'dashboard'],
+		body: ['display_title', 'dashboard'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			dashboard: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/dashboards',
+					label: 'dashboard',
 					multiple: true
 				}
 			}

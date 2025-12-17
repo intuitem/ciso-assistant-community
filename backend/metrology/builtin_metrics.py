@@ -13,6 +13,15 @@ METRIC_TYPE_PERCENTAGE = "percentage"  # 0-100 percentage
 METRIC_TYPE_BREAKDOWN = "breakdown"  # Dictionary of category -> count
 METRIC_TYPE_STATUS = "status"  # Single status value (string)
 
+# Chart types allowed per metric type
+# Maps metric_type -> list of allowed chart_type values
+METRIC_TYPE_CHART_TYPES = {
+    METRIC_TYPE_NUMBER: ["kpi_card", "gauge", "sparkline", "line", "area"],
+    METRIC_TYPE_PERCENTAGE: ["gauge", "kpi_card", "sparkline", "line", "area"],
+    METRIC_TYPE_BREAKDOWN: ["donut", "bar", "table"],
+    METRIC_TYPE_STATUS: ["kpi_card"],
+}
+
 
 # Registry of available builtin metrics per model
 # Format: model_name -> {metric_key: {label, type, description}}
@@ -150,3 +159,21 @@ def get_metric_choices_for_model(model_name: str) -> list[tuple[str, str]]:
     """
     metrics = get_available_metrics_for_model(model_name)
     return [(key, str(meta["label"])) for key, meta in metrics.items()]
+
+
+def get_chart_types_for_metric(model_name: str, metric_key: str) -> list[str]:
+    """
+    Returns the allowed chart types for a specific metric.
+
+    Args:
+        model_name: The Django model class name
+        metric_key: The metric key
+
+    Returns:
+        List of allowed chart type values
+    """
+    metrics = get_available_metrics_for_model(model_name)
+    if metric_key not in metrics:
+        return []
+    metric_type = metrics[metric_key].get("type", METRIC_TYPE_NUMBER)
+    return METRIC_TYPE_CHART_TYPES.get(metric_type, [])

@@ -596,9 +596,10 @@ class Dashboard(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
 class DashboardWidget(AbstractBaseModel, FolderMixin):
     """
     Individual widget configuration for dashboards.
-    Each widget displays either:
+    Each widget displays one of:
     - A custom metric (via metric_instance), or
-    - A builtin metric (via target_content_type + target_object_id + metric_key)
+    - A builtin metric (via target_content_type + target_object_id + metric_key), or
+    - Text content with markdown support (via chart_type=TEXT + text_content)
     """
 
     class ChartType(models.TextChoices):
@@ -609,6 +610,7 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
         GAUGE = "gauge", _("Gauge")
         SPARKLINE = "sparkline", _("Sparkline")
         TABLE = "table", _("Table")
+        TEXT = "text", _("Text")
 
     class TimeRange(models.TextChoices):
         LAST_HOUR = "last_hour", _("Last Hour")
@@ -684,6 +686,14 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
         ),
     )
 
+    # Option 3: Text widget (static content with markdown support)
+    text_content = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_("Text content"),
+        help_text=_("Markdown content for text widgets"),
+    )
+
     # Grid position (12-column grid layout)
     position_x = models.PositiveIntegerField(
         default=0,
@@ -734,7 +744,8 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
     )
     show_legend = models.BooleanField(
         default=True,
-        verbose_name=_("Show legend"),
+        verbose_name=_("Show title and legend"),
+        help_text=_("Display widget title bar and legend (for charts)"),
     )
 
     # Additional configuration stored as JSON for flexibility
@@ -757,9 +768,14 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
 
     @property
     def display_title(self):
-        """Returns the widget title or falls back to metric instance name or metric key"""
+        """Returns the widget title or falls back to metric instance name or metric key.
+        Returns None for text widgets without a title (they don't need one).
+        """
         if self.title:
             return self.title
+        # Text widgets don't need a fallback title
+        if self.chart_type == self.ChartType.TEXT:
+            return None
         if self.metric_instance:
             return self.metric_instance.name
         if self.metric_key:
@@ -777,11 +793,37 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
         """Returns True if this widget displays a custom metric"""
         return self.metric_instance is not None
 
+    @property
+    def is_text_widget(self):
+        """Returns True if this widget displays text content"""
+        return self.chart_type == self.ChartType.TEXT
+
     def clean(self):
         """Validate widget configuration"""
         from django.core.exceptions import ValidationError
 
-        # Validate mutual exclusivity: either custom metric OR builtin metric
+        # Text widgets only need title and text_content, not metrics
+        if self.is_text_widget:
+            # Text widgets should not have metric fields set
+            if self.metric_instance is not None:
+                raise ValidationError(
+                    {
+                        "metric_instance": _(
+                            "Text widgets should not have a metric instance."
+                        )
+                    }
+                )
+            if self.target_content_type is not None:
+                raise ValidationError(
+                    {
+                        "target_content_type": _(
+                            "Text widgets should not have builtin metric fields."
+                        )
+                    }
+                )
+            return  # Text widgets are valid without metrics
+
+        # For non-text widgets: validate mutual exclusivity of custom metric OR builtin metric
         # For builtin detection, require target_content_type to be set
         # (target_object_id and metric_key alone don't constitute a builtin metric)
         has_custom = self.metric_instance is not None

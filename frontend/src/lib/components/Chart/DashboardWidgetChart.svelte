@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import MarkdownRenderer from '../MarkdownRenderer.svelte';
 
 	interface Props {
 		widget: any;
@@ -163,6 +164,10 @@
 	let chartInstance: any = null;
 
 	onMount(async () => {
+		// Skip ECharts for text widgets - they render markdown, not charts
+		if (widget.chart_type === 'text') {
+			return;
+		}
 		// Skip ECharts for KPI/table with scalar values, but allow for breakdown metrics
 		if ((widget.chart_type === 'kpi_card' || widget.chart_type === 'table') && !isBreakdownMetric) {
 			return; // These don't use ECharts for scalar values
@@ -558,7 +563,12 @@
 	}
 </script>
 
-{#if widget.chart_type === 'kpi_card' && !isBreakdownMetric}
+{#if widget.chart_type === 'text'}
+	<!-- Text widget with markdown rendering -->
+	<div class="h-full overflow-auto p-2">
+		<MarkdownRenderer content={widget.text_content} />
+	</div>
+{:else if widget.chart_type === 'kpi_card' && !isBreakdownMetric}
 	<!-- KPI Card for scalar values -->
 	<div class="flex items-center justify-center h-full">
 		<div class="flex items-baseline gap-3">

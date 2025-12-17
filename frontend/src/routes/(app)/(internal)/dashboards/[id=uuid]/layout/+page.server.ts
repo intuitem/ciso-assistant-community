@@ -43,6 +43,42 @@ export const load: PageServerLoad = async (event) => {
 		{ errors: false }
 	);
 
+	// Prepare the text widget create form
+	const textWidgetModel = getModelInfo('dashboard-text-widgets');
+	const textWidgetSchema = modelSchema('dashboard-text-widgets');
+	const textWidgetCreateForm = await superValidate(
+		{
+			dashboard: event.params.id,
+			folder: detailData.data.folder?.id || detailData.data.folder,
+			position_y: firstFreeRow,
+			// Set text widget specific defaults
+			chart_type: 'text',
+			time_range: 'all_time',
+			aggregation: 'none',
+			show_target: false,
+			show_legend: false,
+			height: 1
+		},
+		zod(textWidgetSchema),
+		{ errors: false }
+	);
+
+	// Prepare the builtin widget create form
+	const builtinWidgetModel = getModelInfo('dashboard-builtin-widgets');
+	const builtinWidgetSchema = modelSchema('dashboard-builtin-widgets');
+	const builtinWidgetCreateForm = await superValidate(
+		{
+			dashboard: event.params.id,
+			folder: detailData.data.folder?.id || detailData.data.folder,
+			position_y: firstFreeRow,
+			time_range: 'all_time',
+			aggregation: 'none',
+			show_target: false
+		},
+		zod(builtinWidgetSchema),
+		{ errors: false }
+	);
+
 	// Fetch selectOptions for widget form
 	const selectFields = urlParamModelSelectFields('dashboard-widgets');
 	const selectOptions: Record<string, any> = {};
@@ -68,11 +104,18 @@ export const load: PageServerLoad = async (event) => {
 	const supportedModelsResponse = await event.fetch(supportedModelsEndpoint);
 	const supportedModels = supportedModelsResponse.ok ? await supportedModelsResponse.json() : {};
 
+	// Add selectOptions to builtin widget model
+	builtinWidgetModel.selectOptions = selectOptions;
+
 	return {
 		...detailData,
 		widgets,
 		widgetModel,
 		widgetCreateForm,
+		textWidgetModel,
+		textWidgetCreateForm,
+		builtinWidgetModel,
+		builtinWidgetCreateForm,
 		supportedModels
 	};
 };

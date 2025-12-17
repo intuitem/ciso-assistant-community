@@ -15,6 +15,40 @@
 	const GRID_COLS = 12;
 	const ROW_HEIGHT = 150;
 
+	// Chart type labels
+	const chartTypeLabels: Record<string, string> = {
+		kpi_card: 'KPI Card',
+		gauge: 'Gauge',
+		sparkline: 'Sparkline',
+		line: 'Line',
+		area: 'Area',
+		bar: 'Bar',
+		table: 'Table',
+		donut: 'Donut',
+		text: 'Text'
+	};
+
+	// Get effective chart type display (accounting for breakdown fallbacks)
+	function getEffectiveChartTypeDisplay(widget: any): string {
+		// Check if this is a breakdown metric
+		const isBreakdownMetric = widget.metric_key && widget.metric_key.endsWith('_breakdown');
+
+		if (isBreakdownMetric) {
+			// For breakdown metrics, donut, bar and table are valid
+			if (
+				widget.chart_type === 'donut' ||
+				widget.chart_type === 'bar' ||
+				widget.chart_type === 'table'
+			) {
+				return widget.chart_type_display;
+			}
+			// Other types (kpi_card, gauge) fall back to donut for breakdowns
+			return chartTypeLabels['donut'] || 'Donut';
+		}
+
+		return widget.chart_type_display;
+	}
+
 	// Calculate grid position style
 	function getWidgetStyle(widget: any): string {
 		const x = widget.position_x || 0;
@@ -75,14 +109,18 @@
 						class="card p-4 bg-white dark:bg-surface-900 shadow-sm flex flex-col"
 						style={getWidgetStyle(widget)}
 					>
-						<div class="mb-3">
-							<h4 class="font-semibold text-base">
-								{widget.display_title || widget.title || widget.metric_instance?.name}
-							</h4>
-							<p class="text-xs text-surface-500">
-								{widget.chart_type_display} | {widget.time_range_display}
-							</p>
-						</div>
+						{#if widget.display_title || widget.title}
+							<div class="mb-3">
+								<h4 class="font-semibold text-base">
+									{widget.display_title || widget.title}
+								</h4>
+								{#if widget.chart_type !== 'text'}
+									<p class="text-xs text-surface-500">
+										{getEffectiveChartTypeDisplay(widget)} | {widget.time_range_display}
+									</p>
+								{/if}
+							</div>
+						{/if}
 
 						<!-- Chart based on widget type -->
 						<div class="flex-1 min-h-0">

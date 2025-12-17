@@ -147,6 +147,7 @@ class DashboardWidgetWriteSerializer(BaseModelSerializer):
             "target_object_id": {"required": False},
             "metric_key": {"required": False},
             "metric_instance": {"required": False},
+            "text_content": {"required": False},
         }
 
     def get_target_content_type_display(self, obj):
@@ -207,10 +208,45 @@ class DashboardWidgetWriteSerializer(BaseModelSerializer):
         # If target_object_id is empty string, set to None
         if data.get("target_object_id") == "":
             data["target_object_id"] = None
+        # If text_content is empty string, set to None
+        if data.get("text_content") == "":
+            data["text_content"] = None
 
-        # Validate metric configuration: must have either custom or builtin metric
         # For partial updates (PATCH), check existing instance values if not in data
         instance = getattr(self, "instance", None)
+
+        # Determine chart_type (from data or existing instance)
+        if "chart_type" in data:
+            chart_type = data.get("chart_type")
+        elif instance:
+            chart_type = instance.chart_type
+        else:
+            chart_type = DashboardWidget.ChartType.KPI_CARD
+
+        # Text widgets don't need metric configuration
+        # Compare with string value "text" since chart_type could be either string or enum
+        is_text_widget = (
+            chart_type == "text" or chart_type == DashboardWidget.ChartType.TEXT
+        )
+
+        if is_text_widget:
+            # Text widgets should not have metric fields - clear them if present
+            if data.get("metric_instance") is not None:
+                raise serializers.ValidationError(
+                    {
+                        "metric_instance": "Text widgets should not have a metric instance."
+                    }
+                )
+            if data.get("target_content_type") is not None:
+                raise serializers.ValidationError(
+                    {
+                        "target_content_type": "Text widgets should not have builtin metric fields."
+                    }
+                )
+            return data
+
+        # For non-text widgets: validate metric configuration
+        # Must have either custom or builtin metric
 
         # Determine metric_instance value (from data or existing instance)
         if "metric_instance" in data:
@@ -308,6 +344,7 @@ class DashboardWidgetReadSerializer(BaseModelSerializer):
     )
     is_builtin_metric = serializers.BooleanField(read_only=True)
     is_custom_metric = serializers.BooleanField(read_only=True)
+    is_text_widget = serializers.BooleanField(read_only=True)
     target_content_type_display = serializers.SerializerMethodField()
     target_object_name = serializers.SerializerMethodField()
 

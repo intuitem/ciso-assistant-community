@@ -18,6 +18,10 @@
 	const dashboard = $derived(data.data);
 	const widgetModel = $derived(data.widgetModel);
 	const widgetCreateForm = $derived(data.widgetCreateForm);
+	const textWidgetModel = $derived(data.textWidgetModel);
+	const textWidgetCreateForm = $derived(data.textWidgetCreateForm);
+	const builtinWidgetModel = $derived(data.builtinWidgetModel);
+	const builtinWidgetCreateForm = $derived(data.builtinWidgetCreateForm);
 	const supportedModels = $derived(data.supportedModels || {});
 
 	let widgets = $state(data.widgets || []);
@@ -41,11 +45,47 @@
 		kpi_card: { width: 2, height: 1 },
 		sparkline: { width: 3, height: 1 },
 		gauge: { width: 3, height: 2 },
+		donut: { width: 3, height: 2 },
 		line: { width: 4, height: 2 },
 		bar: { width: 4, height: 2 },
 		area: { width: 4, height: 2 },
-		table: { width: 4, height: 2 }
+		table: { width: 4, height: 2 },
+		text: { width: 2, height: 1 }
 	};
+
+	// Chart type labels for display
+	const chartTypeLabels: Record<string, string> = {
+		kpi_card: 'KPI Card',
+		gauge: 'Gauge',
+		sparkline: 'Sparkline',
+		line: 'Line',
+		area: 'Area',
+		bar: 'Bar',
+		table: 'Table',
+		donut: 'Donut',
+		text: 'Text'
+	};
+
+	// Get effective chart type display (accounting for breakdown fallbacks)
+	function getEffectiveChartTypeDisplay(widget: any): string {
+		// Check if this is a breakdown metric
+		const isBreakdownMetric = widget.metric_key && widget.metric_key.endsWith('_breakdown');
+
+		if (isBreakdownMetric) {
+			// For breakdown metrics, donut, bar and table are valid
+			if (
+				widget.chart_type === 'donut' ||
+				widget.chart_type === 'bar' ||
+				widget.chart_type === 'table'
+			) {
+				return widget.chart_type_display || chartTypeLabels[widget.chart_type] || widget.chart_type;
+			}
+			// Other types (kpi_card, gauge) fall back to donut for breakdowns
+			return chartTypeLabels['donut'] || 'Donut';
+		}
+
+		return widget.chart_type_display || chartTypeLabels[widget.chart_type] || widget.chart_type;
+	}
 
 	// Get minimum dimensions for a widget based on its chart type
 	function getMinDimensions(chartType: string): { width: number; height: number } {
@@ -78,7 +118,7 @@
 		widgets = data.widgets || [];
 	}
 
-	function openAddWidgetModal() {
+	function openAddCustomWidgetModal() {
 		modalStore.trigger({
 			type: 'component',
 			component: {
@@ -86,11 +126,41 @@
 				props: {
 					form: widgetCreateForm,
 					model: widgetModel,
-					formAction: '/dashboard-widgets?/create',
+					formAction: '/dashboard-widgets?/create'
+				}
+			},
+			title: safeTranslate('addCustomWidget')
+		});
+	}
+
+	function openAddBuiltinWidgetModal() {
+		modalStore.trigger({
+			type: 'component',
+			component: {
+				ref: CreateModal,
+				props: {
+					form: builtinWidgetCreateForm,
+					model: builtinWidgetModel,
+					formAction: '/dashboard-builtin-widgets?/create',
 					supportedModels: supportedModels
 				}
 			},
-			title: safeTranslate('addWidget')
+			title: safeTranslate('addBuiltinWidget')
+		});
+	}
+
+	function openAddTextWidgetModal() {
+		modalStore.trigger({
+			type: 'component',
+			component: {
+				ref: CreateModal,
+				props: {
+					form: textWidgetCreateForm,
+					model: textWidgetModel,
+					formAction: '/dashboard-widgets?/create'
+				}
+			},
+			title: safeTranslate('addTextWidget')
 		});
 	}
 
@@ -259,9 +329,17 @@
 			<h1 class="text-2xl font-bold">{m.edit()}: {dashboard.name}</h1>
 		</div>
 		<div class="flex items-center gap-2">
-			<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>
-				<i class="fa-solid fa-plus"></i>
-				{m.addWidget()}
+			<button class="btn preset-filled-primary-500" onclick={openAddBuiltinWidgetModal}>
+				<i class="fa-solid fa-chart-simple"></i>
+				{m.addBuiltinWidget()}
+			</button>
+			<button class="btn preset-tonal" onclick={openAddCustomWidgetModal}>
+				<i class="fa-solid fa-sliders"></i>
+				{m.addCustomWidget()}
+			</button>
+			<button class="btn preset-tonal" onclick={openAddTextWidgetModal}>
+				<i class="fa-solid fa-font"></i>
+				{m.addTextWidget()}
 			</button>
 			{#if hasChanges}
 				<form
@@ -353,12 +431,16 @@
 											'Widget'}
 									</h4>
 									<p class="text-xs text-surface-500 truncate">
-										{widget.chart_type_display || widget.chart_type}
+										{getEffectiveChartTypeDisplay(widget)}
 									</p>
 								</div>
 								<div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 									<a
-										href="/dashboard-widgets/{widget.id}/edit?next=/dashboards/{dashboard.id}/layout"
+										href="/{widget.chart_type === 'text'
+											? 'dashboard-text-widgets'
+											: widget.metric_key
+												? 'dashboard-builtin-widgets'
+												: 'dashboard-widgets'}/{widget.id}/edit?next=/dashboards/{dashboard.id}/layout"
 										class="btn btn-sm preset-tonal p-1"
 										title={m.edit()}
 									>
@@ -391,7 +473,9 @@
 														? 'fa-table'
 														: widget.chart_type === 'area'
 															? 'fa-chart-area'
-															: 'fa-chart-line'}"
+															: widget.chart_type === 'text'
+																? 'fa-font'
+																: 'fa-chart-line'}"
 								></i>
 							</div>
 
@@ -484,8 +568,8 @@
 			<div class="flex flex-col items-center justify-center min-h-[400px] text-surface-500">
 				<i class="fa-solid fa-chart-line text-6xl mb-4"></i>
 				<p class="mb-4">{m.noWidgetsYet()}</p>
-				<button class="btn preset-filled-primary-500" onclick={openAddWidgetModal}>
-					<i class="fa-solid fa-plus"></i>
+				<button class="btn preset-filled-primary-500" onclick={openAddBuiltinWidgetModal}>
+					<i class="fa-solid fa-chart-simple"></i>
 					{m.addFirstWidget()}
 				</button>
 			</div>

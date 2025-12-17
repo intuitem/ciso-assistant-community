@@ -69,9 +69,9 @@ export const load: LayoutServerLoad = async (event) => {
 	}
 	model.selectOptions = selectOptions;
 
-	// For dashboard-widgets, fetch supported models for builtin metrics
+	// For dashboard widgets, fetch supported models for builtin metrics
 	let supportedModels = {};
-	if (URLModel === 'dashboard-widgets') {
+	if (URLModel === 'dashboard-widgets' || URLModel === 'dashboard-builtin-widgets') {
 		const supportedModelsEndpoint = `${BASE_API_URL}/metrology/builtin-metric-samples/supported_models/`;
 		const supportedModelsResponse = await event.fetch(supportedModelsEndpoint);
 		if (supportedModelsResponse.ok) {

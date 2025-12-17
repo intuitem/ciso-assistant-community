@@ -171,7 +171,10 @@ class BuiltinMetricSampleViewSet(BaseModelViewSet):
     def supported_models(self, request):
         """
         Returns list of models that support builtin metrics with their available metrics.
+        Includes chart_types for each metric based on the metric type.
         """
+        from .builtin_metrics import METRIC_TYPE_CHART_TYPES
+
         result = {}
         for model_name, metrics in BUILTIN_METRICS.items():
             result[model_name] = {
@@ -179,6 +182,7 @@ class BuiltinMetricSampleViewSet(BaseModelViewSet):
                     "label": str(meta["label"]),
                     "type": meta["type"],
                     "description": str(meta["description"]),
+                    "chart_types": METRIC_TYPE_CHART_TYPES.get(meta["type"], []),
                 }
                 for key, meta in metrics.items()
             }
