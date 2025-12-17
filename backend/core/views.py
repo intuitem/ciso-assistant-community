@@ -6996,8 +6996,13 @@ class RequirementViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], name="Inspect specific requirements")
     def inspect_requirement(self, request, pk):
         requirement = RequirementNode.objects.get(id=pk)
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=RequirementAssessment,
+        )
         requirement_assessments = RequirementAssessment.objects.filter(
-            requirement=requirement
+            requirement=requirement, id__in=viewable_objects
         ).prefetch_related("folder", "compliance_assessment__perimeter")
         serialized_requirement_assessments = RequirementAssessmentReadSerializer(
             requirement_assessments, many=True
