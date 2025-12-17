@@ -40,7 +40,6 @@ class MappingEngine:
             "applied_controls",
             "security_exceptions",
             "evidences",
-            "id",
         ]
 
     # --- Compression helpers ---
@@ -262,17 +261,22 @@ class MappingEngine:
         self,
         source_audit: dict[str, str | dict[str, str]],
         requirement_mapping_set: dict,
+        source_of_the_sources: list[str],
+        path: list[str],
     ) -> dict[str, str | dict[str, str]]:
         if not source_audit.get("requirement_assessments"):
             return {}
         target_audit: dict[str, str | dict[str, str | dict[str, str]]] = {
             "requirement_assessments": defaultdict(dict)
         }
+
         # Framework info may be missing (library references frameworks not in DB).
         # Use .get() and treat missing info as "non equal" so we don't attempt
         # to copy scores that cannot be validated against a target framework.
         target_framework_urn = requirement_mapping_set.get("target_framework_urn", "")
         target_framework = self.frameworks.get(target_framework_urn)
+        with open("/home/martin/test.json", "w") as j:
+            j.write(str(source_of_the_sources))
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
             dst = mapping["target_requirement_urn"]
@@ -440,21 +444,42 @@ class MappingEngine:
             target_audit["requirement_assessments"][dst]["mapping_inference"] = {
                 "result": target_audit["requirement_assessments"][dst].get(
                     "result", ""
-                ),
-                "source_requirement_assessment": {
-                    "id": source_audit["requirement_assessments"][src].get("id"),
-                    "str": source_audit["requirement_assessments"][src].get("name"),
-                    "coverage": "full" if rel in ("equal", "superset") else "partial",
-                    "score": source_audit["requirement_assessments"][src].get("score"),
-                    "is_scored": source_audit["requirement_assessments"][src].get(
-                        "is_scored"
-                    ),
-                },
+                ),  
+                "used_path": path,
                 "annotation": source_audit["requirement_assessments"][src]
                 .get("mapping_inference", {})
                 .get("annotation", ""),
             }
 
+            mif = target_audit["requirement_assessments"][dst]["mapping_inference"].get(
+                "source_requirement_assessments"
+            )
+            if mif == None:
+                target_audit["requirement_assessments"][dst]["mapping_inference"][
+                    "source_requirement_assessments"
+                ] = defaultdict(dict)
+
+            target_audit["requirement_assessments"][dst]["mapping_inference"][
+                "source_requirement_assessments"
+            ][src] = {
+                "id": source_of_the_sources["requirement_assessments"][src].get("id"),
+                "str": source_of_the_sources["requirement_assessments"][src].get("name"),
+                "coverage": "full" if rel in ("equal", "superset") else "partial",
+                "score": source_of_the_sources["requirement_assessments"][src].get("score"),
+                "is_scored": source_of_the_sources["requirement_assessments"][src].get(
+                    "is_scored"
+                ),
+                "source_framework": source_of_the_sources["requirement_assessments"][src].get("framework"),
+                "used_mapping_set": {}
+            }
+
+            with open("/home/martin/test.json", "a") as j:
+                j.write(str(source_of_the_sources["requirement_assessments"][src]))
+                j.write(",")
+
+        with open("/home/martin/test.json", "a") as j:
+            j.write("\n")
+            j.write(str(target_audit))
         return target_audit
 
     def _most_restrictive_result(self, result1, result2):
@@ -492,7 +517,12 @@ class MappingEngine:
         dest_urn: str,
         max_depth: Optional[int] = None,
     ) -> tuple[dict, list[str]]:
+        print(
+            "source_audit has framework name inside ?",
+            "framework" in source_audit.keys(),
+        )
         paths = self.all_paths_between(source_urn, dest_urn, max_depth)
+        print("all paths between  =", paths)
         inferences = {}
         best_path = []
 
@@ -504,13 +534,17 @@ class MappingEngine:
                 rms = self.get_rms((tmp_urn, urn))
                 if not rms:
                     break
-                tmp_inferences = self.map_audit_results(tmp_inferences, rms)
+                tmp_inferences = self.map_audit_results(
+                    tmp_inferences,
+                    rms,
+                    source_of_the_sources=source_audit,
+                    path=path,
+                )
                 tmp_urn = urn
 
             if len(tmp_inferences) > len(inferences):
                 inferences = tmp_inferences
                 best_path = path
-
         return inferences, best_path
 
     def load_audit_fields(
@@ -528,6 +562,10 @@ class MappingEngine:
         fields = self.fields_to_map
         all_ra = audit.get_requirement_assessments(include_non_assessable=False)
         audit_results = {
+            "source_framework": {
+                "id": str(audit.framework.id),
+                "name": str(audit.framework),
+            },
             "min_score": audit.min_score,
             "max_score": audit.max_score,
             "requirement_assessments": defaultdict(dict),
@@ -539,6 +577,9 @@ class MappingEngine:
             audit_results["requirement_assessments"][ra.requirement.urn]["name"] = str(
                 ra
             )
+            audit_results["requirement_assessments"][ra.requirement.urn]["id"] = str(
+                ra.id
+            )
             for m2m_field in self.m2m_fields:
                 attr = getattr(ra, m2m_field)
                 if isinstance(attr, QuerySet) or hasattr(attr, "all"):
@@ -546,14 +587,11 @@ class MappingEngine:
                         m2m_field
                     ] = attr.all().values_list("id", flat=True)
                 else:
-                    if (
-                        type(attr) is UUID
-                    ):  # Handle the case of the RA's id to avoid error when merging m2m_fields
-                        attr = str(attr)
                     audit_results["requirement_assessments"][ra.requirement.urn][
                         m2m_field
                     ] = attr
-
+        with open("/home/martin/source.json", "w") as j:
+            j.write(str(audit_results))
         return audit_results
 
     def summary_results(
