@@ -110,6 +110,22 @@
 										</div>
 									</a>
 								</div>
+                <div class="card p-4 bg-inherit flex flex-col space-y-3">
+									<a class="unstyled" href="/settings/integrations/servicenow">
+										<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
+											<span class="flex flex-row justify-between text-xl">
+												<i class="text-green-700 fa-solid fa-o"></i>
+												{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.name === 'servicenow' && integration.configurations?.length)}
+													<i class="fa-solid fa-circle-check text-success-600-400"></i>
+												{/if}
+											</span>
+											<span class="flex flex-row space-x-2">
+												<h6 class="h6 base-font-color">{m.serviceNow()}</h6>
+											</span>
+										</div>
+									</a>
+								</div>
+
 								<hr />
 							</dd>
 						</div>
