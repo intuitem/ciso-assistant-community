@@ -104,6 +104,15 @@
 		>
 			{m.activityOne()}
 		</p>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="risk-matrices"
+			field="risk_matrix"
+			cacheLock={cacheLocks['risk_matrix']}
+			bind:cachedValue={formDataCache['risk_matrix']}
+			label={m.riskMatrix()}
+			helpText={m.ebiosRmMatrixHelpText()}
+		/>
 		<TextArea
 			{form}
 			field="description"
