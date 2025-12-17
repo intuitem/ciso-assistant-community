@@ -510,14 +510,25 @@ def backup_full(dest_dir, batch_size, resume):
     existing_manifest = {}
     if resume and manifest_file.exists():
         rprint("[dim]Loading existing manifest for resume...[/dim]")
-        with open(manifest_file, "r") as f:
+        with open(manifest_file, "r") as f:  # FIX: "r" not "a"
             for line in f:
                 if line.strip():
                     entry = json.loads(line)
                     if entry.get("downloaded"):
-                        existing_manifest[entry["id"]] = entry
-        rprint(f"[dim]Found {len(existing_manifest)} already downloaded files[/dim]")
+                        # Verify file actually exists on disk before adding to manifest
+                        evidence_id = entry.get("evidence_id")
+                        version = entry.get("version")
+                        filename = entry.get("filename")
+                        file_path = (
+                            attachments_dir / f"{evidence_id}_v{version}_{filename}"
+                        )
 
+                        if file_path.exists():
+                            existing_manifest[entry["id"]] = entry
+                        # If file doesn't exist, simply don't add it to existing_manifest
+                        # (it will be re-downloaded)
+
+        rprint(f"[dim]Found {len(existing_manifest)} already downloaded files[/dim]")
     # Fetch all attachment metadata from API (paginated)
     rprint("[dim]Fetching attachment metadata from server...[/dim]")
     all_metadata = []
@@ -549,10 +560,18 @@ def backup_full(dest_dir, batch_size, resume):
         revision_id = meta["id"]
         file_hash = meta["attachment_hash"]
 
-        # Skip if already downloaded with matching hash
+        # Skip if already downloaded with matching hash AND file exists on disk
         if revision_id in existing_manifest:
-            if existing_manifest[revision_id].get("hash") == file_hash:
-                continue
+            manifest_entry = existing_manifest[revision_id]
+            if manifest_entry.get("hash") == file_hash:
+                # Verify file actually exists on disk
+                evidence_id = meta["evidence_id"]
+                version = meta["version"]
+                filename = meta["filename"]
+                file_path = attachments_dir / f"{evidence_id}_v{version}_{filename}"
+
+                if file_path.exists():
+                    continue
 
         to_download.append(meta)
 
@@ -642,7 +661,7 @@ def backup_full(dest_dir, batch_size, resume):
                     total_downloaded += 1
                     total_bytes += len(file_bytes)
 
-                    # Append to manifest
+                    # Add to manifest
                     manifest_entry = {
                         "id": header["id"],
                         "evidence_id": evidence_id,
@@ -654,8 +673,7 @@ def backup_full(dest_dir, batch_size, resume):
                         "timestamp": datetime.now().isoformat(),
                     }
 
-                    with open(manifest_file, "a") as f:
-                        f.write(json.dumps(manifest_entry) + "\n")
+                    existing_manifest[header["id"]] = manifest_entry
 
             rprint(
                 f"[green]✓ Batch {i // batch_size + 1} completed ({total_downloaded} files, {total_bytes / 1024 / 1024:.1f} MB)[/green]"
@@ -665,6 +683,12 @@ def backup_full(dest_dir, batch_size, resume):
             f"[bold green]✓ Downloaded {total_downloaded} attachments ({total_bytes / 1024 / 1024:.1f} MB total)[/bold green]"
         )
 
+    # Rebuild manifest removing duplicates and missing files
+    if existing_manifest or total_downloaded > 0:
+        rprint("[dim]Cleaning up manifest...[/dim]")
+        with open(manifest_file, "w") as f:
+            for entry in existing_manifest.values():
+                f.write(json.dumps(entry) + "\n")
     rprint("[bold green]Full backup completed successfully![/bold green]")
     rprint(f"[dim]Location: {dest_path}[/dim]")
 

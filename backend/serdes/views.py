@@ -1041,8 +1041,7 @@ class BatchUploadAttachmentsView(APIView):
                         )
                         continue
 
-                    # Check if attachment already exists with same hash (skip if identical)
-                    # IMPORTANT: Also verify the file actually exists in storage
+                    # Check if attachment already exists with same hash & verify the file actually exists in storage
                     if (
                         revision.attachment
                         and revision.attachment_hash
