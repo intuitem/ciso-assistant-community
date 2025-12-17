@@ -436,7 +436,7 @@
 	"residual": "Residual",
 	"jumpToRiskAssessment": "Ir a evaluación de riesgos",
 	"additionalMeasures": "Medidas adicionales",
-	"riskAssessmentMatrixHelpText": "ADVERTENCIA: No podrá cambiar la matriz de riesgos después de que se cree la evaluación de riesgos",
+	"riskAssessmentMatrixHelpText": "ADVERTENCIA: Cambiar la matriz de riesgos ajusta automáticamente los valores según la nueva escala. Revise los resultados después y corríjalos si es necesario.",
 	"etaHelpText": "Tiempo estimado de llegada",
 	"dueDateHelpText": "Fecha en la que se debe completar la evaluación",
 	"expiryDateHelpText": "Fecha en la que el objeto ya no es válido",
@@ -986,6 +986,13 @@
 	"downloadCertificate": "Descargar certificado",
 	"viewMore": "Ver más",
 	"viewLess": "Ver menos",
+	"scoreChangeDetected": "Cambio de puntuación detectado",
+	"scoreChangeDetectedDescription": "Se ha detectado un cambio en las puntuaciones. Elija cómo manejar las actualizaciones de puntuación para las auditorías asociadas.",
+	"clamp": "Restringir",
+	"clampDescription": "Restringir el valor dentro de los límites definidos",
+	"resetDescription": "Restablecer las puntuaciones de las auditorías",
+	"ruleOfThree": "Regla de Tres",
+	"ruleOfThreeDescription": "Aplicar la Regla de Tres para escalar puntuaciones entre nuevos límites",
 	"loginFailed": "Inicio de sesión fallido",
 	"expectedEvidence": "Evidencia esperada",
 	"taskNodeLegacyEvidence": "El campo de evidencia anterior está obsoleto. La evidencia ahora es a nivel de tarea y compartida entre ocurrencias en espera de revisiones.\n Para moverlas a evidencia esperada o eliminarlas de la ocurrencia, use los botones",
@@ -2903,5 +2910,19 @@
 	"year": "Año",
 	"yearlyTasksReview": "Revisión Agregada de Tareas",
 	"yellowZoneRadius": "Radio de zona amarilla",
-	"yes": "Sí"
+	"yes": "Sí",
+	"cascadeDeleteWarning": "Advertencia: Eliminar esto también eliminará permanentemente {count} objeto(s) relacionado(s):",
+	"errorFetching": "No se puede cargar la información de cascada. Por favor, intente nuevamente.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "No se afectarán otros objetos.",
+				"countPlural=one": "{count} objeto relacionado no se eliminará pero perderá una o más relaciones.",
+				"countPlural=other": "{count} objetos relacionados no se eliminarán pero perderán una o más relaciones."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Los elementos a continuación permanecen en el sistema pero se eliminarán sus enlaces a este objeto."
 }

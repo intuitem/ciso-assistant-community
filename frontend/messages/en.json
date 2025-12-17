@@ -564,7 +564,7 @@
 	"residual": "Residual",
 	"jumpToRiskAssessment": "Jump to risk assessment",
 	"additionalMeasures": "Additional measures",
-	"riskAssessmentMatrixHelpText": "WARNING: You will not be able to change the risk matrix after the risk assessment is created",
+	"riskAssessmentMatrixHelpText": "WARNING: Changing the risk matrix automatically adjusts values according to the new scale. Review the results afterwards and correct them if needed.",
 	"etaHelpText": "Estimated time of arrival",
 	"dueDateHelpText": "Date by which this must be completed",
 	"expiryDateHelpText": "Date by which the object is no longer valid",
@@ -768,8 +768,8 @@
 	"advancedSettings": "Advanced settings",
 	"IdPEntityID": "IdP Entity ID",
 	"metadataURL": "Metadata URL",
-	"SSOURL": "SSO URL",
-	"SLOURL": "SLO URL",
+	"SSOURL": "SSO URL (login)",
+	"SLOURL": "SLO URL (logout)",
 	"x509Cert": "x509 certificate",
 	"SPEntityID": "SP Entity ID",
 	"attributeMappingUID": "UID attribute mapping",
@@ -1018,8 +1018,8 @@
 	"operationsDescription": "Covers daily and periodic GRC activities: task management, findings follow-up, security incidents, and inconsistency checks via X-rays.",
 	"questionSingular": "Question",
 	"questionPlural": "Questions",
-	"fillMetadataURL": "Option 1: Fill the metadata url",
-	"fillSSOSLOURLx509cert": "Option 2: Fill the SSO URL, SLO URL and x509cert",
+	"fillMetadataURL": "Option 1: Fill the metadata url (requires connection from instance to IdP)",
+	"fillSSOSLOURLx509cert": "Option 2: Fill the SSO URL, SLO URL and x509cert (no connection from instance to IdP)",
 	"licenseAboutToExpireWarning": "You have only {days_left} days before the end of your license.",
 	"proof": "Proof",
 	"privacy": "Privacy",
@@ -2730,6 +2730,13 @@
 	"runningMonteCarloSimulations": "Running Monte Carlo simulations for quantitative risk analysis. This may take a moment...",
 	"probabilityRequirements": "All values must be provided and between 0 and 100 (e.g., 5, 20, 50, 90). Values must increase from top to bottom.",
 	"impactRequirements": "All values must be provided and greater than 0. Values must increase from top to bottom (e.g., Minor: 5,000 → Major: 50,000 → Critical: 500,000).",
+	"scoreChangeDetected": "Score change detected",
+	"scoreChangeDetectedDescription": "A change in scores has been detected. Choose how to handle the score updates for the associated audits.",
+	"clamp": "Clamp",
+	"clampDescription": "Restrict the value within the defined bounds",
+	"resetDescription": "Reset the audits scores",
+	"ruleOfThree": "Rule of Three",
+	"ruleOfThreeDescription": "Apply the Rule of Three to scale scores between new bounds",
 	"webhooks": "Webhooks",
 	"webhooksDescription": "Integration with external systems via webhooks",
 	"configureOutgoingWebhooks": "Configure outgoing webhooks",
@@ -2905,5 +2912,19 @@
 	"deleteQuantitativeRiskStudy": "Delete risk quantification study",
 	"viewQuantitativeRiskStudy": "View risk quantification study",
 	"dueDateUpdatedSuccessfully": "Due date updated successfully",
-	"taskScheduleInfo": "Past occurences are protected from schedule changes. Only upcoming tasks will be recalculated."
+	"taskScheduleInfo": "Past occurences are protected from schedule changes. Only upcoming tasks will be recalculated.",
+	"cascadeDeleteWarning": "Warning: Deleting this will also permanently delete {count} related object(s):",
+	"errorFetching": "Unable to load cascade information. Please try again.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "No other objects will be impacted.",
+				"countPlural=one": "{count} related object will not be deleted but will lose one or more relationships.",
+				"countPlural=other": "{count} related objects will not be deleted but will lose one or more relationships."
+			}
+		}
+	],
+	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed."
 }

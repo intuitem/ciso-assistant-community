@@ -523,7 +523,7 @@
 	"residual": "Résiduel",
 	"jumpToRiskAssessment": "Passer à l'évaluation des risques",
 	"additionalMeasures": "Mesures supplémentaires",
-	"riskAssessmentMatrixHelpText": "ATTENTION : Vous ne pourrez pas changer la matrice de risque une fois l'évaluation de risque créée.",
+	"riskAssessmentMatrixHelpText": "ATTENTION : changer la matrice de risque ajuste automatiquement les valeurs selon la nouvelle échelle. Pensez à vérifier les résultats et à les corriger au besoin.",
 	"etaHelpText": "Date d'arrivée estimée",
 	"dueDateHelpText": "Date à laquelle ceci doit être complété",
 	"expiryDateHelpText": "Date à laquelle l'objet n'est plus valide",
@@ -725,8 +725,8 @@
 	"advancedSettings": "Réglages avancés",
 	"IdPEntityID": "ID d'entité IdP",
 	"metadataURL": "URL des métadonnées",
-	"SSOURL": "URL SSO",
-	"SLOURL": "URL SLO",
+	"SSOURL": "URL SSO (login)",
+	"SLOURL": "URL SLO (logout)",
 	"x509Cert": "Certificat x509",
 	"SPEntityID": "ID d'entité SP",
 	"attributeMappingUID": "Mappage d'attributs UID",
@@ -958,8 +958,8 @@
 	"operations": "Opérations",
 	"questionSingular": "Question",
 	"questionPlural": "Questions",
-	"fillMetadataURL": "Option 1 : Remplissez l'URL des métadonnées",
-	"fillSSOSLOURLx509cert": "Option 2 : Remplissez l'URL SSO, l'URL SLO et le certificat x509",
+	"fillMetadataURL": "Option 1 : Remplissez l'URL des métadonnées (requiert un lien instance vers IdP)",
+	"fillSSOSLOURLx509cert": "Option 2 : Remplissez l'URL SSO, l'URL SLO et le certificat x509 (pas de lien instance / IdP)",
 	"licenseAboutToExpireWarning": "Il reste {days_left} jours avant l'expiration de votre licence.",
 	"proof": "Preuve",
 	"privacy": "Vie privée",
@@ -1340,7 +1340,7 @@
 	"visualAnalysis": "Analyse visuelle",
 	"ro_activity": "Niveau d'activité",
 	"activity": "Activité",
-	"ebiosRmMatrixHelpText": "Matrice de risque utilisée pour l'étude :",
+	"ebiosRmMatrixHelpText": "Matrice de risque utilisée pour l'étude",
 	"activityOne": "Activité 1",
 	"activityTwo": "Activité 2",
 	"activityThree": "Activité 3",
@@ -2669,6 +2669,13 @@
 	"runningMonteCarloSimulations": "Exécution des simulations Monte Carlo pour l'analyse de risque quantitative. Cela peut prendre un moment...",
 	"probabilityRequirements": "Toutes les valeurs doivent être fournies et comprises entre 0 et 100 (par exemple, 5, 20, 50, 90). Les valeurs doivent augmenter de haut en bas.",
 	"impactRequirements": "Toutes les valeurs doivent être fournies et supérieures à 0. Les valeurs doivent augmenter de haut en bas (par exemple, Mineur : 5 000 → Majeur : 50 000 → Critique : 500 000).",
+	"scoreChangeDetected": "Changement de score détecté",
+	"scoreChangeDetectedDescription": "Un changement de scores a été détecté. Choisissez comment gérer les mises à jour des scores pour les audits associés.",
+	"clamp": "Borner",
+	"clampDescription": "Restreindre la valeur dans les limites définies",
+	"resetDescription": "Réinitialiser les scores des audits",
+	"ruleOfThree": "Règle de trois",
+	"ruleOfThreeDescription": "Appliquer la règle de trois pour mettre à l'échelle les scores entre les nouvelles limites",
 	"loginFailed": "Connexion échouée",
 	"storageOfData": "Stocke des données",
 	"dataLocationStorage": "Localisation des données au repos",
@@ -2905,5 +2912,19 @@
 	"webhookSharedSecretShownOnce": "Le secret partagé n'est affiché qu'une seule fois lors de la création. Assurez-vous de le copier et de le stocker dans un endroit sûr.",
 	"workshopFive": "Atelier 5",
 	"workshopThree": "Atelier 3",
-	"workshopTwo": "Atelier 2"
+	"workshopTwo": "Atelier 2",
+	"cascadeDeleteWarning": "Attention : La suppression de cet élément entraînera également la suppression définitive de {count} objet(s) associé(s) :",
+	"errorFetching": "Impossible de charger les informations de cascade. Veuillez réessayer.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Aucun autre objet ne sera impacté.",
+				"countPlural=one": "{count} objet associé ne sera pas supprimé mais perdra une ou plusieurs relations.",
+				"countPlural=other": "{count} objets associés ne seront pas supprimés mais perdront une ou plusieurs relations."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Les éléments ci-dessous restent dans le système mais leurs liens avec cet objet seront supprimés."
 }
