@@ -622,7 +622,9 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
     class ChartType(models.TextChoices):
         KPI_CARD = "kpi_card", _("KPI Card")
         DONUT = "donut", _("Donut Chart")
+        PIE = "pie", _("Pie Chart")
         BAR = "bar", _("Bar Chart")
+        LINE = "line", _("Line Chart")
         AREA = "area", _("Area Chart")
         GAUGE = "gauge", _("Gauge")
         SPARKLINE = "sparkline", _("Sparkline")

@@ -18,7 +18,7 @@ METRIC_TYPE_STATUS = "status"  # Single status value (string)
 METRIC_TYPE_CHART_TYPES = {
     METRIC_TYPE_NUMBER: ["kpi_card", "gauge", "sparkline", "line", "area"],
     METRIC_TYPE_PERCENTAGE: ["gauge", "kpi_card", "sparkline", "line", "area"],
-    METRIC_TYPE_BREAKDOWN: ["donut", "bar", "table"],
+    METRIC_TYPE_BREAKDOWN: ["donut", "pie", "bar", "table"],
     METRIC_TYPE_STATUS: ["kpi_card"],
 }
 

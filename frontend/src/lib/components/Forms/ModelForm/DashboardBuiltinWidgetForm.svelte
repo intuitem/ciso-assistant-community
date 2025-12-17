@@ -60,6 +60,7 @@
 		area: 'Area',
 		bar: 'Bar',
 		donut: 'Donut',
+		pie: 'Pie',
 		table: 'Table'
 	};
 

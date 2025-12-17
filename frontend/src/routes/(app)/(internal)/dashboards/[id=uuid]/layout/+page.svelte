@@ -46,6 +46,7 @@
 		sparkline: { width: 3, height: 1 },
 		gauge: { width: 3, height: 2 },
 		donut: { width: 3, height: 2 },
+		pie: { width: 3, height: 2 },
 		line: { width: 4, height: 2 },
 		bar: { width: 4, height: 2 },
 		area: { width: 4, height: 2 },
@@ -63,6 +64,7 @@
 		bar: 'Bar',
 		table: 'Table',
 		donut: 'Donut',
+		pie: 'Pie',
 		text: 'Text'
 	};
 
@@ -72,9 +74,10 @@
 		const isBreakdownMetric = widget.metric_key && widget.metric_key.endsWith('_breakdown');
 
 		if (isBreakdownMetric) {
-			// For breakdown metrics, donut, bar and table are valid
+			// For breakdown metrics, donut, pie, bar and table are valid
 			if (
 				widget.chart_type === 'donut' ||
+				widget.chart_type === 'pie' ||
 				widget.chart_type === 'bar' ||
 				widget.chart_type === 'table'
 			) {

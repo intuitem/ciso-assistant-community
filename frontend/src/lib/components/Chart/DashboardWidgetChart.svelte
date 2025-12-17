@@ -285,6 +285,48 @@
 				};
 			}
 
+			// For pie chart with breakdown, use solid pie (no hole)
+			if (widget.chart_type === 'pie') {
+				return {
+					tooltip: {
+						trigger: 'item',
+						formatter: '{b}: {c} ({d}%)'
+					},
+					legend: {
+						show: widget.show_legend !== false,
+						orient: 'vertical',
+						right: 10,
+						top: 'center',
+						type: 'scroll'
+					},
+					series: [
+						{
+							type: 'pie',
+							radius: '70%',
+							center: ['40%', '50%'],
+							avoidLabelOverlap: true,
+							itemStyle: {
+								borderRadius: 4,
+								borderColor: '#fff',
+								borderWidth: 2
+							},
+							label: {
+								show: false
+							},
+							emphasis: {
+								label: {
+									show: true,
+									fontSize: 14,
+									fontWeight: 'bold'
+								}
+							},
+							labelLine: { show: false },
+							data: pieChartData
+						}
+					]
+				};
+			}
+
 			// For donut/gauge/kpi_card with breakdown, use donut chart
 			if (
 				widget.chart_type === 'donut' ||
@@ -333,6 +375,34 @@
 		}
 
 		switch (widget.chart_type) {
+			case 'line':
+				return {
+					grid: baseGrid,
+					tooltip: baseTooltip,
+					xAxis: baseXAxis,
+					yAxis: baseYAxis,
+					series: [
+						{
+							type: 'line',
+							smooth: true,
+							symbol: 'circle',
+							symbolSize: 6,
+							lineStyle: { width: 2, color: 'rgb(59, 130, 246)' },
+							itemStyle: { color: 'rgb(59, 130, 246)' },
+							data: chartData,
+							...(widget.show_target && targetValue
+								? {
+										markLine: {
+											data: [{ yAxis: targetValue, name: m.target() }],
+											lineStyle: { color: 'rgb(34, 197, 94)', type: 'dashed' },
+											label: { formatter: `${m.target()}: ${targetValue}` }
+										}
+									}
+								: {})
+						}
+					]
+				};
+
 			case 'area':
 				return {
 					grid: baseGrid,
