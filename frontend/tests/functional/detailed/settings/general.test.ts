@@ -29,7 +29,8 @@ test.describe('General settings', () => {
 			await foldersPage.hasUrl();
 			await foldersPage.createItem({
 				name: vars.folderName,
-				description: vars.description
+				description: vars.description,
+				parent_folder: 'Global'
 			});
 		});
 		await test.step('import risk matrix', async () => {

@@ -42,7 +42,8 @@ test('user usual routine actions are working correctly', async ({
 
 		await pages.foldersPage.createItem({
 			name: vars.folderName,
-			description: vars.description
+			description: vars.description,
+			parent_folder: 'Global'
 		});
 
 		//TODO assert that the domain data are displayed in the table
