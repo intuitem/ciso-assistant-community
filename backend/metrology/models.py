@@ -456,21 +456,38 @@ class BuiltinMetricSample(AbstractBaseModel):
                 treatment=treatment[0]
             ).count()
 
+        # Get risk level labels from the risk matrix
+        risk_level_labels = {}
+        if assessment.risk_matrix:
+            risk_levels = assessment.risk_matrix.risk
+            for idx, level in enumerate(risk_levels):
+                # Each level is a dict with 'name', 'abbreviation', 'hexcolor', etc.
+                risk_level_labels[idx] = level.get("name", str(idx))
+
         # Current level breakdown
-        current_level_breakdown = dict(
+        current_level_counts = dict(
             scenarios.exclude(current_level=-1)
             .values("current_level")
             .annotate(count=Count("id"))
             .values_list("current_level", "count")
         )
+        # Convert integer keys to labels
+        current_level_breakdown = {
+            risk_level_labels.get(k, str(k)): v for k, v in current_level_counts.items()
+        }
 
         # Residual level breakdown
-        residual_level_breakdown = dict(
+        residual_level_counts = dict(
             scenarios.exclude(residual_level=-1)
             .values("residual_level")
             .annotate(count=Count("id"))
             .values_list("residual_level", "count")
         )
+        # Convert integer keys to labels
+        residual_level_breakdown = {
+            risk_level_labels.get(k, str(k)): v
+            for k, v in residual_level_counts.items()
+        }
 
         return {
             "total_scenarios": total,
