@@ -10456,12 +10456,10 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         # Related Threats
         if incident.threats.exists():
             md_content += "## Related Threats\n\n"
-            md_content += "| Name | Type |\n"
+            md_content += "| Name | Reference ID |\n"
             md_content += "|------|------|\n"
             for threat in incident.threats.all():
-                md_content += (
-                    f"| {threat.name} | {threat.get_category_display() or 'N/A'} |\n"
-                )
+                md_content += f"| {threat.name} | {threat.ref_id or 'N/A'} |\n"
             md_content += "\n"
 
         # Timeline
