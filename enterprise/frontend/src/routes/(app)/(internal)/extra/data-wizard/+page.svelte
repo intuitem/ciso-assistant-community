@@ -171,7 +171,6 @@
 							{:else}
 								<p class="font-medium text-gray-900">
 									<span class="text-blue-600">{m.clickToUpload()}</span>
-									{m.orDragAndDrop()}
 								</p>
 								<p class="text-gray-500">{m.fileAcceptExcelOnly()}</p>
 							{/if}
