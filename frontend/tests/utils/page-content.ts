@@ -105,7 +105,7 @@ export class PageContent extends BasePage {
 		];
 		const row = this.getRow(name, filters);
 
-		const isAlreadyLoaded = await row.getByTestId('tablerow-unload-button').isVisible();
+		const isAlreadyLoaded = await row.getByTestId('tablerow-import-button').isHidden();
 		if (isAlreadyLoaded) return;
 
 		const importButton = row.getByTestId('tablerow-import-button');
