@@ -99,7 +99,18 @@ export class PageContent extends BasePage {
 		await this.page.getByRole('searchbox').first().fill(name);
 		await this.page.waitForTimeout(3000);
 
-		await this.importItemButton(name, language === 'any' ? undefined : language).click();
+		const filters = [
+			{ has: this.page.getByText(name, { exact: true }).first() },
+			{ has: this.page.getByText(language).first() }
+		];
+		const row = this.getRow(name, filters);
+
+		const isAlreadyLoaded = await row.getByTestId('tablerow-unload-button').isVisible();
+		if (isAlreadyLoaded) return;
+
+		const importButton = row.getByTestId('tablerow-import-button');
+		await importButton.click();
+
 		await this.isToastVisible(`The library has been successfully loaded.+`, undefined, {
 			timeout: 15000
 		});
@@ -116,8 +127,15 @@ export class PageContent extends BasePage {
 		await this.page.waitForURL(new RegExp('^.*\\' + this.url + '/.+'));
 	}
 
-	getRow(value?: string, filters: Filter[] = []) {
-		const substringSearch = { name: value };
+	/**
+	 * Get the first table row that matches the given substring and optional filters
+	 *
+	 * @param substring Substring to look for within the row (case-insensitive search).
+	 * @param filters Extra filters passed to the locator with the `locator.filter` method.
+	 * @returns The first matching row.
+	 */
+	getRow(substring?: string, filters: Filter[] = []): Locator {
+		const substringSearch = { name: substring };
 		let rowLocator = this.page.getByRole('row', substringSearch);
 
 		for (const filterOptions of filters) {
@@ -150,15 +168,5 @@ export class PageContent extends BasePage {
 
 	deletePromptConfirmButton() {
 		return this.page.getByTestId('delete-prompt-confirm-button');
-	}
-
-	importItemButton(value: string, language?: string) {
-		const filters = [{ has: this.page.getByText(value, { exact: true }).first() }];
-		if (language) {
-			filters.push({ has: this.page.getByText(language).first() });
-		}
-		const row = this.getRow(value, filters);
-		const importButton = row.getByTestId('tablerow-import-button');
-		return importButton;
 	}
 }
