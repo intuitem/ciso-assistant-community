@@ -51,10 +51,13 @@
 					if (riskMatrix && riskMatrix.json_definition) {
 						const jsonDefinition = JSON.parse(riskMatrix.json_definition);
 						const riskLevels = jsonDefinition.risk || [];
-						riskToleranceChoices = riskLevels.map((level, index) => ({
-							label: level.name,
-							value: level.id ?? index
-						}));
+						riskToleranceChoices = [
+							{ label: '--', value: -1 },
+							...riskLevels.map((level, index) => ({
+								label: level.name,
+								value: level.id ?? index
+							}))
+						];
 					}
 				}
 			} catch (error) {
@@ -102,7 +105,6 @@
 	/>
 	<AutocompleteSelect
 		{form}
-		disabled={object.id || isLocked}
 		translateOptions={false}
 		disableDoubleDash
 		optionsEndpoint="risk-matrices"
@@ -110,8 +112,7 @@
 		cacheLock={cacheLocks['risk_matrix']}
 		bind:cachedValue={formDataCache['risk_matrix']}
 		label={m.riskMatrix()}
-		helpText={m.riskAssessmentMatrixHelpText()}
-		hidden={initialData.risk_matrix}
+		helpText={object?.id ? m.riskAssessmentMatrixHelpText() : ''}
 		onChange={async (e) => await handleRiskMatrixChange(e)}
 		mount={async (e) => await handleRiskMatrixChange(e)}
 	/>
@@ -119,6 +120,7 @@
 		<Select
 			{form}
 			translateOptions={false}
+			disableDoubleDash
 			options={riskToleranceChoices}
 			field="risk_tolerance"
 			cacheLock={cacheLocks['risk_tolerance']}

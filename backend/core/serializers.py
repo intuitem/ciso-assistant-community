@@ -835,6 +835,9 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
+    requirement_assessments = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=RequirementAssessment.objects.all(), required=False
+    )
     stakeholders = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Stakeholder.objects.all()
     )
@@ -1185,6 +1188,16 @@ class PolicyWriteSerializer(AppliedControlWriteSerializer):
 
 class PolicyReadSerializer(AppliedControlReadSerializer):
     path = PathField(read_only=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = Policy
@@ -1587,7 +1600,6 @@ class EvidenceImportExportSerializer(BaseModelSerializer):
             "description",
             "created_at",
             "updated_at",
-            "owner",
             "status",
             "expiry_date",
         ]
@@ -1941,6 +1953,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     requirement = FilteredNodeSerializer()
     security_exceptions = FieldsRelatedField(many=True)
     is_locked = serializers.BooleanField()
+    applied_controls = FieldsRelatedField(many=True)
 
     class Meta:
         model = RequirementAssessment
@@ -2024,6 +2037,7 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
     source_framework = serializers.SerializerMethodField()
     target_framework = serializers.SerializerMethodField()
     urn = serializers.SerializerMethodField()
+    frameworks_available = serializers.SerializerMethodField()
 
     class Meta:
         model = StoredLibrary
@@ -2042,18 +2056,25 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
             "default_locale",
             "is_published",
             "translations",
+            "frameworks_available",
         ]
 
     def get_source_framework(self, obj):
         mapping_set = obj.content.get(
             "requirement_mapping_sets", [obj.content.get("requirement_mapping_set", {})]
         )[0]
+        source_urn = mapping_set.get("source_framework_urn", "")
         framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn=mapping_set["source_framework_urn"],
+            content__framework__urn=source_urn,
             content__framework__isnull=False,
             content__requirement_mapping_set__isnull=True,
             content__requirement_mapping_sets__isnull=True,
         ).first()
+        if framework_lib is None:
+            return {
+                "str": source_urn,
+                "urn": source_urn,
+            }
         framework = framework_lib.content.get("framework")
         return {
             "str": framework.get("name", framework.get("urn")),
@@ -2064,12 +2085,18 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
         mapping_set = obj.content.get(
             "requirement_mapping_sets", [obj.content.get("requirement_mapping_set", {})]
         )[0]
+        target_urn = mapping_set.get("target_framework_urn", "")
         framework_lib = StoredLibrary.objects.filter(
-            content__framework__urn=mapping_set["target_framework_urn"],
+            content__framework__urn=target_urn,
             content__framework__isnull=False,
             content__requirement_mapping_set__isnull=True,
             content__requirement_mapping_sets__isnull=True,
         ).first()
+        if framework_lib is None:
+            return {
+                "str": target_urn,
+                "urn": target_urn,
+            }
         framework = framework_lib.content.get("framework")
         return {
             "str": framework.get("name", framework.get("urn")),
@@ -2081,6 +2108,12 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
             "requirement_mapping_sets", [obj.content.get("requirement_mapping_set", {})]
         )
         return rms[0].get("urn") if rms else None
+
+    def get_frameworks_available(self, obj):
+        source = self.get_source_framework(obj)
+        target = self.get_target_framework(obj)
+        # When framework is not found, str equals urn
+        return source["str"] != source["urn"] and target["str"] != target["urn"]
 
 
 class RequirementAssessmentImportExportSerializer(BaseModelSerializer):

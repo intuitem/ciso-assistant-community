@@ -7,6 +7,7 @@ from ..resolvers import (
     resolve_risk_matrix_id,
     resolve_framework_id,
     resolve_risk_assessment_id,
+    resolve_applied_control_id,
 )
 from ..config import GLOBAL_FOLDER_ID
 from ..utils.response_formatter import (
@@ -901,3 +902,107 @@ async def refresh_quantitative_risk_study_simulations(study_id: str) -> str:
             return f"Error refreshing simulations: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in refresh_quantitative_risk_study_simulations: {str(e)}"
+
+
+async def create_task_template(
+    name: str,
+    folder_id: str,
+    description: str = None,
+    status: str = None,
+    observation: str = None,
+    evidences: list = None,
+    is_published: bool = False,
+    task_date: str = None,
+    is_recurrent: bool = False,
+    ref_id: str = None,
+    schedule: str = None,
+    enabled: bool = True,
+    link: str = None,
+    assigned_to: list = None,
+    assets: list = None,
+    applied_controls: list = None,
+    compliance_assessments: list = None,
+    risk_assessments: list = None,
+    findings_assessment: list = None,
+) -> str:
+    """Create task template
+
+    Args:
+        name: Task template name (required)
+        folder_id: Folder ID/name (required)
+        description: Description
+        status: Status
+        observation: Observation text
+        evidences: Array of evidence UUIDs
+        is_published: Published flag
+        task_date: Task date (YYYY-MM-DD)
+        is_recurrent: Recurrent flag
+        ref_id: Reference ID
+        schedule: Schedule definition
+        enabled: Enabled flag
+        link: Link to evidence (e.g. Jira ticket)
+        assigned_to: Array of user UUIDs
+        assets: Array of asset UUIDs
+        applied_controls: List of applied control IDs/names
+        compliance_assessments: Array of compliance assessment UUIDs
+        risk_assessments: Array of risk assessment UUIDs
+        findings_assessment: Array of finding assessment UUIDs
+    """
+    try:
+        # Resolve folder name to ID if needed
+        folder_id = resolve_folder_id(folder_id)
+
+        payload = {
+            "name": name,
+            "folder": folder_id,
+            "is_published": is_published,
+            "is_recurrent": is_recurrent,
+            "enabled": enabled,
+        }
+
+        # Add optional fields if provided
+        if description is not None:
+            payload["description"] = description
+        if status is not None:
+            valid_statuses = ["pending", "in_progress", "cancelled", "completed"]
+            if status not in valid_statuses:
+                return f"Error: Invalid status '{status}'. Must be one of: {', '.join(valid_statuses)}"
+            payload["status"] = status
+        if observation is not None:
+            payload["observation"] = observation
+        if evidences is not None:
+            payload["evidences"] = evidences
+        if task_date is not None:
+            payload["task_date"] = task_date
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+        if schedule is not None:
+            payload["schedule"] = schedule
+        if link is not None:
+            payload["link"] = link
+        if assigned_to is not None:
+            payload["assigned_to"] = assigned_to
+        if assets is not None:
+            payload["assets"] = assets
+        if applied_controls is not None:
+            resolved_controls = []
+            for control in applied_controls:
+                resolved_control_id = resolve_applied_control_id(control)
+                resolved_controls.append(resolved_control_id)
+            payload["applied_controls"] = resolved_controls
+        if compliance_assessments is not None:
+            payload["compliance_assessments"] = compliance_assessments
+        if risk_assessments is not None:
+            payload["risk_assessments"] = risk_assessments
+        if findings_assessment is not None:
+            payload["findings_assessment"] = findings_assessment
+
+        res = make_post_request("/task-templates/", payload)
+
+        if res.status_code == 201:
+            task = res.json()
+            return f"Created task template: {task.get('name')} (ID: {task.get('id')})"
+        else:
+            return f"Error creating task template: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_task_template: {str(e)}"

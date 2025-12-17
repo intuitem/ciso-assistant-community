@@ -136,7 +136,8 @@
 					</div>
 				{/snippet}
 				{#snippet trigger()}
-					<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
+					<span class="font-semibold p-1 break-all" data-testid="x-header-name">{xHeader.name}</span
+					>
 					{#if xHeader.description}
 						<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
 					{/if}

@@ -1,5 +1,9 @@
 from core.constants import COUNTRY_CHOICES
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    ExportMixin,
+    escape_excel_formula,
+)
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -179,10 +183,55 @@ def agg_countries(viewable_data_transfers, viewable_data_contractors):
     return countries
 
 
-class ProcessingViewSet(BaseModelViewSet):
+class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     model = Processing
 
     filterset_fields = ["folder", "nature", "status", "filtering_labels"]
+
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "status": {"source": "get_status_display", "label": "status"},
+            "nature": {
+                "source": "nature",
+                "label": "processing_nature",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(str(n)) for n in qs.all()
+                ),
+            },
+            "folder": {"source": "folder.name", "label": "folder", "escape": True},
+            "assigned_to": {
+                "source": "assigned_to",
+                "label": "assigned_to",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(u.email) for u in qs.all()
+                ),
+            },
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.label) for o in qs.all()
+                ),
+            },
+            "dpia_required": {"source": "dpia_required", "label": "dpia_required"},
+            "dpia_reference": {
+                "source": "dpia_reference",
+                "label": "dpia_reference",
+                "escape": True,
+            },
+        },
+        "filename": "processings_export",
+        "select_related": ["folder"],
+        "prefetch_related": ["filtering_labels", "nature", "assigned_to"],
+    }
 
     @action(detail=False, name="Get status choices")
     def status(self, request):

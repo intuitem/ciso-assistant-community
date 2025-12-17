@@ -36,6 +36,7 @@
 	{form}
 	optionsEndpoint="assets"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
 	optionsInfoFields={{
 		fields: [
 			{
@@ -55,6 +56,7 @@
 	{form}
 	multiple
 	optionsEndpoint="assets"
+	optionsLabelField="auto"
 	optionsExtraFields={[['folder', 'str']]}
 	optionsInfoFields={{
 		fields: [
