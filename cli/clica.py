@@ -575,6 +575,9 @@ def backup_full(dest_dir, batch_size, resume):
 
         to_download.append(meta)
 
+    total_downloaded = 0
+    total_bytes = 0
+
     if not to_download:
         rprint("[green]✓ All attachments already downloaded[/green]")
     else:
@@ -583,9 +586,6 @@ def backup_full(dest_dir, batch_size, resume):
         )
 
         # Download in batches
-        total_downloaded = 0
-        total_bytes = 0
-
         for i in range(0, len(to_download), batch_size):
             batch = to_download[i : i + batch_size]
             batch_ids = [meta["id"] for meta in batch]
@@ -786,14 +786,16 @@ def restore_full(src_dir, verify_hashes):
         if to_upload:
             rprint(f"[cyan]Found {len(to_upload)} attachments to restore[/cyan]")
 
-            # Build streaming data for ALL attachments
-            body_parts = []
+            # Stream to temp file with reasonable buffering
+            temp_attachments = tempfile.NamedTemporaryFile(
+                suffix=".dat", delete=False, buffering=8 * 1024 * 1024
+            )  # 8MB buffer
+
             for file_info in to_upload:
-                # Read file
                 with open(file_info["path"], "rb") as f:
                     file_bytes = f.read()
 
-                # Build JSON header
+                # Build header
                 header = {
                     "id": file_info["id"],
                     "evidence_id": file_info["evidence_id"],
@@ -803,24 +805,18 @@ def restore_full(src_dir, verify_hashes):
                     "size": len(file_bytes),
                 }
                 header_bytes = json.dumps(header).encode("utf-8")
-
-                # Calculate total size: header + file
                 total_size = len(header_bytes) + len(file_bytes)
 
-                # Add: [4-byte length][header][file]
-                body_parts.append(struct.pack(">I", total_size))
-                body_parts.append(header_bytes)
-                body_parts.append(file_bytes)
-
-            # Create temporary file for attachments binary data
-
-            temp_attachments = tempfile.NamedTemporaryFile(suffix=".dat", delete=False)
-            temp_attachments.write(b"".join(body_parts))
+                # Write directly (OS will buffer intelligently)
+                temp_attachments.write(struct.pack(">I", total_size))
+                temp_attachments.write(header_bytes)
+                temp_attachments.write(file_bytes)
             temp_attachments.close()
             attachments_data = temp_attachments.name
 
+            total_size_mb = Path(attachments_data).stat().st_size / 1024 / 1024
             rprint(
-                f"[dim]Prepared {len(to_upload)} attachments for upload ({sum(len(p) for p in body_parts) / 1024 / 1024:.1f} MB)[/dim]"
+                f"[dim]Prepared {len(to_upload)} attachments for upload ({total_size_mb:.1f} MB)[/dim]"
             )
 
     # Send SINGLE request with both database and attachments
