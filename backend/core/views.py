@@ -10790,7 +10790,7 @@ class TaskTemplateFilter(GenericFilterSet):
         )
 
 
-class TaskTemplateViewSet(BaseModelViewSet):
+class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
     model = TaskTemplate
     filterset_fields = [
         "assigned_to",
@@ -10801,6 +10801,116 @@ class TaskTemplateViewSet(BaseModelViewSet):
     ]
     search_fields = ["ref_id", "name"]
     filterset_class = TaskTemplateFilter
+
+    export_config = {
+        "filename": "task_templates",
+        "select_related": ["folder"],
+        "prefetch_related": [
+            "assigned_to",
+            "evidences",
+            "applied_controls",
+            "compliance_assessments",
+            "risk_assessments",
+            "assets",
+            "findings_assessment",
+        ],
+        "fields": {
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {"source": "description", "label": "description"},
+            "folder": {"source": "folder.name", "label": "folder", "escape": True},
+            "is_recurrent": {
+                "source": "is_recurrent",
+                "label": "is_recurrent",
+                "format": lambda x: "Yes" if x else "No",
+            },
+            "task_date": {
+                "source": "task_date",
+                "label": "task_date",
+                "format": lambda x: x.strftime("%Y-%m-%d") if x else "",
+            },
+            "schedule_frequency": {
+                "source": "schedule",
+                "label": "schedule_frequency",
+                "format": lambda s: s.get("frequency", "") if s else "",
+            },
+            "schedule_interval": {
+                "source": "schedule",
+                "label": "schedule_interval",
+                "format": lambda s: str(s.get("interval", "")) if s else "",
+            },
+            "schedule_end_date": {
+                "source": "schedule",
+                "label": "schedule_end_date",
+                "format": lambda s: s.get("end_date", "") if s else "",
+            },
+            "next_occurrence": {
+                "source": "get_next_occurrence",
+                "label": "next_occurrence",
+                "format": lambda x: x.strftime("%Y-%m-%d") if x else "",
+            },
+            "next_occurrence_status": {
+                "source": "get_next_occurrence_status",
+                "label": "next_occurrence_status",
+            },
+            "enabled": {
+                "source": "enabled",
+                "label": "enabled",
+                "format": lambda x: "Yes" if x else "No",
+            },
+            "assigned_to": {
+                "source": "assigned_to.all",
+                "label": "assigned_to",
+                "format": lambda users: ", ".join([u.email for u in users])
+                if users
+                else "",
+            },
+            "assets": {
+                "source": "assets.all",
+                "label": "assets",
+                "format": lambda items: ", ".join([str(item) for item in items])
+                if items
+                else "",
+            },
+            "applied_controls": {
+                "source": "applied_controls.all",
+                "label": "applied_controls",
+                "format": lambda items: ", ".join([str(item) for item in items])
+                if items
+                else "",
+            },
+            "evidences": {
+                "source": "evidences.all",
+                "label": "evidences",
+                "format": lambda items: ", ".join([item.name for item in items])
+                if items
+                else "",
+            },
+            "compliance_assessments": {
+                "source": "compliance_assessments.all",
+                "label": "compliance_assessments",
+                "format": lambda items: ", ".join([str(item) for item in items])
+                if items
+                else "",
+            },
+            "risk_assessments": {
+                "source": "risk_assessments.all",
+                "label": "risk_assessments",
+                "format": lambda items: ", ".join([str(item) for item in items])
+                if items
+                else "",
+            },
+            "findings_assessment": {
+                "source": "findings_assessment.all",
+                "label": "findings_assessment",
+                "format": lambda items: ", ".join([str(item) for item in items])
+                if items
+                else "",
+            },
+            "link": {"source": "link", "label": "link", "escape": True},
+        },
+        "wrap_columns": ["name", "description"],
+    }
 
     def get_queryset(self):
         qs = super().get_queryset()
