@@ -8085,11 +8085,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             instance: ComplianceAssessment = serializer.save()
             instance.create_requirement_assessments(baseline)
 
-            if baseline and baseline.framework == instance.framework:
-                instance.show_documentation_score = baseline.show_documentation_score
-                instance.save()
+            instance.show_documentation_score = baseline.show_documentation_score
+            instance.save()
 
-            elif baseline and baseline.framework != instance.framework:
+            if baseline and baseline.framework != instance.framework:
                 source_urn = baseline.framework.urn
                 audit_from_results = engine.load_audit_fields(baseline)
                 dest_urn = serializer.validated_data["framework"].urn
@@ -8107,7 +8106,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for req in target_requirement_assessments:
-                    for field in ["result", "status", "observation"]:
+                    for field in [
+                        "result",
+                        "status",
+                        "observation",
+                        "score",
+                        "is_scored",
+                        "documentation_score",
+                    ]:
                         if best_results["requirement_assessments"][
                             req.requirement.urn
                         ].get(field):
@@ -8121,7 +8127,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessments_to_update,
-                    ["result", "status", "observation"],
+                    [
+                        "result",
+                        "status",
+                        "observation",
+                        "score",
+                        "is_scored",
+                        "documentation_score",
+                    ],
                     batch_size=500,
                 )
 

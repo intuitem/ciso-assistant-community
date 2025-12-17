@@ -33,6 +33,7 @@ class MappingEngine:
             "score",
             "is_scored",
             "observation",
+            "documentation_score",
         ]
 
         self.m2m_fields = [
@@ -435,6 +436,7 @@ class MappingEngine:
                         target_audit["requirement_assessments"][dst]["result"] = (
                             "partially_compliant"
                         )
+
         return target_audit
 
     def _most_restrictive_result(self, result1, result2):
