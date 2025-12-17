@@ -47,7 +47,11 @@ class IgnoreApiBuildFilter(logging.Filter):
     def filter(self, record):
         request = getattr(record, "request", None)
         code = getattr(record, "code", None)
-        if code == 404 and request and "/api/build" in request:
+        if (
+            code == 404
+            and request
+            and (request.endswith("/api/build") or request.endswith("/api/build/"))
+        ):
             return False
         return True
 
