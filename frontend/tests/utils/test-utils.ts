@@ -158,7 +158,11 @@ export const test = base.extend<Fixtures>({
 	},
 
 	foldersPage: async ({ page }, use) => {
-		const fPage = new PageContent(page, '/folders', 'Domains');
+		const fPage = new PageContent(page, '/folders', 'Domains', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'parent_folder', type: type.SELECT_AUTOCOMPLETE }
+		]);
 		await use(fPage);
 	},
 
@@ -522,7 +526,8 @@ export class TestContent {
 				modelName: 'folder',
 				build: {
 					name: vars.folderName,
-					description: vars.description
+					description: vars.description,
+					parent_folder: 'Global'
 				},
 				editParams: {
 					name: '',

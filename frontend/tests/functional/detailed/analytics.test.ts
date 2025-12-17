@@ -26,7 +26,8 @@ test.skip('Analytics full flow - creation, validation and cleanup', async ({
 		await foldersPage.goto();
 		await foldersPage.createItem({
 			name: vars.folderName,
-			description: vars.description
+			description: vars.description,
+			parent_folder: 'Global'
 		});
 	});
 
