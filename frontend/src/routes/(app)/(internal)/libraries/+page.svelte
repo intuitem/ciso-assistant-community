@@ -22,6 +22,8 @@
 	let quickFilterValues: QuickFilters = $state({
 		object_type: new Set()
 	});
+
+	let quickFilterSelected: Record<string, boolean> = $state({});
 </script>
 
 <div class="card bg-white py-2 shadow-sm">
@@ -29,37 +31,53 @@
 		source={data.storedLibrariesTable}
 		URLModel="stored-libraries"
 		deleteForm={data.deleteForm}
+		onFilterChange={(filters) => {
+			const objectTypeValues = filters['object_type'] ?? [];
+			const filteredObjectTypes = objectTypeValues.map((filter) => filter.value);
+			const filterKeys = Object.keys(quickFilterSelected);
+
+			filterKeys.forEach((filterKey) => {
+				quickFilterSelected[filterKey] = filteredObjectTypes.includes(filterKey);
+			});
+			filteredObjectTypes.forEach((filterKey) => {
+				quickFilterSelected[filterKey] = true;
+			});
+		}}
 	>
 		{#snippet quickFilters(filterValues, form, invalidateTable)}
-			{#each ['frameworks', 'reference_controls', 'risk_matrices', 'threats'] as objectType}
-				<button
-					class="p-4 border-2 border-black"
-					onclick={() => {
-						const filterValue = filterValues['object_type'];
-						const filteredTypes = filterValue.map((obj) => obj.value);
+			<div class="flex gap-1">
+				{#each ['frameworks', 'reference_controls', 'risk_matrices', 'threats'] as objectType}
+					<button
+						class="ml-2 p-2 border-2 rounded-lg {quickFilterSelected[objectType]
+							? 'border-primary-800'
+							: 'border-primary-100'}"
+						onclick={() => {
+							const filterValue = filterValues['object_type'];
+							const filteredTypes = filterValue.map((obj) => obj.value);
 
-						const removeFilter = quickFilterValues.object_type.has(objectType);
-						if (removeFilter) {
-							quickFilterValues.object_type.delete(objectType);
-							filterValues['object_type'] = filterValue.filter((obj) => obj.value !== objectType);
-						} else {
-							quickFilterValues.object_type.add(objectType);
-							const isSelected = filteredTypes.includes(objectType);
-							if (!isSelected) {
-								filterValues['object_type'] = [...filterValue, { value: objectType }];
+							const removeFilter = quickFilterValues.object_type.has(objectType);
+							if (removeFilter) {
+								quickFilterValues.object_type.delete(objectType);
+								filterValues['object_type'] = filterValue.filter((obj) => obj.value !== objectType);
+							} else {
+								quickFilterValues.object_type.add(objectType);
+								const isSelected = filteredTypes.includes(objectType);
+								if (!isSelected) {
+									filterValues['object_type'] = [...filterValue, { value: objectType }];
+								}
 							}
-						}
 
-						const newFilteredTypes = filterValues['object_type'].map((obj) => obj.value);
-						form.form.update((currentData) => {
-							currentData['object_type'] = newFilteredTypes.length > 0 ? newFilteredTypes : null;
-							return currentData;
-						});
+							const newFilteredTypes = filterValues['object_type'].map((obj) => obj.value);
+							form.form.update((currentData) => {
+								currentData['object_type'] = newFilteredTypes.length > 0 ? newFilteredTypes : null;
+								return currentData;
+							});
 
-						invalidateTable();
-					}}>{safeTranslate(objectType)}</button
-				>
-			{/each}
+							invalidateTable();
+						}}>{safeTranslate(objectType)}</button
+					>
+				{/each}
+			</div>
 		{/snippet}
 	</ModelTable>
 </div>

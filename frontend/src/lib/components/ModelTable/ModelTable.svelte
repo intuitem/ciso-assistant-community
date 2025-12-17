@@ -84,6 +84,7 @@
 		folderId?: string;
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
+		onFilterChange?: (filters: Record<string, any>) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, () => void]>;
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
@@ -139,6 +140,7 @@
 		folderId = '',
 		forcePreventDelete = false,
 		forcePreventEdit = false,
+		onFilterChange = () => {},
 		quickFilters,
 		optButton,
 		selectButton,
@@ -287,6 +289,7 @@
 			})
 		)
 	);
+	$effect(() => onFilterChange(filterValues));
 
 	run(() => {
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
