@@ -78,6 +78,7 @@
 	{form}
 	field="assets"
 	optionsEndpoint="assets"
+	optionsLabelField="auto"
 	optionsExtraFields={[['folder', 'str']]}
 	optionsInfoFields={{
 		fields: [
