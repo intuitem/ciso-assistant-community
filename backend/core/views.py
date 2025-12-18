@@ -801,7 +801,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 return
 
             if (
-                source_model
+                source_model == instance.__class__
                 and source_field
                 and is_forced_cascade(source_model, source_field)
             ):
