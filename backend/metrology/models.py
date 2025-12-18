@@ -815,7 +815,7 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
     @property
     def is_text_widget(self):
         """Returns True if this widget displays text content"""
-        return self.chart_type == self.ChartType.TEXT
+        return self.chart_type == self.ChartType.TEXT or self.text_content
 
     def clean(self):
         """Validate widget configuration"""

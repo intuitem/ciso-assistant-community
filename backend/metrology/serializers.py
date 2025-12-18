@@ -224,12 +224,15 @@ class DashboardWidgetWriteSerializer(BaseModelSerializer):
             chart_type = DashboardWidget.ChartType.KPI_CARD
 
         # Text widgets don't need metric configuration
-        # Compare with string value "text" since chart_type could be either string or enum
         is_text_widget = (
-            chart_type == "text" or chart_type == DashboardWidget.ChartType.TEXT
+            chart_type == "text"
+            or chart_type == DashboardWidget.ChartType.TEXT
+            or data.get("text_content")
         )
 
         if is_text_widget:
+            # Ensure chart_type is set to 'text'
+            data["chart_type"] = "text"
             # Text widgets should not have metric fields - clear them if present
             if data.get("metric_instance") is not None:
                 raise serializers.ValidationError(
