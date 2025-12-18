@@ -25,6 +25,8 @@
 	let { parent, form, formAction = '?/createPAT', ...rest }: Props = $props();
 
 	let tokenDisplayed = $state(false);
+	let copied = $state(false);
+	let tokenInputElement: HTMLInputElement | undefined = $state();
 
 	const _form = superForm(form, {
 		dataType: 'json',
@@ -37,14 +39,25 @@
 		onUpdated: async ({ form }) => {
 			if (form.message?.data?.token) {
 				tokenDisplayed = true;
+				// Auto-select token on next tick
+				setTimeout(() => {
+					tokenInputElement?.select();
+				}, 0);
 			}
 		}
 	});
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-fit shadow-xl space-y-4 max-w-[80ch]';
+	const cBase = 'card bg-surface-50 p-4 w-fit shadow-xl space-y-4 max-w-[80ch] overflow-auto';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container-token';
+
+	function handleCopy() {
+		copied = true;
+		setTimeout(() => {
+			copied = false;
+		}, 2000);
+	}
 </script>
 
 {#if $modalStore[0]}
@@ -83,15 +96,31 @@
 									<i class="fa-solid fa-bell mr-2 text-secondary-800"
 									></i>{m.personalAccessTokenOnlyDisplayedOnce()}
 								</div>
-								<span class="flex flex-row gap-2 preset-tonal items-center card pl-2">
-									<pre>{page?.form?.form?.message?.data?.token}</pre>
-									<button
-										type="button"
-										class="btn px-2 py-1 {parent?.buttonNeutral ?? ''} rounded-l-none"
-										use:copy={{ text: page?.form?.form?.message?.data?.token }}
-										><i class="fa-solid fa-copy mr-2"></i>{m.copy()}</button
-									></span
-								>
+								<div class="space-y-2">
+									<label class="label font-semibold">{m.token()}</label>
+									<div class="flex flex-row gap-2 items-stretch">
+										<input
+											bind:this={tokenInputElement}
+											type="text"
+											readonly
+											value={page?.form?.form?.message?.data?.token}
+											class="input font-mono text-sm px-3 py-2 flex-1 select-all"
+											onfocus={(e) => e.currentTarget.select()}
+										/>
+										<button
+											type="button"
+											class="btn preset-filled-primary-500 px-4"
+											use:copy={{ text: page?.form?.form?.message?.data?.token }}
+											onclick={handleCopy}
+										>
+											{#if copied}
+												<i class="fa-solid fa-check mr-2"></i>{m.copied()}
+											{:else}
+												<i class="fa-solid fa-copy mr-2"></i>{m.copy()}
+											{/if}
+										</button>
+									</div>
+								</div>
 								<footer class="modal-footer {parent?.regionFooter ?? ''}">
 									<button
 										class="btn preset-filled-primary-500 w-full"
