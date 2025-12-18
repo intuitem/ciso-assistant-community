@@ -2925,5 +2925,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Les éléments ci-dessous restent dans le système mais leurs liens avec cet objet seront supprimés."
+	"cascadeAffectedHint": "Les éléments ci-dessous restent dans le système mais leurs liens avec cet objet seront supprimés.",
+	"thirdPartyRespondent": "Répondant tiers",
+	"thirdPartyRespondentHelpText": "Limiter l’utilisateur aux questionnaires/audits auxquels il a accès ; aucune autre action n'est possible."
 }

@@ -1244,5 +1244,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Item-item di bawah ini tetap berada di sistem tetapi tautan mereka ke objek ini akan dihapus."
+	"cascadeAffectedHint": "Item-item di bawah ini tetap berada di sistem tetapi tautan mereka ke objek ini akan dihapus.",
+	"thirdPartyRespondent": "Responden pihak ketiga",
+	"thirdPartyRespondentHelpText": "Batasi pengguna untuk menanggapi kuesioner/audit yang dapat diakses; tidak ada tindakan lain yang tersedia."
 }

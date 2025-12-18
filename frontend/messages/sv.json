@@ -1050,5 +1050,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Objekten nedan förblir i systemet men deras länkar till detta objekt kommer att tas bort."
+	"cascadeAffectedHint": "De nedanstående objekten förblir i systemet men deras länkar till detta objekt kommer att tas bort.",
+	"thirdPartyRespondent": "Tredje parts respondent",
+	"thirdPartyRespondentHelpText": "Begränsa användaren till att svara på frågeformulär/revisioner de kan komma åt; inga andra åtgärder är tillgängliga."
 }

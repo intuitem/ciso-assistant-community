@@ -2024,5 +2024,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Stavke ispod ostaju u sustavu, ali njihovi linkovi na ovaj objekt će biti uklonjeni."
+	"cascadeAffectedHint": "Stavke ispod ostaju u sustavu, ali njihovi linkovi na ovaj objekt će biti uklonjeni.",
+	"thirdPartyRespondent": "Odgovornik treće strane",
+	"thirdPartyRespondentHelpText": "Ograničite korisnika na odgovaranje na ankete/audite kojima može pristupiti; ostale radnje nisu dostupne."
 }

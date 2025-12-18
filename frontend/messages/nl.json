@@ -2924,5 +2924,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd."
+	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd.",
+	"thirdPartyRespondent": "Derdepartij-respondent",
+	"thirdPartyRespondentHelpText": "Beperk de gebruiker tot het reageren op vragenlijsten/audits waartoe hij toegang heeft; geen andere acties zijn beschikbaar."
 }

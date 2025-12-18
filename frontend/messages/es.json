@@ -2924,5 +2924,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Los elementos a continuación permanecen en el sistema pero se eliminarán sus enlaces a este objeto."
+	"cascadeAffectedHint": "Los elementos a continuación se mantendrán en el sistema pero se eliminarán sus enlaces a este objeto.",
+	"thirdPartyRespondent": "Respondente de Terceros",
+	"thirdPartyRespondentHelpText": "Limitar al usuario a responder a cuestionarios/auditorías a las que puede acceder; no están disponibles otras acciones."
 }

@@ -1059,5 +1059,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Os itens abaixo permanecem no sistema, mas seus links para este objeto serão removidos."
+	"cascadeAffectedHint": "Os itens abaixo permanecem no sistema, mas seus links para este objeto serão removidos.",
+	"thirdPartyRespondent": "Respondente de Terceiro",
+	"thirdPartyRespondentHelpText": "Limite o usuário a responder a questionários/auditorias que ele pode acessar; nenhuma outra ação está disponível."
 }

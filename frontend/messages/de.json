@@ -2925,5 +2925,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Die unten aufgeführten Elemente bleiben bestehen, aber ihre Verknüpfungen zu diesem Objekt werden entfernt."
+	"cascadeAffectedHint": "Die unten aufgeführten Elemente bleiben bestehen, aber ihre Verknüpfungen zu diesem Objekt werden entfernt.",
+	"thirdPartyRespondent": "Drittanbieter-Antwortverantwortlicher",
+	"thirdPartyRespondentHelpText": "Begrenzen Sie den Benutzer darauf, auf Fragebögen/Audits zu antworten, auf die er Zugriff hat; keine anderen Aktionen sind verfügbar."
 }

@@ -1436,5 +1436,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Gli elementi seguenti rimangono nel sistema ma i loro collegamenti con questo oggetto verranno rimossi."
+	"cascadeAffectedHint": "Gli elementi seguenti rimangono nel sistema ma i loro collegamenti con questo oggetto verranno rimossi.",
+	"thirdPartyRespondent": "Rispondente di terze parti",
+	"thirdPartyRespondentHelpText": "Limita l'utente a rispondere ai questionari/audit a cui può accedere; non sono disponibili altre azioni."
 }

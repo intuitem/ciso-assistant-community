@@ -1059,5 +1059,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Az alábbi elemek a rendszerben maradnak, de a kapcsolataik ebben az objektumban törlődnek."
+	"cascadeAffectedHint": "Az alábbi elemek a rendszerben maradnak, de a kapcsolataik ebben az objektumban törlődnek.",
+	"thirdPartyRespondent": "Harmadik fél válaszadó",
+	"thirdPartyRespondentHelpText": "Korlátozza a felhasználót a kérdőívek/auditok kitöltésére, amelyeket elérhet; más műveletek nem érhetők el."
 }
