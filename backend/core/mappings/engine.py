@@ -261,7 +261,7 @@ class MappingEngine:
         self,
         source_audit: dict[str, str | dict[str, str]],
         requirement_mapping_set: dict,
-        source_of_the_sources: list[str],
+        first_source_urn: str,
         path: list[str],
     ) -> dict[str, str | dict[str, str]]:
         if not source_audit.get("requirement_assessments"):
@@ -275,13 +275,14 @@ class MappingEngine:
         # to copy scores that cannot be validated against a target framework.
         target_framework_urn = requirement_mapping_set.get("target_framework_urn", "")
         target_framework = self.frameworks.get(target_framework_urn)
-        with open("/home/martin/test.json", "w") as j:
-            j.write(str(source_of_the_sources))
+
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
             dst = mapping["target_requirement_urn"]
             rel = mapping["relationship"]
 
+            src_assessment = source_audit["requirement_assessments"][src]
+            target_assessment = target_audit["requirement_assessments"][dst]
             if (
                 rel in ("equal", "superset")
                 and src in source_audit["requirement_assessments"]
@@ -289,7 +290,7 @@ class MappingEngine:
                 # If we have matching score ranges on the target framework, copy
                 # the whole assessment (including score fields). Otherwise only
                 # copy non-score fields to avoid misrepresenting scores.
-                src_assessment = source_audit["requirement_assessments"][src]
+                
                 if (
                     target_framework
                     and target_framework.get("min_score")
@@ -302,12 +303,12 @@ class MappingEngine:
                         for m2m_field in self.m2m_fields:
                             if m2m_field in src_assessment:
                                 existing = set(
-                                    target_audit["requirement_assessments"][dst].get(
+                                    target_assessment.get(
                                         m2m_field, []
                                     )
                                 )
                                 new_values = set(src_assessment.get(m2m_field, []))
-                                target_audit["requirement_assessments"][dst][
+                                target_assessment[
                                     m2m_field
                                 ] = list(existing | new_values)
                         # Keep the most restrictive result
@@ -316,13 +317,13 @@ class MappingEngine:
                                 dst
                             ].get("result")
                             new_result = src_assessment["result"]
-                            target_audit["requirement_assessments"][dst]["result"] = (
+                            target_assessment["result"] = (
                                 self._most_restrictive_result(
                                     existing_result, new_result
                                 )
                             )
                     else:
-                        target_audit["requirement_assessments"][dst] = (
+                        target_assessment = (
                             src_assessment.copy()
                         )
                 else:
@@ -337,13 +338,13 @@ class MappingEngine:
                                     "requirement_assessments"
                                 ][dst].get("result")
                                 new_result = src_assessment.get(field)
-                                target_audit["requirement_assessments"][dst][field] = (
+                                target_assessment[field] = (
                                     self._most_restrictive_result(
                                         existing_result, new_result
                                     )
                                 )
                             else:
-                                target_audit["requirement_assessments"][dst][field] = (
+                                target_assessment[field] = (
                                     src_assessment.get(field)
                                 )
 
@@ -353,19 +354,19 @@ class MappingEngine:
                             if (
                                 dst in target_audit["requirement_assessments"]
                                 and m2m_field
-                                in target_audit["requirement_assessments"][dst]
+                                in target_assessment
                             ):
                                 existing = set(
-                                    target_audit["requirement_assessments"][dst].get(
+                                    target_assessment.get(
                                         m2m_field, []
                                     )
                                 )
                                 new_values = set(src_assessment.get(m2m_field, []))
-                                target_audit["requirement_assessments"][dst][
+                                target_assessment[
                                     m2m_field
                                 ] = list(existing | new_values)
                             else:
-                                target_audit["requirement_assessments"][dst][
+                                target_assessment[
                                     m2m_field
                                 ] = src_assessment.get(m2m_field)
 
@@ -373,26 +374,26 @@ class MappingEngine:
                 rel in ("subset", "intersect")
                 and src in source_audit["requirement_assessments"]
             ):
-                result = source_audit["requirement_assessments"][src].get("result")
+                result = src_assessment.get("result")
 
                 # Merge applied_controls for collisions
-                src_applied_controls = source_audit["requirement_assessments"][src].get(
+                src_applied_controls = src_assessment.get(
                     "applied_controls", []
                 )
                 if (
                     dst in target_audit["requirement_assessments"]
                     and "applied_controls"
-                    in target_audit["requirement_assessments"][dst]
+                    in target_assessment
                 ):
                     existing = set(
-                        target_audit["requirement_assessments"][dst]["applied_controls"]
+                        target_assessment["applied_controls"]
                     )
                     new_values = set(src_applied_controls)
-                    target_audit["requirement_assessments"][dst]["applied_controls"] = (
+                    target_assessment["applied_controls"] = (
                         list(existing | new_values)
                     )
                 else:
-                    target_audit["requirement_assessments"][dst]["applied_controls"] = (
+                    target_assessment["applied_controls"] = (
                         src_applied_controls
                     )
 
@@ -400,66 +401,73 @@ class MappingEngine:
                 for m2m_field in self.m2m_fields:
                     if (
                         m2m_field != "applied_controls"
-                        and m2m_field in source_audit["requirement_assessments"][src]
+                        and m2m_field in src_assessment
                     ):
-                        src_values = source_audit["requirement_assessments"][src].get(
+                        src_values = src_assessment.get(
                             m2m_field, []
                         )
                         if (
                             dst in target_audit["requirement_assessments"]
                             and m2m_field
-                            in target_audit["requirement_assessments"][dst]
+                            in target_assessment
                         ):
                             existing = set(
-                                target_audit["requirement_assessments"][dst][m2m_field]
+                                target_assessment[m2m_field]
                             )
                             new_values = set(src_values)
-                            target_audit["requirement_assessments"][dst][m2m_field] = (
+                            target_assessment[m2m_field] = (
                                 list(existing | new_values)
                             )
                         else:
-                            target_audit["requirement_assessments"][dst][m2m_field] = (
+                            target_assessment[m2m_field] = (
                                 src_values
                             )
 
                 # Handle result: keep the most restrictive
                 if (
                     dst in target_audit["requirement_assessments"]
-                    and "result" in target_audit["requirement_assessments"][dst]
+                    and "result" in target_assessment
                 ):
-                    existing_result = target_audit["requirement_assessments"][dst][
+                    existing_result = target_assessment[
                         "result"
                     ]
-                    target_audit["requirement_assessments"][dst]["result"] = (
+                    target_assessment["result"] = (
                         self._most_restrictive_result(existing_result, result)
                     )
                 else:
                     if result in ("not_assessed", "non_compliant"):
-                        target_audit["requirement_assessments"][dst]["result"] = result
+                        target_assessment["result"] = result
                     elif result in ("compliant", "partially_compliant"):
-                        target_audit["requirement_assessments"][dst]["result"] = (
+                        target_assessment["result"] = (
                             "partially_compliant"
                         )
 
-            target_audit["requirement_assessments"][dst]["mapping_inference"] = {
-                "result": target_audit["requirement_assessments"][dst].get(
+            target_assessment["mapping_inference"] = {
+                "result": target_assessment.get(
                     "result", ""
                 ),  
                 "used_path": path,
-                "annotation": source_audit["requirement_assessments"][src]
+                "annotation": src_assessment
                 .get("mapping_inference", {})
                 .get("annotation", ""),
             }
 
-            mif = target_audit["requirement_assessments"][dst]["mapping_inference"].get(
+            mif = target_assessment["mapping_inference"].get(
                 "source_requirement_assessments"
             )
+
             if mif == None:
-                target_audit["requirement_assessments"][dst]["mapping_inference"][
+                target_assessment["mapping_inference"][
                     "source_requirement_assessments"
                 ] = defaultdict(dict)
 
-            target_audit["requirement_assessments"][dst]["mapping_inference"][
+            if src == first_source_urn:
+                mif_id = src
+            else:
+                mif_id = source_
+            
+
+            target_assessment["mapping_inference"][
                 "source_requirement_assessments"
             ][src] = {
                 "id": source_of_the_sources["requirement_assessments"][src].get("id"),
@@ -473,13 +481,6 @@ class MappingEngine:
                 "used_mapping_set": {}
             }
 
-            with open("/home/martin/test.json", "a") as j:
-                j.write(str(source_of_the_sources["requirement_assessments"][src]))
-                j.write(",")
-
-        with open("/home/martin/test.json", "a") as j:
-            j.write("\n")
-            j.write(str(target_audit))
         return target_audit
 
     def _most_restrictive_result(self, result1, result2):
@@ -517,12 +518,7 @@ class MappingEngine:
         dest_urn: str,
         max_depth: Optional[int] = None,
     ) -> tuple[dict, list[str]]:
-        print(
-            "source_audit has framework name inside ?",
-            "framework" in source_audit.keys(),
-        )
         paths = self.all_paths_between(source_urn, dest_urn, max_depth)
-        print("all paths between  =", paths)
         inferences = {}
         best_path = []
 
