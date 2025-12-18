@@ -6997,8 +6997,13 @@ class RequirementViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], name="Inspect specific requirements")
     def inspect_requirement(self, request, pk):
         requirement = RequirementNode.objects.get(id=pk)
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=RequirementAssessment,
+        )
         requirement_assessments = RequirementAssessment.objects.filter(
-            requirement=requirement
+            requirement=requirement, id__in=viewable_objects
         ).prefetch_related("folder", "compliance_assessment__perimeter")
         serialized_requirement_assessments = RequirementAssessmentReadSerializer(
             requirement_assessments, many=True
@@ -7516,15 +7521,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if best_results:
                 framework = Framework.objects.filter(urn=dest_urn).first()
                 if framework and str(framework) not in str(data):
-                    assessable_requirements_count = framework.requirement_nodes.filter(
-                        assessable=True
-                    ).count()
+                    assessable_urns = set(
+                        framework.requirement_nodes.filter(assessable=True).values_list(
+                            "urn", flat=True
+                        )
+                    )
                     data.append(
                         {
                             "id": framework.id,
                             "str": str(framework),
-                            "results": engine.summary_results(best_results),
-                            "assessable_requirements_count": assessable_requirements_count,
+                            "results": engine.summary_results(
+                                best_results, filter_urns=assessable_urns
+                            ),
+                            "assessable_requirements_count": len(assessable_urns),
                         }
                     )
         return Response(data, status=status.HTTP_200_OK)
@@ -9179,8 +9188,42 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
                 }
             )
 
+        # Calculate coverage in both directions
+        source_assessable_count = len(snodes_idx)
+        target_assessable_count = len(tnodes_idx)
+
+        linked_source_urns = set(
+            mapping.get("source_requirement_urn")
+            for mapping in req_mappings
+            if mapping.get("source_requirement_urn") in snodes_idx
+        )
+        linked_target_urns = set(
+            mapping.get("target_requirement_urn")
+            for mapping in req_mappings
+            if mapping.get("target_requirement_urn") in tnodes_idx
+        )
+
+        source_coverage = (
+            round(len(linked_source_urns) / source_assessable_count * 100)
+            if source_assessable_count > 0
+            else 0
+        )
+        target_coverage = (
+            round(len(linked_target_urns) / target_assessable_count * 100)
+            if target_assessable_count > 0
+            else 0
+        )
+
         meta = {
-            "display_name": f"{source_framework['name']} ➜ {target_framework['name']}"
+            "display_name": f"{source_framework['name']} ➜ {target_framework['name']}",
+            "source_framework": source_framework["name"],
+            "target_framework": target_framework["name"],
+            "source_coverage": source_coverage,
+            "target_coverage": target_coverage,
+            "source_total": source_assessable_count,
+            "source_linked": len(linked_source_urns),
+            "target_total": target_assessable_count,
+            "target_linked": len(linked_target_urns),
         }
 
         return Response(
@@ -10419,12 +10462,10 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         # Related Threats
         if incident.threats.exists():
             md_content += "## Related Threats\n\n"
-            md_content += "| Name | Type |\n"
+            md_content += "| Name | Reference ID |\n"
             md_content += "|------|------|\n"
             for threat in incident.threats.all():
-                md_content += (
-                    f"| {threat.name} | {threat.get_category_display() or 'N/A'} |\n"
-                )
+                md_content += f"| {threat.name} | {threat.ref_id or 'N/A'} |\n"
             md_content += "\n"
 
         # Timeline
