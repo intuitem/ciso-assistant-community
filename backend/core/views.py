@@ -8085,8 +8085,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             instance: ComplianceAssessment = serializer.save()
             instance.create_requirement_assessments(baseline)
 
-            instance.show_documentation_score = baseline.show_documentation_score
-            instance.save()
+            if baseline:
+                instance.show_documentation_score = baseline.show_documentation_score
+                instance.save()
 
             if baseline and baseline.framework != instance.framework:
                 source_urn = baseline.framework.urn
