@@ -718,7 +718,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         """
         Cascade preview:
         - deleted: objects actually deleted by cascade
-        - affected: objects not deleted but whose relationships will be removed (through rows, SET_NULL, local links)
+        - affected: objects not deleted but whose relationships will be removed
         """
         instance = self.get_object()
         collector = NestedObjects(using=router.db_for_write(instance))
@@ -734,20 +734,25 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             "Folder",
             "Permission",
         }
-        skip_model_classes = set()
+
+        # (source_model, field) treated as cascade
+        FORCED_CASCADE_FIELDS = {
+            ("Representative", "user"),
+        }
 
         def is_hidden_model(model):
-            return (skip_model_classes and model in skip_model_classes) or (
-                not skip_model_classes and model.__name__ in skip_model_names
-            )
+            return model.__name__ in skip_model_names
 
-        # Build index of concrete objects that will be deleted
+        def is_forced_cascade(source_model, field_name):
+            return (source_model.__name__, field_name) in FORCED_CASCADE_FIELDS
+
+        # Build index of objects Django will delete
         deleted_index = set()
         for model, objs in collector.model_objs.items():
             if model is type(instance):
                 continue
             if getattr(model._meta, "auto_created", False):
-                continue  # skip through rows here; we will bubble endpoints separately
+                continue
             for o in objs:
                 deleted_index.add((model.__name__, str(getattr(o, "pk", ""))))
 
@@ -755,25 +760,15 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             model = obj.__class__
             if is_hidden_model(model):
                 return
+
             key = model.__name__
             pk = str(getattr(obj, "pk", "")) or ""
             if (key, pk) in bucket["_seen"]:
                 return
 
-            if key == "RoleAssignment":
-                role_name = getattr(getattr(obj, "role", None), "name", "") or ""
-                if getattr(obj, "user", None):
-                    display = f"{role_name} → {getattr(obj.user, 'email', '')}"
-                elif getattr(obj, "user_group", None):
-                    display = f"{role_name} → {getattr(obj.user_group, 'name', '')}"
-                else:
-                    display = role_name
-            else:
-                display = (
-                    getattr(obj, "name", None)
-                    or getattr(obj, "email", None)
-                    or str(obj)
-                )
+            display = (
+                getattr(obj, "name", None) or getattr(obj, "email", None) or str(obj)
+            )
 
             group = bucket["by_model"].setdefault(
                 key,
@@ -797,6 +792,24 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         deleted_bucket = {"by_model": {}, "_seen": set()}
         affected_bucket = {"by_model": {}, "_seen": set()}
 
+        # Centralized classification
+        def add_with_classification(obj, source_model=None, source_field=None):
+            pair = (obj.__class__.__name__, str(getattr(obj, "pk", "")) or "")
+
+            if pair in deleted_index:
+                add_grouped(deleted_bucket, obj)
+                return
+
+            if (
+                source_model
+                and source_field
+                and is_forced_cascade(source_model, source_field)
+            ):
+                add_grouped(deleted_bucket, obj)
+                return
+
+            add_grouped(affected_bucket, obj)
+
         # 1) Concrete deletions
         through_rows = []
         for model, instances in collector.model_objs.items():
@@ -810,109 +823,88 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             for obj in instances:
                 add_grouped(deleted_bucket, obj)
 
-        # 2) Bubble endpoints from through rows (M2M join tables)
+        # 2) Bubble endpoints from through rows
         for through_model, t_instances in through_rows:
-            # Join tables have ≥2 FKs; skip others
             fk_fields = [
-                f
-                for f in through_model._meta.fields
-                if isinstance(f, ForeignKey) and getattr(f, "remote_field", None)
+                f for f in through_model._meta.fields if isinstance(f, ForeignKey)
             ]
             if len(fk_fields) < 2:
                 continue
 
             for t in t_instances:
-                endpoints = []
                 for fk in fk_fields:
                     try:
                         rel_obj = getattr(t, fk.name, None)
                     except Exception:
-                        rel_obj = None
-                    if not rel_obj:
                         continue
-                    if isinstance(rel_obj, type(instance)):
+                    if not rel_obj or isinstance(rel_obj, type(instance)):
                         continue
-                    if getattr(rel_obj._meta, "auto_created", False):
-                        continue
-                    endpoints.append(rel_obj)
 
-                for ep in endpoints:
-                    key = ep.__class__.__name__
-                    pk = str(getattr(ep, "pk", "")) or ""
-                    if (key, pk) in deleted_index:
-                        add_grouped(deleted_bucket, ep)
-                    else:
-                        add_grouped(affected_bucket, ep)
+                    add_with_classification(
+                        rel_obj,
+                        source_model=fk.model,
+                        source_field=fk.name,
+                    )
 
-        # 2b) Incoming updates (SET_NULL/DEFAULT) from Django's plan
+        # 2b) Incoming SET_NULL / DEFAULT updates
         updates = getattr(collector, "field_updates", {})
 
         def _iter_objs(maybe_iter):
-            if maybe_iter is None:
-                return
             if isinstance(maybe_iter, QuerySet):
-                for x in maybe_iter.iterator():
-                    yield x
-            else:
-                for x in maybe_iter:
-                    yield x
+                yield from maybe_iter.iterator()
+            elif maybe_iter:
+                yield from maybe_iter
 
         for key, ops in updates.items():
-            # Shape A: (field, value) -> [objs, ...]
             if isinstance(key, tuple) and len(key) == 2:
                 field, value = key
                 for objs in ops or []:
                     for o in _iter_objs(objs):
-                        model = field.model  # model whose rows will be updated
-                        pair = (model.__name__, str(getattr(o, "pk", "")) or "")
-                        if pair not in deleted_index:
-                            # If you want only SET_NULL cases: if value is None: ...
-                            add_grouped(affected_bucket, o)
-            # Shape B: model -> [(field, value, objs) ...]
-            elif isinstance(ops, (list, tuple)) and ops and isinstance(ops[0], tuple):
+                        add_with_classification(
+                            o,
+                            source_model=field.model,
+                            source_field=field.name,
+                        )
+            elif isinstance(ops, (list, tuple)):
                 for item in ops:
                     if len(item) == 3:
                         field, value, objs = item
                     elif len(item) == 2:
                         field, objs = item
-                        value = None
                     else:
                         continue
                     for o in _iter_objs(objs):
-                        model = field.model
-                        pair = (model.__name__, str(getattr(o, "pk", "")) or "")
-                        if pair not in deleted_index:
-                            add_grouped(affected_bucket, o)
-            else:
-                # Unknown shape; ignore safely
-                pass
+                        add_with_classification(
+                            o,
+                            source_model=field.model,
+                            source_field=field.name,
+                        )
 
-        # 2c) Outgoing links from the instance (FK/O2O/M2M)
+        # 2c) Outgoing links from the instance
         for f in instance._meta.get_fields():
             if getattr(f, "auto_created", False):
-                continue  # skip reverse relations
+                continue
 
-            # Local FK/O2O targets: will remain but lose the link to this instance.
             if isinstance(f, (ForeignKey, OneToOneField)):
                 try:
                     rel_obj = getattr(instance, f.name, None)
                 except Exception:
-                    rel_obj = None
+                    continue
                 if rel_obj:
-                    key = rel_obj.__class__.__name__
-                    pk = str(getattr(rel_obj, "pk", "")) or ""
-                    if (key, pk) not in deleted_index:
-                        add_grouped(affected_bucket, rel_obj)
+                    add_with_classification(
+                        rel_obj,
+                        source_model=instance.__class__,
+                        source_field=f.name,
+                    )
 
-            # Local M2M targets: will remain; join rows are removed.
             elif isinstance(f, ManyToManyField):
                 try:
-                    manager = getattr(instance, f.name)
-                    for rel_obj in manager.all():
-                        key = rel_obj.__class__.__name__
-                        pk = str(getattr(rel_obj, "pk", "")) or ""
-                        if (key, pk) not in deleted_index:
-                            add_grouped(affected_bucket, rel_obj)
+                    for rel_obj in getattr(instance, f.name).all():
+                        add_with_classification(
+                            rel_obj,
+                            source_model=instance.__class__,
+                            source_field=f.name,
+                        )
                 except Exception:
                     pass
 
@@ -947,6 +939,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 "level": "info",
             },
         }
+
         return Response(payload)
 
     def _get_optimized_object_data(self, queryset):

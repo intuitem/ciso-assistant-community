@@ -2925,5 +2925,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed."
-}
+	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed.",
+	"thirdPartyRespondent": "Third-party Respondent",
+	"thirdPartyRespondentHelpText": "Limit the user to responding to questionnaires/audits they can access; no other actions are available."
