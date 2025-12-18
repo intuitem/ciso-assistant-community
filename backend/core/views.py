@@ -429,6 +429,111 @@ class ExportMixin:
         wrap_columns = self.export_config.get("wrap_columns", ["name", "description"])
         return create_xlsx_response(entries, filename, wrap_columns)
 
+    def _create_multi_sheet_xlsx(self, queryset, main_fields, detail_config):
+        """
+        Create multi-sheet XLSX with main summary sheet and per-object detail sheets.
+
+        Args:
+            queryset: Main objects queryset
+            main_fields: Fields config for summary sheet
+            detail_config: Dict with 'fields', 'related_queryset_method', 'sheet_name_field'
+
+        Returns:
+            HttpResponse with XLSX file
+        """
+        wb = Workbook()
+        wb.remove(wb.active)  # Remove default sheet
+
+        # Create summary sheet
+        summary_ws = wb.create_sheet(title="Summary")
+        main_headers = [f.get("label", name) for name, f in main_fields.items()]
+        summary_ws.append(main_headers)
+
+        # Wrap text alignment for summary sheet
+        wrap_alignment = Alignment(wrap_text=True, vertical="top")
+        wrap_columns = self.export_config.get("wrap_columns", ["name", "description"])
+
+        for col_idx, header in enumerate(main_headers, 1):
+            if header.lower() in wrap_columns:
+                for row_idx in range(1, summary_ws.max_row + 1):
+                    summary_ws.cell(
+                        row=row_idx, column=col_idx
+                    ).alignment = wrap_alignment
+
+        # Track sheet names to avoid duplicates
+        used_sheet_names = {"Summary"}
+
+        for obj in queryset:
+            # Add row to summary sheet
+            row = [
+                self._resolve_field_value(obj, field_config)
+                for field_config in main_fields.values()
+            ]
+            summary_ws.append(row)
+
+            # Get related objects for detail sheet
+            related_getter = detail_config.get("related_queryset_method")
+            if related_getter:
+                related_objects = getattr(obj, related_getter)()
+
+                # Skip empty detail sheets if configured
+                if not related_objects and detail_config.get("skip_empty", True):
+                    continue
+
+                # Create unique sheet name
+                sheet_name_field = detail_config.get("sheet_name_field", "name")
+                base_name = str(
+                    self._resolve_field_value(obj, {"source": sheet_name_field})
+                )
+                if not base_name:
+                    base_name = f"Object_{obj.pk}"
+
+                # Truncate and ensure uniqueness
+                sheet_name = base_name[:31]
+                counter = 1
+                while sheet_name in used_sheet_names:
+                    suffix = f" ({counter})"
+                    sheet_name = base_name[: 31 - len(suffix)] + suffix
+                    counter += 1
+                used_sheet_names.add(sheet_name)
+
+                # Create detail sheet
+                detail_ws = wb.create_sheet(title=sheet_name)
+                detail_fields = detail_config.get("fields", {})
+                detail_headers = [
+                    f.get("label", name) for name, f in detail_fields.items()
+                ]
+                detail_ws.append(detail_headers)
+
+                # Add related objects
+                for related_obj in related_objects:
+                    detail_row = [
+                        self._resolve_field_value(related_obj, field_config)
+                        for field_config in detail_fields.values()
+                    ]
+                    detail_ws.append(detail_row)
+
+                # Apply wrap text to detail sheet
+                for col_idx, header in enumerate(detail_headers, 1):
+                    if header.lower() in wrap_columns:
+                        for row_idx in range(1, detail_ws.max_row + 1):
+                            detail_ws.cell(
+                                row=row_idx, column=col_idx
+                            ).alignment = wrap_alignment
+
+        # Save to buffer
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        filename = f"{self.export_config.get('filename', 'export')}_multi_sheet.xlsx"
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
 
 class GenericFilterSet(df.FilterSet):
     @classmethod
@@ -10910,6 +11015,72 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "link": {"source": "link", "label": "link", "escape": True},
         },
         "wrap_columns": ["name", "description"],
+        "task_node_fields": {
+            "due_date": {
+                "source": "due_date",
+                "label": "due_date",
+                "format": lambda x: x.strftime("%Y-%m-%d") if x else "",
+            },
+            "status": {"source": "status", "label": "status"},
+            "observation": {"source": "observation", "label": "observation"},
+            "assigned_to": {
+                "source": "task_template.assigned_to.all",
+                "label": "assigned_to",
+                "format": lambda users: ", ".join([u.email for u in users])
+                if users
+                else "",
+            },
+            "expected_evidence": {
+                "source": "task_template.evidences.all",
+                "label": "expected_evidence",
+                # Note: Formatting with done/pending status is handled specially in export_tasks_xlsx
+                "format": lambda items: ", ".join([item.name for item in items])
+                if items
+                else "",
+            },
+            # "evidences": {
+            #     "source": "evidences.all",
+            #     "label": "evidences",
+            #     "format": lambda items: ", ".join([item.name for item in items])
+            #     if items
+            #     else "",
+            # },
+            "assets": {
+                "source": "task_template.assets.all",
+                "label": "assets",
+                "format": lambda items: ", ".join([str(item) for item in items])
+                if items
+                else "",
+            },
+            "applied_controls": {
+                "source": "task_template.applied_controls.all",
+                "label": "applied_controls",
+                "format": lambda items: ", ".join([str(item) for item in items])
+                if items
+                else "",
+            },
+            "compliance_assessments": {
+                "source": "task_template.compliance_assessments.all",
+                "label": "compliance_assessments",
+                "format": lambda items: ", ".join([str(item) for item in items])
+                if items
+                else "",
+            },
+            "risk_assessments": {
+                "source": "task_template.risk_assessments.all",
+                "label": "risk_assessments",
+                "format": lambda items: ", ".join([str(item) for item in items])
+                if items
+                else "",
+            },
+            "findings_assessment": {
+                "source": "task_template.findings_assessment.all",
+                "label": "findings_assessment",
+                "format": lambda items: ", ".join([str(item) for item in items])
+                if items
+                else "",
+            },
+        },
     }
 
     def get_queryset(self):
@@ -11114,6 +11285,127 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
     def perform_update(self, serializer):
         task_template = serializer.save()
         self._sync_task_nodes(task_template)
+
+    @action(detail=False, name="Export Tasks with Nodes as Multi-Sheet XLSX")
+    def export_tasks_xlsx(self, request):
+        """
+        Export task templates with a summary sheet and individual sheets for each template's task nodes.
+        """
+        if not self.export_config:
+            return HttpResponse(
+                status=501, content="Export not configured for this model"
+            )
+
+        queryset = self._get_export_queryset()
+
+        wb = Workbook()
+        wb.remove(wb.active)
+
+        summary_ws = wb.create_sheet(title="Summary")
+        main_fields = self.export_config["fields"]
+        main_headers = [f.get("label", name) for name, f in main_fields.items()]
+        summary_ws.append(main_headers)
+
+        wrap_alignment = Alignment(wrap_text=True, vertical="top")
+        wrap_columns = self.export_config.get("wrap_columns", ["name", "description"])
+
+        used_sheet_names = {"Summary"}
+        task_node_fields = self.export_config.get("task_node_fields", {})
+
+        template_counter = 0
+        for obj in queryset:
+            row = [
+                self._resolve_field_value(obj, field_config)
+                for field_config in main_fields.values()
+            ]
+            summary_ws.append(row)
+
+            task_nodes = (
+                TaskNode.objects.filter(task_template=obj)
+                .select_related("task_template", "task_template__folder")
+                .prefetch_related(
+                    "evidences",
+                    "task_template__assigned_to",
+                    "task_template__evidences__revisions",  # Prefetch revisions for expected evidences
+                    "task_template__assets",
+                    "task_template__applied_controls",
+                    "task_template__compliance_assessments",
+                    "task_template__risk_assessments",
+                    "task_template__findings_assessment",
+                )
+                .order_by("due_date")
+            )
+
+            if not task_nodes.exists():
+                continue
+
+            template_counter += 1
+            task_name = obj.name or f"Template_{obj.pk}"
+            # Format: "1-task_name", "2-task_name", etc.
+            base_name = f"{template_counter}-{task_name}"
+
+            # Excel sheet names have a 31 character limit
+            sheet_name = base_name[:31]
+            counter = 1
+            while sheet_name in used_sheet_names:
+                suffix = f" ({counter})"
+                sheet_name = base_name[: 31 - len(suffix)] + suffix
+                counter += 1
+            used_sheet_names.add(sheet_name)
+
+            detail_ws = wb.create_sheet(title=sheet_name)
+            detail_headers = [
+                f.get("label", name) for name, f in task_node_fields.items()
+            ]
+            detail_ws.append(detail_headers)
+
+            for task_node in task_nodes:
+                detail_row = []
+                for field_name, field_config in task_node_fields.items():
+                    if field_name == "expected_evidence":
+                        # Special handling for expected evidence with done/pending status
+                        evidences = task_node.task_template.evidences.all()
+                        evidence_statuses = []
+                        for evidence in evidences:
+                            last_revision = evidence.last_revision
+                            if last_revision and last_revision.task_node == task_node:
+                                status = "done"
+                            else:
+                                status = "pending"
+                            evidence_statuses.append(f"{evidence.name} ({status})")
+                        value = (
+                            ", ".join(evidence_statuses) if evidence_statuses else ""
+                        )
+                    else:
+                        value = self._resolve_field_value(task_node, field_config)
+                    detail_row.append(value)
+                detail_ws.append(detail_row)
+
+            for col_idx, header in enumerate(detail_headers, 1):
+                if header.lower() in wrap_columns:
+                    for row_idx in range(1, detail_ws.max_row + 1):
+                        detail_ws.cell(
+                            row=row_idx, column=col_idx
+                        ).alignment = wrap_alignment
+
+        for col_idx, header in enumerate(main_headers, 1):
+            if header.lower() in wrap_columns:
+                for row_idx in range(1, summary_ws.max_row + 1):
+                    summary_ws.cell(
+                        row=row_idx, column=col_idx
+                    ).alignment = wrap_alignment
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        filename = f"{self.export_config.get('filename', 'export')}_multi_sheet.xlsx"
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
 
     def perform_create(self, serializer):
         super().perform_create(serializer)

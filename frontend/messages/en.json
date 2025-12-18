@@ -350,6 +350,7 @@
 	"asPDF": "as PDF",
 	"asCSV": "as CSV",
 	"asXLSX": "as Excel",
+	"asXLSXWithNodes": "as Excel (with task nodes)",
 	"asWord": "as Word",
 	"exportPdf": "Export PDF",
 	"generating": "Generating",
