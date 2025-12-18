@@ -137,7 +137,7 @@ from ebios_rm.models import (
     AttackPath,
 )
 
-from tprm.models import Entity
+from tprm.models import Entity, Representative
 
 from .models import *
 from .serializers import *
@@ -737,14 +737,14 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
         # (source_model, field) treated as cascade
         FORCED_CASCADE_FIELDS = {
-            ("Representative", "user"),
+            (Representative, "user"),
         }
 
         def is_hidden_model(model):
             return model.__name__ in skip_model_names
 
         def is_forced_cascade(source_model, field_name):
-            return (source_model.__name__, field_name) in FORCED_CASCADE_FIELDS
+            return (source_model, field_name) in FORCED_CASCADE_FIELDS
 
         # Build index of objects Django will delete
         deleted_index = set()
