@@ -11,6 +11,18 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z, type AnyZodObject } from 'zod';
 import { canPerformAction } from './access-control';
 
+const GLOBAL_DOMAIN_SKIPPED_REVERSE_FKS: urlModel[] = [
+	'perimeters',
+	'business-impact-analysis',
+	'incidents',
+	'findings-assessments',
+	'risk-assessments',
+	'quantitative-risk-studies',
+	'risk-scenarios',
+	'ebios-rm',
+	'compliance-assessments',
+	'entity-assessments'
+];
 interface LoadValidationFlowFormDataParams {
 	event: { fetch: typeof fetch };
 	folderId: string;
@@ -107,8 +119,9 @@ export const loadDetail = async ({ event, model, id }) => {
 						})
 				)
 				.map(async (e) => {
+					const shouldSkipForGlobalDomain = GLOBAL_DOMAIN_SKIPPED_REVERSE_FKS.includes(e.urlModel);
 					if (
-						e.urlModel === 'perimeters' &&
+						shouldSkipForGlobalDomain &&
 						model.urlModel === 'folders' &&
 						data.content_type === 'GLOBAL'
 					)

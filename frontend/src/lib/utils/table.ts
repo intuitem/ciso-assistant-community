@@ -1080,7 +1080,7 @@ export const PAST_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'past',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
