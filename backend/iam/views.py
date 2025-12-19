@@ -5,6 +5,7 @@ import structlog
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model, login, logout
 from django.db import models
+from django.db.models import Q, Exists, OuterRef
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -455,7 +456,12 @@ class RevokeOtherSessionsView(views.APIView):
         user_id = str(request.user.id)
 
         deleted_count, _ = (
-            AuthToken.objects.filter(user_id=user_id).exclude(digest=digest).delete()
+            AuthToken.objects.filter(user_id=user_id)
+            .exclude(
+                Q(digest=digest)
+                | Exists(PersonalAccessToken.objects.filter(auth_token=OuterRef("pk")))
+            )
+            .delete()
         )
 
         return Response(
