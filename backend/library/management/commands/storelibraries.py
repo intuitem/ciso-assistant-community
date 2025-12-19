@@ -38,7 +38,7 @@ class Command(BaseCommand):
                         filename=fname,
                         library=library,
                     )
-            except:
+            except Exception:
                 logger.error("Invalid library file", filename=fname)
 
         invisible_libraries = (
