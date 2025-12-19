@@ -1224,6 +1224,8 @@ class LoadedLibrary(LibraryMixin):
         """
         Returns the number of distinct dependent libraries and risk and compliance assessments that reference objects from this library
         """
+        from resilience.models import BusinessImpactAnalysis
+
         return (
             RiskAssessment.objects.filter(
                 Q(risk_scenarios__threats__library=self)
@@ -1245,6 +1247,9 @@ class LoadedLibrary(LibraryMixin):
                 objects_meta__requirement_mapping_set__isnull=True,
                 dependencies=self,
             )
+            .distinct()
+            .count()
+            + BusinessImpactAnalysis.objects.filter(risk_matrix__library=self)
             .distinct()
             .count()
         )
