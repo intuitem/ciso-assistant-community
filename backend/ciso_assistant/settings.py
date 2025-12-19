@@ -62,11 +62,6 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
-        "django.server": {
-            "handlers": [],
-            "level": "WARNING",
-            "propagate": False,
-        },
     },
 }
 
