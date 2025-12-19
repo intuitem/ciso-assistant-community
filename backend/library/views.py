@@ -214,6 +214,11 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 data="Loaded library can't be deleted because it's currently being used.",
                 status=HTTP_409_CONFLICT,
             )
+
+        # Delete a libary if it's a "fake" one (one created by the storelibraries django command to prevent invisible loaded libraries.)
+        if not library.content:
+            library.delete()
+
         return Response({"status": "success"})
 
     @action(detail=True, methods=["post"], url_path="import")
