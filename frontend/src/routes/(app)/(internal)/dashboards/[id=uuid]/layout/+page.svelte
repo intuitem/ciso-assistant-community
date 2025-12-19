@@ -332,15 +332,24 @@
 			<h1 class="text-2xl font-bold">{m.edit()}: {dashboard.name}</h1>
 		</div>
 		<div class="flex items-center gap-2">
-			<button class="btn preset-filled-primary-500" onclick={openAddBuiltinWidgetModal}>
+			<button
+				class="btn bg-indigo-500 hover:bg-indigo-600 text-white"
+				onclick={openAddBuiltinWidgetModal}
+			>
 				<i class="fa-solid fa-chart-simple"></i>
 				{m.addBuiltinWidget()}
 			</button>
-			<button class="btn preset-tonal" onclick={openAddCustomWidgetModal}>
+			<button
+				class="btn bg-violet-500 hover:bg-violet-600 text-white"
+				onclick={openAddCustomWidgetModal}
+			>
 				<i class="fa-solid fa-sliders"></i>
 				{m.addCustomWidget()}
 			</button>
-			<button class="btn preset-tonal" onclick={openAddTextWidgetModal}>
+			<button
+				class="btn bg-teal-500 hover:bg-teal-600 text-white"
+				onclick={openAddTextWidgetModal}
+			>
 				<i class="fa-solid fa-font"></i>
 				{m.addTextWidget()}
 			</button>
