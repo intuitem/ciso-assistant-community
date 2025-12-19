@@ -3,7 +3,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 import { getSecureRedirect } from '$lib/utils/helpers';
 import { modelSchema } from '$lib/utils/schemas';
-import { listViewFields } from '$lib/utils/table';
+import { headData } from '$lib/utils/table';
 import { m } from '$paraglide/messages';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import type { Actions } from '@sveltejs/kit';
@@ -101,7 +101,7 @@ export const load = (async ({ fetch, params }) => {
 	await Promise.all(
 		['applied-controls', 'evidences', 'security-exceptions'].map(async (key) => {
 			const table: TableSource = {
-				head: listViewFields[key].head,
+				head: headData(key),
 				body: [],
 				meta: []
 			};

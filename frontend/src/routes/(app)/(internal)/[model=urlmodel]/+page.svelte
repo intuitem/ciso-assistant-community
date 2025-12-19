@@ -8,6 +8,7 @@
 	import { m } from '$paraglide/messages';
 	import type { ActionData, PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 
 	import { onMount } from 'svelte';
 	import {
@@ -24,6 +25,7 @@
 
 	let { data, form }: Props = $props();
 	let URLModel = $derived(data.URLModel);
+	let exportPopupOpen = $state(false);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -116,7 +118,7 @@
 				source={data.table}
 				deleteForm={data.deleteForm}
 				{URLModel}
-				disableEdit={['user-groups'].includes(URLModel)}
+				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
 				disableDelete={['user-groups'].includes(URLModel)}
 			>
 				{#snippet addButton()}
@@ -131,13 +133,35 @@
 									onclick={handlers(modalCreateForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
-								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios'].includes(URLModel)}
-									<a
-										href="{URLModel}/export/"
-										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-										title={m.exportButton()}
-										data-testid="export-button"><i class="fa-solid fa-download mr-2"></i></a
+								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings'].includes(URLModel)}
+									<Popover
+										open={exportPopupOpen}
+										onOpenChange={(e) => (exportPopupOpen = e.open)}
+										triggerBase="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg"
+										positioning={{ placement: 'bottom-end' }}
+										zIndex="1000"
 									>
+										{#snippet trigger()}
+											<span title={m.exportButton()} data-testid="export-button">
+												<i class="fa-solid fa-download"></i>
+											</span>
+										{/snippet}
+										{#snippet content()}
+											<div class="flex flex-col">
+												<a
+													href="{URLModel}/export/"
+													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+													>... {m.asCSV()}</a
+												>
+												<a
+													href="{URLModel}/export/xlsx/"
+													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+													>... {m.asXLSX()}</a
+												>
+											</div>
+										{/snippet}
+									</Popover>
 								{/if}
 								{#if URLModel === 'applied-controls'}
 									<a

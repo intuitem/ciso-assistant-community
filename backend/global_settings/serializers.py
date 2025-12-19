@@ -15,6 +15,9 @@ GENERAL_SETTINGS_KEYS = [
     "risk_matrix_labels",
     "currency",
     "daily_rate",
+    "mapping_max_depth",
+    "allow_self_validation",
+    "show_warning_external_links",
 ]
 
 
@@ -197,6 +200,12 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     reports = serializers.BooleanField(
         source="value.reports", required=False, default=False
     )
+    validation_flows = serializers.BooleanField(
+        source="value.validation_flows", required=False, default=False
+    )
+    outgoing_webhooks = serializers.BooleanField(
+        source="value.outgoing_webhooks", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings
@@ -223,6 +232,8 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "project_management",
             "contracts",
             "reports",
+            "validation_flows",
+            "outgoing_webhooks",
         ]
         read_only_fields = ["name"]
 

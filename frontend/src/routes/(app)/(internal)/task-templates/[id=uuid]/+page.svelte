@@ -13,6 +13,6 @@
 	{data}
 	displayModelTable={data.data.is_recurrent}
 	exclude={data.data.is_recurrent
-		? ['observation', 'evidences', 'status']
+		? ['observation', 'status']
 		: ['last_occurrence_status', 'next_occurrence']}
 />

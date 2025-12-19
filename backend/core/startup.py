@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.db.models.signals import post_migrate
 from structlog import get_logger
 
-from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL, FORCE_CREATE_ADMIN
 from core.utils import RoleCodename, UserGroupCodename
 
 logger = get_logger(__name__)
@@ -33,6 +33,7 @@ READER_PERMISSIONS_LIST = [
     "view_riskassessment",
     "view_riskmatrix",
     "view_riskscenario",
+    "view_validationflow",
     "view_solution",
     "view_contract",
     "view_storedlibrary",
@@ -97,6 +98,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_riskscenario",
     "view_riskacceptance",
     "approve_riskacceptance",
+    "view_validationflow",
+    "change_validationflow",
     "view_asset",
     "view_threat",
     "view_vulnerability",
@@ -197,6 +200,9 @@ ANALYST_PERMISSIONS_LIST = [
     "change_solution",
     "change_contract",
     "change_threat",
+    "add_validationflow",
+    "view_validationflow",
+    "change_validationflow",
     "delete_appliedcontrol",
     "delete_asset",
     "delete_complianceassessment",
@@ -440,6 +446,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_solution",
     "change_contract",
     "change_threat",
+    "add_validationflow",
+    "view_validationflow",
+    "change_validationflow",
+    "delete_validationflow",
     "delete_appliedcontrol",
     "delete_asset",
     "delete_complianceassessment",
@@ -728,6 +738,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_riskacceptance",
     "delete_riskacceptance",
     "approve_riskacceptance",
+    "add_validationflow",
+    "view_validationflow",
+    "change_validationflow",
+    "delete_validationflow",
     "add_riskmatrix",
     "view_riskmatrix",
     "change_riskmatrix",
@@ -969,6 +983,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # webhooks
+    "add_webhookendpoint",
+    "view_webhookendpoint",
+    "change_webhookendpoint",
+    "delete_webhookendpoint",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -1181,25 +1200,30 @@ def startup(sender: AppConfig, **kwargs):
 
     call_command("storelibraries")
     call_command("autoloadlibraries")
-
-    # if superuser defined and does not exist, then create it
-    if (
-        CISO_ASSISTANT_SUPERUSER_EMAIL
-        and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
-    ):
-        try:
-            User.objects.create_superuser(
-                email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
-            )
-        except Exception as e:
-            logger.error("Error creating superuser", exc_info=True)
+    call_command("sync_event_types")
 
     # add administrators group to superusers (for resiliency)
     administrators = UserGroup.objects.get(
         name="BI-UG-ADM", folder=Folder.get_root_folder()
     )
-    for u in User.objects.filter(is_superuser=True):
-        u.user_groups.add(administrators)
+    if (
+        User.objects.filter(user_groups=administrators).distinct().count() == 0
+        or FORCE_CREATE_ADMIN
+    ):
+        # if superuser defined and does not exist, then create it
+        if (
+            CISO_ASSISTANT_SUPERUSER_EMAIL
+            and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
+        ):
+            try:
+                User.objects.create_superuser(
+                    email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
+                )
+            except Exception as e:
+                logger.error("Error creating superuser", exc_info=True)
+
+        for u in User.objects.filter(is_superuser=True):
+            u.user_groups.add(administrators)
 
     # reset global setings in case of an issue
     default_settings = {
@@ -1212,6 +1236,8 @@ def startup(sender: AppConfig, **kwargs):
         "interface_agg_scenario_matrix": False,
         "currency": "€",
         "daily_rate": 500,
+        "mapping_max_depth": 3,
+        "show_warning_external_links": True,
     }
     try:
         settings, _ = GlobalSettings.objects.get_or_create(
