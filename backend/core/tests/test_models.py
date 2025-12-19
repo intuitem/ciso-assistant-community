@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 import pytest
 from ciso_assistant.settings import BASE_DIR
-from conftest import RISK_MATRIX_JSON_DEFINITION
+from test_fixtures import RISK_MATRIX_JSON_DEFINITION
 
 from core.models import (
     Policy,

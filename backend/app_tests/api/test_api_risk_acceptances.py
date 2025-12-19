@@ -11,7 +11,7 @@ from core.models import (
 from iam.models import Folder, UserGroup
 
 from test_utils import EndpointTestsQueries
-from conftest import RISK_MATRIX_JSON_DEFINITION
+from test_fixtures import RISK_MATRIX_JSON_DEFINITION
 
 # Generic risk acceptance data for tests
 RISK_ACCEPTANCE_NAME = "Test Risk Acceptance"

@@ -12,7 +12,7 @@ from core.models import (
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
-from conftest import RISK_MATRIX_JSON_DEFINITION
+from test_fixtures import RISK_MATRIX_JSON_DEFINITION
 
 # Generic perimeter data for tests
 RISK_SCENARIO_NAME = "Test scenario"

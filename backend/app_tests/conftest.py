@@ -6,8 +6,6 @@ from iam.models import User, UserGroup
 from core.apps import startup
 from knox.models import AuthToken
 
-from conftest import RISK_MATRIX_JSON_DEFINITION  # noqa: F401 - re-exported for test imports
-
 
 class Test(dict):
     def __init__(self, *args, **kwargs):
