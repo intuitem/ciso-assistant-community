@@ -4,6 +4,7 @@ from core.models import Perimeter, RiskAssessment, RiskMatrix, StoredLibrary
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
+from conftest import RISK_MATRIX_JSON_DEFINITION
 
 # Generic perimeter data for tests
 RISK_ASSESSMENT_NAME = "Test risk_assessment"
@@ -31,7 +32,9 @@ class TestRiskAssessmentUnauthenticated:
                     name="test", folder=Folder.objects.create(name="test")
                 ),
                 "risk_matrix": RiskMatrix.objects.create(
-                    name="test", folder=Folder.objects.create(name="test2")
+                    name="test",
+                    folder=Folder.objects.create(name="test2"),
+                    json_definition=RISK_MATRIX_JSON_DEFINITION,
                 ),
             },
         )
@@ -66,7 +69,9 @@ class TestRiskAssessmentUnauthenticated:
                     name="test", folder=Folder.objects.create(name="test")
                 ),
                 "risk_matrix": RiskMatrix.objects.create(
-                    name="test", folder=Folder.objects.create(name="test2")
+                    name="test",
+                    folder=Folder.objects.create(name="test2"),
+                    json_definition=RISK_MATRIX_JSON_DEFINITION,
                 ),
             },
             {
@@ -91,7 +96,9 @@ class TestRiskAssessmentUnauthenticated:
                     name="test", folder=Folder.objects.create(name="test")
                 ),
                 "risk_matrix": RiskMatrix.objects.create(
-                    name="test", folder=Folder.objects.create(name="test2")
+                    name="test",
+                    folder=Folder.objects.create(name="test2"),
+                    json_definition=RISK_MATRIX_JSON_DEFINITION,
                 ),
             },
         )
