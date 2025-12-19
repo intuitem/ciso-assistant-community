@@ -85,7 +85,7 @@
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
 		onFilterChange?: (filters: Record<string, any>) => void;
-		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, () => void]>;
+		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
 		addButton?: import('svelte').Snippet;
