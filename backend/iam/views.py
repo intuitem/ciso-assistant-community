@@ -24,6 +24,7 @@ from rest_framework.status import (
     HTTP_401_UNAUTHORIZED,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
+from django.contrib.sessions.models import Session
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
@@ -439,3 +440,26 @@ class SetPasswordView(views.APIView):
                 )
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+class RevokeOtherSessionsView(views.APIView):
+    """
+    An endpoint for revoking all user sessions.
+    """
+
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        auth_header = request.META.get("HTTP_AUTHORIZATION")
+        access_token = auth_header.split(" ")[1]
+        digest = crypto.hash_token(access_token)
+        user_id = str(request.user.id)
+
+        deleted_count, _ = (
+            AuthToken.objects.filter(user_id=user_id).exclude(digest=digest).delete()
+        )
+
+        return Response(
+            {"revoked_sessions": deleted_count},
+            status=status.HTTP_200_OK,
+        )

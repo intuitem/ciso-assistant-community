@@ -90,6 +90,9 @@ export const actions: Actions = {
 			return fail(data.status, { form });
 		}
 
+		// Revoke all user sessions (except the one which activated the TOTP)
+		event.fetch(`${BASE_API_URL}/iam/revoke-sessions/`, { method: 'POST' });
+
 		setFlash({ type: 'success', message: m.successfullyActivatedTOTP() }, event);
 		return { form };
 	},
