@@ -471,56 +471,15 @@ class MappingEngine:
                         )
                         == 0
                     ):
-                        print(f"no source_requirement_assessments for {mif_id} in \n{src_assessment}")
+                        print(
+                            f"no source_requirement_assessments for {mif_id} in \n{src_assessment}"
+                        )
 
             for mif_id in mif_ids:
                 target_assessment["mapping_inference"][
                     "source_requirement_assessments"
                 ][mif_id] = source_requirement_assessments.get(mif_id, {})
 
-            # target_assessment["mapping_inference"]["source_requirement_assessment"] = (
-            #     source_requirement_assessement
-            # )
-
-            # for mif_id in mif_ids:
-            #     print(
-            #         "type of ",
-            #         target_assessment["mapping_inference"][
-            #             "source_requirement_assessment"
-            #         ],
-            #         "=",
-            #         type(
-            #             target_assessment["mapping_inference"][
-            #                 "source_requirement_assessment"
-            #             ]
-            #         ),
-            #     )
-            #     target_assessment["mapping_inference"]["source_requirement_assessment"][
-            #         mif_id
-            #     ] = source_requirement_assessement.copy()
-
-            # target_assessment["mapping_inference"]["source_requirement_assessment"][
-            #     src
-            # ] = {
-            #     "id": source_of_the_sources["requirement_assessments"][src].get("id"),
-            #     "str": source_of_the_sources["requirement_assessments"][src].get(
-            #         "name"
-            #     ),
-            #     "coverage": "full" if rel in ("equal", "superset") else "partial",
-            #     "score": source_of_the_sources["requirement_assessments"][src].get(
-            #         "score"
-            #     ),
-            #     "is_scored": source_of_the_sources["requirement_assessments"][src].get(
-            #         "is_scored"
-            #     ),
-            #     "source_framework": source_of_the_sources["requirement_assessments"][
-            #         src
-            #     ].get("framework"),
-            #     "used_mapping_set": {},
-            # }
-
-        with open(f"/tmp/[{hop_index}]__{requirement_mapping_set.get('source_framework_urn', '')}__to__{requirement_mapping_set.get('target_framework_urn', '')}.json", "w") as j:
-            j.write(str(target_audit))
         return target_audit
 
     def _most_restrictive_result(self, result1, result2):

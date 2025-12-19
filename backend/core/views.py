@@ -6694,12 +6694,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 source_urn = baseline.framework.urn
                 audit_from_results = engine.load_audit_fields(baseline)
                 dest_urn = serializer.validated_data["framework"].urn
-                
+
                 best_results, _ = engine.best_mapping_inferences(
                     audit_from_results, source_urn, dest_urn, MAPPING_MAX_DETPH
                 )
-                with open(f"/tmp/[F]__{source_urn}__to__{dest_urn}.json", "w") as j:
-                    j.write(str(best_results))
 
                 requirement_assessments_to_update: list[RequirementAssessment] = []
 
