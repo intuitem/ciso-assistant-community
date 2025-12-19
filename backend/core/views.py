@@ -10922,7 +10922,11 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
         "fields": {
             "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
             "name": {"source": "name", "label": "name", "escape": True},
-            "description": {"source": "description", "label": "description"},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
             "folder": {"source": "folder.name", "label": "folder", "escape": True},
             "is_recurrent": {
                 "source": "is_recurrent",
@@ -10973,42 +10977,54 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "assets": {
                 "source": "assets.all",
                 "label": "assets",
-                "format": lambda items: ", ".join([str(item) for item in items])
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
                 if items
                 else "",
             },
             "applied_controls": {
                 "source": "applied_controls.all",
                 "label": "applied_controls",
-                "format": lambda items: ", ".join([str(item) for item in items])
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
                 if items
                 else "",
             },
             "evidences": {
                 "source": "evidences.all",
                 "label": "evidences",
-                "format": lambda items: ", ".join([item.name for item in items])
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(item.name) for item in items
+                )
                 if items
                 else "",
             },
             "compliance_assessments": {
                 "source": "compliance_assessments.all",
                 "label": "compliance_assessments",
-                "format": lambda items: ", ".join([str(item) for item in items])
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
                 if items
                 else "",
             },
             "risk_assessments": {
                 "source": "risk_assessments.all",
                 "label": "risk_assessments",
-                "format": lambda items: ", ".join([str(item) for item in items])
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
                 if items
                 else "",
             },
             "findings_assessment": {
                 "source": "findings_assessment.all",
                 "label": "findings_assessment",
-                "format": lambda items: ", ".join([str(item) for item in items])
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
                 if items
                 else "",
             },
@@ -11022,7 +11038,11 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 "format": lambda x: x.strftime("%Y-%m-%d") if x else "",
             },
             "status": {"source": "status", "label": "status"},
-            "observation": {"source": "observation", "label": "observation"},
+            "observation": {
+                "source": "observation",
+                "label": "observation",
+                "escape": True,
+            },
             "assigned_to": {
                 "source": "task_template.assigned_to.all",
                 "label": "assigned_to",
@@ -11048,35 +11068,45 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "assets": {
                 "source": "task_template.assets.all",
                 "label": "assets",
-                "format": lambda items: ", ".join([str(item) for item in items])
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
                 if items
                 else "",
             },
             "applied_controls": {
                 "source": "task_template.applied_controls.all",
                 "label": "applied_controls",
-                "format": lambda items: ", ".join([str(item) for item in items])
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
                 if items
                 else "",
             },
             "compliance_assessments": {
                 "source": "task_template.compliance_assessments.all",
                 "label": "compliance_assessments",
-                "format": lambda items: ", ".join([str(item) for item in items])
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
                 if items
                 else "",
             },
             "risk_assessments": {
                 "source": "task_template.risk_assessments.all",
                 "label": "risk_assessments",
-                "format": lambda items: ", ".join([str(item) for item in items])
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
                 if items
                 else "",
             },
             "findings_assessment": {
                 "source": "task_template.findings_assessment.all",
                 "label": "findings_assessment",
-                "format": lambda items: ", ".join([str(item) for item in items])
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
                 if items
                 else "",
             },
