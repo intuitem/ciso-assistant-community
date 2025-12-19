@@ -137,12 +137,11 @@
 
 		chart.setOption(option);
 
-		window.addEventListener('resize', function () {
-			chart.resize();
-		});
+		const handleResize = () => chart.resize();
+		window.addEventListener('resize', handleResize);
 
 		return () => {
-			window.removeEventListener('resize', () => chart.resize());
+			window.removeEventListener('resize', handleResize);
 			chart.dispose();
 		};
 	});
