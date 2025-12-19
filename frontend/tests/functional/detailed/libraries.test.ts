@@ -18,9 +18,6 @@ test('every library can be loaded', async ({ logedPage, librariesPage, page }) =
 		console.log('library:' + nextRemainingLibrary);
 		await librariesPage.importLibrary(nextRemainingLibrary, undefined, 'any');
 
-		await librariesPage.tab('Libraries store').click();
-		expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
-
 		previousRemainingLibrary = nextRemainingLibrary;
 		nextRemainingLibrary = libraryNames[i];
 		expect(

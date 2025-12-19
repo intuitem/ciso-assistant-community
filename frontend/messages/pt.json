@@ -979,6 +979,9 @@
 	"downloadCertificate": "Baixar certificado",
 	"viewMore": "Ver mais",
 	"viewLess": "Ver menos",
+	"isCustom": "Personalizado",
+	"errorUnloadingLibrary": "Erro ao descarregar a biblioteca",
+	"librarySuccessfullyUnloaded": "A biblioteca foi descarregada com sucesso",
 	"scoreChangeDetected": "Alteração de pontuação detectada",
 	"scoreChangeDetectedDescription": "Uma alteração nas pontuações foi detectada. Escolha como lidar com as atualizações de pontuação para as auditorias associadas.",
 	"clamp": "Limitar",
@@ -1059,5 +1062,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Os itens abaixo permanecem no sistema, mas seus links para este objeto serão removidos."
+	"cascadeAffectedHint": "Os itens abaixo permanecem no sistema, mas seus links para este objeto serão removidos.",
+	"libraryFilteringLabels": "Etiquetas de biblioteca"
 }
