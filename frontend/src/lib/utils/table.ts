@@ -1748,6 +1748,7 @@ export const listViewFields = {
 	},
 	'asset-assessments': {
 		head: [
+			'refId',
 			'asset',
 			'folder',
 			'bia',
@@ -1759,7 +1760,8 @@ export const listViewFields = {
 			'recoveryTargetsMet'
 		],
 		body: [
-			'asset',
+			'asset.ref_id',
+			'asset.str',
 			'asset_folder',
 			'bia',
 			'children_assets',
