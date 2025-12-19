@@ -599,6 +599,8 @@ class Dashboard(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         ),
     )
 
+    fields_to_check = ["ref_id", "name"]
+
     class Meta:
         verbose_name = _("Dashboard")
         verbose_name_plural = _("Dashboards")
