@@ -1059,7 +1059,7 @@ export const IS_LOADED_FILTER: ListViewFilterConfig = {
 export const IS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'updateAvailable',
+		label: 'loadedLibraries',
 		options: YES_NO_OPTIONS,
 		multiple: false
 	}
