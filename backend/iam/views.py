@@ -24,7 +24,6 @@ from rest_framework.status import (
     HTTP_401_UNAUTHORIZED,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
-from django.contrib.sessions.models import Session
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 

@@ -117,14 +117,7 @@ logger.info("SCHEMA_VERSION: %s", SCHEMA_VERSION)
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
-if SECRET_KEY is None:
-    secret_key_file = Path(".django_secret_key")
-    if secret_key_file.exists():
-        SECRET_KEY = secret_key_file.read_text()
-    else:
-        SECRET_KEY = get_random_secret_key()
-        secret_key_file.write_text(SECRET_KEY)
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
