@@ -361,7 +361,7 @@ class StoredLibrary(LibraryMixin):
             )  # I don't want whitespaces in URN anymore nontheless
 
             library_objects = library_data["objects"]
-            label_names = library_data.get("filtering_labels", [])
+            label_names = library_data.get("labels", [])
             filtering_labels = [
                 LibraryFilteringLabel.objects.get_or_create(label=label_name)[0]
                 for label_name in label_names
