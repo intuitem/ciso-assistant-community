@@ -251,7 +251,7 @@
 	"strengthOfKnowledge": "Strength of knowledge",
 	"dueDate": "Due date",
 	"startDate": "Start date",
-	"endDate": "End date",
+	"endDate": "End Date",
 	"attachment": "Attachment",
 	"observation": "Observation",
 	"observationHelpText": "Additional notes and comments in markdown format",
@@ -1000,7 +1000,6 @@
 	"timeline": "Timeline",
 	"timelineEntries": "Timeline",
 	"graph": "Graph",
-	"startDate": "Start date",
 	"startDateHelpText": "Start date (useful for timeline)",
 	"backupLoadingError": "An error occurred while loading the backup.",
 	"backupVersionError": "Can't load the backup, the version of the backup is invalid",
@@ -2926,6 +2925,9 @@
 	"number": "Number",
 	"choiceLevel": "Choice Level",
 	"sampleTimeline": "Timeline",
+	"isCustom": "Custom",
+	"errorUnloadingLibrary": "Error unloading library",
+	"librarySuccessfullyUnloaded": "The library has been successfully unloaded",
 	"webhookSharedSecretShownOnce": "The shared secret is shown only once upon creation. Make sure to copy and store it securely.",
 	"searchResourcesPlaceholder": "Search resources...",
 	"noResourceMatchQuery": "No resource matching your query was found.",
@@ -3018,5 +3020,6 @@
 	"count": "Count",
 	"metricDefinitionsDescription": "Define custom metrics to track and measure performance indicators",
 	"metricInstancesDescription": "Track specific metric values for objects across your organization",
-	"dashboardsDescription": "Custom dashboards to visualize metrics and key performance indicators"
+	"dashboardsDescription": "Custom dashboards to visualize metrics and key performance indicators",
+	"libraryFilteringLabels": "Library labels"
 }

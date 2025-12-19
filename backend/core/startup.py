@@ -169,6 +169,7 @@ APPROVER_PERMISSIONS_LIST = [
 ANALYST_PERMISSIONS_LIST = [
     "add_filteringlabel",
     "view_filteringlabel",
+    "view_libraryfilteringlabel",
     "add_appliedcontrol",
     "add_asset",
     "add_complianceassessment",
@@ -411,6 +412,7 @@ ANALYST_PERMISSIONS_LIST = [
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_filteringlabel",
     "view_filteringlabel",
+    "view_libraryfilteringlabel",
     "add_appliedcontrol",
     "add_asset",
     "add_complianceassessment",
@@ -805,6 +807,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_filteringlabel",
     "change_filteringlabel",
     "delete_filteringlabel",
+    "add_libraryfilteringlabel",
+    "view_libraryfilteringlabel",
+    "change_libraryfilteringlabel",
+    "delete_libraryfilteringlabel",
     "add_ebiosrmstudy",
     "view_ebiosrmstudy",
     "change_ebiosrmstudy",

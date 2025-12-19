@@ -198,6 +198,16 @@
 					<strong>{m.copyright()}</strong>: {data.library.copyright}
 				</p>
 			{/if}
+			{#if data.library.filtering_labels && data.library.filtering_labels.length > 0}
+				<p class="text-md leading-5 text-gray-700">
+					<strong>{m.labels()}</strong>:
+				</p>
+				<ul class="list-disc list-inside">
+					{#each data.library.filtering_labels as label}
+						<li>{label.label}</li>
+					{/each}
+				</ul>
+			{/if}
 		</div>
 	</div>
 
