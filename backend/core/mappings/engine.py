@@ -264,6 +264,8 @@ class MappingEngine:
         hop_index: str,
         path: list[str],
     ) -> dict[str, str | dict[str, str]]:
+        # Hop_index allows us to know if the source_audit is the 'real' source, or a transition audit.
+        # The first hop in 1.
         if not source_audit.get("requirement_assessments"):
             return {}
         target_audit: dict[str, str | dict[str, str | dict[str, str]]] = {
@@ -412,16 +414,16 @@ class MappingEngine:
 
             """
             Here begins the mapping inference.
-            If the source_audit is the "real" first source, we grab the information direcly from the source_audit's RA into the target RA's mapping_inference.
-            However, if the source_audit variable is a transition audit (in case of a multiple hopes mapping), we grab the sources_audit RA's mapping_inference into the target_audit RA's one.
+            If the source_audit is the "real" first source (hop_index == 1), we grab the information direcly from the source_audit's RA into the target RA's mapping_inference.
+            However, if the source_audit variable is a transition audit (in case of a multiple hops mapping), we grab the sources_audit RA's mapping_inference into the target_audit RA's one.
             """
             mif = target_assessment["mapping_inference"].get(
-                "source_requirement_assessment"
+                "source_requirement_assessments"
             )
 
             if mif == None:
                 target_assessment["mapping_inference"][
-                    "source_requirement_assessment"
+                    "source_requirement_assessments"
                 ] = defaultdict(dict)
 
             if (
@@ -429,28 +431,56 @@ class MappingEngine:
             ):  # if the source_audit is the real source and not a transition audit
                 # we build the mapping_inference object to put later in the target_audit RA's
                 ra = source_audit["requirement_assessments"][src]
-                source_requirement_assessement = {
-                    "id": ra.get("id"),
-                    "urn": src,
-                    "str": ra.get("name"),
-                    "coverage": "full" if rel in ("equal", "superset") else "partial",
-                    "score": ra.get("score"),
-                    "is_scored": ra.get("is_scored"),
-                    "source_framework": ra.get("source_framework"),
-                    "used_mapping_set": {},
+                source_requirement_assessments = {
+                    src: {
+                        "id": ra.get("id"),
+                        "urn": src,
+                        "str": ra.get("name"),
+                        "coverage": "full"
+                        if rel in ("equal", "superset")
+                        else "partial",
+                        "score": ra.get("score"),
+                        "is_scored": ra.get("is_scored"),
+                        "source_framework": ra.get("source_framework"),
+                        "used_mapping_set": {},
+                    }
                 }
+                mif_ids = list([src])
 
             else:  # if the source_audit is a transition audit
                 # We will copy the mapping_inferences object of the transition audit RA's into the target_audit RA's one
-                print("src_assessment")
-                print(src_assessment)
-                source_requirement_assessement = src_assessment.get(
-                    "mapping_inference", {}
-                ).get("source_requirement_assessment", {})
+                mif_ids = list(
+                    src_assessment.get("mapping_inference", {}).get(
+                        "source_requirement_assessments", {}
+                    )
+                )
+                source_requirement_assessments = defaultdict(dict)
+                for mif_id in mif_ids:
+                    source_requirement_assessments[mif_id] = (
+                        src_assessment.get("mapping_inference", {})
+                        .get("source_requirement_assessments", {})
+                        .get(mif_id, {})
+                        .copy()
+                    )
+                    if (
+                        len(
+                            src_assessment.get("mapping_inference", {})
+                            .get("source_requirement_assessments", {})
+                            .get(mif_id, {})
+                            .keys()
+                        )
+                        == 0
+                    ):
+                        print(f"no source_requirement_assessments for {mif_id} in \n{src_assessment}")
 
+            for mif_id in mif_ids:
+                target_assessment["mapping_inference"][
+                    "source_requirement_assessments"
+                ][mif_id] = source_requirement_assessments.get(mif_id, {})
 
-            target_assessment["mapping_inference"]["source_requirement_assessment"] = source_requirement_assessement
-
+            # target_assessment["mapping_inference"]["source_requirement_assessment"] = (
+            #     source_requirement_assessement
+            # )
 
             # for mif_id in mif_ids:
             #     print(
@@ -489,6 +519,8 @@ class MappingEngine:
             #     "used_mapping_set": {},
             # }
 
+        with open(f"/tmp/[{hop_index}]__{requirement_mapping_set.get('source_framework_urn', '')}__to__{requirement_mapping_set.get('target_framework_urn', '')}.json", "w") as j:
+            j.write(str(target_audit))
         return target_audit
 
     def _most_restrictive_result(self, result1, result2):
@@ -581,7 +613,9 @@ class MappingEngine:
             audit_results["requirement_assessments"][ra.requirement.urn]["id"] = str(
                 ra.id
             )
-            audit_results["requirement_assessments"][ra.requirement.urn]["source_framework"] = {
+            audit_results["requirement_assessments"][ra.requirement.urn][
+                "source_framework"
+            ] = {
                 "id": str(audit.framework.id),
                 "name": str(audit.framework),
             }
