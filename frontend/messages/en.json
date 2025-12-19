@@ -249,7 +249,7 @@
 	"strengthOfKnowledge": "Strength of knowledge",
 	"dueDate": "Due date",
 	"startDate": "Start date",
-	"endDate": "End date",
+	"endDate": "End Date",
 	"attachment": "Attachment",
 	"observation": "Observation",
 	"observationHelpText": "Additional notes and comments in markdown format",
@@ -2858,6 +2858,9 @@
 	"purposesDescription": "Data processing purposes (GDPR)",
 	"rightRequestsDescription": "Data subject rights requests (GDPR)",
 	"dataBreachesDescription": "Data breach incidents and notifications",
+	"isCustom": "Custom",
+	"errorUnloadingLibrary": "Error unloading library",
+	"librarySuccessfullyUnloaded": "The library has been successfully unloaded",
 	"webhookSharedSecretShownOnce": "The shared secret is shown only once upon creation. Make sure to copy and store it securely.",
 	"searchResourcesPlaceholder": "Search resources...",
 	"noResourceMatchQuery": "No resource matching your query was found.",
@@ -3142,5 +3145,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed."
+	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed.",
+	"libraryFilteringLabels": "Library labels"
 }

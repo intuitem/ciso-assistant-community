@@ -1339,5 +1339,9 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "De følgende elementer forbliver i systemet, men deres forbindelser til dette objekt vil blive fjernet."
+	"cascadeAffectedHint": "De følgende elementer forbliver i systemet, men deres forbindelser til dette objekt vil blive fjernet.",
+	"isCustom": "Brugerdefineret",
+	"errorUnloadingLibrary": "Fejl under aflæsning af bibliotek",
+	"librarySuccessfullyUnloaded": "Biblioteket blev afindlæst med succes",
+	"libraryFilteringLabels": "Bibliotek etiketter"
 }

@@ -70,6 +70,7 @@ export const URL_MODEL = [
 	'representatives',
 	'vulnerabilities',
 	'filtering-labels',
+	'library-filtering-labels',
 	// 'ebios-rm',
 	'feared-events',
 	'ro-to',

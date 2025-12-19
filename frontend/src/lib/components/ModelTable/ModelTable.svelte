@@ -85,6 +85,8 @@
 		folderId?: string;
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
+		onFilterChange?: (filters: Record<string, any>) => void;
+		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
 		addButton?: import('svelte').Snippet;
@@ -139,6 +141,8 @@
 		folderId = '',
 		forcePreventDelete = false,
 		forcePreventEdit = false,
+		onFilterChange = () => {},
+		quickFilters,
 		optButton,
 		selectButton,
 		addButton,
@@ -330,7 +334,7 @@
 
 	const actionsURLModel = URLModel;
 	const preventDelete = (row: TableSource) =>
-		(row?.meta?.builtin && actionsURLModel !== 'loaded-libraries') ||
+		(actionsURLModel === 'stored-libraries' && (row?.meta?.builtin || row?.meta?.is_loaded)) ||
 		(!URLModel?.includes('libraries') && Object.hasOwn(row?.meta, 'urn') && row?.meta?.urn) ||
 		(URLModel?.includes('campaigns') && row?.meta?.compliance_assessments.length > 0) ||
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
@@ -353,6 +357,7 @@
 			})
 		)
 	);
+	$effect(() => onFilterChange(filterValues));
 
 	run(() => {
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
@@ -583,6 +588,9 @@
 			{/if}
 		</div>
 	</header>
+	{@render quickFilters?.(filterValues, _form, () => {
+		invalidateTable = true;
+	})}
 	<!-- Table -->
 	<table
 		class="table caption-bottom {classesTable}"

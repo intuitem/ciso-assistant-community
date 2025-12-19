@@ -643,11 +643,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 id = UUID(q.group(1))
                 if RoleAssignment.is_object_readable(self.request.user, self.model, id):
                     object_ids_view = [id]
+
         if not object_ids_view:
             scope_folder = Folder.get_root_folder()
             object_ids_view = RoleAssignment.get_accessible_object_ids(
                 scope_folder, self.request.user, self.model
             )[0]
+
         queryset = self.model.objects.filter(id__in=object_ids_view)
         return queryset
 
@@ -856,6 +858,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             "LogEntry",
             "Folder",
             "Permission",
+            "LibraryFilteringLabel",
         }
         skip_model_classes = set()
 
@@ -2290,6 +2293,17 @@ class FilteringLabelViewSet(BaseModelViewSet):
     """
 
     model = FilteringLabel
+    filterset_fields = ["folder"]
+    search_fields = ["label"]
+    ordering = ["label"]
+
+
+class LibraryFilteringLabelViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows library labels to be viewed or edited.
+    """
+
+    model = LibraryFilteringLabel
     filterset_fields = ["folder"]
     search_fields = ["label"]
     ordering = ["label"]

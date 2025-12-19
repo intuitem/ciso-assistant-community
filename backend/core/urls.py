@@ -95,6 +95,11 @@ router.register(
     basename="filtering-labels",
 )
 router.register(
+    r"library-filtering-labels",
+    LibraryFilteringLabelViewSet,
+    basename="library-filtering-labels",
+)
+router.register(
     r"security-exceptions",
     SecurityExceptionViewSet,
     basename="security-exceptions",
