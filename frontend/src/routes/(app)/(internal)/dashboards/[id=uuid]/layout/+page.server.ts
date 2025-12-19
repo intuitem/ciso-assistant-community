@@ -30,8 +30,8 @@ export const load: PageServerLoad = async (event) => {
 			? Math.max(...widgets.map((w: any) => (w.position_y || 0) + (w.height || 2)))
 			: 0;
 
-	// Prepare the widget create form
-	const widgetModel = getModelInfo('dashboard-widgets');
+	// Prepare the widget create form (shallow copy to avoid mutating shared cache)
+	const widgetModel = { ...getModelInfo('dashboard-widgets') };
 	const widgetSchema = modelSchema('dashboard-widgets');
 	const widgetCreateForm = await superValidate(
 		{
@@ -43,8 +43,8 @@ export const load: PageServerLoad = async (event) => {
 		{ errors: false }
 	);
 
-	// Prepare the text widget create form
-	const textWidgetModel = getModelInfo('dashboard-text-widgets');
+	// Prepare the text widget create form (shallow copy to avoid mutating shared cache)
+	const textWidgetModel = { ...getModelInfo('dashboard-text-widgets') };
 	const textWidgetSchema = modelSchema('dashboard-text-widgets');
 	const textWidgetCreateForm = await superValidate(
 		{
@@ -63,8 +63,8 @@ export const load: PageServerLoad = async (event) => {
 		{ errors: false }
 	);
 
-	// Prepare the builtin widget create form
-	const builtinWidgetModel = getModelInfo('dashboard-builtin-widgets');
+	// Prepare the builtin widget create form (shallow copy to avoid mutating shared cache)
+	const builtinWidgetModel = { ...getModelInfo('dashboard-builtin-widgets') };
 	const builtinWidgetSchema = modelSchema('dashboard-builtin-widgets');
 	const builtinWidgetCreateForm = await superValidate(
 		{

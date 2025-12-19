@@ -2413,18 +2413,7 @@ export const listViewFields = {
 	},
 	'custom-metric-samples': {
 		head: ['metric_instance', 'timestamp', 'display_value'],
-		body: ['metric_instance', 'timestamp', 'display_value'],
-		filters: {
-			folder: DOMAIN_FILTER,
-			metric_instance: {
-				component: AutocompleteSelect,
-				props: {
-					optionsEndpoint: 'metrology/metric-instances',
-					label: 'metricInstance',
-					multiple: true
-				}
-			}
-		}
+		body: ['metric_instance', 'timestamp', 'display_value']
 	},
 	dashboards: {
 		head: ['ref_id', 'name', 'description', 'widget_count', 'labels', 'folder'],
