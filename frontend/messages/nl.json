@@ -983,6 +983,9 @@
 	"loginFailed": "Login mislukt",
 	"viewMore": "Meer weergeven",
 	"viewLess": "Minder weergeven",
+	"isCustom": "Aangepast",
+	"errorUnloadingLibrary": "Fout bij het ontladen van bibliotheek",
+	"librarySuccessfullyUnloaded": "De bibliotheek is succesvol ontladen",
 	"scoreChangeDetected": "Scoreverandering gedetecteerd",
 	"scoreChangeDetectedDescription": "Er is een scoreverandering gedetecteerd. Kies hoe u de scoreupdates wilt beheren voor de gerelateerde audits.",
 	"clamp": "Beperken",
@@ -2924,5 +2927,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd."
+	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd.",
+	"libraryFilteringLabels": "Bibliotheek etiketten"
 }

@@ -1712,6 +1712,9 @@
 	"downloadCertificate": "Sertifikayı indir",
 	"viewMore": "Daha fazla görüntüle",
 	"viewLess": "Daha az görüntüle",
+	"isCustom": "Özelleştirilmiş",
+	"errorUnloadingLibrary": "Kütüphane boşaltılırken hata oluştu",
+	"librarySuccessfullyUnloaded": "Kütüphane başarıyla kaldırıldı",
 	"scoreChangeDetected": "Puan değişikliği algılandı",
 	"scoreChangeDetectedDescription": "Puanlarda bir değişiklik algılandı. İlişkili denetimler için puan güncellemelerini nasıl yöneteceğinizi seçin.",
 	"clamp": "Sınırla",
@@ -1792,5 +1795,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Aşağıdaki öğeler sistemde kalacak ancak bu nesneye olan bağlantılar kaldırılacaktır."
+	"cascadeAffectedHint": "Aşağıdaki öğeler sistemde kalacak ancak bu nesneye olan bağlantılar kaldırılacaktır.",
+	"libraryFilteringLabels": "Kütüphane etiketleri"
 }

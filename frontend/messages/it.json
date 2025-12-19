@@ -1356,6 +1356,9 @@
 	"downloadCertificate": "Scarica certificato",
 	"viewMore": "Vedi di più",
 	"viewLess": "Vedi meno",
+	"isCustom": "Personalizzato",
+	"errorUnloadingLibrary": "Errore nello scaricamento della libreria",
+	"librarySuccessfullyUnloaded": "La libreria è stata scaricata con successo",
 	"scoreChangeDetected": "Modifica del punteggio rilevata",
 	"scoreChangeDetectedDescription": "È stata rilevata una modifica nei punteggi. Scegli come gestire gli aggiornamenti dei punteggi per gli audit associati.",
 	"clamp": "Limita",
@@ -1436,5 +1439,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Gli elementi seguenti rimangono nel sistema ma i loro collegamenti con questo oggetto verranno rimossi."
+	"cascadeAffectedHint": "Gli elementi seguenti rimangono nel sistema ma i loro collegamenti con questo oggetto verranno rimossi.",
+	"libraryFilteringLabels": "Etichette della biblioteca"
 }
