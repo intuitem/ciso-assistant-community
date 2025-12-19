@@ -11317,7 +11317,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
         self._sync_task_nodes(task_template)
 
     @action(detail=False, name="Export Tasks with Nodes as Multi-Sheet XLSX")
-    def export_tasks_xlsx(self, request):
+    def export_xlsx(self, request):
         """
         Export task templates with a summary sheet and individual sheets for each template's task nodes.
         """

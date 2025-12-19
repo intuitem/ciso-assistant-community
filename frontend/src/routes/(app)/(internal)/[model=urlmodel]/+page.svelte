@@ -159,13 +159,6 @@
 													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 													>... {m.asXLSX()}</a
 												>
-												{#if URLModel === 'task-templates'}
-													<a
-														href="{URLModel}/export-tasks-xlsx/"
-														class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-														>... {m.asXLSXWithNodes()}</a
-													>
-												{/if}
 											</div>
 										{/snippet}
 									</Popover>
