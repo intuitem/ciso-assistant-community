@@ -18,7 +18,7 @@
 		classesContainer = ''
 	}: Props = $props();
 
-	const chart_id = 'metric-sample-chart';
+	const chart_id = `metric-sample-chart-${crypto.randomUUID()}`;
 	const isQualitative = $derived(metricDefinition?.category === 'qualitative');
 	const unitName = $derived(metricDefinition?.unit?.name || '');
 	// Display symbol for unit (e.g., '%' instead of 'percentage')
