@@ -1774,8 +1774,8 @@ export const listViewFields = {
 			'recoveryTargetsMet'
 		],
 		body: [
-			'asset.ref_id',
-			'asset.str',
+			'asset_ref_id',
+			'asset',
 			'asset_folder',
 			'bia',
 			'children_assets',

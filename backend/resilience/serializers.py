@@ -41,7 +41,10 @@ class AssetAssessmentReadSerializer(BaseModelSerializer):
     # name = serializers.CharField(source="__str__")
 
     bia = FieldsRelatedField(["id", "name", "is_locked"])
-    asset = FieldsRelatedField(["id", "str", "ref_id"])
+    asset = FieldsRelatedField()
+    asset_ref_id = serializers.CharField(
+        source="asset.ref_id", read_only=True, allow_null=True
+    )
     asset_folder = FieldsRelatedField(source="asset.folder")
     children_assets = FieldsRelatedField(source="asset.children_assets", many=True)
     folder = FieldsRelatedField()
