@@ -1228,6 +1228,11 @@ def startup(sender: AppConfig, **kwargs):
     call_command("autoloadlibraries")
     call_command("sync_event_types")
 
+    try:
+        call_command("backfill_builtin_metrics")
+    except Exception as e:
+        logger.error("Error backfilling builtin metrics", exc_info=True)
+
     # add administrators group to superusers (for resiliency)
     administrators = UserGroup.objects.get(
         name="BI-UG-ADM", folder=Folder.get_root_folder()
