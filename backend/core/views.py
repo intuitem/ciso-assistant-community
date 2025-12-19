@@ -8103,6 +8103,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for req in target_requirement_assessments:
+                    source = best_results["requirement_assessments"][
+                        req.requirement.urn
+                    ]
                     for field in [
                         "result",
                         "status",
@@ -8111,16 +8114,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "is_scored",
                         "documentation_score",
                     ]:
-                        if best_results["requirement_assessments"][
-                            req.requirement.urn
-                        ].get(field):
-                            req.__setattr__(
-                                field,
-                                best_results["requirement_assessments"][
-                                    req.requirement.urn
-                                ][field],
-                            )
-                    requirement_assessments_to_update.append(req)
+                        if field in source and source[field] is not None:
+                            setattr(req, field, source[field])
+                        requirement_assessments_to_update.append(req)
 
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessments_to_update,
