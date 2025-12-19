@@ -20,4 +20,3 @@ pytest-report.html
 enterprise/
 *.log
 *.bak
-.django_secret_key
