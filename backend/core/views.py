@@ -8231,7 +8231,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for req in target_requirement_assessments:
-                    for field in ["result", "status", "observation"]:
+                    for field in [
+                        "result",
+                        "status",
+                        "observation",
+                        "mapping_inference",
+                    ]:
                         if best_results["requirement_assessments"][
                             req.requirement.urn
                         ].get(field):
@@ -8245,7 +8250,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessments_to_update,
-                    ["result", "status", "observation"],
+                    ["result", "status", "observation", "mapping_inference"],
                     batch_size=500,
                 )
 
