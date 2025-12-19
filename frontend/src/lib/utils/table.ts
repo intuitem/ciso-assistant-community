@@ -1651,7 +1651,6 @@ export const listViewFields = {
 			object_type: LIBRARY_TYPE_FILTER,
 			is_loaded: IS_LOADED_FILTER,
 			is_custom: IS_CUSTOM_FILTER,
-			mapping_suggested: MAPPING_SUGGESTED_FILTER,
 			filtering_labels: LIBRARY_LABELS_FILTER,
 			is_update: IS_UPDATE_FILTER
 		}
