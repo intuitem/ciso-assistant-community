@@ -19,9 +19,9 @@
 	interface QuickFilters {
 		object_type: Set<string>;
 	}
-	let quickFilterValues: QuickFilters = $state({
+	let quickFilterValues: QuickFilters = {
 		object_type: new Set()
-	});
+	};
 
 	let quickFilterSelected: Record<string, boolean> = $state({});
 </script>
