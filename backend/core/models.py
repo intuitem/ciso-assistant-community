@@ -3064,6 +3064,8 @@ class Asset(
                 continue
 
             c = sc_obj.get(key) or {}
+            if not c.get("is_enabled", False):
+                continue
             real_value = c.get("value", None) if isinstance(c, dict) else None
 
             verdict = None
