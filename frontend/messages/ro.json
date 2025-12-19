@@ -976,6 +976,9 @@
 	"downloadCertificate": "Descărcați certificatul",
 	"viewMore": "Vizualizați mai mult",
 	"viewLess": "Vizualizați mai puțin",
+	"isCustom": "Personalizat",
+	"errorUnloadingLibrary": "Eroare la descarcarea bibliotecii",
+	"librarySuccessfullyUnloaded": "Biblioteca a fost descărcată cu succes",
 	"scoreChangeDetected": "Schimbare de scor detectată",
 	"scoreChangeDetectedDescription": "A fost detectată o schimbare în scoruri. Alegeți cum să gestionați actualizările scorurilor pentru auditurile asociate.",
 	"clamp": "Limitare",
@@ -1056,5 +1059,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Obiectele de mai jos rămân în sistem, dar legăturile lor cu acest obiect vor fi eliminate."
+	"cascadeAffectedHint": "Obiectele de mai jos rămân în sistem, dar legăturile lor cu acest obiect vor fi eliminate.",
+	"libraryFilteringLabels": "Etichete bibliotecă"
 }

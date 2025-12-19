@@ -1164,6 +1164,9 @@
 	"downloadCertificate": "Unduh sertifikat",
 	"viewMore": "Lihat lebih banyak",
 	"viewLess": "Lihat lebih sedikit",
+	"isCustom": "Kustom",
+	"errorUnloadingLibrary": "Kesalahan saat membongkar pustaka",
+	"librarySuccessfullyUnloaded": "Pustaka berhasil dilepas",
 	"scoreChangeDetected": "Perubahan skor terdeteksi",
 	"scoreChangeDetectedDescription": "Perubahan dalam skor telah terdeteksi. Pilih cara menangani pembaruan skor untuk audit yang terkait.",
 	"clamp": "Batas",
@@ -1244,5 +1247,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Item-item di bawah ini tetap berada di sistem tetapi tautan mereka ke objek ini akan dihapus."
+	"cascadeAffectedHint": "Item-item di bawah ini tetap berada di sistem tetapi tautan mereka ke objek ini akan dihapus.",
+	"libraryFilteringLabels": "Label perpustakaan"
 }

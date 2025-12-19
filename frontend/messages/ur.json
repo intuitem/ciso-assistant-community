@@ -947,6 +947,9 @@
 	"downloadCertificate": "سرٹیفکیٹ ڈاؤن لوڈ کریں",
 	"viewMore": "مزید دیکھیں",
 	"viewLess": "کم دیکھیں",
+	"isCustom": "کسٹم",
+	"errorUnloadingLibrary": "لائبریری اَن لوڈ کرنے میں خرابی",
+	"librarySuccessfullyUnloaded": "لائبریری کامیابی کے ساتھ اَن لوڈ ہو گئی ہے",
 	"scoreChangeDetected": "سکور میں تبدیلی کا پتہ چلا",
 	"scoreChangeDetectedDescription": "سکور میں تبدیلی کا پتہ چلا ہے۔ مربوط آڈٹس کے لیے سکور اپ ڈیٹس کو ہینڈل کرنے کا طریقہ منتخب کریں۔",
 	"clamp": "کلیمپ",
@@ -1027,5 +1030,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "نیچے دیے گئے اشیاء نظام میں باقی ہیں لیکن ان کی اس اشیاء سے لنکس ہٹا دیے جائیں گے۔"
+	"cascadeAffectedHint": "نیچے دیے گئے اشیاء نظام میں باقی ہیں لیکن ان کی اس اشیاء سے لنکس ہٹا دیے جائیں گے۔",
+	"libraryFilteringLabels": "کتب خانہ لیبلز"
 }
