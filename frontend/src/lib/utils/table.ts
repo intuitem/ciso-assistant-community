@@ -1064,15 +1064,6 @@ export const IS_UPDATE_FILTER: ListViewFilterConfig = {
 	}
 };
 
-export const MAPPING_SUGGESTED_FILTER: ListViewFilterConfig = {
-	component: AutocompleteSelect,
-	props: {
-		label: 'mappingSuggested',
-		options: YES_NO_OPTIONS,
-		multiple: true
-	}
-};
-
 export const LIBRARY_TYPE_FILTER = {
 	component: AutocompleteSelect,
 	props: {
