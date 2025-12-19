@@ -2823,6 +2823,9 @@
 	"purposesDescription": "Finalités des traitements de données (RGPD)",
 	"rightRequestsDescription": "Demandes d'exercice de droits des personnes concernées (RGPD)",
 	"dataBreachesDescription": "Incidents de violations de données et notifications",
+	"isCustom": "Personnalisé",
+	"errorUnloadingLibrary": "Erreur lors du déchargement de la bibliothèque",
+	"librarySuccessfullyUnloaded": "La bibliothèque a été déchargée avec succès",
 	"userLinkedToRepresentative": "Un utilisateur est déjà lié à ce représentant.",
 	"expectedEvidence": "Preuves attendues",
 	"taskNodeLegacyEvidence": "L'ancien champ preuve est obsolète. Les preuves sont maintenant au niveau de la tâche et partagées entre les occurrences en attente de révision.\n Pour les déplacer vers les preuves attendues ou les supprimer de l'occurrence, utilisez les boutons",
@@ -2928,5 +2931,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Les éléments ci-dessous restent dans le système mais leurs liens avec cet objet seront supprimés."
+	"cascadeAffectedHint": "Les éléments ci-dessous restent dans le système mais leurs liens avec cet objet seront supprimés.",
+	"libraryFilteringLabels": "Étiquettes de bibliothèque"
 }
