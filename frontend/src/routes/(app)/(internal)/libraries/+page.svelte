@@ -50,7 +50,7 @@
 					<button
 						class="ml-2 p-2 border-2 rounded-lg {quickFilterSelected[objectType]
 							? 'border-primary-800'
-							: 'border-primary-100'}"
+							: 'border-primary-100 hover:border-primary-500'}"
 						onclick={() => {
 							const filterValue = filterValues['object_type'];
 							const filteredTypes = filterValue.map((obj) => obj.value);
