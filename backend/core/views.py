@@ -11320,8 +11320,11 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             ]
             summary_ws.append(row)
 
+            # Only include past task nodes due_date <= today
+            today = timezone.localdate()
+
             task_nodes = (
-                TaskNode.objects.filter(task_template=obj)
+                TaskNode.objects.filter(task_template=obj, due_date__lte=today)
                 .select_related("task_template", "task_template__folder")
                 .prefetch_related(
                     "evidences",
