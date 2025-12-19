@@ -346,10 +346,7 @@
 				<i class="fa-solid fa-sliders"></i>
 				{m.addCustomWidget()}
 			</button>
-			<button
-				class="btn bg-teal-500 hover:bg-teal-600 text-white"
-				onclick={openAddTextWidgetModal}
-			>
+			<button class="btn bg-teal-500 hover:bg-teal-600 text-white" onclick={openAddTextWidgetModal}>
 				<i class="fa-solid fa-font"></i>
 				{m.addTextWidget()}
 			</button>
