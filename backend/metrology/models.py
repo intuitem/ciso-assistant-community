@@ -459,10 +459,14 @@ class BuiltinMetricSample(AbstractBaseModel):
         # Get risk level labels from the risk matrix
         risk_level_labels = {}
         if assessment.risk_matrix:
-            risk_levels = assessment.risk_matrix.risk
-            for idx, level in enumerate(risk_levels):
-                # Each level is a dict with 'name', 'abbreviation', 'hexcolor', etc.
-                risk_level_labels[idx] = level.get("name", str(idx))
+            try:
+                risk_levels = assessment.risk_matrix.risk or []
+                for idx, level in enumerate(risk_levels):
+                    # Each level is a dict with 'name', 'abbreviation', 'hexcolor', etc.
+                    risk_level_labels[idx] = level.get("name", str(idx))
+            except (KeyError, TypeError, AttributeError):
+                # Handle cases where json_definition is missing or malformed
+                pass
 
         # Current level breakdown
         current_level_counts = dict(
