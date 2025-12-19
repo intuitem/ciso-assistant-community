@@ -1792,5 +1792,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Aşağıdaki öğeler sistemde kalacak ancak bu nesneye olan bağlantılar kaldırılacaktır."
+	"cascadeAffectedHint": "Aşağıdaki öğeler sistemde kalacak ancak bu nesneye olan bağlantılar kaldırılacaktır.",
+	"thirdPartyRespondent": "Üçüncü Taraflı Yanıtlayıcı",
+	"thirdPartyRespondentHelpText": "Kullanıcıyı, erişebileceği anketler/denetimlere yanıt vermeye sınırlayın; başka bir işlem yoktur."
 }

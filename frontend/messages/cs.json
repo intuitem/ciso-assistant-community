@@ -1047,5 +1047,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Níže uvedené položky zůstávají v systému, ale jejich odkazy na tento objekt budou odstraněny."
+	"cascadeAffectedHint": "Níže uvedené položky zůstávají v systému, ale jejich odkazy na tento objekt budou odstraněny.",
+	"thirdPartyRespondent": "Třetí strana - odpovědná osoba",
+	"thirdPartyRespondentHelpText": "Omezit uživatele na odpovídání na dotazníky/audity, ke kterým má přístup; žádné další akce nejsou k dispozici."
 }

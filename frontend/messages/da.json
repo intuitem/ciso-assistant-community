@@ -1339,5 +1339,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "De følgende elementer forbliver i systemet, men deres forbindelser til dette objekt vil blive fjernet."
+	"cascadeAffectedHint": "De følgende elementer forbliver i systemet, men deres forbindelser til dette objekt vil blive fjernet.",
+	"thirdPartyRespondent": "Tredjeparts respondent",
+	"thirdPartyRespondentHelpText": "Begræns brugeren til at svare på spørgeskemaer/revisioner, som de kan få adgang til; ingen andre handlinger er tilgængelige."
 }

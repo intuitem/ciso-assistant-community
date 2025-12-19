@@ -73,6 +73,12 @@
 		label={m.keepLocalLogin()}
 		helpText={m.keepLocalLoginHelpText()}
 	/>
+	<Checkbox
+		{form}
+		field="is_third_party"
+		label={m.thirdPartyRespondent()}
+		helpText={m.thirdPartyRespondentHelpText()}
+	/>
 {/if}
 {#if shape.expiry_date && !page.data.object?.is_superuser}
 	<TextField

@@ -1799,5 +1799,7 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Poniższe elementy pozostają w systemie, ale ich linki do tego obiektu zostaną usunięte."
+	"cascadeAffectedHint": "Elementy pozostaną w systemie, ale ich linki do tego obiektu zostaną usunięte.",
+	"thirdPartyRespondent": "Odpowiedź od strony trzeciej",
+	"thirdPartyRespondentHelpText": "Ogranicz użytkownika do odpowiedzi na ankiety/audyty, do których ma dostęp; żadne inne działania nie są dostępne."
 }
