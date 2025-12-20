@@ -70,6 +70,13 @@
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 	import GenericCollectionForm from './ModelForm/GenericCollectionForm.svelte';
 	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
+	import MetricDefinitionForm from './ModelForm/MetricDefinitionForm.svelte';
+	import MetricInstanceForm from './ModelForm/MetricInstanceForm.svelte';
+	import CustomMetricSampleForm from './ModelForm/CustomMetricSampleForm.svelte';
+	import DashboardForm from './ModelForm/DashboardForm.svelte';
+	import DashboardWidgetForm from './ModelForm/DashboardWidgetForm.svelte';
+	import DashboardTextWidgetForm from './ModelForm/DashboardTextWidgetForm.svelte';
+	import DashboardBuiltinWidgetForm from './ModelForm/DashboardBuiltinWidgetForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -777,6 +784,79 @@
 			/>
 		{:else if URLModel === 'accreditations'}
 			<AccreditationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'metric-definitions'}
+			<MetricDefinitionForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{data}
+				{...rest}
+			/>
+		{:else if URLModel === 'metric-instances'}
+			<MetricInstanceForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{...rest}
+			/>
+		{:else if URLModel === 'custom-metric-samples'}
+			<CustomMetricSampleForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{object}
+				{...rest}
+			/>
+		{:else if URLModel === 'dashboards'}
+			<DashboardForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{...rest}
+			/>
+		{:else if URLModel === 'dashboard-widgets'}
+			<DashboardWidgetForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{object}
+				{...rest}
+			/>
+		{:else if URLModel === 'dashboard-text-widgets'}
+			<DashboardTextWidgetForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{object}
+			/>
+		{:else if URLModel === 'dashboard-builtin-widgets'}
+			<DashboardBuiltinWidgetForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{object}
+				{...rest}
+			/>
 		{/if}
 		<div class="flex flex-row justify-between space-x-4">
 			{#if closeModal}

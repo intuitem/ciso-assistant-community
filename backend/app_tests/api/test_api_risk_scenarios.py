@@ -12,6 +12,7 @@ from core.models import (
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
+from test_fixtures import RISK_MATRIX_JSON_DEFINITION
 
 # Generic perimeter data for tests
 RISK_SCENARIO_NAME = "Test scenario"
@@ -135,7 +136,11 @@ class TestRiskScenariosUnauthenticated:
                 "risk_assessment": RiskAssessment.objects.create(
                     name="test",
                     perimeter=Perimeter.objects.create(name="test", folder=folder),
-                    risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
+                    risk_matrix=RiskMatrix.objects.create(
+                        name="test",
+                        folder=folder,
+                        json_definition=RISK_MATRIX_JSON_DEFINITION,
+                    ),
                 ),
             },
         )
@@ -168,7 +173,11 @@ class TestRiskScenariosUnauthenticated:
                 "risk_assessment": RiskAssessment.objects.create(
                     name="test",
                     perimeter=Perimeter.objects.create(name="test", folder=folder),
-                    risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
+                    risk_matrix=RiskMatrix.objects.create(
+                        name="test",
+                        folder=folder,
+                        json_definition=RISK_MATRIX_JSON_DEFINITION,
+                    ),
                 ),
                 "threats": [Threat.objects.create(name="test", folder=folder)],
             },
@@ -193,7 +202,11 @@ class TestRiskScenariosUnauthenticated:
                 "risk_assessment": RiskAssessment.objects.create(
                     name="test",
                     perimeter=Perimeter.objects.create(name="test", folder=folder),
-                    risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
+                    risk_matrix=RiskMatrix.objects.create(
+                        name="test",
+                        folder=folder,
+                        json_definition=RISK_MATRIX_JSON_DEFINITION,
+                    ),
                 ),
                 "threats": [Threat.objects.create(name="test", folder=folder)],
             },

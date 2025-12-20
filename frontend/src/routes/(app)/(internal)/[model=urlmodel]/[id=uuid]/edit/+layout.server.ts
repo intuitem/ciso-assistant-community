@@ -68,5 +68,16 @@ export const load: LayoutServerLoad = async (event) => {
 		}
 	}
 	model.selectOptions = selectOptions;
-	return { form, model, object, selectOptions, URLModel, title: m.edit() };
+
+	// For dashboard widgets, fetch supported models for builtin metrics
+	let supportedModels = {};
+	if (URLModel === 'dashboard-widgets' || URLModel === 'dashboard-builtin-widgets') {
+		const supportedModelsEndpoint = `${BASE_API_URL}/metrology/builtin-metric-samples/supported_models/`;
+		const supportedModelsResponse = await event.fetch(supportedModelsEndpoint);
+		if (supportedModelsResponse.ok) {
+			supportedModels = await supportedModelsResponse.json();
+		}
+	}
+
+	return { form, model, object, selectOptions, URLModel, title: m.edit(), supportedModels };
 };
