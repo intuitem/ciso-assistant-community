@@ -8227,11 +8227,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             instance: ComplianceAssessment = serializer.save()
             instance.create_requirement_assessments(baseline)
 
-            if baseline and baseline.framework == instance.framework:
-                instance.show_documentation_score = baseline.show_documentation_score
-                instance.save()
-
-            elif baseline and baseline.framework != instance.framework:
+            if baseline and baseline.framework != instance.framework:
                 source_urn = baseline.framework.urn
                 audit_from_results = engine.load_audit_fields(baseline)
                 dest_urn = serializer.validated_data["framework"].urn
@@ -8249,21 +8245,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for req in target_requirement_assessments:
-                    for field in ["result", "status", "observation"]:
-                        if best_results["requirement_assessments"][
-                            req.requirement.urn
-                        ].get(field):
-                            req.__setattr__(
-                                field,
-                                best_results["requirement_assessments"][
-                                    req.requirement.urn
-                                ][field],
-                            )
-                    requirement_assessments_to_update.append(req)
+                    source = best_results["requirement_assessments"][
+                        req.requirement.urn
+                    ]
+                    for field in [
+                        "result",
+                        "status",
+                        "observation",
+                        "score",
+                        "is_scored",
+                        "documentation_score",
+                    ]:
+                        if field in source and source[field] is not None:
+                            setattr(req, field, source[field])
+                        requirement_assessments_to_update.append(req)
 
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessments_to_update,
-                    ["result", "status", "observation"],
+                    [
+                        "result",
+                        "status",
+                        "observation",
+                        "score",
+                        "is_scored",
+                        "documentation_score",
+                    ],
                     batch_size=500,
                 )
 
