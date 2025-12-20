@@ -11,6 +11,7 @@ from core.models import (
 from iam.models import Folder, UserGroup
 
 from test_utils import EndpointTestsQueries
+from test_fixtures import RISK_MATRIX_JSON_DEFINITION
 
 # Generic risk acceptance data for tests
 RISK_ACCEPTANCE_NAME = "Test Risk Acceptance"
@@ -140,7 +141,11 @@ class TestRiskAcceptanceAuthenticated:
             risk_assessment=RiskAssessment.objects.create(
                 name="test",
                 perimeter=Perimeter.objects.create(name="test", folder=test.folder),
-                risk_matrix=RiskMatrix.objects.create(name="test", folder=test.folder),
+                risk_matrix=RiskMatrix.objects.create(
+                    name="test",
+                    folder=test.folder,
+                    json_definition=RISK_MATRIX_JSON_DEFINITION,
+                ),
             ),
         )
 
@@ -192,7 +197,11 @@ class TestRiskAcceptanceAuthenticated:
             risk_assessment=RiskAssessment.objects.create(
                 name="test",
                 perimeter=Perimeter.objects.create(name="test", folder=folder),
-                risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
+                risk_matrix=RiskMatrix.objects.create(
+                    name="test",
+                    folder=folder,
+                    json_definition=RISK_MATRIX_JSON_DEFINITION,
+                ),
             ),
         )
 
