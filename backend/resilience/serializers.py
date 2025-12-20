@@ -45,6 +45,10 @@ class AssetAssessmentReadSerializer(BaseModelSerializer):
     asset_folder = IdRelatedField(source="asset.folder")
     children_assets = IdRelatedField(source="asset.children_assets", many=True)
     folder = IdRelatedField()
+    
+    asset_ref_id = serializers.CharField(
+        source="asset.ref_id", read_only=True, allow_null=True
+    )
 
     dependencies = IdRelatedField(many=True)
     evidences = IdRelatedField(many=True)
