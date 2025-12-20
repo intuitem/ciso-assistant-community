@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 
 import pytest
 from ciso_assistant.settings import BASE_DIR
+from test_fixtures import RISK_MATRIX_JSON_DEFINITION
+
 from core.models import (
     Policy,
     Perimeter,
@@ -67,7 +69,10 @@ class TestEvidence:
         assert evidence.description == "test evidence description"
         assert list(evidence.applied_controls.all()) == [applied_control]
         assert evidence.last_revision == revision
-        assert evidence.filename() == SAMPLE_640x480_JPG.name
+        # Django may add a unique suffix to avoid filename conflicts
+        assert evidence.filename().startswith(
+            "sample_640x480"
+        ) and evidence.filename().endswith(".jpg")
         assert evidence.get_size().endswith("KB") or evidence.get_size().endswith("MB")
         assert evidence.attachment_hash is not None
 
@@ -106,7 +111,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -133,7 +138,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -238,7 +243,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -258,7 +263,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -283,7 +288,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -311,7 +316,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -339,7 +344,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)

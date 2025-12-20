@@ -49,6 +49,11 @@
 					field: 'follow_up',
 					label: m.followUp(),
 					description: m.findingsAssessmentsDescription()
+				},
+				{
+					field: 'metrology',
+					label: m.metrology(),
+					description: m.metrologyDescription()
 				}
 			]
 		},

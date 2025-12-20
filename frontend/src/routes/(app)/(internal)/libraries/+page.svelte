@@ -46,7 +46,7 @@
 	>
 		{#snippet quickFilters(filterValues, form, invalidateTable)}
 			<div class="flex gap-1">
-				{#each ['frameworks', 'reference_controls', 'risk_matrices', 'threats'] as objectType}
+				{#each ['frameworks', 'reference_controls', 'risk_matrices', 'threats', 'metric_definitions'] as objectType}
 					<button
 						class="ml-2 p-2 border-2 rounded-lg {quickFilterSelected[objectType]
 							? 'border-primary-800'
