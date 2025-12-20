@@ -2130,6 +2130,154 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'checklist' },
 			{ field: 'filtering_labels' }
 		]
+	},
+	'metric-definitions': {
+		name: 'metricdefinition',
+		localName: 'metricDefinition',
+		localNamePlural: 'metricDefinitions',
+		verboseName: 'Metric definition',
+		verboseNamePlural: 'Metric definitions',
+		endpointUrl: 'metrology/metric-definitions',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'library', urlModel: 'libraries' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		selectFields: [{ field: 'category' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'metric_definition',
+				urlModel: 'metric-instances'
+			}
+		],
+		filters: [
+			{ field: 'folder' },
+			{ field: 'category' },
+			{ field: 'library' },
+			{ field: 'provider' }
+		]
+	},
+	'metric-instances': {
+		name: 'metricinstance',
+		localName: 'metricInstance',
+		localNamePlural: 'metricInstances',
+		verboseName: 'Metric instance',
+		verboseNamePlural: 'Metric instances',
+		endpointUrl: 'metrology/metric-instances',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'metric_definition', urlModel: 'metric-definitions' },
+			{ field: 'unit', urlModel: 'terminologies' },
+			{ field: 'owner', urlModel: 'users' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		selectFields: [{ field: 'status' }, { field: 'collection_frequency' }],
+		detailViewFields: [
+			{ field: 'id' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'folder' },
+			{ field: 'metric_definition' },
+			{ field: 'unit' },
+			{ field: 'owner' },
+			{ field: 'status' },
+			{ field: 'collection_frequency' },
+			{ field: 'target_value' },
+			{ field: 'current_value' },
+			{ field: 'filtering_labels' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
+		reverseForeignKeyFields: [
+			{
+				field: 'metric_instance',
+				urlModel: 'custom-metric-samples',
+				fieldForInitialData: ['metric_definition']
+			}
+		],
+		filters: [
+			{ field: 'folder' },
+			{ field: 'metric_definition' },
+			{ field: 'status' },
+			{ field: 'collection_frequency' },
+			{ field: 'owner' }
+		]
+	},
+	'custom-metric-samples': {
+		name: 'custommetricsample',
+		localName: 'customMetricSample',
+		localNamePlural: 'customMetricSamples',
+		verboseName: 'Custom metric sample',
+		verboseNamePlural: 'Custom metric samples',
+		endpointUrl: 'metrology/custom-metric-samples',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'metric_instance', urlModel: 'metric-instances' }
+		],
+		filters: [{ field: 'folder' }, { field: 'metric_instance' }]
+	},
+	dashboards: {
+		name: 'dashboard',
+		localName: 'dashboard',
+		localNamePlural: 'dashboards',
+		verboseName: 'Dashboard',
+		verboseNamePlural: 'Dashboards',
+		endpointUrl: 'metrology/dashboards',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		filters: [{ field: 'folder' }],
+		reverseForeignKeyFields: [{ field: 'widgets', urlModel: 'dashboard-widgets' }]
+	},
+	'dashboard-widgets': {
+		name: 'dashboardwidget',
+		localName: 'dashboardWidget',
+		localNamePlural: 'dashboardWidgets',
+		verboseName: 'Dashboard widget',
+		verboseNamePlural: 'Dashboard widgets',
+		endpointUrl: 'metrology/dashboard-widgets',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'dashboard', urlModel: 'dashboards' },
+			{ field: 'metric_instance', urlModel: 'metric-instances' }
+		],
+		selectFields: [
+			{ field: 'chart_type', valueType: 'string', detail: false },
+			{ field: 'time_range', valueType: 'string', detail: false },
+			{ field: 'aggregation', valueType: 'string', detail: false }
+		],
+		filters: [{ field: 'folder' }, { field: 'dashboard' }, { field: 'metric_instance' }]
+	},
+	'dashboard-text-widgets': {
+		name: 'dashboardwidget',
+		localName: 'dashboardTextWidget',
+		localNamePlural: 'dashboardTextWidgets',
+		verboseName: 'Dashboard text widget',
+		verboseNamePlural: 'Dashboard text widgets',
+		endpointUrl: 'metrology/dashboard-widgets',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'dashboard', urlModel: 'dashboards' }
+		]
+	},
+	'dashboard-builtin-widgets': {
+		name: 'dashboardwidget',
+		localName: 'dashboardBuiltinWidget',
+		localNamePlural: 'dashboardBuiltinWidgets',
+		verboseName: 'Dashboard builtin widget',
+		verboseNamePlural: 'Dashboard builtin widgets',
+		endpointUrl: 'metrology/dashboard-widgets',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
+			{ field: 'dashboard', urlModel: 'dashboards' }
+		],
+		selectFields: [
+			{ field: 'chart_type', valueType: 'string', detail: false },
+			{ field: 'time_range', valueType: 'string', detail: false },
+			{ field: 'aggregation', valueType: 'string', detail: false }
+		]
 	}
 };
 

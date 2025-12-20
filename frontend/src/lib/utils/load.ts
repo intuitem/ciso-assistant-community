@@ -165,6 +165,23 @@ export const loadDetail = async ({ event, model, id }) => {
 							initialData['folder'] = data?.folder?.id ?? data.folder;
 						}
 					}
+
+					// Pass additional nested data for specific models
+					if (e.fieldForInitialData) {
+						e.fieldForInitialData.forEach((fieldPath) => {
+							const parts = fieldPath.split('.');
+							let value = data;
+							for (const part of parts) {
+								value = value?.[part];
+								if (!value) break;
+							}
+							if (value) {
+								// Store nested data under a special key that won't interfere with form fields
+								initialData[`_${fieldPath.replace('.', '_')}`] = value;
+							}
+						});
+					}
+
 					const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 
 					const selectOptions: Record<string, any> = {};

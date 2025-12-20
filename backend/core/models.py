@@ -508,6 +508,7 @@ class LibraryUpdater:
 
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
+        self.metric_definitions = new_library_content.get("metric_definitions", [])
 
     def update_dependencies(self) -> Union[str, None]:
         for dependency_urn in self.dependencies:
@@ -565,6 +566,34 @@ class LibraryUpdater:
                     **self.referential_object_dict,
                     **self.i18n_object_dict,
                     **reference_control,
+                    "library": self.old_library,
+                },
+            )
+
+    def update_metric_definitions(self):
+        from metrology.models import MetricDefinition
+
+        for metric_definition in self.metric_definitions:
+            normalized_urn = metric_definition["urn"].lower()
+            # Handle unit lookup by name
+            unit = None
+            if unit_name := metric_definition.get("unit"):
+                unit = Terminology.objects.filter(
+                    name=unit_name,
+                    field_path=Terminology.FieldPath.METRIC_UNIT,
+                ).first()
+                metric_definition = {**metric_definition, "unit": unit}
+            else:
+                metric_definition = {**metric_definition}
+                metric_definition.pop("unit", None)
+
+            MetricDefinition.objects.update_or_create(
+                urn=normalized_urn,
+                defaults=metric_definition,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **metric_definition,
                     "library": self.old_library,
                 },
             )
@@ -1159,6 +1188,7 @@ class LibraryUpdater:
 
         self.update_threats()
         self.update_reference_controls()
+        self.update_metric_definitions()
 
         if self.new_frameworks is not None:
             self.update_frameworks()
@@ -1305,6 +1335,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
         ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
         ENTITY_RELATIONSHIP = "entity.relationship", "entityRelationship"
+        METRIC_UNIT = "metric_definition.unit", "metricUnit"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -1590,6 +1621,65 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             "is_visible": True,
         },
     ]
+
+    DEFAULT_METRIC_UNITS = [
+        {
+            "name": "count",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "nombre"}},
+        },
+        {
+            "name": "users",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "utilisateurs"}},
+        },
+        {
+            "name": "bytes",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "octets"}},
+        },
+        {
+            "name": "percentage",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "pourcentage"}},
+        },
+        {
+            "name": "score",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "score"}},
+        },
+        {
+            "name": "days",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "jours"}},
+        },
+        {
+            "name": "hours",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "heures"}},
+        },
+        {
+            "name": "events per second",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "événements par seconde"}},
+        },
+    ]
     is_published = models.BooleanField(_("published"), default=True)
     field_path = models.CharField(
         max_length=100,
@@ -1661,11 +1751,26 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                 defaults=item,
             )
 
+    @classmethod
+    def create_default_metric_units(cls):
+        for item in cls.DEFAULT_METRIC_UNITS:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
+            )
+
     @property
     def get_name_translated(self) -> str:
         translations = self.translations if self.translations else {}
-        locale_translation = translations.get(get_language(), "")
-        return locale_translation.capitalize() or self.name.capitalize()
+        locale_translation = translations.get(get_language(), {})
+        if isinstance(locale_translation, dict):
+            locale_translation = locale_translation.get("name", "")
+        return (
+            locale_translation.capitalize()
+            if locale_translation
+            else self.name.capitalize()
+        )
 
     def __str__(self) -> str:
         return (
@@ -4701,6 +4806,11 @@ class RiskAssessment(Assessment):
             model=self.__class__.__name__, object_id=self.id, data=data
         )
 
+        # Also update BuiltinMetricSample
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self)
+
     def __str__(self) -> str:
         return f"{self.name} - {self.version}"
 
@@ -5646,6 +5756,11 @@ class ComplianceAssessment(Assessment):
         HistoricalMetric.update_daily_metric(
             model=self.__class__.__name__, object_id=self.id, data=data
         )
+
+        # Also update BuiltinMetricSample
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self)
 
     def save(self, *args, **kwargs) -> None:
         if self.min_score is None:
@@ -6782,6 +6897,16 @@ class FindingsAssessment(Assessment):
             "unresolved_important_count": unresolved_important,
         }
 
+    def upsert_daily_metrics(self):
+        """Update daily metrics for this findings assessment."""
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self)
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        self.upsert_daily_metrics()
+
 
 class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDateMixin):
     class Status(models.TextChoices):
@@ -6868,6 +6993,14 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     @property
     def is_locked(self) -> bool:
         return self.findings_assessment.is_locked
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Update parent findings assessment's updated_at timestamp
+        FindingsAssessment.objects.filter(id=self.findings_assessment.id).update(
+            updated_at=timezone.now()
+        )
+        self.findings_assessment.upsert_daily_metrics()
 
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
