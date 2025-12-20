@@ -2754,7 +2754,7 @@
 	"addMetricInstance": "Add a metric instance",
 	"customMetricSample": "Custom metric sample",
 	"customMetricSamples": "Custom metric samples",
-	"associatedCustomMetricSamples": " ",
+	"associatedCustomMetricSamples": "Associated custom metric samples",
 	"addCustomMetricSample": "Add custom metric sample",
 	"builtinMetricSample": "Builtin metric sample",
 	"builtinMetricSamples": "Builtin metric samples",

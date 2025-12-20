@@ -91,6 +91,7 @@
 
 	<!-- Entries List -->
 	<div class="space-y-2" role="list">
+
 		{#if entries.length === 0}
 			<div class="card bg-white p-4 shadow-sm text-center text-gray-500">
 				{m.orderedEntryListEmptyState()}
