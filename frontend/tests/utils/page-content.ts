@@ -78,11 +78,12 @@ export class PageContent extends BasePage {
 
 		await this.form.fill(values);
 
-		// If parent_folder field is visible (enterprise edition) and not already provided, fill it with 'Global'
+		// If parent_folder field is visible and enabled (enterprise edition) and not already provided, fill it with 'Global'
 		const parentFolderField = this.page.getByTestId('form-input-parent-folder');
 		if (
 			!values.parent_folder &&
-			(await parentFolderField.isVisible({ timeout: 1000 }).catch(() => false))
+			(await parentFolderField.isVisible({ timeout: 1000 }).catch(() => false)) &&
+			(await parentFolderField.isEnabled().catch(() => false))
 		) {
 			await parentFolderField.click();
 			await parentFolderField.getByRole('option', { name: 'Global' }).first().click();
