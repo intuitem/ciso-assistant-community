@@ -58,6 +58,7 @@
 * [Deploy on a VPS](deployment/deploy-on-a-vps.md)
 * [Custom certificates](deployment/custom-certificates.md)
 * [Frequent questions](deployment/frequent-questions.md)
+* [Setting up S3](deployment/setting-up-s3.md)
 * [Setting up mailer](deployment/setting-up-mailer.md)
 * [Updating your local instance](deployment/updating-your-local-instance.md)
 * [Helm Chart](deployment/helm-chart.md)
