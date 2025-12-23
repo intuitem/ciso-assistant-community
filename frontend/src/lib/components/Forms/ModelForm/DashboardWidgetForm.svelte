@@ -76,6 +76,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="metric-instances"
+	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="auto"
 	field="metric_instance"
 	cacheLock={cacheLocks['metric_instance']}
