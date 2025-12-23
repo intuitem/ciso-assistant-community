@@ -1595,6 +1595,60 @@ def _req_map_set_validate_mapping_node_ids_against_sheets(wb: Workbook, df: pd.D
             print(msg2)
 
 
+# Additional rule: for non-empty rows, at least "ref_id", "name" or "description" must be filled
+def _framework_validate_minimum_fields_and_ref_id(df: pd.DataFrame, sheet_name: str, context: str):
+    
+    empty_id_name_desc_rows = []
+    invalid_ref_ids = []
+
+    for idx, row in df.iterrows():
+        if row.dropna().empty:
+            continue  # skip completely empty rows
+
+        ref_id = row.get("ref_id", "")
+        if pd.isna(ref_id):
+            ref_id = ""
+        else:
+            ref_id = str(ref_id).strip()
+
+        name = row.get("name", "")
+        if pd.isna(name):
+            name = ""
+        else:
+            name = str(name).strip()
+            
+        description = row.get("description", "")
+        if pd.isna(description):
+            description = ""
+        else:
+            description = str(description).strip()
+
+        if not ref_id and not name and not description:
+            empty_id_name_desc_rows.append(idx)
+
+        # Check Ref. IDs
+        if ref_id:
+            try:
+                validate_ref_id(ref_id, context, idx) #_with_spaces(ref_id, context, idx)
+            except Exception as e:
+                invalid_ref_ids.append((ref_id, idx))
+
+    # If any, returns an error and print rows with empty Ref. ID, Name and Description 
+    if empty_id_name_desc_rows:
+        raise ValueError(
+            f"({context}) [{sheet_name}] Invalid rows: \"ref_id\", \"name\" and \"description\" are empty :\n   - "
+            + "\n   - ".join(f'Row #{idx + 2}' for idx in empty_id_name_desc_rows)
+            + "\n> 💡 Tip: For each row, at least one of the values must be filled."
+        )
+
+    # If any, returns an error and print invalid Ref. IDs
+    if invalid_ref_ids:
+        raise ValueError(
+            f"({context}) [{sheet_name}] Invalid Ref. IDs found. Only alphanumeric characters, '-', '_', ' ', and '.' are allowed :\n   - "
+            + "\n   - ".join(f'Row #{idx + 2}: {value}' for value, idx in invalid_ref_ids)
+        )
+
+
 def _framework_validate_column_against_reference_sheet(wb: Workbook, df: pd.DataFrame, column_name: str, current_sheet_name: str, verbose: bool = False, ctx: ConsoleContext = None):
 
     context = get_current_fct_name()
@@ -2188,7 +2242,8 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
     optional_columns = [
         "implementation_groups", "description", "threats",
         "reference_controls", "typical_evidence", "annotation",
-        "questions", "answer", "urn_id"
+        "questions", "answer", "urn_id", "importance", "weight",
+        
     ]
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
@@ -2212,59 +2267,9 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
     if "assessable" not in df.columns:
         raise ValueError(f"[{fct_name}] [{sheet_name}] Missing required column \"assessable\"")
 
+
     # Additional rule: for non-empty rows, at least "ref_id", "name" or "description" must be filled
-    empty_id_name_desc_rows = []
-    invalid_ref_ids = []
-
-    for idx, row in df.iterrows():
-        if row.dropna().empty:
-            continue  # skip completely empty rows
-
-        ref_id = row.get("ref_id", "")
-        if pd.isna(ref_id):
-            ref_id = ""
-        else:
-            ref_id = str(ref_id).strip()
-
-        name = row.get("name", "")
-        if pd.isna(name):
-            name = ""
-        else:
-            name = str(name).strip()
-            
-        description = row.get("description", "")
-        if pd.isna(description):
-            description = ""
-        else:
-            description = str(description).strip()
-
-
-        if not ref_id and not name and not description:
-            empty_id_name_desc_rows.append(idx)
-
-        # Check Ref. IDs
-        if ref_id:
-            try:
-                validate_ref_id_with_spaces(ref_id, fct_name, idx)
-            except Exception as e:
-                invalid_ref_ids.append((ref_id, idx))
-
-
-    # If any, returns an error and print rows with empty Ref. ID, Name and Description 
-    if empty_id_name_desc_rows:
-        raise ValueError(
-            f"({fct_name}) [{sheet_name}] Invalid rows: \"ref_id\", \"name\" and \"description\" are empty :\n   - "
-            + "\n   - ".join(f'Row #{idx + 2}' for idx in empty_id_name_desc_rows)
-            + "\n> 💡 Tip: For each row, at least one of the values must be filled."
-        )
-
-    # If any, returns an error and print invalid Ref. IDs
-    if invalid_ref_ids:
-        raise ValueError(
-            f"({fct_name}) [{sheet_name}] Invalid Ref. IDs found. Only alphanumeric characters, '-', '_', ' ', and '.' are allowed :\n   - "
-            + "\n   - ".join(f'Row #{idx + 2}: {value}' for value, idx in invalid_ref_ids)
-        )
-
+    _framework_validate_minimum_fields_and_ref_id(df, sheet_name, fct_name)
 
     # Validate columns that reference other sheets (only if they contain non-empty values)
     for column in ["implementation_groups", "answer"]:
