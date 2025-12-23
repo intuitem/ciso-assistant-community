@@ -9,7 +9,7 @@ test('open redirect fuzz testing', async ({ logedPage, foldersPage }) => {
 	const folderName = crypto.randomUUID();
 
 	await test.step('prepare fuzz open redirect', async () => {
-		await foldersPage.createItem({ name: folderName, parent_folder: 'Global' });
+		await foldersPage.createItem({ name: folderName });
 	});
 
 	// Payloads courtesy of PayloadsAllTheThings
