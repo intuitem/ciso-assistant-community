@@ -136,6 +136,14 @@
 	disableDoubleDash="true"
 	bind:cachedValue={formDataCache['status']}
 />
+<MarkdownField
+	{form}
+	field="observation"
+	label={m.observation()}
+	helpText={m.observationHelpText()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
+/>
 <TextField
 	type="date"
 	{form}
