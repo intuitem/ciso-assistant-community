@@ -82,11 +82,17 @@ export class PageContent extends BasePage {
 		const parentFolderField = this.page.getByTestId('form-input-parent-folder');
 		if (
 			!values.parent_folder &&
-			(await parentFolderField.isVisible({ timeout: 1000 }).catch(() => false)) &&
-			(await parentFolderField.isEnabled().catch(() => false))
+			(await parentFolderField.isVisible({ timeout: 1000 }).catch(() => false))
 		) {
-			await parentFolderField.click();
-			await parentFolderField.getByRole('option', { name: 'Global' }).first().click();
+			const isDisabled = await parentFolderField
+				.locator('.disabled')
+				.first()
+				.isVisible()
+				.catch(() => false);
+			if (!isDisabled) {
+				await parentFolderField.click();
+				await parentFolderField.getByRole('option', { name: 'Global' }).first().click();
+			}
 		}
 
 		await this.form.saveButton.click();
