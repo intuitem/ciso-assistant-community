@@ -536,7 +536,8 @@ export const FeatureFlagsSchema = z.object({
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
-	outgoing_webhooks: z.boolean().optional()
+	outgoing_webhooks: z.boolean().optional(),
+	metrology: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -1333,6 +1334,72 @@ export const AccreditationSchema = z.object({
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
 });
 
+// Metrology
+export const MetricDefinitionSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	category: z.string().default('quantitative'),
+	unit: z.string().optional().nullable(),
+	choices_definition: jsonSchema.optional().nullable(),
+	provider: z.string().optional().nullable(),
+	higher_is_better: z.boolean().default(true),
+	default_target: z.number().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
+});
+
+export const MetricInstanceSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	metric_definition: z.string().uuid(),
+	status: z.string().default('draft'),
+	owner: z.array(z.string().uuid().optional()).optional(),
+	target_value: z.coerce.number().optional().nullable(),
+	collection_frequency: z.string().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
+});
+
+export const CustomMetricSampleSchema = z.object({
+	folder: z.string(),
+	metric_instance: z.string().uuid(),
+	timestamp: z.string().datetime(),
+	value: jsonSchema
+});
+
+export const DashboardSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	dashboard_definition: jsonSchema.default({}),
+	filtering_labels: z.string().optional().array().optional()
+});
+
+export const DashboardWidgetSchema = z.object({
+	folder: z.string(),
+	dashboard: z.string().uuid(),
+	// Custom metric (optional - either this or builtin fields)
+	metric_instance: z.string().uuid().optional().nullable(),
+	// Builtin metric fields (optional - either this or metric_instance)
+	target_model: z.string().optional().nullable(),
+	target_object_id: z.string().uuid().optional().nullable(),
+	metric_key: z.string().optional().nullable(),
+	// Text widget content (for chart_type='text')
+	text_content: z.string().optional().nullable(),
+	// Common fields
+	title: z.string().optional().nullable(),
+	position_x: z.coerce.number().min(0).max(11).default(0),
+	position_y: z.coerce.number().min(0).default(0),
+	width: z.coerce.number().min(1).max(12).default(6),
+	height: z.coerce.number().min(1).default(2),
+	chart_type: z.string().default('kpi_card'),
+	time_range: z.string().default('last_30_days'),
+	aggregation: z.string().default('none'),
+	show_target: z.boolean().default(true),
+	show_legend: z.boolean().default(true),
+	widget_config: jsonSchema.default({})
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1401,7 +1468,14 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	terminologies: TerminologySchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
-	accreditations: AccreditationSchema
+	accreditations: AccreditationSchema,
+	'metric-definitions': MetricDefinitionSchema,
+	'metric-instances': MetricInstanceSchema,
+	'custom-metric-samples': CustomMetricSampleSchema,
+	dashboards: DashboardSchema,
+	'dashboard-widgets': DashboardWidgetSchema,
+	'dashboard-text-widgets': DashboardWidgetSchema,
+	'dashboard-builtin-widgets': DashboardWidgetSchema
 };
 
 export const modelSchema = (model: string) => {

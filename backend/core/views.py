@@ -429,6 +429,111 @@ class ExportMixin:
         wrap_columns = self.export_config.get("wrap_columns", ["name", "description"])
         return create_xlsx_response(entries, filename, wrap_columns)
 
+    def _create_multi_sheet_xlsx(self, queryset, main_fields, detail_config):
+        """
+        Create multi-sheet XLSX with main summary sheet and per-object detail sheets.
+
+        Args:
+            queryset: Main objects queryset
+            main_fields: Fields config for summary sheet
+            detail_config: Dict with 'fields', 'related_queryset_method', 'sheet_name_field'
+
+        Returns:
+            HttpResponse with XLSX file
+        """
+        wb = Workbook()
+        wb.remove(wb.active)  # Remove default sheet
+
+        # Create summary sheet
+        summary_ws = wb.create_sheet(title="Summary")
+        main_headers = [f.get("label", name) for name, f in main_fields.items()]
+        summary_ws.append(main_headers)
+
+        # Wrap text alignment for summary sheet
+        wrap_alignment = Alignment(wrap_text=True, vertical="top")
+        wrap_columns = self.export_config.get("wrap_columns", ["name", "description"])
+
+        for col_idx, header in enumerate(main_headers, 1):
+            if header.lower() in wrap_columns:
+                for row_idx in range(1, summary_ws.max_row + 1):
+                    summary_ws.cell(
+                        row=row_idx, column=col_idx
+                    ).alignment = wrap_alignment
+
+        # Track sheet names to avoid duplicates
+        used_sheet_names = {"Summary"}
+
+        for obj in queryset:
+            # Add row to summary sheet
+            row = [
+                self._resolve_field_value(obj, field_config)
+                for field_config in main_fields.values()
+            ]
+            summary_ws.append(row)
+
+            # Get related objects for detail sheet
+            related_getter = detail_config.get("related_queryset_method")
+            if related_getter:
+                related_objects = getattr(obj, related_getter)()
+
+                # Skip empty detail sheets if configured
+                if not related_objects and detail_config.get("skip_empty", True):
+                    continue
+
+                # Create unique sheet name
+                sheet_name_field = detail_config.get("sheet_name_field", "name")
+                base_name = str(
+                    self._resolve_field_value(obj, {"source": sheet_name_field})
+                )
+                if not base_name:
+                    base_name = f"Object_{obj.pk}"
+
+                # Truncate and ensure uniqueness
+                sheet_name = base_name[:31]
+                counter = 1
+                while sheet_name in used_sheet_names:
+                    suffix = f" ({counter})"
+                    sheet_name = base_name[: 31 - len(suffix)] + suffix
+                    counter += 1
+                used_sheet_names.add(sheet_name)
+
+                # Create detail sheet
+                detail_ws = wb.create_sheet(title=sheet_name)
+                detail_fields = detail_config.get("fields", {})
+                detail_headers = [
+                    f.get("label", name) for name, f in detail_fields.items()
+                ]
+                detail_ws.append(detail_headers)
+
+                # Add related objects
+                for related_obj in related_objects:
+                    detail_row = [
+                        self._resolve_field_value(related_obj, field_config)
+                        for field_config in detail_fields.values()
+                    ]
+                    detail_ws.append(detail_row)
+
+                # Apply wrap text to detail sheet
+                for col_idx, header in enumerate(detail_headers, 1):
+                    if header.lower() in wrap_columns:
+                        for row_idx in range(1, detail_ws.max_row + 1):
+                            detail_ws.cell(
+                                row=row_idx, column=col_idx
+                            ).alignment = wrap_alignment
+
+        # Save to buffer
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        filename = f"{self.export_config.get('filename', 'export')}_multi_sheet.xlsx"
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
 
 class GenericFilterSet(df.FilterSet):
     @classmethod
@@ -538,6 +643,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 id = UUID(q.group(1))
                 if RoleAssignment.is_object_readable(self.request.user, self.model, id):
                     object_ids_view = [id]
+
         if not object_ids_view:
             scope_folder_id = self.request.query_params.get("scope_folder_id")
             scope_folder = (
@@ -548,6 +654,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             object_ids_view = RoleAssignment.get_accessible_object_ids(
                 scope_folder, self.request.user, self.model
             )[0]
+
         queryset = self.model.objects.filter(id__in=object_ids_view)
         return queryset
 
@@ -733,6 +840,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             "LogEntry",
             "Folder",
             "Permission",
+            "LibraryFilteringLabel",
         }
         skip_model_classes = set()
 
@@ -2167,6 +2275,17 @@ class FilteringLabelViewSet(BaseModelViewSet):
     """
 
     model = FilteringLabel
+    filterset_fields = ["folder"]
+    search_fields = ["label"]
+    ordering = ["label"]
+
+
+class LibraryFilteringLabelViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows library labels to be viewed or edited.
+    """
+
+    model = LibraryFilteringLabel
     filterset_fields = ["folder"]
     search_fields = ["label"]
     ordering = ["label"]
@@ -6996,8 +7115,13 @@ class RequirementViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], name="Inspect specific requirements")
     def inspect_requirement(self, request, pk):
         requirement = RequirementNode.objects.get(id=pk)
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=RequirementAssessment,
+        )
         requirement_assessments = RequirementAssessment.objects.filter(
-            requirement=requirement
+            requirement=requirement, id__in=viewable_objects
         ).prefetch_related("folder", "compliance_assessment__perimeter")
         serialized_requirement_assessments = RequirementAssessmentReadSerializer(
             requirement_assessments, many=True
@@ -8085,11 +8209,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             instance: ComplianceAssessment = serializer.save()
             instance.create_requirement_assessments(baseline)
 
-            if baseline and baseline.framework == instance.framework:
-                instance.show_documentation_score = baseline.show_documentation_score
-                instance.save()
-
-            elif baseline and baseline.framework != instance.framework:
+            if baseline and baseline.framework != instance.framework:
                 source_urn = baseline.framework.urn
                 audit_from_results = engine.load_audit_fields(baseline)
                 dest_urn = serializer.validated_data["framework"].urn
@@ -8107,21 +8227,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for req in target_requirement_assessments:
-                    for field in ["result", "status", "observation"]:
-                        if best_results["requirement_assessments"][
-                            req.requirement.urn
-                        ].get(field):
-                            req.__setattr__(
-                                field,
-                                best_results["requirement_assessments"][
-                                    req.requirement.urn
-                                ][field],
-                            )
-                    requirement_assessments_to_update.append(req)
+                    source = best_results["requirement_assessments"][
+                        req.requirement.urn
+                    ]
+                    for field in [
+                        "result",
+                        "status",
+                        "observation",
+                        "score",
+                        "is_scored",
+                        "documentation_score",
+                    ]:
+                        if field in source and source[field] is not None:
+                            setattr(req, field, source[field])
+                        requirement_assessments_to_update.append(req)
 
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessments_to_update,
-                    ["result", "status", "observation"],
+                    [
+                        "result",
+                        "status",
+                        "observation",
+                        "score",
+                        "is_scored",
+                        "documentation_score",
+                    ],
                     batch_size=500,
                 )
 
@@ -10456,12 +10586,10 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         # Related Threats
         if incident.threats.exists():
             md_content += "## Related Threats\n\n"
-            md_content += "| Name | Type |\n"
+            md_content += "| Name | Reference ID |\n"
             md_content += "|------|------|\n"
             for threat in incident.threats.all():
-                md_content += (
-                    f"| {threat.name} | {threat.get_category_display() or 'N/A'} |\n"
-                )
+                md_content += f"| {threat.name} | {threat.ref_id or 'N/A'} |\n"
             md_content += "\n"
 
         # Timeline
@@ -10790,7 +10918,7 @@ class TaskTemplateFilter(GenericFilterSet):
         )
 
 
-class TaskTemplateViewSet(BaseModelViewSet):
+class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
     model = TaskTemplate
     filterset_fields = [
         "assigned_to",
@@ -10801,6 +10929,212 @@ class TaskTemplateViewSet(BaseModelViewSet):
     ]
     search_fields = ["ref_id", "name"]
     filterset_class = TaskTemplateFilter
+
+    export_config = {
+        "filename": "task_templates",
+        "select_related": ["folder"],
+        "prefetch_related": [
+            "assigned_to",
+            "evidences",
+            "applied_controls",
+            "compliance_assessments",
+            "risk_assessments",
+            "assets",
+            "findings_assessment",
+        ],
+        "fields": {
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "folder": {"source": "folder.name", "label": "folder", "escape": True},
+            "is_recurrent": {
+                "source": "is_recurrent",
+                "label": "is_recurrent",
+                "format": lambda x: "Yes" if x else "No",
+            },
+            "task_date": {
+                "source": "task_date",
+                "label": "task_date",
+                "format": lambda x: x.strftime("%Y-%m-%d") if x else "",
+            },
+            "schedule_frequency": {
+                "source": "schedule",
+                "label": "schedule_frequency",
+                "format": lambda s: s.get("frequency", "") if s else "",
+            },
+            "schedule_interval": {
+                "source": "schedule",
+                "label": "schedule_interval",
+                "format": lambda s: str(s.get("interval", "")) if s else "",
+            },
+            "schedule_end_date": {
+                "source": "schedule",
+                "label": "schedule_end_date",
+                "format": lambda s: s.get("end_date", "") if s else "",
+            },
+            "next_occurrence": {
+                "source": "get_next_occurrence",
+                "label": "next_occurrence",
+                "format": lambda x: x.strftime("%Y-%m-%d") if x else "",
+            },
+            "next_occurrence_status": {
+                "source": "get_next_occurrence_status",
+                "label": "next_occurrence_status",
+            },
+            "enabled": {
+                "source": "enabled",
+                "label": "enabled",
+                "format": lambda x: "Yes" if x else "No",
+            },
+            "assigned_to": {
+                "source": "assigned_to.all",
+                "label": "assigned_to",
+                "format": lambda users: ", ".join([u.email for u in users])
+                if users
+                else "",
+            },
+            "assets": {
+                "source": "assets.all",
+                "label": "assets",
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
+                if items
+                else "",
+            },
+            "applied_controls": {
+                "source": "applied_controls.all",
+                "label": "applied_controls",
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
+                if items
+                else "",
+            },
+            "evidences": {
+                "source": "evidences.all",
+                "label": "evidences",
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(item.name) for item in items
+                )
+                if items
+                else "",
+            },
+            "compliance_assessments": {
+                "source": "compliance_assessments.all",
+                "label": "compliance_assessments",
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
+                if items
+                else "",
+            },
+            "risk_assessments": {
+                "source": "risk_assessments.all",
+                "label": "risk_assessments",
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
+                if items
+                else "",
+            },
+            "findings_assessment": {
+                "source": "findings_assessment.all",
+                "label": "findings_assessment",
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
+                if items
+                else "",
+            },
+            "link": {"source": "link", "label": "link", "escape": True},
+        },
+        "wrap_columns": ["name", "description"],
+        "task_node_fields": {
+            "due_date": {
+                "source": "due_date",
+                "label": "due_date",
+                "format": lambda x: x.strftime("%Y-%m-%d") if x else "",
+            },
+            "status": {"source": "status", "label": "status"},
+            "observation": {
+                "source": "observation",
+                "label": "observation",
+                "escape": True,
+            },
+            "assigned_to": {
+                "source": "task_template.assigned_to.all",
+                "label": "assigned_to",
+                "format": lambda users: ", ".join([u.email for u in users])
+                if users
+                else "",
+            },
+            "expected_evidence": {
+                "source": "task_template.evidences.all",
+                "label": "expected_evidence",
+                # Note: Formatting with done/pending status is handled specially in export_tasks_xlsx
+                "format": lambda items: ", ".join([item.name for item in items])
+                if items
+                else "",
+            },
+            # "evidences": {
+            #     "source": "evidences.all",
+            #     "label": "evidences",
+            #     "format": lambda items: ", ".join([item.name for item in items])
+            #     if items
+            #     else "",
+            # },
+            "assets": {
+                "source": "task_template.assets.all",
+                "label": "assets",
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
+                if items
+                else "",
+            },
+            "applied_controls": {
+                "source": "task_template.applied_controls.all",
+                "label": "applied_controls",
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
+                if items
+                else "",
+            },
+            "compliance_assessments": {
+                "source": "task_template.compliance_assessments.all",
+                "label": "compliance_assessments",
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
+                if items
+                else "",
+            },
+            "risk_assessments": {
+                "source": "task_template.risk_assessments.all",
+                "label": "risk_assessments",
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
+                if items
+                else "",
+            },
+            "findings_assessment": {
+                "source": "task_template.findings_assessment.all",
+                "label": "findings_assessment",
+                "format": lambda items: ", ".join(
+                    escape_excel_formula(str(item)) for item in items
+                )
+                if items
+                else "",
+            },
+        },
+    }
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -11004,6 +11338,130 @@ class TaskTemplateViewSet(BaseModelViewSet):
     def perform_update(self, serializer):
         task_template = serializer.save()
         self._sync_task_nodes(task_template)
+
+    @action(detail=False, name="Export Tasks with Nodes as Multi-Sheet XLSX")
+    def export_xlsx(self, request):
+        """
+        Export task templates with a summary sheet and individual sheets for each template's task nodes.
+        """
+        if not self.export_config:
+            return HttpResponse(
+                status=501, content="Export not configured for this model"
+            )
+
+        queryset = self._get_export_queryset()
+
+        wb = Workbook()
+        wb.remove(wb.active)
+
+        summary_ws = wb.create_sheet(title="Summary")
+        main_fields = self.export_config["fields"]
+        main_headers = [f.get("label", name) for name, f in main_fields.items()]
+        summary_ws.append(main_headers)
+
+        wrap_alignment = Alignment(wrap_text=True, vertical="top")
+        wrap_columns = self.export_config.get("wrap_columns", ["name", "description"])
+
+        used_sheet_names = {"Summary"}
+        task_node_fields = self.export_config.get("task_node_fields", {})
+
+        template_counter = 0
+        for obj in queryset:
+            row = [
+                self._resolve_field_value(obj, field_config)
+                for field_config in main_fields.values()
+            ]
+            summary_ws.append(row)
+
+            # Only include past task nodes due_date <= today
+            today = timezone.localdate()
+
+            task_nodes = (
+                TaskNode.objects.filter(task_template=obj, due_date__lte=today)
+                .select_related("task_template", "task_template__folder")
+                .prefetch_related(
+                    "evidences",
+                    "task_template__assigned_to",
+                    "task_template__evidences__revisions",  # Prefetch revisions for expected evidences
+                    "task_template__assets",
+                    "task_template__applied_controls",
+                    "task_template__compliance_assessments",
+                    "task_template__risk_assessments",
+                    "task_template__findings_assessment",
+                )
+                .order_by("due_date")
+            )
+
+            if not task_nodes.exists():
+                continue
+
+            template_counter += 1
+            task_name = obj.name or f"Template_{obj.pk}"
+            # Format: "1-task_name", "2-task_name", etc.
+            base_name = f"{template_counter}-{task_name}"
+
+            # Excel sheet names have a 31 character limit
+            sheet_name = base_name[:31]
+            counter = 1
+            while sheet_name in used_sheet_names:
+                suffix = f" ({counter})"
+                sheet_name = base_name[: 31 - len(suffix)] + suffix
+                counter += 1
+            used_sheet_names.add(sheet_name)
+
+            detail_ws = wb.create_sheet(title=sheet_name)
+            detail_headers = [
+                f.get("label", name) for name, f in task_node_fields.items()
+            ]
+            detail_ws.append(detail_headers)
+
+            for task_node in task_nodes:
+                detail_row = []
+                for field_name, field_config in task_node_fields.items():
+                    if field_name == "expected_evidence":
+                        # Special handling for expected evidence with done/pending status
+                        evidences = task_node.task_template.evidences.all()
+                        evidence_statuses = []
+                        for evidence in evidences:
+                            last_revision = evidence.last_revision
+                            if last_revision and last_revision.task_node == task_node:
+                                status = "done"
+                            else:
+                                status = "pending"
+                            evidence_statuses.append(f"{evidence.name} ({status})")
+                        value = (
+                            ", ".join(evidence_statuses) if evidence_statuses else ""
+                        )
+                    else:
+                        value = self._resolve_field_value(task_node, field_config)
+                    detail_row.append(value)
+                detail_ws.append(detail_row)
+
+            for col_idx, header in enumerate(detail_headers, 1):
+                if header.lower() in wrap_columns:
+                    for row_idx in range(1, detail_ws.max_row + 1):
+                        detail_ws.cell(
+                            row=row_idx, column=col_idx
+                        ).alignment = wrap_alignment
+
+        for col_idx, header in enumerate(main_headers, 1):
+            if header.lower() in wrap_columns:
+                for row_idx in range(1, summary_ws.max_row + 1):
+                    summary_ws.cell(
+                        row=row_idx, column=col_idx
+                    ).alignment = wrap_alignment
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        filename = f"{self.export_config.get('filename', 'export')}_multi_sheet.xlsx"
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
 
     def perform_create(self, serializer):
         super().perform_create(serializer)

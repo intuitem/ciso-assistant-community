@@ -41,11 +41,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await librariesPage.goto();
 		await librariesPage.hasUrl();
 
-		await librariesPage.importLibrary('4x4 risk matrix from EBIOS-RM', undefined, 'any');
-
-		// Optional: Confirm import
-		await librariesPage.tab('Libraries store').click();
-		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+		await librariesPage.importLibrary('4x4 risk matrix from EBIOS-RM', undefined);
 	});
 
 	await test.step('Create risk assessment', async () => {
@@ -97,11 +93,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await librariesPage.goto();
 		await librariesPage.hasUrl();
 
-		await librariesPage.importLibrary('NIST-CSF-2.0', undefined, 'any');
-
-		// Optional: Confirm import
-		await librariesPage.tab('Libraries store').click();
-		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+		await librariesPage.importLibrary('NIST-CSF-2.0', undefined);
 	});
 
 	await test.step('Create audit', async () => {

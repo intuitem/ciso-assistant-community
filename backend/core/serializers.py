@@ -2183,6 +2183,21 @@ class FilteringLabelWriteSerializer(BaseModelSerializer):
         exclude = ["folder", "is_published"]
 
 
+class LibraryFilteringLabelReadSerializer(BaseModelSerializer):
+    path = PathField(read_only=True)
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = LibraryFilteringLabel
+        fields = "__all__"
+
+
+class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = LibraryFilteringLabel
+        exclude = ["folder", "is_published"]
+
+
 class SecurityExceptionWriteSerializer(BaseModelSerializer):
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all(), required=False
