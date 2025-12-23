@@ -397,6 +397,24 @@ def print_sheet_validation(sheet_name: str, verbose: bool = False, ctx: ConsoleC
             else:
                 print(f"🟢 [CHECK] Valid sheet: \"{sheet_name}\"")
 
+def validate_labels(labels_value: str, context: str, row: int):
+    """
+    Split labels with regex r"[\\s,\\n]+" then ensure each label contains no spaces.
+    """
+    
+    if labels_value is None or str(labels_value).strip() == "":
+        return
+
+    raw_labels  = [x for x in re.split(r"[\s,\n]+", str(labels_value).strip()) if x]
+
+    for label in raw_labels:
+        
+        label = label.strip()
+        
+        if not label:
+            continue
+
+        validate_no_spaces(label, "labels", context, row)
 
 # ─────────────────────────────────────────────────────────────
 # VALIDATE META SHEETS
@@ -550,6 +568,10 @@ def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
     except Exception:
         raise ValueError(f"({fct_name}) [{sheet_name}] Row #{version_row}: Invalid \"version\": must be a positive non-zero integer, got \"{version_value}\"")
 
+    # labels (Optional)
+    labels_value, labels_row = get_meta_value(df, "labels", sheet_name, required=False, with_row=True)
+    if labels_value is not None:
+        validate_labels(labels_value, fct_name, labels_row)
 
     # locale
     locale_value, locale_row = get_meta_value(df, "locale", sheet_name, required=True, with_row=True)
