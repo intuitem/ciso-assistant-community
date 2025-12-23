@@ -76,6 +76,8 @@ export class PageContent extends BasePage {
 			await page.waitForLoadState('networkidle');
 		}
 
+		await this.form.fill(values);
+
 		// If parent_folder field is visible (enterprise edition) and not already provided, fill it with 'Global'
 		const parentFolderField = this.page.getByTestId('form-input-parent-folder');
 		if (
@@ -86,7 +88,6 @@ export class PageContent extends BasePage {
 			await parentFolderField.getByRole('option', { name: 'Global' }).first().click();
 		}
 
-		await this.form.fill(values);
 		await this.form.saveButton.click();
 		await expect(this.form.formTitle).not.toBeVisible();
 		if (typeof this.name == 'string') {
