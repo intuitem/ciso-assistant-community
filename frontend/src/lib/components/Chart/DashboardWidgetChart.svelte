@@ -37,8 +37,12 @@
 				: ''
 			: metricDefinition?.unit?.name || ''
 	);
-	// Display symbol for unit (e.g., '%' instead of 'percentage')
-	const unitSymbol = $derived(unitName === 'percentage' ? '%' : unitName);
+	// Units that should not be displayed (dimensionless or implicit)
+	const HIDDEN_UNITS = ['score', 'count'];
+	// Display symbol for unit (e.g., '%' instead of 'percentage', hide 'score'/'count')
+	const unitSymbol = $derived(
+		unitName === 'percentage' ? '%' : HIDDEN_UNITS.includes(unitName) ? '' : unitName
+	);
 	const targetValue = $derived(widget.metric_instance?.target_value);
 	const higherIsBetter = $derived(metricDefinition?.higher_is_better ?? true);
 
@@ -623,7 +627,16 @@
 		}
 	}
 
-	// Format display value
+	// Format display value (without unit, for separate styling)
+	function formatValueOnly(value: any): string {
+		if (value === null || value === undefined) return 'N/A';
+		if (isQualitative && choiceNames[value - 1]) {
+			return choiceNames[value - 1];
+		}
+		return String(value);
+	}
+
+	// Format display value with unit
 	function formatValue(value: any): string {
 		if (value === null || value === undefined) return 'N/A';
 		if (isQualitative && choiceNames[value - 1]) {
@@ -642,9 +655,14 @@
 	<!-- KPI Card for scalar values -->
 	<div class="flex items-center justify-center h-full">
 		<div class="flex items-baseline gap-3">
-			<!-- Main value -->
-			<div class="text-4xl font-bold text-primary-600 capitalize">
-				{formatValue(latestValue)}
+			<!-- Main value and unit -->
+			<div class="flex items-baseline gap-1">
+				<span class="text-4xl font-bold text-primary-600">{formatValueOnly(latestValue)}</span>
+				{#if unitSymbol}
+					<span class="text-2xl font-medium text-primary-500 lowercase"
+						>{safeTranslate(unitSymbol)}</span
+					>
+				{/if}
 			</div>
 			<!-- Trend indicator -->
 			{#if chartData.length > 1}

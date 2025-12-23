@@ -288,6 +288,8 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
                     unit = metric_definition.unit.name
                     if metric_definition.unit.name == "percentage":
                         unit = "%"
+                    if metric_definition.unit.name in ["score", "count"]:
+                        unit = ""
                     if metric_definition.unit.name == "request_per_second":
                         unit = "RPS"
                     return f"{result} {unit}"
