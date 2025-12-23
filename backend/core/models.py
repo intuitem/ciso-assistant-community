@@ -3762,6 +3762,13 @@ class Evidence(
         super().save(*args, **kwargs)
         self.revisions.update(is_published=self.is_published)
 
+    def delete(self, using=None, keep_parents=False):
+        for rev in self.revisions.all():
+            if rev.attachment:
+                rev.attachment.delete(save=False)
+
+        return super().delete(using=using, keep_parents=keep_parents)
+
     @property
     def last_revision(self):
         return self.revisions.order_by("-version").first() or None
@@ -3849,6 +3856,12 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         self.is_published = self.evidence.is_published
 
         super().save(*args, **kwargs)
+
+    def delete(self, using=None, keep_parents=False):
+        if self.attachment:
+            self.attachment.delete(save=False)
+
+        return super().delete(using=using, keep_parents=keep_parents)
 
     def filename(self):
         return os.path.basename(self.attachment.name)
