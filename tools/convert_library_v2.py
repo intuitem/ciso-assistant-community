@@ -26,6 +26,7 @@ import datetime
 import argparse
 import unicodedata
 import openpyxl
+from typing import Any, Dict, List
 from pathlib import Path
 from collections import Counter
 
@@ -39,6 +40,7 @@ COMPATIBILITY_MODES = {
     0: f"[v{SCRIPT_VERSION}] (DEFAULT) Don't use any Compatibility Mode",
     1: "[< v2] Use legacy URN fallback logic (for requirements without ref_id)",
     2: "[v2] Don't clean the URNs before saving it into the YAML file (Only spaces ' ' are replaced with hyphen '-' and the URN is lower-cased)",
+    3: '[< v2++] Updated version of "[< v2]". Handling of the new "fix_count" column in order to ADD or SUBTRACT from the counter (replace "skip_count"). Fixed the URN writing issue when "skip_count" was true and a "ref_id" was defined.',
     # Future modes can be added here with an integer key and description
 }
 
@@ -168,22 +170,58 @@ def expand_urns_from_prefixed_list(
 # --- question management ------------------------------------------------------------
 
 
-def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_dict):
+def inject_questions_into_node(
+    qa_data: dict[str, Any], node: Dict[str, Any], answers_dict: dict
+) -> None:
     """
     Injects parsed questions and their metadata into a requirement node.
     Ensures that question type is valid and handles multiple questions/answers.
 
-    :param node: the requirement node (dict)
-    :param raw_question_str: the string from the "questions" column
-    :param raw_answer_str: the string from the "answer" column
-    :param answers_dict: dictionary of all available answers (from answer sheet)
+    :param qa_data: Allows to retrieve the string from the following columns: "questions", "answer" and "depends_on"
+    :param node: The requirement node (dict)
+    :param answers_dict: Dictionary of all available answers (from answer sheet)
     """
+
+    raw_question_str = qa_data.get("questions")
+    raw_answer_str = qa_data.get("answer")
+    raw_depends_on_str = qa_data.get("depends_on")
+    raw_condition_str = qa_data.get("condition")
+
     if not raw_question_str:
         return
 
     allowed_types = {"unique_choice", "multiple_choice", "text", "date"}
 
     question_lines = [q.strip() for q in str(raw_question_str).split("\n") if q.strip()]
+
+    depends_on_lines = None
+    if raw_depends_on_str:
+        depends_on_lines = [
+            dep.strip() for dep in str(raw_depends_on_str).split("\n") if dep.strip()
+        ]
+        depends_on_lines = [
+            None if dep.lower() == "/" else dep for dep in depends_on_lines
+        ]
+
+        if not node.get("urn"):
+            raise ValueError(
+                f"(inject_questions_into_node) Missing Framework URNs to compute the 'depends_on' column"
+            )
+
+    condition_lines = None
+    if raw_condition_str:
+        condition_lines = [
+            cond.strip() for cond in str(raw_condition_str).split("\n") if cond.strip()
+        ]
+        condition_lines = [
+            None if cond.lower() == "/" else cond for cond in condition_lines
+        ]
+    # If NO condition [AND]
+    elif not raw_condition_str and depends_on_lines:
+        raise ValueError(
+            f"(inject_questions_into_node) Missing value 'condition' to compute 'depends_on' column"
+        )
+
     answer_ids = (
         [a.strip() for a in str(raw_answer_str).split("\n") if raw_answer_str]
         if raw_answer_str
@@ -192,7 +230,25 @@ def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_d
 
     if len(answer_ids) != 1 and len(answer_ids) != len(question_lines):
         raise ValueError(
-            f"Mismatch between questions and answers for node {node.get('urn')}"
+            f"Mismatch between questions and 'answers' for node {node.get('urn')}"
+        )
+
+    if (
+        depends_on_lines
+        and len(depends_on_lines) != 1
+        and len(depends_on_lines) != len(question_lines)
+    ):
+        raise ValueError(
+            f"Mismatch between questions and 'depends_on' for node {node.get('urn')}"
+        )
+
+    if (
+        condition_lines
+        and len(condition_lines) != 1
+        and len(condition_lines) != len(question_lines)
+    ):
+        raise ValueError(
+            f"Mismatch between questions and 'condition' for node {node.get('urn')}"
         )
 
     question_block = {}
@@ -200,6 +256,7 @@ def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_d
     for idx, question_text in enumerate(question_lines):
         answer_id = answer_ids[0] if len(answer_ids) == 1 else answer_ids[idx]
         answer_meta = answers_dict.get(answer_id)
+
         if not answer_meta:
             raise ValueError(
                 f"Unknown answer ID: {answer_id} for node {node.get('urn')}"
@@ -213,13 +270,82 @@ def inject_questions_into_node(node, raw_question_str, raw_answer_str, answers_d
         question_entry = {
             "type": qtype,
         }
+
+        question_entry["text"] = question_text
+
+        # Optional: depends_on
+        depends_on_block = {}
+        depends_on_question_urn = ""
+        depends_on_question_answers = []
+
+        if depends_on_lines:
+            dependency = (
+                depends_on_lines[0]
+                if len(depends_on_lines) == 1
+                else depends_on_lines[idx]
+            )
+
+            # Skip if dependency is not defined [AND]
+            if dependency is not None:
+                condition = None
+                if len(condition_lines) == 1:
+                    condition = condition_lines[0]
+                else:
+                    condition = condition_lines[idx]
+
+                # Check string format (Format == "x:y,z,a,b,c,..." with x,y,a,b,c,... >= 1)
+                if not re.fullmatch(r"[1-9]\d*:(?:[1-9]\d*)(?:,[1-9]\d*)*", dependency):
+                    raise ValueError(
+                        f"Invalid 'depends_on' format for question #{str(idx + 1)} for node {node.get('urn')}: '{dependency}'. Expected 'x:y[,z,...]' with x,y,z >= 1"
+                    )
+
+                dep_split = dependency.split(":")
+                dependency_question = int(dep_split[0])
+                dependency_question_answers = [int(c) for c in dep_split[1].split(",")]
+
+                # If the question DOESN'T want to depend on itself
+                if dependency_question != idx + 1:
+                    ##### Recreate correct URN for Question & Answers (Choices) #####
+                    # SOON: Checks for this will be processed in ./check_library_v2.py
+
+                    # Get URN of the line we refer to
+                    depends_on_urn = node.get("urn")
+                    # URN of the question
+                    depends_on_question_urn = (
+                        depends_on_urn + f":question:{str(dependency_question)}"
+                    )
+                    # URN of choices
+                    for choice in dependency_question_answers:
+                        depends_on_question_answers.append(
+                            depends_on_question_urn + f":choice:{str(choice)}"
+                        )
+
+                    if not condition:
+                        raise ValueError(
+                            f"Missing 'condition' for question #{str(idx + 1)} for node {node.get('urn')}. Must be 'any' or 'all' "
+                        )
+
+                    if condition not in ["any", "all"]:
+                        raise ValueError(
+                            f"Invalid 'condition' for question #{str(idx + 1)} for node {node.get('urn')}: '{condition}'. Must be 'any' or 'all', '/' (= 'undefined') or empty cell"
+                        )
+
+                    depends_on_block["condition"] = condition
+                    depends_on_block["question"] = depends_on_question_urn
+                    depends_on_block["answers"] = depends_on_question_answers
+
+                    question_entry["depends_on"] = depends_on_block
+
         if qtype in {"unique_choice", "multiple_choice"}:
             choices = []
             for j, choice in enumerate(answer_meta["choices"]):
-                choice_urn = f"{q_urn}:choice:{j + 1}"
-                choices.append({"urn": choice_urn, "value": choice["value"]})
+                # make a shallow copy so we don't mutate the original dict
+                entry = choice.copy()
+                # overwrite / add the per-question urn
+                entry["urn"] = f"{q_urn}:choice:{j + 1}"
+                choices.append(entry)
             question_entry["choices"] = choices
-        question_entry["text"] = question_text
+
         question_block[q_urn] = question_entry
     if question_block:
         node["questions"] = question_block
@@ -421,7 +547,7 @@ def parse_risk_matrix(meta, content_ws, wb):
     return risk_matrix
 
 
-# --- Mapping logic ---------------------------------------------------------------
+# --- Mapping logic ------------------------------------------------------------
 
 
 def revert_relationship(relation: str):
@@ -431,6 +557,46 @@ def revert_relationship(relation: str):
         return "subset"
     else:
         return relation
+
+
+# --- Extract optional columns for answers -------------------------------------
+
+
+def _per_choice_lines(data: dict, col: str, n_choices: int, answer_id: str):
+    raw = str(data.get(col, "") or "").strip()
+
+    if not raw:
+        return None
+
+    lines: List[str] = []
+
+    # If col == "description", take into consideration the multiline description logic
+    if col.lower() == "description":
+        for desc in raw.split("\n"):
+            desc = desc.strip()
+
+            if not desc:
+                continue
+
+            # if line starts with "|", concatenate the whole line with the previous description (without the "|")
+            if desc.startswith("|") and lines:
+                # Multi-line value, append to previous
+                lines[-1] += "\n" + desc[1:].strip()
+            else:
+                lines.append(desc)
+    else:
+        lines = [line.strip() for line in raw.split("\n")]
+
+    if len(lines) == 1:
+        lines *= n_choices
+
+    if len(lines) != n_choices:
+        raise ValueError(
+            f"(answers_definition) Invalid {col} count for answer ID '{answer_id}': "
+            f"{len(lines)} values for {n_choices} choices."
+        )
+
+    return lines
 
 
 # --- Main logic ---------------------------------------------------------------
@@ -495,6 +661,19 @@ def create_library(
         "provider": library_meta.get("provider"),
         "packager": library_meta.get("packager"),
     }
+
+    # Labels Addition
+    labels_cell = library_meta.get("labels")
+    if labels_cell:
+        library["labels"] = list(
+            set(
+                [
+                    label.upper()
+                    for label in re.split(r"[\s,\n]+", labels_cell.strip())
+                    if label
+                ]
+            )
+        )
 
     translations = extract_translations_from_metadata(library_meta, "library")
     if translations:
@@ -625,10 +804,12 @@ def create_library(
                     entry["name"] = str(data["name"]).strip()
                 if "category" in data and data["category"]:
                     entry["category"] = str(data["category"]).strip()
-                if "description" in data and data["description"]:
-                    entry["description"] = str(data["description"]).strip()
                 if "csf_function" in data and data["csf_function"]:
                     entry["csf_function"] = str(data["csf_function"]).strip()
+                if "description" in data and data["description"]:
+                    entry["description"] = str(data["description"]).strip()
+                if "annotation" in data and data["annotation"]:
+                    entry["annotation"] = str(data["annotation"]).strip()
 
                 translations = extract_translations_from_row(header, row)
                 if translations:
@@ -636,8 +817,10 @@ def create_library(
 
                 controls.append(entry)
 
-            library["objects"]["reference_controls"] = controls
-
+            if library["objects"].get("reference_controls"):
+                library["objects"]["reference_controls"].extend(controls)
+            else:
+                library["objects"]["reference_controls"] = controls
         elif obj_type == "threats":
             threats = []
             base_urn = obj["meta"].get("base_urn")
@@ -671,7 +854,10 @@ def create_library(
 
                 threats.append(entry)
 
-            library["objects"]["threats"] = threats
+            if library["objects"].get("threats"):
+                library["objects"]["threats"].extend(threats)
+            else:
+                library["objects"]["threats"] = threats
 
         elif obj_type == "framework":
             meta = obj["meta"]
@@ -681,6 +867,8 @@ def create_library(
             # --- Retrieve answers block if declared ---
             answers_dict = {}
             answers_block_name = meta.get("answers_definition")
+            answer_sheet = None
+
             if answers_block_name:
                 if answers_block_name not in object_blocks:
                     raise ValueError(f"Missing answers sheet: '{answers_block_name}'")
@@ -715,6 +903,99 @@ def create_library(
                                 choices[-1]["value"] += "\n" + line[1:].strip()
                             else:
                                 choices.append({"urn": "", "value": line})
+
+                        # --- Optional: description ---------------------------
+                        description_lines = _per_choice_lines(
+                            data, "description", len(choices), answer_id
+                        )
+                        if description_lines:
+                            for i, desc in enumerate(description_lines):
+                                if desc and desc != "/":
+                                    choices[i]["description"] = desc
+
+                        # --- Optional: compute_result -----------------------------------------
+                        compute_lines = _per_choice_lines(
+                            data, "compute_result", len(choices), answer_id
+                        )
+                        if compute_lines:
+                            for i, val in enumerate(compute_lines):
+                                v = val.lower()
+                                if v not in ("true", "false", "/", ""):
+                                    raise ValueError(
+                                        f"(answers_definition) Invalid compute_result value '{val}' "
+                                        f"for answer ID '{answer_id}', choice #{i + 1}. Must be 'true', 'false', '/' (= 'undefined') or empty."
+                                    )
+
+                                # Use Boolean instead of string
+                                if v == "/" or v == "":
+                                    v = None
+                                elif v == "true":
+                                    v = True
+                                elif v == "false":
+                                    v = False
+
+                                if v is not None:
+                                    choices[i]["compute_result"] = v
+
+                        # --- Optional: add_score ----------------------------------------------
+                        score_lines = _per_choice_lines(
+                            data, "add_score", len(choices), answer_id
+                        )
+                        if score_lines:
+                            for i, val in enumerate(score_lines):
+                                if val:
+                                    try:
+                                        score_to_add = int(val)
+                                        if score_to_add != 0:
+                                            choices[i]["add_score"] = score_to_add
+
+                                    except (TypeError, ValueError):
+                                        raise ValueError(
+                                            f"(answers_definition) Invalid add_score value '{val}' "
+                                            f"for answer ID '{answer_id}', choice #{i + 1}. Must be an integer"
+                                        )
+
+                        # --- Optional: select_implementation_groups ---------------------------
+                        sig_lines = _per_choice_lines(
+                            data,
+                            "select_implementation_groups",
+                            len(choices),
+                            answer_id,
+                        )
+                        if sig_lines:
+                            for i, val in enumerate(sig_lines):
+                                if val:
+                                    groups = [
+                                        s.strip() for s in val.split(",") if s.strip()
+                                    ]
+
+                                    # If IG for choice == "/undefined", continue
+                                    if len(groups) == 1 and groups[0].lower() == "/":
+                                        continue
+
+                                    if groups:
+                                        choices[i]["select_implementation_groups"] = (
+                                            groups
+                                        )
+
+                        # --- Optional: color ---------------------------------------------------
+                        color_lines = _per_choice_lines(
+                            data, "color", len(choices), answer_id
+                        )
+                        if color_lines:
+                            for i, val in enumerate(color_lines):
+                                if val:
+                                    if (
+                                        not re.fullmatch(r"#([0-9a-fA-F]{6})", val)
+                                        and val.lower() != "/"
+                                    ):
+                                        raise ValueError(
+                                            f"(answers_definition) Invalid color value '{val}' "
+                                            f"for answer ID '{answer_id}', choice #{i + 1}. Must match #RRGGBB, be '/' (= 'undefined') or the cell must be empty."
+                                        )
+
+                                    if val.lower() != "/":
+                                        choices[i]["color"] = val.upper()
 
                         answers_dict[answer_id] = {
                             "type": answer_type,
@@ -763,7 +1044,11 @@ def create_library(
                     score_entry = {
                         "score": int(data.get("score")),
                         "name": str(data.get("name", "")).strip(),
-                        "description": str(data.get("description", "")).strip(),
+                        "description": (
+                            str(data.get("description", "")).strip()
+                            if data.get("description", "") is not None
+                            else None
+                        ),
                     }
                     if "description_doc" in data and data["description_doc"]:
                         score_entry["description_doc"] = str(
@@ -778,6 +1063,7 @@ def create_library(
                 if verbose:
                     print(f'💬 ℹ️  No "Score Definition" found')
 
+            # [CONTENT] Implementation Groups
             ig_name = meta.get("implementation_groups_definition")
             if ig_name and ig_name in object_blocks:
                 ig_content = object_blocks[ig_name]["content_sheet"]
@@ -801,6 +1087,12 @@ def create_library(
                         if data.get("description")
                         else None,
                     }
+
+                    if data.get("default_selected") is not None:
+                        ig_entry["default_selected"] = bool(
+                            data.get("default_selected")
+                        )
+
                     translations = extract_translations_from_row(ig_header, row)
                     if translations:
                         ig_entry["translations"] = translations
@@ -856,7 +1148,9 @@ def create_library(
                         ).strip().lower() in ("1", "true", "yes", "x")
                         if skip_count:
                             counter_fix += 1
-                            ref_id_urn = f"node{counter - counter_fix}-{counter_fix+1}"
+                            ref_id_urn = (
+                                f"node{counter - counter_fix}-{counter_fix + 1}"
+                            )
                         else:
                             # Adds the ability to use the "urn_id" column despite compatibility mode set to "1"
                             if data.get("urn_id") and data.get("urn_id").strip():
@@ -869,6 +1163,39 @@ def create_library(
                                 )
 
                         urn = f"{base_urn}:{ref_id_urn}"
+                    elif (
+                        compat_mode == 3
+                    ):  # Updated version of "[< v2]" (Compat Mode 1). Handling of the new "fix_count" column in order to ADD or SUBTRACT from the counter (replace "skip_count").
+                        # Fixed the URN writing issue when "skip_count" was true and a "ref_id" was defined.
+
+                        try:
+                            fix_count = int(data.get("fix_count", ""))
+                        except Exception as e:
+                            fix_count = None
+
+                        if fix_count:
+                            counter_fix += fix_count
+
+                            # If "ref_id" is already defined, use the defined "ref_id"
+                            if data.get("urn_id") and data.get("urn_id").strip():
+                                ref_id_urn = data.get("urn_id").strip()
+                            # Else if no "ref_id", use the custom node version
+                            else:
+                                ref_id_urn = f"node{counter + counter_fix}"
+
+                        else:
+                            # Adds the ability to use the "urn_id" column despite compatibility mode set to "3"
+                            if data.get("urn_id") and data.get("urn_id").strip():
+                                ref_id_urn = data.get("urn_id").strip()
+                            else:
+                                ref_id_urn = (
+                                    ref_id.lower().replace(" ", "-")
+                                    if ref_id
+                                    else f"node{counter + counter_fix}"
+                                )
+
+                        urn = f"{base_urn}:{ref_id_urn}"
+
                     else:  # If compat mode = {0,2}
                         if data.get("urn_id") and data.get("urn_id").strip():
                             urn = f"{base_urn}:{data.get('urn_id').strip()}"
@@ -920,6 +1247,36 @@ def create_library(
                         node["annotation"] = str(data["annotation"]).strip()
                     if "typical_evidence" in data and data["typical_evidence"]:
                         node["typical_evidence"] = str(data["typical_evidence"]).strip()
+                    # Optional: importance: mandatory/recommended/nice_to_have or empty (= undefined)
+                    if "importance" in data and data["importance"]:
+                        importance = str(data["importance"]).strip().lower()
+
+                        if importance not in [
+                            "mandatory",
+                            "recommended",
+                            "nice_to_have",
+                        ]:
+                            raise ValueError(
+                                f'(framework_content) Invalid "importance" at row #{row[0].row}: "{data["importance"]}". Must be "mandatory"/"recommended"/"nice_to_have" or empty cell (= "undefined").'
+                            )
+
+                        if importance != "undefined":
+                            node["importance"] = importance
+
+                    # Optional: weight (integer)
+                    if (
+                        "weight" in data
+                        and data["weight"] is not None
+                        and str(data["weight"]).strip() != ""
+                    ):
+                        try:
+                            if (w := int(data["weight"])) <= 0:
+                                raise ValueError
+                            node["weight"] = w
+                        except (TypeError, ValueError):
+                            raise ValueError(
+                                f"(framework) Invalid weight at row #{row[0].row}: {data['weight']}. Must be a strictly positive integer."
+                            )
                     if (
                         "implementation_groups" in data
                         and data["implementation_groups"]
@@ -948,9 +1305,8 @@ def create_library(
                             node["reference_controls"] = rc
                     if "questions" in data and data["questions"]:
                         inject_questions_into_node(
+                            data,
                             node,
-                            data.get("questions"),
-                            data.get("answer"),
                             answers_dict,
                         )
                     translations = extract_translations_from_row(header, row)
@@ -964,6 +1320,113 @@ def create_library(
                 framework["requirement_nodes"] = requirement_nodes
 
             library["objects"]["framework"] = framework
+
+        elif obj_type == "metric_definitions":
+            metric_definitions = []
+            base_urn = obj["meta"].get("base_urn")
+            content_ws = obj["content_sheet"]
+            rows = list(content_ws.iter_rows())
+            if not rows:
+                continue
+            header = [
+                str(cell.value).strip().lower() if cell.value else ""
+                for cell in rows[0]
+            ]
+
+            for row in rows[1:]:
+                if not any(cell.value for cell in row):
+                    continue
+                data = {
+                    header[i]: row[i].value for i in range(len(header)) if i < len(row)
+                }
+                ref_id = str(data.get("ref_id", "")).strip()
+                if not ref_id:
+                    continue
+
+                # Clean ref_id for URN
+                ref_id_for_urn = clean_urn_suffix(ref_id, compat_mode=compat_mode)
+                if verbose and ref_id != ref_id_for_urn:
+                    print(
+                        f"💬 ⚠️  [WARNING] (metric_definitions) Cleaned ref_id (for use in URN) '{ref_id}' → '{ref_id_for_urn}'"
+                    )
+
+                entry = {
+                    "urn": f"{base_urn}:{ref_id_for_urn}",
+                    "ref_id": ref_id,
+                }
+
+                if "name" in data and data["name"]:
+                    entry["name"] = str(data["name"]).strip()
+                if "description" in data and data["description"]:
+                    entry["description"] = str(data["description"]).strip()
+                if "category" in data and data["category"]:
+                    category = str(data["category"]).strip().lower()
+                    if category not in ("quantitative", "qualitative"):
+                        raise ValueError(
+                            f"(metric_definitions) Invalid category '{category}' at row #{row[0].row}. Must be 'quantitative' or 'qualitative'."
+                        )
+                    entry["category"] = category
+                else:
+                    entry["category"] = "quantitative"  # default
+
+                if "unit" in data and data["unit"]:
+                    entry["unit"] = str(data["unit"]).strip()
+
+                # higher_is_better: default True, accept true/false/1/0/yes/no
+                if "higher_is_better" in data and data["higher_is_better"] is not None:
+                    hib = str(data["higher_is_better"]).strip().lower()
+                    entry["higher_is_better"] = hib in ("1", "true", "yes", "x")
+                else:
+                    entry["higher_is_better"] = True
+
+                # default_target: numeric value
+                if "default_target" in data and data["default_target"] is not None:
+                    try:
+                        entry["default_target"] = float(data["default_target"])
+                    except (TypeError, ValueError):
+                        raise ValueError(
+                            f"(metric_definitions) Invalid default_target '{data['default_target']}' at row #{row[0].row}. Must be a number."
+                        )
+
+                # choices_definition for qualitative metrics
+                if entry["category"] == "qualitative":
+                    if "choices_definition" in data and data["choices_definition"]:
+                        choices = []
+                        choices_raw = str(data["choices_definition"]).strip()
+                        for line in choices_raw.split("\n"):
+                            line = line.strip()
+                            if not line:
+                                continue
+                            # Format: "name|description" or just "name"
+                            if "|" in line:
+                                parts = line.split("|", 1)
+                                choices.append(
+                                    {
+                                        "name": parts[0].strip(),
+                                        "description": parts[1].strip()
+                                        if len(parts) > 1
+                                        else "",
+                                    }
+                                )
+                            else:
+                                choices.append({"name": line})
+                        if choices:
+                            entry["choices_definition"] = choices
+                    else:
+                        raise ValueError(
+                            f"(metric_definitions) Qualitative metric at row #{row[0].row} requires 'choices_definition' column."
+                        )
+
+                translations = extract_translations_from_row(header, row)
+                if translations:
+                    entry["translations"] = translations
+
+                metric_definitions.append(entry)
+
+            if library["objects"].get("metric_definitions"):
+                library["objects"]["metric_definitions"].extend(metric_definitions)
+            else:
+                library["objects"]["metric_definitions"] = metric_definitions
 
         elif obj_type == "risk_matrix":
             matrix = parse_risk_matrix(obj["meta"], obj["content_sheet"], wb)
@@ -1164,18 +1627,36 @@ def create_library(
                         f'⚠️  [WARNING] target_node_id "{tid}" not found in sheet "target"'
                     )
 
-            # Then print duplicate counts (only for missing IDs)
+            # Check for duplicate (source, target) pairs in mappings
+            mapping_pairs = [
+                (
+                    m["source_requirement_urn"].split(":")[-1],
+                    m["target_requirement_urn"].split(":")[-1],
+                )
+                for m in requirement_mappings
+            ]
+            duplicate_pairs = Counter(mapping_pairs)
+            duplicates_found = {
+                pair: count for pair, count in duplicate_pairs.items() if count > 1
+            }
+            if duplicates_found:
+                for (sid, tid), count in duplicates_found.items():
+                    print(
+                        f'🔁 [DUPLICATE] mapping "{sid}" -> "{tid}" appears {count} times'
+                    )
+
+            # Print info about missing IDs that are referenced multiple times
             if source_sheet_available:
                 for sid, count in source_missing_counts.items():
                     if count > 1:
                         print(
-                            f'🔁 [DUPLICATE] source_node_id "{sid}" appears {count} times in mappings'
+                            f'ℹ️  [INFO] missing source_node_id "{sid}" is referenced {count} times in mappings'
                         )
             if target_sheet_available:
                 for tid, count in target_missing_counts.items():
                     if count > 1:
                         print(
-                            f'🔁 [DUPLICATE] target_node_id "{tid}" appears {count} times in mappings'
+                            f'ℹ️  [INFO] missing target_node_id "{tid}" is referenced {count} times in mappings'
                         )
 
             # Final summary

@@ -4,8 +4,13 @@ from tprm.views import (
     RepresentativeViewSet,
     SolutionViewSet,
     EntityAssessmentViewSet,
+    ContractViewSet,
 )
-from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
+from library.views import (
+    MappingLibrariesList,
+    StoredLibraryViewSet,
+    LoadedLibraryViewSet,
+)
 import importlib
 
 
@@ -23,6 +28,7 @@ router.register(
 )
 router.register(r"solutions", SolutionViewSet, basename="solutions")
 router.register(r"representatives", RepresentativeViewSet, basename="representatives")
+router.register(r"contracts", ContractViewSet, basename="contracts")
 router.register(r"perimeters", PerimeterViewSet, basename="perimeters")
 router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"vulnerabilities", VulnerabilityViewSet, basename="vulnerabilities")
@@ -32,8 +38,12 @@ router.register(r"risk-scenarios", RiskScenarioViewSet, basename="risk-scenarios
 router.register(r"applied-controls", AppliedControlViewSet, basename="applied-controls")
 router.register(r"policies", PolicyViewSet, basename="policies")
 router.register(r"risk-acceptances", RiskAcceptanceViewSet, basename="risk-acceptances")
+router.register(r"validation-flows", ValidationFlowViewSet, basename="validation-flows")
 router.register(
     r"reference-controls", ReferenceControlViewSet, basename="reference-controls"
+)
+router.register(
+    r"asset-capabilities", AssetCapabilityViewSet, basename="asset-capabilities"
 )
 router.register(r"assets", AssetViewSet, basename="assets")
 router.register(r"asset-class", AssetClassViewSet, basename="asset-class")
@@ -43,6 +53,9 @@ router.register(r"user-groups", UserGroupViewSet, basename="user-groups")
 router.register(r"role-assignments", RoleAssignmentViewSet, basename="role-assignments")
 router.register(r"frameworks", FrameworkViewSet, basename="frameworks")
 router.register(r"evidences", EvidenceViewSet, basename="evidences")
+router.register(
+    r"evidence-revisions", EvidenceRevisionViewSet, basename="evidence-revisions"
+)
 router.register(
     r"compliance-assessments",
     ComplianceAssessmentViewSet,
@@ -82,6 +95,11 @@ router.register(
     basename="filtering-labels",
 )
 router.register(
+    r"library-filtering-labels",
+    LibraryFilteringLabelViewSet,
+    basename="library-filtering-labels",
+)
+router.register(
     r"security-exceptions",
     SecurityExceptionViewSet,
     basename="security-exceptions",
@@ -119,11 +137,33 @@ urlpatterns = [
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),
     path("crq/", include("crq.urls")),
+    path("pmbok/", include("pmbok.urls")),
+    path("metrology/", include("metrology.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
+    path("health/", healthcheck, name="healthcheck"),
     path("build/", get_build, name="get_build"),
-    path("evidences/<uuid:pk>/upload/", UploadAttachmentView.as_view(), name="upload"),
+    path(
+        "evidences/<uuid:pk>/upload/",
+        UploadAttachmentView.as_view(),
+        name="upload",
+    ),
+    path(
+        "evidence-revisions/<uuid:pk>/upload/",
+        UploadAttachmentView.as_view(),
+        name="upload",
+    ),
     path("get_counters/", get_counters_view, name="get_counters_view"),
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
+    path(
+        "get_combined_assessments_status/",
+        get_combined_assessments_status_view,
+        name="get_combined_assessments_status_view",
+    ),
+    path(
+        "get_governance_calendar_data/",
+        get_governance_calendar_data_view,
+        name="get_governance_calendar_data_view",
+    ),
     path("agg_data/", get_agg_data, name="get_agg_data"),
     path("composer_data/", get_composer_data, name="get_composer_data"),
     path("i18n/", include("django.conf.urls.i18n")),
@@ -148,11 +188,28 @@ urlpatterns = [
         ComplianceAssessmentActionPlanList.as_view(),
     ),
     path(
+        "compliance-assessments/<uuid:pk>/evidences-list/",
+        ComplianceAssessmentEvidenceList.as_view(),
+    ),
+    path(
         "risk-assessments/<uuid:pk>/action-plan/",
         RiskAssessmentActionPlanList.as_view(),
     ),
+    path(
+        "mapping-libraries/",
+        MappingLibrariesList.as_view(),
+    ),
+    path(
+        "folders/<uuid:pk>/users/",
+        UserRolesOnFolderList.as_view(),
+        name="user-perms-on-folder-list",
+    ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
     path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),
+    path(
+        "task-nodes/<uuid:pk>/evidences/",
+        TaskNodeEvidenceList.as_view(),
+    ),
 ]
 
 # Additional modules take precedence over the default modules

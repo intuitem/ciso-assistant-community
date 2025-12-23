@@ -33,6 +33,7 @@ LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
+FORCE_CREATE_ADMIN = os.environ.get("FORCE_CREATE_ADMIN", "False").lower() == "true"
 
 
 def set_ciso_assistant_url(_, __, event_dict):
@@ -61,11 +62,6 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
-        "django.server": {
-            "handlers": [],
-            "level": "WARNING",
-            "propagate": False,
-        },
     },
 }
 
@@ -187,16 +183,20 @@ INSTALLED_APPS = [
     "tailwind",
     "iam",
     "global_settings",
+    "pmbok",
     "ebios_rm",
     "tprm",
     "privacy",
     "resilience",
     "crq",
+    "metrology",
     "core",
     "cal",
     "django_filters",
     "library",
     "serdes",
+    "integrations",
+    "webhooks",
     "rest_framework",
     "knox",
     "drf_spectacular",
@@ -224,7 +224,7 @@ MIDDLEWARE = [
     "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
-
+# MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
 ROOT_URLCONF = "ciso_assistant.urls"
 # we leave these for the API UI tools - even if Django templates and Admin are not used anymore
 LOGIN_REDIRECT_URL = "/api"
@@ -242,7 +242,10 @@ AUTH_TOKEN_AUTO_REFRESH_MAX_TTL = (
 
 
 CISO_ASSISTANT_SUPERUSER_EMAIL = os.environ.get("CISO_ASSISTANT_SUPERUSER_EMAIL")
+logger.info("CISO_ASSISTANT_SUPERUSER_EMAIL: %s", CISO_ASSISTANT_SUPERUSER_EMAIL)
+logger.info("FORCE_CREATE_ADMIN: %s", FORCE_CREATE_ADMIN)
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+logger.info("DEFAULT_FROM_EMAIL: %s", DEFAULT_FROM_EMAIL)
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
@@ -383,6 +386,7 @@ LANGUAGES = [
     ("uk", "Ukrainian"),
     ("el", "Greek"),
     ("tr", "Turkish"),
+    ("hr", "Croatian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -497,3 +501,7 @@ HUEY = {
 
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
+
+WEBHOOK_ALLOW_PRIVATE_IPS = (
+    os.environ.get("WEBHOOK_ALLOW_PRIVATE_IPS", "False") == "True"
+)

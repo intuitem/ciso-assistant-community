@@ -47,27 +47,29 @@
 			<div class="flex flex-col space-y-4 items-center">
 				<h4 class="h4">{m.step({ number: 1 })}</h4>
 				<p class="text-surface-900">{$modalStore[0].body ?? '(body missing)'}</p>
-				<QR
-					data={totp.totp_url.replace(
-						/issuer=[^&]+/,
-						'issuer=' + encodeURIComponent('CISO Assistant')
-					)}
-					anchorInnerFill="black"
-					anchorOuterFill="black"
-					width="400"
-					height="400"
-				/>
+				{#if totp?.totp_url}
+					<QR
+						data={totp.totp_url.replace(
+							/issuer=[^&]+/,
+							'issuer=' + encodeURIComponent('CISO Assistant')
+						)}
+						anchorInnerFill="black"
+						anchorOuterFill="black"
+						width="400"
+						height="400"
+					/>
 
-				<div class="flex items-center justify-center w-full space-x-2">
-					<hr class="w-64 items-center bg-gray-200 border-0" />
-					<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
-					<hr class="w-64 items-center bg-gray-200 border-0" />
-				</div>
+					<div class="flex items-center justify-center w-full space-x-2">
+						<hr class="w-64 items-center bg-gray-200 border-0" />
+						<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
+						<hr class="w-64 items-center bg-gray-200 border-0" />
+					</div>
 
-				<div>
-					<p class="text-center text-surface-900">{m.enterTOTPCodeManually()}</p>
-					<p class="text-center">{totp.secret}</p>
-				</div>
+					<div>
+						<p class="text-center text-surface-900">{m.enterTOTPCodeManually()}</p>
+						<p class="text-center">{totp.secret}</p>
+					</div>
+				{/if}
 			</div>
 
 			<span class="divider-vertical"></span>
@@ -88,7 +90,7 @@
 					{#snippet children({ form })}
 						<!-- prettier-ignore -->
 						<OTPInput {form} field="code" />
-						<footer class="modal-footer {parent.regionFooter}">
+						<footer class="modal-footer {parent?.regionFooter ?? ''}">
 							<button
 								class="btn preset-filled-primary-500 w-full"
 								data-testid="activate-totp-confirm-button"

@@ -3,6 +3,7 @@
 .env
 .venv
 venv
+cli/.mcp.env
 **/node_modules/
 .vscode
 *.sqlite3
@@ -19,3 +20,4 @@ charts/custom-values.yaml
 **/charts/*/charts
 charts/ciso-assistant-next/custom.yaml
 .history/
+__pycache__

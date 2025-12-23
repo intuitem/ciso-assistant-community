@@ -78,8 +78,11 @@
 	multiple
 	{form}
 	optionsEndpoint="perimeters"
+	optionsExtraFields={[['folder', 'str']]}
 	field="perimeters"
-	label="Perimeters in scope"
+	cacheLock={cacheLocks['perimeters']}
+	bind:cachedValue={formDataCache['perimeters']}
+	label={m.perimeters()}
 	hidden={initialData.perimeters}
 />
 <TextField

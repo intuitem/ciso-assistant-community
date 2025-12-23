@@ -12,6 +12,7 @@
 	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
 	import type { PageData, ActionData } from './$types';
 	import RiskLevel from './RiskLevel.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
@@ -184,7 +185,7 @@
 					<TextField form={_form} field="ref_id" label={m.refId()} />
 					<TextField form={_form} field="name" label={m.name()} classesContainer="w-full" />
 				</span>
-				<TextArea form={_form} field="description" rows={6} label={m.description()} />
+				<MarkdownField form={_form} field="description" rows={6} label={m.description()} />
 			</div>
 			<div class="card px-4 py-2 bg-white shadow-lg w-7/12 max-h-96 overflow-y-auto">
 				<AutocompleteSelect
@@ -240,6 +241,37 @@
 				/>
 			</div>
 		</div>
+
+		<div class="flex flex-row space-x-2">
+			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+				<AutocompleteSelect
+					form={_form}
+					nullable
+					optionsEndpoint="terminologies?field_path=ro_to.risk_origin&is_visible=true"
+					optionsLabelField="translated_name"
+					field="risk_origin"
+					label={m.riskOrigin()}
+					helpText={m.riskOriginHelpText()}
+				/>
+			</div>
+			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+				<AutocompleteSelect
+					form={_form}
+					multiple
+					optionsEndpoint="risk-scenarios"
+					optionsExtraFields={[
+						['risk_assessment', 'str'],
+						['ref_id', 'str']
+					]}
+					optionsDetailedUrlParameters={[['exclude', data.scenario.id]]}
+					optionsLabelField="auto"
+					field="antecedent_scenarios"
+					label={m.antecedentScenarios()}
+					helpText={m.antecedentScenariosHelpText()}
+				/>
+			</div>
+		</div>
+
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
 
 		{#if page.data?.featureflags?.inherent_risk}
@@ -454,7 +486,19 @@
 					/>
 				</div>
 			</div>
-			<TextArea form={_form} field="justification" label={m.justification()} />
+			<MarkdownField form={_form} field="justification" label={m.justification()} />
+			<AutocompleteSelect
+				multiple
+				form={_form}
+				createFromSelection={true}
+				optionsEndpoint="filtering-labels"
+				optionsLabelField="label"
+				field="filtering_labels"
+				helpText={m.labelsHelpText()}
+				label={m.labels()}
+				translateOptions={false}
+				allowUserOptions="append"
+			/>
 		</div>
 		<div class="flex flex-row justify-between space-x-4">
 			<button

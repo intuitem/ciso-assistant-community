@@ -277,14 +277,17 @@
 				>
 					<Popover
 						open={likelihoodPopupOpen}
-						onOpenChange={(e) => (likelihoodPopupOpen = e.open)}
+						onOpenChange={(e) =>
+							(likelihoodPopupOpen = operationalScenario.likelihood.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
 						zIndex="100"
 						contentBase="max-w-sm"
 					>
 						{#snippet trigger()}
 							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-								<i class="fa-solid fa-dice text-black opacity-75"></i>
+								{#if operationalScenario.likelihood.description}
+									<i class="fa-solid fa-dice text-black opacity-75"></i>
+								{/if}
 								<span>{m.likelihood()}</span>
 							</h3>
 							<span>{operationalScenario.likelihood.name}</span>
@@ -310,14 +313,17 @@
 				>
 					<Popover
 						open={gravityPopupOpen}
-						onOpenChange={(e) => (gravityPopupOpen = e.open)}
+						onOpenChange={(e) =>
+							(gravityPopupOpen = operationalScenario.gravity.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
 						zIndex="100"
 						contentBase="max-w-sm"
 					>
 						{#snippet trigger()}
 							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-								<i class="fa-solid fa-bomb text-black opacity-75"></i>
+								{#if operationalScenario.gravity.description}
+									<i class="fa-solid fa-bomb text-black opacity-75"></i>
+								{/if}
 								<span>{m.gravity()}</span>
 							</h3>
 							<span>{operationalScenario.gravity.name}</span>
@@ -343,14 +349,17 @@
 				>
 					<Popover
 						open={riskLevelPopupOpen}
-						onOpenChange={(e) => (riskLevelPopupOpen = e.open)}
+						onOpenChange={(e) =>
+							(riskLevelPopupOpen = operationalScenario.risk_level.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
 						zIndex="100"
 						contentBase="max-w-sm"
 					>
 						{#snippet trigger()}
 							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-								<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
+								{#if operationalScenario.risk_level.description}
+									<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
+								{/if}
 								<span>{m.riskLevel()}</span>
 							</h3>
 							<span>{operationalScenario.risk_level.name}</span>

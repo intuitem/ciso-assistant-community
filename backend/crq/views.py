@@ -34,6 +34,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
         "status",
+        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["-created_at"]
@@ -406,13 +407,13 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 # Format risk reduction display
                 def format_currency(value):
                     if value >= 1000000000:
-                        return f"{currency}{value / 1000000000:.1f}B"
+                        return f"{value / 1000000000:.1f}B {currency}"
                     elif value >= 1000000:
-                        return f"{currency}{value / 1000000:.1f}M"
+                        return f"{value / 1000000:.1f}M {currency}"
                     elif value >= 1000:
-                        return f"{currency}{value / 1000:.0f}K"
+                        return f"{value / 1000:.0f}K {currency}"
                     else:
-                        return f"{currency}{value:,.0f}"
+                        return f"{value:,.0f} {currency}"
 
                 scenario_info["risk_reduction_display"] = (
                     format_currency(risk_reduction)
@@ -433,7 +434,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
             # Existing controls from current hypothesis
             if current_hypothesis:
-                scenario_info["existing_controls"] = [
+                scenario_info["existing_applied_controls"] = [
                     {
                         "id": str(control.id),
                         "name": control.name,
@@ -445,7 +446,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                     for control in current_hypothesis.existing_applied_controls.all()
                 ]
             else:
-                scenario_info["existing_controls"] = []
+                scenario_info["existing_applied_controls"] = []
 
             # Additional controls from selected residual hypothesis
             if selected_residual_hypothesis:
@@ -589,13 +590,13 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         # Format study total treatment cost
         def format_currency(value):
             if value >= 1000000000:
-                return f"{currency}{value / 1000000000:.1f}B"
+                return f"{value / 1000000000:.1f}B {currency}"
             elif value >= 1000000:
-                return f"{currency}{value / 1000000:.1f}M"
+                return f"{value / 1000000:.1f}M {currency}"
             elif value >= 1000:
-                return f"{currency}{value / 1000:.0f}K"
+                return f"{value / 1000:.0f}K {currency}"
             else:
-                return f"{currency}{value:,.0f}"
+                return f"{value:,.0f} {currency}"
 
         study_total_treatment_cost_display = (
             format_currency(study_total_treatment_cost)
@@ -726,6 +727,23 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 }
                 scenario_info["residual_level"] = residual_data
 
+                # Get treatment controls (added applied controls) with ETA dates for timeline animation
+                treatment_controls = []
+                for control in residual_hypothesis.added_applied_controls.all():
+                    treatment_controls.append(
+                        {
+                            "id": str(control.id),
+                            "name": control.name,
+                            "eta": control.eta.isoformat() if control.eta else None,
+                            "status": control.status,
+                            "effort": control.effort,
+                        }
+                    )
+
+                # Sort by ETA date (earliest first, null ETAs last)
+                treatment_controls.sort(key=lambda x: (x["eta"] is None, x["eta"]))
+                scenario_info["treatment_controls"] = treatment_controls
+
             scenarios_data.append(scenario_info)
 
         return Response(
@@ -744,6 +762,80 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                     1 for s in scenarios_data if s["residual_level"] is not None
                 ),
                 "note": "ALE = Annual Loss Expectancy, VaR = Value at Risk at specified percentiles, proba_of_exceeding_threshold calculated only if study has loss_threshold configured",
+            }
+        )
+
+    @action(detail=True, name="ALE Comparison Chart Data", url_path="ale-comparison")
+    def ale_comparison(self, request, pk=None):
+        """
+        Returns data for ALE comparison chart showing:
+        - Current ALE (positive values)
+        - Residual ALE (positive values)
+        - Treatment cost (negative values) for each scenario
+        """
+        study: QuantitativeRiskStudy = self.get_object()
+
+        # Get currency from global settings
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        currency = (
+            general_settings.value.get("currency", "€") if general_settings else "€"
+        )
+
+        scenarios_data = []
+
+        # Process each scenario in the study
+        for scenario in study.risk_scenarios.all():
+            # Get current ALE
+            current_ale = scenario.current_ale
+
+            # Get residual ALE from selected residual hypothesis
+            residual_ale = scenario.residual_ale
+
+            # Get treatment cost from selected residual hypothesis
+            treatment_cost = None
+            selected_residual_hypothesis = scenario.hypotheses.filter(
+                risk_stage="residual", is_selected=True
+            ).first()
+            if selected_residual_hypothesis:
+                treatment_cost = selected_residual_hypothesis.treatment_cost
+
+            scenarios_data.append(
+                {
+                    "name": scenario.name,
+                    "currentALE": round(current_ale)
+                    if current_ale is not None
+                    else None,
+                    "residualALE": round(residual_ale)
+                    if residual_ale is not None
+                    else None,
+                    "treatmentCost": round(treatment_cost)
+                    if treatment_cost is not None
+                    else None,
+                }
+            )
+
+        # Sort scenarios by current ALE (descending, with None values at the end)
+        scenarios_data.sort(
+            key=lambda x: x["currentALE"] if x["currentALE"] is not None else -1,
+            reverse=True,
+        )
+
+        return Response(
+            {
+                "study_id": str(study.id),
+                "study_name": study.name,
+                "currency": currency,
+                "scenarios": scenarios_data,
+                "total_scenarios": len(scenarios_data),
+                "scenarios_with_current_ale": sum(
+                    1 for s in scenarios_data if s["currentALE"] is not None
+                ),
+                "scenarios_with_residual_ale": sum(
+                    1 for s in scenarios_data if s["residualALE"] is not None
+                ),
+                "scenarios_with_treatment_cost": sum(
+                    1 for s in scenarios_data if s["treatmentCost"] is not None
+                ),
             }
         )
 

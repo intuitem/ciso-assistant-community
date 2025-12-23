@@ -10,6 +10,7 @@
 	import * as m from '$paraglide/messages.js';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import NumberField from '../NumberField.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -55,7 +56,6 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 {#if !$is_recurrent}
 	<TextField
@@ -202,8 +202,8 @@
 			cacheLock={cacheLocks['end_date']}
 			bind:cachedValue={formDataCache['end_date']}
 		/>
-		{#if context == 'edit' && isScheduleTainted}<span class="text-orange-500 italic text-sm"
-				><i class="fa-solid fa-circle-exclamation mr-1"></i>{m.taskScheduleWarning()}</span
+		{#if context == 'edit' && isScheduleTainted}<span class="text-secondary-500 italic text-sm"
+				><i class="fa-solid fa-circle-info mr-1"></i>{m.taskScheduleInfo()}</span
 			>{/if}
 	</Dropdown>
 {:else}
@@ -216,16 +216,19 @@
 		bind:cachedValue={formDataCache['status']}
 		disableDoubleDash={true}
 	/>
-	<AutocompleteSelect
-		multiple
-		{form}
-		optionsEndpoint="evidences"
-		optionsExtraFields={[['folder', 'str']]}
-		optionsLabelField="auto"
-		field="evidences"
-		label={m.evidences()}
-	/>
 {/if}
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
+	helpText={m.taskTemplateEvidenceHelpText()}
+	field="evidences"
+	label={m.evidences()}
+	allowUserOptions="append"
+	translateOptions={false}
+/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -299,7 +302,7 @@
 		bind:cachedValue={formDataCache['findings_assessment']}
 		label={m.findingsAssessment()}
 	/>
-	<TextArea
+	<MarkdownField
 		{form}
 		field="observation"
 		label={m.observation()}

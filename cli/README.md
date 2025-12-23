@@ -11,6 +11,7 @@ CLICA is a command-line interface tool for interacting with the CISO Assistant R
   - [Query Commands](#query-commands)
   - [Import Commands](#import-commands)
   - [File Upload Commands](#file-upload-commands)
+  - [Instance Management Commands](#instance-management-commands)
 - [Data Formats](#data-formats)
 - [MCP Integration](#mcp-integration)
 - [Examples](#examples)
@@ -53,7 +54,7 @@ CLICA uses Personal Access Tokens (PAT) for authentication with the CISO Assista
 
 ### Step 2: Configure Authentication
 
-Create or use existing  `.clica.env` file in the CLI directory with the following content:
+Create or use existing `.clica.env` file in the CLI directory with the following content:
 
 ```env
 TOKEN=
@@ -71,7 +72,8 @@ VERIFY_CERTIFICATE=true
 
 The CLI uses environment variables for configuration. Make sure your `.clica.env` file is properly configured before running any commands.
 
-**Important:** Never commit your `.clica.env` file to version control as it contains sensitive authentication information.
+> [!WARNING]
+> Never commit your `.clica.env` file to version control as it contains sensitive authentication information.
 
 ## Available Commands
 
@@ -220,6 +222,44 @@ python clica.py upload-attachment \
 - `--file`: Path to the file to upload
 - `--name`: Name of the existing evidence record to attach the file to
 
+### Instance Management Commands
+
+#### `clone_instance`
+
+Creates a complete clone of a CISO Assistant instance by copying both the SQLite database and evidence attachments directory. This is useful for creating backups, testing environments, or migrating instances.
+
+```bash
+python clica.py clone-instance \
+  --dest-db /path/to/backup/ciso-assistant.sqlite3 \
+  --dest-attachments /path/to/backup/attachments
+```
+
+**Parameters:**
+
+- `--source-db`: Path to source SQLite database (default: `../backend/db/ciso-assistant.sqlite3`)
+- `--dest-db`: Path to destination SQLite database (required)
+- `--source-attachments`: Path to source attachments directory (default: `../backend/db/attachments`)
+- `--dest-attachments`: Path to destination attachments directory (required)
+- `--force`: Overwrite destination files if they exist without prompting (optional)
+
+**Features:**
+
+- Validates source database is a valid SQLite file before cloning
+- Calculates and displays total size of data to be copied
+- Shows detailed summary before proceeding
+- Requires confirmation before starting the clone operation
+- Verifies copied database integrity after cloning
+- Provides detailed progress feedback
+- Creates necessary destination directories automatically
+- Handles permission errors and edge cases gracefully
+
+**Important Notes:**
+
+- The clone operation does not require API authentication (no TOKEN needed)
+- After cloning, update your CISO Assistant configuration to use the new database and attachments paths
+- For production use, consider stopping the CISO Assistant service before cloning to ensure data consistency
+- The cloned instance is a complete snapshot and can be used independently
+
 ## Data Formats
 
 ### Risk Assessment CSV Format
@@ -264,11 +304,11 @@ CLICA includes Model Context Protocol (MCP) integration for use with Claude Desk
 ### Setup for Claude Desktop
 
 1. Install prerequisites:
-
    - Python 3.12
    - uv package manager
    - Node.js
    - Claude Desktop
+
 2. Configure your `.mcp.env` file with the same parameters as `.clica.env`
 3. Update Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
 
@@ -277,12 +317,7 @@ CLICA includes Model Context Protocol (MCP) integration for use with Claude Desk
   "mcpServers": {
     "ciso-assistant": {
       "command": "/full/path/to/uv",
-      "args": [
-        "--directory",
-        "/full/path/to/cli/folder",
-        "run",
-        "ca_mcp.py"
-      ]
+      "args": ["--directory", "/full/path/to/cli/folder", "run", "ca_mcp.py"]
     }
   }
 }
@@ -332,6 +367,29 @@ python clica.py import-evidences --file evidences.csv
 python clica.py upload-attachment \
   --file "security_policy.pdf" \
   --name "Information Security Policy"
+```
+
+### Clone Instance for Backup or Testing
+
+```bash
+# Create a complete backup of your instance
+python clica.py clone-instance \
+  --dest-db /backups/ciso-assistant-backup-$(date +%Y%m%d).sqlite3 \
+  --dest-attachments /backups/attachments-backup-$(date +%Y%m%d)
+
+# Clone to a test environment
+python clica.py clone-instance \
+  --source-db /prod/db/ciso-assistant.sqlite3 \
+  --source-attachments /prod/db/attachments \
+  --dest-db /test/db/ciso-assistant.sqlite3 \
+  --dest-attachments /test/db/attachments
+```
+# Force database and attachments directory overwrite without prompts
+```bash
+python clica.py clone-instance \
+  --dest-db /backup/ciso-assistant.sqlite3 \
+  --dest-attachments /backup/attachments \
+  --force
 ```
 
 ## Troubleshooting

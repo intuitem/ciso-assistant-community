@@ -8,6 +8,7 @@
 	import { m } from '$paraglide/messages';
 	import type { ActionData, PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 
 	import { onMount } from 'svelte';
 	import {
@@ -24,6 +25,7 @@
 
 	let { data, form }: Props = $props();
 	let URLModel = $derived(data.URLModel);
+	let exportPopupOpen = $state(false);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -112,7 +114,13 @@
 {#if data?.table}
 	<div class="shadow-lg">
 		{#key URLModel}
-			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
+			<ModelTable
+				source={data.table}
+				deleteForm={data.deleteForm}
+				{URLModel}
+				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
+				disableDelete={['user-groups'].includes(URLModel)}
+			>
 				{#snippet addButton()}
 					<div>
 						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
@@ -125,17 +133,51 @@
 									onclick={handlers(modalCreateForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
-								{#if ['applied-controls', 'assets'].includes(URLModel)}
+								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates'].includes(URLModel)}
+									<Popover
+										open={exportPopupOpen}
+										onOpenChange={(e) => (exportPopupOpen = e.open)}
+										triggerBase="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg"
+										positioning={{ placement: 'bottom-end' }}
+										zIndex="1000"
+									>
+										{#snippet trigger()}
+											<span title={m.exportButton()} data-testid="export-button">
+												<i class="fa-solid fa-download"></i>
+											</span>
+										{/snippet}
+										{#snippet content()}
+											<div class="flex flex-col">
+												<a
+													href="{URLModel}/export/"
+													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+													>... {m.asCSV()}</a
+												>
+												<a
+													href="{URLModel}/export/xlsx/"
+													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+													>... {m.asXLSX()}</a
+												>
+											</div>
+										{/snippet}
+									</Popover>
+								{/if}
+								{#if URLModel === 'applied-controls'}
 									<a
-										href="{URLModel}/export/"
-										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-										title={m.exportButton()}
-										data-testid="export-button"><i class="fa-solid fa-download mr-2"></i></a
+										href="{URLModel}/flash-mode/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.flashMode()}
+										data-testid="flash-mode-button"><i class="fa-solid fa-bolt mr-2"></i></a
 									>
 								{/if}
-								{#if ['threats', 'reference-controls'].includes(URLModel)}
+								{#if ['threats', 'reference-controls', 'metric-definitions'].includes(URLModel)}
 									{@const title =
-										URLModel === 'threats' ? m.importThreats() : m.importReferenceControls()}
+										URLModel === 'threats'
+											? m.importThreats()
+											: URLModel === 'reference-controls'
+												? m.importReferenceControls()
+												: m.importMetricDefinitions()}
 									<Anchor
 										href={`/libraries?object_type=${URLModel.replace(/-/g, '_')}`}
 										label={m.libraries()}
@@ -148,6 +190,15 @@
 								{#if URLModel === 'assets'}
 									<Anchor
 										href="assets/graph/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.exploreButton()}
+										label={m.inspect()}
+										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
+									>
+								{/if}
+								{#if URLModel === 'entities'}
+									<Anchor
+										href="entities/graph/"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.exploreButton()}
 										label={m.inspect()}
@@ -170,6 +221,15 @@
 										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
 									>
 								{/if}
+								{#if URLModel === 'vulnerabilities'}
+									<Anchor
+										href="vulnerabilities/treemap/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.visualizeButton()}
+										label={m.visualize()}
+										data-testid="viz-button"><i class="fa-solid fa-chart-pie"></i></Anchor
+									>
+								{/if}
 							{:else if ['risk-matrices', 'frameworks', 'requirement-mapping-sets'].includes(URLModel)}
 								{@const href = `/libraries?object_type=${URLModel.replace(/-/g, '_')}`}
 								{@const title =
@@ -187,6 +247,15 @@
 									id="add-button"
 									{title}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
+								{#if URLModel === 'requirement-mapping-sets'}
+									<Anchor
+										href="requirement-mapping-sets/graph/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.exploreButton()}
+										label={m.inspect()}
+										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
+									>
+								{/if}
 							{/if}
 						</span>
 					</div>

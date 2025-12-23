@@ -143,6 +143,44 @@
 		]
 	};
 
+	function handleActivityOneClick(): void {
+		// Check if a risk assessment already exists
+		if (data.data.last_risk_assessment) {
+			const riskAssessment = data.data.last_risk_assessment;
+			const riskAssessmentName =
+				riskAssessment.str || riskAssessment.name || 'Existing Risk Assessment';
+
+			// Show choice modal - using i18n strings
+			const choiceModal: ModalSettings = {
+				type: 'confirm',
+				title: m.ebiosRmSyncModalTitle(),
+				body: `${m.ebiosRmSyncModalBody({ name: riskAssessmentName })}
+
+  • ${m.ebiosRmSyncExisting()}
+    ${m.ebiosRmSyncExistingDescription()}
+
+  • ${m.ebiosRmCreateNew()}
+    ${m.ebiosRmCreateNewDescription()}`,
+				buttonTextConfirm: m.ebiosRmSyncExisting(),
+				buttonTextCancel: m.ebiosRmCreateNew(),
+				response: (confirmed: boolean | undefined) => {
+					if (confirmed === true) {
+						// Sync existing - navigate to sync
+						window.location.href = `${page.url.pathname}/workshop-5/risk-analyses?sync=${riskAssessment.id}`;
+					} else if (confirmed === false) {
+						// Create new
+						modalCreateForm();
+					}
+					// If confirmed is undefined (close button/escape), do nothing
+				}
+			};
+			modalStore.trigger(choiceModal);
+		} else {
+			// No existing assessment, just create
+			modalCreateForm();
+		}
+	}
+
 	function modalCreateForm(): void {
 		let modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -204,7 +242,10 @@
 		>
 			{#snippet addRiskAnalysis()}
 				<div>
-					<button class="flex flex-col text-left hover:text-purple-800" onclick={modalCreateForm}>
+					<button
+						class="flex flex-col text-left hover:text-purple-800"
+						onclick={handleActivityOneClick}
+					>
 						{#if data.data.meta.workshops[4].steps[0].status == 'done'}
 							<span
 								class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
@@ -226,47 +267,66 @@
 		</Tile>
 		<Tile title={m.summary()} accent_color="bg-purple-800">
 			{#snippet action()}
-				<div>
+				<div class="flex flex-col gap-3">
 					<a
-						class="text-orange-600 hover:text-purple-600 font-medium"
+						class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
 						href={`${page.url.pathname}/visual/`}
-						><span class="bg-orange-600 text-white text-xs mx-2 p-1 rounded-sm">New</span><i
-							class="fa-solid fa-chart-diagram mr-2"
-						></i><span class="font-semibold">{m.visualAnalysis()}</span></a
 					>
+						<i class="fa-solid fa-chart-diagram"></i>
+						<span>{m.visualAnalysis()}</span>
+					</a>
+					<a
+						class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+						href={`${page.url.pathname}/report/`}
+					>
+						<i class="fa-solid fa-file-lines"></i>
+						<span>{m.report()}</span>
+					</a>
 				</div>
 			{/snippet}
 			{#snippet content()}
-				<div>
+				{@const counters = data.data?.counters || {}}
+				<div class="grid grid-cols-2 gap-2">
 					<Card
-						count={data.data.roto_count}
-						label={m.roToCouples()}
+						count={String(counters.selected_asset_count ?? 0)}
+						label={m.assets()}
 						section={''}
-						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
-						count={data.data.selected_roto_count}
-						label={m.selectedRoToCouples()}
+						count={String(counters.selected_feared_event_count ?? 0)}
+						label={m.fearedEvents()}
 						section={''}
-						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
-						count={data.data.selected_attack_path_count}
-						label={m.selectedAttackPaths()}
+						count={String(counters.compliance_assessment_count ?? 0)}
+						label={m.complianceAssessments()}
 						section={''}
-						customClass="col-span-3 lg:col-span-1"
+					/>
+					<Card count={String(counters.roto_count ?? 0)} label={m.roToCouples()} section={''} />
+					<Card
+						count={String(counters.stakeholder_count ?? 0)}
+						label={m.stakeholders()}
+						section={''}
 					/>
 					<Card
-						count={data.data.operational_scenario_count}
+						count={String(counters.strategic_scenario_count ?? 0)}
+						label={m.strategicScenarios()}
+						section={''}
+					/>
+					<Card
+						count={String(counters.operational_scenario_count ?? 0)}
 						label={m.operationalScenarios()}
 						section={''}
-						customClass="col-span-3 lg:col-span-1"
 					/>
 					<Card
-						count={data.data.applied_control_count}
-						label={m.appliedControls()}
+						count={String(counters.compliance_applied_control_count ?? 0)}
+						label={m.appliedControlsFromAudits()}
 						section={''}
-						customClass="col-span-3 lg:col-span-1"
+					/>
+					<Card
+						count={String(counters.risk_assessment_applied_control_count ?? 0)}
+						label={m.appliedControlsFromRiskAssessment()}
+						section={''}
 					/>
 				</div>
 			{/snippet}

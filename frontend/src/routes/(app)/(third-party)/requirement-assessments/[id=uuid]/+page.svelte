@@ -93,6 +93,16 @@
 		>
 			{safeTranslate(data.requirementAssessment.result)}
 		</span>
+		{#if data.requirement.implementation_groups?.length > 0}
+			<div class="ml-3">
+				<b class="mr-2">Implemetation Groups :</b>
+				{#each data.requirement.implementation_groups as ig}
+					<span class="badge bg-blue-100">
+						{ig}
+					</span>
+				{/each}
+			</div>
+		{/if}
 		{#if data.requirementAssessment.is_scored}
 			<ProgressRing
 				strokeWidth="20px"

@@ -36,7 +36,7 @@ class ExportBackupView(APIView):
         response = HttpResponse(content_type="application/json")
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         response["Content-Disposition"] = (
-            f'attachment; filename="ciso-assistant-db-{timestamp}.json"'
+            f'attachment; filename="ciso-assistant-db-{VERSION}-{timestamp}.json"'
         )
 
         buffer = io.StringIO()
@@ -199,6 +199,11 @@ class LoadBackupView(APIView):
 
         try:
             schema_version_int = int(schema_version)
+            compare_schema_versions(schema_version_int, backup_version)
+            if backup_version != VERSION:
+                raise ValueError(
+                    "The version of the current instance and the one that generated the backup are not the same."
+                )
         except (ValueError, TypeError) as e:
             logger.error(
                 "Invalid schema version format",
@@ -208,7 +213,6 @@ class LoadBackupView(APIView):
             return Response(
                 {"error": "InvalidSchemaVersion"}, status=status.HTTP_400_BAD_REQUEST
             )
-        compare_schema_versions(schema_version_int, backup_version)
 
         is_enterprise = apps.is_installed("enterprise_core")
         if not is_enterprise:
@@ -223,6 +227,12 @@ class LoadBackupView(APIView):
                 ]
                 for perm_index in reversed(enterprise_perms_indices):
                     permissions.pop(perm_index)
+
+            decompressed_data = [
+                obj
+                for obj in decompressed_data
+                if obj["model"].split(".", 1)[0] != "enterprise_core"
+            ]
 
         decompressed_data = json.dumps(decompressed_data)
         return self.load_backup(

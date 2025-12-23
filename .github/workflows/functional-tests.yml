@@ -59,6 +59,8 @@ jobs:
 
       - name: Build community frontend
         working-directory: ${{ env.frontend-directory }}
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
         run: pnpm run build
 
       - name: Upload Community Frontend Build Artifact
@@ -97,6 +99,8 @@ jobs:
 
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
         run: make
 
       - name: Upload Enterprise Frontend Build Artifact
@@ -254,7 +258,6 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ matrix.playwright-browser }}
 
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.frontend-directory }}
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}
@@ -379,7 +382,7 @@ jobs:
           python -m pipx ensurepath
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           python -m pipx install poetry
-      
+
       - name: Configure Poetry to not use virtualenvs
         run: poetry config virtualenvs.create false
 
@@ -431,7 +434,6 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ matrix.playwright-browser }}
 
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.playwright-browser }}

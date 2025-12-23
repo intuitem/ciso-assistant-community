@@ -2,7 +2,7 @@ import type { Actions, PageServerLoad } from './$types';
 
 import { BASE_API_URL } from '$lib/utils/constants';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
-import { listViewFields } from '$lib/utils/table';
+import { headData } from '$lib/utils/table';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -24,7 +24,7 @@ export const load = (async ({ fetch, params }) => {
 			const response = await fetch(keyEndpoint);
 			if (response.ok) {
 				const table: TableSource = {
-					head: listViewFields[key].head,
+					head: headData(key),
 					body: [],
 					meta: []
 				};
@@ -38,7 +38,7 @@ export const load = (async ({ fetch, params }) => {
 	await Promise.all(
 		['risk_scenarios', 'risk_scenarios_e'].map(async (key) => {
 			const table: TableSource = {
-				head: ['name', 'owner', 'eta'],
+				head: ['name', 'owner', 'status', 'eta'],
 				body: [],
 				meta: []
 			};

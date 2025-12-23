@@ -7,11 +7,11 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import { onMount } from 'svelte';
 
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import { page } from '$app/state';
 
-	let displayCurrency = $state('€'); // Default to Euro
+	let displayCurrency = $derived(page.data?.settings?.currency ?? '€'); // Default to Euro
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -38,21 +38,33 @@
 	// Declare form store at top level
 	const formStore = form.form;
 
-	// Fetch currency from global settings
-	onMount(async () => {
-		try {
-			const response = await fetch('/global-settings');
-			if (response.ok) {
-				const globalSettings = await response.json();
-				const generalSetting = globalSettings.results?.find(
-					(setting: any) => setting.name === 'general'
-				);
-				if (generalSetting?.value?.currency) {
-					displayCurrency = generalSetting.value.currency;
-				}
-			}
-		} catch (error) {
-			console.warn('Could not fetch global settings for currency:', error);
+	// Local state for percentage display (0-100)
+	let probabilityPercent = $state<number | undefined>(undefined);
+	let initialized = false;
+
+	// One-time initialization: convert probability to percentage when form loads
+	$effect(() => {
+		if (initialized) return;
+
+		const prob = $formStore.probability;
+		if (prob !== undefined && prob !== null && typeof prob === 'number') {
+			probabilityPercent = Math.round(prob * 10000) / 100; // Convert 0-1 to 0-100 with 2 decimals
+		}
+		initialized = true; // Always mark as initialized, even for new forms
+	});
+
+	// Only sync percentage → probability (one direction)
+	$effect(() => {
+		if (!initialized) return;
+
+		if (
+			probabilityPercent !== undefined &&
+			probabilityPercent !== null &&
+			typeof probabilityPercent === 'number'
+		) {
+			$formStore.probability = Math.round(probabilityPercent * 100) / 10000; // Convert 0-100 to 0-1
+		} else {
+			$formStore.probability = undefined;
 		}
 	});
 </script>
@@ -135,18 +147,29 @@
 	header={m.simulationParameters()}
 >
 	<input type="hidden" name="impact.distribution" value="LOGNORMAL-CI90" />
-	<TextField
-		{form}
-		field="probability"
-		label="Probability (P)"
-		type="number"
-		step="0.01"
-		min="0"
-		max="1"
-		cacheLock={cacheLocks['probability']}
-		bind:cachedValue={formDataCache['probability']}
-		helpText={m.probabilityHelpText()}
-	/>
+	<!-- Hidden field for actual probability (0-1) -->
+	<input type="hidden" name="probability" bind:value={$formStore.probability} />
+
+	<!-- Display field for percentage (0-100) -->
+	<div class="form-control">
+		<label class="label" for="probability_percent">
+			<span class="label-text">{m.probabilityPercent()}</span>
+		</label>
+		<input
+			type="number"
+			id="probability_percent"
+			class="input input-bordered w-full"
+			bind:value={probabilityPercent}
+			step="0.1"
+			min="0"
+			max="100"
+		/>
+		{#if m.probabilityPercentHelpText()}
+			<label class="label" for="probability_percent">
+				<span class="label-text-alt text-surface-500">{m.probabilityPercentHelpText()}</span>
+			</label>
+		{/if}
+	</div>
 	<TextField
 		{form}
 		field="impact.lb"

@@ -66,7 +66,7 @@
 		{form}
 		optionsEndpoint="folders?content_type=DO"
 		field="folder"
-	  	pathField="path"
+		pathField="path"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
 		label={m.domain()}
@@ -104,6 +104,15 @@
 		>
 			{m.activityOne()}
 		</p>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="risk-matrices"
+			field="risk_matrix"
+			cacheLock={cacheLocks['risk_matrix']}
+			bind:cachedValue={formDataCache['risk_matrix']}
+			label={m.riskMatrix()}
+			helpText={m.ebiosRmMatrixHelpText()}
+		/>
 		<TextArea
 			{form}
 			field="description"

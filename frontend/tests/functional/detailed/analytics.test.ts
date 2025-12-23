@@ -72,17 +72,14 @@ test.skip('Analytics full flow - creation, validation and cleanup', async ({
 			'any'
 		);
 
-		await librariesPage.importLibrary('NIST CSF v2.0', undefined, 'any');
-
-		await librariesPage.tab('Libraries store').click();
-		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+		await librariesPage.importLibrary('NIST-CSF-2.0', undefined, 'any');
 	});
 
 	await test.step('Create audits', async () => {
 		await complianceAssessmentsPage.goto();
 		await complianceAssessmentsPage.createItem({
 			name: 'test-audit-1',
-			framework: 'NIST CSF v2.0',
+			framework: 'NIST-CSF-2.0',
 			authors: ['admin@tests.com'],
 			perimeter: `${vars.folderName}/${vars.perimeterName}`
 		});
@@ -109,9 +106,6 @@ test.skip('Analytics full flow - creation, validation and cleanup', async ({
 		await librariesPage.hasUrl();
 
 		await librariesPage.importLibrary('4x4 risk matrix from EBIOS-RM', undefined, 'any');
-
-		await librariesPage.tab('Libraries store').click();
-		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
 	});
 
 	await test.step('Create risk assessment', async () => {
@@ -148,7 +142,7 @@ test.skip('Analytics full flow - creation, validation and cleanup', async ({
 		await expect(page.getByTestId('card-Applied controls')).toHaveText('5');
 		await expect(page.getByTestId('card-Risk assessments')).toHaveText('1');
 		await expect(page.getByTestId('card-Audits')).toHaveText('2');
-		await expect(page.getByText('NIST CSF v2.0')).toBeVisible();
+		await expect(page.getByText('NIST-CSF-2.0')).toBeVisible();
 		await expect(page.getByText('International standard ISO/IEC 27001:2022')).toBeVisible();
 		await expect(page.getByText('test-control-2')).toBeVisible();
 	});

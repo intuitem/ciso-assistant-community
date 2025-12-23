@@ -7,6 +7,7 @@ import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
 from django.db import models, transaction
+from django.db.models import Q, F, Prefetch
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
@@ -44,6 +45,7 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
+from allauth.mfa.models import Authenticator
 
 ALLOWED_PERMISSION_APPS = (
     "core",
@@ -51,6 +53,18 @@ ALLOWED_PERMISSION_APPS = (
     "tprm",
     "privacy",
     "resilience",
+    "crq",
+    "pmbok",
+    "iam",
+)
+
+IGNORED_PERMISSION_MODELS = (
+    "personalaccesstoken",
+    "role",
+    "roleassignment",
+    "usergroup",
+    "ssosettings",
+    "historicalmetric",
 )
 
 
@@ -102,6 +116,13 @@ class Folder(NameDescriptionMixin):
     )
     builtin = models.BooleanField(default=False)
 
+    filtering_labels = models.ManyToManyField(
+        "core.FilteringLabel",
+        blank=True,
+        verbose_name=_("Labels"),
+        related_name="folders",
+    )
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -130,7 +151,7 @@ class Folder(NameDescriptionMixin):
         while (current_folder := current_folder.parent_folder) is not None:
             yield current_folder
 
-    def get_folder_full_path(self, include_root: bool = False) -> list[Self]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Self]:
         """
         Get the full path of the folder including its parents.
         If include_root is True, the root folder is included in the path.
@@ -196,6 +217,51 @@ class Folder(NameDescriptionMixin):
 
         # If no folder is found after trying all paths, handle this case (e.g., return None or raise an error).
         return None
+
+    def get_user_roles(self) -> dict[str, list[str]]:
+        """
+        For a given folder, retrieves all users with roles on it
+        and returns a dictionary mapping each user's email to a list of their
+        role codenames.
+
+        This function correctly handles roles that are:
+        - Assigned directly to a user.
+        - Assigned to a user group the user belongs to.
+        - Inherited from parent folders via recursive role assignments.
+        """
+        folder_path_ids = [self.id] + [f.id for f in self.get_parent_folders()]
+
+        role_assignment_filter = Q(is_recursive=False, perimeter_folders=self) | Q(
+            is_recursive=True, perimeter_folders__id__in=folder_path_ids
+        )
+
+        direct_perms_qs = (
+            RoleAssignment.objects.filter(role_assignment_filter, user__isnull=False)
+            .annotate(user_pk=F("user__id"))
+            .order_by()
+        )
+
+        # Query for roles granted to users via groups.
+        # The ORM traverses the UserGroup -> User relationship.
+        group_perms_qs = (
+            RoleAssignment.objects.filter(
+                role_assignment_filter, user_group__isnull=False
+            )
+            .annotate(user_pk=F("user_group__user__id"))
+            .order_by()
+        )
+
+        # Combine both querysets into a single one.
+        all_roles_qs = direct_perms_qs.union(group_perms_qs)
+
+        user_roles = defaultdict(list)
+        for item in all_roles_qs:
+            # Filter out nulls that can occur if a role has no roles
+            # or a group has no users.
+            if item.user_pk and item.role:
+                user_roles[item.user_pk].append(item.role)
+
+        return dict(user_roles)
 
     @staticmethod
     def create_default_ug_and_ra(folder: Self):
@@ -274,7 +340,7 @@ class FolderMixin(models.Model):
         default=Folder.get_root_folder_id,
     )
 
-    def get_folder_full_path(self, include_root: bool = False) -> list[Folder]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
         folders = ([self.folder] + [f for f in self.folder.get_parent_folders()])[::-1]
         if include_root:
             return folders
@@ -363,6 +429,7 @@ class UserManager(BaseUserManager):
             observation=extra_fields.get("observation"),
             folder=_get_root_folder(),
             keep_local_login=extra_fields.get("keep_local_login", False),
+            expiry_date=extra_fields.get("expiry_date"),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         if password:
@@ -481,6 +548,11 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     observation = models.TextField(
         null=True, blank=True, verbose_name="Notes about a user"
     )
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+    )
     objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
@@ -496,6 +568,43 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("users")
         #        swappable = 'AUTH_USER_MODEL'
         permissions = (("backup", "backup"), ("restore", "restore"))
+
+    @classmethod
+    def visible_users(
+        cls, for_user: AbstractBaseUser | AnonymousUser, view_all_users: bool
+    ):
+        """
+        Return a queryset of users visible to `for_user`, always including `for_user`.
+        Mirrors the logic used in UserViewSet.get_queryset().
+        """
+        if not getattr(for_user, "is_authenticated", False):
+            return User.objects.none()
+
+        (viewable_user_group_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), for_user, UserGroup
+        )
+
+        if view_all_users:
+            base_qs = User.objects.all()
+
+        else:
+            (visible_users_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), for_user, User
+            )
+            base_qs = (
+                User.objects.filter(id__in=visible_users_ids)
+                | User.objects.filter(pk=for_user.pk)
+            ).distinct()
+
+        # 🔒 Filtered prefetch for serializer
+        return base_qs.prefetch_related(
+            Prefetch(
+                "user_groups",
+                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
+                    "id", "builtin"
+                ),  # minimal
+            )
+        )
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
@@ -554,13 +663,15 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 fail_silently=False,
                 html_message=email,
             )
-            logger.info("email sent", recipient=self.email, subject=subject)
+            logger.info(
+                "Email sent successfully", recipient=self.email, subject=subject
+            )
         except Exception as primary_exception:
             logger.error(
-                "primary mailer failure, trying rescue",
+                "Primary mail server failure, trying rescue",
                 recipient=self.email,
                 subject=subject,
-                error=primary_exception,
+                error=str(primary_exception),
                 email_host=EMAIL_HOST,
                 email_port=EMAIL_PORT,
                 email_host_user=EMAIL_HOST_USER,
@@ -582,13 +693,17 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                             [self.email],
                             connection=new_connection,
                         ).send()
-                    logger.info("email sent", recipient=self.email, subject=subject)
-                except Exception as rescue_exception:
-                    logger.error(
-                        "rescue mailer failure",
+                    logger.info(
+                        "Email sent via rescue server",
                         recipient=self.email,
                         subject=subject,
-                        error=rescue_exception,
+                    )
+                except Exception as rescue_exception:
+                    logger.error(
+                        "Rescue mail server failure",
+                        recipient=self.email,
+                        subject=subject,
+                        error=str(rescue_exception),
                         email_host=EMAIL_HOST_RESCUE,
                         email_port=EMAIL_PORT_RESCUE,
                         email_username=EMAIL_HOST_USER_RESCUE,
@@ -678,6 +793,13 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             for user in cls.objects.all()
             if user.is_editor and not user.is_third_party
         ]
+
+    def has_mfa_enabled(self) -> bool:
+        """
+        Check if the user has Multi-Factor Authentication (MFA) enabled.
+        Returns True if the user has any active MFA authenticators (TOTP, WebAuthn, etc.).
+        """
+        return Authenticator.objects.filter(user=self).exists()
 
 
 class Role(NameDescriptionMixin, FolderMixin):
@@ -857,6 +979,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             for p in permissions & ra_permissions:
                 for f in target_folders:
                     result_folders[f].add(p)
+
         for f in result_folders:
             if hasattr(object_type, "folder"):
                 objects_ids = object_type.objects.filter(folder=f).values_list(
@@ -878,11 +1001,16 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 objects_ids = [f.id]
             elif class_name == "permission":
                 # Permissions have no folder, so we don't filter them, we just rely on view_permission
-                objects_ids = Permission.objects.filter(
-                    content_type__app_label__in=ALLOWED_PERMISSION_APPS
-                ).values_list("id", flat=True)
+                objects_ids = (
+                    Permission.objects.filter(
+                        content_type__app_label__in=ALLOWED_PERMISSION_APPS
+                    )
+                    .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
+                    .values_list("id", flat=True)
+                )
             else:
                 raise NotImplementedError("type not supported")
+
             if permission_view in result_folders[f]:
                 result_view.update(objects_ids)
             if permission_change in result_folders[f]:
@@ -1012,8 +1140,13 @@ class PersonalAccessToken(models.Model):
         return f"{self.auth_token.user.email} : {self.name} : {self.auth_token.digest}"
 
 
+common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     User,
     m2m_fields={"user_groups"},
-    exclude_fields=["created_at", "updated_at", "password"],
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Folder,
+    exclude_fields=common_exclude,
 )

@@ -8,6 +8,8 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+
 	interface Props {
 		form: SuperForm<any>;
 		model: ModelInfo;
@@ -19,6 +21,7 @@
 	let formDataCache = $state({});
 
 	const formStore = form.form;
+	const modalStore = getModalStore();
 
 	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
 
@@ -30,8 +33,56 @@
 	let horizontalAxisPos = $derived(flipVertically ? 'top-8' : 'bottom-8');
 	let horizontalLabelPos = $derived(flipVertically ? 'top-2' : 'bottom-2');
 
-	let openAccordionItems = $state(['notifications', 'interface', 'financial']);
+	let openAccordionItems = $state(['notifications', 'financial']);
+
+	// Track original currency for change detection
+	let originalCurrency = $state($formStore.currency);
+	let conversionRateValue = $state('1.0');
+
+	function handleCurrencyChange(newCurrency: string) {
+		if (originalCurrency && originalCurrency !== newCurrency) {
+			// Show modal to ask for conversion rate
+			const modal: ModalSettings = {
+				type: 'prompt',
+				title: m.currencyConversionRate?.() || 'Currency Conversion Rate',
+				body: `Converting from ${originalCurrency} to ${newCurrency}. Enter conversion rate (default: 1.0):`,
+				value: '1.0',
+				valueAttr: {
+					type: 'text',
+					pattern: '[0-9]+([\\.][0-9]+)?',
+					required: true,
+					placeholder: '1.0'
+				},
+				response: (rate: string | false) => {
+					if (rate !== false && rate !== null && rate !== '') {
+						// Validate it's a valid number
+						const n = Number(rate);
+						if (Number.isFinite(n) && n > 0) {
+							conversionRateValue = rate.toString();
+							// Accept change
+							originalCurrency = newCurrency;
+						} else {
+							// Revert currency change
+							$formStore.currency = originalCurrency;
+							conversionRateValue = '1.0';
+						}
+					} else {
+						// User cancelled - revert currency
+						$formStore.currency = originalCurrency;
+						conversionRateValue = '1.0';
+					}
+				}
+			};
+			modalStore.trigger(modal);
+		} else {
+			// No currency change, reset conversion rate
+			conversionRateValue = '1.0';
+		}
+	}
 </script>
+
+<!-- Hidden input to send conversion_rate with the form -->
+<input type="hidden" name="conversion_rate" value={conversionRateValue} />
 
 <Accordion
 	value={openAccordionItems}
@@ -52,34 +103,22 @@
 			</div>
 		{/snippet}
 	</Accordion.Item>
-	<Accordion.Item value="interface">
-		{#snippet control()}
-			<i class="fa-solid fa-asterisk mr-2"></i>{m.settingsInterface()}
-		{/snippet}
-		{#snippet panel()}
-			<div class="p-4">
-				<Checkbox
-					{form}
-					field="interface_agg_scenario_matrix"
-					label={m.settingsAggregateMatrix()}
-				/>
-			</div>
-		{/snippet}
-	</Accordion.Item>
 	<Accordion.Item value="assets">
 		{#snippet control()}
 			<i class="fa-solid fa-gem mr-2"></i>{m.assets()}
 		{/snippet}
 		{#snippet panel()}
-			<Select
-				{form}
-				field="security_objective_scale"
-				cacheLock={cacheLocks['security_objective_scale']}
-				bind:cachedValue={formDataCache['security_objective_scale']}
-				options={model.selectOptions['security_objective_scale']}
-				helpText={m.securityObjectiveScaleHelpText()}
-				label={m.securityObjectiveScale()}
-			/>
+			<div class="p-4">
+				<Select
+					{form}
+					field="security_objective_scale"
+					cacheLock={cacheLocks['security_objective_scale']}
+					bind:cachedValue={formDataCache['security_objective_scale']}
+					options={model.selectOptions['security_objective_scale']}
+					helpText={m.securityObjectiveScaleHelpText()}
+					label={m.securityObjectiveScale()}
+				/>
+			</div>
 		{/snippet}
 	</Accordion.Item>
 	<Accordion.Item value="riskMatrix">
@@ -87,8 +126,13 @@
 			<i class="fa-solid fa-table-cells-large mr-2"></i>{m.settingsRiskMatrix()}
 		{/snippet}
 		{#snippet panel()}
-			<div class="flex flex-row gap-4">
+			<div class="p-4 flex flex-row gap-4">
 				<div class="flex flex-col flex-1 space-y-4">
+					<Checkbox
+						{form}
+						field="interface_agg_scenario_matrix"
+						label={m.settingsAggregateMatrix()}
+					/>
 					<Checkbox
 						{form}
 						field="risk_matrix_swap_axes"
@@ -146,51 +190,43 @@
 			<i class="fa-solid fa-gopuram mr-2"></i>{m.ebiosRadarParameters()}
 		{/snippet}
 		{#snippet panel()}
-			<NumberField
-				{form}
-				field="ebios_radar_max"
-				label={m.maxRadius()}
-				min={6}
-				max={16}
-				step={0.1}
-				cacheLock={cacheLocks['ebios_radar_max']}
-				bind:cachedValue={formDataCache['ebios_radar_max']}
-			/>
-			<NumberField
-				{form}
-				field="ebios_radar_green_zone_radius"
-				label={m.greenZoneRadius()}
-				min={0.1}
-				max={16}
-				step={0.1}
-				cacheLock={cacheLocks['ebios_radar_green_zone_radius']}
-				bind:cachedValue={formDataCache['ebios_radar_green_zone_radius']}
-			/>
-			<NumberField
-				{form}
-				field="ebios_radar_yellow_zone_radius"
-				label={m.yellowZoneRadius()}
-				min={0.5}
-				max={16}
-				step={0.1}
-				cacheLock={cacheLocks['ebios_radar_yellow_zone_radius']}
-				bind:cachedValue={formDataCache['ebios_radar_yellow_zone_radius']}
-			/>
-			<NumberField
-				{form}
-				field="ebios_radar_red_zone_radius"
-				label={m.redZoneRadius()}
-				min={1}
-				max={16}
-				step={0.1}
-				cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
-				bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
-			/>
+			<div class="p-4 space-y-4">
+				<NumberField
+					{form}
+					field="ebios_radar_green_zone_radius"
+					label={m.greenZoneRadius()}
+					min={0.1}
+					max={16}
+					step={0.1}
+					cacheLock={cacheLocks['ebios_radar_green_zone_radius']}
+					bind:cachedValue={formDataCache['ebios_radar_green_zone_radius']}
+				/>
+				<NumberField
+					{form}
+					field="ebios_radar_yellow_zone_radius"
+					label={m.yellowZoneRadius()}
+					min={0.5}
+					max={16}
+					step={0.1}
+					cacheLock={cacheLocks['ebios_radar_yellow_zone_radius']}
+					bind:cachedValue={formDataCache['ebios_radar_yellow_zone_radius']}
+				/>
+				<NumberField
+					{form}
+					field="ebios_radar_red_zone_radius"
+					label={m.redZoneRadius()}
+					min={1}
+					max={16}
+					step={0.1}
+					cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
+					bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
+				/>
+			</div>
 		{/snippet}
 	</Accordion.Item>
 	<Accordion.Item value="financial">
 		{#snippet control()}
-			<i class="fa-solid fa-coins mr-2"></i>Financial Settings
+			<i class="fa-solid fa-coins mr-2"></i>{m.financialSettings()}
 		{/snippet}
 		{#snippet panel()}
 			<div class="p-4 space-y-4">
@@ -203,18 +239,69 @@
 						{ label: 'British Pound (£)', value: '£' },
 						{ label: 'Japanese Yen (¥)', value: '¥' },
 						{ label: 'Canadian Dollar (C$)', value: 'C$' },
-						{ label: 'Australian Dollar (A$)', value: 'A$' }
+						{ label: 'Australian Dollar (A$)', value: 'A$' },
+						{ label: 'New Zealand Dollar (NZ$)', value: 'NZ$' },
+						{ label: 'Swiss Franc (CHF)', value: 'CHF' }
 					]}
-					label="Currency"
-					helpText="Select the default currency for financial calculations"
+					label={m.currency()}
+					helpText={m.currencyHelpText()}
+					onchange={(e) => handleCurrencyChange(e.target.value)}
 				/>
 				<NumberField
 					{form}
 					field="daily_rate"
-					label="Daily Rate"
-					helpText="Default daily rate for cost calculations"
+					label={m.dailyRate()}
+					helpText={m.dailyRateHelpText()}
 					min={0}
 					step={1}
+				/>
+			</div>
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item value="mappings">
+		{#snippet control()}
+			<i class="fa-solid fa-diagram-project mr-2"></i>{m.requirementMappingSets()}
+		{/snippet}
+		{#snippet panel()}
+			<div class="p-4">
+				<NumberField
+					{form}
+					field="mapping_max_depth"
+					label={m.mappingMaxDepth()}
+					helpText={m.mappingMaxDepthHelpText()}
+					min={2}
+					max={5}
+					step={1}
+				/>
+			</div>
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item value="workflows">
+		{#snippet control()}
+			<i class="fa-solid fa-code-branch mr-2"></i>{m.workflows()}
+		{/snippet}
+		{#snippet panel()}
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="allow_self_validation"
+					label={m.allowSelfValidation()}
+					helpText={m.allowSelfValidationHelpText()}
+				/>
+			</div>
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item value="security">
+		{#snippet control()}
+			<i class="fa-solid fa-shield-halved mr-2"></i>{m.security()}
+		{/snippet}
+		{#snippet panel()}
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="show_warning_external_links"
+					label={m.showWarningExternalLinks()}
+					helpText={m.showWarningExternalLinksHelpText()}
 				/>
 			</div>
 		{/snippet}
