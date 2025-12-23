@@ -271,22 +271,31 @@ def get_meta_sheets_names_from_type(wb: Workbook, sheet_type: MetaTypes) -> List
 
 
 # Retrieve the value associated with a given key in a meta sheet (2-column format).
-def get_meta_value(df, key_name: str, sheet_name: str, required: bool = False):
+def get_meta_value(df, key_name: str, sheet_name: str, required: bool = False, with_row: bool = False) -> tuple[str | None, int | None]:
     
+    """
+    If with_row=False (default): returns value
+    If with_row=True: returns (value, excel_row_number)
+    """
+
     matches = df[df.iloc[:, 0] == key_name]
 
     if matches.empty:
         if required:
             raise ValueError(f"[{sheet_name}] Missing required key \"{key_name}\" in meta sheet.")
-        return None
+        
+        return (None, None) if with_row else None
 
     value = matches.iloc[0, 1]
+    row = matches.index[0] + 1  # Excel-style row number
+
     if pd.isna(value) or str(value).strip() == "":
         if required:
-            raise ValueError(f"[{sheet_name}] Key \"{key_name}\" is present but has an empty value.")
-        return None
+            raise ValueError(f"[{sheet_name}] Row #{row}: Key \"{key_name}\" is present but has an empty value.")
+        return (None, row) if with_row else None
 
-    return str(value).strip()
+    value = str(value).strip()
+    return (value, row) if with_row else value
 
 
 # Return a list of non-empty, stripped string values from a specified column in a DataFrame.
@@ -518,25 +527,22 @@ def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
         "urn", "version", "locale", "ref_id", "name",
         "description", "copyright", "provider", "packager"
     ]
-    optional_keys = ["dependencies"]
+    optional_keys = ["dependencies", "labels"]
 
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
     validate_optional_values_meta_sheet(df, sheet_name, optional_keys, fct_name, verbose, ctx)
 
     # URN
-    urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
-    urn_row = df[df.iloc[:, 0] == "urn"].index[0] + 1 
+    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True) 
     validate_urn(urn_value, fct_name, urn_row)
     validate_urn_type(urn_value, URNMetadataFormat.LIBRARY_URN, fct_name, urn_row)
 
     # ref_id
-    ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
-    ref_id_row = df[df.iloc[:, 0] == "ref_id"].index[0] + 1
+    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True,  with_row=True)
     validate_ref_id(ref_id_value, fct_name, ref_id_row)
 
     # version
-    version_value = df[df.iloc[:, 0] == "version"].iloc[0, 1]
-    version_row = df[df.iloc[:, 0] == "version"].index[0] + 1
+    version_value, version_row = get_meta_value(df, "version", sheet_name, required=True,  with_row=True)
     try:
         version_int = int(str(version_value).strip())
         if version_int <= 0:
@@ -544,9 +550,9 @@ def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
     except Exception:
         raise ValueError(f"({fct_name}) [{sheet_name}] Row #{version_row}: Invalid \"version\": must be a positive non-zero integer, got \"{version_value}\"")
 
+
     # locale
-    locale_value = str(df[df.iloc[:, 0] == "locale"].iloc[0, 1]).strip()
-    locale_row = df[df.iloc[:, 0] == "locale"].index[0] + 1
+    locale_value, locale_row = get_meta_value(df, "locale", sheet_name, required=True, with_row=True)
     if not is_valid_locale(locale_value):
         raise ValueError(
             f"({fct_name}) [{sheet_name}] Row #{locale_row}: Invalid \"locale\" value: \"{locale_value}\""
@@ -576,20 +582,17 @@ def validate_framework_meta(wb: Workbook, df, sheet_name: str, verbose: bool = F
     validate_optional_values_meta_sheet(df, sheet_name, optional_keys, fct_name, verbose, ctx)
 
     # URN
-    urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
-    urn_row = df[df.iloc[:, 0] == "urn"].index[0] + 1
+    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True)
     validate_urn(urn_value, fct_name, urn_row)
     validate_urn_type(urn_value, URNMetadataFormat.FRAMEWORK_URN, fct_name, urn_row)
 
     # base_urn
-    base_urn_value = df[df.iloc[:, 0] == "base_urn"].iloc[0, 1]
-    base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0] + 1
+    base_urn_value, base_urn_row = get_meta_value(df, "base_urn", sheet_name, required=True, with_row=True)
     validate_urn(base_urn_value, fct_name, base_urn_row)
     validate_urn_type(base_urn_value, URNMetadataFormat.FRAMEWORK_BASE_URN, fct_name, base_urn_row)
 
     # ref_id
-    ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
-    ref_id_row = df[df.iloc[:, 0] == "ref_id"].index[0] + 1
+    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True, with_row=True)
     validate_ref_id(ref_id_value, fct_name, ref_id_row)
     
     # Check that *_definition keys (if present) point to an existing *_meta sheet
@@ -660,8 +663,7 @@ def validate_threats_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
 
     # base_urn
-    base_urn_value = df[df.iloc[:, 0] == "base_urn"].iloc[0, 1]
-    base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0] + 1
+    base_urn_value, base_urn_row = get_meta_value(df, "base_urn", sheet_name, required=True, with_row=True)
     validate_urn(base_urn_value, fct_name, base_urn_row)
     validate_urn_type(base_urn_value, URNMetadataFormat.THREATS_BASE_URN, fct_name, base_urn_row)
 
@@ -683,8 +685,7 @@ def validate_reference_controls_meta(df, sheet_name: str, verbose: bool = False,
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
 
     # base_urn
-    base_urn_value = df[df.iloc[:, 0] == "base_urn"].iloc[0, 1]
-    base_urn_row = df[df.iloc[:, 0] == "base_urn"].index[0] + 1
+    base_urn_value, base_urn_row = get_meta_value(df, "base_urn", sheet_name, required=True, with_row=True)
     validate_urn(base_urn_value, fct_name, base_urn_row)
     validate_urn_type(base_urn_value, URNMetadataFormat.REFERENCE_CONTROLS_BASE_URN, fct_name, base_urn_row)
 
@@ -706,14 +707,12 @@ def validate_risk_matrix_meta(df, sheet_name: str, verbose: bool = False, ctx: C
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
 
     # URN
-    urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
-    urn_row = df[df.iloc[:, 0] == "urn"].index[0] + 1 
+    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True) 
     validate_urn(urn_value, fct_name, urn_row)
     validate_urn_type(urn_value, URNMetadataFormat.MATRIX_URN, fct_name, urn_row)
 
     # ref_id
-    ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
-    ref_id_row = df[df.iloc[:, 0] == "ref_id"].index[0] + 1
+    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True, with_row=True)
     validate_ref_id(ref_id_value, fct_name, ref_id_row)
 
     # Extra locales
@@ -761,34 +760,28 @@ def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: Con
     validate_meta_sheet(df, sheet_name, expected_keys, expected_type, fct_name)
 
     # URN
-    urn_value = df[df.iloc[:, 0] == "urn"].iloc[0, 1]
-    urn_row = df[df.iloc[:, 0] == "urn"].index[0] + 1 
+    urn_value, urn_row = get_meta_value(df, "urn", sheet_name, required=True, with_row=True) 
     validate_urn(urn_value, fct_name, urn_row)
     validate_urn_type(urn_value, URNMetadataFormat.MAPPING_URN, fct_name, urn_row)
 
     # source_framework_urn
-    source_framework_urn_value = df[df.iloc[:, 0] == "source_framework_urn"].iloc[0, 1]
-    source_framework_urn_row = df[df.iloc[:, 0] == "source_framework_urn"].index[0] + 1 
+    source_framework_urn_value, source_framework_urn_row = get_meta_value(df, "source_framework_urn", sheet_name, required=True, with_row=True)
     validate_urn_type(source_framework_urn_value, URNMetadataFormat.MAPPING_SOURCE_AND_TARGET_FRAMEWORK_URN, fct_name, source_framework_urn_row)
 
     # target_framework_urn
-    target_framework_urn_value = df[df.iloc[:, 0] == "target_framework_urn"].iloc[0, 1]
-    target_framework_urn_row = df[df.iloc[:, 0] == "target_framework_urn"].index[0] + 1 
+    target_framework_urn_value, target_framework_urn_row = get_meta_value(df, "target_framework_urn", sheet_name, required=True, with_row=True)
     validate_urn_type(target_framework_urn_value, URNMetadataFormat.MAPPING_SOURCE_AND_TARGET_FRAMEWORK_URN, fct_name, target_framework_urn_row)
 
     # source_node_base_urn
-    source_node_base_urn_value = df[df.iloc[:, 0] == "source_node_base_urn"].iloc[0, 1]
-    source_node_base_urn_row = df[df.iloc[:, 0] == "source_node_base_urn"].index[0] + 1 
+    source_node_base_urn_value, source_node_base_urn_row = get_meta_value(df, "source_node_base_urn", sheet_name, required=True, with_row=True)
     validate_urn_type(source_node_base_urn_value, URNMetadataFormat.MAPPING_SOURCE_AND_TARGET_NODE_BASE_URN, fct_name, source_node_base_urn_row)
 
     # target_node_base_urn
-    target_node_base_urn_value = df[df.iloc[:, 0] == "target_node_base_urn"].iloc[0, 1]
-    target_node_base_urn_row = df[df.iloc[:, 0] == "target_node_base_urn"].index[0] + 1 
+    target_node_base_urn_value, target_node_base_urn_row = get_meta_value(df, "target_node_base_urn", sheet_name, required=True, with_row=True)
     validate_urn_type(target_node_base_urn_value, URNMetadataFormat.MAPPING_SOURCE_AND_TARGET_NODE_BASE_URN, fct_name, target_node_base_urn_row)
 
     # ref_id
-    ref_id_value = df[df.iloc[:, 0] == "ref_id"].iloc[0, 1]
-    ref_id_row = df[df.iloc[:, 0] == "ref_id"].index[0] + 1
+    ref_id_value, ref_id_row = get_meta_value(df, "ref_id", sheet_name, required=True, with_row=True)
     validate_ref_id(ref_id_value, fct_name, ref_id_row)
 
     # Duplicate the list to avoid future modifications of expected_keys affecting the validation
@@ -801,18 +794,14 @@ def validate_requirement_mapping_set_meta(df, sheet_name: str, verbose, ctx: Con
 
     # Validate that the values for specific keys do not contain spaces
     for key in keys_to_check_no_spaces:
-        row_data = df[df.iloc[:, 0] == key]
-        if row_data.empty:
-            raise ValueError(f"({fct_name}) [{sheet_name}] Missing required key \"{key}\"")
-
-        value = str(row_data.iloc[0, 1]).strip()
-        row = row_data.index[0] + 1  # Excel-style row number (1-based index)
-        validate_no_spaces(value, key, fct_name, row)
+        value, row = get_meta_value(df, key, sheet_name, required=True, with_row=True)
+        validate_no_spaces(str(value), key, fct_name, row)
 
     # Extra locales
     validate_extra_locales_in_meta(df, sheet_name, fct_name)
 
     print_sheet_validation(sheet_name, verbose, ctx)
+
 
 
 # [META] Scores {OK}
