@@ -416,6 +416,137 @@ def validate_labels(labels_value: str, context: str, row: int):
 
         validate_no_spaces(label, "labels", context, row)
 
+
+def validate_integer_value(
+    value_or_df,
+    sheet_name: str = None,
+    column_name: str = None,
+    context: str = None,
+    row: int = None,
+    value_name: str = "value",
+    positive_only: bool = False,
+    min: int = None,
+    max: int = None,
+):
+    """
+    Validate integer(s) from:
+    - a single value (int/str)
+    - OR a DataFrame column if column_name is provided (and value_or_df is a df)
+    
+    Parameters:
+    - value_or_df:
+        Either:
+        - a single value (int or str) to validate
+        - OR a pandas DataFrame if validating a whole column
+
+    - sheet_name (str, optional):
+        Name of the Excel sheet (used for error messages).
+
+    - column_name (str, optional):
+        Name of the DataFrame column to validate.
+        If provided, all non-empty values in this column will be checked.
+
+    - context (str, optional):
+        Context string (usually the calling function name) added to error messages.
+
+    - row (int, optional):
+        Excel row number of the single value (used only when validating one value).
+
+    - value_name (str, default="value"):
+        Logical name of the value being validated (e.g. "version", "score").
+        Used in error messages.
+
+    - positive_only (bool, default=False):
+        If True, only positive non-zero integers are accepted (> 0).
+
+    - min (int, optional):
+        Minimum allowed integer value (inclusive).
+
+    - max (int, optional):
+        Maximum allowed integer value (inclusive).
+
+    Rules:
+    - Always checks "is integer" (default behavior)
+    - If positive_only=True -> checks > 0
+    - If min/max provided -> checks min <= value <= max
+
+    Collects all invalid values and raises ONE ValueError at the end.
+    """
+
+    # --- resolve values list ---
+    if column_name is not None:
+        df = value_or_df
+        if column_name not in df.columns:
+            raise ValueError(
+                f"{f'({context}) ' if context else ''}[{sheet_name}] Column \"{column_name}\" not found"
+            )
+
+        values = []
+        rows = []
+        for idx, v in df[column_name].items():
+            if v is None or (isinstance(v, float) and pd.isna(v)):
+                continue
+            s = str(v).strip()
+            if s == "":
+                continue
+            values.append(s)
+            rows.append(idx + 2)  # Excel-like row number for content sheet
+            
+    # --- [OR] validate single value ---
+    else:
+        values = [value_or_df]
+        rows = [row]
+
+    invalid_values = []
+
+    # --- validate each value ---
+    for v, r in zip(values, rows):
+        try:
+            v_str = str(v).strip()
+            v_int = int(v_str)
+
+            # Reject floats-like strings (e.g. "1.0") if needed
+
+            if positive_only and v_int <= 0:
+                raise ValueError
+
+            if min is not None and v_int < min:
+                raise ValueError
+
+            if max is not None and v_int > max:
+                raise ValueError
+
+        except Exception:
+            invalid_values.append((v, r))
+
+    # --- raise grouped error if needed ---
+    if invalid_values:
+        bounds = []
+        if positive_only:
+            bounds.append("positive non-zero")
+        if min is not None:
+            bounds.append(f">= {min}")
+        if max is not None:
+            bounds.append(f"<= {max}")
+
+        bounds_str = f" ({', '.join(bounds)})" if bounds else ""
+
+        details = []
+        for v, r in invalid_values:
+            if r is not None:
+                details.append(f"Row #{r}: {v}")
+            else:
+                details.append(str(v))
+
+        location = f"[{sheet_name}] " if sheet_name else ""
+
+        raise ValueError(
+            f"{f'({context}) ' if context else ''}{location}Invalid \"{value_name}\" values: must be integer{bounds_str}:\n   - "
+            + "\n   - ".join(details)
+        )
+
+
+
 # ─────────────────────────────────────────────────────────────
 # VALIDATE META SHEETS
 # ─────────────────────────────────────────────────────────────
@@ -561,12 +692,7 @@ def validate_library_meta(df, sheet_name: str, verbose: bool = False, ctx: Conso
 
     # version
     version_value, version_row = get_meta_value(df, "version", sheet_name, required=True,  with_row=True)
-    try:
-        version_int = int(str(version_value).strip())
-        if version_int <= 0:
-            raise ValueError
-    except Exception:
-        raise ValueError(f"({fct_name}) [{sheet_name}] Row #{version_row}: Invalid \"version\": must be a positive non-zero integer, got \"{version_value}\"")
+    validate_integer_value(version_value, sheet_name, context=fct_name, row=version_row, value_name="version", positive_only=True)
 
     # labels (Optional)
     labels_value, labels_row = get_meta_value(df, "labels", sheet_name, required=False, with_row=True)
@@ -2242,8 +2368,7 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
     optional_columns = [
         "implementation_groups", "description", "threats",
         "reference_controls", "typical_evidence", "annotation",
-        "questions", "answer", "urn_id", "importance", "weight",
-        
+        "questions", "answer", "urn_id", "importance", "weight"  
     ]
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
@@ -2287,6 +2412,18 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
 
     # Ensure that the number of "questions" and "answer" entries match per row (1 or same count), or both are empty
     _framework_validate_question_answer_alignment(df, sheet_name, fct_name, verbose, ctx)
+
+
+    # Special values
+    importance_values = ["mandatory", "recommended", "nice_to_have"]
+
+    # Check if values in "importance" columns are valid
+    validate_allowed_column_values(df, "importance", importance_values, sheet_name, fct_name, ctx=ctx)
+    
+    # Check if values in "weight" columns are valid
+    validate_integer_value(df, sheet_name, "weight", fct_name, value_name="weight", positive_only=True)
+    
+
 
     # Extra locales
     validate_extra_locales_in_content(df, sheet_name, fct_name, ctx, verbose)
