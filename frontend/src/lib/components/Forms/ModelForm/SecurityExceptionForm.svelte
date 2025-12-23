@@ -16,6 +16,7 @@
 	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModalStore } from '$lib/components/Modals/stores';
+	import MarkdownField from '../MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
