@@ -2391,6 +2391,10 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
     # Enforce presence of "assessable" column (even if values can be empty)
     if "assessable" not in df.columns:
         raise ValueError(f"[{fct_name}] [{sheet_name}] Missing required column \"assessable\"")
+    
+    # Check "assessable" values
+    assessable_values = ["x", "X"]
+    validate_allowed_column_values(df, "assessable", assessable_values, sheet_name, fct_name, ctx=ctx)
 
 
     # Additional rule: for non-empty rows, at least "ref_id", "name" or "description" must be filled
