@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0118_riskscenario_antecedent_scenarios_and_more'),
+        ("core", "0118_riskscenario_antecedent_scenarios_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='securityexception',
-            name='observation',
-            field=models.TextField(blank=True, null=True, verbose_name='Observation'),
+            model_name="securityexception",
+            name="observation",
+            field=models.TextField(blank=True, null=True, verbose_name="Observation"),
         ),
     ]

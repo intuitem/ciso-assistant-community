@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0119_securityexception_observation'),
-        ('core', '0120_alter_terminology_field_path'),
+        ("core", "0119_securityexception_observation"),
+        ("core", "0120_alter_terminology_field_path"),
     ]
 
-    operations = [
-    ]
+    operations = []
