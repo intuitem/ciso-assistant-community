@@ -87,8 +87,6 @@ export class Page {
 		}
 		await modalBackdrop.press('Escape');
 		await modalBackdrop.waitFor({ state: 'hidden' });
-
-		// await this._self.mouse.click(1, 1);
 	}
 }
 export namespace Page {
