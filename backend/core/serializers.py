@@ -1398,6 +1398,14 @@ class FolderWriteSerializer(BaseModelSerializer):
             )
         return value
 
+    def validate_parent_folder(self, value):
+        """
+        If parent_folder is empty or None, default to the root folder.
+        """
+        if not value:
+            return Folder.get_root_folder()
+        return value
+
 
 class FolderReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
