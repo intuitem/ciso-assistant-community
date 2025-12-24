@@ -172,6 +172,12 @@ class URNMetadataFormat(Enum):
 
     MATRIX_URN = f"{URNObjects.URN_BEGGINING.value}:{PACKAGER_INDICATOR}:{URNObjects.URN_3RD_WORD.value}:{URNObjects.MATRIX.value}:{ID_INDICATOR}"
 
+
+class CommonRegexSeparator(Enum):
+    LF = r"\n+"
+    SPACE_COMMA_LF = r"[\s,\n]+"
+    
+
 # ─────────────────────────────────────────────────────────────
 # MISC
 # ─────────────────────────────────────────────────────────────
@@ -1284,7 +1290,16 @@ def check_unused_ids_in_frameworks(wb: Workbook, df_ids: pd.DataFrame, id_column
 
 
 # Validate that all non-empty values in a specific column are in the allowed list. Ignores blank or whitespace-only cells.
-def validate_allowed_column_values(df: pd.DataFrame, column_name: str, allowed_values: List[str], sheet_name: str, context: str = None, warn_only: bool = False, ctx: ConsoleContext = None):
+def validate_allowed_column_values(
+    df: pd.DataFrame,
+    column_name: str,
+    allowed_values: List[str],
+    sheet_name: str,
+    context: str = None,
+    warn_only: bool = False,
+    ctx: ConsoleContext = None,
+    split_regex: str | CommonRegexSeparator = None,
+):
     """
     Args:
         df: The DataFrame to validate.
@@ -1294,6 +1309,8 @@ def validate_allowed_column_values(df: pd.DataFrame, column_name: str, allowed_v
         context: Optional context string (e.g., function name).
         warn_only: If True, warnings are printed instead of raising errors.
         ctx: Optional ConsoleContext to collect warning messages.
+        split_regex: Optional regex used to split a cell into multiple values (e.g. r"[\\n,]+").
+                     If provided, each split entry is validated independently.
     """
 
     context = context or "validate_allowed_column_values"
@@ -1302,22 +1319,75 @@ def validate_allowed_column_values(df: pd.DataFrame, column_name: str, allowed_v
         return
         # raise ValueError(f"({context}) [{sheet_name}] Column \"{column_name}\" not found in sheet")
 
-    # Drop NA and strip values
-    cleaned_series = df[column_name].dropna().map(lambda x: str(x).strip())
-    cleaned_series = cleaned_series[cleaned_series != ""]
+    invalid_values = []
 
-    # Find invalid values
-    invalid_mask = ~cleaned_series.isin(allowed_values)
+    # ───────────────────────────────────────────────────────────────
+    # Case 1: Single-value cells (default behavior)
+    # ───────────────────────────────────────────────────────────────
+    if not split_regex:
+        cleaned_series = df[column_name].dropna().map(lambda x: str(x).strip())
+        cleaned_series = cleaned_series[cleaned_series != ""]
 
-    if invalid_mask.any():
-        invalid_values = cleaned_series[invalid_mask]
-        invalid_entries = invalid_values.unique()
-        invalid_rows = invalid_values.index + 2  # Excel-style row numbers
+        invalid_mask = ~cleaned_series.isin(allowed_values)
 
-        quoted_values = ', '.join(f'"{v}"' for v in invalid_entries)
+        if invalid_mask.any():
+            invalid_series = cleaned_series[invalid_mask]
+            invalid_entries = invalid_series.unique()
+
+            quoted_values = ', '.join(f'"{v}"' for v in invalid_entries)
+
+            details = "\n   - " + "\n   - ".join(
+                f"Row #{idx + 2} : \"{val}\""
+                for idx, val in invalid_series.items()
+            )
+
+            msg = (
+                f"({context}) [{sheet_name}] Invalid value(s) found in column \"{column_name}\": {quoted_values}"
+                f"{details}"
+                f"\n> Allowed values are: {', '.join(f'\"{v}\"' for v in allowed_values)}"
+            )
+
+            if warn_only:
+                msg = f"⚠️  [WARNING] {msg}"
+                print(msg)
+                if ctx:
+                    ctx.add_sheet_warning_msg(sheet_name, msg)
+            else:
+                raise ValueError(msg)
+
+        return
+
+    # ───────────────────────────────────────────────────────────────
+    # Case 2: Multi-value cells (split by regex)
+    # ───────────────────────────────────────────────────────────────
+    
+    if isinstance(split_regex, CommonRegexSeparator):
+        split_regex = split_regex.value
+
+    for idx, cell_value in df[column_name].dropna().items():
+        cell_str = str(cell_value).strip()
+        if not cell_str:
+            continue
+
+        entries = [x.strip() for x in re.split(split_regex, cell_str) if x.strip()]
+
+        for i, entry in enumerate(entries, start=1):
+            if entry not in allowed_values:
+                invalid_values.append((idx, i, entry))
+
+    if invalid_values:
+        invalid_entries = sorted(set(v for _, _, v in invalid_values))
+
+        quoted_values = ", ".join(f'"{v}"' for v in invalid_entries)
+
+        details = "\n   - " + "\n   - ".join(
+            f"Row #{idx + 2} ; Cell line #{line_idx} : \"{value}\""
+            for idx, line_idx, value in invalid_values
+        )
+
         msg = (
             f"({context}) [{sheet_name}] Invalid value(s) found in column \"{column_name}\": {quoted_values}"
-            f"\n> Rows: {', '.join(map(str, invalid_rows))}"
+            f"{details}"
             f"\n> Allowed values are: {', '.join(f'\"{v}\"' for v in allowed_values)}"
         )
 
@@ -1328,6 +1398,91 @@ def validate_allowed_column_values(df: pd.DataFrame, column_name: str, allowed_v
                 ctx.add_sheet_warning_msg(sheet_name, msg)
         else:
             raise ValueError(msg)
+
+
+# Validate that two columns have coherent internal line counts (split by regex) and are both empty or both filled.
+def validate_cell_line_count_alignment(
+    df: pd.DataFrame,
+    ref_column: str,
+    cmp_column: str,
+    sheet_name: str,
+    context: str = None,
+    split_regex = r"\n+",
+    cmp_can_be_empty: bool = False,
+):
+    """
+    Vérifie l'alignement du nombre de "lignes internes" (split regex) entre 2 colonnes.
+
+    Règles (par ligne Excel) :
+    1) If ref cell is empty => cmp cell must be empty.
+    2) If cmp cell is empty => ref cell must be empty.
+    3) If both are not empty:
+       - cmp must have either 1 internal line OR the same internal line count as ref.
+
+    The function collects all incoherences and raises ONE ValueError at the end.
+    """
+
+    context = context or "validate_cell_line_count_alignment"
+
+    # Skip if columns are missing (consistent with other validators)
+    if ref_column not in df.columns or cmp_column not in df.columns:
+        return
+
+    # Allow Enum (CommonRegexSeparator) or string
+    if isinstance(split_regex, CommonRegexSeparator):
+        split_regex = split_regex.value
+
+    errors = []
+
+    def _split_lines(cell_str: str) -> List[str]:
+        return [x.strip() for x in re.split(split_regex, cell_str) if x.strip()]
+
+    for idx, row in df.iterrows():
+        ref_raw = row.get(ref_column, "")
+        cmp_raw = row.get(cmp_column, "")
+
+        ref_str = "" if pd.isna(ref_raw) else str(ref_raw).strip()
+        cmp_str = "" if pd.isna(cmp_raw) else str(cmp_raw).strip()
+
+        excel_row = idx + 2  # header offset
+
+        # --- Rule 1: ref empty => cmp must be empty
+        if not ref_str:
+            if cmp_str:
+                cmp_lines = _split_lines(cmp_str)
+                details = ", ".join(f'#{i}="{v}"' for i, v in enumerate(cmp_lines, start=1))
+                errors.append(
+                    f'Row #{excel_row}: "{ref_column}" is empty but "{cmp_column}" is not '
+                    f'(cmp has {len(cmp_lines)} line(s): {details})'
+                )
+            continue
+
+        # --- Rule 2: cmp empty => ref must be empty (unless cmp_can_be_empty=True)
+        if not cmp_str:
+            if not cmp_can_be_empty:
+                errors.append(
+                    f'Row #{excel_row}: "{cmp_column}" is empty but "{ref_column}" is not'
+                )
+            continue
+
+        # --- Rule 3: both not empty => cmp must have 1 line OR ref_count lines
+        ref_lines = _split_lines(ref_str)
+        cmp_lines = _split_lines(cmp_str)
+
+        ref_count = len(ref_lines)
+        cmp_count = len(cmp_lines)
+
+        if cmp_count != 1 and cmp_count != ref_count:
+            errors.append(
+                f'Row #{excel_row}: "{cmp_column}" has {cmp_count} line(s) but "{ref_column}" has {ref_count} '
+                f'(expected 1 or {ref_count})'
+            )
+
+    if errors:
+        raise ValueError(
+            f'({context}) [{sheet_name}] Invalid line alignment between "{ref_column}" and "{cmp_column}":\n   - '
+            + "\n   - ".join(errors)
+        )
 
 
 # Check whether each Prefix URN ID is used in at least one framework sheet. Emit a warning if any IDs are unused.
@@ -2420,9 +2575,19 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
 
     # Special values
     importance_values = ["mandatory", "recommended", "nice_to_have"]
+    condition_values = ["any", "all", "/"]
 
     # Check if values in "importance" columns are valid
     validate_allowed_column_values(df, "importance", importance_values, sheet_name, fct_name, ctx=ctx)
+    
+    # Check if values in "condition" columns are valid
+    validate_allowed_column_values(df, "condition", condition_values, sheet_name, fct_name, ctx=ctx, split_regex=CommonRegexSeparator.LF)
+    
+    # Check if the number of lines in cells of "depends_on" are coherent with lines in celles of "questions"
+    validate_cell_line_count_alignment(df, "questions", "depends_on", sheet_name, fct_name, cmp_can_be_empty=True)
+    
+    # Check if the number of lines in cells of "condition" are coherent with lines in celles of "questions"
+    validate_cell_line_count_alignment(df, "questions", "condition", sheet_name, fct_name, cmp_can_be_empty=True)
     
     # Check if values in "weight" columns are valid
     validate_integer_value(df, sheet_name, "weight", fct_name, value_name="weight", positive_only=True)
