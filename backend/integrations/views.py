@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import json
+from typing import Type
 import uuid
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -15,6 +16,7 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from integrations.base import BaseSyncOrchestrator
 from integrations.models import (
     IntegrationConfiguration,
     IntegrationProvider,
@@ -171,6 +173,42 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
                 {"status": "error", "message": "An unexpected error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+    @action(detail=True, methods=["post"], url_path="rpc")
+    def execute_rpc(self, request, pk=None):
+        """
+        Generic endpoint for interactive integration commands.
+        Payload: { "action": "get_tables", "params": { ... } }
+        """
+        config = IntegrationConfiguration.objects.get(pk=pk)
+
+        action_name = request.data.get("action")
+        params = request.data.get("params", {})
+
+        if not action_name:
+            return Response(
+                {"error": "Action is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            orchestrator = IntegrationRegistry.get_orchestrator(config)
+
+            result = orchestrator.execute_action(action_name, params)
+
+            return Response({"result": result})
+
+        except NotImplementedError:
+            return Response(
+                {
+                    "error": f"Action '{action_name}' not supported by provider '{config.provider}'"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except ValueError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # Catch connectivity errors from the client
+            return Response({"error": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
 
 @method_decorator(csrf_exempt, name="dispatch")

@@ -150,6 +150,119 @@ class ServiceNowClient(BaseIntegrationClient):
             logger.error(f"Failed to search ServiceNow: {e}")
             raise
 
+    def get_available_tables(self) -> list[dict]:
+        """
+        Fetches list of tables.
+        We filter out many system tables to keep the list usable.
+        """
+        # Query explanation:
+        # sys_update_nameISNOTEMPTY: Generally ensures it's a "real" table managed by the system
+        # nameNOT LIKEts_: Excludes text search tables
+        # nameNOT LIKEsys_: Excludes deep system internals (optional, but recommended for cleaner UX)
+        # We allow 'sys_user' or 'sys_user_group' explicitly if needed, but for now let's keep it broad but safe.
+        query = "sys_update_nameISNOTEMPTY^nameNOT LIKEts_^nameNOT LIKEv_"
+
+        url = f"{self.base_url}/api/now/table/sys_db_object"
+        params = {
+            "sysparm_query": query,
+            "sysparm_fields": "name,label",
+            "sysparm_limit": 500,  # Safety limit
+            "sysparm_exclude_reference_link": "true",
+        }
+
+        try:
+            response = requests.get(
+                url,
+                auth=self.auth,
+                headers=self._get_headers(),
+                params=params,
+                timeout=10,
+            )
+            response.raise_for_status()
+            results = response.json().get("result", [])
+
+            # Sort by Label for UX
+            return sorted(results, key=lambda x: x.get("label", ""))
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to fetch tables: {e}")
+            raise
+
+    def get_table_columns(self, table_name: str) -> list[dict]:
+        """
+        Fetches columns for a specific table from sys_dictionary.
+        """
+        url = f"{self.base_url}/api/now/table/sys_dictionary"
+        # Query: name matches table AND it's an actual column (element is not empty)
+        query = f"name={table_name}^active=true^elementISNOTEMPTY"
+
+        params = {
+            "sysparm_query": query,
+            "sysparm_fields": "element,column_label,internal_type,read_only,reference",
+            "sysparm_exclude_reference_link": "true",
+        }
+
+        try:
+            response = requests.get(
+                url,
+                auth=self.auth,
+                headers=self._get_headers(),
+                params=params,
+                timeout=10,
+            )
+            response.raise_for_status()
+            results = response.json().get("result", [])
+
+            # Map to a cleaner format for frontend
+            columns = []
+            for r in results:
+                columns.append(
+                    {
+                        "name": r.get("element"),
+                        "label": r.get("column_label"),
+                        "type": r.get("internal_type"),
+                        "readonly": r.get("read_only") == "true",
+                        "reference": r.get("reference"),
+                    }
+                )
+
+            return sorted(columns, key=lambda x: x["label"])
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to fetch columns for {table_name}: {e}")
+            raise
+
+    def get_field_choices(self, table_name: str, field_name: str) -> list[dict]:
+        """
+        Fetches choice values (e.g., Incident State 1=New) from sys_choice.
+        """
+        url = f"{self.base_url}/api/now/table/sys_choice"
+        query = f"name={table_name}^element={field_name}^inactive=false"
+
+        params = {
+            "sysparm_query": query,
+            "sysparm_fields": "value,label,sequence",
+            "sysparm_order": "sequence",
+            "sysparm_exclude_reference_link": "true",
+        }
+
+        try:
+            response = requests.get(
+                url,
+                auth=self.auth,
+                headers=self._get_headers(),
+                params=params,
+                timeout=10,
+            )
+            response.raise_for_status()
+            results = response.json().get("result", [])
+
+            return [{"value": r["value"], "label": r["label"]} for r in results]
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to fetch choices for {table_name}.{field_name}: {e}")
+            raise
+
     def test_connection(self) -> bool:
         try:
             # Just try to fetch 1 record to validate auth and table existence

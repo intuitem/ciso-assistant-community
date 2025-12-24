@@ -67,6 +67,33 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
 
         return False
 
+    def get_interactive_actions(self):
+        return ["get_tables", "get_columns", "get_choices"]
+
+    def execute_action(self, action: str, params: dict):
+        client = self._get_client()
+
+        if action == "get_tables":
+            return client.get_available_tables()
+
+        elif action == "get_columns":
+            table = params.get("table_name")
+            if not table:
+                raise ValueError("Parameter 'table_name' is required for get_columns")
+            return client.get_table_columns(table)
+
+        elif action == "get_choices":
+            table = params.get("table_name")
+            field = params.get("field_name")
+            if not table or not field:
+                raise ValueError(
+                    "Parameters 'table_name' and 'field_name' are required"
+                )
+            return client.get_field_choices(table, field)
+
+        else:
+            raise NotImplementedError(f"Unknown action: {action}")
+
 
 IntegrationRegistry.register(
     name="servicenow",
