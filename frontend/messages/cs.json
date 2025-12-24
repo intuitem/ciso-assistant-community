@@ -436,7 +436,7 @@
 	"residual": "Zbytkový",
 	"jumpToRiskAssessment": "Přejít na hodnocení rizika",
 	"additionalMeasures": "Další opatření",
-	"riskAssessmentMatrixHelpText": "UPOZORNĚNÍ: Po vytvoření hodnocení rizika již nebudete moci změnit rizikovou matici",
+	"riskAssessmentMatrixHelpText": "UPOZORNĚNÍ: Změna matice rizik automaticky upraví hodnoty podle nové škály. Poté výsledky zkontrolujte a v případě potřeby je opravte.",
 	"etaHelpText": "Předpokládaný čas doručení",
 	"dueDateHelpText": "Datum, do kterého musí být hodnocení dokončeno",
 	"expiryDateHelpText": "Datum, kdy objekt přestane být platný",
@@ -967,6 +967,14 @@
 	"downloadCertificate": "Stáhnout certifikát",
 	"viewMore": "Zobrazit více",
 	"viewLess": "Zobrazit méně",
+	"scoreChangeDetected": "Zjištěna změna skóre",
+	"scoreChangeDetectedDescription": "Byla zjištěna změna skóre. Vyberte, jak chcete zpracovat aktualizace skóre pro přidružené audity.",
+	"clamp": "Omezení",
+	"clampDescription": "Omezit hodnotu do definovaných mezí",
+	"reset": "Resetovat",
+	"resetDescription": "Resetovat skóre auditů",
+	"ruleOfThree": "Pravidlo tří",
+	"ruleOfThreeDescription": "Aplikovat pravidlo tří pro škálování skóre mezi novými mezemi",
 	"loginFailed": "Přihlášení se nezdařilo",
 	"expectedEvidence": "Očekávaný důkaz",
 	"taskNodeLegacyEvidence": "Staré pole pro důkazy je zastaralé. Důkazy jsou nyní na úrovni úlohy a sdíleny mezi výskyty čekajícími na revize.\n Chcete-li je přesunout do očekávaných důkazů nebo je odstranit z výskytu, použijte tlačítka",
@@ -1025,5 +1033,23 @@
 	"deleteQuantitativeRiskStudy": "Smazat kvantitativní studii rizika",
 	"viewQuantitativeRiskStudy": "Zobrazit kvantitativní studii rizika",
 	"dueDateUpdatedSuccessfully": "Termín byl úspěšně aktualizován",
-	"taskScheduleInfo": "Minulé výskyty jsou chráněny před změnami plánu. Pouze nadcházející úlohy budou přepočítány."
+	"taskScheduleInfo": "Předchozí výskyty jsou chráněny před změnami plánu. Pouze nadcházející úlohy budou přepočítány.",
+	"cascadeDeleteWarning": "Varování: Smazáním tohoto objektu budou také trvale smazány {count} související objekty:",
+	"errorFetching": "Nelze načíst informace o kaskádě. Zkuste to prosím znovu.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Žádné další objekty nebudou ovlivněny.",
+				"countPlural=one": "{count} související objekt nebude smazán, ale ztratí jedno nebo více vztahů.",
+				"countPlural=other": "{count} souvisejících objektů nebude smazáno, ale ztratí jedno nebo více vztahů."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Níže uvedené položky zůstávají v systému, ale jejich odkazy na tento objekt budou odstraněny.",
+	"isCustom": "Vlastní",
+	"errorUnloadingLibrary": "Chyba při uvolňování knihovny",
+	"librarySuccessfullyUnloaded": "Knihovna byla úspěšně uvolněna",
+	"libraryFilteringLabels": "Štítky knihovny"
 }

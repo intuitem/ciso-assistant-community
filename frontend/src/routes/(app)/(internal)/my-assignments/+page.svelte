@@ -335,4 +335,29 @@
 			/>
 		</div>
 	{/if}
+	{#if showEmptySections || counts.metricInstances > 0}
+		<div class="col-span-6 bg-linear-to-br from-teal-200 to-teal-50 p-2 rounded">
+			<div class="font-bold mb-2">
+				<i class="fa-solid fa-chart-line mr-2" />{m.metricInstances()}
+				{#if counts.metricInstances > 0}
+					<span class="badge variant-filled-surface ml-2">{counts.metricInstances}</span>
+				{/if}
+			</div>
+			<ModelTable
+				source={{
+					head: {
+						ref_id: 'ref_id',
+						name: 'name',
+						status: 'status',
+						current_value: 'current_value',
+						folder: 'folder'
+					},
+					body: []
+				}}
+				hideFilters={true}
+				URLModel="metric-instances"
+				baseEndpoint="/metric-instances?owner={data.user.id}"
+			/>
+		</div>
+	{/if}
 </div>

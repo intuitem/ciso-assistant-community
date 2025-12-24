@@ -436,7 +436,7 @@
 	"residual": "Residual",
 	"jumpToRiskAssessment": "Ir para a avaliação de risco",
 	"additionalMeasures": "Controles adicionais",
-	"riskAssessmentMatrixHelpText": "AVISO: Você não poderá alterar a matriz de risco após a criação da avaliação de risco",
+	"riskAssessmentMatrixHelpText": "AVISO: Alterar a matriz de riscos ajusta automaticamente os valores de acordo com a nova escala. Revise os resultados depois e corrija-os se necessário.",
 	"etaHelpText": "Tempo estimado de chegada",
 	"dueDateHelpText": "Data em que a avaliação deve ser concluída",
 	"expiryDateHelpText": "Data em que o objeto não é mais válido",
@@ -979,6 +979,17 @@
 	"downloadCertificate": "Baixar certificado",
 	"viewMore": "Ver mais",
 	"viewLess": "Ver menos",
+	"isCustom": "Personalizado",
+	"errorUnloadingLibrary": "Erro ao descarregar a biblioteca",
+	"librarySuccessfullyUnloaded": "A biblioteca foi descarregada com sucesso",
+	"scoreChangeDetected": "Alteração de pontuação detectada",
+	"scoreChangeDetectedDescription": "Uma alteração nas pontuações foi detectada. Escolha como lidar com as atualizações de pontuação para as auditorias associadas.",
+	"clamp": "Limitar",
+	"clampDescription": "Restringir o valor dentro dos limites definidos",
+	"reset": "Redefinir",
+	"resetDescription": "Redefinir as pontuações das auditorias",
+	"ruleOfThree": "Regra dos Três",
+	"ruleOfThreeDescription": "Aplicar a Regra dos Três para escalar pontuações entre novos limites",
 	"loginFailed": "Falha no login",
 	"expectedEvidence": "Evidência esperada",
 	"taskNodeLegacyEvidence": "O campo de evidência antigo está obsoleto. A evidência agora é de nível de tarefa e compartilhada entre ocorrências aguardando revisões.\n Para movê-las para evidência esperada ou removê-las da ocorrência, use os botões",
@@ -1037,5 +1048,20 @@
 	"deleteQuantitativeRiskStudy": "Excluir estudo de quantificação de risco",
 	"viewQuantitativeRiskStudy": "Ver estudo de quantificação de risco",
 	"dueDateUpdatedSuccessfully": "Data de vencimento atualizada com sucesso",
-	"taskScheduleInfo": "Ocorrências passadas estão protegidas de alterações de agendamento. Apenas tarefas futuras serão recalculadas."
+	"taskScheduleInfo": "As ocorrências passadas estão protegidas de alterações de agendamento. Apenas tarefas futuras serão recalculadas.",
+	"cascadeDeleteWarning": "Aviso: Excluir isso também excluirá permanentemente {count} objeto(s) relacionado(s):",
+	"errorFetching": "Não foi possível carregar as informações de cascata. Por favor, tente novamente.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Nenhum outro objeto será impactado.",
+				"countPlural=one": "{count} objeto relacionado não será excluído, mas perderá um ou mais relacionamentos.",
+				"countPlural=other": "{count} objetos relacionados não serão excluídos, mas perderão um ou mais relacionamentos."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Os itens abaixo permanecem no sistema, mas seus links para este objeto serão removidos.",
+	"libraryFilteringLabels": "Etiquetas de biblioteca"
 }

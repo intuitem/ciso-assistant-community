@@ -436,7 +436,7 @@
 	"residual": "Maradvány",
 	"jumpToRiskAssessment": "Ugrás a kockázatértékeléshez",
 	"additionalMeasures": "További intézkedések",
-	"riskAssessmentMatrixHelpText": "FIGYELEM: A kockázati mátrixot a kockázatértékelés létrehozása után már nem lehet módosítani",
+	"riskAssessmentMatrixHelpText": "FIGYELMEZTETÉS: A kockázati mátrix megváltoztatásakor az értékek automatikusan igazodnak az új skálához. Ellenőrizd utána az eredményeket, és szükség esetén javítsd őket.",
 	"etaHelpText": "Becsült befejezési idő",
 	"dueDateHelpText": "A dátum, ameddig az értékelést be kell fejezni",
 	"expiryDateHelpText": "A dátum, amikortól az objektum már nem érvényes",
@@ -979,6 +979,17 @@
 	"downloadCertificate": "Tanúsítvány letöltése",
 	"viewMore": "Megtekintés több",
 	"viewLess": "Megtekintés kevesebb",
+	"isCustom": "Egyedi",
+	"errorUnloadingLibrary": "Hiba a könyvtár kiürítésekor",
+	"librarySuccessfullyUnloaded": "A könyvtár sikeresen ki lett töltve",
+	"scoreChangeDetected": "Pontszám változás észlelve",
+	"scoreChangeDetectedDescription": "Pontszámváltozás észlelve. Válassza ki, hogyan kezelje a kapcsolódó auditok pontszámainak frissítését.",
+	"clamp": "Korlátozás",
+	"clampDescription": "A pontszámok korlátozása a meghatározott határokon belül",
+	"reset": "Visszaállítás",
+	"resetDescription": "Az auditok pontszámainak visszaállítása",
+	"ruleOfThree": "Háromszoros szabály",
+	"ruleOfThreeDescription": "A Háromszoros szabály alkalmazása a pontszámok átméretezése új határok között",
 	"loginFailed": "Sikertelen bejelentkezés",
 	"expectedEvidence": "Várt bizonyíték",
 	"taskNodeLegacyEvidence": "A régi bizonyíték mező elavult. A bizonyíték most feladat-szintű és megosztott az áttekintésre váró előfordulások között.\n A mozgatásuk a várható bizonyítékok közé vagy az eltávolításuk az előfordulásból a gombok segítségével történik.",
@@ -1037,5 +1048,20 @@
 	"deleteQuantitativeRiskStudy": "Kockázati kvantifikációs tanulmány törlése",
 	"viewQuantitativeRiskStudy": "Kockázati kvantifikációs tanulmány megtekintése",
 	"dueDateUpdatedSuccessfully": "Határidő sikeresen frissítve",
-	"taskScheduleInfo": "A múltbéli előfordulások védettek az ütemezési változásokkal szemben. Csak jövőbeli feladatok kerülnek újraszámításra."
+	"taskScheduleInfo": "A múltbéli előfordulások védettek az ütemezési változásokkal szemben. Csak jövőbeli feladatok kerülnek újraszámításra.",
+	"cascadeDeleteWarning": "Figyelmeztetés: A törlés véglegesen törölni fogja {count} kapcsolódó objektumot:",
+	"errorFetching": "Nem sikerült betölteni a láncolt információkat. Kérjük, próbálja újra.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Egyéb objektumok nem lesznek érintve.",
+				"countPlural=one": "{count} kapcsolódó objektum nem lesz törölve, de elveszíti egy vagy több kapcsolatot.",
+				"countPlural=other": "{count} kapcsolódó objektum nem lesz törölve, de elveszíti egy vagy több kapcsolatot."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Az alábbi elemek a rendszerben maradnak, de a kapcsolataik ebben az objektumban törlődnek.",
+	"libraryFilteringLabels": "Könyvtári címkék"
 }

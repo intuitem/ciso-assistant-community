@@ -484,7 +484,7 @@
 	"residual": "Preostalo",
 	"jumpToRiskAssessment": "Idi na procjenu rizika",
 	"additionalMeasures": "Dodatne mjere",
-	"riskAssessmentMatrixHelpText": "UPOZORENJE: Nećete moći promijeniti matricu rizika nakon kreiranja procjene rizika",
+	"riskAssessmentMatrixHelpText": "UPOZORENJE: Promjena matrice rizika automatski prilagođava vrijednosti prema novoj skali. Nakon toga pregledajte rezultate i po potrebi ih ispravite.",
 	"etaHelpText": "Procijenjeno vrijeme",
 	"dueDateHelpText": "Krajnji rok za provedbu procjene",
 	"expiryDateHelpText": "Datum nakon kojeg objekt više ne vrijedi",
@@ -1945,6 +1945,17 @@
 	"samlCertificateHelpText": "Možete navesti vlastiti certifikat ili pustiti aplikaciju da ga generira.",
 	"samlAuthnRequestSignedHelpText": "Kada je omogućeno, zahtjev za SAML autentifikaciju potpisuje se privatnim ključem ispod. Odgovarajući javni certifikat šalje se Identity Provideru kako bi mogao provjeriti potpis.",
 	"downloadCertificate": "Preuzmi certifikat",
+	"isCustom": "Prilagođeno",
+	"errorUnloadingLibrary": "Greška pri istovaru knjižnice",
+	"librarySuccessfullyUnloaded": "Knjižnica je uspješno uklonjena iz memorije",
+	"scoreChangeDetected": "Promjena ocjene otkrivena",
+	"scoreChangeDetectedDescription": "Promjena ocjena je otkrivena. Odaberite kako želite upravljati ažuriranjem ocjena za povezane audite.",
+	"clamp": "Ograniči",
+	"clampDescription": "Ograničite vrijednost unutar definiranih granica",
+	"reset": "Resetiraj",
+	"resetDescription": "Resetiraj ocjene audita",
+	"ruleOfThree": "Pravilo trojke",
+	"ruleOfThreeDescription": "Primijenite pravilo trojke za skaliranje ocjena između novih granica",
 	"expectedEvidence": "Očekivano dokazivanje",
 	"taskNodeLegacyEvidence": "Staro polje za dokazivanje je zastarjelo. Dokazivanje je sada na razini zadatka i dijeli se među događajima koji čekaju revizije.\n Za premještanje u očekivano dokazivanje ili uklanjanje iz događaja, koristite gumbove",
 	"taskNodeNewEvidence": "Dokazivanje globalno povezano s zadatkom i širi se na događaje. Možete dodati reviziju u kartici 'Dokazivanja' ispod",
@@ -2002,5 +2013,20 @@
 	"deleteQuantitativeRiskStudy": "Obriši kvantitativno istraživanje rizika",
 	"viewQuantitativeRiskStudy": "Pogledaj kvantitativno istraživanje rizika",
 	"dueDateUpdatedSuccessfully": "Rok ažuriran uspješno",
-	"taskScheduleInfo": "Prošle pojave su zaštićene od promjena rasporeda. Samo nadolazeće zadatke će se ponovo izračunati."
+	"taskScheduleInfo": "Prošle pojave su zaštićene od promjena rasporeda. Samo nadolazeće zadatke će se ponovo izračunati.",
+	"cascadeDeleteWarning": "Upozorenje: Brisanjem ovog objekta također ćete trajno obrisati {count} povezanih objekata:",
+	"errorFetching": "Nije moguće učitati informacije o kaskadnom brisanju. Pokušajte ponovno.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Nijedan drugi objekt neće biti pogođen.",
+				"countPlural=one": "{count} povezanog objekta neće biti obrisan, ali će izgubiti jednu ili više veza.",
+				"countPlural=other": "{count} povezanih objekata neće biti obrisani, ali će izgubiti jednu ili više veza."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Stavke ispod ostaju u sustavu, ali njihovi linkovi na ovaj objekt će biti uklonjeni.",
+	"libraryFilteringLabels": "Oznake knjižnice"
 }

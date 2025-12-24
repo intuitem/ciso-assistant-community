@@ -62,36 +62,32 @@ class Command(BaseCommand):
             ]
 
             with transaction.atomic():
-                updated_count = 0
-
                 if mode == "reset":
-                    # Reset all to not_assessed
-                    for req_assessment in requirement_assessments:
-                        req_assessment.result = (
-                            RequirementAssessment.Result.NOT_ASSESSED
-                        )
-                        req_assessment.save()
-                        updated_count += 1
+                    # Reset all to not_assessed using a single UPDATE query
+                    updated_count = requirement_assessments.update(
+                        result=RequirementAssessment.Result.NOT_ASSESSED
+                    )
                     action = "reset to not_assessed"
 
                 elif mode == "compliant":
-                    # Set all to compliant
-                    for req_assessment in requirement_assessments:
-                        req_assessment.result = RequirementAssessment.Result.COMPLIANT
-                        req_assessment.save()
-                        updated_count += 1
+                    # Set all to compliant using a single UPDATE query
+                    updated_count = requirement_assessments.update(
+                        result=RequirementAssessment.Result.COMPLIANT
+                    )
                     action = "set to compliant"
 
                 else:  # random
-                    # Randomize results
-                    for req_assessment in requirement_assessments:
-                        random_result = random.choice(result_choices)
-                        req_assessment.result = random_result
-                        req_assessment.save()
-                        updated_count += 1
+                    # Randomize results using bulk_update
+                    assessments_to_update = list(requirement_assessments)
+                    for req_assessment in assessments_to_update:
+                        req_assessment.result = random.choice(result_choices)
                         logger.debug(
-                            f"Updated RequirementAssessment {req_assessment.id} with result: {random_result}"
+                            f"Will update RequirementAssessment {req_assessment.id} with result: {req_assessment.result}"
                         )
+                    RequirementAssessment.objects.bulk_update(
+                        assessments_to_update, ["result"], batch_size=1000
+                    )
+                    updated_count = len(assessments_to_update)
                     action = "randomized"
 
             self.stdout.write(

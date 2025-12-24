@@ -434,7 +434,7 @@
 	"residual": "باقی",
 	"jumpToRiskAssessment": "خطرے کی تشخیص پر جائیں",
 	"additionalMeasures": "اضافی اقدامات",
-	"riskAssessmentMatrixHelpText": "انتباہ: آپ خطرے کی تشخیص بننے کے بعد خطرے کی میٹرکس کو تبدیل نہیں کر سکیں گے",
+	"riskAssessmentMatrixHelpText": "انتباہ: خطرے کی میٹرکس بدلنے سے اقدار نئے سکیل کے مطابق خود بخود ایڈجسٹ ہو جاتی ہیں۔ بعد میں نتائج کا جائزہ لیں اور ضرورت ہو تو درست کریں۔",
 	"etaHelpText": "متوقع آمد کا وقت",
 	"dueDateHelpText": "وہ تاریخ جس تک تشخیص مکمل کرنا ضروری ہے",
 	"expiryDateHelpText": "جس تاریخ تک شے اب درست نہیں ہوگی",
@@ -947,6 +947,17 @@
 	"downloadCertificate": "سرٹیفکیٹ ڈاؤن لوڈ کریں",
 	"viewMore": "مزید دیکھیں",
 	"viewLess": "کم دیکھیں",
+	"isCustom": "کسٹم",
+	"errorUnloadingLibrary": "لائبریری اَن لوڈ کرنے میں خرابی",
+	"librarySuccessfullyUnloaded": "لائبریری کامیابی کے ساتھ اَن لوڈ ہو گئی ہے",
+	"scoreChangeDetected": "سکور میں تبدیلی کا پتہ چلا",
+	"scoreChangeDetectedDescription": "سکور میں تبدیلی کا پتہ چلا ہے۔ مربوط آڈٹس کے لیے سکور اپ ڈیٹس کو ہینڈل کرنے کا طریقہ منتخب کریں۔",
+	"clamp": "کلیمپ",
+	"clampDescription": "معررف شدہ حدوں کے اندر قدر کو محدود کریں۔",
+	"reset": "ری سیٹ",
+	"resetDescription": "آڈٹس کے سکور ری سیٹ کریں۔",
+	"ruleOfThree": "تین کا قانون",
+	"ruleOfThreeDescription": "نئے حدوں کے درمیان سکورز کو اسکیل کرنے کے لیے تین کا قانون لاگو کریں۔",
 	"loginFailed": "لاگ ان ناکام",
 	"expectedEvidence": "توقع ثبوت",
 	"taskNodeLegacyEvidence": "پرانا ثبوت فیلڈ منسوخ کر دیا گیا ہے۔ ثبوت اب ٹاسک سطح پر ہے اور تجدید کے لیے انتظار کرنے والے واقعات کے ساتھ اشتراک کیا جاتا ہے۔\n انہیں توقع ثبوت میں منتقل کرنے یا واقعہ سے ہٹانے کے لیے، نیچے دیے گئے بٹنوں کا استعمال کریں",
@@ -1005,5 +1016,20 @@
 	"deleteQuantitativeRiskStudy": "خطرہ کی مقدار کی تحقیق حذف کریں",
 	"viewQuantitativeRiskStudy": "خطرہ کی مقدار کی تحقیق دیکھیں",
 	"dueDateUpdatedSuccessfully": "فہرست کی تاریخ کامیابی کے ساتھ اپ ڈیٹ کی گئی",
-	"taskScheduleInfo": "پچھلے واقعات شیڈول کی تبدیلیوں سے محفوظ ہیں۔ صرف آئندہ ٹاسک دوبارہ حساب کیے جائیں گے۔"
+	"taskScheduleInfo": "تغییرات شیڈول کے پچھلے واقعات محفوظ ہیں۔ صرف آئندہ ٹاسک دوبارہ حساب کیے جائیں گے۔",
+	"cascadeDeleteWarning": "انتباہ: اس کو حذف کرنے سے {count} متعلقہ اشیاء کو بھی مستقل طور پر حذف کر دیا جائے گا:",
+	"errorFetching": "کاسکیڈ کی معلومات لوڈ کرنے میں ناکامی۔ براہ کرم دوبارہ کوشش کریں۔",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "کوئی دوسری اشیاء متاثر نہیں ہوں گی۔",
+				"countPlural=one": "{count} متعلقہ اشیاء حذف نہیں کی جائیں گی لیکن ان کی ایک یا زیادہ رشتے کھو دیں گی۔",
+				"countPlural=other": "{count} متعلقہ اشیاء حذف نہیں کی جائیں گی لیکن ان کی ایک یا زیادہ رشتے کھو دیں گی۔"
+			}
+		}
+	],
+	"cascadeAffectedHint": "نیچے دیے گئے اشیاء نظام میں باقی ہیں لیکن ان کی اس اشیاء سے لنکس ہٹا دیے جائیں گے۔",
+	"libraryFilteringLabels": "کتب خانہ لیبلز"
 }

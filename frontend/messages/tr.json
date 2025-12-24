@@ -472,7 +472,7 @@
 	"residual": "Kalan",
 	"jumpToRiskAssessment": "Risk değerlendirmesine atla",
 	"additionalMeasures": "Ek önlemler",
-	"riskAssessmentMatrixHelpText": "UYARI: Risk değerlendirmesi oluşturulduktan sonra risk matrisini değiştiremezsiniz",
+	"riskAssessmentMatrixHelpText": "UYARI: Risk matrisini değiştirmek değerleri yeni ölçeğe göre otomatik olarak ayarlar. Sonrasında sonuçları gözden geçirip gerekirse düzeltin.",
 	"etaHelpText": "Tahmini tamamlanma zamanı",
 	"dueDateHelpText": "Değerlendirmenin tamamlanması gereken tarih",
 	"expiryDateHelpText": "Nesnenin artık geçerli olmadığı tarih",
@@ -1712,6 +1712,17 @@
 	"downloadCertificate": "Sertifikayı indir",
 	"viewMore": "Daha fazla görüntüle",
 	"viewLess": "Daha az görüntüle",
+	"isCustom": "Özelleştirilmiş",
+	"errorUnloadingLibrary": "Kütüphane boşaltılırken hata oluştu",
+	"librarySuccessfullyUnloaded": "Kütüphane başarıyla kaldırıldı",
+	"scoreChangeDetected": "Puan değişikliği algılandı",
+	"scoreChangeDetectedDescription": "Puanlarda bir değişiklik algılandı. İlişkili denetimler için puan güncellemelerini nasıl yöneteceğinizi seçin.",
+	"clamp": "Sınırla",
+	"clampDescription": "Değeri tanımlanan sınırlar içinde kısıtlayın",
+	"reset": "Sıfırla",
+	"resetDescription": "Denetim puanlarını sıfırla",
+	"ruleOfThree": "Üçlü Kural",
+	"ruleOfThreeDescription": "Puanları yeni sınırlar arasında ölçeklemek için Üçlü Kuralı uygulayın",
 	"loginFailed": "Giriş başarısız",
 	"expectedEvidence": "Beklenen Kanıt",
 	"taskNodeLegacyEvidence": "Eski kanıt alanı kullanımdan kaldırıldı. Kanıt şimdi görev düzeyinde ve revizyonlar için beklenilen kanıtlar arasında paylaşılır.\n Bunları beklenilen kanıtlara taşımak veya gerçekleşmeden kaldırmak için aşağıdaki düğmeleri kullanın",
@@ -1770,5 +1781,20 @@
 	"deleteQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını sil",
 	"viewQuantitativeRiskStudy": "Risk nicelleştirme çalışmasını görüntüle",
 	"dueDateUpdatedSuccessfully": "Son tarih başarıyla güncellendi",
-	"taskScheduleInfo": "Geçmiş gerçekleşmeler program değişikliklerinden korunur. Sadece yaklaşan görevler yeniden hesaplanır."
+	"taskScheduleInfo": "Geçmiş gerçekleşmeler program değişikliklerinden korunur. Sadece yaklaşan görevler yeniden hesaplanır.",
+	"cascadeDeleteWarning": "Uyarı: Bu, ayrıca {count} ilgili nesneyi kalıcı olarak silecektir:",
+	"errorFetching": "Kaskat bilgileri yüklenemiyor. Lütfen tekrar deneyin.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Diğer nesneler etkilenmeyecek.",
+				"countPlural=one": "{count} ilgili nesne silinmeyecek ancak bir veya daha fazla ilişkiyi kaybedecek.",
+				"countPlural=other": "{count} ilgili nesne silinmeyecek ancak bir veya daha fazla ilişkiyi kaybedecek."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Aşağıdaki öğeler sistemde kalacak ancak bu nesneye olan bağlantılar kaldırılacaktır.",
+	"libraryFilteringLabels": "Kütüphane etiketleri"
 }

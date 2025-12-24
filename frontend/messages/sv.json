@@ -435,7 +435,7 @@
 	"residual": "Rest",
 	"jumpToRiskAssessment": "Hoppa till riskbedömning",
 	"additionalMeasures": "Ytterligare åtgärder",
-	"riskAssessmentMatrixHelpText": "VARNING: Du kommer inte att kunna ändra riskmatrisen efter att riskbedömningen har skapats",
+	"riskAssessmentMatrixHelpText": "VARNING: Att ändra riskmatrisen justerar automatiskt värdena enligt den nya skalan. Granska resultaten efteråt och korrigera dem vid behov.",
 	"etaHelpText": "Beräknad ankomsttid",
 	"dueDateHelpText": "Datum då bedömningen måste slutföras",
 	"expiryDateHelpText": "Datum då objektet inte längre är giltigt",
@@ -970,6 +970,17 @@
 	"downloadCertificate": "Ladda ner certifikat",
 	"viewMore": "Visa mer",
 	"viewLess": "Visa mindre",
+	"isCustom": "Anpassad",
+	"errorUnloadingLibrary": "Fel vid avlastning av bibliotek",
+	"librarySuccessfullyUnloaded": "Biblioteket har avladdats framgångsrikt",
+	"scoreChangeDetected": "Ändring i poäng upptäckt",
+	"scoreChangeDetectedDescription": "En ändring i poäng har upptäckts. Välj hur du vill hantera uppdateringarna av poängen för de associerade revisionerna.",
+	"clamp": "Begränsa",
+	"clampDescription": "Begränsa värdet inom de definierade gränserna",
+	"reset": "Återställ",
+	"resetDescription": "Återställ revisionernas poäng",
+	"ruleOfThree": "Trets regler",
+	"ruleOfThreeDescription": "Tillämpa trets regler för att skala poäng mellan nya gränser",
 	"loginFailed": "Inloggning misslyckades",
 	"expectedEvidence": "Förväntat bevis",
 	"taskNodeLegacyEvidence": "Det gamla bevisfältet är föråldrat. Bevis är nu uppgift-nivå och delas över förekomster som väntar på revisioner.\n För att flytta dem till förväntat bevis eller ta bort dem från förekomsten, använd knapparna",
@@ -1028,5 +1039,20 @@
 	"deleteQuantitativeRiskStudy": "Ta bort kvantitativ riskstudie",
 	"viewQuantitativeRiskStudy": "Visa kvantitativ riskstudie",
 	"dueDateUpdatedSuccessfully": "Förfallodatum uppdaterades framgångsrikt",
-	"taskScheduleInfo": "Tidigare förekomster är skyddade från schemaläggningsändringar. Endast kommande uppgifter kommer att omräknas."
+	"taskScheduleInfo": "Tidigare förekomster är skyddade från schemaläggningsändringar. Endast kommande uppgifter kommer att omräknas.",
+	"cascadeDeleteWarning": "Varning: Radering av detta kommer också att permanent radera {count} relaterade objekt:",
+	"errorFetching": "Det gick inte att ladda kaskadinformation. Försök igen.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Inga andra objekt kommer att påverkas.",
+				"countPlural=one": "{count} relaterat objekt kommer inte att raderas men kommer att förlora en eller flera relationer.",
+				"countPlural=other": "{count} relaterade objekt kommer inte att raderas men kommer att förlora en eller flera relationer."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Objekten nedan förblir i systemet men deras länkar till detta objekt kommer att tas bort.",
+	"libraryFilteringLabels": "Biblioteksetiketter"
 }

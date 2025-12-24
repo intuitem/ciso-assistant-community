@@ -436,7 +436,7 @@
 	"residual": "Rest",
 	"jumpToRiskAssessment": "Gå til risikovurdering",
 	"additionalMeasures": "Yderligere foranstaltninger",
-	"riskAssessmentMatrixHelpText": "ADVARSEL: Du vil ikke kunne ændre risikomatrixen efter oprettelsen",
+	"riskAssessmentMatrixHelpText": "ADVARSEL: Når du ændrer risikomatricen, justeres værdierne automatisk efter den nye skala. Gennemgå resultaterne bagefter og ret dem om nødvendigt.",
 	"etaHelpText": "Forventet ankomsttidspunkt",
 	"dueDateHelpText": "Dato hvor vurderingen skal være afsluttet",
 	"expiryDateHelpText": "Dato hvor objektet ikke længere er gyldigt",
@@ -1258,7 +1258,15 @@
 	"samlAuthnRequestSignedHelpText": "Når aktiveret, bliver SAML-autentificeringsanmodningen underskrevet med den private nøgle nedenfor. Det tilsvarende offentlige certifikat sendes til Identity Provider, så det kan verificere underskriften.",
 	"downloadCertificate": "Download certifikat",
 	"viewMore": "Se mere",
-	"viewLess": "Se mindre",
+	"viewLess": "Vis mindre",
+	"scoreChangeDetected": "Scoreændring registreret",
+	"scoreChangeDetectedDescription": "En ændring i scores er blevet registreret. Vælg, hvordan du vil håndtere scoreopdateringerne for de tilknyttede revisioner.",
+	"clamp": "Begræns",
+	"clampDescription": "Begræns værdien inden for de definerede grænser",
+	"reset": "Nulstil",
+	"resetDescription": "Nulstil revisionernes scores",
+	"ruleOfThree": "Regel af Tre",
+	"ruleOfThreeDescription": "Anvend Regel af Tre for at skalere scores mellem nye grænser",
 	"loginFailed": "Login mislykkedes",
 	"expectedEvidence": "Forventet bevis",
 	"taskNodeLegacyEvidence": "Det gamle bevisfelt er udfaset. Bevis er nu opgavebaseret og delt over forekomster, der venter på revisioner.\n For at flytte dem til forventet bevis eller fjerne dem fra forekomsten, skal du bruge knapperne",
@@ -1317,5 +1325,23 @@
 	"deleteQuantitativeRiskStudy": "Slet risiko kvantitativ studie",
 	"viewQuantitativeRiskStudy": "Vis risiko kvantitativ studie",
 	"dueDateUpdatedSuccessfully": "Forventet afslutningsdato opdateret med succes",
-	"taskScheduleInfo": "Tidligere forekomster er beskyttet mod ændringer i planlægning. Kun kommende opgaver vil blive genberegnet."
+	"taskScheduleInfo": "Tidligere forekomster er beskyttet mod ændringer i planlægning. Kun kommende opgaver vil blive genberegnet.",
+	"cascadeDeleteWarning": "Advarsel: Sletning af dette vil også permanent slette {count} relaterede objekt(er):",
+	"errorFetching": "Kan ikke indlæse kaskadeinformation. Prøv igen.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Ingen andre objekter vil blive påvirket.",
+				"countPlural=one": "{count} relateret objekt vil ikke blive slettet, men vil miste en eller flere relationer.",
+				"countPlural=other": "{count} relaterede objekter vil ikke blive slettet, men vil miste en eller flere relationer."
+			}
+		}
+	],
+	"cascadeAffectedHint": "De følgende elementer forbliver i systemet, men deres forbindelser til dette objekt vil blive fjernet.",
+	"isCustom": "Brugerdefineret",
+	"errorUnloadingLibrary": "Fejl under aflæsning af bibliotek",
+	"librarySuccessfullyUnloaded": "Biblioteket blev afindlæst med succes",
+	"libraryFilteringLabels": "Bibliotek etiketter"
 }

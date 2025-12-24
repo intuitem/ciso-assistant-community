@@ -52,7 +52,7 @@ export const load: PageServerLoad = async (event) => {
 	);
 
 	async function fetchJson(url: string) {
-		const res = await fetch(url);
+		const res = await event.fetch(url);
 		if (!res.ok) {
 			console.error(`Failed to fetch data from ${url}: ${res.statusText}`);
 			return null;

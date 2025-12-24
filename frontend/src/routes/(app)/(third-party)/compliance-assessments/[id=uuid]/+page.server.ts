@@ -1,8 +1,9 @@
 import { nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
-import { ComplianceAssessmentSchema, modelSchema } from '$lib/utils/schemas';
-import { json, type Actions } from '@sveltejs/kit';
+import { loadValidationFlowFormData } from '$lib/utils/load';
+import { ComplianceAssessmentSchema } from '$lib/utils/schemas';
+import { type Actions } from '@sveltejs/kit';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
@@ -76,17 +77,12 @@ export const load = (async ({ fetch, params }) => {
 
 	const form = await superValidate(zod(z.object({ id: z.string().uuid() })));
 
-	const validationFlowSchema = modelSchema('validation-flows');
-	const validationFlowInitialData = {
-		folder: compliance_assessment.folder.id,
-		compliance_assessments: [params.id],
-		ref_id: ''
-	};
-	const validationFlowForm = await superValidate(
-		validationFlowInitialData,
-		zod(validationFlowSchema),
-		{ errors: false }
-	);
+	const { validationFlowForm } = await loadValidationFlowFormData({
+		event: { fetch },
+		folderId: compliance_assessment.folder.id,
+		targetField: 'compliance_assessments',
+		targetIds: [params.id]
+	});
 
 	return {
 		URLModel,

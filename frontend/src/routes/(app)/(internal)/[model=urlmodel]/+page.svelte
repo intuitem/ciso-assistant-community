@@ -133,7 +133,7 @@
 									onclick={handlers(modalCreateForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
-								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios'].includes(URLModel)}
+								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates'].includes(URLModel)}
 									<Popover
 										open={exportPopupOpen}
 										onOpenChange={(e) => (exportPopupOpen = e.open)}
@@ -171,9 +171,13 @@
 										data-testid="flash-mode-button"><i class="fa-solid fa-bolt mr-2"></i></a
 									>
 								{/if}
-								{#if ['threats', 'reference-controls'].includes(URLModel)}
+								{#if ['threats', 'reference-controls', 'metric-definitions'].includes(URLModel)}
 									{@const title =
-										URLModel === 'threats' ? m.importThreats() : m.importReferenceControls()}
+										URLModel === 'threats'
+											? m.importThreats()
+											: URLModel === 'reference-controls'
+												? m.importReferenceControls()
+												: m.importMetricDefinitions()}
 									<Anchor
 										href={`/libraries?object_type=${URLModel.replace(/-/g, '_')}`}
 										label={m.libraries()}

@@ -435,7 +435,7 @@
 	"residual": "अवशिष्ट",
 	"jumpToRiskAssessment": "जोखिम आकलन पर जाएं",
 	"additionalMeasures": "अतिरिक्त उपाय",
-	"riskAssessmentMatrixHelpText": "चेतावनी: जोखिम आकलन बनने के बाद आप जोखिम मैट्रिक्स को नहीं बदल पाएंगे",
+	"riskAssessmentMatrixHelpText": "चेतावनी: जोखिम मैट्रिक्स बदलने पर मान नए पैमाने के अनुसार स्वतः समायोजित हो जाते हैं। बाद में परिणामों की समीक्षा करें और आवश्यकता होने पर उन्हें सुधारें।",
 	"etaHelpText": "आगमन का अनुमानित समय",
 	"dueDateHelpText": "जिस तिथि तक आकलन पूरा करना है",
 	"expiryDateHelpText": "जिस तिथि तक वस्तु मान्य नहीं होगी",
@@ -948,6 +948,17 @@
 	"downloadCertificate": "सर्टिफिकेट डाउनलोड करें",
 	"viewMore": "और देखें",
 	"viewLess": "कम देखें",
+	"isCustom": "कस्टम",
+	"errorUnloadingLibrary": "लाइब्रेरी अनलोड करने में त्रुटि",
+	"librarySuccessfullyUnloaded": "लाइब्रेरी सफलतापूर्वक अनलोड की गई है",
+	"scoreChangeDetected": "स्कोर परिवर्तन का पता चला",
+	"scoreChangeDetectedDescription": "स्कोर में परिवर्तन का पता चला है। संबद्ध ऑडिट्स के लिए स्कोर अपडेट्स को कैसे हैंडल करना चुनें।",
+	"clamp": "क्लैम्प",
+	"clampDescription": "परिभाषित सीमाओं के भीतर मान को प्रतिबंधित करें",
+	"reset": "रीसेट",
+	"resetDescription": "ऑडिट स्कोर रीसेट करें",
+	"ruleOfThree": "तीन का नियम",
+	"ruleOfThreeDescription": "नए सीमाओं के बीच स्कोर को स्केल करने के लिए तीन का नियम लागू करें",
 	"loginFailed": "लॉगिन विफल",
 	"expectedEvidence": "अपेक्षित सबूत",
 	"taskNodeLegacyEvidence": "पुराना सबूत फ़ील्ड निष्क्रिय है। अब सबूत कार्य-स्तर पर है और संशोधनों के लिए प्रतीक्षा कर रहा है।\n उन्हें अपेक्षित सबूत में स्थानांतरित करने या घटना से हटाने के लिए, नीचे दिए गए बटन का उपयोग करें",
@@ -1006,5 +1017,20 @@
 	"deleteQuantitativeRiskStudy": "जोखिम सांख्यिकी अध्ययन हटाएं",
 	"viewQuantitativeRiskStudy": "जोखिम सांख्यिकी अध्ययन देखें",
 	"dueDateUpdatedSuccessfully": "देय तिथि सफलतापूर्वक अपडेट की गई",
-	"taskScheduleInfo": "पिछले घटनाएँ शेड्यूल परिवर्तनों से सुरक्षित हैं। केवल आने वाले कार्य पुनः गणना किए जाएंगे।"
+	"taskScheduleInfo": "पिछले घटनाएँ शेड्यूल परिवर्तनों से सुरक्षित हैं। केवल आने वाले कार्य पुनः गणना किए जाएंगे।",
+	"cascadeDeleteWarning": "चेतावनी: इसको हटाने से {count} संबंधित वस्तुओं को स्थायी रूप से हटा दिया जाएगा:",
+	"errorFetching": "कास्केड जानकारी लोड करने में असमर्थ। कृपया पुनः प्रयास करें।",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "कोई अन्य वस्तुएँ प्रभावित नहीं होंगी।",
+				"countPlural=one": "{count} संबंधित वस्तु हटाई नहीं जाएगी लेकिन एक या अधिक संबंध खो देगी।",
+				"countPlural=other": "{count} संबंधित वस्तुएँ हटाई नहीं जाएंगी लेकिन एक या अधिक संबंध खो देंगी।"
+			}
+		}
+	],
+	"cascadeAffectedHint": "नीचे दिए गए आइटम सिस्टम में बने रहेंगे लेकिन इस वस्तु से उनके लिंक हटा दिए जाएंगे।",
+	"libraryFilteringLabels": "लाइब्रेरी लेबल"
 }

@@ -434,7 +434,7 @@
 	"residual": "المتبقي",
 	"jumpToRiskAssessment": "انتقل إلى تقييم المخاطر",
 	"additionalMeasures": "إجراءات إضافية",
-	"riskAssessmentMatrixHelpText": "تحذير: لن تتمكن من تغيير مصفوفة المخاطر بعد إنشاء تقييم المخاطر",
+	"riskAssessmentMatrixHelpText": "تحذير: تغيير مصفوفة المخاطر يضبط القيم تلقائيًا وفقًا للمقياس الجديد. راجع النتائج بعد ذلك وصححها إذا لزم الأمر.",
 	"etaHelpText": "الوقت المقدر للوصول",
 	"dueDateHelpText": "تاريخ الاستحقاق لإكمال التقييم",
 	"expiryDateHelpText": "التاريخ الذي لم يعد فيه الكائن صالحًا",
@@ -947,6 +947,14 @@
 	"downloadCertificate": "تنزيل الشهادة",
 	"viewMore": "عرض المزيد",
 	"viewLess": "عرض أقل",
+	"scoreChangeDetected": "تم الكشف عن تغيير في النتيجة",
+	"scoreChangeDetectedDescription": "تم الكشف عن تغيير في النتائج. اختر كيفية التعامل مع تحديثات النتائج للتقييمات المرتبطة.",
+	"clamp": "تقييد",
+	"clampDescription": "تقييد القيمة ضمن الحدود المعرفة",
+	"reset": "إعادة تعيين",
+	"resetDescription": "إعادة تعيين نتائج التقييمات",
+	"ruleOfThree": "قاعدة الثلاثة",
+	"ruleOfThreeDescription": "تطبيق قاعدة الثلاثة لتعديل النتائج بين الحدود الجديدة",
 	"loginFailed": "فشل الدخول",
 	"expectedEvidence": "الأدلة المتوقعة",
 	"taskNodeLegacyEvidence": "حقل الأدلة القديم معطل. الأدلة الآن على مستوى المهمة ومشاركة عبر الحدوثات في انتظار المراجعات.\n لنقلها إلى الأدلة المتوقعة أو إزالتها من الحدوث، استخدم الأزرار",
@@ -1005,5 +1013,23 @@
 	"deleteQuantitativeRiskStudy": "حذف دراسة الكمية المخاطر",
 	"viewQuantitativeRiskStudy": "عرض دراسة المخاطر الكمية",
 	"dueDateUpdatedSuccessfully": "تم تحديث تاريخ الاستحقاق بنجاح",
-	"taskScheduleInfo": "يتم حماية الحدوثات الماضية من التغييرات في الجدول الزمني. فقط المهام القادمة سيتم إعادة حسابها."
+	"taskScheduleInfo": "يتم حماية الحدوثات الماضية من التغييرات في الجدول الزمني. فقط المهام القادمة سيتم إعادة حسابها.",
+	"cascadeDeleteWarning": "تحذير: حذف هذا العنصر سيؤدي أيضًا إلى حذف {count} كائن(أ) مرتبط(ة) بشكل دائم:",
+	"errorFetching": "تعذر تحميل معلومات التسلسل. يرجى المحاولة مرة أخرى.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "لا سيؤثر على أي كائنات أخرى.",
+				"countPlural=one": "سيتم حذف {count} كائن(أ) مرتبط(ة) ولكنهم سيخسرون أحد أو أكثر من العلاقات.",
+				"countPlural=other": "سيتم حذف {count} كائن(أ) مرتبط(ة) ولكنهم سيخسرون أحد أو أكثر من العلاقات."
+			}
+		}
+	],
+	"cascadeAffectedHint": "البنود أدناه تبقى في النظام ولكن روابطها بهذا العنصر ستتم إزالتها.",
+	"isCustom": "مخصص",
+	"errorUnloadingLibrary": "خطأ في تفريغ المكتبة",
+	"librarySuccessfullyUnloaded": "تم إلغاء تحميل المكتبة بنجاح",
+	"libraryFilteringLabels": "العلامات المكتبية"
 }

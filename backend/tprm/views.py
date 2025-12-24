@@ -711,6 +711,11 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         if instance.compliance_assessment:
             folder = instance.compliance_assessment.folder
             if folder.content_type == Folder.ContentType.ENCLAVE:
+                logger.info(
+                    "deleting_compliance_assessment_folder",
+                    folder_id=str(folder.id),
+                    content_type=str(folder.content_type),
+                )
                 folder.delete()
             else:
                 logger.warning(

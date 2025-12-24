@@ -435,7 +435,7 @@
 	"residual": "Rezidual",
 	"jumpToRiskAssessment": "Sari la evaluarea riscului",
 	"additionalMeasures": "Măsuri suplimentare",
-	"riskAssessmentMatrixHelpText": "ATENȚIE: Nu veți putea schimba matricea de risc după ce evaluarea riscului a fost creată",
+	"riskAssessmentMatrixHelpText": "ATENȚIE: Modificarea matricei de risc ajustează automat valorile conform noii scale. Revizuiți apoi rezultatele și corectați-le dacă este nevoie.",
 	"etaHelpText": "Ora estimată de sosire",
 	"dueDateHelpText": "Data la care trebuie finalizată evaluarea",
 	"expiryDateHelpText": "Data la care obiectul nu mai este valabil",
@@ -976,6 +976,17 @@
 	"downloadCertificate": "Descărcați certificatul",
 	"viewMore": "Vizualizați mai mult",
 	"viewLess": "Vizualizați mai puțin",
+	"isCustom": "Personalizat",
+	"errorUnloadingLibrary": "Eroare la descarcarea bibliotecii",
+	"librarySuccessfullyUnloaded": "Biblioteca a fost descărcată cu succes",
+	"scoreChangeDetected": "Schimbare de scor detectată",
+	"scoreChangeDetectedDescription": "A fost detectată o schimbare în scoruri. Alegeți cum să gestionați actualizările scorurilor pentru auditurile asociate.",
+	"clamp": "Limitare",
+	"clampDescription": "Restricționați valoarea în limitele definite",
+	"reset": "Resetare",
+	"resetDescription": "Resetați scorurile auditurilor",
+	"ruleOfThree": "Regula celor trei",
+	"ruleOfThreeDescription": "Aplicați Regula celor trei pentru a scala scorurile între limite noi",
 	"loginFailed": "Autentificare eșuată",
 	"expectedEvidence": "Dovadă așteptată",
 	"taskNodeLegacyEvidence": "Câmpul de dovadă vechi este depreciat. Dovezile sunt acum la nivel de sarcină și sunt partajate între apariții așteptând revizuiri.\n Pentru a le muta la dovezi așteptate sau pentru a le elimina din apariție, utilizați butoanele",
@@ -1034,5 +1045,20 @@
 	"deleteQuantitativeRiskStudy": "Șterge studiul de risc cantitativ",
 	"viewQuantitativeRiskStudy": "Vizualizați studiul de risc cantitativ",
 	"dueDateUpdatedSuccessfully": "Data limită a fost actualizată cu succes",
-	"taskScheduleInfo": "Aparițiile trecute sunt protejate împotriva schimbărilor de programare. Doar sarcinile viitoare vor fi recalculate."
+	"taskScheduleInfo": "Aparițiile trecute sunt protejate împotriva schimbărilor de programare. Doar sarcinile viitoare vor fi recalculate.",
+	"cascadeDeleteWarning": "Avertizare: Ștergerea acestuia va șterge și {count} obiect(e) asociat(e):",
+	"errorFetching": "Nu se poate încărca informația în cascadă. Vă rugăm să încercați din nou.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Niciun alt obiect nu va fi afectat.",
+				"countPlural=one": "{count} obiect asociat nu va fi șters, dar va pierde una sau mai multe relații.",
+				"countPlural=other": "{count} obiecte asociate nu vor fi șterse, dar vor pierde una sau mai multe relații."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Obiectele de mai jos rămân în sistem, dar legăturile lor cu acest obiect vor fi eliminate.",
+	"libraryFilteringLabels": "Etichete bibliotecă"
 }

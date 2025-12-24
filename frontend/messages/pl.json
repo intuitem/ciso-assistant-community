@@ -473,7 +473,7 @@
 	"residual": "Resztkowy",
 	"jumpToRiskAssessment": "Przejdź do oceny ryzyka",
 	"additionalMeasures": "Dodatkowe środki",
-	"riskAssessmentMatrixHelpText": "OSTRZEŻENIE: Po utworzeniu oceny ryzyka nie będzie można zmienić macierzy ryzyka",
+	"riskAssessmentMatrixHelpText": "OSTRZEŻENIE: Zmiana macierzy ryzyka automatycznie dostosowuje wartości do nowej skali. Po zmianie przejrzyj wyniki i w razie potrzeby je popraw.",
 	"etaHelpText": "Szacowany czas przybycia",
 	"dueDateHelpText": "Termin ukończenia oceny",
 	"expiryDateHelpText": "Data, do której obiekt jest ważny",
@@ -1717,9 +1717,20 @@
 	"samlCertificateHelpText": "Możesz określić własny certyfikat lub pozwolić aplikacji wygenerować go.",
 	"samlAuthnRequestSignedHelpText": "Gdy włączone, żądanie uwierzytelniania SAML jest podpisywane kluczem prywatnym poniżej. Odpowiedni certyfikat publiczny jest wysyłany do dostawcy tożsamości, aby mógł zweryfikować podpis.",
 	"downloadCertificate": "Pobierz certyfikat",
+	"viewMore": "Voir plus",
+	"scoreChangeDetected": "Zmiana wyniku wykryta",
+	"scoreChangeDetectedDescription": "Wykryto zmianę wyników. Wybierz sposób obsługi aktualizacji wyników dla powiązanych audytów.",
+	"clamp": "Ograniczyć",
+	"clampDescription": "Ogranicz wartość w ramach zdefiniowanych granic",
+	"reset": "Resetowanie",
+	"resetDescription": "Zresetuj wyniki audytów",
+	"ruleOfThree": "Zasada trzech",
+	"ruleOfThreeDescription": "Zastosuj zasadę trzech, aby skalować wyniki między nowymi granicami",
 	"loginFailed": "Logowanie nieudane",
-	"viewMore": "Pokaż więcej",
 	"viewLess": "Zobacz mniej",
+	"isCustom": "Niestandardowy",
+	"errorUnloadingLibrary": "Błąd rozładowywania biblioteki",
+	"librarySuccessfullyUnloaded": "Biblioteka została pomyślnie rozładowana",
 	"expectedEvidence": "Oczekiwane dowody",
 	"taskNodeLegacyEvidence": "Stare pole dowodów jest przestarzałe. Dowody są teraz na poziomie zadania i są współdzielone między wystąpieniami oczekującymi na rewizje.\nAby przenieść je do oczekiwanych dowodów lub usunąć je z wystąpienia, użyj przycisków",
 	"taskNodeNewEvidence": "Dowody globalnie powiązane z zadaniem i rozprzestrzenione na wystąpienia. Możesz dodać rewizję w zakładce 'Dowody' poniżej",
@@ -1777,5 +1788,20 @@
 	"deleteQuantitativeRiskStudy": "Usuń badanie ilościowe ryzyka",
 	"viewQuantitativeRiskStudy": "Zobacz badanie ilościowe ryzyka",
 	"dueDateUpdatedSuccessfully": "Termin zaktualizowany pomyślnie",
-	"taskScheduleInfo": "Wcześniejsze wystąpienia są chronione przed zmianami harmonogramu. Tylko nadchodzące zadania zostaną przeliczone."
+	"taskScheduleInfo": "Wcześniejsze wystąpienia są chronione przed zmianami harmonogramu. Tylko nadchodzące zadania zostaną przeliczone.",
+	"cascadeDeleteWarning": "Uwaga: Usunięcie tego spowoduje również trwałe usunięcie {count} powiązanych obiektów:",
+	"errorFetching": "Nie można załadować informacji o kaskadzie. Spróbuj ponownie.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Żadne inne obiekty nie będą dotknięte.",
+				"countPlural=one": "{count} powiązany obiekt nie zostanie usunięty, ale straci jedno lub więcej relacji.",
+				"countPlural=other": "{count} powiązanych obiektów nie zostanie usuniętych, ale stracią jedno lub więcej relacji."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Poniższe elementy pozostają w systemie, ale ich linki do tego obiektu zostaną usunięte.",
+	"libraryFilteringLabels": "Etykiety biblioteki"
 }

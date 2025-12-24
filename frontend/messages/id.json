@@ -436,7 +436,7 @@
 	"residual": "Residu",
 	"jumpToRiskAssessment": "Lompat ke penilaian risiko",
 	"additionalMeasures": "Kontrol tambahan",
-	"riskAssessmentMatrixHelpText": "PERINGATAN: Anda tidak dapat mengubah matriks risiko setelah penilaian risiko dibuat",
+	"riskAssessmentMatrixHelpText": "PERINGATAN: Mengubah matriks risiko akan menyesuaikan nilai secara otomatis sesuai skala baru. Tinjau hasilnya setelahnya dan koreksi bila diperlukan.",
 	"etaHelpText": "Perkiraan waktu kedatangan",
 	"dueDateHelpText": "Tanggal batas waktu penyelesaian penilaian",
 	"expiryDateHelpText": "Tanggal di mana objek tidak lagi berlaku",
@@ -1164,6 +1164,17 @@
 	"downloadCertificate": "Unduh sertifikat",
 	"viewMore": "Lihat lebih banyak",
 	"viewLess": "Lihat lebih sedikit",
+	"isCustom": "Kustom",
+	"errorUnloadingLibrary": "Kesalahan saat membongkar pustaka",
+	"librarySuccessfullyUnloaded": "Pustaka berhasil dilepas",
+	"scoreChangeDetected": "Perubahan skor terdeteksi",
+	"scoreChangeDetectedDescription": "Perubahan dalam skor telah terdeteksi. Pilih cara menangani pembaruan skor untuk audit yang terkait.",
+	"clamp": "Batas",
+	"clampDescription": "Batasi nilai dalam batas yang ditentukan",
+	"reset": "Atur ulang",
+	"resetDescription": "Atur ulang skor audit",
+	"ruleOfThree": "Aturan Tiga",
+	"ruleOfThreeDescription": "Terapkan Aturan Tiga untuk menskalakan skor antara batas baru",
 	"loginFailed": "Gagal masuk",
 	"expectedEvidence": "Bukti yang Diharapkan",
 	"taskNodeLegacyEvidence": "Bidang bukti lama sudah usang. Bukti sekarang tingkat tugas dan dibagikan di seluruh kejadian yang menunggu revisi.\n Untuk memindahkannya ke bukti yang diharapkan atau menghapusnya dari kejadian, gunakan tombol",
@@ -1222,5 +1233,20 @@
 	"deleteQuantitativeRiskStudy": "Hapus studi kuantifikasi risiko",
 	"viewQuantitativeRiskStudy": "Lihat studi kuantifikasi risiko",
 	"dueDateUpdatedSuccessfully": "Tanggal jatuh tempo berhasil diperbarui",
-	"taskScheduleInfo": "Kejadian yang lalu dilindungi dari perubahan jadwal. Hanya tugas mendatang yang akan dihitung ulang."
+	"taskScheduleInfo": "Jadwal kejadian yang lalu dilindungi dari perubahan. Hanya tugas mendatang yang akan dihitung ulang.",
+	"cascadeDeleteWarning": "Peringatan: Menghapus ini juga akan menghapus secara permanen {count} objek terkait:",
+	"errorFetching": "Tidak dapat memuat informasi kaskade. Silakan coba lagi.",
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Tidak ada objek lain yang akan terpengaruh.",
+				"countPlural=one": "{count} objek terkait tidak akan dihapus tetapi akan kehilangan satu atau lebih hubungan.",
+				"countPlural=other": "{count} objek terkait tidak akan dihapus tetapi akan kehilangan satu atau lebih hubungan."
+			}
+		}
+	],
+	"cascadeAffectedHint": "Item-item di bawah ini tetap berada di sistem tetapi tautan mereka ke objek ini akan dihapus.",
+	"libraryFilteringLabels": "Label perpustakaan"
 }
