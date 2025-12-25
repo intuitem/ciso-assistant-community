@@ -1,5 +1,5 @@
 FROM node:22-slim AS builder
-ENV NODE_OPTIONS="--max-old-space-size=102400"
+ENV NODE_OPTIONS="--max-old-space-size=10240"
 WORKDIR /app
 
 ENV PUBLIC_BACKEND_API_URL=foo
