@@ -9,7 +9,7 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.11"
 django = "^5.2.9"
-weasyprint = "62.3"
+weasyprint = "^67.0"
 psycopg2-binary = "^2.9.9"
 gunicorn = "23.0.0"
 django-filter = "24.3"
