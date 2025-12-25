@@ -1,5 +1,5 @@
 FROM node:22-slim AS builder
-ENV NODE_OPTIONS="--max-old-space-size=8192"
+ENV NODE_OPTIONS="--max-old-space-size=102400"
 WORKDIR /app
 
 ENV PUBLIC_BACKEND_API_URL=foo
@@ -15,7 +15,7 @@ RUN pnpm run build
 RUN pnpm prune
 
 FROM node:22-slim
-ENV NODE_OPTIONS="--max-old-space-size=8192"
+ENV NODE_OPTIONS="--max-old-space-size=102400"
 WORKDIR /app
 COPY --from=builder /app/build build/
 COPY --from=builder /app/server server/
