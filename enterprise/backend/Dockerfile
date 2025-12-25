@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.14-slim
 ENV PYTHONUNBUFFERED=1 \
    PYTHONDONTWRITEBYTECODE=1 \
    POETRY_NO_INTERACTION=1 \
@@ -43,7 +43,7 @@ RUN apt-get update && apt-get install -y \
    && locale-gen cs_CZ.UTF-8 \
    && locale-gen sv_SE.UTF-8 \
    && locale-gen id_ID.UTF-8 \
-   && pip install --no-cache-dir --upgrade pip poetry==2.0.1
+   && pip install --no-cache-dir --upgrade pip poetry==2.2.1
 
 COPY backend/pyproject.toml backend/poetry.lock ./
 RUN poetry install --no-root \

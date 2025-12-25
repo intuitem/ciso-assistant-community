@@ -59,8 +59,16 @@ class AccountAdapter(DefaultAccountAdapter):
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data
-        # Primary lookup
+        # Primary lookup (legacy format)
         email_address = extra.get("email") or extra.get("email_address")
+        # allauth 65.8.0+ stores userinfo under "userinfo" key
+        if not email_address:
+            userinfo = extra.get("userinfo", {})
+            email_address = userinfo.get("email") or userinfo.get("email_address")
+        # Also check id_token claims (for OIDC providers)
+        if not email_address:
+            id_token = extra.get("id_token", {})
+            email_address = id_token.get("email") or id_token.get("email_address")
         # Fallback: first string value containing '@'
         if not email_address:
             email_address = next(
@@ -68,14 +76,19 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             )
 
         if not email_address:
+            logger.error(
+                "pre_social_login: no email found in extra_data",
+                extra_data_keys=list(extra.keys()),
+            )
             return Response(
                 {"message": "Email not provided."}, status=HTTP_401_UNAUTHORIZED
             )
         try:
-            user = User.objects.get(email=email_address)
+            user = User.objects.get(email__iexact=email_address)
             sociallogin.user = user
             sociallogin.connect(request, user)
         except User.DoesNotExist:
+            logger.error("pre_social_login: user not found")
             return Response(
                 {"message": "User not found."}, status=HTTP_401_UNAUTHORIZED
             )
