@@ -37,6 +37,9 @@ def callback(request, provider_id):
         return HttpResponseRedirect(next)
     except SocialApp.DoesNotExist as e:
         raise Http404 from e
+    except Exception as e:
+        logger.error("OIDC callback error", provider=provider_id, exc_info=True)
+        return render_authentication_error(request, None, error=AuthError.FAILED_SSO)
 
 
 @login_not_required
