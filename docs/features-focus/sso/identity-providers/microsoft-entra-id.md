@@ -45,3 +45,19 @@ Go into your **Azure portal home**
 
 You can now [configure CISO Assistant](../#configure-ciso-assistant-with-saml) with the <mark style="color:purple;">**3 parameters**</mark> you've retrieved.
 
+
+
+### Using Open ID connect
+
+
+
+* head to Entra ID
+* Under manage, select `App registrations` and create a `New registration` and use the default settings.
+* Once createad, copy the `Application (client) ID` and use it as first parameter on CISO Assistant.
+* under the manage section of the app, select `certificates and secrets`
+* Create a `new client secret` under the client secrets, copy its value and use it as second parameter on CISO Assistant.
+* Go back to Overview of the app, and click Endpoints. Use the value on `OpenID Connect metadata document` as third parameter on CISO Assistant.
+* Under the `Authentication (Preview)` of the app, click `add redirect URI`, and select `web` , the value should be something like `<ciso_assistant_backend_url>/api/accounts/oidc/openid_connect/login/callback/` for instance, for localhost, `http://localhost:8000/api/accounts/oidc/openid_connect/login/callback/`
+
+
+
