@@ -29,7 +29,7 @@ django-allauth = { version = "^65.0.2", extras = [
   "mfa",
 ] }
 python-magic = "0.4.27"
-pytz = "2024.2"
+pytz = "2025.2"
 fido2 = "^1.1.3"
 humanize = "^4.11.0"
 huey = "^2.5.2"

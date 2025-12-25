@@ -12,7 +12,7 @@ RUN pnpm run build
 RUN pnpm prune
 
 FROM node:22-slim
-ENV NODE_OPTIONS="--max-old-space-size=102400"
+ENV NODE_OPTIONS="--max-old-space-size=10240"
 WORKDIR /app
 COPY --from=builder /app/build build/
 COPY --from=builder /app/server server/
