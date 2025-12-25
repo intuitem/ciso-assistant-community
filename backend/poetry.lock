@@ -871,7 +871,7 @@ asgiref = ">=3.8.1"
 Django = ">=4.2.16"
 fido2 = {version = ">=1.1.2,<3", optional = true, markers = "extra == \"mfa\""}
 oauthlib = {version = ">=3.3.0,<4", optional = true, markers = "extra == \"socialaccount\""}
-pyjwt = {version = ">=2.0,<3", extras = ["crypto"], optional = true, markers = "extra == \"socialaccount\""}
+pyjwt = {version = ">=2.0,<3", extras = ["crypto"], optional = true, markers = "extra == \"headless\" or extra == \"socialaccount\""}
 python3-saml = {version = ">=1.15.0,<2.0.0", optional = true, markers = "extra == \"saml\""}
 qrcode = {version = ">=7.0.0,<9", optional = true, markers = "extra == \"mfa\""}
 requests = {version = ">=2.0.0,<3", optional = true, markers = "extra == \"socialaccount\""}
@@ -3562,4 +3562,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "4bb04e4729bfb2bd0b8f08d1b6cd1b9082842438be468ab08dfd6f6e2a4d1b1b"
+content-hash = "59cb21e77f6f765a8dfdbf7f53389223838c3fe2fa110fca258d2a482e60d277"

@@ -27,6 +27,7 @@ django-allauth = { version = "^65.13.1", extras = [
   "socialaccount",
   "saml",
   "mfa",
+  "headless",
 ] }
 python-magic = "0.4.27"
 pytz = "2025.2"
