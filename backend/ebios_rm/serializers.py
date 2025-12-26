@@ -270,7 +270,17 @@ class StrategicScenarioWriteSerializer(BaseModelSerializer):
         ro_to_couple = attrs.get("ro_to_couple") or (
             self.instance.ro_to_couple if self.instance else None
         )
-        focused_feared_event = attrs.get("focused_feared_event")
+
+        # If the field is present in attrs, use it (even if None means clearing).
+        # Otherwise, fall back to the existing instance value.
+        if "focused_feared_event" in attrs:
+            focused_feared_event = attrs["focused_feared_event"]
+        else:
+            focused_feared_event = (
+                getattr(self.instance, "focused_feared_event", None)
+                if self.instance
+                else None
+            )
 
         if focused_feared_event and ro_to_couple:
             if not ro_to_couple.feared_events.filter(
@@ -281,6 +291,7 @@ class StrategicScenarioWriteSerializer(BaseModelSerializer):
                         "focused_feared_event": "The feared event must belong to the selected RoTo couple."
                     }
                 )
+
         return super().validate(attrs)
 
 
