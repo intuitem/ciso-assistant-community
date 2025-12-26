@@ -232,6 +232,9 @@
 	const rows = handler.getRows();
 	let invalidateTable = $state(false);
 
+	// Hide search field when table is empty to avoid user confusion
+	let showSearch = $derived(search && $rows.length > 0);
+
 	$tableHandlers[baseEndpoint] = handler;
 
 	handler.onChange((state: State) =>
@@ -255,7 +258,6 @@
 			featureFlags: page.data?.featureflags
 		})
 	);
-
 	onMount(() => {
 		if (orderBy) {
 			orderBy.direction === 'asc'
@@ -507,7 +509,7 @@
 				{/snippet}
 			</Popover>
 		{/if}
-		{#if search}
+		{#if showSearch}
 			<Search {handler} />
 		{/if}
 		{#if pagination && rowsPerPage}
