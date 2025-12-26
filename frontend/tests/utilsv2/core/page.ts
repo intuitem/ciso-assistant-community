@@ -80,12 +80,14 @@ export class Page {
 	async doCloseModal() {
 		const modalBackdrop = this.getSelf().getByTestId('modal-backdrop');
 
-		if (await modalBackdrop.isVisible()) {
-			await modalBackdrop.press('Escape');
-			await modalBackdrop.waitFor({ state: 'hidden' });
+		try {
+			await modalBackdrop.waitFor({ state: 'visible', timeout: 5000 });
+		} catch {
+			return;
 		}
 
-		// await this._self.mouse.click(1, 1);
+		await modalBackdrop.press('Escape');
+		await modalBackdrop.waitFor({ state: 'hidden' });
 	}
 }
 export namespace Page {

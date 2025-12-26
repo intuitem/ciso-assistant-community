@@ -122,7 +122,7 @@
 		}}
 		includeAllOptionFields
 	>
-		{#snippet optionSnippet(option: Record<string, any>)}
+		{#snippet optionSnippet(option: Record)}
 			<FrameworkResultSnippet {option} />
 		{/snippet}
 	</AutocompleteSelect>
