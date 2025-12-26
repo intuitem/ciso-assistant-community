@@ -9,12 +9,34 @@
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { tableHandlers } from '$lib/utils/stores';
+	import UploadLibraryModal from '$lib/components/Modals/UploadLibraryModal.svelte';
+	import {
+		getModalStore,
+		type ModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
+	import { getModelInfo } from '$lib/utils/crud';
 
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	let { data, ...rest } = $props();
+	let { data } = $props();
 
-	let fileResetSignal = $state(false);
+	// let fileResetSignal = $state(false);
+
+	const modalStore: ModalStore = getModalStore();
+
+	function modalCreateForm(): void {
+		let modalComponent: ModalComponent = {
+			ref: UploadLibraryModal
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('addYourLibrary')
+		};
+		modalStore.trigger(modal);
+	}
 
 	interface QuickFilters {
 		object_type: Set<string>;
@@ -79,9 +101,22 @@
 				{/each}
 			</div>
 		{/snippet}
+		{#snippet addButton()}
+			<div>
+				<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+					<button
+						class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+						data-testid="add-button"
+						title={m.addYourLibrary()}
+						onclick={modalCreateForm}
+						><i class="fa-solid fa-file-circle-plus"></i>
+					</button>
+				</span>
+			</div>
+		{/snippet}
 	</ModelTable>
 </div>
-{#if page.data.user.is_admin}
+<!-- {#if page.data.user.is_admin}
 	<div class="card bg-white p-4 mt-4 shadow-sm">
 		{#await superValidate(zod(LibraryUploadSchema))}
 			<h1>{m.loadingLibraryUploadButton()}...</h1>
@@ -128,4 +163,4 @@
 			<h1>{m.errorOccurredWhileLoadingLibrary()}: {err}</h1>
 		{/await}
 	</div>
-{/if}
+{/if} -->
