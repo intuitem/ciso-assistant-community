@@ -31,7 +31,6 @@ Notes:
     - It does not overwrite the original file; a copy is saved with "_modified" in the filename.
 """
 
-
 import re
 import sys
 import os
@@ -42,8 +41,10 @@ from openpyxl.cell.cell import Cell
 
 # === Configuration: Sheet name and target columns ===
 SHEET_NAME = "finma_content"
-COLUMN_PREFIXES = ["description"]  # Columns starting with these prefixes will be processed
-SPECIFIC_COLUMNS = []              # Specific column names to process
+COLUMN_PREFIXES = [
+    "description"
+]  # Columns starting with these prefixes will be processed
+SPECIFIC_COLUMNS = []  # Specific column names to process
 
 # === Regex to detect patterns ===
 # Matches:
@@ -67,7 +68,7 @@ def process_cell_text(text: str) -> Tuple[str, List[Tuple[str, str]]]:
     Returns:
         (new_text, changes) where changes is a list of tuples (original_word, replaced_word)
     """
-    
+
     changes = []
 
     def replacer(match):
@@ -84,9 +85,8 @@ def process_cell_text(text: str) -> Tuple[str, List[Tuple[str, str]]]:
         return replaced
 
     new_text = REGEX.sub(replacer, text)
-    
-    return new_text, changes
 
+    return new_text, changes
 
 
 def process_excel_file(file_path: str, verbose: bool = False):
@@ -98,12 +98,12 @@ def process_excel_file(file_path: str, verbose: bool = False):
         file_path (str): Path to the .xlsx file to be processed.
         verbose (bool): If True, logs every change made to the console.
     """
-    
+
     wb = load_workbook(file_path)
 
     # Ensure the target sheet exists
     if SHEET_NAME not in wb.sheetnames:
-        print(f"❌ [ERROR] Sheet \"{SHEET_NAME}\" not found")
+        print(f'❌ [ERROR] Sheet "{SHEET_NAME}" not found')
         sys.exit(1)
 
     ws = wb[SHEET_NAME]
@@ -116,14 +116,16 @@ def process_excel_file(file_path: str, verbose: bool = False):
     for idx, col_name in enumerate(header):
         if col_name is None:
             continue
-        if any(col_name.startswith(prefix) for prefix in COLUMN_PREFIXES) or col_name in SPECIFIC_COLUMNS:
+        if (
+            any(col_name.startswith(prefix) for prefix in COLUMN_PREFIXES)
+            or col_name in SPECIFIC_COLUMNS
+        ):
             target_col_indices.append(idx)
 
     if not target_col_indices:
         print("❌ [ERROR] No matching columns found")
         sys.exit(1)
-        
-    
+
     total_replacements = 0
 
     # Loop over each data row (starting from row 2)
@@ -137,16 +139,21 @@ def process_excel_file(file_path: str, verbose: bool = False):
                     if verbose:
                         column_name = header[idx]
                         # Only shows modified words in cell
-                        changes_str = "; ".join([f"\"{orig}\" -> \"{rep}\"" for orig, rep in changes])
-                        print(f"ℹ️  [verbose] Row #{row_idx}, Column \"{column_name}\": {changes_str}")
+                        changes_str = "; ".join(
+                            [f'"{orig}" -> "{rep}"' for orig, rep in changes]
+                        )
+                        print(
+                            f'ℹ️  [verbose] Row #{row_idx}, Column "{column_name}": {changes_str}'
+                        )
                     cell.value = new_value
 
     # Save the modified Excel file with "_modified" suffix
     base, ext = os.path.splitext(file_path)
     new_file = f"{base}_modified{ext}"
     wb.save(new_file)
-    print(f"✅ File saved as: \"{new_file}\"")
+    print(f'✅ File saved as: "{new_file}"')
     print(f"ℹ️  Total replacements made: {total_replacements}")
+
 
 if __name__ == "__main__":
     # Parse arguments
@@ -156,10 +163,10 @@ if __name__ == "__main__":
 
     excel_file = sys.argv[1]
     verbose_flag = "--verbose" in sys.argv
-    
+
     # Verify file exists
     if not os.path.isfile(excel_file):
-        print(f"❌ [ERROR] File \"{excel_file}\" not found")
+        print(f'❌ [ERROR] File "{excel_file}" not found')
         sys.exit(1)
 
     # Run the processing function

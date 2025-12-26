@@ -1314,6 +1314,14 @@ def create_library(
                         node["translations"] = translations
                     if node.get("urn") in all_urns:
                         raise ValueError(f"urn already used: {node.get('urn')}")
+
+                    if node.get("assessable", False) is False and node.get(
+                        "annotation", ""
+                    ):
+                        print(
+                            f"💬 ⚠️  [WARNING] Requirement {repr(node.get('name'))} have a non-empty annotation while being not assessable."
+                        )
+
                     all_urns.add(node.get("urn"))
                     requirement_nodes.append(node)
 

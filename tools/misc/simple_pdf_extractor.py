@@ -26,13 +26,14 @@ WARNING:
     you may need to manually adjust or clean some parts of the extracted text.
 """
 
-
-
 import fitz  # PyMuPDF
 import argparse
 import os
 
-def extract_structured_text(pdf_path, output_txt_path, start_page=None, end_page=None, show_page_break=True):
+
+def extract_structured_text(
+    pdf_path, output_txt_path, start_page=None, end_page=None, show_page_break=True
+):
     try:
         doc = fitz.open(pdf_path)
     except Exception as e:
@@ -72,10 +73,23 @@ def extract_structured_text(pdf_path, output_txt_path, start_page=None, end_page
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract structured text from a PDF.")
     parser.add_argument("pdf_path", help="Path to the input PDF file")
-    parser.add_argument("-o", "--output", help="Path to output .txt file (default: same name as PDF)", default=None)
-    parser.add_argument("--start", type=int, help="Start page number (1-based)", default=None)
-    parser.add_argument("--end", type=int, help="End page number (1-based, inclusive)", default=None)
-    parser.add_argument("--no-page-break", action="store_true", help="Do not include '--- PAGE X ---' separators")
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="Path to output .txt file (default: same name as PDF)",
+        default=None,
+    )
+    parser.add_argument(
+        "--start", type=int, help="Start page number (1-based)", default=None
+    )
+    parser.add_argument(
+        "--end", type=int, help="End page number (1-based, inclusive)", default=None
+    )
+    parser.add_argument(
+        "--no-page-break",
+        action="store_true",
+        help="Do not include '--- PAGE X ---' separators",
+    )
 
     args = parser.parse_args()
 
@@ -85,5 +99,5 @@ if __name__ == "__main__":
         output_path,
         args.start,
         args.end,
-        show_page_break=not args.no_page_break
+        show_page_break=not args.no_page_break,
     )

@@ -39,8 +39,12 @@ def load_json(file_path: Path) -> dict:
         return json.load(f)
 
 
-def create_report(dir: Path, base_locale: str, target_locale: str, base_file_path: Path) -> list:
-    base_keys = set(load_json(base_file_path).keys()) # will be used to check against others locales
+def create_report(
+    dir: Path, base_locale: str, target_locale: str, base_file_path: Path
+) -> list:
+    base_keys = set(
+        load_json(base_file_path).keys()
+    )  # will be used to check against others locales
 
     report = {}
     for locale_file in dir.glob(f"*.{DEFAULT_LOCALE_EXTENSION}"):
@@ -80,7 +84,7 @@ def save_report_to_json(report: list, report_path: Path, base_file_path: Path) -
             json_content[locale][key] = base_file[key]
 
     with open(args.output, "w", encoding="utf-8") as f:
-        #Not sure if ascii should be enforced or not. I prefer to show the content as is, it's better for translating. Correct if i'm wrong.
+        # Not sure if ascii should be enforced or not. I prefer to show the content as is, it's better for translating. Correct if i'm wrong.
         json.dump(json_content, f, indent=4, ensure_ascii=False)
 
     print(f"\nReport saved to {report_path}")
@@ -91,31 +95,36 @@ if __name__ == "__main__":
         description="Detect missing i18n keys from target locale(s) compared to a base locale."
     )
     parser.add_argument(
-        "-d", "--dir",
+        "-d",
+        "--dir",
         type=Path,
         default=Path("frontend/messages"),
         help="Path to directory containing locale JSON files (default: frontend/messages).",
     )
     parser.add_argument(
-        "-b", "--base",
+        "-b",
+        "--base",
         type=str,
         default="en",
         help="Base locale to compare against (default: en).",
     )
     parser.add_argument(
-        "-t", "--target",
+        "-t",
+        "--target",
         type=str,
         default=None,
         help="Target locale to compare against (optional, default all locales).",
     )
     parser.add_argument(
-        "-o", "--output",
+        "-o",
+        "--output",
         type=Path,
         default=None,
         help="Output JSON file to save missing keys report (optional).",
     )
     parser.add_argument(
-        "-f", "--format",
+        "-f",
+        "--format",
         type=str,
         default="csv",
         help="Output format. Choose between csv and json. (optional, default csv).",
@@ -127,7 +136,9 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if args.output and args.format.lower() not in ALLOWED_OUTPUT_FORMAT:
-        print(f"Output format \"{args.format}\" is not recognized. Choose between csv and json.")
+        print(
+            f'Output format "{args.format}" is not recognized. Choose between csv and json.'
+        )
         sys.exit(1)
 
     base_file_path = args.dir / f"{args.base}.{DEFAULT_LOCALE_EXTENSION}"
