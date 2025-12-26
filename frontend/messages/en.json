@@ -3021,7 +3021,7 @@
 	"serviceNowIntegrationConfig": "ServiceNow Integration Configuration",
 	"serviceNowInstanceUrlHelpText": "The URL of your ServiceNow instance (e.g., https://example.service-now.com/).",
 	"serviceNowUsernameHelpText": "The username of your ServiceNow account.",
-	"serviceNowTableHelpText": "The name of the ServiceNow table where records will be created (e.g., 'incident').",
+	"serviceNowTableHelpText": "Select the ServiceNow table to sync with (e.g., GRC Control).",
 	"instanceUrl": "Instance URL",
 	"username": "Username",
 	"passwordAlreadySetHelpText": "The instance password is already set.",
@@ -3031,5 +3031,6 @@
 	"metricDefinitionsDescription": "Define custom metrics to track and measure performance indicators",
 	"metricInstancesDescription": "Track specific metric values for objects across your organization",
 	"dashboardsDescription": "Custom dashboards to visualize metrics and key performance indicators",
-	"libraryFilteringLabels": "Library labels"
+	"libraryFilteringLabels": "Library labels",
+	"targetTable": "Target Table"
 }
