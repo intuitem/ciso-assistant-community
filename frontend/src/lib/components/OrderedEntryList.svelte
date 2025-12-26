@@ -90,7 +90,7 @@
 	</div>
 
 	<!-- Entries List -->
-	<div class="space-y-2">
+	<div class="space-y-2" role="list">
 		{#if entries.length === 0}
 			<div class="card bg-white p-4 shadow-sm text-center text-gray-500">
 				{m.orderedEntryListEmptyState()}
@@ -106,7 +106,6 @@
 					ondrop={(e) => handleDrop(e, index)}
 					ondragend={handleDragEnd}
 					role="listitem"
-					tabindex="0"
 				>
 					<div class="flex-none">
 						<span class="text-sm font-semibold text-gray-500 w-6 text-center">{index + 1}</span>
