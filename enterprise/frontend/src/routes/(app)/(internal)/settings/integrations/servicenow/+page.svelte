@@ -169,14 +169,6 @@
 					</span>
 					<TextField
 						{form}
-						field="table_name"
-						valuePath="settings.table_name"
-						label={m.tableName()}
-						helpText={m.serviceNowTableHelpText()}
-						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
-					/>
-					<TextField
-						{form}
 						field="base_query"
 						valuePath="settings.base_query"
 						label={m.baseQuery()}
@@ -234,7 +226,7 @@
 					</span>
 					<p class="text-sm text-surface-500 -mt-3">{m.webhookEndpointUrlHelpText()}</p>
 				{/if}
-        <FieldMapper integrationId={page.data?.config?.id} />
+        <FieldMapper {form} integrationId={page.data?.config?.id} />
 				<button
 					class="text-center btn preset-filled-primary-500 font-semibold w-full"
 					data-testid="save-button">{m.save()}</button
