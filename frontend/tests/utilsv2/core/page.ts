@@ -85,6 +85,7 @@ export class Page {
 		} catch {
 			return;
 		}
+
 		await modalBackdrop.press('Escape');
 		await modalBackdrop.waitFor({ state: 'hidden' });
 	}
