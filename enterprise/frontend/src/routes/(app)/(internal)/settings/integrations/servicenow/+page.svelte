@@ -38,8 +38,13 @@
 			enable_outgoing_sync: z.boolean().default(false),
 			enable_incoming_sync: z.boolean().default(false),
 			table_name: z.string(),
-			base_query: z.string().default('active=true')
-		})
+      field_map: z.record(z.string(), z.any())
+                  .default({})
+                  .optional(),
+      value_map: z.record(z.string(), z.any())
+                  .default({})
+                  .optional()
+    })
 	});
 
 	const _form = superForm(data.form, {
@@ -167,13 +172,6 @@
 							{/if}
 						</div>
 					</span>
-					<TextField
-						{form}
-						field="base_query"
-						valuePath="settings.base_query"
-						label={m.baseQuery()}
-						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
-					/>
 				</div>
 				<div class="flex flex-col gap-4 card preset-outlined-surface-200-800 p-2">
 					<span class="flex flex-row justify-between items-center">

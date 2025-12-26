@@ -8,22 +8,27 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { m } from '$paraglide/messages';
 
 const schema = z.object({
-	id: z.string(),
-	provider_id: z.string(),
-	folder_id: z.string(),
-	is_active: z.boolean().default(true),
-	// webhook_secret: z.string().optional(),
-	credentials: z.object({
-		instance_url: z.string().url(),
-		username: z.string(),
-		password: z.string().optional()
-	}),
-	settings: z.object({
-		enable_outgoing_sync: z.boolean().default(false),
-		enable_incoming_sync: z.boolean().default(false),
-		table_name: z.string().default('incident'),
-		base_query: z.string().default('active=true')
-	})
+  id: z.string(),
+  provider_id: z.string(),
+  folder_id: z.string(),
+  is_active: z.boolean().default(true),
+  webhook_secret: z.string().optional(),
+  credentials: z.object({
+    instance_url: z.string().url(),
+    username: z.string(),
+    password: z.string().optional()
+  }),
+  settings: z.object({
+    enable_outgoing_sync: z.boolean().default(false),
+    enable_incoming_sync: z.boolean().default(false),
+    table_name: z.string(),
+    field_map: z.record(z.string(), z.any())
+                .default({})
+                .optional(),
+    value_map: z.record(z.string(), z.any())
+                .default({})
+                .optional()
+  })
 });
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {

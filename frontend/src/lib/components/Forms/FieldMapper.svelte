@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { writable } from 'svelte/store';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
 
@@ -194,7 +193,8 @@
 								{#key columns}
 									<AutocompleteSelect
 										{form}
-										field={`map_${field.key}`}
+										field={field.key}
+										valuePath={`settings.field_map.${field.key}`}
 										options={columns}
 										cachedValue={fieldMap[field.key]}
 										onChange={(val) => (fieldMap[field.key] = val)}
@@ -240,7 +240,8 @@
 											{#key choices}
 												<AutocompleteSelect
 													{form}
-													field={`val_map_${field.key}_${choice.value}`}
+													field={choice.value}
+													valuePath={`settings.value_map.${field.key}.${choice.value}`}
 													options={choices}
 													optionsValueField="value"
 													optionsLabelField="label"
