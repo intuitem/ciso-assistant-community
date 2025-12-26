@@ -152,21 +152,91 @@ class ServiceNowClient(BaseIntegrationClient):
 
     def get_available_tables(self) -> list[dict]:
         """
-        Fetches list of tables.
-        We filter out many system tables to keep the list usable.
+        Fetches 'user-facing' tables (Incidents, Controls, etc).
+        Aggressively filters out system internals, import sets, and link tables.
         """
-        # Query explanation:
-        # sys_update_nameISNOTEMPTY: Generally ensures it's a "real" table managed by the system
-        # nameNOT LIKEts_: Excludes text search tables
-        # nameNOT LIKEsys_: Excludes deep system internals (optional, but recommended for cleaner UX)
-        # We allow 'sys_user' or 'sys_user_group' explicitly if needed, but for now let's keep it broad but safe.
-        query = "sys_update_nameISNOTEMPTY^nameNOT LIKEts_^nameNOT LIKEv_"
+        # Noise filters:
+        # imp_  -> Import Sets (Temporary data buffers, usually hundreds of them)
+        # m2m_  -> Many-to-Many link tables (Internal relationship storage)
+        # sys_  -> System tables (Metadata)
+        # ts_   -> Text Search indices
+        # v_    -> Database Views
+        # var_  -> Variables (Service Catalog internals)
+        # wf_   -> Workflow contexts
+        # pa_   -> Performance Analytics
+        # ecc_  -> External Communication Channel (Queue)
+        # metric_ -> Metric definitions
+        # etc.
+
+        exclusions = [
+            "nameNOT LIKEsys_",
+            "nameNOT LIKEts_",
+            "nameNOT LIKEv_",
+            "nameNOT LIKEimp_",
+            "nameNOT LIKEm2m",  # Catch m2m_ and ..._m2m
+            "nameNOT LIKEvar_",
+            "nameNOT LIKEwf_",
+            "nameNOT LIKEpa_",
+            "nameNOT LIKEecc_",
+            "nameNOT LIKEmetric_",
+            "nameNOT LIKEais_",
+            "nameNOT LIKEsyslog_",
+            "nameNOT LIKEsysevent_",
+            "nameNOT LIKEsn_",
+            "nameNOT LIKEprotected_",
+            "nameNOT LIKEml_",
+            "nameNOT LIKEexpert_panel",
+            "nameNOT LIKEua_",
+            "nameNOT LIKEusageanalytics_",
+            "nameNOT LIKEautomation_pipeline_",
+            "nameNOT LIKEcdc_",
+            "nameNOT LIKEcmn_",
+            "nameNOT LIKEcxs_",
+            "nameNOT LIKEdiscovery_",
+            "nameNOT LIKEhermes_",
+            "nameNOT LIKEip_",
+            "nameNOT LIKElicense_",
+            "nameNOT LIKElicensing_",
+            "nameNOT LIKEnlq_",
+            "nameNOT LIKEnlu_",
+            "nameNOT LIKEoauth_",
+            "nameNOT LIKEoidc_",
+            "nameNOT LIKEopen_nlu_predict_",
+            "nameNOT LIKEpar_",
+            "nameNOT LIKEproactive_analytics_",
+            "nameNOT LIKEpromin_",
+            "nameNOT LIKEproposed_change_verification_",
+            "nameNOT LIKEpwd_",
+            "nameNOT LIKEqb_",
+            "nameNOT LIKEsc_cart_",
+            "nameNOT LIKEsc_cat_",
+            "nameNOT LIKEsc_catalog_",
+            "nameNOT LIKEsc_category_",
+            "nameNOT LIKEsc_item_",
+            "nameNOT LIKEsc_layout_",
+            "nameNOT LIKEsc_service_",
+            "nameNOT LIKEsc_wizard_",
+            "nameNOT LIKEscan_log_",
+            "nameNOT LIKEscan_mute_",
+            "nameNOT LIKEsla_repair_",
+            "nameNOT LIKEstagemgmt_",
+            "nameNOT LIKEsysevent",
+            "nameNOT LIKEsyslog",
+        ]
+
+        # Combine with OR operator logic if needed, but here we need AND logic (exclusion)
+        # In ServiceNow query syntax, separating with ^ acts as AND.
+
+        # 'sys_update_nameISNOTEMPTY' ensures the table is a tracked system object (excludes some temp tables)
+        base_query = "sys_update_nameISNOTEMPTY"
+
+        query = f"{base_query}^{'^'.join(exclusions)}"
 
         url = f"{self.base_url}/api/now/table/sys_db_object"
         params = {
             "sysparm_query": query,
             "sysparm_fields": "name,label",
-            "sysparm_limit": 500,  # Safety limit
+            "sysparm_limit": 5000,  # Safety limit
             "sysparm_exclude_reference_link": "true",
         }
 
