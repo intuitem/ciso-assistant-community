@@ -237,7 +237,7 @@
 										<div class="text-surface-300">→</div>
 
 										<div class="w-2/3">
-											{#key field.choices}
+											{#key choices}
 												<AutocompleteSelect
 													{form}
 													field={`val_map_${field.key}_${choice.value}`}
