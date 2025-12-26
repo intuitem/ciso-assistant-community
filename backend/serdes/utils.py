@@ -401,7 +401,7 @@ def get_domain_export_objects(domain: Folder):
 
     risk_matrices = RiskMatrix.objects.filter(
         Q(folder__in=folders)
-        | Q(riskassessment__in=risk_assessments)
+        | Q(risk_assessments__in=risk_assessments)
         | Q(ebios_rm_studies__in=ebios_rm_studies)
     ).distinct()
 
@@ -414,7 +414,7 @@ def get_domain_export_objects(domain: Folder):
         compliance_assessment__in=compliance_assessments
     ).distinct()
     frameworks = Framework.objects.filter(
-        Q(folder__in=folders) | Q(complianceassessment__in=compliance_assessments)
+        Q(folder__in=folders) | Q(compliance_assessments__in=compliance_assessments)
     ).distinct()
 
     entities = Entity.objects.filter(
@@ -444,7 +444,7 @@ def get_domain_export_objects(domain: Folder):
     ).distinct()
 
     reference_controls = ReferenceControl.objects.filter(
-        Q(folder__in=folders) | Q(appliedcontrol__in=applied_controls)
+        Q(folder__in=folders) | Q(applied_controls__in=applied_controls)
     ).distinct()
 
     threats = Threat.objects.filter(
