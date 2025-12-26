@@ -195,6 +195,31 @@ def check_evidences_expiring_tomorrow():
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="33"))
+def check_evidences_expiring_today():
+    """Check for Evidences expiring today and notify owners"""
+    target_date = date.today()
+    evidences_expiring_today = (
+        Evidence.objects.filter(expiry_date=target_date)
+        .exclude(status__in=["expired"])
+        .prefetch_related("owner")
+    )
+
+    # Group by individual owner
+    owner_evidences = {}
+    for evidence in evidences_expiring_today:
+        for owner in evidence.owner.all():
+            if owner.email not in owner_evidences:
+                owner_evidences[owner.email] = []
+            owner_evidences[owner.email].append(evidence)
+
+    # Send personalized email to each owner
+    for owner_email, evidences in owner_evidences.items():
+        # days=0 indicates 'today'
+        send_evidence_expiring_soon_notification(owner_email, evidences, days=0)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="40"))
 def check_validation_flows_deadline_in_week():
     """Check for ValidationFlows with deadline in 7 days (only submitted status)"""
@@ -517,7 +542,9 @@ def send_evidence_expiring_soon_notification(owner_email, evidences, days):
         "evidence_count": len(evidences),
         "evidence_list": format_evidence_list(evidences),
         "days_remaining": days,
-        "days_text": "day" if days == 1 else "days",
+        # For days==0 we want a clearer wording in templates (e.g. "today").
+        # Templates can use `days_text` and `days_remaining` to render correctly.
+        "days_text": "today" if days == 0 else ("day" if days == 1 else "days"),
     }
 
     template_name = "evidence_expiring_soon"
