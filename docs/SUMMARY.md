@@ -36,6 +36,7 @@
     * [Google Workspace](features-focus/sso/identity-providers/google-workplace.md)
     * [Keycloak](features-focus/sso/identity-providers/keycloak.md)
 * [Setting up Multi-Factor Authentication (MFA)](features-focus/setting-up-multi-factor-authentication-mfa.md)
+* [Metrics](features-focus/metrics.md)
 
 ## Model
 
