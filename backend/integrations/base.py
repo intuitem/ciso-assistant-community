@@ -179,6 +179,19 @@ class BaseSyncOrchestrator(ABC):
         """Return the appropriate field mapper for this integration"""
         pass
 
+    def get_interactive_actions(self) -> list[str]:
+        """Return a list of supported interactive actions (RPCs)."""
+        return []
+
+    def execute_action(self, action: str, params: dict) -> Any:
+        """
+        Execute a dynamic action requested by the frontend.
+        Raises NotImplementedError if action is unknown.
+        """
+        raise NotImplementedError(
+            f"Action '{action}' is not supported by this integration."
+        )
+
     def push_changes(
         self, local_object: models.Model, changed_fields: list[str]
     ) -> bool:
