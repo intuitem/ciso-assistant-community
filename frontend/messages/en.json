@@ -3032,5 +3032,13 @@
 	"metricInstancesDescription": "Track specific metric values for objects across your organization",
 	"dashboardsDescription": "Custom dashboards to visualize metrics and key performance indicators",
 	"libraryFilteringLabels": "Library labels",
-	"targetTable": "Target Table"
+	"targetTable": "Target Table",
+	"serviceNowIntegrationMappingsDescription": "ServiceNow synchronization mappings",
+	"serviceNowIntegrationMappingsHelpText": "Map your local controls to ServiceNow records.",
+	"fieldMapping": "Field Mapping",
+	"localField": "Local Field",
+	"serviceNowColumn": "ServiceNow Column",
+	"valueMapping": "Value Mapping",
+	"valueMappingForField": "{field} Mapping",
+	"valueMappingToField": "mapped_to: {field}"
 }

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	let {
 		integrationId,
@@ -11,31 +12,31 @@
 	} = $props();
 
 	const LOCAL_FIELDS = [
-		{ key: 'name', label: 'Name / Title', type: 'string', required: true },
-		{ key: 'description', label: 'Description', type: 'text', required: false },
-		{ key: 'eta', label: 'Due Date (ETA)', type: 'date', required: false },
-		{ key: 'ref_id', label: 'Reference ID (External)', type: 'string', required: false },
+		{ key: 'name', label: m.name(), type: 'string', required: true },
+		{ key: 'description', label: m.description(), type: 'text', required: false },
+		{ key: 'eta', label: m.eta(), type: 'date', required: false },
+		{ key: 'ref_id', label: m.refId(), type: 'string', required: false },
 		{
 			key: 'status',
-			label: 'Status',
+			label: m.status(),
 			type: 'choice',
 			choices: [
-				{ value: 'to_do', label: 'To Do' },
-				{ value: 'in_progress', label: 'In Progress' },
-				{ value: 'on_hold', label: 'On Hold' },
-				{ value: 'active', label: 'Active' },
-				{ value: 'deprecated', label: 'Deprecated' }
+				{ value: 'to_do', label: m.toDo() },
+				{ value: 'in_progress', label: m.inProgress() },
+				{ value: 'on_hold', label: m.onHold() },
+				{ value: 'active', label: m.active() },
+				{ value: 'deprecated', label: m.deprecated() }
 			]
 		},
 		{
 			key: 'priority',
-			label: 'Priority',
+			label: m.priority(),
 			type: 'choice',
 			choices: [
-				{ value: 1, label: 'P1 - Critical' },
-				{ value: 2, label: 'P2 - High' },
-				{ value: 3, label: 'P3 - Medium' },
-				{ value: 4, label: 'P4 - Low' }
+				{ value: 1, label: m.p1() },
+				{ value: 2, label: m.p2() },
+				{ value: 3, label: m.p3() },
+				{ value: 4, label: m.p4() }
 			]
 		}
 	];
@@ -127,20 +128,14 @@
 		columns = [];
 		loadColumns(val);
 	}
-
-	function handleSave() {
-		onSave({
-			table_name: selectedTable,
-			field_map: $state.snapshot(fieldMap),
-			value_map: $state.snapshot(valueMap)
-		});
-	}
 </script>
 
 <div class="p-6 max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-surface-200">
 	<div class="mb-8 border-b border-surface-100 pb-4">
-		<h2 class="text-xl font-bold text-surface-800">ServiceNow Integration Setup</h2>
-		<p class="text-sm text-surface-500 mt-1">Map your local controls to ServiceNow records.</p>
+		<h2 class="text-xl font-bold text-surface-800">
+			{m.serviceNowIntegrationMappingsDescription()}
+		</h2>
+		<p class="text-sm text-surface-500 mt-1">{m.serviceNowIntegrationMappingsHelpText()}</p>
 	</div>
 
 	<section class="mb-8">
@@ -164,16 +159,16 @@
 	{#if selectedTable}
 		<section class="mb-8 animate-fade-in">
 			<div class="flex justify-between items-center mb-4">
-				<h3 class="text-lg font-semibold text-surface-700">Field Mapping</h3>
+				<h3 class="text-lg font-semibold text-surface-700">{m.fieldMapping()}</h3>
 			</div>
 
 			<div class="bg-surface-50 rounded-lg p-4 border border-surface-200">
 				<div
 					class="grid grid-cols-12 gap-4 mb-2 text-xs font-semibold text-surface-500 uppercase tracking-wider"
 				>
-					<div class="col-span-5">Local Field</div>
+					<div class="col-span-5">{m.localField()}</div>
 					<div class="col-span-1 text-center"></div>
-					<div class="col-span-6">ServiceNow Column</div>
+					<div class="col-span-6">{m.serviceNowColumn()}</div>
 				</div>
 
 				<div class="space-y-4">
@@ -211,7 +206,7 @@
 
 		{#if activeChoiceFields.length > 0}
 			<section class="mb-8 animate-fade-in">
-				<h3 class="text-lg font-semibold text-surface-700 mb-4">Value Mapping</h3>
+				<h3 class="text-lg font-semibold text-surface-700 mb-4">{m.valueMapping()}</h3>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					{#each activeChoiceFields as field}
@@ -222,9 +217,9 @@
 							<div
 								class="bg-surface-100 px-4 py-2 border-b border-surface-200 font-medium text-surface-700 flex justify-between"
 							>
-								<span>{field.label} Mapping</span>
+								<span>{m.valueMappingForField({ field: safeTranslate(field.label) })}</span>
 								<span class="text-xs bg-surface-200 px-2 py-1 rounded text-surface-600">
-									mapped to: {remoteField}
+									{m.valueMappingToField({ field: remoteField })}
 								</span>
 							</div>
 
@@ -260,15 +255,6 @@
 				</div>
 			</section>
 		{/if}
-
-		<div class="flex justify-end pt-4 border-t border-surface-100">
-			<button
-				onclick={handleSave}
-				class="bg-secondary-600 hover:bg-secondary-700 text-white font-medium py-2 px-6 rounded-md transition-colors shadow-sm"
-			>
-				Save Configuration
-			</button>
-		</div>
 	{/if}
 </div>
 
