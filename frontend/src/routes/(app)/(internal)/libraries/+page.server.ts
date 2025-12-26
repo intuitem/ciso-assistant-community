@@ -44,10 +44,12 @@ export const load = (async ({ fetch }) => {
 
 	const schema = z.object({ id: z.string() });
 	const deleteForm = await superValidate(zod(schema));
+	const uploadForm = await superValidate({}, zod(LibraryUploadSchema), { errors: false });
 
 	return {
 		storedLibrariesTable,
 		deleteForm,
+		uploadForm,
 		title: m.libraries()
 	};
 }) satisfies PageServerLoad;
