@@ -108,6 +108,12 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
     API endpoint for creating, viewing, updating, and deleting Integration Configurations.
     """
 
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+
     queryset = IntegrationConfiguration.objects.select_related(
         "provider", "folder"
     ).all()
