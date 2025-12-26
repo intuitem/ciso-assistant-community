@@ -2,31 +2,14 @@
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { m } from '$paraglide/messages';
 
 	let {
 		integrationId,
 		initialConfig = null,
+		form,
 		onSave = (config) => console.log('Saved:', config)
 	} = $props();
-
-	// Since AutocompleteSelect expects a SuperForm but we use local state here,
-	// we create a dummy store to satisfy the type contract.
-	function createMockForm() {
-		return {
-			form: writable({}),
-			errors: writable({}),
-			constraints: writable({}),
-			message: writable(null),
-			posted: writable(false),
-			allErrors: writable([]),
-			submitting: writable(false),
-			delayed: writable(false),
-			tainted: writable({}),
-			capture: () => {},
-			restore: () => {}
-		} as any;
-	}
-	const mockForm = createMockForm();
 
 	const LOCAL_FIELDS = [
 		{ key: 'name', label: 'Name / Title', type: 'string', required: true },
@@ -164,15 +147,16 @@
 	<section class="mb-8">
 		{#key tables}
 			<AutocompleteSelect
-				form={mockForm}
-				field="servicenow_table"
-				label="Target Table"
+				{form}
+				field="table_name"
+				valuePath="settings.table_name"
+				label={m.targetTable()}
 				optionsValueField="value"
 				optionsLabelField="label"
 				options={tables}
 				cachedValue={selectedTable}
 				onChange={handleTableChange}
-				helpText="Select the ServiceNow table to sync with (e.g., Incident, GRC Control)."
+				helpText={m.serviceNowTableHelpText()}
 				baseClass="w-full md:w-1/2"
 			/>
 		{/key}
@@ -209,7 +193,7 @@
 							<div class="col-span-6">
 								{#key columns}
 									<AutocompleteSelect
-										form={mockForm}
+										{form}
 										field={`map_${field.key}`}
 										options={columns}
 										cachedValue={fieldMap[field.key]}
@@ -255,7 +239,7 @@
 										<div class="w-2/3">
 											{#key field.choices}
 												<AutocompleteSelect
-													form={mockForm}
+													{form}
 													field={`val_map_${field.key}_${choice.value}`}
 													options={choices}
 													optionsValueField="value"
