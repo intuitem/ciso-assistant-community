@@ -105,7 +105,8 @@
 					ondragover={handleDragOver}
 					ondrop={(e) => handleDrop(e, index)}
 					ondragend={handleDragEnd}
-					role="listitem"
+					role="option"
+					aria-selected="false"
 					tabindex="0"
 				>
 					<div class="flex-none">

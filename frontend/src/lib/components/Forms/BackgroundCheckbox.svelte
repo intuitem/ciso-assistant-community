@@ -61,7 +61,11 @@
 		       {$value
 			? 'bg-gradient-to-br from-primary-400 to-primary-500 border-primary text-white'
 			: 'bg-white border-gray-300'}"
-		on:click={toggle}
+		onclick={toggle}
+		onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && toggle()}
+		role="checkbox"
+		aria-checked={$value}
+		tabindex="0"
 	>
 		<div class="flex justify-between items-center min-h-[2.5rem]">
 			<span class="font-semibold">{label}</span>
