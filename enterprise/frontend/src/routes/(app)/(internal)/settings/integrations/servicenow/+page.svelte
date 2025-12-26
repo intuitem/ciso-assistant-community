@@ -6,6 +6,7 @@
 	import type { ActionData, PageData } from './$types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import FieldMapper from '$lib/components/Forms/FieldMapper.svelte';
 	import { z } from 'zod';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
@@ -72,6 +73,7 @@
 			{_form}
 			{invalidateAll}
 			validators={zod(schema)}
+      debug
 		>
 			{#snippet children({ form })}
 				<Checkbox {form} field="is_active" label={m.active()} />
@@ -232,6 +234,7 @@
 					</span>
 					<p class="text-sm text-surface-500 -mt-3">{m.webhookEndpointUrlHelpText()}</p>
 				{/if}
+        <FieldMapper integrationId={page.data?.config?.id} />
 				<button
 					class="text-center btn preset-filled-primary-500 font-semibold w-full"
 					data-testid="save-button">{m.save()}</button
