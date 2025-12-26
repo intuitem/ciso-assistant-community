@@ -30,6 +30,8 @@ class ServiceNowClient(BaseIntegrationClient):
 
         url = f"{self.base_url}/api/now/table/{self.table}"
 
+        logger.info("Attempting to create ServiceNow record", payload=payload)
+
         try:
             response = requests.post(
                 url,
@@ -44,7 +46,7 @@ class ServiceNowClient(BaseIntegrationClient):
             sys_id = result.get("sys_id")
             number = result.get("number")
 
-            logger.info(f"Created ServiceNow record {number} ({sys_id})")
+            logger.info("Created ServiceNow record", number=number, sys_id=sys_id)
 
             # Optional: Update the local ref_id with the human-readable number immediately
             # This depends on your specific flow, but it's often useful.
@@ -53,9 +55,9 @@ class ServiceNowClient(BaseIntegrationClient):
 
             return sys_id
 
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             logger.error(
-                f"Failed to create ServiceNow record: {e.response.text if e.response else e}"
+                "Failed to create ServiceNow record", payload=payload, exc_info=True
             )
             raise
 
