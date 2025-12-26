@@ -62,7 +62,12 @@
 			? 'bg-gradient-to-br from-primary-400 to-primary-500 border-primary text-white'
 			: 'bg-white border-gray-300'}"
 		onclick={toggle}
-		onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && toggle()}
+		onkeydown={(e) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				toggle();
+			}
+		}}
 		role="checkbox"
 		aria-checked={$value}
 		tabindex="0"
