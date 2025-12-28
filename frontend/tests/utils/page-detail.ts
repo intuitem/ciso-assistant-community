@@ -44,11 +44,11 @@ export class PageDetail extends BasePage {
 			if ('perimeter' in values) {
 				await expect
 					.soft(this.page.getByTestId('name-field-value'))
-					.toHaveText(`${values.perimeter}/${values.name} - ${values.version}`);
+					.toHaveText(`${values.perimeter} / ${values.name} - ${values.version}`);
 			} else {
 				await expect
 					.soft(this.page.getByTestId('name-field-value'))
-					.toHaveText(new RegExp(`.+/${values.name} - ${values.version}`));
+					.toHaveText(new RegExp(`.+ / ${values.name} - ${values.version}`));
 			}
 			if ('risk_matrix' in values) {
 				await expect
