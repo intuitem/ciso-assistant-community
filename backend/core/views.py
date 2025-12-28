@@ -1167,6 +1167,8 @@ class PathAwareOrderingFilter(filters.OrderingFilter):
 
         # Build full path string
         def full_path(obj):
+            if isinstance(obj, Folder):
+                return str(obj)
             folder = getattr(obj, related_field, None) if related_field else None
             if folder is None:
                 return ""
@@ -5589,10 +5591,6 @@ class FolderFilter(GenericFilterSet):
         ]
 
 
-class FolderOrderingFilter(PathAwareOrderingFilter):
-    path_fields = {"name", "parent_folder"}
-
-
 class FolderViewSet(BaseModelViewSet):
     """
     API endpoint that allows folders to be viewed or edited.
@@ -5603,11 +5601,13 @@ class FolderViewSet(BaseModelViewSet):
     search_fields = ["name"]
     filter_backends = [
         DjangoFilterBackend,
-        FolderOrderingFilter,
+        PathAwareOrderingFilter,
         filters.SearchFilter,
     ]
-    ordering_fields = ["name", "parent_folder"]
+    ordering_fields = ["name", "str", "parent_folder", "description", "content_type"]
     batch_size = 100  # Configurable batch size for processing domain import
+    path_ordering_fields = {"str"}
+    path_fields = {"str"}
 
     def perform_create(self, serializer):
         """
