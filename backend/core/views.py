@@ -1210,7 +1210,7 @@ class PerimeterViewSet(BaseModelViewSet):
     search_fields = ["name", "ref_id", "description"]
     filterset_fields = ["name", "folder", "campaigns"]
     filter_backends = [DjangoFilterBackend, PathAwareOrderingFilter, filters.SearchFilter]
-    ordering_fields = ["name", "folder", "str"]
+    ordering_fields = ["name", "folder", "str", "description", "default_assignee"]
     path_ordering_fields = {"str"}
     path_fields = {"str"}
 
