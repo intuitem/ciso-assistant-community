@@ -1120,9 +1120,6 @@ class ContentTypeListView(APIView):
         return Response(content_types)
 
 
-# Risk Assessment
-
-
 class PerimeterFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(
         queryset=Folder.objects.all(),
@@ -1194,9 +1191,9 @@ class PerimeterViewSet(BaseModelViewSet):
     search_fields = ["name", "ref_id", "description"]
     filterset_fields = ["name", "folder", "campaigns"]
     filter_backends = [DjangoFilterBackend, PathAwareOrderingFilter, filters.SearchFilter]
-    ordering_fields = ["name", "folder"]
-    path_ordering_fields = {"name"}
-    path_fields = {"name"}
+    ordering_fields = ["name", "folder", "str"]
+    path_ordering_fields = {"str"}
+    path_fields = {"str"}
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
