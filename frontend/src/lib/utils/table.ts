@@ -122,6 +122,7 @@ export const PARENT_DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
+		optionsLabelField: 'str',
 		label: 'parent_domain',
 		multiple: true
 	}
