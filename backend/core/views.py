@@ -1136,47 +1136,66 @@ class PerimeterFilter(GenericFilterSet):
 class PathAwareOrderingFilter(filters.OrderingFilter):
     """
     Ordering filter that supports Python-side ordering for configured path fields.
-    """
 
+    - path_fields: fields that require Python-side ordering
+    - related_field: the related FK to follow for path-aware sorting (optional)
+    """
     path_fields: set[str] = set()
+    related_field: str | None = None  # override per view if needed
 
     def filter_queryset(self, request, queryset, view):
         ordering = self.get_ordering(request, queryset, view)
         if not ordering:
             return queryset
 
-        view_path_fields = getattr(view, "path_ordering_fields", set())
-        path_fields = self.path_fields or view_path_fields or set()
-
-        normalized_ordering = [field.lstrip("-") for field in ordering]
-        if not any(field in path_fields for field in normalized_ordering):
+        # Use view-defined path_fields if not explicitly set in the filter
+        path_fields = self.path_fields or getattr(view, "path_ordering_fields", set())
+        if not path_fields:
             return super().filter_queryset(request, queryset, view)
 
-        queryset = queryset.select_related("folder")
+        # Normalize ordering fields
+        normalized_ordering = [f.lstrip("-") for f in ordering]
+        if not any(f in path_fields for f in normalized_ordering):
+            return super().filter_queryset(request, queryset, view)
+
+        # Optional related field for path-aware sorting
+        related_field = getattr(view, "path_related_field", self.related_field)
+        if related_field and hasattr(queryset.model, related_field):
+            queryset = queryset.select_related(related_field)
+
         data = list(queryset)
 
-        def full_path_or_name(folder):
+        # Build full path string
+        def full_path(obj):
+            folder = getattr(obj, related_field, None) if related_field else None
             if folder is None:
                 return ""
-            items = folder.get_folder_full_path(include_root=False)
-            names = [getattr(f, "name", "") or "" for f in items]
-            return " / ".join(names) if names else (folder.name or "")
+            # Use get_folder_full_path if available
+            if hasattr(folder, "get_folder_full_path"):
+                items = folder.get_folder_full_path(include_root=False)
+                names = [getattr(f, "name", "") or "" for f in items]
+                return " / ".join(names) if names else (folder.name or "")
+            return getattr(folder, "name", "") or ""
 
+        # Key function for sorting
         def key_for_field(obj, field):
             if field not in path_fields:
                 value = getattr(obj, field, "")
-                if isinstance(value, str):
-                    return value.casefold()
-                return value
-            folder = getattr(obj, "folder", None)
-            path_key = full_path_or_name(folder).casefold()
+                return value.casefold() if isinstance(value, str) else value
+            # Path-aware field
+            path_key = full_path(obj).casefold()
             name_key = (getattr(obj, "name", "") or "").casefold()
             return (path_key, name_key)
 
+        # Apply multi-field stable sort in reverse order
         for field in reversed(ordering):
             reverse = field.startswith("-")
             field_name = field.lstrip("-")
             data.sort(key=lambda obj, f=field_name: key_for_field(obj, f), reverse=reverse)
+
+        # DRF pagination support
+        if getattr(view, "paginator", None):
+            return view.paginator.paginate_queryset(data, request, view=view)
 
         return data
 
