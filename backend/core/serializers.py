@@ -266,6 +266,7 @@ class PerimeterReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     lc_status = serializers.CharField(source="get_lc_status_display")
     default_assignee = FieldsRelatedField(many=True)
+    str = serializers.CharField(source="__str__", read_only=True)
 
     class Meta:
         model = Perimeter

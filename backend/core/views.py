@@ -1136,6 +1136,54 @@ class PerimeterFilter(GenericFilterSet):
         fields = ["name", "folder", "lc_status", "campaigns"]
 
 
+class PathAwareOrderingFilter(filters.OrderingFilter):
+    """
+    Ordering filter that supports Python-side ordering for configured path fields.
+    """
+
+    path_fields: set[str] = set()
+
+    def filter_queryset(self, request, queryset, view):
+        ordering = self.get_ordering(request, queryset, view)
+        if not ordering:
+            return queryset
+
+        view_path_fields = getattr(view, "path_ordering_fields", set())
+        path_fields = self.path_fields or view_path_fields or set()
+
+        normalized_ordering = [field.lstrip("-") for field in ordering]
+        if not any(field in path_fields for field in normalized_ordering):
+            return super().filter_queryset(request, queryset, view)
+
+        queryset = queryset.select_related("folder")
+        data = list(queryset)
+
+        def full_path_or_name(folder):
+            if folder is None:
+                return ""
+            items = folder.get_folder_full_path(include_root=False)
+            names = [getattr(f, "name", "") or "" for f in items]
+            return " / ".join(names) if names else (folder.name or "")
+
+        def key_for_field(obj, field):
+            if field not in path_fields:
+                value = getattr(obj, field, "")
+                if isinstance(value, str):
+                    return value.casefold()
+                return value
+            folder = getattr(obj, "folder", None)
+            path_key = full_path_or_name(folder).casefold()
+            name_key = (getattr(obj, "name", "") or "").casefold()
+            return (path_key, name_key)
+
+        for field in reversed(ordering):
+            reverse = field.startswith("-")
+            field_name = field.lstrip("-")
+            data.sort(key=lambda obj, f=field_name: key_for_field(obj, f), reverse=reverse)
+
+        return data
+
+
 class PerimeterViewSet(BaseModelViewSet):
     """
     API endpoint that allows perimeters to be viewed or edited.
@@ -1145,6 +1193,10 @@ class PerimeterViewSet(BaseModelViewSet):
     filterset_class = PerimeterFilter
     search_fields = ["name", "ref_id", "description"]
     filterset_fields = ["name", "folder", "campaigns"]
+    filter_backends = [DjangoFilterBackend, PathAwareOrderingFilter, filters.SearchFilter]
+    ordering_fields = ["name", "folder"]
+    path_ordering_fields = {"name"}
+    path_fields = {"name"}
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -5456,66 +5508,12 @@ class UserViewSet(BaseModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-class UserGroupOrderingFilter(filters.OrderingFilter):
+class UserGroupOrderingFilter(PathAwareOrderingFilter):
     """
     Custom ordering filter:
-    - Performs in-memory (Python) sorting only for `localization_dict`.
-    - The sort key is a tuple: (folder full_path OR folder.name, object.name).
-    - Supports `-localization_dict` for descending order.
-    - For all other fields, it falls back to standard SQL ordering.
+    - Supports `localization_dict` via PathAwareOrderingFilter
     """
-
-    def filter_queryset(self, request, queryset, view):
-        ordering = self.get_ordering(request, queryset, view)
-        if not ordering:
-            return queryset
-
-        # Special case: in-memory sorting for `localization_dict`
-        if len(ordering) == 1 and ordering[0].lstrip("-") == "localization_dict":
-            desc = ordering[0].startswith("-")
-
-            # Optimize DB access: fetch the related folder in one query
-            queryset = queryset.select_related("folder")
-
-            # Materialize queryset into a list to sort in Python
-            data = list(queryset)
-
-            def full_path_or_name(folder):
-                """
-                Build a string key from the folder:
-                - Prefer the full path (names of all parent folders + current).
-                - Fall back to the folder's name if no path is available.
-                """
-                if folder is None:
-                    return ""
-
-                path_list = getattr(folder, "get_folder_full_path", None)
-                if callable(path_list):
-                    items = folder.get_folder_full_path(include_root=False)
-                    names = [getattr(f, "name", "") or "" for f in items]
-                    if names:
-                        return "/".join(names)
-
-                # Fallback: just the folder name
-                return getattr(folder, "name", "") or ""
-
-            def key_func(obj):
-                # Get the folder from the object
-                folder = getattr(obj, "folder", None)
-                # If you want to be more robust, you could use:
-                # from yourapp.models import Folder
-                # folder = Folder.get_folder(obj)
-
-                path_key = full_path_or_name(folder).casefold()
-                name_key = (getattr(obj, "name", "") or "").casefold()
-                return (path_key, name_key)
-
-            # Perform stable sort, reverse if `-localization_dict`
-            data.sort(key=key_func, reverse=desc)
-            return data
-
-        # Default case: fall back to SQL ordering
-        return super().filter_queryset(request, queryset, view)
+    path_fields = {"localization_dict"}
 
 
 class UserGroupViewSet(BaseModelViewSet):
@@ -5575,6 +5573,10 @@ class FolderFilter(GenericFilterSet):
         ]
 
 
+class FolderOrderingFilter(PathAwareOrderingFilter):
+    path_fields = {"name", "parent_folder"}
+
+
 class FolderViewSet(BaseModelViewSet):
     """
     API endpoint that allows folders to be viewed or edited.
@@ -5583,6 +5585,12 @@ class FolderViewSet(BaseModelViewSet):
     model = Folder
     filterset_class = FolderFilter
     search_fields = ["name"]
+    filter_backends = [
+        DjangoFilterBackend,
+        FolderOrderingFilter,
+        filters.SearchFilter,
+    ]
+    ordering_fields = ["name", "parent_folder"]
     batch_size = 100  # Configurable batch size for processing domain import
 
     def perform_create(self, serializer):
