@@ -65,8 +65,7 @@ const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
 		params.set('search', search);
 	}
 	if (sort) {
-		const orderBy = sort.orderBy === 'str' ? 'name' : sort.orderBy;
-		params.set('ordering', `${sort.direction === 'desc' ? '-' : ''}${orderBy}`);
+		params.set('ordering', `${sort.direction === 'desc' ? '-' : ''}${sort.orderBy}`);
 	}
 	if (filters) {
 		for (const filter of filters) {
