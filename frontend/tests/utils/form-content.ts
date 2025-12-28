@@ -87,7 +87,10 @@ export class FormContent {
 								.getByRole('searchbox')
 								.evaluate((el) => el.classList.contains('disabled')))
 						) {
-							await expect(field.locator.getByRole('searchbox')).toContainText(values[key]);
+							await expect(field.locator.getByRole('searchbox')).toContainText(values[key], {
+								ignoreCase: false,
+								normalizeWhitespace: true
+							});
 						} else {
 							if (typeof values[key] === 'object' && 'request' in values[key]) {
 								const responsePromise = this.page.waitForResponse(
