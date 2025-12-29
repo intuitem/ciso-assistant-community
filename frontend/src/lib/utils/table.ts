@@ -1212,8 +1212,8 @@ export const listViewFields = {
 		}
 	},
 	perimeters: {
-		head: ['ref_id', 'name', 'description', 'defaultAssignee', 'domain'],
-		body: ['ref_id', 'str', 'description', 'default_assignee', 'folder'],
+		head: ['ref_id', 'name', 'description', 'defaultAssignee'],
+		body: ['ref_id', 'str', 'description', 'default_assignee'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			lc_status: PERIMETER_STATUS_FILTER

@@ -1160,7 +1160,7 @@ class PathAwareOrderingFilter(filters.OrderingFilter):
             return super().filter_queryset(request, queryset, view)
 
         # Optional related field for path-aware sorting
-        related_field = getattr(view, "path_related_field", self.related_field)
+        related_field = getattr(view, "path_related_field", "folder")
         if related_field and hasattr(queryset.model, related_field):
             queryset = queryset.select_related(related_field)
 
@@ -1198,10 +1198,6 @@ class PathAwareOrderingFilter(filters.OrderingFilter):
                 key=lambda obj, f=field_name: key_for_field(obj, f), reverse=reverse
             )
 
-        # DRF pagination support
-        if getattr(view, "paginator", None):
-            return view.paginator.paginate_queryset(data, request, view=view)
-
         return data
 
 
@@ -1212,7 +1208,7 @@ class PerimeterViewSet(BaseModelViewSet):
 
     model = Perimeter
     filterset_class = PerimeterFilter
-    search_fields = ["name", "ref_id", "description"]
+    search_fields = ["name", "folder__name", "ref_id", "description"]
     filterset_fields = ["name", "folder", "campaigns"]
     filter_backends = [
         DjangoFilterBackend,
@@ -5616,6 +5612,7 @@ class FolderViewSet(BaseModelViewSet):
     batch_size = 100  # Configurable batch size for processing domain import
     path_ordering_fields = {"str"}
     path_fields = {"str"}
+    path_related_fields = "parent_folder"
 
     def perform_create(self, serializer):
         """
