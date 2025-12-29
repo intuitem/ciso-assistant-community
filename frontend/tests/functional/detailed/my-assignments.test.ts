@@ -47,7 +47,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await riskAssessmentsPage.goto();
 		await riskAssessmentsPage.createItem({
 			name: vars.riskAssessmentName,
-			perimeter: `${vars.folderName} / ${vars.perimeterName}`,
+			perimeter: `${vars.folderName}/${vars.perimeterName}`,
 			description: vars.description,
 			authors: ['admin@tests.com']
 		});
@@ -100,7 +100,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await complianceAssessmentsPage.createItem({
 			name: vars.assessmentName,
 			framework: 'NIST CSF',
-			perimeter: `${vars.folderName} / ${vars.perimeterName}`,
+			perimeter: `${vars.folderName}/${vars.perimeterName}`,
 			authors: ['admin@tests.com']
 		});
 	});
