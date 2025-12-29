@@ -3237,5 +3237,14 @@
 	"metricInstancesDescription": "Track specific metric values for objects across your organization",
 	"dashboardsDescription": "Custom dashboards to visualize metrics and key performance indicators",
 	"libraryFilteringLabels": "Library labels",
-	"objectsNotVisible": "{count} object{s} not visible."
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} object not visible.",
+				"countPlural=other": "{count} objects not visible."
+			}
+		}
+	]
 }
