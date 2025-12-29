@@ -70,6 +70,15 @@
 	const requirementHashmap = Object.fromEntries(
 		data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
 	);
+	const getRequirement = (requirementAssessment: Record<string, any>) => {
+		if (!requirementAssessment) return undefined;
+		const requirementValue = requirementAssessment.requirement;
+		if (!requirementValue) return requirementAssessment;
+		if (typeof requirementValue === 'string') {
+			return requirementHashmap[requirementValue] ?? requirementAssessment;
+		}
+		return requirementValue;
+	};
 
 	// Initialize hide suggestion state
 	let hideSuggestionHashmap: Record<string, boolean> = $state({});
@@ -78,7 +87,7 @@
 
 	const hasQuestions = $derived(
 		requirementAssessments.some(
-			(requirementAssessment) => requirementAssessment.requirement.questions
+			(requirementAssessment) => getRequirement(requirementAssessment)?.questions
 		)
 	);
 
@@ -93,8 +102,7 @@
 		if (titleMap.has(requirementAssessment.id)) {
 			return titleMap.get(requirementAssessment.id);
 		}
-		const requirement =
-			requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
+		const requirement = getRequirement(requirementAssessment);
 		const result = requirement.display_short ? requirement.display_short : (requirement.name ?? '');
 		titleMap.set(requirementAssessment.id, result);
 		return result;
@@ -275,8 +283,6 @@
 	const accordionItems: Record<string, ['' | 'observation' | 'evidence']> = $state(
 		// svelte-ignore state_referenced_locally
 		requirementAssessments.reduce((acc, requirementAssessment) => {
-			const requirement =
-				requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
 			return {
 				...acc,
 				[requirementAssessment.id]: ['']
@@ -292,7 +298,7 @@
 			tocItems = requirementAssessments
 				.filter((ra) => {
 					// Only include non-assessable nodes, non empty title and depth <= 4
-					const requirement = requirementHashmap[ra.requirement] ?? ra;
+					const requirement = getRequirement(ra);
 					if (ra.assessable || requirement.assessable) return false;
 
 					const refId = requirement.ref_id ?? requirement.requirement?.ref_id;
@@ -310,7 +316,7 @@
 					return true;
 				})
 				.map((ra, index) => {
-					const requirement = requirementHashmap[ra.requirement] ?? ra;
+					const requirement = getRequirement(ra);
 
 					// Safely access ref_id and name
 					const refId = requirement.ref_id ?? requirement.requirement?.ref_id;
@@ -395,6 +401,7 @@
 		{/if}
 		<ul data-testid="requirement-assessments">
 			{#each requirementAssessments as requirementAssessment, i}
+				{@const requirement = getRequirement(requirementAssessment)}
 				<li class="list-none">
 					<span
 						class="relative flex justify-center py-4"
@@ -412,11 +419,11 @@
 						</span>
 					</span>
 					<div class="h-2"></div>
-					{#if requirementAssessment.requirement.description || requirementAssessment.assessable}
+					{#if requirement?.description || requirementAssessment.assessable}
 						<div
 							class="flex flex-col items-center justify-center border px-4 py-2 shadow-sm rounded-xl space-y-2"
 						>
-							{#if requirementAssessment.requirement.description}
+							{#if requirement?.description}
 								<div
 									class="card w-full font-light text-lg p-4 preset-tonal-primary"
 									data-testid="description"
@@ -426,11 +433,11 @@
 											<i class="fa-solid fa-file-lines mr-2"></i>{m.description()}
 										</div>
 									</h2>
-									<MarkdownRenderer content={requirementAssessment.requirement.description} />
+									<MarkdownRenderer content={requirement?.description} />
 								</div>
 							{/if}
 							{#if requirementAssessment.assessable}
-								{#if requirementAssessment.requirement.annotation || requirementAssessment.requirement.typical_evidence || requirementAssessment.mapping_inference?.result}
+								{#if requirement?.annotation || requirement?.typical_evidence || requirementAssessment.mapping_inference?.result}
 									<div
 										class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto w-full"
 									>
@@ -447,29 +454,25 @@
 											</button>
 										</h2>
 										{#if !hideSuggestionHashmap[requirementAssessment.id]}
-											{#if requirementAssessment.requirement.annotation}
+											{#if requirement?.annotation}
 												<div class="my-2">
 													<p class="font-medium">
 														<i class="fa-solid fa-pencil"></i>
 														{m.annotation()}
 													</p>
 													<div class="py-1">
-														<MarkdownRenderer
-															content={requirementAssessment.requirement.annotation}
-														/>
+														<MarkdownRenderer content={requirement?.annotation} />
 													</div>
 												</div>
 											{/if}
-											{#if requirementAssessment.requirement.typical_evidence}
+											{#if requirement?.typical_evidence}
 												<div class="my-2">
 													<p class="font-medium">
 														<i class="fa-solid fa-pencil"></i>
 														{m.typicalEvidence()}
 													</p>
 													<div class="py-1">
-														<MarkdownRenderer
-															content={requirementAssessment.requirement.typical_evidence}
-														/>
+														<MarkdownRenderer content={requirement?.typical_evidence} />
 													</div>
 												</div>
 											{/if}
@@ -603,10 +606,10 @@
 											</div>
 										</div>
 									{/if}
-									{#if requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
+									{#if requirement?.questions != null && Object.keys(requirement?.questions ?? {}).length !== 0}
 										<div class="flex flex-col w-full space-y-2">
 											<Question
-												questions={requirementAssessment.requirement.questions}
+												questions={requirement?.questions}
 												initialValue={requirementAssessment.answers}
 												field="answers"
 												{shallow}

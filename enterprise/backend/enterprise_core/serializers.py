@@ -4,7 +4,7 @@ from core.serializers import (
     BaseModelSerializer,
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
-from core.serializer_fields import FieldsRelatedField
+from core.serializer_fields import IdRelatedField
 from iam.models import Folder, User, Role
 
 from .models import ClientSettings, LogEntryAction
@@ -43,7 +43,7 @@ class FolderWriteSerializer(BaseModelSerializer):
 class RoleReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     permissions = serializers.SerializerMethodField()
-    folder = FieldsRelatedField()
+    folder = IdRelatedField()
 
     class Meta:
         model = Role

@@ -13,6 +13,9 @@ import type { PageServerLoad } from './$types';
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
+	const getId = (value: any) => (typeof value === 'string' ? value : value?.id);
+	const normalizeIds = (items: any[] | undefined) =>
+		(items ?? []).map((item) => (typeof item === 'string' ? item : item?.id)).filter(Boolean);
 
 	const [compliance_assessment, tableMode, scores] = await Promise.all(
 		[endpoint, `${endpoint}requirements_list/`, `${endpoint}global_score/`].map((endpoint) =>
@@ -20,9 +23,12 @@ export const load = (async ({ fetch, params }) => {
 		)
 	);
 
-	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/`;
-	const framework = await fetch(frameworkEndpoint).then((res) => res.json());
-	compliance_assessment.framework = framework;
+	const frameworkId = getId(compliance_assessment.framework);
+	if (frameworkId) {
+		const frameworkEndpoint = `${BASE_API_URL}/frameworks/${frameworkId}/`;
+		const framework = await fetch(frameworkEndpoint).then((res) => res.json());
+		compliance_assessment.framework = framework;
+	}
 
 	const measureModel = getModelInfo('applied-controls');
 	const measureCreateSchema = modelSchema('applied-controls');
@@ -36,17 +42,20 @@ export const load = (async ({ fetch, params }) => {
 	});
 	const requirement_assessments = await Promise.all(
 		tableMode.requirement_assessments.map(async (requirementAssessment) => {
+			const folderId = getId(requirementAssessment.folder);
+			const requirementId = getId(requirementAssessment.requirement);
+			const complianceAssessmentId = getId(requirementAssessment.compliance_assessment);
 			// TODO: merge initial data ?
 			const measureInitialData = {
 				requirement_assessments: [requirementAssessment.id],
-				folder: requirementAssessment.folder.id
+				folder: folderId
 			};
 			const measureCreateForm = await superValidate(measureInitialData, zod(measureCreateSchema), {
 				errors: false
 			});
 			const evidenceInitialData = {
 				requirement_assessments: [requirementAssessment.id],
-				folder: requirementAssessment.folder.id
+				folder: folderId
 			};
 			const evidenceCreateForm = await superValidate(
 				evidenceInitialData,
@@ -68,11 +77,11 @@ export const load = (async ({ fetch, params }) => {
 			const updatedModel: ModelInfo = getModelInfo('requirement-assessments');
 			const object = {
 				...requirementAssessment,
-				folder: requirementAssessment.folder.id,
-				requirement: requirementAssessment.requirement.id,
-				compliance_assessment: requirementAssessment.compliance_assessment.id,
-				evidences: requirementAssessment.evidences.map((evidence) => evidence.id),
-				applied_controls: requirementAssessment.applied_controls.map((ac) => ac.id)
+				folder: folderId,
+				requirement: requirementId,
+				compliance_assessment: complianceAssessmentId,
+				evidences: normalizeIds(requirementAssessment.evidences),
+				applied_controls: normalizeIds(requirementAssessment.applied_controls)
 			};
 			const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 			return {
@@ -96,12 +105,7 @@ export const load = (async ({ fetch, params }) => {
 		{}
 	);
 
-	const requirements = tableMode.requirements.map((requirement) => {
-		if (requirementAssessmentsById[requirement.id]) {
-			return requirementAssessmentsById[requirement.id];
-		}
-		return requirement;
-	});
+	const requirements = tableMode.requirements;
 
 	return {
 		URLModel,
