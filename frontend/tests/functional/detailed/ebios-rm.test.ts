@@ -215,7 +215,7 @@ test('ebios rm study', async ({
 			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await complianceAssessmentsPage.createItem({
 				name: 'security foundation audit',
-				perimeter: `${vars.folderName}/${vars.perimeterName}`,
+				perimeter: `${vars.folderName} / ${vars.perimeterName}`,
 				framework: vars.framework.name,
 				authors: [LoginPage.defaultEmail]
 			});
@@ -592,7 +592,7 @@ test('ebios rm study', async ({
 		await page.getByRole('button', { name: ' Step 1 Generate the risk' }).click();
 		await riskAssessmentsPage.form.fill({
 			name: 'test-risk-assessment-ebios-rm',
-			perimeter: `${vars.folderName}/${vars.perimeterName}`
+			perimeter: `${vars.folderName} / ${vars.perimeterName}`
 		});
 		await page.getByTestId('save-button').click();
 		await expect(page.getByTestId('modal-title')).not.toBeVisible();
