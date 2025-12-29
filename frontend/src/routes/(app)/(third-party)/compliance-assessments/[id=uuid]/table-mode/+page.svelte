@@ -359,14 +359,16 @@
 			<div
 				class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full"
 			>
-				<a
-					href="/compliance-assessments/{complianceAssessment.id}"
-					class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
-					data-testid="back-to-audit"
-				>
-					<i class="fa-solid fa-arrow-left"></i>
-					<p class="">{m.goBackToAudit()} {complianceAssessment.name}</p>
-				</a>
+				{#if !page.data.user.is_third_party}
+					<a
+						href="/compliance-assessments/{complianceAssessment.id}"
+						class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+						data-testid="back-to-audit"
+					>
+						<i class="fa-solid fa-arrow-left"></i>
+						<p class="">{m.goBackToAudit()} {complianceAssessment.name}</p>
+					</a>
+				{/if}
 				{#if !hasQuestions}
 					<div class="flex items-center justify-center space-x-4">
 						{#if questionnaireMode}
