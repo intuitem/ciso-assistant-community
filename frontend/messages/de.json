@@ -2929,5 +2929,6 @@
 		}
 	],
 	"cascadeAffectedHint": "Die unten aufgeführten Elemente bleiben im System, aber ihre Verknüpfungen zu diesem Objekt werden entfernt.",
-	"libraryFilteringLabels": "Bibliotheksetiketten"
+	"libraryFilteringLabels": "Bibliotheksetiketten",
+	"objectsNotVisible": "{count} Objekt nicht sichtbar."
 }

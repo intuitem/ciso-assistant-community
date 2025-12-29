@@ -3266,5 +3266,6 @@
 	"viewTimelineentry": "Voir une entrée de chronologie",
 	"viewUsergroup": "Voir un groupe d'utilisateurs",
 	"viewValidationflow": "Voir un flux de validation",
-	"viewWebhookendpoint": "Voir un point de terminaison webhook"
+	"viewWebhookendpoint": "Voir un point de terminaison webhook",
+	"objectsNotVisible": "{count} objet{s} non visible."
 }

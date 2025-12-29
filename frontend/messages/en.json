@@ -3287,5 +3287,6 @@
 	"viewTimelineentry": "View timeline entry",
 	"viewUsergroup": "View user group",
 	"viewValidationflow": "View validation flow",
-	"viewWebhookendpoint": "View webhook endpoint"
+	"viewWebhookendpoint": "View webhook endpoint",
+	"objectsNotVisible": "{count} object{s} not visible."
 }

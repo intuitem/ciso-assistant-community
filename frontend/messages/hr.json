@@ -2028,5 +2028,6 @@
 		}
 	],
 	"cascadeAffectedHint": "Stavke ispod ostaju u sustavu, ali njihovi linkovi na ovaj objekt će biti uklonjeni.",
-	"libraryFilteringLabels": "Oznake knjižnice"
+	"libraryFilteringLabels": "Oznake knjižnice",
+	"objectsNotVisible": "{count} objekt nije vidljiv."
 }
