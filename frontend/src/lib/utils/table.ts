@@ -1996,6 +1996,7 @@ export const listViewFields = {
 			'description',
 			'ro_to_couple',
 			'fearedEvents',
+			'focusedFearedEvent',
 			'attackPaths',
 			'gravity'
 		],
@@ -2005,6 +2006,7 @@ export const listViewFields = {
 			'description',
 			'ro_to_couple',
 			'feared_events',
+			'focused_feared_event',
 			'attack_paths',
 			'gravity'
 		],
