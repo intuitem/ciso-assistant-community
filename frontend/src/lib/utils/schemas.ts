@@ -1042,6 +1042,7 @@ export const StrategicScenarioSchema = z.object({
 	...NameDescriptionMixin,
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
+	focused_feared_event: z.string().uuid().nullable().optional(),
 	ref_id: z.string().optional(),
 	folder: z.string()
 });
