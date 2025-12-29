@@ -6961,7 +6961,9 @@ class FrameworkViewSet(BaseModelViewSet):
 
         return Response(
             {
-                str(framework.id): framework.get_name_translated()
+                str(framework.id): framework.get_name_translated
+                if isinstance(framework.get_name_translated, str)
+                else framework.get_name_translated()
                 for framework in queryset
             }
         )

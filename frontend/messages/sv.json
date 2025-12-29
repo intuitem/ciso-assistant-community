@@ -1054,5 +1054,6 @@
 		}
 	],
 	"cascadeAffectedHint": "Objekten nedan förblir i systemet men deras länkar till detta objekt kommer att tas bort.",
-	"libraryFilteringLabels": "Biblioteksetiketter"
+	"libraryFilteringLabels": "Biblioteksetiketter",
+	"objectsNotVisible": "{count} objekt inte synligt."
 }

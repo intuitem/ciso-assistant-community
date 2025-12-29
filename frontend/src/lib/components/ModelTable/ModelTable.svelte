@@ -85,6 +85,7 @@
 		folderId?: string;
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
+		expectedCount?: number;
 		onFilterChange?: (filters: Record<string, any>) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
@@ -141,6 +142,7 @@
 		folderId = '',
 		forcePreventDelete = false,
 		forcePreventEdit = false,
+		expectedCount = 0,
 		onFilterChange = () => {},
 		quickFilters,
 		optButton,
@@ -292,7 +294,9 @@
 		}
 	);
 	const rows = handler.getRows();
+	const rowCountState = handler.getRowCount();
 	let invalidateTable = $state(false);
+	let hiddenCount = $state(0);
 
 	$tableHandlers[baseEndpoint] = handler;
 
@@ -330,6 +334,15 @@
 		$rows;
 		model?.foreignKeyFields;
 		void refreshRelatedNames($rows);
+	});
+
+	$effect(() => {
+		if (!expectedCount || $rowCountState?.total === undefined) {
+			hiddenCount = 0;
+			return;
+		}
+		const diff = expectedCount - $rowCountState.total;
+		hiddenCount = diff > 0 ? diff : 0;
 	});
 
 	const actionsURLModel = URLModel;
@@ -591,6 +604,13 @@
 			{/if}
 		</div>
 	</header>
+	{#if hiddenCount > 0}
+		<div
+			class="mx-4 my-2 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-800"
+		>
+			{m.objectsNotVisible({ count: hiddenCount, s: hiddenCount === 1 ? '' : 's' })}
+		</div>
+	{/if}
 	{@render quickFilters?.(filterValues, _form, () => {
 		invalidateTable = true;
 	})}
@@ -696,7 +716,10 @@
 																	</ul>
 																	{#if hiddenCount > 0}
 																		<p class="text-xs text-yellow-700">
-																			{hiddenCount} object{hiddenCount === 1 ? '' : 's'} not visible.
+																			{m.objectsNotVisible({
+																				count: hiddenCount,
+																				s: hiddenCount === 1 ? '' : 's'
+																			})}
 																		</p>
 																	{/if}
 																{:else}
@@ -769,8 +792,6 @@
 																{label}
 															{:else if !resolvedNames}
 																{value}
-															{:else}
-																<span class="text-xs text-yellow-700">1 object not visible.</span>
 															{/if}
 														{:else if value && value.hexcolor}
 															<p

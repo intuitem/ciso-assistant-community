@@ -1051,5 +1051,6 @@
 	"isCustom": "Vlastní",
 	"errorUnloadingLibrary": "Chyba při uvolňování knihovny",
 	"librarySuccessfullyUnloaded": "Knihovna byla úspěšně uvolněna",
-	"libraryFilteringLabels": "Štítky knihovny"
+	"libraryFilteringLabels": "Štítky knihovny",
+	"objectsNotVisible": "{count} objekt není viditelný."
 }

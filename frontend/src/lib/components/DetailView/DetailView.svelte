@@ -153,6 +153,23 @@
 		return !hasDisplayLabels && extractIds(value).length > 0;
 	};
 
+	const getExpectedRelatedIds = (urlModel: string): string[] => {
+		if (!urlModel) return [];
+		const fieldFromUrl = urlModel.replace(/-/g, '_');
+		const candidates = [fieldFromUrl];
+		const matchingField = data.model?.foreignKeyFields?.find((item) => item.urlModel === urlModel);
+		if (matchingField?.field && matchingField.field !== fieldFromUrl) {
+			candidates.unshift(matchingField.field);
+		}
+		for (const fieldName of candidates) {
+			const value = data.data?.[fieldName];
+			if (!Array.isArray(value)) continue;
+			const ids = extractIds(value);
+			if (ids.length > 0) return Array.from(new Set(ids));
+		}
+		return [];
+	};
+
 	const refreshRelatedNames = async () => {
 		if (!data.model?.foreignKeyFields) return;
 		const idsByModel = new Map<string, Set<string>>();
@@ -525,8 +542,6 @@
 													{label}
 												{:else if typeof value === 'string' && !resolvedNames}
 													{libraryId}
-												{:else}
-													<span class="text-xs text-yellow-700">1 object not visible.</span>
 												{/if}
 											{:else if key === 'severity' && data.urlModel !== 'incidents'}
 												<!-- We must add translations for the following severity levels -->
@@ -568,7 +583,10 @@
 															</ul>
 															{#if hiddenCount > 0}
 																<p class="text-xs text-yellow-700">
-																	{hiddenCount} object{hiddenCount === 1 ? '' : 's'} not visible.
+																	{m.objectsNotVisible({
+																		count: hiddenCount,
+																		s: hiddenCount === 1 ? '' : 's'
+																	})}
 																</p>
 															{/if}
 														{:else}
@@ -652,7 +670,10 @@
 														{/if}
 														{#if hiddenCount > 0}
 															<p class="text-xs text-yellow-700">
-																{hiddenCount} object{hiddenCount === 1 ? '' : 's'} not visible.
+																{m.objectsNotVisible({
+																	count: hiddenCount,
+																	s: hiddenCount === 1 ? '' : 's'
+																})}
 															</p>
 														{/if}
 													{:else if idValues.length > 0}
@@ -720,8 +741,6 @@
 													{label}
 												{:else if !resolvedNames}
 													{value}
-												{:else}
-													<span class="text-xs text-yellow-700">1 object not visible.</span>
 												{/if}
 											{:else if value.id && !value.hexcolor}
 												{@const itemHref = `/${
@@ -928,6 +947,8 @@
 									key: urlmodel,
 									featureFlags: page.data?.featureflags
 								}).body.filter((v) => v !== field.field)}
+							{@const expectedIds = getExpectedRelatedIds(urlmodel)}
+							{@const expectedCount = expectedIds.length}
 							{#if model.table}
 								<ModelTable
 									baseEndpoint={getReverseForeignKeyEndpoint({
@@ -945,6 +966,7 @@
 									URLModel={urlmodel}
 									fields={fieldsToUse}
 									defaultFilters={field.defaultFilters || {}}
+									{expectedCount}
 								>
 									{#snippet addButton()}
 										<button
