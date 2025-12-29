@@ -414,35 +414,68 @@ class MappingEngine:
                     elif result in ("compliant", "partially_compliant"):
                         target_assessment["result"] = "partially_compliant"
 
-            target_assessment["mapping_inference"] = {
-                "result": target_assessment.get("result", ""),
-                "used_path": path,
-                "annotation": src_assessment.get("mapping_inference", {}).get(
-                    "annotation", ""
-                ),
+
+            mapping_set_info = {
+                k: v
+                for k, v in {
+                    "urn": requirement_mapping_set.get("urn"),
+                    "name": requirement_mapping_set.get("name"),
+                    "ref_id": requirement_mapping_set.get("ref_id"),
+                    "library_urn": requirement_mapping_set.get("library_urn"),
+                }.items()
+                if v
             }
 
-            """
-            Here begins the mapping inference.
-            If the source_audit is the "real" first source (hop_index == 1), we grab the information direcly from the source_audit's RA into the target RA's mapping_inference.
-            However, if the source_audit variable is a transition audit (in case of a multiple hops mapping), we grab the sources_audit RA's mapping_inference into the target_audit RA's one.
-            """
-            mapping_inference = target_assessment["mapping_inference"].get(
-                "source_requirement_assessments"
+            mapping_inference = target_assessment.get("mapping_inference", {})
+            source_requirement_assessments = mapping_inference.get(
+                "source_requirement_assessments", {}
             )
 
-            if mapping_inference is None:
-                target_assessment["mapping_inference"][
-                    "source_requirement_assessments"
-                ] = defaultdict(dict)
+            mapping_inference["result"] = target_assessment.get("result", "")
+            mapping_inference["used_path"] = path
+            incoming_annotation = src_assessment.get("mapping_inference", {}).get(
+                "annotation", ""
+            )
+            if incoming_annotation:
+                mapping_inference["annotation"] = incoming_annotation
+            else:
+                mapping_inference.setdefault("annotation", "")
 
-            if (
-                hop_index == 1
-            ):  # if the source_audit is the real source and not a transition audit
-                # we build the mapping_inference object to put later in the target_audit RA's
+            target_assessment["mapping_inference"] = mapping_inference
+            target_assessment["mapping_inference"][
+                "source_requirement_assessments"
+            ] = source_requirement_assessments
+
+            def merge_source_requirement_assessment(
+                key: str, new_value: dict
+            ) -> None:
+                existing = source_requirement_assessments.get(key, {}).copy()
+                existing_cov = existing.get("coverage")
+                new_cov = new_value.get("coverage")
+
+                if new_cov:
+                    if existing_cov == "full" or new_cov == "full":
+                        existing["coverage"] = "full"
+                    else:
+                        existing["coverage"] = "partial"
+
+                for field, value in new_value.items():
+                    if field == "coverage" or value is None:
+                        continue
+                    if field == "used_mapping_set":
+                        if value and not existing.get("used_mapping_set"):
+                            existing["used_mapping_set"] = value
+                        continue
+                    if existing.get(field) in (None, "", []):
+                        existing[field] = value
+
+                source_requirement_assessments[key] = existing
+
+            if hop_index == 1:
                 ra = source_audit["requirement_assessments"][src]
-                source_requirement_assessments = {
-                    src: {
+                merge_source_requirement_assessment(
+                    src,
+                    {
                         "id": ra.get("id"),
                         "urn": src,
                         "str": ra.get("name"),
@@ -452,31 +485,19 @@ class MappingEngine:
                         "score": ra.get("score"),
                         "is_scored": ra.get("is_scored"),
                         "source_framework": ra.get("source_framework"),
-                        "used_mapping_set": {},
-                    }
-                }
-                mif_ids = list([src])
-
-            else:  # if the source_audit is a transition audit
-                # We will copy the mapping_inferences object of the transition audit RA's into the target_audit RA's one
-                mif_ids = list(
-                    src_assessment.get("mapping_inference", {}).get(
-                        "source_requirement_assessments", {}
-                    )
+                        "used_mapping_set": mapping_set_info,
+                    },
                 )
-                source_requirement_assessments = defaultdict(dict)
-                for mif_id in mif_ids:
-                    source_requirement_assessments[mif_id] = (
-                        src_assessment.get("mapping_inference", {})
-                        .get("source_requirement_assessments", {})
-                        .get(mif_id, {})
-                        .copy()
-                    )
-
-            for mif_id in mif_ids:
-                target_assessment["mapping_inference"][
-                    "source_requirement_assessments"
-                ][mif_id] = source_requirement_assessments.get(mif_id, {})
+            else:
+                for mif_id, mif_value in (
+                    src_assessment.get("mapping_inference", {})
+                    .get("source_requirement_assessments", {})
+                    .items()
+                ):
+                    copied_value = mif_value.copy()
+                    if mapping_set_info and not copied_value.get("used_mapping_set"):
+                        copied_value["used_mapping_set"] = mapping_set_info
+                    merge_source_requirement_assessment(mif_id, copied_value)
 
         return target_audit
 
