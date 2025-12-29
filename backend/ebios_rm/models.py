@@ -726,6 +726,15 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         help_text=_("RO/TO couple from which the attach path is derived"),
     )
     ref_id = models.CharField(max_length=100, blank=True)
+    focused_feared_event = models.ForeignKey(
+        FearedEvent,
+        verbose_name=_("Focused feared event"),
+        related_name="focused_strategic_scenarios",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text=_("Override gravity with this specific feared event's gravity"),
+    )
 
     fields_to_check = ["ebios_rm_study", "name", "ref_id"]
 
@@ -753,9 +762,11 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         return result
 
     def get_gravity_display(self):
-        return FearedEvent.format_gravity(
-            self.ro_to_couple.get_gravity(), self.ebios_rm_study.parsed_matrix
-        )
+        if self.focused_feared_event:
+            gravity = self.focused_feared_event.gravity
+        else:
+            gravity = self.ro_to_couple.get_gravity()
+        return FearedEvent.format_gravity(gravity, self.ebios_rm_study.parsed_matrix)
 
 
 class AttackPath(NameDescriptionMixin, FolderMixin):
