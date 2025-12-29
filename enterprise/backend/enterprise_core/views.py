@@ -495,8 +495,6 @@ class LogEntryViewSet(
                 )
             ),
         )
-
-
 class RoleOrderingFilter(filters.OrderingFilter):
     def filter_queryset(self, request, queryset, view):
         ordering = self.get_ordering(request, queryset, view)

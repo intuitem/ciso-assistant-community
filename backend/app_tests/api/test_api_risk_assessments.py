@@ -129,7 +129,7 @@ class TestRiskAssessmentAuthenticated:
             {
                 "perimeter": {
                     "id": str(perimeter.id),
-                    "str": perimeter.folder.name + " / " + perimeter.name,
+                    "str": perimeter.folder.name + "/" + perimeter.name,
                     "folder": {
                         "id": str(perimeter.folder.id),
                         "str": perimeter.folder.name,
@@ -168,7 +168,7 @@ class TestRiskAssessmentAuthenticated:
             {
                 "perimeter": {
                     "id": str(perimeter.id),
-                    "str": perimeter.folder.name + " / " + perimeter.name,
+                    "str": perimeter.folder.name + "/" + perimeter.name,
                     "folder": {
                         "id": str(perimeter.folder.id),
                         "str": perimeter.folder.name,
@@ -225,7 +225,7 @@ class TestRiskAssessmentAuthenticated:
             {
                 "perimeter": {
                     "id": str(perimeter.id),
-                    "str": perimeter.folder.name + " / " + perimeter.name,
+                    "str": perimeter.folder.name + "/" + perimeter.name,
                     "folder": {
                         "id": str(perimeter.folder.id),
                         "str": perimeter.folder.name,

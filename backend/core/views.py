@@ -1140,7 +1140,6 @@ class PathAwareOrderingFilter(filters.OrderingFilter):
     - path_fields: fields that require Python-side ordering
     - related_field: the related FK to follow for path-aware sorting (optional)
     """
-
     path_fields: set[str] = set()
     related_field: str | None = None  # override per view if needed
 
@@ -1194,9 +1193,7 @@ class PathAwareOrderingFilter(filters.OrderingFilter):
         for field in reversed(ordering):
             reverse = field.startswith("-")
             field_name = field.lstrip("-")
-            data.sort(
-                key=lambda obj, f=field_name: key_for_field(obj, f), reverse=reverse
-            )
+            data.sort(key=lambda obj, f=field_name: key_for_field(obj, f), reverse=reverse)
 
         # DRF pagination support
         if getattr(view, "paginator", None):
@@ -1214,11 +1211,7 @@ class PerimeterViewSet(BaseModelViewSet):
     filterset_class = PerimeterFilter
     search_fields = ["name", "ref_id", "description"]
     filterset_fields = ["name", "folder", "campaigns"]
-    filter_backends = [
-        DjangoFilterBackend,
-        PathAwareOrderingFilter,
-        filters.SearchFilter,
-    ]
+    filter_backends = [DjangoFilterBackend, PathAwareOrderingFilter, filters.SearchFilter]
     ordering_fields = ["name", "folder", "str", "description", "default_assignee"]
     path_ordering_fields = {"str"}
     path_fields = {"str"}
@@ -5538,7 +5531,6 @@ class UserGroupOrderingFilter(PathAwareOrderingFilter):
     Custom ordering filter:
     - Supports `localization_dict` via PathAwareOrderingFilter
     """
-
     path_fields = {"localization_dict"}
 
 
