@@ -1,5 +1,5 @@
 from core.serializers import BaseModelSerializer, AssessmentReadSerializer
-from core.serializer_fields import FieldsRelatedField
+from core.serializer_fields import IdRelatedField
 from .models import (
     BusinessImpactAnalysis,
     EscalationThreshold,
@@ -15,10 +15,10 @@ class BusinessImpactAnalysisReadSerializer(AssessmentReadSerializer):
         exclude = []
 
     str = serializers.CharField(source="__str__")
-    perimeter = FieldsRelatedField(["id", "folder"])
-    folder = FieldsRelatedField()
-    risk_matrix = FieldsRelatedField()
-    validation_flows = FieldsRelatedField(
+    perimeter = IdRelatedField(["id", "folder"])
+    folder = IdRelatedField()
+    risk_matrix = IdRelatedField()
+    validation_flows = IdRelatedField(
         many=True,
         fields=[
             "id",
@@ -40,18 +40,15 @@ class AssetAssessmentReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     # name = serializers.CharField(source="__str__")
 
-    bia = FieldsRelatedField(["id", "name", "is_locked"])
-    asset = FieldsRelatedField()
-    asset_ref_id = serializers.CharField(
-        source="asset.ref_id", read_only=True, allow_null=True
-    )
-    asset_folder = FieldsRelatedField(source="asset.folder")
-    children_assets = FieldsRelatedField(source="asset.children_assets", many=True)
-    folder = FieldsRelatedField()
+    bia = IdRelatedField(["id", "name", "is_locked"])
+    asset = IdRelatedField()
+    asset_folder = IdRelatedField(source="asset.folder")
+    children_assets = IdRelatedField(source="asset.children_assets", many=True)
+    folder = IdRelatedField()
 
-    dependencies = FieldsRelatedField(many=True)
-    evidences = FieldsRelatedField(many=True)
-    associated_controls = FieldsRelatedField(
+    dependencies = IdRelatedField(many=True)
+    evidences = IdRelatedField(many=True)
+    associated_controls = IdRelatedField(
         ["id", "folder", "name", "status", "eta"], many=True
     )
 
@@ -89,11 +86,11 @@ class AssetAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class EscalationThresholdReadSerializer(BaseModelSerializer):
-    asset_assessment = FieldsRelatedField()
-    folder = FieldsRelatedField()
+    asset_assessment = IdRelatedField()
+    folder = IdRelatedField()
     name = serializers.CharField(source="__str__")
 
-    qualifications = FieldsRelatedField(many=True)
+    qualifications = IdRelatedField(many=True)
     get_human_pit = serializers.JSONField()
     quali_impact = serializers.JSONField(source="get_impact_display")
 

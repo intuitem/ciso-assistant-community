@@ -10,6 +10,7 @@
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { onMount } from 'svelte';
+	import { fetchNames, isUuid } from '$lib/utils/related-names';
 
 	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
@@ -204,6 +205,67 @@
 	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
 	const user = page.data.user;
+	let relatedNames: Record<string, Record<string, string>> = $state({});
+	let relatedNamesKey = '';
+
+	const getUrlModelForField = (fieldName: string): string | undefined => {
+		const modelField = model?.foreignKeyFields?.find((item) => item.field === fieldName);
+		return modelField?.urlModel ?? modelField?.field?.replace(/_/g, '-');
+	};
+
+	const extractId = (value: any): string | null => {
+		if (typeof value === 'string' && isUuid(value)) return value;
+		if (value && typeof value === 'object' && 'id' in value) {
+			const idValue = String(value.id);
+			return isUuid(idValue) ? idValue : null;
+		}
+		return null;
+	};
+
+	const extractIds = (value: any): string[] => {
+		if (Array.isArray(value)) {
+			return value.map((item) => extractId(item)).filter((item): item is string => Boolean(item));
+		}
+		const single = extractId(value);
+		return single ? [single] : [];
+	};
+
+	const isIdOnlyArray = (value: any[]): boolean => {
+		const hasDisplayLabels = value.some(
+			(item) => item && typeof item === 'object' && ('str' in item || 'name' in item)
+		);
+		return !hasDisplayLabels && extractIds(value).length > 0;
+	};
+
+	const refreshRelatedNames = async (rowsToInspect: Record<string, any>[] = tableSource.body) => {
+		if (!browser || !model?.foreignKeyFields) return;
+		if (!Array.isArray(rowsToInspect)) return;
+		const idsByModel = new Map<string, Set<string>>();
+		for (const fieldConfig of model.foreignKeyFields) {
+			const urlModel = fieldConfig.urlModel ?? fieldConfig.field?.replace(/_/g, '-');
+			if (!urlModel) continue;
+			for (const row of rowsToInspect) {
+				const ids = extractIds(row[fieldConfig.field]);
+				if (ids.length === 0) continue;
+				const bucket = idsByModel.get(urlModel) ?? new Set<string>();
+				ids.forEach((id) => bucket.add(id));
+				idsByModel.set(urlModel, bucket);
+			}
+		}
+		const key = JSON.stringify(
+			Array.from(idsByModel.entries()).map(([urlModel, ids]) => [urlModel, Array.from(ids).sort()])
+		);
+		if (!key || key === relatedNamesKey) return;
+		relatedNamesKey = key;
+
+		const updates: Record<string, Record<string, string>> = {};
+		for (const [urlModel, ids] of idsByModel.entries()) {
+			updates[urlModel] = await fetchNames(urlModel, Array.from(ids));
+		}
+		if (Object.keys(updates).length > 0) {
+			relatedNames = { ...relatedNames, ...updates };
+		}
+	};
 
 	// Replace $$props.class with classProp for compatibility
 	let classProp = ''; // Replacing $$props.class
@@ -262,6 +324,12 @@
 				? handler.sortAsc(orderBy.identifier)
 				: handler.sortDesc(orderBy.identifier);
 		}
+	});
+
+	$effect(() => {
+		$rows;
+		model?.foreignKeyFields;
+		void refreshRelatedNames($rows);
 	});
 
 	const actionsURLModel = URLModel;
@@ -598,36 +666,79 @@
 														class="base-font-family whitespace-pre-line break-words"
 													>
 														{#if Array.isArray(value)}
-															<ul class="list-disc pl-4 whitespace-normal">
-																{#each [...value].sort((a, b) => {
-																	if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
-																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
-																}) as val}
-																	<li>
-																		{#if key === 'linked_models' && typeof val === 'string'}
-																			{safeTranslate(convertLinkedModelName(val))}
-																		{:else if key === 'security_objectives' || key === 'security_capabilities'}
-																			{@const [securityObjectiveName, securityObjectiveValue] =
-																				Object.entries(val)[0]}
-																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
-																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
-																			<Anchor href={itemHref} class="anchor" stopPropagation
-																				>{val.str}</Anchor
-																			>
-																		{:else if val.str}
-																			{safeTranslate(val.str)}
-																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
-																			<span class="text"
-																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																				{val.split(':')[1]}</span
-																			>
-																		{:else}
-																			{val ?? '-'}
-																		{/if}
-																	</li>
-																{/each}
-															</ul>
+															{@const isIdArray = isIdOnlyArray(value)}
+															{@const idValues = isIdArray ? extractIds(value) : []}
+															{@const urlModel = isIdArray ? getUrlModelForField(key) : undefined}
+															{@const resolvedNames = urlModel ? relatedNames[urlModel] : undefined}
+															{@const hasResolvedNames = Boolean(resolvedNames)}
+															{@const visibleIds = hasResolvedNames
+																? idValues.filter((id) => resolvedNames?.[id])
+																: []}
+															{@const hiddenCount = hasResolvedNames
+																? idValues.length - visibleIds.length
+																: 0}
+															{#if isIdArray}
+																{#if hasResolvedNames}
+																	<ul class="list-disc pl-4 whitespace-normal">
+																		{#each visibleIds as id}
+																			{@const label = resolvedNames?.[id]}
+																			{@const itemHref =
+																				label && urlModel ? `/${urlModel}/${id}` : undefined}
+																			<li>
+																				{#if label && itemHref}
+																					<Anchor href={itemHref} class="anchor" stopPropagation
+																						>{label}</Anchor
+																					>
+																				{:else if label}
+																					{label}
+																				{/if}
+																			</li>
+																		{/each}
+																	</ul>
+																	{#if hiddenCount > 0}
+																		<p class="text-xs text-yellow-700">
+																			{hiddenCount} object{hiddenCount === 1 ? '' : 's'} not visible.
+																		</p>
+																	{/if}
+																{:else}
+																	<ul class="list-disc pl-4 whitespace-normal">
+																		{#each idValues as id}
+																			<li>{id}</li>
+																		{/each}
+																	</ul>
+																{/if}
+															{:else}
+																<ul class="list-disc pl-4 whitespace-normal">
+																	{#each [...value].sort((a, b) => {
+																		if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+																		return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+																	}) as val}
+																		<li>
+																			{#if key === 'linked_models' && typeof val === 'string'}
+																				{safeTranslate(convertLinkedModelName(val))}
+																			{:else if key === 'security_objectives' || key === 'security_capabilities'}
+																				{@const [securityObjectiveName, securityObjectiveValue] =
+																					Object.entries(val)[0]}
+																				{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
+																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
+																				<Anchor href={itemHref} class="anchor" stopPropagation
+																					>{val.str}</Anchor
+																				>
+																			{:else if val.str}
+																				{safeTranslate(val.str)}
+																			{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
+																				<span class="text"
+																					>{unsafeTranslate(val.split(':')[0] + 'Colon')}
+																					{val.split(':')[1]}</span
+																				>
+																			{:else}
+																				{val ?? '-'}
+																			{/if}
+																		</li>
+																	{/each}
+																</ul>
+															{/if}
 														{:else if value && value.str}
 															{#if value.id}
 																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
@@ -644,6 +755,23 @@
 																{/if}
 															{:else}
 																{value.str ?? '-'}
+															{/if}
+														{:else if typeof value === 'string' && isUuid(value) && getUrlModelForField(key)}
+															{@const urlModel = getUrlModelForField(key)}
+															{@const resolvedNames = urlModel ? relatedNames[urlModel] : undefined}
+															{@const label = resolvedNames?.[value]}
+															{@const itemHref =
+																label && urlModel ? `/${urlModel}/${value}` : undefined}
+															{#if label && itemHref}
+																<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																	>{label}</Anchor
+																>
+															{:else if label}
+																{label}
+															{:else if !resolvedNames}
+																{value}
+															{:else}
+																<span class="text-xs text-yellow-700">1 object not visible.</span>
 															{/if}
 														{:else if value && value.hexcolor}
 															<p

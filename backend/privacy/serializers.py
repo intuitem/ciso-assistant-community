@@ -1,6 +1,6 @@
 from core.serializers import BaseModelSerializer, ReferentialSerializer
 from django.db import transaction
-from core.serializer_fields import FieldsRelatedField
+from core.serializer_fields import IdRelatedField
 from .models import (
     ProcessingNature,
     Purpose,
@@ -23,8 +23,8 @@ class PurposeWriteSerializer(BaseModelSerializer):
 
 
 class PurposeReadSerializer(BaseModelSerializer):
-    processing = FieldsRelatedField()
-    folder = FieldsRelatedField()
+    processing = IdRelatedField()
+    folder = IdRelatedField()
 
     class Meta:
         model = Purpose
@@ -39,9 +39,9 @@ class PersonalDataWriteSerializer(BaseModelSerializer):
 
 
 class PersonalDataReadSerializer(BaseModelSerializer):
-    processing = FieldsRelatedField()
-    folder = FieldsRelatedField()
-    assets = FieldsRelatedField(["name", "type", "folder"], many=True)
+    processing = IdRelatedField()
+    folder = IdRelatedField()
+    assets = IdRelatedField(["name", "type", "folder"], many=True)
 
     class Meta:
         model = PersonalData
@@ -56,8 +56,8 @@ class DataSubjectWriteSerializer(BaseModelSerializer):
 
 
 class DataSubjectReadSerializer(BaseModelSerializer):
-    processing = FieldsRelatedField()
-    folder = FieldsRelatedField()
+    processing = IdRelatedField()
+    folder = IdRelatedField()
 
     class Meta:
         model = DataSubject
@@ -72,8 +72,8 @@ class DataRecipientWriteSerializer(BaseModelSerializer):
 
 
 class DataRecipientReadSerializer(BaseModelSerializer):
-    processing = FieldsRelatedField()
-    folder = FieldsRelatedField()
+    processing = IdRelatedField()
+    folder = IdRelatedField()
 
     class Meta:
         model = DataRecipient
@@ -88,9 +88,9 @@ class DataContractorWriteSerializer(BaseModelSerializer):
 
 
 class DataContractorReadSerializer(BaseModelSerializer):
-    processing = FieldsRelatedField()
-    folder = FieldsRelatedField()
-    entity = FieldsRelatedField()
+    processing = IdRelatedField()
+    folder = IdRelatedField()
+    entity = IdRelatedField()
 
     class Meta:
         model = DataContractor
@@ -105,9 +105,9 @@ class DataTransferWriteSerializer(BaseModelSerializer):
 
 
 class DataTransferReadSerializer(BaseModelSerializer):
-    processing = FieldsRelatedField()
-    folder = FieldsRelatedField()
-    entity = FieldsRelatedField()
+    processing = IdRelatedField()
+    folder = IdRelatedField()
+    entity = IdRelatedField()
 
     class Meta:
         model = DataTransfer
@@ -141,12 +141,12 @@ class ProcessingWriteSerializer(BaseModelSerializer):
 
 
 class ProcessingReadSerializer(BaseModelSerializer):
-    folder = FieldsRelatedField()
-    filtering_labels = FieldsRelatedField(many=True)
-    nature = FieldsRelatedField(["name"], many=True)
-    associated_controls = FieldsRelatedField(["name"], many=True)
-    assigned_to = FieldsRelatedField(many=True)
-    purposes = FieldsRelatedField(["name", "id", "legal_basis"], many=True)
+    folder = IdRelatedField()
+    filtering_labels = IdRelatedField(many=True)
+    nature = IdRelatedField(["name"], many=True)
+    associated_controls = IdRelatedField(["name"], many=True)
+    assigned_to = IdRelatedField(many=True)
+    purposes = IdRelatedField(["name", "id", "legal_basis"], many=True)
 
     class Meta:
         model = Processing
@@ -171,9 +171,9 @@ class RightRequestWriteSerializer(BaseModelSerializer):
 
 
 class RightRequestReadSerializer(BaseModelSerializer):
-    folder = FieldsRelatedField()
-    owner = FieldsRelatedField(many=True)
-    processings = FieldsRelatedField(many=True)
+    folder = IdRelatedField()
+    owner = IdRelatedField(many=True)
+    processings = IdRelatedField(many=True)
 
     class Meta:
         model = RightRequest
@@ -188,13 +188,13 @@ class DataBreachWriteSerializer(BaseModelSerializer):
 
 
 class DataBreachReadSerializer(BaseModelSerializer):
-    folder = FieldsRelatedField()
-    assigned_to = FieldsRelatedField(many=True)
-    authorities = FieldsRelatedField(many=True)
-    affected_processings = FieldsRelatedField(many=True)
-    affected_personal_data = FieldsRelatedField(many=True)
-    remediation_measures = FieldsRelatedField(["name"], many=True)
-    incident = FieldsRelatedField()
+    folder = IdRelatedField()
+    assigned_to = IdRelatedField(many=True)
+    authorities = IdRelatedField(many=True)
+    affected_processings = IdRelatedField(many=True)
+    affected_personal_data = IdRelatedField(many=True)
+    remediation_measures = IdRelatedField(["name"], many=True)
+    incident = IdRelatedField()
 
     class Meta:
         model = DataBreach

@@ -1,6 +1,6 @@
 from django.db import transaction
 from rest_framework import serializers
-from core.serializer_fields import FieldsRelatedField
+from core.serializer_fields import IdRelatedField
 from core.serializers import (
     BaseModelSerializer,
     ActionPlanSerializer,
@@ -96,14 +96,14 @@ class QuantitativeRiskStudyWriteSerializer(BaseModelSerializer):
 
 
 class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
-    folder = FieldsRelatedField()
-    authors = FieldsRelatedField(many=True)
-    reviewers = FieldsRelatedField(many=True)
+    folder = IdRelatedField()
+    authors = IdRelatedField(many=True)
+    reviewers = IdRelatedField(many=True)
     risk_tolerance_display = serializers.CharField(
         source="get_risk_tolerance_display", read_only=True
     )
     loss_threshold_display = serializers.CharField(read_only=True)
-    validation_flows = FieldsRelatedField(
+    validation_flows = IdRelatedField(
         many=True,
         fields=[
             "id",
@@ -152,13 +152,13 @@ class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
 
 
 class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
-    quantitative_risk_study = FieldsRelatedField()
-    assets = FieldsRelatedField(many=True)
-    owner = FieldsRelatedField(many=True)
-    threats = FieldsRelatedField(many=True)
-    vulnerabilities = FieldsRelatedField(many=True)
-    qualifications = FieldsRelatedField(many=True)
-    folder = FieldsRelatedField()
+    quantitative_risk_study = IdRelatedField()
+    assets = IdRelatedField(many=True)
+    owner = IdRelatedField(many=True)
+    threats = IdRelatedField(many=True)
+    vulnerabilities = IdRelatedField(many=True)
+    qualifications = IdRelatedField(many=True)
+    folder = IdRelatedField()
     current_ale = serializers.DecimalField(
         max_digits=12, decimal_places=2, read_only=True
     )
@@ -314,10 +314,10 @@ class QuantitativeRiskHypothesisWriteSerializer(BaseModelSerializer):
 
 
 class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
-    quantitative_risk_scenario = FieldsRelatedField()
-    existing_applied_controls = FieldsRelatedField(many=True)
-    added_applied_controls = FieldsRelatedField(many=True)
-    removed_applied_controls = FieldsRelatedField(many=True)
+    quantitative_risk_scenario = IdRelatedField()
+    existing_applied_controls = IdRelatedField(many=True)
+    added_applied_controls = IdRelatedField(many=True)
+    removed_applied_controls = IdRelatedField(many=True)
     probability = serializers.FloatField(
         source="parameters.probability", read_only=True
     )
@@ -338,7 +338,7 @@ class QuantitativeRiskHypothesisReadSerializer(BaseModelSerializer):
     roc_display = serializers.CharField(read_only=True)
     roc_interpretation = serializers.CharField(read_only=True)
     roc_calculation_explanation = serializers.CharField(read_only=True)
-    folder = FieldsRelatedField()
+    folder = IdRelatedField()
 
     def get_lec_data(self, obj):
         """Return LEC data for the table preview"""

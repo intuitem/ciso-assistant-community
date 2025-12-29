@@ -629,7 +629,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return None
 
     def get_queryset(self) -> models.query.QuerySet:
-        """the scope_folder_id query_param allows scoping the objects to retrieve"""
+        """Return the objects visible to the current user."""
         if not self.model:
             return None
         object_ids_view = None
@@ -645,12 +645,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     object_ids_view = [id]
 
         if not object_ids_view:
-            scope_folder_id = self.request.query_params.get("scope_folder_id")
-            scope_folder = (
-                get_object_or_404(Folder, id=scope_folder_id)
-                if scope_folder_id
-                else Folder.get_root_folder()
-            )
+            scope_folder = Folder.get_root_folder()
             object_ids_view = RoleAssignment.get_accessible_object_ids(
                 scope_folder, self.request.user, self.model
             )[0]
@@ -662,6 +657,29 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context["action"] = self.action
         return context
+
+    @action(detail=False, methods=["get"])
+    def names(self, request):
+        if not self.model:
+            return Response({})
+        uuid_list = request.query_params.getlist("id[]", [])
+        if not uuid_list:
+            return Response({})
+        parsed_ids = []
+        for value in uuid_list:
+            try:
+                parsed_ids.append(UUID(value))
+            except (TypeError, ValueError):
+                continue
+        if not parsed_ids:
+            return Response({})
+        viewable_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, self.model
+        )[0]
+        queryset = self.model.objects.filter(id__in=parsed_ids).filter(
+            id__in=viewable_ids
+        )
+        return Response({str(obj.id): str(obj) for obj in queryset})
 
     def get_serializer_class(self, **kwargs):
         serializer_factory = SerializerFactory(
@@ -1269,10 +1287,10 @@ class ThreatViewSet(BaseModelViewSet):
             .select_related(
                 "folder",
                 "folder__parent_folder",  # For get_folder_full_path() optimization
-                "library",  # FieldsRelatedField includes library
+                "library",  # IdRelatedField includes library
             )
             .prefetch_related(
-                "filtering_labels__folder",  # FieldsRelatedField includes folder
+                "filtering_labels__folder",  # IdRelatedField includes folder
             )
         )
 
@@ -3797,12 +3815,12 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             )
             .prefetch_related(
                 "owner",
-                "filtering_labels__folder",  # FieldsRelatedField includes folder
+                "filtering_labels__folder",  # IdRelatedField includes folder
                 "findings",  # Used for findings_count
-                "evidences",  # Serialized as FieldsRelatedField
+                "evidences",  # Serialized as IdRelatedField
                 "objectives",  # ManyToManyField to OrganisationObjective
                 "assets",  # ManyToManyField used in table
-                "security_exceptions",  # Serialized as FieldsRelatedField
+                "security_exceptions",  # Serialized as IdRelatedField
             )
         )
 
@@ -7570,12 +7588,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "folder__parent_folder",  # For get_folder_full_path() optimization
                 "framework",  # Displayed in table
                 "perimeter",  # Displayed in table
-                "perimeter__folder",  # FieldsRelatedField(["id", "folder"]) optimization
-                "campaign",  # Serialized as FieldsRelatedField
+                "perimeter__folder",  # IdRelatedField(["id", "folder"]) optimization
+                "campaign",  # Serialized as IdRelatedField
             )
             .prefetch_related(
-                "assets",  # ManyToManyField serialized as FieldsRelatedField
-                "evidences",  # ManyToManyField serialized as FieldsRelatedField
+                "assets",  # ManyToManyField serialized as IdRelatedField
+                "evidences",  # ManyToManyField serialized as IdRelatedField
                 "authors",  # ManyToManyField from Assessment parent class
                 "reviewers",  # ManyToManyField from Assessment parent class
             )
@@ -8950,13 +8968,13 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "folder__parent_folder",  # For get_folder_full_path() optimization
                 "compliance_assessment",  # Displayed in table and serialized
                 "compliance_assessment__perimeter",  # perimeter field uses compliance_assessment.perimeter
-                "compliance_assessment__perimeter__folder",  # Nested FieldsRelatedField optimization
+                "compliance_assessment__perimeter__folder",  # Nested IdRelatedField optimization
                 "requirement",  # Used for name (__str__), description, assessable in table
             )
             .prefetch_related(
-                "evidences",  # ManyToManyField serialized as FieldsRelatedField
+                "evidences",  # ManyToManyField serialized as IdRelatedField
                 "applied_controls",  # ManyToManyField to AppliedControl
-                "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
+                "security_exceptions",  # ManyToManyField serialized as IdRelatedField
             )
         )
 

@@ -3,7 +3,7 @@ from rest_framework import serializers
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import ComplianceAssessment, Framework
 
-from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
+from core.serializer_fields import IdRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import Folder, Role, RoleAssignment, UserGroup
@@ -19,15 +19,15 @@ User = get_user_model()
 
 
 class EntityReadSerializer(BaseModelSerializer):
-    folder = FieldsRelatedField()
-    owned_folders = FieldsRelatedField(many=True)
-    parent_entity = FieldsRelatedField()
-    branches = FieldsRelatedField(many=True)
-    relationship = FieldsRelatedField(many=True)
-    contracts = FieldsRelatedField(many=True)
+    folder = IdRelatedField()
+    owned_folders = IdRelatedField(many=True)
+    parent_entity = IdRelatedField()
+    branches = IdRelatedField(many=True)
+    relationship = IdRelatedField(many=True)
+    contracts = IdRelatedField(many=True)
     legal_identifiers = serializers.SerializerMethodField()
     default_criticality = serializers.ReadOnlyField()
-    filtering_labels = FieldsRelatedField(many=True)
+    filtering_labels = IdRelatedField(many=True)
 
     def get_legal_identifiers(self, obj):
         """Format legal identifiers as a readable string for display"""
@@ -110,16 +110,16 @@ class EntityImportExportSerializer(BaseModelSerializer):
 
 
 class EntityAssessmentReadSerializer(BaseModelSerializer):
-    compliance_assessment = FieldsRelatedField()
-    evidence = FieldsRelatedField()
-    perimeter = FieldsRelatedField()
-    entity = FieldsRelatedField()
-    folder = FieldsRelatedField()
-    solutions = FieldsRelatedField(many=True)
-    representatives = FieldsRelatedField(many=True)
-    authors = FieldsRelatedField(many=True)
-    reviewers = FieldsRelatedField(many=True)
-    validation_flows = FieldsRelatedField(
+    compliance_assessment = IdRelatedField()
+    evidence = IdRelatedField()
+    perimeter = IdRelatedField()
+    entity = IdRelatedField()
+    folder = IdRelatedField()
+    solutions = IdRelatedField(many=True)
+    representatives = IdRelatedField(many=True)
+    authors = IdRelatedField(many=True)
+    reviewers = IdRelatedField(many=True)
+    validation_flows = IdRelatedField(
         many=True,
         fields=[
             "id",
@@ -263,9 +263,9 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
 
 class RepresentativeReadSerializer(BaseModelSerializer):
-    entity = FieldsRelatedField()
-    user = FieldsRelatedField()
-    filtering_labels = FieldsRelatedField(many=True)
+    entity = IdRelatedField()
+    user = IdRelatedField()
+    filtering_labels = IdRelatedField(many=True)
 
     class Meta:
         model = Representative
@@ -334,12 +334,12 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
 
 
 class SolutionReadSerializer(BaseModelSerializer):
-    provider_entity = FieldsRelatedField()
-    recipient_entity = FieldsRelatedField()
-    assets = FieldsRelatedField(many=True)
-    contracts = FieldsRelatedField(many=True)
-    owner = FieldsRelatedField(many=True)
-    filtering_labels = FieldsRelatedField(many=True)
+    provider_entity = IdRelatedField()
+    recipient_entity = IdRelatedField()
+    assets = IdRelatedField(many=True)
+    contracts = IdRelatedField(many=True)
+    owner = IdRelatedField(many=True)
+    filtering_labels = IdRelatedField(many=True)
 
     class Meta:
         model = Solution
@@ -373,14 +373,14 @@ class SolutionWriteSerializer(BaseModelSerializer):
 
 
 class ContractReadSerializer(BaseModelSerializer):
-    folder = FieldsRelatedField()
-    owner = FieldsRelatedField(many=True)
-    provider_entity = FieldsRelatedField()
-    beneficiary_entity = FieldsRelatedField()
-    evidences = FieldsRelatedField(many=True)
-    solutions = FieldsRelatedField(many=True)
-    overarching_contract = FieldsRelatedField()
-    filtering_labels = FieldsRelatedField(many=True)
+    folder = IdRelatedField()
+    owner = IdRelatedField(many=True)
+    provider_entity = IdRelatedField()
+    beneficiary_entity = IdRelatedField()
+    evidences = IdRelatedField(many=True)
+    solutions = IdRelatedField(many=True)
+    overarching_contract = IdRelatedField()
+    filtering_labels = IdRelatedField(many=True)
 
     class Meta:
         model = Contract

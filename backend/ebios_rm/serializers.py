@@ -2,7 +2,7 @@ from core.serializers import (
     BaseModelSerializer,
 )
 from django.db import transaction
-from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
+from core.serializer_fields import IdRelatedField, HashSlugRelatedField
 from core.models import RiskMatrix
 from .models import (
     EbiosRMStudy,
@@ -50,24 +50,24 @@ class EbiosRMStudyWriteSerializer(BaseModelSerializer):
 
 class EbiosRMStudyReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
-    perimeter = FieldsRelatedField(["id", "folder"])
-    folder = FieldsRelatedField()
-    reference_entity = FieldsRelatedField()
-    risk_matrix = FieldsRelatedField()
-    reference_entity = FieldsRelatedField()
-    assets = FieldsRelatedField(["id", "type", {"folder": ["id"]}], many=True)
-    compliance_assessments = FieldsRelatedField(many=True)
-    risk_assessments = FieldsRelatedField(many=True)
-    authors = FieldsRelatedField(many=True)
-    reviewers = FieldsRelatedField(many=True)
+    perimeter = IdRelatedField(["id", "folder"])
+    folder = IdRelatedField()
+    reference_entity = IdRelatedField()
+    risk_matrix = IdRelatedField()
+    reference_entity = IdRelatedField()
+    assets = IdRelatedField(["id", "type", {"folder": ["id"]}], many=True)
+    compliance_assessments = IdRelatedField(many=True)
+    risk_assessments = IdRelatedField(many=True)
+    authors = IdRelatedField(many=True)
+    reviewers = IdRelatedField(many=True)
     roto_count = serializers.IntegerField()
     selected_roto_count = serializers.IntegerField()
     selected_attack_path_count = serializers.IntegerField()
     operational_scenario_count = serializers.IntegerField()
     applied_control_count = serializers.IntegerField()
-    last_risk_assessment = FieldsRelatedField()
+    last_risk_assessment = IdRelatedField()
     counters = serializers.SerializerMethodField()
-    validation_flows = FieldsRelatedField(
+    validation_flows = IdRelatedField(
         many=True,
         fields=[
             "id",
@@ -125,11 +125,11 @@ class FearedEventWriteSerializer(BaseModelSerializer):
 
 
 class FearedEventReadSerializer(BaseModelSerializer):
-    ebios_rm_study = FieldsRelatedField()
-    qualifications = FieldsRelatedField(many=True)
-    assets = FieldsRelatedField(many=True)
+    ebios_rm_study = IdRelatedField()
+    qualifications = IdRelatedField(many=True)
+    assets = IdRelatedField(many=True)
     gravity = serializers.JSONField(source="get_gravity_display")
-    folder = FieldsRelatedField()
+    folder = IdRelatedField()
 
     class Meta:
         model = FearedEvent
@@ -171,9 +171,9 @@ class RoToWriteSerializer(BaseModelSerializer):
 
 class RoToReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
-    ebios_rm_study = FieldsRelatedField()
-    folder = FieldsRelatedField()
-    feared_events = FieldsRelatedField(["folder", "id"], many=True)
+    ebios_rm_study = IdRelatedField()
+    folder = IdRelatedField()
+    feared_events = IdRelatedField(["folder", "id"], many=True)
     risk_origin = serializers.SerializerMethodField()
 
     def get_risk_origin(self, obj):
@@ -231,10 +231,10 @@ class StakeholderWriteSerializer(BaseModelSerializer):
 
 class StakeholderReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
-    ebios_rm_study = FieldsRelatedField()
-    folder = FieldsRelatedField()
-    entity = FieldsRelatedField()
-    applied_controls = FieldsRelatedField(many=True)
+    ebios_rm_study = IdRelatedField()
+    folder = IdRelatedField()
+    entity = IdRelatedField()
+    applied_controls = IdRelatedField(many=True)
     category = serializers.SerializerMethodField()
 
     def get_category(self, obj):
@@ -316,12 +316,12 @@ class StrategicScenarioWriteSerializer(BaseModelSerializer):
 
 
 class StrategicScenarioReadSerializer(BaseModelSerializer):
-    ebios_rm_study = FieldsRelatedField()
-    folder = FieldsRelatedField()
-    ro_to_couple = FieldsRelatedField()
-    focused_feared_event = FieldsRelatedField()
+    focused_feared_event = IdRelatedField()
+    ebios_rm_study = IdRelatedField()
+    folder = IdRelatedField()
+    ro_to_couple = IdRelatedField()
     gravity = serializers.JSONField(source="get_gravity_display")
-    attack_paths = FieldsRelatedField(many=True)
+    attack_paths = IdRelatedField(many=True)
     feared_events = serializers.SerializerMethodField()
 
     def get_feared_events(self, obj):
@@ -379,16 +379,16 @@ class AttackPathWriteSerializer(BaseModelSerializer):
 
 class AttackPathReadSerializer(BaseModelSerializer):
     form_display_name = serializers.CharField()
-    ebios_rm_study = FieldsRelatedField()
-    folder = FieldsRelatedField()
-    ro_to_couple = FieldsRelatedField()
-    stakeholders = FieldsRelatedField(many=True)
+    ebios_rm_study = IdRelatedField()
+    folder = IdRelatedField()
+    ro_to_couple = IdRelatedField()
+    stakeholders = IdRelatedField(many=True)
     risk_origin = serializers.CharField(
         source="ro_to_couple.risk_origin.get_name_translated"
     )
     target_objective = serializers.CharField(source="ro_to_couple.target_objective")
 
-    strategic_scenario = FieldsRelatedField()
+    strategic_scenario = IdRelatedField()
 
     class Meta:
         model = AttackPath
@@ -428,23 +428,23 @@ class OperationalScenarioWriteSerializer(BaseModelSerializer):
 
 class OperationalScenarioReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
-    ebios_rm_study = FieldsRelatedField()
-    folder = FieldsRelatedField()
-    attack_path = FieldsRelatedField(["id", "name", "description", "form_display_name"])
-    stakeholders = FieldsRelatedField(many=True)
-    ro_to = FieldsRelatedField(["risk_origin", "target_objective"])
-    threats = FieldsRelatedField(many=True)
+    ebios_rm_study = IdRelatedField()
+    folder = IdRelatedField()
+    attack_path = IdRelatedField(["id", "name", "description", "form_display_name"])
+    stakeholders = IdRelatedField(many=True)
+    ro_to = IdRelatedField(["risk_origin", "target_objective"])
+    threats = IdRelatedField(many=True)
     strategic_scenario = serializers.SerializerMethodField()
     likelihood = serializers.JSONField(source="get_likelihood_display")
     gravity = serializers.JSONField(source="get_gravity_display")
     risk_level = serializers.JSONField(source="get_risk_level_display")
     ref_id = serializers.CharField()
     operating_modes_description = serializers.SerializerMethodField()
-    operating_modes = FieldsRelatedField(many=True)
+    operating_modes = IdRelatedField(many=True)
 
     def get_strategic_scenario(self, obj):
         if obj.attack_path and obj.attack_path.strategic_scenario:
-            return FieldsRelatedField().to_representation(
+            return IdRelatedField().to_representation(
                 obj.attack_path.strategic_scenario
             )
         return None
@@ -527,8 +527,8 @@ class ElementaryActionReadSerializer(BaseModelSerializer):
     icon = serializers.CharField(source="get_icon_display")
     icon_fa_class = serializers.CharField()
     icon_fa_hex = serializers.CharField()
-    threat = FieldsRelatedField(["id", "name"], serializer=ThreatReadSerializer)
-    folder = FieldsRelatedField()
+    threat = IdRelatedField(["id", "name"], serializer=ThreatReadSerializer)
+    folder = IdRelatedField()
     attack_stage = serializers.CharField(source="get_attack_stage_display")
 
     class Meta:
@@ -543,11 +543,11 @@ class OperatingModeWriteSerializer(BaseModelSerializer):
 
 
 class OperatingModeReadSerializer(BaseModelSerializer):
-    operational_scenario = FieldsRelatedField()
-    folder = FieldsRelatedField()
-    elementary_actions = FieldsRelatedField(many=True)
+    operational_scenario = IdRelatedField()
+    folder = IdRelatedField()
+    elementary_actions = IdRelatedField(many=True)
     likelihood = serializers.JSONField(source="get_likelihood_display")
-    ebios_rm_study = FieldsRelatedField()
+    ebios_rm_study = IdRelatedField()
 
     class Meta:
         model = OperatingMode
@@ -600,11 +600,11 @@ class KillChainWriteSerializer(BaseModelSerializer):
 
 
 class KillChainReadSerializer(BaseModelSerializer):
-    operating_mode = FieldsRelatedField()
-    elementary_action = FieldsRelatedField()
-    antecedents = FieldsRelatedField(many=True)
+    operating_mode = IdRelatedField()
+    elementary_action = IdRelatedField()
+    antecedents = IdRelatedField(many=True)
     attack_stage = serializers.CharField()
-    folder = FieldsRelatedField()
+    folder = IdRelatedField()
     str = serializers.CharField(source="__str__")
 
     class Meta:
