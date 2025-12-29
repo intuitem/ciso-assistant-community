@@ -1,7 +1,4 @@
-from ctypes import sizeof
-from uuid import UUID
 from django.db.models import Q
-from icecream import ic
 from core.models import (
     Framework,
     StoredLibrary,
