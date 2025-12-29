@@ -319,6 +319,7 @@ class StrategicScenarioReadSerializer(BaseModelSerializer):
     ebios_rm_study = IdRelatedField()
     folder = IdRelatedField()
     ro_to_couple = IdRelatedField()
+    focused_feared_event = IdRelatedField()
     gravity = serializers.JSONField(source="get_gravity_display")
     attack_paths = IdRelatedField(many=True)
     feared_events = serializers.SerializerMethodField()
