@@ -42,26 +42,27 @@
     {#each data.perimeters as perimeter}
       {#if perimeter.compliance_assessments.length > 0}
         <div class="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden transition hover:shadow-xl transform w-full">
-          
-          <!-- Header du périmètre -->
           <div class="p-4 bg-gradient-to-r from-primary-400 to-primary-500 text-white flex justify-between items-center">
             <a class="text-lg font-bold hover:underline" href="/perimeters/{perimeter.id}">
               {perimeter.folder.str}/{perimeter.name}
             </a>
           </div>
-
-          <!-- Bar chart de moyenne -->
-          <!-- Bar chart améliorée -->
 			{#if perimeter.overallCompliance?.values?.length > 0}
-			<div class="px-4 py-3 bg-gradient-to-r from-primary-100 to-primary-200 rounded-b-lg">
-				<p class="text-sm font-semibold text-primary-700 mb-2">Moyenne globale</p>
-				<div class="flex  h-6 rounded-lg overflow-hidden">
-				{#each perimeter.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
+			<div class="px-4 py-3 bg-gradient-to-r from-primary-50 to-primary-100 rounded-b-lg">
+				<p class="text-sm font-semibold text-primary-700 mb-2">{m.globalOverall()}</p>
+				<div class="flex h-6 rounded-lg overflow-hidden shadow-inner">
+				{#each perimeter.overallCompliance.values
+					.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
 					<div
-					class="flex justify-center items-center text-xs font-semibold text-white"
-					style="width: {sp.percentage}%; background-color: {sp.itemStyle.color}"
+					class="flex justify-center items-center text-xs font-semibold"
+					style="
+						width: {sp.percentage}%;
+						background-color: {sp.itemStyle.color};
+						color: {sp.itemStyle.color === '#000000' ? 'white' : 'black'};
+						box-shadow: inset 0 0 1px rgba(0,0,0,0.3);
+					"
 					>
-					{sp.percentage > 5 ? `${sp.percentage}%` : ''}
+					{Number(sp.percentage) > 5 ? `${sp.percentage}%` : ''}
 					</div>
 				{/each}
 				</div>
@@ -69,12 +70,10 @@
 			{/if}
 
 
-          <!-- Audits du périmètre -->
           <div class="p-4 space-y-4">
             {#each perimeter.compliance_assessments as assessment}
               <div class="bg-gray-50 rounded-lg p-4 shadow-inner transition hover:bg-gray-100">
 
-                <!-- Nom + référentiel sur une seule ligne -->
                 <div class="flex justify-between items-center mb-4">
                   <div>
                     <p class="text-sm font-semibold">{m.name()}</p>
@@ -88,10 +87,8 @@
                   </div>
                 </div>
 
-                <!-- Score + Donut + Actions -->
                 <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
                   
-                  <!-- Score Ring -->
                   {#if assessment.globalScore.score >= 0}
                     <div class="flex justify-center items-center lg:order-1">
                       <ProgressRing
@@ -105,7 +102,6 @@
                     </div>
                   {/if}
 
-                  <!-- Donut -->
                   <div class="w-full lg:w-3/5 h-40 lg:h-32">
                     <DonutChart
                       s_label={m.complianceAssessments()}
@@ -114,11 +110,10 @@
                     />
                   </div>
 
-                  <!-- Actions -->
                   <div class="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 lg:order-3">
                     {#if canEditObject(perimeter)}
                       <Anchor
-                        href="/compliance-assessments/{assessment.id}/edit?next=/analytics?tab=compliance"
+                        href="/compliance-assessments/{assessment.id}/edit?next=/recap"
                         class="btn preset-filled-primary-500 w-1/2 lg:w-full"
                       >
                         <i class="fa-solid fa-edit mr-2"></i> {m.edit()}
