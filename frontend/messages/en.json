@@ -1870,6 +1870,7 @@
 	"changeEffort": "... effort",
 	"changePriority": "... priority",
 	"changeCsfFunction": "... CSF function",
+	"changeAttackStage": "Change attack stage",
 	"logEntryRepr": "{timestamp} - {actor} - {action} - {object}",
 	"auditLog": "Audit log",
 	"actor": "Actor",
