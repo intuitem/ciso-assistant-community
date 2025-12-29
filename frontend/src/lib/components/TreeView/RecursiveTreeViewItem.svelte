@@ -3,6 +3,8 @@
 	import RecursiveTreeViewItem from './RecursiveTreeViewItem.svelte';
 	import TreeViewItem from './TreeViewItem.svelte';
 	import type { TreeViewNode } from './types';
+		import { ContextMenu } from 'bits-ui';
+	import UpdateStatusRequirementAssessment from '$lib/components/ContextMenu/compliance-assesments/UpdateStatusRequirementAssessment.svelte';
 
 	onMount(async () => {
 		if (selection) {
@@ -150,66 +152,78 @@
 
 {#if nodes && nodes.length > 0}
 	{#each rnodes as node, i}
-		<TreeViewItem
-			bind:this={treeItems[i]}
-			bind:childrenProp={childrenNodes[i]}
-			bind:group
-			bind:name
-			bind:value={node.id}
-			classProp={node?.contentProps?.hidden === true || areAllChildrenHiddenRecursive(node)
-				? 'hidden'
-				: ''}
-			mappingInference={hasMappingInference(node)}
-			hideLead={!node.lead}
-			hideChildren={!node.children || node.children.length === 0}
-			open={expandedNodes.includes(node.id)}
-			disabled={disabledNodes.includes(node.id)}
-			checked={checkedNodes.includes(node.id)}
-			indeterminate={indeterminateNodes.includes(node.id)}
-			onToggle={(isOpened) => {
-				toggleNode(node, isOpened);
-				dispatch('toggle', {
-					id: node.id
-				});
-			}}
-			on:groupChange={(e) => checkNode(node, e.detail.checked, e.detail.indeterminate)}
-			on:click={() =>
-				dispatch('click', {
-					id: node.id
-				})}
-		>
-			{#if typeof node.content === 'string'}
-				{node.content}
-			{:else}
-				<node.content {...node.contentProps} />
-			{/if}
-			{#snippet lead()}
-				{#if typeof node.lead === 'string'}
-					{node.lead}
-				{:else}
-					<node.lead {...node.leadProps} />
-				{/if}
-			{/snippet}
-			{#snippet childrenSlot()}
-				{#if expandedNodes.includes(node.id)}
-					<RecursiveTreeViewItem
-						nodes={node.children}
-						bind:expandedNodes
-						bind:disabledNodes
-						bind:checkedNodes
-						bind:indeterminateNodes
-						bind:treeItems={childrenNodes[i]}
-						on:click={(e) =>
-							dispatch('click', {
-								id: e.detail.id
-							})}
-						on:toggle={(e) =>
-							dispatch('toggle', {
-								id: e.detail.id
-							})}
+		{#if node.id}
+<ContextMenu.Root>
+	<div
+		on:contextmenu|preventDefault
+	>
+		<ContextMenu.Trigger>
+						<TreeViewItem
+							bind:this={treeItems[i]}
+							bind:childrenProp={childrenNodes[i]}
+							bind:group
+							bind:name
+							bind:value={node.id}
+							classProp={node?.contentProps?.hidden === true || areAllChildrenHiddenRecursive(node)
+								? 'hidden'
+								: ''}
+							mappingInference={hasMappingInference(node)}
+							hideLead={!node.lead}
+							hideChildren={!node.children || node.children.length === 0}
+							open={expandedNodes.includes(node.id)}
+							disabled={disabledNodes.includes(node.id)}
+							checked={checkedNodes.includes(node.id)}
+							indeterminate={indeterminateNodes.includes(node.id)}
+							onToggle={(isOpened) => {
+								toggleNode(node, isOpened);
+								dispatch('toggle', { id: node.id });
+							}}
+							on:groupChange={(e) => checkNode(node, e.detail.checked, e.detail.indeterminate)}
+							on:click={() => dispatch('click', { id: node.id })}
+						>
+							{#if typeof node.content === 'string'}
+								{node.content}
+							{:else}
+								<node.content {...node.contentProps} />
+							{/if}
+
+							{#snippet lead()}
+								{#if typeof node.lead === 'string'}
+									{node.lead}
+								{:else}
+									<node.lead {...node.leadProps} />
+								{/if}
+							{/snippet}
+
+							{#snippet childrenSlot()}
+								{#if expandedNodes.includes(node.id)}
+									<RecursiveTreeViewItem
+										nodes={node.children}
+										bind:expandedNodes
+										bind:disabledNodes
+										bind:checkedNodes
+										bind:indeterminateNodes
+										bind:treeItems={childrenNodes[i]}
+										on:click={(e) => dispatch('click', { id: e.detail.id })}
+										on:toggle={(e) => dispatch('toggle', { id: e.detail.id })}
+									/>
+								{/if}
+							{/snippet}
+						</TreeViewItem>
+					</ContextMenu.Trigger>
+			</div>
+
+				<ContextMenu.Content class="z-50">
+					<UpdateStatusRequirementAssessment
+						id={node.id}
+						result={node.contentProps?.result ?? null}
 					/>
-				{/if}
-			{/snippet}
-		</TreeViewItem>
+				</ContextMenu.Content>
+			</ContextMenu.Root>
+		{:else}
+			<!-- fallback sans menu -->
+			<TreeViewItem ... />
+		{/if}
 	{/each}
+
 {/if}

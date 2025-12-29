@@ -185,5 +185,21 @@ export const actions: Actions = {
 			);
 		}
 		return { form, message: { requirementAssessmentsSync: await response.json() } };
+	},
+	updateRequirementAssessment: async (event) => {
+		const { id, result } = await event.request.json();
+
+		const endpoint = `${BASE_API_URL}/requirement-assessments/${id}/`;
+
+		const res = await event.fetch(endpoint, {
+			method: 'PATCH',
+			body: JSON.stringify({ result })
+		});
+
+		return {
+			status: res.status,
+			body: await res.json()
+		};
 	}
+
 };
