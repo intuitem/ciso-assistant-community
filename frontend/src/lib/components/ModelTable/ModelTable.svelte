@@ -301,15 +301,13 @@
 			const overrideFilterValue = overrideFilters[field];
 			const finalFilterValue = overrideFilterValue || filterValue;
 
-			handler.filter(
-				finalFilterValue ? finalFilterValue.map((v: Record<string, any>) => v.value) : [],
-				field
-			);
+			const fieldFilterParams = finalFilterValue
+				? finalFilterValue.map((v: Record<string, any>) => v.value)
+				: [];
+			handler.filter(fieldFilterParams, field);
 			page.url.searchParams.delete(field);
-			if (finalFilterValue && finalFilterValue.length > 0) {
-				for (const value of finalFilterValue) {
-					page.url.searchParams.append(field, value.value);
-				}
+			if (finalFilterValue) {
+				finalFilterValue.forEach(({ value }) => page.url.searchParams.append(field, value));
 			}
 
 			const hrefPattern = new RegExp(`^/${URLModel}(\\?.*)?$`);
@@ -493,7 +491,12 @@
 										fieldContext="filter"
 										label={safeTranslate(filters[field].props?.label)}
 										onChange={(value) => {
-											filterValues[field] = value.map((v) => ({ value: v }));
+											const arrayValue = Array.isArray(value) ? value : [value];
+											const sanitizedArrayValue = arrayValue.filter(
+												(v) => v !== null && v !== undefined
+											);
+
+											filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
 											invalidateTable = true;
 										}}
 									/>

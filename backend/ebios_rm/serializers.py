@@ -266,11 +266,40 @@ class StrategicScenarioWriteSerializer(BaseModelSerializer):
         model = StrategicScenario
         exclude = ["created_at", "updated_at"]
 
+    def validate(self, attrs):
+        ro_to_couple = attrs.get("ro_to_couple") or (
+            self.instance.ro_to_couple if self.instance else None
+        )
+
+        # If the field is present in attrs, use it (even if None means clearing).
+        # Otherwise, fall back to the existing instance value.
+        if "focused_feared_event" in attrs:
+            focused_feared_event = attrs["focused_feared_event"]
+        else:
+            focused_feared_event = (
+                getattr(self.instance, "focused_feared_event", None)
+                if self.instance
+                else None
+            )
+
+        if focused_feared_event and ro_to_couple:
+            if not ro_to_couple.feared_events.filter(
+                id=focused_feared_event.id
+            ).exists():
+                raise serializers.ValidationError(
+                    {
+                        "focused_feared_event": "The feared event must belong to the selected RoTo couple."
+                    }
+                )
+
+        return super().validate(attrs)
+
 
 class StrategicScenarioReadSerializer(BaseModelSerializer):
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
     ro_to_couple = FieldsRelatedField()
+    focused_feared_event = FieldsRelatedField()
     gravity = serializers.JSONField(source="get_gravity_display")
     attack_paths = FieldsRelatedField(many=True)
     feared_events = serializers.SerializerMethodField()
@@ -305,6 +334,7 @@ class StrategicScenarioImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     ebios_rm_study = HashSlugRelatedField(slug_field="pk", read_only=True)
     ro_to_couple = HashSlugRelatedField(slug_field="pk", read_only=True)
+    focused_feared_event = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
         model = StrategicScenario
@@ -314,6 +344,7 @@ class StrategicScenarioImportExportSerializer(BaseModelSerializer):
             "description",
             "ebios_rm_study",
             "ro_to_couple",
+            "focused_feared_event",
             "folder",
             "created_at",
             "updated_at",

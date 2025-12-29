@@ -301,7 +301,7 @@ export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'withinTolerance',
 		options: YES_NO_UNSET_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -677,7 +677,7 @@ export const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_selected',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -686,7 +686,7 @@ export const IS_RECURRENT_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_recurrent',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -706,7 +706,7 @@ export const USER_IS_ACTIVE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_active',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -715,7 +715,7 @@ export const USER_IS_THIRD_PARTY_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_third_party',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -925,7 +925,7 @@ const ASSET_IS_BUSINESS_FUNCTION_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_business_function',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1051,7 +1051,7 @@ export const IS_LOADED_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'loadedLibraries',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1060,7 +1060,7 @@ export const IS_UPDATE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'updateAvailable',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1081,7 +1081,7 @@ export const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'isAssigned',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1090,7 +1090,7 @@ export const PAST_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'past',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1110,7 +1110,7 @@ export const IS_CUSTOM_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_custom',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1119,7 +1119,7 @@ export const BUILTIN_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'builtin',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1128,7 +1128,7 @@ export const IS_VISIBLE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_visible',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1996,6 +1996,7 @@ export const listViewFields = {
 			'description',
 			'ro_to_couple',
 			'fearedEvents',
+			'focusedFearedEvent',
 			'attackPaths',
 			'gravity'
 		],
@@ -2005,6 +2006,7 @@ export const listViewFields = {
 			'description',
 			'ro_to_couple',
 			'feared_events',
+			'focused_feared_event',
 			'attack_paths',
 			'gravity'
 		],
@@ -2271,7 +2273,7 @@ export const listViewFields = {
 				props: {
 					label: 'is_selected',
 					options: YES_NO_OPTIONS,
-					multiple: true
+					multiple: false
 				}
 			},
 			risk_stage: RISK_STAGE_FILTER

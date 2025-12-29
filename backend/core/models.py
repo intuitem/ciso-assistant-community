@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List, Optional
+from typing import Self, Union, List, Optional, Literal
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -2367,6 +2367,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         blank=True,
     )
     is_published = models.BooleanField(_("published"), default=True)
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     fields_to_check = ["name"]
 
@@ -5474,7 +5475,7 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
         return self.risk_assessment.risk_matrix.parse_json_translated()
 
     @property
-    def within_tolerance(self):
+    def within_tolerance(self) -> Literal["YES", "NO", "--"]:
         tolerance = self.risk_assessment.risk_tolerance
         if tolerance >= 0:
             if self.current_level <= tolerance:

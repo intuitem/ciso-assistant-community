@@ -1042,6 +1042,7 @@ export const StrategicScenarioSchema = z.object({
 	...NameDescriptionMixin,
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
+	focused_feared_event: z.string().uuid().nullable().optional(),
 	ref_id: z.string().optional(),
 	folder: z.string()
 });
@@ -1080,7 +1081,8 @@ export const SecurityExceptionSchema = z.object({
 	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	requirement_assessments: z.string().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	assets: z.string().uuid().optional().array().optional(),
+	observation: z.string().optional()
 });
 
 export const FindingSchema = z.object({
