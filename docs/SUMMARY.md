@@ -94,6 +94,7 @@
 * [API usage](integration/api-documentation.md)
 * [Third-party integrations](integration/third-party-integrations/README.md)
   * [Jira](integration/third-party-integrations/jira.md)
+* [Outgoing webhooks](integration/outgoing-webhooks.md)
 
 ## Presentations
 
