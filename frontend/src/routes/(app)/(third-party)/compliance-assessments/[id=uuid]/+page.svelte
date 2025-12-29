@@ -531,12 +531,11 @@
 				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
-				<div class="flex w-1/3 relative">
+				<div class="flex w-1/4 relative">
 					{#if data.global_score.score >= 0}
-						<div class="absolute font-bold text-sm">{m.maturity()}</div>
-						<div class="flex justify-center items-center w-full">
+						<div class="flex flex-col justify-center items-center w-full">
 							<ProgressRing
-								strokeWidth="20px"
+								strokeWidth="18px"
 								meterStroke={displayScoreColor(
 									data.global_score.score,
 									data.global_score.max_score
@@ -546,6 +545,7 @@
 							>
 								<p class="font-semibold text-4xl">{data.global_score.score}</p>
 							</ProgressRing>
+							<div class="text-sm font-semibold py-2">{m.maturity()}</div>
 						</div>
 					{/if}
 				</div>
