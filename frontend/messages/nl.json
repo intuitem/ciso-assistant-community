@@ -2929,5 +2929,14 @@
 	],
 	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd.",
 	"libraryFilteringLabels": "Bibliotheek etiketten",
-	"objectsNotVisible": "{count} object niet zichtbaar."
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} object niet zichtbaar.",
+				"countPlural=other": "{count} objecten niet zichtbaar."
+			}
+		}
+	]
 }

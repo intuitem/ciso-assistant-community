@@ -3288,5 +3288,14 @@
 	"viewUsergroup": "View user group",
 	"viewValidationflow": "View validation flow",
 	"viewWebhookendpoint": "View webhook endpoint",
-	"objectsNotVisible": "{count} object{s} not visible."
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} object not visible.",
+				"countPlural=other": "{count} objects not visible."
+			}
+		}
+	]
 }

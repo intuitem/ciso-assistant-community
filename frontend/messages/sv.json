@@ -1055,5 +1055,14 @@
 	],
 	"cascadeAffectedHint": "Objekten nedan förblir i systemet men deras länkar till detta objekt kommer att tas bort.",
 	"libraryFilteringLabels": "Biblioteksetiketter",
-	"objectsNotVisible": "{count} objekt inte synligt."
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} objekt är inte synligt.",
+				"countPlural=other": "{count} objekt är inte synliga."
+			}
+		}
+	]
 }

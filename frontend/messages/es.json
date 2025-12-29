@@ -3022,5 +3022,14 @@
 	"editLayout": "Widgets",
 	"widgets": "Widgets",
 	"width": "Anchura",
-	"objectsNotVisible": "{count} objeto{s} no visible."
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} objeto no visible.",
+				"countPlural=other": "{count} objetos no visibles."
+			}
+		}
+	]
 }

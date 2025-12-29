@@ -1061,5 +1061,14 @@
 	],
 	"cascadeAffectedHint": "Obiectele de mai jos rămân în sistem, dar legăturile lor cu acest obiect vor fi eliminate.",
 	"libraryFilteringLabels": "Etichete bibliotecă",
-	"objectsNotVisible": "{count} obiect nevizibil."
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} obiect nevizibil.",
+				"countPlural=other": "{count} obiecte nevizibile."
+			}
+		}
+	]
 }
