@@ -210,11 +210,31 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        except ValueError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
+        except ValueError:
+            logger.warning(
+                "ValueError while executing integration RPC action",
+                action_name=action_name,
+                config_id=config.pk,
+                exc_info=True,
+            )
+            return Response(
+                {"error": "Invalid request parameters"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception:
             # Catch connectivity errors from the client
-            return Response({"error": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+            logger.error(
+                "RPC execution for integration config raised an exception",
+                config_id=pk,
+                action_name=action_name,
+                exc_info=True,
+            )
+            return Response(
+                {
+                    "error": "An unexpected error occurred while executing the requested action."
+                },
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
 
 
 @method_decorator(csrf_exempt, name="dispatch")
