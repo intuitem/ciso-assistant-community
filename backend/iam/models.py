@@ -135,7 +135,7 @@ class Folder(NameDescriptionMixin):
         path = self.get_folder_full_path(include_root=False)
         names = [getattr(folder, "name", "") or "" for folder in path]
         cleaned = [name for name in names if name]
-        display = " / ".join(cleaned) if cleaned else (self.name or "")
+        display = "/".join(cleaned) if cleaned else (self.name or "")
         return display or ""
 
     def get_sub_folders(self) -> Generator[Self, None, None]:
