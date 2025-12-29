@@ -38,13 +38,9 @@
 			enable_outgoing_sync: z.boolean().default(false),
 			enable_incoming_sync: z.boolean().default(false),
 			table_name: z.string(),
-      field_map: z.record(z.string(), z.any())
-                  .default({})
-                  .optional(),
-      value_map: z.record(z.string(), z.any())
-                  .default({})
-                  .optional()
-    })
+			field_map: z.record(z.string(), z.any()).default({}).optional(),
+			value_map: z.record(z.string(), z.any()).default({}).optional()
+		})
 	});
 
 	const _form = superForm(data.form, {
@@ -78,7 +74,7 @@
 			{_form}
 			{invalidateAll}
 			validators={zod(schema)}
-      debug
+			debug
 		>
 			{#snippet children({ form })}
 				<Checkbox {form} field="is_active" label={m.active()} />
@@ -224,7 +220,7 @@
 					</span>
 					<p class="text-sm text-surface-500 -mt-3">{m.webhookEndpointUrlHelpText()}</p>
 				{/if}
-        <FieldMapper {form} integrationId={page.data?.config?.id} />
+				<FieldMapper {form} integrationId={page.data?.config?.id} />
 				<button
 					class="text-center btn preset-filled-primary-500 font-semibold w-full"
 					data-testid="save-button">{m.save()}</button

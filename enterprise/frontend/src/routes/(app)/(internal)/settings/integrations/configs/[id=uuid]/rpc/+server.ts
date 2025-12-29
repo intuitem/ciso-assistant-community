@@ -2,10 +2,9 @@ import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { BASE_API_URL } from '$lib/utils/constants';
 
-
 export const POST: RequestHandler = async ({ params, request, fetch, locals }) => {
 	const { id } = params;
-	
+
 	// Parse the incoming RPC payload
 	let body;
 	try {
@@ -42,7 +41,6 @@ export const POST: RequestHandler = async ({ params, request, fetch, locals }) =
 		}
 
 		return json(data);
-
 	} catch (err) {
 		console.error('RPC Network Error:', err);
 		return error(502, 'Failed to reach integration backend');

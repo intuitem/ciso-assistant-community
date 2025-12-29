@@ -110,7 +110,7 @@
 										</div>
 									</a>
 								</div>
-                <div class="card p-4 bg-inherit flex flex-col space-y-3">
+								<div class="card p-4 bg-inherit flex flex-col space-y-3">
 									<a class="unstyled" href="/settings/integrations/servicenow">
 										<div class="flex flex-col space-y-2 hover:bg-primary-50 card p-4">
 											<span class="flex flex-row justify-between text-xl">
