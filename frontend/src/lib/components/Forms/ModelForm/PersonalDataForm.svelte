@@ -31,6 +31,7 @@
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
+	hidden={!initialData.ref_id}
 />
 <AutocompleteSelect
 	{form}
