@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from core.models import OrganisationObjective
 from core.serializers import BaseModelSerializer, ReferentialSerializer
-from core.serializer_fields import FieldsRelatedField, PathField
+from core.serializer_fields import IdRelatedField, PathField
 from metrology.models import (
     MetricDefinition,
     MetricInstance,
@@ -24,10 +24,10 @@ class MetricDefinitionWriteSerializer(BaseModelSerializer):
 
 class MetricDefinitionReadSerializer(ReferentialSerializer):
     path = PathField(read_only=True)
-    folder = FieldsRelatedField()
-    library = FieldsRelatedField(["name", "id"])
-    unit = FieldsRelatedField(["name", "id"])
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    folder = IdRelatedField()
+    library = IdRelatedField(["name", "id"])
+    unit = IdRelatedField(["name", "id"])
+    filtering_labels = IdRelatedField(["folder"], many=True)
 
     class Meta:
         model = MetricDefinition
@@ -49,8 +49,8 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
 
 class MetricInstanceReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
-    folder = FieldsRelatedField()
-    metric_definition = FieldsRelatedField(
+    folder = IdRelatedField()
+    metric_definition = IdRelatedField(
         [
             "name",
             "ref_id",
@@ -61,9 +61,9 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
             "higher_is_better",
         ]
     )
-    owner = FieldsRelatedField(many=True)
-    organisation_objectives = FieldsRelatedField(many=True)
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    organisation_objectives = IdRelatedField(many=True)
+    owner = IdRelatedField(many=True)
+    filtering_labels = IdRelatedField(["folder"], many=True)
     status = serializers.CharField(source="get_status_display", read_only=True)
     collection_frequency = serializers.CharField(
         source="get_collection_frequency_display", read_only=True
@@ -113,8 +113,8 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
 
 
 class CustomMetricSampleReadSerializer(BaseModelSerializer):
-    folder = FieldsRelatedField()
-    metric_instance = FieldsRelatedField(["name", "ref_id", "id"])
+    folder = IdRelatedField()
+    metric_instance = IdRelatedField(["name", "ref_id", "id"])
     display_value = serializers.SerializerMethodField()
     raw_value = serializers.SerializerMethodField()
 
@@ -140,8 +140,8 @@ class DashboardWriteSerializer(BaseModelSerializer):
 
 class DashboardReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
-    folder = FieldsRelatedField()
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    folder = IdRelatedField()
+    filtering_labels = IdRelatedField(["folder"], many=True)
     widget_count = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -334,9 +334,9 @@ class DashboardWidgetWriteSerializer(BaseModelSerializer):
 
 
 class DashboardWidgetReadSerializer(BaseModelSerializer):
-    folder = FieldsRelatedField()
-    dashboard = FieldsRelatedField(["name", "id"])
-    metric_instance = FieldsRelatedField(
+    folder = IdRelatedField()
+    dashboard = IdRelatedField(["name", "id"])
+    metric_instance = IdRelatedField(
         [
             "name",
             "ref_id",
