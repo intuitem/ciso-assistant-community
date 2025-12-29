@@ -548,7 +548,7 @@
 						</div>
 					{/if}
 				</div>
-				<div class="w-1/3">
+				<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
 					<DonutChart
 						s_label="Result"
 						name="compliance_result"
@@ -558,9 +558,25 @@
 						colors={compliance_assessment_donut_values.result.values.map(
 							(object) => object.itemStyle.color
 						)}
+						showPercentage={true}
 					/>
 				</div>
-				<div class="w-1/3">
+				{#if data.compliance_assessment.extended_result_enabled && compliance_assessment_donut_values.extended_result?.values?.length > 0}
+					<div class="w-1/4">
+						<DonutChart
+							s_label="Extended Result"
+							name="compliance_extended_result"
+							title={m.extendedResult()}
+							orientation="horizontal"
+							values={compliance_assessment_donut_values.extended_result.values}
+							colors={compliance_assessment_donut_values.extended_result.values.map(
+								(object) => object.itemStyle.color
+							)}
+							showPercentage={true}
+						/>
+					</div>
+				{/if}
+				<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
 					<DonutChart
 						s_label="Status"
 						name="compliance_status"
@@ -570,6 +586,7 @@
 						colors={compliance_assessment_donut_values.status.values.map(
 							(object) => object.itemStyle.color
 						)}
+						showPercentage={true}
 					/>
 				</div>
 			{/key}
