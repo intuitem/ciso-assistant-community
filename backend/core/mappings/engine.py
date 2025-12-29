@@ -259,7 +259,7 @@ class MappingEngine:
         self,
         source_audit: dict[str, str | dict[str, str]],
         requirement_mapping_set: dict,
-        hop_index: str,
+        hop_index: int,
         path: list[str],
     ) -> dict[str, str | dict[str, str]]:
         # Hop_index allows us to know if the source_audit is the 'real' source, or a transition audit.
@@ -472,18 +472,6 @@ class MappingEngine:
                         .get(mif_id, {})
                         .copy()
                     )
-                    if (
-                        len(
-                            src_assessment.get("mapping_inference", {})
-                            .get("source_requirement_assessments", {})
-                            .get(mif_id, {})
-                            .keys()
-                        )
-                        == 0
-                    ):
-                        print(
-                            f"no source_requirement_assessments for {mif_id} in \n{src_assessment}"
-                        )
 
             for mif_id in mif_ids:
                 target_assessment["mapping_inference"][
