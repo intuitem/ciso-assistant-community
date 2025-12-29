@@ -250,7 +250,7 @@ class ServiceNowClient(BaseIntegrationClient):
                 auth=self.auth,
                 headers=self._get_headers(),
                 params=params,
-                timeout=10,
+                timeout=30,
             )
             response.raise_for_status()
             results = response.json().get("result", [])
@@ -343,7 +343,11 @@ class ServiceNowClient(BaseIntegrationClient):
             url = f"{self.base_url}/api/now/table/{self.table}"
             params = {"sysparm_limit": 1}
             response = requests.get(
-                url, auth=self.auth, headers=self._get_headers(), params=params
+                url,
+                auth=self.auth,
+                headers=self._get_headers(),
+                params=params,
+                timeout=10,
             )
             return response.status_code == 200
         except Exception as e:
