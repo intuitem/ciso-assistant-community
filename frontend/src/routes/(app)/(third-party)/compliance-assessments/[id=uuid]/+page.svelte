@@ -228,6 +228,7 @@
 					isScored: node.is_scored,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					max_score: node.max_score,
+					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,
 					extendedResultEnabled: data.compliance_assessment.extended_result_enabled,
 					extendedResult: node.extended_result,
 					extendedResultColor: extendedResultColorMap[node.extended_result]
@@ -576,19 +577,21 @@
 						/>
 					</div>
 				{/if}
-				<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
-					<DonutChart
-						s_label="Status"
-						name="compliance_status"
-						title={m.progress()}
-						orientation="horizontal"
-						values={compliance_assessment_donut_values.status.values}
-						colors={compliance_assessment_donut_values.status.values.map(
-							(object) => object.itemStyle.color
-						)}
-						showPercentage={true}
-					/>
-				</div>
+				{#if data.compliance_assessment.progress_status_enabled}
+					<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
+						<DonutChart
+							s_label="Status"
+							name="compliance_status"
+							title={m.progress()}
+							orientation="horizontal"
+							values={compliance_assessment_donut_values.status.values}
+							colors={compliance_assessment_donut_values.status.values.map(
+								(object) => object.itemStyle.color
+							)}
+							showPercentage={true}
+						/>
+					</div>
+				{/if}
 			{/key}
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
@@ -847,25 +850,27 @@
 							{/each}
 						</div>
 					</div>
-					<div>
-						<span class="text-sm font-bold">{m.status()}</span>
-						<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-							{#each Object.entries(complianceStatusColorMap) as [status, color]}
-								<button
-									type="button"
-									onclick={() => toggleStatus(status)}
-									class="px-2 py-1 rounded-md font-bold"
-									style="background-color: {selectedStatus.includes(status)
-										? color + '44'
-										: 'grey'}; color: {selectedStatus.includes(status)
-										? darkenColor(color, 0.3)
-										: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
-								>
-									{safeTranslate(status)}
-								</button>
-							{/each}
+					{#if data.compliance_assessment.progress_status_enabled}
+						<div>
+							<span class="text-sm font-bold">{m.status()}</span>
+							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+								{#each Object.entries(complianceStatusColorMap) as [status, color]}
+									<button
+										type="button"
+										onclick={() => toggleStatus(status)}
+										class="px-2 py-1 rounded-md font-bold"
+										style="background-color: {selectedStatus.includes(status)
+											? color + '44'
+											: 'grey'}; color: {selectedStatus.includes(status)
+											? darkenColor(color, 0.3)
+											: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+									>
+										{safeTranslate(status)}
+									</button>
+								{/each}
+							</div>
 						</div>
-					</div>
+					{/if}
 					{#if data.compliance_assessment.extended_result_enabled}
 						<div>
 							<span class="text-sm font-bold">{m.extendedResult()}</span>

@@ -432,6 +432,7 @@ export const ComplianceAssessmentSchema = z.object({
 	framework: z.string(),
 	show_documentation_score: z.boolean().optional().default(false),
 	extended_result_enabled: z.boolean().optional().default(false),
+	progress_status_enabled: z.boolean().optional().default(true),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),

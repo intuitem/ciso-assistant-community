@@ -14,6 +14,7 @@
 		isScored: boolean;
 		showDocumentationScore: boolean;
 		max_score: number;
+		progressStatusEnabled?: boolean;
 		extendedResultEnabled?: boolean;
 		extendedResult?: string | null;
 		extendedResultColor?: string | null;
@@ -30,6 +31,7 @@
 		isScored,
 		showDocumentationScore,
 		max_score,
+		progressStatusEnabled = true,
 		extendedResultEnabled = false,
 		extendedResult = null,
 		extendedResultColor = null
@@ -44,9 +46,11 @@
 
 {#if assessable}
 	<div class="flex flex-row space-x-2 items-center">
-		<span class="badge h-fit" style="color: {statusColor ?? '#d1d5db'};">
-			{lead}
-		</span>
+		{#if progressStatusEnabled}
+			<span class="badge h-fit" style="color: {statusColor ?? '#d1d5db'};">
+				{lead}
+			</span>
+		{/if}
 		<span class="badge {classesText} h-fit" style="background-color: {resultColor ?? '#d1d5db'};">
 			{leadResult}
 		</span>

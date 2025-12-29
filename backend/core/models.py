@@ -5743,6 +5743,7 @@ class ComplianceAssessment(Assessment):
     )
 
     extended_result_enabled = models.BooleanField(default=False)
+    progress_status_enabled = models.BooleanField(default=True)
 
     fields_to_check = ["name", "version"]
 

@@ -1576,6 +1576,8 @@
 	"requirementAssessmentStatusHelpText": "La progression de la revue de l'auditeur",
 	"requirementAssessmentResultHelpText": "Le résultat de conformité pour cette exigence",
 	"extendedResultHelpText": "Détails du résultat de la conformité",
+	"progressStatusEnabled": "Activer le statut de progression",
+	"progressStatusEnabledHelpText": "Affiche le statut de progression (à faire, en cours, en revue, terminé) sur les évaluations d'exigences.",
 	"importFolder": "Importer un domaine",
 	"importFolderHelpText": "Importer un domaine à partir d'un ZIP ou fichier JSON",
 	"importVersionNotCompatibleWithCurrentVersion": "La version de l'import n'est pas compatible avec la version actuelle de l'application.",
