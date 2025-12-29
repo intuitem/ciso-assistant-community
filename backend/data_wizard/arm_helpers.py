@@ -32,12 +32,15 @@ class ARMSheets:
     # Workshop 2 - Risk Origins
     ROTO_COUPLES = "2 - Base de couples SR OV"
 
-    # Workshop 3 - Stakeholders
+    # Workshop 3 - Stakeholders & Strategic Scenarios
     STAKEHOLDER_CATEGORIES = "3 - Catégories de partie prena"
     STAKEHOLDERS = "3 - Base de parties prenantes"
     STAKEHOLDER_DANGER_LEVELS = "3 - Niveau de danger des parti"
+    STRATEGIC_SCENARIOS = "3 - Synthèse des scénarios str"
 
-    # Workshop 4 - Operational Scenarios (to be added)
+    # Workshop 4 - Operational Scenarios
+    ELEMENTARY_ACTIONS = "4 - Actions élémentaires"
+
     # Workshop 5 - Risk Treatment Plan (to be added)
 
 
@@ -318,11 +321,16 @@ def extract_feared_events(workbook, gravity_mapping: dict[str, int]) -> list[dic
         # Parse linked assets
         asset_names = parse_bullet_list(row.get("Valeurs métier") or "")
 
+        # Check if selected (column B: ✓/❒)
+        selected_value = row.get("✓/❒") or ""
+        is_selected = "✔" in str(selected_value) or "✓" in str(selected_value)
+
         feared_event = {
             "name": name.strip(),
             "justification": (row.get("Impacts") or "").strip(),
             "gravity": gravity,
             "asset_names": asset_names,
+            "is_selected": is_selected,
         }
         feared_events.append(feared_event)
 
@@ -626,12 +634,17 @@ def extract_stakeholders(workbook) -> list[dict]:
         # Parse risk origins (bullet list)
         risk_origins = parse_bullet_list(row.get("Sources de risque") or "")
 
+        # Check if selected (column B: ✓/❒)
+        selected_value = row.get("✓/❒") or ""
+        is_selected = "✔" in str(selected_value) or "✓" in str(selected_value)
+
         stakeholder = {
             "name": name,
             "description": (row.get("Description") or "").strip(),
             "category": normalize_category_name(category_raw),
             "category_raw": category_raw.strip(),
             "risk_origins": risk_origins,
+            "is_selected": is_selected,
             "current_dependency": assessment["dependency"],
             "current_penetration": assessment["penetration"],
             "current_maturity": assessment["maturity"],
@@ -641,6 +654,145 @@ def extract_stakeholders(workbook) -> list[dict]:
 
     logger.info(f"Extracted {len(stakeholders)} stakeholders from ARM file")
     return stakeholders
+
+
+def extract_strategic_scenarios(workbook) -> list[dict]:
+    """
+    Extract strategic scenarios from ARM file.
+
+    The sheet has:
+    - Row 1: Main headers (merged)
+    - Row 2: Sub-headers
+    - Row 3+: Data
+
+    Column layout (0-indexed):
+    - Columns A-D (0-3): Scenario info (Nom, Abrév.)
+    - Columns E-F (4-5): RoTo reference (Source de risque, Objectif visé)
+    - Columns H-I (7-8): Attack path (Réf., Nom)
+
+    Args:
+        workbook: openpyxl Workbook object
+
+    Returns:
+        List of dicts with strategic scenario data
+    """
+    sheet_name = ARMSheets.STRATEGIC_SCENARIOS
+    if sheet_name not in workbook.sheetnames:
+        logger.warning(f"Sheet '{sheet_name}' not found in workbook")
+        return []
+
+    sheet = workbook[sheet_name]
+
+    # Get headers from row 1 and sub-headers from row 2
+    headers_row1 = [cell.value for cell in sheet[1]]
+    sub_headers = [cell.value for cell in sheet[2]]
+
+    # Find column indices by scanning both header rows
+    # Column layout based on actual data:
+    # - Column C (index 2): Scenario name (under merged header in row 1)
+    # - Column E (index 4): Source de risque
+    # - Column F (index 5): Objectif visé
+    # - Column H (index 7): Attack path Réf.
+    # - Column I (index 8): Attack path Nom
+    scenario_name_col = None
+    scenario_ref_col = None
+    risk_origin_col = None
+    target_objective_col = None
+    attack_path_ref_col = None
+    attack_path_name_col = None
+
+    for i, header in enumerate(sub_headers):
+        if not header:
+            continue
+        header_clean = header.strip()
+
+        if header_clean == "Source de risque":
+            risk_origin_col = i
+        elif header_clean == "Objectif visé":
+            target_objective_col = i
+        elif header_clean == "Réf.":
+            attack_path_ref_col = i
+        elif header_clean == "Nom":
+            attack_path_name_col = i
+
+    # Check row 1 for scenario name column (often under a merged "Scénario" header)
+    for i, header in enumerate(headers_row1):
+        if header and "Nom" in str(header):
+            scenario_name_col = i
+            break
+        elif header and "Abrév" in str(header):
+            scenario_ref_col = i
+
+    # Fallback: scenario name is typically in column C (index 2) based on observed data
+    if scenario_name_col is None:
+        scenario_name_col = 2
+
+    scenarios = []
+    for row in sheet.iter_rows(min_row=3):
+        row_values = [cell.value for cell in row]
+
+        # Skip empty rows
+        if not any(row_values):
+            continue
+
+        def get_val(col_idx):
+            if col_idx is not None and col_idx < len(row_values):
+                return row_values[col_idx]
+            return None
+
+        scenario_name = get_val(scenario_name_col)
+        if not scenario_name:
+            continue
+
+        scenario = {
+            "name": str(scenario_name).strip(),
+            "ref_id": (str(get_val(scenario_ref_col) or "")).strip(),
+            "risk_origin": (str(get_val(risk_origin_col) or "")).strip(),
+            "target_objective": (str(get_val(target_objective_col) or "")).strip(),
+            "attack_path_ref_id": (str(get_val(attack_path_ref_col) or "")).strip(),
+            "attack_path_name": (str(get_val(attack_path_name_col) or "")).strip(),
+        }
+        scenarios.append(scenario)
+
+    logger.info(f"Extracted {len(scenarios)} strategic scenarios from ARM file")
+    return scenarios
+
+
+# =============================================================================
+# Workshop 4 Processing
+# =============================================================================
+
+
+def extract_elementary_actions(workbook) -> list[dict]:
+    """
+    Extract elementary actions from ARM file.
+
+    Args:
+        workbook: openpyxl Workbook object
+
+    Returns:
+        List of dicts with elementary action data:
+        - name: str
+        - description: str
+        - ref_id: str
+    """
+    rows = get_sheet_data(workbook, ARMSheets.ELEMENTARY_ACTIONS)
+
+    elementary_actions = []
+    for row in rows:
+        name = row.get("Nom")
+        if not name:
+            continue
+
+        elementary_action = {
+            "name": name.strip(),
+            "description": (row.get("Description") or "").strip(),
+            "ref_id": (row.get("Abrév.") or "").strip(),
+        }
+        elementary_actions.append(elementary_action)
+
+    logger.info(f"Extracted {len(elementary_actions)} elementary actions from ARM file")
+    return elementary_actions
 
 
 # =============================================================================
@@ -682,6 +834,10 @@ def process_arm_file(file_content: bytes) -> dict:
     # Extract Workshop 3 data
     result["stakeholder_categories"] = extract_stakeholder_categories(workbook)
     result["stakeholders"] = extract_stakeholders(workbook)
+    result["strategic_scenarios"] = extract_strategic_scenarios(workbook)
+
+    # Extract Workshop 4 data
+    result["elementary_actions"] = extract_elementary_actions(workbook)
 
     logger.info(
         f"Extracted from ARM file: "
@@ -690,7 +846,9 @@ def process_arm_file(file_content: bytes) -> dict:
         f"{len(result['feared_events'])} feared events, "
         f"{len(result['applied_controls'])} applied controls, "
         f"{len(result['roto_couples'])} RoTo couples, "
-        f"{len(result['stakeholders'])} stakeholders"
+        f"{len(result['stakeholders'])} stakeholders, "
+        f"{len(result['strategic_scenarios'])} strategic scenarios, "
+        f"{len(result['elementary_actions'])} elementary actions"
     )
 
     return result

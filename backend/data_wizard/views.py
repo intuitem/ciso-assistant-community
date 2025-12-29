@@ -35,7 +35,15 @@ from core.serializers import (
     ThreatWriteSerializer,
     FolderWriteSerializer,
 )
-from ebios_rm.models import EbiosRMStudy, FearedEvent, RoTo, Stakeholder
+from ebios_rm.models import (
+    EbiosRMStudy,
+    FearedEvent,
+    RoTo,
+    Stakeholder,
+    StrategicScenario,
+    AttackPath,
+    ElementaryAction,
+)
 from ebios_rm.serializers import (
     ElementaryActionWriteSerializer,
     EbiosRMStudyWriteSerializer,
@@ -1908,7 +1916,10 @@ class LoadFileView(APIView):
     def _process_ebios_rm_study_arm(self, request, excel_data, folder_id, matrix_id):
         """
         Process EBIOS RM Study import from ARM Excel format.
-        This creates an EbiosRMStudy with Workshop 1, 2, and 3 objects.
+        This creates an EbiosRMStudy with Workshop 1, 2, and 3 objects:
+        - Workshop 1: Assets, Feared Events, Applied Controls
+        - Workshop 2: RoTo Couples
+        - Workshop 3: Stakeholders, Strategic Scenarios, Attack Paths
         """
         from datetime import datetime
 
@@ -2174,6 +2185,7 @@ class LoadFileView(APIView):
                             name=fe_data["name"],
                             justification=fe_data.get("justification", ""),
                             gravity=fe_data.get("gravity", -1),
+                            is_selected=fe_data.get("is_selected", False),
                         )
 
                         # Link assets
@@ -2348,6 +2360,7 @@ class LoadFileView(APIView):
                                 ebios_rm_study=study,
                                 entity=entity,
                                 category=category,
+                                is_selected=stakeholder_data.get("is_selected", False),
                                 current_dependency=stakeholder_data.get(
                                     "current_dependency", 0
                                 ),
@@ -2411,6 +2424,141 @@ class LoadFileView(APIView):
                         logger.info(
                             "Marked workshop 3 step 2 as done (assessment data captured)"
                         )
+
+                # =========================================================
+                # Step 7: Create Strategic Scenarios and Attack Paths (Workshop 3)
+                # =========================================================
+                results["details"]["strategic_scenarios_created"] = 0
+                results["details"]["attack_paths_created"] = 0
+
+                # Build a lookup for RoTo couples by risk_origin + target_objective
+                roto_lookup = {}
+                for roto in study.roto_set.all():
+                    # Store both the normalized name and the original for flexible matching
+                    key = (
+                        roto.risk_origin.name.lower(),
+                        roto.target_objective.lower(),
+                    )
+                    roto_lookup[key] = roto
+
+                for scenario_data in arm_data.get("strategic_scenarios", []):
+                    try:
+                        scenario_name = scenario_data["name"]
+                        if not scenario_name:
+                            continue
+
+                        # Find the matching RoTo couple
+                        # Normalize the risk origin name the same way we do when creating terminologies
+                        risk_origin_raw = scenario_data.get("risk_origin", "")
+                        risk_origin_name = risk_origin_raw.lower().replace(" ", "_")
+                        target_objective = scenario_data.get(
+                            "target_objective", ""
+                        ).lower()
+
+                        roto = roto_lookup.get((risk_origin_name, target_objective))
+
+                        if not roto:
+                            # Try without underscore normalization
+                            risk_origin_name_alt = risk_origin_raw.lower()
+                            roto = roto_lookup.get(
+                                (risk_origin_name_alt, target_objective)
+                            )
+
+                        if not roto:
+                            # Try partial matching on target objective
+                            for key, r in roto_lookup.items():
+                                if (
+                                    key[0] == risk_origin_name
+                                    and target_objective in key[1]
+                                ):
+                                    roto = r
+                                    break
+
+                        if not roto:
+                            results["errors"].append(
+                                {
+                                    "strategic_scenario": scenario_name,
+                                    "error": f"Could not find RoTo couple for '{risk_origin_name}' - '{target_objective}'",
+                                }
+                            )
+                            continue
+
+                        # Create the strategic scenario
+                        strategic_scenario = StrategicScenario.objects.create(
+                            ebios_rm_study=study,
+                            ro_to_couple=roto,
+                            name=scenario_name,
+                            ref_id=scenario_data.get("ref_id", ""),
+                        )
+                        results["details"]["strategic_scenarios_created"] += 1
+
+                        # Create the attack path if provided
+                        attack_path_name = scenario_data.get("attack_path_name", "")
+                        if attack_path_name:
+                            attack_path = AttackPath.objects.create(
+                                ebios_rm_study=study,
+                                strategic_scenario=strategic_scenario,
+                                name=attack_path_name,
+                                ref_id=scenario_data.get("attack_path_ref_id", ""),
+                            )
+                            results["details"]["attack_paths_created"] += 1
+
+                    except Exception as e:
+                        results["errors"].append(
+                            {
+                                "strategic_scenario": scenario_data.get(
+                                    "name", "unknown"
+                                ),
+                                "error": str(e),
+                            }
+                        )
+
+                # Mark workshop 3 step 3 (index 2) as done if we created strategic scenarios
+                if results["details"]["strategic_scenarios_created"] > 0:
+                    study.meta["workshops"][2]["steps"][2]["status"] = "done"
+                    meta_updated = True
+                    logger.info(
+                        f"Created {results['details']['strategic_scenarios_created']} strategic scenarios, "
+                        f"{results['details']['attack_paths_created']} attack paths"
+                    )
+
+                # =========================================================
+                # Step 8: Create Elementary Actions (Workshop 4)
+                # =========================================================
+                results["details"]["elementary_actions_created"] = 0
+
+                for ea_data in arm_data.get("elementary_actions", []):
+                    try:
+                        ea_name = ea_data["name"]
+                        if not ea_name:
+                            continue
+
+                        # Create the elementary action
+                        elementary_action = ElementaryAction.objects.create(
+                            name=ea_name,
+                            description=ea_data.get("description", ""),
+                            ref_id=ea_data.get("ref_id", ""),
+                            folder=folder,
+                        )
+
+                        results["details"]["elementary_actions_created"] += 1
+                        logger.debug(f"Created elementary action: {ea_name}")
+
+                    except Exception as e:
+                        results["errors"].append(
+                            {
+                                "elementary_action": ea_data.get("name", "unknown"),
+                                "error": str(e),
+                            }
+                        )
+
+                # Mark workshop 4 step 1 (index 0) as done if we created elementary actions
+                if results["details"]["elementary_actions_created"] > 0:
+                    study.meta["workshops"][3]["steps"][0]["status"] = "done"
+                    meta_updated = True
+                    logger.info(
+                        f"Created {results['details']['elementary_actions_created']} elementary actions"
+                    )
 
                 # Save the study if meta was updated
                 if meta_updated:
