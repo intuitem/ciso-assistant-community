@@ -79,7 +79,7 @@
 										<p class="text-sm font-semibold">{m.name()}</p>
 										<a
 											class="text-blue-600 hover:underline text-lg font-bold"
-											href="compliance-assessments/{assessment.id}"
+											href="/compliance-assessments/{assessment.id}"
 										>
 											{assessment.name}
 										</a>
