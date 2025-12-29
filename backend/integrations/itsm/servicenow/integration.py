@@ -94,6 +94,42 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
         else:
             raise NotImplementedError(f"Unknown action: {action}")
 
+    def validate_webhook_request(self, request) -> bool:
+        """
+        Validates the request by checking for a matching secret token header.
+        ServiceNow doesn't support HMAC signing natively easily, so we use a
+        shared secret header approach.
+        """
+        # Define the header we expect from ServiceNow
+        # (The user must configure this in their Outbound REST Message)
+        incoming_secret = request.headers.get("X-CISO-Secret")
+
+        if not incoming_secret:
+            # Fallback: check query params if they prefer that method
+            # incoming_secret = request.GET.get("secret")
+            pass
+
+        if not incoming_secret:
+            raise ValueError("Missing authentication header (X-CISO-Secret)")
+
+        configured_secret = self.configuration.webhook_secret
+        if not configured_secret:
+            raise ValueError("Webhook secret not configured on server")
+
+        # Constant time comparison to prevent timing attacks
+        import hmac
+
+        # Compare strings safely
+        if not hmac.compare_digest(incoming_secret, configured_secret):
+            raise ValueError("Invalid secret token")
+
+        return True
+
+    def extract_webhook_event_type(self, payload: dict) -> str:
+        # Based on the Business Rule script we wrote earlier,
+        # we inject an "event" field into the JSON body.
+        return payload.get("event")
+
 
 IntegrationRegistry.register(
     name="servicenow",

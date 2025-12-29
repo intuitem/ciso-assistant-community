@@ -264,12 +264,76 @@ class ServiceNowClient(BaseIntegrationClient):
 
     def get_table_columns(self, table_name: str) -> list[dict]:
         """
-        Fetches columns for a specific table from sys_dictionary.
+        Fetches columns for a table AND its parents (e.g., incident -> task).
+        Recursively walks up the sys_db_object inheritance tree.
         """
-        url = f"{self.base_url}/api/now/table/sys_dictionary"
-        # Query: name matches table AND it's an actual column (element is not empty)
-        query = f"name={table_name}^active=true^elementISNOTEMPTY"
+        columns_map = {}  # Use a dict to handle overrides (child hides parent)
+        current_table = table_name
 
+        while current_table:
+            # 1. Fetch fields for the current level
+            self._fetch_fields_for_single_table(current_table, columns_map)
+
+            # 2. Find the parent table
+            parent_table = self._get_parent_table(current_table)
+
+            # 3. Move up or stop
+            if (
+                parent_table
+                and parent_table != "sys_metadata"
+                and parent_table != "cmdb"
+            ):
+                current_table = parent_table
+            else:
+                current_table = None
+
+        # Convert back to list and sort
+        return sorted(columns_map.values(), key=lambda x: x["label"])
+
+    def _get_parent_table(self, table_name: str) -> str | None:
+        """Helper to find the super_class (parent) of a table."""
+        url = f"{self.base_url}/api/now/table/sys_db_object"
+        params = {
+            "sysparm_query": f"name={table_name}",
+            "sysparm_fields": "super_class",
+            "sysparm_limit": 1,
+        }
+        try:
+            resp = requests.get(
+                url, auth=self.auth, headers=self._get_headers(), params=params
+            )
+            resp.raise_for_status()
+            result = resp.json().get("result", [])
+            if result and result[0].get("super_class"):
+                # super_class returns a link object: {"link": "...", "value": "sys_id"}
+                # We need to fetch the name of that parent, but the API gives us a link.
+                # Optimization: It's often faster to just query sys_db_object by sys_id
+                # or rely on a known cache, but let's do the robust lookup.
+
+                parent_id = result[0]["super_class"]["value"]
+                return self._get_table_name_by_id(parent_id)
+            return None
+        except Exception:
+            return None
+
+    def _get_table_name_by_id(self, sys_id: str) -> str | None:
+        """Resolves a table sys_id to its name (e.g., 'task')."""
+        url = f"{self.base_url}/api/now/table/sys_db_object/{sys_id}"
+        params = {"sysparm_fields": "name"}
+        try:
+            resp = requests.get(
+                url, auth=self.auth, headers=self._get_headers(), params=params
+            )
+            if resp.status_code == 200:
+                return resp.json().get("result", {}).get("name")
+        except Exception:
+            pass
+        return None
+
+    def _fetch_fields_for_single_table(self, table_name: str, columns_map: dict):
+        """Fetches fields for one table and merges them into the map (child wins)."""
+        url = f"{self.base_url}/api/now/table/sys_dictionary"
+        query = f"name={table_name}^active=true^elementISNOTEMPTY"
         params = {
             "sysparm_query": query,
             "sysparm_fields": "element,column_label,internal_type,read_only,reference",
@@ -287,30 +351,48 @@ class ServiceNowClient(BaseIntegrationClient):
             response.raise_for_status()
             results = response.json().get("result", [])
 
-            # Map to a cleaner format for frontend
-            columns = []
             for r in results:
-                columns.append(
-                    {
-                        "name": r.get("element"),
+                col_name = r.get("element")
+                # Only add if not already present (Child fields processed first take precedence)
+                if col_name not in columns_map:
+                    columns_map[col_name] = {
+                        "name": col_name,
                         "label": r.get("column_label"),
                         "type": r.get("internal_type"),
                         "readonly": r.get("read_only") == "true",
                         "reference": r.get("reference"),
                     }
-                )
-
-            return sorted(columns, key=lambda x: x["label"])
-
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             logger.error(f"Failed to fetch columns for {table_name}: {e}")
-            raise
 
     def get_field_choices(self, table_name: str, field_name: str) -> list[dict]:
         """
-        Fetches choice values (e.g., Incident State 1=New) from sys_choice.
+        Fetches choice values by walking up the table hierarchy.
+        Example: If asking for 'incident.priority', it checks 'incident', then 'task'.
         """
+        current_table = table_name
+
+        # Prevent infinite loops or deep dives into abstract system tables
+        # 'cmdb' and 'sys_metadata' are good stopping points for ITSM/GRC
+        while current_table and current_table not in ["sys_metadata", "cmdb"]:
+            choices = self._fetch_choices_for_single_table(current_table, field_name)
+
+            # If we found choices at this level, return them immediately.
+            # ServiceNow logic: A child table's choice list overrides the parent's entirely.
+            if choices:
+                return choices
+
+            # Not found? Move up to the parent (e.g., incident -> task)
+            current_table = self._get_parent_table(current_table)
+
+        return []
+
+    def _fetch_choices_for_single_table(
+        self, table_name: str, field_name: str
+    ) -> list[dict]:
+        """Helper to hit the API for a specific table/field combination."""
         url = f"{self.base_url}/api/now/table/sys_choice"
+        # inactive=false ensures we don't get deprecated options
         query = f"name={table_name}^element={field_name}^inactive=false"
 
         params = {
@@ -333,9 +415,9 @@ class ServiceNowClient(BaseIntegrationClient):
 
             return [{"value": r["value"], "label": r["label"]} for r in results]
 
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Failed to fetch choices for {table_name}.{field_name}: {e}")
-            raise
+        except Exception as e:
+            logger.warning(f"Error fetching choices for {table_name}.{field_name}: {e}")
+            return []
 
     def test_connection(self) -> bool:
         try:
