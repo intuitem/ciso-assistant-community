@@ -36,6 +36,22 @@
 	bind:cachedValue={formDataCache['ro_to_couple']}
 	label={m.roToCouple()}
 />
+{#key formDataCache['ro_to_couple'] || initialData.ro_to_couple}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="feared-events"
+		optionsDetailedUrlParameters={[
+			['ebios_rm_study', initialData.ebios_rm_study],
+			['ro_to_couples', formDataCache['ro_to_couple'] || initialData.ro_to_couple]
+		]}
+		optionsLabelField="auto"
+		field="focused_feared_event"
+		cacheLock={cacheLocks['focused_feared_event']}
+		bind:cachedValue={formDataCache['focused_feared_event']}
+		label={m.focusedFearedEvent()}
+		nullable
+	/>
+{/key}
 <AutocompleteSelect
 	{form}
 	field="folder"

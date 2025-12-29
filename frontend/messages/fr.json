@@ -1382,6 +1382,8 @@
 	"roToCouple": "Couple SR/OV",
 	"roToCouples": "Couples SR/OV",
 	"selectedRoToCouples": "Couples SR/OV sélectionnés",
+	"focusedFearedEvent": "Événement redouté spécifique",
+	"focusedOn": "Concentré sur",
 	"addRoto": "Ajouter un couple SR/OV",
 	"organizedCrime": "Crime organisé",
 	"terrorist": "Terroriste",

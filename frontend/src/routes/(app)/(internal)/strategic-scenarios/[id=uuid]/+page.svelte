@@ -10,16 +10,28 @@
 	}
 
 	let { data }: Props = $props();
+
+	const focusedFearedEvent = $derived(data.data.focused_feared_event);
 </script>
 
 <DetailView {data}>
 	{#snippet widgets()}
 		<div class="h-full flex flex-col space-y-4">
 			<div class="card p-4 bg-gray-50 shadow-xs grow">
-				<h3 class="text-lg font-semibold mb-4">
-					<i class="fa-solid fa-route mr-2"></i>
-					{m.attackPaths()}
-				</h3>
+				<div class="flex items-center justify-between mb-4">
+					<h3 class="text-lg font-semibold">
+						<i class="fa-solid fa-route mr-2"></i>
+						{m.attackPaths()}
+					</h3>
+					{#if focusedFearedEvent}
+						<span
+							class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800"
+						>
+							<i class="fa-solid fa-crosshairs mr-2"></i>
+							{m.focusedOn()}: {focusedFearedEvent.str}
+						</span>
+					{/if}
+				</div>
 				{#key data.attackPaths}
 					{#if data.attackPaths && data.attackPaths.length > 0}
 						<!-- Graph visualization -->
