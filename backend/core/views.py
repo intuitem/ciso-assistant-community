@@ -7674,6 +7674,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "name",
                 "description",
                 "compliance_result",
+                "extended_result",
                 "requirement_progress",
                 "score",
                 "observations",
@@ -7700,12 +7701,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 if req_node.assessable:
                     row += [
                         req.result,
+                        req.extended_result,
                         req.status,
                         req.score,
                         req.observation,
                     ]
                 else:
-                    row += ["", "", "", ""]
+                    row += ["", "", "", "", ""]
                 writer.writerow(row)
 
             return response
@@ -7749,6 +7751,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     req_node.get_description_translated
                 ),
                 "compliance_result": req.result,
+                "extended_result": req.extended_result,
                 "requirement_progress": req.status,
                 "observations": escape_excel_formula(req.observation),
             }

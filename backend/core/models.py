@@ -6586,7 +6586,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     class ExtendedResult(models.TextChoices):
         MAJOR_NONCONFORMITY = "major_nonconformity", "Major nonconformity"
         MINOR_NONCONFORMITY = "minor_nonconformity", "Minor nonconformity"
-        OBSERVATION = "observation", "Observation / sensitive point"
+        OBSERVATION = "observation_sensitive_point", "Observation / sensitive point"
         OPPORTUNITY_FOR_IMPROVEMENT = (
             "opportunity_for_improvement",
             "Opportunity for improvement",
