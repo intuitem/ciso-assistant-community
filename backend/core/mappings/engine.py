@@ -414,7 +414,6 @@ class MappingEngine:
                     elif result in ("compliant", "partially_compliant"):
                         target_assessment["result"] = "partially_compliant"
 
-
             mapping_set_info = {
                 k: v
                 for k, v in {
@@ -442,13 +441,11 @@ class MappingEngine:
                 mapping_inference.setdefault("annotation", "")
 
             target_assessment["mapping_inference"] = mapping_inference
-            target_assessment["mapping_inference"][
-                "source_requirement_assessments"
-            ] = source_requirement_assessments
+            target_assessment["mapping_inference"]["source_requirement_assessments"] = (
+                source_requirement_assessments
+            )
 
-            def merge_source_requirement_assessment(
-                key: str, new_value: dict
-            ) -> None:
+            def merge_source_requirement_assessment(key: str, new_value: dict) -> None:
                 existing = source_requirement_assessments.get(key, {}).copy()
                 existing_cov = existing.get("coverage")
                 new_cov = new_value.get("coverage")
