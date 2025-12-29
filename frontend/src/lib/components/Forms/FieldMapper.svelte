@@ -235,7 +235,7 @@
 											{#key choices}
 												<AutocompleteSelect
 													{form}
-													field={choice.value}
+													field={String(choice.value)}
 													valuePath={`settings.value_map.${field.key}.${choice.value}`}
 													options={choices}
 													optionsValueField="value"
