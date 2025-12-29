@@ -10,7 +10,7 @@ from core.serializers import BaseModelSerializer, ReferentialSerializer
 class StoredLibrarySerializer(ReferentialSerializer):
     locales = serializers.ListField(source="get_locales", read_only=True)
     loaded_library = serializers.SerializerMethodField()
-    filtering_labels = FieldsRelatedField(many=True, fields=["label"])
+    filtering_labels = IdRelatedField(many=True, fields=["label"])
 
     def get_loaded_library(self, obj) -> Optional[str]:
         loaded_library = obj.get_loaded_library()
