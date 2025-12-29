@@ -2322,7 +2322,7 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         return round(count * 100 / total)
 
     def __str__(self):
-        return f"{self.folder} / {self.name}"
+        return f"{self.folder}/{self.name}"
 
 
 class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
