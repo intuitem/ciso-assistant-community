@@ -12,8 +12,10 @@ logger = get_logger(__name__)
 class ServiceNowClient(BaseIntegrationClient):
     def __init__(self, configuration):
         super().__init__(configuration)
-        self.base_url = self.credentials["instance_url"].rstrip("/")
-        self.auth = (self.credentials["username"], self.credentials["password"])
+        self.base_url = self.credentials.get("instance_url", "").rstrip("/")
+        username = self.credentials.get("username", "")
+        password = self.credentials.get("password", "")
+        self.auth = (username, password)
         # Default to 'incident' if not specified, but for AppliedControl likely 'sn_compliance_control' or custom
         self.table = self.settings.get("table_name", "incident")
         self.mapper = ServiceNowFieldMapper(configuration)
