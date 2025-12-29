@@ -182,7 +182,6 @@ class IntegrationRegistry:
             logger.error(
                 "Configuration has no provider attribute",
                 config_id=configuration.id,
-                provider=configuration.provider.name,
             )
             raise ValueError("Configuration must have a provider")
 
