@@ -131,7 +131,7 @@
 								class="btn preset-filled"
 								onclick={() => {
 									showApiTokenField = true;
-									$formStore.password = '';
+									$formStore.credentials.password = '';
 								}}
 								>{m.resetPassword()}
 							</button>
