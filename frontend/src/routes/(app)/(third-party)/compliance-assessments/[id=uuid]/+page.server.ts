@@ -18,6 +18,23 @@ export const load = (async ({ fetch, params }) => {
 
 	const res = await fetch(endpoint);
 	const compliance_assessment = await res.json();
+	const folderId =
+		typeof compliance_assessment.folder === 'string'
+			? compliance_assessment.folder
+			: compliance_assessment.folder?.id;
+	const frameworkId =
+		typeof compliance_assessment.framework === 'string'
+			? compliance_assessment.framework
+			: compliance_assessment.framework?.id;
+	const perimeterId =
+		typeof compliance_assessment.perimeter === 'string'
+			? compliance_assessment.perimeter
+			: compliance_assessment.perimeter?.id;
+	const framework = frameworkId
+		? await fetch(`${BASE_API_URL}/frameworks/${frameworkId}/`).then((res) =>
+				res.ok ? res.json() : null
+			)
+		: null;
 
 	const object = await fetch(objectEndpoint).then((res) => res.json());
 
@@ -41,8 +58,8 @@ export const load = (async ({ fetch, params }) => {
 
 	const cloneInitialData = {
 		baseline: compliance_assessment.id,
-		framework: compliance_assessment.framework.id,
-		perimeter: compliance_assessment.perimeter?.id
+		framework: frameworkId,
+		perimeter: perimeterId ?? null
 	};
 	const auditCloneForm = await superValidate(cloneInitialData, zod(ComplianceAssessmentSchema), {
 		errors: false
@@ -79,7 +96,7 @@ export const load = (async ({ fetch, params }) => {
 
 	const { validationFlowForm } = await loadValidationFlowFormData({
 		event: { fetch },
-		folderId: compliance_assessment.folder.id,
+		folderId,
 		targetField: 'compliance_assessments',
 		targetIds: [params.id]
 	});
@@ -90,6 +107,7 @@ export const load = (async ({ fetch, params }) => {
 		auditCreateForm,
 		auditCloneForm,
 		auditModel,
+		framework,
 		object,
 		tree,
 		compliance_assessment_donut_values,

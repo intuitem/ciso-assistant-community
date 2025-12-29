@@ -48,6 +48,13 @@
 	let { data, form }: Props = $props();
 
 	const compliance_assessment = $derived(data.compliance_assessment);
+	const folderId =
+		typeof compliance_assessment.folder === 'string'
+			? compliance_assessment.folder
+			: compliance_assessment.folder?.id;
+	const framework = data.framework ?? compliance_assessment.framework;
+	const frameworkReferenceControls = framework?.reference_controls ?? [];
+	const implementationGroupsDefinition = framework?.implementation_groups_definition ?? [];
 
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
@@ -55,7 +62,7 @@
 		user,
 		action: 'change',
 		model: model.name,
-		domain: compliance_assessment.folder.id
+		domain: folderId
 	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
 	const canEditRequirementAssessment: boolean =
@@ -64,7 +71,7 @@
 			user,
 			action: 'change',
 			model: requirementAssessmentModel.name,
-			domain: data.compliance_assessment.folder.id
+			domain: folderId
 		});
 
 	const has_threats = data.threats.total_unique_threats > 0;
@@ -352,7 +359,7 @@
 			// Data
 			title: m.syncToAppliedControls(),
 			body: m.syncToAppliedControlsMessage({
-				count: data.compliance_assessment.framework.reference_controls.length //change this
+				count: frameworkReferenceControls.length //change this
 			}),
 			response: (r: boolean) => {
 				syncingToActionsIsLoading = r;
@@ -373,7 +380,7 @@
 				formAction: action,
 				bodyComponent: List,
 				bodyProps: {
-					items: data.compliance_assessment.framework.reference_controls,
+					items: frameworkReferenceControls,
 					message: m.theFollowingControlsWillBeAddedColon()
 				}
 			}
@@ -384,7 +391,7 @@
 			// Data
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
-				count: data.compliance_assessment.framework.reference_controls.length
+				count: frameworkReferenceControls.length
 			}),
 			response: (r: boolean) => {
 				createAppliedControlsLoading = r;
@@ -442,7 +449,7 @@
 					const fieldsToShow = ['ref_id', 'name', 'description', 'version', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'];
 					if (!fieldsToShow.includes(key)) return false;
 					// Hide selected_implementation_groups if framework doesn't support implementation groups
-					if (key === 'selected_implementation_groups' && (!data.compliance_assessment.framework.implementation_groups_definition || !Array.isArray(data.compliance_assessment.framework.implementation_groups_definition) || data.compliance_assessment.framework.implementation_groups_definition.length === 0)) return false;
+					if (key === 'selected_implementation_groups' && (!implementationGroupsDefinition || !Array.isArray(implementationGroupsDefinition) || implementationGroupsDefinition.length === 0)) return false;
 					return true;
 				}) as [key, value]}
 					<div class="flex flex-col">
@@ -722,7 +729,7 @@
 					</button>
 				{/if}
 
-				{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0 && !data.compliance_assessment.is_locked}
+				{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && frameworkReferenceControls.length > 0 && !data.compliance_assessment.is_locked}
 					<button
 						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
 						onclick={() => {

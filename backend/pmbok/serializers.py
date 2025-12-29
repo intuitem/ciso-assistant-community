@@ -1,24 +1,24 @@
 from rest_framework import serializers
 
 from core.serializers import BaseModelSerializer
-from core.serializer_fields import FieldsRelatedField, PathField
+from core.serializer_fields import IdRelatedField, PathField
 from pmbok.models import GenericCollection, Accreditation
 
 
 class GenericCollectionReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
-    folder = FieldsRelatedField()
-    compliance_assessments = FieldsRelatedField(many=True)
-    risk_assessments = FieldsRelatedField(many=True)
-    crq_studies = FieldsRelatedField(many=True)
-    ebios_studies = FieldsRelatedField(many=True)
-    entity_assessments = FieldsRelatedField(many=True)
-    findings_assessments = FieldsRelatedField(many=True)
-    documents = FieldsRelatedField(many=True)
-    security_exceptions = FieldsRelatedField(many=True)
-    policies = FieldsRelatedField(many=True)
-    dependencies = FieldsRelatedField(many=True)
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    folder = IdRelatedField()
+    compliance_assessments = IdRelatedField(many=True)
+    risk_assessments = IdRelatedField(many=True)
+    crq_studies = IdRelatedField(many=True)
+    ebios_studies = IdRelatedField(many=True)
+    entity_assessments = IdRelatedField(many=True)
+    findings_assessments = IdRelatedField(many=True)
+    documents = IdRelatedField(many=True)
+    security_exceptions = IdRelatedField(many=True)
+    policies = IdRelatedField(many=True)
+    dependencies = IdRelatedField(many=True)
+    filtering_labels = IdRelatedField(["folder"], many=True)
 
     class Meta:
         model = GenericCollection
@@ -33,13 +33,13 @@ class GenericCollectionWriteSerializer(BaseModelSerializer):
 
 class AccreditationReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
-    folder = FieldsRelatedField()
-    author = FieldsRelatedField(["id", "first_name", "last_name"])
-    authority = FieldsRelatedField()
-    linked_collection = FieldsRelatedField()
+    folder = IdRelatedField()
+    author = IdRelatedField(["id", "first_name", "last_name"])
+    authority = IdRelatedField()
+    linked_collection = IdRelatedField()
     collection_data = serializers.SerializerMethodField()
-    checklist = FieldsRelatedField()
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    checklist = IdRelatedField()
+    filtering_labels = IdRelatedField(["folder"], many=True)
     status = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
     checklist_progress = serializers.SerializerMethodField()
