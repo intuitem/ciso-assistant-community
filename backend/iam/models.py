@@ -979,6 +979,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             for p in permissions & ra_permissions:
                 for f in target_folders:
                     result_folders[f].add(p)
+
         for f in result_folders:
             if hasattr(object_type, "folder"):
                 objects_ids = object_type.objects.filter(folder=f).values_list(
@@ -1009,6 +1010,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 )
             else:
                 raise NotImplementedError("type not supported")
+
             if permission_view in result_folders[f]:
                 result_view.update(objects_ids)
             if permission_change in result_folders[f]:

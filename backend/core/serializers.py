@@ -1400,6 +1400,14 @@ class FolderWriteSerializer(BaseModelSerializer):
             )
         return value
 
+    def validate_parent_folder(self, value):
+        """
+        If parent_folder is empty or None, default to the root folder.
+        """
+        if not value:
+            return Folder.get_root_folder()
+        return value
+
 
 class FolderReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
@@ -2172,6 +2180,21 @@ class FilteringLabelReadSerializer(BaseModelSerializer):
 class FilteringLabelWriteSerializer(BaseModelSerializer):
     class Meta:
         model = FilteringLabel
+        exclude = ["folder", "is_published"]
+
+
+class LibraryFilteringLabelReadSerializer(BaseModelSerializer):
+    path = PathField(read_only=True)
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = LibraryFilteringLabel
+        fields = "__all__"
+
+
+class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = LibraryFilteringLabel
         exclude = ["folder", "is_published"]
 
 

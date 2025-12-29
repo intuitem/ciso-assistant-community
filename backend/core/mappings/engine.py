@@ -34,6 +34,7 @@ class MappingEngine:
             "score",
             "is_scored",
             "observation",
+            "documentation_score",
         ]
 
         self.m2m_fields = [
@@ -278,6 +279,13 @@ class MappingEngine:
         target_framework_urn = requirement_mapping_set.get("target_framework_urn", "")
         target_framework = self.frameworks.get(target_framework_urn)
 
+        # Check if score ranges match between source and target frameworks
+        scores_compatible = (
+            target_framework
+            and target_framework.get("min_score") == source_audit.get("min_score")
+            and target_framework.get("max_score") == source_audit.get("max_score")
+        )
+
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
             dst = mapping["target_requirement_urn"]
@@ -292,14 +300,7 @@ class MappingEngine:
                 # If we have matching score ranges on the target framework, copy
                 # the whole assessment (including score fields). Otherwise only
                 # copy non-score fields to avoid misrepresenting scores.
-
-                if (
-                    target_framework
-                    and target_framework.get("min_score")
-                    == source_audit.get("min_score")
-                    and target_framework.get("max_score")
-                    == source_audit.get("max_score")
-                ):
+                if scores_compatible:
                     # Handle collision: merge m2m fields if target already exists
                     if dst in target_audit["requirement_assessments"]:
                         for m2m_field in self.m2m_fields:
@@ -322,7 +323,7 @@ class MappingEngine:
                         target_assessment = src_assessment.copy()
                 else:
                     for field in self.fields_to_map:
-                        if field not in ["score", "is_scored"]:
+                        if field not in ["score", "is_scored", "documentation_score"]:
                             if (
                                 field == "result"
                                 and dst in target_audit["requirement_assessments"]
@@ -388,6 +389,15 @@ class MappingEngine:
                             target_assessment[m2m_field] = list(existing | new_values)
                         else:
                             target_assessment[m2m_field] = src_values
+
+                # Copy score fields if scores are compatible
+                if scores_compatible:
+                    src_assessment = source_audit["requirement_assessments"][src]
+                    for score_field in ["score", "is_scored", "documentation_score"]:
+                        if score_field in src_assessment:
+                            target_audit["requirement_assessments"][dst][
+                                score_field
+                            ] = src_assessment.get(score_field)
 
                 # Handle result: keep the most restrictive
                 if (

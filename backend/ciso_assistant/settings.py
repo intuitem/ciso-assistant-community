@@ -62,11 +62,6 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
-        "django.server": {
-            "handlers": [],
-            "level": "WARNING",
-            "propagate": False,
-        },
     },
 }
 
@@ -194,6 +189,7 @@ INSTALLED_APPS = [
     "privacy",
     "resilience",
     "crq",
+    "metrology",
     "core",
     "cal",
     "django_filters",

@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List, Optional
+from typing import Self, Union, List, Optional, Literal
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -198,6 +198,37 @@ class FilteringLabelMixin(models.Model):
         abstract = True
 
 
+class LibraryFilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
+    @property
+    def reference_count(self) -> int:
+        return self.stored_libraries.count()
+
+    def garbage_collect(self) -> bool:
+        """Delete the object if it's not being used (self.reference_count == 0).
+        Return True if the object was deleted, otherwise return false."""
+        if self.reference_count > 0:
+            return False
+        self.delete()
+        return True
+
+    label = models.CharField(
+        max_length=100,
+        verbose_name=_("Label"),
+        validators=[
+            RegexValidator(
+                regex=r"^[\w-]{1,36}$",
+                message="invalidLabel",
+                code="invalid_label",
+            )
+        ],
+    )
+
+    def __str__(self) -> str:
+        return self.label
+
+    fields_to_check = ["label"]
+
+
 class LibraryMixin(ReferentialObjectMixin, I18nObjectMixin):
     class Meta:
         abstract = True
@@ -241,6 +272,12 @@ class Severity(models.IntegerChoices):
 
 
 class StoredLibrary(LibraryMixin):
+    filtering_labels = models.ManyToManyField(
+        LibraryFilteringLabel,
+        blank=True,
+        verbose_name=_("Labels"),
+        related_name="stored_libraries",
+    )
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
     content = models.JSONField()
@@ -307,51 +344,59 @@ class StoredLibrary(LibraryMixin):
         if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
             return None  # We do not accept to store outdated libraries
 
-        # This code allows adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
-        for outdated_library in StoredLibrary.objects.filter(
-            urn=urn, locale=locale, version__lt=version
-        ):
-            outdated_library.delete()
+        with transaction.atomic():
+            # This code allows adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
+            for outdated_library in StoredLibrary.objects.filter(
+                urn=urn, locale=locale, version__lt=version
+            ):
+                outdated_library.delete()
 
-        objects_meta = {
-            key: (1 if key == "framework" else len(value))
-            for key, value in library_data["objects"].items()
-        }
+            objects_meta = {
+                key: (1 if key == "framework" else len(value))
+                for key, value in library_data["objects"].items()
+            }
 
-        dependencies = library_data.get(
-            "dependencies", []
-        )  # I don't want whitespaces in URN anymore nontheless
+            dependencies = library_data.get(
+                "dependencies", []
+            )  # I don't want whitespaces in URN anymore nontheless
 
-        library_objects = library_data["objects"]
-        return StoredLibrary.objects.create(
-            name=library_data["name"],
-            is_published=True,
-            urn=urn,
-            locale=locale,
-            version=version,
-            ref_id=library_data["ref_id"],
-            default_locale=False,  # We don't care about this value yet.
-            description=library_data.get("description"),
-            annotation=library_data.get("annotation"),
-            copyright=library_data.get("copyright"),
-            provider=library_data.get("provider"),
-            packager=library_data.get("packager"),
-            publication_date=library_data.get("publication_date"),
-            translations=library_data.get("translations", {}),
-            objects_meta=objects_meta,
-            dependencies=dependencies,
-            is_loaded=is_loaded,
-            # We have to add a "builtin: true" line to every builtin library file.
-            builtin=builtin,
-            hash_checksum=hash_checksum,
-            content=library_objects,
-            autoload=bool(
-                library_objects.get(
-                    "requirement_mapping_set",
-                    library_objects.get("requirement_mapping_sets"),
-                )
-            ),  # autoload is true if the library contains requirement mapping sets
-        )
+            library_objects = library_data["objects"]
+            label_names = library_data.get("labels", [])
+            filtering_labels = [
+                LibraryFilteringLabel.objects.get_or_create(label=label_name)[0]
+                for label_name in label_names
+            ]
+            new_library = StoredLibrary.objects.create(
+                name=library_data["name"],
+                is_published=True,
+                urn=urn,
+                locale=locale,
+                version=version,
+                ref_id=library_data["ref_id"],
+                default_locale=False,  # We don't care about this value yet.
+                description=library_data.get("description"),
+                annotation=library_data.get("annotation"),
+                copyright=library_data.get("copyright"),
+                provider=library_data.get("provider"),
+                packager=library_data.get("packager"),
+                publication_date=library_data.get("publication_date"),
+                translations=library_data.get("translations", {}),
+                objects_meta=objects_meta,
+                dependencies=dependencies,
+                is_loaded=is_loaded,
+                # We have to add a "builtin: true" line to every builtin library file.
+                builtin=builtin,
+                hash_checksum=hash_checksum,
+                content=library_objects,
+                autoload=bool(
+                    library_objects.get(
+                        "requirement_mapping_set",
+                        library_objects.get("requirement_mapping_sets"),
+                    )
+                ),  # autoload is true if the library contains requirement mapping sets
+            )
+            new_library.filtering_labels.set(filtering_labels)
+            return new_library
 
     @classmethod
     def store_library_file(
@@ -362,10 +407,25 @@ class StoredLibrary(LibraryMixin):
 
         return StoredLibrary.store_library_content(library_content, builtin)
 
+    def get_loaded_library(self) -> Optional["LoadedLibrary"]:
+        if not self.is_loaded:
+            return
+        return LoadedLibrary.objects.filter(urn=self.urn).first()
+
+    @property
+    def is_update(self) -> bool:
+        loaded_library = self.get_loaded_library()
+        return loaded_library is not None and loaded_library.has_update
+
+    @property
+    def reference_count(self) -> int:
+        loaded_library = self.get_loaded_library()
+        return loaded_library.reference_count if loaded_library is not None else 0
+
     def load(self) -> Union[str, None]:
         from library.utils import LibraryImporter
 
-        if LoadedLibrary.objects.filter(urn=self.urn, locale=self.locale):
+        if LoadedLibrary.objects.filter(urn=self.urn, locale=self.locale).exists():
             return "This library has already been loaded."
 
         library_importer = LibraryImporter(self)
@@ -374,6 +434,13 @@ class StoredLibrary(LibraryMixin):
             self.is_loaded = True
             self.save()
         return error_msg
+
+    def delete(self, *args, **kwargs):
+        library_filtering_labels = list(self.filtering_labels.all())
+        super().delete(*args, **kwargs)
+
+        for library_label in library_filtering_labels:
+            library_label.garbage_collect()
 
 
 class LibraryUpdater:
@@ -441,6 +508,7 @@ class LibraryUpdater:
 
         self.threats = new_library_content.get("threats", [])
         self.reference_controls = new_library_content.get("reference_controls", [])
+        self.metric_definitions = new_library_content.get("metric_definitions", [])
 
     def update_dependencies(self) -> Union[str, None]:
         for dependency_urn in self.dependencies:
@@ -498,6 +566,34 @@ class LibraryUpdater:
                     **self.referential_object_dict,
                     **self.i18n_object_dict,
                     **reference_control,
+                    "library": self.old_library,
+                },
+            )
+
+    def update_metric_definitions(self):
+        from metrology.models import MetricDefinition
+
+        for metric_definition in self.metric_definitions:
+            normalized_urn = metric_definition["urn"].lower()
+            # Handle unit lookup by name
+            unit = None
+            if unit_name := metric_definition.get("unit"):
+                unit = Terminology.objects.filter(
+                    name=unit_name,
+                    field_path=Terminology.FieldPath.METRIC_UNIT,
+                ).first()
+                metric_definition = {**metric_definition, "unit": unit}
+            else:
+                metric_definition = {**metric_definition}
+                metric_definition.pop("unit", None)
+
+            MetricDefinition.objects.update_or_create(
+                urn=normalized_urn,
+                defaults=metric_definition,
+                create_defaults={
+                    **self.referential_object_dict,
+                    **self.i18n_object_dict,
+                    **metric_definition,
                     "library": self.old_library,
                 },
             )
@@ -1092,6 +1188,7 @@ class LibraryUpdater:
 
         self.update_threats()
         self.update_reference_controls()
+        self.update_metric_definitions()
 
         if self.new_frameworks is not None:
             self.update_frameworks()
@@ -1157,6 +1254,8 @@ class LoadedLibrary(LibraryMixin):
         """
         Returns the number of distinct dependent libraries and risk and compliance assessments that reference objects from this library
         """
+        from resilience.models import BusinessImpactAnalysis
+
         return (
             RiskAssessment.objects.filter(
                 Q(risk_scenarios__threats__library=self)
@@ -1178,6 +1277,9 @@ class LoadedLibrary(LibraryMixin):
                 objects_meta__requirement_mapping_set__isnull=True,
                 dependencies=self,
             )
+            .distinct()
+            .count()
+            + BusinessImpactAnalysis.objects.filter(risk_matrix__library=self)
             .distinct()
             .count()
         )
@@ -1233,6 +1335,7 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
         ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
         ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
         ENTITY_RELATIONSHIP = "entity.relationship", "entityRelationship"
+        METRIC_UNIT = "metric_definition.unit", "metricUnit"
 
     DEFAULT_ROTO_RISK_ORIGINS = [
         {
@@ -1518,6 +1621,65 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
             "is_visible": True,
         },
     ]
+
+    DEFAULT_METRIC_UNITS = [
+        {
+            "name": "count",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "nombre"}},
+        },
+        {
+            "name": "users",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "utilisateurs"}},
+        },
+        {
+            "name": "bytes",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "octets"}},
+        },
+        {
+            "name": "percentage",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "pourcentage"}},
+        },
+        {
+            "name": "score",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "score"}},
+        },
+        {
+            "name": "days",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "jours"}},
+        },
+        {
+            "name": "hours",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "heures"}},
+        },
+        {
+            "name": "events per second",
+            "builtin": True,
+            "field_path": FieldPath.METRIC_UNIT,
+            "is_visible": True,
+            "translations": {"fr": {"name": "événements par seconde"}},
+        },
+    ]
     is_published = models.BooleanField(_("published"), default=True)
     field_path = models.CharField(
         max_length=100,
@@ -1589,11 +1751,26 @@ class Terminology(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
                 defaults=item,
             )
 
+    @classmethod
+    def create_default_metric_units(cls):
+        for item in cls.DEFAULT_METRIC_UNITS:
+            Terminology.objects.update_or_create(
+                name=item["name"],
+                field_path=item["field_path"],
+                defaults=item,
+            )
+
     @property
     def get_name_translated(self) -> str:
         translations = self.translations if self.translations else {}
-        locale_translation = translations.get(get_language(), "")
-        return locale_translation.capitalize() or self.name.capitalize()
+        locale_translation = translations.get(get_language(), {})
+        if isinstance(locale_translation, dict):
+            locale_translation = locale_translation.get("name", "")
+        return (
+            locale_translation.capitalize()
+            if locale_translation
+            else self.name.capitalize()
+        )
 
     def __str__(self) -> str:
         return (
@@ -2190,6 +2367,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         blank=True,
     )
     is_published = models.BooleanField(_("published"), default=True)
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     fields_to_check = ["name"]
 
@@ -3059,6 +3237,8 @@ class Asset(
                 continue
 
             c = sc_obj.get(key) or {}
+            if not c.get("is_enabled", False):
+                continue
             real_value = c.get("value", None) if isinstance(c, dict) else None
 
             verdict = None
@@ -3583,6 +3763,13 @@ class Evidence(
         super().save(*args, **kwargs)
         self.revisions.update(is_published=self.is_published)
 
+    def delete(self, using=None, keep_parents=False):
+        for rev in self.revisions.all():
+            if rev.attachment:
+                rev.attachment.delete(save=False)
+
+        return super().delete(using=using, keep_parents=keep_parents)
+
     @property
     def last_revision(self):
         return self.revisions.order_by("-version").first() or None
@@ -3670,6 +3857,12 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         self.is_published = self.evidence.is_published
 
         super().save(*args, **kwargs)
+
+    def delete(self, using=None, keep_parents=False):
+        if self.attachment:
+            self.attachment.delete(save=False)
+
+        return super().delete(using=using, keep_parents=keep_parents)
 
     def filename(self):
         return os.path.basename(self.attachment.name)
@@ -4627,6 +4820,11 @@ class RiskAssessment(Assessment):
             model=self.__class__.__name__, object_id=self.id, data=data
         )
 
+        # Also update BuiltinMetricSample
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self)
+
     def __str__(self) -> str:
         return f"{self.name} - {self.version}"
 
@@ -5277,7 +5475,7 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
         return self.risk_assessment.risk_matrix.parse_json_translated()
 
     @property
-    def within_tolerance(self):
+    def within_tolerance(self) -> Literal["YES", "NO", "--"]:
         tolerance = self.risk_assessment.risk_tolerance
         if tolerance >= 0:
             if self.current_level <= tolerance:
@@ -5572,6 +5770,11 @@ class ComplianceAssessment(Assessment):
         HistoricalMetric.update_daily_metric(
             model=self.__class__.__name__, object_id=self.id, data=data
         )
+
+        # Also update BuiltinMetricSample
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self)
 
     def save(self, *args, **kwargs) -> None:
         if self.min_score is None:
@@ -6708,6 +6911,16 @@ class FindingsAssessment(Assessment):
             "unresolved_important_count": unresolved_important,
         }
 
+    def upsert_daily_metrics(self):
+        """Update daily metrics for this findings assessment."""
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self)
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+        self.upsert_daily_metrics()
+
 
 class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDateMixin):
     class Status(models.TextChoices):
@@ -6794,6 +7007,14 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     @property
     def is_locked(self) -> bool:
         return self.findings_assessment.is_locked
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Update parent findings assessment's updated_at timestamp
+        FindingsAssessment.objects.filter(id=self.findings_assessment.id).update(
+            updated_at=timezone.now()
+        )
+        self.findings_assessment.upsert_daily_metrics()
 
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################

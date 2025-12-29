@@ -970,6 +970,9 @@
 	"downloadCertificate": "Ladda ner certifikat",
 	"viewMore": "Visa mer",
 	"viewLess": "Visa mindre",
+	"isCustom": "Anpassad",
+	"errorUnloadingLibrary": "Fel vid avlastning av bibliotek",
+	"librarySuccessfullyUnloaded": "Biblioteket har avladdats framgångsrikt",
 	"scoreChangeDetected": "Ändring i poäng upptäckt",
 	"scoreChangeDetectedDescription": "En ändring i poäng har upptäckts. Välj hur du vill hantera uppdateringarna av poängen för de associerade revisionerna.",
 	"clamp": "Begränsa",
@@ -1050,5 +1053,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "Objekten nedan förblir i systemet men deras länkar till detta objekt kommer att tas bort."
+	"cascadeAffectedHint": "Objekten nedan förblir i systemet men deras länkar till detta objekt kommer att tas bort.",
+	"libraryFilteringLabels": "Biblioteksetiketter"
 }
