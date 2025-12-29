@@ -1060,5 +1060,6 @@
 		}
 	],
 	"cascadeAffectedHint": "Obiectele de mai jos rămân în sistem, dar legăturile lor cu acest obiect vor fi eliminate.",
-	"libraryFilteringLabels": "Etichete bibliotecă"
+	"libraryFilteringLabels": "Etichete bibliotecă",
+	"objectsNotVisible": "{count} obiect nevizibil."
 }

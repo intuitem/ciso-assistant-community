@@ -3237,5 +3237,6 @@
 	"metricDefinitionsDescription": "Définir des métriques personnalisées pour suivre et mesurer les indicateurs de performance",
 	"metricInstancesDescription": "Suivre les valeurs de métriques pour les objets de votre organisation",
 	"dashboardsDescription": "Tableaux de bord personnalisés pour visualiser les métriques et indicateurs clés de performance",
-	"libraryFilteringLabels": "Étiquettes de bibliothèque"
+	"libraryFilteringLabels": "Étiquettes de bibliothèque",
+	"objectsNotVisible": "{count} objet{s} non visible."
 }
