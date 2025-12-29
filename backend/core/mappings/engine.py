@@ -317,7 +317,10 @@ class MappingEngine:
                                 existing_result, new_result
                             )
                     else:
-                        target_assessment = src_assessment.copy()
+                        target_audit["requirement_assessments"][dst] = (
+                            src_assessment.copy()
+                        )
+                        target_assessment = target_audit["requirement_assessments"][dst]
                 else:
                     for field in self.fields_to_map:
                         if field not in ["score", "is_scored", "documentation_score"]:
@@ -424,11 +427,11 @@ class MappingEngine:
             If the source_audit is the "real" first source (hop_index == 1), we grab the information direcly from the source_audit's RA into the target RA's mapping_inference.
             However, if the source_audit variable is a transition audit (in case of a multiple hops mapping), we grab the sources_audit RA's mapping_inference into the target_audit RA's one.
             """
-            mif = target_assessment["mapping_inference"].get(
+            mapping_inference = target_assessment["mapping_inference"].get(
                 "source_requirement_assessments"
             )
 
-            if mif == None:
+            if mapping_inference is None:
                 target_assessment["mapping_inference"][
                     "source_requirement_assessments"
                 ] = defaultdict(dict)
