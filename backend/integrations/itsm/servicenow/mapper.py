@@ -69,6 +69,17 @@ class ServiceNowFieldMapper(BaseFieldMapper):
 
         return local_data
 
+    def get_allowed_fields(self, direction: str, operation: str) -> set[str]:
+        """
+        Get allowed fields for a given sync direction and operation.
+        Checks the FIELD_MAPPINGS_OPERATIONS dictionary.
+        """
+        allowed = set()
+        for field, ops in self.FIELD_MAPPINGS_OPERATIONS.items():
+            if operation in ops.get(direction, set()):
+                allowed.add(field)
+        return allowed
+
     def _transform_value_to_remote(self, field: str, value: Any) -> Any:
         if value is None:
             return ""
