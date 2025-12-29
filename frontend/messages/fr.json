@@ -1362,6 +1362,8 @@
 	"isSelected": "Retenu",
 	"ebiosRM": "EBIOS RM",
 	"ebiosRMStudies": "Études EBIOS RM",
+	"ebiosRMStudyARM": "Étude EBIOS RM (format ARM)",
+	"ebiosRMStudyARMDescription": "Importer une étude EBIOS RM depuis un fichier Excel au format ARM",
 	"riskOrigin": "Source de risque",
 	"riskOrigins": "Sources de risque",
 	"targetObjective": "Objectif visé",

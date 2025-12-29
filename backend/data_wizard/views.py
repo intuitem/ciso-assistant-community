@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
 from .serializers import LoadFileSerializer
 from core.models import (
+    Asset,
     Folder,
     Perimeter,
     RequirementAssessment,
@@ -34,7 +35,13 @@ from core.serializers import (
     ThreatWriteSerializer,
     FolderWriteSerializer,
 )
-from ebios_rm.serializers import ElementaryActionWriteSerializer
+from ebios_rm.models import EbiosRMStudy, FearedEvent, RoTo
+from ebios_rm.serializers import (
+    ElementaryActionWriteSerializer,
+    EbiosRMStudyWriteSerializer,
+)
+from core.models import Terminology
+from data_wizard.arm_helpers import process_arm_file
 from tprm.models import Entity, Solution, Contract
 from tprm.serializers import (
     EntityWriteSerializer,
@@ -90,6 +97,11 @@ class LoadFileView(APIView):
                 folders_map = get_accessible_folders_map(request.user)
                 res = self._process_tprm_file(
                     request, excel_data, folders_map, folder_id
+                )
+            # Special handling for EBIOS RM Study ARM format (multi-sheet)
+            elif model_type == "EbiosRMStudyARM":
+                res = self._process_ebios_rm_study_arm(
+                    request, excel_data, folder_id, matrix_id
                 )
             else:
                 # Read Excel file into a pandas DataFrame
@@ -1892,3 +1904,392 @@ class LoadFileView(APIView):
             # Get the field and set the many-to-many relationship
             field = getattr(risk_scenario, field_name)
             field.set(control_ids)
+
+    def _process_ebios_rm_study_arm(self, request, excel_data, folder_id, matrix_id):
+        """
+        Process EBIOS RM Study import from ARM Excel format.
+        This creates an EbiosRMStudy with Workshop 1 and Workshop 2 objects.
+        """
+        from datetime import datetime
+
+        results = {
+            "successful": 0,
+            "failed": 0,
+            "errors": [],
+            "details": {
+                "study": None,
+                "assets_created": 0,
+                "feared_events_created": 0,
+                "applied_controls_created": 0,
+            },
+        }
+
+        try:
+            # Validate folder exists
+            folder = Folder.objects.get(id=folder_id)
+
+            # Validate matrix exists
+            risk_matrix = None
+            if matrix_id:
+                risk_matrix = RiskMatrix.objects.get(id=matrix_id)
+
+            # Parse ARM Excel file
+            excel_data.seek(0)
+            arm_data = process_arm_file(excel_data.read())
+
+            # Generate study name
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            study_name = f"EBIOS_RM_Study_{timestamp}"
+
+            # Use missions as description
+            study_description = arm_data.get("study_description", "")
+
+            # =========================================================
+            # Step 1: Create Assets (primary and supporting)
+            # =========================================================
+            asset_name_to_id = {}
+            # Track parent relationships to set up after all assets are created
+            # Format: {child_name_lower: parent_name}
+            supporting_asset_parents = {}
+            # Track primary -> supporting relationships from Base de valeurs métier
+            # Format: {primary_name_lower: [supporting_name1, supporting_name2, ...]}
+            primary_to_supporting = {}
+
+            # Create supporting assets first (from dedicated sheet)
+            for asset_data in arm_data.get("supporting_assets", []):
+                try:
+                    serializer = AssetWriteSerializer(
+                        data={
+                            "name": asset_data["name"],
+                            "description": asset_data["description"],
+                            "type": "SP",
+                            "folder": folder_id,
+                        },
+                        context={"request": request},
+                    )
+                    if serializer.is_valid():
+                        asset = serializer.save()
+                        asset_name_to_id[asset_data["name"].lower()] = asset.id
+                        results["details"]["assets_created"] += 1
+
+                        # Track parent relationship if specified
+                        if asset_data.get("parent_name"):
+                            supporting_asset_parents[asset_data["name"].lower()] = (
+                                asset_data["parent_name"]
+                            )
+                    else:
+                        results["errors"].append(
+                            {"asset": asset_data["name"], "error": serializer.errors}
+                        )
+                except Exception as e:
+                    results["errors"].append(
+                        {"asset": asset_data["name"], "error": str(e)}
+                    )
+
+            # Create primary assets and their linked supporting assets
+            for asset_data in arm_data.get("primary_assets", []):
+                try:
+                    # Track supporting assets for this primary asset
+                    supporting_names = asset_data.get("supporting_asset_names", [])
+                    if supporting_names:
+                        primary_to_supporting[asset_data["name"].lower()] = (
+                            supporting_names
+                        )
+
+                    # Create any supporting assets mentioned in this primary asset
+                    for supporting_name in supporting_names:
+                        if supporting_name.lower() not in asset_name_to_id:
+                            serializer = AssetWriteSerializer(
+                                data={
+                                    "name": supporting_name,
+                                    "type": "SP",
+                                    "folder": folder_id,
+                                },
+                                context={"request": request},
+                            )
+                            if serializer.is_valid():
+                                asset = serializer.save()
+                                asset_name_to_id[supporting_name.lower()] = asset.id
+                                results["details"]["assets_created"] += 1
+
+                    # Create the primary asset
+                    serializer = AssetWriteSerializer(
+                        data={
+                            "name": asset_data["name"],
+                            "description": asset_data["description"],
+                            "type": "PR",
+                            "folder": folder_id,
+                        },
+                        context={"request": request},
+                    )
+                    if serializer.is_valid():
+                        asset = serializer.save()
+                        asset_name_to_id[asset_data["name"].lower()] = asset.id
+                        results["details"]["assets_created"] += 1
+                    else:
+                        results["errors"].append(
+                            {"asset": asset_data["name"], "error": serializer.errors}
+                        )
+                except Exception as e:
+                    results["errors"].append(
+                        {"asset": asset_data["name"], "error": str(e)}
+                    )
+
+            # =========================================================
+            # Step 1b: Set up asset parent relationships
+            # =========================================================
+            logger.info(
+                f"Setting up asset hierarchy: "
+                f"{len(supporting_asset_parents)} explicit parents, "
+                f"{len(primary_to_supporting)} primary->supporting mappings"
+            )
+
+            # First, apply explicit parent relationships from "Bien support parent"
+            for child_name_lower, parent_name in supporting_asset_parents.items():
+                child_id = asset_name_to_id.get(child_name_lower)
+                parent_id = asset_name_to_id.get(parent_name.lower())
+                if child_id and parent_id:
+                    try:
+                        child_asset = Asset.objects.get(id=child_id)
+                        child_asset.parent_assets.add(parent_id)
+                        logger.info(
+                            f"Set explicit parent '{parent_name}' for asset '{child_name_lower}'"
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to set parent for asset: {e}")
+
+            # Then, for supporting assets, use primary asset from "Base de valeurs métier" as parent
+            for primary_name_lower, supporting_names in primary_to_supporting.items():
+                primary_id = asset_name_to_id.get(primary_name_lower)
+                if not primary_id:
+                    logger.warning(
+                        f"Primary asset '{primary_name_lower}' not found in asset_name_to_id"
+                    )
+                    continue
+
+                primary_asset = Asset.objects.get(id=primary_id)
+
+                for supporting_name in supporting_names:
+                    supporting_name_lower = supporting_name.lower()
+                    supporting_id = asset_name_to_id.get(supporting_name_lower)
+
+                    if supporting_id:
+                        try:
+                            supporting_asset = Asset.objects.get(id=supporting_id)
+                            # Add primary as parent of supporting (supporting.parent_assets contains primary)
+                            supporting_asset.parent_assets.add(primary_id)
+                            logger.info(
+                                f"Linked: '{supporting_name}' -> parent: '{primary_asset.name}'"
+                            )
+                        except Exception as e:
+                            logger.warning(
+                                f"Failed to set parent for asset '{supporting_name}': {e}"
+                            )
+                    else:
+                        logger.debug(
+                            f"Supporting asset '{supporting_name}' not found in asset_name_to_id"
+                        )
+
+            # =========================================================
+            # Step 2: Create Applied Controls
+            # =========================================================
+            for control_data in arm_data.get("applied_controls", []):
+                try:
+                    serializer = AppliedControlWriteSerializer(
+                        data={
+                            "name": control_data["name"],
+                            "description": control_data["description"],
+                            "ref_id": control_data["ref_id"] or None,
+                            "folder": folder_id,
+                        },
+                        context={"request": request},
+                    )
+                    if serializer.is_valid():
+                        serializer.save()
+                        results["details"]["applied_controls_created"] += 1
+                    else:
+                        results["errors"].append(
+                            {
+                                "control": control_data["name"],
+                                "error": serializer.errors,
+                            }
+                        )
+                except Exception as e:
+                    results["errors"].append(
+                        {"control": control_data["name"], "error": str(e)}
+                    )
+
+            # =========================================================
+            # Step 3: Create EBIOS RM Study
+            # =========================================================
+            study_data = {
+                "name": study_name,
+                "folder": folder_id,
+                "description": study_description,
+            }
+
+            if risk_matrix:
+                study_data["risk_matrix"] = matrix_id
+
+            serializer = EbiosRMStudyWriteSerializer(
+                data=study_data, context={"request": request}
+            )
+
+            if serializer.is_valid(raise_exception=True):
+                study = serializer.save()
+                results["details"]["study"] = study.id
+                logger.info(f"Created EBIOS RM Study: {study_name} with ID {study.id}")
+
+                # Track workshop progress
+                meta_updated = False
+
+                # Mark step 1 (index 0) as done if we have a description
+                if study_description:
+                    study.meta["workshops"][0]["steps"][0]["status"] = "done"
+                    meta_updated = True
+
+                # Link assets to study
+                asset_ids = list(asset_name_to_id.values())
+                if asset_ids:
+                    study.assets.set(asset_ids)
+                    # Mark step 2 (index 1) as done if we have assets
+                    study.meta["workshops"][0]["steps"][1]["status"] = "done"
+                    meta_updated = True
+
+                # =========================================================
+                # Step 4: Create Feared Events
+                # =========================================================
+                for fe_data in arm_data.get("feared_events", []):
+                    try:
+                        # Find linked assets
+                        linked_asset_ids = []
+                        for asset_name in fe_data.get("asset_names", []):
+                            asset_id = asset_name_to_id.get(asset_name.lower())
+                            if asset_id:
+                                linked_asset_ids.append(asset_id)
+
+                        # Create feared event
+                        feared_event = FearedEvent.objects.create(
+                            ebios_rm_study=study,
+                            name=fe_data["name"],
+                            justification=fe_data.get("justification", ""),
+                            gravity=fe_data.get("gravity", -1),
+                        )
+
+                        # Link assets
+                        if linked_asset_ids:
+                            feared_event.assets.set(linked_asset_ids)
+
+                        results["details"]["feared_events_created"] += 1
+
+                    except Exception as e:
+                        results["errors"].append(
+                            {"feared_event": fe_data["name"], "error": str(e)}
+                        )
+
+                # Mark step 3 (index 2) as done if we created feared events
+                if results["details"]["feared_events_created"] > 0:
+                    study.meta["workshops"][0]["steps"][2]["status"] = "done"
+                    meta_updated = True
+
+                # =========================================================
+                # Step 5: Create RoTo Couples (Workshop 2)
+                # =========================================================
+                results["details"]["roto_couples_created"] = 0
+
+                for roto_data in arm_data.get("roto_couples", []):
+                    try:
+                        # Find or create the risk origin terminology
+                        risk_origin_name = roto_data["risk_origin"]
+
+                        # Try to find existing terminology by name (case-insensitive)
+                        risk_origin = Terminology.objects.filter(
+                            field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
+                            name__iexact=risk_origin_name,
+                        ).first()
+
+                        if not risk_origin:
+                            # Create a new terminology entry for this risk origin
+                            risk_origin = Terminology.objects.create(
+                                field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
+                                name=risk_origin_name.lower().replace(" ", "_"),
+                                is_visible=True,
+                                builtin=False,
+                            )
+                            logger.info(
+                                f"Created new risk origin terminology: {risk_origin_name}"
+                            )
+
+                        # Create the RoTo couple
+                        roto = RoTo.objects.create(
+                            ebios_rm_study=study,
+                            risk_origin=risk_origin,
+                            target_objective=roto_data["target_objective"],
+                            motivation=roto_data.get("motivation", 0),
+                            resources=roto_data.get("resources", 0),
+                            activity=roto_data.get("activity", 0),
+                            is_selected=roto_data.get("is_selected", False),
+                            justification=roto_data.get("justification", ""),
+                        )
+
+                        results["details"]["roto_couples_created"] += 1
+                        logger.debug(
+                            f"Created RoTo couple: {risk_origin_name} - {roto_data['target_objective']}"
+                        )
+
+                    except Exception as e:
+                        results["errors"].append(
+                            {
+                                "roto_couple": f"{roto_data.get('risk_origin', 'unknown')} - {roto_data.get('target_objective', 'unknown')}",
+                                "error": str(e),
+                            }
+                        )
+
+                # Mark workshop 2 step 1 (index 0) as done if we created RoTo couples
+                if results["details"]["roto_couples_created"] > 0:
+                    study.meta["workshops"][1]["steps"][0]["status"] = "done"
+                    meta_updated = True
+                    logger.info(
+                        f"Created {results['details']['roto_couples_created']} RoTo couples"
+                    )
+
+                    # Check if any RoTo couple has motivation or resources data
+                    # If so, mark workshop 2 step 2 (index 1) as done
+                    has_quotation_data = any(
+                        roto.get("motivation", 0) > 0 or roto.get("resources", 0) > 0
+                        for roto in arm_data.get("roto_couples", [])
+                    )
+                    if has_quotation_data:
+                        study.meta["workshops"][1]["steps"][1]["status"] = "done"
+                        logger.info(
+                            "Marked workshop 2 step 2 as done (motivation/resources data captured)"
+                        )
+
+                # Save the study if meta was updated
+                if meta_updated:
+                    study.save()
+
+                results["successful"] = 1
+
+            else:
+                results["failed"] = 1
+                results["errors"].append(
+                    {"error": "Failed to create study", "details": serializer.errors}
+                )
+
+        except Folder.DoesNotExist:
+            results["failed"] = 1
+            results["errors"].append(
+                {"error": f"Folder with ID {folder_id} does not exist"}
+            )
+        except RiskMatrix.DoesNotExist:
+            results["failed"] = 1
+            results["errors"].append(
+                {"error": f"Risk matrix with ID {matrix_id} does not exist"}
+            )
+        except Exception as e:
+            logger.error(f"Error processing EBIOS RM Study: {str(e)}", exc_info=True)
+            results["failed"] = 1
+            results["errors"].append({"error": str(e)})
+
+        return results
