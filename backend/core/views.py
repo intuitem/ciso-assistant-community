@@ -8227,9 +8227,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 )
 
                 for req in target_requirement_assessments:
-                    source = best_results["requirement_assessments"][
-                        req.requirement.urn
-                    ]
                     for field in [
                         "result",
                         "status",
