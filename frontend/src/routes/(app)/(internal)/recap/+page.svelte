@@ -50,6 +50,25 @@
             </a>
           </div>
 
+          <!-- Bar chart de moyenne -->
+          <!-- Bar chart améliorée -->
+			{#if perimeter.overallCompliance?.values?.length > 0}
+			<div class="px-4 py-3 bg-gradient-to-r from-primary-100 to-primary-200 rounded-b-lg">
+				<p class="text-sm font-semibold text-primary-700 mb-2">Moyenne globale</p>
+				<div class="flex  h-6 rounded-lg overflow-hidden">
+				{#each perimeter.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
+					<div
+					class="flex justify-center items-center text-xs font-semibold text-white"
+					style="width: {sp.percentage}%; background-color: {sp.itemStyle.color}"
+					>
+					{sp.percentage > 5 ? `${sp.percentage}%` : ''}
+					</div>
+				{/each}
+				</div>
+			</div>
+			{/if}
+
+
           <!-- Audits du périmètre -->
           <div class="p-4 space-y-4">
             {#each perimeter.compliance_assessments as assessment}
