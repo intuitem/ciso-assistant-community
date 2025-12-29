@@ -186,7 +186,7 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
         Generic endpoint for interactive integration commands.
         Payload: { "action": "get_tables", "params": { ... } }
         """
-        config = IntegrationConfiguration.objects.get(pk=pk)
+        config = get_object_or_404(IntegrationConfiguration, pk=pk)
 
         action_name = request.data.get("action")
         params = request.data.get("params", {})
