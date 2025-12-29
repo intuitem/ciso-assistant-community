@@ -389,6 +389,149 @@ class TestRiskAssessment:
 
 
 @pytest.mark.django_db
+class TestAssessmentQualityCheckDomainMismatch:
+    pytestmark = pytest.mark.django_db
+
+    def _get_root_folder(self):
+        root_folder = Folder.get_root_folder()
+        if not root_folder:
+            root_folder = Folder.objects.create(
+                name="root",
+                description="root folder",
+                content_type=Folder.ContentType.ROOT,
+                parent_folder=None,
+            )
+        return root_folder
+
+    def test_risk_assessment_quality_check_warns_on_cross_domain_links(self):
+        root_folder = self._get_root_folder()
+        folder_a = Folder.objects.create(
+            name="domain-a",
+            description="domain a",
+            parent_folder=root_folder,
+        )
+        folder_b = Folder.objects.create(
+            name="domain-b",
+            description="domain b",
+            parent_folder=root_folder,
+        )
+        risk_matrix = RiskMatrix.objects.create(
+            name="risk matrix",
+            description="risk matrix description",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
+            folder=folder_a,
+        )
+        perimeter = Perimeter.objects.create(name="perimeter", folder=folder_a)
+        risk_assessment = RiskAssessment.objects.create(
+            name="risk assessment",
+            description="risk assessment description",
+            perimeter=perimeter,
+            risk_matrix=risk_matrix,
+            folder=folder_a,
+        )
+        scenario = RiskScenario.objects.create(
+            name="scenario",
+            description="scenario description",
+            risk_assessment=risk_assessment,
+        )
+        applied_control = AppliedControl.objects.create(
+            name="applied control",
+            description="applied control description",
+            folder=folder_b,
+        )
+        scenario.applied_controls.add(applied_control)
+        risk_acceptance = RiskAcceptance.objects.create(
+            name="risk acceptance",
+            description="risk acceptance description",
+            folder=folder_b,
+        )
+        risk_acceptance.risk_scenarios.add(scenario)
+        asset = Asset.objects.create(
+            name="asset",
+            description="asset description",
+            folder=folder_b,
+        )
+        scenario.assets.add(asset)
+        evidence = Evidence.objects.create(
+            name="evidence",
+            description="evidence description",
+            folder=folder_b,
+        )
+        applied_control.evidences.add(evidence)
+
+        findings = risk_assessment.quality_check()
+        warning_ids = {item["msgid"] for item in findings["warnings"]}
+        assert "appliedControlDifferentDomain" in warning_ids
+        assert "riskAcceptanceDifferentDomain" in warning_ids
+        assert "assetDifferentDomain" in warning_ids
+        assert "evidenceDifferentDomain" in warning_ids
+
+    def test_compliance_assessment_quality_check_warns_on_cross_domain_links(self):
+        root_folder = self._get_root_folder()
+        folder_a = Folder.objects.create(
+            name="domain-a",
+            description="domain a",
+            parent_folder=root_folder,
+        )
+        folder_b = Folder.objects.create(
+            name="domain-b",
+            description="domain b",
+            parent_folder=root_folder,
+        )
+        framework = Framework.objects.create(
+            name="framework",
+            description="framework description",
+            folder=folder_a,
+        )
+        perimeter = Perimeter.objects.create(name="perimeter", folder=folder_a)
+        compliance_assessment = ComplianceAssessment.objects.create(
+            name="compliance assessment",
+            description="compliance assessment description",
+            perimeter=perimeter,
+            framework=framework,
+            folder=folder_a,
+        )
+        requirement = RequirementNode.objects.create(
+            name="requirement",
+            description="requirement description",
+            framework=framework,
+            assessable=True,
+            folder=folder_b,
+        )
+        requirement_assessment = RequirementAssessment.objects.create(
+            compliance_assessment=compliance_assessment,
+            requirement=requirement,
+            folder=folder_b,
+        )
+        applied_control = AppliedControl.objects.create(
+            name="applied control",
+            description="applied control description",
+            folder=folder_b,
+        )
+        requirement_assessment.applied_controls.add(applied_control)
+        evidence = Evidence.objects.create(
+            name="evidence",
+            description="evidence description",
+            folder=folder_b,
+        )
+        applied_control.evidences.add(evidence)
+        compliance_assessment.evidences.add(evidence)
+        asset = Asset.objects.create(
+            name="asset",
+            description="asset description",
+            folder=folder_b,
+        )
+        compliance_assessment.assets.add(asset)
+
+        findings = compliance_assessment.quality_check()
+        warning_ids = {item["msgid"] for item in findings["warnings"]}
+        assert "requirementAssessmentDifferentDomain" in warning_ids
+        assert "appliedControlDifferentDomain" in warning_ids
+        assert "evidenceDifferentDomain" in warning_ids
+        assert "assetDifferentDomain" in warning_ids
+
+
+@pytest.mark.django_db
 class TestRiskScenario:
     pytestmark = pytest.mark.django_db
 
