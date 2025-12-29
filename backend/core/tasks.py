@@ -198,10 +198,9 @@ def check_evidences_expiring_tomorrow():
 @db_periodic_task(crontab(hour="6", minute="40"))
 def check_evidences_expired():
     """Check for expired Evidences"""
-    expired_evidences = (
-        Evidence.objects.filter(expiry_date__lt=date.today())
-        .prefetch_related("owner")
-    )
+    expired_evidences = Evidence.objects.filter(
+        expiry_date__lt=date.today()
+    ).prefetch_related("owner")
 
     # Group by individual owner
     owner_evidences = {}
@@ -214,14 +213,12 @@ def check_evidences_expired():
     # Send personalized email to each owner
     for owner_email, evidences in owner_evidences.items():
         days = 0
-        days_list = [
-            (date.today() - ev.expiry_date).days
-            for ev in evidences
-        ]
+        days_list = [(date.today() - ev.expiry_date).days for ev in evidences]
         if days_list:
             days = max(days_list)
 
         send_notification_email_expired_evidence(owner_email, evidences, days=days)
+
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="40"))
@@ -532,6 +529,7 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
         )
+
 
 @task()
 def send_notification_email_expired_evidence(owner_email, evidences, days=0):
