@@ -74,7 +74,6 @@
 			{_form}
 			{invalidateAll}
 			validators={zod(schema)}
-			debug
 		>
 			{#snippet children({ form })}
 				<Checkbox {form} field="is_active" label={m.active()} />
