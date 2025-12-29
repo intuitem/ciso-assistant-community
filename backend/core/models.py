@@ -5742,6 +5742,8 @@ class ComplianceAssessment(Assessment):
         related_name="compliance_assessments",
     )
 
+    extended_result_enabled = models.BooleanField(default=False)
+
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -6542,6 +6544,16 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         COMPLIANT = "compliant", _("Compliant")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
 
+    class ExtendedResult(models.TextChoices):
+        MAJOR_NONCONFORMITY = "major_nonconformity", "Major nonconformity"
+        MINOR_NONCONFORMITY = "minor_nonconformity", "Minor nonconformity"
+        OBSERVATION = "observation", "Observation / sensitive point"
+        OPPORTUNITY_FOR_IMPROVEMENT = (
+            "opportunity_for_improvement",
+            "Opportunity for improvement",
+        )
+        GOOD_PRACTICE = "good_practice", "Good practice"
+
     status = models.CharField(
         max_length=100,
         choices=Status.choices,
@@ -6553,6 +6565,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         choices=Result.choices,
         verbose_name=_("Result"),
         default=Result.NOT_ASSESSED,
+    )
+    extended_result = models.CharField(
+        max_length=64,
+        choices=ExtendedResult.choices,
+        verbose_name="Extended Result",
+        blank=True,
+        null=True,
     )
     is_scored = models.BooleanField(
         default=False,
