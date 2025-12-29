@@ -1052,5 +1052,14 @@
 	"errorUnloadingLibrary": "Chyba při uvolňování knihovny",
 	"librarySuccessfullyUnloaded": "Knihovna byla úspěšně uvolněna",
 	"libraryFilteringLabels": "Štítky knihovny",
-	"objectsNotVisible": "{count} objekt není viditelný."
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} objekt není viditelný.",
+				"countPlural=other": "{count} objekty nejsou viditelné."
+			}
+		}
+	]
 }

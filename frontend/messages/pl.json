@@ -1804,5 +1804,15 @@
 	],
 	"cascadeAffectedHint": "Poniższe elementy pozostają w systemie, ale ich linki do tego obiektu zostaną usunięte.",
 	"libraryFilteringLabels": "Etykiety biblioteki",
-	"objectsNotVisible": "{count} obiekt niewidoczny."
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} obiekt niewidoczny.",
+				"countPlural=few": "{count} obiekty niewidoczne.",
+				"countPlural=other": "{count} obiektów niewidocznych."
+			}
+		}
+	]
 }

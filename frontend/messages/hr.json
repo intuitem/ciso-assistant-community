@@ -2029,5 +2029,14 @@
 	],
 	"cascadeAffectedHint": "Stavke ispod ostaju u sustavu, ali njihovi linkovi na ovaj objekt će biti uklonjeni.",
 	"libraryFilteringLabels": "Oznake knjižnice",
-	"objectsNotVisible": "{count} objekt nije vidljiv."
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} objekt nije vidljiv.",
+				"countPlural=other": "{count} objekti nisu vidljivi."
+			}
+		}
+	]
 }

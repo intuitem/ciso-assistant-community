@@ -2054,5 +2054,14 @@
 	"xRaysLoadingData": "Analisi dei dati...",
 	"xRaysView": "Visualizza",
 	"year": "Anno",
-	"objectsNotVisible": "{count} oggetto{s} non visibile."
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} oggetto non visibile.",
+				"countPlural=other": "{count} oggetti non visibili."
+			}
+		}
+	]
 }

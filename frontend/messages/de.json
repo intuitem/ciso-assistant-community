@@ -2930,5 +2930,14 @@
 	],
 	"cascadeAffectedHint": "Die unten aufgeführten Elemente bleiben im System, aber ihre Verknüpfungen zu diesem Objekt werden entfernt.",
 	"libraryFilteringLabels": "Bibliotheksetiketten",
-	"objectsNotVisible": "{count} Objekt nicht sichtbar."
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Objekt nicht sichtbar.",
+				"countPlural=other": "{count} Objekte nicht sichtbar."
+			}
+		}
+	]
 }
