@@ -35,7 +35,7 @@ from core.serializers import (
     ThreatWriteSerializer,
     FolderWriteSerializer,
 )
-from ebios_rm.models import EbiosRMStudy, FearedEvent, RoTo
+from ebios_rm.models import EbiosRMStudy, FearedEvent, RoTo, Stakeholder
 from ebios_rm.serializers import (
     ElementaryActionWriteSerializer,
     EbiosRMStudyWriteSerializer,
@@ -1908,7 +1908,7 @@ class LoadFileView(APIView):
     def _process_ebios_rm_study_arm(self, request, excel_data, folder_id, matrix_id):
         """
         Process EBIOS RM Study import from ARM Excel format.
-        This creates an EbiosRMStudy with Workshop 1 and Workshop 2 objects.
+        This creates an EbiosRMStudy with Workshop 1, 2, and 3 objects.
         """
         from datetime import datetime
 
@@ -2263,6 +2263,153 @@ class LoadFileView(APIView):
                         study.meta["workshops"][1]["steps"][1]["status"] = "done"
                         logger.info(
                             "Marked workshop 2 step 2 as done (motivation/resources data captured)"
+                        )
+
+                # =========================================================
+                # Step 6: Create Stakeholders (Workshop 3)
+                # =========================================================
+                results["details"]["entities_created"] = 0
+                results["details"]["stakeholders_created"] = 0
+
+                # First, create or find category terminologies
+                category_name_to_terminology = {}
+                for cat_data in arm_data.get("stakeholder_categories", []):
+                    normalized_name = cat_data["normalized_name"]
+                    if not normalized_name:
+                        continue
+
+                    # Try to find existing terminology
+                    terminology = Terminology.objects.filter(
+                        field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                        name__iexact=normalized_name,
+                    ).first()
+
+                    if not terminology:
+                        # Also try without the trailing 's' stripped
+                        terminology = Terminology.objects.filter(
+                            field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                            name__iexact=cat_data["name"].lower(),
+                        ).first()
+
+                    if not terminology:
+                        # Create a new terminology entry
+                        terminology = Terminology.objects.create(
+                            field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                            name=normalized_name,
+                            is_visible=True,
+                            builtin=False,
+                        )
+                        logger.info(
+                            f"Created new stakeholder category: {normalized_name}"
+                        )
+
+                    category_name_to_terminology[normalized_name] = terminology
+                    # Also map the raw name for direct lookups
+                    category_name_to_terminology[cat_data["name"].lower()] = terminology
+
+                # Now create entities and stakeholders
+                for stakeholder_data in arm_data.get("stakeholders", []):
+                    try:
+                        entity_name = stakeholder_data["name"]
+
+                        # Create or get the entity
+                        entity, created = Entity.objects.get_or_create(
+                            name=entity_name,
+                            defaults={
+                                "folder": folder,
+                                "description": stakeholder_data.get("description", ""),
+                            },
+                        )
+                        if created:
+                            results["details"]["entities_created"] += 1
+                            logger.debug(f"Created entity: {entity_name}")
+
+                        # Find the category terminology
+                        category_normalized = stakeholder_data.get("category", "")
+                        category = category_name_to_terminology.get(category_normalized)
+
+                        if not category:
+                            # Try to find by normalized name directly
+                            category = Terminology.objects.filter(
+                                field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                                name__iexact=category_normalized,
+                            ).first()
+
+                        if not category:
+                            # Use 'other' as fallback
+                            category = Terminology.objects.filter(
+                                field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                                name="other",
+                            ).first()
+
+                        if category:
+                            # Create the stakeholder
+                            stakeholder = Stakeholder.objects.create(
+                                ebios_rm_study=study,
+                                entity=entity,
+                                category=category,
+                                current_dependency=stakeholder_data.get(
+                                    "current_dependency", 0
+                                ),
+                                current_penetration=stakeholder_data.get(
+                                    "current_penetration", 0
+                                ),
+                                current_maturity=stakeholder_data.get(
+                                    "current_maturity", 1
+                                ),
+                                current_trust=stakeholder_data.get("current_trust", 1),
+                                # Set residual to same as current initially
+                                residual_dependency=stakeholder_data.get(
+                                    "current_dependency", 0
+                                ),
+                                residual_penetration=stakeholder_data.get(
+                                    "current_penetration", 0
+                                ),
+                                residual_maturity=stakeholder_data.get(
+                                    "current_maturity", 1
+                                ),
+                                residual_trust=stakeholder_data.get("current_trust", 1),
+                            )
+
+                            results["details"]["stakeholders_created"] += 1
+                            logger.debug(
+                                f"Created stakeholder: {entity_name} ({category.name})"
+                            )
+                        else:
+                            results["errors"].append(
+                                {
+                                    "stakeholder": entity_name,
+                                    "error": "Could not find or create category terminology",
+                                }
+                            )
+
+                    except Exception as e:
+                        results["errors"].append(
+                            {
+                                "stakeholder": stakeholder_data.get("name", "unknown"),
+                                "error": str(e),
+                            }
+                        )
+
+                # Mark workshop 3 step 1 (index 0) as done if we created stakeholders
+                if results["details"]["stakeholders_created"] > 0:
+                    study.meta["workshops"][2]["steps"][0]["status"] = "done"
+                    meta_updated = True
+                    logger.info(
+                        f"Created {results['details']['stakeholders_created']} stakeholders "
+                        f"({results['details']['entities_created']} new entities)"
+                    )
+
+                    # Check if any stakeholder has assessment data (dependency or penetration > 0)
+                    has_assessment_data = any(
+                        s.get("current_dependency", 0) > 0
+                        or s.get("current_penetration", 0) > 0
+                        for s in arm_data.get("stakeholders", [])
+                    )
+                    if has_assessment_data:
+                        study.meta["workshops"][2]["steps"][1]["status"] = "done"
+                        logger.info(
+                            "Marked workshop 3 step 2 as done (assessment data captured)"
                         )
 
                 # Save the study if meta was updated

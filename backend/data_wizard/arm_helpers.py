@@ -32,7 +32,11 @@ class ARMSheets:
     # Workshop 2 - Risk Origins
     ROTO_COUPLES = "2 - Base de couples SR OV"
 
-    # Workshop 3 - Strategic Scenarios (to be added)
+    # Workshop 3 - Stakeholders
+    STAKEHOLDER_CATEGORIES = "3 - Catégories de partie prena"
+    STAKEHOLDERS = "3 - Base de parties prenantes"
+    STAKEHOLDER_DANGER_LEVELS = "3 - Niveau de danger des parti"
+
     # Workshop 4 - Operational Scenarios (to be added)
     # Workshop 5 - Risk Treatment Plan (to be added)
 
@@ -40,6 +44,31 @@ class ARMSheets:
 # =============================================================================
 # Helper functions
 # =============================================================================
+
+
+def normalize_category_name(text: str) -> str:
+    """
+    Normalize a category name for matching.
+
+    ARM Excel uses French plural forms (e.g., 'Clients') that need to be
+    matched to our internal singular forms (e.g., 'client').
+
+    Args:
+        text: The raw category name from Excel
+
+    Returns:
+        Normalized name (lowercase, trailing 's' stripped)
+    """
+    if not text:
+        return ""
+
+    normalized = text.strip().lower()
+
+    # Strip trailing 's' for plural -> singular conversion
+    if normalized.endswith("s") and len(normalized) > 1:
+        normalized = normalized[:-1]
+
+    return normalized
 
 
 def parse_plus_signs(text: str) -> int:
@@ -433,6 +462,188 @@ def extract_roto_couples(workbook) -> list[dict]:
 
 
 # =============================================================================
+# Workshop 3 Processing
+# =============================================================================
+
+
+def extract_stakeholder_categories(workbook) -> list[dict]:
+    """
+    Extract stakeholder categories from ARM file.
+
+    These map to Terminology entries for entity.relationship.
+
+    Args:
+        workbook: openpyxl Workbook object
+
+    Returns:
+        List of dicts with 'name', 'normalized_name', 'description'
+    """
+    rows = get_sheet_data(workbook, ARMSheets.STAKEHOLDER_CATEGORIES)
+
+    categories = []
+    for row in rows:
+        name = row.get("Nom")
+        if not name:
+            continue
+
+        category = {
+            "name": name.strip(),
+            "normalized_name": normalize_category_name(name),
+            "description": (row.get("Description") or "").strip(),
+        }
+        categories.append(category)
+
+    logger.info(f"Extracted {len(categories)} stakeholder categories from ARM file")
+    return categories
+
+
+def get_stakeholder_danger_data(workbook) -> dict[str, dict]:
+    """
+    Extract stakeholder danger/assessment data with nested column handling.
+
+    The sheet has:
+    - Row 1: Main headers (merged)
+    - Row 2: Sub-headers for the assessment columns
+    - Row 3+: Data
+
+    Args:
+        workbook: openpyxl Workbook object
+
+    Returns:
+        Dictionary mapping stakeholder name to assessment data:
+        {
+            "stakeholder_name": {
+                "dependency": int,
+                "penetration": int,
+                "maturity": int,
+                "trust": int,
+            }
+        }
+    """
+    sheet_name = ARMSheets.STAKEHOLDER_DANGER_LEVELS
+    if sheet_name not in workbook.sheetnames:
+        logger.warning(f"Sheet '{sheet_name}' not found in workbook")
+        return {}
+
+    sheet = workbook[sheet_name]
+
+    # Get sub-headers from row 2
+    sub_headers = [cell.value for cell in sheet[2]]
+
+    # Build a mapping of header names to column indices for flexibility
+    header_to_col = {}
+    for i, header in enumerate(sub_headers):
+        if header:
+            header_to_col[header.strip()] = i
+
+    danger_data = {}
+    for row in sheet.iter_rows(min_row=3):
+        row_values = [cell.value for cell in row]
+
+        # Skip empty rows
+        if not any(row_values):
+            continue
+
+        # Find stakeholder name - try 'Partie prenante' column or column C (index 2)
+        stakeholder_name = None
+        if "Partie prenante" in header_to_col:
+            stakeholder_name = row_values[header_to_col["Partie prenante"]]
+        elif len(row_values) > 2:
+            # Fallback to column C (index 2)
+            stakeholder_name = row_values[2]
+
+        if not stakeholder_name:
+            continue
+
+        assessment = {
+            "dependency": 0,
+            "penetration": 0,
+            "maturity": 1,  # Default to 1 (minimum valid value)
+            "trust": 1,  # Default to 1 (minimum valid value)
+        }
+
+        # Extract assessment values by header name
+        for header, col_idx in header_to_col.items():
+            if col_idx >= len(row_values):
+                continue
+            value = row_values[col_idx]
+
+            if "Dépendance" in header:
+                assessment["dependency"] = int(value) if value else 0
+            elif "Pénétration" in header:
+                assessment["penetration"] = int(value) if value else 0
+            elif "Maturité" in header:
+                assessment["maturity"] = max(1, int(value) if value else 1)
+            elif "Confiance" in header:
+                assessment["trust"] = max(1, int(value) if value else 1)
+
+        danger_data[stakeholder_name.strip().lower()] = assessment
+
+    logger.info(f"Extracted danger data for {len(danger_data)} stakeholders")
+    return danger_data
+
+
+def extract_stakeholders(workbook) -> list[dict]:
+    """
+    Extract stakeholders (entities) from ARM file.
+
+    Args:
+        workbook: openpyxl Workbook object
+
+    Returns:
+        List of dicts with stakeholder data:
+        - name: str (entity name)
+        - description: str
+        - category: str (normalized category name for matching)
+        - risk_origins: list[str] (linked risk origins)
+        - current_dependency, current_penetration, current_maturity, current_trust
+    """
+    rows = get_sheet_data(workbook, ARMSheets.STAKEHOLDERS)
+
+    # Get danger level data for assessment values
+    danger_data = get_stakeholder_danger_data(workbook)
+
+    stakeholders = []
+    for row in rows:
+        name = row.get("Nom")
+        if not name:
+            continue
+
+        name = name.strip()
+        category_raw = row.get("Catégorie") or ""
+
+        # Get assessment data if available
+        assessment = danger_data.get(
+            name.lower(),
+            {
+                "dependency": 0,
+                "penetration": 0,
+                "maturity": 1,
+                "trust": 1,
+            },
+        )
+
+        # Parse risk origins (bullet list)
+        risk_origins = parse_bullet_list(row.get("Sources de risque") or "")
+
+        stakeholder = {
+            "name": name,
+            "description": (row.get("Description") or "").strip(),
+            "category": normalize_category_name(category_raw),
+            "category_raw": category_raw.strip(),
+            "risk_origins": risk_origins,
+            "current_dependency": assessment["dependency"],
+            "current_penetration": assessment["penetration"],
+            "current_maturity": assessment["maturity"],
+            "current_trust": assessment["trust"],
+        }
+        stakeholders.append(stakeholder)
+
+    logger.info(f"Extracted {len(stakeholders)} stakeholders from ARM file")
+    return stakeholders
+
+
+# =============================================================================
 # Main processing function
 # =============================================================================
 
@@ -468,13 +679,18 @@ def process_arm_file(file_content: bytes) -> dict:
     # Extract Workshop 2 data
     result["roto_couples"] = extract_roto_couples(workbook)
 
+    # Extract Workshop 3 data
+    result["stakeholder_categories"] = extract_stakeholder_categories(workbook)
+    result["stakeholders"] = extract_stakeholders(workbook)
+
     logger.info(
         f"Extracted from ARM file: "
         f"{len(result['primary_assets'])} primary assets, "
         f"{len(result['supporting_assets'])} supporting assets, "
         f"{len(result['feared_events'])} feared events, "
         f"{len(result['applied_controls'])} applied controls, "
-        f"{len(result['roto_couples'])} RoTo couples"
+        f"{len(result['roto_couples'])} RoTo couples, "
+        f"{len(result['stakeholders'])} stakeholders"
     )
 
     return result
