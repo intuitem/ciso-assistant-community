@@ -18,6 +18,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
+	import type { ListViewFilterConfig } from '$lib/utils/table';
 	import { goto, breadcrumbs } from '$lib/utils/breadcrumbs';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isDark } from '$lib/utils/helpers';
@@ -77,10 +78,14 @@
 		fields?: string[];
 		canSelectObject?: boolean;
 		overrideFilters?: { [key: string]: any[] };
+		defaultFilters?: { [key: string]: any[] };
 		hideFilters?: boolean;
+		tableFilters?: Record<string, ListViewFilterConfig>;
 		folderId?: string;
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
+		onFilterChange?: (filters: Record<string, any>) => void;
+		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
 		addButton?: import('svelte').Snippet;
@@ -125,10 +130,18 @@
 		fields = [],
 		canSelectObject = false,
 		overrideFilters = {},
+		defaultFilters = {},
 		hideFilters = $bindable(false),
+		tableFilters = URLModel &&
+		listViewFields[URLModel] &&
+		Object.hasOwn(listViewFields[URLModel], 'filters')
+			? listViewFields[URLModel].filters
+			: {},
 		folderId = '',
 		forcePreventDelete = false,
 		forcePreventEdit = false,
+		onFilterChange = () => {},
+		quickFilters,
 		optButton,
 		selectButton,
 		addButton,
@@ -253,7 +266,7 @@
 
 	const actionsURLModel = URLModel;
 	const preventDelete = (row: TableSource) =>
-		(row?.meta?.builtin && actionsURLModel !== 'loaded-libraries') ||
+		(actionsURLModel === 'stored-libraries' && (row?.meta?.builtin || row?.meta?.is_loaded)) ||
 		(!URLModel?.includes('libraries') && Object.hasOwn(row?.meta, 'urn') && row?.meta?.urn) ||
 		(URLModel?.includes('campaigns') && row?.meta?.compliance_assessments.length > 0) ||
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
@@ -265,23 +278,18 @@
 
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
 
-	const filters =
-		source?.filters ??
-		(tableURLModel &&
-		listViewFields[tableURLModel] &&
-		Object.hasOwn(listViewFields[tableURLModel], 'filters')
-			? listViewFields[tableURLModel].filters
-			: {});
-
+	const filters = source?.filters ?? tableFilters;
 	const filteredFields = Object.keys(filters);
 	const filterValues: { [key: string]: any } = $state(
 		Object.fromEntries(
-			filteredFields.map((field: string) => [
-				field,
-				page.url.searchParams.getAll(field).map((value) => ({ value }))
-			])
+			filteredFields.map((field: string) => {
+				const urlValues = page.url.searchParams.getAll(field).map((value) => ({ value }));
+				const defaultValue = defaultFilters[field] || [];
+				return [field, urlValues.length > 0 ? urlValues : defaultValue];
+			})
 		)
 	);
+	$effect(() => onFilterChange(filterValues));
 
 	run(() => {
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
@@ -293,15 +301,13 @@
 			const overrideFilterValue = overrideFilters[field];
 			const finalFilterValue = overrideFilterValue || filterValue;
 
-			handler.filter(
-				finalFilterValue ? finalFilterValue.map((v: Record<string, any>) => v.value) : [],
-				field
-			);
+			const fieldFilterParams = finalFilterValue
+				? finalFilterValue.map((v: Record<string, any>) => v.value)
+				: [];
+			handler.filter(fieldFilterParams, field);
 			page.url.searchParams.delete(field);
-			if (finalFilterValue && finalFilterValue.length > 0) {
-				for (const value of finalFilterValue) {
-					page.url.searchParams.append(field, value.value);
-				}
+			if (finalFilterValue) {
+				finalFilterValue.forEach(({ value }) => page.url.searchParams.append(field, value));
 			}
 
 			const hrefPattern = new RegExp(`^/${URLModel}(\\?.*)?$`);
@@ -316,10 +322,16 @@
 	});
 
 	const filterInitialData: Record<string, string[]> = {};
-	// convert URL search params to filter initial data
+	// convert URL search params and default filters to filter initial data
 	for (const [key, value] of page.url.searchParams) {
 		filterInitialData[key] ??= [];
 		filterInitialData[key].push(value);
+	}
+	// Add default filter values if no URL params exist for that field
+	for (const field of filteredFields) {
+		if (!filterInitialData[field] && filterValues[field]?.length > 0) {
+			filterInitialData[field] = filterValues[field].map((v: Record<string, any>) => v.value);
+		}
 	}
 	const zodFiltersObject = {};
 	Object.keys(filters).forEach((k) => {
@@ -407,6 +419,7 @@
 	const MULTI_VALUE_COLUMNS = [
 		'owner',
 		'filtering_labels',
+		'linked_models',
 		'threats',
 		'assets',
 		'applied_controls',
@@ -422,6 +435,23 @@
 			MULTI_VALUE_COLUMNS.includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
+	};
+
+	// Helper function to convert linked_models snake_case to camelCase for translation
+	const convertLinkedModelName = (snakeCaseName: string): string => {
+		const mapping: Record<string, string> = {
+			compliance_assessments: 'complianceAssessments',
+			risk_assessments: 'riskAssessments',
+			business_impact_analysis: 'businessImpactAnalysis',
+			crq_studies: 'quantitativeRiskStudies',
+			ebios_studies: 'ebiosRMStudies',
+			entity_assessments: 'entityAssessments',
+			findings_assessments: 'findingsAssessments',
+			evidences: 'evidences',
+			security_exceptions: 'securityExceptions',
+			policies: 'policies'
+		};
+		return mapping[snakeCaseName] || snakeCaseName;
 	};
 
 	let openState = $state(false);
@@ -461,7 +491,12 @@
 										fieldContext="filter"
 										label={safeTranslate(filters[field].props?.label)}
 										onChange={(value) => {
-											filterValues[field] = value.map((v) => ({ value: v }));
+											const arrayValue = Array.isArray(value) ? value : [value];
+											const sanitizedArrayValue = arrayValue.filter(
+												(v) => v !== null && v !== undefined
+											);
+
+											filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
 											invalidateTable = true;
 										}}
 									/>
@@ -488,6 +523,9 @@
 			{/if}
 		</div>
 	</header>
+	{@render quickFilters?.(filterValues, _form, () => {
+		invalidateTable = true;
+	})}
 	<!-- Table -->
 	<table
 		class="table caption-bottom {classesTable}"
@@ -565,7 +603,9 @@
 																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 																}) as val}
 																	<li>
-																		{#if key === 'security_objectives' || key === 'security_capabilities'}
+																		{#if key === 'linked_models' && typeof val === 'string'}
+																			{safeTranslate(convertLinkedModelName(val))}
+																		{:else if key === 'security_objectives' || key === 'security_capabilities'}
 																			{@const [securityObjectiveName, securityObjectiveValue] =
 																				Object.entries(val)[0]}
 																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
@@ -643,8 +683,16 @@
 																	{m.accept()}
 																</span>
 															</div>
+														{:else if (key === 'name' || key === 'str') && row.meta?.is_locked}
+															<div class="flex items-center space-x-2">
+																<i class="fa-solid fa-lock text-yellow-600" title={m.isLocked()}
+																></i>
+																<span class="text-yellow-600">{safeTranslate(value ?? '-')}</span>
+															</div>
 														{:else if key === 'icon_fa_class'}
 															<i class="text-lg fa {value}"></i>
+														{:else if value && value.name}
+															{value.name}
 														{:else}
 															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
 															{#if value?.length > 300}

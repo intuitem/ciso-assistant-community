@@ -53,6 +53,18 @@ ALLOWED_PERMISSION_APPS = (
     "tprm",
     "privacy",
     "resilience",
+    "crq",
+    "pmbok",
+    "iam",
+)
+
+IGNORED_PERMISSION_MODELS = (
+    "personalaccesstoken",
+    "role",
+    "roleassignment",
+    "usergroup",
+    "ssosettings",
+    "historicalmetric",
 )
 
 
@@ -139,7 +151,7 @@ class Folder(NameDescriptionMixin):
         while (current_folder := current_folder.parent_folder) is not None:
             yield current_folder
 
-    def get_folder_full_path(self, include_root: bool = False) -> list[Self]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Self]:
         """
         Get the full path of the folder including its parents.
         If include_root is True, the root folder is included in the path.
@@ -328,7 +340,7 @@ class FolderMixin(models.Model):
         default=Folder.get_root_folder_id,
     )
 
-    def get_folder_full_path(self, include_root: bool = False) -> list[Folder]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
         folders = ([self.folder] + [f for f in self.folder.get_parent_folders()])[::-1]
         if include_root:
             return folders
@@ -417,6 +429,7 @@ class UserManager(BaseUserManager):
             observation=extra_fields.get("observation"),
             folder=_get_root_folder(),
             keep_local_login=extra_fields.get("keep_local_login", False),
+            expiry_date=extra_fields.get("expiry_date"),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         if password:
@@ -567,7 +580,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if not getattr(for_user, "is_authenticated", False):
             return User.objects.none()
 
-        (_, changeable_user_groups_ids, _) = RoleAssignment.get_accessible_object_ids(
+        (viewable_user_group_ids, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), for_user, UserGroup
         )
 
@@ -579,10 +592,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 Folder.get_root_folder(), for_user, User
             )
             base_qs = (
-                User.objects.filter(
-                    Q(id__in=visible_users_ids)
-                    | Q(user_groups__in=changeable_user_groups_ids)
-                )
+                User.objects.filter(id__in=visible_users_ids)
                 | User.objects.filter(pk=for_user.pk)
             ).distinct()
 
@@ -590,9 +600,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return base_qs.prefetch_related(
             Prefetch(
                 "user_groups",
-                queryset=UserGroup.objects.filter(
-                    id__in=changeable_user_groups_ids
-                ).only("id", "builtin"),  # minimal
+                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
+                    "id", "builtin"
+                ),  # minimal
             )
         )
 
@@ -653,13 +663,15 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 fail_silently=False,
                 html_message=email,
             )
-            logger.info("email sent", recipient=self.email, subject=subject)
+            logger.info(
+                "Email sent successfully", recipient=self.email, subject=subject
+            )
         except Exception as primary_exception:
             logger.error(
-                "primary mailer failure, trying rescue",
+                "Primary mail server failure, trying rescue",
                 recipient=self.email,
                 subject=subject,
-                error=primary_exception,
+                error=str(primary_exception),
                 email_host=EMAIL_HOST,
                 email_port=EMAIL_PORT,
                 email_host_user=EMAIL_HOST_USER,
@@ -681,13 +693,17 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                             [self.email],
                             connection=new_connection,
                         ).send()
-                    logger.info("email sent", recipient=self.email, subject=subject)
-                except Exception as rescue_exception:
-                    logger.error(
-                        "rescue mailer failure",
+                    logger.info(
+                        "Email sent via rescue server",
                         recipient=self.email,
                         subject=subject,
-                        error=rescue_exception,
+                    )
+                except Exception as rescue_exception:
+                    logger.error(
+                        "Rescue mail server failure",
+                        recipient=self.email,
+                        subject=subject,
+                        error=str(rescue_exception),
                         email_host=EMAIL_HOST_RESCUE,
                         email_port=EMAIL_PORT_RESCUE,
                         email_username=EMAIL_HOST_USER_RESCUE,
@@ -963,6 +979,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             for p in permissions & ra_permissions:
                 for f in target_folders:
                     result_folders[f].add(p)
+
         for f in result_folders:
             if hasattr(object_type, "folder"):
                 objects_ids = object_type.objects.filter(folder=f).values_list(
@@ -984,11 +1001,16 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 objects_ids = [f.id]
             elif class_name == "permission":
                 # Permissions have no folder, so we don't filter them, we just rely on view_permission
-                objects_ids = Permission.objects.filter(
-                    content_type__app_label__in=ALLOWED_PERMISSION_APPS
-                ).values_list("id", flat=True)
+                objects_ids = (
+                    Permission.objects.filter(
+                        content_type__app_label__in=ALLOWED_PERMISSION_APPS
+                    )
+                    .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
+                    .values_list("id", flat=True)
+                )
             else:
                 raise NotImplementedError("type not supported")
+
             if permission_view in result_folders[f]:
                 result_view.update(objects_ids)
             if permission_change in result_folders[f]:
@@ -1122,7 +1144,7 @@ common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     User,
     m2m_fields={"user_groups"},
-    exclude_fields=common_exclude + ["password"],
+    exclude_fields=common_exclude,
 )
 auditlog.register(
     Folder,

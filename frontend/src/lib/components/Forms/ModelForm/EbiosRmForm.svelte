@@ -65,6 +65,15 @@
 		cacheLock={cacheLocks['ref_id']}
 		bind:cachedValue={formDataCache['ref_id']}
 	/>
+	<Select
+		{form}
+		options={model.selectOptions['quotation_method']}
+		field="quotation_method"
+		disableDoubleDash
+		label={m.quotationMethod()}
+		cacheLock={cacheLocks['quotation_method']}
+		bind:cachedValue={formDataCache['quotation_method']}
+	/>
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="folders?content_type=DO"
@@ -97,6 +106,15 @@
 		>
 			{m.activityOne()}
 		</p>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="risk-matrices"
+			field="risk_matrix"
+			cacheLock={cacheLocks['risk_matrix']}
+			bind:cachedValue={formDataCache['risk_matrix']}
+			label={m.riskMatrix()}
+			helpText={m.ebiosRmMatrixHelpText() + '\n' + m.riskAssessmentMatrixHelpText()}
+		/>
 		<MarkdownField
 			{form}
 			field="description"

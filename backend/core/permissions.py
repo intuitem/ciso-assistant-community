@@ -31,6 +31,7 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
             return True
         if not request.method:
             return False
+
         perms = self.get_required_permissions(request.method, type(obj))
         if not perms:
             return False

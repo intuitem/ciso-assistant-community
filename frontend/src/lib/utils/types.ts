@@ -43,6 +43,7 @@ export const URL_MODEL = [
 	'applied-controls',
 	'policies',
 	'risk-acceptances',
+	'validation-flows',
 	'reference-controls',
 	'assets',
 	'users',
@@ -65,9 +66,11 @@ export const URL_MODEL = [
 	'entities',
 	'entity-assessments',
 	'solutions',
+	'contracts',
 	'representatives',
 	'vulnerabilities',
 	'filtering-labels',
+	'library-filtering-labels',
 	// 'ebios-rm',
 	'feared-events',
 	'ro-to',
@@ -121,7 +124,15 @@ export const URL_MODEL = [
 	'permissions',
 	// pmbok
 	'generic-collections',
-	'accreditations'
+	'accreditations',
+	// metrology
+	'metric-definitions',
+	'metric-instances',
+	'custom-metric-samples',
+	'dashboards',
+	'dashboard-widgets',
+	'dashboard-text-widgets',
+	'dashboard-builtin-widgets'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = [

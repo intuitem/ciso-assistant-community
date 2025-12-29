@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 
 import pytest
 from ciso_assistant.settings import BASE_DIR
+from test_fixtures import RISK_MATRIX_JSON_DEFINITION
+
 from core.models import (
     Policy,
     Perimeter,
@@ -67,7 +69,10 @@ class TestEvidence:
         assert evidence.description == "test evidence description"
         assert list(evidence.applied_controls.all()) == [applied_control]
         assert evidence.last_revision == revision
-        assert evidence.filename() == SAMPLE_640x480_JPG.name
+        # Django may add a unique suffix to avoid filename conflicts
+        assert evidence.filename().startswith(
+            "sample_640x480"
+        ) and evidence.filename().endswith(".jpg")
         assert evidence.get_size().endswith("KB") or evidence.get_size().endswith("MB")
         assert evidence.attachment_hash is not None
 
@@ -106,7 +111,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -133,7 +138,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -238,7 +243,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -258,7 +263,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -283,7 +288,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -311,7 +316,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -339,7 +344,7 @@ class TestRiskAssessment:
         risk_matrix = RiskMatrix.objects.create(
             name="test risk matrix",
             description="test risk matrix description",
-            json_definition="{}",
+            json_definition=RISK_MATRIX_JSON_DEFINITION,
             folder=folder,
         )
         perimeter = Perimeter.objects.create(name="test perimeter", folder=folder)
@@ -960,6 +965,176 @@ class TestAsset:
         child2.parent_assets.add(child1)
         assert child2.ancestors_plus_self() == {child1, child2, primary_asset}
 
+    def test_primary_asset_chaining(self):
+        """Test that primary assets can have other primary assets as parents"""
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+
+        # Create primary asset hierarchy
+        parent_primary = Asset.objects.create(
+            name="Parent Primary", type=Asset.Type.PRIMARY, folder=root_folder
+        )
+        child_primary = Asset.objects.create(
+            name="Child Primary", type=Asset.Type.PRIMARY, folder=root_folder
+        )
+        support_asset = Asset.objects.create(
+            name="Support Asset", type=Asset.Type.SUPPORT, folder=root_folder
+        )
+
+        # Create relationships: parent_primary <- child_primary <- support_asset
+        child_primary.parent_assets.add(parent_primary)
+        support_asset.parent_assets.add(child_primary)
+
+        # Verify relationships
+        assert parent_primary in child_primary.parent_assets.all()
+        assert child_primary.get_descendants() == {support_asset}
+        assert parent_primary.get_descendants() == {child_primary, support_asset}
+        assert support_asset.ancestors_plus_self() == {
+            support_asset,
+            child_primary,
+            parent_primary,
+        }
+
+    def test_primary_asset_capabilities_aggregation(self):
+        """Test that primary assets aggregate capabilities from all descendants including other primaries"""
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+
+        # Create asset hierarchy
+        parent_primary = Asset.objects.create(
+            name="Parent Primary", type=Asset.Type.PRIMARY, folder=root_folder
+        )
+        child_primary = Asset.objects.create(
+            name="Child Primary",
+            type=Asset.Type.PRIMARY,
+            folder=root_folder,
+            security_capabilities={
+                "objectives": {"confidentiality": {"value": 3, "is_enabled": True}}
+            },
+        )
+        support_asset = Asset.objects.create(
+            name="Support Asset",
+            type=Asset.Type.SUPPORT,
+            folder=root_folder,
+            security_capabilities={
+                "objectives": {"confidentiality": {"value": 2, "is_enabled": True}}
+            },
+        )
+
+        # Create relationships
+        child_primary.parent_assets.add(parent_primary)
+        support_asset.parent_assets.add(child_primary)
+
+        # Parent primary should aggregate capabilities from both child primary and support
+        parent_capabilities = parent_primary.get_security_capabilities()
+        assert "objectives" in parent_capabilities
+        # Should take minimum value (worst case) = 2
+        assert parent_capabilities["objectives"]["confidentiality"]["value"] == 2
+
+    def test_cycle_detection_support_assets(self):
+        """Test that cycles are detected and prevented in support asset chains"""
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+
+        # Create three support assets
+        asset_a = Asset.objects.create(
+            name="Support A", type=Asset.Type.SUPPORT, folder=root_folder
+        )
+        asset_b = Asset.objects.create(
+            name="Support B", type=Asset.Type.SUPPORT, folder=root_folder
+        )
+        asset_c = Asset.objects.create(
+            name="Support C", type=Asset.Type.SUPPORT, folder=root_folder
+        )
+
+        # Create chain: A -> B -> C
+        asset_b.parent_assets.add(asset_a)
+        asset_c.parent_assets.add(asset_b)
+
+        # Attempting to create cycle: C -> A should be prevented
+        # This would create: A -> B -> C -> A (cycle)
+        from rest_framework.exceptions import ValidationError
+        from core.serializers import AssetWriteSerializer
+
+        serializer = AssetWriteSerializer(
+            asset_a,
+            data={
+                "name": "Support A",
+                "type": "SP",
+                "folder": str(root_folder.id),
+                "parent_assets": [str(asset_c.id)],  # This creates a cycle
+            },
+            partial=True,
+        )
+
+        assert serializer.is_valid() is False
+        assert "errorAssetGraphMustNotContainCycles" in str(serializer.errors)
+
+    def test_cycle_detection_primary_assets(self):
+        """Test that cycles are detected and prevented in primary asset chains"""
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+
+        # Create three primary assets
+        primary_a = Asset.objects.create(
+            name="Primary A", type=Asset.Type.PRIMARY, folder=root_folder
+        )
+        primary_b = Asset.objects.create(
+            name="Primary B", type=Asset.Type.PRIMARY, folder=root_folder
+        )
+        primary_c = Asset.objects.create(
+            name="Primary C", type=Asset.Type.PRIMARY, folder=root_folder
+        )
+
+        # Create chain: A -> B -> C
+        primary_b.parent_assets.add(primary_a)
+        primary_c.parent_assets.add(primary_b)
+
+        # Attempting to create cycle: C -> A should be prevented
+        from core.serializers import AssetWriteSerializer
+
+        serializer = AssetWriteSerializer(
+            primary_a,
+            data={
+                "name": "Primary A",
+                "type": "PR",
+                "folder": str(root_folder.id),
+                "parent_assets": [str(primary_c.id)],  # This creates a cycle
+            },
+            partial=True,
+        )
+
+        assert serializer.is_valid() is False
+        assert "errorAssetGraphMustNotContainCycles" in str(serializer.errors)
+
+    def test_cycle_detection_mixed_asset_types(self):
+        """Test that cycles are detected in mixed primary/support asset chains"""
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+
+        # Create mixed asset chain
+        primary_asset = Asset.objects.create(
+            name="Primary Asset", type=Asset.Type.PRIMARY, folder=root_folder
+        )
+        support_asset = Asset.objects.create(
+            name="Support Asset", type=Asset.Type.SUPPORT, folder=root_folder
+        )
+
+        # Create: Primary -> Support
+        support_asset.parent_assets.add(primary_asset)
+
+        # Attempting to create cycle: Support -> Primary should be prevented
+        from core.serializers import AssetWriteSerializer
+
+        serializer = AssetWriteSerializer(
+            primary_asset,
+            data={
+                "name": "Primary Asset",
+                "type": "PR",
+                "folder": str(root_folder.id),
+                "parent_assets": [str(support_asset.id)],  # This creates a cycle
+            },
+            partial=True,
+        )
+
+        assert serializer.is_valid() is False
+        assert "errorAssetGraphMustNotContainCycles" in str(serializer.errors)
+
 
 @pytest.mark.django_db
 class TestLibrary:
@@ -1090,8 +1265,8 @@ class TestLibrary:
         domain = Folder.objects.create(name="Domain", description="Domain description")
         perimeter = Perimeter.objects.create(name="Perimeter", folder=domain)
 
-        library = LoadedLibrary.objects.get()
         risk_matrix = RiskMatrix.objects.get()
+        library = risk_matrix.library
 
         assert library.reference_count == 0
 
@@ -1245,7 +1420,13 @@ class TestLibrary:
         except:
             None
 
-        assert LoadedLibrary.objects.count() == 0
+        assert (
+            LoadedLibrary.objects.filter(
+                objects_meta__requirement_mapping_sets__isnull=True,
+                objects_meta__requirement_mapping_set__isnull=True,
+            ).count()
+            == 0
+        )
 
     @pytest.mark.usefixtures("domain_perimeter_fixture")
     def test_library_cannot_be_deleted_if_it_is_a_dependency_of_other_libraries(self):
@@ -1275,13 +1456,25 @@ class TestLibrary:
         except:
             None
 
-        assert LoadedLibrary.objects.count() == 1
+        assert (
+            LoadedLibrary.objects.filter(
+                objects_meta__requirement_mapping_sets__isnull=True,
+                objects_meta__requirement_mapping_set__isnull=True,
+            ).count()
+            == 1
+        )
 
         try:  # wrapping in try/except to avoid raising exception due to StoredLibrary not existing
             dependency_library.delete()
         except:
             None
-        assert LoadedLibrary.objects.count() == 0
+
+        assert (
+            LoadedLibrary.objects.filter(
+                objects_meta__requirement_mapping_sets__isnull=True,
+                objects_meta__requirement_mapping_set__isnull=True,
+            ).count()
+        ) == 0
 
 
 @pytest.mark.django_db

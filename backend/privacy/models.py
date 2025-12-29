@@ -1,7 +1,7 @@
 from django.db import models
 from iam.models import User, FolderMixin
 from tprm.models import Entity
-from core.models import AppliedControl, Asset, Incident
+from core.models import AppliedControl, Asset, Evidence, Incident
 from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
@@ -127,6 +127,15 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         blank=True,
     )
 
+    evidences = models.ManyToManyField(
+        Evidence,
+        verbose_name="Evidences",
+        blank=True,
+        related_name="processings",
+    )
+
+    fields_to_check = ["name"]
+
     def update_sensitive_data_flag(self):
         """Update the has_sensitive_personal_data flag based on associated personal data"""
         has_sensitive = self.personal_data.filter(is_sensitive=True).exists()
@@ -251,9 +260,10 @@ class PersonalData(NameDescriptionFolderMixin):
             self.processing.save(update_fields=["has_sensitive_personal_data"])
 
     @classmethod
-    def get_categories_count(cls):
+    def get_categories_count(cls, filters: dict = {}):
         categories = (
-            cls.objects.values("category")
+            cls.objects.filter(**filters)
+            .values("category")
             .annotate(count=Count("id"))
             .order_by("-count")
         )

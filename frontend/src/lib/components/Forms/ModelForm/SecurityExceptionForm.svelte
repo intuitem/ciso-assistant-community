@@ -16,6 +16,7 @@
 	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModalStore } from '$lib/components/Modals/stores';
+	import MarkdownField from '../MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -136,6 +137,14 @@
 	disableDoubleDash="true"
 	bind:cachedValue={formDataCache['status']}
 />
+<MarkdownField
+	{form}
+	field="observation"
+	label={m.observation()}
+	helpText={m.observationHelpText()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
+/>
 <TextField
 	type="date"
 	{form}
@@ -143,6 +152,17 @@
 	label={m.expirationDate()}
 	cacheLock={cacheLocks['expiration_date']}
 	bind:cachedValue={formDataCache['expiration_date']}
+/>
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="assets"
+	optionsLabelField="auto"
+	pathField="path"
+	field="assets"
+	cacheLock={cacheLocks['assets']}
+	bind:cachedValue={formDataCache['assets']}
+	label={m.assets()}
 />
 <div class="flex flex-row space-x-2 items-center">
 	<div class="w-full">

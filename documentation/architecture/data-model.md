@@ -1147,6 +1147,10 @@ When a library is loaded, this loading is stored in the database, and the corres
 
 Deleting a library is possible only if none of its objects is currently used. Removing individual elements of a library is not possible. Dependencies are not concerned by the deletion, they should be deleted individually.
 
+There is a hidden boolean flag "autoload" on stored libraries that indicates if this library should be auto-loaded at startup. The default value is false by default, except for requirement mapping sets. When unloading a library, the flag is set to false.
+
+Loaded requirement mapping sets are cached in memory. As an exception, their dependencies are not loaded automatically.
+
 ## Referential objects
 
 Frameworks (including requirement nodes), mappings, threats, reference controls and risk matrices are called "referential objects", as they constitute the basis of an assessment.
@@ -2079,3 +2083,31 @@ The new model is a superset of the current model, so it is possible to migrate p
 - overridden_children_capabilities are mapped to security_objectives_propagation and disaster_recovery_objectives_propagation
 - inherit_objectives = true for supporting assets, false for primary assets
 - intherit_capabilities = true for primary assets, false for supporting assets (TBC)
+
+
+## DORA support
+
+### Objective
+
+- generate ROI report following https://www.eba.europa.eu/activities/direct-supervision-and-oversight/digital-operational-resilience-act/preparation-dora-application
+- generate Incident reports: https://www.bafin.de/SharedDocs/Downloads/EN/Anlage/dl_DORA_Incident_reporting_Template.html
+- Generate threat reports (not in MVP)
+
+### ROI
+
+- The ROI shall be based on the following objects:
+  - critical functions -> assets with a boolean flag "critical function"
+  - entities: add required parameters in entities:
+    - LEI (if available)
+    - EU ID (if relevant, LEI not available)
+    - ...
+  - contracts between entities (new object)
+- The ROI is a zip file with simple content, mainly CSV files
+- Good description of the zip content here: https://www.centralbank.ie/docs/default-source/regulation/dora-templates/guide-to-submitting-dora-registers-on-the-central-bank-of-ireland-portal.pdf
+- The content of the CSV files is well described in the XLS template, which provides all the possible values for dropdown menus: https://github.com/lesleyxyz/dora-register-of-information/blob/main/unprotected_XLS%20Master%20Template%20DORA%20RoI%20dryrun.xlsx
+
+### Incident reports
+
+- Reports are in XLSX
+- the format of reports is well described by the xlsx template: https://www.bafin.de/SharedDocs/Downloads/EN/Anlage/dl_DORA_Incident_reporting_Template.html
+- Missing fields shall be added in the incident data model to generate the various reports

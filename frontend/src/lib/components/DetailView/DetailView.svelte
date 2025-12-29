@@ -51,6 +51,7 @@
 		widgets?: import('svelte').Snippet;
 		actions?: import('svelte').Snippet;
 		disableCreate?: boolean;
+		disableEdit?: boolean;
 		disableDelete?: boolean;
 	}
 
@@ -69,6 +70,7 @@
 			'revoked_at',
 			'eta',
 			'expiration_date',
+			'validation_deadline',
 			'timestamp',
 			'reported_at',
 			'due_date',
@@ -77,6 +79,7 @@
 		widgets,
 		actions,
 		disableCreate = false,
+		disableEdit = false,
 		disableDelete = false
 	}: Props = $props();
 
@@ -263,7 +266,8 @@
 				!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
 				!data.data.urn &&
 				!data.data.builtin) ||
-			data?.urlModel === 'terminologies'
+			data?.urlModel === 'terminologies' ||
+			data?.urlModel === 'entities'
 		);
 	});
 
@@ -391,7 +395,7 @@
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
 					{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
 						<div
-							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-3 sm:gap-4 {index >=
+							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-5 sm:gap-4 {index >=
 								MAX_ROWS && !expandedTable
 								? 'hidden'
 								: ''}"
@@ -423,7 +427,7 @@
 									</Tooltip>
 								{/if}
 							</dt>
-							<dd class="text-gray-700 sm:col-span-2">
+							<dd class="text-gray-700 sm:col-span-4">
 								<ul class="">
 									<li
 										class="list-none whitespace-pre-line"
@@ -496,7 +500,20 @@
 															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if key === 'security_objectives' || key === 'security_capabilities'}
+																{#if key === 'purposes'}
+																	{@const itemHref = `/${
+																		data.model?.foreignKeyFields?.find((item) => item.field === key)
+																			?.urlModel ?? 'purposes'
+																	}/${val.id}`}
+																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																		>{val.name}</Anchor
+																	>
+																	{#if val.legal_basis}
+																		<span class="text-gray-600">
+																			- {safeTranslate(val.legal_basis)}
+																		</span>
+																	{/if}
+																{:else if key === 'security_objectives' || key === 'security_capabilities'}
 																	{@const [securityObjectiveName, securityObjectiveValue] =
 																		Object.entries(val)[0]}
 																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
@@ -531,7 +548,7 @@
 													>
 												{:else}
 													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-														>{value.str}</Anchor
+														>{value.str || value.name}</Anchor
 													>
 												{/if}
 												<!-- Shortcut before DetailView refactoring -->
@@ -735,10 +752,12 @@
 									})}
 									source={model.table}
 									disableCreate={disableCreate || model.disableCreate}
+									disableEdit={disableEdit || model.disableEdit}
 									disableDelete={disableDelete || model.disableDelete}
 									deleteForm={model.deleteForm}
 									URLModel={urlmodel}
 									fields={fieldsToUse}
+									defaultFilters={field.defaultFilters || {}}
 								>
 									{#snippet addButton()}
 										<button

@@ -108,15 +108,17 @@
 			<i class="fa-solid fa-gem mr-2"></i>{m.assets()}
 		{/snippet}
 		{#snippet panel()}
-			<Select
-				{form}
-				field="security_objective_scale"
-				cacheLock={cacheLocks['security_objective_scale']}
-				bind:cachedValue={formDataCache['security_objective_scale']}
-				options={model.selectOptions['security_objective_scale']}
-				helpText={m.securityObjectiveScaleHelpText()}
-				label={m.securityObjectiveScale()}
-			/>
+			<div class="p-4">
+				<Select
+					{form}
+					field="security_objective_scale"
+					cacheLock={cacheLocks['security_objective_scale']}
+					bind:cachedValue={formDataCache['security_objective_scale']}
+					options={model.selectOptions['security_objective_scale']}
+					helpText={m.securityObjectiveScaleHelpText()}
+					label={m.securityObjectiveScale()}
+				/>
+			</div>
 		{/snippet}
 	</Accordion.Item>
 	<Accordion.Item value="riskMatrix">
@@ -124,7 +126,7 @@
 			<i class="fa-solid fa-table-cells-large mr-2"></i>{m.settingsRiskMatrix()}
 		{/snippet}
 		{#snippet panel()}
-			<div class="flex flex-row gap-4">
+			<div class="p-4 flex flex-row gap-4">
 				<div class="flex flex-col flex-1 space-y-4">
 					<Checkbox
 						{form}
@@ -188,36 +190,38 @@
 			<i class="fa-solid fa-gopuram mr-2"></i>{m.ebiosRadarParameters()}
 		{/snippet}
 		{#snippet panel()}
-			<NumberField
-				{form}
-				field="ebios_radar_green_zone_radius"
-				label={m.greenZoneRadius()}
-				min={0.1}
-				max={16}
-				step={0.1}
-				cacheLock={cacheLocks['ebios_radar_green_zone_radius']}
-				bind:cachedValue={formDataCache['ebios_radar_green_zone_radius']}
-			/>
-			<NumberField
-				{form}
-				field="ebios_radar_yellow_zone_radius"
-				label={m.yellowZoneRadius()}
-				min={0.5}
-				max={16}
-				step={0.1}
-				cacheLock={cacheLocks['ebios_radar_yellow_zone_radius']}
-				bind:cachedValue={formDataCache['ebios_radar_yellow_zone_radius']}
-			/>
-			<NumberField
-				{form}
-				field="ebios_radar_red_zone_radius"
-				label={m.redZoneRadius()}
-				min={1}
-				max={16}
-				step={0.1}
-				cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
-				bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
-			/>
+			<div class="p-4 space-y-4">
+				<NumberField
+					{form}
+					field="ebios_radar_green_zone_radius"
+					label={m.greenZoneRadius()}
+					min={0.1}
+					max={16}
+					step={0.1}
+					cacheLock={cacheLocks['ebios_radar_green_zone_radius']}
+					bind:cachedValue={formDataCache['ebios_radar_green_zone_radius']}
+				/>
+				<NumberField
+					{form}
+					field="ebios_radar_yellow_zone_radius"
+					label={m.yellowZoneRadius()}
+					min={0.5}
+					max={16}
+					step={0.1}
+					cacheLock={cacheLocks['ebios_radar_yellow_zone_radius']}
+					bind:cachedValue={formDataCache['ebios_radar_yellow_zone_radius']}
+				/>
+				<NumberField
+					{form}
+					field="ebios_radar_red_zone_radius"
+					label={m.redZoneRadius()}
+					min={1}
+					max={16}
+					step={0.1}
+					cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
+					bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
+				/>
+			</div>
 		{/snippet}
 	</Accordion.Item>
 	<Accordion.Item value="financial">
@@ -236,7 +240,8 @@
 						{ label: 'Japanese Yen (¥)', value: '¥' },
 						{ label: 'Canadian Dollar (C$)', value: 'C$' },
 						{ label: 'Australian Dollar (A$)', value: 'A$' },
-						{ label: 'New Zealand Dollar (NZ$)', value: 'NZ$' }
+						{ label: 'New Zealand Dollar (NZ$)', value: 'NZ$' },
+						{ label: 'Swiss Franc (CHF)', value: 'CHF' }
 					]}
 					label={m.currency()}
 					helpText={m.currencyHelpText()}
@@ -249,6 +254,54 @@
 					helpText={m.dailyRateHelpText()}
 					min={0}
 					step={1}
+				/>
+			</div>
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item value="mappings">
+		{#snippet control()}
+			<i class="fa-solid fa-diagram-project mr-2"></i>{m.requirementMappingSets()}
+		{/snippet}
+		{#snippet panel()}
+			<div class="p-4">
+				<NumberField
+					{form}
+					field="mapping_max_depth"
+					label={m.mappingMaxDepth()}
+					helpText={m.mappingMaxDepthHelpText()}
+					min={2}
+					max={5}
+					step={1}
+				/>
+			</div>
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item value="workflows">
+		{#snippet control()}
+			<i class="fa-solid fa-code-branch mr-2"></i>{m.workflows()}
+		{/snippet}
+		{#snippet panel()}
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="allow_self_validation"
+					label={m.allowSelfValidation()}
+					helpText={m.allowSelfValidationHelpText()}
+				/>
+			</div>
+		{/snippet}
+	</Accordion.Item>
+	<Accordion.Item value="security">
+		{#snippet control()}
+			<i class="fa-solid fa-shield-halved mr-2"></i>{m.security()}
+		{/snippet}
+		{#snippet panel()}
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="show_warning_external_links"
+					label={m.showWarningExternalLinks()}
+					helpText={m.showWarningExternalLinksHelpText()}
 				/>
 			</div>
 		{/snippet}

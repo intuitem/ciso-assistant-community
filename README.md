@@ -213,6 +213,11 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 80. Post-Quantum Cryptography (PQC) Migration Roadmap (May 2025) 🔐
 81. Cloud Sovereignty Framework - 1.2.1 - Oct 2025 🇪🇺
 82. ISO 22301:2019 outline - Business continuity management systems 🌐
+83. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
+84. Vendor Due Diligence - simple baseline - intuitem 🌐
+85. Points de contrôle Active Directory (AD) - ANSSI 🇫🇷
+86. ISO 42001:2023 outline - Artificial Intelligence Management System, including Annex A 🤖🌐
+87. India's Digital Personal Data Protection Act (DPDPA) - 2023 🇮🇳
 
 ### Community contributions
 
@@ -627,4 +632,4 @@ Unless otherwise noted, all files are © intuitem.
 
 ## Activity
 
-![Alt](https://repobeats.axiom.co/api/embed/83162c6044da29efd7efa28f746b6bee5a3c6a8a.svg "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/02f80d1b099ffd1ae66d9cfdc3a0e13234606f35.svg "Repobeats analytics image")

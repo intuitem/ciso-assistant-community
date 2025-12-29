@@ -64,9 +64,10 @@
 		optionsSelf?: any;
 		optionsSelfSelect?: boolean;
 		allowUserOptions?: boolean | 'append';
-		onChange: (value: any) => void;
+		onChange?: (value: any) => void;
 		cacheLock?: CacheLock;
 		cachedValue?: any[] | undefined;
+		cachedOptions?: any[] | undefined;
 		includeAllOptionFields?: boolean;
 		mount?: (value: any) => void;
 		optionSnippet?: import('svelte').Snippet<[Record<string, any>]>;
@@ -113,6 +114,7 @@
 			resolve: (x: any) => x
 		},
 		cachedValue = $bindable(),
+		cachedOptions = $bindable(),
 		mount = () => null,
 		optionSnippet = undefined
 	}: Props = $props();
@@ -366,6 +368,7 @@
 
 	run(() => {
 		cachedValue = selected.map((option) => option.value);
+		cachedOptions = selected;
 	});
 
 	run(() => {
