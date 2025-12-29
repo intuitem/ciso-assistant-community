@@ -2183,7 +2183,7 @@ class FilteringLabelWriteSerializer(BaseModelSerializer):
 
 class LibraryFilteringLabelReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
-    folder = FieldsRelatedField()
+    folder = IdRelatedField()
 
     class Meta:
         model = LibraryFilteringLabel
