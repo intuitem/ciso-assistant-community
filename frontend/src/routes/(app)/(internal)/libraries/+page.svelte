@@ -6,106 +6,117 @@
 	import FileInput from '$lib/components/Forms/FileInput.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { tableHandlers } from '$lib/utils/stores';
-	import { LANGUAGE_FILTER, PROVIDER_FILTER } from '$lib/utils/table.js';
+	import UploadLibraryModal from '$lib/components/Modals/UploadLibraryModal.svelte';
+	import {
+		getModalStore,
+		type ModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
+	import { getModelInfo } from '$lib/utils/crud';
 
-	let { data, ...rest } = $props();
+	import { safeTranslate } from '$lib/utils/i18n';
 
-	let group: 'stored' | 'loaded' = $state(
-		data.loadedLibrariesTable.meta.count > 0 ? 'stored' : 'loaded'
-	);
+	let { data } = $props();
 
-	let fileResetSignal = $state(false);
+	// let fileResetSignal = $state(false);
 
-	let availableUpdatesCount = $derived(data?.updatableLibraries?.length);
+	const modalStore: ModalStore = getModalStore();
 
-	$effect(() => {
-		if (data.loadedLibrariesTable.meta.count === 0) group = 'stored';
-	});
-	let mappingSuggestedCount = $derived(data?.mappingSuggested?.length);
+	function modalCreateForm(): void {
+		let modalComponent: ModalComponent = {
+			ref: UploadLibraryModal
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('addYourLibrary')
+		};
+		modalStore.trigger(modal);
+	}
+
+	interface QuickFilters {
+		object_type: Set<string>;
+	}
+	let quickFilterValues: QuickFilters = {
+		object_type: new Set()
+	};
+
+	let quickFilterSelected: Record<string, boolean> = $state({});
 </script>
 
 <div class="card bg-white py-2 shadow-sm">
-	<Tabs value={group} onValueChange={(e) => (group = e.value)} listJustify="justify-center">
-		{#snippet list()}
-			<Tabs.Control value="stored" labelBase="inert">
-				{m.librariesStore()}
-				<span class="badge preset-tonal-primary">{data.storedLibrariesTable.meta.count}</span>
-				{#if mappingSuggestedCount > 0}
-					<span class="badge preset-tonal-secondary" title={m.mappingSuggestedHelpText()}
-						>{mappingSuggestedCount} <i class="fa-solid fa-diagram-project ml-1"></i></span
+	<ModelTable
+		source={data.storedLibrariesTable}
+		URLModel="stored-libraries"
+		deleteForm={data.deleteForm}
+		onFilterChange={(filters) => {
+			const objectTypeValues = filters['object_type'] ?? [];
+			const filteredObjectTypes = objectTypeValues.map((filter) => filter.value);
+			const filterKeys = Object.keys(quickFilterSelected);
+
+			filterKeys.forEach((filterKey) => {
+				quickFilterSelected[filterKey] = filteredObjectTypes.includes(filterKey);
+			});
+			filteredObjectTypes.forEach((filterKey) => {
+				quickFilterSelected[filterKey] = true;
+			});
+		}}
+	>
+		{#snippet quickFilters(filterValues, form, invalidateTable)}
+			<div class="flex gap-1">
+				{#each ['frameworks', 'reference_controls', 'risk_matrices', 'threats', 'metric_definitions'] as objectType}
+					<button
+						class="ml-2 p-2 border-2 rounded-lg {quickFilterSelected[objectType]
+							? 'border-primary-800'
+							: 'border-primary-100 hover:border-primary-500'}"
+						onclick={() => {
+							const filterValue = filterValues['object_type'];
+							const filteredTypes = filterValue.map((obj) => obj.value);
+
+							const removeFilter = quickFilterValues.object_type.has(objectType);
+							if (removeFilter) {
+								quickFilterValues.object_type.delete(objectType);
+								filterValues['object_type'] = filterValue.filter((obj) => obj.value !== objectType);
+							} else {
+								quickFilterValues.object_type.add(objectType);
+								const isSelected = filteredTypes.includes(objectType);
+								if (!isSelected) {
+									filterValues['object_type'] = [...filterValue, { value: objectType }];
+								}
+							}
+
+							const newFilteredTypes = filterValues['object_type'].map((obj) => obj.value);
+							form.form.update((currentData) => {
+								currentData['object_type'] = newFilteredTypes.length > 0 ? newFilteredTypes : null;
+								return currentData;
+							});
+
+							invalidateTable();
+						}}>{safeTranslate(objectType)}</button
 					>
-				{/if}
-			</Tabs.Control>
-			<Tabs.Control value="loaded" labelBase="inert"
-				>{m.loadedLibraries()}
-				<span class="badge preset-tonal-primary">{data.loadedLibrariesTable.meta.count}</span>
-				{#if availableUpdatesCount > 0}
-					<span class="badge preset-tonal-success"
-						>{availableUpdatesCount} <i class="fa-solid fa-circle-up ml-1"></i></span
-					>
-				{/if}
-			</Tabs.Control>
-			<Tabs.Control value="mappings" labelBase="inert"
-				>{m.mappingLibraries()}
-				<span class="badge preset-tonal-primary">{data.mappingLibrariesTable.meta.count}</span>
-			</Tabs.Control>
-		{/snippet}
-		{#if data.loadedLibrariesTable.meta.count < 0}
-			<div class="card p-4 preset-tonal-secondary w-full m-4">
-				<i class="fa-solid fa-info-circle mr-2"></i>
-				{m.currentlyNoLoadedLibraries()}.
+				{/each}
 			</div>
-		{/if}
-		{#snippet content()}
-			<Tabs.Panel value="stored">
-				{#if mappingSuggestedCount > 0}
-					<div
-						class="flex items-center justify-center w-full -mt-4 p-2 preset-tonal-secondary text-sm"
-					>
-						<span class="badge preset-tonal-secondary mr-1" title={m.mappingSuggestedHelpText()}
-							>{mappingSuggestedCount} <i class="fa-solid fa-diagram-project ml-1"></i>
-						</span>
-						<span class="">{m.mappingSuggestionTeasing()}</span>
-					</div>
-				{/if}
-				<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-					<i class="fa-solid fa-info-circle"></i>
-					<p>{m.librariesCanOnlyBeLoadedByAdmin()}</p>
-				</div>
-				<ModelTable
-					source={data.storedLibrariesTable}
-					URLModel="stored-libraries"
-					deleteForm={data.deleteForm}
-				/>
-			</Tabs.Panel>
-			<Tabs.Panel value="loaded">
-				<ModelTable
-					source={data.loadedLibrariesTable}
-					URLModel="loaded-libraries"
-					deleteForm={data.deleteForm}
-					detailQueryParameter="loaded"
-				/>
-			</Tabs.Panel>
-			<Tabs.Panel value="mappings">
-				<ModelTable
-					source={data.mappingLibrariesTable}
-					URLModel="stored-libraries"
-					baseEndpoint="mapping-libraries"
-					tableFilters={{
-						locale: LANGUAGE_FILTER,
-						provider: PROVIDER_FILTER
-					}}
-					deleteForm={data.deleteForm}
-				/>
-			</Tabs.Panel>
 		{/snippet}
-	</Tabs>
+		{#snippet addButton()}
+			<div>
+				<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+					<button
+						class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+						data-testid="add-button"
+						title={m.addYourLibrary()}
+						onclick={modalCreateForm}
+						><i class="fa-solid fa-file-circle-plus"></i>
+					</button>
+				</span>
+			</div>
+		{/snippet}
+	</ModelTable>
 </div>
-{#if group === 'stored' && page.data.user.is_admin}
+<!-- {#if page.data.user.is_admin}
 	<div class="card bg-white p-4 mt-4 shadow-sm">
 		{#await superValidate(zod(LibraryUploadSchema))}
 			<h1>{m.loadingLibraryUploadButton()}...</h1>
@@ -141,7 +152,6 @@
 						resetSignal={fileResetSignal}
 						allowedExtensions={['yaml', 'yml']}
 					/>
-
 					<button
 						class="btn preset-filled-primary-500 font-semibold w-full"
 						data-testid="save-button"
@@ -153,4 +163,4 @@
 			<h1>{m.errorOccurredWhileLoadingLibrary()}: {err}</h1>
 		{/await}
 	</div>
-{/if}
+{/if} -->

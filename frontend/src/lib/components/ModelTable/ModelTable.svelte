@@ -85,6 +85,8 @@
 		folderId?: string;
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
+		onFilterChange?: (filters: Record<string, any>) => void;
+		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
 		addButton?: import('svelte').Snippet;
@@ -139,6 +141,8 @@
 		folderId = '',
 		forcePreventDelete = false,
 		forcePreventEdit = false,
+		onFilterChange = () => {},
+		quickFilters,
 		optButton,
 		selectButton,
 		addButton,
@@ -330,7 +334,7 @@
 
 	const actionsURLModel = URLModel;
 	const preventDelete = (row: TableSource) =>
-		(row?.meta?.builtin && actionsURLModel !== 'loaded-libraries') ||
+		(actionsURLModel === 'stored-libraries' && (row?.meta?.builtin || row?.meta?.is_loaded)) ||
 		(!URLModel?.includes('libraries') && Object.hasOwn(row?.meta, 'urn') && row?.meta?.urn) ||
 		(URLModel?.includes('campaigns') && row?.meta?.compliance_assessments.length > 0) ||
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
@@ -353,6 +357,7 @@
 			})
 		)
 	);
+	$effect(() => onFilterChange(filterValues));
 
 	run(() => {
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
@@ -364,15 +369,13 @@
 			const overrideFilterValue = overrideFilters[field];
 			const finalFilterValue = overrideFilterValue || filterValue;
 
-			handler.filter(
-				finalFilterValue ? finalFilterValue.map((v: Record<string, any>) => v.value) : [],
-				field
-			);
+			const fieldFilterParams = finalFilterValue
+				? finalFilterValue.map((v: Record<string, any>) => v.value)
+				: [];
+			handler.filter(fieldFilterParams, field);
 			page.url.searchParams.delete(field);
-			if (finalFilterValue && finalFilterValue.length > 0) {
-				for (const value of finalFilterValue) {
-					page.url.searchParams.append(field, value.value);
-				}
+			if (finalFilterValue) {
+				finalFilterValue.forEach(({ value }) => page.url.searchParams.append(field, value));
 			}
 
 			const hrefPattern = new RegExp(`^/${URLModel}(\\?.*)?$`);
@@ -556,7 +559,12 @@
 										fieldContext="filter"
 										label={safeTranslate(filters[field].props?.label)}
 										onChange={(value) => {
-											filterValues[field] = value.map((v) => ({ value: v }));
+											const arrayValue = Array.isArray(value) ? value : [value];
+											const sanitizedArrayValue = arrayValue.filter(
+												(v) => v !== null && v !== undefined
+											);
+
+											filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
 											invalidateTable = true;
 										}}
 									/>
@@ -583,6 +591,9 @@
 			{/if}
 		</div>
 	</header>
+	{@render quickFilters?.(filterValues, _form, () => {
+		invalidateTable = true;
+	})}
 	<!-- Table -->
 	<table
 		class="table caption-bottom {classesTable}"

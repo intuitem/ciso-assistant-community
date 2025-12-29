@@ -948,6 +948,9 @@
 	"downloadCertificate": "सर्टिफिकेट डाउनलोड करें",
 	"viewMore": "और देखें",
 	"viewLess": "कम देखें",
+	"isCustom": "कस्टम",
+	"errorUnloadingLibrary": "लाइब्रेरी अनलोड करने में त्रुटि",
+	"librarySuccessfullyUnloaded": "लाइब्रेरी सफलतापूर्वक अनलोड की गई है",
 	"scoreChangeDetected": "स्कोर परिवर्तन का पता चला",
 	"scoreChangeDetectedDescription": "स्कोर में परिवर्तन का पता चला है। संबद्ध ऑडिट्स के लिए स्कोर अपडेट्स को कैसे हैंडल करना चुनें।",
 	"clamp": "क्लैम्प",
@@ -1028,5 +1031,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "नीचे दिए गए आइटम सिस्टम में बने रहेंगे लेकिन इस वस्तु से उनके लिंक हटा दिए जाएंगे।"
+	"cascadeAffectedHint": "नीचे दिए गए आइटम सिस्टम में बने रहेंगे लेकिन इस वस्तु से उनके लिंक हटा दिए जाएंगे।",
+	"libraryFilteringLabels": "लाइब्रेरी लेबल"
 }

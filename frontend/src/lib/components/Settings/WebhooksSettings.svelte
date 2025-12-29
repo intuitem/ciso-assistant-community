@@ -141,7 +141,7 @@
 						</a>
 						<div>
 							<p class="font-medium">{m.events()}</p>
-							{#each Object.values(modelEventsMap(displayedEndpoint.event_types)).filter((e: Record<string, any>) => e?.events?.length > 0) as model}
+							{#each Object.values(modelEventsMap(displayedEndpoint.event_types)).filter((e: Record) => e?.events?.length > 0) as model}
 								<div class="flex flex-col gap-3">
 									<span class="flex flex-row gap-3">
 										<p class="font-medium">{safeTranslate(model.i18nName)}</p>

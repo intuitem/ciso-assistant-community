@@ -128,6 +128,16 @@ export const LABELS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const LIBRARY_LABELS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'library-filtering-labels',
+		label: 'libraryFilteringLabels',
+		optionsLabelField: 'label',
+		multiple: true
+	}
+};
+
 export const CONTENT_TYPE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -291,7 +301,7 @@ export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'withinTolerance',
 		options: YES_NO_UNSET_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -667,7 +677,7 @@ export const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_selected',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -676,7 +686,7 @@ export const IS_RECURRENT_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_recurrent',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -696,7 +706,7 @@ export const USER_IS_ACTIVE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_active',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -705,7 +715,7 @@ export const USER_IS_THIRD_PARTY_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_third_party',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -915,7 +925,7 @@ const ASSET_IS_BUSINESS_FUNCTION_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_business_function',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1036,21 +1046,21 @@ export const NEXT_OCCURENCE_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-export const HAS_UPDATE_FILTER: ListViewFilterConfig = {
+export const IS_LOADED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'loadedLibraries',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+export const IS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'updateAvailable',
 		options: YES_NO_OPTIONS,
-		multiple: true
-	}
-};
-
-export const MAPPING_SUGGESTED_FILTER: ListViewFilterConfig = {
-	component: AutocompleteSelect,
-	props: {
-		label: 'mappingSuggested',
-		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1071,7 +1081,7 @@ export const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'isAssigned',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1080,7 +1090,7 @@ export const PAST_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'past',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1095,12 +1105,21 @@ export const FIELD_PATH_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const IS_CUSTOM_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_custom',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 export const BUILTIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'builtin',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1109,7 +1128,7 @@ export const IS_VISIBLE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_visible',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1606,9 +1625,19 @@ export const listViewFields = {
 		body: ['provider', 'name', 'description', 'locales', 'objects_meta']
 	},
 	'stored-libraries': {
-		head: ['provider', 'ref_id', 'name', 'description', 'language', 'overview', 'publication_date'],
+		head: [
+			'provider',
+			'builtin',
+			'ref_id',
+			'name',
+			'description',
+			'language',
+			'overview',
+			'publication_date'
+		],
 		body: [
 			'provider',
+			'builtin',
 			'ref_id',
 			'name',
 			'description',
@@ -1620,25 +1649,10 @@ export const listViewFields = {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
 			object_type: LIBRARY_TYPE_FILTER,
-			mapping_suggested: MAPPING_SUGGESTED_FILTER
-		}
-	},
-	'loaded-libraries': {
-		head: ['provider', 'ref_id', 'name', 'description', 'language', 'overview', 'publication_date'],
-		body: [
-			'provider',
-			'ref_id',
-			'name',
-			'description',
-			'locales',
-			'objects_meta',
-			'publication_date'
-		],
-		filters: {
-			locale: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER,
-			object_type: LIBRARY_TYPE_FILTER,
-			has_update: HAS_UPDATE_FILTER
+			is_loaded: IS_LOADED_FILTER,
+			is_custom: IS_CUSTOM_FILTER,
+			filtering_labels: LIBRARY_LABELS_FILTER,
+			is_update: IS_UPDATE_FILTER
 		}
 	},
 	'sso-settings': {
@@ -1748,6 +1762,7 @@ export const listViewFields = {
 	},
 	'asset-assessments': {
 		head: [
+			'refId',
 			'asset',
 			'folder',
 			'bia',
@@ -1759,6 +1774,7 @@ export const listViewFields = {
 			'recoveryTargetsMet'
 		],
 		body: [
+			'asset_ref_id',
 			'asset',
 			'asset_folder',
 			'bia',
@@ -2255,7 +2271,7 @@ export const listViewFields = {
 				props: {
 					label: 'is_selected',
 					options: YES_NO_OPTIONS,
-					multiple: true
+					multiple: false
 				}
 			},
 			risk_stage: RISK_STAGE_FILTER
@@ -2330,6 +2346,173 @@ export const listViewFields = {
 			category: ACCREDITATION_CATEGORY_FILTER,
 			authority: ACCREDITATION_AUTHORITY_FILTER,
 			filtering_labels: LABELS_FILTER
+		}
+	},
+	'metric-definitions': {
+		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'labels', 'folder'],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'unit',
+			'provider',
+			'filtering_labels',
+			'folder'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			category: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metric-definitions/category',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'category',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			library: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'loaded-libraries',
+					label: 'library',
+					multiple: true
+				}
+			},
+			provider: {
+				...PROVIDER_FILTER,
+				props: {
+					...PROVIDER_FILTER.props,
+					optionsEndpoint: 'metric-definitions/provider'
+				}
+			},
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'metric-instances': {
+		head: ['ref_id', 'name', 'metric_definition', 'current_value', 'status', 'folder'],
+		body: ['ref_id', 'name', 'metric_definition', 'current_value', 'status', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			metric_definition: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metric-definitions',
+					label: 'metricDefinition',
+					multiple: true
+				}
+			},
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metric-instances/status',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'status',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			owner: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'users',
+					optionsLabelField: 'email',
+					label: 'owner',
+					multiple: true
+				}
+			},
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'custom-metric-samples': {
+		head: ['metric_instance', 'timestamp', 'display_value'],
+		body: ['metric_instance', 'timestamp', 'display_value']
+	},
+	dashboards: {
+		head: ['ref_id', 'name', 'description', 'widget_count', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'widget_count', 'filtering_labels', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'dashboard-widgets': {
+		head: [
+			'display_title',
+			'metric_instance',
+			'chart_type_display',
+			'time_range_display',
+			'dashboard'
+		],
+		body: [
+			'display_title',
+			'metric_instance',
+			'chart_type_display',
+			'time_range_display',
+			'dashboard'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			dashboard: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/dashboards',
+					label: 'dashboard',
+					multiple: true
+				}
+			},
+			metric_instance: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/metric-instances',
+					label: 'metricInstance',
+					multiple: true
+				}
+			},
+			chart_type: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/dashboard-widgets/chart_type',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'chartType',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			}
+		}
+	},
+	'dashboard-text-widgets': {
+		head: ['display_title', 'dashboard'],
+		body: ['display_title', 'dashboard'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			dashboard: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/dashboards',
+					label: 'dashboard',
+					multiple: true
+				}
+			}
+		}
+	},
+	'dashboard-builtin-widgets': {
+		head: ['display_title', 'dashboard'],
+		body: ['display_title', 'dashboard'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			dashboard: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/dashboards',
+					label: 'dashboard',
+					multiple: true
+				}
+			}
 		}
 	},
 	extra: {
