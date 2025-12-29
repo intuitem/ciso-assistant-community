@@ -1952,6 +1952,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             "is_locked",
             "min_score",
             "max_score",
+            "extended_result_enabled",
             {"framework": ["implementation_groups_definition"]},
         ]
     )

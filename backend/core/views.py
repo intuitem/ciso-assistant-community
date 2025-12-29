@@ -7556,6 +7556,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
         "genericcollection",
+        "extended_result_enabled",
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
@@ -8923,6 +8924,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "security_exceptions",
         "requirement__ref_id",
         "result",
+        "extended_result",
         "compliance_assessment__ref_id",
         "compliance_assessment__perimeter",
         "compliance_assessment__perimeter__name",
@@ -9034,6 +9036,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get result choices")
     def result(self, request):
         return Response(dict(RequirementAssessment.Result.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get extended result choices")
+    def extended_result(self, request):
+        return Response(dict(RequirementAssessment.ExtendedResult.choices))
 
     @staticmethod
     @api_view(["POST"])

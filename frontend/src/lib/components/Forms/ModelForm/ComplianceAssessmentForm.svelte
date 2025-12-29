@@ -202,6 +202,14 @@
 		cacheLock={cacheLocks['show_documentation_score']}
 		bind:cachedValue={formDataCache['show_documentation_score']}
 	/>
+	<Checkbox
+		{form}
+		field="extended_result_enabled"
+		label={m.extendedResultEnabled()}
+		helpText={m.extendedResultEnabledHelpText()}
+		cacheLock={cacheLocks['extended_result_enabled']}
+		bind:cachedValue={formDataCache['extended_result_enabled']}
+	/>
 	<TextField
 		{form}
 		field="ref_id"

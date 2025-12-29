@@ -20,7 +20,11 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
-	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import {
+		complianceResultColorMap,
+		complianceStatusColorMap,
+		extendedResultColorMap
+	} from '$lib/utils/constants';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
@@ -150,12 +154,14 @@
 	// reactive values that update whenever auditFiltersStore changes
 	let selectedStatus = $state([]);
 	let selectedResults = $state([]);
+	let selectedExtendedResults = $state([]);
 	let displayOnlyAssessableNodes = $state(false);
 	$effect(
 		() =>
 			({
 				selectedStatus = [],
 				selectedResults = [],
+				selectedExtendedResults = [],
 				displayOnlyAssessableNodes = false
 			} = $currentFilters)
 	);
@@ -178,13 +184,20 @@
 		auditFiltersStore.setResults(page.params.id, selectedResults);
 	}
 
+	function toggleExtendedResult(extendedResult) {
+		selectedExtendedResults = toggleItem(extendedResult, selectedExtendedResults);
+		auditFiltersStore.setExtendedResults(page.params.id, selectedExtendedResults);
+	}
+
 	function isNodeHidden(node: Node, displayOnlyAssessableNodes: boolean): boolean {
 		const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
 		return (
 			(displayOnlyAssessableNodes && !node.assessable && !hasAssessableChildren) ||
 			(node.assessable &&
 				((selectedStatus.length > 0 && !selectedStatus.includes(node.status)) ||
-					(selectedResults.length > 0 && !selectedResults.includes(node.result))))
+					(selectedResults.length > 0 && !selectedResults.includes(node.result)) ||
+					(selectedExtendedResults.length > 0 &&
+						!selectedExtendedResults.includes(node.extended_result))))
 		);
 	}
 	function transformToTreeView(nodes: Node[], hasParentNode: boolean = false) {
@@ -214,7 +227,10 @@
 					documentationScore: node.documentation_score,
 					isScored: node.is_scored,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
-					max_score: node.max_score
+					max_score: node.max_score,
+					extendedResultEnabled: data.compliance_assessment.extended_result_enabled,
+					extendedResult: node.extended_result,
+					extendedResultColor: extendedResultColorMap[node.extended_result]
 				},
 				children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
 			};
@@ -419,6 +435,7 @@
 	let filterCount = $derived(
 		(selectedStatus.length > 0 ? 1 : 0) +
 			(selectedResults.length > 0 ? 1 : 0) +
+			(selectedExtendedResults.length > 0 ? 1 : 0) +
 			(displayOnlyAssessableNodes ? 1 : 0)
 	);
 </script>
@@ -832,6 +849,29 @@
 							{/each}
 						</div>
 					</div>
+					{#if data.compliance_assessment.extended_result_enabled}
+						<div>
+							<span class="text-sm font-bold">{m.extendedResult()}</span>
+							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+								{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
+									<button
+										type="button"
+										onclick={() => toggleExtendedResult(extendedResult)}
+										class="px-2 py-1 rounded-md font-bold"
+										style="background-color: {selectedExtendedResults.includes(extendedResult)
+											? color
+											: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
+											extendedResult
+										)
+											? 1
+											: 0.3};"
+									>
+										{safeTranslate(extendedResult)}
+									</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
 					<div>
 						<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
 						<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
@@ -862,7 +902,7 @@
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults}
+			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults || selectedExtendedResults}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes
