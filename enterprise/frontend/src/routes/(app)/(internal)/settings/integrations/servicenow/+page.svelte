@@ -7,6 +7,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import FieldMapper from '$lib/components/Forms/FieldMapper.svelte';
+	import WebhookSecretGenerator from '$lib/components/Forms/WebhookSecretGenerator.svelte';
 	import { z } from 'zod';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
@@ -85,7 +86,7 @@
 							field="enable_outgoing_sync"
 							valuePath="settings.enable_outgoing_sync"
 							label=""
-							disabled={!$formStore.is_active}
+							disabled={!$formStore?.is_active}
 						/>
 					</span>
 					<TextField
@@ -94,7 +95,7 @@
 						valuePath="credentials.instance_url"
 						label={m.instanceUrl()}
 						helpText={m.serviceNowInstanceUrlHelpText()}
-						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+						disabled={!$formStore?.is_active || !$formStore.settings.enable_outgoing_sync}
 					/>
 					<TextField
 						{form}
@@ -103,7 +104,7 @@
 						autocomplete="new-password"
 						label={m.username()}
 						helpText={m.serviceNowUsernameHelpText()}
-						disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+						disabled={!$formStore?.is_active || !$formStore.settings.enable_outgoing_sync}
 					/>
 					{#if showApiTokenField}
 						<TextField
@@ -113,7 +114,7 @@
 							valuePath="credentials.password"
 							autocomplete="new-password"
 							label={m.password()}
-							disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+							disabled={!$formStore?.is_active || !$formStore.settings.enable_outgoing_sync}
 						/>
 					{:else}
 						<p class="font-semibold text-sm -mb-4">{m.password()}</p>
@@ -122,7 +123,7 @@
 						>
 							<p>{m.passwordAlreadySetHelpText()}</p>
 							<button
-								disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+								disabled={!$formStore?.is_active || !$formStore.settings.enable_outgoing_sync}
 								class="btn preset-filled"
 								onclick={() => {
 									showApiTokenField = true;
@@ -134,7 +135,7 @@
 					{/if}
 					<span class="flex flex-row justify-between gap-4">
 						<button
-							disabled={!$formStore.is_active || !$formStore.settings.enable_outgoing_sync}
+							disabled={!$formStore?.is_active || !$formStore.settings.enable_outgoing_sync}
 							type="button"
 							class="btn preset-filled-secondary-500"
 							onclick={async () => {
@@ -176,17 +177,11 @@
 							field="enable_incoming_sync"
 							valuePath="settings.enable_incoming_sync"
 							label=""
-							disabled={!$formStore.is_active}
+							disabled={!$formStore?.is_active}
 						/>
 					</span>
 					{#if showWebhookSecretField}
-						<TextField
-							{form}
-							field="webhook_secret"
-							type="password"
-							label={m.webhookSecret()}
-							disabled={!$formStore.is_active || !$formStore.settings.enable_incoming_sync}
-						/>
+              <WebhookSecretGenerator {form} field="webhook_secret" />
 					{:else}
 						<p class="font-semibold text-sm -mb-4">{m.webhookSecret()}</p>
 						<div
@@ -194,7 +189,7 @@
 						>
 							<p>{m.webhookSecretAlreadySetHelpText()}</p>
 							<button
-								disabled={!$formStore.is_active || !$formStore.settings.enable_incoming_sync}
+								disabled={!$formStore?.is_active || !$formStore.settings.enable_incoming_sync}
 								class="btn preset-filled"
 								onclick={() => {
 									showWebhookSecretField = true;
