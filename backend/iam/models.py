@@ -860,7 +860,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         for ra in RoleAssignment.get_role_assignments(user):
             ra_perimeter = ra.perimeter_folders.all()
             if perm in ra.role.permissions.all():
-                if perm == add_filteringlabel:  
+                if perm == add_filteringlabel:
                     # Allow any user to add filtering labels if he has the permission in any folder
                     # Necessary as the labels are stored in global folder
                     return True
@@ -881,7 +881,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         obj = object_type.objects.filter(id=id).first()
         if not obj:
             return False
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(Folder.get_folder(obj), user, object_type)
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_folder(obj), user, object_type
+        )
         return id in viewable_ids
 
     @staticmethod
