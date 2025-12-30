@@ -53,8 +53,8 @@
 		{ id: 'Processing', label: m.processings(), description: '' },
 		{
 			id: 'TPRM',
-			label: 'TPRM (Third-Party Risk Management)',
-			description: 'Import entities, solutions, and contracts from a multi-sheet Excel file'
+			label: m.thirdPartyCategory(),
+			description: m.thirdPatiesImportHelpText()
 		},
 		{
 			id: 'EbiosRMStudyARM',
