@@ -2990,7 +2990,7 @@
 	"addMetricDefinition": "Ajouter une définition de métrique",
 	"addMetricInstance": "Ajouter une instance de métrique",
 	"addRow": "Ajouter une ligne",
-	"associatedCustomMetricSamples": "Échantillons associés",
+	"associatedCustomMetricSamples": " ",
 	"builtinMetric": "Métrique intégrée",
 	"builtinMetricSample": "Échantillon de métrique intégrée",
 	"builtinMetricSamples": "Échantillons de métriques intégrées",
