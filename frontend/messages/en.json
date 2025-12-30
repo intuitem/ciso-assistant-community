@@ -3070,5 +3070,8 @@
   "valueMappingForField": "{field} Mapping",
   "valueMappingToField": "mapped_to: {field}",
   "secretCopiedToClipboard": "Secret copied to clipboard successfully",
-  "libraryFilteringLabels": "Library labels"
+  "libraryFilteringLabels": "Library labels",
+  "lastRefresh": "Last refresh",
+  "widgetCount": "Widgets count",
+  "rawValue": "Value"
 }
