@@ -194,3 +194,58 @@ class TestUsersAuthenticated:
             assert response.json() == {"email": ["Enter a valid email address."]}, (
                 f"users can be created with an invalid email ({email})"
             )
+
+    def test_user_can_see_himself_and_update_only_if_admin(self, test):
+        """
+        - A user can retrieve their own user object only if in the same domain
+        - Only an admin can update their own user object
+        """
+
+        list_url = reverse(API_ENDPOINT)
+        is_admin = test.user_group == "BI-UG-ADM"
+
+        # --- create the user via admin ---
+        user_data = {
+            "email": USER_EMAIL,
+            "first_name": "Self",
+            "last_name": "User",
+        }
+
+        response = test.admin_client.post(list_url, user_data, format="json")
+        assert response.status_code == status.HTTP_201_CREATED
+
+        user_id = response.json()["id"]
+        detail_url = reverse("users-detail", args=[user_id])
+
+        # --- user attempts to retrieve himself ---
+        response = test.client.get(detail_url)
+
+        if (
+            is_admin
+            or test.folder == response.json().get("folder")
+            or test.user_group == "BI-UG-GAD"
+            or test.user_group == "BI-UG-GAP"
+        ):
+            # Admin or same domain can access
+            assert response.status_code == status.HTTP_200_OK
+            assert response.json()["email"] == USER_EMAIL
+        else:
+            # Other users cannot access
+            assert response.status_code in (
+                status.HTTP_403_FORBIDDEN,
+                status.HTTP_401_UNAUTHORIZED,
+            )
+
+        # --- attempt to update self ---
+        updated_data = {"first_name": "Updated"}
+        response = test.client.patch(detail_url, updated_data, format="json")
+
+        if is_admin:
+            assert response.status_code == status.HTTP_200_OK
+            user = User.objects.get(id=user_id)
+            assert user.first_name == "Updated"
+        else:
+            assert response.status_code in (
+                status.HTTP_403_FORBIDDEN,
+                status.HTTP_401_UNAUTHORIZED,
+            )
