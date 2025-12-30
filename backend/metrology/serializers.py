@@ -64,6 +64,7 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
     organisation_objectives = IdRelatedField(many=True)
     owner = IdRelatedField(many=True)
     filtering_labels = IdRelatedField(["folder"], many=True)
+    organisation_objectives = IdRelatedField(many=True)
     status = serializers.CharField(source="get_status_display", read_only=True)
     collection_frequency = serializers.CharField(
         source="get_collection_frequency_display", read_only=True
