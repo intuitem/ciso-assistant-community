@@ -58,6 +58,11 @@ class ServiceNowOrchestrator(BaseITSMOrchestrator):
         # Define event types in your ServiceNow 'Business Rule' that calls this webhook
         # e.g., 'sn_update', 'sn_delete'
         remote_id = self._extract_remote_id(payload)
+        if not remote_id:
+            logger.warning(
+                f"Could not extract remote ID from payload for event {event_type}"
+            )
+            return False
 
         if event_type == "sn_update":
             remote_data = self._extract_remote_data(payload)
