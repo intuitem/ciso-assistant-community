@@ -92,24 +92,24 @@
 	label={m.owner()}
 />
 <Dropdown open={false} class="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="organisation-objectives"
-	optionsLabelField="auto"
-	field="organisation_objectives"
-	cacheLock={cacheLocks['organisation_objectives']}
-	bind:cachedValue={formDataCache['organisation_objectives']}
-	label={m.organisationObjectives()}
-/>
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="filtering-labels"
-	optionsLabelField="label"
-	field="filtering_labels"
-	cacheLock={cacheLocks['filtering_labels']}
-	bind:cachedValue={formDataCache['filtering_labels']}
-	label={m.labels()}
-/>
-  </Dropdown>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="organisation-objectives"
+		optionsLabelField="auto"
+		field="organisation_objectives"
+		cacheLock={cacheLocks['organisation_objectives']}
+		bind:cachedValue={formDataCache['organisation_objectives']}
+		label={m.organisationObjectives()}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		cacheLock={cacheLocks['filtering_labels']}
+		bind:cachedValue={formDataCache['filtering_labels']}
+		label={m.labels()}
+	/>
+</Dropdown>
