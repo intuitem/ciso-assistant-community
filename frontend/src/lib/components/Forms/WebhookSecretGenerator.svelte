@@ -42,6 +42,17 @@
 			});
 		});
 	}
+
+	function copySecret() {
+		if (!generatedSecret) return;
+
+		navigator.clipboard.writeText(generatedSecret).then(() => {
+			flash.set({
+				type: 'success',
+				message: m.secretCopiedToClipboard()
+			});
+		});
+	}
 </script>
 
 <div class="w-full flex flex-col items-center gap-2">

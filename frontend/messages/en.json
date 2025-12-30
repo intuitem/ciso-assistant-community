@@ -3297,5 +3297,6 @@
 				"countPlural=other": "{count} objects not visible."
 			}
 		}
-	]
+	],
+	"secretCopiedToClipboard": "Secret copied to clipboard successfully"
 }
