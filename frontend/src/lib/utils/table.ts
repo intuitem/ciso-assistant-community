@@ -2405,8 +2405,28 @@ export const listViewFields = {
 		}
 	},
 	'metric-instances': {
-		head: ['ref_id', 'name', 'metric_definition', 'current_value', 'status', 'folder'],
-		body: ['ref_id', 'name', 'metric_definition', 'current_value', 'status', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'metric_definition',
+			'rawValue',
+			'target_value',
+			'unit',
+			'status',
+			'lastRefresh',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'metric_definition',
+			'raw_value',
+			'target_value',
+			'unit',
+			'status',
+			'last_refresh',
+			'folder'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			metric_definition: {
