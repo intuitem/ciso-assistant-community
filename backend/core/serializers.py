@@ -1843,35 +1843,37 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         return assessment
 
     def update(self, instance, validated_data):
-        # Track old authors before update
+        # Track old authors and folder before update
         old_author_ids = set(instance.authors.values_list("id", flat=True))
         old_folder_id = instance.folder_id
 
-        # Check if status is changing to deprecated
+        # Auto-lock when status changes to deprecated
         old_status = instance.status
         new_status = validated_data.get("status", old_status)
-
-        # Auto-lock when status changes to deprecated
         if old_status != "deprecated" and new_status == "deprecated":
             validated_data["is_locked"] = True
 
-        updated_instance = super().update(instance, validated_data)
+        with transaction.atomic():
+            # Perform the main update (fields + M2M)
+            updated_instance = super().update(instance, validated_data)
 
-        # Get new authors after update
-        new_author_ids = set(updated_instance.authors.values_list("id", flat=True))
+            # Cascade folder change to requirement assessments
+            if old_folder_id != updated_instance.folder_id:
+                RequirementAssessment.objects.filter(
+                    compliance_assessment=updated_instance
+                ).update(folder=updated_instance.folder)
 
-        # Send notifications only to newly assigned authors
-        newly_assigned_ids = new_author_ids - old_author_ids
-        if newly_assigned_ids:
-            self._send_assignment_notifications(
-                updated_instance, list(newly_assigned_ids)
-            )
+            # Determine newly assigned authors
+            new_author_ids = set(updated_instance.authors.values_list("id", flat=True))
+            newly_assigned_ids = new_author_ids - old_author_ids
 
-        # Cascade folder change to requirement assessments
-        if old_folder_id != updated_instance.folder_id:
-            RequirementAssessment.objects.filter(
-                compliance_assessment=updated_instance
-            ).update(folder=updated_instance.folder)
+            # Schedule notifications to run **after transaction commits**
+            if newly_assigned_ids:
+                transaction.on_commit(
+                    lambda: self._send_assignment_notifications(
+                        updated_instance, list(newly_assigned_ids)
+                    )
+                )
 
         return updated_instance
 
