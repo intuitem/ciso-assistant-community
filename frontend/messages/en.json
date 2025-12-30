@@ -3028,5 +3028,6 @@
 	"metricDefinitionsDescription": "Define custom metrics to track and measure performance indicators",
 	"metricInstancesDescription": "Track specific metric values for objects across your organization",
 	"dashboardsDescription": "Custom dashboards to visualize metrics and key performance indicators",
+	"secretCopiedToClipboard": "Secret copied to clipboard successfully",
 	"libraryFilteringLabels": "Library labels"
 }
