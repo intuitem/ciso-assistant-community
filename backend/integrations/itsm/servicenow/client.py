@@ -80,11 +80,18 @@ class ServiceNowClient(BaseIntegrationClient):
             )
             response.raise_for_status()
             logger.info(
-                f"Updated ServiceNow record {remote_id}: {list(changes.keys())}"
+                "Updated ServiceNow record",
+                remote_id=remote_id,
+                changed_fields=list(changes.keys()),
             )
             return True
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Failed to update ServiceNow record {remote_id}: {e}")
+        except requests.exceptions.RequestException:
+            logger.error(
+                "Failed to update ServiceNow record",
+                remote_id=remote_id,
+                changed_fields=list(changes.keys()),
+                exc_info=True,
+            )
             raise
 
     def get_remote_object(self, remote_id: str) -> Dict[str, Any]:
@@ -103,8 +110,10 @@ class ServiceNowClient(BaseIntegrationClient):
                 "fields": result,  # ServiceNow returns flat structure, unlike Jira's nested 'fields'
                 "updated": result.get("sys_updated_on"),
             }
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Failed to fetch ServiceNow record {remote_id}: {e}")
+        except requests.exceptions.RequestException:
+            logger.error(
+                "Failed to fetch ServiceNow record", remote_id=remote_id, exc_info=True
+            )
             raise
 
     def list_remote_objects(
@@ -150,8 +159,8 @@ class ServiceNowClient(BaseIntegrationClient):
                     )
             return results
 
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Failed to search ServiceNow: {e}")
+        except requests.exceptions.RequestException:
+            logger.error("Failed to search ServiceNow", exc_info=True)
             raise
 
     def get_available_tables(self) -> list[dict]:
@@ -259,7 +268,7 @@ class ServiceNowClient(BaseIntegrationClient):
             return sorted(results, key=lambda x: x.get("label", ""))
 
         except requests.exceptions.RequestException as e:
-            logger.error(f"Failed to fetch tables: {e}")
+            logger.error("Failed to fetch tables", exc_info=True)
             raise
 
     def get_table_columns(self, table_name: str) -> list[dict]:
@@ -300,7 +309,11 @@ class ServiceNowClient(BaseIntegrationClient):
         }
         try:
             resp = requests.get(
-                url, auth=self.auth, headers=self._get_headers(), params=params
+                url,
+                auth=self.auth,
+                headers=self._get_headers(),
+                params=params,
+                timeout=10,
             )
             resp.raise_for_status()
             result = resp.json().get("result", [])
@@ -322,7 +335,11 @@ class ServiceNowClient(BaseIntegrationClient):
         params = {"sysparm_fields": "name"}
         try:
             resp = requests.get(
-                url, auth=self.auth, headers=self._get_headers(), params=params
+                url,
+                auth=self.auth,
+                headers=self._get_headers(),
+                params=params,
+                timeout=10,
             )
             if resp.status_code == 200:
                 return resp.json().get("result", {}).get("name")
@@ -363,8 +380,8 @@ class ServiceNowClient(BaseIntegrationClient):
                         "readonly": r.get("read_only") == "true",
                         "reference": r.get("reference"),
                     }
-        except Exception as e:
-            logger.error(f"Failed to fetch columns for {table_name}: {e}")
+        except Exception:
+            logger.error("Failed to fetch columns", table=table_name, exc_info=True)
 
     def get_field_choices(self, table_name: str, field_name: str) -> list[dict]:
         """
@@ -416,8 +433,13 @@ class ServiceNowClient(BaseIntegrationClient):
 
             return [{"value": r["value"], "label": r["label"]} for r in results]
 
-        except Exception as e:
-            logger.warning(f"Error fetching choices for {table_name}.{field_name}: {e}")
+        except Exception:
+            logger.warning(
+                "Error fetching choices",
+                table=table_name,
+                field=field_name,
+                exc_info=True,
+            )
             return []
 
     def test_connection(self) -> bool:
@@ -433,6 +455,6 @@ class ServiceNowClient(BaseIntegrationClient):
                 timeout=10,
             )
             return response.status_code == 200
-        except Exception as e:
-            logger.error(f"ServiceNow connection test failed: {e}")
+        except Exception:
+            logger.error("ServiceNow connection test failed", exc_info=True)
             return False
