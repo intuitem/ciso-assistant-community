@@ -269,9 +269,11 @@ class IntegrationWebhookView(View):
         try:
             if not orchestrator.validate_webhook_request(request):
                 return JsonResponse({"error": "Authentication failed"}, status=401)
-        except Exception as e:
-            logger.warning(f"Webhook validation failed for {config_id}: {e}")
-            return JsonResponse({"error": str(e)}, status=403)
+        except Exception:
+            logger.warning(
+                "Webhook validation failed", config_id=config_id, exc_info=True
+            )
+            return JsonResponse({"error": "Webhook validation failed"}, status=403)
 
         # Parse payload
         try:
