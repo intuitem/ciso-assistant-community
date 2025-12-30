@@ -856,20 +856,19 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         Determines if a user has specified permission on a specified folder
         """
-        add_tag_permission = Permission.objects.get(codename="add_filteringlabel")
+        add_filteringlabel = Permission.objects.get(codename="add_filteringlabel")
         for ra in RoleAssignment.get_role_assignments(user):
-            if (
-                (perm == add_tag_permission) and perm in ra.role.permissions.all()
-            ):  # Allow any user to add tags if he has the permission
-                return True
-            f = folder
-            while f is not None:
-                if (
-                    f in ra.perimeter_folders.all()
-                    and perm in ra.role.permissions.all()
-                ):
+            ra_perimeter = ra.perimeter_folders.all()
+            if perm in ra.role.permissions.all():
+                if perm == add_filteringlabel:  
+                    # Allow any user to add filtering labels if he has the permission in any folder
+                    # Necessary as the labels are stored in global folder
                     return True
-                f = f.parent_folder
+                f = folder
+                while f is not None:
+                    if f in ra_perimeter:
+                        return True
+                    f = f.parent_folder
         return False
 
     @staticmethod
@@ -882,11 +881,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         obj = object_type.objects.filter(id=id).first()
         if not obj:
             return False
-        class_name = object_type.__name__.lower()
-        permission = Permission.objects.get(codename="view_" + class_name)
-        return RoleAssignment.is_access_allowed(
-            user, permission, Folder.get_folder(obj)
-        )
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(Folder.get_folder(obj), user, object_type)
+        return id in viewable_ids
 
     @staticmethod
     def get_accessible_folders(

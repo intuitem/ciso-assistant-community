@@ -34,10 +34,6 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
         if not perms:
             return False
         _codename = perms[0].split(".")[1]
-        if request.method in ["GET", "OPTIONS", "HEAD"] and getattr(
-            obj, "is_published", False
-        ):
-            return True
 
         # Check for view action permission overrides
         current_action = getattr(view, "action", None)
