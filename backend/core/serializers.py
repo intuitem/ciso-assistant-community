@@ -1950,6 +1950,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             "is_locked",
             "min_score",
             "max_score",
+            "extended_result_enabled",
             {"framework": ["implementation_groups_definition"]},
         ]
     )
@@ -1976,6 +1977,41 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 "⚠️ Cannot modify the requirement when the audit is locked."
             )
+
+        # Validate extended_result against result
+        extended_result = attrs.get("extended_result")
+        if extended_result is None and self.instance:
+            extended_result = self.instance.extended_result
+
+        result = attrs.get("result")
+        if result is None and self.instance:
+            result = self.instance.result
+
+        if extended_result:
+            nonconformity_values = [
+                RequirementAssessment.ExtendedResult.MAJOR_NONCONFORMITY,
+                RequirementAssessment.ExtendedResult.MINOR_NONCONFORMITY,
+            ]
+            applicable_results_for_nonconformity = [
+                RequirementAssessment.Result.NON_COMPLIANT,
+                RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+            ]
+
+            if extended_result in nonconformity_values:
+                if result not in applicable_results_for_nonconformity:
+                    raise serializers.ValidationError(
+                        {
+                            "extended_result": "Major and minor nonconformities are only applicable when result is non-compliant or partially compliant."
+                        }
+                    )
+
+            if extended_result == RequirementAssessment.ExtendedResult.GOOD_PRACTICE:
+                if result != RequirementAssessment.Result.COMPLIANT:
+                    raise serializers.ValidationError(
+                        {
+                            "extended_result": "Good practice is only applicable when result is compliant."
+                        }
+                    )
 
         return super().validate(attrs)
 

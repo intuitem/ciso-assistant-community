@@ -288,6 +288,7 @@ def get_sorted_requirement_nodes(
                 "ra_id": str(req_as.id) if req_as else None,
                 "status": req_as.status if req_as else None,
                 "result": req_as.result if req_as else None,
+                "extended_result": req_as.extended_result if req_as else None,
                 "is_scored": req_as.is_scored if req_as else None,
                 "score": req_as.score if req_as else None,
                 "documentation_score": req_as.documentation_score if req_as else None,
@@ -346,6 +347,9 @@ def get_sorted_requirement_nodes(
                     if child_req_as
                     else None,
                     "result": child_req_as.result if child_req_as else None,
+                    "extended_result": child_req_as.extended_result
+                    if child_req_as
+                    else None,
                     "result_i18n": camel_case(child_req_as.result)
                     if child_req_as and child_req_as.result is not None
                     else None,

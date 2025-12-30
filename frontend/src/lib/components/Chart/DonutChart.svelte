@@ -11,6 +11,7 @@
 		orientation?: string;
 		values: any[]; // Set the types for these variables later on
 		colors?: string[];
+		showPercentage?: boolean;
 	}
 
 	let {
@@ -22,7 +23,8 @@
 		title = '',
 		orientation = 'vertical',
 		values = $bindable(),
-		colors = []
+		colors = [],
+		showPercentage = false
 	}: Props = $props();
 	for (const index in values) {
 		if (values[index].localName) {
@@ -77,17 +79,27 @@
 				{
 					name: s_label,
 					type: 'pie',
-					radius: ['40%', '70%'],
-					avoidLabelOverlap: false,
+					radius: showPercentage ? ['30%', '55%'] : ['40%', '70%'],
+					center: ['50%', '45%'],
+					avoidLabelOverlap: true,
 					itemStyle: {
 						borderRadius: 10,
 						borderColor: '#fff',
 						borderWidth: 2
 					},
-					label: {
-						show: false,
-						position: 'center'
-					},
+					label: showPercentage
+						? {
+								show: true,
+								position: 'outside',
+								formatter: '{d}%',
+								fontSize: 10,
+								fontWeight: 'bold',
+								distanceToLabelLine: 2
+							}
+						: {
+								show: false,
+								position: 'center'
+							},
 					emphasis: {
 						label: {
 							show: true,
@@ -105,7 +117,7 @@
 								const percent = ((params.data.value / total) * 100).toFixed(1);
 
 								// Return formatted center label with just the name and percentage
-								return `{name|${params.data.name}}\n{value|${percent}%}`;
+								return `{value|${percent}%}`;
 							},
 							rich: {
 								name: {
@@ -121,7 +133,9 @@
 						}
 					},
 					labelLine: {
-						show: false
+						show: showPercentage,
+						length: 8,
+						length2: 5
 					},
 					data: filteredValues,
 					color: colors
