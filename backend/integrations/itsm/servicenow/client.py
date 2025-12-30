@@ -327,7 +327,8 @@ class ServiceNowClient(BaseIntegrationClient):
             if resp.status_code == 200:
                 return resp.json().get("result", {}).get("name")
         except Exception:
-            pass
+            logger.warning("Failed to resolve table name for sys_id", sys_id=sys_id)
+            return None
         return None
 
     def _fetch_fields_for_single_table(self, table_name: str, columns_map: dict):
