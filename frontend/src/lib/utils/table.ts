@@ -12,6 +12,7 @@ import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeS
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
+import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -1996,6 +1997,7 @@ export const listViewFields = {
 			'description',
 			'ro_to_couple',
 			'fearedEvents',
+			'focusedFearedEvent',
 			'attackPaths',
 			'gravity'
 		],
@@ -2005,6 +2007,7 @@ export const listViewFields = {
 			'description',
 			'ro_to_couple',
 			'feared_events',
+			'focused_feared_event',
 			'attack_paths',
 			'gravity'
 		],
@@ -2061,7 +2064,17 @@ export const listViewFields = {
 	},
 	'elementary-actions': {
 		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'threat'],
-		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat']
+		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
+		filters: {
+			attack_stage: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'elementary-actions/attack_stage',
+					label: 'attackStage',
+					multiple: true
+				}
+			}
+		}
 	},
 	'operating-modes': {
 		head: ['ref_id', 'name', 'likelihood'],
@@ -2547,7 +2560,8 @@ export const contextMenuActions = {
 	'ro-to': [{ component: SelectObject, props: {} }],
 	stakeholders: [{ component: SelectObject, props: {} }],
 	'attack-paths': [{ component: SelectObject, props: {} }],
-	'operational-scenarios': [{ component: SelectObject, props: {} }]
+	'operational-scenarios': [{ component: SelectObject, props: {} }],
+	'elementary-actions': [{ component: ChangeAttackStage, props: {} }]
 };
 
 export function getListViewFields({

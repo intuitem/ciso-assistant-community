@@ -169,6 +169,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'perimeters' },
 			{ field: 'folder', urlModel: 'entities' },
 			{ field: 'folder', urlModel: 'assets' },
+			{ field: 'folder', urlModel: 'applied-controls' },
 			{
 				field: 'folder',
 				urlModel: 'users',
@@ -1378,6 +1379,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlParams: 'is_selected=true&used=false&ebios_rm_study=',
 				detail: true
 			},
+			{
+				field: 'focused_feared_event',
+				urlModel: 'feared-events',
+				endpointUrl: 'ebios-rm/feared-events',
+				detail: true
+			},
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{
 				field: 'attack_paths',
@@ -1399,6 +1406,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'feared_events', urlModel: 'feared-events' },
 			{ field: 'ro_to_couple' },
+			{ field: 'focused_feared_event', urlModel: 'feared-events' },
 			{ field: 'gravity' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'ebios_rm_study' }
