@@ -117,7 +117,7 @@
 								const percent = ((params.data.value / total) * 100).toFixed(1);
 
 								// Return formatted center label with just the name and percentage
-								return `{name|${params.data.name}}\n{value|${percent}%}`;
+								return `{value|${percent}%}`;
 							},
 							rich: {
 								name: {
