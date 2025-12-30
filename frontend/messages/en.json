@@ -3024,6 +3024,7 @@
 	],
 	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed.",
 	"serviceNow": "ServiceNow",
+	"servicenow": "ServiceNow",
 	"serviceNowIntegrationConfig": "ServiceNow Integration Configuration",
 	"serviceNowInstanceUrlHelpText": "The URL of your ServiceNow instance (e.g., https://example.service-now.com/).",
 	"serviceNowUsernameHelpText": "The username of your ServiceNow account.",
