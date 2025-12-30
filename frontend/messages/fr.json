@@ -3018,6 +3018,7 @@
 	"targetObject": "Objet cible",
 	"targetObjectType": "Type d'objet",
 	"widgetConfig": "Configuration du widget",
+	"globalOverall": "Moyenne globale",
 	"widgets": "Widgets",
 	"metricDefinitionsDescription": "Définir des métriques personnalisées pour suivre et mesurer les indicateurs de performance",
 	"metricInstancesDescription": "Suivre les valeurs de métriques pour les objets de votre organisation",
