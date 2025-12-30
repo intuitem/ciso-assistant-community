@@ -1,6 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
+from core.models import OrganisationObjective
 from core.serializers import BaseModelSerializer, ReferentialSerializer
 from core.serializer_fields import FieldsRelatedField, PathField
 from metrology.models import (
@@ -35,6 +36,12 @@ class MetricDefinitionReadSerializer(ReferentialSerializer):
 
 # MetricInstance serializers
 class MetricInstanceWriteSerializer(BaseModelSerializer):
+    organisation_objectives = serializers.PrimaryKeyRelatedField(
+        queryset=OrganisationObjective.objects.all(),
+        many=True,
+        required=False,
+    )
+
     class Meta:
         model = MetricInstance
         fields = "__all__"
@@ -55,6 +62,7 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
         ]
     )
     owner = FieldsRelatedField(many=True)
+    organisation_objectives = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["folder"], many=True)
     status = serializers.CharField(source="get_status_display", read_only=True)
     collection_frequency = serializers.CharField(
