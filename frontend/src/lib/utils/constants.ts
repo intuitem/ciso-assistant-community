@@ -49,6 +49,14 @@ export const complianceStatusTailwindColorMap = {
 	done: 'bg-green-300'
 };
 
+export const extendedResultColorMap: { [key: string]: string } = {
+	major_nonconformity: '#dc2626',
+	minor_nonconformity: '#f97316',
+	observation: '#eab308',
+	opportunity_for_improvement: '#3b82f6',
+	good_practice: '#22c55e'
+};
+
 export const MONTH_LIST = [
 	'January',
 	'February',
