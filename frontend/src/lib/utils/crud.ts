@@ -169,6 +169,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'perimeters' },
 			{ field: 'folder', urlModel: 'entities' },
 			{ field: 'folder', urlModel: 'assets' },
+			{ field: 'folder', urlModel: 'applied-controls' },
 			{
 				field: 'folder',
 				urlModel: 'users',

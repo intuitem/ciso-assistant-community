@@ -1425,6 +1425,8 @@
 	"isSelected": "Selected",
 	"ebiosRM": "Ebios RM",
 	"ebiosRMStudies": "Ebios RM studies",
+	"ebiosRMStudyARM": "Ebios RM study (ARM format)",
+	"ebiosRMStudyARMDescription": "Import an Ebios RM study from ARM Excel format",
 	"riskOrigin": "Risk origin",
 	"riskOrigins": "Risk origins",
 	"targetObjective": "Target objective",
@@ -1868,6 +1870,7 @@
 	"changeEffort": "... effort",
 	"changePriority": "... priority",
 	"changeCsfFunction": "... CSF function",
+	"changeAttackStage": "Change attack stage",
 	"logEntryRepr": "{timestamp} - {actor} - {action} - {object}",
 	"auditLog": "Audit log",
 	"actor": "Actor",
@@ -2727,6 +2730,7 @@
 	"targetObjectType": "Object type",
 	"targetObject": "Target object",
 	"metric": "Metric",
+	"metricUnit": "Metric unit",
 	"dashboard": "Dashboard",
 	"dashboards": "Dashboards",
 	"addDashboard": "Add dashboard",
@@ -3020,6 +3024,7 @@
 	],
 	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed.",
 	"count": "Count",
+	"globalOverall": "Global overall",
 	"metricDefinitionsDescription": "Define custom metrics to track and measure performance indicators",
 	"metricInstancesDescription": "Track specific metric values for objects across your organization",
 	"dashboardsDescription": "Custom dashboards to visualize metrics and key performance indicators",
@@ -3033,5 +3038,7 @@
 				"countPlural=other": "{count} objects not visible."
 			}
 		}
-	]
+	],
+	"secretCopiedToClipboard": "Secret copied to clipboard successfully",
+	"libraryFilteringLabels": "Library labels"
 }

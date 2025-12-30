@@ -89,6 +89,7 @@
 					data-testid="tablerow-import-button"
 					id="tablerow-import-button"
 					onclick={(e) => e.stopPropagation()}
+					aria-label="Load library"
 				>
 					<i class="fa-solid fa-file-import"></i>
 				</button>
@@ -124,7 +125,11 @@
 					};
 				}}
 			>
-				<button title={m.updateThisLibrary()} onclick={(e) => e.stopPropagation()}>
+				<button
+					title={m.updateThisLibrary()}
+					aria-label={m.updateThisLibrary()}
+					onclick={(e) => e.stopPropagation()}
+				>
 					<i class="fa-solid fa-circle-up text-success-700-300 hover:text-success-600-400"></i>
 				</button>
 			</form>
@@ -157,6 +162,7 @@
 					type="submit"
 					data-testid="tablerow-unload-button"
 					class="hover:text-red-500"
+					aria-label="Unload library"
 					onclick={(e) => e.stopPropagation()}
 				>
 					<i class="fa-solid fa-file-circle-minus"></i>

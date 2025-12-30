@@ -16,6 +16,7 @@
 
 <!-- SIDEBAR TOGGLE -->
 <button
+	aria-label="Toggle sidebar"
 	onclick={toggle}
 	class="{classesSidebarOpenButton(
 		open
