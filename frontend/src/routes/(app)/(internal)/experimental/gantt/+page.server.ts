@@ -1,24 +1,41 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 
+async function fetchData(fetch: typeof globalThis.fetch, endpoint: string) {
+	const res = await fetch(`${BASE_API_URL}/${endpoint}/`);
+	const data = await res.json();
+	return data.results || data;
+}
+
 export const load = (async ({ fetch }) => {
-	// Load applied controls with dates for Gantt visualization
-	const appliedControlsEndpoint = `${BASE_API_URL}/applied-controls/`;
-	const appliedControlsRes = await fetch(appliedControlsEndpoint);
-	const appliedControlsData = await appliedControlsRes.json();
-	const appliedControls = appliedControlsData.results || appliedControlsData;
+	const [
+		appliedControls,
+		taskNodes,
+		complianceAssessments,
+		riskAssessments,
+		businessImpactAnalyses,
+		organisationObjectives,
+		findingsAssessments,
+		folders
+	] = await Promise.all([
+		fetchData(fetch, 'applied-controls'),
+		fetchData(fetch, 'task-nodes'),
+		fetchData(fetch, 'compliance-assessments'),
+		fetchData(fetch, 'risk-assessments'),
+		fetchData(fetch, 'resilience/business-impact-analysis'),
+		fetchData(fetch, 'organisation-objectives'),
+		fetchData(fetch, 'findings-assessments'),
+		fetchData(fetch, 'folders')
+	]);
 
-	// Load task nodes for Gantt visualization
-	const taskNodesEndpoint = `${BASE_API_URL}/task-nodes/`;
-	const taskNodesRes = await fetch(taskNodesEndpoint);
-	const taskNodesData = await taskNodesRes.json();
-	const taskNodes = taskNodesData.results || taskNodesData;
-
-	// Load folders for filtering
-	const foldersEndpoint = `${BASE_API_URL}/folders/`;
-	const foldersRes = await fetch(foldersEndpoint);
-	const foldersData = await foldersRes.json();
-	const folders = foldersData.results || foldersData;
-
-	return { appliedControls, taskNodes, folders };
+	return {
+		appliedControls,
+		taskNodes,
+		complianceAssessments,
+		riskAssessments,
+		businessImpactAnalyses,
+		organisationObjectives,
+		findingsAssessments,
+		folders
+	};
 }) satisfies PageServerLoad;
