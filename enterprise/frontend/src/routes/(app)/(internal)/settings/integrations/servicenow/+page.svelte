@@ -156,10 +156,10 @@
 									})
 								});
 								testConnectionState = { loading: false, success: response.ok };
-                if (testConnectionState.success && !page.data?.config?.id) {
-                  // Submit the form to save the integration if the connection is successful
-                  form.submit();
-                }
+								if (testConnectionState.success && !page.data?.config?.id) {
+									// Submit the form to save the integration if the connection is successful
+									form.submit();
+								}
 							}}>{m.testConnection()}</button
 						>
 						<div class="flex items-center">
@@ -185,7 +185,7 @@
 						/>
 					</span>
 					{#if showWebhookSecretField}
-              <WebhookSecretGenerator {form} field="webhook_secret" />
+						<WebhookSecretGenerator {form} field="webhook_secret" />
 					{:else}
 						<p class="font-semibold text-sm -mb-4">{m.webhookSecret()}</p>
 						<div
@@ -218,9 +218,9 @@
 					</span>
 					<p class="text-sm text-surface-500 -mt-3">{m.webhookEndpointUrlHelpText()}</p>
 				{/if}
-        {#if page.data?.config?.id}
-				<FieldMapper {form} integrationId={page.data?.config?.id} />
-        {/if}
+				{#if page.data?.config?.id}
+					<FieldMapper {form} integrationId={page.data?.config?.id} />
+				{/if}
 				<button
 					class="text-center btn preset-filled-primary-500 font-semibold w-full"
 					data-testid="save-button">{m.save()}</button
