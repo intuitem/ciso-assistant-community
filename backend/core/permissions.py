@@ -44,8 +44,13 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
 
         perm = Permission.objects.get(codename=_codename)
 
+        # any user is allowed to view itself
         if obj == request.user and perm.codename == "view_user":
             return True
+
+        # for view, use is_object_readable to implement is_published correctly
+        if _codename[:5] == 'view_':
+            return RoleAssignment.is_object_readable(request.user, type(obj), obj.id)
 
         return RoleAssignment.is_access_allowed(
             user=request.user,
