@@ -25,9 +25,9 @@
 	const formAction = '?/save';
 
 	const schema = z.object({
-		id: z.string(),
-		provider_id: z.string(),
-		folder_id: z.string(),
+		id: z.string().optional(),
+		provider_id: z.string().optional(),
+		folder_id: z.string().optional(),
 		is_active: z.boolean().default(true),
 		webhook_secret: z.string().optional(),
 		credentials: z.object({
