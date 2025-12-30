@@ -149,11 +149,14 @@ class ServiceNowClient(BaseIntegrationClient):
 
             results = []
             for record in response.json().get("result", []):
-                if record["sys_id"] not in used_ids:
+                sys_id = record.get("sys_id")
+                if not sys_id:
+                    continue
+                if sys_id not in used_ids:
                     results.append(
                         {
-                            "key": record["sys_id"],  # The ID we sync on
-                            "id": record["sys_id"],
+                            "key": sys_id,
+                            "id": sys_id,
                             "summary": f"{record.get('number')} - {record.get('short_description')}",
                         }
                     )
