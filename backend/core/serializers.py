@@ -1677,6 +1677,7 @@ class OrganisationObjectiveReadSerializer(BaseModelSerializer):
     assets = IdRelatedField(many=True)
     issues = IdRelatedField(many=True)
     tasks = IdRelatedField(many=True)
+    metrics = IdRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
     health = serializers.CharField(source="get_health_display")
     assigned_to = IdRelatedField(many=True)
