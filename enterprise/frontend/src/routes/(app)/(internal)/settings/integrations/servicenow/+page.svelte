@@ -56,7 +56,7 @@
 
 	const formStore = _form.form;
 
-	let showApiTokenField = $state(!data?.config?.has_password);
+	let showApiTokenField = $state(!data?.config?.has_api_token);
 	let showWebhookSecretField = $state(!data?.config?.has_webhook_secret);
 	let testConnectionState: { loading: boolean; success?: boolean } = $state({
 		loading: false,
