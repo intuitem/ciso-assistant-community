@@ -1,9 +1,10 @@
-import structlog
 from abc import ABC, abstractmethod
 from typing import Any
 
+import structlog
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.http import HttpRequest
 
 from core.base_models import AbstractBaseModel
 from integrations.models import IntegrationConfiguration, SyncMapping
@@ -179,6 +180,19 @@ class BaseSyncOrchestrator(ABC):
         """Return the appropriate field mapper for this integration"""
         pass
 
+    def get_interactive_actions(self) -> list[str]:
+        """Return a list of supported interactive actions (RPCs)."""
+        return []
+
+    def execute_action(self, action: str, params: dict) -> Any:
+        """
+        Execute a dynamic action requested by the frontend.
+        Raises NotImplementedError if action is unknown.
+        """
+        raise NotImplementedError(
+            f"Action '{action}' is not supported by this integration."
+        )
+
     def push_changes(
         self, local_object: models.Model, changed_fields: list[str]
     ) -> bool:
@@ -303,6 +317,19 @@ class BaseSyncOrchestrator(ABC):
                 mapping, SyncMapping.SyncDirection.PULL, [], success=False, error=str(e)
             )
             return False
+
+    def validate_webhook_request(self, request: HttpRequest) -> bool:
+        """
+        Validates the incoming webhook request (signatures, tokens, etc).
+        Returns True if valid, raises generic exceptions or returns False if invalid.
+        """
+        raise NotImplementedError("validate_webhook_request must be implemented")
+
+    def extract_webhook_event_type(self, payload: dict) -> str:
+        """
+        Extracts the event type string (e.g., 'issue_updated', 'sn_update') from the payload.
+        """
+        raise NotImplementedError("extract_webhook_event_type must be implemented")
 
     def handle_webhook_event(self, event_type: str, payload: dict[str, Any]) -> bool:
         """Handle incoming webhook event
