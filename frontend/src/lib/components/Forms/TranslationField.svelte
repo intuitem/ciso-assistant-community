@@ -92,7 +92,7 @@
 
 <div class="space-y-4">
 	<div class="flex items-center justify-between">
-		<label class="text-sm font-semibold">{m.translations()}</label>
+		<span class="text-sm font-semibold">{m.translations()}</span>
 		<button
 			type="button"
 			class="px-3 py-1 text-sm rounded bg-blue-100 hover:bg-blue-200 text-blue-700 transition-colors"
@@ -118,8 +118,11 @@
 					{#if $errors && $errors[lang]}
 						<div class="text-xs text-red-500 mb-1">{m.translationErrorMessage()}</div>
 					{/if}
-					<label class="block text-xs font-medium text-gray-600 mb-1">{m.language()}</label>
+					<label for="translation-lang-{i}" class="block text-xs font-medium text-gray-600 mb-1"
+						>{m.language()}</label
+					>
 					<select
+						id="translation-lang-{i}"
 						value={lang}
 						onchange={(e) => updateLanguageKey(lang, e.target.value)}
 						class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -137,8 +140,11 @@
 					{#if $errors && $errors[lang]}
 						<div class="text-xs text-red-500 mb-1 invisible">{m.translationErrorMessage()}</div>
 					{/if}
-					<label class="block text-xs font-medium text-gray-600 mb-1">{m.translations()}</label>
+					<label for="translation-value-{i}" class="block text-xs font-medium text-gray-600 mb-1"
+						>{m.translations()}</label
+					>
 					<input
+						id="translation-value-{i}"
 						type="text"
 						value={text}
 						oninput={(e) => updateTranslationValue(lang, e.target.value)}
@@ -169,10 +175,6 @@
 </div>
 
 <style>
-	.space-y-2 > * + * {
-		margin-top: 0.5rem;
-	}
-
 	.space-y-3 > * + * {
 		margin-top: 0.75rem;
 	}
