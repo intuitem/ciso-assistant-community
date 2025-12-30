@@ -61,22 +61,28 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
         source="get_collection_frequency_display", read_only=True
     )
     current_value = serializers.SerializerMethodField()
+    raw_value = serializers.SerializerMethodField()
     unit = serializers.SerializerMethodField()
+    last_refresh = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = MetricInstance
         fields = "__all__"
 
     def get_current_value(self, obj):
-        """Get the current value from the latest sample"""
+        """Get the current value (formatted with unit) from the latest sample"""
         return obj.current_value()
+
+    def get_raw_value(self, obj):
+        """Get the raw numeric/index value from the latest sample (without unit)"""
+        return obj.raw_value()
 
     def get_unit(self, obj):
         """Get the unit from the metric definition"""
-        if obj.metric_definition and obj.metric_definition.unit:
+        if obj.unit:
             return {
-                "id": str(obj.metric_definition.unit.id),
-                "name": obj.metric_definition.unit.name,
+                "id": str(obj.unit.id),
+                "name": obj.unit.name,
             }
         return None
 
@@ -102,14 +108,19 @@ class CustomMetricSampleReadSerializer(BaseModelSerializer):
     folder = IdRelatedField()
     metric_instance = IdRelatedField(["name", "ref_id", "id"])
     display_value = serializers.SerializerMethodField()
+    raw_value = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomMetricSample
         fields = "__all__"
 
     def get_display_value(self, obj):
-        """Get the human-readable display value"""
+        """Get the human-readable display value (with unit)"""
         return obj.display_value()
+
+    def get_raw_value(self, obj):
+        """Get the raw numeric/index value (without unit)"""
+        return obj.raw_value()
 
 
 # Dashboard serializers
