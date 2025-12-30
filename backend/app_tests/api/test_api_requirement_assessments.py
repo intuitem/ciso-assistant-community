@@ -126,6 +126,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "is_locked": False,
                     "min_score": compliance_assessment.min_score,
                     "max_score": compliance_assessment.max_score,
+                    "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
@@ -214,6 +215,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "is_locked": False,
                     "min_score": compliance_assessment.min_score,
                     "max_score": compliance_assessment.max_score,
+                    "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
@@ -271,6 +273,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "is_locked": False,
                     "min_score": compliance_assessment.min_score,
                     "max_score": compliance_assessment.max_score,
+                    "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
