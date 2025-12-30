@@ -1,10 +1,11 @@
 from rest_framework import serializers
 
+from core.serializers import BaseModelSerializer
 from iam.models import Folder, RoleAssignment
 from .models import WebhookEndpoint, WebhookEventType
 
 
-class WebhookEndpointSerializer(serializers.ModelSerializer):
+class WebhookEndpointSerializer(BaseModelSerializer):
     """
     Serializer for the WebhookEndpoint model.
     Handles the 'show once' secret logic.

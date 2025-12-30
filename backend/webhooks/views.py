@@ -1,13 +1,13 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, viewsets, permissions
+from rest_framework import filters, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import WebhookEndpoint, WebhookEventType
 from .serializers import WebhookEndpointSerializer
-from .registry import webhook_registry
+from core.views import BaseModelViewSet
 
 
-class WebhookEndpointViewSet(viewsets.ModelViewSet):
+class WebhookEndpointViewSet(BaseModelViewSet):
     """
     API endpoint to create, list, retrieve, update, and delete
     Webhook Endpoints.
@@ -19,9 +19,12 @@ class WebhookEndpointViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
     ]
 
-    serializer_class = WebhookEndpointSerializer
+    model = WebhookEndpoint
     ordering_fields = ["is_active", "created_at", "name", "url"]
     ordering = ["-is_active", "-created_at"]
+
+    def get_serializer_class(self, **kwargs):
+        return WebhookEndpointSerializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
