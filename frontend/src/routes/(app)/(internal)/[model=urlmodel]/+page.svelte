@@ -130,6 +130,7 @@
 									data-testid="add-button"
 									id="add-button"
 									title={safeTranslate('add-' + data.model.localName)}
+									aria-label={safeTranslate('add-' + data.model.localName)}
 									onclick={handlers(modalCreateForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
@@ -168,6 +169,7 @@
 										href="{URLModel}/flash-mode/"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.flashMode()}
+										aria-label={m.flashMode()}
 										data-testid="flash-mode-button"><i class="fa-solid fa-bolt mr-2"></i></a
 									>
 								{/if}
@@ -210,6 +212,7 @@
 										class="text-gray-50 inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
 										data-testid="import-button"
 										title={safeTranslate('importFolder')}
+										aria-label={safeTranslate('importFolder')}
 										onclick={modalFolderImportForm}
 										><i class="fa-solid fa-file-import"></i>
 									</button>
