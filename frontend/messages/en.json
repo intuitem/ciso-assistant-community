@@ -207,7 +207,6 @@
 	"link": "Link",
 	"createdAt": "Created at",
 	"updatedAt": "Updated at",
-	"lastRefresh": "Last refresh",
 	"acceptedAt": "Accepted at",
 	"rejectedAt": "Rejected at",
 	"revokedAt": "Revoked at",
@@ -2789,7 +2788,6 @@
 	"showTarget": "Show target",
 	"showLegend": "Show title and legend",
 	"widgetConfig": "Widget configuration",
-	"widgetCount": "Widgets count",
 	"target": "Target",
 	"actual": "Actual",
 	"remaining": "Remaining",
@@ -2807,7 +2805,6 @@
 	"layoutSaved": "Layout saved successfully",
 	"collectionFrequency": "Collection frequency",
 	"targetValue": "Target value",
-	"rawValue": "Value",
 	"minValue": "Minimum value",
 	"maxValue": "Maximum value",
 	"unit": "Unit",
@@ -3256,12 +3253,22 @@
 		}
 	],
 	"cascadeAffectedHint": "The items below remain in the system but their links to this object will be removed.",
+	"serviceNow": "ServiceNow",
+	"servicenow": "ServiceNow",
+	"serviceNowIntegrationConfig": "ServiceNow Integration Configuration",
+	"serviceNowInstanceUrlHelpText": "The URL of your ServiceNow instance (e.g., https://example.service-now.com/).",
+	"serviceNowUsernameHelpText": "The username of your ServiceNow account.",
+	"serviceNowTableHelpText": "Select the ServiceNow table to sync with (e.g., GRC Control).",
+	"instanceUrl": "Instance URL",
+	"username": "Username",
+	"passwordAlreadySetHelpText": "The instance password is already set.",
+	"tableName": "Table Name",
+	"baseQuery": "Base Query",
 	"count": "Count",
 	"globalOverall": "Global overall",
 	"metricDefinitionsDescription": "Define custom metrics to track and measure performance indicators",
 	"metricInstancesDescription": "Track specific metric values for objects across your organization",
 	"dashboardsDescription": "Custom dashboards to visualize metrics and key performance indicators",
-	"libraryFilteringLabels": "Library labels",
 	"objectsNotVisible": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -3272,5 +3279,18 @@
 			}
 		}
 	],
-	"secretCopiedToClipboard": "Secret copied to clipboard successfully"
+	"targetTable": "Target Table",
+	"serviceNowIntegrationMappingsDescription": "ServiceNow synchronization mappings",
+	"serviceNowIntegrationMappingsHelpText": "Map your local controls to ServiceNow records.",
+	"fieldMapping": "Field Mapping",
+	"localField": "Local Field",
+	"serviceNowColumn": "ServiceNow Column",
+	"valueMapping": "Value Mapping",
+	"valueMappingForField": "{field} Mapping",
+	"valueMappingToField": "mapped_to: {field}",
+	"secretCopiedToClipboard": "Secret copied to clipboard successfully",
+	"libraryFilteringLabels": "Library labels",
+	"lastRefresh": "Last refresh",
+	"widgetCount": "Widgets count",
+	"rawValue": "Value"
 }

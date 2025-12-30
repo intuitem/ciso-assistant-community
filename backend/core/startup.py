@@ -1274,6 +1274,13 @@ def startup(sender: AppConfig, **kwargs):
         )
     except Exception as e:
         logger.error("Error creating Jira IntegrationProvider", exc_info=True)
+    try:
+        IntegrationProvider.objects.get_or_create(
+            name="servicenow",
+            defaults={"provider_type": IntegrationProvider.ProviderType.ITSM},
+        )
+    except Exception as e:
+        logger.error("Error creating servicenow IntegrationProvider", exc_info=True)
 
     call_command("storelibraries")
     call_command("autoloadlibraries")
