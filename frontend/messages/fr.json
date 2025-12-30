@@ -3244,5 +3244,6 @@
 	"metricInstancesDescription": "Suivre les valeurs de métriques pour les objets de votre organisation",
 	"dashboardsDescription": "Tableaux de bord personnalisés pour visualiser les métriques et indicateurs clés de performance",
 	"libraryFilteringLabels": "Étiquettes de bibliothèque",
-	"objectsNotVisible": "{count} objet{s} non visible."
+	"objectsNotVisible": "{count} objet{s} non visible.",
+	"secretCopiedToClipboard": "Secret copié dans le presse-papier avec succès"
 }
