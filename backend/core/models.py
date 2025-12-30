@@ -5742,6 +5742,9 @@ class ComplianceAssessment(Assessment):
         related_name="compliance_assessments",
     )
 
+    extended_result_enabled = models.BooleanField(default=False)
+    progress_status_enabled = models.BooleanField(default=True)
+
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -6164,6 +6167,11 @@ class ComplianceAssessment(Assessment):
             RequirementAssessment.Status.IN_PROGRESS: "#f59e0b",
             RequirementAssessment.Status.IN_REVIEW: "#3b82f6",
             RequirementAssessment.Status.DONE: "#86efac",
+            RequirementAssessment.ExtendedResult.MAJOR_NONCONFORMITY: "#dc2626",
+            RequirementAssessment.ExtendedResult.MINOR_NONCONFORMITY: "#f97316",
+            RequirementAssessment.ExtendedResult.OBSERVATION: "#eab308",
+            RequirementAssessment.ExtendedResult.OPPORTUNITY_FOR_IMPROVEMENT: "#3b82f6",
+            RequirementAssessment.ExtendedResult.GOOD_PRACTICE: "#22c55e",
         }
 
         compliance_assessments_result = {"values": [], "labels": []}
@@ -6228,9 +6236,42 @@ class ComplianceAssessment(Assessment):
             compliance_assessments_status["values"].append(value_entry)
             compliance_assessments_status["labels"].append(status)
 
+        compliance_assessments_extended_result = {"values": [], "labels": []}
+        if self.extended_result_enabled:
+            for extended_result in RequirementAssessment.ExtendedResult.values:
+                assessable_requirements_filter = {
+                    "compliance_assessment": self,
+                    "requirement__assessable": True,
+                }
+
+                base_query = RequirementAssessment.objects.filter(
+                    extended_result=extended_result, **assessable_requirements_filter
+                ).distinct()
+
+                if self.selected_implementation_groups:
+                    union_query = union_queries(
+                        base_query,
+                        self.selected_implementation_groups,
+                        "requirement__implementation_groups",
+                    )
+                else:
+                    union_query = base_query
+
+                count = union_query.count()
+                value_entry = {
+                    "name": extended_result,
+                    "localName": camel_case(extended_result),
+                    "value": count,
+                    "itemStyle": {"color": color_map[extended_result]},
+                }
+
+                compliance_assessments_extended_result["values"].append(value_entry)
+                compliance_assessments_extended_result["labels"].append(extended_result)
+
         return {
             "result": compliance_assessments_result,
             "status": compliance_assessments_status,
+            "extended_result": compliance_assessments_extended_result,
         }
 
     def quality_check(self) -> dict:
@@ -6542,6 +6583,16 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         COMPLIANT = "compliant", _("Compliant")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
 
+    class ExtendedResult(models.TextChoices):
+        MAJOR_NONCONFORMITY = "major_nonconformity", "Major nonconformity"
+        MINOR_NONCONFORMITY = "minor_nonconformity", "Minor nonconformity"
+        OBSERVATION = "observation_sensitive_point", "Observation / sensitive point"
+        OPPORTUNITY_FOR_IMPROVEMENT = (
+            "opportunity_for_improvement",
+            "Opportunity for improvement",
+        )
+        GOOD_PRACTICE = "good_practice", "Good practice"
+
     status = models.CharField(
         max_length=100,
         choices=Status.choices,
@@ -6553,6 +6604,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         choices=Result.choices,
         verbose_name=_("Result"),
         default=Result.NOT_ASSESSED,
+    )
+    extended_result = models.CharField(
+        max_length=64,
+        choices=ExtendedResult.choices,
+        verbose_name="Extended Result",
+        blank=True,
+        null=True,
     )
     is_scored = models.BooleanField(
         default=False,
