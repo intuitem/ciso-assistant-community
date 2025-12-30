@@ -6,6 +6,8 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -89,6 +91,17 @@
 	bind:cachedValue={formDataCache['owner']}
 	label={m.owner()}
 />
+<Dropdown open={false} class="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="organisation-objectives"
+	optionsLabelField="auto"
+	field="organisation_objectives"
+	cacheLock={cacheLocks['organisation_objectives']}
+	bind:cachedValue={formDataCache['organisation_objectives']}
+	label={m.organisationObjectives()}
+/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -99,3 +112,4 @@
 	bind:cachedValue={formDataCache['filtering_labels']}
 	label={m.labels()}
 />
+  </Dropdown>

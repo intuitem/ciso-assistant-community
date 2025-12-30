@@ -885,6 +885,7 @@ export const organisationObjectiveSchema = z.object({
 	issues: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	tasks: z.string().uuid().optional().array().optional(),
+	metrics: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
@@ -1359,6 +1360,7 @@ export const MetricInstanceSchema = z.object({
 	owner: z.array(z.string().uuid().optional()).optional(),
 	target_value: z.coerce.number().optional().nullable(),
 	collection_frequency: z.string().optional().nullable(),
+	organisation_objectives: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional()
 });
 
