@@ -86,6 +86,12 @@ READER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "view_metricinstance",
+    "view_custommetricsample",
+    "view_dashboard",
+    "view_dashboardwidget",
     # integrations
     "view_syncmapping",
 ]
@@ -401,6 +407,24 @@ ANALYST_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "view_metricinstance",
+    "add_metricinstance",
+    "change_metricinstance",
+    "delete_metricinstance",
+    "view_custommetricsample",
+    "add_custommetricsample",
+    "change_custommetricsample",
+    "delete_custommetricsample",
+    "view_dashboard",
+    "add_dashboard",
+    "change_dashboard",
+    "delete_dashboard",
+    "view_dashboardwidget",
+    "add_dashboardwidget",
+    "change_dashboardwidget",
+    "delete_dashboardwidget",
     # integrations
     "view_integrationconfiguration",
     "add_syncmapping",
@@ -668,6 +692,27 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "add_metricdefinition",
+    "change_metricdefinition",
+    "delete_metricdefinition",
+    "view_metricinstance",
+    "add_metricinstance",
+    "change_metricinstance",
+    "delete_metricinstance",
+    "view_custommetricsample",
+    "add_custommetricsample",
+    "change_custommetricsample",
+    "delete_custommetricsample",
+    "view_dashboard",
+    "add_dashboard",
+    "change_dashboard",
+    "delete_dashboard",
+    "view_dashboardwidget",
+    "add_dashboardwidget",
+    "change_dashboardwidget",
+    "delete_dashboardwidget",
     # integrations
     "add_integrationconfiguration",
     "view_integrationconfiguration",
@@ -1229,6 +1274,13 @@ def startup(sender: AppConfig, **kwargs):
         )
     except Exception as e:
         logger.error("Error creating Jira IntegrationProvider", exc_info=True)
+    try:
+        IntegrationProvider.objects.get_or_create(
+            name="servicenow",
+            defaults={"provider_type": IntegrationProvider.ProviderType.ITSM},
+        )
+    except Exception as e:
+        logger.error("Error creating servicenow IntegrationProvider", exc_info=True)
 
     call_command("storelibraries")
     call_command("autoloadlibraries")

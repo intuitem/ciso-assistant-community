@@ -12,6 +12,7 @@ import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeS
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
+import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -2063,7 +2064,17 @@ export const listViewFields = {
 	},
 	'elementary-actions': {
 		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'threat'],
-		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat']
+		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
+		filters: {
+			attack_stage: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'elementary-actions/attack_stage',
+					label: 'attackStage',
+					multiple: true
+				}
+			}
+		}
 	},
 	'operating-modes': {
 		head: ['ref_id', 'name', 'likelihood'],
@@ -2394,8 +2405,28 @@ export const listViewFields = {
 		}
 	},
 	'metric-instances': {
-		head: ['ref_id', 'name', 'metric_definition', 'current_value', 'status', 'folder'],
-		body: ['ref_id', 'name', 'metric_definition', 'current_value', 'status', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'metric_definition',
+			'rawValue',
+			'target_value',
+			'unit',
+			'status',
+			'lastRefresh',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'metric_definition',
+			'raw_value',
+			'target_value',
+			'unit',
+			'status',
+			'last_refresh',
+			'folder'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			metric_definition: {
@@ -2549,7 +2580,8 @@ export const contextMenuActions = {
 	'ro-to': [{ component: SelectObject, props: {} }],
 	stakeholders: [{ component: SelectObject, props: {} }],
 	'attack-paths': [{ component: SelectObject, props: {} }],
-	'operational-scenarios': [{ component: SelectObject, props: {} }]
+	'operational-scenarios': [{ component: SelectObject, props: {} }],
+	'elementary-actions': [{ component: ChangeAttackStage, props: {} }]
 };
 
 export function getListViewFields({

@@ -93,7 +93,7 @@
 
 <div class="space-y-4">
 	<div class="flex items-center justify-between">
-		<label class="text-sm font-semibold">{m.legalIdentifiers()}</label>
+		<span class="text-sm font-semibold">{m.legalIdentifiers()}</span>
 		<button
 			type="button"
 			class="px-3 py-1 text-sm rounded bg-blue-100 hover:bg-blue-200 text-blue-700 transition-colors"
@@ -132,8 +132,11 @@
 					{#if $errors && $errors[type]}
 						<div class="text-xs text-red-500 mb-1">{m.identifierErrorMessage()}</div>
 					{/if}
-					<label class="block text-xs font-medium text-gray-600 mb-1">{m.identifierType()}</label>
+					<label for="identifier-type-{i}" class="block text-xs font-medium text-gray-600 mb-1"
+						>{m.identifierType()}</label
+					>
 					<select
+						id="identifier-type-{i}"
 						value={type}
 						onchange={(e) => updateIdentifierType(type, e.target.value)}
 						class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -150,8 +153,11 @@
 					{#if $errors && $errors[type]}
 						<div class="text-xs text-red-500 mb-1 invisible">{m.identifierErrorMessage()}</div>
 					{/if}
-					<label class="block text-xs font-medium text-gray-600 mb-1">{m.identifierValue()}</label>
+					<label for="identifier-value-{i}" class="block text-xs font-medium text-gray-600 mb-1"
+						>{m.identifierValue()}</label
+					>
 					<input
+						id="identifier-value-{i}"
 						type="text"
 						value={identifier}
 						oninput={(e) => updateIdentifierValue(type, e.target.value)}
@@ -166,6 +172,7 @@
 						class="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded transition-colors"
 						onclick={() => removeIdentifier(type)}
 						title={m.removeIdentifier()}
+						aria-label={m.removeIdentifier()}
 					>
 						<i class="fa-solid fa-trash"></i>
 					</button>

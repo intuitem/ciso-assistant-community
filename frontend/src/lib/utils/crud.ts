@@ -169,6 +169,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'perimeters' },
 			{ field: 'folder', urlModel: 'entities' },
 			{ field: 'folder', urlModel: 'assets' },
+			{ field: 'folder', urlModel: 'applied-controls' },
 			{
 				field: 'folder',
 				urlModel: 'users',
@@ -749,7 +750,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'requirementAssessments',
 		verboseName: 'Requirement assessment',
 		verboseNamePlural: 'Requirement assessments',
-		selectFields: [{ field: 'status' }, { field: 'result' }],
+		selectFields: [{ field: 'status' }, { field: 'result' }, { field: 'extended_result' }],
 		foreignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },
@@ -1860,12 +1861,34 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'issues', urlModel: 'organisation-issues' },
 			{ field: 'tasks', urlModel: 'task-templates' },
+			{ field: 'metrics', urlModel: 'metric-instances' },
 			{ field: 'assigned_to', urlModel: 'users' }
+		],
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'folder' },
+			{ field: 'status' },
+			{ field: 'health' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'observation' },
+			{ field: 'assigned_to' },
+			{ field: 'issues' },
+			{ field: 'assets' },
+			{ field: 'tasks' }
 		],
 		reverseForeignKeyFields: [
 			{
 				field: 'objectives',
 				urlModel: 'applied-controls',
+				disableCreate: false,
+				disableDelete: true
+			},
+			{
+				field: 'organisation_objectives',
+				urlModel: 'metric-instances',
 				disableCreate: false,
 				disableDelete: true
 			}
@@ -2176,6 +2199,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'metric_definition', urlModel: 'metric-definitions' },
 			{ field: 'unit', urlModel: 'terminologies' },
 			{ field: 'owner', urlModel: 'users' },
+			{ field: 'organisation_objectives', urlModel: 'organisation-objectives' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'collection_frequency' }],
@@ -2188,6 +2212,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'metric_definition' },
 			{ field: 'unit' },
 			{ field: 'owner' },
+			{ field: 'organisation_objectives' },
 			{ field: 'status' },
 			{ field: 'collection_frequency' },
 			{ field: 'target_value' },
