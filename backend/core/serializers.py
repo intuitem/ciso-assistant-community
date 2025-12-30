@@ -2,7 +2,7 @@ import importlib
 from typing import Any
 
 import structlog
-from django.db import models
+from django.db import models, transaction
 from django.db.models import F
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
@@ -1567,15 +1567,16 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
         # Handle properly owner field cleaning
         owners = validated_data.get("owner", None)
-        instance = super().update(instance, validated_data)
-        if not owners:
-            instance.owner.set([])
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            if not owners:
+                instance.owner.set([])
 
-        # Update all EvidenceRevisions' folder if the Evidence's folder changed
-        if old_folder_id != instance.folder_id:
-            EvidenceRevision.objects.filter(evidence=instance).update(
-                folder=instance.folder
-            )
+            # Update all EvidenceRevisions' folder if the Evidence's folder changed
+            if old_folder_id != instance.folder_id:
+                EvidenceRevision.objects.filter(evidence=instance).update(
+                    folder=instance.folder
+                )
 
         return instance
 
@@ -2490,6 +2491,16 @@ class IncidentWriteSerializer(BaseModelSerializer):
         model = Incident
         exclude = ["created_at", "updated_at"]
 
+    def update(self, instance, validated_data):
+        old_folder_id = instance.folder_id
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
+            if old_folder_id != updated_instance.folder_id:
+                TimelineEntry.objects.filter(incident=updated_instance).update(
+                    folder=updated_instance.folder
+                )
+        return updated_instance
+
 
 class IncidentReadSerializer(IncidentWriteSerializer):
     path = PathField(read_only=True)
@@ -2605,15 +2616,17 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
         was_recurrent = instance.is_recurrent  # Store the previous state
         tasknode_data = self._extract_tasknode_fields(validated_data)
-        instance = super().update(instance, validated_data)
-        now_recurrent = instance.is_recurrent
-        self._sync_task_node(instance, tasknode_data, was_recurrent, now_recurrent)
 
-        # Update all TaskNodes' folder if the TaskTemplate's folder changed
-        if old_folder_id != instance.folder_id:
-            TaskNode.objects.filter(task_template=instance).update(
-                folder=instance.folder
-            )
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            now_recurrent = instance.is_recurrent
+            self._sync_task_node(instance, tasknode_data, was_recurrent, now_recurrent)
+
+            # Update all TaskNodes' folder if the TaskTemplate's folder changed
+            if old_folder_id != instance.folder_id:
+                TaskNode.objects.filter(task_template=instance).update(
+                    folder=instance.folder
+                )
 
         # Get new assigned users after update
         new_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
@@ -2821,6 +2834,7 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         from core.models import FlowEvent
 
         request_user = self.context["request"].user
+        old_folder_id = instance.folder_id
 
         # Check if status is being modified
         if "status" in validated_data:
@@ -2868,26 +2882,41 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
             # Extract event notes from validated_data (passed from actions)
             event_notes = validated_data.pop("event_notes", None)
 
-            # Update the instance
-            updated_instance = super().update(instance, validated_data)
+            with transaction.atomic():
+                # Update the instance
+                updated_instance = super().update(instance, validated_data)
 
-            # Create FlowEvent after successful status transition
-            FlowEvent.objects.create(
-                validation_flow=updated_instance,
-                event_type=updated_instance.status,
-                event_actor=request_user,
-                event_notes=event_notes,
-                folder=updated_instance.folder,
-            )
+                # Create FlowEvent after successful status transition
+                FlowEvent.objects.create(
+                    validation_flow=updated_instance,
+                    event_type=updated_instance.status,
+                    event_actor=request_user,
+                    event_notes=event_notes,
+                    folder=updated_instance.folder,
+                )
 
-            # Auto-lock/unlock associated objects based on status transitions
-            self._manage_associated_objects_lock(
-                updated_instance, current_status, new_status
-            )
+                # Auto-lock/unlock associated objects based on status transitions
+                self._manage_associated_objects_lock(
+                    updated_instance, current_status, new_status
+                )
+
+                # Cascade folder changes to events if needed
+                if old_folder_id != updated_instance.folder_id:
+                    FlowEvent.objects.filter(validation_flow=updated_instance).update(
+                        folder=updated_instance.folder
+                    )
 
             return updated_instance
 
-        return super().update(instance, validated_data)
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
+
+            if old_folder_id != updated_instance.folder_id:
+                FlowEvent.objects.filter(validation_flow=updated_instance).update(
+                    folder=updated_instance.folder
+                )
+
+        return updated_instance
 
     def _manage_associated_objects_lock(
         self, validation_flow, old_status: str, new_status: str
