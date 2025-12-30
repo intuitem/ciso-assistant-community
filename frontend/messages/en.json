@@ -207,7 +207,6 @@
 	"link": "Link",
 	"createdAt": "Created at",
 	"updatedAt": "Updated at",
-	"lastRefresh": "Last refresh",
 	"acceptedAt": "Accepted at",
 	"rejectedAt": "Rejected at",
 	"revokedAt": "Revoked at",
@@ -2789,7 +2788,6 @@
 	"showTarget": "Show target",
 	"showLegend": "Show title and legend",
 	"widgetConfig": "Widget configuration",
-	"widgetCount": "Widgets count",
 	"target": "Target",
 	"actual": "Actual",
 	"remaining": "Remaining",
@@ -2807,7 +2805,6 @@
 	"layoutSaved": "Layout saved successfully",
 	"collectionFrequency": "Collection frequency",
 	"targetValue": "Target value",
-	"rawValue": "Value",
 	"minValue": "Minimum value",
 	"maxValue": "Maximum value",
 	"unit": "Unit",
@@ -3300,6 +3297,5 @@
 				"countPlural=other": "{count} objects not visible."
 			}
 		}
-	],
-	"secretCopiedToClipboard": "Secret copied to clipboard successfully"
+	]
 }

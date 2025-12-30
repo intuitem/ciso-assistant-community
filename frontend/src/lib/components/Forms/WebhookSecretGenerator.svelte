@@ -41,6 +41,7 @@
 				message: m.secretCopiedToClipboard()
 			});
 		});
+
 	}
 
 	function copySecret() {
