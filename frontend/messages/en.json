@@ -3024,9 +3024,9 @@
 	"metricInstancesDescription": "Track specific metric values for objects across your organization",
 	"dashboardsDescription": "Custom dashboards to visualize metrics and key performance indicators",
 	"libraryFilteringLabels": "Library labels",
-	"requirementAssessmentDifferentDomain": "Requirement assessment belongs to another domain than the audit",
-	"appliedControlDifferentDomain": "Applied control belongs to another domain than the assessment",
-	"riskAcceptanceDifferentDomain": "Risk acceptance belongs to another domain than the risk assessment",
-	"evidenceDifferentDomain": "Evidence belongs to another domain than the assessment",
-	"assetDifferentDomain": "Asset belongs to another domain than the assessment"
+	"requirementAssessmentDifferentBranch": "Requirement assessment belongs to another branch than the audit",
+	"appliedControlDifferentBranch": "Applied control belongs to another branch than the assessment",
+	"riskAcceptanceDifferentBranch": "Risk acceptance belongs to another branch than the risk assessment",
+	"evidenceDifferentBranch": "Evidence belongs to another branch than the assessment",
+	"assetDifferentBranch": "Asset belongs to another branch than the assessment"
 }

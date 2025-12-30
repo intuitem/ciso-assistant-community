@@ -1845,6 +1845,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         # Track old authors before update
         old_author_ids = set(instance.authors.values_list("id", flat=True))
+        old_folder_id = instance.folder_id
 
         # Check if status is changing to deprecated
         old_status = instance.status
@@ -1865,6 +1866,12 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             self._send_assignment_notifications(
                 updated_instance, list(newly_assigned_ids)
             )
+
+        # Cascade folder change to requirement assessments
+        if old_folder_id != updated_instance.folder_id:
+            RequirementAssessment.objects.filter(
+                compliance_assessment=updated_instance
+            ).update(folder=updated_instance.folder)
 
         return updated_instance
 

@@ -3023,9 +3023,9 @@
 	"metricInstancesDescription": "Suivre les valeurs de métriques pour les objets de votre organisation",
 	"dashboardsDescription": "Tableaux de bord personnalisés pour visualiser les métriques et indicateurs clés de performance",
 	"libraryFilteringLabels": "Étiquettes de bibliothèque",
-	"requirementAssessmentDifferentDomain": "L'évaluation d'exigence appartient à un autre domaine que l'audit",
-	"appliedControlDifferentDomain": "Le contrôle appliqué appartient à un autre domaine que l'évaluation",
-	"riskAcceptanceDifferentDomain": "L'acceptation de risque appartient à un autre domaine que l'évaluation des risques",
-	"evidenceDifferentDomain": "La preuve appartient à un autre domaine que l'évaluation",
-	"assetDifferentDomain": "L'actif appartient à un autre domaine que l'évaluation"
+	"requirementAssessmentDifferentBranch": "L'évaluation d'exigence appartient à une autre branche que l'audit",
+	"appliedControlDifferentBranch": "Le contrôle appliqué appartient à une autre branche que l'évaluation",
+	"riskAcceptanceDifferentBranch": "L'acceptation de risque appartient à une autre branche que l'évaluation des risques",
+	"evidenceDifferentBranch": "La preuve appartient à une autre branche que l'évaluation",
+	"assetDifferentBranch": "L'actif appartient à une autre branche que l'évaluation"
 }

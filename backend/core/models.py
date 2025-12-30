@@ -5142,12 +5142,12 @@ class RiskAssessment(Assessment):
                 is_domain_mismatch(mtg.get("folder"))
                 and mtg["id"] not in domain_checked_controls
             ):
-                warnings_lst.append(
+                info_lst.append(
                     {
                         "msg": _(
-                            "{}: Applied control belongs to another domain than the risk assessment"
+                            "{}: Applied control belongs to another branch than the risk assessment"
                         ).format(mtg["name"]),
-                        "msgid": "appliedControlDifferentDomain",
+                        "msgid": "appliedControlDifferentBranch",
                         "link": f"applied-controls/{mtg['id']}",
                         "obj_type": "appliedcontrol",
                         "object": {"name": mtg["name"], "id": mtg["id"]},
@@ -5229,12 +5229,12 @@ class RiskAssessment(Assessment):
             acceptances[i]["id"] = json.loads(_acceptances)[i]["pk"]
         for ra in acceptances:
             if is_domain_mismatch(ra.get("folder")):
-                warnings_lst.append(
+                info_lst.append(
                     {
                         "msg": _(
-                            "{}: Risk acceptance belongs to another domain than the risk assessment"
+                            "{}: Risk acceptance belongs to another branch than the risk assessment"
                         ).format(ra["name"]),
-                        "msgid": "riskAcceptanceDifferentDomain",
+                        "msgid": "riskAcceptanceDifferentBranch",
                         "link": f"risk-acceptances/{ra['id']}",
                         "obj_type": "riskacceptance",
                         "object": ra,
@@ -5274,12 +5274,12 @@ class RiskAssessment(Assessment):
         )
         for asset in assets:
             if is_domain_mismatch(asset.folder_id):
-                warnings_lst.append(
+                info_lst.append(
                     {
                         "msg": _(
-                            "{}: Asset belongs to another domain than the risk assessment"
+                            "{}: Asset belongs to another branch than the risk assessment"
                         ).format(asset.name),
-                        "msgid": "assetDifferentDomain",
+                        "msgid": "assetDifferentBranch",
                         "link": f"assets/{asset.id}",
                         "obj_type": "asset",
                         "object": {"name": asset.name, "id": asset.id},
@@ -5296,12 +5296,12 @@ class RiskAssessment(Assessment):
         )
         for evidence_obj in evidence_objects:
             if is_domain_mismatch(evidence_obj.folder_id):
-                warnings_lst.append(
+                info_lst.append(
                     {
                         "msg": _(
-                            "{}: Evidence belongs to another domain than the risk assessment"
+                            "{}: Evidence belongs to another branch than the risk assessment"
                         ).format(evidence_obj.name),
-                        "msgid": "evidenceDifferentDomain",
+                        "msgid": "evidenceDifferentBranch",
                         "link": f"evidences/{evidence_obj.id}",
                         "obj_type": "evidence",
                         "object": {"name": evidence_obj.name, "id": evidence_obj.id},
@@ -6384,12 +6384,12 @@ class ComplianceAssessment(Assessment):
             ra_dict["name"] = str(ra)
             ra_dict["id"] = ra.id
             if is_domain_mismatch(ra.folder_id):
-                warnings_lst.append(
+                info_lst.append(
                     {
                         "msg": _(
-                            "{}: Requirement assessment belongs to another domain than the compliance assessment"
+                            "{}: Requirement assessment belongs to another branch than the compliance assessment"
                         ).format(str(ra)),
-                        "msgid": "requirementAssessmentDifferentDomain",
+                        "msgid": "requirementAssessmentDifferentBranch",
                         "link": f"requirement-assessments/{ra.id}",
                         "obj_type": "requirementassessment",
                         "object": ra_dict,
@@ -6450,12 +6450,12 @@ class ComplianceAssessment(Assessment):
                 is_domain_mismatch(applied_control.get("folder"))
                 and applied_control["id"] not in domain_checked_controls
             ):
-                warnings_lst.append(
+                info_lst.append(
                     {
                         "msg": _(
-                            "{}: Applied control belongs to another domain than the compliance assessment"
+                            "{}: Applied control belongs to another branch than the compliance assessment"
                         ).format(applied_control["name"]),
-                        "msgid": "appliedControlDifferentDomain",
+                        "msgid": "appliedControlDifferentBranch",
                         "link": f"applied-controls/{applied_control['id']}",
                         "obj_type": "appliedcontrol",
                         "object": {
@@ -6521,12 +6521,12 @@ class ComplianceAssessment(Assessment):
         )
         for evidence_obj in domain_evidence_objects:
             if is_domain_mismatch(evidence_obj.folder_id):
-                warnings_lst.append(
+                info_lst.append(
                     {
                         "msg": _(
-                            "{}: Evidence belongs to another domain than the compliance assessment"
+                            "{}: Evidence belongs to another branch than the compliance assessment"
                         ).format(evidence_obj.name),
-                        "msgid": "evidenceDifferentDomain",
+                        "msgid": "evidenceDifferentBranch",
                         "link": f"evidences/{evidence_obj.id}",
                         "obj_type": "evidence",
                         "object": {"name": evidence_obj.name, "id": evidence_obj.id},
@@ -6537,12 +6537,12 @@ class ComplianceAssessment(Assessment):
         assets = self.assets.all().only("id", "name", "folder_id")
         for asset in assets:
             if is_domain_mismatch(asset.folder_id):
-                warnings_lst.append(
+                info_lst.append(
                     {
                         "msg": _(
-                            "{}: Asset belongs to another domain than the compliance assessment"
+                            "{}: Asset belongs to another branch than the compliance assessment"
                         ).format(asset.name),
-                        "msgid": "assetDifferentDomain",
+                        "msgid": "assetDifferentBranch",
                         "link": f"assets/{asset.id}",
                         "obj_type": "asset",
                         "object": {"name": asset.name, "id": asset.id},

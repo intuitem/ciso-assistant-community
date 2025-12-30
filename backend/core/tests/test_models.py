@@ -460,11 +460,11 @@ class TestAssessmentQualityCheckDomainMismatch:
         applied_control.evidences.add(evidence)
 
         findings = risk_assessment.quality_check()
-        warning_ids = {item["msgid"] for item in findings["warnings"]}
-        assert "appliedControlDifferentDomain" in warning_ids
-        assert "riskAcceptanceDifferentDomain" in warning_ids
-        assert "assetDifferentDomain" in warning_ids
-        assert "evidenceDifferentDomain" in warning_ids
+        info_ids = {item["msgid"] for item in findings["info"]}
+        assert "appliedControlDifferentBranch" in info_ids
+        assert "riskAcceptanceDifferentBranch" in info_ids
+        assert "assetDifferentBranch" in info_ids
+        assert "evidenceDifferentBranch" in info_ids
 
     def test_compliance_assessment_quality_check_warns_on_cross_domain_links(self):
         root_folder = self._get_root_folder()
@@ -524,11 +524,11 @@ class TestAssessmentQualityCheckDomainMismatch:
         compliance_assessment.assets.add(asset)
 
         findings = compliance_assessment.quality_check()
-        warning_ids = {item["msgid"] for item in findings["warnings"]}
-        assert "requirementAssessmentDifferentDomain" in warning_ids
-        assert "appliedControlDifferentDomain" in warning_ids
-        assert "evidenceDifferentDomain" in warning_ids
-        assert "assetDifferentDomain" in warning_ids
+        info_ids = {item["msgid"] for item in findings["info"]}
+        assert "requirementAssessmentDifferentBranch" in info_ids
+        assert "appliedControlDifferentBranch" in info_ids
+        assert "evidenceDifferentBranch" in info_ids
+        assert "assetDifferentBranch" in info_ids
 
 
 @pytest.mark.django_db
