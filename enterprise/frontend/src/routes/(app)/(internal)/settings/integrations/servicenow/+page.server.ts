@@ -14,28 +14,29 @@ const schema = z.object({
 	is_active: z.boolean().default(true),
 	webhook_secret: z.string().optional(),
 	credentials: z.object({
-		server_url: z.string().url(),
-		email: z.string().email(),
-		api_token: z.string().optional()
+		instance_url: z.string().url(),
+		username: z.string(),
+		password: z.string().optional()
 	}),
 	settings: z.object({
 		enable_outgoing_sync: z.boolean().default(false),
 		enable_incoming_sync: z.boolean().default(false),
-		project_key: z.string(),
-		issue_type: z.string().default('Task')
+		table_name: z.string(),
+		field_map: z.record(z.string(), z.any()).default({}).optional(),
+		value_map: z.record(z.string(), z.any()).default({}).optional()
 	})
 });
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
-	const response = await fetch(`${BASE_API_URL}/integrations/configs/?provider__name=jira`);
+	const response = await fetch(`${BASE_API_URL}/integrations/configs/?provider__name=servicenow`);
 	let config = {};
 	if (response.ok) {
 		config = await response.json().then((res) => res.results[0]);
 	}
 	if (!config) {
-		const providerResponse = await fetch(`${BASE_API_URL}/integrations/providers/?name=jira`);
+		const providerResponse = await fetch(`${BASE_API_URL}/integrations/providers/?name=servicenow`);
 		if (!providerResponse.ok) {
-			throw new Error('Failed to fetch Jira provider information');
+			throw new Error('Failed to fetch ServiceNow provider information');
 		}
 		const providerData = await providerResponse.json();
 		const provider = providerData.results[0];
@@ -48,9 +49,9 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 	return {
 		form,
 		config,
-		provider: 'jira',
+		provider: 'servicenow',
 		schema: JSON.stringify(schema),
-		title: m.jiraIntegrationConfig()
+		title: m.serviceNowIntegrationConfig()
 	};
 };
 
@@ -78,11 +79,14 @@ export const actions: Actions = {
 				});
 
 		if (!response.ok) {
-			console.error('Failed to save Jira integration config:', await response.text());
-			setFlash({ type: 'error', message: 'Failed to save Jira integration config' }, event);
+			console.error('Failed to save ServiceNow integration config:', await response.text());
+			setFlash({ type: 'error', message: 'Failed to save ServiceNow integration config' }, event);
 			return fail(400, { form: form });
 		}
-		setFlash({ type: 'success', message: 'Successfully saved Jira integration config' }, event);
+		setFlash(
+			{ type: 'success', message: 'Successfully saved ServiceNow integration config' },
+			event
+		);
 		return { form };
 	}
 };

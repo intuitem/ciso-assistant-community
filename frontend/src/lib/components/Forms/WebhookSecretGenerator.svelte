@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { copy } from '@svelte-put/copy';
-	import type { SuperForm } from 'sveltekit-superforms';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import TextField from './TextField.svelte';
 	import { page } from '$app/stores';
 
@@ -11,9 +11,11 @@
 	interface Props {
 		field: string;
 		form: SuperForm<any>;
+		valuePath?: any; // the place where the value is stored in the form. This is useful for nested objects
 	}
 
-	let { form, field = 'secret' }: Props = $props();
+	let { form, field = 'secret', valuePath = field }: Props = $props();
+	const { value, errors, constraints } = formFieldProxy(form, valuePath);
 
 	const formStore = form?.form;
 
@@ -27,7 +29,7 @@
 			.replace(/\//g, '_')
 			.replace(/=+$/, '');
 		generatedSecret = `whsec_${randomString}`;
-		$formStore.secret = generatedSecret;
+		$value = generatedSecret;
 	}
 
 	function copySecret() {
@@ -47,6 +49,7 @@
 		<TextField
 			{form}
 			{field}
+			{valuePath}
 			type="password"
 			label={m.secret()}
 			helpText={m.webhookSecretHelpText()}
