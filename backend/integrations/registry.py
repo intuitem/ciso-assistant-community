@@ -1,6 +1,5 @@
 from typing import Type, Optional
-from django.utils.module_loading import import_string
-import logging
+import structlog
 
 from integrations.models import IntegrationConfiguration
 
@@ -10,7 +9,7 @@ from .base import (
     BaseSyncOrchestrator,
 )
 
-logger = logging.getLogger(__name__)
+logger = structlog.getLogger(__name__)
 
 
 class IntegrationProvider:
@@ -180,10 +179,15 @@ class IntegrationRegistry:
         if hasattr(configuration, "provider"):
             provider_name = configuration.provider.name
         else:
+            logger.error(
+                "Configuration has no provider attribute",
+                config_id=configuration.id,
+            )
             raise ValueError("Configuration must have a provider")
 
         provider = cls.get_provider(provider_name)
         if not provider:
+            logger.error("Provider not registered", provider=provider_name)
             raise ValueError(f"Provider {provider_name} is not registered")
 
         return provider.create_orchestrator(configuration)
