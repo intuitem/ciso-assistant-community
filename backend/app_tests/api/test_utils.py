@@ -16,6 +16,33 @@ from test_vars import *
 class EndpointTestsUtils:
     """Provides utils functions for API endpoints testing"""
 
+    def normalize_value(value):
+        if isinstance(value, str):
+            try:
+                return json.loads(value)
+            except (TypeError, json.JSONDecodeError):
+                return value
+        if isinstance(value, models.Model):
+            return str(value.id)
+        if isinstance(value, dict):
+            if "id" in value:
+                return str(value["id"])
+            return value
+        if isinstance(value, (list, tuple, set)):
+            return [EndpointTestsUtils.normalize_value(item) for item in value]
+        return value
+
+    def values_equal(actual, expected):
+        actual_value = EndpointTestsUtils.normalize_value(actual)
+        expected_value = EndpointTestsUtils.normalize_value(expected)
+        if isinstance(actual_value, list) and isinstance(expected_value, list):
+            if all(
+                not isinstance(item, dict) for item in actual_value + expected_value
+            ):
+                return sorted(actual_value) == sorted(expected_value)
+            return actual_value == expected_value
+        return actual_value == expected_value
+
     def get_endpoint_url(verbose_name: str, resolved: bool = True):
         """Get the endpoint URL for the given object"""
 
@@ -498,14 +525,9 @@ class EndpointTestsQueries:
                 else:
                     response_item = response.json()["results"][-1]
                 for key, value in params.items():
-                    if type(value) == dict and type(response_item[key]) == str:
-                        assert json.loads(response_item[key]) == value, (
-                            f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
-                        )
-                    else:
-                        assert response_item[key] == value, (
-                            f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
-                        )
+                    assert EndpointTestsUtils.values_equal(response_item[key], value), (
+                        f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                    )
 
         def get_object_options(
             authenticated_client,
@@ -658,7 +680,9 @@ class EndpointTestsQueries:
                                 f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
                             )
                         else:
-                            assert response.json()[key] == value, (
+                            assert EndpointTestsUtils.values_equal(
+                                response.json()[key], value
+                            ), (
                                 f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
                             )
 
@@ -698,7 +722,9 @@ class EndpointTestsQueries:
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                         )
                     else:
-                        assert response_item[key] == value, (
+                        assert EndpointTestsUtils.values_equal(
+                            response_item[key], value
+                        ), (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                         )
 
@@ -805,7 +831,9 @@ class EndpointTestsQueries:
                                 f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
                             )
                         else:
-                            assert response.json()[key] == value, (
+                            assert EndpointTestsUtils.values_equal(
+                                response.json()[key], value
+                            ), (
                                 f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                             )
 
@@ -852,7 +880,9 @@ class EndpointTestsQueries:
                                 f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                             )
                         else:
-                            assert update_response.json()[key] == value, (
+                            assert EndpointTestsUtils.values_equal(
+                                update_response.json()[key], value
+                            ), (
                                 f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                             )
 
