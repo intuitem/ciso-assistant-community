@@ -61,7 +61,7 @@ erDiagram
     ROOT_FOLDER           ||--o{ USER_GROUP                  : contains
     ROOT_FOLDER           ||--o{ ROLE                        : contains
     ROOT_FOLDER           ||--o{ ROLE_ASSIGNMENT             : contains
-    ROOT_FOLDER           ||--o{ LABEL                       : contains
+    ROOT_FOLDER           ||--o{ FILTERING_LABEL             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ EVIDENCE                    : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ APPLIED_CONTROL             : contains
@@ -150,6 +150,7 @@ erDiagram
     USER                         }o--o{ ASSET                 : owns
     USER                         }o--o{ INCIDENT              : owns
     ASSET                        ||--o{ SECURITY_OBJECTIVE    : has
+    ASSET                        }o--o{ ASSET                 : has_parent
     SECURITY_OBJECTIVE           }o--|| QUALIFICATION         : implements
     PERIMETER                    |o--o{ COMPLIANCE_ASSESSMENT : contains
     PERIMETER                    |o--o{ RISK_ASSESSMENT       : contains
@@ -198,8 +199,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
 
         string[]    selected_implementation_groups
@@ -217,8 +218,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
     }
 
@@ -340,7 +341,7 @@ erDiagram
         string  provider
         json    translations
 
-        json    definition
+        json    json_definition
     }
 
     ASSET {
@@ -348,11 +349,9 @@ erDiagram
         string description
         string business_value
         string type
-        asset  parent_asset
         url    reference_link
-        int    rto
-        int    rpo
-        int    mtd
+        json   security_objectives
+        json   disaster_recovery_objectives // contient rto, rpo, mtd, ...
     }
 
     RISK_SCENARIO {
@@ -420,8 +419,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
 
         string      category
@@ -475,24 +474,24 @@ erDiagram
 
 ```
 
-### Labels
+### Filtering labels
 
-All objects can be linked to user-defined labels. Labels are simple strings with no blank, regex r"\w{0:36}".
+All objects can be linked to user-defined filtering labels. Labels are simple strings with no blank, regex r"\w{0:36}".
 
 Labels are attached to the root folder. They can be read by everyone, added by any contributor, and modified or deleted only by global administrators.
 
 ```mermaid
 erDiagram
-    ANY_USER_DEFINED_OBJECT   }o--o{ LABEL : has_label
+    ANY_USER_DEFINED_OBJECT   }o--o{ FILTERING_LABEL : has_label
 
-    LABEL {
+    FILTERING_LABEL {
         string  label
     }
 ```
 
 In all views and analytics, a filter on label shall be displayed.
 
-Note: For now, labels are attached to the following objects: vulnerabilities, assets, findings, threats, reference controls, applied controls.
+Note: For now, filtering labels are attached to the following objects: vulnerabilities, assets, findings, threats, reference controls, applied controls.
 
 ## Global fields
 
@@ -766,7 +765,7 @@ Both types of assessments have common fields:
 - an observation
 - an is_locked boolean
 
-An assessment review can be asked. When at least one principal is defined, the _done_ status can only be set if a representant of each principal has reviewed and validated the assessment.
+An assessment review can be asked. When at least one reviewer is defined, the _done_ status can only be set if a representant of each reviewer has reviewed and validated the assessment.
 
 When the assessment status goes from _in progress_ to _in review_, each defined reviewer is notified of the review request.
 A review is deprecated if the assessment is changed. A warning shall be displayed to avoid doing that by error.
@@ -1073,7 +1072,7 @@ Once a risk acceptance is active, the correponding risk assessments are frozen. 
 
 Security exceptions are used to trace assumed non-compliances, whether for assets, requirement assessments, risk scenarios, applied controls, vulnerabilities, or even something not linked to an existing object.
 
-Security exceptions can have zero, one or several owners.
+Security exceptions can have zero, one or several owners (actors).
 Security exceptions can have zero, or one approver.
 
 Security exceptions can be mitigated by applied controls.
@@ -1102,7 +1101,7 @@ Significant security incidents can be traced in CISO Assistant. An incident obje
 - severity (like security exceptions)
 - status: new/in progress/solved/closed/rejected
 
-Incidents can be linked to threats, assets, owners.
+Incidents can be linked to threats, assets, owners (actors).
 
 Incidents contain a table of timeline_entry objects.
 
@@ -1414,8 +1413,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
 
         string      conclusion
@@ -1549,7 +1548,7 @@ The object feared events (workshop 1) contains the following fields:
 - description
 - list of impact qualifications
 - gravity (from the risk matrix impact scale)
-- selected
+- is_selected
 - justification
 
 The object risk_origin_target_objective (workshop 2) contains the following fields:
@@ -1560,7 +1559,7 @@ The object risk_origin_target_objective (workshop 2) contains the following fiel
 - resources (--/1 limited/2 significant/3 important/4 unlimited) (--/limitées/significatives/importantes/illimitées)
 - pertinence (--/1 Irrelevant/2 partially relevant/3 fairly relevant/4 highly relevant) (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent) -> calculated
 - activity (--/1/2/3/4)
-- selected
+- is_selected
 - justification
 
 The object ecosystem entity (workshop 3) links to a TPRM entity, and contains the following fields:
@@ -1571,7 +1570,7 @@ The object ecosystem entity (workshop 3) links to a TPRM entity, and contains th
 - Penetration
 - Cyber maturity
 - trust
-- selected
+- is_selected
 - justification
 
 The object strategic attack path (workshop 3) contains the following fields:
@@ -1582,7 +1581,7 @@ The object strategic attack path (workshop 3) contains the following fields:
 - intial threat level
 - Controls
 - residual threat level
-- selected
+- is_selected
 - justification
 
 THe object operational scenario (workshop 4) contains the following fields:
@@ -1591,7 +1590,7 @@ THe object operational scenario (workshop 4) contains the following fields:
 - list of techniques/threats (typically from Mitre Att@ck)
 - description
 - likelihood
-- selected
+- is_selected
 - justification
 
 The frontend for risk study shall propose the following steps:
@@ -1661,8 +1660,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
     }
 
@@ -1671,7 +1670,7 @@ erDiagram
         string name
         string description
         int    gravity
-        bool   selected
+        bool   is_selected
         string justification
     }
 
@@ -1681,7 +1680,7 @@ erDiagram
         int    motivation
         int    resources
         int    activity
-        bool   selected
+        bool   is_selected
         string justification
     }
 
@@ -1695,7 +1694,7 @@ erDiagram
         int    residual_penetration
         int    residual_maturity
         int    residual_trust
-        bool   selected
+        bool   is_selected
         string justification
     }
 
@@ -1709,14 +1708,14 @@ erDiagram
         string ref_id
         string name
         string description
-        bool   selected
+        bool   is_selected
         string justification
     }
 
     OPERATIONAL_SCENARIO {
         string operating_modes_description
         int    likelihood
-        bool   selected
+        bool   is_selected
         string justification
     }
 
@@ -1903,8 +1902,8 @@ CAMPAIGN {
     date        eta
     date        due_date
     string      status
-    principal[] author
-    principal[] reviewer
+    actor[]     author
+    actor[]     reviewer
     string      observation
 }
 
@@ -1941,7 +1940,7 @@ QUANT_HYPOTHESIS      }o--|| QUANT_SCENARIO        : applies_to
 QUANT_HYPOTHESIS      }o--o{ APPLIED_CONTROL       : removes
 QUANT_HYPOTHESIS      }o--o{ APPLIED_CONTROL       : adds
 QUANT_HYPOTHESIS      }o--o{ APPLIED_CONTROL       : already_contains
-QUANT_HYPOTHESIS      }o--o{ LABEL                 : contains
+QUANT_HYPOTHESIS      }o--o{ FILTERING_LABEL       : contains
 QUANT_AGGREGATION     }o--o{ QUANT_HYPOTHESIS      : contains
 
 QUANT_STUDY {
@@ -1952,8 +1951,8 @@ QUANT_STUDY {
     date        eta
     date        due_date
     string      status
-    principal[] author
-    principal[] reviewer
+    actor[]     author
+    actor[]     reviewer
     string      observation
 }
 
@@ -2012,6 +2011,79 @@ Notes for MVP:
 - the proability is entered as a percentage
 - the reference period is hardcoded to year
 - aggregations are not implemented
+
+## Asset / Actors evolution
+
+```mermaid
+erDiagram
+
+ACTOR          }o--o| USER       : contains
+ACTOR          }o--o| USER_GROUP : contains
+ACTOR          }o--o| ENTITY     : contains
+ACTOR          }o--o{ ASSET      : owns
+
+ACTOR {
+    string      ref_id
+    string      name
+    string      description
+    string      actor_type
+    user        deputy
+}
+
+ENTITY {
+    string  name
+    string  description
+    string  missions
+    url     reference_link
+    string  entity_type
+}
+
+ASSET {
+    string  name
+    string  description
+    string  business_value
+    string  type
+    url     reference_link
+    json    security_objectives
+    json    disaster_recovery_objectives
+    json    security_capabilities
+    json    disaster_recovery_capabilities
+    boolean inherit_objectives
+    boolean intherit_capabilities
+}
+
+ASSET_RELATION {
+    string  description
+    asset   source
+    asset   destination
+    string  relation_type
+    string  asset_type
+    json    security_objectives_propagation
+    json    disaster_recovery_objectives_propagation
+}
+
+```
+
+- Actors are used for ownership of objects, instead of using users directly.
+- actor_type is a string among USER | USER_GROUP | ENTITY | TEAM
+- if actor_type = TEAM, then:
+  -  the main user is the leader
+  -  the deputy can be defined
+  -  members of the team are defined by the user_group, and this group shall contain the leader and deputy.
+- entity_type indicates if this is a legal entity, a natural person or none of this (e.g. a division/branch of another entity).
+- relation_type can be DEPENDS_ON | HAS_ACCESS | LOCATED_IN
+- asset_type can be PRIMARY | SUPPORT | LOCATION | IDENTITY
+- if inherit_objectives is true, then the objectives are calculated from the ascendant assets, and local objectives are ignored.
+- if inherit_capabilities is true, then the capabilities are calculated from the descendant assets, and local capabilities are ignored.
+
+### Migration
+
+The new model is a superset of the current model, so it is possible to migrate properly.
+- parent relations are transformed in explicit asset relations
+- overridden_children_capabilities are mapped to security_objectives_propagation and disaster_recovery_objectives_propagation
+- inherit_objectives = true for supporting assets, false for primary assets
+- intherit_capabilities = true for primary assets, false for supporting assets (TBC)
+
 
 ## DORA support
 
