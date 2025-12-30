@@ -125,7 +125,7 @@
 			onValueChange={(e) => {
 				group = e.value;
 			}}
-			listJustify="justify-center"
+			listJustify="justify-center flex flex-wrap gap-2"
 		>
 			{#snippet list()}
 				{#each Object.entries(data.relatedModels).sort( ([a], [b]) => a.localeCompare(b) ) as [urlmodel, model]}
