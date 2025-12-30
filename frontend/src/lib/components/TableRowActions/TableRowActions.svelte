@@ -215,6 +215,7 @@
 						stopPropagation(e);
 					}}
 					class="cursor-pointer hover:text-primary-500"
+					aria-label={m.delete()}
 					data-testid="tablerow-delete-button"><i class="fa-solid fa-trash"></i></button
 				>
 			{:else}
@@ -229,6 +230,7 @@
 						stopPropagation(e);
 					}}
 					class="cursor-pointer hover:text-primary-500"
+					aria-label={m.delete()}
 					data-testid="tablerow-delete-button"><i class="fa-solid fa-trash"></i></button
 				>
 			{/if}
