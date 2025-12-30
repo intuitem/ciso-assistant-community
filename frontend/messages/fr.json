@@ -846,7 +846,7 @@
 	"thirdParty": "Tiers",
 	"thirdPartyCategory": "Gestion des tiers",
 	"thirdPartyDescription": "Gestion des entités tierces ainsi que leurs représentants, solutions et contrats associés",
-	"thirdPatiesImportHelpText": "Import des entités, solutions et contrats selon le format Excel multi-onglets",
+	"thirdPartiesImportHelpText": "Import des entités, solutions et contrats selon le format Excel multi-onglets",
 	"entityAssessment": "Évaluation de l'entité",
 	"entityAssessments": "Évaluations des entités",
 	"addEntityAssessment": "Ajouter une évaluation d'entité",

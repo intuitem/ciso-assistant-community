@@ -54,7 +54,7 @@
 		{
 			id: 'TPRM',
 			label: m.thirdPartyCategory(),
-			description: m.thirdPatiesImportHelpText()
+			description: m.thirdPartiesImportHelpText()
 		},
 		{
 			id: 'EbiosRMStudyARM',

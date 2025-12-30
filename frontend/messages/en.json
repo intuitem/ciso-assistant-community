@@ -895,7 +895,7 @@
 	"thirdParty": "Third party",
 	"thirdPartyCategory": "Third parties",
 	"thirdPartyDescription": "Management of third-party entities and their representatives, contracts, solutions and assessments.",
-	"thirdPatiesImportHelpText": "Import entities, solutions and contracts of your third parties from the multi-sheet excel template",
+	"thirdPartiesImportHelpText": "Import entities, solutions and contracts of your third parties from the multi-sheet excel template",
 	"entityAssessment": "Entity assessment",
 	"entityAssessments": "Entity assessments",
 	"addEntityAssessment": "Add entity assessment",
