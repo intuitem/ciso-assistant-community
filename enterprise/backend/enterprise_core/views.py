@@ -495,18 +495,3 @@ class LogEntryViewSet(
                 )
             ),
         )
-
-
-class RoleOrderingFilter(filters.OrderingFilter):
-    def filter_queryset(self, request, queryset, view):
-        ordering = self.get_ordering(request, queryset, view)
-        if not ordering:
-            return queryset
-
-        if len(ordering) == 1 and ordering[0].lstrip("-") == "name":
-            reverse = ordering[0].startswith("-")
-            data = list(queryset)
-            data.sort(key=lambda role: str(role).casefold(), reverse=reverse)
-            return data
-
-        return super().filter_queryset(request, queryset, view)
