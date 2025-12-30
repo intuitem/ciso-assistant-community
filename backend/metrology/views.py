@@ -66,6 +66,7 @@ class MetricInstanceViewSet(BaseModelViewSet):
         "collection_frequency",
         "owner",
         "filtering_labels",
+        "organisation_objectives",
     ]
     search_fields = ["name", "description", "ref_id"]
 

@@ -4612,6 +4612,12 @@ class OrganisationObjective(
     )
     eta = models.DateField(blank=True, null=True, verbose_name=_("ETA"))
     due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    metrics = models.ManyToManyField(
+        "metrology.MetricInstance",
+        verbose_name="Tracking metrics",
+        blank=True,
+        related_name="organisation_objectives",
+    )
     fields_to_check = ["name"]
 
     class Meta:
