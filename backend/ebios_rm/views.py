@@ -1,6 +1,10 @@
 import django_filters as df
 from core.serializers import RiskMatrixReadSerializer
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    GenericFilterSet,
+    CustomOrderingFilter,
+)
 from core.models import Terminology
 from iam.models import RoleAssignment
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
@@ -22,6 +26,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 from django.shortcuts import get_object_or_404
 
@@ -612,6 +618,15 @@ class StakeholderFilter(df.FilterSet):
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
     filterset_class = StakeholderFilter
+    search_fields = ["entity__name", "category__name"]
+
+    ordering_mapping = {"entity": "entity__name"}
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        CustomOrderingFilter,
+    ]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
