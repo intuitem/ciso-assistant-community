@@ -464,7 +464,11 @@ class RevokeOtherSessionsView(views.APIView):
             AuthToken.objects.filter(user_id=user_id)
             .exclude(
                 Q(digest=digest)
-                | Exists(PersonalAccessToken.objects.filter(auth_token=OuterRef("pk")))
+                | Q(
+                    Exists(
+                        PersonalAccessToken.objects.filter(auth_token=OuterRef("pk"))
+                    )
+                )
             )
             .delete()
         )
