@@ -73,6 +73,19 @@ class BaseModelSerializer(serializers.ModelSerializer):
                 self.fields.pop(field_name)
 
     def update(self, instance: models.Model, validated_data: Any) -> models.Model:
+        if (
+            getattr(instance, "builtin", False)
+            and hasattr(instance, "folder_id")
+            and ("folder" in validated_data or "folder_id" in validated_data)
+        ):
+            new_folder = validated_data.get("folder", validated_data.get("folder_id"))
+            new_folder_id = (
+                new_folder.id if isinstance(new_folder, models.Model) else new_folder
+            )
+            if new_folder_id and str(new_folder_id) != str(instance.folder_id):
+                raise PermissionDenied(
+                    {"folder": "Builtin objects cannot change folder"}
+                )
         if hasattr(instance, "urn") and getattr(instance, "urn"):
             raise PermissionDenied({"urn": "Imported objects cannot be modified"})
         try:
@@ -255,6 +268,16 @@ class PerimeterWriteSerializer(BaseModelSerializer):
                 "The name cannot contain '/' for a Perimeter."
             )
         return value
+
+    def update(self, instance, validated_data):
+        new_folder = validated_data.get("folder", None)
+        if new_folder is not None:
+            new_folder_id = (
+                new_folder.id if isinstance(new_folder, models.Model) else new_folder
+            )
+            if new_folder_id and str(new_folder_id) != str(instance.folder_id):
+                raise PermissionDenied({"folder": "Perimeter domain cannot be changed"})
+        return super().update(instance, validated_data)
 
     class Meta:
         model = Perimeter

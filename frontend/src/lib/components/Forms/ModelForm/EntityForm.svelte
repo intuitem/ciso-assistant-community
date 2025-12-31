@@ -73,6 +73,7 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
+	disabled={object.builtin}
 />
 {#if !object.builtin}
 	<AutocompleteSelect
