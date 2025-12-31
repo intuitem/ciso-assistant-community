@@ -3267,5 +3267,14 @@
 	"viewUsergroup": "Voir un groupe d'utilisateurs",
 	"viewValidationflow": "Voir un flux de validation",
 	"viewWebhookendpoint": "Voir un point de terminaison webhook",
-	"objectsNotVisible": "{count} objet{s} non visible."
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} objet non visible.",
+				"countPlural=other": "{count} objets non visible."
+			}
+		}
+	]
 }
