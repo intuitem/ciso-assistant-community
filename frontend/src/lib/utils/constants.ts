@@ -50,6 +50,7 @@ export const complianceStatusTailwindColorMap = {
 };
 
 export const extendedResultColorMap: { [key: string]: string } = {
+	not_set: '#d1d5db',
 	major_nonconformity: '#dc2626',
 	minor_nonconformity: '#f97316',
 	observation: '#eab308',
