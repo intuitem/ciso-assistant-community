@@ -82,6 +82,16 @@
 		bind:cachedValue={formDataCache['health']}
 	/>
 
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="metric-instances"
+		field="metrics"
+		optionsExtraFields={[['folder', 'str']]}
+		cacheLock={cacheLocks['metrics']}
+		bind:cachedValue={formDataCache['metrics']}
+		label={m.metricInstances()}
+	/>
 	<TextField
 		type="date"
 		{form}

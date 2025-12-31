@@ -27,8 +27,6 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
         return True
 
     def has_object_permission(self, request: Request, view, obj):
-        if obj == request.user:
-            return True
         if not request.method:
             return False
 
@@ -49,6 +47,9 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
             _codename = permission_overrides.get(current_action, _codename)
 
         perm = Permission.objects.get(codename=_codename)
+
+        if obj == request.user and perm.codename == "view_user":
+            return True
 
         return RoleAssignment.is_access_allowed(
             user=request.user,

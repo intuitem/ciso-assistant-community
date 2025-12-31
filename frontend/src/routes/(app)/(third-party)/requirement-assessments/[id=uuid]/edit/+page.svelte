@@ -626,6 +626,7 @@
 						options={page.data.model.selectOptions['status']}
 						field="status"
 						label={m.status()}
+						helpText={m.requirementAssessmentStatusHelpText()}
 					/>
 					{#if computedResult}
 						<p class="flex flex-row items-center space-x-4">
@@ -645,6 +646,16 @@
 							options={page.data.model.selectOptions['result']}
 							field="result"
 							label={m.result()}
+							helpText={m.requirementAssessmentResultHelpText()}
+						/>
+					{/if}
+					{#if page.data.requirementAssessment.compliance_assessment.extended_result_enabled}
+						<Select
+							{form}
+							options={page.data.model.selectOptions['extended_result']}
+							field="extended_result"
+							label={m.extendedResult()}
+							helpText={m.extendedResultHelpText()}
 						/>
 					{/if}
 					{#if computedScore !== null}

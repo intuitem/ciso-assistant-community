@@ -14,6 +14,10 @@
 		isScored: boolean;
 		showDocumentationScore: boolean;
 		max_score: number;
+		progressStatusEnabled?: boolean;
+		extendedResultEnabled?: boolean;
+		extendedResult?: string | null;
+		extendedResultColor?: string | null;
 	}
 
 	let {
@@ -26,23 +30,35 @@
 		documentationScore,
 		isScored,
 		showDocumentationScore,
-		max_score
+		max_score,
+		progressStatusEnabled = true,
+		extendedResultEnabled = false,
+		extendedResult = null,
+		extendedResultColor = null
 	}: Props = $props();
 
 	const leadResult = safeTranslate(resultI18n);
 	const lead = safeTranslate(statusI18n);
+	const leadExtendedResult = extendedResult ? safeTranslate(extendedResult) : null;
 
 	let classesText = $derived(resultColor == '#000000' ? 'text-white' : '');
 </script>
 
 {#if assessable}
 	<div class="flex flex-row space-x-2 items-center">
-		<span class="badge h-fit" style="color: {statusColor ?? '#d1d5db'};">
-			{lead}
-		</span>
+		{#if progressStatusEnabled}
+			<span class="badge h-fit" style="color: {statusColor ?? '#d1d5db'};">
+				{lead}
+			</span>
+		{/if}
 		<span class="badge {classesText} h-fit" style="background-color: {resultColor ?? '#d1d5db'};">
 			{leadResult}
 		</span>
+		{#if extendedResultEnabled && leadExtendedResult && extendedResultColor}
+			<span class="badge text-white h-fit" style="background-color: {extendedResultColor};">
+				{leadExtendedResult}
+			</span>
+		{/if}
 		{#if resultI18n !== 'notApplicable' && isScored}
 			<ProgressRing
 				strokeWidth="20px"

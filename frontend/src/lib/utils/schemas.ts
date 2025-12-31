@@ -346,6 +346,7 @@ export const RequirementAssessmentSchema = z.object({
 	answers: jsonSchema,
 	status: z.string(),
 	result: z.string(),
+	extended_result: z.string().optional().nullable(),
 	is_scored: z.boolean().optional(),
 	score: z.number().optional().nullable(),
 	documentation_score: z.number().optional().nullable(),
@@ -430,6 +431,8 @@ export const ComplianceAssessmentSchema = z.object({
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
 	show_documentation_score: z.boolean().optional().default(false),
+	extended_result_enabled: z.boolean().optional().default(false),
+	progress_status_enabled: z.boolean().optional().default(true),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
@@ -885,6 +888,7 @@ export const organisationObjectiveSchema = z.object({
 	issues: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	tasks: z.string().uuid().optional().array().optional(),
+	metrics: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
@@ -1359,6 +1363,7 @@ export const MetricInstanceSchema = z.object({
 	owner: z.array(z.string().uuid().optional()).optional(),
 	target_value: z.coerce.number().optional().nullable(),
 	collection_frequency: z.string().optional().nullable(),
+	organisation_objectives: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional()
 });
 
