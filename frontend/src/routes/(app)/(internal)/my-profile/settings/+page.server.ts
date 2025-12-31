@@ -91,7 +91,16 @@ export const actions: Actions = {
 		}
 
 		// Revoke all user sessions (except the one which activated the TOTP)
-		event.fetch(`${BASE_API_URL}/iam/revoke-sessions/`, { method: 'POST' });
+		try {
+			const revokeResponse = await event.fetch(`${BASE_API_URL}/iam/revoke-sessions/`, {
+				method: 'POST'
+			});
+			if (!revokeResponse.ok) {
+				console.error('Failed to revoke other sessions', await revokeResponse.text());
+			}
+		} catch (error) {
+			console.error('Error revoking other sessions', error);
+		}
 
 		setFlash({ type: 'success', message: m.successfullyActivatedTOTP() }, event);
 		return { form };
