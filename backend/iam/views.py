@@ -451,6 +451,11 @@ class RevokeOtherSessionsView(views.APIView):
 
     def post(self, request, *args, **kwargs):
         auth_header = request.META.get("HTTP_AUTHORIZATION")
+        if not auth_header or " " not in auth_header:
+            return Response(
+                {"error": "Invalid authorization header"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         access_token = auth_header.split(" ")[1]
         digest = crypto.hash_token(access_token)
         user_id = str(request.user.id)
