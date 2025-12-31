@@ -444,7 +444,7 @@ class SetPasswordView(views.APIView):
 
 class RevokeOtherSessionsView(views.APIView):
     """
-    An endpoint for revoking all user sessions.
+    An endpoint for revoking all other user sessions (except the current one).
     """
 
     permission_classes = (permissions.IsAuthenticated,)
