@@ -20,7 +20,11 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
-	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import {
+		complianceResultColorMap,
+		complianceStatusColorMap,
+		extendedResultColorMap
+	} from '$lib/utils/constants';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
@@ -150,12 +154,14 @@
 	// reactive values that update whenever auditFiltersStore changes
 	let selectedStatus = $state([]);
 	let selectedResults = $state([]);
+	let selectedExtendedResults = $state([]);
 	let displayOnlyAssessableNodes = $state(false);
 	$effect(
 		() =>
 			({
 				selectedStatus = [],
 				selectedResults = [],
+				selectedExtendedResults = [],
 				displayOnlyAssessableNodes = false
 			} = $currentFilters)
 	);
@@ -178,13 +184,20 @@
 		auditFiltersStore.setResults(page.params.id, selectedResults);
 	}
 
+	function toggleExtendedResult(extendedResult) {
+		selectedExtendedResults = toggleItem(extendedResult, selectedExtendedResults);
+		auditFiltersStore.setExtendedResults(page.params.id, selectedExtendedResults);
+	}
+
 	function isNodeHidden(node: Node, displayOnlyAssessableNodes: boolean): boolean {
 		const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
 		return (
 			(displayOnlyAssessableNodes && !node.assessable && !hasAssessableChildren) ||
 			(node.assessable &&
 				((selectedStatus.length > 0 && !selectedStatus.includes(node.status)) ||
-					(selectedResults.length > 0 && !selectedResults.includes(node.result))))
+					(selectedResults.length > 0 && !selectedResults.includes(node.result)) ||
+					(selectedExtendedResults.length > 0 &&
+						!selectedExtendedResults.includes(node.extended_result))))
 		);
 	}
 	function transformToTreeView(nodes: Node[], hasParentNode: boolean = false) {
@@ -214,7 +227,11 @@
 					documentationScore: node.documentation_score,
 					isScored: node.is_scored,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
-					max_score: node.max_score
+					max_score: node.max_score,
+					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,
+					extendedResultEnabled: data.compliance_assessment.extended_result_enabled,
+					extendedResult: node.extended_result,
+					extendedResultColor: extendedResultColorMap[node.extended_result]
 				},
 				children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
 			};
@@ -419,6 +436,7 @@
 	let filterCount = $derived(
 		(selectedStatus.length > 0 ? 1 : 0) +
 			(selectedResults.length > 0 ? 1 : 0) +
+			(selectedExtendedResults.length > 0 ? 1 : 0) +
 			(displayOnlyAssessableNodes ? 1 : 0)
 	);
 </script>
@@ -513,12 +531,11 @@
 				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
-				<div class="flex w-1/3 relative">
+				<div class="flex w-1/4 relative">
 					{#if data.global_score.score >= 0}
-						<div class="absolute font-bold text-sm">{m.maturity()}</div>
-						<div class="flex justify-center items-center w-full">
+						<div class="flex flex-col justify-center items-center w-full">
 							<ProgressRing
-								strokeWidth="20px"
+								strokeWidth="18px"
 								meterStroke={displayScoreColor(
 									data.global_score.score,
 									data.global_score.max_score
@@ -528,10 +545,11 @@
 							>
 								<p class="font-semibold text-4xl">{data.global_score.score}</p>
 							</ProgressRing>
+							<div class="text-sm font-semibold py-2">{m.maturity()}</div>
 						</div>
 					{/if}
 				</div>
-				<div class="w-1/3">
+				<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
 					<DonutChart
 						s_label="Result"
 						name="compliance_result"
@@ -541,20 +559,39 @@
 						colors={compliance_assessment_donut_values.result.values.map(
 							(object) => object.itemStyle.color
 						)}
+						showPercentage={true}
 					/>
 				</div>
-				<div class="w-1/3">
-					<DonutChart
-						s_label="Status"
-						name="compliance_status"
-						title={m.progress()}
-						orientation="horizontal"
-						values={compliance_assessment_donut_values.status.values}
-						colors={compliance_assessment_donut_values.status.values.map(
-							(object) => object.itemStyle.color
-						)}
-					/>
-				</div>
+				{#if data.compliance_assessment.extended_result_enabled && compliance_assessment_donut_values.extended_result?.values?.length > 0}
+					<div class="w-1/4">
+						<DonutChart
+							s_label="Extended Result"
+							name="compliance_extended_result"
+							title={m.extendedResult()}
+							orientation="horizontal"
+							values={compliance_assessment_donut_values.extended_result.values}
+							colors={compliance_assessment_donut_values.extended_result.values.map(
+								(object) => object.itemStyle.color
+							)}
+							showPercentage={true}
+						/>
+					</div>
+				{/if}
+				{#if data.compliance_assessment.progress_status_enabled}
+					<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
+						<DonutChart
+							s_label="Status"
+							name="compliance_status"
+							title={m.progress()}
+							orientation="horizontal"
+							values={compliance_assessment_donut_values.status.values}
+							colors={compliance_assessment_donut_values.status.values.map(
+								(object) => object.itemStyle.color
+							)}
+							showPercentage={true}
+						/>
+					</div>
+				{/if}
 			{/key}
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
@@ -813,25 +850,50 @@
 							{/each}
 						</div>
 					</div>
-					<div>
-						<span class="text-sm font-bold">{m.status()}</span>
-						<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-							{#each Object.entries(complianceStatusColorMap) as [status, color]}
-								<button
-									type="button"
-									onclick={() => toggleStatus(status)}
-									class="px-2 py-1 rounded-md font-bold"
-									style="background-color: {selectedStatus.includes(status)
-										? color + '44'
-										: 'grey'}; color: {selectedStatus.includes(status)
-										? darkenColor(color, 0.3)
-										: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
-								>
-									{safeTranslate(status)}
-								</button>
-							{/each}
+					{#if data.compliance_assessment.progress_status_enabled}
+						<div>
+							<span class="text-sm font-bold">{m.status()}</span>
+							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+								{#each Object.entries(complianceStatusColorMap) as [status, color]}
+									<button
+										type="button"
+										onclick={() => toggleStatus(status)}
+										class="px-2 py-1 rounded-md font-bold"
+										style="background-color: {selectedStatus.includes(status)
+											? color + '44'
+											: 'grey'}; color: {selectedStatus.includes(status)
+											? darkenColor(color, 0.3)
+											: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+									>
+										{safeTranslate(status)}
+									</button>
+								{/each}
+							</div>
 						</div>
-					</div>
+					{/if}
+					{#if data.compliance_assessment.extended_result_enabled}
+						<div>
+							<span class="text-sm font-bold">{m.extendedResult()}</span>
+							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+								{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
+									<button
+										type="button"
+										onclick={() => toggleExtendedResult(extendedResult)}
+										class="px-2 py-1 rounded-md font-bold"
+										style="background-color: {selectedExtendedResults.includes(extendedResult)
+											? color
+											: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
+											extendedResult
+										)
+											? 1
+											: 0.3};"
+									>
+										{safeTranslate(extendedResult)}
+									</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
 					<div>
 						<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
 						<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
@@ -862,7 +924,7 @@
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults}
+			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults || selectedExtendedResults}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes
