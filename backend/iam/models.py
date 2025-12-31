@@ -1,13 +1,14 @@
 """IAM model for CISO Assistant
 Inspired from Azure IAM model"""
 
+from __future__ import annotations
 from collections import defaultdict
-from typing import Any, List, Self, Tuple, Generator
+from dataclasses import dataclass
+from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Self
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
 from django.db import models, transaction
-from django.db.models import Q, F, Prefetch
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
@@ -46,6 +47,21 @@ logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
 from allauth.mfa.models import Authenticator
+from iam.cache_builders import (
+    get_folder_state,
+    get_roles_state,
+    get_groups_state,
+    get_assignments_state,
+    get_sub_folders_cached,
+    get_parent_folders_cached,
+    get_folder_path,
+    invalidate_folders_cache,
+    invalidate_roles_cache,
+    invalidate_groups_cache,
+    invalidate_assignments_cache,
+    iter_descendant_ids,
+)
+
 
 ALLOWED_PERMISSION_APPS = (
     "core",
@@ -89,12 +105,9 @@ class Folder(NameDescriptionMixin):
         return _get_root_folder()
 
     @staticmethod
-    def get_root_folder_id() -> uuid.UUID:
-        """class function for general use"""
-        try:
-            return _get_root_folder().id
-        except:
-            return _get_root_folder()
+    def get_root_folder_id() -> uuid.UUID | None:
+        root = _get_root_folder()
+        return root.id if root else None
 
     class ContentType(models.TextChoices):
         """content type for a folder"""
@@ -134,32 +147,31 @@ class Folder(NameDescriptionMixin):
     def __str__(self) -> str:
         return self.name.__str__()
 
+    def save(self, *args, **kwargs):
+        result = super().save(*args, **kwargs)
+        invalidate_folders_cache()
+        return result
+
+    def delete(self, *args, **kwargs):
+        result = super().delete(*args, **kwargs)
+        invalidate_folders_cache()
+        return result
+
     def get_sub_folders(self) -> Generator[Self, None, None]:
-        """Return the list of subfolders"""
-
-        def sub_folders_in(folder):
-            for sub_folder in folder.folder_set.all():
-                yield sub_folder
-                yield from sub_folders_in(sub_folder)
-
-        yield from sub_folders_in(self)
+        """Return the list of subfolders through the cached tree."""
+        yield from get_sub_folders_cached(self.id)
 
     # Should we update data-model.md now that this method is a generator ?
     def get_parent_folders(self) -> Generator[Self, None, None]:
         """Return the list of parent folders"""
-        current_folder = self
-        while (current_folder := current_folder.parent_folder) is not None:
-            yield current_folder
+        yield from get_parent_folders_cached(self.id)
 
     def get_folder_full_path(self, *, include_root: bool = False) -> list[Self]:
         """
         Get the full path of the folder including its parents.
         If include_root is True, the root folder is included in the path.
         """
-        folders = ([self] + [f for f in self.get_parent_folders()])[::-1]
-        if include_root:
-            return folders
-        return folders[1:] if len(folders) > 1 else folders
+        return get_folder_path(self.id, include_root=include_root)
 
     @staticmethod
     def _navigate_structure(start, path):
@@ -394,6 +406,18 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
             if self.builtin
             else self.name,
         }
+
+    def save(self, *args, **kwargs):
+        result = super().save(*args, **kwargs)
+        invalidate_groups_cache()
+        invalidate_assignments_cache()  # because RoleAssignment points to groups
+        return result
+
+    def delete(self, *args, **kwargs):
+        result = super().delete(*args, **kwargs)
+        invalidate_groups_cache()
+        invalidate_assignments_cache()
+        return result
 
     @property
     def permissions(self):
@@ -812,12 +836,46 @@ class Role(NameDescriptionMixin, FolderMixin):
     )
     builtin = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        result = super().save(*args, **kwargs)
+        invalidate_roles_cache()
+        return result
+
+    def delete(self, *args, **kwargs):
+        result = super().delete(*args, **kwargs)
+        invalidate_roles_cache()
+        return result
+
     def __str__(self) -> str:
         if self.builtin:
             return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
         return self.name
 
     fields_to_check = ["name"]
+
+
+def _iter_assignment_lites_for_user(user: AbstractBaseUser | AnonymousUser):
+    """
+    Yield AssignmentLite for a user, including via groups, using caches only.
+    Returns empty iterator for AnonymousUser / unauthenticated.
+    """
+    if not getattr(user, "is_authenticated", False) or not getattr(user, "id", None):
+        return iter(())
+
+    assignments_state = get_assignments_state()
+    groups_state = get_groups_state()
+
+    user_id = user.id
+    group_ids = groups_state.user_group_ids.get(user_id, frozenset())
+
+    # user direct
+    direct = assignments_state.by_user.get(user_id, ())
+    # via groups
+    via_groups = []
+    for gid in group_ids:
+        via_groups.extend(assignments_state.by_group.get(gid, ()))
+
+    return iter((*direct, *via_groups))
 
 
 class RoleAssignment(NameDescriptionMixin, FolderMixin):
@@ -833,6 +891,16 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name=_("Role"))
     is_recursive = models.BooleanField(_("sub folders are visible"), default=False)
     builtin = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        result = super().save(*args, **kwargs)
+        invalidate_assignments_cache()
+        return result
+
+    def delete(self, *args, **kwargs):
+        result = super().delete(*args, **kwargs)
+        invalidate_assignments_cache()
+        return result
 
     def __str__(self) -> str:
         # pragma pylint: disable=no-member
@@ -854,22 +922,44 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         user: AbstractBaseUser | AnonymousUser, perm: Permission, folder: Folder
     ) -> bool:
         """
-        Determines if a user has specified permission on a specified folder
+        Determines if a user has specified permission on a specified folder.
+        Cached path:
+        - role permissions: Roles cache
+        - assignments: Assignments cache (+ groups cache)
+        - folder ancestry: Folder cache
         """
-        add_tag_permission = Permission.objects.get(codename="add_filteringlabel")
-        for ra in RoleAssignment.get_role_assignments(user):
-            if (
-                (perm == add_tag_permission) and perm in ra.role.permissions.all()
-            ):  # Allow any user to add tags if he has the permission
+        if not getattr(user, "is_authenticated", False):
+            return False
+
+        perm_codename = perm.codename
+        if not perm_codename:
+            return False
+
+        state = get_folder_state()
+        roles_state = get_roles_state()
+
+        # Special-case preserved from your code (but now codename based)
+        add_tag_codename = "add_filteringlabel"
+
+        for a in _iter_assignment_lites_for_user(user):
+            role_perms = roles_state.role_permissions.get(a.role_id, frozenset())
+
+            if perm_codename not in role_perms:
+                continue
+
+            # allow any folder if user has add_filteringlabel in role (your old behavior)
+            if perm_codename == add_tag_codename:
                 return True
-            f = folder
-            while f is not None:
-                if (
-                    f in ra.perimeter_folders.all()
-                    and perm in ra.role.permissions.all()
-                ):
+
+            perimeter_ids = set(a.perimeter_folder_ids)
+
+            # walk up folder parents via cached parent_map
+            current_id = folder.id
+            while current_id is not None:
+                if current_id in perimeter_ids:
                     return True
-                f = f.parent_folder
+                current_id = state.parent_map.get(current_id)
+
         return False
 
     @staticmethod
@@ -895,39 +985,41 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         content_type: Folder.ContentType,
         codename: str = "view_folder",
     ) -> list[Folder]:
-        """Gets the list of folders with specified contentType that can be viewed by a user from a given folder
-        If the contentType is not specified, returns all accessible folders
-        Returns the list of the ids of the matching folders
-        If permission is specified, returns accessible folders which can be altered with this specific permission
-        """
-        folders_set = set()
-        ref_permission = Permission.objects.get(codename=codename)
-        # first get all accessible folders, independently of contentType
-        for ra in [
-            x
-            for x in RoleAssignment.get_role_assignments(user)
-            if (
-                (
-                    Permission.objects.get(codename="view_folder")
-                    in x.role.permissions.all()
-                )
-                and (ref_permission in x.role.permissions.all())
-            )
-        ]:
-            for f in ra.perimeter_folders.all():
-                folders_set.add(f)
-                folders_set.update(f.get_sub_folders())
-        # calculate perimeter
-        perimeter = set()
-        perimeter.add(folder)
-        perimeter.update(folder.get_sub_folders())
-        # return filtered result
-        return [
-            x.id
-            for x in folders_set
-            if (x.content_type == content_type if content_type else True)
-            and x in perimeter
-        ]
+        state = get_folder_state()
+        roles_state = get_roles_state()
+
+        perimeter_ids = set(iter_descendant_ids(state, folder.id, include_start=True))
+
+        accessible_ids: Set[uuid.UUID] = set()
+
+        for a in _iter_assignment_lites_for_user(user):
+            role_perms = roles_state.role_permissions.get(a.role_id, frozenset())
+            # Must be able to see folders + have requested permission
+            if "view_folder" not in role_perms or codename not in role_perms:
+                continue
+
+            ra_perimeter_ids = set(a.perimeter_folder_ids)
+            if a.is_recursive:
+                # Expand assignment perimeter downward
+                expanded = set()
+                for pf_id in ra_perimeter_ids:
+                    expanded.update(
+                        iter_descendant_ids(state, pf_id, include_start=True)
+                    )
+                ra_perimeter_ids = expanded
+
+            accessible_ids.update(perimeter_ids & ra_perimeter_ids)
+
+        # Filter by content_type and keep only within perimeter_ids
+        result: list[uuid.UUID] = []
+        for folder_id in accessible_ids:
+            folder_obj = state.folders[folder_id]
+            if content_type and folder_obj.content_type != content_type:
+                continue
+            if folder_id in perimeter_ids:
+                result.append(folder_id)
+
+        return result
 
     @staticmethod
     def get_accessible_object_ids(
@@ -939,68 +1031,110 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Assumes that object type follows Django conventions for permissions
         Also retrieve published objects in view
         """
+        if not getattr(user, "is_authenticated", False):
+            return ([], [], [])
+
         class_name = object_type.__name__.lower()
+
+        # We still need Permission rows for:
+        # - returning ids when object_type is Permission
+        # - (optionally) ensuring the codenames exist in DB
+        needed_codenames = [
+            f"view_{class_name}",
+            f"change_{class_name}",
+            f"delete_{class_name}",
+        ]
         permissions_map = {
             p.codename: p
-            for p in Permission.objects.filter(
-                codename__in=[
-                    f"view_{class_name}",
-                    f"change_{class_name}",
-                    f"delete_{class_name}",
-                    "view_folder",
-                ]
-            )
+            for p in Permission.objects.filter(codename__in=needed_codenames)
         }
-        permission_view = permissions_map[f"view_{class_name}"]
-        permission_change = permissions_map[f"change_{class_name}"]
-        permission_delete = permissions_map[f"delete_{class_name}"]
-        permissions = set([permission_view, permission_change, permission_delete])
-        result_view = set()
-        result_change = set()
-        result_delete = set()
 
-        ref_permission = permissions_map["view_folder"]
-        perimeter = {folder} | set(folder.get_sub_folders())
-        # Process role assignments
-        role_assignments = [
-            ra
-            for ra in RoleAssignment.get_role_assignments(user)
-            if ref_permission in ra.role.permissions.all()
-        ]
-        result_folders = defaultdict(set)
-        for ra in role_assignments:
-            ra_permissions = set(ra.role.permissions.all())
-            ra_perimeter = set(ra.perimeter_folders.all())
-            if ra.is_recursive:
-                ra_perimeter.update(
-                    *[folder.get_sub_folders() for folder in ra_perimeter]
-                )
-            target_folders = perimeter & ra_perimeter
-            for p in permissions & ra_permissions:
-                for f in target_folders:
-                    result_folders[f].add(p)
+        view_code = f"view_{class_name}"
+        change_code = f"change_{class_name}"
+        delete_code = f"delete_{class_name}"
 
-        for f in result_folders:
+        # If a permission doesn't exist for this model, behave safely.
+        # (Django usually creates them, but better than KeyError.)
+        if (
+            view_code not in permissions_map
+            or change_code not in permissions_map
+            or delete_code not in permissions_map
+        ):
+            return ([], [], [])
+
+        # Cached state
+        state = get_folder_state()
+        roles_state = get_roles_state()
+
+        perimeter_ids = set(iter_descendant_ids(state, folder.id, include_start=True))
+
+        # folder_id -> set of granted permission codenames ("view_x", "change_x", "delete_x")
+        folder_perm_codes: dict[uuid.UUID, set[str]] = defaultdict(set)
+
+        # Compute folder permissions using caches only
+        for a in _iter_assignment_lites_for_user(user):
+            role_perm_codenames = roles_state.role_permissions.get(
+                a.role_id, frozenset()
+            )
+
+            # Must be able to see folders at all
+            if "view_folder" not in role_perm_codenames:
+                continue
+
+            ra_perimeter = set(a.perimeter_folder_ids)
+            if a.is_recursive:
+                expanded: set[uuid.UUID] = set()
+                for pf_id in ra_perimeter:
+                    expanded.update(
+                        iter_descendant_ids(state, pf_id, include_start=True)
+                    )
+                ra_perimeter = expanded
+
+            target_folders = perimeter_ids & ra_perimeter
+            if not target_folders:
+                continue
+
+            can_view = view_code in role_perm_codenames
+            can_change = change_code in role_perm_codenames
+            can_delete = delete_code in role_perm_codenames
+
+            if not (can_view or can_change or can_delete):
+                continue
+
+            for f_id in target_folders:
+                if can_view:
+                    folder_perm_codes[f_id].add(view_code)
+                if can_change:
+                    folder_perm_codes[f_id].add(change_code)
+                if can_delete:
+                    folder_perm_codes[f_id].add(delete_code)
+
+        result_view: set[Any] = set()
+        result_change: set[Any] = set()
+        result_delete: set[Any] = set()
+
+        # Fetch object ids per folder (DB work only here)
+        for f_id, perms in folder_perm_codes.items():
             if hasattr(object_type, "folder"):
-                objects_ids = object_type.objects.filter(folder=f).values_list(
+                objects_ids = object_type.objects.filter(folder_id=f_id).values_list(
                     "id", flat=True
                 )
             elif hasattr(object_type, "risk_assessment"):
                 objects_ids = object_type.objects.filter(
-                    risk_assessment__folder=f
+                    risk_assessment__folder_id=f_id
                 ).values_list("id", flat=True)
             elif hasattr(object_type, "entity"):
-                objects_ids = object_type.objects.filter(entity__folder=f).values_list(
-                    "id", flat=True
-                )
+                objects_ids = object_type.objects.filter(
+                    entity__folder_id=f_id
+                ).values_list("id", flat=True)
             elif hasattr(object_type, "provider_entity"):
                 objects_ids = object_type.objects.filter(
-                    provider_entity__folder=f
+                    provider_entity__folder_id=f_id
                 ).values_list("id", flat=True)
             elif hasattr(object_type, "parent_folder"):
-                objects_ids = [f.id]
+                objects_ids = [f_id]
             elif class_name == "permission":
-                # Permissions have no folder, so we don't filter them, we just rely on view_permission
+                # Permissions have no folder; rely on filtering rules
                 objects_ids = (
                     Permission.objects.filter(
                         content_type__app_label__in=ALLOWED_PERMISSION_APPS
@@ -1011,28 +1145,30 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             else:
                 raise NotImplementedError("type not supported")
 
-            if permission_view in result_folders[f]:
+            if view_code in perms:
                 result_view.update(objects_ids)
-            if permission_change in result_folders[f]:
+            if change_code in perms:
                 result_change.update(objects_ids)
-            if permission_delete in result_folders[f]:
+            if delete_code in perms:
                 result_delete.update(objects_ids)
 
+        # Published inheritance: published parents for local-view folders
         if hasattr(object_type, "is_published") and hasattr(object_type, "folder"):
-            # we assume only objects with a folder attribute are worth publishing
-            folders_with_local_view = [
-                f for f in result_folders if permission_view in result_folders[f]
+            local_view_folder_ids = [
+                f_id for f_id, perms in folder_perm_codes.items() if view_code in perms
             ]
-            for my_folder in folders_with_local_view:
-                if my_folder.content_type != Folder.ContentType.ENCLAVE:
-                    my_folder2 = my_folder.parent_folder
-                    while my_folder2:
+
+            for folder_id in local_view_folder_ids:
+                folder_obj = state.folders[folder_id]
+                if folder_obj.content_type != Folder.ContentType.ENCLAVE:
+                    parent_id = state.parent_map.get(folder_id)
+                    while parent_id:
                         result_view.update(
                             object_type.objects.filter(
-                                folder=my_folder2, is_published=True
+                                folder_id=parent_id, is_published=True
                             ).values_list("id", flat=True)
                         )
-                        my_folder2 = my_folder2.parent_folder
+                        parent_id = state.parent_map.get(parent_id)
 
         return (list(result_view), list(result_change), list(result_delete))
 
@@ -1043,77 +1179,135 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         )
 
     @staticmethod
-    def get_role_assignments(principal: AbstractBaseUser | AnonymousUser | UserGroup):
-        """get all role assignments attached to a user directly or indirectly"""
-        assignments = list(
-            principal.roleassignment_set.select_related("role").prefetch_related(
-                "role__permissions", "perimeter_folders"
-            )
-        )
-        if hasattr(principal, "user_groups"):
-            for user_group in principal.user_groups.all():
-                assignments += list(
-                    user_group.roleassignment_set.select_related(
-                        "role"
-                    ).prefetch_related("role__permissions", "perimeter_folders")
-                )
-        return assignments
-
-    @staticmethod
     def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup):
-        """get all permissions attached to a user directly or indirectly"""
-        permissions = {}
+        """Get all permissions attached to a user/group (direct or indirect), using caches.
 
-        # Build the filter query based on principal type
+        Returns: {codename: {"str": Permission.name}}
+        """
+        if isinstance(principal, AnonymousUser) or not getattr(
+            principal, "is_authenticated", True
+        ):
+            return {}
+
+        roles_state = get_roles_state()
+        permissions_codes: set[str] = set()
+
+        # --- UserGroup principal: assignments come from "by_group" cache only
         if isinstance(principal, UserGroup):
-            # If principal is a UserGroup, only look for role assignments to that group
-            query_filter = models.Q(user_group=principal)
-        else:
-            # If principal is a User, look for direct assignments and assignments via user groups
-            query_filter = models.Q(user=principal)
-            if hasattr(principal, "user_groups"):
-                query_filter |= models.Q(user_group__in=principal.user_groups.all())
+            assignments_state = get_assignments_state()
+            for a in assignments_state.by_group.get(principal.id, ()):
+                permissions_codes.update(
+                    roles_state.role_permissions.get(a.role_id, frozenset())
+                )
 
-        permission_rows = (
-            RoleAssignment.objects.filter(query_filter)
-            .values_list("role__permissions__codename", "role__permissions__name")
-            .distinct()
+        # --- User principal: assignments come from helper (user + via groups)
+        else:
+            for a in _iter_assignment_lites_for_user(principal):
+                permissions_codes.update(
+                    roles_state.role_permissions.get(a.role_id, frozenset())
+                )
+
+        if not permissions_codes:
+            return {}
+
+        # Preserve old output: codename -> {"str": permission name}
+        # (single DB hit, but IAM logic is cached)
+        rows = Permission.objects.filter(codename__in=permissions_codes).values_list(
+            "codename", "name"
         )
-        for codename, name in permission_rows:
+
+        out: dict[str, dict[str, str]] = {}
+        for codename, name in rows:
             if codename:
-                permissions[codename] = {"str": name}
-        return permissions
+                out[codename] = {"str": name}
+
+        return out
 
     @staticmethod
-    def has_role(user: AbstractBaseUser | AnonymousUser, role: Role):
+    def has_role(user: AbstractBaseUser | AnonymousUser, role: Role) -> bool:
         """
-        Determines if a user has a specific role.
+        Determines if a user has a specific role, using caches only.
+        Checks both direct assignments and assignments via groups.
         """
-        for ra in RoleAssignment.get_role_assignments(user):
-            if ra.role == role:
+        if not getattr(user, "is_authenticated", False) or not getattr(
+            user, "id", None
+        ):
+            return False
+
+        role_id = getattr(role, "id", None)
+        if not role_id:
+            return False
+
+        for a in _iter_assignment_lites_for_user(user):
+            if a.role_id == role_id:
                 return True
         return False
 
     @classmethod
     def get_permissions_per_folder(
-        cls, principal: AbstractBaseUser | AnonymousUser | UserGroup, recursive=False
+        cls,
+        principal: AbstractBaseUser | AnonymousUser | UserGroup,
+        recursive: bool = False,
     ):
+        """Get permissions grouped by folder id, using caches.
+
+        - Always adds permissions on the explicit perimeter folders in assignments.
+        - If `recursive=True` AND assignment.is_recursive=True, propagates to descendants.
+        Returns: dict[str(folder_id)] -> set[codename]
         """
-        Get all permissions attached to a user directly or indirectly, grouped by folder.
-        If recursive is set to True, permissions from recursive role assignments are transmitted
-        to the children of its perimeter folders.
-        """
-        permissions = defaultdict(set)
-        for ra in cls.get_role_assignments(principal):
-            ra_permissions = set(
-                ra.role.permissions.all().values_list("codename", flat=True)
+        if isinstance(principal, AnonymousUser) or not getattr(
+            principal, "is_authenticated", True
+        ):
+            return {}
+
+        state = get_folder_state()
+        roles_state = get_roles_state()
+        perms_by_folder: dict[str, set[str]] = defaultdict(set)
+
+        def apply_assignment(a):
+            role_perm_codenames = roles_state.role_permissions.get(
+                a.role_id, frozenset()
             )
-            for folder in ra.perimeter_folders.all():
-                permissions[str(folder.id)] |= ra_permissions
-                if recursive and ra.is_recursive:
-                    for f in folder.get_sub_folders():
-                        permissions[str(f.id)] |= ra_permissions
-        return permissions
+            if not role_perm_codenames:
+                return
+
+            for folder_id in a.perimeter_folder_ids:
+                perms_by_folder[str(folder_id)].update(role_perm_codenames)
+
+                if recursive and a.is_recursive:
+                    for descendant_id in iter_descendant_ids(
+                        state, folder_id, include_start=False
+                    ):
+                        perms_by_folder[str(descendant_id)].update(role_perm_codenames)
+
+        # --- UserGroup principal
+        if isinstance(principal, UserGroup):
+            assignments_state = get_assignments_state()
+            for a in assignments_state.by_group.get(principal.id, ()):
+                apply_assignment(a)
+            return perms_by_folder
+
+        # --- User principal (user + via groups)
+        for a in _iter_assignment_lites_for_user(principal):
+            apply_assignment(a)
+
+        return perms_by_folder
+
+
+@dataclass(frozen=True, slots=True)
+class FolderDisplayContext:
+    """Information needed to render a folder path in the UI."""
+
+    folder: Folder
+    absolute_path: tuple[str, ...]
+    relative_path: tuple[str, ...]
+    minimal_context: tuple[str, ...]
+    depth: int
+
+
+# -----------------------------
+# Personal Access Token
+# -----------------------------
 
 
 class PersonalAccessToken(models.Model):
