@@ -27,7 +27,7 @@ const schema = z.object({
 });
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
-	const response = await fetch(`${BASE_API_URL}/integrations/configs/`);
+	const response = await fetch(`${BASE_API_URL}/integrations/configs/?provider__name=jira`);
 	let config = {};
 	if (response.ok) {
 		config = await response.json().then((res) => res.results[0]);
@@ -82,7 +82,7 @@ export const actions: Actions = {
 			setFlash({ type: 'error', message: 'Failed to save Jira integration config' }, event);
 			return fail(400, { form: form });
 		}
-		setFlash({ type: 'success', message: 'Successfully savec Jira integration config' }, event);
+		setFlash({ type: 'success', message: 'Successfully saved Jira integration config' }, event);
 		return { form };
 	}
 };

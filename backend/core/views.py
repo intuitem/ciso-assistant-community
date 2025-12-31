@@ -7585,6 +7585,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         "authors",
         "reviewers",
         "genericcollection",
+        "extended_result_enabled",
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
@@ -7702,6 +7703,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "name",
                 "description",
                 "compliance_result",
+                "extended_result",
                 "requirement_progress",
                 "score",
                 "observations",
@@ -7728,12 +7730,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 if req_node.assessable:
                     row += [
                         req.result,
+                        req.extended_result,
                         req.status,
                         req.score,
                         req.observation,
                     ]
                 else:
-                    row += ["", "", "", ""]
+                    row += ["", "", "", "", ""]
                 writer.writerow(row)
 
             return response
@@ -7777,6 +7780,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     req_node.get_description_translated
                 ),
                 "compliance_result": req.result,
+                "extended_result": req.extended_result,
                 "requirement_progress": req.status,
                 "observations": escape_excel_formula(req.observation),
             }
@@ -8952,6 +8956,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "security_exceptions",
         "requirement__ref_id",
         "result",
+        "extended_result",
         "compliance_assessment__ref_id",
         "compliance_assessment__perimeter",
         "compliance_assessment__perimeter__name",
@@ -9063,6 +9068,11 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get result choices")
     def result(self, request):
         return Response(dict(RequirementAssessment.Result.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get extended result choices")
+    def extended_result(self, request):
+        return Response(dict(RequirementAssessment.ExtendedResult.choices))
 
     @staticmethod
     @api_view(["POST"])
