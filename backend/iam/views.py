@@ -5,6 +5,7 @@ import structlog
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model, login, logout
 from django.db import models
+from django.db.models import Q, Exists, OuterRef
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -439,3 +440,40 @@ class SetPasswordView(views.APIView):
                 )
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+class RevokeOtherSessionsView(views.APIView):
+    """
+    An endpoint for revoking all other user sessions (except the current one).
+    """
+
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        auth_header = request.META.get("HTTP_AUTHORIZATION")
+        if not auth_header or " " not in auth_header:
+            return Response(
+                {"error": "Invalid authorization header"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        access_token = auth_header.split(" ")[1]
+        digest = crypto.hash_token(access_token)
+        user_id = str(request.user.id)
+
+        deleted_count, _ = (
+            AuthToken.objects.filter(user_id=user_id)
+            .exclude(
+                Q(digest=digest)
+                | Q(
+                    Exists(
+                        PersonalAccessToken.objects.filter(auth_token=OuterRef("pk"))
+                    )
+                )
+            )
+            .delete()
+        )
+
+        return Response(
+            {"revoked_sessions": deleted_count},
+            status=status.HTTP_200_OK,
+        )

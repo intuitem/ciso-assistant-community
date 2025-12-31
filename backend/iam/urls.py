@@ -11,6 +11,7 @@ from .views import (
     ResetPasswordConfirmView,
     SessionTokenView,
     SetPasswordView,
+    RevokeOtherSessionsView,
 )
 
 urlpatterns = [
@@ -26,6 +27,7 @@ urlpatterns = [
         name="password-reset-confirm",
     ),
     path("set-password/", SetPasswordView.as_view(), name="set-password"),
+    path("revoke-sessions/", RevokeOtherSessionsView.as_view()),
     path("sso/", include("iam.sso.urls")),
     path(
         "session-token/",
