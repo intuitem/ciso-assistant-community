@@ -130,10 +130,11 @@
 									data-testid="add-button"
 									id="add-button"
 									title={safeTranslate('add-' + data.model.localName)}
+									aria-label={safeTranslate('add-' + data.model.localName)}
 									onclick={handlers(modalCreateForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
-								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios'].includes(URLModel)}
+								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates'].includes(URLModel)}
 									<Popover
 										open={exportPopupOpen}
 										onOpenChange={(e) => (exportPopupOpen = e.open)}
@@ -168,12 +169,17 @@
 										href="{URLModel}/flash-mode/"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.flashMode()}
+										aria-label={m.flashMode()}
 										data-testid="flash-mode-button"><i class="fa-solid fa-bolt mr-2"></i></a
 									>
 								{/if}
-								{#if ['threats', 'reference-controls'].includes(URLModel)}
+								{#if ['threats', 'reference-controls', 'metric-definitions'].includes(URLModel)}
 									{@const title =
-										URLModel === 'threats' ? m.importThreats() : m.importReferenceControls()}
+										URLModel === 'threats'
+											? m.importThreats()
+											: URLModel === 'reference-controls'
+												? m.importReferenceControls()
+												: m.importMetricDefinitions()}
 									<Anchor
 										href={`/libraries?object_type=${URLModel.replace(/-/g, '_')}`}
 										label={m.libraries()}
@@ -206,6 +212,7 @@
 										class="text-gray-50 inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
 										data-testid="import-button"
 										title={safeTranslate('importFolder')}
+										aria-label={safeTranslate('importFolder')}
 										onclick={modalFolderImportForm}
 										><i class="fa-solid fa-file-import"></i>
 									</button>

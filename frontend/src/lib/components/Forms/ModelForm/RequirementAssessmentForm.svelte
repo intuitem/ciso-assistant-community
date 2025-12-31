@@ -38,6 +38,15 @@
 		field="evidences"
 		label={m.evidences()}
 	/>
+{:else if context === 'selectAppliedControls'}
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="applied-controls"
+		optionsExtraFields={[['folder', 'str']]}
+		field="applied_controls"
+		label={m.appliedControls()}
+	/>
 {:else}
 	<Select
 		{form}
@@ -55,6 +64,16 @@
 		cacheLock={cacheLocks['result']}
 		bind:cachedValue={formDataCache['result']}
 	/>
+	{#if object?.compliance_assessment?.extended_result_enabled}
+		<Select
+			{form}
+			options={model.selectOptions['extended_result']}
+			field="extended_result"
+			label={m.extendedResult()}
+			cacheLock={cacheLocks['extended_result']}
+			bind:cachedValue={formDataCache['extended_result']}
+		/>
+	{/if}
 	<MarkdownField
 		{form}
 		field="observation"

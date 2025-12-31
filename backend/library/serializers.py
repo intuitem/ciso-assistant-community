@@ -1,3 +1,5 @@
+from typing import Optional
+
 from rest_framework import serializers
 
 from core.models import LoadedLibrary, StoredLibrary
@@ -7,6 +9,12 @@ from core.serializers import BaseModelSerializer, ReferentialSerializer
 
 class StoredLibrarySerializer(ReferentialSerializer):
     locales = serializers.ListField(source="get_locales", read_only=True)
+    loaded_library = serializers.SerializerMethodField()
+    filtering_labels = FieldsRelatedField(many=True, fields=["label"])
+
+    def get_loaded_library(self, obj) -> Optional[str]:
+        loaded_library = obj.get_loaded_library()
+        return str(loaded_library.id) if loaded_library else None
 
     class Meta:
         model = StoredLibrary
@@ -20,11 +28,15 @@ class StoredLibrarySerializer(ReferentialSerializer):
             "version",
             "packager",
             "provider",
+            "filtering_labels",
             "publication_date",
             "builtin",
             "objects_meta",
+            "reference_count",
             "is_loaded",
+            "is_update",
             "locales",
+            "loaded_library",
             "copyright",
         ]
 

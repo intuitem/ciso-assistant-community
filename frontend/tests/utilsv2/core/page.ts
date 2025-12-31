@@ -78,7 +78,16 @@ export class Page {
 	 * This way of closing modal may not work for all modals.
 	 */
 	async doCloseModal() {
-		await this._self.mouse.click(1, 1);
+		const modalBackdrop = this.getSelf().getByTestId('modal-backdrop');
+
+		try {
+			await modalBackdrop.waitFor({ state: 'visible', timeout: 5000 });
+		} catch {
+			return;
+		}
+
+		await modalBackdrop.press('Escape');
+		await modalBackdrop.waitFor({ state: 'hidden' });
 	}
 }
 export namespace Page {

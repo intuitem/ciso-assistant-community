@@ -436,7 +436,7 @@
 	"residual": "Rest",
 	"jumpToRiskAssessment": "Spring naar risicobeoordeling",
 	"additionalMeasures": "Aanvullende maatregelen",
-	"riskAssessmentMatrixHelpText": "WAARSCHUWING: Je zult de risicomatrix niet kunnen wijzigen nadat de risicobeoordeling is gemaakt",
+	"riskAssessmentMatrixHelpText": "WAARSCHUWING: Bij het wijzigen van de risicomatrix worden de waarden automatisch aangepast aan de nieuwe schaal. Controleer daarna de resultaten en corrigeer ze indien nodig.",
 	"etaHelpText": "Geschatte aankomsttijd",
 	"dueDateHelpText": "Datum waarop de beoordeling voltooid moet zijn",
 	"expiryDateHelpText": "Datum waarop het object niet langer geldig is",
@@ -983,6 +983,16 @@
 	"loginFailed": "Login mislukt",
 	"viewMore": "Meer weergeven",
 	"viewLess": "Minder weergeven",
+	"isCustom": "Aangepast",
+	"errorUnloadingLibrary": "Fout bij het ontladen van bibliotheek",
+	"librarySuccessfullyUnloaded": "De bibliotheek is succesvol ontladen",
+	"scoreChangeDetected": "Scoreverandering gedetecteerd",
+	"scoreChangeDetectedDescription": "Er is een scoreverandering gedetecteerd. Kies hoe u de scoreupdates wilt beheren voor de gerelateerde audits.",
+	"clamp": "Beperken",
+	"clampDescription": "Beperk de waarde binnen de gedefinieerde grenzen",
+	"resetDescription": "Reset de scores van de audits",
+	"ruleOfThree": "Regel van drie",
+	"ruleOfThreeDescription": "Pas de regel van drie toe om scores te schalen tussen de nieuwe grenzen",
 	"expectedEvidence": "Verwacht bewijs",
 	"taskNodeLegacyEvidence": "Het oude bewijsveld is verouderd. Bewijs is nu taakniveau en gedeeld over herhalingen die wachten op herzieningen.\n Om ze naar verwacht bewijs te verplaatsen of uit de herhaling te verwijderen, gebruik de knoppen",
 	"taskNodeNewEvidence": "Bewijs globaal gekoppeld aan de taak en verspreid over herhalingen. U kunt een herziening toevoegen in het tabblad 'Bewijzen' hieronder",
@@ -2917,5 +2927,6 @@
 			}
 		}
 	],
-	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd."
+	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd.",
+	"libraryFilteringLabels": "Bibliotheek etiketten"
 }

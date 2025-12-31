@@ -93,7 +93,7 @@
 		>
 			{safeTranslate(data.requirementAssessment.result)}
 		</span>
-		{#if data.requirement.implementation_groups.length > 0}
+		{#if data.requirement.implementation_groups?.length > 0}
 			<div class="ml-3">
 				<b class="mr-2">Implemetation Groups :</b>
 				{#each data.requirement.implementation_groups as ig}

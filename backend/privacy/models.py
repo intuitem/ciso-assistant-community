@@ -134,6 +134,8 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         related_name="processings",
     )
 
+    fields_to_check = ["name"]
+
     def update_sensitive_data_flag(self):
         """Update the has_sensitive_personal_data flag based on associated personal data"""
         has_sensitive = self.personal_data.filter(is_sensitive=True).exists()

@@ -216,6 +216,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 83. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
 84. Vendor Due Diligence - simple baseline - intuitem 🌐
 85. Points de contrôle Active Directory (AD) - ANSSI 🇫🇷
+86. ISO 42001:2023 outline - Artificial Intelligence Management System, including Annex A 🤖🌐
+87. India's Digital Personal Data Protection Act (DPDPA) - 2023 🇮🇳
 
 ### Community contributions
 
