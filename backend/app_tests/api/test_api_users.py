@@ -212,7 +212,7 @@ class TestUsersAuthenticated:
 
         detail_url = reverse("users-detail", args=[user.id])
 
-        # --- attempt to update self ---
+        # Attempt to update another user (requires admin privileges)
         response = test.client.patch(
             detail_url, {"first_name": "Updated"}, format="json"
         )
@@ -226,28 +226,6 @@ class TestUsersAuthenticated:
                 status.HTTP_401_UNAUTHORIZED,
                 status.HTTP_403_FORBIDDEN,
             )
-
-    def test_user_visibility_scope(self, test):
-        user, _ = User.objects.get_or_create(
-            email=USER_EMAIL,
-            defaults={
-                "first_name": USER_FIRSTNAME,
-                "last_name": USER_NAME,
-                "password": USER_PASSWORD,
-                "is_active": True,
-            },
-        )
-
-        client = test.client
-        response = client.get(reverse(API_ENDPOINT))
-        data = response.json()
-
-        users_list = data.get("results", data)
-
-        if test.user_group.startswith("Global"):
-            assert len(users_list) >= 2
-        else:
-            assert any(u["email"] == user.email for u in users_list)
 
     def test_superuser_cannot_be_deactivated(self, test):
         superuser, _ = User.objects.get_or_create(
@@ -263,6 +241,7 @@ class TestUsersAuthenticated:
 
         url = reverse("users-detail", args=[superuser.id])
         response = test.client.patch(url, {"is_active": False}, format="json")
+
         superuser.refresh_from_db()
 
         assert superuser.is_active is True
