@@ -26,7 +26,8 @@ export const load = (async ({ fetch, parent }) => {
 		findings: `/findings?owner=${userId}&limit=0`,
 		organisationObjectives: `/organisation-objectives?assigned_to=${userId}&limit=0`,
 		rightRequests: `/privacy/right-requests?owner=${userId}&limit=0`,
-		validationFlows: `/validation-flows?approver=${userId}&limit=0`
+		validationFlows: `/validation-flows?approver=${userId}&limit=0`,
+		metricInstances: `/metrology/metric-instances?owner=${userId}&limit=0`
 	};
 
 	const counts: Record<string, number> = {};

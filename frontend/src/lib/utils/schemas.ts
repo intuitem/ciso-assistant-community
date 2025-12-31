@@ -74,7 +74,7 @@ const NameDescriptionMixin = {
 export const FolderSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
-	parent_folder: z.string().optional(),
+	parent_folder: z.string(),
 	filtering_labels: z.array(z.string()).optional()
 });
 
@@ -346,6 +346,7 @@ export const RequirementAssessmentSchema = z.object({
 	answers: jsonSchema,
 	status: z.string(),
 	result: z.string(),
+	extended_result: z.string().optional().nullable(),
 	is_scored: z.boolean().optional(),
 	score: z.number().optional().nullable(),
 	documentation_score: z.number().optional().nullable(),
@@ -430,6 +431,8 @@ export const ComplianceAssessmentSchema = z.object({
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
 	show_documentation_score: z.boolean().optional().default(false),
+	extended_result_enabled: z.boolean().optional().default(false),
+	progress_status_enabled: z.boolean().optional().default(true),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
@@ -536,7 +539,8 @@ export const FeatureFlagsSchema = z.object({
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
-	outgoing_webhooks: z.boolean().optional()
+	outgoing_webhooks: z.boolean().optional(),
+	metrology: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -884,6 +888,7 @@ export const organisationObjectiveSchema = z.object({
 	issues: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	tasks: z.string().uuid().optional().array().optional(),
+	metrics: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
@@ -1041,6 +1046,7 @@ export const StrategicScenarioSchema = z.object({
 	...NameDescriptionMixin,
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
+	focused_feared_event: z.string().uuid().nullable().optional(),
 	ref_id: z.string().optional(),
 	folder: z.string()
 });
@@ -1079,7 +1085,8 @@ export const SecurityExceptionSchema = z.object({
 	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	requirement_assessments: z.string().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	assets: z.string().uuid().optional().array().optional(),
+	observation: z.string().optional()
 });
 
 export const FindingSchema = z.object({
@@ -1333,6 +1340,73 @@ export const AccreditationSchema = z.object({
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
 });
 
+// Metrology
+export const MetricDefinitionSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	category: z.string().default('quantitative'),
+	unit: z.string().optional().nullable(),
+	choices_definition: jsonSchema.optional().nullable(),
+	provider: z.string().optional().nullable(),
+	higher_is_better: z.boolean().default(true),
+	default_target: z.number().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
+});
+
+export const MetricInstanceSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	metric_definition: z.string().uuid(),
+	status: z.string().default('draft'),
+	owner: z.array(z.string().uuid().optional()).optional(),
+	target_value: z.coerce.number().optional().nullable(),
+	collection_frequency: z.string().optional().nullable(),
+	organisation_objectives: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional()
+});
+
+export const CustomMetricSampleSchema = z.object({
+	folder: z.string(),
+	metric_instance: z.string().uuid(),
+	timestamp: z.string().datetime(),
+	value: jsonSchema
+});
+
+export const DashboardSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	dashboard_definition: jsonSchema.default({}),
+	filtering_labels: z.string().optional().array().optional()
+});
+
+export const DashboardWidgetSchema = z.object({
+	folder: z.string(),
+	dashboard: z.string().uuid(),
+	// Custom metric (optional - either this or builtin fields)
+	metric_instance: z.string().uuid().optional().nullable(),
+	// Builtin metric fields (optional - either this or metric_instance)
+	target_model: z.string().optional().nullable(),
+	target_object_id: z.string().uuid().optional().nullable(),
+	metric_key: z.string().optional().nullable(),
+	// Text widget content (for chart_type='text')
+	text_content: z.string().optional().nullable(),
+	// Common fields
+	title: z.string().optional().nullable(),
+	position_x: z.coerce.number().min(0).max(11).default(0),
+	position_y: z.coerce.number().min(0).default(0),
+	width: z.coerce.number().min(1).max(12).default(6),
+	height: z.coerce.number().min(1).default(2),
+	chart_type: z.string().default('kpi_card'),
+	time_range: z.string().default('last_30_days'),
+	aggregation: z.string().default('none'),
+	show_target: z.boolean().default(true),
+	show_legend: z.boolean().default(true),
+	widget_config: jsonSchema.default({})
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1401,7 +1475,14 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	terminologies: TerminologySchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
-	accreditations: AccreditationSchema
+	accreditations: AccreditationSchema,
+	'metric-definitions': MetricDefinitionSchema,
+	'metric-instances': MetricInstanceSchema,
+	'custom-metric-samples': CustomMetricSampleSchema,
+	dashboards: DashboardSchema,
+	'dashboard-widgets': DashboardWidgetSchema,
+	'dashboard-text-widgets': DashboardWidgetSchema,
+	'dashboard-builtin-widgets': DashboardWidgetSchema
 };
 
 export const modelSchema = (model: string) => {

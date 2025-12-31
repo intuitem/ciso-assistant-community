@@ -73,9 +73,6 @@ test.skip('Analytics full flow - creation, validation and cleanup', async ({
 		);
 
 		await librariesPage.importLibrary('NIST-CSF-2.0', undefined, 'any');
-
-		await librariesPage.tab('Libraries store').click();
-		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
 	});
 
 	await test.step('Create audits', async () => {
@@ -109,9 +106,6 @@ test.skip('Analytics full flow - creation, validation and cleanup', async ({
 		await librariesPage.hasUrl();
 
 		await librariesPage.importLibrary('4x4 risk matrix from EBIOS-RM', undefined, 'any');
-
-		await librariesPage.tab('Libraries store').click();
-		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
 	});
 
 	await test.step('Create risk assessment', async () => {

@@ -53,8 +53,13 @@
 		{ id: 'Processing', label: m.processings(), description: '' },
 		{
 			id: 'TPRM',
-			label: 'TPRM (Third-Party Risk Management)',
-			description: 'Import entities, solutions, and contracts from a multi-sheet Excel file'
+			label: m.thirdPartyCategory(),
+			description: m.thirdPartiesImportHelpText()
+		},
+		{
+			id: 'EbiosRMStudyARM',
+			label: m.ebiosRMStudyARM(),
+			description: m.ebiosRMStudyARMDescription()
 		}
 	];
 
@@ -89,7 +94,9 @@
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
 
-	let isMatrixDisabled = $derived(selectedModel !== 'RiskAssessment');
+	let isMatrixDisabled = $derived(
+		selectedModel !== 'RiskAssessment' && selectedModel !== 'EbiosRMStudyARM'
+	);
 
 	// Models that don't need perimeter selection
 	const modelsWithoutPerimeter = [
@@ -100,7 +107,8 @@
 		'ReferenceControl',
 		'Threat',
 		'Processing',
-		'TPRM'
+		'TPRM',
+		'EbiosRMStudyARM'
 	];
 
 	// Determine if perimeter selection should be disabled
@@ -171,7 +179,6 @@
 							{:else}
 								<p class="font-medium text-gray-900">
 									<span class="text-blue-600">{m.clickToUpload()}</span>
-									{m.orDragAndDrop()}
 								</p>
 								<p class="text-gray-500">{m.fileAcceptExcelOnly()}</p>
 							{/if}

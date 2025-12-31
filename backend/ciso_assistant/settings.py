@@ -62,11 +62,6 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
-        "django.server": {
-            "handlers": [],
-            "level": "WARNING",
-            "propagate": False,
-        },
     },
 }
 
@@ -194,6 +189,7 @@ INSTALLED_APPS = [
     "privacy",
     "resilience",
     "crq",
+    "metrology",
     "core",
     "cal",
     "django_filters",
@@ -455,9 +451,8 @@ SPECTACULAR_SETTINGS = {
 # SSO with allauth
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
 # NOTE: The reauthentication flow has not been implemented in the frontend yet, hence the long timeout.
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.

@@ -31,6 +31,7 @@ LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
+FORCE_CREATE_ADMIN = os.environ.get("FORCE_CREATE_ADMIN", "False").lower() == "true"
 
 
 def set_ciso_assistant_url(_, __, event_dict):
@@ -70,7 +71,6 @@ if LOG_OUTFILE:
         "formatter": "json",
     }
     LOGGING["loggers"][""]["handlers"].append("file")
-
 
 structlog.configure(
     processors=[
@@ -187,6 +187,7 @@ INSTALLED_APPS = [
     "privacy",
     "resilience",
     "crq",
+    "metrology",
     "core",
     "cal",
     "django_filters",
@@ -238,7 +239,10 @@ AUTH_TOKEN_AUTO_REFRESH_MAX_TTL = (
 )  # absolute timeout for auto-refresh, defaults to 10 hours. token expires after this time even if the user is active.
 
 CISO_ASSISTANT_SUPERUSER_EMAIL = os.environ.get("CISO_ASSISTANT_SUPERUSER_EMAIL")
+logger.info("CISO_ASSISTANT_SUPERUSER_EMAIL: %s", CISO_ASSISTANT_SUPERUSER_EMAIL)
+logger.info("FORCE_CREATE_ADMIN: %s", FORCE_CREATE_ADMIN)
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+logger.info("DEFAULT_FROM_EMAIL: %s", DEFAULT_FROM_EMAIL)
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
@@ -445,9 +449,8 @@ SPECTACULAR_SETTINGS = {
 # SSO with allauth
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
 # NOTE: The reauthentication flow has not been implemented in the frontend yet, hence the long timeout.
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
@@ -510,10 +513,12 @@ HUEY_FILE_PATH = os.environ.get("HUEY_FILE_PATH", BASE_DIR / "db" / "huey.db")
 HUEY = {
     "huey_class": "huey.SqliteHuey",
     "name": "ciso_assistant",
+    "utc": True,
     "filename": HUEY_FILE_PATH,
     "results": True,  # would be interesting for debug
     "immediate": False,  # set to False to run in "live" mode regardless of DEBUG, otherwise it will follow
 }
+
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
 
