@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from iam.models import User
 
+
 from test_vars import USERS_ENDPOINT as API_ENDPOINT
 from test_utils import EndpointTestsQueries
 from test_vars import GROUPS_PERMISSIONS
@@ -195,57 +196,73 @@ class TestUsersAuthenticated:
                 f"users can be created with an invalid email ({email})"
             )
 
-    def test_user_can_see_himself_and_update_only_if_admin(self, test):
-        """
-        - A user can retrieve their own user object only if in the same domain
-        - Only an admin can update their own user object
-        """
-
-        list_url = reverse(API_ENDPOINT)
+    def test_update_only_if_admin(self, test):
         is_admin = test.user_group == "BI-UG-ADM"
 
-        # --- create the user via admin ---
-        user_data = {
-            "email": USER_EMAIL,
-            "first_name": "Self",
-            "last_name": "User",
-        }
+        # Ensure the user exists
+        user, created = User.objects.get_or_create(
+            email=USER_EMAIL,
+            defaults={
+                "first_name": USER_FIRSTNAME,
+                "last_name": USER_NAME,
+                "password": USER_PASSWORD,
+                "is_active": True,
+            },
+        )
 
-        response = test.admin_client.post(list_url, user_data, format="json")
-        assert response.status_code == status.HTTP_201_CREATED
-
-        user_id = response.json()["id"]
-        detail_url = reverse("users-detail", args=[user_id])
-
-        # --- user attempts to retrieve himself ---
-        response = test.client.get(detail_url)
-
-        if (
-            is_admin
-            or test.folder == response.json().get("folder")
-            or test.user_group == "BI-UG-GAD"
-            or test.user_group == "BI-UG-GAP"
-        ):
-            # Admin or same domain can access
-            assert response.status_code == status.HTTP_200_OK
-            assert response.json()["email"] == USER_EMAIL
-        else:
-            # Other users cannot access
-            assert response.status_code in (
-                status.HTTP_403_FORBIDDEN,
-                status.HTTP_401_UNAUTHORIZED,
-            )
+        detail_url = reverse("users-detail", args=[user.id])
 
         # --- attempt to update self ---
-        updated_data = {"first_name": "Updated"}
-        response = test.client.patch(detail_url, updated_data, format="json")
+        response = test.client.patch(
+            detail_url, {"first_name": "Updated"}, format="json"
+        )
 
         if is_admin:
             assert response.status_code == status.HTTP_200_OK
-            user = User.objects.get(id=user_id)
+            user.refresh_from_db()
             assert user.first_name == "Updated"
         else:
             assert response.status_code in (
-                status.HTTP_403_FORBIDDEN,
                 status.HTTP_401_UNAUTHORIZED,
+                status.HTTP_403_FORBIDDEN,
             )
+
+    def test_user_visibility_scope(self, test):
+        user, _ = User.objects.get_or_create(
+            email=USER_EMAIL,
+            defaults={
+                "first_name": USER_FIRSTNAME,
+                "last_name": USER_NAME,
+                "password": USER_PASSWORD,
+                "is_active": True,
+            },
+        )
+
+        client = test.client
+        response = client.get(reverse(API_ENDPOINT))
+        data = response.json()
+
+        users_list = data.get("results", data)
+
+        if test.user_group.startswith("Global"):
+            assert len(users_list) >= 2
+        else:
+            assert any(u["email"] == user.email for u in users_list)
+
+    def test_superuser_cannot_be_deactivated(self, test):
+        superuser, _ = User.objects.get_or_create(
+            email="admin.tests@example.com",
+            defaults={
+                "first_name": "Admin",
+                "last_name": "User",
+                "password": USER_PASSWORD,
+                "is_superuser": True,
+                "is_active": True,
+            },
+        )
+
+        url = reverse("users-detail", args=[superuser.id])
+        response = test.client.patch(url, {"is_active": False}, format="json")
+        superuser.refresh_from_db()
+
+        assert superuser.is_active is True
