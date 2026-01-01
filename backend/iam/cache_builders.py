@@ -36,9 +36,11 @@ from typing import (
 
 from django.apps import apps
 from django.contrib.auth.models import Permission
+from django.db import connection
 from django.db.models import Prefetch
+from django.db.utils import OperationalError, ProgrammingError
 
-from iam.snapshot_cache import CacheRegistry
+from iam.snapshot_cache import CacheRegistry, CacheVersion
 
 # Only for type-checkers (no runtime import => no circular import)
 if TYPE_CHECKING:
@@ -71,9 +73,25 @@ def is_cache_ready() -> bool:
     return cache_ready
 
 
+def _cache_tables_ready() -> bool:
+    """
+    Detect whether the tables required for cache hydration exist.
+    """
+    try:
+        with connection.cursor() as cursor:
+            tables = set(connection.introspection.table_names(cursor))
+    except (OperationalError, ProgrammingError):
+        return False
+    return CacheVersion._meta.db_table in tables
+
+
 def _ensure_cache_ready() -> None:
-    if not cache_ready:
-        raise CacheNotReadyError("IAM caches are not ready to run DB queries")
+    if cache_ready:
+        return
+    if _cache_tables_ready():
+        set_cache_ready()
+        return
+    raise CacheNotReadyError("IAM caches are not ready to run DB queries")
 
 
 # --------------------------------------------------------------------
