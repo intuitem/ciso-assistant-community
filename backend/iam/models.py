@@ -104,14 +104,14 @@ class Folder(NameDescriptionMixin):
     @staticmethod
     def get_root_folder() -> Self | None:
         """class function for general use"""
-        if apps.ready:
-            try:
+        try:
+            if apps.ready:
                 state = get_folder_state()
                 root_id = getattr(state, "root_folder_id", None)
                 if root_id:
                     return state.folders.get(root_id)
-            except Exception:
-                pass
+        except Exception:
+            pass
         return _get_root_folder()
 
     @staticmethod
