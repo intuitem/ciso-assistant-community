@@ -14,6 +14,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
+from django.db.models import Q, F, Prefetch
 from knox.models import AuthToken
 from core.utils import (
     BUILTIN_USERGROUP_CODENAMES,
