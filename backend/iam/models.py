@@ -985,7 +985,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         user: User,
         content_type: Folder.ContentType,
         codename: str = "view_folder",
-    ) -> list[Folder]:
+    ) -> list[uuid.UUID]:
+        """Return folder IDs in the scoped perimeter that the user can access."""
         state = get_folder_state()
         roles_state = get_roles_state()
 
