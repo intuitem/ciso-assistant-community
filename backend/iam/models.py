@@ -3,6 +3,7 @@ Inspired from Azure IAM model"""
 
 from __future__ import annotations
 from collections import defaultdict
+from django.apps import apps
 from dataclasses import dataclass
 from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Self
 import uuid
