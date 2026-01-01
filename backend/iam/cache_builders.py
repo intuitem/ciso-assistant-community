@@ -8,7 +8,6 @@ Design goals:
 - Import-time registration is DB-free (only CacheRegistry.register calls).
 - Actual DB work happens only when CacheRegistry.hydrate_all() rebuilds a snapshot.
 - Snapshots are immutable-ish via MappingProxyType + frozenset/tuple.
-- Manual invalidation is expected (no signals). Be careful with M2M changes.
 
 Keys:
 - folders
