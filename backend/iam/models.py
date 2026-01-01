@@ -1055,7 +1055,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         delete_code = f"delete_{class_name}"
 
         # If a permission doesn't exist for this model, behave safely.
-        # (Django usually creates them, but better than KeyError.)
         if (
             view_code not in permissions_map
             or change_code not in permissions_map
@@ -1120,6 +1119,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 objects_ids = object_type.objects.filter(folder_id=f_id).values_list(
                     "id", flat=True
                 )
+            elif object_type is Folder:
+                objects_ids = [f_id]
             elif hasattr(object_type, "risk_assessment"):
                 objects_ids = object_type.objects.filter(
                     risk_assessment__folder_id=f_id
@@ -1132,17 +1133,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 objects_ids = object_type.objects.filter(
                     provider_entity__folder_id=f_id
                 ).values_list("id", flat=True)
-            elif hasattr(object_type, "parent_folder"):
-                objects_ids = [f_id]
-            elif class_name == "permission":
-                # Permissions have no folder; rely on filtering rules
-                objects_ids = (
-                    Permission.objects.filter(
-                        content_type__app_label__in=ALLOWED_PERMISSION_APPS
-                    )
-                    .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
-                    .values_list("id", flat=True)
-                )
             else:
                 raise NotImplementedError("type not supported")
 
@@ -1154,22 +1144,29 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 result_delete.update(objects_ids)
 
         # Published inheritance: published parents for local-view folders
+        # PERF: collect all ancestor folder_ids first, then do ONE query.
         if hasattr(object_type, "is_published") and hasattr(object_type, "folder"):
-            local_view_folder_ids = [
-                f_id for f_id, perms in folder_perm_codes.items() if view_code in perms
-            ]
+            ancestor_ids: set[uuid.UUID] = set()
 
-            for folder_id in local_view_folder_ids:
+            for folder_id, perms in folder_perm_codes.items():
+                if view_code not in perms:
+                    continue
+
                 folder_obj = state.folders[folder_id]
-                if folder_obj.content_type != Folder.ContentType.ENCLAVE:
-                    parent_id = state.parent_map.get(folder_id)
-                    while parent_id:
-                        result_view.update(
-                            object_type.objects.filter(
-                                folder_id=parent_id, is_published=True
-                            ).values_list("id", flat=True)
-                        )
-                        parent_id = state.parent_map.get(parent_id)
+                if folder_obj.content_type == Folder.ContentType.ENCLAVE:
+                    continue
+
+                parent_id = state.parent_map.get(folder_id)
+                while parent_id:
+                    ancestor_ids.add(parent_id)
+                    parent_id = state.parent_map.get(parent_id)
+
+            if ancestor_ids:
+                result_view.update(
+                    object_type.objects.filter(
+                        folder_id__in=ancestor_ids, is_published=True
+                    ).values_list("id", flat=True)
+                )
 
         return (list(result_view), list(result_change), list(result_delete))
 

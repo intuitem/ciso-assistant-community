@@ -5,8 +5,16 @@ class IamConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "iam"
 
+
+from django.apps import AppConfig
+
+
+class IamConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "iam"
+
     def ready(self):
-        #  Register m2m invalidation hooks
+        from django.apps import apps
         from django.db.models.signals import m2m_changed
 
         from iam.cache_builders import (
@@ -14,19 +22,27 @@ class IamConfig(AppConfig):
             invalidate_assignments_cache,
         )
 
-        # Import models only inside ready() to avoid import-time circular deps
-        from iam.models import User  # or use apps.get_model if you prefer
+        User = apps.get_model("iam", "User")
+        RoleAssignment = apps.get_model("iam", "RoleAssignment")
 
         def _user_groups_changed(sender, instance, action, **kwargs):
-            # Only after DB has changed
             if action in {"post_add", "post_remove", "post_clear"}:
                 invalidate_groups_cache()
-                # effective permissions depend on group membership
+                invalidate_assignments_cache()
+
+        def _ra_perimeters_changed(sender, instance, action, **kwargs):
+            if action in {"post_add", "post_remove", "post_clear"}:
                 invalidate_assignments_cache()
 
         m2m_changed.connect(
             _user_groups_changed,
             sender=User.user_groups.through,
             dispatch_uid="iam.user_groups.m2m.invalidate_caches",
+            weak=False,
+        )
+        m2m_changed.connect(
+            _ra_perimeters_changed,
+            sender=RoleAssignment.perimeter_folders.through,
+            dispatch_uid="iam.roleassignment.perimeter_folders.m2m.invalidate_assignments_cache",
             weak=False,
         )
