@@ -3,7 +3,6 @@ Inspired from Azure IAM model"""
 
 from __future__ import annotations
 from collections import defaultdict
-from django.apps import apps
 from dataclasses import dataclass
 from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Self
 import uuid
@@ -105,11 +104,10 @@ class Folder(NameDescriptionMixin):
     def get_root_folder() -> Self | None:
         """class function for general use"""
         try:
-            if apps.ready:
-                state = get_folder_state()
-                root_id = getattr(state, "root_folder_id", None)
-                if root_id:
-                    return state.folders.get(root_id)
+            state = get_folder_state()
+            root_id = getattr(state, "root_folder_id", None)
+            if root_id:
+                return state.folders.get(root_id)
         except Exception:
             pass
         return _get_root_folder()

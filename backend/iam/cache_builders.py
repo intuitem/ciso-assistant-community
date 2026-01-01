@@ -54,6 +54,28 @@ IAM_GROUPS_KEY = "iam.groups"
 IAM_ASSIGNMENTS_KEY = "iam.assignments"
 
 
+class CacheNotReadyError(RuntimeError):
+    """Raised when IAM caches are accessed before being marked ready."""
+
+
+cache_ready: bool = False
+
+
+def set_cache_ready(*, ready: bool = True) -> None:
+    """Allow callers to toggle whether caches may touch the DB."""
+    global cache_ready
+    cache_ready = bool(ready)
+
+
+def is_cache_ready() -> bool:
+    return cache_ready
+
+
+def _ensure_cache_ready() -> None:
+    if not cache_ready:
+        raise CacheNotReadyError("IAM caches are not ready to run DB queries")
+
+
 # --------------------------------------------------------------------
 # Folder snapshot cache
 # --------------------------------------------------------------------
@@ -353,21 +375,25 @@ def get_folder_state(*, force_reload: bool = False) -> FolderCacheState:
     """
     Convenience accessor for folder cache state.
     """
+    _ensure_cache_ready()
     state_map = CacheRegistry.hydrate_all(force_reload=force_reload)
     return state_map[FOLDER_CACHE_KEY]
 
 
 def get_roles_state(*, force_reload: bool = False) -> RolesCacheState:
+    _ensure_cache_ready()
     state_map = CacheRegistry.hydrate_all(force_reload=force_reload)
     return state_map[IAM_ROLES_KEY]
 
 
 def get_groups_state(*, force_reload: bool = False) -> GroupsCacheState:
+    _ensure_cache_ready()
     state_map = CacheRegistry.hydrate_all(force_reload=force_reload)
     return state_map[IAM_GROUPS_KEY]
 
 
 def get_assignments_state(*, force_reload: bool = False) -> AssignmentsCacheState:
+    _ensure_cache_ready()
     state_map = CacheRegistry.hydrate_all(force_reload=force_reload)
     return state_map[IAM_ASSIGNMENTS_KEY]
 
@@ -377,6 +403,9 @@ __all__ = [
     "IAM_ROLES_KEY",
     "IAM_GROUPS_KEY",
     "IAM_ASSIGNMENTS_KEY",
+    "CacheNotReadyError",
+    "is_cache_ready",
+    "set_cache_ready",
     "FolderCacheState",
     "RolesCacheState",
     "GroupsCacheState",
