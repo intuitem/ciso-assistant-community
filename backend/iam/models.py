@@ -49,6 +49,8 @@ logger = structlog.get_logger(__name__)
 from auditlog.registry import auditlog
 from allauth.mfa.models import Authenticator
 from iam.cache_builders import (
+    CacheNotReadyError,
+    FolderCacheState,
     get_folder_state,
     get_roles_state,
     get_groups_state,
@@ -105,11 +107,18 @@ class Folder(NameDescriptionMixin):
         """class function for general use"""
         try:
             state = get_folder_state()
-            root_id = getattr(state, "root_folder_id", None)
-            if root_id:
-                return state.folders.get(root_id)
+        except CacheNotReadyError:
+            return _get_root_folder()
         except Exception:
-            pass
+            logger.exception("Failed to load folder cache state", exc_info=True)
+            return _get_root_folder()
+
+        root_id = getattr(state, "root_folder_id", None)
+        if root_id:
+            folder = state.folders.get(root_id)
+            if folder:
+                return folder
+
         return _get_root_folder()
 
     @staticmethod
@@ -1043,7 +1052,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return ([], [], [])
 
         class_name = object_type.__name__.lower()
-
         # We still need Permission rows for:
         # - returning ids when object_type is Permission
         # - (optionally) ensuring the codenames exist in DB
@@ -1052,10 +1060,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             f"change_{class_name}",
             f"delete_{class_name}",
         ]
-        permissions_map = {
-            p.codename: p
-            for p in Permission.objects.filter(codename__in=needed_codenames)
-        }
+        roles_state = get_roles_state()
+        permissions_map = roles_state.permission_ids_by_codename
 
         view_code = f"view_{class_name}"
         change_code = f"change_{class_name}"
@@ -1071,7 +1077,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         # Cached state
         state = get_folder_state()
-        roles_state = get_roles_state()
 
         perimeter_ids = set(iter_descendant_ids(state, folder.id, include_start=True))
 

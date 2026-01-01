@@ -11,6 +11,7 @@ Generic versioned snapshot caching logic for Django with:
 from __future__ import annotations
 
 from dataclasses import dataclass
+import time
 from typing import Callable, Dict, Generic, Mapping, Optional, Sequence, Tuple, TypeVar
 
 from django.db import models, transaction
@@ -51,27 +52,35 @@ class VersionSnapshot:
 
 class VersionStore:
     """
-    Fetch ALL cache versions in one query, plus helpers to ensure keys exist and bump versions.
+    Fetch all cache versions, creating missing keys if needed.
     """
 
     @staticmethod
-    def get_versions() -> VersionSnapshot:
-        rows = CacheVersion.objects.all().values_list("key", "version")
-        return VersionSnapshot(versions={k: int(v) for k, v in rows})
+    def ensure_and_get_versions(keys: Sequence[str]) -> VersionSnapshot:
+        """
+        Return versions for the provided keys, creating rows when missing.
 
-    @staticmethod
-    def ensure_keys(keys: Sequence[str]) -> None:
+        In the common case (all keys exist) this executes a single SELECT.
+        If some keys are missing we insert them and re-query.
+        """
         if not keys:
-            return
-        existing = set(
-            CacheVersion.objects.filter(key__in=keys).values_list("key", flat=True)
-        )
-        missing = [k for k in keys if k not in existing]
+            return VersionSnapshot(versions={})
+
+        rows = CacheVersion.objects.filter(key__in=keys).values_list("key", "version")
+        versions = {k: int(v) for k, v in rows}
+
+        missing = [k for k in keys if k not in versions]
         if missing:
             CacheVersion.objects.bulk_create(
                 [CacheVersion(key=k, version=1) for k in missing],
                 ignore_conflicts=True,
             )
+            rows = CacheVersion.objects.filter(key__in=keys).values_list(
+                "key", "version"
+            )
+            versions = {k: int(v) for k, v in rows}
+
+        return VersionSnapshot(versions=versions)
 
     @staticmethod
     def bump(key: str) -> int:
@@ -109,13 +118,12 @@ class VersionedSnapshotCache(Generic[T]):
         Return snapshot, rebuilding if version differs.
 
         IMPORTANT: We fail loudly if the key is missing from versions, because it indicates
-        the CacheVersion row was not created (or ensure_keys wasn't called).
+        the CacheVersion row was not created (hydrate_all must run first).
         """
         if self.key not in versions:
             raise KeyError(
                 f"Cache key '{self.key}' missing from CacheVersion table. "
-                f"Ensure CacheRegistry.hydrate_all() is used (it calls ensure_keys), "
-                f"or call VersionStore.ensure_keys([...]) for this key."
+                f"Ensure CacheRegistry.hydrate_all() ran before accessing this cache."
             )
 
         v = int(versions[self.key])
@@ -158,6 +166,9 @@ class CacheRegistry:
     """
 
     _caches: Dict[str, VersionedSnapshotCache] = {}
+    _last_versions: Optional[Mapping[str, int]] = None
+    _last_fetched_at: Optional[float] = None
+    _MIN_FETCH_INTERVAL_MS = 500.0
 
     @classmethod
     def register(
@@ -192,11 +203,20 @@ class CacheRegistry:
 
         keys = tuple(cls._caches.keys())
 
-        # Create missing version rows lazily (safe to call each time; usually no-ops)
-        VersionStore.ensure_keys(list(keys))
+        now = time.monotonic() * 1000.0
+        versions: Mapping[str, int] | None = None
+        if (
+            not force_reload
+            and cls._last_versions is not None
+            and cls._last_fetched_at is not None
+            and now - cls._last_fetched_at < cls._MIN_FETCH_INTERVAL_MS
+        ):
+            versions = cls._last_versions
 
-        # One DB query: fetch-all versions
-        versions = VersionStore.get_versions().versions
+        if versions is None:
+            versions = VersionStore.ensure_and_get_versions(list(keys)).versions
+            cls._last_versions = versions
+            cls._last_fetched_at = now
 
         # Hydrate each cache
         return {

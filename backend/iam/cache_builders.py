@@ -234,6 +234,7 @@ def get_folder_path(
 @dataclass(frozen=True, slots=True)
 class RolesCacheState:
     role_permissions: Mapping[uuid.UUID, FrozenSet[str]]
+    permission_ids_by_codename: Mapping[str, int]
 
 
 def build_roles_cache_state() -> RolesCacheState:
@@ -256,7 +257,15 @@ def build_roles_cache_state() -> RolesCacheState:
             p.codename for p in role.permissions.all() if p.codename
         )
 
-    return RolesCacheState(role_permissions=MappingProxyType(role_permissions))
+    permissions = Permission.objects.all().only("codename", "id")
+    permission_ids_by_codename: Dict[str, int] = {
+        p.codename: p.id for p in permissions if p.codename
+    }
+
+    return RolesCacheState(
+        role_permissions=MappingProxyType(role_permissions),
+        permission_ids_by_codename=MappingProxyType(permission_ids_by_codename),
+    )
 
 
 def invalidate_roles_cache() -> Optional[int]:
