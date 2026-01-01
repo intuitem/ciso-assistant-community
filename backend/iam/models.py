@@ -101,14 +101,20 @@ class Folder(NameDescriptionMixin):
     """
 
     @staticmethod
-    def get_root_folder() -> Self:
+    def get_root_folder() -> Self | None:
         """class function for general use"""
+        try:
+            state = get_folder_state()
+            root_id = getattr(state, "root_folder_id", None)
+            if root_id:
+                return state.folders.get(root_id)
+        except Exception:
+            pass
         return _get_root_folder()
 
     @staticmethod
     def get_root_folder_id() -> uuid.UUID | None:
-        root = _get_root_folder()
-        return root.id if root else None
+        return getattr(Folder.get_root_folder(), "id", None)
 
     class ContentType(models.TextChoices):
         """content type for a folder"""
@@ -980,7 +986,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         )
 
     @staticmethod
-    def get_accessible_folders(
+    def get_accessible_folder_ids(
         folder: Folder,
         user: User,
         content_type: Folder.ContentType,

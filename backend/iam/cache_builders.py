@@ -64,6 +64,7 @@ class FolderCacheState:
     children_map: Mapping[Optional[uuid.UUID], Tuple[uuid.UUID, ...]]
     depth_map: Mapping[uuid.UUID, int]
     root_ids: Tuple[uuid.UUID, ...]
+    root_folder_id: Optional[uuid.UUID]
 
 
 def build_folder_cache_state() -> FolderCacheState:
@@ -84,8 +85,11 @@ def build_folder_cache_state() -> FolderCacheState:
     }
 
     children_map: defaultdict[Optional[uuid.UUID], List[uuid.UUID]] = defaultdict(list)
+    root_folder_id: Optional[uuid.UUID] = None
     for folder in folders:
         children_map[folder.parent_folder_id].append(folder.id)
+        if root_folder_id is None and folder.content_type == Folder.ContentType.ROOT:
+            root_folder_id = folder.id
 
     # Stable ordering for traversal
     for child_list in children_map.values():
@@ -112,6 +116,7 @@ def build_folder_cache_state() -> FolderCacheState:
         ),
         depth_map=MappingProxyType(depth_map),
         root_ids=tuple(children_map.get(None, ())),
+        root_folder_id=root_folder_id,
     )
 
 
