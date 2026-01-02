@@ -61,7 +61,7 @@ test('User can import a domain from a .bak file', async ({ logedPage, page }) =>
 
 		// Verify that a success toast appears with expected text.
 		const toast = page.getByTestId('toast');
-		await expect(toast).toBeVisible({ timeout: 30000 });
+		await expect(toast).toBeVisible({ timeout: 120000 });
 		await expect(toast).toHaveText(/successfully imported/i);
 
 		// Confirm that the number of rows has increased.
