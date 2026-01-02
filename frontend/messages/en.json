@@ -641,6 +641,7 @@
 	"compliant": "Compliant",
 	"notApplicable": "Not applicable",
 	"notAssessed": "Not assessed",
+	"notSet": "--",
 	"administrator": "Administrator",
 	"domainManager": "Domain manager",
 	"analyst": "Analyst",
