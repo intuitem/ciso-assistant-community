@@ -39,6 +39,21 @@ def set_ciso_assistant_url(_, __, event_dict):
     return event_dict
 
 
+class IgnoreApiBuildFilter(logging.Filter):
+    """Filter out request_finished logs for /api/build endpoint with 404 status."""
+
+    def filter(self, record):
+        request = getattr(record, "request", None)
+        code = getattr(record, "code", None)
+        if (
+            code == 404
+            and request
+            and (request.endswith("/api/build") or request.endswith("/api/build/"))
+        ):
+            return False
+        return True
+
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -52,10 +67,16 @@ LOGGING = {
             "processor": structlog.dev.ConsoleRenderer(),
         },
     },
+    "filters": {
+        "ignore_api_build": {
+            "()": IgnoreApiBuildFilter,
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": LOG_FORMAT,
+            "filters": ["ignore_api_build"],
         },
     },
     "loggers": {
@@ -69,6 +90,7 @@ if LOG_OUTFILE:
         "class": "logging.handlers.WatchedFileHandler",
         "filename": "ciso-assistant.log",
         "formatter": "json",
+        "filters": ["ignore_api_build"],
     }
     LOGGING["loggers"][""]["handlers"].append("file")
 
