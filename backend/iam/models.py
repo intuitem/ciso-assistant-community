@@ -132,7 +132,11 @@ class Folder(NameDescriptionMixin):
         verbose_name_plural = _("Folders")
 
     def __str__(self) -> str:
-        return self.name.__str__()
+        path = self.get_folder_full_path(include_root=False)
+        names = [getattr(folder, "name", "") or "" for folder in path]
+        cleaned = [name for name in names if name]
+        display = "/".join(cleaned) if cleaned else (self.name or "")
+        return display or ""
 
     def get_sub_folders(self) -> Generator[Self, None, None]:
         """Return the list of subfolders"""
@@ -381,15 +385,15 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
 
     def __str__(self) -> str:
         if self.builtin:
-            return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
-        return f"{self.folder.name} - {self.name}"
+            return f"{self.folder} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
+        return f"{self.folder} - {self.name}"
 
     def get_name_display(self) -> str:
         return self.name
 
     def get_localization_dict(self) -> dict:
         return {
-            "folder": self.folder.name,
+            "folder": str(self.folder),
             "role": BUILTIN_USERGROUP_CODENAMES.get(self.name)
             if self.builtin
             else self.name,

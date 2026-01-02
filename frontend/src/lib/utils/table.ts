@@ -119,6 +119,16 @@ export const DOMAIN_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const PARENT_DOMAIN_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
+		optionsLabelField: 'str',
+		label: 'parent_domain',
+		multiple: true
+	}
+};
+
 export const LABELS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1194,16 +1204,17 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'contentType', 'parentDomain', 'labels'],
-		body: ['name', 'description', 'content_type', 'parent_folder', 'filtering_labels'],
+		head: ['name', 'description', 'contentType', 'labels'],
+		body: ['str', 'description', 'content_type', 'filtering_labels'],
 		filters: {
+			parent_folder: PARENT_DOMAIN_FILTER,
 			content_type: CONTENT_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
 	perimeters: {
-		head: ['ref_id', 'name', 'description', 'defaultAssignee', 'domain'],
-		body: ['ref_id', 'name', 'description', 'default_assignee', 'folder'],
+		head: ['ref_id', 'name', 'description', 'defaultAssignee'],
+		body: ['ref_id', 'str', 'description', 'default_assignee'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			lc_status: PERIMETER_STATUS_FILTER

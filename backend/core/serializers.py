@@ -266,6 +266,7 @@ class PerimeterReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     lc_status = serializers.CharField(source="get_lc_status_display")
     default_assignee = FieldsRelatedField(many=True)
+    str = serializers.CharField(source="__str__", read_only=True)
 
     class Meta:
         model = Perimeter
@@ -1415,6 +1416,7 @@ class FolderReadSerializer(BaseModelSerializer):
     filtering_labels = FieldsRelatedField(many=True)
 
     content_type = serializers.CharField(source="get_content_type_display")
+    str = serializers.CharField(source="__str__", read_only=True)
 
     class Meta:
         model = Folder

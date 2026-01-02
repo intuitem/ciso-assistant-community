@@ -435,7 +435,9 @@
 											? key.replace('_', '-') + '-field-value'
 											: null}
 									>
-										{#if value !== null && value !== undefined && value !== ''}
+										{#if key === 'name' && (data.model?.name === 'folder' || data.urlModel === 'folders') && data.data?.str}
+											{data.data.str}
+										{:else if value !== null && value !== undefined && value !== ''}
 											{#if key === 'asset_class'}
 												<!-- Special case for asset_class - Always translate the value -->
 												{#if typeof value === 'object' && (value.str || value.name)}

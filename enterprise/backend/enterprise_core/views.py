@@ -250,6 +250,25 @@ class LicenseStatusView(APIView):
             return Response({"status": "expired", "days_expired": days_expired})
 
 
+class RoleOrderingFilter(filters.OrderingFilter):
+    """
+    Order roles by their display name (sensitive to builtin translations).
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        ordering = self.get_ordering(request, queryset, view)
+        if not ordering:
+            return queryset
+
+        if len(ordering) == 1 and ordering[0].lstrip("-") == "name":
+            reverse = ordering[0].startswith("-")
+            data = list(queryset)
+            data.sort(key=lambda role: str(role).casefold(), reverse=reverse)
+            return data
+
+        return super().filter_queryset(request, queryset, view)
+
+
 class RoleViewSet(BaseModelViewSet):
     """
     API endpoint that allows roles to be viewed or edited
@@ -257,6 +276,8 @@ class RoleViewSet(BaseModelViewSet):
 
     model = Role
     ordering = ["builtin", "name"]
+    ordering_fields = ["name"]
+    filter_backends = [DjangoFilterBackend, RoleOrderingFilter, filters.SearchFilter]
 
     def perform_create(self, serializer):
         """
