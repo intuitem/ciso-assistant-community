@@ -954,17 +954,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         state = get_folder_state()
         roles_state = get_roles_state()
 
-        # Special-case preserved from your code (but now codename based)
-        add_tag_codename = "add_filteringlabel"
-
         for a in _iter_assignment_lites_for_user(user):
             role_perms = roles_state.role_permissions.get(a.role_id, frozenset())
 
             if perm_codename not in role_perms:
                 continue
 
-            # allow any folder if user has add_filteringlabel in role (your old behavior)
-            if perm_codename == add_tag_codename:
+            # allow any folder if user has add_filteringlabel in role
+            if perm_codename == "add_filteringlabel":
                 return True
 
             perimeter_ids = set(a.perimeter_folder_ids)
@@ -988,11 +985,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         obj = object_type.objects.filter(id=id).first()
         if not obj:
             return False
-        class_name = object_type.__name__.lower()
-        permission = Permission.objects.get(codename="view_" + class_name)
-        return RoleAssignment.is_access_allowed(
-            user, permission, Folder.get_folder(obj)
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_folder(obj), user, object_type
         )
+        return id in viewable_ids
 
     @staticmethod
     def get_accessible_folder_ids(
