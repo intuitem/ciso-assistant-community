@@ -531,9 +531,10 @@ class MappingEngine:
             for m2m_field in self.m2m_fields:
                 attr = getattr(ra, m2m_field)
                 if isinstance(attr, QuerySet) or hasattr(attr, "all"):
+                    related_items = list(attr.all())
                     audit_results["requirement_assessments"][ra.requirement.urn][
                         m2m_field
-                    ] = attr.all().values_list("id", flat=True)
+                    ] = [item.id for item in related_items]
                 else:
                     audit_results["requirement_assessments"][ra.requirement.urn][
                         m2m_field
