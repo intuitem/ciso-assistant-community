@@ -80,6 +80,6 @@ We've detailed our model to help you understand how everything is organized
 [risk.md](model/risk.md)
 {% endcontent-ref %}
 
-{% content-ref url="model/compliance.md" %}
-[compliance.md](model/compliance.md)
+{% content-ref url="model/compliance/" %}
+[compliance](model/compliance/)
 {% endcontent-ref %}

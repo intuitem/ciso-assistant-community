@@ -48,7 +48,8 @@
 * [⚙️ Context](model/context.md)
 * [🏛️ Governance](model/governance.md)
 * [💣 Risk](model/risk.md)
-* [📋 Compliance](model/compliance.md)
+* [📋 Compliance](model/compliance/README.md)
+  * [Manage extended result](model/compliance/manage-extended-result.md)
 * [Domain export/import](model/domain-export-import.md)
 
 ## Deployment
