@@ -68,12 +68,6 @@ class AbstractBaseModel(models.Model):
 
         return not scope.filter(**filters).exists()
 
-    def display_path(self):
-        pass
-
-    def display_name(self):
-        pass
-
     @property
     def edit_url(self):
         return reverse_lazy(
