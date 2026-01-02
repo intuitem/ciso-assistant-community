@@ -3,14 +3,14 @@ from typing import Optional
 from rest_framework import serializers
 
 from core.models import LoadedLibrary, StoredLibrary
-from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
+from core.serializer_fields import IdRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer, ReferentialSerializer
 
 
 class StoredLibrarySerializer(ReferentialSerializer):
     locales = serializers.ListField(source="get_locales", read_only=True)
     loaded_library = serializers.SerializerMethodField()
-    filtering_labels = FieldsRelatedField(many=True, fields=["label"])
+    filtering_labels = IdRelatedField(many=True, fields=["label"])
 
     def get_loaded_library(self, obj) -> Optional[str]:
         loaded_library = obj.get_loaded_library()
@@ -79,7 +79,7 @@ class LoadedLibraryImportExportSerializer(BaseModelSerializer):
 
 class LoadedLibraryDetailedSerializer(ReferentialSerializer):
     locales = serializers.ListField(source="get_locales", read_only=True)
-    dependencies = FieldsRelatedField(many=True, fields=["urn", "str", "name"])
+    dependencies = IdRelatedField(many=True, fields=["urn", "str", "name"])
 
     class Meta:
         model = LoadedLibrary

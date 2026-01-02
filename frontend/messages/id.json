@@ -1248,5 +1248,6 @@
 		}
 	],
 	"cascadeAffectedHint": "Item-item di bawah ini tetap berada di sistem tetapi tautan mereka ke objek ini akan dihapus.",
-	"libraryFilteringLabels": "Label perpustakaan"
+	"libraryFilteringLabels": "Label perpustakaan",
+	"objectsNotVisible": "{count} objek tidak terlihat."
 }

@@ -1031,5 +1031,15 @@
 	"isCustom": "مخصص",
 	"errorUnloadingLibrary": "خطأ في تفريغ المكتبة",
 	"librarySuccessfullyUnloaded": "تم إلغاء تحميل المكتبة بنجاح",
-	"libraryFilteringLabels": "العلامات المكتبية"
+	"libraryFilteringLabels": "العلامات المكتبية",
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} عنصر غير مرئي.",
+				"countPlural=other": "{count} عناصر غير مرئية."
+			}
+		}
+	]
 }

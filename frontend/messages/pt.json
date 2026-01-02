@@ -1063,5 +1063,15 @@
 		}
 	],
 	"cascadeAffectedHint": "Os itens abaixo permanecem no sistema, mas seus links para este objeto serão removidos.",
-	"libraryFilteringLabels": "Etiquetas de biblioteca"
+	"libraryFilteringLabels": "Etiquetas de biblioteca",
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} objeto não visível.",
+				"countPlural=other": "{count} objetos não visíveis."
+			}
+		}
+	]
 }

@@ -2,6 +2,8 @@ import { listViewFields } from '$lib/utils/table';
 import type { ParamMatcher } from '@sveltejs/kit';
 
 export const match = ((param) => {
+	if (param.toLowerCase() === 'names') return true;
+
 	const filterKeys = new Set<string>();
 
 	Object.values(listViewFields).forEach((field) => {

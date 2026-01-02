@@ -1051,5 +1051,15 @@
 	"isCustom": "Vlastní",
 	"errorUnloadingLibrary": "Chyba při uvolňování knihovny",
 	"librarySuccessfullyUnloaded": "Knihovna byla úspěšně uvolněna",
-	"libraryFilteringLabels": "Štítky knihovny"
+	"libraryFilteringLabels": "Štítky knihovny",
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} objekt není viditelný.",
+				"countPlural=other": "{count} objekty nejsou viditelné."
+			}
+		}
+	]
 }

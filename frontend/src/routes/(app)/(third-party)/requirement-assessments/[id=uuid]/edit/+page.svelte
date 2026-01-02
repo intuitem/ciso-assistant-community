@@ -46,19 +46,16 @@
 
 	let { data, form, ...rest }: Props = $props();
 
-	const threats = data.requirementAssessment.requirement.associated_threats ?? [];
-	const reference_controls =
-		data.requirementAssessment.requirement.associated_reference_controls ?? [];
-	const annotation = data.requirement.annotation;
-	const typical_evidence = data.requirement.typical_evidence;
+	const threats = data.requirement?.associated_threats ?? [];
+	const reference_controls = data.requirement?.associated_reference_controls ?? [];
+	const annotation = data.requirement?.annotation;
+	const typical_evidence = data.requirement?.typical_evidence;
 
 	const has_threats = threats.length > 0;
 	const has_reference_controls = reference_controls.length > 0;
 
 	// Map implementation group ref_ids to their display names
-	const implementationGroupsDefinition =
-		data.requirementAssessment.compliance_assessment.framework?.implementation_groups_definition ??
-		[];
+	const implementationGroupsDefinition = data.framework?.implementation_groups_definition ?? [];
 
 	function getImplementationGroupName(refId: string): string {
 		return implementationGroupsDefinition.find((g) => g.ref_id === refId)?.name ?? refId;
@@ -71,7 +68,13 @@
 		if (nextValue) window.location.href = nextValue;
 	}
 
-	const complianceAssessmentURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
+	const complianceAssessmentId =
+		typeof data.requirementAssessment.compliance_assessment === 'string'
+			? data.requirementAssessment.compliance_assessment
+			: data.requirementAssessment.compliance_assessment?.id;
+	const complianceAssessmentURL = complianceAssessmentId
+		? `/compliance-assessments/${complianceAssessmentId}`
+		: '/compliance-assessments';
 	const schema = RequirementAssessmentSchema;
 
 	const modalStore: ModalStore = getModalStore();
@@ -275,7 +278,7 @@
 	let computedScore = $derived(computedScoreAndResult.score);
 </script>
 
-{#if data.requirementAssessment.compliance_assessment.is_locked}
+{#if data.complianceAssessment?.is_locked}
 	<div
 		class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm mb-4"
 	>
@@ -289,7 +292,7 @@
 <div class="card space-y-2 p-4 bg-white shadow-sm">
 	<div class="flex justify-between">
 		<div class="flex">
-			<span class="code left h-min">{data.requirement.urn}</span>
+			<span class="code left h-min">{data.requirement?.urn ?? '-'}</span>
 		</div>
 		<a
 			class="text-pink-500 hover:text-pink-400"
@@ -299,21 +302,21 @@
 	</div>
 	{#if data.requirement?.implementation_groups?.length > 0}
 		<div class="mb-2">
-			{#each data.requirement.implementation_groups as ig}
+			{#each data.requirement?.implementation_groups ?? [] as ig}
 				<span class="badge bg-blue-100 mr-2">
 					{getImplementationGroupName(ig)}
 				</span>
 			{/each}
 		</div>
 	{/if}
-	{#if data.requirement.description}
+	{#if data.requirement?.description}
 		<div class="font-light text-lg card p-4 preset-tonal-primary">
 			<h2 class="font-semibold text-base flex flex-row justify-between">
 				<div>
 					<i class="fa-solid fa-file-lines mr-2"></i>{m.description()}
 				</div>
 			</h2>
-			<MarkdownRenderer content={data.requirement.description} />
+			<MarkdownRenderer content={data.requirement?.description} />
 		</div>
 	{/if}
 	{#if has_threats || has_reference_controls || annotation || mappingInference.result || typical_evidence}
@@ -526,7 +529,7 @@
 											{form}
 											optionsEndpoint="applied-controls"
 											optionsDetailedUrlParameters={[
-												['scope_folder_id', page.data.requirementAssessment.folder.id]
+												['scope_folder_id', page.data.requirementAssessment.folder]
 											]}
 											optionsExtraFields={[['folder', 'str']]}
 											field="applied_controls"
@@ -561,7 +564,7 @@
 											optionsEndpoint="evidences"
 											optionsExtraFields={[['folder', 'str']]}
 											optionsDetailedUrlParameters={[
-												['scope_folder_id', page.data.requirementAssessment.folder.id]
+												['scope_folder_id', page.data.requirementAssessment.folder]
 											]}
 											field="evidences"
 										/>
@@ -610,11 +613,11 @@
 				<HiddenInput {form} field="requirement" />
 				<HiddenInput {form} field="compliance_assessment" />
 				<div class="flex flex-col my-8 space-y-6">
-					{#if page.data.requirementAssessment.requirement.questions != null && Object.keys(page.data.requirementAssessment.requirement.questions).length !== 0}
+					{#if page.data.requirement?.questions != null && Object.keys(page.data.requirement?.questions ?? {}).length !== 0}
 						<Question
 							{form}
 							field="answers"
-							questions={page.data.requirementAssessment.requirement.questions}
+							questions={page.data.requirement?.questions}
 							label={m.questionSingular()}
 						/>
 					{/if}

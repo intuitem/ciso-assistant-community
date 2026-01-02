@@ -2,7 +2,7 @@ import structlog
 from django.contrib.auth import authenticate, password_validation
 from rest_framework import serializers
 
-from core.serializer_fields import FieldsRelatedField
+from core.serializer_fields import IdRelatedField
 
 from .models import PersonalAccessToken, User
 
@@ -122,7 +122,7 @@ class PersonalAccessTokenReadSerializer(serializers.ModelSerializer):
     Serializer for PersonalAccessToken model.
     """
 
-    user = FieldsRelatedField(["email", "id"])
+    user = IdRelatedField(["email", "id"])
 
     class Meta:
         model = PersonalAccessToken

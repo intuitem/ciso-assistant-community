@@ -18,6 +18,7 @@ export const load = (async ({ fetch, params }) => {
 	const URLModel = 'requirement-assessments';
 	const baseUrl = BASE_API_URL;
 	const endpoint = `${baseUrl}/${URLModel}/${params.id}/`;
+	const getId = (value: any) => (typeof value === 'string' ? value : value?.id);
 
 	async function fetchJson(url: string) {
 		const res = await fetch(url);
@@ -29,15 +30,28 @@ export const load = (async ({ fetch, params }) => {
 	}
 
 	const requirementAssessment = await fetchJson(endpoint);
-	const requirement = requirementAssessment.requirement;
-	const compliance_assessment_score = await fetchJson(
-		`${baseUrl}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/global_score/`
-	);
+	const complianceAssessmentId = getId(requirementAssessment?.compliance_assessment);
+	const requirementId = getId(requirementAssessment?.requirement);
+	const folderId = getId(requirementAssessment?.folder);
 
-	const parent = requirementAssessment.requirement.parent_requirement;
+	const complianceAssessment = complianceAssessmentId
+		? await fetchJson(`${baseUrl}/compliance-assessments/${complianceAssessmentId}/`)
+		: null;
+	const frameworkId = getId(complianceAssessment?.framework);
+	const framework = frameworkId ? await fetchJson(`${baseUrl}/frameworks/${frameworkId}/`) : null;
+	const requirement = requirementId
+		? await fetchJson(`${baseUrl}/requirements/${requirementId}/`)
+		: null;
+	const compliance_assessment_score = complianceAssessmentId
+		? await fetchJson(`${baseUrl}/compliance-assessments/${complianceAssessmentId}/global_score/`)
+		: null;
+
+	const parent = requirement?.parent_requirement ?? null;
 
 	const model = getModelInfo(URLModel);
 	const object = { ...requirementAssessment };
+	const normalizeIds = (items: any[] | undefined) =>
+		(items ?? []).map((item) => (typeof item === 'string' ? item : item?.id)).filter(Boolean);
 	Object.keys(object).forEach((key) => {
 		if (object[key] instanceof Object && 'id' in object[key]) {
 			object[key] = object[key].id;
@@ -45,10 +59,9 @@ export const load = (async ({ fetch, params }) => {
 	});
 
 	const schema = modelSchema(URLModel);
-	object.evidences = object.evidences.map((evidence) => evidence.id);
-	object.applied_controls = object.applied_controls.map((applied_control) => applied_control.id);
-	object.security_exceptions =
-		object.security_exceptions?.map((security_exception) => security_exception.id) ?? [];
+	object.evidences = normalizeIds(object.evidences);
+	object.applied_controls = normalizeIds(object.applied_controls);
+	object.security_exceptions = normalizeIds(object.security_exceptions);
 	const form = await superValidate(object, zod(schema), { errors: true });
 
 	const selectOptions: Record<string, any> = {};
@@ -69,11 +82,9 @@ export const load = (async ({ fetch, params }) => {
 	model.selectOptions = selectOptions;
 
 	const measureCreateSchema = modelSchema('applied-controls');
-	const measureCreateForm = await superValidate(
-		{ folder: requirementAssessment.folder.id },
-		zod(measureCreateSchema),
-		{ errors: false }
-	);
+	const measureCreateForm = await superValidate({ folder: folderId }, zod(measureCreateSchema), {
+		errors: false
+	});
 
 	const measureModel = getModelInfo('applied-controls');
 
@@ -113,7 +124,7 @@ export const load = (async ({ fetch, params }) => {
 	const evidenceModel = getModelInfo('evidences');
 	const evidenceCreateSchema = modelSchema('evidences');
 	const evidenceCreateForm = await superValidate(
-		{ requirement_assessments: [params.id], folder: requirementAssessment.folder.id },
+		{ requirement_assessments: [params.id], folder: folderId },
 		zod(evidenceCreateSchema),
 		{ errors: false }
 	);
@@ -138,7 +149,7 @@ export const load = (async ({ fetch, params }) => {
 	const securityExceptionModel = getModelInfo('security-exceptions');
 	const securityExceptionCreateSchema = modelSchema('security-exceptions');
 	const securityExceptionCreateForm = await superValidate(
-		{ requirement_assessments: [params.id], folder: requirementAssessment.folder.id },
+		{ requirement_assessments: [params.id], folder: folderId },
 		zod(securityExceptionCreateSchema),
 		{ errors: false }
 	);
@@ -166,6 +177,8 @@ export const load = (async ({ fetch, params }) => {
 		URLModel,
 		title: requirementAssessment.name,
 		requirementAssessment,
+		complianceAssessment,
+		framework,
 		compliance_assessment_score,
 		requirement,
 		parent,

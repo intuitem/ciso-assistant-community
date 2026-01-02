@@ -11,6 +11,7 @@
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { fetchNames, isUuid } from '$lib/utils/related-names';
 	import { toCamelCase } from '$lib/utils/locales.js';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
@@ -120,6 +121,81 @@
 	};
 
 	let hasWidgets = $derived(!!widgets);
+	let relatedNames: Record<string, Record<string, string>> = $state({});
+	let relatedNamesKey = '';
+
+	const getUrlModelForField = (fieldName: string): string | undefined => {
+		const modelField = data.model?.foreignKeyFields?.find((item) => item.field === fieldName);
+		return modelField?.urlModel ?? modelField?.field?.replace(/_/g, '-');
+	};
+
+	const extractId = (value: any): string | null => {
+		if (typeof value === 'string' && isUuid(value)) return value;
+		if (value && typeof value === 'object' && 'id' in value) {
+			const idValue = String(value.id);
+			return isUuid(idValue) ? idValue : null;
+		}
+		return null;
+	};
+
+	const extractIds = (value: any): string[] => {
+		if (Array.isArray(value)) {
+			return value.map((item) => extractId(item)).filter((item): item is string => Boolean(item));
+		}
+		const single = extractId(value);
+		return single ? [single] : [];
+	};
+
+	const isIdOnlyArray = (value: any[]): boolean => {
+		const hasDisplayLabels = value.some(
+			(item) => item && typeof item === 'object' && ('str' in item || 'name' in item)
+		);
+		return !hasDisplayLabels && extractIds(value).length > 0;
+	};
+
+	const getExpectedRelatedIds = (urlModel: string): string[] => {
+		if (!urlModel) return [];
+		const fieldFromUrl = urlModel.replace(/-/g, '_');
+		const candidates = [fieldFromUrl];
+		const matchingField = data.model?.foreignKeyFields?.find((item) => item.urlModel === urlModel);
+		if (matchingField?.field && matchingField.field !== fieldFromUrl) {
+			candidates.unshift(matchingField.field);
+		}
+		for (const fieldName of candidates) {
+			const value = data.data?.[fieldName];
+			if (!Array.isArray(value)) continue;
+			const ids = extractIds(value);
+			if (ids.length > 0) return Array.from(new Set(ids));
+		}
+		return [];
+	};
+
+	const refreshRelatedNames = async () => {
+		if (!data.model?.foreignKeyFields) return;
+		const idsByModel = new Map<string, Set<string>>();
+		for (const fieldConfig of data.model.foreignKeyFields) {
+			const urlModel = fieldConfig.urlModel ?? fieldConfig.field?.replace(/_/g, '-');
+			if (!urlModel) continue;
+			const ids = extractIds(data.data[fieldConfig.field]);
+			if (ids.length === 0) continue;
+			const bucket = idsByModel.get(urlModel) ?? new Set<string>();
+			ids.forEach((id) => bucket.add(id));
+			idsByModel.set(urlModel, bucket);
+		}
+		const key = JSON.stringify(
+			Array.from(idsByModel.entries()).map(([urlModel, ids]) => [urlModel, Array.from(ids).sort()])
+		);
+		if (!key || key === relatedNamesKey) return;
+		relatedNamesKey = key;
+
+		const updates: Record<string, Record<string, string>> = {};
+		for (const [urlModel, ids] of idsByModel.entries()) {
+			updates[urlModel] = await fetchNames(urlModel, Array.from(ids));
+		}
+		if (Object.keys(updates).length > 0) {
+			relatedNames = { ...relatedNames, ...updates };
+		}
+	};
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -133,6 +209,7 @@
 	}
 
 	onMount(() => {
+		void refreshRelatedNames();
 		// Add event listener to the document
 		document.addEventListener('keydown', handleKeydown);
 
@@ -140,6 +217,12 @@
 		return () => {
 			document.removeEventListener('keydown', handleKeydown);
 		};
+	});
+
+	$effect(() => {
+		data.data;
+		data.model?.foreignKeyFields;
+		void refreshRelatedNames();
 	});
 
 	function modalCreateForm(model: Record<string, any>): void {
@@ -444,10 +527,22 @@
 													{safeTranslate(value)}
 												{/if}
 											{:else if key === 'library'}
-												{@const itemHref = `/loaded-libraries/${value.id}`}
-												<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-													>{value.name}</Anchor
-												>
+												{@const urlModel = getUrlModelForField(key)}
+												{@const libraryId = typeof value === 'string' ? value : value?.id}
+												{@const resolvedNames = urlModel ? relatedNames[urlModel] : undefined}
+												{@const label =
+													typeof value === 'string' ? resolvedNames?.[value] : value?.name}
+												{@const itemHref =
+													libraryId && urlModel ? `/${urlModel}/${libraryId}` : undefined}
+												{#if label && itemHref}
+													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+														>{label}</Anchor
+													>
+												{:else if label}
+													{label}
+												{:else if typeof value === 'string' && !resolvedNames}
+													{libraryId}
+												{/if}
 											{:else if key === 'severity' && data.urlModel !== 'incidents'}
 												<!-- We must add translations for the following severity levels -->
 												<!-- Is this a correct way to convert the severity integer to the stringified security level ? -->
@@ -456,26 +551,73 @@
 													: (safeTranslate(value) ?? m.undefined())}
 												{stringifiedSeverity}
 											{:else if key === 'children_assets'}
-												{#if Object.keys(value).length > 0}
-													<ul class="inline-flex flex-wrap space-x-4">
-														{#each value as val}
-															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if val.str && val.id}
-																	{@const itemHref = `/${
-																		data.model?.foreignKeyFields?.find((item) => item.field === key)
-																			?.urlModel
-																	}/${val.id}`}
-																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
-																		{truncateString(val.str)}</Anchor
-																	>
-																{:else if val.str}
-																	{safeTranslate(val.str)}
-																{:else}
-																	{value}
-																{/if}
-															</li>
-														{/each}
-													</ul>
+												{#if Array.isArray(value) && value.length > 0}
+													{@const isIdArray = isIdOnlyArray(value)}
+													{@const idValues = isIdArray ? extractIds(value) : []}
+													{@const urlModel = isIdArray ? getUrlModelForField(key) : undefined}
+													{@const resolvedNames = urlModel ? relatedNames[urlModel] : undefined}
+													{@const hasResolvedNames = Boolean(resolvedNames)}
+													{@const visibleIds = hasResolvedNames
+														? idValues.filter((id) => resolvedNames?.[id])
+														: []}
+													{@const hiddenCount = hasResolvedNames
+														? idValues.length - visibleIds.length
+														: 0}
+													{#if isIdArray}
+														{#if hasResolvedNames}
+															<ul class="inline-flex flex-wrap space-x-4">
+																{#each visibleIds as id}
+																	{@const label = resolvedNames?.[id]}
+																	{@const itemHref =
+																		label && urlModel ? `/${urlModel}/${id}` : undefined}
+																	<li data-testid={key.replace('_', '-') + '-field-value'}>
+																		{#if label && itemHref}
+																			<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																				>{truncateString(label)}</Anchor
+																			>
+																		{:else if label}
+																			{truncateString(label)}
+																		{/if}
+																	</li>
+																{/each}
+															</ul>
+															{#if hiddenCount > 0}
+																<p class="text-xs text-yellow-700">
+																	{m.objectsNotVisible({
+																		count: hiddenCount,
+																		s: hiddenCount === 1 ? '' : 's'
+																	})}
+																</p>
+															{/if}
+														{:else}
+															<ul class="inline-flex flex-wrap space-x-4">
+																{#each idValues as id}
+																	<li data-testid={key.replace('_', '-') + '-field-value'}>{id}</li>
+																{/each}
+															</ul>
+														{/if}
+													{:else}
+														<ul class="inline-flex flex-wrap space-x-4">
+															{#each value as val}
+																<li data-testid={key.replace('_', '-') + '-field-value'}>
+																	{#if val.str && val.id}
+																		{@const itemHref = `/${
+																			data.model?.foreignKeyFields?.find(
+																				(item) => item.field === key
+																			)?.urlModel
+																		}/${val.id}`}
+																		<Anchor breadcrumbAction="push" href={itemHref} class="anchor">
+																			{truncateString(val.str)}</Anchor
+																		>
+																	{:else if val.str}
+																		{safeTranslate(val.str)}
+																	{:else}
+																		{value}
+																	{/if}
+																</li>
+															{/each}
+														</ul>
+													{/if}
 												{:else}
 													--
 												{/if}
@@ -493,7 +635,57 @@
 													--
 												{/if}
 											{:else if Array.isArray(value)}
-												{#if Object.keys(value).length > 0}
+												{@const isIdArray = isIdOnlyArray(value)}
+												{@const idValues = isIdArray ? extractIds(value) : []}
+												{@const urlModel = isIdArray ? getUrlModelForField(key) : undefined}
+												{@const resolvedNames = urlModel ? relatedNames[urlModel] : undefined}
+												{@const hasResolvedNames = Boolean(resolvedNames)}
+												{@const visibleIds = hasResolvedNames
+													? idValues.filter((id) => resolvedNames?.[id])
+													: []}
+												{@const hiddenCount = hasResolvedNames
+													? idValues.length - visibleIds.length
+													: 0}
+												{#if isIdArray}
+													{#if hasResolvedNames}
+														{#if visibleIds.length > 0}
+															<ul>
+																{#each visibleIds as id}
+																	{@const label = resolvedNames?.[id]}
+																	{@const itemHref =
+																		label && urlModel ? `/${urlModel}/${id}` : undefined}
+																	<li data-testid={key.replace('_', '-') + '-field-value'}>
+																		{#if label && itemHref}
+																			<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																				>{label}</Anchor
+																			>
+																		{:else if label}
+																			{label}
+																		{/if}
+																	</li>
+																{/each}
+															</ul>
+														{:else}
+															--
+														{/if}
+														{#if hiddenCount > 0}
+															<p class="text-xs text-yellow-700">
+																{m.objectsNotVisible({
+																	count: hiddenCount,
+																	s: hiddenCount === 1 ? '' : 's'
+																})}
+															</p>
+														{/if}
+													{:else if idValues.length > 0}
+														<ul>
+															{#each idValues as id}
+																<li data-testid={key.replace('_', '-') + '-field-value'}>{id}</li>
+															{/each}
+														</ul>
+													{:else}
+														--
+													{/if}
+												{:else if value.length > 0}
 													<ul>
 														{#each value.sort((a, b) => {
 															if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
@@ -536,6 +728,20 @@
 												{:else}
 													--
 												{/if}
+											{:else if typeof value === 'string' && isUuid(value) && getUrlModelForField(key)}
+												{@const urlModel = getUrlModelForField(key)}
+												{@const resolvedNames = urlModel ? relatedNames[urlModel] : undefined}
+												{@const label = resolvedNames?.[value]}
+												{@const itemHref = label && urlModel ? `/${urlModel}/${value}` : undefined}
+												{#if label && itemHref}
+													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+														>{label}</Anchor
+													>
+												{:else if label}
+													{label}
+												{:else if !resolvedNames}
+													{value}
+												{/if}
 											{:else if value.id && !value.hexcolor}
 												{@const itemHref = `/${
 													data.model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel
@@ -575,7 +781,7 @@
 												{formatDateOrDateTime(value, getLocale())}
 											{:else if key === 'description' || key === 'observation' || key === 'annotation'}
 												<MarkdownRenderer content={value} />
-											{:else if m[toCamelCase(value.str || value.name)]}
+											{:else if value && typeof value === 'object' && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
 												{(value.str || value.name) ?? value}
@@ -741,6 +947,8 @@
 									key: urlmodel,
 									featureFlags: page.data?.featureflags
 								}).body.filter((v) => v !== field.field)}
+							{@const expectedIds = getExpectedRelatedIds(urlmodel)}
+							{@const expectedCount = expectedIds.length}
 							{#if model.table}
 								<ModelTable
 									baseEndpoint={getReverseForeignKeyEndpoint({
@@ -758,6 +966,7 @@
 									URLModel={urlmodel}
 									fields={fieldsToUse}
 									defaultFilters={field.defaultFilters || {}}
+									{expectedCount}
 								>
 									{#snippet addButton()}
 										<button
