@@ -6244,12 +6244,40 @@ class ComplianceAssessment(Assessment):
 
         compliance_assessments_extended_result = {"values": [], "labels": []}
         if self.extended_result_enabled:
-            for extended_result in RequirementAssessment.ExtendedResult.values:
-                assessable_requirements_filter = {
-                    "compliance_assessment": self,
-                    "requirement__assessable": True,
-                }
+            assessable_requirements_filter = {
+                "compliance_assessment": self,
+                "requirement__assessable": True,
+            }
 
+            # Count "not_set" first (requirements without extended_result)
+            base_query_not_set = (
+                RequirementAssessment.objects.filter(**assessable_requirements_filter)
+                .filter(Q(extended_result__isnull=True) | Q(extended_result=""))
+                .distinct()
+            )
+
+            if self.selected_implementation_groups:
+                union_query_not_set = union_queries(
+                    base_query_not_set,
+                    self.selected_implementation_groups,
+                    "requirement__implementation_groups",
+                )
+            else:
+                union_query_not_set = base_query_not_set
+
+            not_set_count = union_query_not_set.count()
+            compliance_assessments_extended_result["values"].append(
+                {
+                    "name": "not_set",
+                    "localName": "notSet",
+                    "value": not_set_count,
+                    "itemStyle": {"color": "#d1d5db"},
+                }
+            )
+            compliance_assessments_extended_result["labels"].append("not_set")
+
+            # Count each extended_result value
+            for extended_result in RequirementAssessment.ExtendedResult.values:
                 base_query = RequirementAssessment.objects.filter(
                     extended_result=extended_result, **assessable_requirements_filter
                 ).distinct()
