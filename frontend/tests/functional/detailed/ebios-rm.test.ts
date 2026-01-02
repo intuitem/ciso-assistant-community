@@ -590,6 +590,7 @@ test('ebios rm study', async ({
 
 	await test.step('workshop 5', async () => {
 		await page.getByRole('button', { name: ' Step 1 Generate the risk' }).click();
+		await page.waitForTimeout(3000);
 		await riskAssessmentsPage.form.fill({
 			name: 'test-risk-assessment-ebios-rm',
 			perimeter: `${vars.folderName}/${vars.perimeterName}`
