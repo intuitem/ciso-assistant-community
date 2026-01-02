@@ -11,6 +11,8 @@ from django.db.models import Q, F, Prefetch
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
 from knox.models import AuthToken
@@ -368,6 +370,56 @@ class PublishInRootFolderMixin(models.Model):
         super().save(*args, **kwargs)
 
 
+class Actor(AbstractBaseModel, FolderMixin):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.UUIDField(db_index=True)
+    content_object = GenericForeignKey("content_type", "object_id")
+
+
+class ActorSyncMixin(models.Model):
+    """
+    Mixin to automatically manage the lifecycle of the associated Actor.
+    - Creates an Actor with a shared UUID upon creation.
+    - Deletes the Actor upon deletion.
+    """
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        # Save the instance (User, Team, Entity)
+        super().save(*args, **kwargs)
+
+        # Ensure the Actor shadow exists
+        # NOTE: We use a local import to prevent circular dependency errors
+        from .models import Actor
+
+        # get_or_create checks if the ID exists.
+        # If yes (Update), it does nothing (0 writes).
+        # If no (Create), it inserts the new Actor (1 write).
+        Actor.objects.get_or_create(
+            id=self.pk,
+            defaults={
+                "content_type": ContentType.objects.get_for_model(self._meta.model),
+                "object_id": self.pk,
+            },
+        )
+
+    def delete(self, *args, **kwargs):
+        # Capture the ID before the instance is destroyed
+        actor_id = self.pk
+
+        # Perform the deletion
+        super().delete(*args, **kwargs)
+
+        # Clean up the orphan Actor
+        # NOTE: Generic Foreign Keys do not support ON DELETE CASCADE at the database level,
+        # so we must delete the actor explicitly to avoid junk data.
+        from .models import Actor
+
+        Actor.objects.filter(id=actor_id).delete()
+
+
 class UserGroup(NameDescriptionMixin, FolderMixin):
     """UserGroup objects contain users and can be used as principals in role assignments"""
 
@@ -505,7 +557,7 @@ class CaseInsensitiveUserManager(UserManager):
         return self.get(**{self.model.USERNAME_FIELD + "__iexact": username})
 
 
-class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
+class User(AbstractBaseUser, AbstractBaseModel, FolderMixin, ActorSyncMixin):
     """a user is a principal corresponding to a human"""
 
     last_name = models.CharField(_("last name"), max_length=150, blank=True)
@@ -1112,6 +1164,31 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     for f in folder.get_sub_folders():
                         permissions[str(f.id)] |= ra_permissions
         return permissions
+
+
+class Team(NameDescriptionMixin, FolderMixin, ActorSyncMixin):
+    leader = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="led_teams",
+        verbose_name="Team Leader",
+        help_text="The leader of the team",
+    )
+    deputies = models.ManyToManyField(
+        User,
+        related_name="deputy_teams",
+        blank=True,
+        verbose_name="Team Deputies",
+        help_text="The deputies of the team",
+    )
+    members = models.ManyToManyField(
+        User,
+        related_name="teams",
+        blank=True,
+        verbose_name="Team Members",
+        help_text="The members of the team",
+    )
+    team_email = models.EmailField(verbose_name="Team Email", blank=True, null=True)
 
 
 class PersonalAccessToken(models.Model):
