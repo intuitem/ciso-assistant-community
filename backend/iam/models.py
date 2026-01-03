@@ -1048,14 +1048,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return ([], [], [])
 
         class_name = object_type.__name__.lower()
-        # We still need Permission rows for:
-        # - returning ids when object_type is Permission
-        # - (optionally) ensuring the codenames exist in DB
-        needed_codenames = [
-            f"view_{class_name}",
-            f"change_{class_name}",
-            f"delete_{class_name}",
-        ]
         roles_state = get_roles_state()
         permissions_map = roles_state.permission_ids_by_codename
 
@@ -1116,6 +1108,29 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     folder_perm_codes[f_id].add(change_code)
                 if can_delete:
                     folder_perm_codes[f_id].add(delete_code)
+
+        if object_type is Permission:
+            has_view = any(view_code in perms for perms in folder_perm_codes.values())
+            has_change = any(
+                change_code in perms for perms in folder_perm_codes.values()
+            )
+            has_delete = any(
+                delete_code in perms for perms in folder_perm_codes.values()
+            )
+
+            allowed_ids = list(
+                Permission.objects.filter(
+                    content_type__app_label__in=ALLOWED_PERMISSION_APPS
+                )
+                .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
+                .values_list("id", flat=True)
+            )
+
+            result_view = allowed_ids if has_view else []
+            result_change = allowed_ids if has_change else []
+            result_delete = allowed_ids if has_delete else []
+
+            return (result_view, result_change, result_delete)
 
         result_view: set[Any] = set()
         result_change: set[Any] = set()
