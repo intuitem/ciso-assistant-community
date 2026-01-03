@@ -1,9 +1,10 @@
 import pytest
+from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import Perimeter
 from iam.models import Folder
 
-from test_utils import EndpointTestsQueries
+from test_utils import EndpointTestsQueries, EndpointTestsUtils
 
 # Generic perimeter data for tests
 PERIMETER_NAME = "Test Perimeter"
@@ -127,7 +128,6 @@ class TestPerimetersAuthenticated:
         """test to update perimeters with the API with authentication"""
 
         status = ("in_dev", "Development")
-        folder = Folder.objects.create(name="test2")
 
         EndpointTestsQueries.Auth.update_object(
             test.client,
@@ -143,16 +143,40 @@ class TestPerimetersAuthenticated:
             {
                 "name": "new " + PERIMETER_NAME,
                 "description": "new " + PERIMETER_DESCRIPTION,
-                "folder": str(folder.id),
                 "ref_id": "new " + PERIMETER_REFERENCE,
                 "lc_status": status[0],
             },
             {
-                "folder": {"id": str(test.folder.id), "str": test.folder.name},
+                "folder": {"id": str(test.folder.id), "str": str(test.folder)},
                 "lc_status": PERIMETER_STATUS[1],
+            },
+            test_params={
+                "folder": str(test.folder.id),
             },
             user_group=test.user_group,
         )
+
+    def test_update_perimeters_folder_forbidden(self, authenticated_client):
+        """test to ensure perimeter folder cannot be updated with the API"""
+
+        folder = Folder.objects.create(name="test")
+        perimeter = Perimeter.objects.create(
+            name=PERIMETER_NAME,
+            description=PERIMETER_DESCRIPTION,
+            folder=folder,
+            ref_id=PERIMETER_REFERENCE,
+            lc_status=PERIMETER_STATUS[0],
+        )
+        new_folder = Folder.objects.create(name="test2")
+        url = (
+            EndpointTestsUtils.get_endpoint_url("Perimeters") + str(perimeter.id) + "/"
+        )
+        response = authenticated_client.patch(
+            url, {"folder": str(new_folder.id)}, format="json"
+        )
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        perimeter.refresh_from_db()
+        assert perimeter.folder_id == folder.id
 
     def test_delete_perimeters(self, test):
         """test to delete perimeters with the API with authentication"""

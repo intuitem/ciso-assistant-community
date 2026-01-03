@@ -109,7 +109,6 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 	onChange={async (e) => {
 		if (e && !object?.id) {
 			await fetchDefaultRefId();

@@ -2,7 +2,7 @@ import importlib
 from typing import Any
 
 import structlog
-from django.db import models
+from django.db import models, transaction
 from django.db.models import F
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
@@ -73,6 +73,19 @@ class BaseModelSerializer(serializers.ModelSerializer):
                 self.fields.pop(field_name)
 
     def update(self, instance: models.Model, validated_data: Any) -> models.Model:
+        if (
+            getattr(instance, "builtin", False)
+            and hasattr(instance, "folder_id")
+            and ("folder" in validated_data or "folder_id" in validated_data)
+        ):
+            new_folder = validated_data.get("folder", validated_data.get("folder_id"))
+            new_folder_id = (
+                new_folder.id if isinstance(new_folder, models.Model) else new_folder
+            )
+            if new_folder_id and str(new_folder_id) != str(instance.folder_id):
+                raise PermissionDenied(
+                    {"folder": "Builtin objects cannot change folder"}
+                )
         if hasattr(instance, "urn") and getattr(instance, "urn"):
             raise PermissionDenied({"urn": "Imported objects cannot be modified"})
         try:
@@ -255,6 +268,16 @@ class PerimeterWriteSerializer(BaseModelSerializer):
                 "The name cannot contain '/' for a Perimeter."
             )
         return value
+
+    def update(self, instance, validated_data):
+        new_folder = validated_data.get("folder", None)
+        if new_folder is not None:
+            new_folder_id = (
+                new_folder.id if isinstance(new_folder, models.Model) else new_folder
+            )
+            if new_folder_id and str(new_folder_id) != str(instance.folder_id):
+                raise PermissionDenied({"folder": "Perimeter domain cannot be changed"})
+        return super().update(instance, validated_data)
 
     class Meta:
         model = Perimeter
@@ -1567,15 +1590,16 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
         # Handle properly owner field cleaning
         owners = validated_data.get("owner", None)
-        instance = super().update(instance, validated_data)
-        if not owners:
-            instance.owner.set([])
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            if not owners:
+                instance.owner.set([])
 
-        # Update all EvidenceRevisions' folder if the Evidence's folder changed
-        if old_folder_id != instance.folder_id:
-            EvidenceRevision.objects.filter(evidence=instance).update(
-                folder=instance.folder
-            )
+            # Update all EvidenceRevisions' folder if the Evidence's folder changed
+            if old_folder_id != instance.folder_id:
+                EvidenceRevision.objects.filter(evidence=instance).update(
+                    folder=instance.folder
+                )
 
         return instance
 
@@ -1844,28 +1868,37 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         return assessment
 
     def update(self, instance, validated_data):
-        # Track old authors before update
+        # Track old authors and folder before update
         old_author_ids = set(instance.authors.values_list("id", flat=True))
-
-        # Check if status is changing to deprecated
-        old_status = instance.status
-        new_status = validated_data.get("status", old_status)
+        old_folder_id = instance.folder_id
 
         # Auto-lock when status changes to deprecated
+        old_status = instance.status
+        new_status = validated_data.get("status", old_status)
         if old_status != "deprecated" and new_status == "deprecated":
             validated_data["is_locked"] = True
 
-        updated_instance = super().update(instance, validated_data)
+        with transaction.atomic():
+            # Perform the main update (fields + M2M)
+            updated_instance = super().update(instance, validated_data)
 
-        # Get new authors after update
-        new_author_ids = set(updated_instance.authors.values_list("id", flat=True))
+            # Cascade folder change to requirement assessments
+            if old_folder_id != updated_instance.folder_id:
+                RequirementAssessment.objects.filter(
+                    compliance_assessment=updated_instance
+                ).update(folder=updated_instance.folder)
 
-        # Send notifications only to newly assigned authors
-        newly_assigned_ids = new_author_ids - old_author_ids
-        if newly_assigned_ids:
-            self._send_assignment_notifications(
-                updated_instance, list(newly_assigned_ids)
-            )
+            # Determine newly assigned authors
+            new_author_ids = set(updated_instance.authors.values_list("id", flat=True))
+            newly_assigned_ids = new_author_ids - old_author_ids
+
+            # Schedule notifications to run **after transaction commits**
+            if newly_assigned_ids:
+                transaction.on_commit(
+                    lambda: self._send_assignment_notifications(
+                        updated_instance, list(newly_assigned_ids)
+                    )
+                )
 
         return updated_instance
 
@@ -2518,6 +2551,16 @@ class IncidentWriteSerializer(BaseModelSerializer):
         model = Incident
         exclude = ["created_at", "updated_at"]
 
+    def update(self, instance, validated_data):
+        old_folder_id = instance.folder_id
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
+            if old_folder_id != updated_instance.folder_id:
+                TimelineEntry.objects.filter(incident=updated_instance).update(
+                    folder=updated_instance.folder
+                )
+        return updated_instance
+
 
 class IncidentReadSerializer(IncidentWriteSerializer):
     path = PathField(read_only=True)
@@ -2633,15 +2676,17 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
         was_recurrent = instance.is_recurrent  # Store the previous state
         tasknode_data = self._extract_tasknode_fields(validated_data)
-        instance = super().update(instance, validated_data)
-        now_recurrent = instance.is_recurrent
-        self._sync_task_node(instance, tasknode_data, was_recurrent, now_recurrent)
 
-        # Update all TaskNodes' folder if the TaskTemplate's folder changed
-        if old_folder_id != instance.folder_id:
-            TaskNode.objects.filter(task_template=instance).update(
-                folder=instance.folder
-            )
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            now_recurrent = instance.is_recurrent
+            self._sync_task_node(instance, tasknode_data, was_recurrent, now_recurrent)
+
+            # Update all TaskNodes' folder if the TaskTemplate's folder changed
+            if old_folder_id != instance.folder_id:
+                TaskNode.objects.filter(task_template=instance).update(
+                    folder=instance.folder
+                )
 
         # Get new assigned users after update
         new_assigned_ids = set(instance.assigned_to.values_list("id", flat=True))
@@ -2849,6 +2894,7 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         from core.models import FlowEvent
 
         request_user = self.context["request"].user
+        old_folder_id = instance.folder_id
 
         # Check if status is being modified
         if "status" in validated_data:
@@ -2896,26 +2942,41 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
             # Extract event notes from validated_data (passed from actions)
             event_notes = validated_data.pop("event_notes", None)
 
-            # Update the instance
-            updated_instance = super().update(instance, validated_data)
+            with transaction.atomic():
+                # Update the instance
+                updated_instance = super().update(instance, validated_data)
 
-            # Create FlowEvent after successful status transition
-            FlowEvent.objects.create(
-                validation_flow=updated_instance,
-                event_type=updated_instance.status,
-                event_actor=request_user,
-                event_notes=event_notes,
-                folder=updated_instance.folder,
-            )
+                # Create FlowEvent after successful status transition
+                FlowEvent.objects.create(
+                    validation_flow=updated_instance,
+                    event_type=updated_instance.status,
+                    event_actor=request_user,
+                    event_notes=event_notes,
+                    folder=updated_instance.folder,
+                )
 
-            # Auto-lock/unlock associated objects based on status transitions
-            self._manage_associated_objects_lock(
-                updated_instance, current_status, new_status
-            )
+                # Auto-lock/unlock associated objects based on status transitions
+                self._manage_associated_objects_lock(
+                    updated_instance, current_status, new_status
+                )
+
+                # Cascade folder changes to events if needed
+                if old_folder_id != updated_instance.folder_id:
+                    FlowEvent.objects.filter(validation_flow=updated_instance).update(
+                        folder=updated_instance.folder
+                    )
 
             return updated_instance
 
-        return super().update(instance, validated_data)
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
+
+            if old_folder_id != updated_instance.folder_id:
+                FlowEvent.objects.filter(validation_flow=updated_instance).update(
+                    folder=updated_instance.folder
+                )
+
+        return updated_instance
 
     def _manage_associated_objects_lock(
         self, validation_flow, old_status: str, new_status: str
