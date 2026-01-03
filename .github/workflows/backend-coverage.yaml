@@ -12,7 +12,6 @@ concurrency:
   cancel-in-progress: true
 env:
   GITHUB_WORKFLOW: github_actions
-  POSTGRES_VERSION: "16"
   UBUNTU_VERSION: "ubuntu-24.04"
   PYTHON_VERSION: "3.12"
 jobs:
@@ -21,10 +20,6 @@ jobs:
     env:
       backend-directory: ./backend
       DJANGO_DEBUG: "True"
-      POSTGRES_NAME: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      DB_HOST: localhost
       EMAIL_HOST: localhost
       EMAIL_PORT: 1025
       EMAIL_HOST_USER: ""
@@ -32,15 +27,6 @@ jobs:
       DEFAULT_FROM_EMAIL: "ciso-assistant@alsigo.net"
       CISO_ASSISTANT_SUPERUSER_EMAIL: ""
       CISO_ASSISTANT_URL: http://127.0.0.1:5173
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres # test credential
-          POSTGRES_DB: postgres
-        ports: ["5432:5432"]
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     strategy:
       max-parallel: 4
       matrix:
@@ -72,11 +58,7 @@ jobs:
         run: poetry run python manage.py migrate
       - name: Run coverage
         working-directory: ${{ env.backend-directory }}
-        env:
-          DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
         run: poetry run coverage run -m pytest
       - name: Display coverage report
         working-directory: ${{ env.backend-directory }}
-        env:
-          DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
         run: poetry run coverage report
