@@ -2017,18 +2017,23 @@ Notes for MVP:
 ```mermaid
 erDiagram
 
-ACTOR          }o--o| USER       : contains
-ACTOR          }o--o| USER_GROUP : contains
-ACTOR          }o--o| ENTITY     : contains
-ACTOR          }o--o{ ASSET      : owns
+ACTOR          }o--o| USER       : is
+ACTOR          }o--o| ENTITY     : is
+ACTOR          }o--o| TEAM       : is
 
-ACTOR {
+TEAM {
     string      ref_id
     string      name
     string      description
+    user        leader
+    user[]      deputy
+    user[]      member
+ }
+
+
+ACTOR {
     string      actor_type
-    user        deputy
-}
+ }
 
 ENTITY {
     string  name
@@ -2066,15 +2071,12 @@ ASSET_RELATION {
 
 - Actors are used for ownership of objects, instead of using users directly.
 - actor_type is a string among USER | USER_GROUP | ENTITY | TEAM
-- if actor_type = TEAM, then:
-  -  the main user is the leader
-  -  the deputy can be defined
-  -  members of the team are defined by the user_group, and this group shall contain the leader and deputy.
 - entity_type indicates if this is a legal entity, a natural person or none of this (e.g. a division/branch of another entity).
 - relation_type can be DEPENDS_ON | HAS_ACCESS | LOCATED_IN
 - asset_type can be PRIMARY | SUPPORT | LOCATION | IDENTITY
 - if inherit_objectives is true, then the objectives are calculated from the ascendant assets, and local objectives are ignored.
 - if inherit_capabilities is true, then the capabilities are calculated from the descendant assets, and local capabilities are ignored.
+- Teams are created and updated by domain managers.
 
 ### Migration
 
