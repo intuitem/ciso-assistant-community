@@ -172,6 +172,7 @@ class I18nObjectMixin(models.Model):
 
 class FilteringLabel(FolderMixin, AbstractBaseModel, PublishInRootFolderMixin):
     """User-defined labels that can be attached to almost any object"""
+
     label = models.CharField(
         max_length=100,
         verbose_name=_("Label"),
