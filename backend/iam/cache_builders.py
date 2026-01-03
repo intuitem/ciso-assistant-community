@@ -59,17 +59,7 @@ class CacheNotReadyError(RuntimeError):
     """Raised when IAM caches are accessed before being marked ready."""
 
 
-cache_ready: bool = False
-
-
-def set_cache_ready(*, ready: bool = True) -> None:
-    """Allow callers to toggle whether caches may touch the DB."""
-    global cache_ready
-    cache_ready = bool(ready)
-
-
-def is_cache_ready() -> bool:
-    return cache_ready
+_cache_ready: bool = False
 
 
 def _cache_tables_ready() -> bool:
@@ -85,10 +75,11 @@ def _cache_tables_ready() -> bool:
 
 
 def _ensure_cache_ready() -> None:
-    if cache_ready:
+    global _cache_ready
+    if _cache_ready:
         return
     if _cache_tables_ready():
-        set_cache_ready()
+        _cache_ready = True
         return
     raise CacheNotReadyError("IAM caches are not ready to run DB queries")
 
@@ -113,9 +104,9 @@ def build_folder_cache_state() -> FolderCacheState:
     Folder = apps.get_model("iam", "Folder")
 
     folders = list(
-        Folder.objects.all()
-        .select_related("parent_folder")
-        .only("id", "name", "parent_folder_id", "content_type", "builtin")
+        Folder.objects.all().only(
+            "id", "name", "parent_folder_id", "content_type", "builtin"
+        )
     )
 
     folders_by_id: Dict[uuid.UUID, "Folder"] = {folder.id: folder for folder in folders}
@@ -163,16 +154,11 @@ def invalidate_folders_cache() -> Optional[int]:
     return CacheRegistry.invalidate(FOLDER_CACHE_KEY)
 
 
-def ensure_cached_folder(state: FolderCacheState, folder_id: uuid.UUID) -> "Folder":
-    if folder_id not in state.folders:
-        raise KeyError(f"Folder {folder_id} is not cached")
-    return state.folders[folder_id]
-
-
 def path_ids_from_root(
     state: FolderCacheState, folder_id: uuid.UUID
 ) -> Tuple[uuid.UUID, ...]:
-    ensure_cached_folder(state, folder_id)
+    if folder_id not in state.folders:
+        raise KeyError(f"Folder {folder_id} is not cached")
     path: List[uuid.UUID] = []
     current = folder_id
     while current is not None:
@@ -200,14 +186,16 @@ def iter_descendant_ids(
 
 def get_sub_folders_cached(folder_id: uuid.UUID) -> Iterator["Folder"]:
     state = get_folder_state()
-    ensure_cached_folder(state, folder_id)
+    if folder_id not in state.folders:
+        raise KeyError(f"Folder {folder_id} is not cached")
     for descendant_id in iter_descendant_ids(state, folder_id, include_start=False):
         yield state.folders[descendant_id]
 
 
 def get_parent_folders_cached(folder_id: uuid.UUID) -> Iterator["Folder"]:
     state = get_folder_state()
-    ensure_cached_folder(state, folder_id)
+    if folder_id not in state.folders:
+        raise KeyError(f"Folder {folder_id} is not cached")
     current = state.parent_map.get(folder_id)
     while current is not None:
         yield state.folders[current]
@@ -319,6 +307,7 @@ class AssignmentsCacheState:
 
 def build_assignments_cache_state() -> AssignmentsCacheState:
     RoleAssignment = apps.get_model("iam", "RoleAssignment")
+    Folder = apps.get_model("iam", "Folder")
 
     ras = (
         RoleAssignment.objects.all()
@@ -326,7 +315,7 @@ def build_assignments_cache_state() -> AssignmentsCacheState:
         .prefetch_related(
             Prefetch(
                 "perimeter_folders",
-                queryset=RoleAssignment.perimeter_folders.rel.model.objects.only("id"),
+                queryset=Folder.objects.only("id"),
             )
         )
     )
@@ -430,8 +419,6 @@ __all__ = [
     "IAM_GROUPS_KEY",
     "IAM_ASSIGNMENTS_KEY",
     "CacheNotReadyError",
-    "is_cache_ready",
-    "set_cache_ready",
     "FolderCacheState",
     "RolesCacheState",
     "GroupsCacheState",
