@@ -254,8 +254,8 @@ class Folder(NameDescriptionMixin):
             if folder is not None:
                 return folder
 
-        # If no folder is found after trying all paths, raise an error
-        raise RuntimeError(f"Unable to resolve folder for {obj!r}")
+        # If no folder is found after trying all paths, gracefully fall back
+        return None
 
     def get_user_roles(self) -> dict[str, list[str]]:
         """
