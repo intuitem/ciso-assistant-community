@@ -373,6 +373,7 @@ def register_all_caches(*, allow_replace: bool = False) -> None:
         allow_replace=allow_replace,
     )
 
+
 # Import-time registration (DB-free).
 # If you prefer explicit registration, delete these lines and call register_all_caches()
 # in iam/apps.py -> IamConfig.ready().
