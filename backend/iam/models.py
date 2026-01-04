@@ -16,7 +16,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
-from django.db.models import Q, F, Prefetch
+from django.db.models import Q, F, Prefetch, QuerySet
 from knox.models import AuthToken
 
 if TYPE_CHECKING:
@@ -808,8 +808,8 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return RoleAssignment.get_permissions(self)
 
     @staticmethod
-    def get_admin_users() -> List["User"]:
-        return list(User.objects.filter(user_groups__name="BI-UG-ADM"))
+    def get_admin_users() -> QuerySet["User"]:
+        return User.objects.filter(user_groups__name="BI-UG-ADM")
 
     def is_admin(self) -> bool:
         return self.user_groups.filter(name="BI-UG-ADM").exists()
