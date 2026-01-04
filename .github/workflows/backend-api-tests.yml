@@ -1,5 +1,6 @@
 name: API Tests
-
+permissions:
+  contents: read
 on:
   pull_request:
     branches: [main, develop]
@@ -7,69 +8,70 @@ on:
     paths:
       - "backend/**"
       - ".github/workflows/backend-api-tests.yml"
-    workflow_dispatch:
-
+  workflow_dispatch:
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   GITHUB_WORKFLOW: github_actions
   PYTHON_VERSION: "3.12"
   UBUNTU_VERSION: "ubuntu-24.04"
-
 jobs:
   test:
     runs-on: ubuntu-24.04
     env:
       backend-directory: ./backend
-
+      DJANGO_DEBUG: "True"
+      DB_HOST: localhost
+      EMAIL_HOST: localhost
+      EMAIL_PORT: 1025
+      EMAIL_HOST_USER: ""
+      EMAIL_HOST_PASSWORD: ""
+      DEFAULT_FROM_EMAIL: "ciso-assistant@alsigo.net"
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
+      CISO_ASSISTANT_URL: http://127.0.0.1:5173
     strategy:
       max-parallel: 4
       matrix:
         python-version: ["3.12"]
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
-      - name: Create environment variables file
-        working-directory: ${{env.backend-directory}}
-        run: |
-          touch .env
-          echo DJANGO_DEBUG='True' >> .env
-          echo DB_HOST=localhost >> .env
-          echo EMAIL_HOST=localhost >> .env
-          echo EMAIL_PORT=1025 >> .env
-          echo EMAIL_HOST_USER='' >> .env
-          echo EMAIL_HOST_PASSWORD='' >> .env
-          #echo EMAIL_USE_TLS=False >> .env
-          echo DEFAULT_FROM_EMAIL='ciso-assistant@alsigo.net' >> .env
-          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
-          echo CISO_ASSISTANT_URL=http://127.0.0.1:5173 >> .env
       - name: Run migrations
         working-directory: ${{env.backend-directory}}
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py migrate
+        run: poetry run python manage.py migrate
       - name: Run API tests
         working-directory: ${{env.backend-directory}}
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run pytest app_tests/api --html=pytest-report.html --self-contained-html
+        run: poetry run pytest app_tests/api --html=pytest-report.html --self-contained-html
       - name: Set current date as env variable
         if: ${{ !cancelled() }}
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
         if: ${{ !cancelled() }}
-        run: echo "BRANCH_SANITIZED=$(echo "${{ env.BRANCH_NAME }}" | tr "/()" "_")" >> $GITHUB_ENV
+        run: |
+          SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

@@ -43,6 +43,8 @@ export class LoginPage extends BasePage {
 	) {
 		this.email = email;
 		this.password = password;
+		// try avoiding race condition
+		await this.page.waitForLoadState('networkidle');
 		await this.usernameInput.fill(email);
 		await this.passwordInput.fill(password);
 		if (
@@ -74,6 +76,16 @@ export class LoginPage extends BasePage {
 				//url must be /login?next=/
 				await expect(this.page).toHaveURL(/^.*\/login\?next=\/.*$/);
 				break;
+		}
+	}
+
+	async skipWelcome(url = /^.*\/analytics$/) {
+		// if welcome popup is visible, close it
+		await expect(this.page).toHaveURL(url);
+		const welcomePopup = this.page.getByTestId('modal-component');
+		if (await welcomePopup.isVisible()) {
+			await this.page.keyboard.press('Escape');
+			await expect(welcomePopup).toBeHidden();
 		}
 	}
 }

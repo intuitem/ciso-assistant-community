@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { tableSourceMapper } from '$lib/utils/table';
+	import { page } from '$app/state';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { m } from '$paraglide/messages';
-	import { tableSourceMapper } from '@skeletonlabs/skeleton';
-
-	export let data;
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	let { data } = $props();
 
 	const appliedControlsHead = {
 		name: 'name',
@@ -16,7 +16,7 @@
 		eta: 'eta',
 		expiry_date: 'expiryDate',
 		effort: 'effort',
-		cost: 'cost',
+		annual_cost: 'cost',
 		findings_count: 'associated_findings'
 	};
 	const appliedControlsColumns = [
@@ -28,7 +28,7 @@
 		'eta',
 		'expiry_date',
 		'effort',
-		'cost',
+		'annual_cost',
 		'findings_count'
 	];
 
@@ -39,7 +39,7 @@
 	};
 </script>
 
-<div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
+<div class="bg-white p-2 shadow-sm rounded-lg space-x-2 flex flex-row justify-center mb-2">
 	<p class="font-semibold text-lg">
 		{m.perimeter()}:
 		<a
@@ -59,12 +59,22 @@
 	</p>
 	<p>/</p>
 </div>
-<div class="flex flex-col space-y-4 bg-white p-4 shadow rounded-lg space-x-2">
-	<div>
-		<p class="text-xl font-extrabold">{m.associatedAppliedControls()}</p>
-		<p class="text-sm text-gray-500">
-			{m.actionPlanHelpText()}
-		</p>
+<div class="flex flex-col space-y-4 bg-white p-4 shadow-sm rounded-lg space-x-2">
+	<div class="flex justify-between items-center w-full">
+		<div class="flex-1">
+			<p class="text-xl font-extrabold">{m.associatedAppliedControls()}</p>
+			<p class="text-sm text-gray-500">
+				{m.actionPlanHelpText()}
+			</p>
+		</div>
+		<div class="flex gap-2 ml-auto">
+			<Anchor
+				breadcrumbAction="push"
+				href={`/applied-controls/flash-mode?findings_assessments=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
+				class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+				><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
+			>
+		</div>
 	</div>
 	<div class="">
 		<ModelTable
@@ -74,7 +84,7 @@
 			rowsPerPage={true}
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			tags={false}
-			baseEndpoint="/applied-controls?findings_assessments={$page.params.id}"
+			baseEndpoint="/applied-controls?findings_assessments={page.params.id}"
 			fields={[
 				'name',
 				'status',
@@ -84,7 +94,7 @@
 				'eta',
 				'expiry_date',
 				'effort',
-				'cost',
+				'annual_cost',
 				'findings_count'
 			]}
 		/>

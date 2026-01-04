@@ -2,6 +2,8 @@ import knox.views as knox_views
 from django.urls import include, path
 
 from .views import (
+    AuthTokenDetailView,
+    PersonalAccessTokenViewSet,
     ChangePasswordView,
     CurrentUserView,
     LoginView,
@@ -9,6 +11,7 @@ from .views import (
     ResetPasswordConfirmView,
     SessionTokenView,
     SetPasswordView,
+    RevokeOtherSessionsView,
 )
 
 urlpatterns = [
@@ -24,10 +27,17 @@ urlpatterns = [
         name="password-reset-confirm",
     ),
     path("set-password/", SetPasswordView.as_view(), name="set-password"),
+    path("revoke-sessions/", RevokeOtherSessionsView.as_view()),
     path("sso/", include("iam.sso.urls")),
     path(
         "session-token/",
         SessionTokenView.as_view(),
         name="session-token",
+    ),
+    path("auth-tokens/", PersonalAccessTokenViewSet.as_view(), name="auth-tokens"),
+    path(
+        "auth-tokens/<str:pk>/",
+        AuthTokenDetailView.as_view(),
+        name="auth-token-detail",
     ),
 ]

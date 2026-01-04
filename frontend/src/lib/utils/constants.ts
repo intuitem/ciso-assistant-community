@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/public';
+import { m } from '$paraglide/messages';
 
 export const BASE_API_URL = `${
 	Object.hasOwn(env, 'PUBLIC_BACKEND_API_URL')
@@ -22,16 +23,16 @@ export const complianceResultColorMap: { [key: string]: string } = {
 	not_assessed: '#d1d5db',
 	partially_compliant: '#fde047',
 	non_compliant: '#f87171',
-	not_applicable: '#000000',
-	compliant: '#86efac'
+	compliant: '#86efac',
+	not_applicable: '#000000'
 };
 
 export const complianceResultTailwindColorMap: { [key: string]: string } = {
 	not_assessed: 'bg-gray-300',
 	partially_compliant: 'bg-yellow-300',
 	non_compliant: 'bg-red-300',
-	not_applicable: 'bg-black text-white',
-	compliant: 'bg-green-300'
+	compliant: 'bg-green-300',
+	not_applicable: 'bg-black text-white'
 };
 
 export const complianceStatusColorMap: { [key: string]: string } = {
@@ -46,6 +47,15 @@ export const complianceStatusTailwindColorMap = {
 	in_progress: 'bg-amber-500',
 	in_review: 'bg-blue-500',
 	done: 'bg-green-300'
+};
+
+export const extendedResultColorMap: { [key: string]: string } = {
+	not_set: '#d1d5db',
+	major_nonconformity: '#dc2626',
+	minor_nonconformity: '#f97316',
+	observation: '#eab308',
+	opportunity_for_improvement: '#3b82f6',
+	good_practice: '#22c55e'
 };
 
 export const MONTH_LIST = [
@@ -85,14 +95,20 @@ export const LOCALE_DISPLAY_MAP = {
 	cs: '🇨🇿 Český',
 	sv: '🇸🇪 Svenska',
 	id: '🇮🇩 Bahasa Indonesia',
-	da: '🇩🇰 Dansk'
+	da: '🇩🇰 Dansk',
+	uk: '🇺🇦 Українська',
+	el: '🇬🇷 Ελληνικά',
+	tr: '🇹🇷 Türkçe',
+	hr: '🇭🇷 Hrvatski'
 };
 
 export const ISO_8601_REGEX =
 	/^([+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24:?00)([.,]\d+(?!:))?)?(\17[0-5]\d([.,]\d+)?)?([zZ]|([+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$/;
 
 export const SECURITY_OBJECTIVE_SCALE_MAP = {
-	'0-3': ['0', '1', '2', '3'],
-	'1-4': ['1', '2', '3', '4'],
-	'FIPS-199': ['low', 'moderate', 'moderate', 'high']
+	'0-3': ['0', '1', '2', '3', '3'],
+	'0-4': ['0', '1', '2', '3', '4'],
+	'1-4': ['1', '2', '3', '4', '4'],
+	'1-5': ['1', '2', '3', '4', '5'],
+	'FIPS-199': ['low', 'moderate', 'moderate', 'high', 'high']
 };

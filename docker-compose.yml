@@ -13,7 +13,7 @@ services:
     volumes:
       - ./db:/code/db
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://backend:8000/api/build || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://backend:8000/api/health/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -50,13 +50,14 @@ services:
       - HOST_HEADER=x-forwarded-host
     image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
     pull_policy: always
+    restart: always
     depends_on:
       backend:
         condition: service_healthy
 
   caddy:
     container_name: caddy
-    image: caddy:2.8.4
+    image: caddy:2.10.0
     environment:
       - CISO_ASSISTANT_URL=https://localhost:8443
     depends_on:

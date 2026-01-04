@@ -1,21 +1,18 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { run } from 'svelte/legacy';
+
+	import { page } from '$app/state';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
-	import { displayOnlyAssessableNodes } from './store';
 
 	import { onMount } from 'svelte';
 
-	import type {
-		ModalComponent,
-		ModalSettings,
-		ModalStore,
-		PopupSettings,
-		TreeViewNode
-	} from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 
-	import { goto } from '$app/navigation';
+	import { Switch, ProgressRing, Popover } from '@skeletonlabs/skeleton-svelte';
 
-	import { getModalStore, popup, SlideToggle } from '@skeletonlabs/skeleton';
+	import { goto, invalidateAll } from '$app/navigation';
+
+	import {} from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
@@ -23,49 +20,61 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
-	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import {
+		complianceResultColorMap,
+		complianceStatusColorMap,
+		extendedResultColorMap
+	} from '$lib/utils/constants';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
 	import type { Node } from './types';
 
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-
-	export let data: PageData;
-	export let form: ActionData;
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { getLocale } from '$paraglide/runtime.js';
 
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
-	import { expandedNodesState } from '$lib/utils/stores';
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
+	import { derived } from 'svelte/store';
 	import { canPerformAction } from '$lib/utils/access-control';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 
-	$: tree = data.tree;
+	interface Props {
+		data: PageData;
+		form: ActionData;
+	}
 
-	$: compliance_assessment_donut_values = data.compliance_assessment_donut_values;
+	let { data, form }: Props = $props();
 
-	const user = $page.data.user;
+	const compliance_assessment = $derived(data.compliance_assessment);
+
+	const user = page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
 		model: model.name,
-		domain: data.compliance_assessment.folder.id
+		domain: compliance_assessment.folder.id
 	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
-	const canEditRequirementAssessment: boolean = canPerformAction({
-		user,
-		action: 'change',
-		model: requirementAssessmentModel.name,
-		domain: data.compliance_assessment.folder.id
-	});
+	const canEditRequirementAssessment: boolean =
+		!data.compliance_assessment.is_locked &&
+		canPerformAction({
+			user,
+			action: 'change',
+			model: requirementAssessmentModel.name,
+			domain: data.compliance_assessment.folder.id
+		});
 
 	const has_threats = data.threats.total_unique_threats > 0;
 
-	let threatDialogOpen = false;
-	let dialogElement;
+	let threatDialogOpen = $state(false);
+	let dialogElement = $state();
 
 	function openThreatsDialog() {
 		threatDialogOpen = true;
@@ -80,19 +89,21 @@
 		if (dialogElement) dialogElement.close();
 	}
 
-	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
 	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import CompareAuditModal from '$lib/components/Modals/CompareAuditModal.svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return; // otherwise it will interfere with input fields
 		if (event.key === 'f') {
 			event.preventDefault();
-			goto(`${$page.url.pathname}/flash-mode`);
+			goto(`${page.url.pathname}/flash-mode`);
 		}
 		if (event.key === 't') {
 			event.preventDefault();
-			goto(`${$page.url.pathname}/table-mode`);
+			goto(`${page.url.pathname}/table-mode`);
 		}
 	}
 
@@ -118,10 +129,12 @@
 		}
 		if (node.is_scored && node.assessable && node.result !== 'not_applicable') {
 			resultCounts['scored'] = (resultCounts['scored'] || 0) + 1;
-			const nodeMeanScore = data.compliance_assessment.show_documentation_score
-				? (node.score + node.documentation_score) / 2
-				: node.score;
-			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + nodeMeanScore;
+			const nodeDocumentationScore = data.compliance_assessment.show_documentation_score
+				? node.documentation_score
+				: 0;
+			resultCounts['total_documentation_score'] =
+				(resultCounts['total_documentation_score'] || 0) + nodeDocumentationScore;
+			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + node.score;
 		}
 
 		if (node.children && Object.keys(node.children).length > 0) {
@@ -135,14 +148,24 @@
 		return resultCounts;
 	};
 
-	let selectedStatus = ['done', 'to_do', 'in_progress', 'in_review'];
-	let selectedResults = [
-		'compliant',
-		'non_compliant',
-		'partially_compliant',
-		'not_assessed',
-		'not_applicable'
-	];
+	let id = $state(page.params.id);
+	// derive the current filters for this audit ID
+	const currentFilters = derived(auditFiltersStore, ($f) => $f[id] ?? {});
+	// reactive values that update whenever auditFiltersStore changes
+	let selectedStatus = $state([]);
+	let selectedResults = $state([]);
+	let selectedExtendedResults = $state([]);
+	let displayOnlyAssessableNodes = $state(false);
+	$effect(
+		() =>
+			({
+				selectedStatus = [],
+				selectedResults = [],
+				selectedExtendedResults = [],
+				displayOnlyAssessableNodes = false
+			} = $currentFilters)
+	);
+
 	function toggleItem(item, selectedItems) {
 		if (selectedItems.includes(item)) {
 			return selectedItems.filter((s) => s !== item);
@@ -153,25 +176,34 @@
 
 	function toggleStatus(status) {
 		selectedStatus = toggleItem(status, selectedStatus);
+		auditFiltersStore.setStatus(page.params.id, selectedStatus);
 	}
 
 	function toggleResult(result) {
 		selectedResults = toggleItem(result, selectedResults);
+		auditFiltersStore.setResults(page.params.id, selectedResults);
+	}
+
+	function toggleExtendedResult(extendedResult) {
+		selectedExtendedResults = toggleItem(extendedResult, selectedExtendedResults);
+		auditFiltersStore.setExtendedResults(page.params.id, selectedExtendedResults);
 	}
 
 	function isNodeHidden(node: Node, displayOnlyAssessableNodes: boolean): boolean {
 		const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
 		return (
-			!(!displayOnlyAssessableNodes || node.assessable || hasAssessableChildren) ||
-			((!selectedStatus.includes(node.status) || !selectedResults.includes(node.result)) &&
-				node.assessable)
+			(displayOnlyAssessableNodes && !node.assessable && !hasAssessableChildren) ||
+			(node.assessable &&
+				((selectedStatus.length > 0 && !selectedStatus.includes(node.status)) ||
+					(selectedResults.length > 0 && !selectedResults.includes(node.result)) ||
+					(selectedExtendedResults.length > 0 &&
+						!selectedExtendedResults.includes(node.extended_result))))
 		);
 	}
-	function transformToTreeView(nodes: Node[]) {
+	function transformToTreeView(nodes: Node[], hasParentNode: boolean = false) {
 		return nodes.map(([id, node]) => {
 			node.resultCounts = countResults(node);
-			const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
-			const hidden = isNodeHidden(node, $displayOnlyAssessableNodes);
+			const hidden = isNodeHidden(node, displayOnlyAssessableNodes);
 
 			return {
 				id: id,
@@ -179,6 +211,8 @@
 				contentProps: {
 					...node,
 					canEditRequirementAssessment,
+					hasParentNode,
+					showDocumentationScore: data.compliance_assessment.show_documentation_score,
 					hidden,
 					selectedStatus
 				},
@@ -193,16 +227,17 @@
 					documentationScore: node.documentation_score,
 					isScored: node.is_scored,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
-					max_score: node.max_score
+					max_score: node.max_score,
+					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,
+					extendedResultEnabled: data.compliance_assessment.extended_result_enabled,
+					extendedResult: node.extended_result,
+					extendedResultColor: extendedResultColorMap[node.extended_result]
 				},
-				children: node.children ? transformToTreeView(Object.entries(node.children)) : []
+				children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
 			};
 		});
 	}
-	let treeViewNodes: TreeViewNode[];
-	$: if (tree) {
-		treeViewNodes = transformToTreeView(Object.entries(tree));
-	}
+	let treeViewNodes: TreeViewNode[] = $state();
 
 	function assessableNodesCount(nodes: TreeViewNode[]): number {
 		let count = 0;
@@ -217,16 +252,9 @@
 		return count;
 	}
 
-	let expandedNodes: TreeViewNode[] = [];
+	let expandedNodes: TreeViewNode[] = $state([]);
 
 	expandedNodes = $expandedNodesState;
-	$: expandedNodesState.set(expandedNodes);
-
-	const popupDownload: PopupSettings = {
-		event: 'click',
-		target: 'popupDownload',
-		placement: 'bottom'
-	};
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -249,7 +277,107 @@
 		modalStore.trigger(modal);
 	}
 
-	let createAppliedControlsLoading = false;
+	function modalCreateCloneForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.auditCloneForm,
+				context: 'clone',
+				model: data.auditModel,
+				debug: false
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.cloneAudit()
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalCompareAudit(): void {
+		const modalComponent: ModalComponent = {
+			ref: CompareAuditModal,
+			props: {
+				currentAudit: data.compliance_assessment
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalRequestValidation(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.validationFlowForm,
+				model: getModelInfo('validation-flows'),
+				formAction: '/validation-flows?/create',
+				invalidateAll: true,
+				onConfirm: async () => {
+					await invalidateAll();
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.requestValidation()
+		};
+		modalStore.trigger(modal);
+	}
+	let syncingToActionsIsLoading = $state(false);
+	async function modalConfirmSyncToActions(
+		id: string,
+		name: string,
+		action: string
+	): Promise<void> {
+		const requirementAssessmentsSync = await fetch(
+			`/compliance-assessments/${page.params.id}/sync-to-actions`,
+			{ method: 'POST' }
+		).then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				throw new Error('Failed to fetch requirement assessments sync data');
+			}
+		});
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: data.form,
+				id: id,
+				debug: false,
+				URLModel: 'compliance-assessments',
+				formAction: action,
+				bodyComponent: List,
+				bodyProps: {
+					items: Object.values(requirementAssessmentsSync.changes).map(
+						(req) => `${req.str}, ${safeTranslate(req.current)} -> ${safeTranslate(req.new)}`
+					),
+					message: m.theFollowingChangesWillBeApplied()
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: m.syncToAppliedControls(),
+			body: m.syncToAppliedControlsMessage({
+				count: data.compliance_assessment.framework.reference_controls.length //change this
+			}),
+			response: (r: boolean) => {
+				syncingToActionsIsLoading = r;
+			}
+		};
+		modalStore.trigger(modal);
+	}
+	let createAppliedControlsLoading = $state(false);
 
 	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
 		const modalComponent: ModalComponent = {
@@ -282,291 +410,521 @@
 		modalStore.trigger(modal);
 	}
 
-	$: if (createAppliedControlsLoading === true && form) createAppliedControlsLoading = false;
+	let tree = $derived(data.tree);
+	let compliance_assessment_donut_values = $derived(data.compliance_assessment_donut_values);
+
+	let exportPopupOpen = $state(false);
+	let filterPopupOpen = $state(false);
+
+	run(() => {
+		if (tree) {
+			treeViewNodes = transformToTreeView(Object.entries(tree));
+		}
+	});
+	run(() => {
+		expandedNodesState.set(expandedNodes);
+	});
+	run(() => {
+		if (syncingToActionsIsLoading === true && (form || form?.error))
+			syncingToActionsIsLoading = false;
+	});
+	run(() => {
+		if (createAppliedControlsLoading === true && (form || form?.error))
+			createAppliedControlsLoading = false;
+	});
+
+	let filterCount = $derived(
+		(selectedStatus.length > 0 ? 1 : 0) +
+			(selectedResults.length > 0 ? 1 : 0) +
+			(selectedExtendedResults.length > 0 ? 1 : 0) +
+			(displayOnlyAssessableNodes ? 1 : 0)
+	);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
-	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
-		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
-			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['ref_id', 'name', 'description', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets'].includes(key) ) as [key, value]}
-				<div class="flex flex-col">
-					<div
-						class="text-sm font-medium text-gray-800 capitalize-first"
-						data-testid={key.replaceAll('_', '-') + '-field-title'}
-					>
-						{safeTranslate(key)}
-					</div>
-					<ul class="text-sm">
-						<li
-							class="text-gray-600 list-none"
-							data-testid={key.replaceAll('_', '-') + '-field-value'}
+	{#if data.compliance_assessment.is_locked}
+		<div
+			class="alert bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg shadow-sm"
+		>
+			<div class="flex items-center">
+				<i class="fa-solid fa-lock text-yellow-600 mr-2"></i>
+				<span class="font-medium">{m.lockedAssessment()}</span>
+				<span class="ml-2 text-sm">{m.lockedAssessmentMessage()}</span>
+			</div>
+		</div>
+	{/if}
+	<div class="flex flex-col card px-6 py-4 bg-white shadow-lg w-full">
+		<div class="flex flex-row justify-between">
+			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
+				{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
+					const fieldsToShow = ['ref_id', 'name', 'description', 'version', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'];
+					if (!fieldsToShow.includes(key)) return false;
+					// Hide selected_implementation_groups if framework doesn't support implementation groups
+					if (key === 'selected_implementation_groups' && (!data.compliance_assessment.framework.implementation_groups_definition || !Array.isArray(data.compliance_assessment.framework.implementation_groups_definition) || data.compliance_assessment.framework.implementation_groups_definition.length === 0)) return false;
+					return true;
+				}) as [key, value]}
+					<div class="flex flex-col">
+						<div
+							class="text-sm font-medium text-gray-800 capitalize-first"
+							data-testid={key.replaceAll('_', '-') + '-field-title'}
 						>
-							{#if value}
-								{#if Array.isArray(value)}
-									<ul>
-										{#each value as val}
-											<li>
-												{#if val.str && val.id}
-													{@const itemHref = `/${
-														URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
-															(item) => item.field === key
-														)?.urlModel
-													}/${val.id}`}
-													{#if !$page.data.user.is_third_party}
-														<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
+							{safeTranslate(key)}
+						</div>
+						<ul class="text-sm">
+							<li
+								class="text-gray-600 list-none"
+								data-testid={key.replaceAll('_', '-') + '-field-value'}
+							>
+								{#if value}
+									{#if Array.isArray(value)}
+										<ul>
+											{#each value as val}
+												<li>
+													{#if val.str && val.id}
+														{@const itemHref = `/${
+															URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
+																(item) => item.field === key
+															)?.urlModel
+														}/${val.id}`}
+														{#if !page.data.user.is_third_party}
+															<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
+														{:else}
+															{val.str}
+														{/if}
 													{:else}
-														{val.str}
+														{val}
 													{/if}
-												{:else}
-													{val}
-												{/if}
-											</li>
-										{/each}
-									</ul>
-								{:else if value.str && value.id}
-									{@const itemHref = `/${
-										URL_MODEL_MAP['compliance-assessments']['foreignKeyFields']?.find(
-											(item) => item.field === key
-										)?.urlModel
-									}/${value.id}`}
-									{#if !$page.data.user.is_third_party}
-										<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
+												</li>
+											{/each}
+										</ul>
+									{:else if value.str && value.id}
+										{@const itemHref = `/${
+											URL_MODEL_MAP['compliance-assessments']['foreignKeyFields']?.find(
+												(item) => item.field === key
+											)?.urlModel
+										}/${value.id}`}
+										{#if !page.data.user.is_third_party}
+											<Anchor href={itemHref} class="anchor">{value.str}</Anchor>
+										{:else}
+											{value.str}
+										{/if}
+									{:else if key === 'description'}
+										<MarkdownRenderer content={value} />
 									{:else}
-										{value.str}
+										{safeTranslate(value.str ?? value)}
 									{/if}
 								{:else}
-									{safeTranslate(value.str ?? value)}
+									--
 								{/if}
-							{:else}
-								--
-							{/if}
-						</li>
-					</ul>
-				</div>
-			{/each}
-		</div>
-		{#key compliance_assessment_donut_values}
-			<div class="flex w-1/3 relative">
-				{#if data.global_score.score >= 0}
-					<div class="absolute font-bold text-sm">{m.maturity()}</div>
-					<div class="flex justify-center items-center w-full">
-						<ProgressRadial
-							stroke={100}
-							meter={displayScoreColor(data.global_score.score, data.global_score.max_score)}
-							font={125}
-							value={(data.global_score.score * 100) / data.global_score.max_score}
-							width={'w-52'}
-						>
-							{data.global_score.score}
-						</ProgressRadial>
+							</li>
+						</ul>
 					</div>
+				{/each}
+				<div>
+					<div class="font-medium">{m.createdAt()}</div>
+					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
+				</div>
+				{#if page.data?.featureflags?.validation_flows}
+					{#key compliance_assessment.validation_flows}
+						<ValidationFlowsSection validationFlows={compliance_assessment.validation_flows} />
+					{/key}
 				{/if}
 			</div>
-			<div class="w-1/3">
-				<DonutChart
-					s_label="Result"
-					name="compliance_result"
-					title={m.compliance()}
-					orientation="horizontal"
-					values={compliance_assessment_donut_values.result.values}
-					colors={compliance_assessment_donut_values.result.values.map(
-						(object) => object.itemStyle.color
-					)}
-				/>
-			</div>
-			<div class="w-1/3">
-				<DonutChart
-					s_label="Status"
-					name="compliance_status"
-					title={m.progress()}
-					orientation="horizontal"
-					values={compliance_assessment_donut_values.status.values}
-					colors={compliance_assessment_donut_values.status.values.map(
-						(object) => object.itemStyle.color
-					)}
-				/>
-			</div>
-		{/key}
-		<div class="flex flex-col space-y-2 ml-4">
-			<div class="flex flex-row space-x-2">
-				<button class="btn variant-filled-primary w-full" use:popup={popupDownload}
-					><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
-				>
-				<div
-					class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 z-10"
-					data-popup="popupDownload"
-				>
-					<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
-					{#if !$page.data.user.is_third_party}
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
-						>
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asWord()}</a
-						>
+			{#key compliance_assessment_donut_values}
+				<div class="flex w-1/4 relative">
+					{#if data.global_score.score >= 0}
+						<div class="flex flex-col justify-center items-center w-full">
+							<ProgressRing
+								strokeWidth="18px"
+								meterStroke={displayScoreColor(
+									data.global_score.score,
+									data.global_score.max_score
+								)}
+								value={(data.global_score.score * 100) / data.global_score.max_score}
+								size="size-52"
+							>
+								<p class="font-semibold text-4xl">{data.global_score.score}</p>
+							</ProgressRing>
+							<div class="text-sm font-semibold py-2">{m.maturity()}</div>
+						</div>
 					{/if}
-					<a
-						href="/compliance-assessments/{data.compliance_assessment.id}/export"
-						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
+				</div>
+				<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
+					<DonutChart
+						s_label="Result"
+						name="compliance_result"
+						title={m.compliance()}
+						orientation="horizontal"
+						values={compliance_assessment_donut_values.result.values}
+						colors={compliance_assessment_donut_values.result.values.map(
+							(object) => object.itemStyle.color
+						)}
+						showPercentage={true}
+					/>
+				</div>
+				{#if data.compliance_assessment.extended_result_enabled && compliance_assessment_donut_values.extended_result?.values?.length > 0}
+					<div class="w-1/4">
+						<DonutChart
+							s_label="Extended Result"
+							name="compliance_extended_result"
+							title={m.extendedResult()}
+							orientation="horizontal"
+							values={compliance_assessment_donut_values.extended_result.values}
+							colors={compliance_assessment_donut_values.extended_result.values.map(
+								(object) => object.itemStyle.color
+							)}
+							showPercentage={true}
+						/>
+					</div>
+				{/if}
+				{#if data.compliance_assessment.progress_status_enabled}
+					<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
+						<DonutChart
+							s_label="Status"
+							name="compliance_status"
+							title={m.progress()}
+							orientation="horizontal"
+							values={compliance_assessment_donut_values.status.values}
+							colors={compliance_assessment_donut_values.status.values.map(
+								(object) => object.itemStyle.color
+							)}
+							showPercentage={true}
+						/>
+					</div>
+				{/if}
+			{/key}
+			<div class="flex flex-col space-y-2 ml-4">
+				<div class="flex flex-row space-x-2">
+					<Popover
+						open={exportPopupOpen}
+						onOpenChange={(e) => (exportPopupOpen = e.open)}
+						positioning={{ placement: 'bottom' }}
+						triggerBase="btn preset-filled-primary-500 w-full"
+						contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+						zIndex="1000"
 					>
-					{#if !$page.data.user.is_third_party}
-						<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}/action-plan/export/csv"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
-						>
-						<a
-							href="/compliance-assessments/{data.compliance_assessment.id}/action-plan/export/pdf"
-							class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+						{#snippet trigger()}
+							<span data-testid="export-button">
+								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+							</span>
+						{/snippet}
+						{#snippet content()}
+							<div>
+								<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
+								{#if !page.data.user.is_third_party}
+									<a
+										href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asCSV()}</a
+									>
+									<a
+										href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asXLSX()}</a
+									>
+									<a
+										href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asWord()}</a
+									>
+								{/if}
+								<a
+									href="/compliance-assessments/{data.compliance_assessment.id}/export"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
+								>
+								{#if !page.data.user.is_third_party}
+									<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
+									<a
+										href="/compliance-assessments/{data.compliance_assessment
+											.id}/action-plan/export/csv"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asCSV()}</a
+									>
+									<a
+										href="/compliance-assessments/{data.compliance_assessment
+											.id}/action-plan/export/xlsx"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asXLSX()}</a
+									>
+									<a
+										href="/compliance-assessments/{data.compliance_assessment
+											.id}/action-plan/export/pdf"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asPDF()}</a
+									>
+								{/if}
+							</div>
+						{/snippet}
+					</Popover>
+					{#if canEditObject}
+						<Anchor
+							breadcrumbAction="push"
+							href={`${page.url.pathname}/edit?next=${page.url.pathname}`}
+							class="btn preset-filled-primary-500 h-fit"
+							data-testid="edit-button"
+							><i class="fa-solid fa-pen-to-square mr-2"></i> {m.edit()}</Anchor
 						>
 					{/if}
 				</div>
-				{#if canEditObject}
+				{#if !page.data.user.is_third_party}
+					<Anchor
+						href={`${page.url.pathname}/action-plan`}
+						class="btn preset-filled-primary-500 h-fit"
+						breadcrumbAction="push"
+						data-testid="action-plan-button"
+						><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
+					>
+					<Anchor
+						href={`${page.url.pathname}/evidences-list`}
+						class="btn preset-filled-secondary-500 h-fit"
+						breadcrumbAction="push"
+						><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
+					>
+				{/if}
+				<span class="pt-4 text-sm">{m.powerUps()}</span>
+				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
 					<Anchor
 						breadcrumbAction="push"
-						href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
-						class="btn variant-filled-primary h-fit"
-						data-testid="edit-button"
-						><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</Anchor
+						href={`${page.url.pathname}/flash-mode`}
+						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+						data-testid="flash-mode-button"
+						><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 					>
 				{/if}
+				{#if !data.compliance_assessment.is_locked}
+					<Anchor
+						breadcrumbAction="push"
+						href={`${page.url.pathname}/table-mode`}
+						class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
+						data-testid="table-mode-button"
+						><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
+					>
+				{/if}
+				{#if !page.data.user.is_third_party}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
+						onclick={() => modalCreateForm()}
+						data-testid="apply-mapping-button"
+						><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
+					</button>
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-pink-500 h-fit"
+						onclick={() => modalCreateCloneForm()}
+						data-testid="clone-audit-button"
+						><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
+					</button>
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-rose-500 to-pink-500 h-fit"
+						onclick={() => modalCompareAudit()}
+						data-testid="compare-audit-button"
+						><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
+					</button>
+					{#if page.data?.featureflags?.validation_flows}
+						<button
+							class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+							onclick={() => modalRequestValidation()}
+							data-testid="request-validation-button"
+						>
+							<i class="fa-solid fa-check-circle mr-2"></i>
+							{m.requestValidation()}
+						</button>
+					{/if}
+				{/if}
+
+				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						data-testid="sync-to-actions-button"
+						onclick={async () => {
+							await modalConfirmSyncToActions(
+								data.compliance_assessment.id,
+								data.compliance_assessment.name,
+								'?/syncToActions'
+							);
+						}}
+					>
+						<span class="mr-2">
+							{#if syncingToActionsIsLoading}
+								<ProgressRing
+									strokeWidth="16px"
+									meterStroke="stroke-white"
+									size="size-6"
+									classes="-ml-2"
+								/>
+							{:else}
+								<i class="fa-solid fa-arrows-rotate mr-2"></i>
+							{/if}
+						</span>
+						{m.syncToAppliedControls()}
+					</button>
+				{/if}
+
+				{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0 && !data.compliance_assessment.is_locked}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
+						onclick={() => {
+							modalConfirmCreateSuggestedControls(
+								data.compliance_assessment.id,
+								data.compliance_assessment.name,
+								'?/createSuggestedControls'
+							);
+						}}
+					>
+						<span class="mr-2">
+							{#if createAppliedControlsLoading}
+								<ProgressRing
+									strokeWidth="16px"
+									meterStroke="stroke-white"
+									classes="-ml-2"
+									size="size-6"
+								/>
+							{:else}
+								<i class="fa-solid fa-wand-magic-sparkles"></i>
+							{/if}
+						</span>
+						{m.suggestControls()}
+					</button>
+				{/if}
+				{#if has_threats && !page.data.user.is_third_party}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-yellow-500 to-red-600 h-fit"
+						onclick={openThreatsDialog}
+					>
+						<div class="flex items-center space-x-2">
+							<i class="fa-solid fa-triangle-exclamation text-white"></i>
+							<span class="text-white font-bold">{data.threats.total_unique_threats}</span>
+							<span>{m.potentialThreats()}</span>
+						</div>
+					</button>
+				{/if}
 			</div>
-			{#if !$page.data.user.is_third_party}
-				<Anchor
-					href={`${$page.url.pathname}/action-plan`}
-					class="btn variant-filled-primary h-fit"
-					breadcrumbAction="push"><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</Anchor
-				>
-			{/if}
-			<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
-			{#if !$page.data.user.is_third_party}
-				<Anchor
-					breadcrumbAction="push"
-					href={`${$page.url.pathname}/flash-mode`}
-					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-violet-500 h-fit"
-					><i class="fa-solid fa-bolt mr-2" /> {m.flashMode()}</Anchor
-				>
-			{/if}
-			<Anchor
-				breadcrumbAction="push"
-				href={`${$page.url.pathname}/table-mode`}
-				class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-yellow-500 h-fit"
-				><i class="fa-solid fa-table-list mr-2" /> {m.tableMode()}</Anchor
-			>
-			{#if !$page.data.user.is_third_party}
-				<button
-					class="btn text-gray-100 bg-gradient-to-l from-sky-500 to-green-600 h-fit"
-					on:click={() => modalCreateForm()}
-					><i class="fa-solid fa-diagram-project mr-2" /> {m.applyMapping()}
-				</button>
-			{/if}
-			{#if Object.hasOwn($page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
-				<button
-					class="btn text-gray-100 bg-gradient-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
-					on:click={() => {
-						modalConfirmCreateSuggestedControls(
-							data.compliance_assessment.id,
-							data.compliance_assessment.name,
-							'?/createSuggestedControls'
-						);
-					}}
-				>
-					<span class="mr-2">
-						{#if createAppliedControlsLoading}
-							<ProgressRadial class="-ml-2" width="w-6" meter="stroke-white" stroke={80} />
-						{:else}
-							<i class="fa-solid fa-fire-extinguisher" />
-						{/if}
-					</span>
-					{m.suggestControls()}
-				</button>
-			{/if}
-			{#if has_threats}
-				<button
-					class="border rounded-lg btn h-fit bg-gradient-to-r from-yellow-500 to-yellow-300 px-3 py-2"
-					on:click={openThreatsDialog}
-				>
-					<div class="flex items-center space-x-2">
-						<i class="fa-solid fa-triangle-exclamation text-red-700"></i>
-						<span class="text-red-700 font-bold">{data.threats.total_unique_threats}</span>
-						<span>{m.potentialThreats()}</span>
-					</div>
-				</button>
-			{/if}
 		</div>
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
-		<div class=" flex items-center font-semibold">
-			<span class="h4">{m.associatedRequirements()}</span>
-			<span class="badge variant-soft-primary ml-1">
-				{#if treeViewNodes}
-					{assessableNodesCount(treeViewNodes)}
-				{/if}
-			</span>
-			<span class="text-xs ml-2 text-gray-500">{m.filterBy()}</span>
-			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-				{#each Object.entries(complianceStatusColorMap) as [status, color]}
-					<button
-						type="button"
-						on:click={() => toggleStatus(status)}
-						class="px-2 py-1 rounded-md font-bold"
-						style="background-color: {selectedStatus.includes(status)
-							? color + '44'
-							: 'grey'}; color: {selectedStatus.includes(status)
-							? darkenColor(color, 0.3)
-							: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.5};"
-					>
-						{safeTranslate(status)}
-					</button>
-				{/each}
-			</div>
-			<div class="flex flex-wrap gap-2 ml-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-				{#each Object.entries(complianceResultColorMap) as [result, color]}
-					<button
-						type="button"
-						on:click={() => toggleResult(result)}
-						class="px-2 py-1 rounded-md font-bold"
-						style="background-color: {selectedResults.includes(result)
-							? color + '44'
-							: 'grey'}; color: {selectedResults.includes(result)
-							? darkenColor(color, 0.3)
-							: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.5};"
-					>
-						{safeTranslate(result)}
-					</button>
-				{/each}
-			</div>
-			<div id="toggle" class="flex items-center justify-center space-x-4 text-xs ml-auto mr-4">
-				{#if $displayOnlyAssessableNodes}
-					<p class="font-bold">{m.ShowAllNodesMessage()}</p>
-				{:else}
-					<p class="font-bold text-green-500">{m.ShowAllNodesMessage()}</p>
-				{/if}
-				<SlideToggle
-					name="questionnaireToggle"
-					class="flex flex-row items-center justify-center"
-					active="bg-primary-500"
-					background="bg-green-500"
-					bind:checked={$displayOnlyAssessableNodes}
-					on:click={() => ($displayOnlyAssessableNodes = !$displayOnlyAssessableNodes)}
-				>
-					{#if $displayOnlyAssessableNodes}
-						<p class="font-bold text-primary-500">{m.ShowOnlyAssessable()}</p>
-					{:else}
-						<p class="font-bold">{m.ShowOnlyAssessable()}</p>
+		<div class="flex flex-row items-center font-semibold justify-between">
+			<div>
+				<span class="h4">{m.associatedRequirements()}</span>
+				<span class="badge bg-violet-400 text-white ml-1 rounded-xl">
+					{#if treeViewNodes}
+						{assessableNodesCount(treeViewNodes)}
 					{/if}
-				</SlideToggle>
+				</span>
 			</div>
+			<Popover
+				open={filterPopupOpen}
+				onOpenChange={(e) => (filterPopupOpen = e.open)}
+				positioning={{ placement: 'bottom-start' }}
+				triggerBase="btn preset-filled-primary-500 w-fit"
+				contentBase="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
+				zIndex="1000"
+				autoFocus={false}
+				onPointerDownOutside={() => (filterPopupOpen = false)}
+				closeOnInteractOutside={false}
+			>
+				{#snippet trigger()}
+					<i class="fa-solid fa-filter mr-2"></i>
+					{m.filters()}
+					{#if filterCount}
+						<span class="text-xs">{filterCount}</span>
+					{/if}
+				{/snippet}
+				{#snippet content()}
+					<div>
+						<span class="text-sm font-bold">{m.result()}</span>
+						<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+							{#each Object.entries(complianceResultColorMap) as [result, color]}
+								<button
+									type="button"
+									onclick={() => toggleResult(result)}
+									class="px-2 py-1 rounded-md font-bold"
+									style="background-color: {selectedResults.includes(result)
+										? color
+										: 'grey'}; color: {selectedResults.includes(result)
+										? result === 'not_applicable'
+											? 'white'
+											: 'black'
+										: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
+								>
+									{safeTranslate(result)}
+								</button>
+							{/each}
+						</div>
+					</div>
+					{#if data.compliance_assessment.progress_status_enabled}
+						<div>
+							<span class="text-sm font-bold">{m.status()}</span>
+							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+								{#each Object.entries(complianceStatusColorMap) as [status, color]}
+									<button
+										type="button"
+										onclick={() => toggleStatus(status)}
+										class="px-2 py-1 rounded-md font-bold"
+										style="background-color: {selectedStatus.includes(status)
+											? color + '44'
+											: 'grey'}; color: {selectedStatus.includes(status)
+											? darkenColor(color, 0.3)
+											: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+									>
+										{safeTranslate(status)}
+									</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
+					{#if data.compliance_assessment.extended_result_enabled}
+						<div>
+							<span class="text-sm font-bold">{m.extendedResult()}</span>
+							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+								{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
+									<button
+										type="button"
+										onclick={() => toggleExtendedResult(extendedResult)}
+										class="px-2 py-1 rounded-md font-bold"
+										style="background-color: {selectedExtendedResults.includes(extendedResult)
+											? color
+											: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
+											extendedResult
+										)
+											? 1
+											: 0.3};"
+									>
+										{safeTranslate(extendedResult)}
+									</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
+					<div>
+						<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
+						<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
+							<Switch
+								name="questionnaireToggle"
+								class="flex flex-row items-center justify-center"
+								active="bg-primary-500"
+								onCheckedChange={(e) => (displayOnlyAssessableNodes = e.checked)}
+								onclick={() => {
+									displayOnlyAssessableNodes = !displayOnlyAssessableNodes;
+									auditFiltersStore.setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes);
+								}}
+							>
+								{#if displayOnlyAssessableNodes}
+									<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
+								{:else}
+									<span class="font-bold text-xs text-gray-500">{m.no()}</span>
+								{/if}
+							</Switch>
+						</div>
+					</div>
+				{/snippet}
+			</Popover>
 		</div>
 
 		<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
-			<i class="fa-solid fa-diagram-project" />
+			<i class="fa-solid fa-diagram-project"></i>
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key $displayOnlyAssessableNodes || selectedStatus || selectedResults}
+			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults || selectedExtendedResults}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes
@@ -580,11 +938,11 @@
 	<dialog
 		bind:this={dialogElement}
 		class="card p-4 bg-white shadow-2xl w-2/3 max-h-3/4 overflow-auto rounded-lg"
-		on:close={() => (threatDialogOpen = false)}
+		onclose={() => (threatDialogOpen = false)}
 	>
 		<div class="flex justify-between items-center mb-4">
 			<h3 class="h3 font-bold capitalize">{m.potentialThreats()}</h3>
-			<button class="btn btn-sm variant-filled-error" on:click={closeThreatsDialog}>
+			<button class="btn btn-sm preset-filled-error-500" onclick={closeThreatsDialog}>
 				<i class="fa-solid fa-times"></i>
 			</button>
 		</div>

@@ -1,8 +1,8 @@
 import type { PageServerLoad } from './$types';
 
 import { BASE_API_URL } from '$lib/utils/constants';
-import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
-import { listViewFields } from '$lib/utils/table';
+import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { headData } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 
 export const load = (async ({ fetch, params }) => {
@@ -22,7 +22,7 @@ export const load = (async ({ fetch, params }) => {
 		const response = await fetch(keyEndpoint);
 		if (response.ok) {
 			const table: TableSource = {
-				head: listViewFields[key].head,
+				head: headData(key),
 				body: [],
 				meta: []
 			};

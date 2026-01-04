@@ -40,7 +40,7 @@ services:
 
   caddy:
     container_name: caddy
-    image: caddy:2.8.4
+    image: caddy:2.10.0
     environment:
       - CISO_ASSISTANT_URL=https://cool-vm:8443
     depends_on:
@@ -55,6 +55,7 @@ services:
       reverse_proxy /api/iam/sso/redirect/ backend:8000
       reverse_proxy /api/accounts/saml/0/acs/ backend:8000
       reverse_proxy /api/accounts/saml/0/acs/finish/ backend:8000
+      reverse_proxy /api/accounts/oidc/openid_connect/login/callback/ backend:8000
       reverse_proxy /* frontend:3000
       tls internal
       }" > Caddyfile && caddy run'

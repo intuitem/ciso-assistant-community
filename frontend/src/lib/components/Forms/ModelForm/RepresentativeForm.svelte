@@ -5,11 +5,23 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let data: any = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		object?: any;
+		context?: string;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		object = {},
+		context = 'default'
+	}: Props = $props();
 </script>
 
 <TextField
@@ -20,8 +32,35 @@
 	bind:cachedValue={formDataCache['email']}
 	data-focusindex="2"
 />
-{#if !data.user}
-	<Checkbox {form} field="create_user" label={m.createUser()} helpText={m.createUserHelpText()} />
+{#if context === 'edit' && object.user}
+	<div
+		class="flex items-center gap-2 px-3 py-2.5 bg-secondary-50-950 rounded-md border-l-3 border-secondary-500"
+	>
+		<svg
+			class="w-4 h-4 text-secondary-600-400 flex-shrink-0"
+			fill="none"
+			stroke="currentColor"
+			viewBox="0 0 24 24"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+			></path>
+		</svg>
+		<div class="text-sm text-secondary-900-100">
+			{m.userLinkedToRepresentative()}
+		</div>
+	</div>
+{:else}
+	<Checkbox
+		{form}
+		field="create_user"
+		label={m.createUser()}
+		helpText={m.createUserHelpText()}
+		bind:cachedValue={formDataCache['create_user']}
+	/>
 {/if}
 <AutocompleteSelect
 	{form}

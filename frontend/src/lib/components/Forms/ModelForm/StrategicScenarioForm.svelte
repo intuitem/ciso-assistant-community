@@ -5,28 +5,61 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context: string;
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context: string;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context
+	}: Props = $props();
 </script>
 
 <p class="text-sm text-gray-500">{m.strategicScenarioHelpText()}</p>
-{#if context !== 'edit'}
+
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="ro-to?is_selected=true"
+	optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
+	optionsLabelField="str"
+	field="ro_to_couple"
+	cacheLock={cacheLocks['ro_to_couple']}
+	bind:cachedValue={formDataCache['ro_to_couple']}
+	label={m.roToCouple()}
+/>
+{#key formDataCache['ro_to_couple'] || initialData.ro_to_couple}
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="ro-to?is_selected=true"
-		optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
-		optionsLabelField="str"
-		field="ro_to_couple"
-		cacheLock={cacheLocks['ro_to_couple']}
-		bind:cachedValue={formDataCache['ro_to_couple']}
-		label={m.roToCouple()}
-		hidden={initialData.ro_to_couple}
+		optionsEndpoint="feared-events"
+		optionsDetailedUrlParameters={[
+			['ebios_rm_study', initialData.ebios_rm_study],
+			['ro_to_couples', formDataCache['ro_to_couple'] || initialData.ro_to_couple]
+		]}
+		optionsLabelField="auto"
+		field="focused_feared_event"
+		cacheLock={cacheLocks['focused_feared_event']}
+		bind:cachedValue={formDataCache['focused_feared_event']}
+		label={m.focusedFearedEvent()}
+		nullable
 	/>
-{/if}
+{/key}
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
+/>
 <TextField
 	{form}
 	field="ref_id"

@@ -1,3 +1,4 @@
+import os
 from django import template
 from django.utils.safestring import mark_safe
 
@@ -58,6 +59,42 @@ def country_name(country_code):
 @register.filter(name="isinstance")
 def isinstance_filter(val, instance_type):
     return isinstance(val, eval(instance_type))
+
+
+@register.filter(name="is_list")
+def is_list(val):
+    return isinstance(val, list)
+
+
+@register.filter(name="is_string")
+def is_string(val):
+    return isinstance(val, str)
+
+
+@register.filter(name="get_answers")
+def get_answers(question, answers):
+    if not answers:
+        return None
+    if isinstance(answers, list):
+        return [get_answers(question, answer) for answer in answers]
+    elif not answers.startswith("urn:"):
+        return answers
+    for choice in question["choices"]:
+        if choice["urn"] == answers:
+            return choice["value"]
+
+
+@register.filter(name="get_item")
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+
+@register.filter(name="basename")
+def basename_filter(file_path):
+    """Extract the basename from a file path."""
+    if not file_path:
+        return ""
+    return os.path.basename(str(file_path))
 
 
 @register.simple_tag

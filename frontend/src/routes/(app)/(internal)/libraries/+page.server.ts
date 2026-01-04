@@ -1,11 +1,10 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 
-import { nestedDeleteFormAction } from '$lib/utils/actions';
+import { defaultDeleteFormAction } from '$lib/utils/actions';
 import { safeTranslate } from '$lib/utils/i18n';
 import { LibraryUploadSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import { m } from '$paraglide/messages';
-import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
@@ -15,19 +14,8 @@ import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
 	const storedLibrariesEndpoint = `${BASE_API_URL}/stored-libraries/`;
-	const loadedLibrariesEndpoint = `${BASE_API_URL}/loaded-libraries/`;
-	const updatableLibrariesEndpoint = `${loadedLibrariesEndpoint}available-updates/`;
-
-	const [storedLibrariesResponse, loadedLibrariesResponse, updatableLibrariesResponse] =
-		await Promise.all([
-			fetch(storedLibrariesEndpoint),
-			fetch(loadedLibrariesEndpoint),
-			fetch(updatableLibrariesEndpoint)
-		]);
-
+	const storedLibrariesResponse = await fetch(storedLibrariesEndpoint);
 	const storedLibraries = await storedLibrariesResponse.json();
-	const loadedLibraries = await loadedLibrariesResponse.json();
-	const updatableLibraries = await updatableLibrariesResponse.json();
 
 	const prepareRow = (row: Record<string, any>) => {
 		row.overview = [
@@ -40,11 +28,8 @@ export const load = (async ({ fetch }) => {
 	};
 
 	storedLibraries.results.forEach(prepareRow);
-	loadedLibraries.results.forEach(prepareRow);
 
-	type libraryURLModel = 'stored-libraries' | 'loaded-libraries';
-
-	const makeHeadData = (URLModel: libraryURLModel) => {
+	const makeHeadData = (URLModel) => {
 		return listViewFields[URLModel].body.reduce((obj, key, index) => {
 			obj[key] = listViewFields[URLModel].head[index];
 			return obj;
@@ -54,23 +39,17 @@ export const load = (async ({ fetch }) => {
 	const storedLibrariesTable = {
 		head: makeHeadData('stored-libraries'),
 		meta: { urlmodel: 'stored-libraries', ...storedLibraries },
-		body: tableSourceMapper(storedLibraries.results, listViewFields['stored-libraries'].body)
-	};
-
-	const loadedLibrariesTable = {
-		head: makeHeadData('loaded-libraries'),
-		meta: { urlmodel: 'loaded-libraries', ...loadedLibraries },
-		body: tableSourceMapper(loadedLibraries.results, listViewFields['loaded-libraries'].body)
+		body: []
 	};
 
 	const schema = z.object({ id: z.string() });
 	const deleteForm = await superValidate(zod(schema));
+	const uploadForm = await superValidate({}, zod(LibraryUploadSchema), { errors: false });
 
 	return {
 		storedLibrariesTable,
-		loadedLibrariesTable,
-		updatableLibraries,
 		deleteForm,
+		uploadForm,
 		title: m.libraries()
 	};
 }) satisfies PageServerLoad;
@@ -110,6 +89,6 @@ export const actions: Actions = {
 		}
 	},
 	delete: async (event) => {
-		return nestedDeleteFormAction({ event });
+		return defaultDeleteFormAction({ event, urlModel: 'stored-libraries' });
 	}
 };

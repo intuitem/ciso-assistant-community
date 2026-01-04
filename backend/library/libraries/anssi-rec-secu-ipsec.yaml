@@ -1,0 +1,301 @@
+urn: urn:protocolpaladin:risk:library:anssi-rec-secu-ipsec
+locale: fr
+ref_id: ANSSI-REC-SECU-IPSEC
+name: "Recommandations de s\xE9curit\xE9 relatives \xE0 IPsec  pour la protection\
+  \ des flux r\xE9seau"
+description: "Version: 1.1 du 03/08/2015\n\nLes syst\xE8mes d\u2019information adoptent\
+  \ g\xE9n\xE9ralement aujourd\u2019hui une architecture distribu\xE9e. Les diff\xE9\
+  rentes briques logicielles et mat\xE9rielles qui les composent sont de plus en plus\
+  \ communicantes, non seulement entre elles, mais \xE9galement avec des syst\xE8\
+  mes d\u2019information distants et \xE0 travers l\u2019Internet.\n\nLa mont\xE9\
+  e en puissance de l\u2019informatique en nuage et de l\u2019externalisation ne font\
+  \ qu\u2019acc\xE9l\xE9rer cette tendance. Tout comme ces diff\xE9rentes briques\
+  \ peuvent \xEAtre critiques pour un syst\xE8me d\u2019information, les flux de communication\
+  \ entre elles peuvent l\u2019\xEAtre \xE9galement. Ces flux regroupent de nombreuses\
+  \ informations sensibles (donn\xE9es d\u2019authentification, informations m\xE9\
+  tier confidentielles, commandes de pilotage d\u2019installations industrielles,\
+  \ etc.). L\u2019interception ou l\u2019alt\xE9ration de ces informations par des\
+  \ individus potentiellement malveillants repr\xE9sentent des risques non n\xE9gligeables\
+  \ dans un contexte o\xF9 les cyberattaques sont de plus en plus nombreuses et sophistiqu\xE9\
+  es. La protection de ces flux sensibles est alors primordiale.\n\nForce est pourtant\
+  \ de constater que cette probl\xE9matique n\u2019est pas toujours bien appr\xE9\
+  hend\xE9e, et que de nombreux flux r\xE9seau sensibles ne sont pas prot\xE9g\xE9\
+  s comme ils le devraient. IPsec est une suite de protocoles de communication s\xE9\
+  curis\xE9e permettant la protection des flux r\xE9seau. Elle est \xE9prouv\xE9e,\
+  \ mais souvent mal ma\xEEtris\xE9e et reste encore trop peu ou mal employ\xE9e.\n\
+  \nLien vers le document :\nhttps://cyber.gouv.fr/sites/default/files/2012/09/NT_IPsec.pdf"
+copyright: Note technique publique
+version: 1
+publication_date: 2025-05-04
+provider: ANSSI
+packager: protocolpaladin
+objects:
+  framework:
+    urn: urn:protocolpaladin:risk:framework:anssi-rec-secu-ipsec
+    ref_id: ANSSI-REC-SECU-IPSEC
+    name: "Recommandations de s\xE9curit\xE9 relatives \xE0 IPsec  pour la protection\
+      \ des flux r\xE9seau"
+    description: "Version: 1.1 du 03/08/2015\n\nLes syst\xE8mes d\u2019information\
+      \ adoptent g\xE9n\xE9ralement aujourd\u2019hui une architecture distribu\xE9\
+      e. Les diff\xE9rentes briques logicielles et mat\xE9rielles qui les composent\
+      \ sont de plus en plus communicantes, non seulement entre elles, mais \xE9galement\
+      \ avec des syst\xE8mes d\u2019information distants et \xE0 travers l\u2019Internet.\n\
+      \nLa mont\xE9e en puissance de l\u2019informatique en nuage et de l\u2019externalisation\
+      \ ne font qu\u2019acc\xE9l\xE9rer cette tendance. Tout comme ces diff\xE9rentes\
+      \ briques peuvent \xEAtre critiques pour un syst\xE8me d\u2019information, les\
+      \ flux de communication entre elles peuvent l\u2019\xEAtre \xE9galement. Ces\
+      \ flux regroupent de nombreuses informations sensibles (donn\xE9es d\u2019authentification,\
+      \ informations m\xE9tier confidentielles, commandes de pilotage d\u2019installations\
+      \ industrielles, etc.). L\u2019interception ou l\u2019alt\xE9ration de ces informations\
+      \ par des individus potentiellement malveillants repr\xE9sentent des risques\
+      \ non n\xE9gligeables dans un contexte o\xF9 les cyberattaques sont de plus\
+      \ en plus nombreuses et sophistiqu\xE9es. La protection de ces flux sensibles\
+      \ est alors primordiale.\n\nForce est pourtant de constater que cette probl\xE9\
+      matique n\u2019est pas toujours bien appr\xE9hend\xE9e, et que de nombreux flux\
+      \ r\xE9seau sensibles ne sont pas prot\xE9g\xE9s comme ils le devraient. IPsec\
+      \ est une suite de protocoles de communication s\xE9curis\xE9e permettant la\
+      \ protection des flux r\xE9seau. Elle est \xE9prouv\xE9e, mais souvent mal ma\xEE\
+      tris\xE9e et reste encore trop peu ou mal employ\xE9e.\n\nLien vers le document\
+      \ :\nhttps://cyber.gouv.fr/sites/default/files/2012/09/NT_IPsec.pdf"
+    requirement_nodes:
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: "Diff\xE9rents cas d\u2019usage d\u2019IPsec"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:4
+      ref_id: '4.1'
+      name: "Acc\xE8s distants en nomadisme"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:4.1
+      ref_id: R1
+      name: "\xC9quipements de confiance"
+      description: "Un certain nombre de logiciels ou d\u2019\xE9quipements r\xE9\
+        seau destin\xE9s \xE0 la mise en oeuvre de VPN IPsec ont \xE9t\xE9 \xE9valu\xE9\
+        s par l\u2019ANSSI et ont obtenu une certification de s\xE9curit\xE9 ou une\
+        \ qualification. Il est recommand\xE9 de recourir \xE0 ces produits, en priorit\xE9\
+        \ \xE0 ceux qui sont qualifi\xE9s, (list\xE9s sur https://cyber.gouv.fr/trouver-un-produitservice-de-securite-evalue)\
+        \ d\xE8s lors qu\u2019il existe un besoin de produits de confiance."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Comparaison avec TLS
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r2
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:5
+      ref_id: R2
+      name: "Pour les cas d\u2019usage \xE9voqu\xE9s pr\xE9c\xE9demment, il est recommand\xE9\
+        \ d\u2019utiliser IPsec plut\xF4t que TLS."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: "Fonctionnement d\u2019IPsec"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r3
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6
+      ref_id: R3
+      name: "L\u2019emploi d\u2019IPsec doit se faire avec le protocole ESP. Bien\
+        \ qu\u2019il ne pr\xE9sente pas de risque de s\xE9curit\xE9 en soi, l\u2019\
+        emploi d\u2019AH est d\xE9conseill\xE9."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6
+      ref_id: '6.1'
+      name: Services fournis par IPsec
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.1
+      ref_id: 6.1.2
+      name: "ESP : confidentialit\xE9, int\xE9grit\xE9 et authentification des paquets"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r4
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.1.2
+      ref_id: R4
+      name: "Le service de confidentialit\xE9 d\u2019ESP ne doit jamais \xEAtre employ\xE9\
+        \ sans activer le m\xE9canisme de contr\xF4le d\u2019int\xE9grit\xE9."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6
+      ref_id: '6.3'
+      name: Security Policy
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r5
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.3
+      ref_id: R5
+      name: "Les SP permettant un usage \xAB facultatif \xBB ou \xAB optionnel \xBB\
+        \ d\u2019IPsec doivent \xEAtre \xE9vit\xE9es car elles ne garantissent pas\
+        \ la s\xE9curit\xE9 (possibilit\xE9 de \xAB downgrade attack \xBB)."
+      description: "Pour un lien donn\xE9, on s\u2019en tiendra donc \xE0 n\u2019\
+        autoriser que les flux s\xE9curis\xE9s d\xE8s lors qu\u2019il existe un besoin\
+        \ de s\xE9curit\xE9."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r6
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.3
+      ref_id: R6
+      name: "Malgr\xE9 la possibilit\xE9 technique de fonctionnement asym\xE9trique,\
+        \ on pr\xE9f\xE8rera lorsque c\u2019est possible avoir une politique uniforme\
+        \ entre le lien aller et le lien retour."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6
+      ref_id: '6.4'
+      name: "Etablissement d\u2019un lien IPsec"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4
+      ref_id: 6.4.1
+      name: Security Association
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r7
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4.1
+      ref_id: R7
+      name: "Il est pr\xE9f\xE9rable de fixer a priori les algorithmes et tailles\
+        \ de cl\xE9s employ\xE9s (voir infra pour le choix) et de n\u2019utiliser\
+        \ IKE que pour l\u2019\xE9change de cl\xE9s."
+      description: "\xC0 d\xE9faut de pouvoir les fixer, on ne permettra la n\xE9\
+        gociation que sur un nombre r\xE9duit d\u2019algorithmes."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4
+      ref_id: 6.4.3
+      name: "Utilisation d\u2019IKE"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r8
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4.3
+      ref_id: R8
+      name: "Il est recommand\xE9 d\u2019utiliser la version 2 d\u2019IKE."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4.3.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4.3
+      ref_id: 6.4.3.2
+      name: Authentification des correspondants
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r9
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4.3.2
+      ref_id: R9
+      name: "Il est fortement d\xE9conseill\xE9 dans le cas g\xE9n\xE9ral d\u2019\
+        utiliser la mise \xE0 cl\xE9 manuelle ou une cl\xE9 pr\xE9-partag\xE9e (PSK)\
+        \ pour l\u2019\xE9tablissement d\u2019un lien IPsec."
+      description: " Des m\xE9canismes bas\xE9s sur de la cryptographie asym\xE9trique\
+        \ sont \xE0 privil\xE9gier. On privil\xE9giera en particulier les m\xE9canismes\
+        \ d\u2019IGC qui permettent la r\xE9vocation rapide des cl\xE9s compromises,\
+        \ en particulier en cas de perte d\u2019un poste. Les d\xE9rogations \xE0\
+        \ ces recommandations doivent avoir fait l\u2019objet d\u2019une \xE9tude\
+        \ de s\xE9curit\xE9 rigoureuse."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4.3.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4.3
+      ref_id: 6.4.3.3
+      name: "N\xE9gociation des SP"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r10
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.4.3.3
+      ref_id: R10
+      name: "On privil\xE9giera la configuration statique des SP lorsque le cadre\
+        \ d\u2019emploi le permet."
+      description: " \xC0 d\xE9faut, il est n\xE9cessaire de s\u2019assurer que la\
+        \ politique de filtrage mise en \u0153uvre garantit l\u2019absence de flux\
+        \ en clair."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6
+      ref_id: '6.5'
+      name: "Utilisation d\u2019IPsec avec un syst\xE8me de traduction d\u2019adresses\
+        \ (NAT)"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r11
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.5
+      ref_id: R11
+      name: "S\u2019il est n\xE9cessaire de recourir au NAT sur des flux IPsec, il\
+        \ est n\xE9cessaire d\u2019activer le m\xE9canisme de NAT-Traversal."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6
+      ref_id: '6.6'
+      name: 'PFS : Perfect forward Secrecy'
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r12
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.6
+      ref_id: R12
+      name: "D\xE8s lors que cette possibilit\xE9 est offerte par les \xE9quipements\
+        \ employ\xE9s."
+      description: "Il est recommand\xE9 de mettre en \u0153uvre la propri\xE9t\xE9\
+        \ PFS en phase 2 en utilisant dans le \xAB quick mode \xBB l\u2019\xE9change\
+        \ de cl\xE9 Diffie-Hellman \xE9ph\xE9m\xE8re classique ou sa variante sur\
+        \ courbes elliptiques."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r13
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.6
+      ref_id: R13
+      name: "D\xE8s lors que cette possibilit\xE9 est offerte par les \xE9quipements\
+        \ employ\xE9s."
+      description: "Il est recommand\xE9 de forcer le renouvellement p\xE9riodique\
+        \ des cl\xE9s, par exemple toutes les heures et tous les 100 Go de donn\xE9\
+        es, afin de limiter l\u2019impact de la compromission d\u2019une cl\xE9 sur\
+        \ le trafic des donn\xE9es."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6
+      ref_id: '6.7'
+      name: "Choix des param\xE8tres"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r14
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.7
+      ref_id: R14
+      name: "Il est fortement d\xE9conseill\xE9 d\u2019employer la fonction de hachage\
+        \ MD5, le chiffrement DES, des cl\xE9s RSA de taille inf\xE9rieure \xE0 2048\
+        \ bits ou des cl\xE9s ECDSA de taille inf\xE9rieure \xE0 200 bits."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r15
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.7
+      ref_id: R15
+      name: "Il est d\xE9conseill\xE9 d\u2019utiliser 3DES, SHA-1 ou ECDSA avec des\
+        \ cl\xE9s de moins de 256 bits."
+      description: "Si des alternatives plus s\xE9curis\xE9es telles qu\u2019AES (AES-128\
+        \ ou AES-256), SHA-2 (SHA-224, SHA-256, SHA-384 ou SHA-512) ou ECDSA avec\
+        \ des cl\xE9s d\u2019au moins 256 bits sont disponibles."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:r16
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-ipsec:6.7
+      ref_id: R16
+      name: "On prendra garde au groupe de Diffie-Hellman employ\xE9. Les groupes\
+        \ 1 ou 2, tr\xE8s fr\xE9quemment propos\xE9s dans les configurations par d\xE9\
+        faut, ne sont plus d\u2019une taille acceptable."
+      description: "On privil\xE9giera les groupes ayant des modules de taille plus\
+        \ importante (comme les groupes 14 et 15) voire (si possible) les groupes\
+        \ construits sur des courbes elliptiques d\u2019au moins 256 bits (comme la\
+        \ courbe ecp256, aussi nomm\xE9e groupe 19 ou encore la courbe ecp384bp, normalis\xE9\
+        e sous l\u2019appellation groupe 29)."

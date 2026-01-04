@@ -1,0 +1,55 @@
+{% load i18n core_extras %}
+
+<div class="bg-white rounded-lg p-6">
+    <div class="w-full">
+        <div class="text-black font-bold text-center mx-auto mt-4">
+            {% trans "Probability" %}
+        </div>
+        <div class="flex flex-row h-full">
+            <div class="text-black font-bold mt-45">
+                <p class="-rotate-90">{% trans "impact" %}</p>
+            </div>
+            <table class="w-3/4 mt-10 ml-13">
+                <tr>
+                    <td></td>
+                    {% for probability in risk_matrix.parse_json_translated.probability %}
+                        <td class="w-1/6 h-16 text-center text-black bg-gray-200 border-4 border-white">
+                            {{ probability.name }}:
+                            {{ probability.description|linebreaksbr }}
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% for row in risk_matrix.render_transposed_grid_as_colors reversed %}
+                    {% with row_index=forloop.counter0 %}
+                        <tr>
+                            <td class="w-1/6 text-center text-black bg-gray-200 border-4 border-white pr-2">
+                                {% with impact=risk_matrix.parse_json_translated.impact|index:row_index %}
+                                {{ impact.name }}:
+                                {{ impact.description|linebreaksbr }}
+                                {% endwith %}
+                            </td>
+                            {% if enriched_data %}
+                                {% for item in row %}
+                                {% with transpose=risk_matrix.render_grid_as_colors|index:forloop.counter0|index:row_index %}
+                                    <td class="w-1/6 h-16 text-center border-4 border-white" style="background-color: {{ transpose.hexcolor }}">
+                                        {{ enriched_data|index:forloop.counter0|index:row_index|join:", " }}
+                                    </td>
+                                {% endwith %}
+                                {% endfor %}
+                            {% else %}
+                                {% for item in row %}
+                                {% with transpose=risk_matrix.render_grid_as_colors|index:forloop.counter0|index:row_index %}
+                                  <td class="w-1/6 h-16 text-center border-4 border-white" style="background-color: {{ transpose.hexcolor }}">
+                                  </td>
+                                {% endwith %}
+                                </td>
+                                {% endfor %}
+                            {% endif %}
+                            </td>
+                        </tr>
+                    {% endwith %}
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>

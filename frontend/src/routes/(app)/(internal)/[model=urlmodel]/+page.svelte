@@ -1,18 +1,31 @@
 <script lang="ts">
+	import { handlers } from 'svelte/legacy';
+
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { driverInstance } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ActionData, PageData } from './$types';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 
 	import { onMount } from 'svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
-	export let data: PageData;
-	export let form: ActionData;
-	$: URLModel = data.URLModel;
+	interface Props {
+		data: PageData;
+		form: ActionData;
+	}
+
+	let { data, form }: Props = $props();
+	let URLModel = $derived(data.URLModel);
+	let exportPopupOpen = $state(false);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -98,82 +111,169 @@
 	});
 </script>
 
-{#if data.table}
+{#if data?.table}
 	<div class="shadow-lg">
 		{#key URLModel}
-			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
-				<div slot="addButton">
-					<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-sm">
-						{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments'].includes(URLModel)}
-							<button
-								class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-								data-testid="add-button"
-								id="add-button"
-								title={safeTranslate('add-' + data.model.localName)}
-								on:click={modalCreateForm}
-								on:click={handleClickForGT}
-								><i class="fa-solid fa-file-circle-plus"></i>
-							</button>
-							{#if ['applied-controls', 'assets'].includes(URLModel)}
-								<a
-									href="{URLModel}/export/"
-									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-									title={m.exportButton()}
-									data-testid="export-button"><i class="fa-solid fa-download mr-2" /></a
-								>
-							{/if}
-							{#if URLModel === 'assets'}
-								<a
-									href="assets/graph/"
-									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-									title={m.exploreButton()}
-									data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></a
-								>
-							{/if}
-							{#if URLModel === 'folders'}
+			<ModelTable
+				source={data.table}
+				deleteForm={data.deleteForm}
+				{URLModel}
+				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
+				disableDelete={['user-groups'].includes(URLModel)}
+			>
+				{#snippet addButton()}
+					<div>
+						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+							{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
 								<button
-									class="text-gray-50 inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
-									data-testid="import-button"
-									title={safeTranslate('importFolder')}
-									on:click={modalFolderImportForm}
-									><i class="fa-solid fa-file-import"></i>
+									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+									data-testid="add-button"
+									id="add-button"
+									title={safeTranslate('add-' + data.model.localName)}
+									aria-label={safeTranslate('add-' + data.model.localName)}
+									onclick={handlers(modalCreateForm, handleClickForGT)}
+									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
-								<a
-									href="x-rays/inspect"
-									class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-									title={m.exploreButton()}
-									data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></a
+								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates'].includes(URLModel)}
+									<Popover
+										open={exportPopupOpen}
+										onOpenChange={(e) => (exportPopupOpen = e.open)}
+										triggerBase="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg"
+										positioning={{ placement: 'bottom-end' }}
+										zIndex="1000"
+									>
+										{#snippet trigger()}
+											<span title={m.exportButton()} data-testid="export-button">
+												<i class="fa-solid fa-download"></i>
+											</span>
+										{/snippet}
+										{#snippet content()}
+											<div class="flex flex-col">
+												<a
+													href="{URLModel}/export/"
+													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+													>... {m.asCSV()}</a
+												>
+												<a
+													href="{URLModel}/export/xlsx/"
+													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+													>... {m.asXLSX()}</a
+												>
+											</div>
+										{/snippet}
+									</Popover>
+								{/if}
+								{#if URLModel === 'applied-controls'}
+									<a
+										href="{URLModel}/flash-mode/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.flashMode()}
+										aria-label={m.flashMode()}
+										data-testid="flash-mode-button"><i class="fa-solid fa-bolt mr-2"></i></a
+									>
+								{/if}
+								{#if ['threats', 'reference-controls', 'metric-definitions'].includes(URLModel)}
+									{@const title =
+										URLModel === 'threats'
+											? m.importThreats()
+											: URLModel === 'reference-controls'
+												? m.importReferenceControls()
+												: m.importMetricDefinitions()}
+									<Anchor
+										href={`/libraries?object_type=${URLModel.replace(/-/g, '_')}`}
+										label={m.libraries()}
+										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										data-testid="import-button"
+										id="import-button"
+										{title}><i class="fa-solid fa-file-import mr-2"></i></Anchor
+									>
+								{/if}
+								{#if URLModel === 'assets'}
+									<Anchor
+										href="assets/graph/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.exploreButton()}
+										label={m.inspect()}
+										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
+									>
+								{/if}
+								{#if URLModel === 'entities'}
+									<Anchor
+										href="entities/graph/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.exploreButton()}
+										label={m.inspect()}
+										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
+									>
+								{/if}
+								{#if URLModel === 'folders'}
+									<button
+										class="text-gray-50 inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
+										data-testid="import-button"
+										title={safeTranslate('importFolder')}
+										aria-label={safeTranslate('importFolder')}
+										onclick={modalFolderImportForm}
+										><i class="fa-solid fa-file-import"></i>
+									</button>
+									<Anchor
+										href="x-rays/inspect"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.exploreButton()}
+										label={m.inspect()}
+										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
+									>
+								{/if}
+								{#if URLModel === 'vulnerabilities'}
+									<Anchor
+										href="vulnerabilities/treemap/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.visualizeButton()}
+										label={m.visualize()}
+										data-testid="viz-button"><i class="fa-solid fa-chart-pie"></i></Anchor
+									>
+								{/if}
+							{:else if ['risk-matrices', 'frameworks', 'requirement-mapping-sets'].includes(URLModel)}
+								{@const href = `/libraries?object_type=${URLModel.replace(/-/g, '_')}`}
+								{@const title =
+									URLModel === 'risk-matrices'
+										? m.importMatrices()
+										: URLModel === 'frameworks'
+											? m.importFrameworks()
+											: m.importMappings()}
+								<Anchor
+									{href}
+									onclick={handleClickForGT}
+									label={m.libraries()}
+									class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+									data-testid="import-button"
+									id="add-button"
+									{title}><i class="fa-solid fa-file-import mr-2"></i></Anchor
 								>
+								{#if URLModel === 'requirement-mapping-sets'}
+									<Anchor
+										href="requirement-mapping-sets/graph/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.exploreButton()}
+										label={m.inspect()}
+										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
+									>
+								{/if}
 							{/if}
-						{:else if URLModel === 'risk-matrices'}
-							<a
-								href="/libraries?object_type=risk_matrix"
-								on:click={handleClickForGT}
-								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
-								data-testid="add-button"
-								id="add-button"
-								title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2" /></a
-							>
-						{:else if URLModel === 'frameworks'}
-							<a
-								href="/libraries?object_type=framework"
-								on:click={handleClickForGT}
-								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
-								data-testid="add-button"
-								id="add-button"
-								title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2" /></a
-							>
-						{:else if URLModel === 'requirement-mapping-sets'}
-							<a
-								href="/libraries?object_type=requirement_mapping_set"
-								class="inline-block p-3 btn-mini-primary w-12 focus:relative"
-								data-testid="add-button"
-								id="add-button"
-								title={m.importMappings()}><i class="fa-solid fa-file-import mr-2" /></a
+						</span>
+					</div>
+				{/snippet}
+				{#snippet badge(key, row)}
+					{#if URLModel === 'risk-assessments'}
+						{#if key === 'perimeter' && row.meta.ebios_rm_study}
+							<span
+								class="badge inline-block bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-md border border-amber-200 rotate-[-6deg] font-semibold uppercase tracking-wide"
+								>ebios-rm</span
 							>
 						{/if}
-					</span>
-				</div>
+					{/if}
+				{/snippet}
+				{#if URLModel === 'risk-assessments'}{/if}
 			</ModelTable>
 		{/key}
 	</div>

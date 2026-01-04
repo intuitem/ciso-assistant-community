@@ -1,7 +1,12 @@
-from django.contrib.auth import authenticate
+import structlog
+from django.contrib.auth import authenticate, password_validation
 from rest_framework import serializers
-from .models import User
-from django.contrib.auth import password_validation
+
+from core.serializer_fields import FieldsRelatedField
+
+from .models import PersonalAccessToken, User
+
+logger = structlog.get_logger(__name__)
 
 
 class LoginSerializer(serializers.Serializer):
@@ -110,3 +115,15 @@ class ResetPasswordConfirmSerializer(serializers.Serializer):
                 {"confirm_new_password": "The two password fields didn't match."}
             )
         return data
+
+
+class PersonalAccessTokenReadSerializer(serializers.ModelSerializer):
+    """
+    Serializer for PersonalAccessToken model.
+    """
+
+    user = FieldsRelatedField(["email", "id"])
+
+    class Meta:
+        model = PersonalAccessToken
+        fields = ["name", "user", "created", "expiry", "digest"]

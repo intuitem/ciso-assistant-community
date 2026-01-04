@@ -2,21 +2,62 @@
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	// export let name: string;
-	export let s_label = '';
+	interface Props {
+		// export let name: string;
+		s_label?: string;
+		width?: string;
+		height?: string;
+		classesContainer?: string;
+		title?: string;
+		name?: string;
+		values: any[]; // Set the types for these variables later on
+		labels: any[];
+	}
 
-	export let width = 'w-auto';
-	export let height = 'h-full';
-	export let classesContainer = '';
-	export let title = '';
-	export let name = '';
-
-	export let values: any[]; // Set the types for these variables later on
-	export let labels: any[];
+	let {
+		s_label = '',
+		width = 'w-auto',
+		height = 'h-full',
+		classesContainer = '',
+		title = '',
+		name = '',
+		values = $bindable(),
+		labels
+	}: Props = $props();
 
 	for (const index in values) {
 		if (values[index].localName) {
 			values[index].name = safeTranslate(values[index].localName);
+		} else {
+			// Auto-translate common severity, detection, and status values
+			const nameToTranslate = values[index].name?.toLowerCase();
+			if (nameToTranslate) {
+				const translatedName = safeTranslate(nameToTranslate);
+				if (translatedName !== nameToTranslate) {
+					values[index].name = translatedName;
+				}
+			}
+		}
+	}
+
+	// Auto-translate radar chart labels
+	for (const index in labels) {
+		if (typeof labels[index] === 'object' && labels[index].name) {
+			const nameToTranslate = labels[index].name?.toLowerCase();
+			if (nameToTranslate) {
+				const translatedName = safeTranslate(nameToTranslate);
+				if (translatedName !== nameToTranslate) {
+					labels[index].name = translatedName;
+				}
+			}
+		} else if (typeof labels[index] === 'string') {
+			const nameToTranslate = labels[index]?.toLowerCase();
+			if (nameToTranslate) {
+				const translatedName = safeTranslate(nameToTranslate);
+				if (translatedName !== nameToTranslate) {
+					labels[index] = translatedName;
+				}
+			}
 		}
 	}
 
@@ -40,7 +81,9 @@
 			},
 			radar: {
 				shape: 'circle',
-				indicator: labels
+				indicator: labels,
+				radius: '65%',
+				center: ['50%', '55%']
 			},
 			series: [
 				{
@@ -67,4 +110,4 @@
 	});
 </script>
 
-<div id={chart_id} class="{width} {height} {classesContainer}" />
+<div id={chart_id} class="{width} {height} {classesContainer}"></div>

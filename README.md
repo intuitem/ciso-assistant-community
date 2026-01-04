@@ -9,7 +9,7 @@ Star the project 🌟 to get releases notification and help growing the communit
     ·
     <a href="https://intuitem.com/trial">SaaS Free trial</a>
     ·
-    <a href="https://roadmap.productboard.com/c483ebdf-87df-4dc2-96dc-a2e8c66aac63">Roadmap</a>
+    <a href="https://intuitem.releasedhub.com/ciso-assistant-public/roadmap/d738f2fd">Roadmap</a>
     ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
     ·
@@ -29,31 +29,45 @@ Star the project 🌟 to get releases notification and help growing the communit
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
 ![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
+<a href="https://intuitem.gitbook.io/ciso-assistant"><img src="https://img.shields.io/static/v1?message=Documentation&logo=gitbook&logoColor=ffffff&label=%20&labelColor=5c5c5c&color=F4E28D"></a>
+<a href="https://ca-api-doc.pages.dev/"><img src="https://img.shields.io/static/v1?message=API&logo=swagger&label=%20"></a>
 
 CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
-- Designed as a central hub to connect multiple cybersecurity concepts with smart linking between objects,  
-- Built as a **multi-paradigm** tool that adapts to different backgrounds, methodologies, and expectations,  
-- Explicitly **decouples** compliance from cybersecurity controls, enabling reusability across the platform,  
-- Promotes **reusability** and interlinking instead of redundant work,  
-- Developed with an **API-first** approach to support both UI interaction and external **automation**,  
-- Comes packed with a wide range of built-in standards, security controls, and threat libraries,  
-- Offers an **open format** to customize and reuse your own objects and frameworks,  
-- Includes built-in **risk assessment** and **remediation tracking** workflows,  
-- Supports custom frameworks via a simple syntax and flexible tooling,  
+- Designed as a central hub to connect multiple cybersecurity concepts with smart linking between objects,
+- Built as a **multi-paradigm** tool that adapts to different backgrounds, methodologies, and expectations,
+- Explicitly **decouples** compliance from cybersecurity controls, enabling reusability across the platform,
+- Promotes **reusability** and interlinking instead of redundant work,
+- Developed with an **API-first** approach to support both UI interaction and external **automation**,
+- Comes packed with a wide range of built-in standards, security controls, and threat libraries,
+- Offers an **open format** to customize and reuse your own objects and frameworks,
+- Includes built-in **risk assessment** and **remediation tracking** workflows,
+- Supports custom frameworks via a simple syntax and flexible tooling,
 - Provides rich **import/export** capabilities across various channels and formats (UI, CLI, Kafka, reports, etc.).
 
-Our vision is to create a **one-stop-shop** for cybersecurity management—modernizing GRC through **simplification** and **interoperability**.  
+![Single Hub](single_hub.png)
 
-As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.  
+Our vision is to create a **one-stop-shop** for cybersecurity management—modernizing GRC through **simplification** and **interoperability**.
+
+As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.
 
 We’re constantly evolving with input from users and customers. Like an octopus 🐙, CISO Assistant keeps growing extra arms—bringing clarity, automation, and productivity to cybersecurity teams while reducing the effort of data input and output.
 
 ---
 
+## Features
+
+![Current features](features.png)
+
+Upcoming features are listed on the roadmap.
+
+CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
+
+---
+
 ## Core Concepts
 
-Here’s a snapshot of the fundamental building blocks in CISO Assistant:
+Here’s an extract of some of the building blocks in CISO Assistant to illustrate the decoupling concept that encourages reusability:
 
 ![Core Objects](core_objects.png)
 
@@ -61,36 +75,22 @@ For full details, check the [data model documentation](documentation/architectur
 
 ---
 
-## Features
-
-Explore the full range of features and capabilities:
-
-![Features Overview](features.png)
-
-CISO Assistant is developed and maintained by [Intuitem](https://intuitem.com/), a company specialized in Cybersecurity, Cloud, and Data/AI.
-
----
-
 ## Decoupling Concept
 
 At the heart of CISO Assistant lies the **decoupling principle**, which enables powerful use cases and major time savings:
 
-- Reuse past assessments across scopes or frameworks,  
-- Evaluate a single scope against multiple frameworks simultaneously,  
-- Let CISO Assistant handle reporting and consistency checks so you can focus on remediation,  
+- Reuse past assessments across scopes or frameworks,
+- Evaluate a single scope against multiple frameworks simultaneously,
+- Let CISO Assistant handle reporting and consistency checks so you can focus on remediation,
 - Separate control implementation from compliance tracking.
 
 Here is an illustration of the **decoupling** principle and its advantages:
 
-https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62
-
-
+<https://github.com/user-attachments/assets/87bd4497-5cc2-4221-aeff-396f6b6ebe62>
 
 ## System architecture
 
 ![](./documentation/system-architecture.png)
-
-
 
 ## Quick Start 🚀
 
@@ -131,7 +131,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 
 ## Supported frameworks 🐙
 
-1. ISO 27001:2022 🌐
+1. ISO 27001:2013 & 27001:2022 🌐
 2. NIST Cyber Security Framework (CSF) v1.1 🇺🇸
 3. NIST Cyber Security Framework (CSF) v2.0 🇺🇸
 4. NIS2 🇪🇺
@@ -149,7 +149,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 16. CCB CyberFundamentals Framework 🇧🇪
 17. NIST SP-800-66 (HIPAA) 🏥
 18. HDS/HDH 🇫🇷
-19. OWASP Application Security Verification Standard (ASVS) 🐝🖥️
+19. OWASP Application Security Verification Standard (ASVS) 4 🐝🖥️
 20. RGS v2.0 🇫🇷
 21. AirCyber ✈️🌐
 22. Cyber Resilience Act (CRA) 🇪🇺
@@ -188,7 +188,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 55. ENS Esquema Nacional de seguridad 🇪🇸
 56. Korea ISA ISMS-P 🇰🇷
 57. Swiss ICT minimum standard 🇨🇭
-58. Adobe Common Controls Framework (CCF) 🌐
+58. Adobe Common Controls Framework (CCF) v5 🌐
 59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
 60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
 61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
@@ -207,6 +207,17 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 74. Recommandations relatives à l'administration sécurisée des SI (ANSSI) 🇫🇷
 75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
 76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
+77. Vehicle Cyber Security Audit (VCSA) v1.1 🚘
+78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
+79. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
+80. Post-Quantum Cryptography (PQC) Migration Roadmap (May 2025) 🔐
+81. Cloud Sovereignty Framework - 1.2.1 - Oct 2025 🇪🇺
+82. ISO 22301:2019 outline - Business continuity management systems 🌐
+83. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
+84. Vendor Due Diligence - simple baseline - intuitem 🌐
+85. Points de contrôle Active Directory (AD) - ANSSI 🇫🇷
+86. ISO 42001:2023 outline - Artificial Intelligence Management System, including Annex A 🤖🌐
+87. India's Digital Personal Data Protection Act (DPDPA) - 2023 🇮🇳
 
 ### Community contributions
 
@@ -221,6 +232,18 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 9. Référentiel National de Sécurité de l’Information (RNSI), MPT Algérie 🇩🇿
 10. Misure minime di sicurezza ICT per le pubbliche amministrazioni, AGID Italia 🇮🇹
 11. Framework Nazionale CyberSecurity v2, FNCS Italia 🇮🇹
+12. Framework Nazionale per la Cybersecurity e la Data Protection, ACN Italia 🇮🇹
+13. PSSIE du Bénin, ANSSI Bénin 🇧🇯
+14. IGI 1300 / II 901 - Liste des exigences pour la mise en oeuvre d'un SI classifié (ANSSI) 🇫🇷
+15. Référentiel Général de Sécurité 2.0 - Annexe B2 🇫🇷
+16. Recommandations sur la sécurisation des systèmes de contrôle d'accès physique et de vidéoprotection 🇫🇷
+17. Recommandations pour un usage sécurisé d’(Open)SSH 🇫🇷
+18. Recommandations de sécurité relatives à IPsec pour la protection des flux réseau 🇫🇷
+19. Recommandations relatives à l'interconnexion d'un système d'information à internet 🇫🇷
+20. Guides des mécanismes cryptographiques 🇫🇷
+21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
+22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
+23. NIST 800-82 (OT) - appendix 🏭🤖
 
 <br/>
 
@@ -234,11 +257,9 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - Indonesia PDP 🇮🇩
-- VCS framework from ENX
 - OWASP SAMM
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
-- NIST 800-82
 - ASD ISM 🇦🇺
 - Baseline informatiebeveiliging Overheid (BIO) 🇳🇱
 
@@ -248,11 +269,11 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 A library can be a framework, a catalog of threats or reference controls, and even a custom risk matrix.
 
-Take a look at the `tools` directory and its [dedicated README](tools/README.md). The `convert_library.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting yaml file.
+Take a look at the `tools` directory and its [dedicated README](tools/README.md). The `convert_library_v2.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting YAML file.
 
 You can also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
 
-There is also a tool to facilitate the creation of mappings, called `prepare_mapping.py` that will create an Excel file based on two framework libraries in yaml. Once properly filled, this Excel file can be processed by the `convert_library.py` tool to get the resulting mapping library.
+There is also a tool to facilitate the creation of mappings, called `prepare_mapping_v2.py` that will create an Excel file based on two framework libraries in YAML. Once properly filled, this Excel file can be processed by the `convert_library_v2.py` tool to get the resulting mapping library.
 
 ## Community
 
@@ -350,7 +371,16 @@ export POSTGRES_PASSWORD_FILE=<XXX>  # alternative way to specify password
 export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
-# Add a second backup mailer
+# CISO Assistant will use filesystem storage backend by default.
+# You can use a S3 Bucket by declaring these variables
+# The S3 bucket must be created before starting CISO Assistant
+export USE_S3=True
+export AWS_ACCESS_KEY_ID=<XXX>
+export AWS_SECRET_ACCESS_KEY=<XXX>
+export AWS_STORAGE_BUCKET_NAME=<your-bucket-name>
+export AWS_S3_ENDPOINT_URL=<your-bucket-endpoint>
+
+# Add a second backup mailer (will be deprecated, not recommended anymore)
 export EMAIL_HOST_RESCUE=<XXX>
 export EMAIL_PORT_RESCUE=587
 export EMAIL_HOST_USER_RESCUE=<XXX>
@@ -371,13 +401,14 @@ export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBU
 export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
 
 # Authentication options
-export AUTH_TOKEN_TTL=900 # optional, default value is 3600 seconds (60 minutes). It defines the time to live of the authentication token
+export AUTH_TOKEN_TTL=3600 # optional, default value is 3600 seconds (60 minutes). It defines the time to live of the authentication token
 export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It defines if the token TTL should be refreshed automatically after each request authenticated with the token
+export AUTH_TOKEN_AUTO_REFRESH_TTL=36000 # optional, default value is 36000 seconds (10 hours). It defines the time to live of the authentication token after auto refresh. You can disable it by setting it to 0.
 ```
 
 3. Install poetry
 
-Visit the poetry website for instructions: https://python-poetry.org/docs/#installation
+Visit the poetry website for instructions: <https://python-poetry.org/docs/#installation>
 
 4. Install required dependencies.
 
@@ -403,13 +434,22 @@ pre-commit install
   - `create user ciso-assistantuser with password '<POSTGRES_PASSWORD>';`
   - `grant all privileges on database ciso-assistant to ciso-assistantuser;`
 
-7. Apply migrations.
+7. If you want to setup s3 bucket:
+
+- Choose your s3 provider or try s3 feature with miniO with this command:
+  - `docker run -p 9000:9000 -p 9001:9001 -e "MINIO_ROOT_USER=XXX" -e "MINIO_ROOT_PASSWORD=XXX" quay.io/minio/minio server /data --console-address ":9001"`
+- You can now check your bucket on <http://localhost:9001>
+  - Fill the login with the credentials you filled on the docker run env variables
+- Export in the backend directory all the env variables asked about S3
+  - You can see the list above in the recommanded variables
+
+8. Apply migrations.
 
 ```sh
 poetry run python manage.py migrate
 ```
 
-8. Create a Django superuser, that will be CISO Assistant administrator.
+9. Create a Django superuser, that will be CISO Assistant administrator.
 
 > If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
@@ -417,13 +457,13 @@ poetry run python manage.py migrate
 poetry run python manage.py createsuperuser
 ```
 
-9. Run development server.
+10. Run development server.
 
 ```sh
 poetry run python manage.py runserver
 ```
 
-10. for Huey (tasks runner)
+11. for Huey (tasks runner)
 
 - prepare a mailer for testing.
 - run `python manage.py run_huey -w 2 -k process` or equivalent in a separate shell.
@@ -503,13 +543,19 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 
 ## API and Swagger
 
-- The API is available only on dev mode. To get that, you need to switch on the backend, for instance, `export DJANGO_DEBUG=True`
-- The API documentation will be available on `<backend_endpoint>/api/schema/swagger/`, for instance <http://127.0.0.1:8000/api/schema/swagger/>
+- The interactive API documentation (Swagger UI) is available only in development mode.
+  To enable it, set `export DJANGO_DEBUG=True` before starting the backend.
+- Once the server is running, the documentation will be accessible at `<backend_endpoint>/api/schema/swagger/`,
+  for example: <http://127.0.0.1:8000/api/schema/swagger/>.
 
-To interact with it:
+To interact with the API via Swagger or directly with HTTP calls:
 
-- call `/api/iam/login/` with your credentials in the body to get the token
-- pass it then as a header `Authorization: Token {token}` for your next calls. Notice it's `Token` not `Bearer`.
+1. Authenticate by sending a POST request to `/api/iam/login/` with your credentials in the request body. The response will include an authentication token.
+2. Include this token in the header of subsequent requests as: `Authorization: Token <token>`
+
+⚠️ Note: use `Token`, **not** `Bearer`.
+
+When using the interactive Swagger UI, simply log in, the token will be automatically handled for subsequent requests.
 
 ## Setting CISO Assistant for production
 
@@ -525,22 +571,27 @@ Set DJANGO_DEBUG=False for security reason.
 
 ## Supported languages 🌐
 
-- FR: French
-- EN: English
-- AR: Arabic
-- PT: Portuguese
-- ES: Spanish
-- DE: German
-- NL: Dutch
-- IT: Italian
-- PL: Polish
-- RO: Romanian
-- HI: Hindi
-- UR: Urdu
-- CS: Czech
-- SV: Swedish
-- ID: Indonesian
-- DA: Danish
+1. FR: French
+2. EN: English
+3. AR: Arabic
+4. PT: Portuguese
+5. ES: Spanish
+6. DE: German
+7. NL: Dutch
+8. IT: Italian
+9. PL: Polish
+10. RO: Romanian
+11. HI: Hindi
+12. UR: Urdu
+13. CS: Czech
+14. SV: Swedish
+15. ID: Indonesian
+16. DA: Danish
+17. HU: Hungarian
+18. UK: Ukrainian
+19. EL: Greek
+20. TR: Turkish
+21. HR: Croatian
 
 ## Contributors 🤝
 
@@ -581,4 +632,4 @@ Unless otherwise noted, all files are © intuitem.
 
 ## Activity
 
-![Alt](https://repobeats.axiom.co/api/embed/83162c6044da29efd7efa28f746b6bee5a3c6a8a.svg "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/02f80d1b099ffd1ae66d9cfdc3a0e13234606f35.svg "Repobeats analytics image")

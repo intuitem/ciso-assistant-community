@@ -4,11 +4,12 @@ import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { ModelInfo, urlModel } from '$lib/utils/types';
-import { type TableSource } from '@skeletonlabs/skeleton';
+import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
+import { m } from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
@@ -16,8 +17,17 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const deleteForm = await superValidate(zod(schema));
 	const URLModel = 'ro-to';
 	const createSchema = modelSchema(URLModel);
+	const objectEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/object/`;
+	const objectResponse = await fetch(objectEndpoint);
+	let object: any = {};
+	if (objectResponse.ok) {
+		object = await objectResponse.json();
+	} else {
+		console.error(`Failed to fetch study object: ${objectResponse.statusText}`);
+	}
 	const initialData = {
-		ebios_rm_study: params.id
+		ebios_rm_study: params.id,
+		folder: object.folder
 	};
 	const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 	const model: ModelInfo = getModelInfo(URLModel);
@@ -57,7 +67,15 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: []
 	};
 
-	return { createForm, deleteForm, model, URLModel, table };
+	return {
+		createForm,
+		deleteForm,
+		model,
+		URLModel,
+		table,
+		title: m.roToCouples(),
+		modelVerboseName: m.ebiosRmRoToSubtitle()
+	};
 };
 
 export const actions: Actions = {

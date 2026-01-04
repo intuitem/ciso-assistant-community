@@ -1,0 +1,105 @@
+# ==============================================================================
+# YAML Template for Excel Framework Generator
+# ------------------------------------------------------------------------------
+# This configuration file is used to generate a structured Excel file for a 
+# CISO Assistant framework using the "Framework Generator" script.
+#
+# REQUIRED FIELDS:
+# - urn_root: (str) Unique identifier base. Must contain only lowercase letters,
+#   digits, dashes (-), underscores (_) or dots (.) — no uppercase or special chars.
+# - locale: (str) Locale setting complying with ISO 639 Set 1 (e.g., "en", "fr").
+#   See https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes.
+# - ref_id: (str) Reference ID for the framework. Must contain only letters,
+#   digits, dashes (-), underscores (_) or dots (.) — no special chars.
+# - framework_name: (str) Name of the framework.
+# - description: (str, multiline supported) Description of the framework.
+# - copyright: (str) Copyright information.
+# - provider: (str) Name of the providing organization.
+# - packager: (str) Name of the organisation / person creating the package.
+# - framework_sheet_base_name: (str) Base name used for the framework-related sheets.
+#
+# OPTIONAL / CONDITIONAL FIELDS:
+# - excel_file_name: (str) Custom name for the output Excel file.
+#   If not defined or empty, a default name will be used.
+#   The ".xlsx" extension will be automatically enforced.
+#
+# - implementation_groups_sheet_base_name: (str) If you use it, you MUST also define
+#   a non-empty "implementation_groups" list (see example below).
+#
+# - implementation_groups: (list of objects) Only required if you use 
+#   "implementation_groups_sheet_base_name". Each object must contain:
+#     - ref_id (str, required) Must contain only letters,
+#       digits, dashes (-), underscores (_) or dots (.) — no special chars.
+#     - name (str, required)
+#     - description (str, optional) — warning shown if missing
+#
+# - extra_locales: (list of locale dicts)
+#   Used to add additional localized columns and data in the Excel output.
+#   To enable, uncomment the example block below.
+#
+# TO ENABLE custom Excel file name : Uncomment the first block below.
+# TO ENABLE implementation groups: Uncomment the last two blocks below.
+# TO ENABLE extra_locales: Uncomment the block below marked as extra_locales.
+# ==============================================================================
+
+
+# --- Output Excel file name (optional) ---
+# excel_file_name: "my_framework.xlsx"
+
+# --- Metadata sheets ---
+urn_root: "risk-framework_2025.example"
+locale: "en"
+ref_id: "risk-framework_2025.example"
+framework_name: "Example Risk Framework"
+description: |
+  This is a demonstration framework.
+  It outlines example policies, controls, and requirements.
+  Designed for illustration and testing of the Excel generator.
+copyright: "© 2025 Example Organization"
+provider: "intuitem"
+packager: "intuitem"
+
+# --- Specific to Framework sheets ---
+framework_sheet_base_name: "framework"
+
+# --- To enable implementation groups, uncomment the lines below ---
+# implementation_groups_sheet_base_name: "imp_grp"
+
+# implementation_groups:
+#   - ref_id: "grp001"
+#     name: "Access Control Group"
+#     description: "Covers requirements for authentication, authorization, and access restrictions."
+#
+#   - ref_id: "grp002"
+#     name: "Data Protection Group"
+#     description: |
+#       Ensures the confidentiality, integrity, and availability of sensitive data.
+#       Includes encryption, storage policies, and data lifecycle management.
+#
+#   - ref_id: "grp003"
+#     name: "Incident Response Group"
+#     # This group is missing a description on purpose to trigger a warning.
+
+# --- To enable extra locales (localized framework versions), uncomment the block below ---
+# extra_locales:
+#   - fr:
+#       framework_name: Exemple de Framework de risque
+#       description: |
+#         Il s'agit d'un framework de démonstration.
+#         Il présente des exemples de règles, de contrôles et d'exigences.
+#         Il est conçu pour illustrer et tester le générateur Excel.
+#       copyright: "© 2025 Entreprise d'Exemple"
+#
+#       implementation_groups:
+#       - ref_id: "grp001"
+#         name: "Groupe de contrôle d'accès"
+#         description: "Couvre les exigences en matière d'authentification, d'autorisation et de restrictions d'accès."
+#
+#       - ref_id: "grp002"
+#         name: "Groupe de protection des données"
+#         description: |
+#           Garantit la confidentialité, l'intégrité et la disponibilité des données sensibles.
+#           Comprend le cryptage, les politiques de stockage et la gestion du cycle de vie des données.
+#
+#       - ref_id: "grp003"
+#         name: "Groupe de réponse aux incidents"

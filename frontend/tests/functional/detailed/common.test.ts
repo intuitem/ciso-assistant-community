@@ -54,11 +54,15 @@ for (const key of testPages) {
 				await page.waitForTimeout(1000); // try mitigating race condition on isHidden
 				if (await pages[key].getRow(items[key].build.name || items[key].build.email).isHidden()) {
 					await page.waitForTimeout(3000);
-					await pages[key].searchInput.fill(items[key].build.name || items[key].build.email);
+					await pages[key].searchInput.fill(
+						items[key].build.name || items[key].build.email || items[key].build.str
+					);
 				}
 
 				await pages[key].waitUntilLoaded();
-				await pages[key].viewItemDetail(items[key].build.name || items[key].build.email);
+				await pages[key].viewItemDetail(
+					items[key].build.name || items[key].build.email || items[key].build.str
+				);
 				await pages[key].itemDetail.hasTitle(
 					items[key].build.str || items[key].build.name || items[key].build.email
 				);

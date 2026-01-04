@@ -1,0 +1,22 @@
+[project]
+name = "ciso-assistant-dispatcher"
+version = "0.1.0"
+description = "Kafka-compatible message dispatcher for CISO Assistant"
+readme = "README.md"
+authors = [{ name = "intuitem", email = "contact@intuitem.com" }]
+requires-python = "<4.0,>=3.11"
+dependencies = [
+  "kafka-python[snappy]<3.0.0,>=2.0.6",
+  "click<9.0.0,>=8.1.8",
+  "requests<3.0.0,>=2.32.3",
+  "pyyaml<7.0.0,>=6.0.2",
+  "loguru<1.0.0,>=0.7.3",
+  "s3fs<2026.0.0,>=2025.3.0",
+]
+
+[dependency-groups]
+dev = [
+    "packaging>=24.2",
+    "pytest>=8.3.5",
+    "testcontainers[kafka]>=4.9.2",
+]

@@ -1,7 +1,11 @@
 <script lang="ts">
-	export let icon;
-	export let text;
-	export let count = 0;
+	interface Props {
+		icon: any;
+		text: any;
+		count?: number;
+	}
+
+	let { icon, text, count = 0 }: Props = $props();
 </script>
 
 <div

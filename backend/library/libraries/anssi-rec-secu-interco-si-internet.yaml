@@ -1,0 +1,1348 @@
+urn: urn:protocolpaladin:risk:library:anssi-rec-secu-interco-si-internet
+locale: fr
+ref_id: ANSSI-REC-INTERCO-SI-INTERNET
+name: "Recommandations relatives \xE0 l'interconnexion d'un syst\xE8me d'information\
+  \ \xE0 internet"
+description: "Version: 3.0 du 19/06/2020\n\nL\u2019ANSSI a r\xE9dig\xE9 un guide pr\xE9\
+  sentant les diff\xE9rents principes qui permettent de d\xE9finir l\u2019architecture\
+  \ d\u2019une passerelle d\u2019interconnexion s\xE9curis\xE9e en axant les recommandations\
+  \ sur l'interconnexion \xE0 Internet qui repr\xE9sente un cas d'usage tr\xE8s fr\xE9\
+  quent. Il s\u2019adresse en priorit\xE9 aux architectes et administrateurs r\xE9\
+  seau. Des connaissances basiques en mati\xE8re d\u2019architecture r\xE9seau sont\
+  \ n\xE9cessaires pour appr\xE9hender certains des concepts pr\xE9sent\xE9s. Ce document\
+  \ d\xE9crit un ensemble de concepts ou de recommandations que chacun pourra adapter\
+  \ en fonction de ses contraintes et de ses enjeux. Deux chapitres respectivement\
+  \ sur la s\xE9curisation de l'acc\xE8s aux contenus Web et sur la s\xE9curisation\
+  \ du service de messagerie \xE9lectronique sont notamment propos\xE9s.\n\nLien vers\
+  \ le document :\nhttps://cyber.gouv.fr/sites/default/files/2020/06/anssi-guide-passerelle_internet_securisee-v3.pdf"
+copyright: "Licence ouverte / Open Licence (\xC9talab - v2.0)"
+version: 1
+publication_date: 2025-05-13
+provider: ANSSI
+packager: protocolpaladin
+objects:
+  framework:
+    urn: urn:protocolpaladin:risk:framework:anssi-rec-secu-interco-si-internet
+    ref_id: ANSSI-REC-INTERCO-SI-INTERNET
+    name: "Recommandations relatives \xE0 l'interconnexion d'un syst\xE8me d'information\
+      \ \xE0 internet"
+    description: "Version: 3.0 du 19/06/2020\n\nL\u2019ANSSI a r\xE9dig\xE9 un guide\
+      \ pr\xE9sentant les diff\xE9rents principes qui permettent de d\xE9finir l\u2019\
+      architecture d\u2019une passerelle d\u2019interconnexion s\xE9curis\xE9e en\
+      \ axant les recommandations sur l'interconnexion \xE0 Internet qui repr\xE9\
+      sente un cas d'usage tr\xE8s fr\xE9quent. Il s\u2019adresse en priorit\xE9 aux\
+      \ architectes et administrateurs r\xE9seau. Des connaissances basiques en mati\xE8\
+      re d\u2019architecture r\xE9seau sont n\xE9cessaires pour appr\xE9hender certains\
+      \ des concepts pr\xE9sent\xE9s. Ce document d\xE9crit un ensemble de concepts\
+      \ ou de recommandations que chacun pourra adapter en fonction de ses contraintes\
+      \ et de ses enjeux. Deux chapitres respectivement sur la s\xE9curisation de\
+      \ l'acc\xE8s aux contenus Web et sur la s\xE9curisation du service de messagerie\
+      \ \xE9lectronique sont notamment propos\xE9s.\n\nLien vers le document :\nhttps://cyber.gouv.fr/sites/default/files/2020/06/anssi-guide-passerelle_internet_securisee-v3.pdf"
+    implementation_groups_definition:
+    - ref_id: R+
+      name: "Recommandation renforc\xE9e compl\xE9mentaire"
+      description: "Cette recommandation compl\xE9mentaire permet de mettre en \u0153\
+        uvre un niveau de s\xE9curit\xE9 renforc\xE9. Elle est destin\xE9e aux entit\xE9\
+        s qui sont matures en s\xE9curit\xE9 des syst\xE8mes d\u2019information."
+    - ref_id: R
+      name: "Recommandation \xE0 l'\xE9tat de l'art"
+      description: "Cette recommandation permet de mettre en \u0153uvre un niveau\
+        \ de s\xE9curit\xE9 \xE0 l\u2019\xE9tat del\u2019art."
+    - ref_id: R-
+      name: Recommandation alternative de premier niveau
+      description: "Cette recommandation permet de mettre en \u0153uvre une premi\xE8\
+        re alternative, d\u2019un niveaude s\xE9curit\xE9 moindre que la recommandation\
+        \ R."
+    - ref_id: R--
+      name: Recommandation alternative de second niveau
+      description: "Cette recommandation permet de mettre en \u0153uvre une seconde\
+        \ alternative, d\u2019un .niveau de s\xE9curit\xE9 moindre que les recommandations\
+        \ R et R -."
+    requirement_nodes:
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Introduction
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:1.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:1
+      ref_id: '1.6'
+      name: Expression du besoin
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:1.6
+      ref_id: R1
+      name: "D\xE9terminer l'ensemble des services n\xE9cessitant l'interconnexion\
+        \ \xE0 Internet"
+      description: "A\uFB01n de d\xE9ployer une infrastructure d\u2019interconnexion\
+        \ r\xE9pondant au juste besoin fonctionnel de l\u2019entit\xE9, il est n\xE9\
+        cessaire d\u2019\xE9tablir de mani\xE8re exhaustive une liste des services\
+        \ du SI de l\u2019entit\xE9 (applications m\xE9tier, services d\u2019infrastructure)\
+        \ n\xE9cessitant une interconnexion \xE0 Internet, en distinguant les \uFB02\
+        ux entrants et les \uFB02ux sortants. Cette liste doit \xEAtre mise \xE0 jour\
+        \ d\xE8s que n\xE9cessaire et revue r\xE9guli\xE8rement."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: "Architecture et fonctions de s\xE9curit\xE9 de l'interconnexion"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2
+      ref_id: '2.2'
+      name: Filtrage et cloisonnement
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.2
+      ref_id: 2.2.1
+      name: "Filtrage p\xE9rim\xE9trique et \uFB01ltrage interne"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r2
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.2.1
+      ref_id: R2
+      name: "D\xE9ployer un pare-feu ma\xEEtris\xE9 entre la DMZ et le routeur d'acc\xE8\
+        s Internet"
+      description: "L\u2019interconnexion entre Internet et la DMZ doit \xEAtre prot\xE9\
+        g\xE9e de fa\xE7on p\xE9rim\xE9trique par une fonction de \uFB01ltrage IP\
+        \ assur\xE9e par un pare-feu. Ce dernier est dit externe ; il doit \xEAtre\
+        \ ma\xEEtris\xE9 par l\u2019entit\xE9 (ou un prestataire mandat\xE9 \xE0 cet\
+        \ e\uFB00et) et ne doit pas \xEAtre contournable. Une matrice des \uFB02ux\
+        \ correspondant au juste besoin op\xE9rationnel doit \xEAtre d\xE9\uFB01nie,\
+        \ .mise en \u0153uvre sur ce pare-feu et revue r\xE9guli\xE8rement."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r3
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.2.1
+      ref_id: R3
+      name: "D\xE9ployer un pare-feu ma\xEEtris\xE9 entre le SI interne et la DMZ"
+      description: "L\u2019interconnexion entre le SI interne et la DMZ doit \xEA\
+        tre prot\xE9g\xE9e de fa\xE7on p\xE9rim\xE9trique par une fonction de \uFB01\
+        ltrage IP assur\xE9e par un pare-feu. Ce dernier est dit interne ; il doit\
+        \ \xEAtre ma\xEEtris\xE9 par l\u2019entit\xE9 (ou un prestataire mandat\xE9\
+        \ \xE0 cet e\uFB00et) et ne doit pas \xEAtre contournable. Une matrice des\
+        \ \uFB02ux correspondant au juste besoin op\xE9rationnel doit \xEAtre d\xE9\
+        \uFB01nie, .mise en \u0153uvre sur ce pare-feu et revue r\xE9guli\xE8rement."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r4
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.2.1
+      ref_id: R4
+      name: "Rendre incontournable la passerelle Internet s\xE9curis\xE9e"
+      description: "Tout syst\xE8me d\u2019information n\xE9cessitant une interconnexion\
+        \ avec Internet doit \xEAtre prot\xE9g\xE9 par une passerelle Internet s\xE9\
+        curis\xE9e mettant en \u0153uvre au minimum des fonctions de \uFB01ltrage\
+        \ p\xE9rim\xE9trique ainsi que des services applicatifs relais. Cette passerelle\
+        \ doit \xEAtre incontournable. En particulier, tout autre acc\xE8s \xE0 Internet\
+        \ pour des besoins sp\xE9ci\uFB01ques, potentiellement non compatibles avec\
+        \ la passerelle (ex. : acc\xE8s Internet \xE0 des \uFB01ns de test \xAB comme\
+        \ \xE0 la maison \xBB, sans aucune fonction de s\xE9curit\xE9 depuis un poste\
+        \ d\xE9di\xE9) doit \xEAtre r\xE9alis\xE9 depuis des infrastructures physiquement\
+        \ distinctes."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r5
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.2.1
+      ref_id: R5
+      name: "D\xE9ployer si n\xE9cessaire des pare-feux interm\xE9diaires dans la\
+        \ passerelle Internet s\xE9curis\xE9e"
+      description: "A\uFB01n de \uFB01ltrer les \uFB02ux internes de la passerelle\
+        \ Internet s\xE9curis\xE9e entre des serveurs m\xE9tier et des serveurs relais,\
+        \ la mise en \u0153uvre d\u2019un ou plusieurs pare-feux interm\xE9diaires\
+        \ compl\xE9mentaires est recommand\xE9e."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.2
+      ref_id: 2.2.2
+      name: "Cloisonnement et cin\xE9matique des \uFB02ux"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r6
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.2.2
+      ref_id: R6
+      name: "Cloisonner les \uFB02ux au sein de cha\xEEnes de traitement homog\xE8\
+        ne"
+      description: "A\uFB01n d\u2019adapter les mesures de s\xE9curit\xE9 en fonction\
+        \ de la source des \uFB02ux et des besoins de s\xE9curit\xE9 du service, autant\
+        \ de cha\xEEnes de traitement distinctes doivent \xEAtre construites et cloisonn\xE9\
+        es au sein de la passerelle Internet s\xE9curis\xE9e. La nature du cloisonnement,\
+        \ physique de pr\xE9f\xE9rence ou logique \xE0 d\xE9faut, d\xE9pend des besoins\
+        \ de s\xE9curit\xE9 et de l\u2019exposition des services et doit \xEAtre d\xE9\
+        termin\xE9e par une .analyse de risque."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r7
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.2.2
+      ref_id: R7
+      name: "Respecter une cin\xE9matique s\xE9curis\xE9e des \uFB02ux"
+      description: "Le principe d\u2019un \uFB02ux initi\xE9 depuis une zone de plus\
+        \ haute con\uFB01ance vers une zone de moindre con\uFB01ance doit ici \xEA\
+        tre adapt\xE9 au contexte d\u2019une passerelle Internet s\xE9curis\xE9e,\
+        \ respectivement vis-\xE0-vis d\u2019Internet et du SI de l\u2019entit\xE9\
+        . Il est recommand\xE9 en particulier de ne pas initialiser de \uFB02ux depuis\
+        \ la passerelle Internet s\xE9curis\xE9e vers le SI interne de l\u2019entit\xE9\
+        ."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2
+      ref_id: '2.3'
+      name: "Fonctions de s\xE9curit\xE9 g\xE9n\xE9riques de l'interconnexion"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.3
+      ref_id: 2.3.1
+      name: "Rupture protocolaire et analyse de \uFB02ux"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r8
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.3.1
+      ref_id: R8
+      name: "Proc\xE9der \xE0 une rupture protocolaire des \uFB02ux"
+      description: "A\uFB01n de se pr\xE9munir de connexions malveillantes directes\
+        \ entre une ressource de l\u2019entit\xE9 et une ressource sur Internet (ex.\
+        \ : un serveur de commande et contr\xF4le), une rupture protocolaire doit\
+        \ \xEAtre mise en \u0153uvre au sein de la passerelle Internet s\xE9curis\xE9\
+        e."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r9
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.3.1
+      ref_id: R9
+      name: "Proc\xE9der \xE0 une analyse des \uFB02ux en fonction de l'analyse de\
+        \ risque"
+      description: "Pour \xE9viter toute fuite de donn\xE9es ou introduction de codes\
+        \ malveillants, une analyse des . \uFB02ux est recommand\xE9e lors de cette\
+        \ rupture protocolaire."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.3
+      ref_id: 2.3.2
+      name: "Authenti\uFB01cation"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r10
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.3.2
+      ref_id: R10
+      name: "Ne pas exposer d'annuaire du SI interne aux ressources de la passerelle\
+        \ Internet s\xE9curis\xE9e"
+      description: "En aucun cas un annuaire du SI interne ne doit \xEAtre directement\
+        \ requ\xEAt\xE9 par les \xE9quipements de la passerelle Internet s\xE9curis\xE9\
+        e pour les besoins propres d\u2019authenti\uFB01cation. Trois architectures\
+        \ sont propos\xE9es pour y r\xE9pondre :"
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r10:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r10
+      description: "- un annuaire d\xE9di\xE9, minimaliste et en lecture seule, au\
+        \ sein de la passerelle Internet s\xE9curis\xE9e (cf. \uFB01gure 2.7);"
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r10:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r10
+      description: "- un serveur mandataire inverse d\u2019authenti\uFB01cation au\
+        \ sein de la passerelle Internet s\xE9curis\xE9e (cf. \uFB01gure 2.8);"
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r10:3
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r10
+      description: "- un serveur mandataire au sein du SI de l\u2019entit\xE9 d\xE9\
+        di\xE9 aux besoins d\u2019authenti\uFB01cation de la passerelle Internet s\xE9\
+        curis\xE9e (cf. \uFB01gure 2.9)."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2
+      ref_id: '2.4'
+      name: "Architecture d\xE9taill\xE9e"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4
+      ref_id: 2.4.1
+      name: Rappels sur les risques de la mutualisation par virtualisation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r11
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4.1
+      ref_id: R11
+      name: "\xC9valuer les risques de mutualisation par virtualisation"
+      description: "Les opportunit\xE9s permises par la virtualisation doivent \xEA\
+        tre mises au regard des risques qu\u2019elle pr\xE9sente. Le principe de pr\xE9\
+        caution doit pr\xE9valoir : des ressources peuvent \xEAtre virtualis\xE9es\
+        \ et mutualis\xE9es sur un socle physique commun \xE0 la condition que les\
+        \ services qu\u2019elles portent aient des besoins de s\xE9curit\xE9 et une\
+        \ exposition homog\xE8nes."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4
+      ref_id: 2.4.2
+      name: 'Cas 1 : absence de mutualisation par virtualisation entre zones'
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r12
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4.2
+      ref_id: R12
+      name: "D\xE9ployer une passerelle Internet s\xE9curis\xE9e \xE0 base d'\xE9\
+        quipements physiques d\xE9di\xE9s par zone"
+      description: "A\uFB01n de garantir le cloisonnement e\uFB00ectif entre chaque\
+        \ zone de la passerelle Internet s\xE9curis\xE9e et in \uFB01ne entre le SI\
+        \ interne et Internet, il est recommand\xE9 de d\xE9dier des \xE9quipements\
+        \ physiques par zone, y compris pour le \uFB01ltrage et la commutation r\xE9\
+        seau."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4
+      ref_id: 2.4.3
+      name: "Cas 2 : mutualisation physique de la commutation r\xE9seau"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r12-(-)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4.3
+      ref_id: R12 (-)
+      name: "D\xE9ployer une passerelle Internet en acceptant la mutualisation de\
+        \ certains \xE9quipements de commutation r\xE9seau"
+      description: "La d\xE9rogation \xE0 l\u2019architecture la plus s\xE9curis\xE9\
+        e consiste \xE0 mutualiser les \xE9quipements de commutation r\xE9seau pour\
+        \ les zones d\u2019acc\xE8s interne, des services relais et d\u2019acc\xE8\
+        s externe de la passerelle Internet s\xE9curis\xE9e. Dans ce cas, des commutateurs\
+        \ physiques d\xE9di\xE9s respectivement \xE0 la zone de services internes\
+        \ et \xE0 l\u2019\xE9ventuelle zone de services expos\xE9s doivent \xEAtre\
+        \ maintenus."
+      implementation_groups:
+      - R--
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4
+      ref_id: 2.4.4
+      name: "Cas 3 : mutualisation du \uFB01ltrage \xE0 proscrire"
+      description: "Une solution d\u2019un niveau de s\xE9curit\xE9 moindre consisterait\
+        \ \xE0 mutualiser le \uFB01ltrage de la passerelle Internet s\xE9curis\xE9\
+        e vers Internet et vers le SI interne (c\u2019est-\xE0-dire les pare-feux\
+        \ interne et externe) sur un seul \xE9quipement physique."
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r13
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.4.4
+      ref_id: R13
+      name: Proscrire toute mutualisation des pare-feux interne et externe
+      description: "En raison de la forte exposition des zones d\u2019acc\xE8s interne\
+        \ et externe, toute mutualisation des pare-feux interne et externe, m\xEA\
+        me \xE0 l\u2019aide d\u2019instances virtuelles distinctes d\xE9ploy\xE9es\
+        \ sur un socle physique commun, doit \xEAtre proscrite."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2
+      ref_id: '2.5'
+      name: "Raccordement des sites g\xE9ographiques"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r14
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.5
+      ref_id: R14
+      name: "Homog\xE9n\xE9iser les passerelles Internet s\xE9curis\xE9es dans le\
+        \ cas d'une architecture multi-zones"
+      description: "Dans le cas d\u2019une architecture multi-zones n\xE9cessitant\
+        \ de d\xE9multiplier le point d\u2019acc\xE8s \xE0 Internet et donc la passerelle\
+        \ Internet s\xE9curis\xE9e, il est recommand\xE9 de d\xE9ployer la m\xEAme\
+        \ architecture (ou un sous-ensemble) et les m\xEAmes produits pour chaque\
+        \ passerelle Internet s\xE9curis\xE9e."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2
+      ref_id: '2.6'
+      name: Externalisation des fonctions de relais
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r15
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.6
+      ref_id: R15
+      name: "Utiliser une offre quali\uFB01\xE9e par l'ANSSI pour les fonctions relais\
+        \ externalis\xE9es"
+      description: "Si l\u2019entit\xE9 fait le choix d\u2019externaliser dans le\
+        \ cloud une fonction relais, il est recommand\xE9 que le service a\uFB00\xE9\
+        rent soit quali\uFB01\xE9 selon le r\xE9f\xE9rentiel d\u2019exigences SecNumCloud\
+        \ de l\u2019ANSSI. De plus, il est recommand\xE9 que l\u2019interconnexion\
+        \ avec le fournisseur du service soit r\xE9alis\xE9e au travers d\u2019un\
+        \ tunnel VPN IPsec \xE0 l\u2019\xE9tat de l\u2019art (cf. le guide IPSec de\
+        \ l\u2019ANSSI)."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r15-(-)
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:2.6
+      ref_id: R15 (-)
+      name: "\xC9valuer rigoureusement les risques d'une offre non quali\uFB01\xE9\
+        e par l'ANSSI pour les fonctions relais externalis\xE9es"
+      description: "Pour des entit\xE9s souhaitant externaliser une fonction relais\
+        \ vers une o\uFB00re de service non quali\uFB01\xE9e par l\u2019ANSSI, l\u2019\
+        analyse de risque doit \xEAtre men\xE9e avec d\u2019autant plus de rigueur\
+        \ et d\u2019exhaustivit\xE9."
+      implementation_groups:
+      - R--
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: "S\xE9curisation de l'interconnexion"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3
+      ref_id: '3.1'
+      name: Administration
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r16
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3.1
+      ref_id: R16
+      name: "Administrer de mani\xE8re s\xE9curis\xE9e la passerelle Internet s\xE9\
+        curis\xE9e"
+      description: "La passerelle Internet s\xE9curis\xE9e doit \xEAtre administr\xE9\
+        e de mani\xE8re s\xE9curis\xE9e selon les recommandations de l\u2019ANSSI\
+        \ rassembl\xE9es dans le guide a\uFB00\xE9rent."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3
+      ref_id: '3.2'
+      name: "Disponibilit\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r17
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3.2
+      ref_id: R17
+      name: "Garantir la disponibilit\xE9 attendue gr\xE2ce \xE0 la r\xE9silience\
+        \ des acc\xE8s op\xE9rateurs"
+      description: "L\u2019entit\xE9 doit prendre les mesures n\xE9cessaires pour\
+        \ garantir la disponibilit\xE9 attendue de l\u2019acc\xE8s \xE0 Internet :"
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r17:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r17
+      description: "- travaux de g\xE9nie civil pour \xE9viter tout point unique de\
+        \ rupture ;"
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r17:2
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r17
+      description: "- d\xE9ploiement d\u2019\xE9quipements suppl\xE9mentaires pour\
+        \ assurer la redondance mat\xE9rielle ;"
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r17:3
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r17
+      description: "-con\uFB01guration logicielle pour garantir une r\xE9silience\
+        \ r\xE9seau protocolaire. "
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r18
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3.2
+      ref_id: R18
+      name: "Mettre en \u0153uvre des contre-mesures aux attaques en d\xE9ni de service"
+      description: "Qu\u2019il s\u2019agisse d\u2019un service souscrit aupr\xE8s\
+        \ d\u2019un FAI ou g\xE9r\xE9 en propre par l\u2019entit\xE9, il .est recommand\xE9\
+        \ de d\xE9ployer une solution de protection anti-DDoS."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r19
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3.2
+      ref_id: R19
+      name: "Utiliser un routage statique au sein de la passerelle Internet s\xE9\
+        curis\xE9e"
+      description: "Au sein de la passerelle Internet s\xE9curis\xE9e, il est recommand\xE9\
+        \ de d\xE9clarer statiquement les routes IP dans les \xE9quipements r\xE9\
+        seau et de d\xE9sactiver explicitement les protocoles de routage dynamique."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3
+      ref_id: '3.3'
+      name: "Con\uFB01dentialit\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r20
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3.3
+      ref_id: R20
+      name: "Ignorer les paquets refus\xE9s par la politique des pare-feux externes"
+      description: "Il est recommand\xE9 que les connexions refus\xE9es par la politique\
+        \ d\u2019un pare-feu externe ne g\xE9n\xE8rent pas de r\xE9ponses (mode DROP\
+        \ et non REJECT)."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r21
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:3.3
+      ref_id: R21
+      name: "Masquer l'architecture interne vis-\xE0-vis d'Internet"
+      description: "D\xE8s lors que c\u2019est techniquement possible, il est recommand\xE9\
+        \ d\u2019anonymiser les champs techniques divulguant de l\u2019information\
+        \ sur les infrastructures internes de l\u2019entit\xE9."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: "S\xE9curisation de l'acc\xE8s aux contenus h\xE9berg\xE9s sur le Web"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4
+      ref_id: '4.1'
+      name: Mise en place d'un serveur mandataire
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r22
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.1
+      ref_id: R22
+      name: "Mettre en place un serveur mandataire pour l'acc\xE8s aux contenus Web"
+      description: "Pour l\u2019acc\xE8s aux contenus h\xE9berg\xE9s sur le Web, un\
+        \ serveur mandataire doit \xEAtre mis en place au sein de la zone de services\
+        \ relais de la passerelle Internet s\xE9curis\xE9e."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4
+      ref_id: '4.2'
+      name: "Authenti\uFB01cation"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r23
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.2
+      ref_id: R23
+      name: "Authenti\uFB01er tous les acc\xE8s aux contenus Web"
+      description: "Tous les acc\xE8s aux contenus h\xE9berg\xE9s sur le Web doivent\
+        \ \xEAtre authenti\uFB01\xE9s de mani\xE8re individuelle pour les utilisateurs\
+        \ et non ambigu\xEB pour les services. \xC0 d\xE9faut, pour un compte g\xE9\
+        n\xE9rique, une tra\xE7abilit\xE9 de son utilisation (relev\xE9 d\u2019identit\xE9\
+        ) doit \xEAtre mise en place."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r24
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.2
+      ref_id: R24
+      name: "Pr\xE9voir des restrictions pour les acc\xE8s non authenti\uFB01ables"
+      description: "Les exceptions \xE0 la recommandation R23 (typiquement les logiciels\
+        \ ne supportant pas l\u2019authenti\uFB01cation \xE0 un serveur mandataire)\
+        \ doivent \xEAtre g\xE9r\xE9es gr\xE2ce \xE0 une liste d\u2019autorisations\
+        \ contenant les adresses IP ou domaines exempt\xE9s d\u2019authenti\uFB01\
+        cation. Dans ce cas, il est recommand\xE9 d\u2019\xEAtre le plus proche possible\
+        \ du besoin op\xE9rationnel et d\u2019\xE9viter tout ajout \xE0 la liste d\u2019\
+        autorisations d\u2019un large masque de sous-r\xE9seau (ex. :\nsup\xE9rieur\
+        \ \xE0 /24 en IPv4) ou d\u2019un domaine DNS tr\xE8s \xE9tendu (ex. : *.moncdn.fr)."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4
+      ref_id: '4.3'
+      name: Inspection TLS
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r25
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.3
+      ref_id: R25
+      name: "\xC9tudier la mise en place d'une inspection TLS ma\xEEtris\xE9e"
+      description: "A\uFB01n de se pr\xE9munir de la di\uFB00usion de codes malveillants\
+        \ par le biais de sites accessibles en HTTPS, il est recommand\xE9 d\u2019\
+        \xE9tudier la mise en place d\u2019une inspection TLS permettant d\u2019analyser\
+        \ le contenu \xE9chang\xE9. Le lecteur doit s\u2019approprier au pr\xE9alable\
+        \ les recommandations de s\xE9curit\xE9 concernant l\u2019analyse des \uFB02\
+        ux HTTPS dans le guide [8]. Entre autres, le choix de l\u2019\xE9quipement\
+        \ d\u2019inspection et la con\uFB01guration de ses param\xE8tres cryptographiques\
+        \ doivent \xEAtre consid\xE9r\xE9s avec la plus grande attention. En\uFB01\
+        n, en vertu du respect de la vie priv\xE9e des collaborateurs, une liste de\
+        \ sites r\xE9put\xE9s de con\uFB01ance et non inspect\xE9s doit \xEAtre \xE9\
+        tablie (ex. : sites bancaires) et partag\xE9e avec les utilisateurs."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4
+      ref_id: '4.4'
+      name: Journalisation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r26
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.4
+      ref_id: R26
+      name: "Centraliser et s\xE9curiser les journaux li\xE9s aux acc\xE8s Web"
+      description: "L\u2019ensemble des journaux (techniques et fonctionnels) g\xE9\
+        n\xE9r\xE9s par les serveurs mandataires doivent \xEAtre centralis\xE9s, de\
+        \ pr\xE9f\xE9rence par l\u2019interm\xE9diaire d\u2019un r\xE9seau d\u2019\
+        administration d\xE9di\xE9 (cf. R16). Il est recommand\xE9 de consulter les\
+        \ recommandations de s\xE9curit\xE9 de l\u2019ANSSI pour la mise en \u0153\
+        uvre d\u2019un syst\xE8me de journalisation [4], en particulier le paragraphe\
+        \ C.3.1 sur la conservation des \xE9l\xE9ments de journalisation par les fournisseurs\
+        \ d\u2019acc\xE8s \xE0 Internet."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4
+      ref_id: '4.5'
+      name: "D\xE9ploiement de postes de rebond"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r27-(+)
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.5
+      ref_id: R27 (+)
+      name: "D\xE9ployer des postes de rebond pour la navigation Web"
+      description: "Pour r\xE9pondre \xE0 des objectifs de s\xE9curit\xE9 \xE9lev\xE9\
+        s, il est recommand\xE9 de d\xE9ployer une infrastructure de postes de rebond\
+        \ d\xE9di\xE9s \xE0 la navigation Web sur lesquels les utilisateurs se connectent\
+        \ par acc\xE8s \xE0 distance depuis leur poste de travail bureautique. Les\
+        \ postes de rebond doivent utiliser le serveur mandataire de la passerelle\
+        \ Internet s\xE9curis\xE9e pour acc\xE9der aux contenus h\xE9berg\xE9s sur\
+        \ le Web."
+      implementation_groups:
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4
+      ref_id: '4.6'
+      name: "Con\uFB01guration des postes de travail pour la navigation Web"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.6.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.6
+      ref_id: 4.6.1
+      name: "Ma\xEEtrise d'un ou plusieurs navigateurs Web"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r28
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.6.1
+      ref_id: R28
+      name: "Ma\xEEtriser le d\xE9ploiement et l'exploitation du ou des navigateurs\
+        \ Web"
+      description: "En tant qu\u2019interface d\u2019acc\xE8s des utilisateurs au\
+        \ Web, le ou les navigateurs Web d\xE9ploy\xE9s sur les postes de travail\
+        \ doivent \xEAtre con\uFB01gur\xE9s et mis \xE0 jour selon des proc\xE9dures\
+        \ strictes. En particulier leur surface d\u2019attaque doit \xEAtre r\xE9\
+        duite au strict n\xE9cessaire par d\xE9sactivation de tout module ou param\xE8\
+        tre inutile."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.6.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.6
+      ref_id: 4.6.2
+      name: "Con\uFB01guration du serveur mandataire"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r29
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.6.2
+      ref_id: R29
+      name: "Con\uFB01gurer le serveur mandataire en mode explicite"
+      description: "Du point de vue de la s\xE9curit\xE9, le serveur mandataire doit\
+        \ \xEAtre con\uFB01gur\xE9 en mode explicite sur les clients."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r30
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.6.2
+      ref_id: R30
+      name: "Emp\xEAcher le contournement du serveur mandataire"
+      description: "Il doit \xEAtre techniquement impossible pour l\u2019utilisateur\
+        \ de contourner les \xE9quipements de s\xE9curit\xE9 pour acc\xE9der \xE0\
+        \ Internet. En particulier, la con\uFB01guration du serveur mandataire dans\
+        \ les navigateurs Web doit \xEAtre non modi\uFB01able par l\u2019utilisateur\
+        \ ou un logiciel tiers. Dans un souci de d\xE9fense en profondeur, le pare-feu\
+        \ local des postes de travail doit bloquer tout acc\xE8s direct \xE0 Internet\
+        \ (sauf exception pour l\u2019acc\xE8s au concentrateur VPN de l\u2019entit\xE9\
+        ). Cette recommandation est \xE9galement valable pour toute autre ressource\
+        \ (ex. : serveur ou mobile multifonction 12 sous contr\xF4le de l\u2019entit\xE9\
+        ) n\xE9cessitant d\u2019acc\xE9der au Web \xE0 travers un navigateur ou les\
+        \ protocoles HTTP/HTTPS."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r31
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:4.6.2
+      ref_id: R31
+      name: "Appliquer une politique de con\uFB01guration locale du serveur mandataire"
+      description: "Il est recommand\xE9 de d\xE9clarer le serveur mandataire localement\
+        \ sur les postes acc\xE9dant \xE0 Internet, id\xE9alement gr\xE2ce \xE0 une\
+        \ politique de con\uFB01guration. Cette recommandation est \xE9galement valable\
+        \ pour toute autre ressource (ex. : serveur ou mobile multifonction 12 sous\
+        \ contr\xF4le de l\u2019entit\xE9) n\xE9cessitant d\u2019acc\xE9der au Web\
+        \ \xE0 travers un navigateur ou les protocoles HTTP/HTTPS."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: "S\xE9curisation du service de messagerie \xE9lectronique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5
+      ref_id: '5.1'
+      name: Expression de besoin et analyse de risque
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r32
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.1
+      ref_id: R32
+      name: "Identi\uFB01er les diff\xE9rents besoins li\xE9s \xE0 la messagerie \xE9\
+        lectronique"
+      description: "Pour le service de messagerie \xE9lectronique, l\u2019entit\xE9\
+        \ doit identi\uFB01er les di\uFB00\xE9rents besoins : r\xE9ception ou envoi\
+        \ de courriels, interconnexion \xE0 Internet, r\xF4les des exp\xE9diteurs\
+        \ (ex. : utilisateurs, services), noms de domaines associ\xE9s, etc."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r33
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.1
+      ref_id: R33
+      name: "Ne pas externaliser le service de messagerie \xE9lectronique sans une\
+        \ analyse de risque"
+      description: "Le niveau d\u2019externalisation du service de messagerie \xE9\
+        lectronique doit faire l\u2019objet d\u2019un traitement rigoureux dans le\
+        \ cadre d\u2019une analyse de risque. Dans le cas d\u2019une o\uFB00re SaaS\
+        \ et conform\xE9ment \xE0 R15, il est recommand\xE9 que le service soit quali\uFB01\
+        \xE9 selon le r\xE9f\xE9rentiel d\u2019exigences SecNumCloud de l\u2019ANSSI."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5
+      ref_id: '5.2'
+      name: Architecture
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2
+      ref_id: 5.2.2
+      name: "Cloisonnement et \uFB01ltrage"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r34
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2.2
+      ref_id: R34
+      name: "D\xE9ployer les serveurs de bo\xEEtes aux lettres au sein du SI"
+      description: "Les serveurs de bo\xEEtes aux lettres et le stockage associ\xE9\
+        \ doivent \xEAtre d\xE9ploy\xE9s au sein du SI de l\u2019entit\xE9 (et non\
+        \ au sein de la passerelle Internet s\xE9curis\xE9e)."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r35
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2.2
+      ref_id: R35
+      name: "D\xE9ployer les serveurs relais en fonction des stricts besoins"
+      description: "Pour les besoins de messagerie strictement internes \xE0 l\u2019\
+        entit\xE9, au moins un serveur relais doit \xEAtre positionn\xE9 au sein du\
+        \ SI de l\u2019entit\xE9, et d\xE9di\xE9 \xE0 cette fonction. Ce serveur ne\
+        \ doit pas \xEAtre cha\xEEn\xE9 avec un serveur SMTP expos\xE9 sur Internet.\
+        \ Pour les besoins de messagerie externes \xE0 l\u2019entit\xE9 (i.e. avec\
+        \ une interconnexion \xE0 Internet), au moins un serveur SMTP doit \xEAtre\
+        \ positionn\xE9 au sein de la passerelle Internet s\xE9curis\xE9e."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r36
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2.2
+      ref_id: R36
+      name: "Cloisonner les serveurs SMTP d'envoi et de r\xE9ception"
+      description: "Il est recommand\xE9 de cloisonner les serveurs SMTP d\u2019envoi\
+        \ et de r\xE9ception (ex. : deux machines virtuelles distinctes) au sein de\
+        \ la passerelle Internet s\xE9curis\xE9e. Ils doivent \xEAtre con\uFB01gur\xE9\
+        s en cons\xE9quence ; par exemple :"
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r36:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r36
+      description: "- un serveur SMTP d\u2019envoi n\u2019accepte les courriels que\
+        \ depuis une liste de serveurs autoris\xE9s (serveurs relais internes ou serveurs\
+        \ de bo\xEEtes aux lettres) et assure des fonctions de nettoyage des en-t\xEA\
+        tes (cf. recommandation R21) ;"
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r36:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r36
+      description: "- un serveur SMTP de r\xE9ception applique les premi\xE8res politiques\
+        \ de s\xE9curit\xE9, assure des fonctions d\u2019analyse protocolaire et de\
+        \ contenu, quali\uFB01e les courriels n\xE9cessitant une mise en quarantaine,\
+        \ transmet in \uFB01ne les courriers \xE0 un autre serveur relais de l\u2019\
+        entit\xE9 ou \xE0 un serveur de bo\xEEtes aux lettres."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r37
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2.2
+      ref_id: R37
+      name: "N'autoriser les protocoles de messagerie qu'entre infrastructures l\xE9\
+        gitimes"
+      description: "A\uFB01n d\u2019\xE9viter des usages d\xE9tourn\xE9s du service\
+        \ de messagerie \xE9lectronique, les protocoles de messagerie doivent \xEA\
+        tre autoris\xE9s selon le strict besoin op\xE9rationnel des infrastructures\
+        \ l\xE9gitimes. En particulier, l\u2019utilisation ill\xE9gitime des ports\
+        \ SMTP (TCP/25 sans chi\uFB00rement et TCP/465 avec chi\uFB00rement implicite)\
+        \ par un serveur autre qu\u2019un serveur SMTP doit .g\xE9n\xE9rer des journaux\
+        \ au niveau des pare-feux et une alerte de s\xE9curit\xE9."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2
+      ref_id: 5.2.3
+      name: "M\xE9canismes antispam et recherche de contenu malveillant"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r38
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2.3
+      ref_id: R38
+      name: "Mettre en \u0153uvre des m\xE9canismes antispam"
+      description: "A\uFB01n de limiter la r\xE9ception des courriels ind\xE9sirables\
+        \ dans les bo\xEEtes aux lettres, des m\xE9canismes antispam doivent \xEA\
+        tre mis en \u0153uvre en amont, par exemple :"
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r38:1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r38
+      description: "- l\u2019utilisation de listes d\u2019autorisations, d\u2019interdictions\
+        \ ou d\u2019interdictions provisoires d\u2019adresses IP ou de noms de domaine\
+        \ ;"
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r38:2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r38
+      description: "- l\u2019analyse heuristique du corps des courriels ;"
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r38:3
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r38
+      description: "- le test de Turing pour les nouveaux exp\xE9diteurs."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r39
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2.3
+      ref_id: R39
+      name: "Mettre en \u0153uvre des m\xE9canismes de d\xE9tection de contenu malveillant"
+      description: "Des m\xE9canismes de d\xE9tection de contenu malveillant sp\xE9\
+        ci\uFB01ques \xE0 la messagerie \xE9lectronique doivent \xEAtre mis en \u0153\
+        uvre, comme l\u2019analyse antivirus des pi\xE8ces jointes ou l\u2019analyse\
+        \ des liens Web pr\xE9sents dans le corps des courriels."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2
+      ref_id: 5.2.4
+      name: "Exposition des acc\xE8s utilisateurs \xE0 la messagerie sur Internet"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2.4
+      ref_id: R40
+      name: "Ne pas exposer les acc\xE8s utilisateurs \xE0 la messagerie sur Internet"
+      description: "Le service de messagerie \xE9lectronique ne doit pas \xEAtre expos\xE9\
+        \ sur Internet pour les acc\xE8s des utilisateurs \xE0 leurs bo\xEEtes aux\
+        \ lettres. En particulier, aucun portail de type Webmail expos\xE9 sur Internet\
+        \ ne doit \xEAtre d\xE9ploy\xE9."
+      implementation_groups:
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.2.4
+      ref_id: R40 (-)
+      name: "S\xE9curiser les acc\xE8s utilisateurs \xE0 la messagerie sur Internet"
+      description: "Dans le cas o\xF9 une autorit\xE9 aurait accept\xE9 le risque\
+        \ d\u2019exposition du service de messagerie \xE9lectronique sur Internet,\
+        \ il est indispensable de pr\xE9voir une cha\xEEne d\u2019acc\xE8s avec des\
+        \ ressources d\xE9di\xE9es, des restrictions d\u2019acc\xE8s et une strat\xE9\
+        gie renforc\xE9e de d\xE9tection, par exemple :"
+      implementation_groups:
+      - R--
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-):1
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-)
+      description: "- un serveur d\u2019exposition (ex. : portail Webmail) h\xE9berg\xE9\
+        \ au sein de la zone de services expos\xE9s ;"
+      implementation_groups:
+      - R--
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-):2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-)
+      description: "- la protection du serveur d\u2019exposition par un serveur mandataire\
+        \ inverse (reverse proxy), voire un pare-feu applicatif, h\xE9berg\xE9s en\
+        \ zone de services relais ;"
+      implementation_groups:
+      - R--
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-):3
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-)
+      description: "- la mise en \u0153uvre d\u2019une authenti\uFB01cation double\
+        \ facteur pour les utilisateurs, \xE9ventuellement avec la fourniture d\u2019\
+        un certi\uFB01cat \xE9lectronique ;"
+      implementation_groups:
+      - R--
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-):4
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r40-(-)
+      description: "- la d\xE9\uFB01nition d\u2019une strat\xE9gie renforc\xE9e de\
+        \ d\xE9tection (g\xE9olocalisation des connexions, nombre d\u2019authenti\uFB01\
+        cations \xE9chou\xE9es, volumes de courriels \xE9chang\xE9s)."
+      implementation_groups:
+      - R--
+      - R-
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5
+      ref_id: '5.3'
+      name: "S\xE9curisation des canaux de transport"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r41
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.3
+      ref_id: R41
+      name: "S\xE9curiser le canal de transport entre clients de messagerie et serveurs\
+        \ de bo\xEEtes aux lettres"
+      description: "Quel que soit le protocole utilis\xE9, les \uFB02ux de messagerie\
+        \ entre les clients de messagerie et les serveurs de bo\xEEtes aux lettres\
+        \ doivent \xEAtre chi\uFB00r\xE9s et authenti\uFB01\xE9s. Cette authenti\uFB01\
+        cation des \uFB02ux est compl\xE9mentaire \xE0 l\u2019authenti\uFB01cation\
+        \ applicative des utilisateurs. Ainsi, l\u2019utilisation des protocoles s\xE9\
+        curis\xE9s de messagerie, d\xE9sormais standards (ex. : .SMTPS, POPS, IMAPS\
+        \ ou HTTPS) est recommand\xE9e."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r42
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.3
+      ref_id: R42
+      name: Activer l'option STARTTLS sur les serveurs SMTP
+      description: "Sur les serveurs SMTP, l\u2019option STARTTLS doit \xEAtre activ\xE9\
+        e avec une con\uFB01guration TLS supportant l\u2019\xE9tat de l\u2019art et\
+        \ tol\xE9rant des param\xE8tres d\u2019un niveau de s\xE9curit\xE9 moindre.\
+        \ Le cycle de vie des certi\uFB01cats doit \xEAtre trait\xE9 avec attention.\
+        \ De plus, il est recommand\xE9 dans ce cas de d\xE9sactiver sur les serveurs\
+        \ SMTP, et de bloquer sur les briques de \uFB01ltrage, le service SMTP avec\
+        \ chi\uFB00rement implicite (TCP/465)."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r42-(+)
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.3
+      ref_id: R42 (+)
+      name: Activer l'option REQUIRETLS sur les serveurs SMTP
+      description: "Pour forcer les \xE9changes \xE0 travers un canal TLS avec une\
+        \ entit\xE9 destinataire qui le supporte, il est recommand\xE9 d\u2019activer\
+        \ l\u2019option REQUIRETLS."
+      implementation_groups:
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5
+      ref_id: '5.4'
+      name: "Protection contre les courriels ill\xE9gitimes"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4
+      ref_id: 5.4.1
+      name: Sender Policy Framework (SPF)
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r43
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.1
+      ref_id: R43
+      name: "Supporter SPF sur les serveurs SMTP de r\xE9ception"
+      description: "Le protocole SPF (ou le service Sender ID dans les infrastructures\
+        \ Microsoft Exchange) doit \xEAtre support\xE9 sur les serveurs SMTP de r\xE9\
+        ception de l\u2019entit\xE9."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r44
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.1
+      ref_id: R44
+      name: "Con\uFB01gurer SPF pour les domaines de messagerie \xE9lectronique de\
+        \ l'entit\xE9"
+      description: "Il est recommand\xE9 de con\uFB01gurer SPF pour les domaines de\
+        \ messagerie \xE9lectronique de l\u2019entit\xE9, en \xE9tant particuli\xE8\
+        rement attentif, d\u2019une part \xE0 l\u2019inventaire des serveurs SMTP\
+        \ d\u2019envoi, qu\u2019ils soient internes ou externes, et d\u2019autre part\
+        \ aux usages sp\xE9ci\uFB01ques (ex. : utilisation d\u2019alias)."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4
+      ref_id: 5.4.2
+      name: "DomainKeys Identi\uFB01ed Mail (DKIM)"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r45
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.2
+      ref_id: R45
+      name: "Supporter DKIM sur les serveurs SMTP de r\xE9ception"
+      description: "Le protocole DKIM doit \xEAtre support\xE9 sur les serveurs SMTP\
+        \ de r\xE9ception de l\u2019entit\xE9."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r46-(+)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.2
+      ref_id: R46 (+)
+      name: "Con\uFB01gurer DKIM pour les domaines de messagerie \xE9lectronique de\
+        \ l'entit\xE9"
+      description: "Il est recommand\xE9 de con\uFB01gurer DKIM pour les domaines\
+        \ de messagerie \xE9lectronique de l\u2019entit\xE9. Le cas \xE9ch\xE9ant,\
+        \ la cl\xE9 priv\xE9e utilis\xE9e pour la signature doit \xEAtre prot\xE9\
+        g\xE9e."
+      implementation_groups:
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4
+      ref_id: 5.4.3
+      name: Domain-based Message Authentication, Reporting and Conformance (DMARC)
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r47-(+)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.3
+      ref_id: R47 (+)
+      name: "Supporter DMARC sur les serveurs SMTP de r\xE9ception"
+      description: "Il est recommand\xE9 de supporter le protocole DMARC sur les serveurs\
+        \ SMTP de r\xE9ception de l\u2019entit\xE9."
+      implementation_groups:
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r48-(+)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.3
+      ref_id: R48 (+)
+      name: "Con\uFB01gurer DMARC pour les domaines de messagerie \xE9lectronique\
+        \ de l'entit\xE9"
+      description: "Il est recommand\xE9 de con\uFB01gurer DMARC pour les domaines\
+        \ de messagerie \xE9lectronique de l\u2019entit\xE9. Dans un premier temps,\
+        \ il est recommand\xE9 d\u2019analyser les statistiques d\u2019utilisation\
+        \ sur la base d\u2019une politique d\u2019acceptation de tous les courriels\
+        \ (p=none), avant d\u2019activer .une politique plus stricte."
+      implementation_groups:
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4
+      ref_id: 5.4.4
+      name: DNSSEC
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r49
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.4
+      ref_id: R49
+      name: "Supporter DNSSEC pour les r\xE9solutions publiques"
+      description: "A\uFB01n de \uFB01abiliser le support de SPF, DKIM et DMARC, reposant\
+        \ sur les enregistrements DNS des domaines d\u2019exp\xE9dition, il est recommand\xE9\
+        \ que les r\xE9solutions DNSSEC soient support\xE9es sur les serveurs DNS\
+        \ de r\xE9solution publique de l\u2019entit\xE9."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r50-(+)
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.4
+      ref_id: R50 (+)
+      name: "Con\uFB01gurer DNSSEC pour les domaines de messagerie \xE9lectronique\
+        \ de l'entit\xE9"
+      description: "A\uFB01n de \uFB01abiliser l\u2019utilisation de SPF, DKIM et\
+        \ DMARC, pour les domaines de messagerie \xE9lectronique de l\u2019entit\xE9\
+        , il est recommand\xE9 de con\uFB01gurer DNSSEC pour ces domaines."
+      implementation_groups:
+      - R+
+    - urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:r51
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-rec-secu-interco-si-internet:5.4.4
+      ref_id: R51
+      name: "Pr\xE9voir des mesures de protection en disponibilit\xE9 du service de\
+        \ messagerie \xE9lectronique"
+      description: "Suivant les besoins de s\xE9curit\xE9 et les moyens de l\u2019\
+        entit\xE9, il est recommand\xE9 de mettre en \u0153uvre ou d\u2019anticiper\
+        \ des mesures de protection en disponibilit\xE9 du service de messagerie \xE9\
+        lectronique, pour couvrir les cas de panne et les attaques."
+      implementation_groups:
+      - R--
+      - R-
+      - R
+      - R+

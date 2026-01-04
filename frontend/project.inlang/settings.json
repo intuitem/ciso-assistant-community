@@ -17,7 +17,12 @@
 		"cs",
 		"sv",
 		"id",
-		"da"
+		"da",
+		"hu",
+		"uk",
+		"el",
+		"tr",
+		"hr"
 	],
 	"modules": [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@4/dist/index.js",

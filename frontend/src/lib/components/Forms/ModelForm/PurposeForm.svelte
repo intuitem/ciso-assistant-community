@@ -7,11 +7,21 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {}
+	}: Props = $props();
 </script>
 
 <TextField
@@ -20,6 +30,14 @@
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
+/>
+<AutocompleteSelect
+	{form}
+	field="legal_basis"
+	options={model.selectOptions['legal_basis']}
+	cacheLock={cacheLocks['legal_basis']}
+	bind:cachedValue={formDataCache['legal_basis']}
+	label={m.legalBasis()}
 />
 <AutocompleteSelect
 	{form}

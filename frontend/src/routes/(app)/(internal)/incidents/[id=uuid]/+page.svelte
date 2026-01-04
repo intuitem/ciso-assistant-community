@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import type { PageData, ActionData } from './$types';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
@@ -15,29 +17,35 @@
 	import RowCount from '$lib/components/ModelTable/RowCount.svelte';
 	import Pagination from '$lib/components/ModelTable/Pagination.svelte';
 	import { listViewFields } from '$lib/utils/table';
-	import { browser } from '$app/environment';
 	import { goto as _goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime.js';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+
+	import { canPerformAction } from '$lib/utils/access-control';
 	import {
-		type TableSource,
+		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	} from '$lib/components/Modals/stores';
+	import type { TableSource } from '$lib/components/ModelTable/types';
+	import { Popover } from '@skeletonlabs/skeleton-svelte';
 
-	import { canPerformAction } from '$lib/utils/access-control';
+	interface Props {
+		data: PageData;
+		form: ActionData;
+		[key: string]: any;
+	}
 
-	export let data: PageData;
-	export let form: ActionData;
+	let { data, form }: Props = $props();
 
 	const invalidateAll = true;
 	const formAction = '?/create';
@@ -49,7 +57,7 @@
 		dataType: 'json',
 		enctype: 'application/x-www-form-urlencoded',
 		invalidateAll,
-		applyAction: $$props.applyAction ?? true,
+		applyAction: true,
 		resetForm: true,
 		validators: zod(schema),
 		taintedMessage: false,
@@ -98,12 +106,21 @@
 		})
 	);
 
-	let invalidateTable = false;
-	$: if (browser || invalidateTable) {
-		handler.invalidate();
-		_goto($page.url);
-		invalidateTable = false;
-	}
+	let invalidateTable = $state(true);
+
+	$effect(() => {
+		if (page.form?.form?.posted && page.form?.form?.valid) {
+			handler.invalidate();
+		}
+	});
+
+	$effect(() => {
+		if (invalidateTable) {
+			handler.invalidate();
+			_goto(page.url);
+			invalidateTable = false;
+		}
+	});
 
 	const preventDelete = (row: TableSource) =>
 		['severity_changed', 'status_changed'].includes(row.meta.entry_type);
@@ -129,31 +146,31 @@
 		modalStore.trigger(modal);
 	}
 
-	let refreshKey = false;
-	function forceRefresh() {
-		refreshKey = !refreshKey;
-	}
+	let refreshKey = $state(false);
 
-	let resetForm = true;
+	let resetForm = $state(true);
 
-	$: formStore = _form.form;
+	let formStore = $derived(_form.form);
 
-	$: if (form?.newEvidence) {
-		refreshKey = !refreshKey;
-		resetForm = false;
-		_form.form.update(
-			(current: Record<string, any>) => ({
-				...current,
-				evidences: current.evidences
-					? [...current.evidences, form?.newEvidence]
-					: [form?.newEvidence]
-			}),
-			{ taint: false }
-		);
-		console.debug('formStore', $formStore);
-	}
+	run(() => {
+		if (form?.newEvidence) {
+			refreshKey = !refreshKey;
+			resetForm = false;
+			_form.form.update(
+				(current: Record<string, any>) => ({
+					...current,
+					evidences: current.evidences
+						? [...current.evidences, form?.newEvidence]
+						: [form?.newEvidence]
+				}),
+				{ taint: false }
+			);
+			form.newEvidence = undefined;
+			console.debug('formStore', $formStore);
+		}
+	});
 
-	const user = $page.data.user;
+	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
@@ -163,109 +180,148 @@
 				? data.data.id
 				: (data.data.folder?.id ?? data.data.folder ?? user.root_folder_id)
 	});
+
+	let exportPopupOpen = $state(false);
 </script>
 
 <div class="flex flex-col space-y-2">
 	<DetailView {data} displayModelTable={false}>
-		<div
-			slot="widgets"
-			class="shadow-xl border-l border-t p-4 rounded bg-gradient-to-tl from-slate-50 to-white"
-			hidden={!canEditObject}
-		>
-			{#if canEditObject}
-				<!-- new record form -->
-				<h1 class="text-xl font-bold font-serif mb-2">{m.addTimelineEntry()}</h1>
-				<SuperForm
-					class="flex flex-col space-y-3"
-					action={formAction}
-					dataType={'json'}
-					enctype={'application/x-www-form-urlencoded'}
-					data={timelineForm}
-					{_form}
-					{invalidateAll}
-					let:form
-					let:data
-					let:initialData
-					validators={zod(schema)}
-					{...$$restProps}
+		{#snippet actions()}
+			<div class="flex flex-col space-y-2">
+				<Popover
+					open={exportPopupOpen}
+					onOpenChange={(e) => (exportPopupOpen = e.open)}
+					positioning={{ placement: 'bottom' }}
+					triggerBase="btn preset-filled-primary-500 w-full"
+					contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+					zIndex="1000"
 				>
-					<AutocompleteSelect
-						{form}
-						optionsEndpoint="incidents"
-						field="incident"
-						label={m.incident()}
-						hidden={initialData.incident}
-					/>
-					<Select
-						{form}
-						disableDoubleDash={true}
-						options={model.selectOptions['entry_type']}
-						field="entry_type"
-						label={m.entryType()}
-					/>
-					{#key refreshKey}
-						<TextField
-							type="datetime-local"
-							step="1"
-							{form}
-							field="timestamp"
-							label={m.timestamp()}
-						/>
-					{/key}
-					<TextField {form} field="entry" label={m.entry()} data-focusindex="0" />
-					<TextArea {form} field="observation" label={m.observation()} />
-					{#key refreshKey}
-						<div class="flex items-end justify-center">
-							<div class="w-full mr-2">
-								<AutocompleteSelect
-									{form}
-									multiple
-									optionsEndpoint="evidences"
-									field="evidences"
-									{resetForm}
-									label={m.evidences()}
-								/>
-							</div>
-							<button
-								class="btn bg-gray-300 h-11 w-10"
-								on:click={(_) => modalEvidenceCreateForm()}
-								type="button"><i class="fa-solid fa-plus text-sm" /></button
+					{#snippet trigger()}
+						<span data-testid="export-button">
+							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+						</span>
+					{/snippet}
+					{#snippet content()}
+						<div>
+							<p class="block px-4 py-2 text-sm text-gray-800">{m.incident()}</p>
+							<a
+								href="/incidents/{data.data.id}/export/md"
+								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+								>... {m.asMarkdown()}</a
+							>
+							<a
+								href="/incidents/{data.data.id}/export/pdf"
+								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
 							>
 						</div>
-					{/key}
-					<div class="flex flex-row justify-between space-x-4">
-						<button
-							class="btn variant-filled-tertiary font-semibold w-full"
-							data-testid="reset-button"
-							type="button"
-							on:click={() => {
-								_form.reset();
-								_form.form.update((current) => ({
-									...current,
-									evidences: undefined,
-									timestamp: new Date().toISOString()
-								}));
-								refreshKey = !refreshKey;
-								resetForm = true;
-							}}>{m.cancel()}</button
-						>
-						<button
-							class="btn variant-filled-primary font-semibold w-full"
-							data-testid="save-button"
-							type="submit"
-							on:click={() => {
-								resetForm = true;
-							}}>{m.save()}</button
-						>
-					</div>
-				</SuperForm>
-			{/if}
-		</div>
+					{/snippet}
+				</Popover>
+			</div>
+		{/snippet}
+		{#snippet widgets()}
+			<div
+				class="shadow-xl border-l border-t p-4 rounded-sm bg-linear-to-tl from-slate-50 to-white"
+				hidden={!canEditObject}
+			>
+				{#if canEditObject}
+					<!-- new record form -->
+					<h1 class="text-xl font-bold mb-1">{m.addTimelineEntry()}</h1>
+					<SuperForm
+						class="flex flex-col space-y-3"
+						action={formAction}
+						dataType={'json'}
+						enctype={'application/x-www-form-urlencoded'}
+						data={timelineForm}
+						{_form}
+						{invalidateAll}
+						validators={zod(schema)}
+					>
+						{#snippet children({ form, data, initialData })}
+							<AutocompleteSelect
+								{form}
+								optionsEndpoint="incidents"
+								field="incident"
+								label={m.incident()}
+								hidden={initialData.incident}
+							/>
+							<Select
+								{form}
+								disableDoubleDash={true}
+								options={model.selectOptions['entry_type']}
+								field="entry_type"
+								label={m.entryType()}
+							/>
+							{#key refreshKey}
+								<TextField
+									type="datetime-local"
+									step="1"
+									{form}
+									field="timestamp"
+									label={m.timestamp()}
+								/>
+							{/key}
+							<TextField {form} field="entry" label={m.entry()} data-focusindex="0" />
+							<MarkdownField {form} field="observation" label={m.observation()} />
+
+							{#key refreshKey}
+								<div class="flex items-end justify-center">
+									<div class="w-full mr-2">
+										<AutocompleteSelect
+											{form}
+											multiple
+											optionsEndpoint="evidences"
+											optionsDetailedUrlParameters={[
+												['scope_folder_id', page.data.data?.folder?.id]
+											]}
+											field="evidences"
+											{resetForm}
+											label={m.evidences()}
+										/>
+									</div>
+									<button
+										class="btn bg-gray-300 h-11 w-10"
+										onclick={(_) => modalEvidenceCreateForm()}
+										type="button"
+										data-testid="add-button-evidence"
+										><i class="fa-solid fa-plus text-sm"></i></button
+									>
+								</div>
+							{/key}
+							<div class="flex flex-row justify-between space-x-4">
+								<button
+									class="btn preset-filled-tertiary-500 font-semibold w-full"
+									data-testid="reset-button"
+									type="button"
+									onclick={() => {
+										_form.reset();
+										_form.form.update((current) => ({
+											...current,
+											evidences: undefined,
+											timestamp: new Date().toISOString()
+										}));
+										refreshKey = !refreshKey;
+										resetForm = true;
+									}}>{m.cancel()}</button
+								>
+								<button
+									class="btn preset-filled-primary-500 font-semibold w-full"
+									data-testid="save-button-event"
+									type="submit"
+									onclick={() => {
+										resetForm = true;
+									}}>{m.save()}</button
+								>
+							</div>
+						{/snippet}
+					</SuperForm>
+				{/if}
+			</div>
+		{/snippet}
 	</DetailView>
 
 	<div class="card shadow-lg bg-white p-4 space-y-2">
-		<div class="flex flex-row justify-between items-center">
-			<h1 class="text-xl font-bold font-serif">{m.timeline()}</h1>
+		<div class="flex flex-row justify-between items-center mb-4">
+			<h1 class="text-xl font-bold">{m.timeline()}</h1>
 			<Search {handler} />
 			<RowsPerPage {handler} />
 		</div>
@@ -273,14 +329,15 @@
 			{#each $rows as row, rowIndex}
 				{@const meta = row?.meta ?? row}
 				{@const actionsURLModel = 'timeline-entries'}
-				<li class="mb-10 ms-4">
+				<li class="ms-4">
 					<div
 						class="absolute w-3 h-3 bg-primary-500 rounded-full mt-1.5 -start-1.5 border border-white dark:border-primary-900 dark:bg-primary-700"
 					></div>
 					<div class="flex flex-col">
-						<div class="flex flex-row items-center space-x-3">
-							<time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
-								{formatDateOrDateTime(meta.timestamp, getLocale())} - {meta.author.str}</time
+						<div class="flex flex-row items-center space-x-3 mb-1">
+							<time class="text-sm font-normal leading-none text-gray-600 dark:text-gray-800">
+								{formatDateOrDateTime(meta.timestamp, getLocale())} - {#if meta.author}{meta?.author
+										?.str}{:else}{m.unknownOrDeletedUser()}{/if}</time
 							>
 							<TableRowActions
 								baseClass="space-x-2 whitespace-nowrap flex flex-row items-center text-sm text-surface-700"
@@ -288,9 +345,8 @@
 								model={model.info}
 								URLModel={actionsURLModel}
 								detailURL={`/${actionsURLModel}/${meta.id}`}
-								editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent($page.url.pathname + $page.url.search)}`}
+								editURL={`/${actionsURLModel}/${meta.id}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
 								{row}
-								hasBody={$$slots.actionsBody}
 								identifierField={'id'}
 								preventDelete={preventDelete(row)}
 							></TableRowActions>
@@ -300,17 +356,40 @@
 								</span>
 							{/if}
 						</div>
-						<div class="mb-1">
-							<span class="text-xs font-mono bg-violet-700 text-white p-1 rounded"
+						<div class="flex mb-2">
+							<span class="text-xs font-mono bg-violet-700 text-white py-1 px-2 rounded-sm mr-1"
 								>{safeTranslate(meta.entry_type)}</span
 							>
+							<a
+								href={`/${actionsURLModel}/${meta.id}`}
+								class="font-semibold capitalize"
+								data-testid="name-entry-{rowIndex}">{safeTranslate(meta.entry)}</a
+							>
 						</div>
-						<a href={`/${actionsURLModel}/${meta.id}`} class="font-semibold capitalize"
-							>{safeTranslate(meta.entry)}</a
-						>
-						<p class="text-xs italic text-gray-500 dark:text-gray-400 whitespace-pre-line">
-							{meta.observation ?? m.noObservation()}
-						</p>
+						<div class="py-1 mb-2">
+							{#if meta.observation}
+								<MarkdownRenderer content={meta.observation} class="bg-primary-50 rounded-lg p-2" />
+							{:else}
+								<p class="italic text-gray-500 dark:text-gray-400">{m.noObservation()}</p>
+							{/if}
+						</div>
+						{#if meta.evidences && meta.evidences.length > 0}
+							<div class="mb-2">
+								<p class="text-xs font-medium text-gray-700 mb-1">{m.associatedEvidences()}:</p>
+								<div class="flex flex-wrap gap-1">
+									{#each meta.evidences as evidence}
+										<a
+											href={`/evidences/${evidence.id}`}
+											class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full hover:bg-blue-200 transition-colors max-w-50"
+											title={evidence.str}
+										>
+											<i class="fa-solid fa-paperclip mr-1 flex-shrink-0"></i>
+											<span class="truncate">{evidence.str}</span>
+										</a>
+									{/each}
+								</div>
+							</div>
+						{/if}
 					</div>
 				</li>
 			{/each}

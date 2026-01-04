@@ -6,11 +6,16 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+	}
+
+	let { form, model, cacheLocks = {}, formDataCache = $bindable({}) }: Props = $props();
 </script>
 
 <TextField
@@ -21,6 +26,7 @@
 	helpText={m.dueDateHelpText()}
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
+	disabled
 />
 <Select
 	{form}
@@ -30,7 +36,7 @@
 	cacheLock={cacheLocks['status']}
 	bind:cachedValue={formDataCache['status']}
 />
-<TextArea
+<MarkdownField
 	{form}
 	field="observation"
 	label={m.observation()}
@@ -39,9 +45,11 @@
 />
 <AutocompleteSelect
 	multiple
+	disabled
 	{form}
 	optionsEndpoint="evidences"
 	optionsExtraFields={[['folder', 'str']]}
+	helpText={m.taskNodeLegacyEvidence()}
 	optionsLabelField="auto"
 	field="evidences"
 	label={m.evidences()}

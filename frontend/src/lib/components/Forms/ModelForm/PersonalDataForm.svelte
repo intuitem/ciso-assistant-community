@@ -8,13 +8,21 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+	}
 
-	console.log(model);
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {}
+	}: Props = $props();
 </script>
 
 <TextField
@@ -64,6 +72,27 @@
 	label={m.isSensitive()}
 	cacheLock={cacheLocks['is_sensitive']}
 	bind:cachedValue={formDataCache['is_sensitive']}
+/>
+
+<AutocompleteSelect
+	{form}
+	field="assets"
+	optionsEndpoint="assets"
+	optionsLabelField="auto"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type',
+				translate: true
+			}
+		],
+		classes: 'text-blue-500'
+	}}
+	cacheLock={cacheLocks['assets']}
+	bind:cachedValue={formDataCache['assets']}
+	label={m.assets()}
+	multiple={true}
 />
 <!-- retention = models.CharField(max_length=255, blank=True) -->
 <!-- deletion_policy = models.CharField( -->

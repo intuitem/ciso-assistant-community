@@ -22,7 +22,7 @@ services:
     volumes:
       - ./db:/code/db
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://backend:8000/api/build || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://backend:8000/api/health/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -74,7 +74,7 @@ services:
 
   caddy:
     container_name: caddy
-    image: caddy:2.8.4
+    image: caddy:2.10.0
     environment:
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
     depends_on:

@@ -1,0 +1,296 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) D''ont use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:cyfun-small-self-assessment
+locale: en
+ref_id: cyfun-small-self-assessment
+name: CCB CyberFundamentals Small - Self assessment
+description: 'Centre For Cybersecurity Belgium - CyberFundamentals Framework - Small
+
+  With content from safeOnWeb website as of July 2025
+
+  https://ccb.belgium.be'
+copyright: All texts, layouts, designs and other elements of any nature in this document
+  are subject to copyright law.
+version: 1
+publication_date: 2025-07-03
+provider: CCB
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cyfun-small-self-assessment
+    ref_id: cyfun-small-self-assessment
+    name: CCB CyberFundamentals Small - Self assessment
+    description: Centre For Cybersecurity Belgium - CyberFundamentals Framework -
+      Small
+    min_score: 1
+    max_score: 5
+    scores_definition:
+    - score: 1
+      name: Initial
+      description: Standard process does not exist.
+      description_doc: No Process documentation or not formally approved by management.
+      translations:
+        fr:
+          name: Initial
+          description: "Il n\u2019existe pas de processus standard."
+          description_doc: "Pas de documentation sur le processus ou pas d\u2019approbation\
+            \ formelle par la direction."
+        nl:
+          name: "Initi\xEBle"
+          description: Er bestaat geen standaardproces.
+          description_doc: Geen procesdocumentatie of niet formeel goedgekeurd door
+            het management.
+    - score: 2
+      name: Repeatable
+      description: Ad-hoc process exists and is done informally.
+      description_doc: Formally approved Process documentation exists but not reviewed
+        in the previous 2 years.
+      translations:
+        fr:
+          name: "R\xE9p\xE9table"
+          description: "Il existe un processus ad hoc qui se d\xE9roule de mani\xE8\
+            re informelle."
+          description_doc: "Il existe une documentation de processus formellement\
+            \ approuv\xE9e, mais elle n\u2019a pas fait l\u2019objet d\u2019un audit\
+            \ au cours des deux derni\xE8res ann\xE9es."
+        nl:
+          name: Herhaalbaar
+          description: Er bestaat een ad-hocproces dat informeel wordt uitgevoerd.
+          description_doc: Er bestaat formeel goedgekeurde Procesdocumentatie, maar
+            deze is de afgelopen 2 jaar niet herzien.
+    - score: 3
+      name: Defined
+      description: 'Formal process exists and is implemented.
+
+        Evidence available for most activities.
+
+        Less than 10% process exceptions.'
+      description_doc: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved.
+
+        Documented & approved exceptions < 5% of the time.'
+      translations:
+        fr:
+          name: "D\xE9fini"
+          description: "Un processus formel existe et est mis en \u0153uvre.\nDes\
+            \ preuves sont disponibles pour la plupart des activit\xE9s. \nMoins de\
+            \ 10 % d\u2019exceptions au processus."
+          description_doc: "Il existe une documentation formellement approuv\xE9e\
+            \ sur les processus et les exceptions sont document\xE9es et approuv\xE9\
+            es.\nLes exceptions sont document\xE9es et approuv\xE9es dans moins de\
+            \ 5 % des cas."
+        nl:
+          name: Gedefinieerd
+          description: "Formeel proces bestaat en wordt ge\xEFmplementeerd. Bewijs\
+            \ beschikbaar voor de meeste activiteiten. Minder dan 10% procesuitzonderingen."
+          description_doc: Er bestaat formeel goedgekeurde procesdocumentatie en uitzonderingen
+            worden gedocumenteerd en goedgekeurd. Gedocumenteerde en goedgekeurde
+            uitzonderingen < 5% van de tijd.
+    - score: 4
+      name: Managed
+      description: 'Formal process exists and is implemented.
+
+        Evidence available for all activities.
+
+        Detailed metrics of the process are captured and reported.
+
+        Minimal target for metrics has been established.
+
+        Less than 5% of process exceptions.'
+      description_doc: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved.
+
+        Documented & approved exceptions < 3% of the time.'
+      translations:
+        fr:
+          name: "G\xE9r\xE9"
+          description: "Un processus formel existe et est mis en \u0153uvre.\nDes\
+            \ preuves sont disponibles pour toutes les activit\xE9s.\nDes mesures\
+            \ d\xE9taill\xE9es du processus sont saisies et communiqu\xE9es.\nUn objectif\
+            \ minimum est fix\xE9 pour les indicateurs.\nMoins de 5 % des exceptions\
+            \ au processus."
+          description_doc: "Il existe une documentation formellement approuv\xE9e\
+            \ sur les processus et les exceptions sont document\xE9es et approuv\xE9\
+            es.\nExceptions document\xE9es et approuv\xE9es < 3 % du temps."
+        nl:
+          name: Beheerd
+          description: "Formeel proces bestaat en wordt ge\xEFmplementeerd. Voor alle\
+            \ activiteiten is bewijsmateriaal beschikbaar. Gedetailleerde metriek\
+            \ van het proces wordt vastgelegd en gerapporteerd.\nMinimale doelstelling\
+            \ voor metriek is vastgesteld. Minder dan 5% van de procesuitzonderingen."
+          description_doc: Er bestaat formeel goedgekeurde procesdocumentatie en uitzonderingen
+            worden gedocumenteerd en goedgekeurd. Gedocumenteerde en goedgekeurde
+            uitzonderingen < 3% van de tijd.
+    - score: 5
+      name: Optimizing
+      description: 'Formal process exists and is implemented.
+
+        Evidence available for all activities.
+
+        Detailed metrics of the process are captured and reported.
+
+        Minimal target for metrics has been established and continually improving.
+
+        Less than 1% of process exceptions.'
+      description_doc: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved.
+
+        Documented & approved exceptions < 0,5% of the time.'
+      translations:
+        fr:
+          name: "Optimis\xE9"
+          description: "Un processus formel existe et est mis en \u0153uvre.\nDes\
+            \ preuves sont disponibles pour toutes les activit\xE9s.\nDes mesures\
+            \ d\xE9taill\xE9es du processus sont saisies et communiqu\xE9es.\nDes\
+            \ objectifs minimaux sont fix\xE9s pour les indicateurs et sont am\xE9\
+            lior\xE9s en permanence.\nMoins de 1 % des exceptions au processus."
+          description_doc: "Il existe une documentation formellement approuv\xE9e\
+            \ sur les processus et les exceptions sont document\xE9es et approuv\xE9\
+            es.\nExceptions document\xE9es et approuv\xE9es < 0,5 % du temps."
+        nl:
+          name: Geoptimaliseerd
+          description: "Formeel proces bestaat en wordt ge\xEFmplementeerd. Voor alle\
+            \ activiteiten is bewijsmateriaal beschikbaar. Gedetailleerde metriek\
+            \ van het proces wordt vastgelegd en gerapporteerd..\nMinimale doelstelling\
+            \ voor metriek is vastgesteld en wordt voortdurend verbeterd. Minder dan\
+            \ 1% van de procesuitzonderingen."
+          description_doc: Er bestaat formeel goedgekeurde procesdocumentatie en uitzonderingen
+            worden gedocumenteerd en goedgekeurd. Gedocumenteerde en goedgekeurde
+            uitzonderingen < 0,5% van de tijd.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:passwords
+      assessable: true
+      depth: 1
+      name: PASSWORDS
+      description: Do you have rules in place for your passwords?
+      annotation: '1: No rules, passwords have no creation or reuse criteria
+
+        2: There are some rules around password creation but no history or reuse checks.
+
+        3: There are common requirements for all passwords and they should be changed
+        regularly.
+
+        4: There are strong requirements for all users and most systems and these
+        are only changed if there is an indication of a violation.
+
+        5: Two-factor authentication is in place for all critical systems.'
+    - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:system-maintenance
+      assessable: true
+      depth: 1
+      name: SYSTEM MAINTENANCE
+      description: Do you update your systems and applications?
+      annotation: '1: No, we do not make any updates as long as the systems continue
+        to work.
+
+        2: Manual updates are done when needed or for the most critical systems.
+
+        3: There is a standard procedure for scheduling updates.
+
+        4: All systems are quickly updated to their latest versions.
+
+        5: All updates are done continuously and systematically, and are tested before
+        implementation.'
+    - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:antivirus-and-anti-malware-management
+      assessable: true
+      depth: 1
+      name: ANTIVIRUS AND ANTI-MALWARE MANAGEMENT
+      description: Do you have antivirus or anti-malware software installed?
+      annotation: '1: No, none.
+
+        2: On some major systems but not everywhere.
+
+        3: On all systems but they are not necessarily updated.
+
+        4: On all systems and updated a few times a week.
+
+        5: On all systems and updated daily. Suspicious activity is also reported.'
+    - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:network-security
+      assessable: true
+      depth: 1
+      name: NETWORK SECURITY
+      description: Are you protecting your network?
+      annotation: '1: Not actively: the network is not segmented and connected to
+        the internet without updates and strong passwords.
+
+        2: In a limited way: the public and internal networks are separated and protected
+        by a firewall.
+
+        3: Basic protection: a number of segmentations exist according to functions
+        and needs and everything is documented.
+
+        4: The security of the network is measured and monitored; anomalies can be
+        detected.
+
+        5: The network is compartmentalized into strictly separated areas; anomalies
+        are quickly detected and resolved.'
+    - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:backup-procedure
+      assessable: true
+      depth: 1
+      name: BACKUP PROCEDURE
+      description: Do you have a backup procedure?
+      annotation: '1: No, neither systematic nor documented.
+
+        2: Backups are limited and manual, and restoration is not tested. Sometimes
+        the backups are done locally by the employees themselves, on USB sticks or
+        external hard drives.
+
+        3: Backups are tested and available for all major systems, and file restores
+        are tested regularly.
+
+        4: Backups are encrypted, available to all systems in the organization and
+        tested immediately with performance metrics to improve.
+
+        5: All data is backed up completely with fast recovery time and without data
+        loss.'
+    - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:administration-rights
+      assessable: true
+      depth: 1
+      name: ADMINISTRATION RIGHTS
+      description: How do you protect your administrator accounts?
+      annotation: '1: Without an overview of our administrators'' accounts; we do
+        not specifically protect them.
+
+        2: We manage administrator access only on certain services.
+
+        3: All administrator access is distributed in separate accounts and is managed
+        centrally.
+
+        4: All administrator accounts are strictly monitored with automatic notifications
+        in case of anomalies.
+
+        5: Administrator accounts are disabled or modified if there are changes and
+        anomalies.'
+    - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:physical-security
+      assessable: true
+      depth: 1
+      name: PHYSICAL SECURITY
+      description: Do you have measures in place to physically protect access to your
+        premises and infrastructure?
+      annotation: '1: We have nothing in place.
+
+        2: We only protect critical systems (e.g. server room).
+
+        3: All our infrastructure is protected, including fire and flood protection.
+
+        4: We centrally control access (e.g. badges) and segment access according
+        to confidentiality levels.
+
+        5: Access control is centralized, regularly reviewed and follows the life
+        cycle of employees (entry/change of position/exit).'
+    - urn: urn:intuitem:risk:req_node:cyfun-small-self-assessment:incident-preparedness
+      assessable: true
+      depth: 1
+      name: INCIDENT PREPAREDNESS
+      description: Do you have an incident management plan?
+      annotation: '1: No, we haven''t looked at that yet.
+
+        2: We have a plan but the responsibilities are not clear and our suppliers
+        have not been identified.
+
+        3: Our plan is validated internally and actively communicated to all parties
+        involved, ensuring good coordination between the players.
+
+        4: We have a plan and we have already tested it.
+
+        5: We regularly test and improve our plan, including the communication and
+        coordination parts.'

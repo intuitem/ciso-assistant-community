@@ -9,6 +9,8 @@ from .models import (
     DataContractor,
     DataTransfer,
     Processing,
+    RightRequest,
+    DataBreach,
 )
 
 
@@ -38,6 +40,7 @@ class PersonalDataWriteSerializer(BaseModelSerializer):
 class PersonalDataReadSerializer(BaseModelSerializer):
     processing = FieldsRelatedField()
     folder = FieldsRelatedField()
+    assets = FieldsRelatedField(["name", "type", "folder"], many=True)
 
     class Meta:
         model = PersonalData
@@ -121,6 +124,9 @@ class ProcessingReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
     nature = FieldsRelatedField(["name"], many=True)
+    associated_controls = FieldsRelatedField(["name"], many=True)
+    assigned_to = FieldsRelatedField(many=True)
+    purposes = FieldsRelatedField(["name", "id", "legal_basis"], many=True)
 
     class Meta:
         model = Processing
@@ -135,3 +141,41 @@ class ProcessingNatureReadSerializer(ReferentialSerializer):
 
 class ProcessingNatureWriteSerializer(ProcessingNatureReadSerializer):
     pass
+
+
+# RightRequest Serializers
+class RightRequestWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = RightRequest
+        fields = "__all__"
+
+
+class RightRequestReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    owner = FieldsRelatedField(many=True)
+    processings = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = RightRequest
+        fields = "__all__"
+
+
+# DataBreach Serializers
+class DataBreachWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = DataBreach
+        fields = "__all__"
+
+
+class DataBreachReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    assigned_to = FieldsRelatedField(many=True)
+    authorities = FieldsRelatedField(many=True)
+    affected_processings = FieldsRelatedField(many=True)
+    affected_personal_data = FieldsRelatedField(many=True)
+    remediation_measures = FieldsRelatedField(["name"], many=True)
+    incident = FieldsRelatedField()
+
+    class Meta:
+        model = DataBreach
+        fields = "__all__"

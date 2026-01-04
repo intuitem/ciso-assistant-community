@@ -24,7 +24,7 @@
     {{ status }}
     {% for status, applied_controls in context.items %}
         {% for status_color, color in color_map.items %}
-            {% if status_color == status and status == "no status" %}
+            {% if status_color == status and status == "--" %}
                 <p class="flex p-2 m-2 text-lg font-semibold justify-center" style="background-color: {{color}}">{% trans "No status" %}</p>
             {% else %}
                 {% for text in status_text %}
@@ -54,13 +54,13 @@
                         {% for applied_control in applied_controls %}
                         <tr>
                             <td class="text-md p-2 text-center">{{ applied_control.name }}</td>
-                            <td class="text-md p-2 text-center">{{ applied_control.description|default:"--" }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.description|default:"--"|linebreaksbr }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.get_category_display|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.get_csf_function_display|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.eta|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.expiry_date|default:"--" }}</td>
                             <td class="text-md p-2 text-center">{{ applied_control.get_effort_display|default:"--" }}</td>
-                            <td class="text-md p-2 text-center">{{ applied_control.cost|default:"--" }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.display_cost|default:"--" }}</td>
                             {% get_requirements applied_control compliance_assessment as requirements  %}
                             <td class="text-md p-2 text-center">
                                 {% for req in requirements %}
@@ -72,7 +72,7 @@
                         </tr>
                         {% empty %}
                             <tr>
-                                <td class="text-md p-2 text-center" colspan="7">
+                                <td class="text-md p-2 text-center" colspan="9">
                                     <p>{% trans "No entries found" %}</p>
                                 </td>
                             </tr>

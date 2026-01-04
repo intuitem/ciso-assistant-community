@@ -1,28 +1,53 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import { darkenColor } from '$lib/utils/helpers';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
 	import { m } from '$paraglide/messages';
-	import { displayOnlyAssessableNodes } from './store';
+	import { auditFiltersStore } from '$lib/utils/stores';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { isQuestionVisible } from '$lib/utils/helpers';
 
-	export let ref_id: string;
-	export let name: string;
-	export let description: string;
-	export let ra_id: string | undefined = undefined;
-	export let threats: z.infer<typeof ThreatSchema>[] | undefined = undefined;
-	export let reference_controls: z.infer<typeof ReferenceControlSchema>[] | undefined = undefined;
-	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
-	export let canEditRequirementAssessment: boolean;
-	export let selectedStatus: string[];
-	export let resultCounts: Record<string, number> | undefined;
-	export let assessable: boolean;
-	export let max_score: number;
+	interface Props {
+		ref_id: string;
+		name: string;
+		description: string;
+		ra_id?: string | undefined;
+		threats?: z.infer<typeof ThreatSchema>[] | undefined;
+		reference_controls?: z.infer<typeof ReferenceControlSchema>[] | undefined;
+		children?: Record<string, Record<string, unknown>> | undefined;
+		canEditRequirementAssessment: boolean;
+		hasParentNode: boolean;
+		showDocumentationScore: boolean;
+		selectedStatus: string[];
+		resultCounts: Record<string, number> | undefined;
+		assessable: boolean;
+		max_score: number;
+		[key: string]: any;
+	}
+
+	let {
+		ref_id,
+		name,
+		description,
+		ra_id = undefined,
+		threats = undefined,
+		reference_controls = undefined,
+		children = undefined,
+		canEditRequirementAssessment,
+		hasParentNode,
+		showDocumentationScore,
+		selectedStatus,
+		resultCounts,
+		assessable,
+		max_score,
+		...rest
+	}: Props = $props();
 
 	const node = {
 		ref_id,
@@ -36,7 +61,7 @@
 		max_score,
 		resultCounts,
 		assessable,
-		...$$restProps
+		...rest
 	} as const;
 
 	type TreeViewItemNode = typeof node;
@@ -45,7 +70,12 @@
 	const title: string =
 		pattern == 3 ? `${ref_id} - ${name}` : pattern == 2 ? ref_id : pattern == 1 ? name : '';
 
-	let showInfo = false;
+	let showInfo = $state(false);
+
+	let id = page.params.id;
+	let displayOnlyAssessableNodes = $derived(
+		$auditFiltersStore[id]?.displayOnlyAssessableNodes ?? false
+	);
 
 	const getAssessableNodes = (
 		startNode: TreeViewItemNode,
@@ -95,50 +125,94 @@
 	);
 
 	function nodeScore(): number | null {
-		if (!resultCounts) return null;
+		if (
+			!resultCounts ||
+			!resultCounts.hasOwnProperty('total_score') ||
+			!resultCounts.hasOwnProperty('scored')
+		) {
+			return null;
+		}
 		let mean = resultCounts['total_score'] / resultCounts['scored'];
 		return Math.floor(mean * 10) / 10;
 	}
 
-	$: classesShowInfo = (show: boolean) => (!show ? 'hidden' : '');
-	$: classesShowInfoText = (show: boolean) => (show ? 'text-primary-500' : '');
-	$: classesPercentText = (resultColor: string) => (resultColor === '#000000' ? 'text-white' : '');
+	function nodeDocumentationScore(): number | null {
+		if (
+			!resultCounts ||
+			!resultCounts.hasOwnProperty('total_documentation_score') ||
+			!resultCounts.hasOwnProperty('scored')
+		) {
+			return null;
+		}
+		let mean = resultCounts['total_documentation_score'] / resultCounts['scored'];
+		return Math.floor(mean * 10) / 10;
+	}
+
+	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
+	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
+	let classesPercentText = $derived((resultColor: string) =>
+		resultColor === '#000000' ? 'text-white' : ''
+	);
+
+	export const getBadgeStyles = (answers: any, questions: any) => {
+		const visibleQuestions = Object.entries(questions || {}).filter(([_, q]) =>
+			isQuestionVisible(q, answers)
+		);
+
+		const answeredCount = visibleQuestions.filter(([urn, _]) => {
+			const answer = answers[urn];
+			if (Array.isArray(answer)) return answer.length > 0;
+			return answer !== null && answer !== undefined && answer !== '';
+		}).length;
+
+		const totalCount = visibleQuestions.length;
+
+		const backgroundColor =
+			answeredCount === 0 ? '#fca5a5' : answeredCount === totalCount ? '#bbf7d0' : '#fef08a';
+
+		return {
+			backgroundColor,
+			color: darkenColor(backgroundColor, 0.6),
+			answeredCount,
+			totalCount
+		};
+	};
 </script>
 
-{#if !$displayOnlyAssessableNodes || assessable || hasAssessableChildren}
+{#if !displayOnlyAssessableNodes || assessable || hasAssessableChildren}
 	<div class="flex flex-row justify-between space-x-8">
 		<div class="flex flex-1 justify-center max-w-[80ch] flex-col">
-			<div class="flex flex-row space-x-2" style="font-weight: 300;">
+			<div class="flex flex-row space-x-2 items-center" style="font-weight: 300;">
 				<div>
 					{#if assessable}
-						<span class="w-full h-full flex rounded-token hover:text-primary-500">
+						<span class="w-full h-full flex rounded-base hover:text-primary-500">
 							{#if canEditRequirementAssessment}
 								<Anchor
 									breadcrumbAction="push"
-									href="/requirement-assessments/{ra_id}/edit?next={$page.url.pathname}"
+									href="/requirement-assessments/{ra_id}/edit?next={page.url.pathname}"
 								>
 									{#if title || description}
 										{#if title}
 											<span style="font-weight: 600;">{title}</span>
 										{/if}
 										{#if description}
-											<p>{description}</p>
+											<MarkdownRenderer content={description} />
 										{/if}
-									{:else if node.question && node.question.questions && node.question.questions[0]}
-										<!-- This only displays the first question -->
-										{node.question.questions[0].text}
+									{:else if Object.keys(node.questions).length > 0}
+										<!-- This displays the first question's text -->
+										{Object.entries(node.questions)[0][1].text}
 									{/if}
 								</Anchor>
 							{:else}
 								<Anchor
 									breadcrumbAction="push"
-									href="/requirement-assessments/{ra_id}?next={$page.url.pathname}"
+									href="/requirement-assessments/{ra_id}?next={page.url.pathname}"
 								>
 									{#if title}
 										<span style="font-weight: 600;">{title}</span>
 									{/if}
 									{#if description}
-										<p>{description}</p>
+										<MarkdownRenderer content={description} />
 									{/if}
 								</Anchor>
 							{/if}
@@ -149,15 +223,45 @@
 								<span style="font-weight: 600;">{title}</span>
 							{/if}
 							{#if description}
-								<p>{description}</p>
+								<MarkdownRenderer content={description} />
 							{/if}
 						</p>
 					{/if}
 				</div>
+				{#if !assessable}
+					<div class="flex flex-row items-end items-middle text-xs mr-2" style="width:6rem">
+						{#each orderedResultPercentages as rp}
+							{#if resultCounts && resultCounts[rp.result] !== undefined}
+								<div
+									class="rounded-md px-1 mx-1 leading-4"
+									style="background-color: {complianceResultColorMap[
+										rp.result
+									]}; color: {complianceResultColorMap[rp.result] === '#000000'
+										? '#ffffff'
+										: '#111827'}"
+								>
+									{resultCounts[rp.result]}
+								</div>
+							{/if}
+						{/each}
+						{#if resultCounts && resultCounts['not_assessed'] !== undefined}
+							<div
+								class="rounded-md px-1 mx-1 leading-4"
+								style="background-color: {complianceResultColorMap[
+									'not_assessed'
+								]}; color: {complianceResultColorMap['not_assessed'] === '#000000'
+									? '#ffffff'
+									: '#111827'}"
+							>
+								{resultCounts['not_assessed']}
+							</div>
+						{/if}
+					</div>
+				{/if}
 				<div>
 					{#if hasAssessableChildren}
 						{#each Object.entries(complianceStatusColorMap) as [status, color]}
-							{#if resultCounts[status] && selectedStatus.includes(status)}
+							{#if resultCounts?.status && (selectedStatus.includes(status) || selectedStatus.length === 0)}
 								<span
 									class="badge mr-1"
 									style="background-color: {color + '44'}; color: {darkenColor(color, 0.3)}"
@@ -168,20 +272,15 @@
 							{/if}
 						{/each}
 					{/if}
-					{#if node.question && node.question.questions}
-						{#if node.question.questions.length > 1}
-							<span
-								class="badge"
-								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
-								>{node.question.questions.length} {m.questionPlural()}</span
-							>
-						{:else}
-							<span
-								class="badge"
-								style="background-color: pink; color: {darkenColor('#FFC0CB', 0.5)}"
-								>{node.question.questions.length} {m.questionSingular()}</span
-							>
-						{/if}
+					{#if node.questions}
+						{@const badgeStyles = getBadgeStyles(node.answers, node.questions)}
+						<span
+							class="badge"
+							style="background-color: {badgeStyles.backgroundColor}; color: {badgeStyles.color}"
+						>
+							{badgeStyles.answeredCount}/{badgeStyles.totalCount}
+							{Object.keys(node.questions).length > 1 ? m.questionPlural() : m.questionSingular()}
+						</span>
 					{/if}
 				</div>
 			</div>
@@ -191,27 +290,27 @@
 				role="button"
 				tabindex="0"
 				class="select-none text-sm hover:text-primary-400 {classesShowInfoText(showInfo)}"
-				on:click={(e) => {
+				onclick={(e) => {
 					e.preventDefault();
 					showInfo = !showInfo;
 				}}
-				on:keydown={(e) => {
+				onkeydown={(e) => {
 					if (e.key === 'Enter') {
 						e.preventDefault();
 						showInfo = !showInfo;
 					}
 				}}
 			>
-				<i class="text-xs fa-solid fa-info-circle" /> Learn more
+				<i class="text-xs fa-solid fa-info-circle"></i> Learn more
 			</div>
 			<div
-				class="card p-2 variant-ghost-primary text-sm flex flex-row cursor-auto {classesShowInfo(
+				class="card p-2 preset-tonal-primary border border-primary-500 text-sm flex flex-row cursor-auto {classesShowInfo(
 					showInfo
 				)}"
 			>
 				<div class="flex-1">
 					<p class="font-medium">
-						<i class="fa-solid fa-gears" />
+						<i class="fa-solid fa-gears"></i>
 						Suggested reference controls
 					</p>
 					{#if reference_controls?.length === 0}
@@ -221,10 +320,7 @@
 							{#each reference_controls as func}
 								<li>
 									{#if func.id}
-										<a
-											class="anchor"
-											href="/reference-controls/{func.id}?next={$page.url.pathname}"
-										>
+										<a class="anchor" href="/reference-controls/{func.id}?next={page.url.pathname}">
 											{func.name}
 										</a>
 									{:else}
@@ -237,7 +333,7 @@
 				</div>
 				<div class="flex-1">
 					<p class="font-medium">
-						<i class="fa-solid fa-gears" />
+						<i class="fa-solid fa-gears"></i>
 						Threats covered
 					</p>
 					{#if threats?.length === 0}
@@ -247,7 +343,7 @@
 							{#each threats as threat}
 								<li>
 									{#if threat.id}
-										<a class="anchor" href="/threats/{threat.id}?next={$page.url.pathname}">
+										<a class="anchor" href="/threats/{threat.id}?next={page.url.pathname}">
 											{threat.name}
 										</a>
 									{:else}
@@ -278,17 +374,41 @@
 						</div>
 					{/each}
 				</div>
-				{#if nodeScore() !== null}
-					<span>
-						<ProgressRadial
-							stroke={100}
-							meter={displayScoreColor(nodeScore(), node.max_score)}
-							font={150}
+				<div class="flex flex-row space-x-2 items-center">
+					{#if hasParentNode}
+						{#if nodeScore() !== null}
+							<ProgressRing
+								strokeWidth="20px"
+								value={formatScoreValue(nodeScore(), node.max_score)}
+								meterStroke={displayScoreColor(nodeScore(), node.max_score)}
+								size="size-12">{nodeScore()}</ProgressRing
+							>
+							{#if showDocumentationScore}
+								<ProgressRing
+									strokeWidth="20px"
+									value={formatScoreValue(nodeDocumentationScore(), node.max_score)}
+									meterStroke={displayScoreColor(nodeDocumentationScore(), node.max_score)}
+									size="size-12">{nodeDocumentationScore()}</ProgressRing
+								>
+							{/if}
+						{/if}
+					{:else if nodeScore() !== null}
+						<ProgressRing
+							strokeWidth="20px"
 							value={formatScoreValue(nodeScore(), node.max_score)}
-							width={'w-10'}>{nodeScore()}</ProgressRadial
+							meterStroke={displayScoreColor(nodeScore(), node.max_score)}
+							size="size-12">{nodeScore()}</ProgressRing
 						>
-					</span>
-				{/if}
+						{#if showDocumentationScore}
+							<ProgressRing
+								strokeWidth="20px"
+								value={formatScoreValue(nodeDocumentationScore(), node.max_score)}
+								meterStroke={displayScoreColor(nodeDocumentationScore(), node.max_score)}
+								size="size-12">{nodeDocumentationScore()}</ProgressRing
+							>
+						{/if}
+					{/if}
+				</div>
 			</div>
 		{/if}
 	</div>

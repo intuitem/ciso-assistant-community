@@ -1,0 +1,2578 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:mapping-adobe-ccf-v5-and-cyber_essentials_requirements_for_it_infrastructure
+locale: en
+ref_id: mapping-adobe-ccf-v5-and-cyber_essentials_requirements_for_it_infrastructure
+name: 'adobe-ccf-v5 <-> Cyber Essentials: Requirements for IT infrastructure'
+description: 'Mapping between Adobe CCF v5 and Cyber Essentials: Requirements for
+  IT infrastructure v3.1'
+copyright: Adobe
+version: 1
+publication_date: 2025-07-01
+provider: Adobe
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:adobe-ccf-v5
+- urn:intuitem:risk:library:cyber_essentials_requirements_for_it_infrastructure
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-and-cyber_essentials_requirements_for_it_infrastructure
+    ref_id: mapping-adobe-ccf-v5-and-cyber_essentials_requirements_for_it_infrastructure
+    name: 'adobe-ccf-v5 <-> Cyber Essentials: Requirements for IT infrastructure'
+    description: 'Mapping between Adobe CCF v5 and Cyber Essentials: Requirements
+      for IT infrastructure v3.1'
+    source_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
+    target_framework_urn: urn:intuitem:risk:framework:cyber_essentials_requirements_for_it_infrastructure
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node128
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node136
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node138
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node139
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node140
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node141
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node142
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node143
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node144
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node145
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node146
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node128
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node136
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node138
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node139
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node140
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node141
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node142
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node143
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node144
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node145
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node146
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node128
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node136
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node138
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node139
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node140
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node141
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node142
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node143
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node144
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node145
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node146
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node128
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node136
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node138
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node139
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node140
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node141
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node142
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node143
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node144
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node145
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node146
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node128
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node136
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node138
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node139
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node140
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node141
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node142
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node143
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node144
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node145
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node146
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node204
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node205
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node206
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node207
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node208
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node209
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node210
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node211
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node214
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node215
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node216
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node217
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node218
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node219
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node220
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node221
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node223
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node224
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node225
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node226
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node227
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node228
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node229
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node230
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node231
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node232
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node233
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node234
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node235
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node236
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node237
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node238
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node239
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node241
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node242
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node243
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node244
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node245
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node246
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node247
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node248
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node249
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node204
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node205
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node206
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node207
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node208
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node209
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node210
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node211
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node214
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node215
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node216
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node217
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node218
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node219
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node220
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node221
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node223
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node224
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node225
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node226
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node227
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node228
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node229
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node230
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node231
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node232
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node233
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node234
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node235
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node236
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node237
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node238
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node239
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node241
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node242
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node243
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node244
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node245
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node246
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node247
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node248
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node249
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node204
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node205
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node206
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node207
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node208
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node209
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node210
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node211
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node214
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node215
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node216
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node217
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node218
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node219
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node220
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node221
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node223
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node224
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node225
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node226
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node227
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node228
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node229
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node230
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node231
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node232
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node233
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node234
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node235
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node236
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node237
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node238
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node239
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node241
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node242
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node243
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node244
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node245
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node246
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node247
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node248
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node249
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node204
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node205
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node206
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node207
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node208
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node209
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node210
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node211
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node214
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node215
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node216
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node217
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node218
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node219
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node220
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node221
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node223
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node224
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node225
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node226
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node227
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node228
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node229
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node230
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node231
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node232
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node233
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node234
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node235
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node236
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node237
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node238
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node239
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node241
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node242
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node243
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node244
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node245
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node246
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node247
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node248
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node249
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node255
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node256
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node257
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node258
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node259
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node262
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node264
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node265
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node266
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node267
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node268
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node269
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node271
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node272
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node273
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node255
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node256
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node257
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node258
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node259
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node262
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node264
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node265
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node266
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node267
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node268
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node269
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node271
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node272
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node273
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node255
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node256
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node257
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node258
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node259
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node262
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node264
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node265
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node266
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node267
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node268
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node269
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node271
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node272
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node273
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node255
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node256
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node257
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node258
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node259
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node262
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node264
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node265
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node266
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node267
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node268
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node269
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node271
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node272
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node273
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node185
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node186
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node187
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node188
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node189
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node190
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node191
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node192
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node185
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node186
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node187
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node188
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node189
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node190
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node191
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node192
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node185
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node186
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node187
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node188
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node189
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node190
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node191
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node192
+      relationship: intersect
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-and-cyber_essentials_requirements_for_it_infrastructure-revert
+    ref_id: mapping-adobe-ccf-v5-and-cyber_essentials_requirements_for_it_infrastructure-revert
+    name: 'adobe-ccf-v5 <-> Cyber Essentials: Requirements for IT infrastructure'
+    description: 'Mapping between Adobe CCF v5 and Cyber Essentials: Requirements
+      for IT infrastructure v3.1'
+    target_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
+    source_framework_urn: urn:intuitem:risk:framework:cyber_essentials_requirements_for_it_infrastructure
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node128
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node136
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node138
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node139
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node140
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node141
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node142
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node143
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node144
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node145
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node146
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node128
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node136
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node138
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node139
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node140
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node141
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node142
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node143
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node144
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node145
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node146
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node128
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node136
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node138
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node139
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node140
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node141
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node142
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node143
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node144
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node145
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node146
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node128
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node136
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node138
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node139
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node140
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node141
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node142
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node143
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node144
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node145
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node146
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node128
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node136
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node138
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node139
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node140
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node141
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node142
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node143
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node144
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node145
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node146
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node162
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node163
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node164
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node165
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node166
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node167
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node168
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node170
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node171
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node172
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node173
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node174
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node175
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-38
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node204
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node205
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node206
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node207
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node208
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node209
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node210
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node211
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node214
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node215
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node216
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node217
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node218
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node219
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node220
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node221
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node223
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node224
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node225
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node226
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node227
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node228
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node229
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node230
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node231
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node232
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node233
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node234
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node235
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node236
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node237
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node238
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node239
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node241
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node242
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node243
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node244
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node245
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node246
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node247
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node248
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node249
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node204
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node205
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node206
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node207
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node208
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node209
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node210
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node211
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node214
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node215
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node216
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node217
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node218
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node219
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node220
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node221
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node223
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node224
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node225
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node226
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node227
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node228
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node229
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node230
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node231
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node232
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node233
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node234
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node235
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node236
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node237
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node238
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node239
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node241
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node242
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node243
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node244
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node245
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node246
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node247
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node248
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node249
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node204
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node205
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node206
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node207
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node208
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node209
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node210
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node211
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node214
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node215
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node216
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node217
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node218
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node219
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node220
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node221
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node223
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node224
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node225
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node226
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node227
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node228
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node229
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node230
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node231
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node232
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node233
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node234
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node235
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node236
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node237
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node238
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node239
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node241
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node242
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node243
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node244
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node245
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node246
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node247
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node248
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node249
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node204
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node205
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node206
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node207
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node208
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node209
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node210
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node211
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node214
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node215
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node216
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node217
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node218
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node219
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node220
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node221
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node223
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node224
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node225
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node226
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node227
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node228
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node229
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node230
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node231
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node232
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node233
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node234
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node235
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node236
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node237
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node238
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node239
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node241
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node242
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node243
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node244
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node245
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node246
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node247
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node248
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node249
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node255
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node256
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node257
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node258
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node259
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node262
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node264
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node265
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node266
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node267
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node268
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node269
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node271
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node272
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node273
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node255
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node256
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node257
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node258
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node259
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node262
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node264
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node265
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node266
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node267
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node268
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node269
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node271
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node272
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node273
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node255
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node256
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node257
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node258
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node259
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node262
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node264
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node265
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node266
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node267
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node268
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node269
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node271
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node272
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node273
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node255
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node256
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node257
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node258
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node259
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node262
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node264
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node265
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node266
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node267
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node268
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node269
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node271
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node272
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node273
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node185
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node186
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node187
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node188
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node189
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node190
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node191
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node192
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node185
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node186
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node187
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node188
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node189
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node190
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node191
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node192
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node185
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node186
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node187
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node188
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node189
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node190
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node191
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:cyber_essentials_requirements_for_it_infrastructure:node192
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      relationship: intersect

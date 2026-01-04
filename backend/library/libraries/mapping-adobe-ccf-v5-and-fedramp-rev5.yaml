@@ -1,0 +1,2431 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:mapping-adobe-ccf-v5-and-fedramp-rev5
+locale: en
+ref_id: mapping-adobe-ccf-v5-and-fedramp-rev5
+name: adobe-ccf-v5 <-> GSA-FEDRAMP-rev5
+description: Mapping between Adobe CCF v5 and GSA FedRAMP rev5
+copyright: Adobe
+version: 1
+publication_date: 2025-07-01
+provider: Adobe
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:adobe-ccf-v5
+- urn:intuitem:risk:library:fedramp-rev5
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-and-fedramp-rev5
+    ref_id: mapping-adobe-ccf-v5-and-fedramp-rev5
+    name: adobe-ccf-v5 <-> GSA-FEDRAMP-rev5
+    description: Mapping between Adobe CCF v5 and GSA FedRAMP rev5
+    source_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
+    target_framework_urn: urn:intuitem:risk:framework:fedramp-rev5
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9-(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-09
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-09
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-3-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-2-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-4-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-2-(8)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-7-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-2-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-2-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-9-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-2-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-9-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-6-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-7-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9-(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-7-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-8-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-8-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-2-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-9-(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17-(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-9-(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-7-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-9-(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-6-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-4-(21)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-5-(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-5-(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-28
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-28-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-19-(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-13
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-17
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-20
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-4-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-21
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-21
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-9-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-09
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-4-(21)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-09
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(9)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-4-(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-2-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-2-(12)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-2-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-15
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-15
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-15
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-15
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-23
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-19
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-19
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-20
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-2-(12)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(7)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(9)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(10)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-23
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-25
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-25
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-25
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-25
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-25
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-26
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(10)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-29
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(7)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-29
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-29
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-29
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-29
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-35
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-3-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-4-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-9-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-3-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-2-(7)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-7-(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-4-(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-7-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-7-(18)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-7-(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-7-(8)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-8-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-13
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-39
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-15
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-16
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-18-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-16
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-17
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-18
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-18
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-18
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-18
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-19-(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-09
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:at-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:at-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-09
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-15
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-9-(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-4-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-4-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-7-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-6-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-6-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(12)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-6-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-4-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-4-(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-15
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-16
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(12)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-18
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-22
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(9)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-22
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(10)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-6-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-4-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-29
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-2-(8)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9-(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-8-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-03
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-6-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-11
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-12
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-13
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-13
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-13
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-13-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-14
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-15
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-16
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:at-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:at-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:at-2-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:at-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5-(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-8-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-2-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-8-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-13
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-16
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-20
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7-(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-20
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-20
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-11-(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-21
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-22
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-22
+      target_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5
+      relationship: intersect
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-adobe-ccf-v5-and-fedramp-rev5-revert
+    ref_id: mapping-adobe-ccf-v5-and-fedramp-rev5-revert
+    name: adobe-ccf-v5 <-> GSA-FEDRAMP-rev5
+    description: Mapping between Adobe CCF v5 and GSA FedRAMP rev5
+    target_framework_urn: urn:intuitem:risk:framework:adobe-ccf-v5
+    source_framework_urn: urn:intuitem:risk:framework:fedramp-rev5
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9-(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-3-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:am-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-2-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-4-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-9
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-2-(8)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-7-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-2-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bc-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-9
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-2-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-9-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-2-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-9-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-6-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-7-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9-(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-7-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-8-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-8-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:bm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-2-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-9-(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17-(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-9-(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-7-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-16
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-9-(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-6-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-9
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-21
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-4-(21)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-15
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cfm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-5-(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-5-(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:chm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-28
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-28-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-19-(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:cry-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-12
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-12
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-4-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-22
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-9-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:dm-21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:em-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-9
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-4-(21)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(9)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-4-(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-14
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-20
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-2-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-2-(12)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-2-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-14
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-12
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-23
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-19
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-2-(12)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(7)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(9)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(10)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-23
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-23
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(10)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(7)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-29
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-29
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-29
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-29
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-29
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-20
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-30
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-3-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:iam-35
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-4-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-9-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-9
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-3-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ir-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-19
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-19
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-2-(7)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:mdm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-7-(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-4-(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-7-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-7-(18)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-7-(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-7-(8)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-8-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-21
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-22
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-39
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-18-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-18
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-19-(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:no-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:pr-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:rm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-9
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sdd-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:at-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:at-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ia-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sc-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-9-(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sg-17
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-4-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pl-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-4-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:slc-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-12
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-7-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-6-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-6-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-12
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(12)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-6-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-4-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-4-(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-2-(12)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-17
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(9)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ac-6-(10)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:au-9
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-6-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-25
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-4-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-26
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-29
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-2-(8)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:sm-31
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-1
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-16
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9-(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-15
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-8-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-9
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:mp-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ma-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cp-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-6-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-14
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-6
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-13
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-13-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-10
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:pe-12
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:so-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:at-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:at-4
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:at-2-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:at-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ir-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:ta-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-9-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ps-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:tpm-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5-(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-8-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-2-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-8
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-8-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-2
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:cm-8-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-3
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:si-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7-(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-11-(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-20
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:sa-11
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-21
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ca-7
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:fedramp-rev5:ra-5
+      target_requirement_urn: urn:intuitem:risk:req_node:adobe-ccf-v5:vm-22
+      relationship: intersect

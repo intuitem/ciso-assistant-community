@@ -5,8 +5,13 @@ from ciso_assistant.settings import CISO_ASSISTANT_URL
 from rest_framework.decorators import action
 
 from iam.sso.models import SSOSettings
+from integrations.models import IntegrationProvider
 
-from .serializers import GlobalSettingsSerializer, GeneralSettingsSerializer
+from .serializers import (
+    GlobalSettingsSerializer,
+    GeneralSettingsSerializer,
+    FeatureFlagsSerializer,
+)
 
 from .models import GlobalSettings
 
@@ -34,6 +39,31 @@ class GlobalSettingsViewSet(viewsets.ModelViewSet):
         )
 
 
+class FeatureFlagsViewSet(viewsets.ModelViewSet):
+    model = GlobalSettings
+    serializer_class = FeatureFlagsSerializer
+    queryset = GlobalSettings.objects.filter(name="feature-flags")
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def get_object(self):
+        obj, _ = self.model.objects.get_or_create(name="feature-flags")
+        obj.is_published = True  # we could do that at creation, but it's ok here
+        obj.save(update_fields=["is_published"])
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+
 class GeneralSettingsViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = GeneralSettingsSerializer
@@ -54,6 +84,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     def get_object(self):
         obj = self.model.objects.get(name="general")
         obj.is_published = True  # we could do that at creation, but it's ok here
+        obj.save(update_fields=["is_published"])
         self.check_object_permissions(self.request, obj)
         return obj
 
@@ -67,6 +98,13 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "ebios_radar_red_zone_radius": 2.5,
             "notifications_enable_mailing": False,
             "interface_agg_scenario_matrix": False,
+            "risk_matrix_swap_axes": False,
+            "risk_matrix_flip_vertical": False,
+            "risk_matrix_labels": "ISO",
+            "mapping_max_depth": 3,
+            "allow_self_validation": False,
+            "show_warning_external_links": True,
+            "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
@@ -77,13 +115,22 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             settings.value = updated_value
             settings.save()
 
+        enabled_integrations = (
+            IntegrationProvider.objects.filter(is_active=True)
+            .distinct()
+            .values("id", "provider_type", "name", "configurations")
+        )
+        settings.value["enabled_integrations"] = list(enabled_integrations)
+
         return Response(GeneralSettingsSerializer(settings).data.get("value"))
 
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
         choices = {
             "1-4": "1-4",
+            "1-5": "1-5",
             "0-3": "0-3",
+            "0-4": "0-4",
             "FIPS-199": "FIPS-199",
         }
         return Response(choices)

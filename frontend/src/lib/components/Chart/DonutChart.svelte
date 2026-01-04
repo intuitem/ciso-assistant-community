@@ -1,18 +1,43 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
-	export let name: string;
-	export let s_label = '';
-	export let width = 'w-auto';
-	export let height = 'h-full';
-	export let classesContainer = '';
-	export let title = '';
-	export let orientation = 'vertical';
-	export let values: any[]; // Set the types for these variables later on
-	export let colors: string[] = [];
+	interface Props {
+		name: string;
+		s_label?: string;
+		width?: string;
+		height?: string;
+		classesContainer?: string;
+		title?: string;
+		orientation?: string;
+		values: any[]; // Set the types for these variables later on
+		colors?: string[];
+		showPercentage?: boolean;
+	}
+
+	let {
+		name,
+		s_label = '',
+		width = 'w-auto',
+		height = 'h-full',
+		classesContainer = '',
+		title = '',
+		orientation = 'vertical',
+		values = $bindable(),
+		colors = [],
+		showPercentage = false
+	}: Props = $props();
 	for (const index in values) {
 		if (values[index].localName) {
 			values[index].name = safeTranslate(values[index].localName);
+		} else {
+			// Auto-translate common severity, detection, and status values
+			const nameToTranslate = values[index].name?.toLowerCase();
+			if (nameToTranslate) {
+				const translatedName = safeTranslate(nameToTranslate);
+				if (translatedName !== nameToTranslate) {
+					values[index].name = translatedName;
+				}
+			}
 		}
 	}
 	const chart_id = `${name}_div`;
@@ -54,17 +79,27 @@
 				{
 					name: s_label,
 					type: 'pie',
-					radius: ['40%', '70%'],
-					avoidLabelOverlap: false,
+					radius: showPercentage ? ['30%', '55%'] : ['40%', '70%'],
+					center: ['50%', '45%'],
+					avoidLabelOverlap: true,
 					itemStyle: {
 						borderRadius: 10,
 						borderColor: '#fff',
 						borderWidth: 2
 					},
-					label: {
-						show: false,
-						position: 'center'
-					},
+					label: showPercentage
+						? {
+								show: true,
+								position: 'outside',
+								formatter: '{d}%',
+								fontSize: 10,
+								fontWeight: 'bold',
+								distanceToLabelLine: 2
+							}
+						: {
+								show: false,
+								position: 'center'
+							},
 					emphasis: {
 						label: {
 							show: true,
@@ -82,7 +117,7 @@
 								const percent = ((params.data.value / total) * 100).toFixed(1);
 
 								// Return formatted center label with just the name and percentage
-								return `{name|${params.data.name}}\n{value|${percent}%}`;
+								return `{value|${percent}%}`;
 							},
 							rich: {
 								name: {
@@ -98,7 +133,9 @@
 						}
 					},
 					labelLine: {
-						show: false
+						show: showPercentage,
+						length: 8,
+						length2: 5
 					},
 					data: filteredValues,
 					color: colors
@@ -114,4 +151,4 @@
 	});
 </script>
 
-<div id={chart_id} class="{width} {height} {classesContainer}" />
+<div id={chart_id} class="{width} {height} {classesContainer}"></div>

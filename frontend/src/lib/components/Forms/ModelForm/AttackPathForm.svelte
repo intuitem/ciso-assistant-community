@@ -2,16 +2,30 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import Checkbox from '../Checkbox.svelte';
 	import TextArea from '../TextArea.svelte';
+	import TextField from '$lib/components/Forms/TextField.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let additionalInitialData: Record<string, any> = {};
+	interface Props {
+		form: SuperForm<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		additionalInitialData?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		additionalInitialData = {}
+	}: Props = $props();
+
+	const formStore = form.form;
 </script>
 
 <AutocompleteSelect
@@ -26,9 +40,26 @@
 />
 <AutocompleteSelect
 	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
+/>
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
+<AutocompleteSelect
+	{form}
 	multiple
 	optionsEndpoint="stakeholders"
-	optionsDetailedUrlParameters={[['ebios_rm_study', additionalInitialData.ebios_rm_study]]}
+	optionsDetailedUrlParameters={$formStore.ebios_rm_study
+		? [['ebios_rm_study', $formStore.ebios_rm_study]]
+		: undefined}
 	optionsLabelField="str"
 	field="stakeholders"
 	cacheLock={cacheLocks['stakeholders']}

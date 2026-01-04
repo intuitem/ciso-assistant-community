@@ -1,10 +1,17 @@
 name: Backend migrations check
+permissions:
+  contents: read
 
 on:
   pull_request:
     branches: [main, develop]
     types: [opened, synchronize]
   workflow_dispatch:
+
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   GITHUB_WORKFLOW: github_actions
@@ -17,50 +24,18 @@ env:
 jobs:
   migrations-check:
     runs-on: ubuntu-24.04
-
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: ["3.12"]
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: "pip"
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
-      - name: Install backend requirements
-        working-directory: ${{ env.backend-directory }}
-        run: poetry install
-      - name: Create backend environment variables file
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          touch .env
-          echo DJANGO_DEBUG=True >> .env
-          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
-          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
-          echo DB_HOST=localhost >> .env
-          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
-          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
-          echo DEFAULT_FROM_EMAIL='ciso-assistant@tests.net' >> .env
-          echo EMAIL_HOST=localhost >> .env
-          echo EMAIL_HOST_USER=user@tests.com >> .env
-          echo EMAIL_HOST_PASSWORD=password >> .env
-          echo EMAIL_PORT=1025 >> .env
-      - name: Check that migrations were made
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py makemigrations --check --dry-run --verbosity=3
-
-  enterprise-migrations-check:
-    runs-on: ubuntu-24.04
+    env:
+      DJANGO_DEBUG: "True"
+      DJANGO_SUPERUSER_EMAIL: admin@tests.com
+      DJANGO_SUPERUSER_PASSWORD: 1234
+      DB_HOST: localhost
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
+      CISO_ASSISTANT_URL: http://localhost:4173
+      DEFAULT_FROM_EMAIL: "ciso-assistant@tests.net"
+      EMAIL_HOST: localhost
+      EMAIL_HOST_USER: user@tests.com
+      EMAIL_HOST_PASSWORD: password
+      EMAIL_PORT: 1025
 
     strategy:
       max-parallel: 4
@@ -74,37 +49,78 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
+      - name: Install backend requirements
+        working-directory: ${{ env.backend-directory }}
+        run: poetry install
+      - name: Check that migrations were made
+        working-directory: ${{ env.backend-directory }}
+        run: poetry run python manage.py makemigrations --check --dry-run --verbosity=3
+
+  enterprise-migrations-check:
+    runs-on: ubuntu-24.04
+    env:
+      DJANGO_DEBUG: "True"
+      DJANGO_SUPERUSER_EMAIL: admin@tests.com
+      DJANGO_SUPERUSER_PASSWORD: 1234
+      DB_HOST: localhost
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
+      CISO_ASSISTANT_URL: http://localhost:4173
+      DEFAULT_FROM_EMAIL: "ciso-assistant@tests.net"
+      EMAIL_HOST: localhost
+      EMAIL_HOST_USER: user@tests.com
+      EMAIL_HOST_PASSWORD: password
+      EMAIL_PORT: 1025
+      DJANGO_SETTINGS_MODULE: enterprise_core.settings
+      LICENSE_SEATS: 999
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
-          virtualenvs-create: false
-          installer-parallel: true
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      - name: Configure Poetry to not use virtualenvs
+        run: poetry config virtualenvs.create false
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
       - name: Install enterprise backend
         working-directory: ${{ env.enterprise-backend-directory }}
         run: poetry install
-      - name: Create backend environment variables file
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          touch .env
-          echo DJANGO_DEBUG=True >> .env
-          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
-          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
-          echo DB_HOST=localhost >> .env
-          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
-          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
-          echo DEFAULT_FROM_EMAIL='ciso-assistant@tests.net' >> .env
-          echo EMAIL_HOST=localhost >> .env
-          echo EMAIL_HOST_USER=user@tests.com >> .env
-          echo EMAIL_HOST_PASSWORD=password >> .env
-          echo EMAIL_PORT=1025 >> .env
-          echo DJANGO_SETTINGS_MODULE=enterprise_core.settings >> .env
-          echo LICENSE_SEATS=999 >> .env
       - name: Check that migrations were made
         working-directory: ${{ env.backend-directory }}
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py makemigrations --check --dry-run --verbosity=3 --settings=${{ env.enterprise-backend-settings-module }}
+          poetry run python manage.py makemigrations --check --dry-run --verbosity=3 --settings="$SETTINGS_MODULE"
           if [ $? -ne 0 ]; then echo "::error Migrations were not made, please run the makemigrations command." && exit 1; fi

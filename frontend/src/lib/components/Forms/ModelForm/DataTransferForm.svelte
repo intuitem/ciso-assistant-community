@@ -6,12 +6,23 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
+	import { safeTranslate } from '$lib/utils/i18n';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {}
+	}: Props = $props();
 </script>
 
 <TextField
@@ -23,6 +34,7 @@
 />
 <AutocompleteSelect
 	{form}
+	translateOptions={false}
 	field="country"
 	options={model.selectOptions['country']}
 	cacheLock={cacheLocks['country']}
@@ -58,6 +70,20 @@
 	cacheLock={cacheLocks['entity']}
 	bind:cachedValue={formDataCache['entity']}
 	label={m.entity()}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'relationship',
+				display: (relationships) => {
+					if (!relationships || relationships.length === 0) return '';
+					return relationships.map((r) => safeTranslate(r.str || r.name || r)).join(' | ');
+				}
+			}
+		],
+		position: 'suffix',
+		separator: ' | ',
+		classes: 'text-xs text-surface-500'
+	}}
 />
 <AutocompleteSelect
 	{form}

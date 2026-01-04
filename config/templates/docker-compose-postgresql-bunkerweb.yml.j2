@@ -1,0 +1,251 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:16
+    pull_policy: always
+    restart: always
+    environment:
+      POSTGRES_DB: {{ postgres.name }}
+      POSTGRES_USER: {{ postgres.user }}
+      {% if postgres.password is defined %}
+      POSTGRES_PASSWORD: {{ postgres.password }}
+      {% endif %}
+    volumes:
+      - ./db/pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{ postgres.user }} -d {{ postgres.name }}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - bw-services
+
+  backend:
+    container_name: backend
+    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    pull_policy: always
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - ALLOWED_HOSTS=backend,localhost{% if fqdn != 'localhost'%},{{ fqdn }}{% endif %}
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
+      - DJANGO_DEBUG={{ enable_debug }}
+      - AUTH_TOKEN_TTL=7200
+      - POSTGRES_NAME={{ postgres.name }}
+      - POSTGRES_USER={{ postgres.user }}
+      {% if postgres.password is defined %}
+      - POSTGRES_PASSWORD={{ postgres.password }}
+      {% endif %}
+      - DB_HOST=postgres
+      {% if need_mailer %}
+      - EMAIL_HOST={{ email.host }}
+      - EMAIL_PORT={{ email.port }}
+      {% if email.use_tls %}- EMAIL_USE_TLS={{ email.use_tls }}{% endif %}
+      - EMAIL_HOST_USER={{ email.user }}
+      - EMAIL_HOST_PASSWORD={{ email.password }}
+      - DEFAULT_FROM_EMAIL={{ email.from_email }}
+      {% endif %}
+    volumes:
+      - ./db:/code/db
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://backend:8000/api/health/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 100s
+    networks:
+      - bw-services
+
+  huey:
+    container_name: huey
+    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    pull_policy: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend,localhost
+      - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
+      - DJANGO_DEBUG=False
+      - AUTH_TOKEN_TTL=7200
+      - POSTGRES_NAME={{ postgres.name }}
+      - POSTGRES_USER={{ postgres.user }}
+      {% if postgres.password is defined %}
+      - POSTGRES_PASSWORD={{ postgres.password }}
+      {% endif %}
+      - DB_HOST=postgres
+      {% if need_mailer %}
+      - EMAIL_HOST={{ email.host }}
+      - EMAIL_PORT={{ email.port }}
+      {% if email.use_tls %}- EMAIL_USE_TLS={{ email.use_tls }}{% endif %}
+      - EMAIL_HOST_USER={{ email.user }}
+      - EMAIL_HOST_PASSWORD={{ email.password }}
+      - DEFAULT_FROM_EMAIL={{ email.from_email }}
+      {% endif %}
+    volumes:
+      - ./db:/code/db
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        poetry run python manage.py run_huey -w 2 --scheduler-interval 60
+    networks:
+      - bw-services
+
+  frontend:
+    container_name: frontend
+    environment:
+      - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=https://{{ fqdn }}:{{ port }}/api
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - HOST_HEADER=x-forwarded-host
+    image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
+    pull_policy: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - bw-services
+
+  bunkerweb:
+    image: bunkerity/bunkerweb:1.6.1
+    ports:
+      {% if can_do_tls %}- "80:8080/tcp"{% endif %}
+      - "{{ port }}:8443/tcp"
+    environment:
+      - "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24"
+    restart: unless-stopped
+    networks:
+      - bw-universe
+      - bw-services
+
+  bw-scheduler:
+    depends_on:
+      bw-db:
+        condition: service_started
+    image: bunkerity/bunkerweb-scheduler:1.6.1
+    environment:
+      - "DATABASE_URI=mariadb+pymysql://{{ bunkerweb.db_username }}:{{ bunkerweb.db_password }}@bw-db:3306/{{ bunkerweb.db_name }}"
+      - "API_WHITELIST_IP=127.0.0.0/8 10.20.30.0/24"
+      - MULTISITE=yes
+      - BUNKERWEB_INSTANCES=bunkerweb
+      - "SERVER_NAME={{ fqdn }}{% if bunkerweb.use_ui and mode == 'VM/Remote' %} {{ bunkerweb.ui_fqdn }}{% endif %}"
+      - {{ fqdn }}_PROXY_BUFFER_SIZE=16k
+      - {{ fqdn }}_PROXY_BUFFERS=8 16k
+      - {{ fqdn }}_USE_TEMPLATE=low
+      - {{ fqdn }}_USE_REVERSE_PROXY=yes
+      - {{ fqdn }}_REVERSE_PROXY_URL=/
+      - {{ fqdn }}_REVERSE_PROXY_HOST=http://frontend:3000
+      - {{ fqdn }}_REVERSE_PROXY_URL_2=/api/
+      - {{ fqdn }}_REVERSE_PROXY_HOST_2=http://backend:8000
+      {% if can_do_tls %}- {{ fqdn }}_AUTO_LETS_ENCRYPT=yes{% elif use_custom_cert %}
+      - {{ fqdn }}_USE_CUSTOM_SSL=yes
+      - {{ fqdn }}_CUSTOM_SSL_CERT=/etc/bunkerweb/cert.pem
+      - {{ fqdn }}_CUSTOM_SSL_KEY=/etc/bunkerweb/key.pem{% else %}
+      - {{ fqdn }}_GENERATE_SELF_SIGNED_SSL=yes
+      {% endif %}
+      {% if bunkerweb.use_ui and mode == "VM/Remote" %}- {{ bunkerweb.ui_fqdn }}_USE_TEMPLATE=ui
+      - {{ bunkerweb.ui_fqdn }}_USE_REVERSE_PROXY=yes
+      - {{ bunkerweb.ui_fqdn }}_REVERSE_PROXY_URL=/
+      - {{ bunkerweb.ui_fqdn }}_REVERSE_PROXY_HOST=http://bw-ui:7010
+      {% if can_do_tls %}- {{ bunkerweb.ui_fqdn }}_AUTO_LETS_ENCRYPT=yes{% elif use_custom_cert %}
+      - {{ bunkerweb.ui_fqdn }}_USE_CUSTOM_SSL=yes
+      - {{ bunkerweb.ui_fqdn }}_CUSTOM_SSL_CERT=/etc/bunkerweb/cert.pem
+      - {{ bunkerweb.ui_fqdn }}_CUSTOM_SSL_KEY=/etc/bunkerweb/key.pem{% else %}
+      - {{ bunkerweb.ui_fqdn }}_GENERATE_SELF_SIGNED_SSL=yes
+      {% endif %}
+      {% endif %}
+    volumes:
+      - bw-storage:/data # This is used to persist the cache and other data like the backups
+      {% if use_custom_cert %}- {{ cert_config.cert_path }}:/etc/bunkerweb/cert.pem:ro
+      - {{ cert_config.key_path }}:/etc/bunkerweb/key.pem:ro{% endif %}
+    restart: unless-stopped
+    networks:
+      - bw-universe
+      - bw-db
+
+  bw-db:
+    image: mariadb:11
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: "{{ bunkerweb.db_name }}"
+      MYSQL_USER: "{{ bunkerweb.db_username }}"
+      MYSQL_PASSWORD: "{{ bunkerweb.db_password }}" # Remember to set a stronger password for the database
+    volumes:
+      - bw-data:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - bw-db
+
+  {% if bunkerweb.use_ui %}bw-ui:
+    depends_on:
+      bw-db:
+        condition: service_started
+    image: bunkerity/bunkerweb-ui:1.6.1
+    {% if mode == "local" %}ports:
+      - 7010:7000{% endif %}
+    environment:
+      - "DATABASE_URI=mariadb+pymysql://{{ bunkerweb.db_username }}:{{ bunkerweb.db_password }}@bw-db:3306/{{ bunkerweb.db_name }}"
+      - "ADMIN_USERNAME={{ bunkerweb.ui_username }}"
+      - "ADMIN_PASSWORD={{ bunkerweb.ui_password }}"
+    restart: unless-stopped
+    networks:
+      - bw-universe
+      - bw-db{% endif %}
+
+  {% if kafka_dispatcher.enabled %}
+  dispatcher:
+    container_name: dispatcher
+    image: ghcr.io/intuitem/ciso-assistant-community/dispatcher:latest
+    # build:
+    #   context: ../dispatcher
+    restart: always
+    environment:
+      - API_URL=http://backend:8000/api
+      - BOOTSTRAP_SERVERS={{ kafka_dispatcher.broker_url }}
+      - KAFKA_USE_AUTH={{ kafka_dispatcher.kafka_use_auth }}
+      {% if kafka_dispatcher.kafka_use_auth %}
+      - KAFKA_SASL_MECHANISM={{ kafka_dispatcher.kafka_sasl_mechanism }}
+      - KAFKA_USERNAME={{ kafka_dispatcher.kafka_username }}
+      - KAFKA_PASSWORD={{ kafka_dispatcher.kafka_password }}
+      {% endif %}
+      - OBSERVATION_TOPIC={{ kafka_dispatcher.observation_topic }}
+      - ERRORS_TOPIC={{ kafka_dispatcher.errors_topic }}
+      {% if kafka_dispatcher.authentication == 'credentials' %}
+      - USER_EMAIL={{ kafka_dispatcher.credentials.user_email }}
+      - USER_PASSWORD={{ kafka_dispatcher.credentials.user_password }}
+      - AUTO_RENEW_SESSION={{ kafka_dispatcher.auto_renew_session }}
+      {% elif kafka_dispatcher.authentication == 'token' %}
+      - TOKEN={{ kafka_dispatcher.token }}
+      {% endif %}
+      {% if kafka_dispatcher.s3_url %}
+      - S3_URL={{ kafka_dispatcher.s3_url }}
+      - S3_ACCESS_KEY={{ kafka_dispatcher.s3_access_key }}
+      - S3_SECRET_KEY={{ kafka_dispatcher.s3_secret_key }}
+      {% endif %}
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - bw-services
+  {% endif %}
+
+volumes:
+  bw-storage:
+  bw-data:
+
+networks:
+  bw-universe:
+    name: bw-universe
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.20.30.0/24 # Make sure to set the correct IP range so the scheduler can send the configuration to the instance
+  bw-services:
+    name: bw-services
+  bw-db:
+    name: bw-db

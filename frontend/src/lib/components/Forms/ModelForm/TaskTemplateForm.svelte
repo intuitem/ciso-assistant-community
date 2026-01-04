@@ -10,25 +10,52 @@
 	import * as m from '$paraglide/messages.js';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import NumberField from '../NumberField.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		context?: string;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		context = '',
+		formDataCache = $bindable({}),
+		initialData = {}
+	}: Props = $props();
 
 	const { value: is_recurrent } = formFieldProxy(form, 'is_recurrent');
 	const { value: frequency } = formFieldProxy(form, 'schedule.frequency');
+	const { tainted: taskDateTainted } = formFieldProxy(form, 'task_date');
+	const { tainted: scheduleTainted } = formFieldProxy(form, 'schedule');
+
+	function scheduleTaintedHandler(data) {
+		if (Array.isArray(data)) {
+			return data.some((item) => scheduleTaintedHandler(item));
+		} else if (data !== null && typeof data === 'object') {
+			return Object.values(data).some((value) => scheduleTaintedHandler(value));
+		} else {
+			return data === true || $taskDateTainted === true;
+		}
+	}
+
+	let isScheduleTainted = $derived(scheduleTaintedHandler($scheduleTainted));
 </script>
 
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 {#if !$is_recurrent}
 	<TextField
@@ -175,8 +202,33 @@
 			cacheLock={cacheLocks['end_date']}
 			bind:cachedValue={formDataCache['end_date']}
 		/>
+		{#if context == 'edit' && isScheduleTainted}<span class="text-secondary-500 italic text-sm"
+				><i class="fa-solid fa-circle-info mr-1"></i>{m.taskScheduleInfo()}</span
+			>{/if}
 	</Dropdown>
+{:else}
+	<Select
+		{form}
+		field="status"
+		label={m.status()}
+		options={model.selectOptions['status']}
+		cacheLock={cacheLocks['status']}
+		bind:cachedValue={formDataCache['status']}
+		disableDoubleDash={true}
+	/>
 {/if}
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
+	helpText={m.taskTemplateEvidenceHelpText()}
+	field="evidences"
+	label={m.evidences()}
+	allowUserOptions="append"
+	translateOptions={false}
+/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -200,6 +252,14 @@
 		{form}
 		optionsEndpoint="assets"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type'
+				}
+			],
+			classes: 'text-blue-500'
+		}}
 		optionsLabelField="auto"
 		field="assets"
 		label={m.assets()}
@@ -227,10 +287,35 @@
 		optionsEndpoint="risk-assessments"
 		optionsExtraFields={[['perimeter', 'str']]}
 		optionsLabelField="str"
-		field="risk_assessment"
-		cacheLock={cacheLocks['risk_assessment']}
-		bind:cachedValue={formDataCache['risk_assessment']}
+		field="risk_assessments"
+		cacheLock={cacheLocks['risk_assessments']}
+		bind:cachedValue={formDataCache['risk_assessments']}
 		label={m.riskAssessments()}
+	/>
+
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="findings-assessments"
+		field="findings_assessment"
+		cacheLock={cacheLocks['findings_assessment']}
+		bind:cachedValue={formDataCache['findings_assessment']}
+		label={m.findingsAssessment()}
+	/>
+	<MarkdownField
+		{form}
+		field="observation"
+		label={m.observation()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
+	/>
+	<TextField
+		{form}
+		field="link"
+		label={m.link()}
+		helpText={m.linkHelpText()}
+		cacheLock={cacheLocks['link']}
+		bind:cachedValue={formDataCache['link']}
 	/>
 </Dropdown>
 <Checkbox {form} field="enabled" label={m.enabled()} />

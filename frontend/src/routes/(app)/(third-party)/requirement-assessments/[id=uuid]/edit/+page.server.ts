@@ -3,9 +3,9 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 import { getSecureRedirect } from '$lib/utils/helpers';
 import { modelSchema } from '$lib/utils/schemas';
-import { listViewFields } from '$lib/utils/table';
+import { headData } from '$lib/utils/table';
 import { m } from '$paraglide/messages';
-import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
+import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import type { Actions } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -46,6 +46,7 @@ export const load = (async ({ fetch, params }) => {
 
 	const schema = modelSchema(URLModel);
 	object.evidences = object.evidences.map((evidence) => evidence.id);
+	object.applied_controls = object.applied_controls.map((applied_control) => applied_control.id);
 	object.security_exceptions =
 		object.security_exceptions?.map((security_exception) => security_exception.id) ?? [];
 	const form = await superValidate(object, zod(schema), { errors: true });
@@ -101,7 +102,7 @@ export const load = (async ({ fetch, params }) => {
 	await Promise.all(
 		['applied-controls', 'evidences', 'security-exceptions'].map(async (key) => {
 			const table: TableSource = {
-				head: listViewFields[key].head,
+				head: headData(key),
 				body: [],
 				meta: []
 			};
@@ -192,9 +193,10 @@ export const actions: Actions = {
 			return fail(400, { form: form });
 		}
 
+		const formData = form.data;
 		const requestInitOptions: RequestInit = {
 			method: 'PUT',
-			body: JSON.stringify(form.data)
+			body: JSON.stringify(formData)
 		};
 
 		const response = await event.fetch(endpoint, requestInitOptions);
@@ -204,6 +206,7 @@ export const actions: Actions = {
 		const object = await response.json();
 		const model: string = urlParamModelVerboseName(URLModel);
 		setFlash({ type: 'success', message: m.successfullySavedObject({ object: model }) }, event);
+		if (formData.noRedirect) return;
 		redirect(
 			302,
 			getSecureRedirect(event.url.searchParams.get('next')) ||
@@ -234,7 +237,7 @@ export const actions: Actions = {
 
 		const requirementAssessmentEndpoint = `${BASE_API_URL}/requirement-assessments/${event.params.id}/`;
 		const requirementAssessment = await event
-			.fetch(`${requirementAssessmentEndpoint}object`)
+			.fetch(`${requirementAssessmentEndpoint}object/`)
 			.then((res) => res.json());
 
 		const measures = [...requirementAssessment.applied_controls, measure.id];

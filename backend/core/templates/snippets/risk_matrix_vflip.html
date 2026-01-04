@@ -1,0 +1,50 @@
+{% load i18n core_extras %}
+
+<div class="bg-white rounded-lg p-6">
+    <div class="w-full">
+        <div class="text-black font-bold text-center mx-auto mt-4">
+            {% trans "Impact" %}
+        </div>
+        <div class="flex flex-row h-full">
+            <div class="text-black font-bold mt-45">
+                <p class="-rotate-90">{% trans "Probability" %}</p>
+            </div>
+            <table class="w-3/4 mt-10 ml-13">
+                <tr>
+                    <td></td>
+                    {% for impact in risk_matrix.parse_json_translated.impact %}
+                        <td class="w-1/6 h-16 text-center text-black bg-gray-200 border-4 border-white">
+                            {{ impact.name }}:
+                            {{ impact.description|linebreaksbr }}
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% for row in risk_matrix.render_grid_as_colors %}
+                    {% with row_index=forloop.counter0 %}
+                        <tr>
+                            <td class="w-1/6 text-center text-black bg-gray-200 border-4 border-white pr-2">
+                                {% with probability=risk_matrix.parse_json_translated.probability|index:row_index %}
+                                {{ probability.name }}:
+                                {{ probability.description|linebreaksbr }}
+                                {% endwith %}
+                            </td>
+                            {% if enriched_data %}
+                                {% for item in row %}
+                                    <td class="w-1/6 h-16 text-center border-4 border-white" style="background-color: {{ item.hexcolor }}">
+                                        {{ enriched_data|index:row_index|index:forloop.counter0|join:", " }}
+                                    </td>
+                                {% endfor %}
+                            {% else %}
+                                {% for item in row %}
+                                <td class="w-1/6 h-16 text-left border-4 border-white" style="background-color: {{ item.hexcolor }}">
+                                </td>
+                                {% endfor %}
+                            {% endif %}
+                            </td>
+                        </tr>
+                    {% endwith %}
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>

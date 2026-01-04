@@ -1,8 +1,10 @@
 from itertools import chain
 import json
 from django.db import IntegrityError
-from django.db.models import F, Q, IntegerField, OuterRef, Subquery
-from rest_framework import viewsets, status
+from django.db.models import F, Q, IntegerField, OuterRef, Subquery, Exists
+from django.db import models
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, generics
 from django.conf import settings
 
 from rest_framework.status import (
@@ -11,6 +13,7 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND,
+    HTTP_409_CONFLICT,
     HTTP_422_UNPROCESSABLE_ENTITY,
 )
 from rest_framework.parsers import FileUploadParser
@@ -19,8 +22,8 @@ from django.http import HttpResponse
 
 import django_filters as df
 from core.helpers import get_sorted_requirement_nodes
-from core.models import StoredLibrary, LoadedLibrary
-from core.views import BaseModelViewSet
+from core.models import StoredLibrary, LoadedLibrary, Framework, LibraryUpdater
+from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
 from .helpers import update_translations, update_translations_in_object
@@ -49,7 +52,7 @@ class MultiStringFilter(df.CharFilter):
         return qs
 
 
-class LibraryMixinFilterSet(df.FilterSet):
+class LibraryMixinFilterSet(GenericFilterSet):
     locale = df.MultipleChoiceFilter(
         choices=[(language[0], language[0]) for language in settings.LANGUAGES],
         method="filter_locale",
@@ -66,16 +69,51 @@ class LibraryMixinFilterSet(df.FilterSet):
 
 class StoredLibraryFilterSet(LibraryMixinFilterSet):
     object_type = df.MultipleChoiceFilter(
-        choices=list(zip(LibraryImporter.OBJECT_FIELDS, LibraryImporter.OBJECT_FIELDS)),
+        choices=list(
+            zip(
+                LibraryImporter.OBJECT_FIELDS,
+                LibraryImporter.OBJECT_FIELDS,
+            )
+        ),
         method="filter_object_type",
     )
+    is_loaded = df.BooleanFilter(
+        method="filter_is_loaded",
+    )
+    is_custom = df.BooleanFilter(
+        method="filter_is_custom",
+    )
+    is_update = df.BooleanFilter(
+        method="filter_is_update",
+    )
+
+    def filter_is_loaded(self, queryset, name, value):
+        return queryset.filter(is_loaded=value)
+
+    def filter_is_custom(self, queryset, name, value):
+        return queryset.filter(builtin=not value)
+
+    def filter_is_update(self, queryset, name, value):
+        return queryset.annotate(
+            _is_update=Exists(
+                LoadedLibrary.objects.filter(
+                    urn=OuterRef("urn"), version__lt=OuterRef("version")
+                )
+            )
+        ).filter(_is_update=value)
 
     def filter_object_type(self, queryset, name, value: list[str]):
+        # For backward compatibility
+        if "risk_matrices" in value:
+            value.append("risk_matrix")
+        if "requirement_mapping_sets" in value:
+            value.append("requirement_mapping_set")
+        if "frameworks" in value:
+            value.append("framework")
         union_qs = Q()
         _value = {f"content__{v}__isnull": False for v in value}
         for item in _value:
             union_qs |= Q(**{item: _value[item]})
-
         return queryset.filter(union_qs)
 
     class Meta:
@@ -87,6 +125,7 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
             "packager",
             "provider",
             "object_type",
+            "filtering_labels",
         ]
 
 
@@ -100,6 +139,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
     queryset = StoredLibrary.objects.all()
 
     search_fields = ["name", "description", "urn", "ref_id"]
+
+    def get_queryset(self) -> models.query.QuerySet:
+        return super().get_queryset().prefetch_related("filtering_labels")
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -145,6 +187,40 @@ class StoredLibraryViewSet(BaseModelViewSet):
         lib.delete()
         return Response(status=HTTP_204_NO_CONTENT)
 
+    @action(detail=True, methods=["post"])
+    def unload(self, request, pk):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="delete_loadedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
+
+        try:
+            key = "urn" if pk.startswith("urn:") else "id"
+            libraries = StoredLibrary.objects.filter(**{key: pk})
+            library = max(libraries, key=lambda lib: lib.version)
+        except:
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+
+        loaded_library = library.get_loaded_library()
+        if loaded_library is None:
+            return Response(data="Loaded library not found.", status=HTTP_404_NOT_FOUND)
+
+        try:
+            loaded_library.delete()
+        except:
+            return Response(
+                data="Loaded library can't be deleted because it's currently being used.",
+                status=HTTP_409_CONFLICT,
+            )
+
+        # Delete a libary if it's a "fake" one (one created by the storelibraries django command to prevent invisible loaded libraries.)
+        if not library.content:
+            library.delete()
+
+        return Response({"status": "success"})
+
     @action(detail=True, methods=["post"], url_path="import")
     def import_library(self, request, pk):
         if not RoleAssignment.is_access_allowed(
@@ -153,6 +229,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             folder=Folder.get_root_folder(),
         ):
             return Response(status=HTTP_403_FORBIDDEN)
+
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             libraries = StoredLibrary.objects.filter(  # The get method raise an exception if multiple objects are found
@@ -172,7 +249,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     status=HTTP_400_BAD_REQUEST,
                 )  # This can cause translation issues
             return Response({"status": "success"})
-        except Exception:
+        except Exception as e:
+            logger.error("Failed to load library", error=e)
             return Response(
                 {"error": "Failed to load library"},  # This must translated
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
@@ -189,14 +267,13 @@ class StoredLibraryViewSet(BaseModelViewSet):
         library_objects = lib.content  # We may need caching for this
         if not (framework := library_objects.get("framework")):
             return Response(
-                data="This library does not include a framework.",
+                data="This library doesn't contain any framework.",
                 status=HTTP_400_BAD_REQUEST,
             )
 
         preview = preview_library(framework)
-        return Response(
-            get_sorted_requirement_nodes(preview.get("requirement_nodes"), None, None)
-        )
+        requirement_nodes = preview.get("requirement_nodes")
+        return Response(get_sorted_requirement_nodes(requirement_nodes, None, None))
 
     @action(detail=False, methods=["post"], url_path="upload")
     def upload_library(self, request):
@@ -214,6 +291,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
             try:
                 library = StoredLibrary.store_library_content(content)
+                if library is not None:
+                    library.load()
+
                 return Response(
                     StoredLibrarySerializer(library).data, status=HTTP_201_CREATED
                 )
@@ -253,12 +333,23 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get all library objects types")
     def object_type(self, request):
-        return Response(LibraryImporter.OBJECT_FIELDS)
+        return Response(
+            [
+                f
+                for f in LibraryImporter.NON_DEPRECATED_OBJECT_FIELDS
+                if "requirement_mapping_sets" not in f
+            ]
+        )
 
 
 class LoadedLibraryFilterSet(LibraryMixinFilterSet):
     object_type = df.MultipleChoiceFilter(
-        choices=list(zip(LibraryImporter.OBJECT_FIELDS, LibraryImporter.OBJECT_FIELDS)),
+        choices=list(
+            zip(
+                LibraryImporter.OBJECT_FIELDS,
+                LibraryImporter.OBJECT_FIELDS,
+            )
+        ),
         method="filter_object_type",
     )
     has_update = df.BooleanFilter(method="filter_has_update")
@@ -284,6 +375,21 @@ class LoadedLibraryFilterSet(LibraryMixinFilterSet):
             )
 
     def filter_object_type(self, queryset, name, value: list[str]):
+        value_set = set(value)
+
+        risk_matrix_keys = {"risk_matrix", "risk_matrices"}
+        requirement_mapping_set_keys = {
+            "requirement_mapping_set",
+            "requirement_mapping_sets",
+        }
+        framework_set = {"framework", "frameworks"}
+
+        # For backward compatibility
+        for key_set in [risk_matrix_keys, requirement_mapping_set_keys, framework_set]:
+            if value_set & key_set:
+                value_set |= key_set
+
+        value = list(value_set)
         union_qs = Q()
         _value = {
             k: v
@@ -333,8 +439,13 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             lib = LoadedLibrary.objects.get(
                 **{key: pk}
             )  # There is no "locale" value involved in the fetch + we have to handle the exception if the pk urn doesn't exist
-        except:
+        except LoadedLibrary.DoesNotExist:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+        except Exception:
+            logger.error("Error retrieving library", pk=pk, exc_info=True)
+            return Response(
+                data="Error retrieving library.", status=HTTP_400_BAD_REQUEST
+            )
         data = LoadedLibraryDetailedSerializer(lib).data
         data["objects"] = lib._objects
         return Response(data)
@@ -350,8 +461,13 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(**{key: pk})
-        except:
+        except LoadedLibrary.DoesNotExist:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+        except Exception:
+            logger.error("Error unloading library", pk=pk, exc_info=True)
+            return Response(
+                data="Error unloading library.", status=HTTP_400_BAD_REQUEST
+            )
 
         if lib.reference_count != 0:
             return Response(
@@ -367,7 +483,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(**{key: pk})
-        except:
+        except Exception:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib._objects)
 
@@ -378,10 +494,10 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(**{key: pk})
-        except:
+        except Exception:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
-        if lib.frameworks.count() == 0:
+        if not lib.frameworks.exists():
             return Response(
                 data="This library doesn't contain any framework.",
                 status=HTTP_404_NOT_FOUND,
@@ -401,6 +517,14 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             folder=Folder.get_root_folder(),
         ):
             return Response(status=HTTP_403_FORBIDDEN)
+        strategy = request.query_params.get("action")
+        if strategy and strategy not in ["rule_of_three", "reset", "clamp"]:
+            return Response(
+                {
+                    "error": "Invalid strategy. Must be one of 'rule_of_three', 'reset', 'clamp'."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             library = LoadedLibrary.objects.get(**{key: pk})
@@ -408,16 +532,70 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             return Response(
                 data="libraryNotFound", status=HTTP_404_NOT_FOUND
             )  # Error messages could be returned as JSON instead
-
-        error_msg = library.update()
+        try:
+            error_msg = library.update(strategy=strategy)
+        except LibraryUpdater.ScoreChangeDetected as e:
+            # Score boundaries changed - need user decision
+            return Response(
+                {
+                    "error": "score_change_detected",
+                    "framework_urn": e.framework_urn,
+                    "prev_scores": e.prev_scores,
+                    "new_scores": e.new_scores,
+                    "affected_assessments": e.affected_assessments,
+                    "strategies": e.strategies,
+                    "message": "Score boundaries have changed. Please choose a strategy.",
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+        except Exception as e:
+            logger.error("Failed to update library", error=e)
+            return Response(
+                {"error": "libraryUpdateFailed"},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
         if error_msg is None:
-            return Response(status=HTTP_204_NO_CONTENT)
-        return Response(
-            error_msg, status=HTTP_422_UNPROCESSABLE_ENTITY
-        )  # We must make at least one error message
+            return Response({"status": "success"})
+        else:
+            return Response(
+                {"status": "error", "error": error_msg},
+                status=HTTP_400_BAD_REQUEST,
+            )
 
     @action(methods=("get",), detail=False, url_path="available-updates")
     def available_updates(self, request):
         return Response(
             LoadedLibrarySerializer(LoadedLibrary.updatable_libraries(), many=True).data
         )
+
+
+class MappingLibrariesList(generics.ListAPIView):
+    filterset_fields = {
+        "provider": ["exact"],
+        "packager": ["exact"],
+        "locale": ["exact"],
+    }
+    search_fields = ["name", "description", "urn", "ref_id"]
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    ordering_fields = "__all__"
+
+    serializer_class = StoredLibrarySerializer
+
+    def get_queryset(self):
+        """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
+        qs = StoredLibrary.objects.filter(
+            Q(content__requirement_mapping_set__isnull=False)
+            | Q(content__requirement_mapping_sets__isnull=False)
+        ).distinct()
+
+        viewable_libraries, _, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(),
+            self.request.user,
+            StoredLibrary,
+        )
+        return qs.filter(id__in=viewable_libraries)

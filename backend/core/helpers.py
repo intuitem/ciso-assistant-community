@@ -7,6 +7,7 @@ from typing import Dict, List
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
+from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -287,11 +288,13 @@ def get_sorted_requirement_nodes(
                 "ra_id": str(req_as.id) if req_as else None,
                 "status": req_as.status if req_as else None,
                 "result": req_as.result if req_as else None,
+                "extended_result": req_as.extended_result if req_as else None,
                 "is_scored": req_as.is_scored if req_as else None,
                 "score": req_as.score if req_as else None,
                 "documentation_score": req_as.documentation_score if req_as else None,
                 "max_score": max_score if req_as else None,
-                "question": req_as.answer if req_as else node.question,
+                "questions": node.questions,
+                "answers": req_as.answers if req_as else None,
                 "mapping_inference": req_as.mapping_inference if req_as else None,
                 "status_display": req_as.get_status_display() if req_as else None,
                 "status_i18n": camel_case(req_as.status) if req_as else None,
@@ -332,7 +335,8 @@ def get_sorted_requirement_nodes(
                     if child_req_as
                     else None,
                     "max_score": max_score if child_req_as else None,
-                    "question": child_req_as.answer if child_req_as else child.question,
+                    "questions": child.questions,
+                    "answers": child_req_as.answers if child_req_as else None,
                     "mapping_inference": child_req_as.mapping_inference
                     if child_req_as
                     else None,
@@ -343,6 +347,9 @@ def get_sorted_requirement_nodes(
                     if child_req_as
                     else None,
                     "result": child_req_as.result if child_req_as else None,
+                    "extended_result": child_req_as.extended_result
+                    if child_req_as
+                    else None,
                     "result_i18n": camel_case(child_req_as.result)
                     if child_req_as and child_req_as.result is not None
                     else None,
@@ -386,14 +393,17 @@ def filter_graph_by_implementation_groups(
     return filtered_graph
 
 
-def get_parsed_matrices(user: User, risk_assessments: list | None = None):
+def get_parsed_matrices(
+    user: User, risk_assessments: list | None = None, folder_id=None
+):
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
     (
         object_ids_view,
         _,
         _,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskScenario
-    )
+    ) = RoleAssignment.get_accessible_object_ids(scoped_folder, user, RiskScenario)
     if risk_assessments is None:
         risk_matrices = list(
             RiskScenario.objects.filter(id__in=object_ids_view)
@@ -543,6 +553,185 @@ def applied_control_per_status(user: User):
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
+def task_template_per_status(user: User):
+    from core.models import TaskTemplate, TaskNode
+
+    values = list()
+    labels = list()
+    local_lables = list()
+    color_map = {
+        "pending": "#BFDBFE",
+        "in_progress": "#392F5A",
+        "completed": "#46D39A",
+        "cancelled": "#E55759",
+    }
+    (
+        object_ids_view,
+        _,
+        _,
+    ) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, TaskTemplate
+    )
+    viewable_task_templates = TaskTemplate.objects.filter(id__in=object_ids_view)
+
+    # Count statuses based on the logic:
+    # - If not recurrent: get the status of the node
+    # - If recurrent: get the status of the last occurrence (most recent past event)
+    from django.db.models import Subquery, OuterRef
+    from django.utils import timezone
+
+    status_counts = {"pending": 0, "in_progress": 0, "completed": 0, "cancelled": 0}
+    today = timezone.localdate()
+
+    # For recurrent templates, get last occurrence status (most recent past)
+    last_occurrence_subq = (
+        TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__lt=today)
+        .order_by("-due_date")
+        .values("status")[:1]
+    )
+
+    recurrent_with_status = (
+        viewable_task_templates.filter(is_recurrent=True)
+        .annotate(node_status=Subquery(last_occurrence_subq))
+        .values_list("node_status", flat=True)
+    )
+
+    # For non-recurrent templates, get the single node's status
+    single_node_subq = TaskNode.objects.filter(task_template=OuterRef("pk")).values(
+        "status"
+    )[:1]
+
+    non_recurrent_with_status = (
+        viewable_task_templates.filter(is_recurrent=False)
+        .annotate(node_status=Subquery(single_node_subq))
+        .values_list("node_status", flat=True)
+    )
+
+    # Count statuses
+    for status in recurrent_with_status:
+        status_counts[status or "pending"] += 1
+
+    for status in non_recurrent_with_status:
+        status_counts[status or "pending"] += 1
+
+    for st in TaskNode.TASK_STATUS_CHOICES:
+        count = status_counts[st[0]]
+        v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
+        values.append(v)
+        labels.append(st[1])
+    local_lables = [camel_case(str(label)) for label in labels]
+    return {"localLables": local_lables, "labels": labels, "values": values}
+
+
+def get_governance_calendar_data(user: User, year: int = None):
+    """
+    Generate calendar heatmap data for governance activities.
+    Returns activity counts per date for:
+    - TaskNode due dates
+    - AppliedControl ETAs
+    - RiskAcceptance expiry dates
+    - RiskAssessment due dates and ETAs
+    - ComplianceAssessment due dates and ETAs
+    - FindingsAssessment due dates and ETAs
+    """
+    from core.models import (
+        TaskNode,
+        AppliedControl,
+        RiskAcceptance,
+        RiskAssessment,
+        ComplianceAssessment,
+        FindingsAssessment,
+    )
+    from datetime import datetime
+    from collections import defaultdict
+
+    if year is None:
+        year = datetime.now().year
+
+    start_date = datetime(year, 1, 1).date()
+    end_date = datetime(year, 12, 31).date()
+
+    # Dictionary to accumulate activity counts per date
+    activity_counts = defaultdict(int)
+
+    # Get accessible objects for each model
+    (task_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, TaskNode
+    )
+    (control_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, AppliedControl
+    )
+    (acceptance_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, RiskAcceptance
+    )
+    (risk_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, RiskAssessment
+    )
+    (compliance_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, ComplianceAssessment
+    )
+    (findings_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, FindingsAssessment
+    )
+
+    # Count TaskNode due dates
+    task_nodes = TaskNode.objects.filter(
+        id__in=task_ids, due_date__gte=start_date, due_date__lte=end_date
+    ).values_list("due_date", flat=True)
+
+    for due_date in task_nodes:
+        if due_date:
+            activity_counts[str(due_date)] += 1
+
+    # Count AppliedControl ETAs
+    applied_controls = AppliedControl.objects.filter(
+        id__in=control_ids, eta__gte=start_date, eta__lte=end_date
+    ).values_list("eta", flat=True)
+
+    for eta in applied_controls:
+        if eta:
+            activity_counts[str(eta)] += 1
+
+    # Count RiskAcceptance expiry dates
+    risk_acceptances = RiskAcceptance.objects.filter(
+        id__in=acceptance_ids, expiry_date__gte=start_date, expiry_date__lte=end_date
+    ).values_list("expiry_date", flat=True)
+
+    for expiry_date in risk_acceptances:
+        if expiry_date:
+            activity_counts[str(expiry_date)] += 1
+
+    # Helper function to count assessment dates
+    def count_assessment_dates(assessment_ids, model):
+        # Count due dates
+        due_dates = model.objects.filter(
+            id__in=assessment_ids, due_date__gte=start_date, due_date__lte=end_date
+        ).values_list("due_date", flat=True)
+
+        for due_date in due_dates:
+            if due_date:
+                activity_counts[str(due_date)] += 1
+
+        # Count ETAs
+        etas = model.objects.filter(
+            id__in=assessment_ids, eta__gte=start_date, eta__lte=end_date
+        ).values_list("eta", flat=True)
+
+        for eta in etas:
+            if eta:
+                activity_counts[str(eta)] += 1
+
+    # Count dates from all assessment types
+    count_assessment_dates(risk_assessment_ids, RiskAssessment)
+    count_assessment_dates(compliance_assessment_ids, ComplianceAssessment)
+    count_assessment_dates(findings_assessment_ids, FindingsAssessment)
+
+    # Convert to array format expected by frontend: [[date, value], ...]
+    result = [[date_str, count] for date_str, count in sorted(activity_counts.items())]
+
+    return result
+
+
 def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessment):
     values = list()
     labels = list()
@@ -574,6 +763,57 @@ def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessme
     labels.insert(0, "undefined")
     local_lables = [camel_case(str(label)) for label in labels]
     return {"localLables": local_lables, "labels": labels, "values": values}
+
+
+def combined_assessments_per_status(user: User):
+    """
+    Returns assessment counts grouped by status for all three assessment types:
+    RiskAssessment, ComplianceAssessment, and FindingsAssessment
+    """
+    from .models import RiskAssessment, ComplianceAssessment, FindingsAssessment
+
+    # Get all unique statuses across all assessment types
+    # Using RiskAssessment.Status as they should all share the same status choices
+    all_statuses = ["undefined"] + [
+        choice[0] for choice in RiskAssessment.Status.choices
+    ]
+    status_labels = ["undefined"] + [
+        choice[1] for choice in RiskAssessment.Status.choices
+    ]
+
+    # Initialize result structure
+    result = {"statuses": all_statuses, "status_labels": status_labels, "series": []}
+
+    # Process each assessment type
+    assessment_types = [
+        ("complianceAssessments", ComplianceAssessment),
+        ("riskAssessments", RiskAssessment),
+        ("findingsAssessments", FindingsAssessment),
+    ]
+
+    for series_name, model in assessment_types:
+        # Get accessible objects
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), user, model
+        )
+        viewable_assessments = model.objects.filter(id__in=object_ids_view)
+
+        # Count by status in a single query
+        status_counts = dict(
+            viewable_assessments.exclude(status__isnull=True)
+            .values_list("status")
+            .annotate(count=Count("status"))
+        )
+        undefined_count = viewable_assessments.filter(status__isnull=True).count()
+
+        # Build data array matching all_statuses order
+        data = [undefined_count] + [
+            status_counts.get(status, 0) for status in all_statuses[1:]
+        ]
+
+        result["series"].append({"name": series_name, "data": data})
+
+    return result
 
 
 def applied_control_per_cur_risk(user: User):
@@ -627,53 +867,70 @@ def applied_control_per_reference_control(user: User):
 
 
 def aggregate_risks_per_field(
-    user: User, field: str, residual: bool = False, risk_assessments: list | None = None
+    user: User,
+    field: str,
+    residual: bool = False,
+    inherent: bool = False,
+    risk_assessments: list | None = None,
+    folder_id=None,
 ):
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
     (
         object_ids_view,
         _,
         _,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskScenario
-    )
+    ) = RoleAssignment.get_accessible_object_ids(scoped_folder, user, RiskScenario)
     parsed_matrices: list = get_parsed_matrices(
-        user=user, risk_assessments=risk_assessments
+        user=user, risk_assessments=risk_assessments, folder_id=folder_id
     )
     values = dict()
     for m in parsed_matrices:
         for i in range(len(m["risk"])):
-            if m["risk"][i][field] not in values:
-                values[m["risk"][i][field]] = dict()
+            k = get_referential_translation(m["risk"][i], field)
+            if k not in values:
+                values[k] = dict()
 
             if residual:
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(residual_level=i)
-                    # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )  # What the second filter does ? Is this useful ?
+                )
+            elif inherent:
+                count = (
+                    RiskScenario.objects.filter(id__in=object_ids_view)
+                    .filter(inherent_level=i)
+                    .count()
+                )
             else:
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(current_level=i)
-                    # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )  # What the second filter does ? Is this useful ?
+                )
 
-            if "count" not in values[m["risk"][i][field]]:
-                values[m["risk"][i][field]]["count"] = count
-                values[m["risk"][i][field]]["color"] = m["risk"][i]["hexcolor"]
-                continue
-            values[m["risk"][i][field]]["count"] += count
+            if "count" not in values[k]:
+                values[k]["count"] = count
+                values[k]["color"] = m["risk"][i]["hexcolor"]
+            else:
+                values[k]["count"] += count
     return values
 
 
-def risks_count_per_level(user: User, risk_assessments: list | None = None):
+def risks_count_per_level(
+    user: User,
+    risk_assessments: list | None = None,
+    folder_id=None,
+    include_inherent=False,
+):
     current_level = list()
     residual_level = list()
+    inherent_level = list()
 
     for r in aggregate_risks_per_field(
-        user, "name", risk_assessments=risk_assessments
+        user, "name", risk_assessments=risk_assessments, folder_id=folder_id
     ).items():
         current_level.append(
             {
@@ -682,9 +939,12 @@ def risks_count_per_level(user: User, risk_assessments: list | None = None):
                 "color": r[1]["color"],
             }
         )
-
     for r in aggregate_risks_per_field(
-        user, "name", residual=True, risk_assessments=risk_assessments
+        user,
+        "name",
+        residual=True,
+        risk_assessments=risk_assessments,
+        folder_id=folder_id,
     ).items():
         residual_level.append(
             {
@@ -693,7 +953,32 @@ def risks_count_per_level(user: User, risk_assessments: list | None = None):
                 "color": r[1]["color"],
             }
         )
-    return {"current": current_level, "residual": residual_level}
+
+    if not include_inherent:
+        return {
+            "current": current_level,
+            "residual": residual_level,
+        }
+
+    for r in aggregate_risks_per_field(
+        user,
+        "name",
+        inherent=True,
+        risk_assessments=risk_assessments,
+        folder_id=folder_id,
+    ).items():
+        inherent_level.append(
+            {
+                "name": r[0],
+                "value": r[1]["count"],
+                "color": r[1]["color"],
+            }
+        )
+    return {
+        "current": current_level,
+        "residual": residual_level,
+        "inherent": inherent_level,
+    }
 
 
 def p_risks(user: User):
@@ -756,38 +1041,42 @@ def risks_per_perimeter_groups(user: User):
 
 
 def get_counters(user: User):
-    controls_count = len(
-        RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, AppliedControl
-        )[0]
-    )
+    # Get all accessible applied controls
+    applied_controls_ids = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, AppliedControl
+    )[0]
+
+    # Count policies and non-policies separately
+    all_applied_controls = AppliedControl.objects.filter(id__in=applied_controls_ids)
+    policies_count = all_applied_controls.filter(category="policy").count()
+    applied_controls_count = all_applied_controls.exclude(category="policy").count()
+
+    # Get accessible frameworks
+    frameworks_ids = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, Framework
+    )[0]
+
+    # Get accessible risk acceptances
+    risk_acceptances_ids = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, RiskAcceptance
+    )[0]
+
+    # Get accessible security exceptions
+    security_exceptions_ids = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, SecurityException
+    )[0]
+
     return {
         "domains": len(
             RoleAssignment.get_accessible_object_ids(
                 Folder.get_root_folder(), user, Folder
             )[0]
         ),
-        "perimeters": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, Perimeter
-            )[0]
-        ),
-        "applied_controls": controls_count,
-        "risk_assessments": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, RiskAssessment
-            )[0]
-        ),
-        "compliance_assessments": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, ComplianceAssessment
-            )[0]
-        ),
-        "policies": len(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), user, Policy
-            )[0]
-        ),
+        "frameworks": len(frameworks_ids),
+        "applied_controls": applied_controls_count,
+        "policies": policies_count,
+        "exceptions": len(security_exceptions_ids),
+        "risk_acceptances": len(risk_acceptances_ids),
     }
 
 
@@ -851,23 +1140,31 @@ def build_audits_tree_metrics(user):
     return tree
 
 
-def build_audits_stats(user):
+def build_audits_stats(user, folder_id=None):
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
     (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, ComplianceAssessment
+        scoped_folder, user, ComplianceAssessment
     )
     data = list()
     names = list()
     uuids = list()
-    for audit in ComplianceAssessment.objects.filter(id__in=object_ids):
+    for audit in ComplianceAssessment.objects.filter(id__in=object_ids).order_by(
+        "-updated_at"
+    )[:10]:
         data.append([rs[0] for rs in audit.get_requirements_result_count()])
         names.append(audit.name)
         uuids.append(audit.id)
     return {"data": data, "names": names, "uuids": uuids}
 
 
-def csf_functions(user):
+def csf_functions(user, folder_id=None):
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
     (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
+        scoped_folder, user, AppliedControl
     )
     viewable_controls = AppliedControl.objects.filter(id__in=object_ids)
     cnt = dict()
@@ -888,17 +1185,27 @@ def csf_functions(user):
     return data
 
 
-def get_metrics(user: User):
-    def viewable_items(model):
+def get_metrics(user: User, folder_id):
+    def viewable_items(model, folder_id=None):
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
         (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, model
+            scoped_folder, user, model
         )
         return model.objects.filter(id__in=object_ids)
 
-    viewable_controls = viewable_items(AppliedControl)
+    viewable_controls = viewable_items(AppliedControl, folder_id)
+    viewable_risk_assessments = viewable_items(RiskAssessment, folder_id)
+    viewable_compliance_assessments = viewable_items(ComplianceAssessment, folder_id)
+    viewable_risk_scenarios = viewable_items(RiskScenario, folder_id)
+    viewable_threats = viewable_items(Threat, folder_id)
+    viewable_risk_acceptances = viewable_items(RiskAcceptance, folder_id)
+    viewable_evidences = viewable_items(Evidence, folder_id)
+    viewable_requirement_assessments = viewable_items(RequirementAssessment, folder_id)
     controls_count = viewable_controls.count()
     progress_avg = math.ceil(
-        mean([x.progress for x in viewable_items(ComplianceAssessment)] or [0])
+        mean([x.get_progress() for x in viewable_compliance_assessments] or [0])
     )
     missed_eta_count = (
         viewable_controls.filter(
@@ -920,33 +1227,229 @@ def get_metrics(user: User):
             "eta_missed": missed_eta_count,
         },
         "risk": {
-            "assessments": viewable_items(RiskAssessment).count(),
-            "scenarios": viewable_items(RiskScenario).count(),
-            "threats": viewable_items(Threat)
-            .filter(risk_scenarios__isnull=False)
+            "assessments": viewable_risk_assessments.count(),
+            "scenarios": viewable_risk_scenarios.count(),
+            "threats": viewable_threats.filter(risk_scenarios__isnull=False)
             .distinct()
             .count(),
-            "acceptances": viewable_items(RiskAcceptance).count(),
+            "acceptances": viewable_risk_acceptances.count(),
         },
         "compliance": {
-            "used_frameworks": viewable_items(ComplianceAssessment)
-            .values("framework_id")
+            "used_frameworks": viewable_compliance_assessments.values("framework_id")
             .distinct()
             .count(),
-            "audits": viewable_items(ComplianceAssessment).count(),
-            "active_audits": viewable_items(ComplianceAssessment)
-            .filter(status__in=["in_progress", "in_review", "done"])
-            .count(),
-            "evidences": viewable_items(Evidence).count(),
-            "non_compliant_items": viewable_items(RequirementAssessment)
-            .filter(result="non_compliant")
-            .count(),
+            "audits": viewable_compliance_assessments.count(),
+            "active_audits": viewable_compliance_assessments.filter(
+                status__in=["in_progress", "in_review", "done"]
+            ).count(),
+            "evidences": viewable_evidences.count(),
+            "expired_evidences": viewable_evidences.filter(status="expired").count(),
+            "non_compliant_items": viewable_requirement_assessments.filter(
+                result="non_compliant"
+            ).count(),
             "progress_avg": progress_avg,
         },
-        "audits_stats": build_audits_stats(user),
-        "csf_functions": csf_functions(user),
+        "audits_stats": build_audits_stats(user, folder_id),
+        "csf_functions": csf_functions(user, folder_id),
     }
     return data
+
+
+def get_compliance_analytics(user: User, folder_id=None):
+    """
+    Returns analytics data for compliance assessments structured by:
+    Framework -> Domain (folder) -> Assessment details
+
+    Structure:
+    {
+        "framework_name": {
+            "framework_id": "uuid",
+            "framework_average": 75.5,
+            "domains": [
+                {
+                    "domain": "Domain Name",
+                    "domain_id": "uuid",
+                    "domain_average": 80.0,
+                    "assessments": [
+                        {
+                            "assessment_id": "uuid",
+                            "assessment_name": "Assessment Name",
+                            "progress": 85,
+                            "perimeter": "Perimeter Name",
+                            "perimeter_id": "uuid",
+                            "status": "in_progress"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+    """
+
+    def viewable_items(model, folder_id=None):
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
+        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, user, model
+        )
+        return model.objects.filter(id__in=object_ids)
+
+    # Get viewable compliance assessments with related data and progress annotation
+    from django.db.models import Count, Q, F, Value, IntegerField, ExpressionWrapper
+    from django.db.models.functions import Greatest, Coalesce
+
+    viewable_assessments = (
+        viewable_items(ComplianceAssessment, folder_id)
+        .select_related("framework", "folder", "perimeter")
+        .annotate(
+            total_requirements=Count(
+                "requirement_assessments",
+                filter=Q(requirement_assessments__requirement__assessable=True),
+                distinct=True,
+            ),
+            assessed_requirements=Count(
+                "requirement_assessments",
+                filter=~Q(
+                    requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
+                )
+                & Q(requirement_assessments__requirement__assessable=True),
+                distinct=True,
+            ),
+            progress=ExpressionWrapper(
+                F("assessed_requirements")
+                * 100
+                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
+                output_field=IntegerField(),
+            ),
+        )
+    )
+
+    framework_data = {}
+
+    for assessment in viewable_assessments:
+        framework_name = assessment.framework.name
+        framework_id = str(assessment.framework.id)
+        domain_name = assessment.folder.name if assessment.folder else "No Domain"
+        domain_id = str(assessment.folder.id) if assessment.folder else None
+        perimeter_name = (
+            assessment.perimeter.name if assessment.perimeter else "No Perimeter"
+        )
+        perimeter_id = str(assessment.perimeter.id) if assessment.perimeter else None
+
+        # Initialize framework if not exists
+        if framework_name not in framework_data:
+            framework_data[framework_name] = {
+                "framework_id": framework_id,
+                "framework_average": 0,
+                "domains": {},
+            }
+
+        # Initialize domain if not exists
+        if domain_name not in framework_data[framework_name]["domains"]:
+            framework_data[framework_name]["domains"][domain_name] = {
+                "domain_id": domain_id,
+                "domain_average": 0,
+                "assessments": [],
+            }
+
+        # Add assessment data using annotated progress
+        framework_data[framework_name]["domains"][domain_name]["assessments"].append(
+            {
+                "assessment_id": str(assessment.id),
+                "assessment_name": assessment.name,
+                "progress": assessment.progress,
+                "perimeter": perimeter_name,
+                "perimeter_id": perimeter_id,
+                "status": assessment.status,
+            }
+        )
+
+    # Calculate averages
+    for framework_name, framework_info in framework_data.items():
+        all_framework_progress = []
+
+        for domain_name, domain_info in framework_info["domains"].items():
+            # Calculate domain average
+            domain_progress = [a["progress"] for a in domain_info["assessments"]]
+            domain_info["domain_average"] = (
+                round(sum(domain_progress) / len(domain_progress), 1)
+                if domain_progress
+                else 0
+            )
+
+            all_framework_progress.extend(domain_progress)
+
+        # Calculate framework average
+        framework_info["framework_average"] = (
+            round(sum(all_framework_progress) / len(all_framework_progress), 1)
+            if all_framework_progress
+            else 0
+        )
+
+        # Convert domains dict to list for frontend consumption
+        framework_info["domains"] = [
+            {"domain": domain_name, **domain_data}
+            for domain_name, domain_data in framework_info["domains"].items()
+        ]
+
+    return framework_data
+
+
+def get_instance_metrics():
+    """
+    Returns the instance metrics such as the number of users, domains, perimeters, etc.
+    """
+    nb_users = User.objects.all().count()
+    nb_first_login = User.objects.filter(first_login=True).count()
+    nb_libraries = LoadedLibrary.objects.all().count()
+    nb_domains = Folder.objects.filter(content_type="DO").count()
+    nb_perimeters = Perimeter.objects.all().count()
+    nb_assets = Asset.objects.all().count()
+    nb_threats = Threat.objects.all().count()
+    nb_functions = ReferenceControl.objects.all().count()
+    nb_measures = AppliedControl.objects.all().count()
+    nb_evidences = Evidence.objects.all().count()
+    nb_compliance_assessments = ComplianceAssessment.objects.all().count()
+    nb_risk_assessments = RiskAssessment.objects.all().count()
+    nb_risk_scenarios = RiskScenario.objects.all().count()
+    nb_risk_acceptances = RiskAcceptance.objects.all().count()
+    nb_seats = getattr(settings, "LICENSE_SEATS", 0)
+    nb_editors = len(User.get_editors())
+    expiration = getattr(settings, "LICENSE_EXPIRATION", -1)
+
+    created_at = int(Folder.get_root_folder().created_at.timestamp())
+    last_login_dt = max(
+        [
+            x["last_login"]
+            for x in User.objects.all().values("last_login")
+            if x["last_login"]
+        ],
+        default=None,
+    )
+    last_login = int(last_login_dt.timestamp()) if last_login_dt else 0
+
+    return {
+        "nb_users": nb_users,
+        "nb_first_login": nb_first_login,
+        "nb_libraries": nb_libraries,
+        "nb_domains": nb_domains,
+        "nb_perimeters": nb_perimeters,
+        "nb_assets": nb_assets,
+        "nb_threats": nb_threats,
+        "nb_functions": nb_functions,
+        "nb_measures": nb_measures,
+        "nb_evidences": nb_evidences,
+        "nb_compliance_assessments": nb_compliance_assessments,
+        "nb_risk_assessments": nb_risk_assessments,
+        "nb_risk_scenarios": nb_risk_scenarios,
+        "nb_risk_acceptances": nb_risk_acceptances,
+        "nb_seats": nb_seats,
+        "nb_editors": nb_editors,
+        "expiration": expiration,
+        "created_at": created_at,
+        "last_login": last_login,
+    }
 
 
 def risk_status(user: User, risk_assessment_list):
@@ -1046,13 +1549,16 @@ def acceptances_to_review(user: User):
     return acceptances
 
 
-def build_scenario_clusters(risk_assessment: RiskAssessment):
+def build_scenario_clusters(risk_assessment: RiskAssessment, include_inherent=False):
     risk_matrix = risk_assessment.risk_matrix.parse_json()
     grid = risk_matrix["grid"]
     risk_matrix_current = [
         [set() for _ in range(len(grid[0]))] for _ in range(len(grid))
     ]
     risk_matrix_residual = [
+        [set() for _ in range(len(grid[0]))] for _ in range(len(grid))
+    ]
+    risk_matrix_inherent = [
         [set() for _ in range(len(grid[0]))] for _ in range(len(grid))
     ]
 
@@ -1063,8 +1569,18 @@ def build_scenario_clusters(risk_assessment: RiskAssessment):
             risk_matrix_current[ri.current_proba][ri.current_impact].add(ri.ref_id)
         if ri.residual_level >= 0:
             risk_matrix_residual[ri.residual_proba][ri.residual_impact].add(ri.ref_id)
+        if include_inherent:
+            if ri.inherent_level >= 0:
+                risk_matrix_inherent[ri.inherent_proba][ri.inherent_impact].add(
+                    ri.ref_id
+                )
 
-    return {"current": risk_matrix_current, "residual": risk_matrix_residual}
+    clusters = {"current": risk_matrix_current, "residual": risk_matrix_residual}
+
+    if include_inherent:
+        clusters["inherent"] = risk_matrix_inherent
+
+    return clusters
 
 
 def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
@@ -1146,12 +1662,15 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
     }
 
 
-def threats_count_per_name(user: User) -> Dict[str, List]:
+def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
     object_ids_view, _, _ = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Threat
+        scoped_folder, user, Threat
     )
     viewable_scenarios = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskScenario
+        scoped_folder, user, RiskScenario
     )[0]
 
     # Updated field name from 'riskscenario' to 'risk_scenarios'
@@ -1178,39 +1697,80 @@ def threats_count_per_name(user: User) -> Dict[str, List]:
     return {"labels": labels, "values": values}
 
 
-def get_folder_content(folder: Folder):
+def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
+    viewable_scenarios = RoleAssignment.get_accessible_object_ids(
+        scoped_folder, user, RiskScenario
+    )[0]
+
+    # Get all risk scenarios that user can view
+    risk_scenarios = RiskScenario.objects.filter(id__in=viewable_scenarios)
+
+    # Count occurrences of each qualification
+    qualification_counts = {}
+    for scenario in risk_scenarios:
+        for qualification in scenario.qualifications.all():
+            key = qualification.name
+            qualification_counts[key] = qualification_counts.get(key, 0) + 1
+
+    # Sort by qualification name and only include those with count > 0
+    sorted_qualifications = sorted(
+        [(qual, count) for qual, count in qualification_counts.items() if count > 0]
+    )
+
+    labels = [qualification for qualification, _ in sorted_qualifications]
+    values = [count for _, count in sorted_qualifications]
+
+    return {"labels": labels, "values": values}
+
+
+def get_folder_content(
+    folder: Folder, include_perimeters, viewable_objects, needed_folders
+):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
-        content.append(
-            {
+        if f.id in viewable_objects or f.id in needed_folders:
+            entry = {
                 "name": f.name,
-                "itemStyle": {"color": "#8338ec"},
-                "children": get_folder_content(f),
+                "uuid": f.id,
+                "viewable": viewable_objects and f.id in viewable_objects,
             }
-        )
-    for p in Perimeter.objects.filter(folder=folder).distinct():
-        content.append(
-            {
-                "name": p.name,
-                "symbol": "circle",
-                "itemStyle": {"color": "#3a86ff"},
-                "children": [
-                    {
-                        "name": "Audits",
-                        "symbol": "diamond",
-                        "value": ComplianceAssessment.objects.filter(
-                            perimeter=p
-                        ).count(),
-                    },
-                    {
-                        "name": "Risk assessments",
-                        "symbol": "diamond",
-                        "value": RiskAssessment.objects.filter(perimeter=p).count(),
-                    },
-                ],
-            }
-        )
+            children = get_folder_content(
+                f,
+                include_perimeters=include_perimeters,
+                viewable_objects=viewable_objects,
+                needed_folders=needed_folders,
+            )
+            if len(children) > 0:
+                entry.update({"children": children})
+            content.append(entry)
 
+    if include_perimeters and folder.id in viewable_objects:
+        for p in Perimeter.objects.filter(folder=folder).distinct():
+            content.append(
+                {
+                    "name": p.name,
+                    "symbol": "circle",
+                    "symbolSize": 10,
+                    "itemStyle": {"color": "#222436"},
+                    "children": [
+                        {
+                            "name": "Audits",
+                            "symbol": "diamond",
+                            "value": ComplianceAssessment.objects.filter(
+                                perimeter=p
+                            ).count(),
+                        },
+                        {
+                            "name": "Risk assessments",
+                            "symbol": "diamond",
+                            "value": RiskAssessment.objects.filter(perimeter=p).count(),
+                        },
+                    ],
+                }
+            )
     return content
 
 
@@ -1292,9 +1852,20 @@ def duplicate_related_objects(
         """
         Duplicate an object and link it to the duplicate object.
         """
-        new_obj.pk = None
-        new_obj.folder = target_folder
-        new_obj.save()
+        # Get the model of the object
+        model_class = new_obj.__class__
+
+        # Extract all fields except the primary key
+        field_values = {}
+        for field in new_obj._meta.fields:
+            if not field.primary_key and not field.auto_created:
+                field_values[field.name] = getattr(new_obj, field.name)
+
+        # Apply changes
+        field_values["folder"] = target_folder
+
+        # Create the new object
+        new_obj = model_class.objects.create(**field_values)
         link_existing_object(duplicate_object, new_obj, field_name)
 
     model_class = getattr(type(source_object), field_name).field.related_model

@@ -1,0 +1,10 @@
+{
+    "message_type": "update_requirement_assessment",
+    "selector": {
+        "compliance_assessment__ref_id": "ISO_001",
+        "requirement__ref_id": "A.5.1"
+    },
+    "values": {
+        "result": "compliant"
+    }
+}

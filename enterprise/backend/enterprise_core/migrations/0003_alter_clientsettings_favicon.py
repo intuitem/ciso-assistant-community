@@ -5,15 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('enterprise_core', '0002_clientsettings_show_images_unauthenticated_and_more'),
+        ("enterprise_core", "0002_clientsettings_show_images_unauthenticated_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='clientsettings',
-            name='favicon',
-            field=models.ImageField(blank=True, null=True, upload_to='client_favicons', validators=[django.core.validators.FileExtensionValidator(['ico', 'png', 'jpeg', 'jpg', 'webp', 'svg'])]),
+            model_name="clientsettings",
+            name="favicon",
+            field=models.ImageField(
+                blank=True,
+                null=True,
+                upload_to="client_favicons",
+                validators=[
+                    django.core.validators.FileExtensionValidator(
+                        ["ico", "png", "jpeg", "jpg", "webp", "svg"]
+                    )
+                ],
+            ),
         ),
     ]

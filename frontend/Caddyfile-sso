@@ -1,0 +1,5 @@
+https://localhost {
+	reverse_proxy /api/* localhost:8000
+	reverse_proxy /* localhost:3000 
+	tls internal
+}

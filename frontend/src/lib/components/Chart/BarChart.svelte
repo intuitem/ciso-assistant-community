@@ -1,15 +1,27 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	export let name: string;
-	export let values: any[]; // Set this type later
-	export let labels: string[];
-	export let horizontal = false;
-	export let title = '';
+	interface Props {
+		name: string;
+		values: any[]; // Set this type later
+		labels: string[];
+		horizontal?: boolean;
+		title?: string;
+		width?: string;
+		height?: string;
+		classesContainer?: string;
+	}
 
-	export let width = 'w-auto';
-	export let height = 'h-full';
-	export let classesContainer = '';
+	let {
+		name,
+		values,
+		labels,
+		horizontal = false,
+		title = '',
+		width = 'w-auto',
+		height = 'h-full',
+		classesContainer = ''
+	}: Props = $props();
 
 	const chart_id = `${name}_div`;
 
@@ -54,13 +66,19 @@
 				}
 				// show: false
 			},
-			grid: { left: 0, top: 40, right: 0, bottom: 10, containLabel: true },
+			grid: { left: 10, top: 40, right: 10, bottom: 10, containLabel: true },
 			xAxis: horizontal ? value : category,
 			yAxis: horizontal ? category : value,
 			series: [
 				{
 					data: values,
-					type: 'bar'
+					type: 'bar',
+					itemStyle: {
+						color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+							{ offset: 0, color: '#4f46e5' },
+							{ offset: 1, color: '#7c3aed' }
+						])
+					}
 				}
 			]
 		};
@@ -79,4 +97,4 @@
 	});
 </script>
 
-<div id={chart_id} class="{width} {height} {classesContainer}" />
+<div id={chart_id} class="{width} {height} {classesContainer}"></div>

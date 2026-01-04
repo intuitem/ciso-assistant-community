@@ -1,0 +1,2975 @@
+urn: urn:intuitem:risk:library:igi-1300
+locale: fr
+ref_id: IGI-1300
+name: urn:intuitem:risk:library:igi-1300
+description: "Ce document reprend les exigences d\xE9finies dans l\u2019instruction\
+  \ g\xE9n\xE9rale interminist\xE9rielle n\xB0 1300/SGDSN/PSE/PSD (IGI 1300) publi\xE9\
+  e par l\u2019arr\xEAt\xE9 du 9 ao\xFBt 2021 portant approbation de l\u2019instruction\
+  \ g\xE9n\xE9rale interminist\xE9rielle n\xB0 1300 sur la protection du secret de\
+  \ la d\xE9fense nationale\n\nLe lien du document :\nhttps://cyber.gouv.fr/sites/default/files/2022-10/ANSSI-NP-IGI1300-listing_des_exigences-v0.4.xlsx"
+copyright: ANSSI
+version: 1
+publication_date: 2025-04-29
+provider: ANSSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:igi-1300
+    ref_id: IGI-1300
+    name: "IGI n\xB0 1300/SGDSN/PSE/PSD sur la protection du secret de la d\xE9fense\
+      \ nationale"
+    description: "Ce document reprend les exigences d\xE9finies dans l\u2019instruction\
+      \ g\xE9n\xE9rale interminist\xE9rielle n\xB0 1300/SGDSN/PSE/PSD (IGI 1300) publi\xE9\
+      e par l\u2019arr\xEAt\xE9 du 9 ao\xFBt 2021 portant approbation de l\u2019instruction\
+      \ g\xE9n\xE9rale interminist\xE9rielle n\xB0 1300 sur la protection du secret\
+      \ de la d\xE9fense nationale\n\nLe lien du document :\nhttps://cyber.gouv.fr/sites/default/files/2022-10/ANSSI-NP-IGI1300-listing_des_exigences-v0.4.xlsx"
+    min_score: 1
+    max_score: 4
+    scores_definition:
+    - score: 1
+      name: "Totalement mis en \u0153uvre"
+      description: null
+    - score: 2
+      name: "Partiellement mis en \u0153uvre"
+      description: null
+    - score: 3
+      name: "Pas commenc\xE9"
+      description: null
+    - score: 4
+      name: "Probl\xE8me !"
+      description: null
+    implementation_groups_definition:
+    - ref_id: S
+      name: Secret
+      description: null
+    - ref_id: TS
+      name: "Tr\xE8s Secret"
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:igi-1300:node1
+      assessable: true
+      depth: 1
+      name: "1.4.2.4 R\xE9ponses aux incidents li\xE9s \xE0 la s\xE9curit\xE9 des\
+        \ syst\xE8mes d\u2019information classifi\xE9s"
+    - urn: urn:intuitem:risk:req_node:igi-1300:inc_01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node1
+      ref_id: INC_01
+      description: "Lorsqu\u2019un organisme d\xE9tient un syst\xE8me d\u2019information\
+        \ pour le traitement des informations classifi\xE9es qu\u2019il \xE9change\
+        \ ou d\xE9tient, il se dote d'un dispositif technique et humain de gestion\
+        \ des incidents afin de d\xE9tecter et d'analyser les attaques et de r\xE9\
+        agir face \xE0 des \xE9v\xE9nements susceptibles d\u2019affecter la s\xE9\
+        curit\xE9 du syst\xE8me d\u2019information classifi\xE9.\n\nCe dispositif\
+        \ s'appuie notamment sur des syst\xE8mes de d\xE9tection conformes au paragraphe\
+        \ 6.6.4.4."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2
+      assessable: false
+      depth: 1
+      name: "6 S\xE9curit\xE9 des syst\xE8mes d'informations classifi\xE9s"
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2
+      name: "6.1 Homologation du syst\xE8me d'information classifi\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:1:1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1
+      name: "6.1.1 D\xE9marche d'homologation"
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:1
+      ref_id: HOMOL_01
+      description: "Le traitement d\u2019informations dont le niveau de classification\
+        \ est sup\xE9rieur au niveau de classification pr\xE9vu par la d\xE9cision\
+        \ d\u2019homologation du syst\xE8me d\u2019information est interdit"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:1
+      ref_id: HOMOL_02
+      description: "Le p\xE9rim\xE8tre d\u2019homologation d\u2019un syst\xE8me d\u2019\
+        information classifi\xE9 inclut les \xE9ventuels supports amovibles mis \xE0\
+        \ disposition par l\u2019autorit\xE9 d\u2019emploi pour ce syst\xE8me d\u2019\
+        information"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_03
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:1
+      ref_id: HOMOL_03
+      description: "[Dans le cadre de la d\xE9marche d'homologation] Une grande attention\
+        \ est pr\xEAt\xE9e \xE0 :\n- l\u2019interconnexion avec d\u2019autres syst\xE8\
+        mes ;\n- l\u2019usage de supports amovibles ;\n- l\u2019acc\xE8s \xE0 distance\
+        \ par des utilisateurs en mobilit\xE9 ;\n- les moyens de visualisation et\
+        \ d\u2019h\xE9bergement des informations classifi\xE9es ;\n- les op\xE9rations\
+        \ de maintenance ou d\u2019exploitation du syst\xE8me ou d\u2019administration,\
+        \ en particulier lorsqu\u2019elles sont effectu\xE9es par des prestataires\
+        \ externes."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:1:2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1
+      name: "6.1.2 Autorit\xE9 d'homologation"
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_04
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:2
+      ref_id: HOMOL_04
+      description: "L'autorit\xE9 d'homologation est le SGDSN pour :\n - les syst\xE8\
+        mes d\u2019information traitant d\u2019informations classifi\xE9es au niveau\
+        \ Tr\xE8s Secret faisant l\u2019objet d\u2019une classification sp\xE9ciale\
+        \ ;\n - les syst\xE8mes d\u2019information amen\xE9s \xE0 traiter des informations\
+        \ classifi\xE9es de l\u2019Union europ\xE9enne ou de l\u2019OTAN, ou toute\
+        \ autre autorit\xE9 \xE0 laquelle il d\xE9l\xE8gue cette responsabilit\xE9\
+        \ ;\n - les syst\xE8mes d\u2019information classifi\xE9s utilis\xE9s par des\
+        \ organismes relevant de son p\xE9rim\xE8tre au titre de l\u2019article 2\
+        \ du d\xE9cret n\xB0 2012-383 du 20 mars 2012 relatif aux attributions du\
+        \ haut fonctionnaire de d\xE9fense et de s\xE9curit\xE9 aupr\xE8s du Premier\
+        \ ministre."
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_05
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:2
+      ref_id: HOMOL_05
+      description: "L'autorit\xE9 d'homologation  est l\u2019autorit\xE9 qualifi\xE9\
+        e en s\xE9curit\xE9 des syst\xE8mes d\u2019information ou la personne qu\u2019\
+        elle d\xE9signe pour les syst\xE8mes d\u2019information traitant d\u2019informations\
+        \ classifi\xE9es au niveau Secret ou Tr\xE8s Secret, hors classifications\
+        \ sp\xE9ciales.\n\nDans le cas o\xF9 le syst\xE8me d\u2019information classifi\xE9\
+        \ d\xE9pend de la responsabilit\xE9 de plusieurs ministres, les autorit\xE9\
+        s qualifi\xE9es en s\xE9curit\xE9 des syst\xE8mes d\u2019information d\xE9\
+        signent une autorit\xE9 d\u2019homologation unique."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:1:3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1
+      name: "6.1.3 Commission d\u2019homologation"
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_06
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:3
+      ref_id: HOMOL_06
+      description: "Cette commission comprend notamment des repr\xE9sentants de l\u2019\
+        autorit\xE9 d\u2019emploi du syst\xE8me d\u2019information, dont l\u2019officier\
+        \ de s\xE9curit\xE9 des syst\xE8mes d\u2019information et le responsable de\
+        \ la s\xE9curit\xE9 du syst\xE8me d\u2019information, ainsi que des repr\xE9\
+        sentants du service du haut fonctionnaire de d\xE9fense et de s\xE9curit\xE9\
+        \ comp\xE9tent. Des repr\xE9sentants du service enqu\xEAteur comp\xE9tent\
+        \ peuvent \xEAtre convi\xE9s \xE0 la commission et sont obligatoirement pr\xE9\
+        sents lorsque l\u2019homologation est au profit d\u2019une personne morale\
+        \ de droit priv\xE9. Dans le cadre de l\u2019utilisation d\u2019un syst\xE8\
+        me d\u2019information classifi\xE9 en ex\xE9cution d\u2019un contrat au sens\
+        \ de la partie 4.4, l\u2019autorit\xE9 contractante participe \xE9galement\
+        \ \xE0 la commission."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_07
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:3
+      ref_id: HOMOL_07
+      description: "En tant qu\u2019autorit\xE9 nationale en mati\xE8re de s\xE9curit\xE9\
+        \ des syst\xE8mes d\u2019information, l\u2019agence nationale de la s\xE9\
+        curit\xE9 des syst\xE8mes d\u2019information peut participer \xE0 toute commission\
+        \ d\u2019homologation d\u2019un syst\xE8me d\u2019information classifi\xE9\
+        . Afin de lui permettre d\u2019appr\xE9cier la n\xE9cessit\xE9 de sa participation,\
+        \ l\u2019autorit\xE9 d\u2019homologation l\u2019informe dans un d\xE9lai raisonnable\
+        \ de la date de la commission et lui transmet, le cas \xE9ch\xE9ant, les pi\xE8\
+        ces n\xE9cessaires \xE0 l\u2019instruction du dossier d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_08
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:3
+      ref_id: HOMOL_08
+      description: "Les modalit\xE9s de transmission des d\xE9cisions et d\u2019acc\xE8\
+        s aux dossiers sont d\xE9termin\xE9es en accord avec le service du haut fonctionnaire\
+        \ de d\xE9fense et de s\xE9curit\xE9 comp\xE9tent."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_09
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:3
+      ref_id: HOMOL_09
+      description: "L\u2019agence nationale de la s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information est membre de droit de la commission d\u2019homologation lorsque\
+        \ le secr\xE9taire g\xE9n\xE9ral de la d\xE9fense et de la s\xE9curit\xE9\
+        \ nationale est autorit\xE9 d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:1:4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1
+      name: 6.1.4 Dossier d'homologation
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:4
+      ref_id: HOMOL_10
+      description: "Le dossier d\u2019homologation est \xE9tabli selon les recommandations\
+        \ de l\u2019agence nationale de la s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:4
+      ref_id: HOMOL_11
+      description: "Le dossier d\u2019homologation, initi\xE9 d\xE8s la conception\
+        \ du syst\xE8me, est par la suite tenu \xE0 jour tout au long du cycle de\
+        \ vie du syst\xE8me d\u2019information classifi\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_12
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:4
+      ref_id: HOMOL_12
+      description: "La strat\xE9gie d\u2019homologation pr\xE9cise, \xE0 partir de\
+        \ l\u2019analyse de risques pesant sur le syst\xE8me d\u2019information classifi\xE9\
+        \ et conform\xE9ment \xE0 la politique de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information applicable, la constitution du dossier d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_13
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:4
+      ref_id: HOMOL_13
+      description: "Peuvent \xEAtre vers\xE9s au dossier d\u2019homologation, au regard\
+        \ de la strat\xE9gie d'homologation, les documents suivants :\n- la politique\
+        \ de s\xE9curit\xE9 du syst\xE8me d\u2019information applicable ;\n- les proc\xE9\
+        dures d\u2019exploitation s\xE9curis\xE9e du syst\xE8me, y compris la documentation\
+        \ \xE0 destination des utilisateurs et des administrateurs ;\n- les modalit\xE9\
+        s de gestion des risques r\xE9siduels ;\n- le plan d\u2019am\xE9lioration\
+        \ continue de la s\xE9curit\xE9 ;\n- les r\xE9sultats des tests et des audits\
+        \ men\xE9s pour v\xE9rifier l\u2019\xE9tat de s\xE9curit\xE9 du syst\xE8me\
+        \ ;\n- la documentation relative \xE0 la gestion des \xE9l\xE9ments cryptographiques\
+        \ mis en oeuvre dans le syst\xE8me d\u2019information ;\n- la cartographie\
+        \ compl\xE8te du syst\xE8me d\u2019information qui comprend notamment la liste\
+        \ des \xE9quipements externes pouvant \xEAtre connect\xE9s au syst\xE8me d\u2019\
+        information (mat\xE9riel de maintenance, d\u2019audit, etc.) ;\n- les sch\xE9\
+        mas d\xE9taill\xE9s de l\u2019architecture du syst\xE8me d\u2019information\
+        \ ;\n- les agr\xE9ments des dispositifs de s\xE9curit\xE9 ;\n- l\u2019analyse\
+        \ de risques et les mesures de mitigation envisag\xE9es, lorsque, par d\xE9\
+        rogation, il est envisag\xE9 de recourir \xE0 des dispositifs de s\xE9curit\xE9\
+        \ non agr\xE9\xE9s (cf. 6.4.1).\n\nLa n\xE9cessit\xE9 de verser au dossier\
+        \ d\u2019homologation les documents list\xE9s ci-apr\xE8s est ainsi \xE9valu\xE9\
+        e et justifi\xE9e au regard de l\u2019analyse de risques et de la strat\xE9\
+        gie d\u2019homologation. Si un document n\u2019est pas vers\xE9 au dossier\
+        \ d\u2019homologation, la justification associ\xE9e y figure."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_14
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:4
+      ref_id: HOMOL_14
+      description: "Une fois le syst\xE8me d\u2019information classifi\xE9 d\xE9ploy\xE9\
+        , les documents relatifs aux lieux d\u2019installation, et notamment les mesures\
+        \ de protection physique et les avis techniques d\u2019aptitude physique,\
+        \ sont vers\xE9s au dossier d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_15
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:4
+      ref_id: HOMOL_15
+      description: "Le dossier d\u2019homologation est tenu \xE0 disposition :\n-\
+        \ du service du haut fonctionnaire de d\xE9fense et de s\xE9curit\xE9 ;\n\
+        - de l\u2019agence nationale de la s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:1:5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1
+      name: "6.1.4 Dur\xE9e de la d\xE9cision d'homologation"
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_16
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:5
+      ref_id: HOMOL_16
+      description: "La d\xE9cision d\u2019homologation est prononc\xE9e pour une dur\xE9\
+        e maximale de trois ans pour un syst\xE8me d\u2019information au niveau Secret"
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_17
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:5
+      ref_id: HOMOL_17
+      description: "La d\xE9cision d\u2019homologation est prononc\xE9e pour une dur\xE9\
+        e maximale de deux ans pour un syst\xE8me d\u2019information au niveau Tr\xE8\
+        s Secret"
+      implementation_groups:
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_18
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:5
+      ref_id: HOMOL_18
+      description: "L\u2019agence nationale de la s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information est destinataire de toute d\xE9cision d\u2019homologation portant\
+        \ sur les syst\xE8mes d\u2019information classifi\xE9s et peut demander le\
+        \ dossier d\u2019homologation correspondant."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_19
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:5
+      ref_id: HOMOL_19
+      description: "Les modalit\xE9s de transmission des d\xE9cisions et d\u2019acc\xE8\
+        s aux dossiers sont d\xE9termin\xE9es en accord avec le service du haut fonctionnaire\
+        \ de d\xE9fense et de s\xE9curit\xE9 de chaque minist\xE8re."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_20
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:5
+      ref_id: HOMOL_20
+      description: "Le service du haut fonctionnaire de d\xE9fense et de s\xE9curit\xE9\
+        \ et, le cas \xE9ch\xE9ant, l\u2019autorit\xE9 contractante, sont \xE9galement\
+        \ destinataires de la d\xE9cision d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_21
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:5
+      ref_id: HOMOL_21
+      description: "Le service enqu\xEAteur comp\xE9tent est destinataire de la d\xE9\
+        cision d\u2019homologation prise au profit d\u2019une personne morale de droit\
+        \ priv\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:1:6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1
+      name: "6.1.6 Contr\xF4le et renouvellement de l'homologation"
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_22
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:6
+      ref_id: HOMOL_22
+      description: "Conform\xE9ment aux lignes directrices de l\u2019autorit\xE9 qualifi\xE9\
+        e en s\xE9curit\xE9 des syst\xE8mes d\u2019information (cf. 2.2.3.1 b), l\u2019\
+        autorit\xE9 d\u2019homologation fixe les conditions du maintien de l\u2019\
+        homologation de s\xE9curit\xE9 tout au long du cycle de vie du syst\xE8me\
+        \ d\u2019information. Elle contr\xF4le r\xE9guli\xE8rement que le syst\xE8\
+        me fonctionne effectivement selon les conditions qu\u2019elle a approuv\xE9\
+        es."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_23
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:6
+      ref_id: HOMOL_23
+      description: "L\u2019autorit\xE9 d\u2019homologation proc\xE8de au renouvellement\
+        \ de l\u2019homologation avant le terme pr\xE9vu. Elle s\u2019assure de la\
+        \ compl\xE9tude du dossier d\u2019homologation et v\xE9rifie que les pi\xE8\
+        ces n\xE9cessaires \xE0 son actualisation y figurent."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_24
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:6
+      ref_id: HOMOL_24
+      description: "Une nouvelle d\xE9cision d\u2019homologation est n\xE9cessaire\
+        \ lorsque :\n- les conditions d\u2019emploi et d\u2019exploitation du syst\xE8\
+        me ont \xE9t\xE9 significativement modifi\xE9es ;\n- de nouvelles fonctionnalit\xE9\
+        s ou applications ont \xE9t\xE9 install\xE9es ;\n- le syst\xE8me a \xE9t\xE9\
+        \ interconnect\xE9 \xE0 de nouveaux syst\xE8mes ;\n- des probl\xE8mes d\u2019\
+        application des mesures de s\xE9curit\xE9 ou des conditions de maintien de\
+        \ l\u2019homologation ont \xE9t\xE9 r\xE9v\xE9l\xE9s, par exemple lors d\u2019\
+        un audit de s\xE9curit\xE9 ;\n- les menaces sur le syst\xE8me ont significativement\
+        \ \xE9volu\xE9 ;\n- de nouvelles vuln\xE9rabilit\xE9s non corrig\xE9es ont\
+        \ \xE9t\xE9 identifi\xE9es ;\n- le syst\xE8me a fait l\u2019objet d\u2019\
+        un incident de s\xE9curit\xE9 significatif au regard de l\u2019analyse de\
+        \ risques."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_25
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:6
+      ref_id: HOMOL_25
+      description: "Si le syst\xE8me d\u2019information classifi\xE9 n\u2019a pas\
+        \ connu de changements significatifs, une proc\xE9dure simplifi\xE9e d\u2019\
+        homologation est mise en oeuvre."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:1:7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1
+      name: "6.1.7 Proc\xE9dure d\xE9rogatoire en cas d'urgence op\xE9rationnelle"
+    - urn: urn:intuitem:risk:req_node:igi-1300:homol_26
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:1:7
+      ref_id: HOMOL_26
+      description: "Lorsque l\u2019urgence op\xE9rationnelle le requiert, il peut\
+        \ \xEAtre proc\xE9d\xE9 \xE0 une mise en service provisoire, sans attendre\
+        \ l\u2019homologation du syst\xE8me, en tenant compte de l\u2019avancement\
+        \ de la proc\xE9dure d\u2019homologation et des risques r\xE9siduels de s\xE9\
+        curit\xE9. Dans ce cas, l\u2019autorit\xE9 d\u2019homologation d\xE9livre\
+        \ une autorisation provisoire d\u2019emploi (APE) pour une dur\xE9e courte\
+        \ et associ\xE9e \xE0 un plan de mise en conformit\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2
+      name: "6.2 Homologation des interconnexions d'un syst\xE8me d'information classifi\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:2:1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2
+      name: "6.2.1 Interconnexion entre deux syst\xE8mes d'information classifi\xE9\
+        s de m\xEAme niveau"
+    - urn: urn:intuitem:risk:req_node:igi-1300:interco_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2:1
+      ref_id: INTERCO_01
+      description: "Toute interconnexion entre syst\xE8mes d\u2019information classifi\xE9\
+        s de m\xEAme niveau doit \xEAtre justifi\xE9e et faire l'objet d'une homologation\
+        \ sp\xE9cifique \xE0 ce m\xEAme niveau."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:interco_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2:1
+      ref_id: INTERCO_02
+      description: "L'ajout d'une interconnexion n\xE9cessite une nouvelle homologation\
+        \ des syst\xE8mes d\u2019information interconnect\xE9s."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:interco_03
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2:1
+      ref_id: INTERCO_03
+      description: "L\u2019autorit\xE9 d\u2019homologation est d\xE9sign\xE9e apr\xE8\
+        s concertation entre les autorit\xE9s d\u2019homologation de chaque syst\xE8\
+        me d\u2019information interconnect\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:interco_04
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2:1
+      ref_id: INTERCO_04
+      description: "L\u2019autorit\xE9 d\u2019homologation est le secr\xE9tariat g\xE9\
+        n\xE9ral de la s\xE9curit\xE9 et de la d\xE9fense nationale, ou toute autorit\xE9\
+        \ \xE0 qui il en d\xE9l\xE8gue la responsabilit\xE9, dans les cas suivants\
+        \ :\n- pour les transferts d'informations entre des syst\xE8mes d\u2019information\
+        \ classifi\xE9s de m\xEAme niveau, dont l\u2019un n\u2019est pas sous ma\xEE\
+        trise nationale ;\n- pour les transferts d'informations entre des syst\xE8\
+        mes d\u2019information classifi\xE9s de m\xEAme niveau, dont l\u2019un est\
+        \ amen\xE9 \xE0 traiter des informations classifi\xE9es de l\u2019Union europ\xE9\
+        enne ou de l\u2019OTAN ;\n- lorsque l\u2019utilisation de dispositifs de s\xE9\
+        curit\xE9 agr\xE9\xE9s est obligatoire mais impossible, notamment lorsqu\u2019\
+        il n\u2019existe pas de dispositif de s\xE9curit\xE9 agr\xE9\xE9 ou lorsqu\u2019\
+        il n\u2019est pas agr\xE9\xE9 au bon niveau."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:interco_05
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2:1
+      ref_id: INTERCO_05
+      description: "L'interconnexion est obligatoirement r\xE9alis\xE9e \xE0 l\u2019\
+        aide de dispositifs de s\xE9curit\xE9 agr\xE9\xE9s lorsqu\u2019ils sont utilis\xE9\
+        s comme moyens essentiels de protection contre les acc\xE8s non autoris\xE9\
+        s aux informations classifi\xE9es ou au syst\xE8me :\n- pour les transferts\
+        \ d'informations entre des syst\xE8mes d\u2019information classifi\xE9s de\
+        \ m\xEAme niveau ou de niveaux \xE9quivalents, dont l\u2019un n\u2019est pas\
+        \ sous ma\xEEtrise nationale ;\n- pour les transferts d'informations entre\
+        \ des syst\xE8mes d\u2019information classifi\xE9s de m\xEAme niveau ou de\
+        \ niveaux \xE9quivalents, dont l\u2019un est amen\xE9 \xE0 traiter des informations\
+        \ classifi\xE9es de l\u2019Union europ\xE9enne ou de l\u2019OTAN.\n\nCes dispositifs\
+        \ de s\xE9curit\xE9 agr\xE9\xE9s sont d\xE9ploy\xE9s dans les conditions d\u2019\
+        emploi associ\xE9es aux d\xE9cisions d\u2019agr\xE9ment pour cet usage."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:2:2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2
+      name: 6.2.2 Autres interconnexions
+    - urn: urn:intuitem:risk:req_node:igi-1300:interco_06
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2:2
+      ref_id: INTERCO_06
+      description: "Les interconnexions entre syst\xE8mes d\u2019information de niveaux\
+        \ de classification diff\xE9rents ou entre un syst\xE8me d\u2019information\
+        \ classifi\xE9 et un syst\xE8me d\u2019information non classifi\xE9 sont par\
+        \ principe interdites."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:interco_07
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2:2
+      ref_id: INTERCO_07
+      description: "Toute interconnexion de ce type d\xE9rogeant \xE0 l\u2019interdiction\
+        \ de principe doit \xEAtre justifi\xE9e par un besoin op\xE9rationnel strictement\
+        \ n\xE9cessaire. La justification est vers\xE9e au dossier d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:interco_08
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2:2
+      ref_id: INTERCO_08
+      description: "Toute interconnexion d\u2019un syst\xE8me d\u2019information classifi\xE9\
+        \ avec un syst\xE8me d\u2019information non classifi\xE9 ou de niveau de classification\
+        \ diff\xE9rent est homologu\xE9e au niveau du syst\xE8me d\u2019information\
+        \ le plus \xE9lev\xE9. Cette interconnexion fait l'objet d'une homologation\
+        \ sp\xE9cifique."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:interco_09
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2:2
+      ref_id: INTERCO_09
+      description: "L'ajout d'une interconnexion n\xE9cessite une nouvelle homologation\
+        \ des syst\xE8mes d\u2019information interconnect\xE9s."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:interco_10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2:2
+      ref_id: INTERCO_10
+      description: "L\u2019autorit\xE9 d\u2019homologation est par d\xE9faut l\u2019\
+        autorit\xE9 d\u2019homologation du syst\xE8me d\u2019information du niveau\
+        \ le plus \xE9lev\xE9, mais elle peut \xEAtre aussi d\xE9sign\xE9e apr\xE8\
+        s concertation entre les autorit\xE9s d\u2019homologation de chaque syst\xE8\
+        me d\u2019information interconnect\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:interco_11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2:2
+      ref_id: INTERCO_11
+      description: "L\u2019autorit\xE9 d\u2019homologation est le secr\xE9tariat g\xE9\
+        n\xE9ral de la s\xE9curit\xE9 et de la d\xE9fense nationale, ou toute autorit\xE9\
+        \ \xE0 qui il en d\xE9l\xE8gue la responsabilit\xE9, dans les cas suivants\
+        \ :\n- pour les transferts d'informations entre des syst\xE8mes d\u2019information\
+        \ classifi\xE9s de m\xEAme niveau, dont l\u2019un n\u2019est pas sous ma\xEE\
+        trise nationale ;\n- pour les transferts d'informations entre des syst\xE8\
+        mes d\u2019information classifi\xE9s de m\xEAme niveau, dont l\u2019un est\
+        \ amen\xE9 \xE0 traiter des informations classifi\xE9es de l\u2019Union europ\xE9\
+        enne ou de l\u2019OTAN ;\n- lorsque l\u2019utilisation de dispositifs de s\xE9\
+        curit\xE9 agr\xE9\xE9s est obligatoire mais impossible, notamment lorsqu\u2019\
+        il n\u2019existe pas de dispositif de s\xE9curit\xE9 agr\xE9\xE9 ou lorsqu\u2019\
+        il n\u2019est pas agr\xE9\xE9 au bon niveau."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:interco_12
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:2:2
+      ref_id: INTERCO_12
+      description: "L'interconnexion est obligatoirement r\xE9alis\xE9e \xE0 l\u2019\
+        aide de dispositifs de s\xE9curit\xE9 agr\xE9\xE9s lorsqu\u2019ils sont utilis\xE9\
+        s comme moyens essentiels de protection contre les acc\xE8s non autoris\xE9\
+        s aux informations classifi\xE9es ou au syst\xE8me et sont d\xE9ploy\xE9s\
+        \ dans les conditions pr\xE9vues par la d\xE9cision d'agr\xE9ment."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2
+      name: "6.3 Mesures de s\xE9curit\xE9 applicables en cas de sous-traitance du\
+        \ d\xE9veloppement ou de la maintenance d'un syst\xE8me d'information classifi\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:tiers_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:3
+      ref_id: TIERS_01
+      description: "Aucun sous-traitant ne peut acc\xE9der \xE0 un syst\xE8me d\u2019\
+        information classifi\xE9 s\u2019il ne fait pas l\u2019objet d\u2019une d\xE9\
+        cision d\u2019habilitation (cf. partie 4.4)."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:tiers_02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:3
+      ref_id: TIERS_02
+      description: "Toute information sp\xE9cifique li\xE9e au d\xE9veloppement ou\
+        \ \xE0 la configuration d\u2019un logiciel ou d\u2019un syst\xE8me d\u2019\
+        information classifi\xE9 et dont la divulgation est susceptible de porter\
+        \ atteinte \xE0 la s\xE9curit\xE9 du syst\xE8me d\u2019information classifi\xE9\
+        \ ou des informations classifi\xE9es qu\u2019il contient est classifi\xE9\
+        e \xE0 un niveau \xE9quivalent ou sup\xE9rieur \xE0 celui du syst\xE8me d\u2019\
+        information classifi\xE9 lui-m\xEAme."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:tiers_03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:3
+      ref_id: TIERS_03
+      description: "Lorsqu'ils sont consid\xE9r\xE9s comme des documents administratifs\
+        \ au sens de l\u2019article L. 300-2 du CRPA, les codes sources et les \xE9\
+        l\xE9ments de configuration d\u2019un syst\xE8me d\u2019information classifi\xE9\
+        \ ne sont pas librement communicables et peuvent \xEAtre classifi\xE9s en\
+        \ fonction de leur sensibilit\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:tiers_04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:3
+      ref_id: TIERS_04
+      description: "Les besoins de protection du code source et des \xE9l\xE9ments\
+        \ de configuration d\u2019un syst\xE8me d\u2019information classifi\xE9 sont\
+        \ d\xE9finis dans le plan contractuel de s\xE9curit\xE9 du contrat correspondant."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2
+      name: "6.4 Mesures de s\xE9curit\xE9 physique et prise en compte des signaux\
+        \ parasites compromettants"
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:4:1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:4
+      name: "6.4.1 Lieux abritant le syst\xE8me d'information classifi\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_phy_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:4:1
+      ref_id: PROT_PHY_01
+      description: "Les lieux abritant des syst\xE8mes d\u2019information classifi\xE9\
+        s doivent satisfaire aux r\xE8gles \xE9nonc\xE9es au chapitre 4."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_phy_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:4:1
+      ref_id: PROT_PHY_02
+      description: "Les lieux abritant des syst\xE8mes d'information classifi\xE9\
+        s respectent la r\xE9glementation en mati\xE8re de protection contre les signaux\
+        \ parasites compromettants, y compris en mati\xE8re de c\xE2blage."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:4:2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:4
+      name: "6.4.2 Mat\xE9riel classifi\xE9 laiss\xE9 sans surveillance par son d\xE9\
+        tenteur"
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_phy_03
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:4:2
+      ref_id: PROT_PHY_03
+      description: "La d\xE9marche d\u2019homologation tient compte des risques li\xE9\
+        s \xE0 la protection physique des mat\xE9riels classifi\xE9s, y compris lorsque\
+        \ des mat\xE9riels classifi\xE9s peuvent \xEAtre laiss\xE9s sans surveillance\
+        \ par leur d\xE9tenteur."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_phy_04
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:4:2
+      ref_id: PROT_PHY_04
+      description: "Pour tenir compte des risques li\xE9s \xE0 la protection physique,\
+        \ diff\xE9rentes mesures de d\xE9fense en profondeur sont combin\xE9es conform\xE9\
+        ment aux dispositions de l\u2019Annexe 30."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_phy_05
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:4:2
+      ref_id: PROT_PHY_05
+      description: "Des mesures sp\xE9cifiques sont \xE9galement prises pour prot\xE9\
+        ger l'acc\xE8s aux \xE9l\xE9ments physiques des syst\xE8mes d\u2019information\
+        \ classifi\xE9s hors \xE9quipements de mobilit\xE9.\n\nLe cas \xE9ch\xE9ant,\
+        \ l\u2019homologation du syst\xE8me d\u2019information classifi\xE9 pr\xE9\
+        voit des mesures de protection adapt\xE9es."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2
+      name: "6.4 Mesures de s\xE9curit\xE9 inh\xE9rentes aux syst\xE8mes d'information\
+        \ classifi\xE9s"
+    - urn: urn:intuitem:risk:req_node:igi-1300:conf_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:5
+      ref_id: CONF_01
+      description: "Tout \xE9quipement constitutif d\u2019un syst\xE8me d\u2019information\
+        \ classifi\xE9 est \xE9quip\xE9 de moyens de protection et dot\xE9 d\u2019\
+        une configuration durcie."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:5:1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:5
+      name: "6.4.1 Dispositifs de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:5:2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:5
+      name: "6.4.2 Recours \xE0 des dispositifs de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:disp_sec_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:5:2
+      ref_id: DISP_SEC_01
+      description: "Un dispositif de s\xE9curit\xE9 mis en place dans un syst\xE8\
+        me d\u2019information qui traite d\u2019informations classifi\xE9es est agr\xE9\
+        \xE9 par l\u2019agence nationale de la s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information lorsqu\u2019il est utilis\xE9, en compl\xE9ment de mesures organisationnelles\
+        \ de s\xE9curit\xE9, comme un moyen essentiel de protection contre les acc\xE8\
+        s non autoris\xE9s aux informations classifi\xE9es ou au syst\xE8me."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:disp_sec_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:5:2
+      ref_id: DISP_SEC_02
+      description: "\xC0 titre exceptionnel, et sur le fondement d\u2019une analyse\
+        \ de risques r\xE9alis\xE9e par le responsable de la s\xE9curit\xE9 du syst\xE8\
+        me d\u2019information dans le cadre de l\u2019homologation, l\u2019autorit\xE9\
+        \ d\u2019homologation peut autoriser le recours \xE0 des mat\xE9riels et logiciels\
+        \ agr\xE9\xE9s \xE0 un niveau inf\xE9rieur, voire non agr\xE9\xE9s lorsqu\u2019\
+        il n\u2019existe pas de dispositif de s\xE9curit\xE9 agr\xE9\xE9 au bon niveau.\n\
+        \nLa justification de cette autorisation est motiv\xE9e dans le dossier d\u2019\
+        homologation du syst\xE8me."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2
+      name: "6.6 Conception et exploitation d'un syst\xE8me d'information classifi\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6
+      name: "6.6.1 Administration des syst\xE8mes d'information classifi\xE9s"
+    - urn: urn:intuitem:risk:req_node:igi-1300:admin_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:1
+      ref_id: ADMIN_01
+      description: "De mani\xE8re g\xE9n\xE9rale, les principes suivants doivent \xEA\
+        tre appliqu\xE9s :\n - les actions d\u2019administration sont men\xE9es par\
+        \ du personnel sp\xE9cialement form\xE9 et sensibilis\xE9 ;\n - le syst\xE8\
+        me d'information d'administration est classifi\xE9 au m\xEAme niveau que le\
+        \ syst\xE8me d'information administr\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:admin_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:1
+      ref_id: ADMIN_02
+      description: "L\u2019administration d\u2019un syst\xE8me d\u2019information\
+        \ classifi\xE9 au niveau Secret est faite dans une zone prot\xE9g\xE9e."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:admin_03
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:1
+      ref_id: ADMIN_03
+      description: "L\u2019administration d\u2019un syst\xE8me d\u2019information\
+        \ classifi\xE9 au niveau Tres Secret est faite dans une zone r\xE9serv\xE9\
+        e."
+      implementation_groups:
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:admin_04
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:1
+      ref_id: ADMIN_04
+      description: "Les pratiques d'administration, en particulier pour la gestion\
+        \ des comptes privil\xE9gi\xE9s et la protection de leurs m\xE9canismes d'authentification,\
+        \ sont \xE9tablies suivant les recommandations de l\u2019agence nationale\
+        \ de la s\xE9curit\xE9 des syst\xE8mes d\u2019information.\n\nToute non-conformit\xE9\
+        \ est justifi\xE9e et int\xE9gr\xE9e dans les risques r\xE9siduels pr\xE9\
+        sent\xE9s lors de la commission d\u2019homologation apr\xE8s avoir \xE9t\xE9\
+        \ notifi\xE9e \xE0 l\u2019autorit\xE9 qualifi\xE9e en s\xE9curit\xE9 des syst\xE8\
+        mes d\u2019information et au service du haut fonctionnaire de d\xE9fense et\
+        \ de s\xE9curit\xE9 comp\xE9tents."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:admin_05
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:1
+      ref_id: ADMIN_05
+      description: "Au niveau Tr\xE8s Secret, les non-conformit\xE9s aux recommandations\
+        \ de l'agence nationale de la s\xE9curit\xE9 des syst\xE8mes d'information\
+        \ sont \xE9galement d\xE9clar\xE9es \xE0 cette agence, au plus tard lors de\
+        \ la commission d\u2019homologation."
+      implementation_groups:
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:admin_06
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:1
+      ref_id: ADMIN_06
+      description: "Les ressources mat\xE9rielles, les ressources logicielles et les\
+        \ informations d\u2019authentification sont strictement s\xE9par\xE9es selon\
+        \ leur usage. Ainsi, toute action d\u2019administration est r\xE9alis\xE9\
+        e exclusivement par un administrateur depuis un compte administrateur individuel\
+        \ et d\xE9di\xE9 \xE0 cet usage. En outre, les actions d\u2019administration\
+        \ sont conduites depuis des ressources d\u2019administration d\xE9di\xE9es\
+        \ (postes de travail, serveurs, ou autres \xE9quipements sp\xE9cifiques).\
+        \ Les ressources d'administration, mat\xE9rielles et logicielles, en particulier\
+        \ les postes d'administration, sont utilis\xE9es exclusivement pour les actions\
+        \ d\u2019administration. Ces ressources sont g\xE9r\xE9es et configur\xE9\
+        es par l\u2019autorit\xE9 responsable de l\u2019administration du syst\xE8\
+        me d\u2019information classifi\xE9 ou par le prestataire qu\u2019elle a mandat\xE9\
+        \ pour r\xE9aliser les actions d\u2019administration."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:admin_07
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:1
+      ref_id: ADMIN_07
+      description: "Les flux d\u2019administration sont cloisonn\xE9s \xE0 l\u2019\
+        \xE9gard des flux m\xE9tier au niveau des ressources administr\xE9es. Les\
+        \ ressources d'administration acc\xE8dent aux ressources administr\xE9es au\
+        \ moyen d\u2019une interface r\xE9seau d\xE9di\xE9e \xE0 l'administration.\
+        \ Cette interface est physique ou, \xE0 d\xE9faut, logique. L\u2019interface\
+        \ r\xE9seau utilis\xE9e pour les actions d\u2019administration n\u2019est\
+        \ accessible qu\u2019aux seules ressources d\u2019administration. En\nl\u2019\
+        absence de mesure d\u2019isolation physique de cette interface, un filtrage\
+        \ logique assure cette restriction d\u2019acc\xE8s. Quand des raisons techniques\
+        \ ou op\xE9rationnelles ne permettent pas l\u2019administration des ressources\
+        \ administr\xE9es par des interfaces r\xE9seau d\xE9di\xE9es, les actions\
+        \ d\u2019administration sont faites par l'unique interface r\xE9seau de la\
+        \ ressource administr\xE9e. Ce cas de figure est justifi\xE9 dans le dossier\
+        \ d'homologation"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:admin_08
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:1
+      ref_id: ADMIN_08
+      description: "Les flux r\xE9seau entre les ressources administr\xE9es et les\
+        \ ressources d\u2019administration sont filtr\xE9s. Afin de r\xE9duire le\
+        \ risque de compromission des ressources d\u2019administration depuis les\
+        \ ressources administr\xE9es, les ressources d\u2019administration sont d\xE9\
+        ploy\xE9es sur un r\xE9seau d\xE9di\xE9 \xE0 cet usage. Ce r\xE9seau portant\
+        \ les ressources d\u2019administration est un r\xE9seau physiquement cloisonn\xE9\
+        \ de pr\xE9f\xE9rence ou, \xE0 d\xE9faut, un r\xE9seau logiquement cloisonn\xE9\
+        \ \xE0 l\u2019aide de m\xE9canismes de chiffrement et d\u2019authentification\
+        \ r\xE9seau. Un filtrage strict des flux r\xE9seau entre les ressources administr\xE9\
+        es et les ressources d\u2019administration est mis en place. Pour minimiser\
+        \ les possibilit\xE9s de rebonds entre ressources administr\xE9es en cas de\
+        \ compromission de l\u2019une d\u2019entre elles, un m\xE9canisme de filtrage\
+        \ restreint les possibilit\xE9s de communication sur ce r\xE9seau  d\u2019\
+        administration."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6
+      name: "6.6.2 Ma\xEEtrise des logiciels en exploitation"
+    - urn: urn:intuitem:risk:req_node:igi-1300:mlog_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:2
+      ref_id: MLOG_01
+      description: "Seuls les services et fonctionnalit\xE9s qui sont indispensables\
+        \ au fonctionnement ou \xE0 la s\xE9curit\xE9 du syst\xE8me d\u2019information\
+        \ sont install\xE9s sur un syst\xE8me d'information classifi\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:mlog_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:2
+      ref_id: MLOG_02
+      description: "Les services et les fonctionnalit\xE9s qui ne sont pas indispensables,\
+        \ notamment ceux install\xE9s par d\xE9faut, sont d\xE9sactiv\xE9s d\xE9sinstall\xE9\
+        s si cela est possible."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:mlog_03
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:2
+      ref_id: MLOG_03
+      description: "Lorsque la d\xE9sinstallation n\u2019est pas possible, cela est\
+        \ mentionn\xE9 dans le dossier d\u2019homologation du syst\xE8me d\u2019information\
+        \ classifi\xE9 en pr\xE9cisant les services et fonctionnalit\xE9s concern\xE9\
+        s, ainsi que les mesures de r\xE9duction du risque mises en oeuvre."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:mlog_04
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:2
+      ref_id: MLOG_04
+      description: "Des dispositifs sont pr\xE9vus pour emp\xEAcher l\u2019installation\
+        \ de services et fonctionnalit\xE9s hors de ces proc\xE9dures. En cas d\u2019\
+        impossibilit\xE9, il y est fait mention dans le dossier d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6
+      name: "6.6.3 Contr\xF4le d'acc\xE8s au syst\xE8me d'information classifi\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      name: "6.6.3.1 Gestion des droits d\u2019acc\xE8s sur la base du principe du\
+        \ moindre privil\xE8ge, corolaire du respect du besoin d\u2019en conna\xEE\
+        tre"
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_01
+      description: "Par principe, toute personne habilit\xE9e acc\xE9dant \xE0 des\
+        \ informations ou supports classifi\xE9s depuis un syst\xE8me d\u2019information\
+        \ classifi\xE9 utilise, \xE0 cette fin, un compte utilisateur individuel assorti\
+        \ des droits d'acc\xE8s correspondant \xE0 son profil et \xE0 son besoin d\u2019\
+        en conna\xEEtre."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_02
+      description: "Les comptes utilisateurs individuels ne disposent pas de droits\
+        \ d\u2019administration sur le syst\xE8me d\u2019information classifi\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_03
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_03
+      description: "L\u2019administrateur d\u2019un syst\xE8me d\u2019information\
+        \ classifi\xE9 et l\u2019administrateur de s\xE9curit\xE9 disposent de comptes\
+        \ individuels d\xE9di\xE9s pour chacune de ces fonctions, distincts de leur\
+        \ compte utilisateur."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_04
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_04
+      description: "Par d\xE9faut, un administrateur est habilit\xE9 au niveau d'habilitation\
+        \ correspondant au moins au niveau de classification du syst\xE8me d'information\
+        \ classifi\xE9 administr\xE9. Lorsque les droits qui lui sont octroy\xE9s\
+        \ sur le syst\xE8me d'information classifi\xE9 sont \xE9tendus, lui permettant\
+        \ notamment\nd'outrepasser ses droits ou de masquer ses actions sur le syst\xE8\
+        me d'information classifi\xE9, l'administrateur doit \xEAtre habilit\xE9 au\
+        \ niveau Tr\xE8s Secret, sans incidence sur le niveau d\u2019habilitation\
+        \ de la personne morale."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_05
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_05
+      description: "\xC0 titre d\xE9rogatoire, lorsque des raisons techniques ou op\xE9\
+        rationnelles ne permettent pas de cr\xE9er de compte individuel, ni de restreindre\
+        \ les droits d\u2019administration aux seules personnes autoris\xE9es, cela\
+        \ est justifi\xE9 dans le dossier d\u2019homologation et l\u2019autorit\xE9\
+        \ qualifi\xE9e en s\xE9curit\xE9 des syst\xE8mes d\u2019information et le\
+        \ service du haut fonctionnaire de d\xE9fense et de s\xE9curit\xE9 comp\xE9\
+        tents en sont inform\xE9s. Le responsable de la s\xE9curit\xE9 du syst\xE8\
+        me d\u2019information met alors en place les mesures n\xE9cessaires pour r\xE9\
+        duire le risque li\xE9 \xE0 l\u2019utilisation de comptes partag\xE9s et assurer\
+        \ la tra\xE7abilit\xE9 et l\u2019imputabilit\xE9 de l\u2019utilisation de\
+        \ ces comptes."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_06
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_06
+      description: "Seule l\u2019agence nationale de la s\xE9curit\xE9 des syst\xE8\
+        mes d\u2019information peut autoriser une d\xE9rogation \xE0 l'usage de compte\
+        \ individuel ou \xE0 la restriction des droits d'administration pour les syst\xE8\
+        mes d\u2019information classifi\xE9s au niveau Tr\xE8s Secret. L\u2019autorit\xE9\
+        \ d\u2019homologation sollicite son autorisation d\xE8s la phase de conception\
+        \ du syst\xE8me d\u2019information classifi\xE9."
+      implementation_groups:
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_07
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_07
+      description: "Les utilisateurs d\u2019un syst\xE8me d\u2019information classifi\xE9\
+        \ ont uniquement acc\xE8s aux donn\xE9es, syst\xE8mes et services auxquels\
+        \ ils sont autoris\xE9s \xE0 acc\xE9der au regard de leur niveau d\u2019habilitation\
+        \ et de leur besoin d\u2019en conna\xEEtre."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_08
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_08
+      description: "Les \xE9l\xE9ments constitutifs du syst\xE8me d\u2019information\
+        \ s\u2019authentifient, dans la mesure du possible, aupr\xE8s des r\xE9seaux\
+        \ et des services."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_09
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_09
+      description: "Le principe de moindre privil\xE8ge est pris en compte dans la\
+        \ mesure du possible."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_10
+      description: "La politique de s\xE9curit\xE9 des syst\xE8mes d'information pr\xE9\
+        cise la proc\xE9dure relative au retrait des droits d'acc\xE8s"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_10:1
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:acc_10
+      name: "a) Ma\xEEtrise de la gestion des acc\xE8s utilisateurs"
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_11
+      description: "La politique de gestion des \xE9l\xE9ments d\u2019authentification\
+        \ li\xE9s aux comptes utilisateurs et administrateurs est mise en place en\
+        \ suivant les recommandations de l\u2019agence nationale de la s\xE9curit\xE9\
+        \ des syst\xE8mes d\u2019information"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_12
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_12
+      description: "Dans le cas d'un syst\xE8me d\u2019information classifi\xE9 au\
+        \ niveau Tr\xE8s Secret, le m\xE9canisme de contr\xF4le d'acc\xE8s permet\
+        \ \xE9galement de tracer chaque acc\xE8s (consultation, copie, modification,\
+        \ impression, etc.) \xE0 chaque information classifi\xE9e."
+      implementation_groups:
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_13
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_13
+      description: "Le m\xE9canisme de contr\xF4le d\u2019acc\xE8s repose sur des\
+        \ m\xE9canismes d\u2019authentification forte \xE9tablis selon le r\xE9f\xE9\
+        rentiel g\xE9n\xE9ral de s\xE9curit\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_14
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_14
+      description: "Si la mise en \u0153uvre de tels m\xE9canismes n\u2019est pas\
+        \ possible pour des raisons techniques ou op\xE9rationnelles et apr\xE8s en\
+        \ avoir rendu compte \xE0 l\u2019autorit\xE9 qualifi\xE9e en s\xE9curit\xE9\
+        \ des syst\xE8mes d\u2019information et au service du haut fonctionnaire de\
+        \ d\xE9fense et de s\xE9curit\xE9 comp\xE9tents, des mesures organisationnelles\
+        \ sont prises pour pallier cette lacune et sont d\xE9crites dans le dossier\
+        \ d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_15
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_15
+      description: "Au niveau Tr\xE8s Secret, cette exception est soumise \xE0 l'autorisation\
+        \ de l\u2019agence nationale de la s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information d\xE8s la phase de conception du syst\xE8me d\u2019information."
+      implementation_groups:
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_15:1
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:acc_15
+      name: "b) Revue des droits d'acc\xE8s des comptes"
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_16
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_16
+      description: "Pour chaque syst\xE8me d\u2019information classifi\xE9 et syst\xE8\
+        me d\u2019administration des syst\xE8mes d\u2019information classifi\xE9s,\
+        \ une revue des droits d\u2019acc\xE8s des comptes est mise en place."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_17
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_17
+      description: "La p\xE9riodicit\xE9 et les modalit\xE9s de cette revue sont fix\xE9\
+        es par l\u2019autorit\xE9 d\u2019homologation en coh\xE9rence avec les besoins\
+        \ op\xE9rationnels et ne doit pas exc\xE9der un an."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_18
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_18
+      description: "Les conditions pr\xE9cises de cette revue sont d\xE9crites dans\
+        \ le dossier d\u2019homologation, ainsi que dans les exigences relatives \xE0\
+        \ la s\xE9curit\xE9 des syst\xE8mes d\u2019information int\xE9gr\xE9es dans\
+        \ la politique des informations et supports classifi\xE9s de l\u2019organisme\
+        \ (cf. 2.3.1.2 et 2.3.1.3)."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_18:1
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:acc_18
+      name: "c)  Mesures de s\xE9curit\xE9 logiques relatives aux mentions compl\xE9\
+        mentaires de protection"
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_19
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_19
+      description: "Les syst\xE8mes d\u2019information susceptibles de traiter des\
+        \ informations portant une mention compl\xE9mentaire de protection, notamment\
+        \ la mention Sp\xE9cial France, font l\u2019objet de mesures de s\xE9curit\xE9\
+        \ particuli\xE8res techniques ou organisationnelles pour garantir l\u2019\
+        acc\xE8s aux seules personnes ayant le besoin d\u2019en conna\xEEtre."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_20
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_20
+      description: "Le processus d\u2019homologation tient compte du fait que le syst\xE8\
+        me d\u2019information est susceptible de traiter d'informations portant la\
+        \ mention Sp\xE9cial France."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:acc_21
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACC_21
+      description: "Dans le cas d\u2019un syst\xE8me devant traiter \xE0 la fois des\
+        \ informations portant la mention compl\xE9mentaire de protection et d\u2019\
+        autres ne la portant pas, et accessible \xE0 des personnes non autoris\xE9\
+        es \xE0 acc\xE9der \xE0 des informations portant la mention compl\xE9mentaire\
+        \ de protection, le syst\xE8me d\u2019information consid\xE9r\xE9 et les mesures\
+        \ organisationnelles aff\xE9rentes garantissent notamment que :\n - pour chaque\
+        \ mention de protection, les informations classifi\xE9es en \xE9tant marqu\xE9\
+        es sont stock\xE9es dans des zones du syst\xE8me d\u2019information clairement\
+        \ identifi\xE9es et indiqu\xE9es dans le dossier d\u2019homologation ;\n \
+        \ - les zones du syst\xE8me d\u2019information ainsi identifi\xE9es sont cloisonn\xE9\
+        es du reste du syst\xE8me d\u2019information avec des mesures conformes aux\
+        \ recommandations de l\u2019agence nationale de la s\xE9curit\xE9 des syst\xE8\
+        mes d\u2019information ;\n  - le contr\xF4le d\u2019acc\xE8s du syst\xE8me\
+        \ d\u2019information permet d\u2019assurer la protection du besoin d\u2019\
+        en conna\xEEtre pour les informations classifi\xE9es marqu\xE9es de la mention\
+        \ de protection consid\xE9r\xE9e. Si n\xE9cessaire, un contr\xF4le d\u2019\
+        acc\xE8s d\xE9di\xE9 est mis en place ;\n  - lorsque des donn\xE9es portant\
+        \ une mention de protection circulent hors des zones identifi\xE9es, elles\
+        \ sont chiffr\xE9es avec des moyens conformes aux recommandations de l\u2019\
+        agence nationale de la s\xE9curit\xE9 des syst\xE8mes d\u2019information ;\n\
+        \  - l\u2019acc\xE8s aux informations portant une mention de protection compl\xE9\
+        mentaire ou aux zones les contenant est trac\xE9 et indique explicitement\
+        \ les \xE9ventuelles mentions de protection."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3:2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      name: "6.6.3.2 Responsabilit\xE9 des utilisateurs"
+    - urn: urn:intuitem:risk:req_node:igi-1300:auth_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: AUTH_01
+      description: "Chaque utilisateur est responsable de la protection de ses informations\
+        \ d\u2019authentification et du bon usage des outils associ\xE9s (de type\
+        \ ACSSI, cartes \xE0 puce, etc.)."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:auth_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: AUTH_02
+      description: "Des moyens de conservation s\xE9curis\xE9s et adapt\xE9s des informations\
+        \ d'authentification sont mis en place"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3:3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      name: "6.6.3.3 Articles contr\xF4l\xE9s de la s\xE9curit\xE9 des syst\xE8mes\
+        \ d\u2019information classifi\xE9s"
+    - urn: urn:intuitem:risk:req_node:igi-1300:acssi_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:3
+      ref_id: ACSSI_01
+      description: "Les articles contr\xF4l\xE9s de la s\xE9curit\xE9 des syst\xE8\
+        mes d\u2019information, sont trait\xE9s conform\xE9ment \xE0 l\u2019instruction\
+        \ interminist\xE9rielle n\xB0 910/SGDSN/ANSSI du 22 octobre 2013 relative\
+        \ aux articles contr\xF4l\xE9s de la s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information (ACSSI)."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6
+      name: "6.6.4 Supervision logicielle de la s\xE9curit\xE9 et tra\xE7abilit\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      name: 6.6.4.1 Synchronisation des horloges
+    - urn: urn:intuitem:risk:req_node:igi-1300:sup_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: SUP_01
+      description: "Pour les besoins en tra\xE7abilit\xE9, les composantes d\u2019\
+        un syst\xE8me d\u2019information classifi\xE9 sont synchronis\xE9es sur une\
+        \ source de temps unique. Lorsque des raisons techniques ou op\xE9rationnelles\
+        \ ne le permettent pas, cette impossibilit\xE9 est mentionn\xE9e dans le dossier\
+        \ d\u2019homologation et des mesures palliatives sont mises en place par le\
+        \ responsable de la s\xE9curit\xE9 des syst\xE8mes d\u2019information."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4:2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      name: "6.6.4.2 Journalisation des \xE9v\xE9nements"
+    - urn: urn:intuitem:risk:req_node:igi-1300:log_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: LOG_01
+      description: "\xC0 des fins d\u2019investigation, de suivi a posteriori des\
+        \ \xE9changes, de traitement des incidents et d\u2019archivage, une journalisation\
+        \ des \xE9v\xE9nements est mise en place pour tracer et imputer les actions\
+        \ r\xE9alis\xE9es sur les syst\xE8mes d\u2019information classifi\xE9s selon\
+        \ les recommandations de l\u2019agence nationale de la s\xE9curit\xE9 des\
+        \ syst\xE8mes d\u2019information."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:log_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: LOG_02
+      description: "Les \xE9v\xE9nements enregistr\xE9s par le syst\xE8me de journalisation\
+        \ sont horodat\xE9s au moyen de sources de temps synchronis\xE9es entre elles."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:log_03
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: LOG_03
+      description: "Les \xE9v\xE9nements enregistr\xE9s par le syst\xE8me de journalisation\
+        \ sont horodat\xE9s au moyen de sources de temps synchronis\xE9es entre elles.\
+        \ Ils sont, pour chaque syst\xE8me d\u2019information classifi\xE9, centralis\xE9\
+        s et archiv\xE9s pour une dur\xE9e d\u2019au moins trois ans pour le niveau\
+        \ Secret."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:log_05
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: LOG_05
+      description: "Les \xE9v\xE9nements enregistr\xE9s par le syst\xE8me de journalisation\
+        \ sont horodat\xE9s au moyen de sources de temps synchronis\xE9es entre elles.\
+        \ Ils sont, pour chaque syst\xE8me d\u2019information classifi\xE9, centralis\xE9\
+        s et archiv\xE9s pour une dur\xE9e d\u2019au moins cinq ans pour le niveau\
+        \ Tr\xE8s Secret."
+      implementation_groups:
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:log_04
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: LOG_04
+      description: "Le format d\u2019archivage des \xE9v\xE9nements permet de r\xE9\
+        aliser des recherches automatis\xE9es sur ces \xE9v\xE9nements.\n\nSi la mise\
+        \ en \u0153uvre de tels m\xE9canismes est impossible pour des raisons techniques\
+        \ ou organisationnelles et, apr\xE8s en avoir rendu compte \xE0\nl\u2019autorit\xE9\
+        \ qualifi\xE9e en s\xE9curit\xE9 des syst\xE8mes d\u2019information et au\
+        \ service du haut fonctionnaire de d\xE9fense et de s\xE9curit\xE9 comp\xE9\
+        tents, des mesures palliatives sont prises et d\xE9crites dans le dossier\
+        \ d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4:3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      name: "6.6.4.3 Protection de l'information journalis\xE9e"
+    - urn: urn:intuitem:risk:req_node:igi-1300:log_06
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: LOG_06
+      description: "Les journaux des \xE9v\xE9nements ne doivent pas \xEAtre con\xE7\
+        us pour contenir d\u2019informations permettant de retrouver les informations\
+        \ d\u2019authentification (de type mots de passe, codes PIN, cl\xE9s priv\xE9\
+        es, etc.)."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:log_07
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: LOG_07
+      description: "Les journaux d'\xE9v\xE9nements sont sauvegard\xE9s et prot\xE9\
+        g\xE9s de mani\xE8re \xE0 assurer leur int\xE9grit\xE9 et leur disponibilit\xE9\
+        ."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4:4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      name: "6.6.4.4 Acc\xE8s aux journaux"
+    - urn: urn:intuitem:risk:req_node:igi-1300:log_08
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: LOG_08
+      description: "Pour chaque syst\xE8me d\u2019information classifi\xE9, une proc\xE9\
+        dure portant sur la manipulation des journaux est \xE9labor\xE9e. Elle pr\xE9\
+        cise les personnes autoris\xE9es \xE0 y acc\xE9der, leurs modes de traitement\
+        \ ainsi que les moyens techniques et op\xE9rationnels mis en \u0153uvre pour\
+        \ assurer le respect du besoin d\u2019en conna\xEEtre et la tra\xE7abilit\xE9\
+        \ des acc\xE8s."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:log_09
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: LOG_09
+      description: "Les donn\xE9es de tra\xE7abilit\xE9 des acc\xE8s sont archiv\xE9\
+        es sur une dur\xE9e d'au moins trois ans pour le niveau Secret et cinq ans."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:log_10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: LOG_10
+      description: "Les donn\xE9es de tra\xE7abilit\xE9 des acc\xE8s sont archiv\xE9\
+        es sur une dur\xE9e d'au moins cinq ans pour le niveau Tr\xE8s Secret."
+      implementation_groups:
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4:5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      name: "6.6.4.4 Syst\xE8me de d\xE9tection"
+    - urn: urn:intuitem:risk:req_node:igi-1300:detec_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: DETEC_01
+      description: "Une proc\xE9dure de d\xE9tection des incidents de s\xE9curit\xE9\
+        \ affectant le syst\xE8me d\u2019information classifi\xE9 est \xE9tablie."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:detec_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: DETEC_02
+      description: "La proc\xE9dure de d\xE9tection pr\xE9voit des mesures organisationnelles\
+        \ et techniques destin\xE9es \xE0 d\xE9tecter les incidents de s\xE9curit\xE9\
+        \ affectant le syst\xE8me d\u2019information classifi\xE9 : \n  - les mesures\
+        \ organisationnelles comprennent les modalit\xE9s d'exploitation des dispositifs\
+        \ de d\xE9tection et d\xE9crivent la cha\xEEne de traitement des \xE9v\xE9\
+        nements de s\xE9curit\xE9 identifi\xE9s par ces dispositifs.\n  - les mesures\
+        \ techniques pr\xE9cisent la nature et le positionnement des dispositifs de\
+        \ d\xE9tection."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:detec_03
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: DETEC_03
+      description: "Des dispositifs de d\xE9tection capables d'identifier des \xE9\
+        v\xE9nements caract\xE9ristiques d'un incident de s\xE9curit\xE9 notamment\
+        \ d'une attaque en cours ou \xE0 venir et de permettre la recherche de traces\
+        \ d'incidents ant\xE9rieurs sont mis en oeuvre. \xC0 cet effet, ces dispositifs\
+        \ :\n  - collectent les donn\xE9es repr\xE9sentatives de l\u2019activit\xE9\
+        \ du syst\xE8me d\u2019information, issues du r\xE9seau, des syst\xE8mes et/ou\
+        \ des applications, \xE0 partir de capteurs positionn\xE9s de mani\xE8re \xE0\
+        \ optimiser la couverture du dispositif de supervision global ;\n  - analysent\
+        \ les donn\xE9es issues des capteurs notamment en recherchant des marqueurs\
+        \ techniques d'attaques connus ou des anomalies, dans le but d'identifier\
+        \ les \xE9v\xE9nements de s\xE9curit\xE9 et de les caract\xE9riser."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:detec_04
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: DETEC_04
+      description: "Ces dispositifs de d\xE9tection archivent les m\xE9tadonn\xE9\
+        es des \xE9v\xE9nements identifi\xE9s afin de permettre une rechercheposteriori\
+        \ de marqueurs techniques d'attaques ou de compromission sur une dur\xE9e\
+        \ d'au moins trois ans pour le niveau Secret."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:detec_05
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: DETEC_05
+      description: "Ces dispositifs de d\xE9tection archivent les m\xE9tadonn\xE9\
+        es des \xE9v\xE9nements identifi\xE9s afin de permettre une rechercheposteriori\
+        \ de marqueurs techniques d'attaques ou de compromission sur une dur\xE9e\
+        \ d\u2019au moins cinq ans pour le niveau Tr\xE8s Secret."
+      implementation_groups:
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:detec_06
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: DETEC_06
+      description: "Les strat\xE9gies de collecte et d\u2019analyse sont \xE9labor\xE9\
+        es."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:detec_07
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: DETEC_07
+      description: "Le recours \xE0 plusieurs sources de donn\xE9es pour d\xE9tecter\
+        \ des activit\xE9s malveillantes est encourag\xE9. Un syst\xE8me de corr\xE9\
+        lation et d\u2019analyse des journaux des \xE9v\xE9nements doit \xEAtre mis\
+        \ en \u0153uvre et exploit\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:detec_08
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: DETEC_08
+      description: "L'architecture de d\xE9ploiement des syst\xE8mes de d\xE9tection\
+        \ ne doit pas remettre en cause la s\xE9curit\xE9 du syst\xE8me d\u2019information\
+        \ classifi\xE9. Dans le cadre de syst\xE8mes de d\xE9tection r\xE9seau, des\
+        \ dispositifs de type \xAB TAP \xBB qualifi\xE9s, qui concourent \xE0 l\u2019\
+        atteinte de cet objectif de s\xE9curit\xE9, sont utilis\xE9s."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:detec_09
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: DETEC_09
+      description: "Ces syst\xE8mes de d\xE9tection sont exploit\xE9s en s\u2019appuyant\
+        \ sur les exigences du r\xE9f\xE9rentiel en mati\xE8re de d\xE9tection des\
+        \ incidents de s\xE9curit\xE9 pris conform\xE9ment \xE0 l\u2019article 10\
+        \ du d\xE9cret n\xB0 2014-340 du 27 mars 2014 relatif \xE0 la qualification\
+        \ des produits de s\xE9curit\xE9 et des prestataires\nde service de confiance\
+        \ pour les besoins de la s\xE9curit\xE9 des syst\xE8mes d\u2019information."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:detec_10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: DETEC_10
+      description: "Les syst\xE8mes de d\xE9tection sont pris en compte dans le p\xE9\
+        rim\xE8tre de l\u2019homologation et les risques propres \xE0 ces syst\xE8\
+        mes font l\u2019objet d\u2019une attention particuli\xE8re. Si les syst\xE8\
+        mes de d\xE9tection sont communs \xE0 plusieurs syst\xE8mes d\u2019information\
+        \ classifi\xE9s, ils font l\u2019objet d\u2019une homologation sp\xE9cifique."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:detec_11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:4
+      ref_id: DETEC_11
+      description: "Si la mise en oeuvre de tels syst\xE8mes de d\xE9tection est impossible\
+        \ pour des raisons techniques ou organisationnelles et, apr\xE8s en avoir\
+        \ rendu compte \xE0 l\u2019autorit\xE9 qualifi\xE9e en s\xE9curit\xE9 des\
+        \ syst\xE8mes d\u2019information et au service du haut fonctionnaire de d\xE9\
+        fense et de s\xE9curit\xE9 comp\xE9tents, des mesures palliatives sont prises\
+        \ et d\xE9crites dans le dossier d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6
+      name: "6.6.4 Maintenance et maintien en condition op\xE9rationnelle et en condition\
+        \ de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:mcs_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:5
+      ref_id: MCS_01
+      description: "Les op\xE9rations de maintenance, qui incluent les op\xE9rations\
+        \ de maintien en condition op\xE9rationnelle et en condition de s\xE9curit\xE9\
+        \ sur un syst\xE8me d\u2019information classifi\xE9 sont trac\xE9es et imput\xE9\
+        es \xE0 leur auteur. Elles sont r\xE9alis\xE9es par des personnes habilit\xE9\
+        es conform\xE9ment \xE0 la partie 3.3."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:mcs_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:5
+      ref_id: MCS_02
+      description: "Le mat\xE9riel connect\xE9 au syst\xE8me d\u2019information classifi\xE9\
+        \ pour sa maintenance et son maintien en condition op\xE9rationnelle ou de\
+        \ s\xE9curit\xE9 lui est d\xE9di\xE9 et est classifi\xE9 au m\xEAme niveau\
+        \ que le syst\xE8me d\u2019information. Les \xE9quipements sont utilis\xE9\
+        s conform\xE9ment aux parties 6.4 et 6.7."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:mcs_03
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:5
+      ref_id: MCS_03
+      description: "Tout \xE9l\xE9ment constitutif d\u2019un syst\xE8me d\u2019information\
+        \ traitant d\u2019informations classifi\xE9es est maintenu en condition op\xE9\
+        rationnelle et en condition de s\xE9curit\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:mcs_04
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:5
+      ref_id: MCS_04
+      description: "Une proc\xE9dure de maintien en condition de s\xE9curit\xE9 des\
+        \ ressources mat\xE9rielles et logicielles de ses syst\xE8mes d\u2019information\
+        \ classifi\xE9s est \xE9labor\xE9e."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:mcs_05
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:5
+      ref_id: MCS_05
+      description: "La proc\xE9dure de maintien en condition de s\xE9curit\xE9 des\
+        \ ressources mat\xE9rielles et logicielles pr\xE9voit :\n  - l\u2019installation\
+        \ et la maintenance de toutes les ressources mat\xE9rielles et logicielles\
+        \ des syst\xE8mes d\u2019information classifi\xE9s dans des versions support\xE9\
+        es par leurs fournisseurs ou leurs fabricants et mises \xE0 jour du point\
+        \ de vue de la s\xE9curit\xE9, sauf en cas de difficult\xE9s techniques ou\
+        \ op\xE9rationnelles justifi\xE9es ;\n  - pr\xE9alablement \xE0 l\u2019installation\
+        \ de toute nouvelle version, la v\xE9rification de l\u2019origine de cette\
+        \ version et de son int\xE9grit\xE9, et l\u2019analyse de l\u2019impact, d'un\
+        \ point de vue technique et op\xE9rationnel, de cette version sur le syst\xE8\
+        me d\u2019information classifi\xE9 concern\xE9 ;\n  - une veille sur les vuln\xE9\
+        rabilit\xE9s affectant le syst\xE8me d\u2019information classifi\xE9 afin\
+        \ de pouvoir mettre en \u0153uvre, d\xE8s qu\u2019une vuln\xE9rabilit\xE9\
+        \ est connue, des mesures palliatives en attente de la publication d\u2019\
+        une mesure correctrice de s\xE9curit\xE9 ;\n  - l\u2019installation sans d\xE9\
+        lai sous le contr\xF4le du responsable de la s\xE9curit\xE9 du syst\xE8me\
+        \ d\u2019information, de toute mesure correctrice de s\xE9curit\xE9 concernant\
+        \ l\u2019une de ses ressources, apr\xE8s s'\xEAtre assur\xE9 de l'origine\
+        \ de cette mesure et de son int\xE9grit\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:mcs_06
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:5
+      ref_id: MCS_06
+      description: "Lorsque des raisons techniques ou op\xE9rationnelles le justifient,\
+        \ l\u2019autorit\xE9 d\u2019emploi du syst\xE8me d\u2019information peut d\xE9\
+        cider, pour certaines ressources de ses syst\xE8mes d\u2019information classifi\xE9\
+        s et des syst\xE8mes d\u2019administration de syst\xE8mes d\u2019information\
+        \ classifi\xE9s, de ne pas installer une version support\xE9e par le fournisseur\
+        \ ou le fabricant de la ressource concern\xE9e ou de ne pas installer une\
+        \ mesure correctrice de s\xE9curit\xE9. Dans ce cas, des mesures techniques\
+        \ ou organisationnelles pour r\xE9duire les risques li\xE9s \xE0 l\u2019utilisation\
+        \ d\u2019une version obsol\xE8te ou comportant des vuln\xE9rabilit\xE9s connues\
+        \ sont mises en oeuvre, document\xE9es et int\xE9gr\xE9es au cycle de maintien\
+        \ en condition de s\xE9curit\xE9 de son syst\xE8me d'information."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6
+      name: 6.6.6 Cloisonnement
+    - urn: urn:intuitem:risk:req_node:igi-1300:clois_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:6
+      ref_id: CLOIS_01
+      description: "Les syst\xE8mes d\u2019information classifi\xE9s sont s\xE9par\xE9\
+        s physiquement des syst\xE8mes d\u2019information de classification diff\xE9\
+        rente, des syst\xE8mes d\u2019information non classifi\xE9s ou des syst\xE8\
+        mes d'information de m\xEAme niveau mais dont l'un n'est pas sous ma\xEEtrise\
+        \ nationale. \xC0 d\xE9faut, des moyens agr\xE9\xE9s sont utilis\xE9s pour\
+        \ cloisonner logiquement ces syst\xE8mes d\u2019information."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:clois_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:6
+      ref_id: CLOIS_02
+      description: "Tout syst\xE8me d'information classifi\xE9 est d\xE9coup\xE9 en\
+        \ zones fonctionnelles ayant des besoins de s\xE9curit\xE9 homog\xE8nes, cloisonn\xE9\
+        es entre elles suivant les recommandations de l\u2019agence nationale de la\
+        \ s\xE9curit\xE9 des syst\xE8mes d\u2019information"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6
+      name: "6.6.7 M\xE9canisme de filtrage des flux de donn\xE9es"
+    - urn: urn:intuitem:risk:req_node:igi-1300:filtr_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:7
+      ref_id: FILTR_01
+      description: "Des m\xE9canismes de filtrage des flux de donn\xE9es circulant\
+        \ dans ou entre les syst\xE8mes d\u2019information classifi\xE9s afin de bloquer\
+        \ la circulation des flux susceptibles de faciliter des attaques informatiques."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:filtr_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:7
+      ref_id: FILTR_02
+      description: "Ces m\xE9canismes respectent les r\xE8gles suivantes :\n - une\
+        \ liste des r\xE8gles de filtrage mentionnant l\u2019ensemble des r\xE8gles\
+        \ en vigueur ou supprim\xE9es est tenue \xE0 jour ;\n - la circulation des\
+        \ flux de donn\xE9es est limit\xE9e autant que possible aux seuls flux n\xE9\
+        cessaires au fonctionnement et \xE0 la s\xE9curit\xE9 du syst\xE8me d\u2019\
+        information classifi\xE9 ;\n -  les flux entrants et sortants ainsi que les\
+        \ flux entre sous-syst\xE8mes du syst\xE8me d\u2019information classifi\xE9\
+        \ sont filtr\xE9s au niveau de leurs interconnexions de mani\xE8re \xE0 ne\
+        \ permettre que la circulation des seuls flux strictement n\xE9cessaires au\
+        \ fonctionnement et \xE0 la s\xE9curit\xE9 du syst\xE8me d\u2019information.\
+        \ Les flux qui ne sont pas conformes aux r\xE8gles de filtrage sont bloqu\xE9\
+        s."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:6:8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6
+      name: "6.6.8 Gestion de la continuit\xE9 et de la reprise d'activit\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:pca_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:8
+      ref_id: PCA_01
+      description: "Tout syst\xE8me d\u2019information classifi\xE9 le n\xE9cessitant\
+        \ fait l'objet d'un plan de continuit\xE9 ou de reprise informatique (PCI/PRI)."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:pca_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:8
+      ref_id: PCA_02
+      description: "Ce PCI/PRI se conforme au plan de protection des sites, au plan\
+        \ de continuit\xE9 ou de reprise d'activit\xE9 (PCA/PRA) de l'organisme et\
+        \ ainsi que, le cas \xE9ch\xE9ant, aux exigences du contrat au profit duquel\
+        \ le syst\xE8me d\u2019information classifi\xE9 est mis en \u0153uvre."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:pca_03
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:8
+      ref_id: PCA_03
+      description: "Ce PCI/PRI est tenu \xE0 jour et r\xE9guli\xE8rement test\xE9\
+        \ \xE0 l'occasion d'exercices."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:pca_04
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:6:8
+      ref_id: PCA_04
+      description: "L\u2019absence de plan de continuit\xE9 ou de reprise informatique\
+        \ est mentionn\xE9e et justifi\xE9e dans le dossier d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2
+      name: "6.7 S\xE9curit\xE9 en mobilit\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:7:1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:7
+      name: "6.7.1 S\xE9curit\xE9 des \xE9quipements en mobilit\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:nomad_01
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:7:1
+      ref_id: NOMAD_01
+      description: "L\u2019utilisation en mobilit\xE9 d\u2019\xE9quipements informatiques\
+        \ exploitant des informations classifi\xE9es est soumise \xE0 une analyse\
+        \ de risques d\xE9di\xE9e qui est int\xE9gr\xE9e au dossier d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:nomad_02
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:7:1
+      ref_id: NOMAD_02
+      description: "Des m\xE9canismes et des fonctions de s\xE9curit\xE9 sont mis\
+        \ en place afin de prot\xE9ger les informations classifi\xE9es sur les \xE9\
+        quipements de mobilit\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:nomad_03
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:7:1
+      ref_id: NOMAD_03
+      description: "Seuls les \xE9quipements mis \xE0 disposition et administr\xE9\
+        s par l\u2019autorit\xE9 d\u2019emploi du syst\xE8me d\u2019information classifi\xE9\
+        \ pour un usage en mobilit\xE9 peuvent \xEAtre utilis\xE9s."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:nomad_04
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:7:1
+      ref_id: NOMAD_04
+      description: "De plus, si un \xE9quipement permet d\u2019exploiter en mobilit\xE9\
+        \ des informations classifi\xE9es, il fait l\u2019objet d\u2019un agr\xE9\
+        ment et est utilis\xE9 dans les conditions pr\xE9vues par la d\xE9cision d\u2019\
+        agr\xE9ment du produit."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:nomad_05
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:7:1
+      ref_id: NOMAD_05
+      description: "Les r\xE8gles minimales applicables aux \xE9quipements utilis\xE9\
+        s en mobilit\xE9 sont :\n - l\u2019\xE9quipement est sous la surveillance\
+        \ permanente de l'utilisateur conform\xE9ment aux conditions pr\xE9vues par\
+        \ l\u2019agr\xE9ment de l\u2019\xE9quipement ;\n - l'utilisation d\u2019un\
+        \ \xE9quipement contenant des informations classifi\xE9es n\u2019est pas autoris\xE9\
+        e d\xE8s lors qu'une personne non habilit\xE9e ou n\u2019ayant pas le besoin\
+        \ d\u2019en conna\xEEtre est susceptible d'en prendre connaissance directement\
+        \ ou indirectement ;\n - la sortie du territoire national d\u2019un \xE9quipement\
+        \ contenant des informations classifi\xE9es est soumise \xE0 autorisation\
+        \ de l\u2019officier de s\xE9curit\xE9 des syst\xE8mes d\u2019information\
+        \ qui fixe des r\xE8gles particuli\xE8res d'emploi et de l\u2019officier de\
+        \ s\xE9curit\xE9.\n\nCes r\xE8gles sont, le cas \xE9ch\xE9ant, compl\xE9t\xE9\
+        es par l\u2019officier de s\xE9curit\xE9 des syst\xE8mes d\u2019information"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:nomad_06
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:7:1
+      ref_id: NOMAD_06
+      description: "Une information sur les r\xE8gles sp\xE9cifiques d'utilisation\
+        \ des \xE9quipements de mobilit\xE9s est adress\xE9e aux utilisateurs"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:nomad_07
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:7:1
+      ref_id: NOMAD_07
+      description: "Une sensibilisation au profit des utilisateurs sur les risques\
+        \ li\xE9s \xE0 l'utilisation d'un \xE9quipement de mobilit\xE9 est r\xE9alis\xE9\
+        e"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:7:2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:7
+      name: "6.7.2 S\xE9curisation des acc\xE8s \xE0 distance"
+    - urn: urn:intuitem:risk:req_node:igi-1300:nomad_08
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:7:2
+      ref_id: NOMAD_08
+      description: "Par principe, les syst\xE8mes d\u2019information classifi\xE9\
+        s sont con\xE7us et param\xE9tr\xE9s pour interdire les acc\xE8s \xE0 distance."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:nomad_09
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:7:2
+      ref_id: NOMAD_09
+      description: "Lorsqu\u2019un acc\xE8s \xE0 distance est absolument n\xE9cessaire\
+        \ pour des raisons op\xE9rationnelles, cet acc\xE8s est prot\xE9g\xE9 au moyen\
+        \ de dispositifs de s\xE9curit\xE9 agr\xE9\xE9s au niveau de classification\
+        \ du syst\xE8me d'information auquel il donne acc\xE8s."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2
+      name: 6.8 Supports amovibles
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:8
+      ref_id: AMOV_01
+      description: "La connexion ou l\u2019installation d'\xE9quipements personnels\
+        \ \xE0 un syst\xE8me d\u2019information classifi\xE9 est strictement interdite."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:8
+      ref_id: AMOV_02
+      description: "La connexion d\u2019un support amovible non classifi\xE9 \xE0\
+        \ un syst\xE8me d\u2019information classifi\xE9 est possible sous r\xE9serve\
+        \ de la mise en place de mesures techniques de protection, notamment des mesures\
+        \ de d\xE9tection ou de protection contre l\u2019introduction de codes malveillants\
+        \ ou d\u2019exfiltration d\u2019information."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:8
+      ref_id: AMOV_03
+      description: "Avant toute utilisation sur un syst\xE8me d\u2019information traitant\
+        \ d'informations classifi\xE9es, l'innocuit\xE9 de tout support est v\xE9\
+        rifi\xE9e."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:8
+      ref_id: AMOV_04
+      description: "Si l\u2019utilisation de supports amovibles est autoris\xE9e,\
+        \ ceux-ci sont int\xE9gr\xE9s au p\xE9rim\xE8tre d\u2019homologation du syst\xE8\
+        me d\u2019information classifi\xE9 (cf. 6.1.1) lorsqu\u2019ils sont g\xE9\
+        r\xE9s, administr\xE9s et mis \xE0 disposition par l\u2019autorit\xE9 d\u2019\
+        emploi du syst\xE8me d\u2019information classifi\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:8
+      ref_id: AMOV_05
+      description: "Tout support amovible susceptible de contenir ou d\u2019avoir\
+        \ contenu de l\u2019information classifi\xE9e d\u2019un niveau donn\xE9 est\
+        \ classifi\xE9 au moins au m\xEAme niveau et est soumis \xE0 ce titre aux\
+        \ obligations d\xE9crites au chapitre 7. En aucun cas, un support amovible\
+        \ classifi\xE9 ne peut \xEAtre connect\xE9 \xE0 un syst\xE8me d'information\
+        \ non classifi\xE9 ou de classification inf\xE9rieure."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:8
+      ref_id: AMOV_06
+      description: "Lorsque des informations classifi\xE9es sont transport\xE9es \xE0\
+        \ l\u2019aide de supports amovibles, les supports amovibles respectent les\
+        \ exigences en mati\xE8re de transport d\u2019informations classifi\xE9es\
+        \ sur un support amovible (cf. 7.3.2.2)."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_07
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:8
+      ref_id: AMOV_07
+      description: "Une sensibilisation des utilisateurs aux mesures de s\xE9curit\xE9\
+        \ \xE0 respecter dans l'emploi des supports amovibles est r\xE9alis\xE9e"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_07:1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:amov_07
+      name: "6.8.1 Supports amovibles en sein du syst\xE8me d'information classifi\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_08
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:amov_07:1
+      ref_id: AMOV_08
+      description: "Seuls les supports amovibles g\xE9r\xE9s, administr\xE9s et mis\
+        \ \xE0 disposition par l\u2019autorit\xE9 d\u2019emploi du syst\xE8me d\u2019\
+        information classifi\xE9 sont autoris\xE9s \xE0 se connecter \xE0 ce syst\xE8\
+        me d\u2019information classifi\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_09
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:amov_07:1
+      ref_id: AMOV_09
+      description: "Des dispositifs de s\xE9curit\xE9 permettant de pr\xE9venir la\
+        \ connexion ou l\u2019installation de supports amovibles non autoris\xE9s\
+        \ sont mis en place."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_07:2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:amov_07
+      name: "6.8.2 Supports amovibles entre un syst\xE8me d'information classifi\xE9\
+        \ et d'autres syst\xE8mes"
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_10
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:amov_07:2
+      ref_id: AMOV_10
+      description: "Lorsque des supports amovibles sont utilis\xE9s pour importer\
+        \ et exporter des informations \xE0 partir d\u2019un syst\xE8me d\u2019information\
+        \ classifi\xE9, ce transfert d\u2019information est r\xE9alis\xE9 exclusivement\
+        \ en connectant ces supports amovibles \xE0 des points de connexion appartenant\
+        \ au syst\xE8me d\u2019information classifi\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_11
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:amov_07:2
+      ref_id: AMOV_11
+      description: "Le point de connexion appartenant au syst\xE8me d'information\
+        \ classifi\xE9 et permettant l'importation ou l'exportation d'informations\
+        \ est d\xE9di\xE9 \xE0 cet usage et garantit notamment les exigences de s\xE9\
+        curit\xE9 suivantes :\n - contr\xF4le d\u2019autorisation (approbation de\
+        \ la sortie d\u2019information) ;\n - rupture protocolaire : (rupture du flux\
+        \ transitant entre le support amovible et le syst\xE8me d\u2019information\
+        \ \xE9metteur ou destinataire) ;\n - tra\xE7abilit\xE9 et imputabilit\xE9\
+        \ du transfert."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_12
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:amov_07:2
+      ref_id: AMOV_12
+      description: "Les exportations d\u2019informations classifi\xE9es r\xE9alis\xE9\
+        es \xE0 partir de supports amovibles sont trac\xE9es par des moyens techniques\
+        \ ou organisationnels qui permettent notamment d\u2019horodater le transfert\
+        \ et de l\u2019imputer \xE0 un utilisateur du syst\xE8me d\u2019information\
+        \ classifi\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_13
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:amov_07:2
+      ref_id: AMOV_13
+      description: "Pour les syst\xE8mes d'information classifi\xE9s au niveau Tr\xE8\
+        s Secret, les m\xE9canismes d'importation et d'exportation d'informations\
+        \ par support amovible permettent d\u2019identifier l\u2019\xE9metteur et\
+        \ les destinataires de l\u2019information classifi\xE9e."
+      implementation_groups:
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:amov_14
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:amov_07:2
+      ref_id: AMOV_14
+      description: "L\u2019utilisation de supports amovibles entre un syst\xE8me d\u2019\
+        information classifi\xE9 et un syst\xE8me d\u2019information non classifi\xE9\
+        \ ou de classification diff\xE9rente est par principe interdite.\n\nToute\
+        \ d\xE9rogation \xE0 l\u2019interdiction de principe doit \xEAtre justifi\xE9\
+        e par un besoin op\xE9rationnel strictement n\xE9cessaire. La justification\
+        \ est vers\xE9e au dossier d\u2019homologation et les mesures de protection\
+        \ minimales suivantes s\u2019appliquent :\n - une analyse de risques est conduite\
+        \ pour identifier les mesures techniques et organisationnelles visant \xE0\
+        \ pr\xE9venir tout risque de sortie incontr\xF4l\xE9e d\u2019information classifi\xE9\
+        e li\xE9 aux cas d\u2019usage de ces supports amovibles ;\n - les \xE9changes\
+        \ d\u2019information entre un syst\xE8me d\u2019information classifi\xE9 et\
+        \ un syst\xE8me d\u2019information non classifi\xE9 ou de classification diff\xE9\
+        rente s\u2019effectuent au moyen de points de connexion des supports amovibles\
+        \ mettant en oeuvre des dispositifs de s\xE9curit\xE9 utilis\xE9s comme moyens\
+        \ essentiels de protection contre les acc\xE8s non-autoris\xE9s aux informations\
+        \ classifi\xE9es. Ces dispositifs de s\xE9curit\xE9 sont agr\xE9\xE9s (cf.\
+        \ 6.4.2). En absence de dispositifs agr\xE9\xE9s et apr\xE8s en avoir rendu\
+        \ compte \xE0 l\u2019autorit\xE9 qualifi\xE9e en s\xE9curit\xE9 des syst\xE8\
+        mes d\u2019information et au service du haut fonctionnaire de d\xE9fense et\
+        \ de s\xE9curit\xE9 comp\xE9tents, des mesures palliatives sont prises et\
+        \ d\xE9crites dans le dossier d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2
+      name: "6.9 Audit des syst\xE8mes d'information"
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:9
+      ref_id: AUDIT_01
+      description: "Des audits de s\xE9curit\xE9 p\xE9riodiques des syst\xE8mes d\u2019\
+        information classifi\xE9s, avant chaque homologation ou renouvellement d\u2019\
+        homologation doivent \xEAtre r\xE9alis\xE9s."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:9
+      ref_id: AUDIT_02
+      description: "Les conditions du d\xE9roulement de l\u2019audit, notamment de\
+        \ l\u2019utilisation et de la restitution des \xE9quipements n\xE9cessaires\
+        \ \xE0 l\u2019audit, sont pr\xE9cis\xE9es. Ces conditions sont, le cas \xE9\
+        ch\xE9ant, formalis\xE9es dans une convention d'audit."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:9
+      ref_id: AUDIT_03
+      description: "Ces audits de s\xE9curit\xE9 doivent, au-del\xE0 de la conformit\xE9\
+        \ aux r\xE8gles de la pr\xE9sente instruction, \xE9valuer le niveau de robustesse\
+        \ des syst\xE8mes d\u2019information eu \xE9gard aux \xE9volutions de la menace\
+        \ informatique. Il s\u2019agit de v\xE9rifier l\u2019application de mesures\
+        \ de d\xE9fense en profondeur, de les \xE9prouver par des techniques et outils\
+        \ \xE0 l\u2019\xE9tat de l\u2019art et de r\xE9aliser des tests compl\xE9\
+        mentaires qui peuvent \xEAtre conduits inopin\xE9ment en fonction des relev\xE9\
+        s d\u2019audit initiaux."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:9
+      ref_id: AUDIT_04
+      description: "Les risques associ\xE9s \xE0 l\u2019utilisation des outils d\u2019\
+        audit, des privil\xE8ges et de communication des relev\xE9s techniques n\xE9\
+        cessaires \xE0 la r\xE9alisation de l\u2019audit de s\xE9curit\xE9 figurent\
+        \ dans le dossier d\u2019homologation du syst\xE8me vis\xE9, quel que soit\
+        \ son niveau de classification et sans pr\xE9judice des dispositions de la\
+        \ pr\xE9sente instruction."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:9
+      ref_id: AUDIT_05
+      description: "Les rapports d'audit portant sur des syst\xE8mes d\u2019information\
+        \ classifi\xE9s sont classifi\xE9s au moins au niveau Secret.\n\nCes rapports\
+        \ sont tenus \xE0 la disposition de l'Agence nationale de la s\xE9curit\xE9\
+        \ des syst\xE8mes d'information, du service du haut fonctionnaire de d\xE9\
+        fense et de s\xE9curit\xE9 et du service enqu\xEAteur comp\xE9tent.\n\nLes\
+        \ modalit\xE9s de consultation des rapports d\u2019audit sont d\xE9termin\xE9\
+        es en accord avec le service du haut fonctionnaire de d\xE9fense et de s\xE9\
+        curit\xE9."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:9
+      ref_id: AUDIT_06
+      description: "Les relev\xE9s techniques d'audit sont classifi\xE9s au maximum\
+        \ au m\xEAme niveau que le rapport."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_07
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:9
+      ref_id: AUDIT_07
+      description: "En cas de recours, pour un audit d\u2019un syst\xE8me d\u2019\
+        information classifi\xE9, \xE0 un prestataire priv\xE9, la prestation d\u2019\
+        audit doit \xEAtre qualifi\xE9e par l\u2019agence nationale de la s\xE9curit\xE9\
+        \ des syst\xE8mes d\u2019information."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_08
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:9
+      ref_id: AUDIT_08
+      description: "Par principe, les auditeurs doivent \xEAtre habilit\xE9s au niveau\
+        \ de classification du syst\xE8me d\u2019information classifi\xE9 audit\xE9\
+        \ selon les modalit\xE9s d\xE9taill\xE9es \xE0 la partie 3.3. Toutefois, lorsque\
+        \ les droits qui leur sont octroy\xE9s initialement sur le syst\xE8me d'information\
+        \ classifi\xE9 sont \xE9tendus, leur permettant notamment d'outrepasser leurs\
+        \ droits ou de masquer leurs actions sur celui-ci, les auditeurs doivent \xEA\
+        tre habilit\xE9s au niveau Tr\xE8s Secret."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_08:1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08
+      name: "7.1.2.4 Marquage d\u2019un support immat\xE9riel"
+    - urn: urn:intuitem:risk:req_node:igi-1300:marq_01
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:1
+      ref_id: MARQ_01
+      description: "Le marquage d\u2019un support immat\xE9riel d\u2019informations\
+        \ classifi\xE9es (message ou fichier \xE9lectronique, base de donn\xE9es,\
+        \ etc.) est adapt\xE9 au type de support et est toujours visible. Il consiste\
+        \ en :\n  - un timbre sp\xE9cifiant le niveau de classification en toutes\
+        \ lettres et ayant une dimension adapt\xE9e \xE0 celle du support (abr\xE9\
+        viations). Il peut contenir la mention Sp\xE9cial France si l\u2019information\
+        \ doit \xEAtre divulgu\xE9e aux seuls ressortissants fran\xE7ais ;\n  - la\
+        \ r\xE9f\xE9rence et, le cas \xE9ch\xE9ant, le volume de chacune des informations\
+        \ enregistr\xE9es."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:marq_02
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:1
+      ref_id: MARQ_02
+      description: "Dans la mesure du possible, les r\xE8gles de marquage d\u2019\
+        un support immat\xE9riel doivent respecter les r\xE8gles de marquage d\u2019\
+        un support papier (cf. 7.1.2.3)."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:marq_03
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:1
+      ref_id: MARQ_03
+      description: "S\u2019il est mat\xE9riellement impossible d\u2019apposer le marquage\
+        \ sur le support classifi\xE9 ou contenant une information classifi\xE9e,\
+        \ il convient de mettre en oeuvre les mesures techniques et organisationnelles\
+        \ d\xE9crites dans le dossier d\u2019homologation et la documentation utilisateur."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_08:2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08
+      name: "7.1.2.6 Marquage des \xE9l\xE9ments constitutifs d\u2019un syst\xE8me\
+        \ d\u2019information classifi\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:marq_04
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:2
+      ref_id: MARQ_04
+      description: "Le marquage des \xE9l\xE9ments constitutifs d\u2019un syst\xE8\
+        me d\u2019information classifi\xE9 est adapt\xE9 au type d\u2019\xE9l\xE9\
+        ment et toujours visible. Il consiste en :\n  - un timbre sp\xE9cifiant le\
+        \ niveau de classification en toutes lettres et ayant une dimension adapt\xE9\
+        e \xE0 celle de l\u2019\xE9l\xE9ment ;\n  - une identification assur\xE9e\
+        \ par l\u2019inscription des r\xE9f\xE9rences de l\u2019\xE9l\xE9ment."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:marq_05
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:2
+      ref_id: MARQ_05
+      description: "S\u2019il est mat\xE9riellement impossible d\u2019apposer le marquage\
+        \ sur l\u2019\xE9l\xE9ment, il convient de mettre en oeuvre les mesures techniques\
+        \ et organisationnelles d\xE9crites dans le dossier d\u2019homologation et\
+        \ la documentation utilisateur."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:marq_06
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:2
+      ref_id: MARQ_06
+      description: "Les claviers et autres p\xE9riph\xE9riques d\u2019entr\xE9e similaires\
+        \ peuvent \xEAtre exempt\xE9s de marquage. Cette exemption doit \xEAtre mentionn\xE9\
+        e dans le dossier d\u2019homologation."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_08:3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08
+      name: "7.1.2.7 Marquage d\u2019un support amovible"
+    - urn: urn:intuitem:risk:req_node:igi-1300:marq_07
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:3
+      ref_id: MARQ_07
+      description: "Le marquage d\u2019un support amovible d\u2019informations classifi\xE9\
+        es est adapt\xE9 au type d\u2019\xE9l\xE9ment et toujours visible. Il consiste\
+        \ en :\n  - un timbre sp\xE9cifiant le niveau de classification en toutes\
+        \ lettres et ayant une dimension adapt\xE9e \xE0 celle du support ;\n  - une\
+        \ identification assur\xE9e par l\u2019inscription des r\xE9f\xE9rences du\
+        \ support."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:marq_08
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:3
+      ref_id: MARQ_08
+      description: "S\u2019il est mat\xE9riellement impossible d\u2019apposer le marquage\
+        \ sur le support, il convient de mettre en oeuvre les mesures techniques et\
+        \ organisationnelles d\xE9crites dans le dossier d\u2019homologation et la\
+        \ documentation utilisateur."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:marq_09
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:3
+      ref_id: MARQ_09
+      description: "Pour les supports amovibles agr\xE9\xE9s, le marquage est r\xE9\
+        alis\xE9 dans les conditions pr\xE9vues par les instructions d\u2019emploi\
+        \ du support, mentionn\xE9es dans la d\xE9cision d\u2019agr\xE9ment."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_08:4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08
+      name: "7.3.2.2 Transport d\u2019informations classifi\xE9es sur un support amovible"
+    - urn: urn:intuitem:risk:req_node:igi-1300:trans_01
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:4
+      ref_id: TRANS_01
+      description: "Par principe, les informations classifi\xE9es stock\xE9es sur\
+        \ un support amovible en vue de leur transport sont chiffr\xE9es."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:trans_02
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:4
+      ref_id: TRANS_02
+      description: "En l\u2019absence de solution agr\xE9\xE9e au niveau de classification\
+        \ requis ou lorsqu\u2019\xE0 titre exceptionnel le chiffrement est impossible,\
+        \ le support amovible est transport\xE9 conform\xE9ment aux dispositions du\
+        \ paragraphe 7.3.2.1."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:audit_08:5
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08
+      name: "7.4.2 Mise au rebut ou r\xE9affectation s\xE9curis\xE9e du mat\xE9riel\
+        \ informatique classifi\xE9"
+    - urn: urn:intuitem:risk:req_node:igi-1300:rebut_01
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:5
+      ref_id: REBUT_01
+      description: "Un support classifi\xE9 ou ayant contenu des informations classifi\xE9\
+        es ne peut \xEAtre affect\xE9 \xE0 un nouvel utilisateur ou \xE0 un nouveau\
+        \ besoin qu\u2019apr\xE8s effacement s\xE9curis\xE9 de l\u2019ensemble des\
+        \ informations et supports classifi\xE9s qu\u2019il contient."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:rebut_02
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:5
+      ref_id: REBUT_02
+      description: "Un support classifi\xE9 ou ayant contenu des informations classifi\xE9\
+        es reste classifi\xE9 \xE0 un niveau au moins \xE9gal au niveau de classification\
+        \ des informations et supports classifi\xE9s qu\u2019il a pr\xE9alablement\
+        \ contenus."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:rebut_03
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:5
+      ref_id: REBUT_03
+      description: "Tout support de stockage \xE9lectronique classifi\xE9 mis au rebut\
+        \ est pr\xE9alablement effac\xE9 selon les recommandations de l\u2019agence\
+        \ nationale de la s\xE9curit\xE9 des syst\xE8mes d\u2019information."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:rebut_04
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:audit_08:5
+      ref_id: REBUT_04
+      description: "En l'absence d'effacement s\xE9curis\xE9, le support de stockage\
+        \ \xE9lectronique classifi\xE9 est d\xE9truit physiquement, selon un proc\xE9\
+        d\xE9 conforme aux recommandations du secr\xE9tariat g\xE9n\xE9ral de la d\xE9\
+        fense et de la s\xE9curit\xE9 nationale, qui rend impossible la reconstitution\
+        \ de tout ou partie de l\u2019information classifi\xE9e qu\u2019il a contenue"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2
+      name: "Annexe 30 \u2013 Barri\xE8res de protection physique et logique, r\xE9\
+        partition en classes et tableaux de combinaison des classes"
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10
+      name: "2 D\xE9termination des classes"
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1
+      name: "d. Classes des postes utilisateurs classifi\xE9s"
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_01
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_01
+      description: "Les postes de travail de classe Y doivent, pour garantir l'int\xE9\
+        grit\xE9 physique des \xE9l\xE9ments constitutifs du SI :\n  - utiliser des\
+        \ scell\xE9s g\xE9n\xE9riques de contr\xF4le d\u2019ouverture de l\u2019\xE9\
+        quipement avec tra\xE7abilit\xE9 des \xE9quipements ayant re\xE7u des scell\xE9\
+        s ;\n  - faire l'objet d'un contr\xF4le ponctuel de l\u2019int\xE9grit\xE9\
+        \ des scell\xE9s par l\u2019utilisateur."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_02
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_02
+      description: "Les postes de travail de classe Y doivent, pour garantir la confidentialit\xE9\
+        \ des donn\xE9es lorsque le terminal n\u2019est pas en fonctionnement :\n\
+        \  - faire l'objet d'un chiffrement des donn\xE9es utilisateur par un logiciel\
+        \ agr\xE9\xE9 pour la protection des informations portant la mention Diffusion\
+        \ Restreinte ; OU\n  - faire l'objet d'un stockage \xE0 distance des donn\xE9\
+        es sur l\u2019infrastructure d\u2019h\xE9bergement du SI ; OU\n  - disposer\
+        \ d'une m\xE9moire de masse extractible ou \xE9quipement mobile stockable\
+        \ dans un meuble de classe adapt\xE9e \xE0 la classification des\ndonn\xE9\
+        es en clair."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_03
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_03
+      description: "Les postes de travail de classe Y doivent, pour garantir la s\xE9\
+        curit\xE9 du contr\xF4le d'acc\xE8s de l\u2019utilisateur, disposer d'un mot\
+        \ de passe avec politique de s\xE9curit\xE9 des mots de passe conforme \xE0\
+        \ la politique de s\xE9curit\xE9 de l\u2019organisme."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_04
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_04
+      description: "Dans le cadre de postes de travail de classe Y, l'acc\xE8s aux\
+        \ dispositifs d\u2019import-export du poste utilisateur :\n  - est r\xE9serv\xE9\
+        \ aux utilisateurs authentifi\xE9s sur le terminal ; ET\n  - s'effectue au\
+        \ moyen de supports amovibles pr\xE9alablement \xAB enr\xF4l\xE9s \xBB sur\
+        \ le syst\xE8me et autoris\xE9s pour cet utilisateur."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_05
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_05
+      description: "Les postes de travail de classe Y doivent, pour garantir le contr\xF4\
+        le des \xE9quipements connect\xE9s au r\xE9seau, avoir les services non utilis\xE9\
+        s d\xE9sactivit\xE9s (conformit\xE9)."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_06
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_06
+      description: "Les postes de travail de classe Y doivent, pour garantir le cloisonnement\
+        \ et le filtrage, faire l'objet d'un cloisonnement par fonction homog\xE8\
+        ne au  sein du SI   (cloisonnement des  r\xE9seaux locaux-LANs-par population)"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_07
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_07
+      description: "Les postes de travail de classe Y doivent, pour garantir la capacit\xE9\
+        \ \xE0 restreindre la visualisation des IC par un tiers, faire l'objet d'une\
+        \ disposition par rapport aux ouvertures du local  (portes, fen\xEAtres, vasistas,\
+        \ hublots, etc.) et d'une protection des vis-\xE0-vis"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_08
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_08
+      description: "Les postes de travail de classe B doivent, pour garantir l'int\xE9\
+        grit\xE9 physique des \xE9l\xE9ments constitutifs du SI :\n  - b\xE9n\xE9\
+        ficier d'une protection de classe Y ;\n  - faire l'objet d'un contr\xF4le\
+        \ annuel de l\u2019int\xE9grit\xE9 des scell\xE9s."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_09
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_09
+      description: "Les postes de travail de classe B doivent, pour garantir la confidentialit\xE9\
+        \ des donn\xE9es lorsque le terminal n\u2019est pas en fonctionnement :\n\
+        \  - faire l'objet d'un chiffrement int\xE9gral du disque par un logiciel\
+        \ agr\xE9\xE9 pour la protection des informations portant la mention Diffusion\
+        \ Restreinte ; OU\n  - faire l'objet d'un stockage \xE0 distance des donn\xE9\
+        es sur l\u2019infrastructure d\u2019h\xE9bergement du SI ; OU\n  - disposer\
+        \ d'une m\xE9moire de masse extractible ou \xE9quipement mobile stockable\
+        \ dans un meuble de classe adapt\xE9e \xE0 la classification des\ndonn\xE9\
+        es en clair."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_10
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_10
+      description: "Les postes de travail de classe B doivent, pour garantir la s\xE9\
+        curit\xE9 du contr\xF4le d'acc\xE8s de l\u2019utilisateur, disposer d'un dispositif\
+        \ d\u2019authentification forte, par exemple bas\xE9e sur une infrastructure\
+        \ de gestion de clefs (IGC) conforme au RGS** - homologu\xE9 par l'organisme."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_11
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_11
+      description: "Dans le cadre de postes de travail de classe B, l'acc\xE8s aux\
+        \ dispositifs d\u2019import-export du poste utilisateur b\xE9n\xE9ficie d'une\
+        \ protection de la classe Y."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_12
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_12
+      description: "Les postes de travail de classe B doivent, pour garantir le contr\xF4\
+        le des \xE9quipements connect\xE9s au r\xE9seau :\n  - b\xE9n\xE9ficier d'une\
+        \ protection de la classe Y ; ET\n  - \xEAtre authentifi\xE9s sur le r\xE9\
+        seau."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_13
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_13
+      description: "Les postes de travail de classe B doivent, pour garantir le cloisonnement\
+        \ et le filtrage, faire l'objet d'un cloisonnement entre les utilisateurs\
+        \ d\u2019une m\xEAme  population, exemple P-VLAN."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_14
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_14
+      description: "Les postes de travail de classe B doivent, pour garantir la capacit\xE9\
+        \ \xE0 restreindre la visualisation des IC par un tiers, faire l'objet d'une\
+        \ protection de la classe Y."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_15
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_15
+      description: "Les postes de travail de classe A doivent, pour garantir l'int\xE9\
+        grit\xE9 physique des \xE9l\xE9ments constitutifs du SI, b\xE9n\xE9ficier\
+        \ d'un dispositif de d\xE9tection d\u2019ouverture de l\u2019\xE9quipement\
+        \ ou scell\xE9s num\xE9rot\xE9s de contr\xF4le d\u2019ouverture de l\u2019\
+        \xE9quipement avec tra\xE7abilit\xE9 des \xE9quipements ayant re\xE7u ces\
+        \ scell\xE9s Contr\xF4le semestriel de l\u2019int\xE9grit\xE9 des scell\xE9\
+        s."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_16
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_16
+      description: "Les postes de travail de classe A doivent, pour garantir la confidentialit\xE9\
+        \ des donn\xE9es lorsque le terminal n\u2019est pas en fonctionnement, b\xE9\
+        n\xE9ficier d'une protection de classe B."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_17
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_17
+      description: "Les postes de travail de classe A doivent, pour garantir la s\xE9\
+        curit\xE9 du contr\xF4le d'acc\xE8s de l\u2019utilisateur, disposer d'un dispostif\
+        \ d\u2019authentification forte, par exemple bas\xE9e sur une infrastructure\
+        \ de gestion de clefs (IGC) conforme au RGS**."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_18
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_18
+      description: "Dans le cadre de postes de travail de classe A, l'acc\xE8s aux\
+        \ dispositifs d\u2019import-export du poste utilisateur est r\xE9serv\xE9\
+        \ aux utilisateurs assurant une fonction d\u2019enregistrement des documents\
+        \ classifi\xE9s ou de gestion des \xE9changes"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_19
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_19
+      description: "Les postes de travail de classe A doivent, pour garantir le contr\xF4\
+        le des \xE9quipements connect\xE9s au r\xE9seau, b\xE9n\xE9ficier d'une protection\
+        \ de la classe B"
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_20
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_20
+      description: "Les postes de travail de classe A doivent, pour garantir le cloisonnement\
+        \ et le filtrage, faire l'objet d'un cloisonnement par le chiffre pour chaque\
+        \ poste utilisateur (tunnel d\xE9di\xE9 vers les services)."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:cl_poste_21
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:1:1
+      ref_id: CL_POSTE_21
+      description: "Les postes de travail de classe A doivent, pour garantir la capacit\xE9\
+        \ \xE0 restreindre la visualisation des IC par un tiers, faire l'objet d'une\
+        \ protection de la classe B."
+      implementation_groups:
+      - S
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10
+      name: 3 Tableaux de combinaison des classes
+    - urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2
+      name: "b. Protection des syst\xE8mes d'information classifi\xE9s"
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_01
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_01
+      description: "Au niveau Secret, il est n\xE9cessaire de recourir \xE0 un syst\xE8\
+        me d'information de classe Y lorsque :\n  - la classe du b\xE2timent est :\
+        \ 1, 2, 3 ou 4 ; ET\n  - la classe du local est : a ou b."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_02
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_02
+      description: "Au niveau Secret, il est n\xE9cessaire de recourir \xE0 un syst\xE8\
+        me d'information de classe B lorsque :\n  - la classe du b\xE2timent est :\
+        \ 1, 2 ou 3 ; ET\n  - la classe du local est : c."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_03
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_03
+      description: "Au niveau Secret, il est n\xE9cessaire de recourir \xE0 un syst\xE8\
+        me d'information de classe B lorsque :\n  - la classe du b\xE2timent est :\
+        \ 1 ou 2 ; ET\n  - la classe du local est : d."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_04
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_04
+      description: "Au niveau Secret, il est n\xE9cessaire de recourir \xE0 un syst\xE8\
+        me d'information de classe A lorsque :\n  - la classe du b\xE2timent est :\
+        \ 4 ; ET\n  - la classe du local est : c."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_05
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_05
+      description: "Au niveau Secret, il est n\xE9cessaire de recourir \xE0 un syst\xE8\
+        me d'information de classe A lorsque :\n  - la classe du b\xE2timent est :\
+        \ 3 ; ET\n  - la classe du local est : d."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_06
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_06
+      description: "Aucun syst\xE8me d'information classifi\xE9 au niveau Secret ne\
+        \ peut \xEAtre mis en \u0153uvre dans un local de classe d situ\xE9 dans un\
+        \ b\xE2timent de classe 4."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_07
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_07
+      description: "Au niveau Tr\xE8s Secret, il est n\xE9cessaire de recourir \xE0\
+        \ un syst\xE8me d'information de classe B lorsque :\n  - la classe du b\xE2\
+        timent est : 1, 2 ou 3 ; ET\n  - la classe du local est : a, b ou c."
+      implementation_groups:
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_08
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_08
+      description: "Aucun syst\xE8me d'information classifi\xE9 au niveau Tr\xE8s\
+        \ Secret ne peut \xEAtre mis en \u0153uvre d\xE8s lors que le b\xE2timent\
+        \ est de classe 4 ou que le local est de classe c ou d."
+      implementation_groups:
+      - TS
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_09
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_09
+      description: "Pour le seul niveau Secret, et dans l'hypoth\xE8se o\xF9 les barri\xE8\
+        res physiques sont assur\xE9s par le local et un meuble adapt\xE9, il est\
+        \ n\xE9cessaire de mettre en \u0153uvre un syst\xE8me d'information classifi\xE9\
+        \ de classe Y lorsque :\n  - la classe du local est : a ou b ; ET\n  - la\
+        \ classe du meuble est : A ou B."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_10
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_10
+      description: "Pour le seul niveau Secret, et dans l'hypoth\xE8se o\xF9 les barri\xE8\
+        res physiques sont assur\xE9s par le local et un meuble adapt\xE9, il est\
+        \ n\xE9cessaire de mettre en \u0153uvre un syst\xE8me d'information classifi\xE9\
+        \ de classe Y lorsque :\n  - la classe du local est : a ; ET\n  - la classe\
+        \ du meuble est : C."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_11
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_11
+      description: "Pour le seul niveau Secret, et dans l'hypoth\xE8se o\xF9 les barri\xE8\
+        res physiques sont assur\xE9s par le local et un meuble adapt\xE9, il est\
+        \ n\xE9cessaire de mettre en \u0153uvre un syst\xE8me d'information classifi\xE9\
+        \ de classe B lorsque :\n  - la classe du local est : b ; ET\n  - la classe\
+        \ du meuble est : C."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_12
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_12
+      description: "Pour le seul niveau Secret, et dans l'hypoth\xE8se o\xF9 les barri\xE8\
+        res physiques sont assur\xE9s par le local et un meuble adapt\xE9, il est\
+        \ n\xE9cessaire de mettre en \u0153uvre un syst\xE8me d'information classifi\xE9\
+        \ de classe B lorsque :\n  - la classe du local est : c ; ET\n  - la classe\
+        \ du meuble est : A ou B."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_13
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_13
+      description: "Pour le seul niveau Secret, et dans l'hypoth\xE8se o\xF9 les barri\xE8\
+        res physiques sont assur\xE9s par le local et un meuble adapt\xE9, il est\
+        \ n\xE9cessaire de mettre en \u0153uvre un syst\xE8me d'information classifi\xE9\
+        \ de classe A lorsque :\n  - la classe du local est : c ; ET\n  - la classe\
+        \ du meuble est : C."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:igi-1300:prot_sic_14
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:igi-1300:node2:10:2:1
+      ref_id: PROT_SIC_14
+      description: "Pour le seul niveau Secret, et dans l'hypoth\xE8se o\xF9 les barri\xE8\
+        res physiques sont assur\xE9s par le local et un meuble adapt\xE9, il est\
+        \ n\xE9cessaire de mettre en \u0153uvre un syst\xE8me d'information classifi\xE9\
+        \ de classe A lorsque :\n  - la classe du local est : d ; ET\n  - la classe\
+        \ du meuble est : A, B ou C."
+      implementation_groups:
+      - S

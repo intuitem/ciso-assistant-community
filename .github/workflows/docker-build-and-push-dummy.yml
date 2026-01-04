@@ -1,6 +1,15 @@
 name: Build and Push Docker Images Dummy
+permissions:
+  contents: read
+  packages: write
 on:
   workflow_dispatch:
+
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   UBUNTU_VERSION: "ubuntu-24.04"
   VERSION: dummy
@@ -8,9 +17,6 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-24.04-arm
-    permissions:
-      contents: read
-      packages: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

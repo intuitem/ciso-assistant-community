@@ -1,9 +1,16 @@
 name: Version change checker
+permissions:
+  contents: read
 
 on:
   pull_request:
     branches: [main]
     types: [opened]
+
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   UBUNTU_VERSION: "ubuntu-24.04"

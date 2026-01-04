@@ -8,6 +8,7 @@ export interface User {
 	first_name: string;
 	last_name: string;
 	is_active: boolean;
+	keep_local_login: boolean;
 	date_joined: string;
 	user_groups: Record<string, any>[];
 	roles: Record<string, any>[];
@@ -17,6 +18,9 @@ export interface User {
 	accessible_domains: string[];
 	domain_permissions: Record<string, string[]>;
 	root_folder_id: string;
+	preferences: {
+		lang?: string;
+	};
 }
 
 export interface GlobalSettings {
@@ -39,6 +43,7 @@ export const URL_MODEL = [
 	'applied-controls',
 	'policies',
 	'risk-acceptances',
+	'validation-flows',
 	'reference-controls',
 	'assets',
 	'users',
@@ -47,6 +52,7 @@ export const URL_MODEL = [
 	'role-assignments',
 	'compliance-assessments',
 	'evidences',
+	'evidence-revisions',
 	'frameworks',
 	'requirements',
 	'requirement-assessments',
@@ -55,40 +61,85 @@ export const URL_MODEL = [
 	'libraries',
 	'sso-settings',
 	'general-settings',
+	'feature-flags',
 	'requirement-mapping-sets',
 	'entities',
 	'entity-assessments',
 	'solutions',
+	'contracts',
 	'representatives',
 	'vulnerabilities',
 	'filtering-labels',
+	'library-filtering-labels',
+	// 'ebios-rm',
 	'feared-events',
 	'ro-to',
 	'stakeholders',
 	'strategic-scenarios',
 	'attack-paths',
 	'operational-scenarios',
-	'qualifications',
+	'elementary-actions',
+	'operating-modes',
+	'kill-chains',
 	'processings',
 	'processing-natures',
-	// 'ebios-rm',
 	'security-exceptions',
 	'findings',
 	'findings-assessments',
+	// privacy,
 	'processings',
+	'right-requests',
+	'data-breaches',
 	'purposes',
 	'personal-data',
 	'data-subjects',
 	'data-recipients',
 	'data-contractors',
 	'data-transfers',
+	// incidents,
 	'incidents',
 	'timeline-entries',
+	// tasks,
 	'task-templates',
-	'task-nodes'
+	'task-nodes',
+	// resilience,
+	'business-impact-analysis',
+	'escalation-thresholds',
+	'asset-assessments',
+	'asset-class',
+	'asset-capabilities',
+	// campaigns,
+	'campaigns',
+	// iso,
+	'organisation-issues',
+	'organisation-objectives',
+	// crq,
+	'quantitative-risk-studies',
+	'quantitative-risk-scenarios',
+	'quantitative-risk-hypotheses',
+	// terminologies
+	'terminologies',
+	// roles,
+	'roles',
+	'permissions',
+	// pmbok
+	'generic-collections',
+	'accreditations',
+	// metrology
+	'metric-definitions',
+	'metric-instances',
+	'custom-metric-samples',
+	'dashboards',
+	'dashboard-widgets',
+	'dashboard-text-widgets',
+	'dashboard-builtin-widgets'
 ] as const;
 
-export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
+export const THIRD_PARTY_URL_MODEL = [
+	'compliance-assessments',
+	'evidences',
+	'evidence-revisions'
+] as const;
 
 export type urlModel = (typeof URL_MODEL)[number];
 
@@ -173,6 +224,12 @@ export interface AggregatedData {
 }
 
 export interface AppliedControlStatus {
+	localLables: string[];
+	labels: any[];
+	values: any[]; // Set these types later on
+}
+
+export interface AppliedControlImpact {
 	localLables: string[];
 	labels: any[];
 	values: any[]; // Set these types later on

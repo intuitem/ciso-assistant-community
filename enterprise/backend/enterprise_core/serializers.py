@@ -4,9 +4,12 @@ from core.serializers import (
     BaseModelSerializer,
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
-from iam.models import Folder, User
+from core.serializer_fields import FieldsRelatedField
+from iam.models import Folder, User, Role
 
-from .models import ClientSettings
+from .models import ClientSettings, LogEntryAction
+from auditlog.models import LogEntry
+
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -27,9 +30,33 @@ class FolderWriteSerializer(BaseModelSerializer):
         if not self.instance:
             return parent_folder
         if parent_folder:
-            if parent_folder == self.instance or parent_folder in self.instance.get_sub_folders():
-                raise serializers.ValidationError("errorFolderGraphMustNotContainCycles")
+            if (
+                parent_folder == self.instance
+                or parent_folder in self.instance.get_sub_folders()
+            ):
+                raise serializers.ValidationError(
+                    "errorFolderGraphMustNotContainCycles"
+                )
         return parent_folder
+
+
+class RoleReadSerializer(BaseModelSerializer):
+    name = serializers.CharField(source="__str__")
+    permissions = serializers.SerializerMethodField()
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Role
+        fields = "__all__"
+
+    def get_permissions(self, obj):
+        return [{"str": perm.codename} for perm in obj.permissions.all()]
+
+
+class RoleWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Role
+        fields = "__all__"
 
 
 class EditorPermissionMixin:
@@ -82,7 +109,62 @@ class ClientSettingsWriteSerializer(BaseModelSerializer):
 class ClientSettingsReadSerializer(BaseModelSerializer):
     logo_hash = serializers.CharField()
     favicon_hash = serializers.CharField()
+    logo = serializers.SerializerMethodField()
+    favicon = serializers.SerializerMethodField()
+    logo_mime_type = serializers.CharField()
+    favicon_mime_type = serializers.CharField()
+
+    def get_logo(self, obj):
+        if obj.logo:
+            return obj.logo.name.split("/")[-1]
+        return None
+
+    def get_favicon(self, obj):
+        if obj.favicon:
+            return obj.favicon.name.split("/")[-1]
+        return None
 
     class Meta:
         model = ClientSettings
         exclude = ["is_published", "folder"]
+
+
+class LogEntrySerializer(serializers.ModelSerializer):
+    """
+    Serializer for the LogEntry model.
+    """
+
+    actor = serializers.SerializerMethodField(method_name="get_actor")
+    action = serializers.SerializerMethodField(method_name="get_action_display")
+    content_type = serializers.SerializerMethodField(method_name="get_content_type")
+    folder = serializers.CharField(source="additional_data.folder", read_only=True)
+
+    def get_action_display(self, obj):
+        return LogEntryAction(obj.action).to_string()
+
+    def get_actor(self, obj):
+        return obj.additional_data.get("user_email") if obj.additional_data else None
+
+    def get_content_type(self, obj):
+        return obj.content_type.name
+
+    def to_representation(self, instance):
+        log_data = super().to_representation(instance)
+        content_type = log_data.get("content_type")
+        change_dict = log_data.get("changes", {})
+
+        if (
+            isinstance(change_dict, dict)
+            and content_type == "user"
+            and "password" in change_dict
+        ):
+            # We want to mask the password in the audit logs.
+            change_dict["password"] = ["[old password]", "[new password]"]
+
+        log_data["changes"] = change_dict
+        return log_data
+
+    class Meta:
+        model = LogEntry
+        fields = "__all__"
+        read_only_fields = ["id", "timestamp", "actor", "action", "changes_text"]

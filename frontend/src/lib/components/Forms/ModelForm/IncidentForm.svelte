@@ -7,13 +7,25 @@
 	import * as m from '$paraglide/messages.js';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let duplicate: boolean = false;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let schema: any = {};
-	export let initialData: Record<string, any> = {};
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		duplicate?: boolean;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		schema?: any;
+		initialData?: Record<string, any>;
+	}
+
+	let {
+		form,
+		model,
+		duplicate = false,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		schema = {},
+		initialData = {}
+	}: Props = $props();
 	const disableDoubleDash = true;
 </script>
 
@@ -24,11 +36,30 @@
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
 />
+<TextField
+	type="datetime-local"
+	step="1"
+	{form}
+	field="reported_at"
+	label={m.reportedAt()}
+	cacheLock={cacheLocks['reported_at']}
+	bind:cachedValue={formDataCache['reported_at']}
+/>
 
+<Select
+	{form}
+	{disableDoubleDash}
+	field="detection"
+	label={m.detectedBy()}
+	options={model.selectOptions['detection']}
+	cacheLock={cacheLocks['detection']}
+	bind:cachedValue={formDataCache['detection']}
+/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -59,20 +90,37 @@
 	cacheLock={cacheLocks['severity']}
 	bind:cachedValue={formDataCache['severity']}
 />
-<AutocompleteSelect
-	multiple
+<TextField
 	{form}
-	optionsEndpoint="qualifications"
-	field="qualifications"
-	label={m.qualifications()}
+	field="link"
+	label={m.link()}
+	helpText={m.linkHelpText()}
+	cacheLock={cacheLocks['link']}
+	bind:cachedValue={formDataCache['link']}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
+		field="qualifications"
+		optionsLabelField="translated_name"
+		label={m.qualifications()}
+	/>
 	<AutocompleteSelect
 		multiple
 		{form}
 		optionsEndpoint="assets"
 		optionsLabelField="auto"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'type'
+				}
+			],
+			classes: 'text-blue-500'
+		}}
 		field="assets"
 		label={m.assets()}
 	/>
@@ -94,5 +142,14 @@
 		cacheLock={cacheLocks['owners']}
 		bind:cachedValue={formDataCache['owners']}
 		label={m.owners()}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="entities"
+		field="entities"
+		cacheLock={cacheLocks['entities']}
+		bind:cachedValue={formDataCache['entities']}
+		label={m.entities()}
 	/>
 </Dropdown>

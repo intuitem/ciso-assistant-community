@@ -1,0 +1,2017 @@
+urn: urn:intuitem:risk:library:pssie-benin
+locale: fr
+ref_id: PSSIE-BENIN
+name: "PSSIE du B\xE9nin "
+description: "Politique de s\xE9curit\xE9 des syst\xE8mes d'information de l'Etat\
+  \ b\xE9ninois. https://asin.bj/doc/44/download "
+copyright: "\xA9 ASIN/ANSSI"
+version: 2
+publication_date: 2025-04-27
+provider: ASIN BENIN
+packager: Joanny DEGBOE
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:pssie-benin
+    ref_id: PSSIE-BENIN
+    name: "PSSIE du B\xE9nin"
+    description: "Politique de s\xE9curit\xE9 des syst\xE8mes d'information de l'Etat\
+      \ b\xE9ninois. https://asin.bj/doc/44/download "
+    implementation_groups_definition:
+    - ref_id: C
+      name: Critique
+      description: null
+    - ref_id: N
+      name: Normal
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.1
+      assessable: false
+      depth: 1
+      ref_id: '4.1'
+      name: "Organisation de la s\xE9curit\xE9 des syst\xE8mes d'information"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.1:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.1
+      name: OBJECTIF 1
+      description: "Etablir un cadre de gestion pour engager, puis v\xE9rifier la\
+        \ mise en oeuvre et le fonctionnement de la s\xE9curit\xE9 des syst\xE8mes\
+        \ d'information au sein de l'entit\xE9."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:org-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.1:1
+      ref_id: ORG-01
+      name: "Fonction s\xE9curit\xE9"
+      description: "R\xE8gle :\nChaque entit\xE9 est tenue de d\xE9signer un RSSI\
+        \ dont les t\xE2ches sont d\xE9taill\xE9es dans une fiche de poste.\nLe RSSI\
+        \ fait valider les mesures d'application de la\n-PSSIE par son Management\
+        \ et veille \xE0 leur application au sein de l'entit\xE9.\nRecommandation\
+        \ :\nEu \xE9gard \xE0 la nature de sa mission, et afin de le doter des pouvoirs\
+        \ et moyens requis, il est recommand\xE9 de rattacher le RSSI \xE0 un responsable\
+        \ de niveau direction. L'entit\xE9 peut au besoin recourir aux services d'un\
+        \ FSSNQ pour jouer le r\xF4le de RSSI."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:org-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.1:1
+      ref_id: ORG-02
+      name: "Coordination de la s\xE9curit\xE9"
+      description: "R\xE8gle :\nL'entit\xE9 cr\xE9e un comit\xE9 s\xE9curit\xE9 des\
+        \ syst\xE8mes d'information ou toute autre structure organisationnelle constitu\xE9\
+        e de responsables seniors. Ce comit\xE9 pilote et coordonne le d\xE9ploiement\
+        \ de la PSSIE au niveau de l'entit\xE9. Ses missions, sa composition et son\
+        \ mode de fonctionnement doivent \xEAtre d\xE9taill\xE9s dans une note de\
+        \ service.\nRecommandation :\nAfin que ce comit\xE9 soit le plus repr\xE9\
+        sentatif possible, il est recommand\xE9 qu'il soit \xE9largi aux fonctions\
+        \ de direction en charge des ressources humaines, des ressources financi\xE8\
+        res, des services g\xE9n\xE9raux et des services juridiques."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:org-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.1:1
+      ref_id: ORG-03
+      name: "S\xE9paration des t\xE2ches"
+      description: "R\xE8gle :\nL'administration des diff\xE9rents composants du syst\xE8\
+        me d'information (syst\xE8mes d'exploitation, bases des donn\xE9es, \xE9quipements\
+        \ r\xE9seau, ...) doit \xEAtre cloisonn\xE9e et les acc\xE8s des administrateurs\
+        \ informatiques doivent respecter ce cloisonnement, chacun \xE9tant dans l'impossibilit\xE9\
+        \ d'acc\xE9der \xE0 un domaine qui n'est pas le sien.\nRecommandation :\n\
+        Pour garantir la s\xE9paration des t\xE2ches au sein des fonctions en charge\
+        \ de. l'administration des syst\xE8mes d'information, il est recommand\xE9\
+        \ de d\xE9finir et de maintenir une matrice des fonctions incompatibles et\
+        \ une proc\xE9dure de contr\xF4le compensatoire des activit\xE9s des administrateurs\
+        \ lorsqu'il est impossible de s\xE9parer certaines t\xE2ches."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:org-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.1:1
+      ref_id: ORG-04
+      name: "Responsabilit\xE9s des administrateurs informatiques"
+      description: "R\xE8gle : \nL'entit\xE9 doit encadrer, d'un point de vue s\xE9\
+        curit\xE9, l'activit\xE9 des administrateurs informatiques en \xE9tablissant\
+        \ une charte administrateur indiquant les responsabilit\xE9s et les limites\
+        \ de la fonction \xAB administrateur \xBB en mati\xE8re de s\xE9curit\xE9\
+        \ SI."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:org-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.1:1
+      ref_id: ORG-05
+      name: "Relations avec les autorit\xE9s comp\xE9tentes en s\xE9curit\xE9 SI"
+      description: "L'entit\xE9 doit entretenir des relations \xE9troites avec l'ANSSI,\
+        \ autorit\xE9 comp\xE9tente en mati\xE8re de s\xE9curit\xE9 des SI au plan\
+        \ national. Elle fournit \xE0 l'ANSSI les coordonn\xE9es du RSSI en vue des\
+        \ \xE9changes d'informations autour de la s\xE9curit\xE9 (veille, incidents\
+        \ de s\xE9curit\xE9, aspects li\xE9s au contr\xF4le, ...)."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:org-06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.1:1
+      ref_id: ORG-06
+      name: "Relations avec des groupes de sp\xE9cialites en s\xE9curit\xE9 SI."
+      description: "L'entit\xE9 doit d\xE9finir une proc\xE9dure de veille permettant\
+        \ au personnel en charge de la s\xE9curit\xE9 du SI d'entretenir des contacts\
+        \ particuliers avec un cercle professionnel \xE9largi pouvant comprendre les\
+        \ services sp\xE9cialis\xE9s en veille s\xE9curit\xE9, les cabinets de conseils,\
+        \ les \xE9diteurs de solutions de s\xE9curit\xE9, les associations\nprofessionnels,\
+        \ ..."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.2
+      assessable: false
+      depth: 1
+      ref_id: '4.2'
+      name: "S\xE9curit\xE9 des ressources humaines"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.2:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.2
+      name: OBJECTIF 2
+      description: "Faire des ressources humaines, un maillon fort de la s\xE9curit\xE9\
+        \ des syst\xE8mes."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:rh-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.2:1
+      ref_id: RH-01
+      name: "S\xE9lection des candidats"
+      description: "R\xE8gle :\nLe recrutement des r\xF4les de confiance (administrateurs\
+        \ bases de donn\xE9es, syst\xE8mes, r\xE9seau, consultants, auditeurs, ...)\
+        \ devra faire l'objet de v\xE9rifications s\xE9curitaires approfondies, dans\
+        \ le strict respect du cadre juridique applicable au B\xE9nin, afin de garantir\
+        \ la probit\xE9 des postulants.\nRecommandation :\nL'entit\xE9 peut proc\xE9\
+        der \xE0 des v\xE9rifications portant sur le casier judiciaire, les contr\xF4\
+        les de r\xE9f\xE9rence, l'authenticit\xE9 des dipl\xF4mes et certifications\
+        \ professionnelles, les r\xE9seaux sociaux, ..."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:rh-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.2:1
+      ref_id: RH-02
+      name: "Engagement s\xE9curit\xE9"
+      description: "R\xE8gle :\nTout personnel embauch\xE9 (interne, partenaire ou\
+        \ tiers) destin\xE9 \xE0 manipuler un composant du syst\xE8me d'information,\
+        \ re\xE7oit et signe une charte, opposable juridiquement, r\xE9capitulant\
+        \ les mesures pratiques d'utilisation du SI. Il doit signer un \xAB accord\
+        \ de non-divulgation \xBB d\xE8s son entr\xE9e en fonction.\nRecommandation\
+        \ :\nLorsque cela est administrativement faisable, il est recommand\xE9 de\
+        \ faire modifier le r\xE8glement int\xE9rieur de l'organisme pour inclure\
+        \ les dispositions applicables en mati\xE8re de s\xE9curit\xE9 du SI (PSSI\
+        \ sp\xE9cifique, respect des textes r\xE8glementaires applicables, sanctions\
+        \ en cas de violation des r\xE8gles de s\xE9curit\xE9,....)."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:rh-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.2:1
+      ref_id: RH-03
+      name: "Int\xE9gration des nouvelles recrues"
+      description: "R\xE8gle : \nLe circuit d'int\xE9gration des nouvelles recrues\
+        \ au sein de la structure d'accueil de l'entit\xE9 doit pr\xE9voir une \xE9\
+        tape de formation aux outils de travail, aux proc\xE9dures et pratiques de\
+        \ s\xE9curit\xE9 en vigueur."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:rh-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.2:1
+      ref_id: RH-04
+      name: Sensibilisation du personnel
+      description: "R\xE8gle : \nL'entit\xE9 doit dispenser r\xE9guli\xE8rement et\
+        \ au moins deux fois l'an, au profit du personnel, des formations de sensibilisation\
+        \ sur les r\xE8gles d'hygi\xE8ne pour une s\xE9curit\xE9 num\xE9rique am\xE9\
+        lior\xE9e dont le contenu sera adapt\xE9 au profil des utilisateurs (utilisateurs\
+        \ s\xE9dentaires,\nitin\xE9rants, administrateurs, fournisseurs, ..). Ces\
+        \ formations doivent faire l'objet d'\xE9valuation des acquis par les utilisateurs."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:rh-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.2:1
+      ref_id: RH-05
+      name: Mouvement du personnel
+      description: "R\xE8gle :\nUne proc\xE9dure permettant de g\xE9rer les mobilit\xE9\
+        s et les d\xE9parts des collaborateurs doit \xEAtre formalis\xE9e et appliqu\xE9\
+        e strictement. Cette proc\xE9dure doit couvrir au minimum l'adaptation ou\
+        \ la suspension des acc\xE8s logiques et physiques, le retrait des actifs\
+        \ SI, la passation des consignes et affaires en cours, ...\nRecommandation:\n\
+        Il est fortement recommand\xE9 que les proc\xE9dures de gestion de la mobilit\xE9\
+        \ et des d\xE9parts prescrivent les d\xE9lais de retrait des acc\xE8s et des\
+        \ actifs suivant la nature du mouvement (changement d'entit\xE9, d\xE9part\
+        \ \xE0 l'initiative de l'employ\xE9, \xE0 l'initiative de l'employeur, ...)."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:rh-06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.2:1
+      ref_id: RH-06
+      name: Mesures disciplinaires
+      description: "R\xE8gle : \nL'entit\xE9 doit pr\xE9voir les sanctions applicables\
+        \ en cas de violation de la politique de s\xE9curit\xE9 du syst\xE8me d'information\
+        \ en vigueur. Les utilisateurs sont inform\xE9s de ces sanctions de mani\xE8\
+        re formelle."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.3
+      assessable: false
+      depth: 1
+      ref_id: '4.3'
+      name: "Gestion des actifs du syst\xE8me d'information"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.3:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3
+      name: OBJECTIF 3
+      description: "Identifier les actifs du syst\xE8me d'information de l'entit\xE9\
+        \ et s'assurer que les responsabilit\xE9s sont d\xE9finies pour la protection\
+        \ des actifs."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:act-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3:1
+      ref_id: ACT-01
+      name: Inventaire des actifs SI
+      description: "R\xE8gle : \nChaque entit\xE9 \xE9tablit et maintient \xE0 jour\
+        \ un inventaire des actifs du syst\xE8me d'information (mat\xE9riels, logiciels,\
+        \ r\xE9seaux, locaux informatiques...) sous sa responsabilit\xE9, en s'appuyant\
+        \ sur un outillage adapt\xE9. Cet inventaire doit \xEAtre certifi\xE9 sur\
+        \ une base annuelle \xE0 minima."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:act-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3:1
+      ref_id: ACT-02
+      name: "Responsabilit\xE9s sur les actifs"
+      description: "R\xE8gle : \nA chaque actif SI identifi\xE9, l'entit\xE9 doit\
+        \ s'assurer qu'un responsable est d\xE9sign\xE9 pour en assurer la s\xE9curit\xE9\
+        ."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:act-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3:1
+      ref_id: ACT-03
+      name: Usage correct des actifs SI
+      description: "R\xE8gle : \nA chaque actif SI identifi\xE9, l'entit\xE9 doit\
+        \ s'assurer qu'un responsable est d\xE9sign\xE9 pour en assurer la s\xE9curit\xE9\
+        . L'entit\xE9 doit r\xE9diger et diffuser une charte d'utilisation des syst\xE8\
+        mes d'information \xE0 tous les utilisateurs des actifs du SI. L'entit\xE9\
+        \ doit s'assurer que les termes de ladite charte sont compris par les utilisateurs."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.3:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3
+      name: OBJECTIF 4
+      description: "Identifier la sensibilit\xE9 des actifs du SI pour permettre aux\
+        \ utilisateurs d'en faire un bon usage."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:act-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3:2
+      ref_id: ACT-04
+      name: "Sensibilit\xE9 des actifs"
+      description: "R\xE8gle :\nLa sensibilit\xE9 de tout actif SI identifi\xE9 doit\
+        \ \xEAtre \xE9valu\xE9e suivant une grille de classification qui fixe les\
+        \ niveaux de sensibilit\xE9 en consid\xE9rant les crit\xE8res de disponibilit\xE9\
+        , d'int\xE9grit\xE9 et de confidentialit\xE9. Cette sensibilit\xE9 est r\xE9\
+        \xE9valu\xE9e au moins une fois sur un cycle de trois ans \xE0 l'\xE9chelle\
+        \ de l'entit\xE9.\nRecommandation :\nIl convient de s'appuyer sur le cadre\
+        \ de classification des SI de l'ANSSI au cas o\xF9 l'entit\xE9 se trouve \xEA\
+        tre un op\xE9rateur d'infrastructure d'information critique."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:act-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3:2
+      ref_id: ACT-05
+      name: Marquage des actifs SI sensibles
+      description: "R\xE8gle : \nL'entit\xE9 doit proc\xE9der au marquage physique\
+        \ des actifs SI mat\xE9riels stockant des donn\xE9es sensibles ou vitales\
+        \ afin d'attirer l'attention des utilisateurs sur la sensibilit\xE9 desdits\
+        \ actifs."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.3:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3
+      name: OBJECTIF 5
+      description: "Ma\xEEtriser la s\xE9curit\xE9 du cycle de la vie des actifs."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:act-06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3:3
+      ref_id: ACT-06
+      name: Cycle de vie des actifs SI
+      description: "R\xE8gle : \nL'entit\xE9 d\xE9finit des proc\xE9dures encadrant\
+        \ le cycle de vie s\xE9curis\xE9 des actifs SI depuis leur acquisition jusqu'\xE0\
+        \ leur mise au rebut en passant par leur utilisation et leur maintenance."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.3:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3
+      name: OBJECTIF 6
+      description: "S\xE9curiser les informations qui sont stock\xE9es sur les supports\
+        \ num\xE9riques."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:act-07
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3:4
+      ref_id: ACT-07
+      name: "Chiffrement des supports num\xE9riques"
+      description: "R\xE8gle :\nLes supports num\xE9riques stockant des donn\xE9es\
+        \ sensibles doivent \xEAtre chiffr\xE9s.\nRecommandation :\nIl est recommand\xE9\
+        \ de recourir aux outils de chiffrements agr\xE9\xE9s par l'ANSSI."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:act-08
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3:4
+      ref_id: ACT-08
+      name: Supports physiques en transit
+      description: "R\xE8gle : \nL'entit\xE9 doit \xE9laborer et appliquer une proc\xE9\
+        dure permettant de g\xE9rer les mouvements de supports stockant des donn\xE9\
+        es. Cette proc\xE9dure doit garantir la tra\xE7abilit\xE9 du mouvement des\
+        \ supports et leur protection durant le transit."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:act-09
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.3:4
+      ref_id: ACT-09
+      name: Reforme (cession ou vente) des passifs du SI/Mise au rebut
+      description: "R\xE8gle : \nL'entit\xE9 doit s'assurer que les mat\xE9riels et\
+        \ \xE9quipements informatiques \xE9ligibles aux r\xE9formes sont proprement\
+        \ d\xE9commissionn\xE9s. La mise au rebut des supports physiques num\xE9riques\
+        \ (CD, DVD, disque dur, etc.) ne pourra se faire qu'une fois les donn\xE9\
+        es qui y sont stock\xE9es sont d\xE9truites de mani\xE8re s\xE9curis\xE9e.\
+        \ Une proc\xE9dure d'effacement s\xE9curis\xE9e des donn\xE9es doit \xEAtre\
+        \ mise en place."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.4
+      assessable: false
+      depth: 1
+      ref_id: '4.4'
+      name: "Contr\xF4le d'acc\xE8s logique au syst\xE8me d'information"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.4:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.4
+      name: OBJECTIF 7
+      description: "Limiter l'acc\xE8s aux SI aux seules personnes autoris\xE9es."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cal-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.4:1
+      ref_id: CAL-01
+      name: "Politique de contr\xF4le d'acc\xE8s"
+      description: "R\xE8gle : \nUn document de politique de contr\xF4le d'acc\xE8\
+        s logique doit \xEAtre \xE9tabli au sein de l'entit\xE9 en prenant en compte,\
+        \ \xE0 minima, la d\xE9finition des identit\xE9s, la standardisation des profils\n\
+        d'habilitation, la normalisation des identifiants, la gestion des autorisations,\
+        \ les conditions d'acc\xE8s au SI, d\xE9lais de validit\xE9 des comptes, des\
+        \ sessions, \u2026"
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cal-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.4:1
+      ref_id: CAL-02
+      name: Identifiant utilisateur
+      description: "R\xE8gle : \nChaque utilisateur interne ou externe \xE0 l'entit\xE9\
+        , permanent ou temporaire, acc\xE9dant au syst\xE8me d'information doit \xEA\
+        tre reconnu par une identit\xE9 unique et norm\xE9e. L'utilisation par plusieurs\
+        \ personnes d'un m\xEAme identifiant individuel est strictement interdite."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cal-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.4:1
+      ref_id: CAL-03
+      name: Identifiant administrateur
+      description: "Les identifiants \xAB administrateurs \xBB donnant acc\xE8s aux\
+        \ composants techniques ou logiques des syst\xE8mes d'information (serveurs,\
+        \ \xE9quipements de communication, param\xE8tres techniques ou de s\xE9curit\xE9\
+        ) doivent \xEAtre distincts des identifiants \xAB utilisateurs \xBB attribu\xE9\
+        s au personnel assurant l'administration desdits syst\xE8mes."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cal-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.4:1
+      ref_id: CAL-04
+      name: Authentifiant utilisateur
+      description: "R\xE8gle : \nChaque utilisateur acc\xE9dant au syst\xE8me d'information\
+        \ doit prouver son identit\xE9 \xE0 l'aide d'un authentifiant bas\xE9 sur\
+        \ ce qu'il conna\xEEt (code secret). La proc\xE9dure de fourniture d'un authentifiant\
+        \ \xE0 un utilisateur (premi\xE8re attribution, modification, remplacement\
+        \ apr\xE8s oubli ou perte, ...) doit en garantir la confidentialit\xE9 (v\xE9\
+        rification syst\xE9matique de l'identit\xE9 du demandeur et du destinataire\
+        \ \xE0 partir d'\xE9l\xE9ments personnels, fiables et pr\xE9cis)."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cal-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.4:1
+      ref_id: CAL-05
+      name: Authentifiant administrateur
+      description: "R\xE8gle : \nLes identifiants permettant l'administration des\
+        \ SI (serveurs, bases de donn\xE9es, \xE9quipements r\xE9seaux, ...) doivent\
+        \ \xEAtre plac\xE9s sous s\xE9questre dans un endroit s\xE9curis\xE9 \xE0\
+        \ l'instar d'un coffre-fort. L'entit\xE9 d\xE9finira une proc\xE9dure de gestion\
+        \ des acc\xE8s de ces identifiants."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cal-06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.4:1
+      ref_id: CAL-06
+      name: "Enregistrement et d\xE9sinscription des utilisateurs"
+      description: "R\xE8gle : \nUne proc\xE9dure formelle de cr\xE9ation et de suspension\
+        \ des identifiants doit \xEAtre d\xE9finie et appliqu\xE9e au sein de l'entit\xE9\
+        . Ladite proc\xE9dure devra inclure, \xE0 minima, les actions suivantes :\
+        \ cr\xE9ation d'identifiants uniques, d\xE9tection et suppression p\xE9riodique\
+        \ des identifiants\nredondants, suppression ou blocage imm\xE9diat des droits\
+        \ d'acc\xE8s des utilisateurs qui ont chang\xE9 de r\xF4le ou de fonction\
+        \ ou qui ont quitt\xE9 l'entit\xE9."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cal-07
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.4:1
+      ref_id: CAL-07
+      name: "Ma\xEEtrise des acc\xE8s utilisiteurs"
+      description: "R\xE8gle : \nUne proc\xE9dure formelle de cr\xE9ation, de revue\
+        \ et de suspension des droits d'acc\xE8s aux SI doit \xEAtre d\xE9finie et\
+        \ appliqu\xE9e au sein de l'entit\xE9. Ladite proc\xE9dure devra inclure,\
+        \ \xE0 minima, les actions suivantes : demande de droits d'acc\xE8s d'un utilisateur,\
+        \ cha\xEEne de validation de la demande, octroi, engagement de l'utilisateur,\
+        \ mise en service des droits d'acc\xE8s, revue p\xE9riodique de l'utilisation\
+        \ des droits, suspension, \u2026"
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cal-08
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.4:1
+      ref_id: CAL-08
+      name: Politique de mot de passe
+      description: "R\xE8gle : \nL'entit\xE9 doit d\xE9finir et impl\xE9menter au\
+        \ sein de ses syst\xE8mes d'information une politique de gestion des mots\
+        \ de passe utilisateur (complexit\xE9, dur\xE9e de vie minimale et maximale\
+        \ des mots de passe, ant\xE9riorit\xE9 des mots de passe,...)."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.5
+      assessable: false
+      depth: 1
+      ref_id: '4.5'
+      name: "S\xE9curit\xE9 physique des locaux et mat\xE9riels abritant les actifs\
+        \ SI"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.5:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5
+      name: OBJECTIF 8
+      description: "Identifier les actifs du syst\xE8me d'information de l'entit\xE9\
+        \ et s'assurer que les responsabilit\xE9s sont d\xE9finies pour la protection\
+        \ des actifs."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:phy-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5:1
+      ref_id: PHY-01
+      name: "P\xE9rim\xE8tre de s\xE9curit\xE9"
+      description: "R\xE8gle : \nTous les \xE9quipements qui sont r\xE9pertori\xE9\
+        s comme importants ou vitaux pour l'entit\xE9 doivent \xEAtre install\xE9\
+        s dans des locaux s\xFBrs. Ces locaux doivent \xEAtre prot\xE9g\xE9s contre\
+        \ l'acc\xE8s de personnes non autoris\xE9es et donc a fortiori aux personnes\
+        \ \xE9trang\xE8res."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:phy-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5:1
+      ref_id: PHY-02
+      name: "Contr\xF4le physique des acc\xE8s du personnel"
+      description: "R\xE8gle : \nSeules les personnes autoris\xE9es \xE0 p\xE9n\xE9\
+        trer dans les locaux abritant les SI de l'entit\xE9 doivent disposer de droits\
+        \ d'acc\xE8s physiques permanents. L'entit\xE9 d\xE9finira \xE0 cet effet\
+        \ une proc\xE9dure de gestion des habilitations physiques encadrant l'octroi,\
+        \ la revue et la suspension desdites habilitations."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:phy-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5:1
+      ref_id: PHY-03
+      name: Locaux sensibles
+      description: "R\xE8gle : \nSeules les personnes autoris\xE9es \xE0 p\xE9n\xE9\
+        trer dans les locaux abritant les SI de l'entit\xE9 doivent disposer de droits\
+        \ d'acc\xE8s physiques permanents. L'entit\xE9 d\xE9finira \xE0 cet effet\
+        \ une proc\xE9dure de gestion des habilitations physiques encadrant l'octroi,\
+        \ la revue et la suspension desdites habilitations.L'entit\xE9 doit impl\xE9\
+        menter un syst\xE8me de contr\xF4le d'acc\xE8s individualis\xE9 aux locaux\
+        \ sensibles permettant de garantir la pr\xE9cision de la tra\xE7abilit\xE9\
+        \ des acc\xE8s (date, heure, ...)."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:phy-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5:1
+      ref_id: PHY-04
+      name: "Acc\xE8s des visiteurs"
+      description: "R\xE8gle : \nL'entit\xE9 doit d\xE9finir une proc\xE9dure formelle\
+        \ d'encadrement des visites aux locaux abritant les actifs SI (identification\
+        \ du visiteur, contr\xF4le d'identit\xE9, tra\xE7abilit\xE9 de l'acc\xE8s,\
+        \ ...)."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:phy-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5:1
+      ref_id: PHY-05
+      name: "Protection des ports physiques d'acc\xE8s au r\xE9seau"
+      description: "R\xE8gle : \nTout acc\xE8s r\xE9seau install\xE9 dans une zone\
+        \ d'accueil du public (ou \xE0 usage public) doit \xEAtre filtr\xE9 ou isol\xE9\
+        \ du r\xE9seau informatique priv\xE9 de l'entit\xE9."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:phy-06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5:1
+      ref_id: PHY-06
+      name: "Gestion des cl\xE9s physiques des locaux"
+      description: "R\xE8gle : \nPour des raisons de continuit\xE9 de service, l'usage\
+        \ des cl\xE9s est autoris\xE9 pour l'acc\xE8s aux locaux abritant les actifs\
+        \ SI. Une proc\xE9dure devra \xEAtre formalis\xE9e pour la protection et l'utilisation\
+        \ s\xE9curis\xE9e des cl\xE9s d'acc\xE8s aux locaux abritant les actifs SI."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:phy-07
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5:1
+      ref_id: PHY-07
+      name: Travail dans les locaux abritant les actifs SI
+      description: "R\xE8gle : \nL'entit\xE9 doit r\xE9diger et afficher dans tous\
+        \ les locaux abritant les actifs SI des consignes de s\xE9curit\xE9 destin\xE9\
+        es au personnel qui exploite ces locaux."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.5:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5
+      name: OBJECTIF 9
+      description: "Emp\xEAcher la perte, l'endommagement, le vol, ou la compromission\
+        \ des actifs SI."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:phy-08
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5:2
+      ref_id: PHY-08
+      name: "Emplacement du mat\xE9riel"
+      description: "R\xE8gle : \nLes mat\xE9riels sensibles sont install\xE9s dans\
+        \ des locaux d\xE9di\xE9s munis de syst\xE8me de\nvid\xE9osurveillance, prot\xE9\
+        g\xE9s contre l'acc\xE8s non autoris\xE9, l'incendie et les infiltrations\
+        \ d'eau (par des m\xE9canismes de contr\xF4les et de d\xE9tection tels que\
+        \ verrous, alarmes) et munies des servitudes n\xE9cessaires (alimentation\
+        \ convenablement secourue, climatisation)."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:phy-09
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5:2
+      ref_id: PHY-09
+      name: "Service g\xE9n\xE9raux"
+      description: "R\xE8gle : \nL'ensemble des mat\xE9riels sensibles doit \xEAtre\
+        \ prot\xE9g\xE9 contre les coupures de courant par un onduleur ou un groupe\
+        \ \xE9lectrog\xE8ne."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:phy-10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5:2
+      ref_id: PHY-10
+      name: "S\xE9curit\xE9 du c\xE2blage r\xE9seau"
+      description: "R\xE8gle : \nL'ensemble des c\xE2bles r\xE9seaux doit \xEAtre\
+        \ correctement \xE9tiquet\xE9, c'est-\xE0-dire aux deux extr\xE9mit\xE9s.\
+        \ L'entit\xE9 doit documenter le plan de c\xE2blage du r\xE9seau informatique\
+        \ et s'assurer que le c\xE2blage r\xE9seau est \xE0 l'abri des endommagements\
+        \ (travaux de voirie, ...)."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:phy-11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5:2
+      ref_id: PHY-11
+      name: "Maintenance du mat\xE9riel"
+      description: "R\xE8gle : \nPour les actifs SI vitaux, un contrat de maintenance\
+        \ doit \xEAtre conclu avec un d\xE9lai d'intervention ou de remplacement garanti,\
+        \ compatible avec les besoins de disponibilit\xE9 et d'int\xE9grit\xE9 de\
+        \ ces actifs."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:phy-12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.5:2
+      ref_id: PHY-12
+      name: "Sortie du mat\xE9riel"
+      description: "R\xE8gle : \nAucun mat\xE9riel contenant des donn\xE9es de l'entit\xE9\
+        \ ne doit sortir hors de ses locaux sans autorisation pr\xE9alable d\xFBment\
+        \ sign\xE9e par les responsables habilit\xE9s. L'entit\xE9 encadre cette mesure\
+        \ par une proc\xE9dure formelle garantissant la tra\xE7abilit\xE9 des sorties\
+        \ de mat\xE9riel."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.6
+      assessable: false
+      depth: 1
+      ref_id: '4.6'
+      name: "S\xE9curit\xE9 des r\xE9seaux informatiques"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.6:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.6
+      name: OBJECTIF 10
+      description: "Garantir la protection de l'information sur les r\xE9seaux informatiques\
+        \ de l'entit\xE9."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:resx-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.6:1
+      ref_id: RESX-01
+      name: "Architecture r\xE9seau"
+      description: "R\xE8gle :\nL'architecture r\xE9seau du syst\xE8me d'information\
+        \ doit \xEAtre d\xE9crite et formalis\xE9e \xE0 travers des sch\xE9mas d'architecture,\
+        \ et des configurations, mis \xE0 jour au fil des \xE9volutions apport\xE9\
+        es au SI.\nRecommandation :\nIl est recommand\xE9 de conserver les sch\xE9\
+        mas d'architecture et les fichiers de configuration dans des r\xE9pertoires\
+        \ s\xE9curis\xE9s."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:resx-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.6:1
+      ref_id: RESX-02
+      name: "Cloisonment r\xE9seau"
+      description: "R\xE8gle : \nAfin de r\xE9duire les risques d'interception de\
+        \ donn\xE9es, de compromission virale et d'augmenter les performances, les\
+        \ diff\xE9rents r\xE9seaux informatiques de l'entit\xE9 devront \xEAtre cloisonn\xE9\
+        s en fonction des besoins m\xE9tiers et en diff\xE9rentes zones r\xE9seaux\
+        \ (zone de confiance dont la s\xE9curit\xE9 est r\xE9put\xE9e ad\xE9quate,\
+        \ zone d'administration, zone utilisateur, ...)."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:resx-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.6:1
+      ref_id: RESX-03
+      name: "Contr\xF4le sur les r\xE9seaux"
+      description: "R\xE8gle : \nL'ensemble des flux entrants et sortants d'une zone\
+        \ r\xE9seau \xE0 une autre, doit \xEAtre contr\xF4l\xE9 et analys\xE9 afin\
+        \ de prot\xE9ger les ressources h\xE9berg\xE9es contre les tentatives d'attaque\
+        \ et les codes malveillants."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:resx-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.6:1
+      ref_id: RESX-04
+      name: "Ma\xEEtrise des flux"
+      description: "R\xE8gle : \nL'entit\xE9 doit \xE9tablir et maintenir \xE0 jour\
+        \ les matrices de flux au niveau de chaque \xE9quipement de filtrage (pare-feu,\
+        \ routeur, ...). Aucun flux ne peut \xEAtre impl\xE9ment\xE9 en dehors des\
+        \ matrices de flux d\xFBment valid\xE9es. Les flux doivent \xEAtre r\xE9guli\xE8\
+        rement revus dans le cadre d'une proc\xE9dure formelle \xE9tablie par l'entit\xE9\
+        ."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:resx-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.6:1
+      ref_id: RESX-05
+      name: "Configuration des \xE9quipements r\xE9seaux"
+      description: "R\xE8gle : \nLes configurations op\xE9rationnelles des \xE9quipements\
+        \ de communication et filtrage doivent \xEAtre durcies notamment par rapport\
+        \ aux versions natives des fournisseurs par le changement des mots de passe\
+        \ et certificats, et la fermeture des services et des ports non n\xE9cessaires."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:resx-06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.6:1
+      ref_id: RESX-06
+      name: "Acc\xE8s distants"
+      description: "R\xE8gle : \nL'acc\xE8s d'utilisateurs distants ne doit \xEAtre\
+        \ r\xE9alisable que par des personnes autoris\xE9es et bien d\xE9finies par\
+        \ l'entit\xE9. Des mesures d'authentification fortes par l'usage de protocoles\
+        \ s\xE9curis\xE9s pour ce type de connexions sont n\xE9cessaires lors d'\xE9\
+        changes sensibles."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:resx-07
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.6:1
+      ref_id: RESX-07
+      name: "Services g\xE9n\xE9raux"
+      description: "R\xE8gle :\nLe d\xE9ploiement du r\xE9seau sans fil doit \xEA\
+        tre limit\xE9 et doit faire l'objet d'une \xE9tude de s\xE9curit\xE9 sp\xE9\
+        cifique.\nRecommandation :\nIl est fortement conseill\xE9 de cloisonner le\
+        \ r\xE9seau sans fil du reste du r\xE9seau : une passerelle ma\xEEtris\xE9\
+        e doit \xEAtre mise en place permettant de tracer les acc\xE8s et de restreindre\
+        \ les \xE9changes aux seuls flux n\xE9cessaires."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:resx-08
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.6:1
+      ref_id: RESX-08
+      name: "Interconnexion avec les r\xE9seaux externes"
+      description: "R\xE8gle : \nUn inventaire exact de l'ensemble des interconnexions\
+        \ avec les r\xE9seaux externes doit \xEAtre tenu \xE0 jour. Une zone d'\xE9\
+        change permettant de relayer les flux et d'\xE9viter des communications directes\
+        \ entre les r\xE9seaux externes et le r\xE9seau interne de l'entit\xE9 doit\
+        \ \xEAtre d\xE9finie (proxy, antivirus, ...). Les interconnexions entre administrations,\
+        \ syst\xE8mes et autres structures de l'Etat doivent se faire via le bus d'interop\xE9\
+        rabilit\xE9 X-ROAD.bj."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:resx-09
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.6:1
+      ref_id: RESX-09
+      name: "Connexion des \xE9quipements au r\xE9seau"
+      description: "R\xE8gle : \nSeuls les \xE9quipements ma\xEEtris\xE9s (configur\xE9\
+        s par l'entit\xE9 ou respectant sa politique de s\xE9curit\xE9) peuvent \xEA\
+        tre connect\xE9s au SI de l'entit\xE9."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.7
+      assessable: false
+      depth: 1
+      ref_id: '4.7'
+      name: "S\xE9curit\xE9 du poste de travail utilisateur"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.7:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.7
+      name: OBJECTIF 11
+      description: "Fournir aux utilisateurs, des postes de travail s\xE9curis\xE9\
+        s pour leurs activit\xE9s professionnelles."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.7:1
+      ref_id: PDT-01
+      name: Attribution, usage et restitution
+      description: "R\xE8gle : \nLe processus d'attribution des postes de travail\
+        \ doit \xEAtre formalis\xE9 et contr\xF4l\xE9. Ce processus devra prendre\
+        \ en compte la demande, l'affectation et une d\xE9charge de l'utilisateur."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.7:1
+      ref_id: PDT-02
+      name: "Privil\xE8ges sur les postes"
+      description: "R\xE8gle : \nLes utilisateurs ne doivent pas avoir, par d\xE9\
+        faut, les droits administrateurs sur leur poste de travail. Chaque utilisateur\
+        \ ne doit disposer que des privil\xE8ges n\xE9cessaires \xE0 la conduite des\
+        \ actions relevant de sa mission. Un contr\xF4le automatis\xE9 doit \xEAtre\
+        \ r\xE9guli\xE8rement r\xE9alis\xE9 sur les postes de travail en utilisant\
+        \ les outils de gestion de parc afin de v\xE9rifier qu'un utilisateur n'ait\
+        \ pas de permissions auxquelles il n'aurait pas droit."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.7:1
+      ref_id: PDT-03
+      name: Configuration des postes de travail
+      description: "R\xE8gle :\nLes postes de travail sont d\xE9ploy\xE9s conform\xE9\
+        ment \xE0 des param\xE9trages standardis\xE9s et s\xE9curis\xE9s, d\xE9finis\
+        \ par l'entit\xE9 (changement de mot de passe par d\xE9faut, d\xE9sactivation\
+        \ des services inutiles, configuration BIOS prot\xE9g\xE9 par mot de passe,\
+        \ protection antivirale, programmation des mises \xE0 jour, verrouillage des\
+        \ sessions, .). L'utilisateur ne doit pas \xEAtre en mesure de modifier les\
+        \ param\xE8tres de s\xE9curit\xE9 du poste de travail.\nRecommandation :\n\
+        L'entit\xE9 peut centraliser la gestion des\nparametres de s\xE9curit\xE9\
+        \ et faire recours aux guides de durcissement pr\xE9conis\xE9s par l'ANSSI."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.7:1
+      ref_id: PDT-04
+      name: "Installation des composants logiciels et mat\xE9riels"
+      description: "Seuls les composants logiciels ou mat\xE9riels valid\xE9s peuvent\
+        \ \xEAtre install\xE9s sur les postes de travail de l'entit\xE9. L'entit\xE9\
+        \ doit veiller \xE0 ce que tout composant logiciel ou mat\xE9riel \xE0 installer\
+        \ fasse l'objet d'une acquisition de licences d'utilisation s'il y est soumis."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.7:1
+      ref_id: PDT-05
+      name: Partage des fichiers
+      description: "R\xE8gle :\nLe partage de r\xE9pertoires ou de donn\xE9es h\xE9\
+        berg\xE9es localement sur les postes de travail n'est pas autoris\xE9.\nRecommandation\
+        \ :\nIl est recommand\xE9 de r\xE9aliser le partage de fichiers entre les\
+        \ utilisateurs par l'interm\xE9diaire des espaces partag\xE9s mis \xE0 disposition\
+        \ par les administrateurs."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.7:1
+      ref_id: PDT-06
+      name: "Sauvegarde des donn\xE9es"
+      description: "R\xE8gle : \nDans le cas o\xF9 des donn\xE9es doivent \xEAtre\
+        \ stock\xE9es en local sur le poste de travail, des moyens de synchronisation\
+        \ ou de sauvegarde doivent \xEAtre fournis aux utilisateurs. Les disques de\
+        \ stockage en local doivent \xEAtre chiffr\xE9s avec des outils de confiance."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-07
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.7:1
+      ref_id: PDT-07
+      name: "R\xE9affectation d'un poste de travail d\xE9j\xE0 utilis\xE9"
+      description: "R\xE8gle : \nL'entit\xE9 d\xE9finit une proc\xE9dure concernant\
+        \ le traitement \xE0 appliquer aux informations ayant \xE9t\xE9 stock\xE9\
+        es ou manipul\xE9es sur les postes r\xE9affect\xE9s."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-08
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.7:1
+      ref_id: PDT-08
+      name: "Utilisation des \xE9quipements personnels (BYOD)"
+      description: "R\xE8gle : \nL'entit\xE9 d\xE9finit une politique d'utilisation\
+        \ des appareils mobiles personnels dans le cadre d'activit\xE9s professionnelles.\
+        \ Ces appareils doivent \xEAtre soumis aux r\xE8gles de s\xE9curit\xE9 \xE9\
+        dict\xE9es au sein de l'entit\xE9."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:pdt-09
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.7:1
+      ref_id: PDT-09
+      name: Chiffrement des postes de travail
+      description: "R\xE8gle : \nLes unit\xE9s de stockages des postes de travail\
+        \ doivent \xEAtre syst\xE9matiquement chiffr\xE9es de sorte que les donn\xE9\
+        es soient illisibles ou inaccessibles tant que le syst\xE8me d'exploitation\
+        \ n'est pas d\xE9marr\xE9."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.8
+      assessable: false
+      depth: 1
+      ref_id: '4.8'
+      name: "S\xE9curit\xE9 des \xE9quipements itin\xE9rants"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.8:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.8
+      name: OBJECTIF 12
+      description: "Prot\xE9ger l'information stock\xE9e sur des \xE9quipements nomades."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:itin-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.8:1
+      ref_id: ITIN-01
+      name: "Stockage des donn\xE9es sensibles"
+      description: "R\xE8gle : \nLe stockage local d'information sur les postes de\
+        \ travail nomades doit \xEAtre limit\xE9 au strict n\xE9cessaire. Les informations\
+        \ sensibles doivent \xEAtre obligatoirement chiffr\xE9es par un moyen de chiffrement\
+        \ agr\xE9\xE9 par l'ANSSI."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:itin-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.8:1
+      ref_id: ITIN-02
+      name: "Filtre de confidentialit\xE9"
+      description: "R\xE8gle : \nPour les postes de travail nomades manipulant des\
+        \ donn\xE9es sensibles, un filtre de confidentialit\xE9 doit \xEAtre fourni\
+        \ et \xEAtre positionn\xE9 sur l'\xE9cran d\xE8s lors que le poste est utilis\xE9\
+        \ en dehors de l'entit\xE9."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:itin-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.8:1
+      ref_id: ITIN-03
+      name: Pare-feu local
+      description: "R\xE8gle : \nUn pare-feu local conforme aux recommandations de\
+        \ l'ANSSI doit \xEAtre install\xE9 sur les postes nomades."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:itin-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.8:1
+      ref_id: ITIN-04
+      name: Protection physique
+      description: "R\xE8gle : \nUn c\xE2ble physique de s\xE9curit\xE9 doit \xEA\
+        tre fourni avec chaque poste portable."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:itin-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.8:1
+      ref_id: ITIN-05
+      name: Incident de perte/vol
+      description: "R\xE8gle : \nL'entit\xE9 doit d\xE9finir une proc\xE9dure de r\xE9\
+        action d'urgence en cas d'incident de vol ou de perte des \xE9quipements itin\xE9\
+        rants."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.9
+      assessable: false
+      depth: 1
+      ref_id: '4.9'
+      name: "S\xE9curit\xE9 li\xE9e \xE0 l'exploitation des SI"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9
+      name: OBJECTIF 13
+      description: "Assurer l'exploitation correcte et s\xE9curis\xE9e des SI et g\xE9\
+        rer les actions d'administration du SI."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:exp-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      ref_id: EXP-01
+      name: "Proc\xE9dures d'exploitation"
+      description: "R\xE8gle : \nChaque entit\xE9 doit documenter les proc\xE9dures\
+        \ d'exploitation des SI, les rendre disponibles, les expliquer \xE0 toute\
+        \ personne ayant besoin d'en conna\xEEtre et les maintenir \xE0 jour. Ces\
+        \ proc\xE9dures incluent \xE0 minima : l'administration et la s\xE9curisation\
+        \ des actifs SI, les sauvegardes des fichiers de configuration, les mises\
+        \ \xE0 jour et application des correctifs de s\xE9curit\xE9, l'exploitation\
+        \ des locaux techniques."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:exp-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      ref_id: EXP-02
+      name: "Acc\xE8s aux outils et interfaces d'administration"
+      description: "R\xE8gle : \nL'acc\xE8s aux outils et interfaces d'administration\
+        \ doit \xEAtre strictement limit\xE9 aux personnes habilit\xE9es, selon une\
+        \ proc\xE9dure formelle d'autorisation d'acc\xE8s."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:exp-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      ref_id: EXP-03
+      name: "Administration \xE0 distance"
+      description: "R\xE8gle : \nLes actions d'administration \xE0 distance sur les\
+        \ composants locaux du SI doivent s'appuyer sur des protocoles d'administration\
+        \ s\xE9curis\xE9s."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:exp-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      ref_id: EXP-04
+      name: "Configuration syst\xE8me"
+      description: "R\xE8gle : \nLes syst\xE8mes d'exploitation et les logiciels doivent\
+        \ \xEAtre configur\xE9s et mis \xE0 jour selon des proc\xE9dures formalis\xE9\
+        es (tests de non-r\xE9gression, compatibilit\xE9 avec les logiciels m\xE9\
+        tiers, etc.)."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:exp-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      ref_id: EXP-05
+      name: Dimensionnement
+      description: "R\xE8gle : \nDes analyses r\xE9guli\xE8res du bon dimensionnement\
+        \ des syst\xE8mes et des r\xE9seaux (capacit\xE9 m\xE9moire, bande passante,\
+        \ temps de r\xE9ponse, ...) doivent \xEAtre r\xE9alis\xE9es dans le but de\
+        \ mener les actions de redimensionnement am\xE9liorant la disponibilit\xE9\
+        \ du SI."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:exp-06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      ref_id: EXP-06
+      name: Protection contre les codes malveillants
+      description: "Regle :\nL'entit\xE9 doit formaliser et mettre en \u0153uvre une\
+        \ politique de lutte antivirale qui stipule les mesures de pr\xE9vention,\
+        \ de d\xE9tection et de r\xE9action en cas d'infections virales. En r\xE8\
+        gle\n g\xE9n\xE9rale, une solution antivirus ou Endpoint Detection and Response\
+        \ doit \xEAtre install\xE9e sur chaque composant du Sl (postes de travail,\
+        \ portables, serveurs, passerelles, ...).\nRecommandation :\nIl est recommand\xE9\
+        \ l'utilisation de solutions centralis\xE9es pour la gestion antivirale."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:exp-07
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      ref_id: EXP-07
+      name: Utilisation de la messagerie personnelle et professionnelle
+      description: "R\xE8gle : \nLe syst\xE8me de messagerie professionnelle mis en\
+        \ place par l'entit\xE9 est le seul autoris\xE9 dans le cadre des activit\xE9\
+        s professionnelles. L'utilisation des courriels personnels (Gmail, Yahoo,\
+        \ Hotmail...) est interdite."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:exp-08
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      ref_id: EXP-08
+      name: "Sauvegarde des donn\xE9es"
+      description: "R\xE8gle : \nChaque entit\xE9 doit mettre en place des proc\xE9\
+        dures de sauvegarde qui pr\xE9cisent pour chaque syst\xE8me d'information\
+        \ la nature des sauvegardes, la fr\xE9quence, le type de support, le calendrier\
+        \ des tests de restauration. Les supports de sauvegarde doivent \xEAtre prot\xE9\
+        g\xE9s physiquement (coffre-fort).Le syst\xE8me de messagerie professionnelle\
+        \ mis en place par l'entit\xE9 est le seul autoris\xE9 dans le cadre des activit\xE9\
+        s professionnelles. L'utilisation des courriels personnels (Gmail, Yahoo,\
+        \ Hotmail...) est interdite."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:exp-09
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      ref_id: EXP-09
+      name: "Journalisation des \xE9v\xE8nements s\xE9curit\xE9"
+      description: "R\xE8gle : \nDes m\xE9canismes permettant de surveiller l'utilisation\
+        \ des SI et de r\xE9examiner p\xE9riodiquement les r\xE9sultats des activit\xE9\
+        s de surveillance doivent \xEAtre impl\xE9ment\xE9s. Le niveau de surveillance\
+        \ requis pour chaque syst\xE8me est d\xE9termin\xE9 par le biais d'une appr\xE9\
+        ciation du risque. Par ailleurs, toutes les activit\xE9s de surveillance devront\
+        \ \xEAtre r\xE9alis\xE9es dans le respect des exigences l\xE9gales applicables."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:exp-10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      ref_id: EXP-10
+      name: Synchronisation des horloges
+      description: "Regle :\nLes serveurs et \xE9quipements r\xE9seaux doivent \xE9\
+        tre synchronis\xE9s sur la m\xEAme base de temps.\nRecommandation :\nIl est\
+        \ recommand\xE9 d'utiliser le service TSA de la PKI nationale."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:exp-11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      ref_id: EXP-11
+      name: "Mesures relatives aux vuln\xE9rabilit\xE9s techniques"
+      description: "R\xE8gle :\nDes \xE9tudes de vuln\xE9rabilit\xE9s syst\xE8me et\
+        \ applicative (scans des syst\xE8mes et des r\xE9seaux, tests d'intrusion)\
+        \ doivent \xEAtre p\xE9riodiquement men\xE9es.\nCela n\xE9cessite une attention\
+        \ permanente sur les bulletins publi\xE9s par l'ANSSI.\nRecommandation:\n\
+        L'entit\xE9 peut recourir aux services des Fournisseurs de Services de S\xE9\
+        curit\xE9 Num\xE9rique Qualifi\xE9s (FSSNQ) dont la liste est publi\xE9e par\
+        \ l'ANSSI."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:exp-12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.9:1
+      ref_id: EXP-12
+      name: "Surveillance des  \xE9v\xE8nements s\xE9curit\xE9"
+      description: "R\xE8gle : \nLes actifs critiques (serveurs, routeurs de t\xEA\
+        te, pares-feux etc..) doivent \xEAtre constamment supervis\xE9s. Pour certains\
+        \ SI et sous le contr\xF4le de l'ANSSI, des sondes de supervision doivent\
+        \ \xEAtre pos\xE9es \xE0 des endroits cl\xE9s du syst\xE8me d'information\
+        \ de l'entit\xE9 et les \xE9v\xE9nements y relatifs remont\xE9s \xE0 un centre\
+        \ d'expertise."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.10
+      assessable: false
+      depth: 1
+      ref_id: '4.10'
+      name: " S\xE9curit\xE9 dans l'acquisition, le d\xE9veloppement et la maintenance\
+        \ des SI"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.10:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.10
+      name: OBJECTIF 14
+      description: "Int\xE9grer la s\xE9curit\xE9 dans le cycle de vie des syst\xE8\
+        mes d'information qu'ils soient acquis ou d\xE9velopp\xE9s par l'entit\xE9\
+        ."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:adm-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.10:1
+      ref_id: ADM-01
+      name: "S\xE9curit\xE9 dans les projets"
+      description: "R\xE8gle :\nLa s\xE9curit\xE9 doit \xEAtre int\xE9gr\xE9e \xE0\
+        \ toutes les \xE9tapes du cycle de vie du projet, depuis l'expression des\
+        \ besoins jusqu'\xE0 la maintenance applicative, en passant par la r\xE9daction\
+        \ du cahier des charges et les phases de recette. L'entit\xE9 doit formaliser\
+        \ une proc\xE9dure dans ce sens.\nRecommandation :\nIl est recommand\xE9 d'int\xE9\
+        grer syst\xE9matiquement le RSSI dans tout projet portant sur les syst\xE8\
+        mes d'information de l'entit\xE9 et de modifier les Framework de gestion de\
+        \ projet pour int\xE9grer les exigences de s\xE9curit\xE9 \xE0 toutes les\
+        \ \xE9tapes d'un projet."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:adm-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.10:1
+      ref_id: ADM-02
+      name: "Sp\xE9cifications s\xE9curit\xE9"
+      description: "R\xE8gle : \nLes cahiers de charges en vue de l'acquisition, du\
+        \ d\xE9veloppement ou de la maintenance des SI devront indiquer syst\xE9matiquement\
+        \ les exigences en mati\xE8re de s\xE9curit\xE9 pour le SI."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:adm-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.10:1
+      ref_id: ADM-03
+      name: Choix des produits
+      description: "R\xE8gle : \nLes progiciels et produits achet\xE9s sont soit certifi\xE9\
+        s soit \xE9valu\xE9s en interne pour v\xE9rifier l'ad\xE9quation avec les\
+        \ mesures et dans le cas contraire, une analyse des risques est conduite pour\
+        \ d\xE9finir les mesures associ\xE9es avant d'acheter ou de rejeter le produit\
+        \ concern\xE9."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:adm-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.10:1
+      ref_id: ADM-04
+      name: "D\xE9veloppement des applications"
+      description: "R\xE8gle :\nLes applications d\xE9velopp\xE9es par l'entit\xE9\
+        \ ne doivent pas comporter des faiblesses qui pourraient compromettre la s\xE9\
+        curit\xE9 de\nl'application elle-m\xEAme ou d'autres syst\xE8mes en production.\n\
+        Recommandation :\nIl est vivement recommand\xE9 de faire recours aux standards\
+        \ internationaux de d\xE9veloppements s\xE9curis\xE9s comme OWASP, guide de\
+        \ l'ANSSI, ..."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:adm-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.10:1
+      ref_id: ADM-05
+      name: "Externalisation du d\xE9veloppement applicatif"
+      description: "R\xE8gle : \nLes fournisseurs externes de logiciels doivent garantir\
+        \ l'int\xE9grit\xE9 de leur code et l'absence de \"portes d\xE9rob\xE9es\"\
+        \ ou de vuln\xE9rabilit\xE9s. Lorsque le logiciel est utilis\xE9 pour une\
+        \ activit\xE9 m\xE9tier en production, et que la p\xE9rennit\xE9 du fournisseur\
+        \ n'est pas garantie, celui-ci doit soit fournir le code source sous licence,\
+        \ soit le placer sous s\xE9questre chez un tiers."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:adm-06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.10:1
+      ref_id: ADM-06
+      name: "Recette s\xE9curit\xE9 (Homologation)"
+      description: "R\xE8gle :\nPar d\xE9faut, avant la mise en production de tout\
+        \ syst\xE8me d\xE9velopp\xE9 ou acquis, des recettes s\xE9curit\xE9 doivent\
+        \ \xEAtre effectu\xE9es et les\nvuln\xE9rabilit\xE9s identifi\xE9es doivent\
+        \ \xEAtre corrig\xE9es apr\xE8s acceptation des risques r\xE9siduels par le\
+        \ sponsor ou le propri\xE9taire du systeme\nd'information.\nRecommandation\
+        \ :\nL'entit\xE9 peut faire appel \xE0 des jeux d'exercice de tests d'intrusion,\
+        \ d'audit de configuration,\nd'architecture, de revue de code source,... ou\
+        \ faire effectuer la recette s\xE9curit\xE9 par un FSSNQ."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:adm-07
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.10:1
+      ref_id: ADM-07
+      name: "Donn\xE9es de test"
+      description: "R\xE8gle :\nEn r\xE8gle g\xE9n\xE9rale, les donn\xE9es utilis\xE9\
+        es comme jeu d'essais pour les applications ne peuvent \xEAtre des donn\xE9\
+        es r\xE9elles. En cas de s\xE9lection de donn\xE9es r\xE9elles comme donn\xE9\
+        es d'essai, l'entit\xE9 doit d\xE9finir des dispositions emp\xEAchant la divulgation\
+        \ de ces donn\xE9es et garantissant leur destruction dans les environnements\
+        \ de test une fois les tests achev\xE9s.\nRecommandation:\nIl est recommand\xE9\
+        \ de proc\xE9der si techniquement faisable \xE0 l'anonymisation des donn\xE9\
+        es r\xE9elles dans les environnements de test."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:adm-08
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.10:1
+      ref_id: ADM-08
+      name: "Collecte et traitement des donn\xE9es \xE0 caract\xE8re personnel"
+      description: "R\xE8gle : \nLes entit\xE9s doivent se r\xE9f\xE9rer \xE0 l'APDP\
+        \ dans le cadre de toute activit\xE9 n\xE9cessitant la collecte et le traitement\
+        \ des donn\xE9es \xE0 caract\xE8re personnel."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.11
+      assessable: false
+      depth: 1
+      ref_id: '4.11'
+      name: "S\xE9curit\xE9 des e-services"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.11:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.11
+      name: OBJECTIF 15
+      description: "S\xE9curiser les informations impliqu\xE9es dans les applications\
+        \ de e-services."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:esv-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.11:1
+      ref_id: ESV-01
+      name: "S\xE9curit\xE9 des services d'application en ligne"
+      description: "R\xE8gle :\nToute plateforme de e-services doit employer des m\xE9\
+        thodes d'authentification s\xE9curis\xE9e pour r\xE9duire les risques gr\xE2\
+        ce \xE0 la cryptographie \xE0 clef publique et aux signatures num\xE9riques\
+        \ offertes par la PKI nationale. Des services de tiers de confiance doivent\
+        \ \xEAtre utilis\xE9s.\nRecommandation:\nLes syst\xE8mes d'authentification\
+        \ de la PKI nationale ou du Portail National des Services\nPublics (PNSP)\
+        \ peuvent \xEAtre utilis\xE9s."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:esv-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.11:1
+      ref_id: ESV-02
+      name: Filtrage applicatif
+      description: "R\xE8gle : \nL'entit\xE9 qui met en \u0153uvre une plateforme\
+        \ de e-services doit faire usage d'une solution tierce de filtrage applicatif."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.12
+      assessable: false
+      depth: 1
+      ref_id: '4.12'
+      name: "S\xE9curit\xE9 des applications Web"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.12:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.12
+      name: OBJECTIF 16
+      description: "S\xE9curiser les applications expos\xE9es sur Internet."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:saw-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.12:1
+      ref_id: SAW-01
+      name: "Evaluation des risques sp\xE9cifiques"
+      description: "R\xE8gle : \nL'entit\xE9 doit identifier et documenter les risques\
+        \ auxquels l'application Web pourrait \xEAtre confront\xE9e, que ce soit sur\
+        \ les biens (infrastructures informatiques, donn\xE9es, etc.) ou sur les fonctions\
+        \ importantes fournies par cette application."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:saw-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.12:1
+      ref_id: SAW-02
+      name: "Exigences de s\xE9curit\xE9 sp\xE9cifiques"
+      description: "R\xE8gle : \nLes exigences de s\xE9curit\xE9 doivent \xEAtre \xE9\
+        labor\xE9es en fonction des sp\xE9cifications de l'application Web \xE0 d\xE9\
+        velopper. En r\xE8gle g\xE9n\xE9rale, doivent \xEAtre consid\xE9r\xE9es dans\
+        \ tout projet de d\xE9veloppement d'une application Web, les aspects suivants\
+        \ :\n- Gestion des entr\xE9es et sorties\n- Gestion des sessions\n- Authentification\n\
+        - Contr\xF4le d'acc\xE8s\n- Gestion des erreurs\n- Connexions aux syst\xE8\
+        mes externes\n- Journalisation\n- Chiffrement"
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:saw-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.12:1
+      ref_id: SAW-03
+      name: "Utilisation des outils de d\xE9veloppement des applications et sites\
+        \ web"
+      description: "R\xE8gle : \nL'entit\xE9 doit veiller \xE0 la prise en compte\
+        \ des exigences minimales ci-dessous dans le d\xE9veloppement de ses applications\
+        \ et sites web.\n- Utiliser les gestionnaires de contenu (CMS) de fa\xE7on\
+        \ s\xE9curis\xE9e en suivant le guide publi\xE9 par l'ANSSI ;\n- Privil\xE9\
+        gier l'utilisation de r\xE9f\xE9rentiels (frameworks) recommand\xE9s par l'ANSSI\
+        \ ou l'ASSI ;\n- Eviter au maximum l'utilisation de plugins externes ;\n-\
+        \ Toujours utiliser la derni\xE8re version des outils de d\xE9veloppement."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:saw-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.12:1
+      ref_id: SAW-04
+      name: "Donn\xE9es en transit"
+      description: "R\xE8gle : \nLe protocole SSL doit \xEAtre utilis\xE9 \xE0 tous\
+        \ les niveaux de l'application. En cas de contraintes ou de limitation d'utilisation\
+        \ de ce protocole, il doit \xEAtre appliqu\xE9 \xE0 toutes les pages d'authentification\
+        \ ainsi que toutes les pages une fois que l'utilisateur est authentifi\xE9\
+        ."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:saw-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.12:1
+      ref_id: SAW-05
+      name: Certificats SSL
+      description: "R\xE8gle : \nL'entit\xE9 doit avoir recours \xE0 des certificats\
+        \ SSL valid\xE9s par une autorit\xE9 de certification reconnue par l'ANSSI.\
+        \ Le nom sur le certificat doit correspondre au nom complet du domaine du\
+        \ site et la date d'expiration du certificat doit \xEAtre encore valide. En\
+        \ fonction du type d'usage, un certificat de validation de domaine de validation\
+        \ d'organisation ou de validation \xE9tendue peut \xEAtre requis."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:saw-06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.12:1
+      ref_id: SAW-06
+      name: Pages d'erreur
+      description: "R\xE8gle : \nToutes les pages d'erreurs doivent \xEAtre personnalis\xE9\
+        es de fa\xE7on \xE0 ne divulguer aucune information qui puisse aider un hacker."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:saw-07
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.12:1
+      ref_id: SAW-07
+      name: "Infrastructure d'h\xE9bergement"
+      description: "R\xE8gle : \nL'infrastructure pr\xE9vue pour h\xE9berger l'application\
+        \ Web doit \xEAtre durcie (serveur Web d\xE9di\xE9, services inutiles d\xE9\
+        sactiv\xE9s, comptes par d\xE9faut bannis, contr\xF4le d'acc\xE8s aux r\xE9\
+        pertoires, durcissement des syst\xE8mes d'exploitation, mises \xE0 jour r\xE9\
+        guli\xE8res des syst\xE8mes d'exploitation...)."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.13
+      assessable: false
+      depth: 1
+      ref_id: '4.13'
+      name: Mesures cryptographiques
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.13:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.13
+      name: OBJECTIF 17
+      description: "Garantir l'utilisation correcte et efficace de la cryptographie\
+        \ en vue de prot\xE9ger la confidentialit\xE9, l'authenticit\xE9 et/ou l'int\xE9\
+        grit\xE9 de l'information."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cry-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.13:1
+      ref_id: CRY-01
+      name: Politique cryptographique
+      description: "Regle :\nLorsqu'elle met en oeuvre des fonctions de s\xE9curit\xE9\
+        \ (authentification, signature \xE9lectronique, chiffrement, horodatage) utilisant\
+        \ des m\xE9canismes cryptographiques sur des syst\xE8mes d'information, l'entit\xE9\
+        \ doit r\xE9diger une politique de certification pour chaque fonction de s\xE9\
+        curit\xE9 mise en oeuvre. Elle doit se conformer aux exigences d\xE9finies\
+        \ par la Commission de\nCryptologie de l'ANSSI.\nRecommandation :\nIl est\
+        \ recommand\xE9 de s'inspirer des politiques de certifications types pour\
+        \ l'\xE9laboration des politiques de certification des fonctions de s\xE9\
+        curit\xE9."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cry-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.13:1
+      ref_id: CRY-02
+      name: "Usage des certificats \xE9lctroniques"
+      description: "Regle :\nLorsque l'entit\xE9 recourt \xE0 des certificats \xE9\
+        lectroniques, le niveau de s\xE9curit\xE9 de ces derniers doit \xEAtre proportionn\xE9\
+        \ \xE0 la sensibilit\xE9 des syst\xE8mes d'information mis en oeuvre. Tout\
+        \ syst\xE8me d'information mettant en jeu des donn\xE9es sensibles doit recourir\
+        \ \xE0 des certificats \xE9lectroniques d'un niveau de s\xE9curit\xE9 \xE9\
+        lev\xE9 c'est-\xE0-dire emp\xEAchant toute usurpation d'identit\xE9.\nRecommandation\
+        \ :\nIl est recommand\xE9 de s'inspirer des politiques de s\xE9curit\xE9 des\
+        \ certificats \xE9lectroniques disponibles."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cry-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.13:1
+      ref_id: CRY-03
+      name: "Exigences de s\xE9curit\xE9 sp\xE9cifiques"
+      description: "R\xE8gle : \nL'entit\xE9 doit documenter les proc\xE9dures pour\
+        \ prot\xE9ger la confidentialit\xE9 des cles cryptographiques. Ceci inclut\
+        \ :\n- G\xE9n\xE9ration des cl\xE9s\n- Stockage s\xE9curis\xE9 des cl\xE9\
+        s\n- Distribution s\xE9curis\xE9e des cl\xE9s\n- Activation des cl\xE9s\n\
+        - Changement des cl\xE9s\n- Recouvrement d'une cl\xE9 (en cas de perte, ...)\n\
+        - Destruction des cl\xE9s"
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.14
+      assessable: false
+      depth: 1
+      ref_id: '4.14'
+      name: Relations avec les fournisseurs
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.14:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.14
+      name: OBJECTIF 18
+      description: "Int\xE9grer la s\xE9curit\xE9 dans le cycle de vie des syst\xE8\
+        mes d'information qu'ils soient acquis ou d\xE9velopp\xE9s par l'entit\xE9\
+        ."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:frn-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.14:1
+      ref_id: FRN-01
+      name: Accord de non-divulgation
+      description: "R\xE8gle : \nTout contrat commercial entre l'entit\xE9 et un tiers\
+        \ doit faire l'objet d'une signature syst\xE9matique d'un accord de non-divulgation\
+        \ lorsque des informations de l'entit\xE9 sont susceptibles d'\xEAtre communiqu\xE9\
+        es au tiers."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:frn-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.14:1
+      ref_id: FRN-02
+      name: "Contractualisation des exigences de s\xE9curit\xE9"
+      description: "R\xE8gle : \nToute fourniture de biens et/ou services dans le\
+        \ domaine des SI doit \xEAtre encadr\xE9e par des clauses contractuelles entre\
+        \ l'entit\xE9 et les tiers.\nLe contrat sign\xE9 entre l'entit\xE9 et ces\
+        \ tiers doit refl\xE9ter les exigences de s\xE9curit\xE9 \xE0 la hauteur des\
+        \ risques induits par la relation entre l'entit\xE9 et ces tiers. Les clauses\
+        \ de s\xE9curit\xE9 minimales \xE0 aborder incluent : la responsabilit\xE9\
+        \ du tiers, la prise en compte de la PSSI sp\xE9cifique, les proc\xE9dures\
+        \ d'\xE9changes des donn\xE9es, l'auditabilit\xE9, la r\xE9versibilit\xE9\
+        , la confidentialit\xE9, ..."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:frn-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.14:1
+      ref_id: FRN-03
+      name: "Contr\xF4le des acc\xE8s des intervenants tiers"
+      description: "R\xE8gle : \nUn inventaire des acc\xE8s physiques et/ou logiques\
+        \ \xE0 attribuer aux intervenants du tiers doit \xEAtre \xE9tabli et mis \xE0\
+        \ la disposition du RSSI pour les besoins de contr\xF4le de conformit\xE9\
+        \ avec la PSSI sp\xE9cifique. Ces derniers doivent disposer des acc\xE8s sp\xE9\
+        cifiques sur la base des proc\xE9dures en place au sein de l'entit\xE9."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:frn-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.14:1
+      ref_id: FRN-04
+      name: "Engagement s\xE9curit\xE9 des intervenants tiers"
+      description: "R\xE8gle : \nTout intervenant d'un tiers amen\xE9 \xE0 interf\xE9\
+        rer avec le syst\xE8me d'information de l'entit\xE9 ou l'un des composants\
+        \ de ce dernier signe une charte de s\xE9curit\xE9 dite \xAB Charte Prestataire\xBB\
+        \ qui l'engage individuellement vis-\xE0-vis de l'entit\xE9."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:frn-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.14:1
+      ref_id: FRN-05
+      name: "Surveillance de la s\xE9curit\xE9 li\xE9e aux prestations"
+      description: "R\xE8gle : \nDurant la prestation, les diff\xE9rentes mesures\
+        \ de s\xE9curit\xE9 activ\xE9es doivent faire l'objet d'une journalisation\
+        \ \xE0 des fins d'audit de conformit\xE9 avec la politique de s\xE9curit\xE9\
+        . Les points \xE0 surveiller incluent \xE0 minima : usage des acc\xE8s physiques\
+        \ et logiques octroy\xE9s, respect des consignes de s\xE9curit\xE9, niveaux\
+        \ de service, coop\xE9ration du tiers en mati\xE8re de s\xE9curit\xE9,..."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:frn-06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.14:1
+      ref_id: FRN-06
+      name: Cessation de la relation
+      description: "R\xE8gle : \nTous les actifs SI confi\xE9s au tiers dans le cadre\
+        \ des prestations r\xE9alis\xE9es doivent \xEAtre restitu\xE9s \xE0 la cessation\
+        \ de la relation. Les droits d'acc\xE8s des intervenants tiers aux SI de l'entit\xE9\
+        \ doivent \xEAtre retir\xE9s dans les plus brefs d\xE9lais apr\xE8s la cessation\
+        \ des activit\xE9s li\xE9es \xE0 la prestation."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.15
+      assessable: false
+      depth: 1
+      ref_id: '4.15'
+      name: "S\xE9curit\xE9 du cloud computing"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.15:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.15
+      name: OBJECTIF 19
+      description: " Assurer la s\xE9curit\xE9 des informations h\xE9berg\xE9es dans\
+        \ une infrastructure cloud."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:scc-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.15:1
+      ref_id: SCC-01
+      name: Externalisation dans le cloud
+      description: "R\xE8gle : \nLes processus m\xE9tiers et les services \xE0 externaliser\
+        \ dans une infrastructure cloud doivent \xEAtre identifi\xE9s. Pour chaque\
+        \ processus ou service identifi\xE9, une analyse de risques doit \xEAtre conduite\
+        \ pour \xE9valuer l'impact li\xE9 \xE0 la perte de confidentialit\xE9, d'int\xE9\
+        grit\xE9 et de disponibilit\xE9 des informations impliqu\xE9es. Cette analyse\
+        \ est conduite en liaison avec l'ASSI et l'ANSSI."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:scc-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.15:1
+      ref_id: SCC-02
+      name: "S\xE9lection d'un fournisseur cloud national"
+      description: "R\xE8gle : \nL'entit\xE9 doit donner priorit\xE9 aux Datacenters\
+        \ se trouvant sur le territoire national pour ses besoins d'externalisation."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:scc-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.15:1
+      ref_id: SCC-03
+      name: "S\xE9lection d'un fournisseur cloud non national"
+      description: "R\xE8gle :\nL'entit\xE9 doit veiller \xE0 souscrire \xE0 des services\
+        \ cloud aupr\xE8s de fournisseurs d\xE9montrant des garanties de s\xE9curit\xE9\
+        \ (transparence des traitements, protection des donn\xE9es personnelles, isolement\
+        \ des donn\xE9es, auditabilit\xE9, conformit\xE9 avec les normes de s\xE9\
+        curit\xE9 reconnues, niveaux de services, haute disponibilit\xE9, coop\xE9\
+        ration lors des audits et des investigations, loi sur la protection des donn\xE9\
+        es \xE0 caract\xE8re personnel ...).\nRecommandation :\nIl est recommand\xE9\
+        \ de proc\xE9der \xE0 une \xE9valuation du fournisseur au moyen d'un questionnaire\
+        \ de s\xE9curit\xE9 permettant d'examiner la posture s\xE9curit\xE9 du fournisseur."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:scc-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.15:1
+      ref_id: SCC-04
+      name: Aspect contractuels
+      description: "R\xE8gle : \nUn accord de non-divulgation doit \xEAtre sign\xE9\
+        \ entre l'entit\xE9 et le fournisseur de services cloud avant toute fourniture\
+        \ de service. Le contrat pass\xE9 entre l'entit\xE9 et le fournisseur de services\
+        \ cloud doit stipuler \xE0 minima des clauses garantissant :\n- Un contr\xF4\
+        le total de l'entit\xE9 sur ses donn\xE9es,\n- La protection des donn\xE9\
+        es \xE0 caract\xE8re personnel suivant la l\xE9gislation du B\xE9nin,\n- La\
+        \ destruction des donn\xE9es de l'entit\xE9,\n- La coop\xE9ration notamment\
+        \ en mati\xE8re d'audit de s\xE9curit\xE9 et d'investigation\n- La conformit\xE9\
+        \ avec la PSSI sp\xE9cifique de l'entit\xE9"
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:scc-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.15:1
+      ref_id: SCC-05
+      name: "Protection des donn\xE9es"
+      description: "R\xE8gle : \nL'entit\xE9 doit veiller \xE0 impl\xE9menter des\
+        \ m\xE9canismes de chiffrement de bout en bout des donn\xE9es en transit et\
+        \ au repos dans une infrastructure cloud.\nL'entit\xE9 doit s'assurer contractuellement\
+        \ qu'elle dispose des cl\xE9s de chiffrement.\nLe contrat d'h\xE9bergement\
+        \ devra prendre en compte la r\xE9versibilit\xE9 et l'obligation de destruction\
+        \ sous contr\xF4le des donn\xE9es, applicables lors de l'extinction du contrat\
+        \ de services Cloud."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.16
+      assessable: false
+      depth: 1
+      ref_id: '4.16'
+      name: "Gestion des incidents de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.16:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.16
+      name: OBJECTIF 20
+      description: "Garantir une m\xE9thode coh\xE9rente et efficace de gestion des\
+        \ incidents li\xE9s \xE0 la s\xE9curit\xE9 du SI, incluant la communication\
+        \ des \xE9v\xE9nements et des failles li\xE9s \xE0 la s\xE9curit\xE9."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:inc-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.16:1
+      ref_id: INC-01
+      name: "Signalement des incidents s\xE9curit\xE9 SI"
+      description: "R\xE8gle : \nUne proc\xE9dure de signalement d'incidents li\xE9\
+        s \xE0 la s\xE9curit\xE9 du SI doit \xEAtre formalis\xE9e et connue des utilisateurs\
+        \ et administrateurs informatiques. La proc\xE9dure devra pr\xE9voir la remont\xE9\
+        e d'incidents significatifs \xE0 l'ANSSI."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:inc-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.16:1
+      ref_id: INC-02
+      name: "R\xE9ponse aux incidents s\xE9curit\xE9 SI"
+      description: "R\xE8gle : \nLes proc\xE9dures de r\xE9ponse aux incidents li\xE9\
+        s \xE0 la s\xE9curit\xE9 du SI doivent \xEAtre formalis\xE9es et couvrir les\
+        \ diff\xE9rents types d'incidents de s\xE9curit\xE9 (malveillances, d\xE9\
+        nis de service, infections virales, intrusion, vol/perte d'\xE9quipements,\
+        \ perte de donn\xE9es, etc.)."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:inc-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.16:1
+      ref_id: INC-03
+      name: "R\xE9pertoire des incidents s\xE9curit\xE9 SI"
+      description: "R\xE8gle : \nLa typologie et la description des incidents li\xE9\
+        s \xE0 la s\xE9curit\xE9 Sl doivent \xEAtre localement enregistr\xE9es dans\
+        \ une base de donn\xE9es permettant un enrichissement progressif ainsi qu'un\
+        \ acc\xE8s s\xE9lectif facile pour effectuer le traitement et le suivi des\
+        \ divers incidents futurs."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:inc-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.16:1
+      ref_id: INC-04
+      name: Collecte des traces
+      description: "R\xE8gle :\nL'entit\xE9 doit mettre en place une proc\xE9dure\
+        \ garantissant la s\xE9curit\xE9 des preuves num\xE9riques depuis leur collecte\
+        \ jusqu'\xE0 leur pr\xE9sentation \xE9ventuelle \xE0 un tribunal en cas d'incidents\
+        \ conduisant \xE0 une proc\xE9dure p\xE9nale.\nRecommandation :\nL'entit\xE9\
+        \ peut recourir au bjCSIRT (Equipe gouvernementale de r\xE9ponse aux incidents\
+        \ de s\xE9curit\xE9 informatique) afin de porter une assistance technique\
+        \ dans le cadre d'une investigation num\xE9rique."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.17
+      assessable: false
+      depth: 1
+      ref_id: '4.17'
+      name: "Gestion de la continuit\xE9 de la s\xE9curit\xE9 du SI"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.17:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.17
+      name: OBJECTIF 21
+      description: "Faire en sorte que la s\xE9curit\xE9 des syst\xE8mes d'information\
+        \ fasse partie int\xE9grante du processus de continuit\xE9 d'activit\xE9 de\
+        \ l'entit\xE9."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cont-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.17:1
+      ref_id: CONT-01
+      name: "Plan de continuit\xE9 de la s\xE9curit\xE9 SI"
+      description: "R\xE8gle : \nChaque entit\xE9 doit d\xE9velopper un plan de continuit\xE9\
+        \ des mesures de s\xE9curit\xE9 afin de faire face aux \xE9v\xE8nements pouvant\
+        \ causer leur arr\xEAt (panne, sinistre, pand\xE9mie, d\xE9ni de service,\
+        \ ...). Ce plan doit \xEAtre test\xE9 au moins une fois par an."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cont-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.17:1
+      ref_id: CONT-02
+      name: "Int\xE9gration de la s\xE9curit\xE9 dans les plans de continuit\xE9/reprise\
+        \ d'activit\xE9 informatique"
+      description: "R\xE8gle : \nLes dispositifs de s\xE9curit\xE9 des syst\xE8mes\
+        \ d'information doivent \xEAtre int\xE9gr\xE9s aux composants d'infrastructure\
+        \ \xE9ligibles au plan de continuit\xE9 ou de reprise d'activit\xE9 informatique\
+        \ de l'entit\xE9."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cont-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.17:1
+      ref_id: CONT-03
+      name: Redondance
+      description: "R\xE8gle : \nLes architectures SI doivent \xEAtre d\xE9pourvues\
+        \ de SPOF (Single Point Of Failure) par des m\xE9canismes de redondance."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:cont-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.17:1
+      ref_id: CONT-04
+      name: "tests du plan de continuit\xE9 de la s\xE9curit\xE9 SI"
+      description: "R\xE8gle : \nLe plan de continuit\xE9 de la s\xE9curit\xE9 du\
+        \ SI doit inclure la planification annuelle de tests afin de s'assurer que\
+        \ chacun des dispositifs de s\xE9curit\xE9 identifi\xE9s critiques est correctement\
+        \ couvert par ce plan."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.18
+      assessable: false
+      depth: 1
+      ref_id: '4.18'
+      name: "Conformit\xE9, audit et contr\xF4les de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.18:1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.18
+      name: OBJECTIF 22
+      description: "\xC9viter toute violation des obligations l\xE9gales, statutaires,\
+        \ r\xE9glementaires ou contractuelles relatives \xE0 la s\xE9curit\xE9 de\
+        \ l'information, \xE9viter toute violation des exigences de s\xE9curit\xE9\
+        ."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:conf-01
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.18:1
+      ref_id: CONF-01
+      name: "Droits de propri\xE9t\xE9 intellectuelle"
+      description: "R\xE8gle : \nL'entit\xE9 doit se soumettre au texte du code du\
+        \ num\xE9rique se rapportant \xE0 la protection de la propri\xE9t\xE9 intellectuelle\
+        \ et des droits d'auteurs. En r\xE8gle g\xE9n\xE9rale, tout logiciel (payant,\
+        \ gratuit et open source) utilis\xE9 par l'entit\xE9 doit \xEAtre accompagn\xE9\
+        \ d'une licence.Le plan de continuit\xE9 de la s\xE9curit\xE9 du SI doit inclure\
+        \ la planification annuelle de tests afin de s'assurer que chacun des dispositifs\
+        \ de s\xE9curit\xE9 identifi\xE9s critiques est correctement couvert par ce\
+        \ plan."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:conf-02
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.18:1
+      ref_id: CONF-02
+      name: "Donn\xE9es \xE0 caract\xE8re personnel"
+      description: "R\xE8gle : \nLes entit\xE9s doivent se r\xE9f\xE9rer \xE0 l'APDP\
+        \ dans le cadre de toute activit\xE9 n\xE9cessitant la collecte et le traitement\
+        \ des donn\xE9es \xE0 caract\xE8re personnel."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:conf-03
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.18:1
+      ref_id: CONF-03
+      name: Mesures cryptographiques
+      description: "R\xE8gle : \nL'entit\xE9 doit se conformer aux dispositions du\
+        \ code du num\xE9rique se rapportant \xE0 la cryptologie et aux recommandations\
+        \ de la Commission Cryptologie."
+      annotation: Normal
+      implementation_groups:
+      - N
+    - urn: urn:intuitem:risk:req_node:pssie-benin:4.18:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.18
+      name: OBJECTIF 23
+      description: "Effectuer des contr\xF4les et des exercices r\xE9guliers de fa\xE7\
+        on \xE0 mesurer les progr\xE8s accomplis et corriger les manquements."
+    - urn: urn:intuitem:risk:req_node:pssie-benin:conf-04
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.18:2
+      ref_id: CONF-04
+      name: "Contr\xF4les locaux"
+      description: "R\xE8gle : \nLa conformit\xE9 \xE0 la PSSIE et \xE0 la PSSI sp\xE9\
+        cifique est v\xE9rifi\xE9e par des contr\xF4les r\xE9guliers. Le RSSI de chaque\
+        \ entit\xE9 conduit des actions locales d'\xE9valuation de la conformit\xE9\
+        \ \xE0 la PSSIE et contribue \xE0 la consolidation, dans un bilan annuel,\
+        \ de l'\xE9tat d'avancement de sa mise en \u0153uvre."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:conf-05
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.18:2
+      ref_id: CONF-05
+      name: "Audits de s\xE9curit\xE9"
+      description: "R\xE8gle : \nDes audits de s\xE9curit\xE9 approfondis du SI doivent\
+        \ \xEAtre r\xE9alis\xE9s dans le cadre d'un programme de tests de s\xE9curit\xE9\
+        . Ces audits doivent \xEAtre confi\xE9s \xE0 des FSSNQ."
+      annotation: Critique
+      implementation_groups:
+      - C
+    - urn: urn:intuitem:risk:req_node:pssie-benin:conf-06
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pssie-benin:4.18:2
+      ref_id: CONF-06
+      name: "Encadrement des audits effectu\xE9s par les tierces parties"
+      description: "R\xE8gle : \nLes audits de s\xE9curit\xE9 r\xE9alis\xE9s sur les\
+        \ syst\xE8mes d'information de l'entit\xE9 par des tiers doivent faire l'objet\
+        \ d'une charte d'audit sign\xE9e entre le prestataire externe d'audit et l'entit\xE9\
+        , laquelle charte pr\xE9cisera le p\xE9rim\xE8tre et les limites de l'audit,\
+        \ les plages horaires pour les activit\xE9s d'audit, les m\xE9thodes utilis\xE9\
+        es, les outils de tests, les engagements de bonne conduite des auditeurs,\
+        \ les acc\xE8s \xE0 accorder, la restitution/destruction des donn\xE9es collect\xE9\
+        es par les auditeurs, ..."
+      annotation: Critique
+      implementation_groups:
+      - C

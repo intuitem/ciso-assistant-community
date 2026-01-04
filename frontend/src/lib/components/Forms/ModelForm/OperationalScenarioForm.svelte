@@ -6,19 +6,33 @@
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
+	import TextField from '../TextField.svelte';
 
-	export let form: SuperValidated<any>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context: string;
+	interface Props {
+		form: SuperValidated<any>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context: string;
+		object?: any; // Optional object for additional data
+	}
 
-	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-800-token';
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context,
+		object = null // Optional object for additional data
+	}: Props = $props();
 
-	let activeActivity: string | null = null;
-	$page.url.searchParams.forEach((value, key) => {
+	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-900';
+
+	let activeActivity: string | null = $state(null);
+	page.url.searchParams.forEach((value, key) => {
 		if (key === 'activity' && value === 'one') {
 			activeActivity = 'one';
 		} else if (key === 'activity' && value === 'two') {
@@ -37,6 +51,14 @@
 	label={m.ebiosRmStudy()}
 	hidden={initialData.ebios_rm_study}
 />
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
+/>
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
 		? 'border-2 border-primary-500'
@@ -49,15 +71,16 @@
 	>
 		{m.activityOne()}
 	</p>
-	<TextArea
-		{form}
-		field="operating_modes_description"
-		label={m.operatingModesDescription()}
-		cacheLock={cacheLocks['operating_modes_description']}
-		bind:cachedValue={formDataCache['operating_modes_description']}
-		data-focusindex="1"
-		helpText={m.operatingModesDescriptionHelpText()}
-	/>
+	{#if context !== 'edit'}
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="attack-paths?is_selected=true&used=false"
+			optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
+			optionsLabelField="form_display_name"
+			field="attack_path"
+			label={m.attackPath() + ` (${m.strategicScenario()})`}
+		/>
+	{/if}
 	<AutocompleteSelect
 		{form}
 		multiple
@@ -67,18 +90,18 @@
 		field="threats"
 		cacheLock={cacheLocks['threats']}
 		bind:cachedValue={formDataCache['threats']}
-		label={m.threats()}
+		label={m.elementaryActionsTechniques()}
 		helpText={m.operationalScenarioThreatsHelpText()}
 	/>
-	{#if context !== 'edit'}
-		<AutocompleteSelect
-			{form}
-			optionsEndpoint="attack-paths?is_selected=true&used=false"
-			optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
-			field="attack_path"
-			label={m.attackPath()}
-		/>
-	{/if}
+	<TextArea
+		{form}
+		field="operating_modes_description"
+		label={m.operatingModesDescription()}
+		cacheLock={cacheLocks['operating_modes_description']}
+		bind:cachedValue={formDataCache['operating_modes_description']}
+		data-focusindex="1"
+		helpText={m.operatingModesDescriptionHelpText()}
+	/>
 </div>
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'two'
@@ -92,15 +115,17 @@
 	>
 		{m.activityTwo()}
 	</p>
-	<Select
-		{form}
-		options={model.selectOptions['likelihood']}
-		field="likelihood"
-		label={m.likelihood()}
-		cacheLock={cacheLocks['likelihood']}
-		bind:cachedValue={formDataCache['likelihood']}
-		helpText={m.likelihoodHelpText()}
-	/>
+	{#if object.quotation_method === 'manual'}
+		<Select
+			{form}
+			options={model.selectOptions['likelihood']}
+			field="likelihood"
+			label={m.likelihood()}
+			cacheLock={cacheLocks['likelihood']}
+			bind:cachedValue={formDataCache['likelihood']}
+			helpText={m.likelihoodHelpText()}
+		/>
+	{/if}
 	<TextArea
 		{form}
 		field="justification"

@@ -1,0 +1,85 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+@import '@skeletonlabs/skeleton';
+@import '@skeletonlabs/skeleton/optional/presets';
+
+/*
+  Add your theme import for your theme: "ciso-theme" here
+*/
+@import '../ciso-theme.css';
+@source '../node_modules/@skeletonlabs/skeleton-svelte/dist';
+
+@source './**/*.{html,js,svelte,ts}';
+@source '../node_modules/.pnpm/@skeletonlabs+skeleton@2.10.3_svelte@5.28.6/node_modules/@skeletonlabs/skeleton/dist/**/*.{html,js,svelte,ts}';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-gray-200, currentcolor);
+	}
+}
+
+@utility btn-mini-primary {
+	@apply text-gray-50 bg-violet-600 hover:bg-violet-500;
+}
+@utility btn-mini-secondary {
+	@apply text-gray-50 bg-pink-500 hover:bg-pink-400;
+}
+@utility btn-mini-tertiary {
+	@apply text-gray-50 bg-sky-500 hover:bg-sky-400;
+}
+
+@layer utilities {
+	/* (all other styles here...) */
+	html,
+	body {
+		@apply h-auto overflow-auto;
+	}
+	.capitalize-first:first-letter {
+		@apply capitalize;
+	}
+	tbody {
+		& > :not(:last-child) {
+			border-color: var(--color-surface-100-900) !important;
+		}
+	}
+	.input,
+	.select,
+	.multiselect,
+	.textarea {
+		background-color: var(--color-surface-100);
+	}
+
+	.checkbox,
+	.radio {
+		background-color: var(--color-surface-100);
+	}
+}
+
+@layer base {
+	[data-popup] {
+		transition: none;
+	}
+}
+
+.hide-scrollbar {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+}

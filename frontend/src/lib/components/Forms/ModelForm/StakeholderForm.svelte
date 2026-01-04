@@ -2,34 +2,43 @@
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '../Checkbox.svelte';
-	import RadioGroupInput from '../RadioGroupInput.svelte';
-	import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
+	import RadioGroup from '../RadioGroup.svelte';
+	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { safeTranslate } from '$lib/utils/i18n';
 
-	export let form: SuperForm<Record<string, any>>;
-	export let model: ModelInfo;
-	export let cacheLocks: Record<string, CacheLock> = {};
-	export let formDataCache: Record<string, any> = {};
-	export let initialData: Record<string, any> = {};
-	export let context: 'create' | 'edit' = 'create';
+	interface Props {
+		form: SuperForm<Record<string, any>>;
+		model: ModelInfo;
+		cacheLocks?: Record<string, CacheLock>;
+		formDataCache?: Record<string, any>;
+		initialData?: Record<string, any>;
+		context?: 'create' | 'edit';
+	}
+
+	let {
+		form,
+		model,
+		cacheLocks = {},
+		formDataCache = $bindable({}),
+		initialData = {},
+		context = 'create'
+	}: Props = $props();
 
 	const formData = form.form;
 
-	const modalStore = getModalStore();
+	// const modalStore = getModalStore();
 
 	function modalMeasureCreateForm(): void {
-		const measureModel = $page.data.measureModel;
-		console.log('measureModel', measureModel);
+		const measureModel = page.data.measureModel;
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
-				form: $page.data.measureCreateForm,
+				form: page.data.measureCreateForm,
 				formAction: '?/createAppliedControl',
 				model: measureModel,
 				debug: false
@@ -41,11 +50,11 @@
 			// Data
 			title: safeTranslate('add-' + measureModel.localName)
 		};
-		modalStore.trigger(modal);
+		// modalStore.trigger(modal);
 	}
 
-	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-800-token';
-	const activeActivity: string = $page.url.searchParams.get('activity') || '';
+	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-900';
+	const activeActivity: string = page.url.searchParams.get('activity') || '';
 
 	const getCriticality = (
 		dependency: number,
@@ -57,23 +66,53 @@
 		return ((dependency * penetration) / (maturity * trust)).toFixed(2).replace(/\.?0+$/, '');
 	};
 
-	$: currentCriticality = getCriticality(
-		$formData.current_dependency,
-		$formData.current_penetration,
-		$formData.current_maturity,
-		$formData.current_trust
+	let currentCriticality = $derived(
+		getCriticality(
+			$formData.current_dependency,
+			$formData.current_penetration,
+			$formData.current_maturity,
+			$formData.current_trust
+		)
 	);
 
-	$: residualCriticality = getCriticality(
-		$formData.residual_dependency,
-		$formData.residual_penetration,
-		$formData.residual_maturity,
-		$formData.residual_trust
+	let residualCriticality = $derived(
+		getCriticality(
+			$formData.residual_dependency,
+			$formData.residual_penetration,
+			$formData.residual_maturity,
+			$formData.residual_trust
+		)
 	);
+
+	// Track selected entity option from autocomplete (with all fields included)
+	let selectedEntityOption: any[] = $state([]);
+
+	// Auto-fill current assessment fields when entity is selected
+	$effect(() => {
+		if (context === 'create' && selectedEntityOption.length > 0) {
+			const entity = selectedEntityOption[0];
+			// Only auto-fill if we have default values from the entity
+			if (entity.default_dependency !== undefined) {
+				// Update form data - RadioGroup will react to these changes now
+				$formData.current_dependency = entity.default_dependency ?? 0;
+				$formData.current_penetration = entity.default_penetration ?? 0;
+				$formData.current_maturity = entity.default_maturity ?? 1;
+				$formData.current_trust = entity.default_trust ?? 1;
+			}
+		}
+	});
 </script>
 
+<AutocompleteSelect
+	{form}
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+	hidden
+/>
 <div
-	class="relative p-2 space-y-2 rounded-container-token {activeActivity === 'one'
+	class="relative p-2 space-y-2 rounded-container {activeActivity === 'one'
 		? 'border-2 border-primary-500'
 		: 'border-2 border-gray-300 border-dashed'}"
 >
@@ -87,24 +126,44 @@
 	<div class="flex flex-wrap items-center gap-4">
 		<div>
 			<span class="flex flex-row space-x-4">
-				<Select
-					{form}
-					options={model.selectOptions['category']}
-					field="category"
-					label={m.category()}
-					cacheLock={cacheLocks['category']}
-					bind:cachedValue={formDataCache['category']}
-					helpText={m.stakeholderCategoryHelpText()}
-				/>
 				<AutocompleteSelect
 					{form}
 					optionsEndpoint="entities"
 					field="entity"
 					cacheLock={cacheLocks['entity']}
 					bind:cachedValue={formDataCache['entity']}
+					bind:cachedOptions={selectedEntityOption}
 					label={m.entity()}
 					hidden={initialData.entity}
 					helpText={m.stakeholderEntityHelpText()}
+					includeAllOptionFields={true}
+					optionsInfoFields={{
+						fields: [
+							{
+								field: 'relationship',
+								display: (relationships) => {
+									if (!relationships || relationships.length === 0) return '';
+									return relationships.map((r) => safeTranslate(r.str || r.name || r)).join(' | ');
+								}
+							}
+						],
+						position: 'suffix',
+						separator: ' | ',
+						classes: 'text-xs text-surface-500'
+					}}
+				/>
+				<AutocompleteSelect
+					{form}
+					optionsEndpoint="terminologies"
+					optionsDetailedUrlParameters={[
+						['field_path', 'entity.relationship'],
+						['is_visible', 'true']
+					]}
+					field="category"
+					label={m.category()}
+					cacheLock={cacheLocks['category']}
+					bind:cachedValue={formDataCache['category']}
+					helpText={m.stakeholderCategoryHelpText()}
 				/>
 			</span>
 
@@ -112,9 +171,9 @@
 			<div class="flex flex-row items-center space-x-4">
 				<div class="flex flex-col space-y-4 w-fit items-center">
 					<span class="flex flex-row items-center space-x-4">
-						<RadioGroupInput
+						<RadioGroup
 							{form}
-							options={[
+							possibleOptions={[
 								{ label: '0', value: 0 },
 								{ label: '1', value: 1 },
 								{ label: '2', value: 2 },
@@ -123,74 +182,82 @@
 							]}
 							label={m.dependency()}
 							field="current_dependency"
+							labelKey="label"
+							key="value"
 							cacheLock={cacheLocks['current_dependency']}
 							bind:cachedValue={formDataCache['current_dependency']}
 							helpText={m.dependencyHelpText()}
 						/>
-						<i class="fa-solid fa-times" />
-						<RadioGroupInput
+						<i class="fa-solid fa-times"></i>
+						<RadioGroup
 							{form}
-							options={[
+							possibleOptions={[
 								{ label: '0', value: 0 },
 								{ label: '1', value: 1 },
 								{ label: '2', value: 2 },
 								{ label: '3', value: 3 },
 								{ label: '4', value: 4 }
 							]}
-							field="current_penetration"
 							label={m.penetration()}
+							field="current_penetration"
+							labelKey="label"
+							key="value"
 							cacheLock={cacheLocks['current_penetration']}
 							bind:cachedValue={formDataCache['current_penetration']}
 							helpText={m.penetrationHelpText()}
 						/>
 					</span>
 
-					<hr class="!border-t-2 !border-surface-900 self-stretch" />
+					<hr class="border-t-2! border-surface-900! self-stretch" />
 
 					<span class="flex flex-row items-center space-x-4">
-						<RadioGroupInput
+						<RadioGroup
 							{form}
-							options={[
+							possibleOptions={[
 								{ label: '1', value: 1 },
 								{ label: '2', value: 2 },
 								{ label: '3', value: 3 },
 								{ label: '4', value: 4 }
 							]}
-							field="current_maturity"
 							label={m.maturity()}
+							field="current_maturity"
+							labelKey="label"
+							key="value"
 							cacheLock={cacheLocks['current_maturity']}
 							bind:cachedValue={formDataCache['current_maturity']}
 							helpText={m.maturityHelpText()}
 						/>
-						<i class="fa-solid fa-times" />
-						<RadioGroupInput
+						<i class="fa-solid fa-times"></i>
+						<RadioGroup
 							{form}
-							options={[
+							possibleOptions={[
 								{ label: '1', value: 1 },
 								{ label: '2', value: 2 },
 								{ label: '3', value: 3 },
 								{ label: '4', value: 4 }
 							]}
-							field="current_trust"
 							label={m.trust()}
+							field="current_trust"
+							labelKey="label"
+							key="value"
 							cacheLock={cacheLocks['current_trust']}
 							bind:cachedValue={formDataCache['current_trust']}
 							helpText={m.trustHelpText()}
 						/></span
 					>
 				</div>
-				<i class="fa-solid fa-equals" />
+				<i class="fa-solid fa-equals"></i>
 				<div class="flex flex-col mb-5">
 					<label for="current_criticality" class="text-sm font-semibold">
 						{m.criticality()}
 					</label>
-					<span class="chip text-base text-center px-4 py-1 rounded-token variant-filled">
+					<span class="chip text-base text-center px-4 py-1 rounded-base preset-filled">
 						{currentCriticality}
 					</span>
 				</div>
 			</div>
 		</div>
-		<div class="flex flex-col flex-grow">
+		<div class="flex flex-col grow">
 			<Checkbox
 				{form}
 				field="is_selected"
@@ -210,7 +277,7 @@
 
 {#if context === 'edit'}
 	<div
-		class="relative p-2 space-y-2 rounded-container-token {activeActivity === 'three'
+		class="relative p-2 space-y-2 rounded-container {activeActivity === 'three'
 			? 'border-2 border-primary-500'
 			: 'border-2 border-gray-300 border-dashed'}"
 	>
@@ -233,8 +300,12 @@
 				/>
 			</div>
 			<div class="flex items-end">
-				<button class="btn input h-11 w-11" on:click={modalMeasureCreateForm} type="button"
-					><i class="fa-solid fa-plus text-sm" />
+				<button
+					class="btn input h-11 w-11"
+					aria-label={m.addAppliedControl()}
+					onclick={modalMeasureCreateForm}
+					type="button"
+					><i class="fa-solid fa-plus text-sm"></i>
 				</button>
 			</div>
 		</div>
@@ -243,9 +314,9 @@
 		<div class="flex flex-row items-center space-x-4">
 			<div class="flex flex-col space-y-4 w-fit items-center">
 				<span class="flex flex-row items-center space-x-4">
-					<RadioGroupInput
+					<RadioGroup
 						{form}
-						options={[
+						possibleOptions={[
 							{ label: '0', value: 0 },
 							{ label: '1', value: 1 },
 							{ label: '2', value: 2 },
@@ -254,64 +325,72 @@
 						]}
 						label={m.dependency()}
 						field="residual_dependency"
+						labelKey="label"
+						key="value"
 						cacheLock={cacheLocks['residual_dependency']}
 						bind:cachedValue={formDataCache['residual_dependency']}
 					/>
-					<i class="fa-solid fa-times" />
-					<RadioGroupInput
+					<i class="fa-solid fa-times"></i>
+					<RadioGroup
 						{form}
-						options={[
+						possibleOptions={[
 							{ label: '0', value: 0 },
 							{ label: '1', value: 1 },
 							{ label: '2', value: 2 },
 							{ label: '3', value: 3 },
 							{ label: '4', value: 4 }
 						]}
-						field="residual_penetration"
 						label={m.penetration()}
+						field="residual_penetration"
+						labelKey="label"
+						key="value"
 						cacheLock={cacheLocks['residual_penetration']}
 						bind:cachedValue={formDataCache['residual_penetration']}
 					/>
 				</span>
 
-				<hr class="!border-t-2 !border-surface-900 self-stretch" />
+				<hr class="border-t-2! border-surface-900! self-stretch" />
 
 				<span class="flex flex-row items-center space-x-4">
-					<RadioGroupInput
+					<RadioGroup
 						{form}
-						options={[
+						possibleOptions={[
 							{ label: '1', value: 1 },
 							{ label: '2', value: 2 },
 							{ label: '3', value: 3 },
 							{ label: '4', value: 4 }
 						]}
-						field="residual_maturity"
 						label={m.maturity()}
+						field="residual_maturity"
+						labelKey="label"
+						key="value"
 						cacheLock={cacheLocks['residual_maturity']}
 						bind:cachedValue={formDataCache['residual_maturity']}
 					/>
-					<i class="fa-solid fa-times" />
-					<RadioGroupInput
+					<i class="fa-solid fa-times"></i>
+					<RadioGroup
 						{form}
-						options={[
+						possibleOptions={[
 							{ label: '1', value: 1 },
 							{ label: '2', value: 2 },
 							{ label: '3', value: 3 },
 							{ label: '4', value: 4 }
 						]}
-						field="residual_trust"
 						label={m.trust()}
+						field="residual_trust"
+						labelKey="label"
+						key="value"
 						cacheLock={cacheLocks['residual_trust']}
 						bind:cachedValue={formDataCache['residual_trust']}
 					/></span
 				>
 			</div>
-			<i class="fa-solid fa-equals" />
+			<i class="fa-solid fa-equals"></i>
 			<div class="flex flex-col mb-5">
 				<label for="residual_criticality" class="text-sm font-semibold">
 					{m.criticality()}
 				</label>
-				<span class="chip text-base text-center px-4 py-1 rounded-token variant-filled">
+				<span class="chip text-base text-center px-4 py-1 rounded-base preset-filled">
 					{residualCriticality}
 				</span>
 			</div>

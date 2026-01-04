@@ -1,16 +1,21 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Calendar from '$lib/components/Calendar/Calendar.svelte';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
 
-	$: year = parseInt($page.params.year);
-	$: month = parseInt($page.params.month);
+	let { data }: Props = $props();
+
+	let year = $derived(parseInt(page.params.year));
+	let month = $derived(parseInt(page.params.month));
 
 	function createCalendarEvents(
 		appliedControls: Record<string, string>[],
 		riskAcceptances: Record<string, string>[],
+		audits: Record<string, string>[],
 		tasks: Record<string, string>[]
 	): Array<{ label: string; date: Date; link: string }> {
 		const events = [
@@ -28,10 +33,19 @@
 				users: ra.approver ? [ra.approver] : [],
 				color: 'secondary'
 			})),
+			...audits.map((audit: Record<string, string>) => ({
+				label: `AU: ${audit.name}`,
+				date: new Date(audit.due_date),
+				link: `/compliance-assessments/${audit.id}`,
+				users: audit.authors || [],
+				color: 'warning'
+			})),
 			...tasks.map((task: Record<string, string>) => ({
 				label: `TA: ${task.name}`,
 				date: new Date(task.due_date),
-				link: task.virtual ? `/task-templates/${task.id}` : `/task-nodes/${task.id}`,
+				link: !task.is_recurrent
+					? `/task-templates/${task.task_template.id}`
+					: `/task-nodes/${task.id}`,
 				users: task.assigned_to,
 				color: 'primary'
 			}))
@@ -39,7 +53,9 @@
 		return events;
 	}
 
-	$: info = createCalendarEvents(data.appliedControls, data.riskAcceptances, data.tasks);
+	let info = $derived(
+		createCalendarEvents(data.appliedControls, data.riskAcceptances, data.audits, data.tasks)
+	);
 </script>
 
 <Calendar {info} {year} {month} />

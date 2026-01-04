@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { tableSourceMapper } from '$lib/utils/table';
 	import { applyAction, deserialize, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
@@ -10,13 +11,12 @@
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
-	import { ProgressRadial, tableSourceMapper } from '@skeletonlabs/skeleton';
+	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionResult } from '@sveltejs/kit';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
-	export let data;
-
-	let loading = { form: false, library: '' };
+	let { data } = $props();
+	let loading = $state({ form: false, library: '' });
 	const showRisks = true;
 
 	interface LibraryObjects {
@@ -27,6 +27,7 @@
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
 	const referenceControls = libraryObjects['reference_controls'] ?? [];
 	const threats = libraryObjects['threats'] ?? [];
+	const metricDefinitions = libraryObjects['metric_definitions'] ?? [];
 	const framework = libraryObjects['framework'];
 
 	function transformToTreeView(nodes) {
@@ -70,6 +71,24 @@
 		meta: { count: threats.length }
 	};
 
+	const metricDefinitionsTable: TableSource = {
+		head: {
+			ref_id: 'ref',
+			name: 'name',
+			description: 'description',
+			category: 'category',
+			unit: 'unit'
+		},
+		body: tableSourceMapper(metricDefinitions, [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'unit'
+		]),
+		meta: { count: metricDefinitions.length }
+	};
+
 	function riskMatricesPreview(riskMatrices: []) {
 		let riskMatricesDumps = [];
 		for (const riskMatrix of riskMatrices) {
@@ -97,17 +116,23 @@
 		applyAction(result);
 	}
 
-	$: displayImportButton = !(data.library.is_loaded ?? true);
+	let displayImportButton = $derived(
+		!(
+			data.library?.is_loaded ||
+			data.library?.objects?.requirement_mapping_set ||
+			data.library?.objects?.requirement_mapping_sets
+		)
+	);
 </script>
 
-<div class="card bg-white p-4 shadow space-y-4">
+<div class="card bg-white p-4 shadow-sm space-y-4">
 	<div class="flex flex-col space-y-2">
 		<span class="w-full flex flex-row justify-between">
 			<h1 class="font-medium text-xl">{data.library.name}</h1>
 			<div>
 				{#if displayImportButton}
 					{#if loading.form}
-						<ProgressRadial width="w-6" meter="stroke-primary-500" />
+						<ProgressRing size="size-6" meterStroke="stroke-primary-500" />
 					{:else}
 						<form
 							method="post"
@@ -121,11 +146,15 @@
 									update();
 								};
 							}}
-							on:submit={handleSubmit}
+							onsubmit={handleSubmit}
 						>
-							{#if $page.data.user.is_admin}
-								<button type="submit" class="p-1 btn text-xl hover:text-primary-500">
-									<i class="fa-solid fa-file-import" />
+							{#if page.data.user.is_admin}
+								<button
+									type="submit"
+									class="p-1 btn text-xl hover:text-primary-500"
+									aria-label="load library"
+								>
+									<i class="fa-solid fa-file-import"></i>
 								</button>
 							{/if}
 						</form>
@@ -169,6 +198,16 @@
 					<strong>{m.copyright()}</strong>: {data.library.copyright}
 				</p>
 			{/if}
+			{#if data.library.filtering_labels && data.library.filtering_labels.length > 0}
+				<p class="text-md leading-5 text-gray-700">
+					<strong>{m.labels()}</strong>:
+				</p>
+				<ul class="list-disc list-inside">
+					{#each data.library.filtering_labels as label}
+						<li>{label.label}</li>
+					{/each}
+				</ul>
+			{/if}
 		</div>
 	</div>
 
@@ -189,7 +228,7 @@
 				interactive={false}
 			/>
 			{#each riskMatricesPreview(riskMatrices) as riskMatrix}
-				<RiskMatrix {riskMatrix} {showRisks} wrapperClass="mt-8" />
+				<RiskMatrix {riskMatrix} showLegend={showRisks} wrapperClass="mt-8" />
 			{/each}
 		</Dropdown>
 	{/if}
@@ -220,6 +259,24 @@
 		>
 			<ModelTable
 				source={threatsTable}
+				displayActions={false}
+				pagination={false}
+				rowCount={false}
+				rowsPerPage={false}
+				search={false}
+				interactive={false}
+			/>
+		</Dropdown>
+	{/if}
+
+	{#if metricDefinitions.length > 0}
+		<Dropdown
+			style="hover:text-indigo-700"
+			icon="fa-solid fa-chart-line"
+			header="{metricDefinitions.length} {m.metricDefinitions()}"
+		>
+			<ModelTable
+				source={metricDefinitionsTable}
 				displayActions={false}
 				pagination={false}
 				rowCount={false}

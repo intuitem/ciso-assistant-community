@@ -1,0 +1,660 @@
+urn: urn:protocolpaladin:risk:library:anssi-guide-des-mecanismes-cryptographiques
+locale: fr
+ref_id: ANSSI-GUI-MECA-CRYPT
+name: "Guides des m\xE9canismes cryptographiques"
+description: "Ce document est une \xE9volution des r\xE8gles et recommandations issues\
+  \ du R\xE9f\xE9rentiel G\xE9n\xE9ral de S\xE9curit\xE9, prenant en compte les \xE9\
+  volutions r\xE9centes de l'\xE9tat de l'art en cryptographie. Il \xE9nonce des r\xE8\
+  gles g\xE9n\xE9rales, valables en principe pour tout m\xE9canisme cryptographique,\
+  \ et dont le respect est n\xE9cessaire \xE0 la s\xE9curit\xE9 du m\xE9canisme, ainsi\
+  \ que des recommandations correspondant \xE0 l'\xE9tat de l'art d'un point de vue\
+  \ technique.\nLes r\xE8gles et recommandations contenues dans ce document sont g\xE9\
+  n\xE9ralement accompagn\xE9es de justifications techniques garantissant la correspondance\
+  \ la plus pr\xE9cise possible avec l'\xE9tat de l'art actuel en cryptographie ainsi\
+  \ que les contraintes pratiques li\xE9es \xE0 sa mise en \u0153uvre.\nCe document\
+  \ est utilisable comme r\xE9f\xE9rentiel dans le cadre de l'\xE9valuation des produits\
+  \ de s\xE9curit\xE9. \L\nhttps://cyber.gouv.fr/sites/default/files/2021/03/anssi-guide-mecanismes_crypto-2.04.pdf"
+copyright: Licence ouverte / Open Licence (Etalab v1)
+version: '1'
+publication_date: 2025-05-12
+provider: ANSSI
+packager: protocolpaladin
+objects:
+  framework:
+    urn: urn:protocolpaladin:risk:framework:anssi-guide-des-mecanismes-cryptographiques
+    ref_id: ANSSI-GUI-MECA-CRYPT
+    name: "Guides des m\xE9canismes cryptographiques"
+    description: "Ce document est une \xE9volution des r\xE8gles et recommandations\
+      \ issues du R\xE9f\xE9rentiel G\xE9n\xE9ral de S\xE9curit\xE9, prenant en compte\
+      \ les \xE9volutions r\xE9centes de l'\xE9tat de l'art en cryptographie. Il \xE9\
+      nonce des r\xE8gles g\xE9n\xE9rales, valables en principe pour tout m\xE9canisme\
+      \ cryptographique, et dont le respect est n\xE9cessaire \xE0 la s\xE9curit\xE9\
+      \ du m\xE9canisme, ainsi que des recommandations correspondant \xE0 l'\xE9tat\
+      \ de l'art d'un point de vue technique.\nLes r\xE8gles et recommandations contenues\
+      \ dans ce document sont g\xE9n\xE9ralement accompagn\xE9es de justifications\
+      \ techniques garantissant la correspondance la plus pr\xE9cise possible avec\
+      \ l'\xE9tat de l'art actuel en cryptographie ainsi que les contraintes pratiques\
+      \ li\xE9es \xE0 sa mise en \u0153uvre.\nCe document est utilisable comme r\xE9\
+      f\xE9rentiel dans le cadre de l'\xE9valuation des produits de s\xE9curit\xE9\
+      . \L\nhttps://cyber.gouv.fr/sites/default/files/2021/03/anssi-guide-mecanismes_crypto-2.04.pdf"
+    implementation_groups_definition:
+    - ref_id: "R\xE8gle"
+      name: "R\xE8gles"
+      description: null
+    - ref_id: Recommandation
+      name: Recommandations
+      description: null
+    requirement_nodes:
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1
+      assessable: false
+      depth: 1
+      ref_id: '2.1'
+      name: "Cryptographie sym\xE9trique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1
+      ref_id: 2.1.1
+      name: "Taille de cl\xE9 sym\xE9trique"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glecl\xE9sym"
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.1
+      ref_id: "R\xE8gleCl\xE9Sym"
+      name: "R\xE8gleCl\xE9Sym"
+      description: "Pour les cl\xE9s sym\xE9triques utilis\xE9es jusqu\u2019\xE0 la\
+        \ fin de l\u2019ann\xE9e 2025, la taille minimale est de 112 bits.\nLa taille\
+        \ minimale des cl\xE9s sym\xE9triques devant \xEAtre utilis\xE9es \xE0 partir\
+        \ de 2026 est de 128 bits"
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationcl\xE9\
+        sym"
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.1
+      ref_id: "RecommandationCl\xE9Sym"
+      name: "RecommandationCl\xE9Sym"
+      description: "La taille minimale recommand\xE9e des cl\xE9s sym\xE9triques est\
+        \ de 128 bits."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1
+      ref_id: 2.1.2
+      name: "Chiffrement sym\xE9trique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2
+      ref_id: 2.1.2.1
+      name: Chiffrement par bloc
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1:1
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1
+      name: Taille de bloc
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        gleblocsym"
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1:1
+      ref_id: "R\xE8gleBlocSym"
+      name: "R\xE8gleBlocSym"
+      description: "Pour une utilisation jusqu\u2019\xE0 la fin de l\u2019ann\xE9\
+        e 2025, la taille minimale des blocs des m\xE9canismes de chiffrement par\
+        \ bloc est de 64 bits.\n\xC0 partir de l\u2019ann\xE9e 2026, la taille minimale\
+        \ des blocs des m\xE9canismes de chiffrement par bloc est de 128 bits.\nLe\
+        \ nombre maximal de blocs chiffr\xE9s sous une m\xEAme cl\xE9 ne doit pas\
+        \ d\xE9passer 2n/2\u22125, o\xF9 n est la taille d\u2019un bloc (en bits)."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationblocsym
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1:1
+      ref_id: RecommandationBlocSym
+      name: RecommandationBlocSym
+      description: "La taille recommand\xE9e des blocs de m\xE9canismes de chiffrement\
+        \ par bloc est de 128 bits."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1:2
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1
+      name: "Choix de l\u2019algorithme"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glealgobloc"
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1:2
+      ref_id: "R\xE8gleAlgoBloc"
+      name: "R\xE8gleAlgoBloc"
+      description: "Pour un algorithme de chiffrement par bloc ne devant pas \xEA\
+        tre utilis\xE9 apr\xE8s la fin de l\u2019ann\xE9e 2025, aucune attaque n\xE9\
+        cessitant moins de Nop = 2100 op\xE9rations de calcul ne doit \xEAtre connue.\n\
+        Pour un algorithme de chiffrement par bloc dont l\u2019utilisation au-del\xE0\
+        \ du 1er janvier 2026 est envisag\xE9e, aucune attaque n\xE9cessitant moins\
+        \ de Nop = 2125 op\xE9rations de calcul ne doit \xEAtre connue."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationalgobloc
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1:2
+      ref_id: RecommandationAlgoBloc
+      name: RecommandationAlgoBloc
+      description: "Il est recommand\xE9 d\u2019employer des algorithmes de chiffrement\
+        \ par bloc largement \xE9prouv\xE9s dans le milieu acad\xE9mique."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1:3
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1
+      name: "Mode op\xE9ratoire pour le chiffrement"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glemodechiff"
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1:3
+      ref_id: "R\xE8gleModeChiff"
+      name: "R\xE8gleModeChiff"
+      description: "Au sein du mod\xE8le de s\xE9curit\xE9 correspondant \xE0 l\u2019\
+        usage du mode de chiffrement, il ne doit exister aucune attaque de complexit\xE9\
+        \ inf\xE9rieure \xE0 2n/2 appels de la primitive o\xF9 n est la taille en\
+        \ bits du bloc."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationmodechiff
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.1:3
+      ref_id: RecommandationModeChiff
+      name: RecommandationModeChiff
+      description: "L\u2019emploi d\u2019un mode op\xE9ratoire de chiffrement non\
+        \ d\xE9terministe est recommand\xE9.\nL\u2019utilisation d\u2019un mode op\xE9\
+        ratoire de chiffrement se fera de pr\xE9f\xE9rence conjointement \xE0 l\u2019\
+        utilisation d\u2019un m\xE9canisme d\u2019int\xE9grit\xE9. Un tel m\xE9canisme\
+        \ pourra \xEAtre ind\xE9pendant du mode de chiffrement.\nOn utilisera de pr\xE9\
+        f\xE9rence des modes op\xE9ratoires disposant d\u2019une preuve de s\xE9curit\xE9\
+        ."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2
+      ref_id: 2.1.2.2
+      name: Chiffrement par flot
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.2:1
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.2
+      name: "Choix de l\u2019algorithme"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glechiffflot"
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.2:1
+      ref_id: "R\xE8gleChiffFlot"
+      name: "R\xE8gleChiffFlot"
+      description: "Pour un algorithme de chiffrement par flot ne devant pas \xEA\
+        tre utilis\xE9 apr\xE8s la fin de l\u2019ann\xE9e 2025, aucune attaque n\xE9\
+        cessitant moins de 2100 op\xE9rations de calcul ne doit \xEAtre connue.\n\
+        Pour un algorithme de chiffrement par flot devant \xEAtre utilis\xE9 \xE0\
+        \ partir de 2026, aucune attaque n\xE9cessitant moins de 2125 op\xE9rations\
+        \ de calcul ne doit \xEAtre connue"
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationchiffflot
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.2.2:1
+      ref_id: RecommandationChiffFlot
+      name: RecommandationChiffFlot
+      description: "Il est recommand\xE9 d\u2019employer des primitives de chiffrement\
+        \ par bloc et non des algorithmes de chiffrement par flot d\xE9di\xE9s. Il\
+        \ est ainsi possible, si les propri\xE9t\xE9s du chiffrement par flot sont\
+        \ requises, d\u2019utiliser un mode op\xE9ratoire par flot de chiffrement\
+        \ par bloc conforme au r\xE9f\xE9rentiel et simulant un chiffrement par flot.\n\
+        En cas d\u2019utilisation d\u2019un algorithme de chiffrement par flot, il\
+        \ est recommand\xE9 d\u2019employer des algorithmes de chiffrement par flot\
+        \ largement \xE9prouv\xE9s dans le milieu acad\xE9mique."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1
+      ref_id: 2.1.3
+      name: "Authentification et int\xE9grit\xE9 de messages"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        gleintegsym"
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.3
+      ref_id: "R\xE8gleIntegSym"
+      name: "R\xE8gleIntegSym"
+      description: "Les m\xE9thodes sym\xE9triques d\u2019int\xE9grit\xE9 les plus\
+        \ classiques se basent sur des m\xE9canismes de chiffrement par bloc ou de\
+        \ hachage. De telles primitives doivent \xEAtre conformes au r\xE9f\xE9rentiel.\n\
+        Il ne doit pas exister d\u2019attaque sur le m\xE9canisme d\u2019int\xE9grit\xE9\
+        \ utilisant moins de 2n/2 appels \xE0 la primitive sous-jacente o\xF9 n est\
+        \ la taille de sortie de cette primitive."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationintegsym
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.1.3
+      ref_id: RecommandationIntegSym
+      name: RecommandationIntegSym
+      description: "On utilisera de pr\xE9f\xE9rence des m\xE9canismes disposant d\u2019\
+        une preuve de s\xE9curit\xE9."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.2
+      assessable: false
+      depth: 1
+      ref_id: '2.2'
+      name: Fonctions de hachage
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glehash"
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.2
+      ref_id: "R\xE8gleHash"
+      name: "R\xE8gleHash"
+      description: "La taille minimale des empreintes produites par une fonction de\
+        \ hachage est de 256 bits.\nLa meilleure attaque connue permettant de trouver\
+        \ des collisions doit n\xE9cessiter de l\u2019ordre de 2h/2 calculs d\u2019\
+        empreintes, o\xF9 h d\xE9signe la taille en bits des empreintes."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationhash
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.2
+      ref_id: RecommandationHash
+      name: RecommandationHash
+      description: "L\u2019emploi de fonctions de hachage pour lesquelles des \xAB\
+        \ attaques partielles \xBB sont connues est d\xE9conseill\xE9."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3
+      assessable: false
+      depth: 1
+      ref_id: '2.3'
+      name: "Cryptographie asym\xE9trique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3
+      ref_id: 2.3.1
+      name: "Probl\xE8mes math\xE9matiques asym\xE9triques"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1
+      ref_id: 2.3.1.1
+      name: Factorisation
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glefactorisation"
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.1
+      ref_id: "R\xE8gleFactorisation"
+      name: "R\xE8gleFactorisation"
+      description: "La taille minimale du module est de 2048 bits, pour une utilisation\
+        \ ne devant pas d\xE9passer la fin de l\u2019ann\xE9e 2030.\nPour une utilisation\
+        \ \xE0 partir de l\u2019ann\xE9e 2031, la taille minimale du module est de\
+        \ 3072 bits.\nLes exposants secrets doivent \xEAtre de m\xEAme taille que\
+        \ le module.\nPour les applications de chiffrement, les exposants publics\
+        \ doivent \xEAtre strictement sup\xE9rieurs \xE0 216 = 65536."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationfactorisation
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.1
+      ref_id: RecommandationFactorisation
+      name: RecommandationFactorisation
+      description: "Il est recommand\xE9 d\u2019employer des modules d\u2019au moins\
+        \ 3072 bits, m\xEAme pour une utilisation ne devant pas d\xE9passer 2030.\n\
+        Il est recommand\xE9, pour toute application, d\u2019employer des exposants\
+        \ publics strictement sup\xE9rieurs \xE0 216 = 65536.\nIl est recommand\xE9\
+        \ que les deux nombres premiers p et q constitutifs du module soient de m\xEA\
+        me taille et choisis al\xE9atoirement uniform\xE9ment."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1
+      ref_id: 2.3.1.2
+      name: Logarithme discret
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2:1
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2
+      name: Logarithme discret dans GF(p)
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glelogp"
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2:1
+      ref_id: "R\xE8gleLogp"
+      name: "R\xE8gleLogp"
+      description: "La taille minimale de modules premiers est de 2048 bits pour une\
+        \ utilisation ne devant pas d\xE9passer la fin de l\u2019ann\xE9e 2030.\n\
+        Pour une utilisation \xE0 partir de l\u2019ann\xE9e 2031, la taille minimale\
+        \ de modules premiers est de 3072 bits.\nOn emploiera des sous-groupes dont\
+        \ l\u2019ordre est multiple d\u2019un nombre premier d\u2019au moins 250 bits."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationlogp
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2:1
+      ref_id: RecommandationLogp
+      name: RecommandationLogp
+      description: "Il est recommand\xE9 d\u2019employer des modules premiers d\u2019\
+        au moins 3072 bits, m\xEAme pour une utilisation ne devant pas d\xE9passer\
+        \ 2030.\nIl est recommand\xE9 d\u2019employer des sous-groupes dont l\u2019\
+        ordre est premier (au lieu d\u2019\xEAtre multiple d\u2019un nombre premier)."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2:2
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2
+      name: "Logarithme discret dans les courbes elliptiques d\xE9finies sur GF(p)"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        gleecp"
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2:2
+      ref_id: "R\xE8gleECp"
+      name: "R\xE8gleECp"
+      description: "On emploiera des sous-groupes dont l\u2019ordre est multiple d\u2019\
+        un nombre premier\nd\u2019au moins 250 bits.\nEn cas d\u2019utilisation de\
+        \ courbes particuli\xE8res faisant reposer la s\xE9curit\xE9 sur un probl\xE8\
+        me math\xE9matique plus facile que le probl\xE8me g\xE9n\xE9rique de calcul\
+        \ de logarithme discret sur courbe elliptique d\xE9finie sur GF(p), ce probl\xE8\
+        me devra v\xE9rifier les r\xE8gles correspondantes."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationecp
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2:2
+      ref_id: RecommandationECp
+      name: RecommandationECp
+      description: "Il est recommand\xE9 d\u2019employer des sous-groupes dont l\u2019\
+        ordre est premier (au lieu d\u2019\xEAtre multiple d\u2019un nombre premier)."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2:3
+      assessable: false
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2
+      name: "Logarithme discret dans les courbes elliptiques d\xE9finies sur GF(2n)"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        gleec2"
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2:3
+      ref_id: "R\xE8gleEC2"
+      name: "R\xE8gleEC2"
+      description: "L\u2019ordre du sous-groupe doit \xEAtre multiple d\u2019un nombre\
+        \ premier d\u2019au moins\n250 bits.\nLe param\xE8tre n doit \xEAtre un nombre\
+        \ premier.\nEn cas d\u2019utilisation de courbes particuli\xE8res faisant\
+        \ reposer la s\xE9curit\xE9 sur\nun probl\xE8me math\xE9matique plus facile\
+        \ que le probl\xE8me g\xE9n\xE9rique de calcul\nde logarithme discret sur\
+        \ courbe elliptique d\xE9finie sur GF(2n), ce probl\xE8me\ndevra v\xE9rifier\
+        \ les r\xE8gles correspondantes."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationec2
+      assessable: true
+      depth: 5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.2:3
+      ref_id: RecommandationEC2
+      name: RecommandationEC2
+      description: "Il est recommand\xE9 d\u2019employer des sous-groupes dont l\u2019\
+        ordre est premier (au lieu d\u2019\xEAtre multiple d\u2019un nombre premier)."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1
+      ref_id: 2.3.1.3
+      name: "Autres probl\xE8mes et cryptographie \xAB post-quantique \xBB"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glepqnonr\xE9gression"
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.3
+      ref_id: "R\xE8glePQNonR\xE9gression"
+      name: "R\xE8glePQNonR\xE9gression"
+      description: "La s\xE9curit\xE9 des cryptosyst\xE8mes asym\xE9triques doit reposer\
+        \ sur au moins un probl\xE8me math\xE9matique largement \xE9tudi\xE9 et reconnu\
+        \ par la communaut\xE9 acad\xE9mique."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationlongtermepq
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.1.3
+      ref_id: RecommandationLongTermePQ
+      name: RecommandationLongTermePQ
+      description: "Pour une utilisation de m\xE9canismes asym\xE9triques au-del\xE0\
+        \ du 1er janvier 2030, il est recommand\xE9 d\u2019utiliser au moins un m\xE9\
+        canisme fond\xE9 sur un probl\xE8me pour lequel aucune attaque utilisant l\u2019\
+        algorithmique quantique n\u2019est connue.\nSi la fonctionnalit\xE9 fournie\
+        \ par le m\xE9canisme asym\xE9trique est potentiellement vuln\xE9rable \xE0\
+        \ une attaque r\xE9troactive, il est recommand\xE9 d\u2019utiliser au moins\
+        \ un m\xE9canisme fond\xE9 sur un probl\xE8me pour lequel aucune attaque utilisant\
+        \ l\u2019algorithmique quantique n\u2019est connue."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3
+      ref_id: 2.3.2
+      name: "Chiffrement asym\xE9trique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationchiffasym
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.2
+      ref_id: RecommandationChiffAsym
+      name: RecommandationChiffAsym
+      description: "Il est recommand\xE9 d\u2019employer des m\xE9canismes de chiffrement\
+        \ asym\xE9trique disposant d\u2019une preuve de s\xE9curit\xE9."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3
+      ref_id: 2.3.3
+      name: "Signature asym\xE9trique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationsignasym
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.3
+      ref_id: RecommandationSignAsym
+      name: RecommandationSignAsym
+      description: "Il est recommand\xE9 d\u2019employer des m\xE9canismes de signature\
+        \ asym\xE9trique disposant d\u2019une preuve de s\xE9curit\xE9."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.3
+      ref_id: 2.3.4
+      name: "Authentification d'entit\xE9s et \xE9tablissement de cl\xE9"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.4
+      assessable: false
+      depth: 1
+      ref_id: '2.4'
+      name: "G\xE9n\xE9ration d'al\xE9a cryptographique"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.4
+      ref_id: 2.4.1
+      name: "Architecture d'un g\xE9n\xE9rateur d\u2019al\xE9a"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glearchigda"
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.4.1
+      ref_id: "R\xE8gleArchiGDA"
+      name: "R\xE8gleArchiGDA"
+      description: "Un retraitement algorithmique disposant d\u2019un \xE9tat interne\
+        \ doit \xEAtre employ\xE9.\nEn l\u2019absence de g\xE9n\xE9rateur physique\
+        \ d\u2019al\xE9a, le retraitement algorithmique doit disposer d\u2019une m\xE9\
+        moire non volatile.\nL\u2019\xE9tat interne doit \xEAtre au minimum de 128\
+        \ bits. En l\u2019absence d\u2019un rafra\xEEchissement suffisamment fr\xE9\
+        quent par un g\xE9n\xE9rateur physique d\u2019al\xE9a, cette limite inf\xE9\
+        rieure est port\xE9e \xE0 160 bits.\nLa qualit\xE9 des sources d\u2019al\xE9\
+        a ponctuelles ou r\xE9guli\xE8res utilis\xE9es pour initialiser l\u2019\xE9\
+        tat interne doit \xEAtre suffisante pour assurer \xE0 la valeur initiale de\
+        \ cet\n\xE9tat une entropie voisine de sa longueur, ou tout au moins sup\xE9\
+        rieure au seuil d\xE9fini dans la r\xE8gle R\xE8gleArchiGDA-3 si un raisonnement\
+        \ permet d\u2019\xE9tablir qu\u2019aucune faiblesse n\u2019en r\xE9sulte."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationarchigda
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.4.1
+      ref_id: RecommandationArchiGDA
+      name: RecommandationArchiGDA
+      description: "Il est recommand\xE9 d\u2019utiliser un retraitement avec un \xE9\
+        tat interne d\u2019au moins 256 bits, une m\xE9moire non volatile et une source\
+        \ d\u2019al\xE9a rafra\xEEchissant r\xE9guli\xE8rement l\u2019\xE9tat interne\
+        \ du g\xE9n\xE9rateur."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.4.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.4
+      ref_id: 2.4.2
+      name: "G\xE9n\xE9rateur physique d'al\xE9a"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glearchigva"
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.4.2
+      ref_id: "R\xE8gleArchiGVA"
+      name: "R\xE8gleArchiGVA"
+      description: "Le g\xE9n\xE9rateur physique d\u2019al\xE9a doit disposer d\u2019\
+        une description fonctionnelle. Celle-ci doit notamment indiquer les principes\
+        \ concourant \xE0 la g\xE9n\xE9ration de vrai al\xE9a.\nDes tests statistiques\
+        \ en sortie du g\xE9n\xE9rateur physique ne doivent pas faire appara\xEEtre\
+        \ de d\xE9fauts significatifs dans l\u2019al\xE9a g\xE9n\xE9r\xE9."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationarchigva
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.4.2
+      ref_id: RecommandationArchiGVA
+      name: RecommandationArchiGVA
+      description: "Il est souhaitable qu\u2019un raisonnement permette de justifier\
+        \ la qualit\xE9 de l\u2019al\xE9a produit par le g\xE9n\xE9rateur physique."
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.4.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.4
+      ref_id: 2.4.3
+      name: Retraitement algorithmique
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glealgogda"
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.4.3
+      ref_id: "R\xE8gleAlgoGDA"
+      name: "R\xE8gleAlgoGDA"
+      description: "Les primitives cryptographiques employ\xE9es par le retraitement\
+        \ algorithmique doivent \xEAtre conformes au r\xE9f\xE9rentiel.\nDans l\u2019\
+        hypoth\xE8se o\xF9 l\u2019\xE9tat interne est fiable, m\xEAme en cas de d\xE9\
+        faillance des sources d\u2019al\xE9a pr\xE9sentes, les sorties successives\
+        \ du retraitement doivent \xEAtre parfaitement al\xE9atoires du point de vue\
+        \ de l\u2019attaquant. De plus, la connaissance de ces sorties ne doit pas\
+        \ mettre en danger la confidentialit\xE9 des \xE9tats internes ni des sources\
+        \ d\u2019al\xE9a (fiables).\nEn cas de compromission \xAB simple \xBB affectant\
+        \ ou bien l\u2019\xE9tat interne ou bien les sources d\u2019al\xE9a \xE9ventuellement\
+        \ pr\xE9sentes mais n\u2019affectant pas simultan\xE9ment ces deux types d\u2019\
+        \xE9l\xE9ments, la sortie courante ne doit donner \xE0 l\u2019attaquant aucune\
+        \ information exploitable sur les sorties pass\xE9es."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.5
+      assessable: false
+      depth: 1
+      ref_id: '2.5'
+      name: "Gestion de cl\xE9s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.5
+      ref_id: 2.5.1
+      name: "Cl\xE9s secr\xE8tes sym\xE9triques"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glegestsym"
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.5.1
+      ref_id: "R\xE8gleGestSym"
+      name: "R\xE8gleGestSym"
+      description: "L\u2019emploi d\u2019une m\xEAme cl\xE9 pour plus d\u2019un usage\
+        \ est exclu\nLes \xE9ventuelles cl\xE9s diff\xE9renci\xE9es utilis\xE9es avec\
+        \ un m\xE9canisme conforme au r\xE9f\xE9rentiel doivent \xEAtre g\xE9n\xE9\
+        r\xE9es en utilisant un m\xE9canisme de diversification conforme au r\xE9\
+        f\xE9rentiel.\nLes \xE9ventuelles cl\xE9s d\xE9riv\xE9es doivent \xEAtre g\xE9\
+        n\xE9r\xE9es en utilisant un m\xE9canisme de diversification conforme au r\xE9\
+        f\xE9rentiel."
+      implementation_groups:
+      - "R\xE8gle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:recommandationgestsym
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.5.1
+      ref_id: RecommandationGestSym
+      name: RecommandationGestSym
+      description: "L\u2019emploi de cl\xE9s communes est d\xE9conseill\xE9"
+      implementation_groups:
+      - Recommandation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.5
+      ref_id: 2.5.2
+      name: "Bi-cl\xE9s asym\xE9triques"
+    - urn: "urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:r\xE8\
+        glegestasym"
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-guide-des-mecanismes-cryptographiques:2.5.2
+      ref_id: "R\xE8gleGestAsym"
+      name: "R\xE8gleGestAsym"
+      description: "L\u2019emploi d\u2019une m\xEAme bi-cl\xE9 \xE0 plus d\u2019un\
+        \ usage est exclu.\nLes cl\xE9s hi\xE9rarchiquement importantes, telles que\
+        \ les cl\xE9s racine, doivent \xEAtre g\xE9n\xE9r\xE9es et utilis\xE9es par\
+        \ des m\xE9canismes conformes au r\xE9f\xE9rentiel."
+      implementation_groups:
+      - "R\xE8gle"

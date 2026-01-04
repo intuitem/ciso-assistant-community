@@ -1,8 +1,15 @@
 name: Startup Tests
+permissions:
+  contents: read
 
 on:
   pull_request:
   workflow_dispatch:
+
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
@@ -20,7 +27,19 @@ env:
 jobs:
   startup-functional-test:
     runs-on: ubuntu-24.04
-
+    env:
+      LOG_LEVEL: DEBUG
+      LOG_OUTFILE: ciso-assistant.log
+      DJANGO_DEBUG: "True"
+      DJANGO_SUPERUSER_EMAIL: admin@tests.com
+      DJANGO_SUPERUSER_PASSWORD: 1234
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
+      CISO_ASSISTANT_URL: http://localhost:4173
+      PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
       postgres:
         image: postgres:16
@@ -46,11 +65,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
@@ -62,38 +88,17 @@ jobs:
       - name: Install Playwright Browsers
         working-directory: ${{ env.frontend-directory }}
         run: pnpm exec playwright install
-      - name: Create frontend environment variables file
-        working-directory: ${{ env.frontend-directory }}
-        run: |
-          touch .env
-          echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
-      - name: Create backend environment variables file
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          touch .env
-          echo LOG_LEVEL=DEBUG >> .env
-          echo LOG_OUTFILE=ciso-assistant.log >> .env
-          echo DJANGO_DEBUG=True >> .env
-          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
-          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
-          echo POSTGRES_NAME=postgres >> .env
-          echo POSTGRES_USER=postgres >> .env
-          echo POSTGRES_PASSWORD=postgres >> .env
-          echo DB_HOST=localhost >> .env
-          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
-          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py migrate
+        run: poetry run python manage.py migrate
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
         run: |
-          export $(grep -v '^#' .env | xargs)
           poetry run python manage.py createsuperuser --noinput
           nohup poetry run python manage.py runserver &
       - name: Build frontend
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
         working-directory: ${{ env.frontend-directory }}
         run: pnpm run build
       - name: Run tests
@@ -104,7 +109,9 @@ jobs:
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
         if: ${{ !cancelled() }}
-        run: echo "BRANCH_SANITIZED=$(echo "${{ env.BRANCH_NAME }}" | tr "/()" "_")" >> $GITHUB_ENV
+        run: |
+          SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
@@ -116,6 +123,7 @@ jobs:
 
   startup-docker-compose-test:
     runs-on: ubuntu-24.04
+    timeout-minutes: 22
     env:
       COMPOSE_TEST: True
     steps:
@@ -136,14 +144,9 @@ jobs:
           rm -rf db
           mkdir db
           docker compose -f docker-compose-build.yml up -d
-      - name: Create backend environment variables file
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          touch .env
-          export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
-          sleep 120 # give the migrations time to finish (included in the up on the previous step)
+          sleep 200 # give the migrations time to finish (included in the up on the previous step)
           docker compose -f docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
@@ -163,7 +166,21 @@ jobs:
 
   enterprise-startup-functional-test:
     runs-on: ubuntu-24.04
-
+    timeout-minutes: 19
+    env:
+      LOG_LEVEL: DEBUG
+      LOG_OUTFILE: ciso-assistant.log
+      DJANGO_DEBUG: "True"
+      DJANGO_SUPERUSER_EMAIL: admin@tests.com
+      DJANGO_SUPERUSER_PASSWORD: 1234
+      POSTGRES_NAME: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: localhost
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
+      CISO_ASSISTANT_URL: http://localhost:4173
+      DJANGO_SETTINGS_MODULE: enterprise_core.settings
+      PUBLIC_BACKEND_API_URL: http://localhost:8000/api
     services:
       postgres:
         image: postgres:16
@@ -189,11 +206,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: false
-          installer-parallel: true
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      - name: Configure Poetry to not use virtualenvs
+        run: poetry config virtualenvs.create false
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
       - name: Install backend requirements
         working-directory: ${{ env.backend-directory }}
         run: poetry install
@@ -202,49 +228,33 @@ jobs:
         run: poetry install
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
         run: make
       - name: Install Playwright Browsers
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright install
-      - name: Create frontend environment variables file
-        working-directory: ${{ env.enterprise-frontend-build-directory }}
-        run: |
-          touch .env
-          echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
-      - name: Create backend environment variables file
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          touch .env
-          echo LOG_LEVEL=DEBUG >> .env
-          echo LOG_OUTFILE=ciso-assistant.log >> .env
-          echo DJANGO_DEBUG=True >> .env
-          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
-          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
-          echo POSTGRES_NAME=postgres >> .env
-          echo POSTGRES_USER=postgres >> .env
-          echo POSTGRES_PASSWORD=postgres >> .env
-          echo DB_HOST=localhost >> .env
-          echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
-          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
-          echo DJANGO_SETTINGS_MODULE=enterprise_core.settings >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
-        run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py migrate --settings=${{ env.enterprise-backend-settings-module }}
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
+        run: poetry run python manage.py migrate --settings="$SETTINGS_MODULE"
       - name: Start test server
         working-directory: ${{ env.backend-directory }}
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          export $(grep -v '^#' .env | xargs)
-          poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }}
-          nohup poetry run python manage.py runserver --settings=${{ env.enterprise-backend-settings-module }} &
+          poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE"
+          nohup poetry run python manage.py runserver --settings="$SETTINGS_MODULE" &
       - name: Run tests
         working-directory: ${{ env.enterprise-frontend-build-directory }}
         run: pnpm exec playwright test tests/functional/startup.test.ts
       - name: Set current date as env variable
         run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
       - name: Sanitize branch name
-        run: echo "BRANCH_SANITIZED=$(echo "${{ env.BRANCH_NAME }}" | tr "/()" "_")" >> $GITHUB_ENV
+        run: |
+          SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
@@ -271,15 +281,12 @@ jobs:
         run: pnpm exec playwright install
       - name: Build the Docker app
         run: docker compose -f enterprise/docker-compose-build.yml up -d
-      - name: Create backend environment variables file
-        working-directory: ${{ env.backend-directory }}
-        run: |
-          touch .env
-          export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
+        env:
+          SETTINGS_MODULE: ${{ env.enterprise-backend-settings-module }}
         run: |
-          sleep 120 # give the migrations time to finish (included in the up on the previous step)
-          docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput --settings=${{ env.enterprise-backend-settings-module }} && exit 0"
+          sleep 200 # give the migrations time to finish (included in the up on the previous step)
+          docker compose -f enterprise/docker-compose-build.yml exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 poetry run python manage.py createsuperuser --noinput --settings="$SETTINGS_MODULE" && exit 0"
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
         run: |

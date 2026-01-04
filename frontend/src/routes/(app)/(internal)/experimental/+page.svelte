@@ -1,33 +1,34 @@
 <script lang="ts">
 	import Article from '$lib/components/DataViz/Article.svelte';
 	import { pageTitle } from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
 
 	$pageTitle = 'Experimental';
 </script>
 
 <div class="bg-white grid grid-cols-2 p-4 gap-4">
 	<Article
-		title="Frameworks mapping"
-		desc="Visualize applied mapping data as a graph"
-		link="experimental/mapping"
-		tags={['analysis', 'mapping']}
+		title={m.requirementsExplorer()}
+		desc={m.visualizeRequirements()}
+		link="/requirement-assessments"
+		tags={['analysis', 'audit']}
 	/>
 	<Article
-		title="Assets explorer"
-		desc="Visualize assets and their relationships"
-		link="assets/graph"
-		tags={['analysis', 'assets']}
+		title={m.findings()}
+		desc={m.findingsExplorer()}
+		link="/findings"
+		tags={['analysis', 'findings']}
 	/>
 	<Article
-		title="Ecosystem radar"
-		desc="Visualize the stakeholders radar"
-		link="experimental/ecosystem"
-		tags={['analysis', 'tprm']}
+		title="Batch Creation"
+		desc="Create multiple assets, entities, or feared events at once from a simple text list"
+		link="/experimental/batch-create"
+		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
 	/>
 	<Article
-		title="Data Import Wizard"
-		desc="Manage data import for various object"
-		link="experimental/data-wizard"
-		tags={['data', 'automation', 'pro']}
+		title="Yearly Tasks Review"
+		desc="Review all recurrent tasks grouped by folder for yearly planning"
+		link="/experimental/yearly-tasks-review"
+		tags={['tasks', 'planning', 'review', 'PRO']}
 	/>
 </div>

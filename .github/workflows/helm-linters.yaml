@@ -1,4 +1,6 @@
 name: Helm Linters
+permissions:
+  contents: read
 
 on:
   pull_request:
@@ -7,6 +9,11 @@ on:
     paths:
       - "charts/ciso-assistant-next/**"
   workflow_dispatch:
+
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   helm-lint:
@@ -21,6 +28,7 @@ jobs:
       - name: Lint Helm Chart
         run: |
           cd charts
+          helm dependency build ciso-assistant-next
           helm lint ciso-assistant-next
 
   helm-check-lock:

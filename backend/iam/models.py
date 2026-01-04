@@ -6,18 +6,20 @@ from typing import Any, List, Self, Tuple, Generator
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
-from django.db import models
+from django.db import models, transaction
+from django.db.models import Q, F, Prefetch
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
-from ciso_assistant import settings
+from knox.models import AuthToken
 from core.utils import (
     BUILTIN_USERGROUP_CODENAMES,
     BUILTIN_ROLE_CODENAMES,
 )
 from core.base_models import AbstractBaseModel, NameDescriptionMixin
+from core.utils import UserGroupCodename, RoleCodename
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
@@ -36,13 +38,34 @@ from ciso_assistant.settings import (
     EMAIL_USE_TLS,
     EMAIL_USE_TLS_RESCUE,
 )
+from django.conf import settings
 
 import structlog
-from django.utils import translation
 
 logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
+from allauth.mfa.models import Authenticator
+
+ALLOWED_PERMISSION_APPS = (
+    "core",
+    "ebios_rm",
+    "tprm",
+    "privacy",
+    "resilience",
+    "crq",
+    "pmbok",
+    "iam",
+)
+
+IGNORED_PERMISSION_MODELS = (
+    "personalaccesstoken",
+    "role",
+    "roleassignment",
+    "usergroup",
+    "ssosettings",
+    "historicalmetric",
+)
 
 
 def _get_root_folder():
@@ -93,6 +116,13 @@ class Folder(NameDescriptionMixin):
     )
     builtin = models.BooleanField(default=False)
 
+    filtering_labels = models.ManyToManyField(
+        "core.FilteringLabel",
+        blank=True,
+        verbose_name=_("Labels"),
+        related_name="folders",
+    )
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -120,6 +150,16 @@ class Folder(NameDescriptionMixin):
         current_folder = self
         while (current_folder := current_folder.parent_folder) is not None:
             yield current_folder
+
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Self]:
+        """
+        Get the full path of the folder including its parents.
+        If include_root is True, the root folder is included in the path.
+        """
+        folders = ([self] + [f for f in self.get_parent_folders()])[::-1]
+        if include_root:
+            return folders
+        return folders[1:] if len(folders) > 1 else folders
 
     @staticmethod
     def _navigate_structure(start, path):
@@ -178,6 +218,115 @@ class Folder(NameDescriptionMixin):
         # If no folder is found after trying all paths, handle this case (e.g., return None or raise an error).
         return None
 
+    def get_user_roles(self) -> dict[str, list[str]]:
+        """
+        For a given folder, retrieves all users with roles on it
+        and returns a dictionary mapping each user's email to a list of their
+        role codenames.
+
+        This function correctly handles roles that are:
+        - Assigned directly to a user.
+        - Assigned to a user group the user belongs to.
+        - Inherited from parent folders via recursive role assignments.
+        """
+        folder_path_ids = [self.id] + [f.id for f in self.get_parent_folders()]
+
+        role_assignment_filter = Q(is_recursive=False, perimeter_folders=self) | Q(
+            is_recursive=True, perimeter_folders__id__in=folder_path_ids
+        )
+
+        direct_perms_qs = (
+            RoleAssignment.objects.filter(role_assignment_filter, user__isnull=False)
+            .annotate(user_pk=F("user__id"))
+            .order_by()
+        )
+
+        # Query for roles granted to users via groups.
+        # The ORM traverses the UserGroup -> User relationship.
+        group_perms_qs = (
+            RoleAssignment.objects.filter(
+                role_assignment_filter, user_group__isnull=False
+            )
+            .annotate(user_pk=F("user_group__user__id"))
+            .order_by()
+        )
+
+        # Combine both querysets into a single one.
+        all_roles_qs = direct_perms_qs.union(group_perms_qs)
+
+        user_roles = defaultdict(list)
+        for item in all_roles_qs:
+            # Filter out nulls that can occur if a role has no roles
+            # or a group has no users.
+            if item.user_pk and item.role:
+                user_roles[item.user_pk].append(item.role)
+
+        return dict(user_roles)
+
+    @staticmethod
+    def create_default_ug_and_ra(folder: Self):
+        if folder.content_type == Folder.ContentType.DOMAIN:
+            readers = UserGroup.objects.create(
+                name=UserGroupCodename.READER, folder=folder, builtin=True
+            )
+            approvers = UserGroup.objects.create(
+                name=UserGroupCodename.APPROVER, folder=folder, builtin=True
+            )
+            analysts = UserGroup.objects.create(
+                name=UserGroupCodename.ANALYST, folder=folder, builtin=True
+            )
+            managers = UserGroup.objects.create(
+                name=UserGroupCodename.DOMAIN_MANAGER, folder=folder, builtin=True
+            )
+            ra1 = RoleAssignment.objects.create(
+                user_group=readers,
+                role=Role.objects.get(name=RoleCodename.READER),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra1.perimeter_folders.add(folder)
+            ra2 = RoleAssignment.objects.create(
+                user_group=approvers,
+                role=Role.objects.get(name=RoleCodename.APPROVER),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra2.perimeter_folders.add(folder)
+            ra3 = RoleAssignment.objects.create(
+                user_group=analysts,
+                role=Role.objects.get(name=RoleCodename.ANALYST),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra3.perimeter_folders.add(folder)
+            ra4 = RoleAssignment.objects.create(
+                user_group=managers,
+                role=Role.objects.get(name=RoleCodename.DOMAIN_MANAGER),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra4.perimeter_folders.add(folder)
+            # Clear the cache after a new folder is created - purposely clearing everything
+
+            # Create a UG and RA for each non-builtin role (idempotent)
+            with transaction.atomic():
+                for role in Role.objects.filter(builtin=False):
+                    ug, _ = UserGroup.objects.get_or_create(
+                        name=role.name, folder=folder, defaults={"builtin": False}
+                    )
+                    ra, created = RoleAssignment.objects.get_or_create(
+                        user_group=ug,
+                        role=role,
+                        folder=Folder.get_root_folder(),
+                        defaults={"builtin": False, "is_recursive": True},
+                    )
+                    # Ensure perimeter folder link exists
+                    ra.perimeter_folders.add(folder)
+
 
 class FolderMixin(models.Model):
     """
@@ -190,6 +339,12 @@ class FolderMixin(models.Model):
         related_name="%(class)s_folder",
         default=Folder.get_root_folder_id,
     )
+
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
+        folders = ([self.folder] + [f for f in self.folder.get_parent_folders()])[::-1]
+        if include_root:
+            return folders
+        return folders[1:] if len(folders) > 1 else folders
 
     class Meta:
         abstract = True
@@ -227,7 +382,7 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
     def __str__(self) -> str:
         if self.builtin:
             return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
-        return self.name
+        return f"{self.folder.name} - {self.name}"
 
     def get_name_display(self) -> str:
         return self.name
@@ -235,7 +390,9 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
     def get_localization_dict(self) -> dict:
         return {
             "folder": self.folder.name,
-            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name),
+            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name)
+            if self.builtin
+            else self.name,
         }
 
     @property
@@ -261,7 +418,6 @@ class UserManager(BaseUserManager):
         On mail error, raise a corresponding exception, but the user is properly created
         TODO: find a better way to manage mailing error
         """
-
         validate_email(email)
         email = self.normalize_email(email)
         user = self.model(
@@ -270,10 +426,16 @@ class UserManager(BaseUserManager):
             last_name=extra_fields.get("last_name", ""),
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
+            observation=extra_fields.get("observation"),
             folder=_get_root_folder(),
+            keep_local_login=extra_fields.get("keep_local_login", False),
+            expiry_date=extra_fields.get("expiry_date"),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
-        user.password = make_password(password if password else str(uuid.uuid4()))
+        if password:
+            user.password = make_password(password)
+        else:
+            user.set_unusable_password()
         user.save(using=self._db)
         if initial_group:
             initial_group.user_set.add(user)
@@ -290,9 +452,14 @@ class UserManager(BaseUserManager):
         logger.info("user created sucessfully", user=user)
 
         if mailing:
+            template_name = (
+                "registration/first_connexion_email.html"
+                if user.is_local
+                else "registration/first_connexion_email_sso.html"
+            )
             try:
                 user.mailing(
-                    email_template_name="registration/first_connexion_email.html",
+                    email_template_name=template_name,
                     subject=_("Welcome to Ciso Assistant!"),
                 )
             except Exception as exception:
@@ -323,6 +490,7 @@ class UserManager(BaseUserManager):
             password=password,
             mailing=not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
+            keep_local_login=True,
             **extra_fields,
         )
         return superuser
@@ -345,7 +513,12 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     email = models.CharField(max_length=100, unique=True)
     first_login = models.BooleanField(default=True)
     preferences = models.JSONField(default=dict)
-    is_sso = models.BooleanField(default=False)
+    keep_local_login = models.BooleanField(
+        default=False,
+        help_text=_(
+            "If True allow the user to log in using the normal login form even with SSO forced."
+        ),
+    )
     is_third_party = models.BooleanField(default=False)
     is_active = models.BooleanField(
         _("active"),
@@ -372,6 +545,14 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "granted to each of their user groups."
         ),
     )
+    observation = models.TextField(
+        null=True, blank=True, verbose_name="Notes about a user"
+    )
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+    )
     objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
@@ -388,11 +569,53 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         #        swappable = 'AUTH_USER_MODEL'
         permissions = (("backup", "backup"), ("restore", "restore"))
 
+    @classmethod
+    def visible_users(
+        cls, for_user: AbstractBaseUser | AnonymousUser, view_all_users: bool
+    ):
+        """
+        Return a queryset of users visible to `for_user`, always including `for_user`.
+        Mirrors the logic used in UserViewSet.get_queryset().
+        """
+        if not getattr(for_user, "is_authenticated", False):
+            return User.objects.none()
+
+        (viewable_user_group_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), for_user, UserGroup
+        )
+
+        if view_all_users:
+            base_qs = User.objects.all()
+
+        else:
+            (visible_users_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), for_user, User
+            )
+            base_qs = (
+                User.objects.filter(id__in=visible_users_ids)
+                | User.objects.filter(pk=for_user.pk)
+            ).distinct()
+
+        # 🔒 Filtered prefetch for serializer
+        return base_qs.prefetch_related(
+            Prefetch(
+                "user_groups",
+                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
+                    "id", "builtin"
+                ),  # minimal
+            )
+        )
+
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
         logger.info("user deleted", user=self)
 
     def save(self, *args, **kwargs):
+        if self.is_superuser and not self.is_active:
+            # avoid deactivation of superuser
+            self.is_active = True
+        if not self.is_local:
+            self.set_unusable_password()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
 
@@ -440,13 +663,15 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 fail_silently=False,
                 html_message=email,
             )
-            logger.info("email sent", recipient=self.email, subject=subject)
+            logger.info(
+                "Email sent successfully", recipient=self.email, subject=subject
+            )
         except Exception as primary_exception:
             logger.error(
-                "primary mailer failure, trying rescue",
+                "Primary mail server failure, trying rescue",
                 recipient=self.email,
                 subject=subject,
-                error=primary_exception,
+                error=str(primary_exception),
                 email_host=EMAIL_HOST,
                 email_port=EMAIL_PORT,
                 email_host_user=EMAIL_HOST_USER,
@@ -468,13 +693,17 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                             [self.email],
                             connection=new_connection,
                         ).send()
-                    logger.info("email sent", recipient=self.email, subject=subject)
-                except Exception as rescue_exception:
-                    logger.error(
-                        "rescue mailer failure",
+                    logger.info(
+                        "Email sent via rescue server",
                         recipient=self.email,
                         subject=subject,
-                        error=rescue_exception,
+                    )
+                except Exception as rescue_exception:
+                    logger.error(
+                        "Rescue mail server failure",
+                        recipient=self.email,
+                        subject=subject,
+                        error=str(rescue_exception),
                         email_host=EMAIL_HOST_RESCUE,
                         email_port=EMAIL_PORT_RESCUE,
                         email_username=EMAIL_HOST_USER_RESCUE,
@@ -537,6 +766,26 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             for perm in permissions
         )
 
+    @property
+    def is_local(self) -> bool:
+        """
+        Indicates whether the user can log in using a local password
+        """
+        from global_settings.models import GlobalSettings
+
+        try:
+            sso_settings = GlobalSettings.objects.get(
+                name=GlobalSettings.Names.SSO
+            ).value
+        except GlobalSettings.DoesNotExist:
+            sso_settings = {}
+
+        return self.is_active and (
+            self.keep_local_login
+            or not sso_settings.get("is_enabled", False)
+            or not sso_settings.get("force_sso", False)
+        )
+
     @classmethod
     def get_editors(cls) -> List[Self]:
         return [
@@ -544,6 +793,13 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             for user in cls.objects.all()
             if user.is_editor and not user.is_third_party
         ]
+
+    def has_mfa_enabled(self) -> bool:
+        """
+        Check if the user has Multi-Factor Authentication (MFA) enabled.
+        Returns True if the user has any active MFA authenticators (TOTP, WebAuthn, etc.).
+        """
+        return Authenticator.objects.filter(user=self).exists()
 
 
 class Role(NameDescriptionMixin, FolderMixin):
@@ -560,6 +816,8 @@ class Role(NameDescriptionMixin, FolderMixin):
         if self.builtin:
             return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
         return self.name
+
+    fields_to_check = ["name"]
 
 
 class RoleAssignment(NameDescriptionMixin, FolderMixin):
@@ -598,20 +856,19 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         Determines if a user has specified permission on a specified folder
         """
-        add_tag_permission = Permission.objects.get(codename="add_filteringlabel")
+        add_filteringlabel = Permission.objects.get(codename="add_filteringlabel")
         for ra in RoleAssignment.get_role_assignments(user):
-            if (
-                (perm == add_tag_permission) and perm in ra.role.permissions.all()
-            ):  # Allow any user to add tags if he has the permission
-                return True
-            f = folder
-            while f is not None:
-                if (
-                    f in ra.perimeter_folders.all()
-                    and perm in ra.role.permissions.all()
-                ):
+            ra_perimeter = ra.perimeter_folders.all()
+            if perm in ra.role.permissions.all():
+                if perm == add_filteringlabel:
+                    # Allow any user to add filtering labels if he has the permission in any folder
+                    # Necessary as the labels are stored in global folder
                     return True
-                f = f.parent_folder
+                f = folder
+                while f is not None:
+                    if f in ra_perimeter:
+                        return True
+                    f = f.parent_folder
         return False
 
     @staticmethod
@@ -624,11 +881,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         obj = object_type.objects.filter(id=id).first()
         if not obj:
             return False
-        class_name = object_type.__name__.lower()
-        permission = Permission.objects.get(codename="view_" + class_name)
-        return RoleAssignment.is_access_allowed(
-            user, permission, Folder.get_folder(obj)
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_folder(obj), user, object_type
         )
+        return id in viewable_ids
 
     @staticmethod
     def get_accessible_folders(
@@ -682,15 +938,26 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Also retrieve published objects in view
         """
         class_name = object_type.__name__.lower()
-        permission_view = Permission.objects.get(codename="view_" + class_name)
-        permission_change = Permission.objects.get(codename="change_" + class_name)
-        permission_delete = Permission.objects.get(codename="delete_" + class_name)
+        permissions_map = {
+            p.codename: p
+            for p in Permission.objects.filter(
+                codename__in=[
+                    f"view_{class_name}",
+                    f"change_{class_name}",
+                    f"delete_{class_name}",
+                    "view_folder",
+                ]
+            )
+        }
+        permission_view = permissions_map[f"view_{class_name}"]
+        permission_change = permissions_map[f"change_{class_name}"]
+        permission_delete = permissions_map[f"delete_{class_name}"]
         permissions = set([permission_view, permission_change, permission_delete])
         result_view = set()
         result_change = set()
         result_delete = set()
 
-        ref_permission = Permission.objects.get(codename="view_folder")
+        ref_permission = permissions_map["view_folder"]
         perimeter = {folder} | set(folder.get_sub_folders())
         # Process role assignments
         role_assignments = [
@@ -710,6 +977,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             for p in permissions & ra_permissions:
                 for f in target_folders:
                     result_folders[f].add(p)
+
         for f in result_folders:
             if hasattr(object_type, "folder"):
                 objects_ids = object_type.objects.filter(folder=f).values_list(
@@ -729,8 +997,18 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 ).values_list("id", flat=True)
             elif hasattr(object_type, "parent_folder"):
                 objects_ids = [f.id]
+            elif class_name == "permission":
+                # Permissions have no folder, so we don't filter them, we just rely on view_permission
+                objects_ids = (
+                    Permission.objects.filter(
+                        content_type__app_label__in=ALLOWED_PERMISSION_APPS
+                    )
+                    .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
+                    .values_list("id", flat=True)
+                )
             else:
                 raise NotImplementedError("type not supported")
+
             if permission_view in result_folders[f]:
                 result_view.update(objects_ids)
             if permission_change in result_folders[f]:
@@ -765,22 +1043,43 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     @staticmethod
     def get_role_assignments(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all role assignments attached to a user directly or indirectly"""
-        assignments = list(principal.roleassignment_set.all())
+        assignments = list(
+            principal.roleassignment_set.select_related("role").prefetch_related(
+                "role__permissions", "perimeter_folders"
+            )
+        )
         if hasattr(principal, "user_groups"):
             for user_group in principal.user_groups.all():
-                assignments += list(user_group.roleassignment_set.all())
-        assignments += list(principal.roleassignment_set.all())
+                assignments += list(
+                    user_group.roleassignment_set.select_related(
+                        "role"
+                    ).prefetch_related("role__permissions", "perimeter_folders")
+                )
         return assignments
 
     @staticmethod
     def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup):
         """get all permissions attached to a user directly or indirectly"""
         permissions = {}
-        for ra in RoleAssignment.get_role_assignments(principal):
-            for p in ra.role.permissions.all():
-                permission_dict = {p.codename: {"str": str(p)}}
-                permissions.update(permission_dict)
 
+        # Build the filter query based on principal type
+        if isinstance(principal, UserGroup):
+            # If principal is a UserGroup, only look for role assignments to that group
+            query_filter = models.Q(user_group=principal)
+        else:
+            # If principal is a User, look for direct assignments and assignments via user groups
+            query_filter = models.Q(user=principal)
+            if hasattr(principal, "user_groups"):
+                query_filter |= models.Q(user_group__in=principal.user_groups.all())
+
+        permission_rows = (
+            RoleAssignment.objects.filter(query_filter)
+            .values_list("role__permissions__codename", "role__permissions__name")
+            .distinct()
+        )
+        for codename, name in permission_rows:
+            if codename:
+                permissions[codename] = {"str": name}
         return permissions
 
     @staticmethod
@@ -815,8 +1114,37 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return permissions
 
 
+class PersonalAccessToken(models.Model):
+    """
+    Personal Access Token model.
+    """
+
+    name = models.CharField(max_length=255)
+    auth_token = models.ForeignKey(AuthToken, on_delete=models.CASCADE)
+
+    @property
+    def created(self):
+        return self.auth_token.created
+
+    @property
+    def expiry(self):
+        return self.auth_token.expiry
+
+    @property
+    def digest(self):
+        return self.auth_token.digest
+
+    def __str__(self):
+        return f"{self.auth_token.user.email} : {self.name} : {self.auth_token.digest}"
+
+
+common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     User,
     m2m_fields={"user_groups"},
-    exclude_fields=["created_at", "updated_at", "password"],
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Folder,
+    exclude_fields=common_exclude,
 )
