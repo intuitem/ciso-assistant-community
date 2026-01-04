@@ -1,3 +1,4 @@
+convert_library_version: 'v1 ; Compat Mode: [False]'
 urn: urn:intuitem:risk:library:Framework-Nazionale-C-DP
 locale: it
 ref_id: Framework-Nazionale-C-DP
@@ -9,8 +10,8 @@ description: Il Framework Nazionale per la Cybersecurity e la Data Protection, n
   per organizzare i processi di cybersecurity adatto alle organizzazioni pubbliche
   e private, di qualunque dimensione. https://www.cybersecurityframework.it/
 copyright: ACN
-version: 1
-publication_date: 2025-04-20
+version: 3
+publication_date: 2025-12-10
 provider: ACN
 packager: matteo.palli
 objects:
@@ -49,14 +50,14 @@ objects:
         \ e requisiti legali, normativi e contrattuali - che influisce sulle decisioni\
         \ di gestione del rischio di cybersecurity dell'organizzazione \xE8 compreso."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc
       ref_id: GV.OC-01
       description: "La missione dell'organizzazione \xE8 compresa e informa la gestione\
         \ del rischio di cybersecurity."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc
       ref_id: GV.OC-02
@@ -64,7 +65,7 @@ objects:
         e aspettative riguardo la gestione del rischio di cybersecurity sono comprese
         e considerate.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc
       ref_id: GV.OC-03
@@ -72,28 +73,25 @@ objects:
         \ compresi gli obblighi in materia di privacy e libert\xE0 civili, sono compresi\
         \ e gestiti."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc
       ref_id: GV.OC-04
       description: "Gli obiettivi, le capacit\xE0 e i servizi critici dai quali gli\
         \ stakeholder dipendono o che si aspettano dall'organizzazione sono compresi\
         \ e comunicati."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc-04.1
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc-04
       ref_id: GV.OC-04.1
       description: "\xC8 mantenuto un elenco aggiornato dei sistemi informativi e\
-        \ di rete rilevanti"
+        \ di rete rilevanti."
       implementation_groups:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc-05
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.oc
       ref_id: GV.OC-05
@@ -109,29 +107,26 @@ objects:
         \ la propensione al rischio, e le assunzioni dell'organizzazione sono stabilite,\
         \ comunicate e utilizzate per supportare le decisioni sul rischio operativo."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm
       ref_id: GV.RM-01
       description: Gli obiettivi di gestione del rischio sono stabiliti e accettati
         dagli stakeholder dell'organizzazione.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm
       ref_id: GV.RM-02
       description: Le dichiarazioni sulla tolleranza e la propensione al rischio sono
         stabilite, comunicate e mantenute.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm
       ref_id: GV.RM-03
       description: "Le attivit\xE0 e gli esiti della gestione del rischio di cybersecurity\
         \ sono parte integrante dei processi di gestione del rischio dell'organizzazione."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-03.1
       assessable: true
       depth: 4
@@ -140,20 +135,20 @@ objects:
       description: "Nell'ambito dei processi di gestione del rischio del soggetto\
         \ NIS e nel rispetto delle politiche di cui alla misura GV.PO-01, \xE8 definito,\
         \ attuato, aggiornato e documentato un piano di gestione dei rischi per la\
-        \ sicurezza informatica per identificare, analizzare, valutare, trattare e\
-        \ monitorare i rischi."
+        \ sicurezza informatica\_per identificare, analizzare, valutare, trattare\
+        \ e monitorare i rischi."
       implementation_groups:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm
       ref_id: GV.RM-04
       description: "\xC8 stabilita e comunicata la direzione strategica che descrive\
         \ le opzioni appropriate di risposta al rischio."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-05
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm
       ref_id: GV.RM-05
@@ -161,14 +156,14 @@ objects:
         per il rischio di cybersecurity, incluso il rischio derivante dai fornitori
         e da altre terze parti.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-06
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm
       ref_id: GV.RM-06
       description: "\xC8 stabilito e comunicato un metodo standardizzato per calcolare,\
         \ documentare, categorizzare e prioritizzare i rischi di cybersecurity."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm-07
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rm
       ref_id: GV.RM-07
@@ -184,7 +179,7 @@ objects:
         \ correlati poteri in materia di cybersecurity per promuovere l'accountability,\
         \ la valutazione delle prestazioni e il miglioramento continuo."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr
       ref_id: GV.RR-01
@@ -192,16 +187,13 @@ objects:
         (accountable) per il rischio di cybersecurity e promuovono una cultura consapevole
         del rischio, etica e in continuo miglioramento.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr
       ref_id: GV.RR-02
       description: "I ruoli, le responsabilit\xE0 e i correlati poteri relativi alla\
         \ gestione del rischio di cybersecurity sono stabiliti, comunicati, compresi\
         \ e applicati."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-02.1
       assessable: true
       depth: 4
@@ -231,9 +223,9 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-02
       ref_id: GV.RR-02.3
       description: "All\u2019interno dell\u2019organizzazione per la sicurezza informatica\
-        \ di cui al punto GV.RR-02.1, sono inclusi il punto di contatto, e almeno\
-        \ un suo sostituto, di cui alla determina adottata ai sensi dell\u2019articolo\
-        \ 7, comma 6 del decreto NIS."
+        \ di cui al punto GV.RR-02.1, sono inclusi il punto di contatto e il suo sostituto,\
+        \ il referente CSIRT e gli eventuali suoi sostituti, di cui alla determinazione\
+        \ adottata ai sensi dell\u2019articolo 7, comma 6 del decreto NIS.\_\_\_"
       implementation_groups:
       - I
       - E
@@ -251,7 +243,7 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr
       ref_id: GV.RR-03
@@ -259,14 +251,11 @@ objects:
         \ di gestione del rischio di cybersecurity, ai ruoli, alle responsabilit\xE0\
         \ e alle politiche."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr
       ref_id: GV.RR-04
       description: "La cybersecurity \xE8 inclusa nelle pratiche delle risorse umane."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr-04.1
       assessable: true
       depth: 4
@@ -323,7 +312,7 @@ objects:
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-gv.rr-05
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.rr
       ref_id: DP-GV.RR-05
@@ -339,171 +328,29 @@ objects:
       description: "La politica di cybersecurity dell'organizzazione \xE8 stabilita,\
         \ comunicata e applicata."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po
       ref_id: GV.PO-01
       description: "La politica per la gestione del rischio di cybersecurity \xE8\
         \ stabilita in base al contesto organizzativo, alla strategia di cybersecurity\
         \ e alle priorit\xE0, ed \xE8 comunicata e applicata."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1
-      assessable: false
+      assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
       ref_id: GV.PO-01.1
-      description: 'Sono adottate e documentate politiche di sicurezza informatica
-        per almeno i seguenti ambiti:'
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.a
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.a
-      description: a) gestione del rischio;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.b
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.b
-      description: "b) ruoli e responsabilit\xE0;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.c
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.c
-      description: "c) affidabilit\xE0 delle risorse umane;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.d
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.d
-      description: "d) conformit\xE0 e audit di sicurezza;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.e
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.e
-      description: e) gestione dei rischi per la sicurezza informatica della catena
-        di approvvigionamento;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.f
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.f
-      description: f) gestione degli asset;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.g
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.g
-      description: "g) gestione delle vulnerabilit\xE0;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.h
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.h
-      description: "h) continuit\xE0 operativa, ripristino in caso di disastro e gestione\
-        \ delle crisi;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.i
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.i
-      description: "i) gestione dell'autenticazione, delle identit\xE0 digitali e\
-        \ del controllo accessi;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.j
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.j
-      description: j) sicurezza fisica;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.k
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.k
-      description: k) formazione del personale e consapevolezza;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.l
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.l
-      description: l) sicurezza dei dati;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.m
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.m
-      description: m) sviluppo, configurazione, manutenzione e dismissione dei sistemi
-        informativi e di rete;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.n
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.n
-      description: n) protezione delle reti e delle comunicazioni;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.o
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.o
-      description: o) monitoraggio degli eventi di sicurezza;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01.1.p
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
-      ref_id: GV.PO-01.1.p
-      description: p) risposta agli incidenti e ripristino.
+      description: "Sono adottate e documentate politiche di sicurezza informatica\
+        \ per almeno i seguenti ambiti:\na) gestione del rischio;\nb) ruoli e responsabilit\xE0\
+        ;\nc) affidabilit\xE0 delle risorse umane;\nd) conformit\xE0 e audit di sicurezza;\n\
+        e) gestione dei rischi per la sicurezza informatica della catena di approvvigionamento;\n\
+        f) gestione degli asset;\ng) gestione delle vulnerabilit\xE0;\nh) continuit\xE0\
+        \ operativa, ripristino in caso di disastro e gestione delle crisi informatiche;\n\
+        i) gestione dell'autenticazione, delle identit\xE0 digitali e del controllo\
+        \ accessi;\nj) sicurezza fisica;\nk) formazione del personale e consapevolezza;\n\
+        l) sicurezza dei dati;\nm) sviluppo, configurazione, manutenzione e dismissione\
+        \ dei sistemi informativi e di rete;\nn) protezione delle reti e delle comunicazioni;\n\
+        o) monitoraggio degli eventi di sicurezza;\np) risposta agli incidenti e ripristino."
       implementation_groups:
       - I
       - E
@@ -513,7 +360,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
       ref_id: GV.PO-01.2
       description: Per gli ambiti di cui al punto GV.PO-01.1 sono incluse almeno le
-        politiche in relazione ai requisiti indicati nella tabella 1 in appendice
+        politiche in relazione ai requisiti indicati nella tabella 1 in Appendice
         al presente allegato
       implementation_groups:
       - I
@@ -523,22 +370,21 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-01
       ref_id: GV.PO-01.3
-      description: Le politiche di cui al punto GV.PO-01.1 sono approvate dagli organi
-        di amministrazione e direttivi.
+      description: "Le politiche di cui al punto 1 sono approvate dagli organi di\
+        \ amministrazione e direttivi e rese note alle articolazioni competenti del\
+        \ soggetto NIS tenuto anche conto della necessit\xE0 di conoscere (need to\
+        \ know)."
       implementation_groups:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po
       ref_id: GV.PO-02
       description: "La politica per la gestione del rischio di cybersecurity \xE8\
         \ revisionata, aggiornata, comunicata e applicata per riflettere i cambiamenti\
         \ nei requisiti, nelle minacce, nella tecnologia e nella missione dell'organizzazione."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.po-02.1
       assessable: true
       depth: 4
@@ -582,21 +428,21 @@ objects:
         \ che interessano l'intera organizzazione e le relative prestazioni sono utilizzati\
         \ per informare, migliorare e adeguare la strategia di gestione del rischio."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.ov-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.ov
       ref_id: GV.OV-01
       description: I risultati della strategia di gestione del rischio di cybersecurity
         sono revisionati per informare e adeguare la strategia e la direzione.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.ov-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.ov
       ref_id: GV.OV-02
       description: "La strategia di gestione del rischio di cybersecurity \xE8 revisionata\
         \ e adeguata per garantire la copertura dei requisiti e dei rischi dell'organizzazione."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.ov-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.ov
       ref_id: GV.OV-03
@@ -612,16 +458,13 @@ objects:
         di approvvigionamento sono identificati, stabiliti, gestiti, monitorati e
         migliorati dagli stakeholder dell'organizzazione.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc
       ref_id: GV.SC-01
       description: Sono stabiliti e accettati dagli stakeholder dell'organizzazione
         il programma, la strategia, gli obiettivi, le politiche e i processi di gestione
         del rischio di cybersecurity della catena di approvvigionamento.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-01.1
       assessable: true
       depth: 4
@@ -671,16 +514,13 @@ objects:
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc
       ref_id: GV.SC-02
       description: "I ruoli e le responsabilit\xE0 in materia di cybersecurity per\
         \ fornitori, clienti e partner sono stabiliti, comunicati e coordinati internamente\
         \ ed esternamente."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-02.1
       assessable: true
       depth: 4
@@ -705,7 +545,7 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc
       ref_id: GV.SC-03
@@ -713,15 +553,12 @@ objects:
         \ \xE8 integrata nella gestione del rischio dell'organizzazione e di cybersecurity,\
         \ nella valutazione del rischio e nei processi di miglioramento."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc
       ref_id: GV.SC-04
       description: "I fornitori sono noti e prioritizzati in base alla criticit\xE0\
         ."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-04.1
       assessable: true
       depth: 4
@@ -735,16 +572,13 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-05
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc
       ref_id: GV.SC-05
       description: I requisiti per affrontare i rischi di cybersecurity nella catena
         di approvvigionamento sono stabiliti, prioritizzati e integrati nei contratti
         e in altri tipi di accordi con i fornitori e altre terze parti rilevanti.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-05.1
       assessable: true
       depth: 4
@@ -759,23 +593,20 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-06
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc
       ref_id: GV.SC-06
       description: Pianificazione e due diligence sono svolte per ridurre i rischi
         prima di intraprendere rapporti formali con i fornitori o altre terze parti.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-07
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc
       ref_id: GV.SC-07
       description: I rischi posti da un fornitore, dai suoi prodotti e servizi e da
         altre terze parti sono compresi, registrati, prioritizzati, valutati, trattati
         e monitorati nel corso della relazione.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-07.1
       assessable: true
       depth: 4
@@ -804,14 +635,14 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-08
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc
       ref_id: GV.SC-08
       description: "I fornitori e le altre terze parti rilevanti sono inclusi nelle\
         \ attivit\xE0 di pianificazione, risposta e ripristino relative agli incidenti."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-09
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc
       ref_id: GV.SC-09
@@ -820,7 +651,7 @@ objects:
         e le loro prestazioni sono monitorate durante l'intero ciclo di vita dei prodotti
         e dei servizi tecnologici.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc-10
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:gv.sc
       ref_id: GV.SC-10
@@ -844,14 +675,11 @@ objects:
         di business sono identificati e gestiti in coerenza con la loro importanza
         rispetto agli obiettivi organizzativi e alla strategia sul rischio dell'organizzazione.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am
       ref_id: ID.AM-01
       description: Sono mantenuti gli inventari dell'hardware gestito dall'organizzazione.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-01.1
       assessable: true
       depth: 4
@@ -865,7 +693,7 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am
       ref_id: ID.AM-02
@@ -884,14 +712,12 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am
       ref_id: ID.AM-03
       description: Sono mantenute le rappresentazioni delle comunicazioni di rete
         e dei flussi di dati di rete interni ed esterni, autorizzati dall'organizzazione.
-      implementation_groups:
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-03.1
       assessable: true
       depth: 4
@@ -903,14 +729,11 @@ objects:
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am
       ref_id: ID.AM-04
       description: Sono mantenuti gli inventari dei servizi erogati dai fornitori.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-04.1
       assessable: true
       depth: 4
@@ -922,28 +745,28 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-05
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am
       ref_id: ID.AM-05
       description: "Gli asset sono prioritizzati in base alla categorizzazione, alla\
         \ criticit\xE0, alle risorse e all'impatto sulla missione."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-07
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am
       ref_id: ID.AM-07
       description: Sono mantenuti gli inventari dei dati e dei relativi metadati per
         selezionati tipi di dati.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am-08
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am
       ref_id: ID.AM-08
       description: I sistemi, l'hardware, il software, i servizi e i dati sono gestiti
         durante il loro intero ciclo di vita.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.am-09
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.am
       ref_id: DP-ID.AM-09
@@ -957,15 +780,12 @@ objects:
       description: "\xC8 compreso il rischio di cybersecurity al quale l'organizzazione,\
         \ gli asset e le persone sono esposti."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra
       ref_id: ID.RA-01
       description: "Le vulnerabilit\xE0 negli asset sono identificate, confermate\
         \ e registrate."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-01.1
       assessable: true
       depth: 4
@@ -1002,37 +822,34 @@ objects:
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra
       ref_id: ID.RA-02
       description: Le informazioni di cyber threat intelligence sono ricevute da forum
         e fonti di condivisione delle informazioni.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra
       ref_id: ID.RA-03
       description: Le minacce interne ed esterne all'organizzazione sono identificate
         e registrate.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra
       ref_id: ID.RA-04
       description: "I potenziali impatti e le probabilit\xE0 di sfruttamento delle\
         \ vulnerabilit\xE0 da parte delle minacce sono identificati e registrati."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-05
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra
       ref_id: ID.RA-05
       description: "Minacce, vulnerabilit\xE0, probabilit\xE0 e impatti sono utilizzati\
         \ per comprendere il rischio inerente e per informare la prioritizzazione\
         \ della risposta al rischio."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-05.1
       assessable: true
       depth: 4
@@ -1080,27 +897,24 @@ objects:
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-06
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra
       ref_id: ID.RA-06
       description: Le risposte al rischio sono scelte, prioritizzate, pianificate,
         monitorate e comunicate.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-06.1
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-06
       ref_id: ID.RA-06.1
       description: "\xC8 definito, documentato, eseguito e monitorato un piano di\
-        \ trattamento del rischio che comprende almeno:\na) le opzioni di trattamento\
-        \ e le misure da attuare in merito al trattamento di ciascun rischio individuato\
-        \ e le relative priorit\xE0;\nb) le articolazioni competenti per l'attuazione\
-        \ delle misure di trattamento dei rischi e le tempistiche per tale attuazione;\n\
-        c) la descrizione e le ragioni che giustificano l'accettazione di eventuali\
-        \ rischi residui al trattamento."
+        \ trattamento dei rischi per la sicurezza informatica che comprende almeno:\n\
+        a) le opzioni di trattamento e le misure da attuare in merito al trattamento\
+        \ di ciascun rischio individuato e le relative priorit\xE0;\nb) le articolazioni\
+        \ competenti per l'attuazione delle misure di trattamento dei rischi e le\
+        \ tempistiche per tale attuazione;\nc) la descrizione e le ragioni che giustificano\
+        \ l'accettazione di eventuali rischi residui al trattamento."
       implementation_groups:
       - I
       - E
@@ -1129,22 +943,19 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-07
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra
       ref_id: ID.RA-07
       description: Le modifiche e le eccezioni sono gestite, valutate per il loro
         impatto sul rischio, registrate e tracciate.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-08
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra
       ref_id: ID.RA-08
       description: "Sono stabiliti processi per la ricezione, l'analisi e la risposta\
         \ alle divulgazioni di vulnerabilit\xE0."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-08.1
       assessable: true
       depth: 4
@@ -1165,8 +976,8 @@ objects:
       description: "Le vulnerabilit\xE0, ivi comprese quelle identificate ai sensi\
         \ della misura ID.RA-01, sono prontamente risolte attraverso aggiornamenti\
         \ di sicurezza o misure di mitigazione, ove disponibili, ovvero accettando\
-        \ e documentando il rischio in accordo al piano di trattamento del rischio\
-        \ informatico di cui alla misura ID.RA-06. "
+        \ e documentando il rischio in accordo al piano di trattamento dei rischi\
+        \ di cui alla misura ID.RA-06\_\_."
       implementation_groups:
       - I
       - E
@@ -1205,20 +1016,20 @@ objects:
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-09
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra
       ref_id: ID.RA-09
       description: "L'autenticit\xE0 e l'integrit\xE0 di hardware e software sono\
         \ valutate prima dell'acquisizione e dell'uso."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra-10
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra
       ref_id: ID.RA-10
       description: I fornitori critici sono valutati prima dell'acquisizione.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.ra-11
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.ra
       ref_id: DP-ID.RA-11
@@ -1234,14 +1045,11 @@ objects:
         \ di gestione del rischio di cybersecurity dell'organizzazione sono identificati\
         \ in tutte le funzioni del framework."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im
       ref_id: ID.IM-01
       description: Sono identificati miglioramenti in esito alle valutazioni.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-01.1
       assessable: true
       depth: 4
@@ -1287,7 +1095,7 @@ objects:
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im
       ref_id: ID.IM-02
@@ -1295,22 +1103,19 @@ objects:
         di sicurezza, compresi quelli effettuati in coordinamento con i fornitori
         e le terze parti interessate.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im
       ref_id: ID.IM-03
       description: "Sono identificati miglioramenti dall'esecuzione di processi, procedure\
         \ e attivit\xE0 operativi."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im
       ref_id: ID.IM-04
       description: I piani di risposta agli incidenti e gli altri piani di cybersecurity
         che impattano le operazioni sono stabiliti, comunicati, mantenuti e migliorati.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-04.1
       assessable: true
       depth: 4
@@ -1318,10 +1123,11 @@ objects:
       ref_id: ID.IM-04.1
       description: "Per almeno i sistemi informativi e di rete rilevanti \xE8 definito,\
         \ attuato, aggiornato e documentato un piano di continuit\xE0 operativa, che\
-        \ comprende almeno:\na) le finalit\xE0 e l'ambito di applicazione;\nb) i ruoli\
-        \ e le responsabilit\xE0;\nc) i contatti principali e i canali di comunicazione\
-        \ (interni ed esterni);\nd) le condizioni per l'attivazione e la disattivazione\
-        \ del piano;\ne) le risorse necessarie, ivi compresi i backup e le ridondanze."
+        \ comprende almeno:\na) le finalit\xE0, ivi incluse le esigenze di continuit\xE0\
+        \ operativa, e l'ambito di applicazione;\nb) i ruoli e le responsabilit\xE0\
+        ;\nc) i contatti principali e i canali di comunicazione (interni ed esterni);\n\
+        d) le condizioni per l'attivazione e la disattivazione del piano;\ne) le risorse\
+        \ necessarie, ivi compresi i backup e le ridondanze."
       implementation_groups:
       - I
       - E
@@ -1332,13 +1138,13 @@ objects:
       ref_id: ID.IM-04.2
       description: "Per almeno i sistemi informativi e di rete rilevanti \xE8 definito,\
         \ attuato, aggiornato e documentato un piano di ripristino in caso di disastro,\
-        \ che comprende almeno:\na) le finalit\xE0 e l'ambito di applicazione;\nb)\
-        \ i ruoli e le responsabilit\xE0;\nc) i contatti principali e i canali di\
-        \ comunicazione (interni ed esterni);\nd) le condizioni per l'attivazione\
-        \ e la disattivazione del piano;\ne) le risorse necessarie, ivi compresi i\
-        \ backup e le ridondanze;\nf) l'ordine di ripristino delle operazioni;\ng)\
-        \ le procedure di ripristino per operazioni specifiche, compresi gli obiettivi\
-        \ di ripristino."
+        \ che comprende almeno:\na) le finalit\xE0, ivi incluse le esigenze di ripristino\
+        \ in caso di disastro, e l'ambito di applicazione;\nb) i ruoli e le responsabilit\xE0\
+        ;\nc) i contatti principali e i canali di comunicazione (interni ed esterni);\n\
+        d) le condizioni per l'attivazione e la disattivazione del piano;\ne) le risorse\
+        \ necessarie, ivi compresi i backup e le ridondanze; \nf) l'ordine di ripristino\
+        \ delle operazioni;\ng) le procedure di ripristino per operazioni specifiche,\
+        \ compresi gli obiettivi di ripristino."
       implementation_groups:
       - I
       - E
@@ -1348,11 +1154,11 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:id.im-04
       ref_id: ID.IM-04.3
       description: "Per almeno i sistemi informativi e di rete rilevanti \xE8 definito,\
-        \ attuato, aggiornato e documentato un piano per la gestione delle crisi che\
-        \ comprende almeno:\na) i ruoli e responsabilit\xE0 del personale e, se opportuno,\
-        \ dei fornitori, specificando l'assegnazione dei ruoli in situazioni di crisi,\
-        \ comprese le procedure specifiche da seguire;\nb) le modalit\xE0 di comunicazione\
-        \ tra i soggetti e le autorit\xE0 competenti."
+        \ attuato, aggiornato e documentato un piano per la gestione delle crisi informatiche\
+        \ che comprende almeno:\na) i ruoli e le responsabilit\xE0 del personale e,\
+        \ se opportuno, dei fornitori, specificando l'assegnazione dei ruoli in situazioni\
+        \ di crisi, comprese le procedure specifiche da seguire;\nb) le modalit\xE0\
+        \ di comunicazione tra i soggetti e le autorit\xE0 competenti."
       implementation_groups:
       - I
       - E
@@ -1387,34 +1193,34 @@ objects:
       description: I dati personali sono trattati attraverso processi definiti, in
         coerenza con le normative di riferimento.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm
       ref_id: DP-ID.DM-01
       description: "Il ciclo di vita dei dati \xE8 definito e documentato."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm
       ref_id: DP-ID.DM-02
       description: Sono definiti, implementati e documentati i processi riguardanti
         l'informazione dell'interessato in merito al trattamento dei dati.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm
       ref_id: DP-ID.DM-03
       description: Sono definiti, implementati e documentati i processi di raccolta
         e revoca del consenso dell'interessato al trattamento di dati.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm
       ref_id: DP-ID.DM-04
       description: Sono definiti, implementati e documentati i processi per l'esercizio
         dei diritti (accesso, rettifica, cancellazione, ecc.) dell'interessato.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm-05
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-id.dm
       ref_id: DP-ID.DM-05
@@ -1437,15 +1243,12 @@ objects:
         \ ai servizi e all'hardware autorizzati, e gestito in misura appropriata alla\
         \ valutazione del rischio di accesso non autorizzato."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa
       ref_id: PR.AA-01
       description: "Le identit\xE0 e le credenziali degli utenti, dei servizi e dell'hardware\
         \ autorizzati sono gestite dall'organizzazione."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-01.1
       assessable: true
       depth: 4
@@ -1493,21 +1296,18 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa
       ref_id: PR.AA-02
       description: "Le identit\xE0 sono verificate e associate alle credenziali in\
         \ base al contesto delle interazioni."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa
       ref_id: PR.AA-03
       description: Utenti, servizi e hardware sono autenticati.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-03.1
       assessable: true
       depth: 4
@@ -1515,7 +1315,7 @@ objects:
       ref_id: PR.AA-03.1
       description: "Le modalit\xE0 di autenticazione delle utenze per accedere ai\
         \ sistemi informativi e di rete sono commisurate al rischio. A tal fine sono\
-        \ valutati almeno i rischi connessi:\na) ai privilegi delle utenze;\nb) alla\
+        \ valutati almeno i rischi connessi: \na) ai privilegi delle utenze;\nb) alla\
         \ criticit\xE0 dei sistemi informativi e di rete;\nc) alla tipologia di operazioni\
         \ che le utenze possono effettuare sui sistemi informativi e di rete."
       implementation_groups:
@@ -1526,9 +1326,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-03
       ref_id: PR.AA-03.2
-      description: "Per almeno i sistemi informativi e di rete rilevanti e in accordo\
-        \ agli esiti della valutazione del rischio di cui alla misura ID.RA-05, sono\
-        \ impiegate modalit\xE0 di autenticazione multifattore."
+      description: Per almeno i sistemi informativi e di rete rilevanti, in accordo
+        agli esiti della valutazione del rischio di cui alla misura ID.RA-05, sono
+        impiegate soluzioni di autenticazione multifattore.
       implementation_groups:
       - I
       - E
@@ -1543,24 +1343,19 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa
       ref_id: PR.AA-04
       description: "Le asserzioni di identit\xE0 sono protette, trasmesse e verificate."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-05
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa
       ref_id: PR.AA-05
       description: I permessi, i diritti e le autorizzazioni di accesso sono definiti
         in una politica, gestiti, applicati e rivisti e incorporano i principi del
         minimo privilegio e della separazione dei compiti.
-      implementation_groups:
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-05.1
       assessable: true
       depth: 4
@@ -1591,15 +1386,12 @@ objects:
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-06
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa
       ref_id: PR.AA-06
       description: "L'accesso fisico agli asset \xE8 gestito, monitorato e applicato\
         \ in misura appropriata al rischio."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.aa-06.1
       assessable: true
       depth: 4
@@ -1630,16 +1422,13 @@ objects:
         \ sulla cybersecurity in modo da poter svolgere i propri compiti inerenti\
         \ alla cybersecurity."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at
       ref_id: PR.AT-01
       description: "Il personale \xE8 sensibilizzato e formato in modo da possedere\
         \ le conoscenze e le competenze per svolgere compiti di carattere generale\
         \ tenendo conto dei rischi di cybersecurity."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at-01.1
       assessable: true
       depth: 4
@@ -1676,15 +1465,13 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at
       ref_id: PR.AT-02
       description: Gli individui che ricoprono ruoli specializzati sono sensibilizzati
         e formati in modo da possedere le conoscenze e le competenze per svolgere
         i pertinenti compiti tenendo conto dei rischi di cybersecurity.
-      implementation_groups:
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.at-02.1
       assessable: true
       depth: 4
@@ -1719,21 +1506,18 @@ objects:
         \ dell'organizzazione per proteggere la riservatezza, l'integrit\xE0 e la\
         \ disponibilit\xE0 delle informazioni."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds
       ref_id: PR.DS-01
       description: "La riservatezza, l'integrit\xE0 e la disponibilit\xE0 dei dati\
         \ a riposo (data-at-rest) sono protette."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-01.1
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-01
       ref_id: PR.DS-01.1
-      description: "Per almeno i sistemi informativi e di rete rilevanti e in accordo\
+      description: "Per almeno i sistemi informativi e di rete rilevanti, in accordo\
         \ agli esiti della valutazione del rischio di cui alla misura ID.RA-05, fatte\
         \ salve motivate e documentate ragioni normative o tecniche, i dati memorizzati\
         \ sui dispositivi portatili, ivi inclusi laptop, smartphone e tablet, e sui\
@@ -1747,10 +1531,10 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-01
       ref_id: PR.DS-01.2
-      description: "Fatte salve e documentate ragioni normative o tecniche, \xE8 disabilitata\
-        \ l'auto esecuzione dei supporti rimovibili ed \xE8 effettuata la loro scansione\
-        \ al fine di rilevare codici malevoli prima che siano utilizzati nei sistemi\
-        \ informativi e di rete."
+      description: "Fatte salve motivate e documentate ragioni normative o tecniche,\
+        \ \xE8 disabilitata l'auto esecuzione dei supporti rimovibili\_ed \xE8 effettuata\
+        \ la loro scansione al fine di rilevare codici malevoli prima che siano utilizzati\
+        \ nei sistemi informativi e di rete."
       implementation_groups:
       - I
       - E
@@ -1765,23 +1549,20 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds
       ref_id: PR.DS-02
       description: "La riservatezza, l'integrit\xE0 e la disponibilit\xE0 dei dati\
         \ in transito (data-in-transit) sono protette."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-02.1
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-02
       ref_id: PR.DS-02.1
       description: "Per almeno i sistemi informativi e di rete rilevanti, ivi inclusi\
-        \ quelli di comunicazione vocale, video e testuale, e in accordo agli esiti\
-        \ della valutazione del rischio di cui alla misura ID.RA-05 fatte salve motivate\
+        \ quelli di comunicazione vocale, video e testuale, in accordo agli esiti\
+        \ della valutazione del rischio di cui alla misura ID.RA-05, fatte salve motivate\
         \ e documentate ragioni normative o tecniche, sono utilizzati, per la trasmissione\
         \ dei dati da e verso l\u2019esterno del soggetto NIS, protocolli e algoritmi\
         \ di cifratura allo stato dell\u2019arte e considerati sicuri."
@@ -1799,21 +1580,18 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-10
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds
       ref_id: PR.DS-10
       description: "La riservatezza, l'integrit\xE0 e la disponibilit\xE0 dei dati\
         \ in uso (data-in-use) sono protette."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-11
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds
       ref_id: PR.DS-11
       description: I backup dei dati sono creati, protetti, mantenuti e verificati.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-11.1
       assessable: true
       depth: 4
@@ -1852,9 +1630,10 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-11
       ref_id: PR.DS-11.4
-      description: "Per almeno i sistemi informativi e di rete rilevanti, \xE8 verificata\
-        \ periodicamente l'utilizzabilit\xE0 dei backup effettuati mediante test di\
-        \ ripristino."
+      description: "Per almeno i sistemi informativi e di rete rilevanti, in accordo\
+        \ agli esiti della valutazione del rischio di cui alla misura ID.RA-05, \xE8\
+        \ verificata periodicamente l'utilizzabilit\xE0 dei backup effettuati mediante\
+        \ test di ripristino."
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ds-11.5
@@ -1877,13 +1656,11 @@ objects:
         \ in modo coerente con la strategia sul rischio dell'organizzazione per proteggere\
         \ la loro riservatezza, integrit\xE0 e disponibilit\xE0."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps
       ref_id: PR.PS-01
       description: Sono stabilite e applicate pratiche di gestione della configurazione.
-      implementation_groups:
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-01.1
       assessable: true
       depth: 4
@@ -1904,20 +1681,18 @@ objects:
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps
       ref_id: PR.PS-02
       description: "Il software \xE8 mantenuto, sostituito e rimosso in base al rischio."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-02.1
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-02
       ref_id: PR.PS-02.1
       description: "Fatte salve motivate e documentate ragioni normative o tecniche,\
+        \ in accordo agli esiti della valutazione del rischio di cui alla misura ID.RA-05,\
         \ \xE8 installato esclusivamente software, ivi compresi i sistemi operativi,\
         \ per il quale \xE8 garantita la disponibilit\xE0 di aggiornamenti di sicurezza."
       implementation_groups:
@@ -1950,10 +1725,10 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-02
       ref_id: PR.PS-02.4
-      description: "Fatte salve motivate e documentate ragioni normative o tecniche\
-        \ e in accordo agli esiti della valutazione del rischio di cui alla misura\
-        \ ID.RA-05, l\u2019aggiornamento del software ritenuto critico \xE8 verificato\
-        \ in ambiente di test prima dell\u2019effettivo impiego in ambiente operativo."
+      description: "Fatte salve motivate e documentate ragioni normative o tecniche,\
+        \ in accordo agli esiti della valutazione del rischio di cui alla misura ID.RA-05,\
+        \ l\u2019aggiornamento del software ritenuto critico \xE8 verificato in ambiente\
+        \ di test prima dell\u2019effettivo impiego in ambiente operativo."
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-02.5
@@ -1966,13 +1741,11 @@ objects:
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps
       ref_id: PR.PS-03
       description: "L'hardware \xE8 mantenuto, sostituito e rimosso in base al rischio."
-      implementation_groups:
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-03.1
       assessable: true
       depth: 4
@@ -1993,15 +1766,12 @@ objects:
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps
       ref_id: PR.PS-04
       description: I registri di log sono generati e resi disponibili per il monitoraggio
         continuo.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-04.1
       assessable: true
       depth: 4
@@ -2017,10 +1787,10 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-04
       ref_id: PR.PS-04.2
-      description: Per almeno i sistemi informativi e di rete rilevanti, sono conservati
-        in modo sicuro, e possibilmente centralizzato, almeno i log necessari ai fini
-        del monitoraggio degli eventi di sicurezza, ivi compresi quelli relativi agli
-        accessi di cui al punto PR.PS-04.1.
+      description: Per almeno i sistemi informativi e di rete rilevanti, sono acquisiti
+        e, in modo sicuro e possibilmente centralizzato, conservati almeno i log necessari
+        ai fini del monitoraggio degli eventi di sicurezza, ivi compresi quelli relativi
+        agli accessi di cui al punto PR.PS-04.1.
       implementation_groups:
       - I
       - E
@@ -2046,21 +1816,18 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-05
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps
       ref_id: PR.PS-05
       description: Sono impedite l'installazione ed esecuzione di software non autorizzato.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-06
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps
       ref_id: PR.PS-06
       description: Le pratiche di sviluppo sicuro del software sono integrate e le
         loro prestazioni sono monitorate durante l'intero ciclo di vita del software.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ps-06.1
       assessable: true
       depth: 4
@@ -2081,15 +1848,12 @@ objects:
         \ sul rischio dell'organizzazione per proteggere la riservatezza, l'integrit\xE0\
         \ e la disponibilit\xE0 degli asset e la resilienza organizzativa."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir
       ref_id: PR.IR-01
       description: Le reti e gli ambienti sono protetti dall'accesso logico e dall'uso
         non autorizzati.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-01.1
       assessable: true
       depth: 4
@@ -2117,8 +1881,8 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-01
       ref_id: PR.IR-01.3
-      description: Sono presenti, aggiornati, mantenuti e configurati i sistemi perimetrali,
-        quali firewall.
+      description: Sono presenti, aggiornati, mantenuti e configurati in modo adeguato
+        sistemi perimetrali, quali firewall.
       implementation_groups:
       - I
       - E
@@ -2128,27 +1892,24 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-01
       ref_id: PR.IR-01.4
       description: Nel rispetto delle politiche di cui alla misura GV.PO-01, sono
-        adottate e documentate le procedure in relazione ai punti PR.IR-01.1, PR.IR-01.2
-        e PR.IR-01.3.
+        adottate e documentate le procedure in relazione ai punti PR.IR-01.2 e PR.IR-01.3.
       implementation_groups:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir
       ref_id: PR.IR-02
       description: Gli asset tecnologici dell'organizzazione sono protetti dalle minacce
         ambientali.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir
       ref_id: PR.IR-03
       description: Sono implementati meccanismi per soddisfare i requisiti di resilienza
         in situazioni normali e avverse.
-      implementation_groups:
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-03.1
       assessable: true
       depth: 4
@@ -2168,7 +1929,7 @@ objects:
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:pr.ir
       ref_id: PR.IR-04
@@ -2190,15 +1951,12 @@ objects:
       description: Gli asset sono monitorati per individuare anomalie, indicatori
         di compromissione e altri eventi potenzialmente avversi.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm
       ref_id: DE.CM-01
       description: Le reti e i servizi di rete sono monitorati per individuare eventi
         potenzialmente avversi.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-01.1
       assessable: true
       depth: 4
@@ -2227,7 +1985,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-01
       ref_id: DE.CM-01.3
       description: Nel rispetto delle politiche di cui alla misura GV.PO-01, sono
-        adottate e documentate le procedure in relazione ai punti DE.CM-01.1 e DE.CM-01.2.
+        adottate e documentate le procedure in relazione al punto DE.CM-01.1.
       implementation_groups:
       - I
       - E
@@ -2250,8 +2008,8 @@ objects:
         \ di cui al punto DE.CM-01.1, sono monitorati gli accessi da remoto, le attivit\xE0\
         \ dei sistemi perimetrali (ad esempio router e firewall), gli eventi amministrativi\
         \ di rilievo, nonch\xE9 gli accessi eseguiti o falliti alle risorse di rete,\
-        \ alle postazioni terminali e agli applicativi al fine di rilevare gli eventi\
-        \ di sicurezza informatica."
+        \ ai punti terminali (endpoint) e agli applicativi al fine di rilevare gli\
+        \ eventi di sicurezza informatica."
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-01.6
@@ -2271,49 +2029,46 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-01
       ref_id: DE.CM-01.7
       description: Nel rispetto delle politiche di cui alla misura GV.PO-01, sono
-        adottate e documentate le procedure in relazione ai punti DE.CM-01.4, DE.CM-01.5
-        e DE.CM-01.6.
+        adottate e documentate le procedure in relazione ai punti DE.CM-01.4 e DE.CM-01.5.
       implementation_groups:
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm
       ref_id: DE.CM-02
       description: "L'ambiente fisico \xE8 monitorato per individuare eventi potenzialmente\
         \ avversi."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm
       ref_id: DE.CM-03
       description: "L'attivit\xE0 del personale e l'utilizzo della tecnologia, sono\
         \ monitorati per individuare eventi potenzialmente avversi."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-06
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm
       ref_id: DE.CM-06
       description: "Le attivit\xE0 e i servizi dei fornitori di servizi esterni sono\
         \ monitorati per individuare eventi potenzialmente avversi."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-09
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm
       ref_id: DE.CM-09
       description: L'hardware e il software di elaborazione, gli ambienti di runtime
         e i loro dati sono monitorati per individuare eventi potenzialmente avversi.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-09.1
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.cm-09
       ref_id: DE.CM-09.1
-      description: Fatte salve motivate e documentate ragioni normative o tecniche,
-        sono presenti, aggiornati, mantenuti e configurati in modo adeguato, sistemi
-        di protezione delle postazioni terminali per il rilevamento del codice malevolo.
+      description: "Fatte salve motivate e documentate ragioni normative o tecniche,\
+        \ sono presenti,\_aggiornati, mantenuti e configurati in modo adeguato, sistemi\
+        \ di protezione dei punti terminali (endpoint)\_per il rilevamento del codice\
+        \ malevolo."
       implementation_groups:
       - I
       - E
@@ -2337,40 +2092,40 @@ objects:
         avversi sono analizzati per caratterizzare gli eventi e rilevare gli incidenti
         di cybersecurity.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae
       ref_id: DE.AE-02
       description: "Gli eventi potenzialmente avversi sono analizzati per meglio comprenderne\
         \ le attivit\xE0 associate."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae
       ref_id: DE.AE-03
       description: "Le informazioni sono correlate da pi\xF9 fonti."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae
       ref_id: DE.AE-04
       description: L'impatto e la portata stimati degli eventi avversi sono compresi.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae-06
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae
       ref_id: DE.AE-06
       description: Le informazioni sugli eventi avversi sono fornite al personale
         e agli strumenti autorizzati.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae-07
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae
       ref_id: DE.AE-07
       description: La cyber threat intelligence e le altre informazioni contestuali
         sono integrate nell'analisi.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae-08
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:de.ae
       ref_id: DE.AE-08
@@ -2391,15 +2146,12 @@ objects:
       name: Gestione degli incidenti
       description: Le risposte agli incidenti di cybersecurity rilevati sono gestite.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma
       ref_id: RS.MA-01
       description: "Il piano di risposta agli incidenti \xE8 eseguito in coordinamento\
         \ con le terze parti interessate una volta dichiarato un incidente."
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.1
       assessable: true
       depth: 4
@@ -2408,56 +2160,14 @@ objects:
       description: "\xC8 definito, attuato, aggiornato e documentato un piano per\
         \ la gestione degli incidenti di sicurezza informatica e la notifica al CSIRT\
         \ Italia, in accordo a quanto previsto dall\u2019articolo 25 del decreto NIS,\
-        \ che comprende almeno:"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.1.a
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01
-      ref_id: RS.MA-01.1.a
-      description: "le fasi e le procedure di gestione e notifica degli incidenti\
-        \ con l\u2019indicazione dei relativi ruoli e delle responsabilit\xE0;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.1.b
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01
-      ref_id: RS.MA-01.1.b
-      description: "le procedure per la predisposizione e la trasmissione delle relazioni\
-        \ di cui all\u2019articolo 25, comma 5, lettere c), d) ed e) del decreto NIS;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.1.c
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01
-      ref_id: RS.MA-01.1.c
-      description: le informazioni di contatto per la segnalazione degli incidenti;
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.1.d
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01
-      ref_id: RS.MA-01.1.d
-      description: "le modalit\xE0 di comunicazione interna, anche con riguardo al\
-        \ coinvolgimento degli organi di amministrazione e direttivi, ed esterna;"
-      implementation_groups:
-      - I
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01.1.e
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-01
-      ref_id: RS.MA-01.1.e
-      description: "la reportistica da utilizzare per la documentazione dell\u2019\
-        incidente."
+        \ che comprende almeno:\na) le fasi e le procedure di gestione e notifica\
+        \ degli incidenti con l\u2019indicazione dei relativi ruoli e delle responsabilit\xE0\
+        ;\nb) le procedure per la predisposizione e la trasmissione delle relazioni\
+        \ di cui all\u2019articolo 25, comma 5, lettere c), d) ed e) del decreto NIS;\n\
+        c) le informazioni di contatto per la segnalazione degli incidenti;\nd) le\
+        \ modalit\xE0 di comunicazione interna, anche con riguardo al coinvolgimento\
+        \ degli organi di amministrazione e direttivi, ed esterna;\ne) la reportistica\
+        \ da utilizzare per la documentazione dell\u2019incidente."
       implementation_groups:
       - I
       - E
@@ -2484,19 +2194,19 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma
       ref_id: RS.MA-02
       description: I report sugli incidenti sono sottoposti a triage e convalidati.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma
       ref_id: RS.MA-03
       description: Gli incidenti sono categorizzati e prioritizzati.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-04
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma
       ref_id: RS.MA-04
@@ -2504,7 +2214,7 @@ objects:
         \ con risorse crescenti) o elevati (passati in gestione a un livello superiore)\
         \ a seconda delle necessit\xE0."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma-05
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.ma
       ref_id: RS.MA-05
@@ -2518,28 +2228,28 @@ objects:
       description: "Sono condotte indagini per garantire una risposta efficace e supportare\
         \ le attivit\xE0 forensi e di ripristino."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.an-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.an
       ref_id: RS.AN-03
       description: "\xC8 eseguita un'analisi per stabilire cosa \xE8 avvenuto durante\
         \ un incidente e la causa principale dell'incidente."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.an-06
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.an
       ref_id: RS.AN-06
       description: "Le azioni eseguite durante un'investigazione sono registrate e\
         \ l'integrit\xE0 e la provenienza delle registrazioni sono preservate."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.an-07
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.an
       ref_id: RS.AN-07
       description: "I dati e i metadati degli incidenti sono raccolti e la loro integrit\xE0\
         \ e provenienza sono preservate."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.an-08
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.an
       ref_id: RS.AN-08
@@ -2553,14 +2263,11 @@ objects:
       description: "Le attivit\xE0 di risposta sono coordinate con gli stakeholder\
         \ interni ed esterni come richiesto da leggi, regolamenti o politiche."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.co-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.co
       ref_id: RS.CO-02
       description: Gli stakeholder interni ed esterni sono informati degli incidenti.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.co-02.1
       assessable: true
       depth: 4
@@ -2571,12 +2278,12 @@ objects:
         \ ingiustificato ritardo, se ritenuto opportuno e qualora possibile, sentito\
         \ il CSIRT Italia, ovvero qualora intimato dall\u2019Agenzia per la cybersicurezza\
         \ nazionale ai sensi dell\u2019articolo 37, comma 3, lettere g) e h), del\
-        \ decreto NIS:\na) ai destinatari dei loro servizi, gli incidenti significativi\
+        \ decreto NIS:\na) ai destinatari dei propri servizi, gli incidenti significativi\
         \ che possono ripercuotersi negativamente sulla fornitura di tali servizi;\n\
-        b) ai destinatari dei servizi che sono potenzialmente interessati da una minaccia\
-        \ informatica significativa, le misure o azioni correttive o di mitigazione\
-        \ che tali destinatari possono adottare in risposta a tale minaccia e la natura\
-        \ di tale minaccia."
+        b) ai destinatari dei propri servizi che sono potenzialmente interessati da\
+        \ una minaccia informatica significativa, le misure o azioni correttive o\
+        \ di mitigazione che tali destinatari possono adottare in risposta a tale\
+        \ minaccia e la natura di tale minaccia."
       implementation_groups:
       - I
       - E
@@ -2592,14 +2299,14 @@ objects:
       - I
       - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.co-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.co
       ref_id: RS.CO-03
       description: Le informazioni sono condivise con gli stakeholder interni ed esterni
         designati.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:dp-rs.co-06
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.co
       ref_id: DP-RS.CO-06
@@ -2615,13 +2322,13 @@ objects:
       description: "Sono eseguite attivit\xE0 per prevenire l'espansione di un evento\
         \ e mitigarne gli effetti."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.mi-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.mi
       ref_id: RS.MI-01
       description: Gli incidenti vengono contenuti.
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.mi-02
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rs.mi
       ref_id: RS.MI-02
@@ -2642,15 +2349,12 @@ objects:
       description: "Le attivit\xE0 di ripristino sono eseguite per garantire la disponibilit\xE0\
         \ operativa dei sistemi e dei servizi interessati da incidenti di cybersecurity."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-01
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp
       ref_id: RC.RP-01
       description: La parte del piano di risposta agli incidenti relativa al rispristino
         viene eseguita una volta avviata dal processo di risposta agli incidenti.
-      implementation_groups:
-      - I
-      - E
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-01.1
       assessable: true
       depth: 4
@@ -2664,55 +2368,6 @@ objects:
       implementation_groups:
       - I
       - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-02
-      assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp
-      ref_id: RC.RP-02
-      description: Le azioni di ripristino sono selezionate, contestualizzate, prioritizzate
-        e eseguite.
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-03
-      assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp
-      ref_id: RC.RP-03
-      description: "L'integrit\xE0 dei backup e delle altre risorse di ripristino\
-        \ \xE8 verificata prima che siano utilizzati per il ripristino."
-      implementation_groups:
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-03.1
-      assessable: true
-      depth: 4
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-03
-      ref_id: RC.RP-03.1
-      description: "Sono adottate e documentate procedure per comunicare alle parti\
-        \ interne interessate, ivi incluse le articolazioni competenti del soggetto\
-        \ NIS, le attivit\xE0 di ripristino a seguito di un incidente."
-      implementation_groups:
-      - E
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-04
-      assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp
-      ref_id: RC.RP-04
-      description: Le funzioni critiche per la mission dell'organizzazione e la gestione
-        del rischio di cybersecurity sono considerate per stabilire le norme operative
-        post-incidente.
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-05
-      assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp
-      ref_id: RC.RP-05
-      description: "L'integrit\xE0 degli asset ripristinati \xE8 verificata, i sistemi\
-        \ e i servizi sono ripristinati e lo stato operativo normale viene confermato."
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp-06
-      assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.rp
-      ref_id: RC.RP-06
-      description: "La conclusione del ripristino dell'incidente viene dichiarata\
-        \ sulla base di criteri definiti e la documentazione relativa all'incidente\
-        \ \xE8 completata."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.co
       assessable: false
       depth: 2
@@ -2722,17 +2377,20 @@ objects:
       description: "Le attivit\xE0 di ripristino sono coordinate con le parti interne\
         \ ed esterne."
     - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.co-03
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.co
       ref_id: RC.CO-03
       description: "Le attivit\xE0 di ripristino e i progressi nel ripristino delle\
         \ capacit\xE0 operative sono comunicati agli stakeholder interni ed esterni\
         \ designati."
-    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.co-04
+    - urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.co-03.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:Framework-Nazionale-C-DP:rc.co
-      ref_id: RC.CO-04
-      description: "Gli aggiornamenti pubblici sul ripristino dagli incidenti sono\
-        \ condivisi utilizzando modalit\xE0 e messaggi approvati."
+      ref_id: RC.CO-03.1
+      description: "Sono adottate e documentate procedure per comunicare alle parti\
+        \ interne interessate, ivi incluse le articolazioni competenti del soggetto\
+        \ NIS, le attivit\xE0 di ripristino a seguito di un incidente."
+      implementation_groups:
+      - E
