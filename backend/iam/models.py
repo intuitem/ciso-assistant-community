@@ -9,6 +9,7 @@ import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
 from django.db import models, transaction
+from django.db.utils import OperationalError, ProgrammingError
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
@@ -87,12 +88,17 @@ IGNORED_PERMISSION_MODELS = (
 )
 
 
-def _get_root_folder():
+def _get_root_folder() -> Folder | None:
     """helper function outside of class to facilitate serialization
-    to be used only in Folder class"""
+    to be used only in Folder class
+    Returns None only before the IAM tables/migrations are ready so Django's
+    pre-migration checks can instantiate models without failing.
+    """
     try:
         return Folder.objects.get(content_type=Folder.ContentType.ROOT)
-    except:
+    except Folder.DoesNotExist:
+        return None
+    except (OperationalError, ProgrammingError):
         return None
 
 
@@ -103,27 +109,26 @@ class Folder(NameDescriptionMixin):
     """
 
     @staticmethod
-    def get_root_folder() -> Self | None:
+    def get_root_folder() -> Self:
         """class function for general use"""
         try:
             state = get_folder_state()
         except CacheNotReadyError:
-            return _get_root_folder()
-        except Exception:
-            logger.exception("Failed to load folder cache state", exc_info=True)
+            # During initial migrations the cache cannot hydrate yet; fall back to the
+            # direct lookup which may still be None until the schema is ready.
             return _get_root_folder()
 
-        root_id = getattr(state, "root_folder_id", None)
-        if root_id:
-            folder = state.folders.get(root_id)
-            if folder:
-                return folder
-
-        return _get_root_folder()
+        # Cache is ready, so root folder is already existing
+        # But if the cache is stale, we call the db
+        if state.root_folder_id and state.folders.get(state.root_folder_id):
+            return state.folders.get(state.root_folder_id)
+        else:
+            return Folder.objects.get(content_type=Folder.ContentType.ROOT)
 
     @staticmethod
     def get_root_folder_id() -> uuid.UUID | None:
-        return getattr(Folder.get_root_folder(), "id", None)
+        folder = _get_root_folder()
+        return getattr(folder, "id", None)
 
     class ContentType(models.TextChoices):
         """content type for a folder"""
@@ -243,8 +248,8 @@ class Folder(NameDescriptionMixin):
             if folder is not None:
                 return folder
 
-        # If no folder is found after trying all paths, handle this case (e.g., return None or raise an error).
-        return None
+        # If no folder is found after trying all paths, raise an error
+        raise RuntimeError(f"Unable to resolve folder for {obj!r}")
 
     def get_user_roles(self) -> dict[str, list[str]]:
         """
@@ -993,11 +998,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     @staticmethod
     def get_accessible_folder_ids(
         folder: Folder,
-        user: User,
+        user: AbstractBaseUser | AnonymousUser,
         content_type: Folder.ContentType,
         codename: str = "view_folder",
     ) -> list[uuid.UUID]:
         """Return folder IDs in the scoped perimeter that the user can access."""
+        if not getattr(user, "is_authenticated", False):
+            return []
         state = get_folder_state()
         roles_state = get_roles_state()
 
