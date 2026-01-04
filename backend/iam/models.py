@@ -4,7 +4,8 @@ Inspired from Azure IAM model"""
 from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Dict, Generator, List, Optional, Set, Tuple, Self
+from typing import Any, Dict, Generator, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, cast
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
@@ -17,6 +18,9 @@ from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
 from django.db.models import Q, F, Prefetch
 from knox.models import AuthToken
+
+if TYPE_CHECKING:
+    from iam.cache_builders import AssignmentLite
 from core.utils import (
     BUILTIN_USERGROUP_CODENAMES,
     BUILTIN_ROLE_CODENAMES,
@@ -109,21 +113,23 @@ class Folder(NameDescriptionMixin):
     """
 
     @staticmethod
-    def get_root_folder() -> Self:
+    def get_root_folder() -> "Folder":
         """class function for general use"""
         try:
             state = get_folder_state()
         except CacheNotReadyError:
             # During initial migrations the cache cannot hydrate yet; fall back to the
             # direct lookup which may still be None until the schema is ready.
-            return _get_root_folder()
+            folder = _get_root_folder()
+            return cast("Folder", folder)  # type: ignore[return-value]
 
         # Cache is ready, so root folder is already existing
         # But if the cache is stale, we call the db
-        if state.root_folder_id and state.folders.get(state.root_folder_id):
-            return state.folders.get(state.root_folder_id)
-        else:
-            return Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        if state.root_folder_id:
+            cached_root = state.folders.get(state.root_folder_id)
+            if cached_root is not None:
+                return cached_root
+        return Folder.objects.get(content_type=Folder.ContentType.ROOT)
 
     @staticmethod
     def get_root_folder_id() -> uuid.UUID | None:
@@ -178,16 +184,16 @@ class Folder(NameDescriptionMixin):
         invalidate_folders_cache()
         return result
 
-    def get_sub_folders(self) -> Generator[Self, None, None]:
+    def get_sub_folders(self) -> Generator["Folder", None, None]:
         """Return the list of subfolders through the cached tree."""
         yield from get_sub_folders_cached(self.id)
 
     # Should we update data-model.md now that this method is a generator ?
-    def get_parent_folders(self) -> Generator[Self, None, None]:
+    def get_parent_folders(self) -> Generator["Folder", None, None]:
         """Return the list of parent folders"""
         yield from get_parent_folders_cached(self.id)
 
-    def get_folder_full_path(self, *, include_root: bool = False) -> list[Self]:
+    def get_folder_full_path(self, *, include_root: bool = False) -> list["Folder"]:
         """
         Get the full path of the folder including its parents.
         If include_root is True, the root folder is included in the path.
@@ -297,19 +303,19 @@ class Folder(NameDescriptionMixin):
         return dict(user_roles)
 
     @staticmethod
-    def create_default_ug_and_ra(folder: Self):
+    def create_default_ug_and_ra(folder: "Folder"):
         if folder.content_type == Folder.ContentType.DOMAIN:
             readers = UserGroup.objects.create(
-                name=UserGroupCodename.READER, folder=folder, builtin=True
+                name=str(UserGroupCodename.READER), folder=folder, builtin=True
             )
             approvers = UserGroup.objects.create(
-                name=UserGroupCodename.APPROVER, folder=folder, builtin=True
+                name=str(UserGroupCodename.APPROVER), folder=folder, builtin=True
             )
             analysts = UserGroup.objects.create(
-                name=UserGroupCodename.ANALYST, folder=folder, builtin=True
+                name=str(UserGroupCodename.ANALYST), folder=folder, builtin=True
             )
             managers = UserGroup.objects.create(
-                name=UserGroupCodename.DOMAIN_MANAGER, folder=folder, builtin=True
+                name=str(UserGroupCodename.DOMAIN_MANAGER), folder=folder, builtin=True
             )
             ra1 = RoleAssignment.objects.create(
                 user_group=readers,
@@ -451,9 +457,9 @@ class UserManager(BaseUserManager):
     def _create_user(
         self,
         email: str,
-        password: str,
+        password: Optional[str],
         mailing: bool,
-        initial_group: UserGroup,
+        initial_group: Optional[UserGroup],
         **extra_fields,
     ):
         """
@@ -465,22 +471,25 @@ class UserManager(BaseUserManager):
         """
         validate_email(email)
         email = self.normalize_email(email)
-        user = self.model(
-            email=email,
-            first_name=extra_fields.get("first_name", ""),
-            last_name=extra_fields.get("last_name", ""),
-            is_superuser=extra_fields.get("is_superuser", False),
-            is_active=extra_fields.get("is_active", True),
-            observation=extra_fields.get("observation"),
-            folder=_get_root_folder(),
-            keep_local_login=extra_fields.get("keep_local_login", False),
-            expiry_date=extra_fields.get("expiry_date"),
+        user = cast(
+            "User",
+            self.model(
+                email=email,
+                first_name=extra_fields.get("first_name", ""),
+                last_name=extra_fields.get("last_name", ""),
+                is_superuser=extra_fields.get("is_superuser", False),
+                is_active=extra_fields.get("is_active", True),
+                observation=extra_fields.get("observation"),
+                folder=_get_root_folder(),
+                keep_local_login=extra_fields.get("keep_local_login", False),
+                expiry_date=extra_fields.get("expiry_date"),
+            ),
         )
-        user.user_groups.set(extra_fields.get("user_groups", []))
         if password:
             user.password = make_password(password)
         else:
             user.set_unusable_password()
+        user.user_groups.set(extra_fields.get("user_groups", []))
         user.save(using=self._db)
         if initial_group:
             initial_group.user_set.add(user)
@@ -512,19 +521,19 @@ class UserManager(BaseUserManager):
                 raise exception
         return user
 
-    def create_user(self, email: str, password: str = None, **extra_fields):
+    def create_user(self, email: str, password: str | None = None, **extra_fields):
         """create a normal user following Django convention"""
         logger.info("creating user", email=email)
         extra_fields.setdefault("is_superuser", False)
         return self._create_user(
             email=email,
             password=password,
-            mailing=(EMAIL_HOST or EMAIL_HOST_RESCUE),
+            mailing=bool(EMAIL_HOST or EMAIL_HOST_RESCUE),
             initial_group=None,
             **extra_fields,
         )
 
-    def create_superuser(self, email: str, password: str = None, **extra_fields):
+    def create_superuser(self, email: str, password: str | None = None, **extra_fields):
         """create a superuser following Django convention"""
         logger.info("creating superuser", email=email)
         extra_fields.setdefault("is_superuser", True)
@@ -533,7 +542,7 @@ class UserManager(BaseUserManager):
         superuser = self._create_user(
             email=email,
             password=password,
-            mailing=not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE),
+            mailing=bool((not password) and (EMAIL_HOST or EMAIL_HOST_RESCUE)),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
             keep_local_login=True,
             **extra_fields,
@@ -636,9 +645,14 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
             (visible_users_ids, _, _) = RoleAssignment.get_accessible_object_ids(
                 Folder.get_root_folder(), for_user, User
             )
+            user_pk = getattr(for_user, "pk", None)
+            user_self_qs = (
+                User.objects.filter(pk=user_pk)
+                if user_pk is not None
+                else User.objects.none()
+            )
             base_qs = (
-                User.objects.filter(id__in=visible_users_ids)
-                | User.objects.filter(pk=for_user.pk)
+                User.objects.filter(id__in=visible_users_ids) | user_self_qs
             ).distinct()
 
         # 🔒 Filtered prefetch for serializer
@@ -781,7 +795,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     @property
     def edit_url(self) -> str:
         """get the edit url of the user"""
-        return reverse_lazy(f"{self.__class__.__name__.lower()}-update", args=[self.id])
+        return str(
+            reverse_lazy(f"{self.__class__.__name__.lower()}-update", args=[self.id])
+        )
 
     @property
     def username(self):
@@ -791,13 +807,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def permissions(self):
         return RoleAssignment.get_permissions(self)
 
-    @username.setter
-    def set_username(self, username):
-        self.email = username
-
     @staticmethod
-    def get_admin_users() -> List[Self]:
-        return User.objects.filter(user_groups__name="BI-UG-ADM")
+    def get_admin_users() -> List["User"]:
+        return list(User.objects.filter(user_groups__name="BI-UG-ADM"))
 
     def is_admin(self) -> bool:
         return self.user_groups.filter(name="BI-UG-ADM").exists()
@@ -832,7 +844,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         )
 
     @classmethod
-    def get_editors(cls) -> List[Self]:
+    def get_editors(cls) -> List["User"]:
         return [
             user
             for user in cls.objects.all()
@@ -880,19 +892,22 @@ def _iter_assignment_lites_for_user(user: AbstractBaseUser | AnonymousUser):
     Yield AssignmentLite for a user, including via groups, using caches only.
     Returns empty iterator for AnonymousUser / unauthenticated.
     """
-    if not getattr(user, "is_authenticated", False) or not getattr(user, "id", None):
+    if isinstance(user, AnonymousUser) or not getattr(user, "is_authenticated", False):
+        return iter(())
+    user_id_opt = cast(Optional[uuid.UUID], getattr(user, "id", None))
+    if user_id_opt is None:
         return iter(())
 
     assignments_state = get_assignments_state()
     groups_state = get_groups_state()
 
-    user_id = user.id
+    user_id = cast(uuid.UUID, user_id_opt)
     group_ids = groups_state.user_group_ids.get(user_id, frozenset())
 
     # user direct
     direct = assignments_state.by_user.get(user_id, ())
     # via groups
-    via_groups = []
+    via_groups: list["AssignmentLite"] = []
     for gid in group_ids:
         via_groups.extend(assignments_state.by_group.get(gid, ()))
 
@@ -902,6 +917,8 @@ def _iter_assignment_lites_for_user(user: AbstractBaseUser | AnonymousUser):
 class RoleAssignment(NameDescriptionMixin, FolderMixin):
     """fundamental class for CISO Assistant RBAC model, similar to Azure IAM model"""
 
+    if TYPE_CHECKING:
+        perimeter_folders: Any  # pragma: no cover
     perimeter_folders = models.ManyToManyField(
         "Folder", verbose_name=_("Domain"), related_name="perimeter_folders"
     )
@@ -972,7 +989,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             perimeter_ids = set(a.perimeter_folder_ids)
 
             # walk up folder parents via cached parent_map
-            current_id = folder.id
+            current_id: Optional[uuid.UUID] = folder.id
             while current_id is not None:
                 if current_id in perimeter_ids:
                     return True
@@ -982,7 +999,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
     @staticmethod
     def is_object_readable(
-        user: AbstractBaseUser | AnonymousUser, object_type: Any, id: uuid
+        user: AbstractBaseUser | AnonymousUser, object_type: Any, id: uuid.UUID
     ) -> bool:
         """
         Determines if a user has read on an object by id
@@ -1021,7 +1038,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             ra_perimeter_ids = set(a.perimeter_folder_ids)
             if a.is_recursive:
                 # Expand assignment perimeter downward
-                expanded = set()
+                expanded: Set[uuid.UUID] = set()
                 for pf_id in ra_perimeter_ids:
                     expanded.update(
                         iter_descendant_ids(state, pf_id, include_start=True)
@@ -1088,9 +1105,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             if "view_folder" not in role_perm_codenames:
                 continue
 
-            ra_perimeter = set(a.perimeter_folder_ids)
+            ra_perimeter: Set[uuid.UUID] = set(a.perimeter_folder_ids)
             if a.is_recursive:
-                expanded: set[uuid.UUID] = set()
+                expanded: Set[uuid.UUID] = set()
                 for pf_id in ra_perimeter:
                     expanded.update(
                         iter_descendant_ids(state, pf_id, include_start=True)
@@ -1133,11 +1150,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 .values_list("id", flat=True)
             )
 
-            result_view = allowed_ids if has_view else []
-            result_change = allowed_ids if has_change else []
-            result_delete = allowed_ids if has_delete else []
-
-            return (result_view, result_change, result_delete)
+            return (
+                allowed_ids if has_view else [],
+                allowed_ids if has_change else [],
+                allowed_ids if has_delete else [],
+            )
 
         result_view: set[Any] = set()
         result_change: set[Any] = set()
@@ -1200,11 +1217,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         return (list(result_view), list(result_change), list(result_delete))
 
-    def is_user_assigned(self, user) -> bool:
+    def is_user_assigned(self, user: "User") -> bool:
         """Determines if a user is assigned to the role assignment"""
-        return user == self.user or (
-            self.user_group and self.user_group in user.user_groups.all()
-        )
+        if user == self.user:
+            return True
+        if self.user_group is None:
+            return False
+        return self.user_group in user.user_groups.all()
 
     @staticmethod
     def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup):

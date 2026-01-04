@@ -613,7 +613,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     ordering_fields = "__all__"
     search_fields = ["name", "description"]
     filterset_fields = []
-    model = None
+    model: type[models.Model] | None = None
 
     serializers_module = "core.serializers"
 

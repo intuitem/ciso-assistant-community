@@ -5,14 +5,6 @@ class IamConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "iam"
 
-
-from django.apps import AppConfig
-
-
-class IamConfig(AppConfig):
-    default_auto_field = "django.db.models.BigAutoField"
-    name = "iam"
-
     def ready(self):
         from django.apps import apps
         from django.db.models.signals import m2m_changed

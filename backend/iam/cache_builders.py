@@ -31,6 +31,7 @@ from typing import (
     Optional,
     Tuple,
     TYPE_CHECKING,
+    cast,
 )
 
 from django.apps import apps
@@ -43,7 +44,7 @@ from iam.snapshot_cache import CacheRegistry, CacheVersion
 
 # Only for type-checkers (no runtime import => no circular import)
 if TYPE_CHECKING:
-    from iam.models import Folder  # noqa: F401
+    from iam.models import Folder
 
 
 # --------------------------------------------------------------------
@@ -101,10 +102,10 @@ def build_folder_cache_state() -> FolderCacheState:
     """
     Build immutable folder tree snapshot.
     """
-    Folder = apps.get_model("iam", "Folder")
+    folder_model = apps.get_model("iam", "Folder")
 
     folders = list(
-        Folder.objects.all().only(
+        folder_model.objects.all().only(
             "id", "name", "parent_folder_id", "content_type", "builtin"
         )
     )
@@ -118,12 +119,17 @@ def build_folder_cache_state() -> FolderCacheState:
     root_folder_id: Optional[uuid.UUID] = None
     for folder in folders:
         children_map[folder.parent_folder_id].append(folder.id)
-        if root_folder_id is None and folder.content_type == Folder.ContentType.ROOT:
+        if (
+            root_folder_id is None
+            and folder.content_type == folder_model.ContentType.ROOT
+        ):
             root_folder_id = folder.id
 
     # Stable ordering for traversal
     for child_list in children_map.values():
-        child_list.sort(key=lambda fid: folders_by_id[fid].name.casefold())
+        child_list.sort(
+            key=lambda fid: folders_by_id[fid].name.casefold()  # type: ignore[attr-defined]
+        )
 
     depth_map: Dict[uuid.UUID, int] = {}
 
@@ -160,7 +166,7 @@ def path_ids_from_root(
     if folder_id not in state.folders:
         raise KeyError(f"Folder {folder_id} is not cached")
     path: List[uuid.UUID] = []
-    current = folder_id
+    current: Optional[uuid.UUID] = folder_id
     while current is not None:
         path.append(current)
         current = state.parent_map.get(current)
@@ -307,7 +313,7 @@ class AssignmentsCacheState:
 
 def build_assignments_cache_state() -> AssignmentsCacheState:
     RoleAssignment = apps.get_model("iam", "RoleAssignment")
-    Folder = apps.get_model("iam", "Folder")
+    folder_model = apps.get_model("iam", "Folder")
 
     ras = (
         RoleAssignment.objects.all()
@@ -315,7 +321,7 @@ def build_assignments_cache_state() -> AssignmentsCacheState:
         .prefetch_related(
             Prefetch(
                 "perimeter_folders",
-                queryset=Folder.objects.only("id"),
+                queryset=folder_model.objects.only("id"),
             )
         )
     )
@@ -392,25 +398,25 @@ def get_folder_state(*, force_reload: bool = False) -> FolderCacheState:
     """
     _ensure_cache_ready()
     state_map = CacheRegistry.hydrate_all(force_reload=force_reload)
-    return state_map[FOLDER_CACHE_KEY]
+    return cast(FolderCacheState, state_map[FOLDER_CACHE_KEY])
 
 
 def get_roles_state(*, force_reload: bool = False) -> RolesCacheState:
     _ensure_cache_ready()
     state_map = CacheRegistry.hydrate_all(force_reload=force_reload)
-    return state_map[IAM_ROLES_KEY]
+    return cast(RolesCacheState, state_map[IAM_ROLES_KEY])
 
 
 def get_groups_state(*, force_reload: bool = False) -> GroupsCacheState:
     _ensure_cache_ready()
     state_map = CacheRegistry.hydrate_all(force_reload=force_reload)
-    return state_map[IAM_GROUPS_KEY]
+    return cast(GroupsCacheState, state_map[IAM_GROUPS_KEY])
 
 
 def get_assignments_state(*, force_reload: bool = False) -> AssignmentsCacheState:
     _ensure_cache_ready()
     state_map = CacheRegistry.hydrate_all(force_reload=force_reload)
-    return state_map[IAM_ASSIGNMENTS_KEY]
+    return cast(AssignmentsCacheState, state_map[IAM_ASSIGNMENTS_KEY])
 
 
 __all__ = [
