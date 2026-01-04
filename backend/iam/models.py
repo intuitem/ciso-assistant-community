@@ -4,8 +4,8 @@ Inspired from Azure IAM model"""
 from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Dict, Generator, List, Optional, Set, Tuple
-from typing import TYPE_CHECKING, cast
+from typing import Any, Dict, Generator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Set, cast
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
@@ -993,6 +993,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             while current_id is not None:
                 if current_id in perimeter_ids:
                     return True
+                if not a.is_recursive:
+                    break
                 current_id = state.parent_map.get(current_id)
 
         return False
