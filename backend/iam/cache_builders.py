@@ -358,30 +358,20 @@ def register_all_caches(*, allow_replace: bool = False) -> None:
     Optional explicit registration entrypoint, useful for AppConfig.ready().
     Safe to call multiple times.
     """
-    # If your CacheRegistry.register does NOT accept allow_replace,
-    # just remove the kwarg and keep idempotency in CacheRegistry itself.
-    try:
-        CacheRegistry.register(
-            FOLDER_CACHE_KEY, build_folder_cache_state, allow_replace=allow_replace
-        )
-        CacheRegistry.register(
-            IAM_ROLES_KEY, build_roles_cache_state, allow_replace=allow_replace
-        )
-        CacheRegistry.register(
-            IAM_GROUPS_KEY, build_groups_cache_state, allow_replace=allow_replace
-        )
-        CacheRegistry.register(
-            IAM_ASSIGNMENTS_KEY,
-            build_assignments_cache_state,
-            allow_replace=allow_replace,
-        )
-    except TypeError:
-        # Backward-compatible: register() without allow_replace
-        CacheRegistry.register(FOLDER_CACHE_KEY, build_folder_cache_state)
-        CacheRegistry.register(IAM_ROLES_KEY, build_roles_cache_state)
-        CacheRegistry.register(IAM_GROUPS_KEY, build_groups_cache_state)
-        CacheRegistry.register(IAM_ASSIGNMENTS_KEY, build_assignments_cache_state)
-
+    CacheRegistry.register(
+        FOLDER_CACHE_KEY, build_folder_cache_state, allow_replace=allow_replace
+    )
+    CacheRegistry.register(
+        IAM_ROLES_KEY, build_roles_cache_state, allow_replace=allow_replace
+    )
+    CacheRegistry.register(
+        IAM_GROUPS_KEY, build_groups_cache_state, allow_replace=allow_replace
+    )
+    CacheRegistry.register(
+        IAM_ASSIGNMENTS_KEY,
+        build_assignments_cache_state,
+        allow_replace=allow_replace,
+    )
 
 # Import-time registration (DB-free).
 # If you prefer explicit registration, delete these lines and call register_all_caches()
