@@ -350,33 +350,7 @@ def invalidate_assignments_cache() -> Optional[int]:
     return CacheRegistry.invalidate(IAM_ASSIGNMENTS_KEY)
 
 
-# --------------------------------------------------------------------
-# Registration (DB-free)
-# --------------------------------------------------------------------
-def register_all_caches(*, allow_replace: bool = False) -> None:
-    """
-    Optional explicit registration entrypoint, useful for AppConfig.ready().
-    Safe to call multiple times.
-    """
-    CacheRegistry.register(
-        FOLDER_CACHE_KEY, build_folder_cache_state, allow_replace=allow_replace
-    )
-    CacheRegistry.register(
-        IAM_ROLES_KEY, build_roles_cache_state, allow_replace=allow_replace
-    )
-    CacheRegistry.register(
-        IAM_GROUPS_KEY, build_groups_cache_state, allow_replace=allow_replace
-    )
-    CacheRegistry.register(
-        IAM_ASSIGNMENTS_KEY,
-        build_assignments_cache_state,
-        allow_replace=allow_replace,
-    )
-
-
 # Import-time registration (DB-free).
-# If you prefer explicit registration, delete these lines and call register_all_caches()
-# in iam/apps.py -> IamConfig.ready().
 CacheRegistry.register(FOLDER_CACHE_KEY, build_folder_cache_state)
 CacheRegistry.register(IAM_ROLES_KEY, build_roles_cache_state)
 CacheRegistry.register(IAM_GROUPS_KEY, build_groups_cache_state)
@@ -425,7 +399,6 @@ __all__ = [
     "build_roles_cache_state",
     "build_groups_cache_state",
     "build_assignments_cache_state",
-    "register_all_caches",
     # helpers used from models.py
     "get_sub_folders_cached",
     "get_parent_folders_cached",
