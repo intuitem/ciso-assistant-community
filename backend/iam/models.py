@@ -489,8 +489,8 @@ class UserManager(BaseUserManager):
             user.password = make_password(password)
         else:
             user.set_unusable_password()
-        user.user_groups.set(extra_fields.get("user_groups", []))
         user.save(using=self._db)
+        user.user_groups.set(extra_fields.get("user_groups", []))
         if initial_group:
             initial_group.user_set.add(user)
 
