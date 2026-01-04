@@ -8382,13 +8382,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def tree(self, request, pk):
         compliance_assessment = self.get_object()
         _framework = compliance_assessment.framework
-        tree = get_sorted_requirement_nodes(
+        requirement_assessments = list(
+            compliance_assessment.get_requirement_assessments(
+                include_non_assessable=True
+            )
+        )
+        requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
+            .prefetch_related("reference_controls", "threats")
             .all(),
-            compliance_assessment.requirement_assessments.select_related(
-                "requirement"
-            ).all(),
+        )
+        nodes_by_urn = {node.urn: node for node in requirement_nodes}
+        for node in requirement_nodes:
+            parent = nodes_by_urn.get(node.parent_urn)
+            if parent:
+                node._parent_requirement_obj = parent
+        for ra in requirement_assessments:
+            req = getattr(ra, "requirement", None)
+            if req:
+                parent = nodes_by_urn.get(req.parent_urn)
+                if parent:
+                    req._parent_requirement_obj = parent
+        tree = get_sorted_requirement_nodes(
+            requirement_nodes,
+            requirement_assessments,
             _framework.max_score,
         )
         implementation_groups = compliance_assessment.selected_implementation_groups
@@ -8403,14 +8421,27 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             self.request.query_params.get("assessable", "false")
         ).lower() in {"true", "1", "yes"}
         compliance_assessment = self.get_object()
-        requirement_assessments_objects = (
+        requirement_assessments_objects = list(
             compliance_assessment.get_requirement_assessments(
                 include_non_assessable=not assessable
             )
         )
-        requirements_objects = RequirementNode.objects.filter(
-            framework=compliance_assessment.framework
-        ).select_related("framework")
+        requirements_objects = list(
+            RequirementNode.objects.filter(framework=compliance_assessment.framework)
+            .select_related("framework")
+            .prefetch_related("reference_controls", "threats")
+        )
+        nodes_by_urn = {node.urn: node for node in requirements_objects}
+        for node in requirements_objects:
+            parent = nodes_by_urn.get(node.parent_urn)
+            if parent:
+                node._parent_requirement_obj = parent
+        for ra in requirement_assessments_objects:
+            req = getattr(ra, "requirement", None)
+            if req:
+                parent = nodes_by_urn.get(req.parent_urn)
+                if parent:
+                    req._parent_requirement_obj = parent
         requirement_assessments = RequirementAssessmentReadSerializer(
             requirement_assessments_objects, many=True
         ).data
