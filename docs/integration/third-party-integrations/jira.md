@@ -92,7 +92,7 @@ This is only useful if you wish to enable incoming sync on CISO Assistant. Incom
 
 <figure><img src="../../.gitbook/assets/image (45).png" alt=""><figcaption></figcaption></figure>
 
-### Usage
+## Usage
 
 Once the integration is configured and enabled, CISO Assistant will start synchronizing applied controls with Jira issues.
 
