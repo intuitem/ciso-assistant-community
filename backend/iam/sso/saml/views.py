@@ -204,20 +204,19 @@ class FinishACSView(SAMLViewMixin, View):
         except Exception as e:
             error = AuthError.FAILED_SSO
             logger.error("SSO failed", exc_info=e)
-        finally:
-            next_url = login.state["next"]
-            if error:
-                next_url = httpkit.add_query_params(
-                    next_url,
-                    {"error": error, "error_process": login.state["process"]},
-                )
-            elif user:
-                email_object = EmailAddress.objects.filter(user=user).first()
-                if email_object and not email_object.verified:
-                    email_object.verified = True
-                    email_object.save()
-                    logger.info("Email verified", user=user)
-            return HttpResponseRedirect(next_url)
+        next_url = login.state["next"]
+        if error:
+            next_url = httpkit.add_query_params(
+                next_url,
+                {"error": error, "error_process": login.state["process"]},
+            )
+        elif user:
+            email_object = EmailAddress.objects.filter(user=user).first()
+            if email_object and not email_object.verified:
+                email_object.verified = True
+                email_object.save()
+                logger.info("Email verified", user=user)
+        return HttpResponseRedirect(next_url)
 
 
 class GenerateSAMLKeyView(SAMLViewMixin, APIView):
