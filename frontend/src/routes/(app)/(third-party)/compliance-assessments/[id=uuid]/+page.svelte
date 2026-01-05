@@ -2,6 +2,7 @@
 	import { run } from 'svelte/legacy';
 
 	import { page } from '$app/state';
+	import { browser } from '$app/environment';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 
 	import { onMount } from 'svelte';
@@ -39,6 +40,7 @@
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
+	import { fetchNames, isUuid } from '$lib/utils/related-names';
 	import { derived } from 'svelte/store';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -53,7 +55,9 @@
 
 	const compliance_assessment = $derived(data.compliance_assessment);
 	const folderId =
-		typeof compliance_assessment.folder === 'string'
+		!compliance_assessment.folder
+		? undefined
+		:typeof compliance_assessment.folder === 'string'
 			? compliance_assessment.folder
 			: compliance_assessment.folder?.id;
 	const framework = data.framework ?? compliance_assessment.framework;
@@ -77,6 +81,69 @@
 			model: requirementAssessmentModel.name,
 			domain: folderId
 		});
+
+	let relatedNames: Record<string, Record<string, string>> = $state({});
+	let relatedNamesKey = '';
+
+	const getUrlModelForField = (fieldName: string): string | undefined => {
+		const modelField = model?.foreignKeyFields?.find((item) => item.field === fieldName);
+		return modelField?.urlModel ?? modelField?.field?.replace(/_/g, '-');
+	};
+
+	const extractId = (value: any): string | null => {
+		if (typeof value === 'string' && isUuid(value)) return value;
+		if (value && typeof value === 'object' && 'id' in value) {
+			const idValue = String(value.id);
+			return isUuid(idValue) ? idValue : null;
+		}
+		return null;
+	};
+
+	const extractIds = (value: any): string[] => {
+		if (Array.isArray(value)) {
+			return value.map((item) => extractId(item)).filter((item): item is string => Boolean(item));
+		}
+		const single = extractId(value);
+		return single ? [single] : [];
+	};
+
+	const isIdOnlyArray = (value: any[]): boolean => {
+		const hasDisplayLabels = value.some(
+			(item) => item && typeof item === 'object' && ('str' in item || 'name' in item)
+		);
+		return !hasDisplayLabels && extractIds(value).length > 0;
+	};
+
+	const refreshRelatedNames = async () => {
+		if (!browser || !model?.foreignKeyFields) return;
+		const idsByModel = new Map<string, Set<string>>();
+		for (const fieldConfig of model.foreignKeyFields) {
+			const urlModel = fieldConfig.urlModel ?? fieldConfig.field?.replace(/_/g, '-');
+			if (!urlModel) continue;
+			const ids = extractIds(compliance_assessment?.[fieldConfig.field]);
+			if (ids.length === 0) continue;
+			const bucket = idsByModel.get(urlModel) ?? new Set<string>();
+			ids.forEach((id) => bucket.add(id));
+			idsByModel.set(urlModel, bucket);
+		}
+		const key = JSON.stringify(
+			Array.from(idsByModel.entries()).map(([urlModel, ids]) => [urlModel, Array.from(ids).sort()])
+		);
+		if (!key || key === relatedNamesKey) return;
+		relatedNamesKey = key;
+
+		const updates: Record<string, Record<string, string>> = {};
+		for (const [urlModel, ids] of idsByModel.entries()) {
+			updates[urlModel] = await fetchNames(urlModel, Array.from(ids));
+		}
+		if (Object.keys(updates).length > 0) {
+			relatedNames = { ...relatedNames, ...updates };
+		}
+	};
+
+	$effect(() => {
+		void refreshRelatedNames();
+	});
 
 	const has_threats = data.threats.total_unique_threats > 0;
 
@@ -484,26 +551,89 @@
 							>
 								{#if value}
 									{#if Array.isArray(value)}
-										<ul>
-											{#each value as val}
-												<li>
-													{#if val.str && val.id}
-														{@const itemHref = `/${
-															URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
-																(item) => item.field === key
-															)?.urlModel
-														}/${val.id}`}
-														{#if !page.data.user.is_third_party}
-															<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
+										{@const isIdArray = isIdOnlyArray(value)}
+										{@const idValues = isIdArray ? extractIds(value) : []}
+										{@const urlModel = isIdArray ? getUrlModelForField(key) : undefined}
+										{@const resolvedNames = urlModel ? relatedNames[urlModel] : undefined}
+										{@const hasResolvedNames = Boolean(resolvedNames)}
+										{@const visibleIds = hasResolvedNames
+											? idValues.filter((id) => resolvedNames?.[id])
+											: []}
+										{@const hiddenCount = hasResolvedNames ? idValues.length - visibleIds.length : 0}
+										{#if isIdArray}
+											{#if hasResolvedNames}
+												<ul>
+													{#each visibleIds as id}
+														{@const label = resolvedNames?.[id]}
+														{@const itemHref = label && urlModel ? `/${urlModel}/${id}` : undefined}
+														<li>
+															{#if label && itemHref}
+																{#if !page.data.user.is_third_party}
+																	<Anchor href={itemHref} class="anchor">{label}</Anchor>
+																{:else}
+																	{label}
+																{/if}
+															{:else if label}
+																{label}
+															{/if}
+														</li>
+													{/each}
+												</ul>
+												{#if hiddenCount > 0}
+													<p class="text-xs text-yellow-700">
+														{m.objectsNotVisible({
+															count: hiddenCount,
+															s: hiddenCount === 1 ? '' : 's'
+														})}
+													</p>
+												{/if}
+											{:else}
+												<ul>
+													{#each idValues as id}
+														<li>{id}</li>
+													{/each}
+												</ul>
+											{/if}
+										{:else}
+											<ul>
+												{#each value as val}
+													<li>
+														{#if val?.str && val?.id}
+															{@const itemHref = `/${
+																URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
+																	(item) => item.field === key
+																)?.urlModel
+															}/${val.id}`}
+															{#if !page.data.user.is_third_party}
+																<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
+															{:else}
+																{val.str}
+															{/if}
+														{:else if val?.str}
+															{safeTranslate(val.str)}
 														{:else}
-															{val.str}
+															{safeTranslate(val)}
 														{/if}
-													{:else}
-														{val}
-													{/if}
-												</li>
-											{/each}
-										</ul>
+													</li>
+												{/each}
+											</ul>
+										{/if}
+									{:else if typeof value === 'string' && isUuid(value) && getUrlModelForField(key)}
+										{@const urlModel = getUrlModelForField(key)}
+										{@const resolvedNames = urlModel ? relatedNames[urlModel] : undefined}
+										{@const label = resolvedNames?.[value]}
+										{@const itemHref = label && urlModel ? `/${urlModel}/${value}` : undefined}
+										{#if label && itemHref}
+											{#if !page.data.user.is_third_party}
+												<Anchor href={itemHref} class="anchor">{label}</Anchor>
+											{:else}
+												{label}
+											{/if}
+										{:else if label}
+											{label}
+										{:else}
+											{value}
+										{/if}
 									{:else if value.str && value.id}
 										{@const itemHref = `/${
 											URL_MODEL_MAP['compliance-assessments']['foreignKeyFields']?.find(
