@@ -355,6 +355,7 @@
 	"asCSV": "as CSV",
 	"asXLSX": "as Excel",
 	"asWord": "as Word",
+	"asPPTX": "as PowerPoint",
 	"exportPdf": "Export PDF",
 	"generating": "Generating",
 	"asMarkdown": "as Markdown",

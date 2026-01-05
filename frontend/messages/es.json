@@ -269,6 +269,7 @@
 	"asPDF": "como PDF",
 	"asCSV": "como CSV",
 	"asWord": "como Word",
+	"asPPTX": "como PowerPoint",
 	"draft": "Borrador",
 	"riskMatrixView": "Vista de matriz de riesgos",
 	"currentInMatrixView": "Actual",

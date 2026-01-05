@@ -641,3 +641,281 @@ def gen_audit_context(id, doc, tree, lang):
     }
 
     return context
+
+
+def gen_audit_pptx_context(id, tree, lang):
+    """
+    Generate context data for PPTX report generation.
+    Similar to gen_audit_context but returns raw data instead of InlineImage objects.
+
+    Args:
+        id: ComplianceAssessment UUID
+        tree: Requirement tree from get_sorted_requirement_nodes
+        lang: Language code ('en' or 'fr')
+
+    Returns:
+        dict: Context data including chart buffers and text data
+    """
+
+    def count_category_results(data):
+        def recursive_result_count(node_data):
+            result_counts = {}
+            if node_data.get("assessable", False):
+                result = node_data.get("result", "unknown")
+                result_counts[result] = 1
+            for child_id, child_data in node_data.get("children", {}).items():
+                child_results = recursive_result_count(child_data)
+                for result, count in child_results.items():
+                    result_counts[result] = result_counts.get(result, 0) + count
+            return result_counts
+
+        category_result_counts = {}
+        for node_id, node_data in data.items():
+            if node_data.get("parent_urn") is None:
+                category_result_counts[node_data["urn"]] = recursive_result_count(
+                    node_data
+                )
+        return category_result_counts
+
+    def aggregate_category_scores(data):
+        def recursive_score_calculation(node_data):
+            scores = {
+                "total_score": 0,
+                "item_count": 0,
+                "scored_count": 0,
+            }
+            if node_data.get("is_scored", False):
+                scores["item_count"] = 1
+                if node_data.get("score") is not None:
+                    scores["total_score"] = node_data["score"]
+                    scores["scored_count"] = 1
+            for child_id, child_data in node_data.get("children", {}).items():
+                child_scores = recursive_score_calculation(child_data)
+                scores["total_score"] += child_scores["total_score"]
+                scores["item_count"] += child_scores["item_count"]
+                scores["scored_count"] += child_scores["scored_count"]
+            return scores
+
+        category_scores = {}
+        for node_id, node_data in data.items():
+            scores = recursive_score_calculation(node_data)
+            average_score = 0
+            if scores["scored_count"] > 0:
+                average_score = scores["total_score"] / scores["scored_count"]
+            category_scores[node_data["urn"]] = {
+                "name": node_data["node_content"].split(":")[0],
+                "total_score": scores["total_score"],
+                "item_count": scores["item_count"],
+                "scored_count": scores["scored_count"],
+                "average_score": round(average_score, 1),
+            }
+        return category_scores
+
+    audit = ComplianceAssessment.objects.get(id=id)
+
+    authors = ", ".join([a.email for a in audit.authors.all()])
+    reviewers = ", ".join([a.email for a in audit.reviewers.all()])
+
+    spider_data = list()
+    result_counts = count_category_results(tree)
+    agg_drifts = list()
+    category_scores = aggregate_category_scores(tree)
+
+    max_score = 100
+    for node in tree.values():
+        if node.get("max_score") is not None:
+            max_score = node["max_score"]
+            break
+
+    for key, content in tree.items():
+        total = sum(result_counts[content["urn"]].values())
+        ok_items = result_counts[content["urn"]].get("compliant", 0) + result_counts[
+            content["urn"]
+        ].get("not_applicable", 0)
+        ok_perc = ceil(ok_items / total * 100) if total > 0 else 0
+        not_ok_count = total - ok_items
+        name = content["node_content"].split(":")[0]
+        spider_data.append({"category": name, "value": ok_perc})
+        agg_drifts.append({"name": name, "drift_count": not_ok_count})
+
+    aggregated = {
+        "compliant": 0,
+        "non_compliant": 0,
+        "not_applicable": 0,
+        "not_assessed": 0,
+        "partially_compliant": 0,
+    }
+
+    for node in result_counts.values():
+        for status, count in node.items():
+            if status in aggregated:
+                aggregated[status] += count
+
+    total = sum([v for v in aggregated.values()])
+    aggregated["total"] = total
+
+    i18n_dict = {
+        "en": {
+            "compliant": "Compliant",
+            "partially_compliant": "Partially compliant",
+            "non_compliant": "Non compliant",
+            "not_applicable": "Not applicable",
+            "not_assessed": "Not assessed",
+            "to_do": "To do",
+            "on_hold": "On hold",
+            "in_progress": "In progress",
+            "deprecated": "Deprecated",
+            "active": "Active",
+            "policy": "Policy",
+            "process": "Process",
+            "technical": "Technical",
+            "physical": "Physical",
+            "procedure": "Procedure",
+        },
+        "fr": {
+            "compliant": "Conformes",
+            "partially_compliant": "Partiellement conformes",
+            "non_compliant": "Non conformes",
+            "not_applicable": "Non applicables",
+            "not_assessed": "Non évalués",
+            "to_do": "À faire",
+            "on_hold": "En attente",
+            "in_progress": "En cours",
+            "deprecated": "Déprécié",
+            "active": "Actif",
+            "policy": "Politique",
+            "process": "Processus",
+            "technical": "Technique",
+            "physical": "Physique",
+            "procedure": "Procédure",
+        },
+    }
+
+    def safe_translate(lang: str, key: str) -> str:
+        if key is None or key == "--":
+            return "-"
+        return i18n_dict[lang].get(key, key)
+
+    donut_data = [
+        {
+            "category": safe_translate(lang, "compliant"),
+            "value": aggregated["compliant"],
+        },
+        {
+            "category": safe_translate(lang, "partially_compliant"),
+            "value": aggregated["partially_compliant"],
+        },
+        {
+            "category": safe_translate(lang, "non_compliant"),
+            "value": aggregated["non_compliant"],
+        },
+        {
+            "category": safe_translate(lang, "not_applicable"),
+            "value": aggregated["not_applicable"],
+        },
+        {
+            "category": safe_translate(lang, "not_assessed"),
+            "value": aggregated["not_assessed"],
+        },
+    ]
+
+    # Generate chart buffers
+    custom_colors = ["#2196F3"]
+    spider_chart_buffer = plot_spider_chart(spider_data, colors=custom_colors)
+    category_radar_buffer = plot_category_radar(
+        category_scores, max_score=max_score, colors=custom_colors
+    )
+    donut_buffer = plot_donut(donut_data)
+    completion_bar_buffer = plot_completion_bar(spider_data, colors=custom_colors)
+
+    # Get applied controls data
+    requirement_assessments_objects = audit.get_requirement_assessments(
+        include_non_assessable=True
+    )
+    applied_controls = AppliedControl.objects.filter(
+        requirement_assessments__in=requirement_assessments_objects
+    ).distinct()
+    ac_total = applied_controls.count()
+    status_cnt = applied_controls.values("status").annotate(count=Count("id"))
+    ac_chart_data = [
+        {"category": safe_translate(lang, item["status"]), "value": item["count"]}
+        for item in status_cnt
+    ]
+
+    p1_controls = list()
+    full_controls = list()
+    for ac in applied_controls.filter(priority=1):
+        requirements_count = (
+            RequirementAssessment.objects.filter(compliance_assessment=audit)
+            .filter(applied_controls=ac.id)
+            .count()
+        )
+        p1_controls.append(
+            {
+                "name": ac.name,
+                "description": safe_translate(lang, ac.description),
+                "status": safe_translate(lang, ac.status),
+                "category": safe_translate(lang, ac.category),
+                "coverage": requirements_count,
+            }
+        )
+
+    for ac in applied_controls.all():
+        requirements_count = (
+            RequirementAssessment.objects.filter(compliance_assessment=audit)
+            .filter(applied_controls=ac.id)
+            .count()
+        )
+        full_controls.append(
+            {
+                "name": ac.name,
+                "description": safe_translate(lang, ac.description),
+                "prio": f"P{ac.priority}" if ac.priority else "-",
+                "status": safe_translate(lang, ac.status),
+                "eta": safe_translate(lang, ac.eta),
+                "category": safe_translate(lang, ac.category),
+                "coverage": requirements_count,
+            }
+        )
+
+    hbar_colors = ["#CCC", "#46D39A", "#E55759", "#392F5A", "#F4D06F", "#BFDBFE"]
+    hbar_buffer = plot_horizontal_bar(ac_chart_data, colors=hbar_colors)
+
+    IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
+
+    context = {
+        # Text data
+        "audit": audit,
+        "audit_name": audit.name,
+        "audit_description": audit.description or "",
+        "framework_name": audit.framework.name if audit.framework else "",
+        "date": now().strftime("%d/%m/%Y"),
+        "authors": authors,
+        "reviewers": reviewers,
+        "contributors": f"{authors}\n{reviewers}",
+        "igs": IGs,
+        # Statistics
+        "req": aggregated,
+        "req_total": aggregated["total"],
+        "req_compliant": aggregated["compliant"],
+        "req_partially_compliant": aggregated["partially_compliant"],
+        "req_non_compliant": aggregated["non_compliant"],
+        "req_not_applicable": aggregated["not_applicable"],
+        "req_not_assessed": aggregated["not_assessed"],
+        "ac_count": ac_total,
+        # Chart buffers (BytesIO objects)
+        "compliance_donut_buffer": donut_buffer,
+        "completion_bar_buffer": completion_bar_buffer,
+        "compliance_radar_buffer": spider_chart_buffer,
+        "category_radar_buffer": category_radar_buffer,
+        "chart_controls_buffer": hbar_buffer,
+        # Data lists
+        "drifts_per_domain": agg_drifts,
+        "p1_controls": p1_controls,
+        "full_controls": full_controls,
+        "category_scores": category_scores,
+        "spider_data": spider_data,
+        "donut_data": donut_data,
+    }
+
+    return context

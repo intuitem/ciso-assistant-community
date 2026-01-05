@@ -60,12 +60,14 @@ import random
 from django.db.models.functions import Lower
 
 from docxtpl import DocxTemplate
+from pptx import Presentation
+from pptx.util import Inches
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from integrations.registry import IntegrationRegistry
 from library.serializers import StoredLibrarySerializer
 from webhooks.service import dispatch_webhook_event
-from .generators import gen_audit_context
+from .generators import gen_audit_context, gen_audit_pptx_context
 
 from django.utils import timezone
 from django.utils.text import slugify
@@ -7835,6 +7837,279 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
         response["Content-Disposition"] = "attachment; filename=exec_report.docx"
+
+        return response
+
+    @action(detail=True, name="Get PPTX Report")
+    def pptx_report(self, request, pk):
+        """
+        PPTX report generation (Exec Summary)
+        """
+        lang = "en"
+        if request.user.preferences.get("lang") is not None:
+            lang = request.user.preferences.get("lang")
+            if lang not in ["fr", "en"]:
+                lang = "en"
+
+        template_path = (
+            Path(settings.BASE_DIR)
+            / "core"
+            / "templates"
+            / "core"
+            / f"audit_report_template_{lang}.pptx"
+        )
+
+        # Fall back to English if language-specific template doesn't exist
+        if not template_path.exists():
+            template_path = (
+                Path(settings.BASE_DIR)
+                / "core"
+                / "templates"
+                / "core"
+                / "audit_report_template_en.pptx"
+            )
+
+        _framework = self.get_object().framework
+        tree = get_sorted_requirement_nodes(
+            RequirementNode.objects.filter(framework=_framework).all(),
+            RequirementAssessment.objects.filter(
+                compliance_assessment=self.get_object()
+            ).all(),
+            _framework.max_score,
+        )
+        implementation_groups = self.get_object().selected_implementation_groups
+        filter_graph_by_implementation_groups(tree, implementation_groups)
+
+        context = gen_audit_pptx_context(pk, tree, lang)
+
+        # Load and process PPTX template
+        prs = Presentation(template_path)
+
+        # Define placeholder replacements
+        replacements = {
+            "{{audit_name}}": context["audit_name"],
+            "{{framework_name}}": context["framework_name"],
+            "{{date}}": context["date"],
+            "{{authors}}": context["authors"],
+            "{{reviewers}}": context["reviewers"],
+            "{{contributors}}": context["contributors"],
+            "{{igs}}": context["igs"],
+            "{{req_total}}": str(context["req_total"]),
+            "{{req_compliant}}": str(context["req_compliant"]),
+            "{{req_partially_compliant}}": str(context["req_partially_compliant"]),
+            "{{req_non_compliant}}": str(context["req_non_compliant"]),
+            "{{req_not_applicable}}": str(context["req_not_applicable"]),
+            "{{req_not_assessed}}": str(context["req_not_assessed"]),
+            "{{ac_count}}": str(context["ac_count"]),
+            "{{audit_description}}": context["audit_description"],
+        }
+
+        def replace_text_in_paragraph(paragraph, replacements):
+            """
+            Replace placeholders in a paragraph, handling text split across runs.
+            """
+            # Get full paragraph text
+            full_text = "".join(run.text for run in paragraph.runs)
+
+            # Check if any placeholder exists in the full text
+            has_placeholder = any(key in full_text for key in replacements.keys())
+            if not has_placeholder:
+                return
+
+            # Perform all replacements
+            for placeholder, value in replacements.items():
+                full_text = full_text.replace(placeholder, value)
+
+            # Clear all runs and set text in the first run
+            if paragraph.runs:
+                # Preserve formatting from first run
+                first_run = paragraph.runs[0]
+                first_run.text = full_text
+                # Clear remaining runs
+                for run in paragraph.runs[1:]:
+                    run.text = ""
+
+        # Define chart image mappings (shape name -> buffer)
+        chart_images = {
+            "compliance_donut": context["compliance_donut_buffer"],
+            "completion_bar": context["completion_bar_buffer"],
+            "compliance_radar": context["compliance_radar_buffer"],
+            "category_radar": context["category_radar_buffer"],
+            "chart_controls": context["chart_controls_buffer"],
+        }
+
+        # Process each slide
+        for slide in prs.slides:
+            # Replace text placeholders
+            for shape in slide.shapes:
+                if shape.has_text_frame:
+                    for paragraph in shape.text_frame.paragraphs:
+                        replace_text_in_paragraph(paragraph, replacements)
+
+            # Find text boxes with chart placeholders like {{compliance_donut}}
+            # and replace them with chart images at the same position/size
+            shapes_to_replace = []
+            for shape in slide.shapes:
+                if shape.has_text_frame:
+                    # Get full text from the shape
+                    full_text = ""
+                    for paragraph in shape.text_frame.paragraphs:
+                        for run in paragraph.runs:
+                            full_text += run.text
+
+                    # Check if text contains a chart placeholder
+                    for chart_name, chart_buffer in chart_images.items():
+                        placeholder = "{{" + chart_name + "}}"
+                        if placeholder in full_text:
+                            shapes_to_replace.append(
+                                {
+                                    "shape": shape,
+                                    "chart_buffer": chart_buffer,
+                                    "left": shape.left,
+                                    "top": shape.top,
+                                    "width": shape.width,
+                                    "height": shape.height,
+                                }
+                            )
+                            break
+
+            # Replace shapes with chart images
+            for item in shapes_to_replace:
+                # Remove the placeholder shape
+                sp = item["shape"]._element
+                sp.getparent().remove(sp)
+
+                # Reset buffer position and insert chart image
+                item["chart_buffer"].seek(0)
+                slide.shapes.add_picture(
+                    item["chart_buffer"],
+                    item["left"],
+                    item["top"],
+                    item["width"],
+                    item["height"],
+                )
+
+            # Find text boxes with table placeholders and replace with tables
+            table_definitions = {
+                "table_p1_controls": {
+                    "headers": ["Name", "Status", "Category", "Coverage"],
+                    "data": [
+                        [c["name"], c["status"], c["category"], str(c["coverage"])]
+                        for c in context["p1_controls"]
+                    ],
+                },
+                "table_full_controls": {
+                    "headers": [
+                        "Name",
+                        "Priority",
+                        "Status",
+                        "ETA",
+                        "Category",
+                        "Coverage",
+                    ],
+                    "data": [
+                        [
+                            c["name"],
+                            c["prio"],
+                            c["status"],
+                            c["eta"],
+                            c["category"],
+                            str(c["coverage"]),
+                        ]
+                        for c in context["full_controls"]
+                    ],
+                },
+                "table_category_scores": {
+                    "headers": ["Category", "Average Score", "Items", "Scored"],
+                    "data": [
+                        [
+                            v["name"],
+                            str(v["average_score"]),
+                            str(v["item_count"]),
+                            str(v["scored_count"]),
+                        ]
+                        for v in context["category_scores"].values()
+                    ],
+                },
+                "table_compliance_summary": {
+                    "headers": ["Status", "Count"],
+                    "data": [
+                        ["Compliant", str(context["req_compliant"])],
+                        [
+                            "Partially Compliant",
+                            str(context["req_partially_compliant"]),
+                        ],
+                        ["Non Compliant", str(context["req_non_compliant"])],
+                        ["Not Applicable", str(context["req_not_applicable"])],
+                        ["Not Assessed", str(context["req_not_assessed"])],
+                        ["Total", str(context["req_total"])],
+                    ],
+                },
+            }
+
+            tables_to_create = []
+            for shape in slide.shapes:
+                if shape.has_text_frame:
+                    full_text = ""
+                    for paragraph in shape.text_frame.paragraphs:
+                        for run in paragraph.runs:
+                            full_text += run.text
+
+                    for table_name, table_def in table_definitions.items():
+                        placeholder = "{{" + table_name + "}}"
+                        if placeholder in full_text:
+                            tables_to_create.append(
+                                {
+                                    "shape": shape,
+                                    "table_def": table_def,
+                                    "left": shape.left,
+                                    "top": shape.top,
+                                    "width": shape.width,
+                                    "height": shape.height,
+                                }
+                            )
+                            break
+
+            # Create tables
+            for item in tables_to_create:
+                # Remove placeholder shape
+                sp = item["shape"]._element
+                sp.getparent().remove(sp)
+
+                table_def = item["table_def"]
+                rows = len(table_def["data"]) + 1  # +1 for header
+                cols = len(table_def["headers"])
+
+                if rows > 1:  # Only create table if there's data
+                    table = slide.shapes.add_table(
+                        rows,
+                        cols,
+                        item["left"],
+                        item["top"],
+                        item["width"],
+                        item["height"],
+                    ).table
+
+                    # Set header row
+                    for col_idx, header in enumerate(table_def["headers"]):
+                        cell = table.cell(0, col_idx)
+                        cell.text = header
+
+                    # Set data rows
+                    for row_idx, row_data in enumerate(table_def["data"]):
+                        for col_idx, cell_value in enumerate(row_data):
+                            cell = table.cell(row_idx + 1, col_idx)
+                            cell.text = cell_value or ""
+
+        buffer_pptx = io.BytesIO()
+        prs.save(buffer_pptx)
+        buffer_pptx.seek(0)
+
+        response = StreamingHttpResponse(
+            FileWrapper(buffer_pptx),
+            content_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        )
+        response["Content-Disposition"] = "attachment; filename=exec_report.pptx"
 
         return response
 

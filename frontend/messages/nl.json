@@ -269,6 +269,7 @@
 	"asPDF": "als PDF",
 	"asCSV": "als CSV",
 	"asWord": "als Word",
+	"asPPTX": "als PowerPoint",
 	"draft": "Concept",
 	"riskMatrixView": "Risicomatrixweergave",
 	"currentInMatrixView": "Huidig",
