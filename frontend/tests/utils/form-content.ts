@@ -1,5 +1,38 @@
 import { expect, type Locator, type Page } from './test-utils.js';
 
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const stripLeadingSlash = (value: string) => value.replace(/^\/+/, '');
+
+const buildSearchboxMatcher = (value: string): RegExp => {
+	const raw = String(value).trim();
+	const normalized = stripLeadingSlash(raw);
+	const escaped = escapeRegExp(normalized);
+	if (!raw.includes('/')) {
+		return new RegExp(`\\s*/?${escaped}\\s*`);
+	}
+	const suffix = stripLeadingSlash(raw.split('/').pop()?.trim() ?? '');
+	if (!suffix || suffix === raw) {
+		return new RegExp(`\\s*/?${escaped}\\s*`);
+	}
+	return new RegExp(`\\s*(?:/?${escaped}|/?${escapeRegExp(suffix)})\\s*`);
+};
+
+const buildOptionMatcher = (value: string): string | RegExp => {
+	const raw = String(value).trim();
+	const normalized = stripLeadingSlash(raw);
+	const escaped = escapeRegExp(normalized);
+	if (!raw.includes('/')) {
+		return new RegExp(`^\\s*(?:/?${escaped}|.*${escapeRegExp(raw)})\\s*$`);
+	}
+	const suffix = stripLeadingSlash(raw.split('/').pop()?.trim() ?? '');
+	if (!suffix || suffix === raw) {
+		return new RegExp(`^\\s*/?${escaped}\\s*$`);
+	}
+	// Match either the full path or just the final suffix (which may have UUID prefixes)
+	return new RegExp(`^\\s*(?:.*${escapeRegExp(suffix)})\\s*$`);
+};
+
 export enum FormFieldType {
 	CHECKBOX = 'checkbox',
 	DATE = 'date',
@@ -87,7 +120,8 @@ export class FormContent {
 								.getByRole('searchbox')
 								.evaluate((el) => el.classList.contains('disabled')))
 						) {
-							await expect(field.locator.getByRole('searchbox')).toContainText(values[key]);
+							const matcher = buildSearchboxMatcher(values[key]);
+							await expect(field.locator.getByRole('searchbox')).toContainText(matcher);
 						} else {
 							if (typeof values[key] === 'object' && 'request' in values[key]) {
 								const responsePromise = this.page.waitForResponse(
@@ -95,10 +129,12 @@ export class FormContent {
 								);
 								await field.locator.click();
 								await expect(
-									field.locator.getByRole('option', { name: values[key].value }).first()
+									field.locator
+										.getByRole('option', { name: buildOptionMatcher(values[key].value) })
+										.first()
 								).toBeVisible({ timeout: 10_000 });
 								await field.locator
-									.getByRole('option', { name: values[key].value })
+									.getByRole('option', { name: buildOptionMatcher(values[key].value) })
 									.first()
 									.click();
 
@@ -106,9 +142,14 @@ export class FormContent {
 							} else {
 								await field.locator.click();
 								await expect(
-									field.locator.getByRole('option', { name: values[key] }).first()
+									field.locator
+										.getByRole('option', { name: buildOptionMatcher(values[key]) })
+										.first()
 								).toBeVisible({ timeout: 10_000 });
-								await field.locator.getByRole('option', { name: values[key] }).first().click();
+								await field.locator
+									.getByRole('option', { name: buildOptionMatcher(values[key]) })
+									.first()
+									.click();
 							}
 						}
 					}).toPass({ timeout: 22_000, intervals: [500, 1000, 10_000] });
@@ -116,8 +157,11 @@ export class FormContent {
 				case FormFieldType.SELECT_MULTIPLE_AUTOCOMPLETE:
 					await field.locator.click();
 					for (const val of values[key]) {
-						await expect(field.locator.getByRole('option', { name: val }).first()).toBeVisible();
-						await field.locator.getByRole('option', { name: val }).first().click();
+						const matcher = buildOptionMatcher(val);
+						await expect(
+							field.locator.getByRole('option', { name: matcher }).first()
+						).toBeVisible();
+						await field.locator.getByRole('option', { name: matcher }).first().click();
 					}
 					if (
 						(await field.locator.isEnabled()) &&
