@@ -1,11 +1,7 @@
 """
 Generic versioned snapshot caching logic for Django with:
 - One DB table for all cache versions
-- Fetch-all versions (no parameters)
-- Manual invalidation (no signals)
-- Optional startup registration call to create/register all caches (DB-free)
 - OR import-time self-registration via CacheRegistry.register(...)
-- A registry + hydrate_all() convenience for request-time access
 """
 
 from __future__ import annotations
