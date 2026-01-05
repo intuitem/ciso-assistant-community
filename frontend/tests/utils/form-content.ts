@@ -4,6 +4,16 @@ const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\
 
 const stripLeadingSlash = (value: string) => value.replace(/^\/+/, '');
 
+/**
+ * Extracts the last meaningful part of a path-like string
+ * e.g., "domain/perimeter/assessment" -> "assessment"
+ *       "domain/perimeter/assessment - 1.4.2" -> "assessment - 1.4.2"
+ */
+const extractLastSegment = (value: string): string => {
+	const segments = value.split('/').map(s => s.trim()).filter(Boolean);
+	return segments[segments.length - 1] || value.trim();
+};
+
 const buildSearchboxMatcher = (value: string): RegExp => {
 	const raw = String(value).trim();
 	const normalized = stripLeadingSlash(raw);
@@ -11,26 +21,24 @@ const buildSearchboxMatcher = (value: string): RegExp => {
 	if (!raw.includes('/')) {
 		return new RegExp(`\\s*/?${escaped}\\s*`);
 	}
-	const suffix = stripLeadingSlash(raw.split('/').pop()?.trim() ?? '');
-	if (!suffix || suffix === raw) {
+	const suffix = escapeRegExp(extractLastSegment(raw));
+	if (!suffix || suffix === escaped) {
 		return new RegExp(`\\s*/?${escaped}\\s*`);
 	}
-	return new RegExp(`\\s*(?:/?${escaped}|/?${escapeRegExp(suffix)})\\s*`);
+	return new RegExp(`\\s*(?:/?${escaped}|/?${suffix})\\s*`);
 };
 
-const buildOptionMatcher = (value: string): string | RegExp => {
+const buildOptionMatcher = (value: string): RegExp => {
 	const raw = String(value).trim();
-	const normalized = stripLeadingSlash(raw);
-	const escaped = escapeRegExp(normalized);
-	if (!raw.includes('/')) {
-		return new RegExp(`^\\s*(?:/?${escaped}|.*${escapeRegExp(raw)})\\s*$`);
-	}
-	const suffix = stripLeadingSlash(raw.split('/').pop()?.trim() ?? '');
-	if (!suffix || suffix === raw) {
-		return new RegExp(`^\\s*/?${escaped}\\s*$`);
-	}
-	// Match either the full path or just the final suffix (which may have UUID prefixes)
-	return new RegExp(`^\\s*(?:.*${escapeRegExp(suffix)})\\s*$`);
+	const lastSegment = extractLastSegment(raw);
+	const escaped = escapeRegExp(lastSegment);
+
+	// Match options that may have:
+	// 1. Index prefix (e.g., "0-", "1-", "42-")
+	// 2. UUID suffix (e.g., "-c817", "-d0c8")
+	// 3. Full breadcrumb path
+	// Examples: "0-Test domain-d0c8/...", "Test asset-c817 Primary", "asset-c817 Primary"
+	return new RegExp(`^\\s*(?:\\d+-)?.*${escaped}.*$`, 'i');
 };
 
 export enum FormFieldType {
