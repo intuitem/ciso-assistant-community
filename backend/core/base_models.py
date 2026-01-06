@@ -136,3 +136,53 @@ class ETADueDateMixin(models.Model):
 
     class Meta:
         abstract = True
+
+
+class ActorSyncMixin(models.Model):
+    """
+    Intercepts save() to ensure an Actor exists for individual records.
+    """
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super().save(*args, **kwargs)
+
+        # If this is a new record, create the actor.
+        # We use get_or_create to be safe against race conditions/re-saves.
+        if is_new:
+            from .models import Actor
+
+            field_name = self.__class__.__name__.lower()
+            Actor.objects.get_or_create(**{field_name: self})
+
+
+class ActorSyncManager(models.Manager):
+    """
+    Intercepts bulk_create to ensure Actors are created for every new record.
+    """
+
+    def bulk_create(self, objs, batch_size=None, ignore_conflicts=False):
+        # Perform the standard bulk_create
+        created_objs = super().bulk_create(
+            objs, batch_size=batch_size, ignore_conflicts=ignore_conflicts
+        )
+
+        # Extract the newly created instances
+        from .models import Actor  # Import inside to avoid circular dependency
+
+        # Determine the field name on the Actor model (user/team/entity)
+        field_name = self.model.__name__.lower()
+
+        actors = []
+        for obj in created_objs:
+            if obj.pk:  # Only link if the object was actually created
+                actors.append(Actor(**{field_name: obj}))
+
+        # Bulk create the corresponding Actors
+        if actors:
+            Actor.objects.bulk_create(actors, ignore_conflicts=True)
+
+        return created_objs

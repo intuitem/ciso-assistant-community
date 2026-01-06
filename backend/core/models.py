@@ -40,7 +40,13 @@ from library.helpers import (
 
 from global_settings.models import GlobalSettings
 
-from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
+from .base_models import (
+    AbstractBaseModel,
+    ActorSyncManager,
+    ActorSyncMixin,
+    ETADueDateMixin,
+    NameDescriptionMixin,
+)
 from .utils import (
     camel_case,
     sha256,
@@ -7666,6 +7672,73 @@ class FlowEvent(AbstractBaseModel, FolderMixin):
 
     def __str__(self) -> str:
         return f"{self.validation_flow.ref_id} - {self.event_type} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
+    objects = ActorSyncManager()
+
+    leader = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="led_teams",
+        verbose_name="Team Leader",
+        help_text="The leader of the team",
+    )
+    deputies = models.ManyToManyField(
+        User,
+        related_name="deputy_teams",
+        blank=True,
+        verbose_name="Team Deputies",
+        help_text="The deputies of the team",
+    )
+    members = models.ManyToManyField(
+        User,
+        related_name="teams",
+        blank=True,
+        verbose_name="Team Members",
+        help_text="The members of the team",
+    )
+    team_email = models.EmailField(verbose_name="Team Email", blank=True, null=True)
+
+
+class Actor(AbstractBaseModel):
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, null=True, blank=True, related_name="actor"
+    )
+    team = models.OneToOneField(
+        Team, on_delete=models.CASCADE, null=True, blank=True, related_name="actor"
+    )
+    entity = models.OneToOneField(
+        "tprm.Entity",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="actor",
+    )
+
+    class Meta:
+        constraints = [
+            # Ensure exactly one field is set (XOR logic)
+            models.CheckConstraint(
+                check=(
+                    Q(user__isnull=False, team__isnull=True, entity__isnull=True)
+                    | Q(user__isnull=True, team__isnull=False, entity__isnull=True)
+                    | Q(user__isnull=True, team__isnull=True, entity__isnull=False)
+                ),
+                name="actor_exactly_one_link",
+            )
+        ]
+
+    @property
+    def specific(self):
+        """Helper to return the actual underlying instance."""
+        if self.user_id:
+            return self.user
+        if self.team_id:
+            return self.team
+        if self.entity_id:
+            return self.entity
+        return None
 
 
 common_exclude = ["created_at", "updated_at"]

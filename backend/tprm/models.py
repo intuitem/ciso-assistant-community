@@ -1,7 +1,12 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
-from core.base_models import NameDescriptionMixin, AbstractBaseModel
+from core.base_models import (
+    ActorSyncManager,
+    ActorSyncMixin,
+    NameDescriptionMixin,
+    AbstractBaseModel,
+)
 from core.models import (
     Assessment,
     ComplianceAssessment,
@@ -33,11 +38,17 @@ from auditlog.registry import auditlog
 
 
 class Entity(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    ActorSyncMixin,
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
 ):
     """
     An entity represents a legal entity, a corporate body, an administrative body, an association
     """
+
+    objects = ActorSyncManager()
 
     ref_id = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
