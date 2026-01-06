@@ -1721,8 +1721,15 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             "asset_class": {
                 "source": "asset_class",
                 "label": "asset_class",
-                "format": lambda ac: ac.full_path.replace("assetClass", ""),
-            },
+                # Handle missing asset_class safely and trim a leading 'assetClass/' segment if present
+                "format": lambda ac: (
+                    (ac.full_path.replace("assetClass/", "", 1)
+                     if ac.full_path.startswith("assetClass/") else ac.full_path.replace("assetClass", ""))
+                    if ac
+                    else ""
+               ),
+               "escape": True,
+           },
             "folder": {"source": "folder.name", "label": "folder", "escape": True},
             "security_objectives": {
                 "source": "get_security_objectives_display",
@@ -1766,6 +1773,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "escape": True,
             },
         },
+        "wrap_columns": ["name", "description", "observation"],
         "filename": "assets_export",
         "select_related": ["folder", "asset_class"],
         "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
