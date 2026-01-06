@@ -61,7 +61,6 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
             "higher_is_better",
         ]
     )
-    organisation_objectives = IdRelatedField(many=True)
     owner = IdRelatedField(many=True)
     filtering_labels = IdRelatedField(["folder"], many=True)
     organisation_objectives = IdRelatedField(many=True)

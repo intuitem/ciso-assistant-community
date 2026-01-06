@@ -315,7 +315,6 @@ class StrategicScenarioWriteSerializer(BaseModelSerializer):
 
 
 class StrategicScenarioReadSerializer(BaseModelSerializer):
-    focused_feared_event = IdRelatedField()
     ebios_rm_study = IdRelatedField()
     folder = IdRelatedField()
     ro_to_couple = IdRelatedField()
