@@ -73,7 +73,7 @@ def plot_donut(data, colors=None):
     """
     plt.close("all")
 
-    plt.figure(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
 
     values = [item["value"] for item in data]
     labels = [item["category"] for item in data]
@@ -87,25 +87,48 @@ def plot_donut(data, colors=None):
     ]
 
     plot_colors = colors if colors is not None else default_colors[: len(values)]
-    plt.pie(
+
+    # Filter out zero values to avoid cluttering
+    filtered_data = [(v, l, c) for v, l, c in zip(values, labels, plot_colors) if v > 0]
+    if filtered_data:
+        values, labels, plot_colors = zip(*filtered_data)
+        values, labels, plot_colors = list(values), list(labels), list(plot_colors)
+
+    # Create pie chart without labels on slices, percentages only for non-tiny slices
+    total = sum(values) if values else 1
+
+    def autopct_func(pct):
+        return f"{pct:.0f}%" if pct >= 5 else ""
+
+    wedges, texts, autotexts = ax.pie(
         values,
-        labels=labels,
         colors=plot_colors,
-        autopct="%1.f%%",  # Show percentage
+        autopct=autopct_func,
         startangle=90,
-        pctdistance=0.85,  # Distance of percentage from the center
-        wedgeprops={"edgecolor": "white", "linewidth": 1},
+        pctdistance=0.75,
+        wedgeprops={"edgecolor": "white", "linewidth": 2, "width": 0.4},
     )
 
-    center_circle = plt.Circle((0, 0), 0.60, fc="white", ec="white")
-    fig = plt.gcf()
-    fig.gca().add_artist(center_circle)
+    # Style the percentage text
+    for autotext in autotexts:
+        autotext.set_fontsize(10)
+        autotext.set_fontweight("bold")
 
-    plt.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle
+    # Add legend outside the chart
+    ax.legend(
+        wedges,
+        [f"{l} ({v})" for l, v in zip(labels, values)],
+        title="",
+        loc="center left",
+        bbox_to_anchor=(1, 0, 0.5, 1),
+        fontsize=9,
+    )
+
+    ax.axis("equal")
     plt.tight_layout()
 
     chart_buffer = io.BytesIO()
-    plt.savefig(chart_buffer, format="png", dpi=300)
+    plt.savefig(chart_buffer, format="png", dpi=300, bbox_inches="tight")
     chart_buffer.seek(0)
     plt.close()
 
@@ -883,12 +906,22 @@ def gen_audit_pptx_context(id, tree, lang):
 
     IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
 
+    # Get perimeter information
+    perimeter_name = audit.perimeter.name if audit.perimeter else ""
+    perimeter_description = (
+        audit.perimeter.description
+        if audit.perimeter and audit.perimeter.description
+        else ""
+    )
+
     context = {
         # Text data
         "audit": audit,
         "audit_name": audit.name,
         "audit_description": audit.description or "",
         "framework_name": audit.framework.name if audit.framework else "",
+        "perimeter_name": perimeter_name,
+        "perimeter_description": perimeter_description,
         "date": now().strftime("%d/%m/%Y"),
         "authors": authors,
         "reviewers": reviewers,

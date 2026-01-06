@@ -7888,7 +7888,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         # Define placeholder replacements
         replacements = {
             "{{audit_name}}": context["audit_name"],
+            "{{audit_description}}": context["audit_description"],
             "{{framework_name}}": context["framework_name"],
+            "{{perimeter_name}}": context["perimeter_name"],
+            "{{perimeter_description}}": context["perimeter_description"],
             "{{date}}": context["date"],
             "{{authors}}": context["authors"],
             "{{reviewers}}": context["reviewers"],
@@ -7901,28 +7904,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             "{{req_not_applicable}}": str(context["req_not_applicable"]),
             "{{req_not_assessed}}": str(context["req_not_assessed"]),
             "{{ac_count}}": str(context["ac_count"]),
-            "{{audit_description}}": context["audit_description"],
         }
 
         def replace_text_in_paragraph(paragraph, replacements):
             """
             Replace placeholders in a paragraph, handling text split across runs.
+            Tries to preserve run structure when possible.
             """
-            # Get full paragraph text
+            # First, try simple replacement within individual runs
+            for run in paragraph.runs:
+                for placeholder, value in replacements.items():
+                    if placeholder in run.text:
+                        run.text = run.text.replace(placeholder, value)
+
+            # Check if any placeholder spans multiple runs
             full_text = "".join(run.text for run in paragraph.runs)
+            has_remaining_placeholder = any(
+                key in full_text for key in replacements.keys()
+            )
 
-            # Check if any placeholder exists in the full text
-            has_placeholder = any(key in full_text for key in replacements.keys())
-            if not has_placeholder:
-                return
+            if has_remaining_placeholder and paragraph.runs:
+                # Placeholder is split across runs - need to join and replace
+                for placeholder, value in replacements.items():
+                    full_text = full_text.replace(placeholder, value)
 
-            # Perform all replacements
-            for placeholder, value in replacements.items():
-                full_text = full_text.replace(placeholder, value)
-
-            # Clear all runs and set text in the first run
-            if paragraph.runs:
-                # Preserve formatting from first run
+                # Preserve formatting from first run, set combined text
                 first_run = paragraph.runs[0]
                 first_run.text = full_text
                 # Clear remaining runs
