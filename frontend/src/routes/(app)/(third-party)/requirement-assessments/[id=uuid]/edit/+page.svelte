@@ -221,6 +221,20 @@
 
 	let formStore = $derived(requirementAssessmentForm.form);
 
+	const appliedControlsExpected = Array.isArray(data.requirementAssessment.applied_controls)
+		? data.requirementAssessment.applied_controls.length
+		: 0;
+	const evidencesExpected = Array.isArray(data.requirementAssessment.evidences)
+		? data.requirementAssessment.evidences.length
+		: 0;
+
+	console.log('data.requirementAssessment.security_exceptions', data.requirementAssessment);
+	const securityExceptionsExpected = Array.isArray(data.requirementAssessment.security_exceptions)
+		? data.requirementAssessment.security_exceptions.length
+		: 0;
+
+	console.log('securityExceptionsExpected', securityExceptionsExpected);
+
 	$effect(() => {
 		if (form?.newControls) {
 			refreshKey = !refreshKey;
@@ -541,6 +555,7 @@
 										source={page.data.tables['applied-controls']}
 										hideFilters={true}
 										URLModel="applied-controls"
+										expectedCount={appliedControlsExpected}
 									/>
 								</div>
 							</Tabs.Panel>
@@ -573,6 +588,7 @@
 										source={page.data.tables['evidences']}
 										hideFilters={true}
 										URLModel="evidences"
+										expectedCount={evidencesExpected}
 										baseEndpoint="/evidences?requirement_assessments={page.data
 											.requirementAssessment.id}"
 									/>
@@ -601,6 +617,7 @@
 										source={page.data.tables['security-exceptions']}
 										hideFilters={true}
 										URLModel="security-exceptions"
+										expectedCount={securityExceptionsExpected}
 										baseEndpoint="/security-exceptions?requirement_assessments={page.data
 											.requirementAssessment.id}"
 									/>

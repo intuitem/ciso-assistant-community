@@ -290,7 +290,11 @@
 			rowsPerPage: pagination
 				? ($tableStates[page.url.pathname]?.rowsPerPage ?? numberRowsPerPage)
 				: 0, // Using 0 as rowsPerPage value when pagination is false disables paging.
-			totalRows: source?.meta?.count
+			totalRows:
+				source?.meta?.count ??
+				(Array.isArray(source?.meta) ? source.meta.length : undefined) ??
+				source?.body?.length ??
+				0
 		}
 	);
 	const rows = handler.getRows();
@@ -337,11 +341,17 @@
 	});
 
 	$effect(() => {
-		if (!expectedCount || $rowCountState?.total === undefined) {
+		if (!expectedCount) {
 			hiddenCount = 0;
 			return;
 		}
-		const diff = expectedCount - $rowCountState.total;
+		const fallbackTotal =
+			source?.meta?.count ??
+			(Array.isArray(source?.meta) ? source.meta.length : undefined) ??
+			source?.body?.length ??
+			0;
+		const totalRows = $rowCountState?.total ?? fallbackTotal;
+		const diff = expectedCount - totalRows;
 		hiddenCount = diff > 0 ? diff : 0;
 	});
 

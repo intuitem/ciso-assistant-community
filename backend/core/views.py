@@ -651,35 +651,26 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             )[0]
 
         queryset = self.model.objects.filter(id__in=object_ids_view)
+        query_ids = self.request.query_params.getlist("id")
+        if not query_ids:
+            query_ids = self.request.query_params.getlist("id[]")
+        if query_ids:
+            parsed_ids = []
+            for value in query_ids:
+                try:
+                    parsed_ids.append(UUID(value))
+                except (TypeError, ValueError):
+                    continue
+            if parsed_ids:
+                queryset = queryset.filter(id__in=parsed_ids)
+            else:
+                queryset = queryset.none()
         return queryset
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["action"] = self.action
         return context
-
-    @action(detail=False, methods=["get"])
-    def names(self, request):
-        if not self.model:
-            return Response({})
-        uuid_list = request.query_params.getlist("id[]", [])
-        if not uuid_list:
-            return Response({})
-        parsed_ids = []
-        for value in uuid_list:
-            try:
-                parsed_ids.append(UUID(value))
-            except (TypeError, ValueError):
-                continue
-        if not parsed_ids:
-            return Response({})
-        viewable_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, self.model
-        )[0]
-        queryset = self.model.objects.filter(id__in=parsed_ids).filter(
-            id__in=viewable_ids
-        )
-        return Response({str(obj.id): str(obj) for obj in queryset})
 
     def get_serializer_class(self, **kwargs):
         serializer_factory = SerializerFactory(

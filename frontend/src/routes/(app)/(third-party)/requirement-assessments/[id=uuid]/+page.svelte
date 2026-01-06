@@ -74,6 +74,12 @@
 	const documentationScore = data.requirementAssessment.documentation_score;
 
 	let group = $state(page.data.user.is_third_party ? 'evidence' : 'applied_controls');
+	const appliedControlsExpected = Array.isArray(data.requirementAssessment.applied_controls)
+		? data.requirementAssessment.applied_controls.length
+		: 0;
+	const evidencesExpected = Array.isArray(data.requirementAssessment.evidences)
+		? data.requirementAssessment.evidences.length
+		: 0;
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow-sm">
@@ -290,6 +296,7 @@
 								source={data.tables['applied-controls']}
 								hideFilters={true}
 								URLModel="applied-controls"
+								expectedCount={appliedControlsExpected}
 								baseEndpoint="/applied-controls?requirement_assessments={page.data
 									.requirementAssessment.id}"
 							/>
@@ -306,6 +313,7 @@
 							source={data.tables['evidences']}
 							hideFilters={true}
 							URLModel="evidences"
+							expectedCount={evidencesExpected}
 							baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment.id}"
 						/>
 					</div>

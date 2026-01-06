@@ -10,7 +10,10 @@ const stripLeadingSlash = (value: string) => value.replace(/^\/+/, '');
  *       "domain/perimeter/assessment - 1.4.2" -> "assessment - 1.4.2"
  */
 const extractLastSegment = (value: string): string => {
-	const segments = value.split('/').map(s => s.trim()).filter(Boolean);
+	const segments = value
+		.split('/')
+		.map((s) => s.trim())
+		.filter(Boolean);
 	return segments[segments.length - 1] || value.trim();
 };
 

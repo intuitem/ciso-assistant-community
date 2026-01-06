@@ -54,10 +54,9 @@
 	let { data, form }: Props = $props();
 
 	const compliance_assessment = $derived(data.compliance_assessment);
-	const folderId =
-		!compliance_assessment.folder
+	const folderId = !compliance_assessment.folder
 		? undefined
-		:typeof compliance_assessment.folder === 'string'
+		: typeof compliance_assessment.folder === 'string'
 			? compliance_assessment.folder
 			: compliance_assessment.folder?.id;
 	const framework = data.framework ?? compliance_assessment.framework;
@@ -559,7 +558,9 @@
 										{@const visibleIds = hasResolvedNames
 											? idValues.filter((id) => resolvedNames?.[id])
 											: []}
-										{@const hiddenCount = hasResolvedNames ? idValues.length - visibleIds.length : 0}
+										{@const hiddenCount = hasResolvedNames
+											? idValues.length - visibleIds.length
+											: 0}
 										{#if isIdArray}
 											{#if hasResolvedNames}
 												<ul>

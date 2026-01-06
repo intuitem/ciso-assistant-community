@@ -41,18 +41,6 @@
 				message: m.secretCopiedToClipboard()
 			});
 		});
-
-	}
-
-	function copySecret() {
-		if (!generatedSecret) return;
-
-		navigator.clipboard.writeText(generatedSecret).then(() => {
-			flash.set({
-				type: 'success',
-				message: m.secretCopiedToClipboard()
-			});
-		});
 	}
 </script>
 

@@ -28,12 +28,21 @@ export const fetchNames = async (
 	let updated = { ...existing };
 	for (const batch of chunk(missing, 100)) {
 		const params = new URLSearchParams();
-		batch.forEach((id) => params.append('id[]', id));
-		const response = await fetch(`/${urlModel}/names?${params.toString()}`);
+		batch.forEach((id) => params.append('id', id));
+		params.set('limit', batch.length.toString());
+		params.set('offset', '0');
+		const response = await fetch(`/${urlModel}?${params.toString()}`);
 		if (!response.ok) continue;
 		const data = await response.json();
-		if (data && typeof data === 'object') {
-			updated = { ...updated, ...data };
+		const results = Array.isArray(data?.results) ? data.results : Array.isArray(data) ? data : [];
+		if (results.length > 0) {
+			const mapped = Object.fromEntries(
+				results.map((item: Record<string, any>) => [
+					String(item.id),
+					item.str ?? item.name ?? item.email ?? item.label ?? String(item.id)
+				])
+			);
+			updated = { ...updated, ...mapped };
 		}
 	}
 
