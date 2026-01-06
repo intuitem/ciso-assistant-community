@@ -20,7 +20,7 @@ from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.db import models, transaction
-from django.db.models import F, Q, OuterRef, Subquery
+from django.db.models import F, Q, OuterRef, Subquery, Prefetch
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -2146,16 +2146,18 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def parent_requirement(self):
-        parent_requirement = RequirementNode.objects.filter(urn=self.parent_urn).first()
-        if not parent_requirement:
+        parent = getattr(self, "_parent_requirement_obj", None)
+        if parent is None and self.parent_urn:
+            parent = RequirementNode.objects.filter(urn=self.parent_urn).first()
+        if not parent:
             return None
         return {
-            "str": parent_requirement.display_long,
-            "urn": parent_requirement.urn,
-            "id": parent_requirement.id,
-            "ref_id": parent_requirement.ref_id,
-            "name": parent_requirement.name,
-            "description": parent_requirement.description,
+            "str": parent.display_long,
+            "urn": parent.urn,
+            "id": parent.id,
+            "ref_id": parent.ref_id,
+            "name": parent.name,
+            "description": parent.description,
         }
 
     @property
@@ -5988,20 +5990,35 @@ class ComplianceAssessment(Assessment):
         Returns sorted assessable requirement assessments based on the selected implementation groups.
         If include_non_assessable is True, it returns all requirements regardless of their assessable status.
         """
-        if not self.selected_implementation_groups:
-            requirements = RequirementAssessment.objects.filter(
-                compliance_assessment=self
+        base_queryset = (
+            RequirementAssessment.objects.filter(compliance_assessment=self)
+            .select_related(
+                "folder",
+                "requirement",
+                "requirement__framework",
+                "compliance_assessment",
+                "compliance_assessment__framework",
+                "compliance_assessment__perimeter",
+                "compliance_assessment__perimeter__folder",
             )
-            if not include_non_assessable:
-                requirements = requirements.filter(requirement__assessable=True)
-            return requirements.order_by("requirement__order_id")
+            .prefetch_related(
+                Prefetch("applied_controls"),
+                Prefetch("security_exceptions"),
+                Prefetch("evidences"),
+                Prefetch("requirement__reference_controls"),
+                Prefetch("requirement__threats"),
+            )
+        )
+
+        if not include_non_assessable:
+            base_queryset = base_queryset.filter(requirement__assessable=True)
+
+        requirements = base_queryset.order_by("requirement__order_id")
+
+        if not self.selected_implementation_groups:
+            return requirements
 
         selected_implementation_groups_set = set(self.selected_implementation_groups)
-        requirements = RequirementAssessment.objects.filter(compliance_assessment=self)
-        if not include_non_assessable:
-            requirements = requirements.filter(requirement__assessable=True)
-
-        requirements = requirements.order_by("requirement__order_id")
 
         requirement_assessments_list = [
             requirement
