@@ -106,9 +106,20 @@ class RequirementNodeImporter:
             logger.info(
                 f"Parsing the reference controls for {self.requirement_data.get('ref_id')}"
             )
-            requirement_node.reference_controls.add(
-                ReferenceControl.objects.get(urn=reference_control.lower())
-            )
+            try:
+                ref = ReferenceControl.objects.get(urn=reference_control.lower())
+            except ReferenceControl.DoesNotExist as exc:
+                reference_control_name = reference_control or "unknown"
+                requirement_identifier = self.requirement_data.get(
+                    "ref_id", self.requirement_data.get("urn")
+                )
+                error_message = (
+                    f"Unknown reference control '{reference_control_name}' "
+                    f"referenced in requirement '{requirement_identifier}'."
+                )
+                logger.error(error_message)
+                raise ValueError(error_message) from exc
+            requirement_node.reference_controls.add(ref)
 
 
 class RequirementMappingImporter:
