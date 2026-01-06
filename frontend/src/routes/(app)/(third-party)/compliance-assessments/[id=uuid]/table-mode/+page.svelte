@@ -573,7 +573,9 @@
 												<p class="flex items-center font-semibold text-purple-600 italic">
 													{m.result()}
 												</p>
-												{#if complianceAssessment.framework.is_dynamic}
+												{#if Object.values(requirementAssessment.requirement.questions || {}).some(question =>
+													Array.isArray(question.choices) && question.choices.some(choice => choice.compute_result)
+												)}
 													<span
 														class="badge text-sm font-semibold"
 														style="background-color: {complianceResultColorMap[
@@ -619,7 +621,9 @@
 									{/if}
 									<div class="flex flex-col w-full place-items-center">
 										{#if !shallow}
-											{#if complianceAssessment.framework.is_dynamic}
+											{#if Object.values(requirementAssessment.requirement.questions || {}).some(question =>
+												Array.isArray(question.choices) && question.choices.some(choice => choice.add_score)
+											)}
 												<div class="flex flex-row items-center space-x-4">
 													<span class="font-medium">{m.score()}</span>
 													<ProgressRing
