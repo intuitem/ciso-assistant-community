@@ -1716,7 +1716,13 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "label": "description",
                 "escape": True,
             },
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
             "type": {"source": "type", "label": "type"},
+            "asset_class": {
+                "source": "asset_class",
+                "label": "asset_class",
+                "format": lambda ac: ac.full_path.replace("assetClass", ""),
+            },
             "folder": {"source": "folder.name", "label": "folder", "escape": True},
             "security_objectives": {
                 "source": "get_security_objectives_display",
@@ -1754,9 +1760,14 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     escape_excel_formula(o.label) for o in qs.all()
                 ),
             },
+            "observation": {
+                "source": "observation",
+                "label": "observation",
+                "escape": True,
+            },
         },
         "filename": "assets_export",
-        "select_related": ["folder"],
+        "select_related": ["folder", "asset_class"],
         "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
     }
 
