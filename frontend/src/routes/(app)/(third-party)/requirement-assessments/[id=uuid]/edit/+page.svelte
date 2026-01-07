@@ -227,13 +227,9 @@
 	const evidencesExpected = Array.isArray(data.requirementAssessment.evidences)
 		? data.requirementAssessment.evidences.length
 		: 0;
-
-	console.log('data.requirementAssessment.security_exceptions', data.requirementAssessment);
 	const securityExceptionsExpected = Array.isArray(data.requirementAssessment.security_exceptions)
 		? data.requirementAssessment.security_exceptions.length
 		: 0;
-
-	console.log('securityExceptionsExpected', securityExceptionsExpected);
 
 	$effect(() => {
 		if (form?.newControls) {
