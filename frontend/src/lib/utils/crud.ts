@@ -388,7 +388,48 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'owner', urlModel: 'users' }
 		],
-		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
+		detailViewFields: [
+			{ field: 'folder' },
+			{ field: 'id' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'priority' },
+			{ field: 'effort' },
+			{ field: 'control_impact' },
+			{ field: 'status' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'owner' },
+			{ field: 'expiry_date', type: 'date' },
+			{ field: 'link' },
+			{ field: 'progress_field' },
+			{ field: 'observation' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'sync_mappings' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'applied_controls', urlModel: 'evidences' },
+			{
+				field: 'applied_controls',
+				urlModel: 'requirement-assessments',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'applied_controls',
+				urlModel: 'risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'applied_controls',
+				urlModel: 'findings',
+				disableCreate: true,
+				disableDelete: true
+			}
+		],
 		selectFields: [
 			{ field: 'status' },
 			{ field: 'csf_function' },
