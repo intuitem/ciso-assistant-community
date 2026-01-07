@@ -1723,13 +1723,16 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "label": "asset_class",
                 # Handle missing asset_class safely and trim a leading 'assetClass/' segment if present
                 "format": lambda ac: (
-                    (ac.full_path.replace("assetClass/", "", 1)
-                     if ac.full_path.startswith("assetClass/") else ac.full_path.replace("assetClass", ""))
+                    (
+                        ac.full_path.replace("assetClass/", "", 1)
+                        if ac.full_path.startswith("assetClass/")
+                        else ac.full_path.replace("assetClass", "")
+                    )
                     if ac
                     else ""
-               ),
-               "escape": True,
-           },
+                ),
+                "escape": True,
+            },
             "folder": {"source": "folder.name", "label": "folder", "escape": True},
             "security_objectives": {
                 "source": "get_security_objectives_display",
