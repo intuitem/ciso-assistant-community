@@ -3021,5 +3021,6 @@
 	"widgetConfig": "Configuración del widget",
 	"editLayout": "Widgets",
 	"widgets": "Widgets",
-	"width": "Anchura"
+	"width": "Largeur",
+	"appliedControlsPlaceholder": "Sélectionnez les contrôles appliqués..."
 }

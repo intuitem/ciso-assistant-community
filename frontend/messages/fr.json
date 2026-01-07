@@ -3044,5 +3044,6 @@
 	"metricInstancesDescription": "Suivre les valeurs de métriques pour les objets de votre organisation",
 	"dashboardsDescription": "Tableaux de bord personnalisés pour visualiser les métriques et indicateurs clés de performance",
 	"secretCopiedToClipboard": "Secret copié dans le presse-papier avec succès",
-	"libraryFilteringLabels": "Étiquettes de bibliothèque"
+	"libraryFilteringLabels": "Étiquettes de bibliothèque",
+	"appliedControlsPlaceholder": "Sélectionnez les mesures appliquées..."
 }

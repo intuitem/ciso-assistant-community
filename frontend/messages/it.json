@@ -2053,5 +2053,6 @@
 	"xRaysIssueTypes": "tipi di problema",
 	"xRaysLoadingData": "Analisi dei dati...",
 	"xRaysView": "Visualizza",
-	"year": "Anno"
+	"year": "Anno",
+	"appliedControlsPlaceholder": "Seleziona i controlli applicati..."
 }

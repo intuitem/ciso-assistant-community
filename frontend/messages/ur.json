@@ -1031,5 +1031,6 @@
 		}
 	],
 	"cascadeAffectedHint": "نیچے دیے گئے اشیاء نظام میں باقی ہیں لیکن ان کی اس اشیاء سے لنکس ہٹا دیے جائیں گے۔",
-	"libraryFilteringLabels": "کتب خانہ لیبلز"
+	"libraryFilteringLabels": "لیبریری لیبلز",
+	"appliedControlsPlaceholder": "لگائے گئے کنٹرولز منتخب کریں..."
 }
