@@ -11441,6 +11441,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             # Format: "1-task_name", "2-task_name", etc.
             base_name = f"{template_counter}-{task_name}"
 
+            INVALID_CHARS = r"[\\\/\?\*\[\]]"
+            base_name = re.sub(INVALID_CHARS, "", base_name)
+
             # Excel sheet names have a 31 character limit
             sheet_name = base_name[:31]
             counter = 1
