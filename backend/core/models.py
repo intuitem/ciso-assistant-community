@@ -2366,6 +2366,12 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         verbose_name="Owner",
         related_name="security_exceptions",
     )
+    new_owners = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        verbose_name="Owner",
+        related_name="security_exceptions",
+    )
     approver = models.ForeignKey(
         User,
         max_length=200,
@@ -2571,6 +2577,12 @@ class Asset(
     )
     owner = models.ManyToManyField(
         User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="assets",
+    )
+    new_owner = models.ManyToManyField(
+        "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
         related_name="assets",
@@ -3751,6 +3763,12 @@ class Evidence(
         related_name="evidences",
         blank=True,
     )
+    new_owner = models.ManyToManyField(
+        "core.Actor",
+        verbose_name="Owner",
+        related_name="evidences",
+        blank=True,
+    )
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -3938,6 +3956,12 @@ class Incident(NameDescriptionMixin, FolderMixin):
         related_name="incidents",
         verbose_name="Owners",
         blank=True,
+    )
+    new_owners = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        verbose_name="Owner",
+        related_name="incidents",
     )
     assets = models.ManyToManyField(
         Asset,
@@ -4147,6 +4171,12 @@ class AppliedControl(
     )
     owner = models.ManyToManyField(
         User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="applied_controls",
+    )
+    new_owner = models.ManyToManyField(
+        "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
         related_name="applied_controls",
@@ -4775,6 +4805,18 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         verbose_name=_("Reviewers"),
         related_name="%(class)s_reviewers",
     )
+    new_reviewers = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        verbose_name=_("Reviewers"),
+        related_name="%(class)s_reviewers_new",
+    )
+    new_authors = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        verbose_name=_("Authors"),
+        related_name="%(class)s_authors_new",
+    )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     is_locked = models.BooleanField(
@@ -5369,6 +5411,12 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
 
     owner = models.ManyToManyField(
         User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="risk_scenarios",
+    )
+    new_owner = models.ManyToManyField(
+        "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
         related_name="risk_scenarios",
@@ -6951,6 +6999,12 @@ class FindingsAssessment(Assessment):
         verbose_name=_("Owner"),
         related_name="findings_assessments",
     )
+    new_owner = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="findings_assessments",
+    )
 
     category = models.CharField(
         verbose_name=_("Category"),
@@ -7080,6 +7134,12 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     )
     owner = models.ManyToManyField(
         User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="findings",
+    )
+    new_owner = models.ManyToManyField(
+        "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
         related_name="findings",

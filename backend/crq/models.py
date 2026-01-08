@@ -379,6 +379,12 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Owner"),
         related_name="quantitative_risk_scenarios",
     )
+    new_owner = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="quantitative_risk_scenarios",
+    )
     STATUS_OPTIONS = [
         ("draft", _("Draft")),
         ("open", _("Open")),

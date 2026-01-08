@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel, NameDescriptionMixin
 from core.models import (
+    Actor,
     FilteringLabelMixin,
     I18nObjectMixin,
     LoadedLibrary,
@@ -127,6 +128,12 @@ class MetricInstance(
     )
     owner = models.ManyToManyField(
         User,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="metric_instances",
+    )
+    new_owner = models.ManyToManyField(
+        Actor,
         blank=True,
         verbose_name=_("Owner"),
         related_name="metric_instances",

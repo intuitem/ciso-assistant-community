@@ -8,6 +8,7 @@ from core.base_models import (
     AbstractBaseModel,
 )
 from core.models import (
+    Actor,
     Assessment,
     ComplianceAssessment,
     Evidence,
@@ -279,6 +280,12 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
         verbose_name=_("Owner"),
         related_name="solutions",
     )
+    new_owner = models.ManyToManyField(
+        Actor,
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="solutions",
+    )
 
     assets = models.ManyToManyField(
         Asset,
@@ -399,6 +406,12 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
 
     owner = models.ManyToManyField(
         User,
+        verbose_name=_("Owner"),
+        related_name="contracts",
+        blank=True,
+    )
+    new_owner = models.ManyToManyField(
+        Actor,
         verbose_name=_("Owner"),
         related_name="contracts",
         blank=True,

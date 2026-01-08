@@ -1,7 +1,7 @@
 from django.db import models
 from iam.models import User, FolderMixin
 from tprm.models import Entity
-from core.models import AppliedControl, Asset, Evidence, Incident
+from core.models import Actor, AppliedControl, Asset, Evidence, Incident
 from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
@@ -430,6 +430,11 @@ class RightRequest(NameDescriptionFolderMixin):
     ref_id = models.CharField(max_length=100, blank=True)
     owner = models.ManyToManyField(
         User,
+        blank=True,
+        related_name="assigned_right_requests",
+    )
+    new_owner = models.ManyToManyField(
+        Actor,
         blank=True,
         related_name="assigned_right_requests",
     )
