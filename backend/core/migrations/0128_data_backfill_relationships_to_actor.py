@@ -18,6 +18,8 @@ def migrate_user_to_actor(apps, schema_editor):
         ("core", "ComplianceAssessment", "reviewers", "new_reviewers"),
         ("core", "RiskAssessment", "authors", "new_authors"),
         ("core", "RiskAssessment", "reviewers", "new_reviewers"),
+        ("crq", "QuantitativeRiskStudy", "authors", "new_authors"),
+        ("crq", "QuantitativeRiskStudy", "reviewers", "new_reviewers"),
         ("core", "FindingsAssessment", "authors", "new_authors"),
         ("core", "FindingsAssessment", "reviewers", "new_reviewers"),
         ("core", "FindingsAssessment", "owner", "new_owner"),
@@ -90,4 +92,8 @@ class Migration(migrations.Migration):
         ("core", "0127_appliedcontrol_new_owner_asset_new_owner_and_more"),
     ]
 
-    operations = []
+    operations = [
+        migrations.RunPython(
+            migrate_user_to_actor, reverse_code=migrations.RunPython.noop
+        ),
+    ]
