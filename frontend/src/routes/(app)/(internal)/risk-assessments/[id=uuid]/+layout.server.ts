@@ -18,9 +18,16 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		.then((res) => res.json())
 		.then((res) => res.results);
 
-	const risk_matrix = await fetch(
-		`${BASE_API_URL}/risk-matrices/${risk_assessment.risk_matrix.id}/`
-	).then((res) => res.json());
+	const riskMatrixId =
+		typeof risk_assessment.risk_matrix === 'string'
+			? risk_assessment.risk_matrix
+			: risk_assessment.risk_matrix?.id;
+	let risk_matrix = null;
+	if (riskMatrixId) {
+		risk_matrix = await fetch(`${BASE_API_URL}/risk-matrices/${riskMatrixId}/`).then((res) =>
+			res.json()
+		);
+	}
 
 	const interface_settings = await fetch(`${BASE_API_URL}/settings/general/object/`).then((res) =>
 		res.json()
@@ -62,7 +69,9 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	};
 
 	risk_assessment.risk_scenarios = scenarios;
-	risk_assessment.risk_matrix = risk_matrix;
+	risk_assessment.risk_matrix =
+		risk_matrix ??
+		(typeof risk_assessment.risk_matrix === 'object' ? risk_assessment.risk_matrix : null);
 
 	const deleteSchema = z.object({ id: z.string() });
 	const scenarioDeleteForm = await superValidate(zod(deleteSchema));

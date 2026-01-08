@@ -166,10 +166,18 @@
 
 	const buildRiskCluster = (
 		scenarios: RiskScenario[],
-		risk_matrix: RiskMatrix,
+		risk_matrix: RiskMatrix | null,
 		risk: 'current' | 'residual' | 'inherent'
 	) => {
-		const parsedRiskMatrix: RiskMatrixJsonDefinition = JSON.parse(risk_matrix.json_definition);
+		if (!risk_matrix?.json_definition) {
+			return [];
+		}
+		let parsedRiskMatrix: RiskMatrixJsonDefinition;
+		try {
+			parsedRiskMatrix = JSON.parse(risk_matrix.json_definition);
+		} catch {
+			return [];
+		}
 		const grid: unknown[][][] = Array.from({ length: parsedRiskMatrix.probability.length }, () =>
 			Array.from({ length: parsedRiskMatrix.impact.length }, () => [])
 		);
@@ -264,11 +272,15 @@
 			<div class="container w-2/3">
 				<div class="text-sm">
 					<span class="font-semibold" data-testid="risk-matrix-field-title">{m.riskMatrix()}:</span>
-					<Anchor
-						href="/risk-matrices/{risk_assessment.risk_matrix.id}"
-						class="anchor"
-						data-testid="risk-matrix-field-value">{risk_assessment.risk_matrix.name}</Anchor
-					>
+					{#if risk_assessment.risk_matrix?.id}
+						<Anchor
+							href="/risk-matrices/{risk_assessment.risk_matrix.id}"
+							class="anchor"
+							data-testid="risk-matrix-field-value">{risk_assessment.risk_matrix.name}</Anchor
+						>
+					{:else}
+						<span class="text-gray-500" data-testid="risk-matrix-field-value">--</span>
+					{/if}
 				</div>
 				<br />
 				{#if risk_assessment.ebios_rm_study}
@@ -440,47 +452,51 @@
 	<!--Matrix view-->
 	<div class="card m-4 p-4 shadow-sm bg-white page-break">
 		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
-		<div class="flex flex-wrap justify-between gap-8 [&>div]:basis-xl [&>div]:grow">
-			{#if page.data?.featureflags?.inherent_risk}
+		{#if risk_assessment.risk_matrix?.json_definition}
+			<div class="flex flex-wrap justify-between gap-8 [&>div]:basis-xl [&>div]:grow">
+				{#if page.data?.featureflags?.inherent_risk}
+					<div>
+						<h3 class="font-bold p-2 m-2 text-lg text-center">{m.inherentRisk()}</h3>
+
+						<RiskMatrix
+							riskMatrix={risk_assessment.risk_matrix}
+							matrixName={'inherent'}
+							data={buildRiskCluster(
+								risk_assessment.risk_scenarios,
+								risk_assessment.risk_matrix,
+								'inherent'
+							)}
+							dataItemComponent={RiskScenarioItem}
+							{useBubbles}
+						/>
+					</div>
+				{/if}
 				<div>
-					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.inherentRisk()}</h3>
+					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.currentRisk()}</h3>
 
 					<RiskMatrix
 						riskMatrix={risk_assessment.risk_matrix}
-						matrixName={'inherent'}
-						data={buildRiskCluster(
-							risk_assessment.risk_scenarios,
-							risk_assessment.risk_matrix,
-							'inherent'
-						)}
+						matrixName={'current'}
+						data={currentCluster}
 						dataItemComponent={RiskScenarioItem}
 						{useBubbles}
 					/>
 				</div>
-			{/if}
-			<div>
-				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.currentRisk()}</h3>
+				<div>
+					<h3 class="font-bold p-2 m-2 text-lg text-center">{m.residualRisk()}</h3>
 
-				<RiskMatrix
-					riskMatrix={risk_assessment.risk_matrix}
-					matrixName={'current'}
-					data={currentCluster}
-					dataItemComponent={RiskScenarioItem}
-					{useBubbles}
-				/>
+					<RiskMatrix
+						riskMatrix={risk_assessment.risk_matrix}
+						matrixName={'residual'}
+						data={residualCluster}
+						dataItemComponent={RiskScenarioItem}
+						showLegend={showRisks}
+						{useBubbles}
+					/>
+				</div>
 			</div>
-			<div>
-				<h3 class="font-bold p-2 m-2 text-lg text-center">{m.residualRisk()}</h3>
-
-				<RiskMatrix
-					riskMatrix={risk_assessment.risk_matrix}
-					matrixName={'residual'}
-					data={residualCluster}
-					dataItemComponent={RiskScenarioItem}
-					showLegend={showRisks}
-					{useBubbles}
-				/>
-			</div>
-		</div>
+		{:else}
+			<div class="text-sm text-gray-500 mt-2">{m.riskMatrix()} --</div>
+		{/if}
 	</div>
 </main>
