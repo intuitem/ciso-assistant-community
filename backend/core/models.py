@@ -7730,6 +7730,17 @@ class Actor(AbstractBaseModel):
         ]
 
     @property
+    def type(self):
+        """Helper to return the type of underlying instance."""
+        if self.user_id:
+            return "user"
+        if self.team_id:
+            return "team"
+        if self.entity_id:
+            return "entity"
+        return None
+
+    @property
     def specific(self):
         """Helper to return the actual underlying instance."""
         if self.user_id:
