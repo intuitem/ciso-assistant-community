@@ -66,6 +66,7 @@ from integrations.registry import IntegrationRegistry
 from library.serializers import StoredLibrarySerializer
 from webhooks.service import dispatch_webhook_event
 from .generators import gen_audit_context
+from .serializer_fields import FieldsRelatedField
 
 from django.utils import timezone
 from django.utils.text import slugify
@@ -78,6 +79,7 @@ from django.core.cache import cache
 from django.apps import apps
 from django.contrib.auth.models import Permission
 from django.conf import settings
+from django.core.exceptions import FieldDoesNotExist
 from django.core.files.storage import default_storage
 
 from django.db import models, transaction
@@ -730,6 +732,106 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 new_evidences.append(str(new_evidence.id))
         return new_evidences
 
+    def _resolve_related_model(self, source: str):
+        """Resolve a dotted source path (e.g. 'asset.folder') to its related model."""
+        model = self.model
+        for part in source.split("."):
+            if not model:
+                return None
+            try:
+                field = model._meta.get_field(part)
+            except FieldDoesNotExist:
+                return None
+            model = getattr(field, "related_model", None)
+        return model
+
+    def _get_fieldsrelated_map(self, serializer):
+        """Map FieldsRelatedField serializer fields to their related models."""
+        if hasattr(serializer, "child"):
+            serializer = serializer.child
+        if not hasattr(serializer, "fields"):
+            return {}
+        field_models = {}
+        for name, field in serializer.fields.items():
+            is_fields_related = isinstance(field, FieldsRelatedField)
+            if not is_fields_related and hasattr(field, "child_relation"):
+                is_fields_related = isinstance(field.child_relation, FieldsRelatedField)
+            if not is_fields_related:
+                continue
+            source = field.source if field.source not in (None, "*") else name
+            related_model = self._resolve_related_model(source)
+            if related_model:
+                field_models[name] = related_model
+        return field_models
+
+    def _get_accessible_ids_map(self, related_models):
+        """Return visible object IDs per related model for the current user."""
+        root_folder = Folder.get_root_folder()
+        allowed = {}
+        for model in related_models:
+            try:
+                ids = RoleAssignment.get_accessible_object_ids(
+                    root_folder, self.request.user, model
+                )[0]
+            except (NotImplementedError, Permission.DoesNotExist):
+                allowed[model] = set()
+                continue
+            allowed[model] = {str(item_id) for item_id in ids}
+        return allowed
+
+    def _extract_related_id(self, item):
+        """Extract a related object ID from a field payload."""
+        if isinstance(item, dict):
+            value = item.get("id")
+        else:
+            value = item
+        if value is None:
+            return None
+        return str(value)
+
+    def _mask_value(self, value):
+        """Recursively blank a value while preserving its structure."""
+        if isinstance(value, dict):
+            return {key: self._mask_value(inner) for key, inner in value.items()}
+        if isinstance(value, list):
+            return []
+        return ""
+
+    def _placeholder_for(self, item):
+        """Create a placeholder for a hidden related object."""
+        if isinstance(item, dict):
+            return {key: self._mask_value(value) for key, value in item.items()}
+        return ""
+
+    def _filter_related_fields(self, data, field_models, allowed_ids):
+        """Mask related fields the current user is not allowed to see."""
+        if isinstance(data, list):
+            return [
+                self._filter_related_fields(item, field_models, allowed_ids)
+                for item in data
+            ]
+        if not isinstance(data, dict):
+            return data
+        for field_name, related_model in field_models.items():
+            allowed = allowed_ids.get(related_model)
+            if allowed is None:
+                continue
+            value = data.get(field_name)
+            if isinstance(value, list):
+                filtered = []
+                for item in value:
+                    item_id = self._extract_related_id(item)
+                    if not item_id or item_id in allowed:
+                        filtered.append(item)
+                    else:
+                        filtered.append(self._placeholder_for(item))
+                data[field_name] = filtered
+            elif isinstance(value, dict):
+                item_id = self._extract_related_id(value)
+                if item_id and item_id not in allowed:
+                    data[field_name] = self._placeholder_for(value)
+        return data
+
     def list(self, request, *args, **kwargs):
         """
         Override the list method to inject optimized data into the serializer context.
@@ -744,9 +846,30 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         context["optimized_data"] = optimized_data
         if page is not None:
             serializer = self.get_serializer(page, many=True, context=context)
-            return self.get_paginated_response(serializer.data)
+            data = serializer.data
+            field_models = self._get_fieldsrelated_map(serializer)
+            if field_models:
+                allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+                data = self._filter_related_fields(data, field_models, allowed_ids)
+            return self.get_paginated_response(data)
         serializer = self.get_serializer(queryset, many=True, context=context)
-        return Response(serializer.data)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        return Response(data)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Return a single object with unauthorized related fields masked."""
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        return Response(data)
 
     def perform_create(self, serializer):
         instance = serializer.save()
