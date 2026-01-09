@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RenameField(
             model_name="webhookendpoint",
-            old_name="new_owmner",
+            old_name="new_owner",
             new_name="owner",
         ),
     ]
