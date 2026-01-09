@@ -429,11 +429,6 @@ class RightRequest(NameDescriptionFolderMixin):
 
     ref_id = models.CharField(max_length=100, blank=True)
     owner = models.ManyToManyField(
-        User,
-        blank=True,
-        related_name="assigned_right_requests",
-    )
-    new_owner = models.ManyToManyField(
         Actor,
         blank=True,
         related_name="assigned_right_requests",
