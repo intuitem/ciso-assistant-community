@@ -43,12 +43,6 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
     )
 
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        related_name="webhook_endpoints",
-        on_delete=models.CASCADE,
-        help_text="The user or team that owns this endpoint.",
-    )
-    new_owner = models.ForeignKey(
         Actor,
         related_name="webhook_endpoints",
         on_delete=models.CASCADE,
