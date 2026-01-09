@@ -154,29 +154,17 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         blank=True,
         null=True,
     )
-    authors = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Authors"),
-        related_name="authors",
-    )
     reviewers = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Reviewers"),
-        related_name="reviewers",
-    )
-    new_reviewers = models.ManyToManyField(
         Actor,
         blank=True,
         verbose_name=_("Reviewers"),
-        related_name="ebios_rm_study_reviewers_new",
+        related_name="ebios_rm_study_reviewers",
     )
-    new_authors = models.ManyToManyField(
+    authors = models.ManyToManyField(
         Actor,
         blank=True,
         verbose_name=_("Authors"),
-        related_name="ebios_rm_study_reviewers_new",
+        related_name="ebios_rm_study_authors",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     meta = models.JSONField(
