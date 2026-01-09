@@ -164,6 +164,8 @@
 	"providerColon": "Fournisseur :",
 	"domain": "Domaine",
 	"domainSemiColon": "Domaine :",
+	"enclave": "Enclave",
+	"includeEnclaves": "Inclure les enclaves",
 	"urn": "URN",
 	"treatmentStatus": "Décision de traitement",
 	"qualification": "Qualification",
