@@ -46,6 +46,7 @@ export const URL_MODEL = [
 	'validation-flows',
 	'reference-controls',
 	'assets',
+	'actors',
 	'users',
 	'user-groups',
 	'roles',
