@@ -173,6 +173,8 @@
 	"providerColon": "Provider:",
 	"domain": "Domain",
 	"domainSemiColon": "Domain:",
+	"enclave": "Enclave",
+	"includeEnclaves": "Include enclaves",
 	"urn": "URN",
 	"treatmentStatus": "Treatment decision",
 	"qualification": "Qualification",
