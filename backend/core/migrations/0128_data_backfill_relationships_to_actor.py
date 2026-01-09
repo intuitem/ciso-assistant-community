@@ -20,6 +20,8 @@ def migrate_user_to_actor(apps, schema_editor):
         ("core", "RiskAssessment", "reviewers", "new_reviewers"),
         ("crq", "QuantitativeRiskStudy", "authors", "new_authors"),
         ("crq", "QuantitativeRiskStudy", "reviewers", "new_reviewers"),
+        ("ebios_rm", "EbiosRMStudy", "authors", "new_authors"),
+        ("ebios_rm", "EbiosRMStudy", "reviewers", "new_reviewers"),
         ("core", "FindingsAssessment", "authors", "new_authors"),
         ("core", "FindingsAssessment", "reviewers", "new_reviewers"),
         ("core", "FindingsAssessment", "owner", "new_owner"),
@@ -90,11 +92,12 @@ def migrate_user_to_actor(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0127_appliedcontrol_new_owner_asset_new_owner_and_more"),
-        ("crq", "0002_quantitativeriskscenario_new_owner"),
+        ("crq", "0002_quantitativeriskscenario_new_owner_and_more"),
         ("metrology", "0002_metricinstance_new_owner"),
         ("privacy", "0012_rightrequest_new_owner"),
         ("resilience", "0004_businessimpactanalysis_new_authors_and_more"),
         ("tprm", "0010_contract_new_owner_entityassessment_new_authors_and_more"),
+        ("ebios_rm", "0022_ebiosrmstudy_new_authors_ebiosrmstudy_new_reviewers"),
         ("webhooks", "0002_webhookendpoint_new_owner"),
     ]
 
