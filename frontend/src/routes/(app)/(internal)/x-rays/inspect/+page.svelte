@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -10,15 +10,10 @@
 
 	let { data }: Props = $props();
 
-	let includeEnclaves = $state(data.includeEnclaves);
-
-	$effect(() => {
-		includeEnclaves = data.includeEnclaves;
-	});
-
-	async function toggleEnclaves() {
-		await goto(`/x-rays/inspect?include_enclaves=${includeEnclaves}`);
-		await invalidateAll();
+	async function toggleEnclaves(checked: boolean) {
+		await goto(`/x-rays/inspect?include_enclaves=${checked ? 'true' : 'false'}`, {
+			replaceState: true
+		});
 	}
 </script>
 
@@ -28,8 +23,8 @@
 			<input
 				type="checkbox"
 				class="checkbox"
-				bind:checked={includeEnclaves}
-				onchange={toggleEnclaves}
+				checked={data.includeEnclaves}
+				onchange={(e) => toggleEnclaves(e.currentTarget.checked)}
 			/>
 			{m.includeEnclaves()}
 		</label>
