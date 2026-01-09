@@ -2361,12 +2361,6 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         verbose_name="Expiration date",
     )
     owners = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name="Owner",
-        related_name="security_exceptions",
-    )
-    new_owners = models.ManyToManyField(
         "core.Actor",
         blank=True,
         verbose_name="Owner",
@@ -2576,12 +2570,6 @@ class Asset(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
     owner = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Owner"),
-        related_name="assets",
-    )
-    new_owner = models.ManyToManyField(
         "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
@@ -3758,12 +3746,6 @@ class Evidence(
     is_published = models.BooleanField(_("published"), default=True)
 
     owner = models.ManyToManyField(
-        User,
-        verbose_name="Owner",
-        related_name="evidences",
-        blank=True,
-    )
-    new_owner = models.ManyToManyField(
         "core.Actor",
         verbose_name="Owner",
         related_name="evidences",
@@ -3952,12 +3934,6 @@ class Incident(NameDescriptionMixin, FolderMixin):
         blank=True,
     )
     owners = models.ManyToManyField(
-        User,
-        related_name="incidents",
-        verbose_name="Owners",
-        blank=True,
-    )
-    new_owners = models.ManyToManyField(
         "core.Actor",
         blank=True,
         verbose_name="Owner",
@@ -4170,12 +4146,6 @@ class AppliedControl(
         verbose_name=_("Status"),
     )
     owner = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Owner"),
-        related_name="applied_controls",
-    )
-    new_owner = models.ManyToManyField(
         "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
@@ -4793,29 +4763,17 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         blank=True,
         null=True,
     )
-    authors = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Authors"),
-        related_name="%(class)s_authors",
-    )
     reviewers = models.ManyToManyField(
-        User,
+        "core.Actor",
         blank=True,
         verbose_name=_("Reviewers"),
         related_name="%(class)s_reviewers",
     )
-    new_reviewers = models.ManyToManyField(
-        "core.Actor",
-        blank=True,
-        verbose_name=_("Reviewers"),
-        related_name="%(class)s_reviewers_new",
-    )
-    new_authors = models.ManyToManyField(
+    authors = models.ManyToManyField(
         "core.Actor",
         blank=True,
         verbose_name=_("Authors"),
-        related_name="%(class)s_authors_new",
+        related_name="%(class)s_authors",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
@@ -5410,12 +5368,6 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
     )
 
     owner = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Owner"),
-        related_name="risk_scenarios",
-    )
-    new_owner = models.ManyToManyField(
         "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
@@ -6994,12 +6946,6 @@ class FindingsAssessment(Assessment):
         SELF_IDENTIFIED = "self_identified", "Self-identified"
 
     owner = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Owner"),
-        related_name="findings_assessments",
-    )
-    new_owner = models.ManyToManyField(
         "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
@@ -7133,12 +7079,6 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         blank=True,
     )
     owner = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Owner"),
-        related_name="findings",
-    )
-    new_owner = models.ManyToManyField(
         "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
