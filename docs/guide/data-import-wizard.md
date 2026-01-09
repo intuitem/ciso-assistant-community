@@ -326,3 +326,30 @@ Reference controls can be bundled also as a library.
 Adding entities, solutions and contracts go through the same file to be able to keep consistent relationships. Each concept needs to be on a separate tab of the excel sheet.<br>
 
 {% file src="../.gitbook/assets/third_parties_ecosystem_template (1).xlsx" %}
+
+## Processings
+
+### Template
+
+{% file src="../.gitbook/assets/sample-processings.xlsx" %}
+
+### Supported fields
+
+* internal\_id
+* ref\_id
+* name\*
+* description
+* status
+  * Approved
+  * Draft
+  * In review
+  * Deprecated
+* processing\_nature
+* domain
+* assigned\_to
+* labels
+* dpia\_required
+  * FALSE
+  * TRUE
+* dpia\_reference
+
