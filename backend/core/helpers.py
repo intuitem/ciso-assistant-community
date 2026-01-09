@@ -1727,19 +1727,37 @@ def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]
 
 
 def get_folder_content(
-    folder: Folder, include_perimeters, viewable_objects, needed_folders
+    folder: Folder,
+    include_perimeters,
+    include_enclaves,
+    viewable_objects,
+    needed_folders,
 ):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
         if f.id in viewable_objects or f.id in needed_folders:
+            # Skip enclaves if not included
+            if not include_enclaves and f.content_type == Folder.ContentType.ENCLAVE:
+                continue
             entry = {
                 "name": f.name,
                 "uuid": f.id,
                 "viewable": viewable_objects and f.id in viewable_objects,
+                "content_type": f.content_type,
             }
+            # Add enclave-specific styling
+            if f.content_type == Folder.ContentType.ENCLAVE:
+                entry.update(
+                    {
+                        "symbol": "triangle",
+                        "symbolSize": 12,
+                        "itemStyle": {"color": "#6366f1"},
+                    }
+                )
             children = get_folder_content(
                 f,
                 include_perimeters=include_perimeters,
+                include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
             )
@@ -1755,20 +1773,6 @@ def get_folder_content(
                     "symbol": "circle",
                     "symbolSize": 10,
                     "itemStyle": {"color": "#222436"},
-                    "children": [
-                        {
-                            "name": "Audits",
-                            "symbol": "diamond",
-                            "value": ComplianceAssessment.objects.filter(
-                                perimeter=p
-                            ).count(),
-                        },
-                        {
-                            "name": "Risk assessments",
-                            "symbol": "diamond",
-                            "value": RiskAssessment.objects.filter(perimeter=p).count(),
-                        },
-                    ],
                 }
             )
     return content
