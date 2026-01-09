@@ -1716,7 +1716,23 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "label": "description",
                 "escape": True,
             },
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
             "type": {"source": "type", "label": "type"},
+            "asset_class": {
+                "source": "asset_class",
+                "label": "asset_class",
+                # Handle missing asset_class safely and trim a leading 'assetClass/' segment if present
+                "format": lambda ac: (
+                    (
+                        ac.full_path.replace("assetClass/", "", 1)
+                        if ac.full_path.startswith("assetClass/")
+                        else ac.full_path.replace("assetClass", "")
+                    )
+                    if ac
+                    else ""
+                ),
+                "escape": True,
+            },
             "folder": {"source": "folder.name", "label": "folder", "escape": True},
             "security_objectives": {
                 "source": "get_security_objectives_display",
@@ -1754,9 +1770,15 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     escape_excel_formula(o.label) for o in qs.all()
                 ),
             },
+            "observation": {
+                "source": "observation",
+                "label": "observation",
+                "escape": True,
+            },
         },
+        "wrap_columns": ["name", "description", "observation"],
         "filename": "assets_export",
-        "select_related": ["folder"],
+        "select_related": ["folder", "asset_class"],
         "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
     }
 
@@ -11467,6 +11489,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             task_name = obj.name or f"Template_{obj.pk}"
             # Format: "1-task_name", "2-task_name", etc.
             base_name = f"{template_counter}-{task_name}"
+
+            INVALID_CHARS = r"[\\\/\?\*\[\]:]"
+            base_name = re.sub(INVALID_CHARS, "", base_name)
 
             # Excel sheet names have a 31 character limit
             sheet_name = base_name[:31]
