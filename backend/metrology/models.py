@@ -127,12 +127,6 @@ class MetricInstance(
         db_index=True,
     )
     owner = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Owner"),
-        related_name="metric_instances",
-    )
-    new_owner = models.ManyToManyField(
         Actor,
         blank=True,
         verbose_name=_("Owner"),
