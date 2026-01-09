@@ -1,5 +1,13 @@
 # SAML
 
+{% hint style="danger" %}
+<mark style="color:$danger;">Please note: if OIDC mode has ben configured before, you must</mark> <mark style="color:$danger;"></mark><mark style="color:$danger;">**reset the Client ID field to**</mark><mark style="color:$danger;">**&#x20;**</mark><mark style="color:$danger;">**`0`**</mark><mark style="color:$danger;">**&#x20;**</mark><mark style="color:$danger;">**in the OIDC tab and save**</mark> <mark style="color:$danger;"></mark><mark style="color:$danger;">before proceeding.</mark>
+
+<img src="../../.gitbook/assets/image.png" alt="" data-size="original">
+
+<mark style="color:$danger;">Failure to do so will prevent proper SAML configuration. This behavior is known and will be addressed in future releases.</mark>
+{% endhint %}
+
 {% tabs %}
 {% tab title="General configuration" %}
 ### Configure CISO Assistant with SAML
