@@ -5629,6 +5629,9 @@ class FolderViewSet(BaseModelViewSet):
         include_perimeters = request.query_params.get(
             "include_perimeters", "True"
         ).lower() in ["true", "1", "yes"]
+        include_enclaves = request.query_params.get(
+            "include_enclaves", "False"
+        ).lower() in ["true", "1", "yes"]
 
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
@@ -5651,14 +5654,31 @@ class FolderViewSet(BaseModelViewSet):
             .filter(id__in=needed_folders, parent_folder=Folder.get_root_folder())
             .distinct()
         ):
+            # Skip enclaves at top level if not included
+            if (
+                not include_enclaves
+                and folder.content_type == Folder.ContentType.ENCLAVE
+            ):
+                continue
             entry = {
                 "name": folder.name,
                 "uuid": folder.id,
                 "viewable": folder.id in viewable_objects,
+                "content_type": folder.content_type,
             }
+            # Add enclave-specific styling
+            if folder.content_type == Folder.ContentType.ENCLAVE:
+                entry.update(
+                    {
+                        "symbol": "triangle",
+                        "symbolSize": 12,
+                        "itemStyle": {"color": "#6366f1"},
+                    }
+                )
             folder_content = get_folder_content(
                 folder,
                 include_perimeters=include_perimeters,
+                include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
             )
