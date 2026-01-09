@@ -43,29 +43,17 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         blank=True,
         null=True,
     )
-    authors = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Authors"),
-        related_name="quantitative_risk_study_authors",
-    )
     reviewers = models.ManyToManyField(
-        User,
+        Actor,
         blank=True,
         verbose_name=_("Reviewers"),
         related_name="quantitative_risk_study_reviewers",
     )
-    new_reviewers = models.ManyToManyField(
-        Actor,
-        blank=True,
-        verbose_name=_("Reviewers"),
-        related_name="quantitative_risk_study_reviewers_new",
-    )
-    new_authors = models.ManyToManyField(
+    authors = models.ManyToManyField(
         Actor,
         blank=True,
         verbose_name=_("Authors"),
-        related_name="quantitative_risk_study_authors_new",
+        related_name="quantitative_risk_study_authors",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     risk_tolerance = models.JSONField(
@@ -387,12 +375,6 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
         related_name="quantitative_risk_scenarios",
     )
     owner = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Owner"),
-        related_name="quantitative_risk_scenarios",
-    )
-    new_owner = models.ManyToManyField(
         "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
