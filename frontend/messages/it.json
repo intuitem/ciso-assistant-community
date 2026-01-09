@@ -1306,30 +1306,36 @@
 	"mappingSuggestedHelpText": "Suggerimenti di mappatura basati sui framework caricati",
 	"mappingSuggestionTeasing": "Le mappature sono ora suggerite! Puoi usare i filtri per esplorare i suggerimenti basati sui framework caricati.",
 	"associatedFindingsAssessments": "Follow-up associati",
-	"hourCount": [{
-		"declarations": ["input count", "local countPlural = count: plural"],
-		"selectors": ["count", "countPlural"],
-		"match": {
-			"countPlural=one": "{count} Ora",
-			"countPlural=other": "{count} Ore"
+	"hourCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"countPlural=one": "{count} Ora",
+				"countPlural=other": "{count} Ore"
+			}
 		}
-	}],
-	"minuteCount": [{
-		"declarations": ["input count", "local countPlural = count: plural"],
-		"selectors": ["countPlural"],
-		"match": {
-			"countPlural=one": "{count} Minuto",
-			"countPlural=other": "{count} Minuti"
+	],
+	"minuteCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Minuto",
+				"countPlural=other": "{count} Minuti"
+			}
 		}
-	}],
-	"dayCount": [{
-		"declarations": ["input count", "local countPlural = count: plural"],
-		"selectors": ["countPlural"],
-		"match": {
-			"countPlural=one": "{count} Giorno",
-			"countPlural=other": "{count} Giorni"
+	],
+	"dayCount": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Giorno",
+				"countPlural=other": "{count} Giorni"
+			}
 		}
-	}],
+	],
 	"matchingScenarios": "Scenari corrispondenti",
 	"select": "Seleziona",
 	"deselect": "Deseleziona",
@@ -1422,15 +1428,17 @@
 	"taskScheduleInfo": "Le occorrenze passate sono protette da modifiche alla pianificazione. Solo le attività future verranno ricalcolate.",
 	"cascadeDeleteWarning": "Attenzione: L'eliminazione di questo elemento comporterà anche l'eliminazione permanente di {count} oggetto/i correlato/i:",
 	"errorFetching": "Impossibile caricare le informazioni di cascata. Riprova.",
-	"cascadeAffectedNotice": [{
-		"declarations": ["input count", "local countPlural = count: plural"],
-		"selectors": ["count", "countPlural"],
-		"match": {
-			"count=0": "Nessun altro oggetto sarà influenzato.",
-			"countPlural=one": "{count} oggetto correlato non verrà eliminato ma perderà una o più relazioni.",
-			"countPlural=other": "{count} oggetti correlati non verranno eliminati ma perderanno una o più relazioni."
+	"cascadeAffectedNotice": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
+			"match": {
+				"count=0": "Nessun altro oggetto sarà influenzato.",
+				"countPlural=one": "{count} oggetto correlato non verrà eliminato ma perderà una o più relazioni.",
+				"countPlural=other": "{count} oggetti correlati non verranno eliminati ma perderanno una o più relazioni."
+			}
 		}
-	}],
+	],
 	"cascadeAffectedHint": "Gli elementi seguenti rimangono nel sistema ma i loro collegamenti con questo oggetto verranno rimossi.",
 	"libraryFilteringLabels": "Etichette della biblioteca",
 	"acceptNotes": "Note di accettazione",
