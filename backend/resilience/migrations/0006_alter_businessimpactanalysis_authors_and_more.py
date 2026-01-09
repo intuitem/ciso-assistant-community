@@ -4,21 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0130_alter_complianceassessment_authors_and_more'),
-        ('resilience', '0005_remove_businessimpactanalysis_new_authors_and_more'),
+        ("core", "0130_alter_complianceassessment_authors_and_more"),
+        ("resilience", "0005_remove_businessimpactanalysis_new_authors_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='businessimpactanalysis',
-            name='authors',
-            field=models.ManyToManyField(blank=True, related_name='%(class)s_authors', to='core.actor', verbose_name='Authors'),
+            model_name="businessimpactanalysis",
+            name="authors",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="%(class)s_authors",
+                to="core.actor",
+                verbose_name="Authors",
+            ),
         ),
         migrations.AlterField(
-            model_name='businessimpactanalysis',
-            name='reviewers',
-            field=models.ManyToManyField(blank=True, related_name='%(class)s_reviewers', to='core.actor', verbose_name='Reviewers'),
+            model_name="businessimpactanalysis",
+            name="reviewers",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="%(class)s_reviewers",
+                to="core.actor",
+                verbose_name="Reviewers",
+            ),
         ),
     ]

@@ -4,26 +4,40 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0127_appliedcontrol_new_owner_asset_new_owner_and_more'),
-        ('crq', '0001_initial'),
+        ("core", "0127_appliedcontrol_new_owner_asset_new_owner_and_more"),
+        ("crq", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='quantitativeriskscenario',
-            name='new_owner',
-            field=models.ManyToManyField(blank=True, related_name='quantitative_risk_scenarios', to='core.actor', verbose_name='Owner'),
+            model_name="quantitativeriskscenario",
+            name="new_owner",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="quantitative_risk_scenarios",
+                to="core.actor",
+                verbose_name="Owner",
+            ),
         ),
         migrations.AddField(
-            model_name='quantitativeriskstudy',
-            name='new_authors',
-            field=models.ManyToManyField(blank=True, related_name='quantitative_risk_study_authors_new', to='core.actor', verbose_name='Authors'),
+            model_name="quantitativeriskstudy",
+            name="new_authors",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="quantitative_risk_study_authors_new",
+                to="core.actor",
+                verbose_name="Authors",
+            ),
         ),
         migrations.AddField(
-            model_name='quantitativeriskstudy',
-            name='new_reviewers',
-            field=models.ManyToManyField(blank=True, related_name='quantitative_risk_study_reviewers_new', to='core.actor', verbose_name='Reviewers'),
+            model_name="quantitativeriskstudy",
+            name="new_reviewers",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="quantitative_risk_study_reviewers_new",
+                to="core.actor",
+                verbose_name="Reviewers",
+            ),
         ),
     ]

@@ -4,16 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0127_appliedcontrol_new_owner_asset_new_owner_and_more'),
-        ('privacy', '0011_processing_evidences'),
+        ("core", "0127_appliedcontrol_new_owner_asset_new_owner_and_more"),
+        ("privacy", "0011_processing_evidences"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='rightrequest',
-            name='new_owner',
-            field=models.ManyToManyField(blank=True, related_name='assigned_right_requests', to='core.actor'),
+            model_name="rightrequest",
+            name="new_owner",
+            field=models.ManyToManyField(
+                blank=True, related_name="assigned_right_requests", to="core.actor"
+            ),
         ),
     ]

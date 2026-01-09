@@ -4,40 +4,69 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0129_remove_appliedcontrol_new_owner_and_more'),
+        ("core", "0129_remove_appliedcontrol_new_owner_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='complianceassessment',
-            name='authors',
-            field=models.ManyToManyField(blank=True, related_name='%(class)s_authors', to='core.actor', verbose_name='Authors'),
+            model_name="complianceassessment",
+            name="authors",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="%(class)s_authors",
+                to="core.actor",
+                verbose_name="Authors",
+            ),
         ),
         migrations.AlterField(
-            model_name='complianceassessment',
-            name='reviewers',
-            field=models.ManyToManyField(blank=True, related_name='%(class)s_reviewers', to='core.actor', verbose_name='Reviewers'),
+            model_name="complianceassessment",
+            name="reviewers",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="%(class)s_reviewers",
+                to="core.actor",
+                verbose_name="Reviewers",
+            ),
         ),
         migrations.AlterField(
-            model_name='findingsassessment',
-            name='authors',
-            field=models.ManyToManyField(blank=True, related_name='%(class)s_authors', to='core.actor', verbose_name='Authors'),
+            model_name="findingsassessment",
+            name="authors",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="%(class)s_authors",
+                to="core.actor",
+                verbose_name="Authors",
+            ),
         ),
         migrations.AlterField(
-            model_name='findingsassessment',
-            name='reviewers',
-            field=models.ManyToManyField(blank=True, related_name='%(class)s_reviewers', to='core.actor', verbose_name='Reviewers'),
+            model_name="findingsassessment",
+            name="reviewers",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="%(class)s_reviewers",
+                to="core.actor",
+                verbose_name="Reviewers",
+            ),
         ),
         migrations.AlterField(
-            model_name='riskassessment',
-            name='authors',
-            field=models.ManyToManyField(blank=True, related_name='%(class)s_authors', to='core.actor', verbose_name='Authors'),
+            model_name="riskassessment",
+            name="authors",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="%(class)s_authors",
+                to="core.actor",
+                verbose_name="Authors",
+            ),
         ),
         migrations.AlterField(
-            model_name='riskassessment',
-            name='reviewers',
-            field=models.ManyToManyField(blank=True, related_name='%(class)s_reviewers', to='core.actor', verbose_name='Reviewers'),
+            model_name="riskassessment",
+            name="reviewers",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="%(class)s_reviewers",
+                to="core.actor",
+                verbose_name="Reviewers",
+            ),
         ),
     ]

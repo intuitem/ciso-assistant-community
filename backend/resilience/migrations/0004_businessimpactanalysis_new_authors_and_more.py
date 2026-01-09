@@ -4,21 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0127_appliedcontrol_new_owner_asset_new_owner_and_more'),
-        ('resilience', '0003_alter_escalationthreshold_qualifications'),
+        ("core", "0127_appliedcontrol_new_owner_asset_new_owner_and_more"),
+        ("resilience", "0003_alter_escalationthreshold_qualifications"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='businessimpactanalysis',
-            name='new_authors',
-            field=models.ManyToManyField(blank=True, related_name='%(class)s_authors_new', to='core.actor', verbose_name='Authors'),
+            model_name="businessimpactanalysis",
+            name="new_authors",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="%(class)s_authors_new",
+                to="core.actor",
+                verbose_name="Authors",
+            ),
         ),
         migrations.AddField(
-            model_name='businessimpactanalysis',
-            name='new_reviewers',
-            field=models.ManyToManyField(blank=True, related_name='%(class)s_reviewers_new', to='core.actor', verbose_name='Reviewers'),
+            model_name="businessimpactanalysis",
+            name="new_reviewers",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="%(class)s_reviewers_new",
+                to="core.actor",
+                verbose_name="Reviewers",
+            ),
         ),
     ]

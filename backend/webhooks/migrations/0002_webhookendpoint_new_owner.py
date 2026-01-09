@@ -5,16 +5,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0127_appliedcontrol_new_owner_asset_new_owner_and_more'),
-        ('webhooks', '0001_initial'),
+        ("core", "0127_appliedcontrol_new_owner_asset_new_owner_and_more"),
+        ("webhooks", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='webhookendpoint',
-            name='new_owner',
-            field=models.ForeignKey(blank=True, help_text='The actor that owns this endpoint.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='webhook_endpoints', to='core.actor'),
+            model_name="webhookendpoint",
+            name="new_owner",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="The actor that owns this endpoint.",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="webhook_endpoints",
+                to="core.actor",
+            ),
         ),
     ]
