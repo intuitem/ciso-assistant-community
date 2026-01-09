@@ -550,6 +550,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'id' },
 			{ field: 'folder' },
 			{ field: 'name' },
+			{ field: 'description' },
 			{ field: 'ref_id' },
 			{ field: 'type' },
 			{ field: 'asset_class' },

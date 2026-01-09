@@ -1716,7 +1716,23 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "label": "description",
                 "escape": True,
             },
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
             "type": {"source": "type", "label": "type"},
+            "asset_class": {
+                "source": "asset_class",
+                "label": "asset_class",
+                # Handle missing asset_class safely and trim a leading 'assetClass/' segment if present
+                "format": lambda ac: (
+                    (
+                        ac.full_path.replace("assetClass/", "", 1)
+                        if ac.full_path.startswith("assetClass/")
+                        else ac.full_path.replace("assetClass", "")
+                    )
+                    if ac
+                    else ""
+                ),
+                "escape": True,
+            },
             "folder": {"source": "folder.name", "label": "folder", "escape": True},
             "security_objectives": {
                 "source": "get_security_objectives_display",
@@ -1754,9 +1770,15 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     escape_excel_formula(o.label) for o in qs.all()
                 ),
             },
+            "observation": {
+                "source": "observation",
+                "label": "observation",
+                "escape": True,
+            },
         },
+        "wrap_columns": ["name", "description", "observation"],
         "filename": "assets_export",
-        "select_related": ["folder"],
+        "select_related": ["folder", "asset_class"],
         "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
     }
 
@@ -5607,6 +5629,9 @@ class FolderViewSet(BaseModelViewSet):
         include_perimeters = request.query_params.get(
             "include_perimeters", "True"
         ).lower() in ["true", "1", "yes"]
+        include_enclaves = request.query_params.get(
+            "include_enclaves", "False"
+        ).lower() in ["true", "1", "yes"]
 
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
@@ -5629,14 +5654,31 @@ class FolderViewSet(BaseModelViewSet):
             .filter(id__in=needed_folders, parent_folder=Folder.get_root_folder())
             .distinct()
         ):
+            # Skip enclaves at top level if not included
+            if (
+                not include_enclaves
+                and folder.content_type == Folder.ContentType.ENCLAVE
+            ):
+                continue
             entry = {
                 "name": folder.name,
                 "uuid": folder.id,
                 "viewable": folder.id in viewable_objects,
+                "content_type": folder.content_type,
             }
+            # Add enclave-specific styling
+            if folder.content_type == Folder.ContentType.ENCLAVE:
+                entry.update(
+                    {
+                        "symbol": "triangle",
+                        "symbolSize": 12,
+                        "itemStyle": {"color": "#6366f1"},
+                    }
+                )
             folder_content = get_folder_content(
                 folder,
                 include_perimeters=include_perimeters,
+                include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
             )
@@ -11440,6 +11482,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             task_name = obj.name or f"Template_{obj.pk}"
             # Format: "1-task_name", "2-task_name", etc.
             base_name = f"{template_counter}-{task_name}"
+
+            INVALID_CHARS = r"[\\\/\?\*\[\]:]"
+            base_name = re.sub(INVALID_CHARS, "", base_name)
 
             # Excel sheet names have a 31 character limit
             sheet_name = base_name[:31]
