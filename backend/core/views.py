@@ -5415,6 +5415,33 @@ class ValidationFlowViewSet(BaseModelViewSet):
             )
 
 
+class ActorViewSet(BaseModelViewSet):
+    http_method_names = ["get", "head", "options"]
+
+    model = Actor
+
+    def get_queryset(self):
+        (viewable_entities, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=self.request.user,
+            object_type=Entity,
+        )
+        (viewable_teams, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=self.request.user,
+            object_type=Team,
+        )
+        return Actor.objects.filter(
+            Q(
+                user__id__in=User.visible_users(
+                    self.request.user, view_all_users=True
+                ).values_list("id")
+            )
+            | Q(entity__id__in=viewable_entities)
+            | Q(team__id__in=viewable_teams)
+        )
+
+
 class UserViewSet(BaseModelViewSet):
     """
     API endpoint that allows users to be viewed or edited

@@ -1204,6 +1204,14 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
         fields = "__all__"
 
 
+class ActorReadSerializer(BaseModelSerializer):
+    specific = FieldsRelatedField()
+
+    class Meta:
+        model = Actor
+        fields = ["id", "type", "specific"]
+
+
 class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
