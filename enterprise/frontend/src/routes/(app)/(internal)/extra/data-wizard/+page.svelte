@@ -92,6 +92,7 @@
 		selectedModel === 'ComplianceAssessment' ||
 			selectedModel === 'FindingsAssessment' ||
 			selectedModel === 'RiskAssessment' ||
+			selectedModel === 'User' ||
 			selectedModel === 'Folder'
 	);
 
@@ -103,6 +104,8 @@
 
 	// Models that don't need perimeter selection
 	const modelsWithoutPerimeter = [
+		'Folder',
+		'User',
 		'Asset',
 		'AppliedControl',
 		'Perimeter',
