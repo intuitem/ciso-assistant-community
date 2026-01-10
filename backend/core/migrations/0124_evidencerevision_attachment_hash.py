@@ -4,15 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0123_organisationobjective_metrics'),
+        ("core", "0123_organisationobjective_metrics"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='evidencerevision',
-            name='attachment_hash',
-            field=models.CharField(blank=True, db_index=True, help_text='SHA256 hash of the attachment file for integrity verification', max_length=64, null=True, verbose_name='Attachment SHA256 Hash'),
+            model_name="evidencerevision",
+            name="attachment_hash",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                help_text="SHA256 hash of the attachment file for integrity verification",
+                max_length=64,
+                null=True,
+                verbose_name="Attachment SHA256 Hash",
+            ),
         ),
     ]
