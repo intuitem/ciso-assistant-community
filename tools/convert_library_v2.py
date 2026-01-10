@@ -946,9 +946,7 @@ def create_library(
                                 if val:
                                     try:
                                         score_to_add = int(val)
-                                        if score_to_add != 0:
-                                            choices[i]["add_score"] = score_to_add
-
+                                        choices[i]["add_score"] = score_to_add
                                     except (TypeError, ValueError):
                                         raise ValueError(
                                             f"(answers_definition) Invalid add_score value '{val}' "
