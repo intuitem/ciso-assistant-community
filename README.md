@@ -603,6 +603,7 @@ Set DJANGO_DEBUG=False for security reason.
 19. EL: Greek
 20. TR: Turkish
 21. HR: Croatian
+22. ZH: Chinese (Simplified)
 
 ## Contributors 🤝
 
