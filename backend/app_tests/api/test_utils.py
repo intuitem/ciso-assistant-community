@@ -8,7 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import StoredLibrary
-from iam.models import User, UserGroup
+from iam.models import Folder, User, UserGroup
 
 from test_vars import *
 
@@ -759,6 +759,54 @@ class EndpointTestsQueries:
             for field, value in m2m_fields.items():
                 getattr(test_object, field).set(value)
 
+            folder_perm_fails = False
+            folder_perm_expected_status = expected_status
+            folder_perm_reason = None
+            if (
+                user_group
+                and "folder" in update_params
+                and hasattr(test_object, "folder_id")
+            ):
+                folder_value = update_params.get("folder")
+                if isinstance(folder_value, list):
+                    folder_value = folder_value[0] if folder_value else None
+                folder_name = None
+                if isinstance(folder_value, dict):
+                    folder_name = folder_value.get("str")
+                    folder_value = folder_value.get("id")
+                if hasattr(folder_value, "id"):
+                    folder_value = folder_value.id
+                target_folder = None
+                if folder_value:
+                    target_folder = Folder.objects.filter(id=folder_value).first()
+                if not target_folder and folder_name:
+                    target_folder = Folder.objects.filter(name=folder_name).first()
+                if target_folder and str(target_folder.id) != str(
+                    test_object.folder_id
+                ):
+                    (
+                        folder_perm_fails,
+                        folder_perm_expected_status,
+                        _,
+                    ) = EndpointTestsUtils.expected_request_response(
+                        "add",
+                        verbose_name,
+                        str(target_folder),
+                        user_group,
+                        expected_status,
+                    )
+                    if folder_perm_fails:
+                        folder_perm_expected_status = status.HTTP_403_FORBIDDEN
+                        folder_perm_reason = "folder_permission_denied"
+
+            update_perm_fails = user_perm_fails
+            update_perm_expected_status = user_perm_expected_status
+            update_perm_reason = user_perm_reason
+            if not user_perm_fails and folder_perm_fails:
+                update_perm_fails = True
+                update_perm_expected_status = folder_perm_expected_status
+                update_perm_reason = folder_perm_reason
+
             url = endpoint or (
                 EndpointTestsUtils.get_endpoint_url(verbose_name)
                 + str(test_object.id)
@@ -813,12 +861,12 @@ class EndpointTestsQueries:
                 url, update_params, format=query_format
             )
 
-            if user_perm_reason == "outside_scope":
+            if update_perm_reason == "outside_scope":
                 assert update_response.status_code == status.HTTP_404_NOT_FOUND, (
                     f"{verbose_name} can be accessed outside the domain"
                 )
             else:
-                if not user_group or user_perm_expected_status == status.HTTP_200_OK:
+                if not user_group or update_perm_expected_status == status.HTTP_200_OK:
                     # User has permission to update the object
                     assert update_response.status_code == expected_status, (
                         f"{verbose_name} can not be updated with authentication.\nResponse: {update_response.json()}"
@@ -828,7 +876,7 @@ class EndpointTestsQueries:
                 else:
                     # User does not have permission to update the object
                     # For Users detail, the API may return 404 (anti-enumeration) instead of 403.
-                    expected_statuses = {user_perm_expected_status}
+                    expected_statuses = {update_perm_expected_status}
                     if verbose_name == "Users":
                         expected_statuses.add(status.HTTP_404_NOT_FOUND)
                     assert update_response.status_code in expected_statuses, (
@@ -836,7 +884,7 @@ class EndpointTestsQueries:
                         f"got {update_response.status_code}"
                     )
 
-                if not (fails or user_perm_fails):
+                if not (fails or update_perm_fails):
                     # NOTE: We should check with a GET and not with the response of the PATCH request
                     for key, value in {
                         **build_params,
