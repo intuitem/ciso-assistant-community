@@ -190,7 +190,33 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         ordering = ["created_at"]
 
     def save(self, *args, **kwargs):
+        if self.pk:
+            old_matrix_id = (
+                EbiosRMStudy.objects.filter(pk=self.pk)
+                .values_list("risk_matrix_id", flat=True)
+                .first()
+            )
+
+            if old_matrix_id != self.risk_matrix_id:
+                probabilities = list(range(len(self.risk_matrix.probability or [])))
+                impacts = list(range(len(self.risk_matrix.impact or [])))
+                min_prob, max_prob = min(probabilities), max(probabilities)
+                min_impact, max_impact = min(impacts), max(impacts)
+                for feared_event in self.feared_events.all():
+                    if feared_event.gravity >= 0:
+                        feared_event.gravity = max(
+                            min_impact, min(feared_event.gravity, max_impact)
+                        )
+                        feared_event.save(update_fields=["gravity"])
+                for operational_scenario in self.operational_scenarios.all():
+                    if operational_scenario.likelihood >= 0:
+                        operational_scenario.likelihood = max(
+                            min_prob, min(operational_scenario.likelihood, max_prob)
+                        )
+                        operational_scenario.save(update_fields=["likelihood"])
+
         super().save(*args, **kwargs)
+
         if self.quotation_method == "express":
             for scenario in self.operational_scenarios.all():
                 scenario.update_likelihood_from_operating_modes()
@@ -301,6 +327,7 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
         on_delete=models.CASCADE,
+        related_name="feared_events",
     )
     assets = models.ManyToManyField(
         Asset,
@@ -699,6 +726,15 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         help_text=_("RO/TO couple from which the attach path is derived"),
     )
     ref_id = models.CharField(max_length=100, blank=True)
+    focused_feared_event = models.ForeignKey(
+        FearedEvent,
+        verbose_name=_("Focused feared event"),
+        related_name="focused_strategic_scenarios",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text=_("Override gravity with this specific feared event's gravity"),
+    )
 
     fields_to_check = ["ebios_rm_study", "name", "ref_id"]
 
@@ -726,9 +762,11 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         return result
 
     def get_gravity_display(self):
-        return FearedEvent.format_gravity(
-            self.ro_to_couple.get_gravity(), self.ebios_rm_study.parsed_matrix
-        )
+        if self.focused_feared_event:
+            gravity = self.focused_feared_event.gravity
+        else:
+            gravity = self.ro_to_couple.get_gravity()
+        return FearedEvent.format_gravity(gravity, self.ebios_rm_study.parsed_matrix)
 
 
 class AttackPath(NameDescriptionMixin, FolderMixin):

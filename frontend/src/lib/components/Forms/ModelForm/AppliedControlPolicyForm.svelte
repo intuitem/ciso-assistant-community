@@ -284,6 +284,7 @@
 			{form}
 			multiple
 			optionsEndpoint="assets"
+			optionsLabelField="auto"
 			optionsExtraFields={[['folder', 'str']]}
 			optionsInfoFields={{
 				fields: [
@@ -341,7 +342,7 @@
 	</Dropdown>
 {/if}
 
-{#if page.data.settings?.enabled_integrations?.some((integration: Record<string, any>) => integration.provider_type === 'itsm' && integration.configurations?.length)}
+{#if page.data.settings?.enabled_integrations?.some((integration: Record) => integration.provider_type === 'itsm' && integration.configurations?.length)}
 	<Dropdown
 		open={false}
 		style="hover:text-primary-700"
@@ -401,7 +402,7 @@
 								});
 								if (response.ok) {
 									syncMappings = syncMappings.filter(
-										(mapping: Record<string, any>) => mapping.id !== syncMapping.id
+										(mapping: Record) => mapping.id !== syncMapping.id
 									);
 								} else {
 									console.error('Failed to delete sync mapping');

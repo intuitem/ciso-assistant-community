@@ -54,6 +54,8 @@ class ConnectionTestSerializer(serializers.Serializer):
             config_data["credentials"]["api_token"] = config.credentials.get(
                 "api_token"
             )
+        if not config_data["credentials"].get("password") and config:
+            config_data["credentials"]["password"] = config.credentials.get("password")
 
         # Use the validation logic from your registry
         is_valid, errors = IntegrationRegistry.validate_configuration(
@@ -132,7 +134,10 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
         return path
 
     def get_has_api_token(self, obj: IntegrationConfiguration) -> bool:
-        return bool(obj.credentials and obj.credentials.get("api_token"))
+        return bool(
+            obj.credentials
+            and (obj.credentials.get("api_token") or obj.credentials.get("password"))
+        )
 
     def get_has_webhook_secret(self, obj: IntegrationConfiguration) -> bool:
         return bool(obj.webhook_secret)
@@ -147,6 +152,7 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
         # Never expose the full credentials, especially the API token, in GET responses.
         if "credentials" in ret and isinstance(ret["credentials"], dict):
             ret["credentials"].pop("api_token", None)  # Remove api_token if it exists
+            ret["credentials"].pop("password", None)  # Remove password if it exists
 
         return ret
 
@@ -169,6 +175,8 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
             config_data["credentials"]["api_token"] = config.credentials.get(
                 "api_token"
             )
+        if not config_data["credentials"].get("password") and config:
+            config_data["credentials"]["password"] = config.credentials.get("password")
 
         is_valid, errors = IntegrationRegistry.validate_configuration(
             provider.name, config_data

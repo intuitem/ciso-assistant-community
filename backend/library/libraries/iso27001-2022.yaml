@@ -8,8 +8,8 @@ description: "Information security, cybersecurity and privacy protection \u2014 
   \ security management systems \u2014 Requirements"
 copyright: This is the outline of the ISO27001-2022 standard. You can purchase the
   full standard from https://www.iso.org/standard/27001
-version: 12
-publication_date: 2025-07-03
+version: 15
+publication_date: 2025-12-04
 provider: ISO/IEC
 packager: intuitem
 translations:
@@ -40,6 +40,12 @@ translations:
       n \u2014 Requisitos"
     copyright: "Este es el esquema de la norma ISO27001-2022. Puede comprar el est\xE1\
       ndar completo en https://www.iso.org/standard/27001"
+  de:
+    name: Internationaler Standard ISO/IEC 27001:2022
+    description: "Informationssicherheit, Cybersicherheit und Datenschutz \u2013 Informationssicherheitsmanagementsysteme\
+      \ \u2013 Anforderungen"
+    copyright: "Dies ist die Gliederung der ISO 27001:2022-Norm. Die vollst\xE4ndige\
+      \ Norm kann unter https://www.iso.org/standard/27001 erworben werden."
 dependencies:
 - urn:intuitem:risk:library:doc-pol
 objects:
@@ -78,6 +84,13 @@ objects:
           n. Las medidas incluyen la definici\xF3n del alcance, el establecimiento\
           \ de objetivos y la garant\xEDa de la alineaci\xF3n con los requisitos de\
           \ cumplimiento."
+      de:
+        name: Informationssicherheitspolitik und -richtlinien
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Richtlinien\
+          \ f\xFCr die Informationssicherheit erstellt, genehmigt und organisatorisch\
+          \ verankert werden. Die Richtlinien m\xFCssen mit den strategischen Zielen\
+          \ \xFCbereinstimmen, Verantwortlichkeiten festlegen und die Einhaltung gesetzlicher,\
+          \ regulatorischer und vertraglicher Anforderungen unterst\xFCtzen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.2
     ref_id: A.5.2
     name: Information security roles and responsibilities
@@ -113,6 +126,13 @@ objects:
           \ la seguridad de la informaci\xF3n para garantizar la responsabilidad.\
           \ Las medidas incluyen documentaci\xF3n clara de las responsabilidades,\
           \ revisiones peri\xF3dicas y mecanismos de cumplimiento."
+      de:
+        name: Informationssicherheitsrollen und -verantwortlichkeiten
+        description: "Diese Steuerungsma\xDFnahme legt klare Rollen, Verantwortlichkeiten\
+          \ und Befugnisse im Bereich der Informationssicherheit fest. Sie stellt\
+          \ sicher, dass Zust\xE4ndigkeiten dokumentiert, kommuniziert und regelm\xE4\
+          \xDFig \xFCberpr\xFCft werden, um eine wirksame Umsetzung der Sicherheitsma\xDF\
+          nahmen zu gew\xE4hrleisten."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.3
     ref_id: A.5.3
     name: Segregation of duties
@@ -145,6 +165,13 @@ objects:
           \ el riesgo de errores, fraudes y accesos no autorizados. Las medidas incluyen\
           \ la separaci\xF3n de roles, restricciones de acceso y auditor\xEDas peri\xF3\
           dicas."
+      de:
+        name: Aufgabentrennung
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass kritische oder\
+          \ miteinander kollidierende Aufgaben voneinander getrennt werden, um Risiken\
+          \ wie Fehler, Betrug oder unbefugte Aktivit\xE4ten zu reduzieren. Dies wird\
+          \ durch rollenspezifische Zugriffsbeschr\xE4nkungen, klare Verantwortlichkeiten\
+          \ und geeignete Kontrollen erreicht."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.4
     ref_id: A.5.4
     name: Management responsibilities
@@ -178,6 +205,13 @@ objects:
           n para la seguridad de la informaci\xF3n est\xE9n claramente definidas e\
           \ implementadas. Las medidas incluyen el establecimiento de objetivos, la\
           \ asignaci\xF3n de recursos y la supervisi\xF3n del cumplimiento."
+      de:
+        name: Verantwortlichkeiten der Leitung
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass die Leitung\
+          \ Verantwortung f\xFCr die Informationssicherheit \xFCbernimmt. Dazu geh\xF6\
+          ren die Unterst\xFCtzung der Sicherheitsziele, die Bereitstellung notwendiger\
+          \ Ressourcen, das F\xF6rdern einer Sicherheitskultur sowie die \xDCberwachung\
+          \ von Umsetzung und Wirksamkeit."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.5
     ref_id: A.5.5
     name: Contact with authorities
@@ -213,6 +247,12 @@ objects:
           \ Las medidas incluyen el establecimiento de protocolos de contacto, el\
           \ mantenimiento de listas de contactos actualizadas y la asignaci\xF3n de\
           \ responsabilidades."
+      de:
+        name: "Kontakt mit Beh\xF6rden"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass die Organisation\
+          \ angemessene Kommunikationswege mit relevanten Beh\xF6rden besitzt. Dies\
+          \ umfasst klare Zust\xE4ndigkeiten, gepflegte Kontaktlisten und definierte\
+          \ Abl\xE4ufe, insbesondere f\xFCr meldepflichtige Sicherheitsvorf\xE4lle."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.6
     ref_id: A.5.6
     name: Contact with special interest groups
@@ -244,6 +284,12 @@ objects:
           \ para mantenerse informado sobre las tendencias y pr\xE1cticas de seguridad.\
           \ Las medidas incluyen la participaci\xF3n en foros, membres\xEDas e iniciativas\
           \ de colaboraci\xF3n."
+      de:
+        name: Kontakt mit speziellen Interessensgruppen
+        description: "Diese Steuerungsma\xDFnahme f\xF6rdert den Austausch mit relevanten\
+          \ Sicherheits- und Branchenforen, um aktuelle Trends, Bedrohungen und bew\xE4\
+          hrte Verfahren fr\xFChzeitig zu erkennen und im Informationssicherheitsmanagement\
+          \ zu ber\xFCcksichtigen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.7
     ref_id: A.5.7
     name: Threat intelligence
@@ -278,6 +324,12 @@ objects:
           \ y mantenga para identificar y mitigar los riesgos de seguridad. Las medidas\
           \ incluyen la supervisi\xF3n de fuentes de amenazas, el an\xE1lisis de tendencias\
           \ y el intercambio de informaci\xF3n procesable."
+      de:
+        name: "Informationen \xFCber die Bedrohungslage"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationen\
+          \ \xFCber aktuelle und potenzielle Bedrohungen systematisch gesammelt, analysiert\
+          \ und bewertet werden. Die gewonnenen Erkenntnisse sollen helfen, Risiken\
+          \ besser zu verstehen und wirksame Schutzma\xDFnahmen abzuleiten."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.8
     ref_id: A.5.8
     name: Information security in project management
@@ -310,6 +362,12 @@ objects:
           \ las pr\xE1cticas de gesti\xF3n de proyectos. Las medidas incluyen evaluaciones\
           \ de riesgos, revisiones de cumplimiento y puntos de control de seguridad\
           \ durante los ciclos de vida del proyecto."
+      de:
+        name: Informationssicherheit im Projektmanagement
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheit\
+          \ systematisch in alle Phasen des Projektmanagements integriert wird. Dazu\
+          \ geh\xF6ren Risikoanalysen, Sicherheitsanforderungen, Compliance-Pr\xFC\
+          fungen und Sicherheitsfreigaben im Rahmen des Projektlebenszyklus."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.9
     ref_id: A.5.9
     name: Inventory of information and other associated assets
@@ -341,6 +399,12 @@ objects:
           \ de la informaci\xF3n y los activos asociados. Las medidas incluyen el\
           \ seguimiento de activos, auditor\xEDas peri\xF3dicas y clasificaci\xF3\
           n por sensibilidad."
+      de:
+        name: Inventar der Informationen und anderen damit verbundenen Werte
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass die Organisation\
+          \ ein aktuelles, vollst\xE4ndiges und gepflegtes Inventar von Informationen\
+          \ und zugeh\xF6rigen Werten f\xFChrt. Es dient der Verantwortlichkeitszuordnung\
+          \ und unterst\xFCtzt risikobasierte Schutzma\xDFnahmen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.10
     ref_id: A.5.10
     name: Acceptable use of information and other associated assets
@@ -376,6 +440,13 @@ objects:
           \ los activos asociados para garantizar un manejo adecuado. Las medidas\
           \ incluyen pol\xEDticas documentadas, capacitaci\xF3n de usuarios y mecanismos\
           \ de cumplimiento."
+      de:
+        name: "Zul\xE4ssiger Gebrauch von Informationen und anderen damit verbundenen\
+          \ Werten"
+        description: "Diese Steuerungsma\xDFnahme definiert klare Regeln f\xFCr die\
+          \ zul\xE4ssige Nutzung von Informationen, Datentr\xE4gern, Ger\xE4ten und\
+          \ anderen Werten. Sie stellt sicher, dass Benutzer die Anforderungen kennen\
+          \ und einhalten, einschlie\xDFlich Schulungen und Richtlinien."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.11
     ref_id: A.5.11
     name: Return of assets
@@ -408,6 +479,12 @@ objects:
           \ cuando los empleados o contratistas se van o cambian de funci\xF3n. Las\
           \ medidas incluyen listas de comprobaci\xF3n, seguimiento de activos y protocolos\
           \ de desmantelamiento."
+      de:
+        name: "R\xFCckgabe von Werten"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass s\xE4mtliche\
+          \ organisatorischen Werte \u2013 einschlie\xDFlich Ger\xE4ten, Datentr\xE4\
+          gern, Zugangsberechtigungen oder Dokumenten \u2013 bei Austritt oder Rollenwechsel\
+          \ vollst\xE4ndig und sicher zur\xFCckgegeben werden."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.12
     ref_id: A.5.12
     name: Classification of information
@@ -442,6 +519,12 @@ objects:
           \ funci\xF3n de su sensibilidad y valor para garantizar una protecci\xF3\
           n adecuada. Las medidas incluyen esquemas de clasificaci\xF3n, restricciones\
           \ de acceso y pautas de etiquetado."
+      de:
+        name: Klassifizierung von Informationen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationen\
+          \ gem\xE4\xDF ihrem Schutzbedarf klassifiziert werden. Die Klassifizierung\
+          \ ber\xFCcksichtigt Vertraulichkeit, Integrit\xE4t, Verf\xFCgbarkeit sowie\
+          \ gesetzliche und vertragliche Anforderungen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.13
     ref_id: A.5.13
     name: Labelling of information
@@ -472,6 +555,11 @@ objects:
         description: "Este control garantiza un etiquetado coherente de la informaci\xF3\
           n para reflejar sus requisitos de clasificaci\xF3n y manejo. Las medidas\
           \ incluyen plantillas estandarizadas, capacitaci\xF3n y auditor\xEDas."
+      de:
+        name: Kennzeichnung von Informationen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass klassifizierte\
+          \ Informationen eindeutig und korrekt gekennzeichnet werden, sodass notwendige\
+          \ Schutzma\xDFnahmen zuverl\xE4ssig angewendet werden k\xF6nnen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.14
     ref_id: A.5.14
     name: Information transfer
@@ -503,6 +591,12 @@ objects:
         description: "Este control establece procesos seguros para la transferencia\
           \ de informaci\xF3n entre sistemas u organizaciones. Las medidas incluyen\
           \ cifrado, controles de acceso y protocolos de transferencia segura."
+      de:
+        name: "Informations\xFCbermittlung"
+        description: "Diese Steuerungsma\xDFnahme definiert Verfahren und Anforderungen\
+          \ f\xFCr die sichere \xDCbertragung von Informationen zwischen Systemen,\
+          \ Personen und Organisationen. Dazu geh\xF6ren Verschl\xFCsselung, Zugriffsbeschr\xE4\
+          nkungen und dokumentierte Kommunikationswege."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.15
     ref_id: A.5.15
     name: Access control
@@ -537,6 +631,12 @@ objects:
           \ acceso para restringir el acceso a las personas autorizadas. Las medidas\
           \ incluyen el acceso basado en roles, la autenticaci\xF3n multifactor y\
           \ las revisiones peri\xF3dicas."
+      de:
+        name: Zugangssteuerung
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass der Zugang zu\
+          \ Informationen und Werten ausschlie\xDFlich autorisierten Personen erm\xF6\
+          glicht wird. Dies umfasst rollenbasierte Zugriffskonzepte, starke Authentisierungsmechanismen\
+          \ und regelm\xE4\xDFige \xDCberpr\xFCfungen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.16
     ref_id: A.5.16
     name: Identity management
@@ -571,6 +671,12 @@ objects:
           \ segura para garantizar un acceso preciso y fiable a los sistemas. Las\
           \ medidas incluyen la verificaci\xF3n de identidad, la gesti\xF3n del ciclo\
           \ de vida y el aprovisionamiento de acceso."
+      de:
+        name: "Identit\xE4tsmanagement"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass digitale und\
+          \ physische Identit\xE4ten \xFCber ihren gesamten Lebenszyklus hinweg sicher\
+          \ verwaltet werden \u2013 einschlie\xDFlich Identit\xE4tspr\xFCfung, Bereitstellung,\
+          \ \xC4nderung und Entzug von Zugriffsrechten."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.17
     ref_id: A.5.17
     name: Authentication information
@@ -603,6 +709,11 @@ objects:
           \ como las contrase\xF1as, para evitar el acceso no autorizado. Las medidas\
           \ incluyen cifrado, almacenamiento seguro y actualizaciones peri\xF3dicas\
           \ de contrase\xF1as."
+      de:
+        name: Authentisierungsinformationen
+        description: "Diese Steuerungsma\xDFnahme sch\xFCtzt Authentisierungsinformationen\
+          \ wie Passw\xF6rter, Tokens oder Schl\xFCssel vor Missbrauch, einschlie\xDF\
+          lich sicherer Speicherung, Verschl\xFCsselung und Nutzungsvorgaben."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.18
     ref_id: A.5.18
     name: Access rights
@@ -637,6 +748,11 @@ objects:
           \ y administren peri\xF3dicamente para alinearlos con las funciones y responsabilidades.\
           \ Las medidas incluyen auditor\xEDas peri\xF3dicas, revocaci\xF3n de acceso\
           \ y gesti\xF3n automatizada del acceso."
+      de:
+        name: Zugangsrechte
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Zugriffsrechte\
+          \ angemessen vergeben, regelm\xE4\xDFig \xFCberpr\xFCft, angepasst und widerrufen\
+          \ werden, wenn sie nicht mehr erforderlich sind."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.19
     ref_id: A.5.19
     name: Information security in supplier relationships
@@ -669,6 +785,11 @@ objects:
           n est\xE9 integrada en las relaciones y los procesos con los proveedores.\
           \ Las medidas incluyen la diligencia debida, las revisiones de seguridad\
           \ y el monitoreo continuo."
+      de:
+        name: Informationssicherheit in Lieferantenbeziehungen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheit\
+          \ in Auswahl, Bewertung, \xDCberwachung und Steuerung von Lieferantenbeziehungen\
+          \ verankert ist."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.20
     ref_id: A.5.20
     name: Addressing information security within supplier agreements
@@ -703,6 +824,11 @@ objects:
           n dentro de los acuerdos con los proveedores. Las medidas incluyen cl\xE1\
           usulas contractuales expl\xEDcitas, auditor\xEDas de cumplimiento y sanciones\
           \ definidas por infracciones."
+      de:
+        name: Behandlung von Informationssicherheit in Lieferantenvereinbarungen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheitsanforderungen\
+          \ ausdr\xFCcklich in Vertr\xE4gen geregelt werden, einschlie\xDFlich Datenschutz,\
+          \ Zugriffskontrolle, Compliance-Vorgaben und Durchsetzungsmechanismen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.21
     ref_id: A.5.21
     name: Managing information security in the ICT supply chain
@@ -739,6 +865,14 @@ objects:
           n en la cadena de suministro de TIC para garantizar la seguridad de los\
           \ servicios y componentes. Las medidas incluyen evaluaciones de riesgos,\
           \ evaluaciones de proveedores y protocolos de respuesta a incidentes."
+      de:
+        name: Umgang mit der Informationssicherheit in der Lieferkette der IKT
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Risiken in der\
+          \ IKT-Lieferkette bewertet und angemessen gesteuert werden, um die Sicherheit,\
+          \ Integrit\xE4t und Verf\xFCgbarkeit von Systemen, Komponenten und Dienstleistungen\
+          \ zu gew\xE4hrleisten. Dazu geh\xF6ren Risikobewertungen, Sicherheits\xFC\
+          berpr\xFCfungen, Anforderungen an Zulieferer und Notfallma\xDFnahmen entlang\
+          \ der Lieferkette."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.22
     ref_id: A.5.22
     name: Monitor, review and change management of supplier services
@@ -773,6 +907,13 @@ objects:
           \ se supervisen, revisen y ajusten para mantener la seguridad de la informaci\xF3\
           n. Las medidas incluyen acuerdos de nivel de servicio, revisiones peri\xF3\
           dicas y actualizaciones de contratos."
+      de:
+        name: "\xDCberwachung, \xDCberpr\xFCfung und \xC4nderungsmanagement von Lieferantendienstleistungen"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Lieferantendienstleistungen\
+          \ kontinuierlich \xFCberwacht, bewertet und bei Bedarf angepasst werden,\
+          \ um Informationssicherheit, Servicequalit\xE4t und Compliance dauerhaft\
+          \ sicherzustellen. Dazu geh\xF6ren Leistungs\xFCberpr\xFCfungen, Vertragsaktualisierungen\
+          \ und Risikobewertungen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.23
     ref_id: A.5.23
     name: Information security for use of cloud services
@@ -805,6 +946,13 @@ objects:
         description: Este control garantiza el uso seguro de los servicios en la nube
           al abordar los riesgos asociados. Las medidas incluyen cifrado de datos,
           controles de acceso y revisiones de cumplimiento de proveedores.
+      de:
+        name: "Informationssicherheit f\xFCr die Nutzung von Cloud-Diensten"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Risiken im Zusammenhang\
+          \ mit der Nutzung von Cloud-Diensten identifiziert, bewertet und angemessen\
+          \ kontrolliert werden. Dazu geh\xF6ren Verschl\xFCsselung, Zugriffskontrollen,\
+          \ Compliance-Pr\xFCfungen, \xDCberwachung des Cloud-Anbieters sowie Anforderungen\
+          \ an Datenstandorte und Incident-Response."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.24
     ref_id: A.5.24
     name: Information security incident management planning and preparation
@@ -840,6 +988,13 @@ objects:
           n adecuadas para la gesti\xF3n de incidentes de seguridad de la informaci\xF3\
           n. Las medidas incluyen planes de respuesta a incidentes, ejercicios de\
           \ capacitaci\xF3n y protocolos de comunicaci\xF3n."
+      de:
+        name: "Planung und Vorbereitung der Handhabung von Informationssicherheitsvorf\xE4\
+          llen"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Strukturen,\
+          \ Rollen, Prozesse und Kommunikationswege f\xFCr den Umgang mit Informationssicherheitsvorf\xE4\
+          llen vorbereitet, dokumentiert und regelm\xE4\xDFig getestet werden. Dazu\
+          \ geh\xF6ren Incident-Response-Pl\xE4ne, Schulungen, \xDCbungen und Eskalationsmechanismen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.25
     ref_id: A.5.25
     name: Assessment and decision on information security events
@@ -876,6 +1031,13 @@ objects:
           \ acciones relacionadas con eventos de seguridad de la informaci\xF3n. Las\
           \ medidas incluyen an\xE1lisis de causa ra\xEDz, evaluaci\xF3n de riesgos\
           \ y planes de mitigaci\xF3n."
+      de:
+        name: "Beurteilung und Entscheidung \xFCber Informationssicherheitsereignisse"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheitsereignisse\
+          \ systematisch erfasst, analysiert und bewertet werden. Dazu geh\xF6rt die\
+          \ Entscheidung, ob ein Ereignis einen Sicherheitsvorfall darstellt, sowie\
+          \ die Durchf\xFChrung von Ursachenanalysen, Risikobewertungen und Ableitung\
+          \ angemessener Ma\xDFnahmen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.26
     ref_id: A.5.26
     name: Response to information security incidents
@@ -909,6 +1071,13 @@ objects:
           \ de seguridad de la informaci\xF3n para minimizar el impacto y recuperarse\
           \ r\xE1pidamente. Las medidas incluyen informes de incidentes, protocolos\
           \ de escalada y estrategias de contenci\xF3n."
+      de:
+        name: "Reaktion auf Informationssicherheitsvorf\xE4lle"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass auf Informationssicherheitsvorf\xE4\
+          lle strukturiert, zeitnah und wirksam reagiert wird, um Auswirkungen zu\
+          \ minimieren und den Normalbetrieb schnellstm\xF6glich wiederherzustellen.\
+          \ Dazu geh\xF6ren Meldemechanismen, Eskalationswege, Eind\xE4mmungsma\xDF\
+          nahmen und Wiederherstellungsprozesse."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.27
     ref_id: A.5.27
     name: Learning from information security incidents
@@ -944,6 +1113,13 @@ objects:
           \ de seguridad de la informaci\xF3n se documenten e implementen para mejorar\
           \ los procesos. Las medidas incluyen revisiones posteriores al incidente,\
           \ planes de acci\xF3n y actualizaciones de pol\xEDticas."
+      de:
+        name: "Erkenntnisse aus Informationssicherheitsvorf\xE4llen"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Erkenntnisse\
+          \ aus Sicherheitsvorf\xE4llen gesammelt, ausgewertet, dokumentiert und in\
+          \ Verbesserungsma\xDFnahmen umgesetzt werden. Dazu geh\xF6ren Lessons-Learned-Sitzungen,\
+          \ Aktualisierung von Richtlinien und Anpassung von technischen und organisatorischen\
+          \ Ma\xDFnahmen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.28
     ref_id: A.5.28
     name: Collection of evidence
@@ -978,6 +1154,13 @@ objects:
           durante los incidentes de seguridad para respaldar las investigaciones.
           Las medidas incluyen procedimientos de cadena de custodia, almacenamiento
           seguro y controles de acceso.
+      de:
+        name: Sammeln von Beweismaterial
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Beweismaterial\
+          \ bei Sicherheitsvorf\xE4llen ordnungsgem\xE4\xDF gesammelt, dokumentiert,\
+          \ gesichert und gesch\xFCtzt wird, um die Integrit\xE4t, Nachvollziehbarkeit\
+          \ und gerichtliche Verwertbarkeit sicherzustellen. Dazu geh\xF6ren Chain-of-Custody-Prozesse,\
+          \ sichere Lagerung und Zugriffskontrollen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.29
     ref_id: A.5.29
     name: Information security during disruption
@@ -1011,6 +1194,12 @@ objects:
           \ mantenga durante las interrupciones para garantizar la continuidad de\
           \ las operaciones. Las medidas incluyen planes de contingencia, sistemas\
           \ de respaldo y mecanismos de conmutaci\xF3n por error."
+      de:
+        name: "Informationssicherheit bei St\xF6rungen"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass die Informationssicherheit\
+          \ auch w\xE4hrend betrieblicher St\xF6rungen, Notf\xE4lle oder Krisen aufrechterhalten\
+          \ wird. Dazu geh\xF6ren Notfallma\xDFnahmen, alternative Betriebsverfahren,\
+          \ redundante Systeme und Priorisierung kritischer Prozesse."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.30
     ref_id: A.5.30
     name: ICT readiness for business continuity
@@ -1045,6 +1234,12 @@ objects:
           \ continuidad del negocio a fin de minimizar el tiempo de inactividad durante\
           \ las interrupciones. Las medidas incluyen probar planes de recuperaci\xF3\
           n, sistemas redundantes y sitios de recuperaci\xF3n ante desastres."
+      de:
+        name: "IKT-Bereitschaft f\xFCr Business Continuity"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass IKT-Systeme\
+          \ und -Dienste so vorbereitet sind, dass sie Ziele der Gesch\xE4ftskontinuit\xE4\
+          t unterst\xFCtzen. Dazu geh\xF6ren Redundanzen, Wiederanlaufverfahren, regelm\xE4\
+          \xDFige Tests von Wiederherstellungspl\xE4nen und Ausweichstandorte."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.31
     ref_id: A.5.31
     name: Legal, statutory, regulatory and contractual requirements
@@ -1077,6 +1272,13 @@ objects:
           \ estatutarios, reglamentarios y contractuales de seguridad de la informaci\xF3\
           n. Las medidas incluyen revisiones de pol\xEDticas, auditor\xEDas y documentaci\xF3\
           n de evidencias."
+      de:
+        name: Juristische, gesetzliche, regulatorische und vertragliche Anforderungen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass alle relevanten\
+          \ gesetzlichen, regulatorischen und vertraglichen Anforderungen identifiziert,\
+          \ dokumentiert, regelm\xE4\xDFig \xFCberpr\xFCft und eingehalten werden.\
+          \ Dazu geh\xF6ren Datenschutzvorgaben, Normen, branchenspezifische Anforderungen\
+          \ und vertragliche Verpflichtungen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.32
     ref_id: A.5.32
     name: Intellectual property rights
@@ -1109,6 +1311,12 @@ objects:
           \ est\xE9n protegidos a trav\xE9s de medidas de seguridad de la informaci\xF3\
           n adecuadas. Las medidas incluyen restricciones de acceso, cifrado y acuerdos\
           \ legales."
+      de:
+        name: Geistige Eigentumsrechte
+        description: "Diese Steuerungsma\xDFnahme sch\xFCtzt geistiges Eigentum durch\
+          \ geeignete technische und organisatorische Ma\xDFnahmen. Dazu geh\xF6ren\
+          \ Zugriffsbeschr\xE4nkungen, Verschl\xFCsselung, vertragliche Vereinbarungen\
+          \ und Schutz vor unbefugter Nutzung oder Verbreitung."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.33
     ref_id: A.5.33
     name: Protection of records
@@ -1143,6 +1351,13 @@ objects:
           \ de forma segura para evitar p\xE9rdidas o accesos no autorizados. Las\
           \ medidas incluyen pol\xEDticas de retenci\xF3n, almacenamiento seguro y\
           \ controles de acceso."
+      de:
+        name: Schutz von Aufzeichnungen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Aufzeichnungen\
+          \ w\xE4hrend ihrer gesamten Aufbewahrungsdauer gesch\xFCtzt werden \u2013\
+          \ vor Verlust, Ver\xE4nderung, unbefugtem Zugriff oder Zerst\xF6rung. Dazu\
+          \ geh\xF6ren Aufbewahrungsrichtlinien, sichere Lagerung und kontrollierter\
+          \ Zugriff."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.34
     ref_id: A.5.34
     name: Privacy and protection of PII
@@ -1176,6 +1391,12 @@ objects:
           \ de la informaci\xF3n de identificaci\xF3n personal (PII). Las medidas\
           \ incluyen la anonimizaci\xF3n, el cifrado y el cumplimiento de las leyes\
           \ de privacidad."
+      de:
+        name: Datenschutz und Schutz von personenbezogenen Daten
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass personenbezogene\
+          \ Daten gem\xE4\xDF gesetzlichen und vertraglichen Datenschutzanforderungen\
+          \ verarbeitet und gesch\xFCtzt werden. Dazu geh\xF6ren Verschl\xFCsselung,\
+          \ Zugriffskontrolle, Minimierung und Dokumentation der Datenverarbeitung."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.35
     ref_id: A.5.35
     name: Independent review of information security
@@ -1208,6 +1429,13 @@ objects:
           \ de la informaci\xF3n para evaluar la eficacia y el cumplimiento. Las medidas\
           \ incluyen auditor\xEDas externas, evaluaciones de riesgos y acciones de\
           \ seguimiento."
+      de:
+        name: "Unabh\xE4ngige \xDCberpr\xFCfung der Informationssicherheit"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheit\
+          \ regelm\xE4\xDFig unabh\xE4ngig bewertet wird, um Wirksamkeit, Angemessenheit\
+          \ und Konformit\xE4t des ISMS zu \xFCberpr\xFCfen. Dazu geh\xF6ren interne\
+          \ oder externe Audits, Sicherheitsbewertungen und Nachverfolgung von Ma\xDF\
+          nahmen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.36
     ref_id: A.5.36
     name: Compliance with policies, rules and standards for information security
@@ -1244,6 +1472,12 @@ objects:
           ticas, reglas y est\xE1ndares de seguridad de la informaci\xF3n. Las medidas\
           \ incluyen capacitaci\xF3n peri\xF3dica, revisiones de pol\xEDticas y mecanismos\
           \ de aplicaci\xF3n."
+      de:
+        name: Einhaltung von Richtlinien, Vorschriften und Normen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass alle Vorgaben,\
+          \ Richtlinien, Regeln und Standards zur Informationssicherheit eingehalten\
+          \ werden. Dazu geh\xF6ren Schulungen, \xDCberwachungsprozesse, Kontrollen\
+          \ und Eskalationsmechanismen."
   - urn: urn:intuitem:risk:function:doc-pol:a.5.37
     ref_id: A.5.37
     name: Documented operating procedures
@@ -1276,6 +1510,11 @@ objects:
           \ documentados para garantizar la coherencia en las pr\xE1cticas de seguridad.\
           \ Las medidas incluyen la documentaci\xF3n del proceso, el control de versiones\
           \ y la accesibilidad."
+      de:
+        name: "Dokumentierte Betriebsabl\xE4ufe"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Betriebsprozesse\
+          \ dokumentiert, gepflegt, versioniert und f\xFCr berechtigte Personen verf\xFC\
+          gbar sind, um konsistente, sichere und nachvollziehbare Abl\xE4ufe sicherzustellen."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.1
     ref_id: A.6.1
     name: Screening
@@ -1312,6 +1551,13 @@ objects:
           n. Las medidas incluyen verificaciones de antecedentes, verificaci\xF3n\
           \ de identidad y evaluaci\xF3n de calificaciones para reducir los riesgos\
           \ de seguridad."
+      de:
+        name: "Sicherheits\xFCberpr\xFCfung"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass geeignete Hintergrundpr\xFC\
+          fungen durchgef\xFChrt werden, um die Vertrauensw\xFCrdigkeit und Eignung\
+          \ von Bewerbern zu best\xE4tigen. Dazu geh\xF6ren Identit\xE4tspr\xFCfung,\
+          \ Qualifikationsnachweise und weitere gesetzlich zul\xE4ssige \xDCberpr\xFC\
+          fungen."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.2
     ref_id: A.6.2
     name: Terms and conditions of employment
@@ -1345,6 +1591,12 @@ objects:
           \ empleo incluyan responsabilidades en materia de seguridad de la informaci\xF3\
           n. Las medidas incluyen cl\xE1usulas expl\xEDcitas sobre confidencialidad,\
           \ cumplimiento de pol\xEDticas y consecuencias por infracciones."
+      de:
+        name: "Besch\xE4ftigungs- und Vertragsbedingungen"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass arbeitsvertragliche\
+          \ Vereinbarungen klare Anforderungen an Informationssicherheit, Vertraulichkeit\
+          \ und Compliance enthalten. Mitarbeitende m\xFCssen ihre sicherheitsrelevanten\
+          \ Verantwortlichkeiten verstehen und anerkennen."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.3
     ref_id: A.6.3
     name: Information security awareness, education and training
@@ -1381,6 +1633,12 @@ objects:
           n, educaci\xF3n y formaci\xF3n peri\xF3dicas sobre la seguridad de la informaci\xF3\
           n. Las medidas incluyen sesiones de capacitaci\xF3n programadas, programas\
           \ de aprendizaje electr\xF3nico y ejercicios simulados de phishing."
+      de:
+        name: Informationssicherheitsbewusstsein, Ausbildung und Schulung
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass alle relevanten\
+          \ Personen regelm\xE4\xDFig Schulungen, Awareness-Ma\xDFnahmen und Unterweisungen\
+          \ zur Informationssicherheit erhalten, um Risiken zu verstehen und sichere\
+          \ Verhaltensweisen anzuwenden."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.4
     ref_id: A.6.4
     name: Disciplinary process
@@ -1415,6 +1673,12 @@ objects:
           \ las violaciones de las pol\xEDticas de seguridad de la informaci\xF3n.\
           \ Las medidas incluyen directrices claras, procedimientos de escalamiento\
           \ y una aplicaci\xF3n coherente para mantener la rendici\xF3n de cuentas."
+      de:
+        name: "Ma\xDFregelungsprozess"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Verst\xF6\xDF\
+          e gegen Sicherheitsrichtlinien formal, fair und nachvollziehbar behandelt\
+          \ werden. Der Prozess legt Ma\xDFnahmen, Eskalationswege und Konsequenzen\
+          \ fest."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.5
     ref_id: A.6.5
     name: Responsibilities after termination or change of employment
@@ -1454,6 +1718,14 @@ objects:
           s de la terminaci\xF3n o los cambios de rol. Las medidas incluyen la revocaci\xF3\
           n de los derechos de acceso, la recopilaci\xF3n de activos de la organizaci\xF3\
           n y la realizaci\xF3n de entrevistas de salida."
+      de:
+        name: "Verantwortlichkeiten bei Beendigung oder \xC4nderung der Besch\xE4\
+          ftigung"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass bei Beendigung\
+          \ des Arbeitsverh\xE4ltnisses oder Rollenwechsels alle sicherheitsrelevanten\
+          \ Verantwortlichkeiten ber\xFCcksichtigt werden \u2013 einschlie\xDFlich\
+          \ Entzug von Zugriffsrechten, R\xFCckgabe von Werten und fortbestehender\
+          \ Vertraulichkeitspflichten."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.6
     ref_id: A.6.6
     name: Confidentiality or non-disclosure agreements
@@ -1490,6 +1762,12 @@ objects:
           n para proteger la informaci\xF3n confidencial. Las medidas incluyen acuerdos\
           \ firmados al comienzo del empleo, recordatorios peri\xF3dicos y la aplicaci\xF3\
           n de acciones legales en caso de violaciones."
+      de:
+        name: Vertraulichkeits- oder Geheimhaltungsvereinbarungen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Mitarbeitende\
+          \ und externe Parteien entsprechende Vertraulichkeitsvereinbarungen unterzeichnen,\
+          \ die definieren, wie sensible Informationen zu sch\xFCtzen sind \u2013\
+          \ auch nach Ende der Zusammenarbeit."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.7
     ref_id: A.6.7
     name: Remote working
@@ -1524,6 +1802,12 @@ objects:
           \ seguridad de la informaci\xF3n durante el trabajo a distancia. Las medidas\
           \ incluyen acceso seguro a los sistemas corporativos, uso obligatorio de\
           \ VPN y pol\xEDticas para el manejo de datos confidenciales de forma remota."
+      de:
+        name: Remote-Arbeit
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Risiken der\
+          \ Remote-Arbeit angemessen adressiert werden, einschlie\xDFlich sicherer\
+          \ Zugriffe, Ger\xE4teschutz, Vorgaben zum Umgang mit Informationen und geeigneten\
+          \ technischen Schutzma\xDFnahmen."
   - urn: urn:intuitem:risk:function:doc-pol:a.6.8
     ref_id: A.6.8
     name: Information security event reporting
@@ -1561,6 +1845,12 @@ objects:
           \ incluyen canales de notificaci\xF3n de incidentes, campa\xF1as de concienciaci\xF3\
           n y procedimientos de seguimiento para investigar y abordar los eventos\
           \ denunciados."
+      de:
+        name: Meldung von Informationssicherheitsereignissen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Mitarbeitende\
+          \ Informationssicherheitsereignisse unverz\xFCglich melden k\xF6nnen. Dazu\
+          \ geh\xF6ren klare Meldewege, Sensibilisierung und definierte Prozesse zur\
+          \ Erfassung, Bewertung und Weiterleitung von Ereignissen."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.1
     ref_id: A.7.1
     name: Physical security perimeters
@@ -1597,6 +1887,12 @@ objects:
           \ para proteger las \xE1reas cr\xEDticas del acceso no autorizado. Las medidas\
           \ incluyen barreras, controles de acceso y sistemas de monitoreo para garantizar\
           \ que solo las personas autorizadas puedan ingresar."
+      de:
+        name: Physische Sicherheitsperimeter
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass physische Sicherheitszonen\
+          \ eingerichtet werden, um kritische Bereiche vor unbefugtem Zutritt zu sch\xFC\
+          tzen. Dazu geh\xF6ren bauliche Schutzma\xDFnahmen, Zutrittskontrollen, \xDC\
+          berwachungssysteme und organisatorische Vorgaben."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.2
     ref_id: A.7.2
     name: Physical entry
@@ -1630,6 +1926,12 @@ objects:
           \ est\xE9n controlados y supervisados para evitar el acceso no autorizado.\
           \ Las medidas incluyen sistemas de credenciales, personal de seguridad y\
           \ registros de visitantes."
+      de:
+        name: Physischer Zutritt
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass der Zutritt\
+          \ zu sicherheitsrelevanten Bereichen kontrolliert, gesteuert und \xFCberwacht\
+          \ wird. Dazu geh\xF6ren Zugangsausweise, Besuchermanagement, Protokollierung\
+          \ und \xDCberwachung des Zutritts."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.3
     ref_id: A.7.3
     name: Securing offices, rooms and facilities
@@ -1663,6 +1965,12 @@ objects:
           \ est\xE9n protegidas para proteger la informaci\xF3n y los recursos. Las\
           \ medidas incluyen puertas cerradas, \xE1reas restringidas y sistemas de\
           \ vigilancia."
+      de:
+        name: "Sichern von B\xFCros, R\xE4umen und Einrichtungen"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass B\xFCros, R\xE4\
+          ume und Einrichtungen vor unbefugtem Zugang, Manipulation oder Diebstahl\
+          \ gesch\xFCtzt werden. Dazu geh\xF6ren Schlie\xDFsysteme, Zugangsbeschr\xE4\
+          nkungen, sichere Aufbewahrung und physische Kontrollen."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.4
     ref_id: A.7.4
     name: Physical security monitoring
@@ -1694,6 +2002,12 @@ objects:
           sica para detectar y responder r\xE1pidamente a las amenazas. Las medidas\
           \ incluyen sistemas de CCTV, detectores de movimiento y alertas en tiempo\
           \ real."
+      de:
+        name: "Physische Sicherheits\xFCberwachung"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass sicherheitsrelevante\
+          \ Bereiche durch geeignete \xDCberwachungseinrichtungen wie Video\xFCberwachung,\
+          \ Sensorik, Alarmsysteme und Benachrichtigungen \xFCberwacht werden, um\
+          \ unbefugte Aktivit\xE4ten fr\xFChzeitig zu erkennen."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.5
     ref_id: A.7.5
     name: Protecting against physical and environmental threats
@@ -1726,6 +2040,13 @@ objects:
           \ f\xEDsicas y ambientales. Las medidas incluyen sistemas de extinci\xF3\
           n de incendios, controles de temperatura y barreras de prevenci\xF3n de\
           \ inundaciones."
+      de:
+        name: Schutz vor physischen und umweltbedingten Bedrohungen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Systeme und\
+          \ Einrichtungen gegen physische und umweltbedingte Risiken wie Feuer, Wasser,\
+          \ Hitze, K\xE4lte, Vibrationen oder Naturereignisse gesch\xFCtzt werden.\
+          \ Dazu geh\xF6ren Brandschutz, Klimakontrolle, \xDCberspannungsschutz und\
+          \ bauliche Ma\xDFnahmen."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.6
     ref_id: A.7.6
     name: Working In secure areas
@@ -1758,6 +2079,12 @@ objects:
         description: "Este control garantiza que las \xE1reas seguras se administren\
           \ para permitir solo el acceso autorizado. Las medidas incluyen sistemas\
           \ de control de acceso, escolta de visitantes y monitoreo de actividad."
+      de:
+        name: Arbeiten in Sicherheitsbereichen
+        description: "Diese Steuerungsma\xDFnahme legt Anforderungen und Verhaltensregeln\
+          \ f\xFCr T\xE4tigkeiten in Sicherheitsbereichen fest. Dazu geh\xF6ren kontrollierte\
+          \ Zug\xE4nge, \xDCberwachung, Begleitung von Besuchern und organisatorische\
+          \ Vorgaben f\xFCr Abl\xE4ufe und Verhalten."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.7
     ref_id: A.7.7
     name: Clear desk and clear screen
@@ -1793,6 +2120,12 @@ objects:
           \ quede expuesta mediante la adopci\xF3n de pol\xEDticas de escritorio y\
           \ pantalla claras. Las medidas incluyen el bloqueo de documentos confidenciales\
           \ y el bloqueo autom\xE1tico de pantallas cuando no est\xE1n en uso."
+      de:
+        name: "Aufger\xE4umte Arbeitsumgebung und Bildschirmsperren"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass sensible Informationen\
+          \ nicht offen einsehbar sind. Dazu geh\xF6ren Clean-Desk-Regeln, sichere\
+          \ Aufbewahrung von Dokumenten, Abschlie\xDFen von Arbeitspl\xE4tzen und\
+          \ automatische Bildschirmsperren."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.8
     ref_id: A.7.8
     name: Equipment siting and protection
@@ -1825,6 +2158,12 @@ objects:
         description: "Este control garantiza que el equipo est\xE9 posicionado y protegido\
           \ para evitar el acceso no autorizado o el da\xF1o. Las medidas incluyen\
           \ montaje seguro, gabinetes cerrados con llave y \xE1reas de acceso restringido."
+      de:
+        name: "Platzierung und Schutz von Ger\xE4ten und Betriebsmitteln"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Ger\xE4te so\
+          \ positioniert, installiert und gesch\xFCtzt werden, dass Risiken wie unbefugter\
+          \ Zugriff, Manipulation oder Besch\xE4digung minimiert werden. Dazu geh\xF6\
+          ren sichere Standorte, Schr\xE4nke, Geh\xE4use und Zutrittskontrollen."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.9
     ref_id: A.7.9
     name: Security of assets off-premises
@@ -1858,6 +2197,12 @@ objects:
           \ fuera de las instalaciones est\xE9n protegidos para mantener la confidencialidad\
           \ y la integridad. Las medidas incluyen cifrado, transporte seguro y seguimiento\
           \ de acceso."
+      de:
+        name: "Sicherheit von Werten au\xDFerhalb der R\xE4umlichkeiten"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Ger\xE4te, Datentr\xE4\
+          ger und andere Werte auch au\xDFerhalb organisatorischer Standorte wirksam\
+          \ gesch\xFCtzt werden. Dazu geh\xF6ren Verschl\xFCsselung, sichere Transportwege,\
+          \ physischer Schutz und Kontrolle \xFCber die Nutzung."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.10
     ref_id: A.7.10
     name: Storage media
@@ -1887,6 +2232,12 @@ objects:
         description: "Este control protege los medios de almacenamiento para evitar\
           \ el acceso no autorizado o la manipulaci\xF3n. Las medidas incluyen almacenamiento\
           \ seguro, cifrado y restricciones de acceso."
+      de:
+        name: Speichermedien
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Speichermedien\
+          \ w\xE4hrend ihres gesamten Lebenszyklus gesch\xFCtzt sind \u2013 bei Speicherung,\
+          \ Transport, Nutzung und Entsorgung. Dazu geh\xF6ren sichere Lagerung, Verschl\xFC\
+          sselung, Zugriffskontrollen und dokumentierte L\xF6schverfahren."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.11
     ref_id: A.7.11
     name: Supporting utilities
@@ -1920,6 +2271,12 @@ objects:
           \ como los sistemas de energ\xEDa y refrigeraci\xF3n, sean fiables y est\xE9\
           n protegidos contra interrupciones. Las medidas incluyen sistemas redundantes\
           \ y seguridad f\xEDsica."
+      de:
+        name: Versorgungseinrichtungen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass essenzielle\
+          \ Versorgungseinrichtungen wie Strom, Klima, Wasser, Netzwerk oder Druckluft\
+          \ zuverl\xE4ssig betrieben und vor Ausf\xE4llen gesch\xFCtzt werden. Redundanzen\
+          \ und \xDCberwachungssysteme unterst\xFCtzen die Betriebssicherheit."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.12
     ref_id: A.7.12
     name: Cabling security
@@ -1950,6 +2307,12 @@ objects:
         description: "Este control garantiza que los cables est\xE9n asegurados para\
           \ evitar intercepciones o da\xF1os no autorizados. Las medidas incluyen\
           \ conductos de protecci\xF3n, etiquetado adecuado y enrutamiento seguro."
+      de:
+        name: Sicherheit der Verkabelung
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Kommunikations-\
+          \ und Stromkabel gegen Abh\xF6ren, Manipulation, Besch\xE4digung und St\xF6\
+          rungen gesch\xFCtzt werden. Dazu geh\xF6ren Kabelschutzrohre, sichere Verlegung,\
+          \ Kennzeichnung und Zugangskontrollen."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.13
     ref_id: A.7.13
     name: Equipment maintenance
@@ -1983,6 +2346,12 @@ objects:
         description: "Este control asegura el mantenimiento de los equipos para garantizar\
           \ su correcto funcionamiento y evitar fallos. Las medidas incluyen servicio\
           \ regular, pr\xE1cticas de mantenimiento seguras y acceso de personal autorizado."
+      de:
+        name: "Instandhaltung von Ger\xE4ten und Betriebsmitteln"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Ger\xE4te regelm\xE4\
+          \xDFig, fachgerecht und sicher gewartet werden, um Ausf\xE4lle und Sicherheitsrisiken\
+          \ zu vermeiden. Wartungsarbeiten d\xFCrfen nur von autorisiertem und qualifiziertem\
+          \ Personal durchgef\xFChrt werden."
   - urn: urn:intuitem:risk:function:doc-pol:a.7.14
     ref_id: A.7.14
     name: Secure disposal or re-use of equipment
@@ -2017,6 +2386,12 @@ objects:
           n de equipos para proteger la informaci\xF3n confidencial. Las medidas incluyen\
           \ la desinfecci\xF3n de datos, la destrucci\xF3n f\xEDsica y los procesos\
           \ de eliminaci\xF3n certificados."
+      de:
+        name: "Sichere Entsorgung oder Wiederverwendung von Ger\xE4ten"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Ger\xE4te vor\
+          \ Entsorgung oder Weiterverwendung so bereinigt werden, dass keine sensiblen\
+          \ Informationen wiederhergestellt werden k\xF6nnen. Dazu geh\xF6ren zertifizierte\
+          \ L\xF6schverfahren, physische Vernichtung und dokumentierte Prozesse."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.1
     ref_id: A.8.1
     name: User end point devices
@@ -2052,6 +2427,12 @@ objects:
           \ m\xF3viles, mediante la implementaci\xF3n de medidas de seguridad como\
           \ la detecci\xF3n de puntos de conexi\xF3n, el cifrado y las configuraciones\
           \ seguras para minimizar los riesgos."
+      de:
+        name: "Endpunktger\xE4te des Benutzers"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Endger\xE4te\
+          \ wie Laptops, Desktops oder Mobilger\xE4te durch technische und organisatorische\
+          \ Ma\xDFnahmen gesch\xFCtzt werden. Dazu geh\xF6ren sichere Konfigurationen,\
+          \ Verschl\xFCsselung, Malware-Schutz, Patch-Management und Zugriffskontrollen."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.2
     ref_id: A.8.2
     name: Privileged access rights
@@ -2089,6 +2470,13 @@ objects:
           \ indebido y mejorar la seguridad. Las medidas incluyen controles de acceso\
           \ basados en roles, revisiones peri\xF3dicas y una estricta gesti\xF3n de\
           \ cuentas."
+      de:
+        name: Privilegierte Zugangsrechte
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass privilegierte\
+          \ Zug\xE4nge nur autorisierten Personen gew\xE4hrt werden und deren Nutzung\
+          \ \xFCberwacht, dokumentiert und regelm\xE4\xDFig \xFCberpr\xFCft wird.\
+          \ Dies umfasst starke Authentisierung, Protokollierung und strenge Verwaltung\
+          \ privilegierter Konten."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.3
     ref_id: A.8.3
     name: Information access restriction
@@ -2122,6 +2510,12 @@ objects:
           \ en funci\xF3n de los principios de necesidad de conocer. Las medidas incluyen\
           \ la autenticaci\xF3n de usuarios, los permisos basados en roles y las revisiones\
           \ peri\xF3dicas del acceso."
+      de:
+        name: "Informationszugangsbeschr\xE4nkung"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass der Zugriff\
+          \ auf Informationen nach dem Need-to-know-Prinzip beschr\xE4nkt wird, um\
+          \ unbefugten Zugriff zu verhindern. Dazu geh\xF6ren Zugriffskontrollen,\
+          \ Rollenrechte, Authentisierung und regelm\xE4\xDFige \xDCberpr\xFCfungen."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.4
     ref_id: A.8.4
     name: Access to source code
@@ -2155,6 +2549,12 @@ objects:
           \ la visualizaci\xF3n, modificaci\xF3n o exposici\xF3n no autorizadas. Las\
           \ medidas incluyen control de versiones, repositorios seguros y acceso restringido\
           \ para desarrolladores."
+      de:
+        name: Zugriff auf den Quellcode
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Zugriff auf\
+          \ Quellcode kontrolliert, \xFCberwacht und gesch\xFCtzt erfolgt, um Manipulation,\
+          \ Offenlegung oder unbefugte \xC4nderung zu verhindern. Dazu geh\xF6ren\
+          \ Rechtemanagement, Versionskontrolle, Code-Reviews und abgesicherte Repositorys."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.5
     ref_id: A.8.5
     name: Secure authentication
@@ -2185,6 +2585,11 @@ objects:
         description: "Este control implementa mecanismos de autenticaci\xF3n seguros,\
           \ como la autenticaci\xF3n multifactor, para verificar las identidades de\
           \ los usuarios y evitar el acceso no autorizado."
+      de:
+        name: Sichere Authentisierung
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass starke Authentisierungsmechanismen\
+          \ eingesetzt werden \u2013 wie Multi-Faktor-Authentisierung, sichere Passwortrichtlinien,\
+          \ Token oder biometrische Verfahren \u2013 um unbefugten Zugriff zu verhindern."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.6
     ref_id: A.8.6
     name: Capacity management
@@ -2218,6 +2623,12 @@ objects:
           \ para proporcionar un rendimiento adecuado y evitar interrupciones. Las\
           \ medidas incluyen el seguimiento del uso de los recursos y la planificaci\xF3\
           n de las necesidades futuras."
+      de:
+        name: "Kapazit\xE4tssteuerung"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Systemkapazit\xE4\
+          ten kontinuierlich \xFCberwacht, geplant und gesteuert werden, um Leistungseinbu\xDF\
+          en, Engp\xE4sse oder Ausf\xE4lle zu vermeiden. Dazu geh\xF6ren Kapazit\xE4\
+          tsplanung, Monitoring und Prognosen."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.7
     ref_id: A.8.7
     name: Protection against malware
@@ -2247,6 +2658,12 @@ objects:
         description: "Este control implementa medidas como software antivirus, herramientas\
           \ de detecci\xF3n de amenazas y actualizaciones peri\xF3dicas para proteger\
           \ los sistemas contra malware y ataques maliciosos."
+      de:
+        name: Schutz gegen Schadsoftware
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Systeme durch\
+          \ geeignete technische und organisatorische Ma\xDFnahmen vor Malware, Schadsoftware\
+          \ und Angriffen gesch\xFCtzt werden. Dazu geh\xF6ren Antivirensoftware,\
+          \ EDR/XDR, regelm\xE4\xDFige Updates und Sensibilisierung."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.8
     ref_id: A.8.8
     name: Management of technical vulnerabilities
@@ -2278,6 +2695,12 @@ objects:
           \ t\xE9cnicas con prontitud para minimizar los riesgos de seguridad. Las\
           \ medidas incluyen el an\xE1lisis de vulnerabilidades y la gesti\xF3n de\
           \ parches."
+      de:
+        name: Handhabung von technischen Schwachstellen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass technische Schwachstellen\
+          \ zeitnah identifiziert, bewertet, priorisiert und behoben werden. Dazu\
+          \ geh\xF6ren Schwachstellenscans, Patch-Management, Risikobewertungen und\
+          \ Nachweisf\xFChrung."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.9
     ref_id: A.8.9
     name: Configuration management
@@ -2305,6 +2728,12 @@ objects:
         description: "Este control garantiza una gesti\xF3n coherente de las configuraciones\
           \ del sistema para mantener la configuraci\xF3n de seguridad y evitar cambios\
           \ no autorizados."
+      de:
+        name: Konfigurationsmanagement
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Systemkonfigurationen\
+          \ definiert, dokumentiert, gesch\xFCtzt und kontrolliert ge\xE4ndert werden,\
+          \ um Sicherheitseinstellungen zu gew\xE4hrleisten und unbeabsichtigte \xC4\
+          nderungen zu verhindern."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.10
     ref_id: A.8.10
     name: Information deletion
@@ -2334,6 +2763,12 @@ objects:
         description: "Este control garantiza que la informaci\xF3n confidencial se\
           \ elimine de forma segura cuando ya no sea necesaria para evitar la recuperaci\xF3\
           n o exposici\xF3n no autorizada."
+      de:
+        name: "L\xF6schung von Informationen"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationen,\
+          \ die nicht mehr ben\xF6tigt werden oder gesetzlichen Vorgaben zufolge gel\xF6\
+          scht werden m\xFCssen, sicher und nachvollziehbar entfernt werden. Dazu\
+          \ geh\xF6ren dokumentierte L\xF6schverfahren, sichere Methoden und Nachweise."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.11
     ref_id: A.8.11
     name: Data masking
@@ -2362,6 +2797,12 @@ objects:
         description: "Este control protege la informaci\xF3n confidencial durante\
           \ el procesamiento o la visualizaci\xF3n mediante el uso de t\xE9cnicas\
           \ de enmascaramiento de datos para ocultar los datos de usuarios no autorizados."
+      de:
+        name: Datenmaskierung
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass sensible Informationen\
+          \ w\xE4hrend Verarbeitung, Anzeige oder Test durch geeignete Maskierungsverfahren\
+          \ gesch\xFCtzt werden. Dies verhindert, dass unbefugte Personen Inhalte\
+          \ erkennen oder missbrauchen k\xF6nnen."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.12
     ref_id: A.8.12
     name: Data leakage prevention
@@ -2390,6 +2831,12 @@ objects:
         description: "Este control implementa mecanismos para evitar la exposici\xF3\
           n accidental de datos confidenciales a trav\xE9s de correo electr\xF3nico,\
           \ medios extra\xEDbles u otros canales."
+      de:
+        name: Verhinderung von Datenlecks
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass unbeabsichtigter\
+          \ oder unbefugter Abfluss sensibler Daten durch technische und organisatorische\
+          \ Ma\xDFnahmen verhindert wird. Dazu geh\xF6ren DLP-Systeme, Richtlinien,\
+          \ \xDCberwachung und Zugriffsbeschr\xE4nkungen."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.13
     ref_id: A.8.13
     name: Information backup
@@ -2418,6 +2865,11 @@ objects:
         description: "Este control garantiza que la informaci\xF3n cr\xEDtica se respalde\
           \ de forma regular y segura para garantizar su disponibilidad en caso de\
           \ incidentes o desastres."
+      de:
+        name: Sicherung von Informationen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass kritische Informationen\
+          \ regelm\xE4\xDFig, vollst\xE4ndig, gesch\xFCtzt und wiederherstellbar gesichert\
+          \ werden. Dies umfasst Backup-Strategien, Speicherorte, Tests und Dokumentation."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.14
     ref_id: A.8.14
     name: Redundancy of information processing facilities
@@ -2447,6 +2899,12 @@ objects:
         description: "Este control garantiza que la redundancia est\xE9 integrada\
           \ en las instalaciones de procesamiento para mantener la disponibilidad\
           \ y las operaciones durante fallas o emergencias del sistema."
+      de:
+        name: Redundanz von informationsverarbeitenden Einrichtungen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass kritische Systeme\
+          \ und Dienste durch Redundanzen, Ausweichmechanismen und Notbetriebskonzepte\
+          \ abgesichert sind, um Ausfallzeiten zu minimieren und Betriebsf\xE4higkeit\
+          \ zu erhalten."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.15
     ref_id: A.8.15
     name: Logging
@@ -2474,6 +2932,12 @@ objects:
         description: "Este control permite el registro de actividades dentro de los\
           \ sistemas para respaldar el monitoreo, la detecci\xF3n de incidentes y\
           \ las investigaciones forenses."
+      de:
+        name: Protokollierung
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass sicherheitsrelevante\
+          \ Ereignisse und Aktivit\xE4ten protokolliert, gesch\xFCtzt, \xFCberpr\xFC\
+          ft und f\xFCr Analysen sowie Ermittlungen genutzt werden k\xF6nnen. Dies\
+          \ umfasst Log-Quellen, Integrit\xE4t der Logs, Aufbewahrung und \xDCberwachung."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.16
     ref_id: A.8.16
     name: Monitoring activities
@@ -2500,6 +2964,12 @@ objects:
         name: Seguimiento de las actividades
         description: "Este control garantiza la supervisi\xF3n continua de las actividades\
           \ del sistema para detectar, responder y mitigar las amenazas de seguridad."
+      de:
+        name: "\xDCberwachung von Aktivit\xE4ten"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Systeme, Dienste\
+          \ und Netzwerke kontinuierlich \xFCberwacht werden, um Anomalien, Angriffe\
+          \ oder sicherheitsrelevante Ereignisse fr\xFChzeitig zu erkennen und geeignete\
+          \ Gegenma\xDFnahmen einzuleiten."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.17
     ref_id: A.8.17
     name: Clock synchronization
@@ -2527,6 +2997,11 @@ objects:
         description: "Este control garantiza que los relojes del sistema est\xE9n\
           \ sincronizados para mantener marcas de tiempo precisas y coherentes para\
           \ los registros y otros procesos cr\xEDticos."
+      de:
+        name: Uhrensynchronisation
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass System- und\
+          \ Netzwerkuhren synchronisiert sind, um korrekte Zeitstempel f\xFCr Protokolle,\
+          \ Analysen und sicherheitsrelevante Prozesse zu gew\xE4hrleisten."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.18
     ref_id: A.8.18
     name: Use of privileged utility programs
@@ -2553,6 +3028,12 @@ objects:
         name: Uso de programas de utilidad privilegiados
         description: Este control restringe y supervisa el uso de programas de utilidad
           con privilegios para evitar el uso indebido y las acciones no autorizadas.
+      de:
+        name: Gebrauch von Hilfsprogrammen mit privilegierten Rechten
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass der Einsatz\
+          \ privilegierter Dienstprogramme kontrolliert, \xFCberwacht und auf berechtigte\
+          \ Personen beschr\xE4nkt wird. Dies verhindert Missbrauch, Manipulation\
+          \ und unbefugte Aktivit\xE4ten."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.19
     ref_id: A.8.19
     name: Installation of software on operational systems
@@ -2581,6 +3062,12 @@ objects:
         description: "Este control garantiza que la instalaci\xF3n de software en\
           \ los sistemas operativos se gestione de forma segura para evitar vulnerabilidades\
           \ o cambios no autorizados."
+      de:
+        name: Installation von Software auf Systemen im Betrieb
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Softwareinstallationen\
+          \ in produktiven Umgebungen kontrolliert, dokumentiert und autorisiert erfolgen,\
+          \ um Risiken durch Schadsoftware, Fehlkonfigurationen oder unbefugte \xC4\
+          nderungen zu vermeiden."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.20
     ref_id: A.8.20
     name: Networks security
@@ -2611,6 +3098,11 @@ objects:
         description: "Este control garantiza la seguridad de la red a trav\xE9s de\
           \ firewalls, sistemas de detecci\xF3n de intrusos y controles de acceso\
           \ para proteger contra accesos y ataques no autorizados."
+      de:
+        name: Netzwerksicherheit
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Netzwerke durch\
+          \ geeignete Sicherheitsma\xDFnahmen wie Firewalls, IDS/IPS, Segmentierung,\
+          \ \xDCberwachung und Zugriffskontrollen gesch\xFCtzt werden."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.21
     ref_id: A.8.21
     name: Security of network services
@@ -2638,6 +3130,12 @@ objects:
         description: "Este control garantiza que los servicios de red est\xE9n protegidos\
           \ para mantener la confidencialidad, la integridad y la disponibilidad durante\
           \ el uso."
+      de:
+        name: Sicherheit von Netzwerkdiensten
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass genutzte Netzwerkdienste\
+          \ \u2013 intern und extern \u2013 sicher bereitgestellt, \xFCberwacht und\
+          \ gesch\xFCtzt werden. Dazu geh\xF6ren Sicherheitsvereinbarungen, Monitoring,\
+          \ Tests und Absicherung gegen Angriffe."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.22
     ref_id: A.8.22
     name: Segregation of networks
@@ -2664,6 +3162,11 @@ objects:
         name: "Segregaci\xF3n de redes"
         description: "Este control implementa la segregaci\xF3n de la red para limitar\
           \ la propagaci\xF3n de amenazas y minimizar el impacto de posibles infracciones."
+      de:
+        name: Trennung von Netzwerken
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Netzwerke nach\
+          \ Schutzbedarf segmentiert werden, um Risiken, Angriffsfl\xE4chen und Auswirkungen\
+          \ potenzieller Vorf\xE4lle zu reduzieren."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.23
     ref_id: A.8.23
     name: Web filtering
@@ -2690,6 +3193,11 @@ objects:
         name: Filtrado web
         description: "Este control usa herramientas de filtrado web para bloquear\
           \ el acceso a contenido no autorizado o da\xF1ino a trav\xE9s de Internet."
+      de:
+        name: Webfilterung
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Zugriffe auf\
+          \ sch\xE4dliche, unangemessene oder unerlaubte Webseiten durch Filtermechanismen\
+          \ eingeschr\xE4nkt oder verhindert werden."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.24
     ref_id: A.8.24
     name: Use of cryptography
@@ -2717,6 +3225,12 @@ objects:
         description: "Este control garantiza que se apliquen t\xE9cnicas criptogr\xE1\
           ficas para proteger la confidencialidad, integridad y autenticidad de los\
           \ datos."
+      de:
+        name: Verwendung von Kryptographie
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass kryptographische\
+          \ Verfahren angemessen ausgew\xE4hlt, eingesetzt, verwaltet und gesch\xFC\
+          tzt werden, um Vertraulichkeit, Integrit\xE4t und Authentizit\xE4t von Informationen\
+          \ zu gew\xE4hrleisten."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.25
     ref_id: A.8.25
     name: Secure development life cycle
@@ -2745,6 +3259,12 @@ objects:
         description: Este control integra la seguridad en todas las etapas del ciclo
           de vida del desarrollo para garantizar que los sistemas y las aplicaciones
           se construyan de forma segura.
+      de:
+        name: Lebenszyklus einer sicheren Entwicklung
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Sicherheitsanforderungen,\
+          \ Tests, Reviews und Kontrollen in allen Phasen des Entwicklungslebenszyklus\
+          \ verankert sind \u2013 von der Planung \xFCber Design, Implementierung,\
+          \ Test bis zur \xDCbergabe."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.26
     ref_id: A.8.26
     name: Application security requirements
@@ -2769,6 +3289,11 @@ objects:
         name: Requisitos de seguridad de las aplicaciones
         description: Este control define y aplica los requisitos de seguridad de las
           aplicaciones para protegerse contra vulnerabilidades.
+      de:
+        name: Anforderungen an die Anwendungssicherheit
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass f\xFCr Anwendungen\
+          \ klare Sicherheitsanforderungen definiert, dokumentiert und umgesetzt werden,\
+          \ um Schwachstellen und Sicherheitsrisiken zu vermeiden."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.27
     ref_id: A.8.27
     name: Secure system architecture and engineering principles
@@ -2796,6 +3321,11 @@ objects:
         name: "Arquitectura de sistemas seguros y principios de ingenier\xEDa"
         description: "Este control garantiza que se adopten los principios de dise\xF1\
           o seguro durante el desarrollo de las arquitecturas de sistemas."
+      de:
+        name: "Sichere Systemarchitektur und Entwicklungsgrunds\xE4tze"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Sicherheitsprinzipien\
+          \ wie Minimierung von Angriffsfl\xE4chen, Defense-in-Depth, sichere Standards\
+          \ und Best Practices in Architektur- und Designprozessen verankert sind."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.28
     ref_id: A.8.28
     name: Secure coding
@@ -2820,6 +3350,11 @@ objects:
         name: "Codificaci\xF3n segura"
         description: "Este control implementa pr\xE1cticas de codificaci\xF3n seguras\
           \ para minimizar las vulnerabilidades en el software desarrollado."
+      de:
+        name: Sichere Codierung
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Entwickler sichere\
+          \ Coding-Praktiken anwenden, um Fehler, Schwachstellen und Angriffsfl\xE4\
+          chen zu reduzieren. Dazu geh\xF6ren Standards, Code-Reviews und Schulungen."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.29
     ref_id: A.8.29
     name: Security testing in development and acceptance
@@ -2847,6 +3382,11 @@ objects:
         description: "Este control garantiza que las pruebas de seguridad se lleven\
           \ a cabo durante las fases de desarrollo y aceptaci\xF3n para identificar\
           \ los puntos d\xE9biles."
+      de:
+        name: "Sicherheitspr\xFCfung bei Entwicklung und Abnahme"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Anwendungen\
+          \ und Systeme w\xE4hrend Entwicklung, Test und Abnahme einer Sicherheitspr\xFC\
+          fung unterzogen werden, um Schwachstellen fr\xFChzeitig zu erkennen."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.30
     ref_id: A.8.30
     name: Outsourced development
@@ -2873,6 +3413,11 @@ objects:
         name: Desarrollo externalizado
         description: Este control garantiza que los riesgos de seguridad se gestionen
           de forma eficaz cuando el desarrollo se externaliza a proveedores externos.
+      de:
+        name: Ausgegliederte Entwicklung
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass bei ausgelagerter\
+          \ Entwicklung Sicherheitsanforderungen vertraglich und organisatorisch geregelt,\
+          \ \xFCberwacht und durchgesetzt werden."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.31
     ref_id: A.8.31
     name: Separation of development, test and production environments
@@ -2904,6 +3449,11 @@ objects:
         description: "Este control garantiza que los entornos de desarrollo, prueba\
           \ y producci\xF3n est\xE9n segregados para evitar interacciones no deseadas\
           \ y accesos no autorizados."
+      de:
+        name: Trennung von Entwicklungs-, Test- und Produktionsumgebungen
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Entwicklungs-,\
+          \ Test- und Produktionsumgebungen klar voneinander getrennt sind, um unbeabsichtigte\
+          \ \xC4nderungen, Sicherheitsrisiken oder Datenverlust zu verhindern."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.32
     ref_id: A.8.32
     name: Change management
@@ -2930,6 +3480,12 @@ objects:
         name: "Gesti\xF3n del cambio"
         description: Este control garantiza que los cambios en los sistemas se gestionen
           de forma segura para minimizar los riesgos y mantener la estabilidad operativa.
+      de:
+        name: "\xC4nderungssteuerung"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass \xC4nderungen\
+          \ an Systemen kontrolliert, dokumentiert und risikobewertet durchgef\xFC\
+          hrt werden, um Stabilit\xE4t, Sicherheit und Nachvollziehbarkeit sicherzustellen.\
+          \ Dies umfasst Genehmigungsprozesse, Tests, Dokumentation und \xDCberwachung."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.33
     ref_id: A.8.33
     name: Test information
@@ -2955,6 +3511,12 @@ objects:
         name: "Informaci\xF3n de la prueba"
         description: "Este control protege los datos de prueba para evitar la exposici\xF3\
           n de informaci\xF3n sensible o confidencial durante los procesos de prueba."
+      de:
+        name: Testdaten
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Testdaten \u2013\
+          \ insbesondere wenn sie produktive oder vertrauliche Inhalte enthalten \u2013\
+          \ gesch\xFCtzt, anonymisiert oder maskiert werden, um unbefugte Einsicht\
+          \ oder Missbrauch zu verhindern."
   - urn: urn:intuitem:risk:function:doc-pol:a.8.34
     ref_id: A.8.34
     name: Protection of information systems during audit testing
@@ -2996,6 +3558,13 @@ objects:
           \ la fuga de datos o las interrupciones. Las medidas incluyen el uso de\
           \ entornos que no son de producci\xF3n, restricciones de acceso y acuerdos\
           \ de confidencialidad para mantener la seguridad y la integridad del sistema."
+      de:
+        name: "Schutz der Informationssysteme w\xE4hrend Tests im Audit"
+        description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Systeme, Dienste\
+          \ und Daten w\xE4hrend Pr\xFCfungen gesch\xFCtzt werden, indem unbefugter\
+          \ Zugriff, Datenabfluss oder Betriebsst\xF6rungen verhindert werden. Dazu\
+          \ geh\xF6ren die Nutzung von Nicht-Produktivumgebungen, Zugriffsbeschr\xE4\
+          nkungen, sichere Verfahren und Vertraulichkeitsvereinbarungen."
   framework:
     urn: urn:intuitem:risk:framework:iso27001-2022
     ref_id: ISO/IEC 27001:2022
@@ -3022,6 +3591,10 @@ objects:
         description: "Seguridad de la informaci\xF3n, ciberseguridad y protecci\xF3\
           n de la privacidad \u2014 Sistemas de gesti\xF3n de la seguridad de la informaci\xF3\
           n \u2014 Requisitos"
+      de:
+        name: Internationaler Standard ISO/IEC 27001:2022
+        description: "Informationssicherheit, Cybersicherheit und Datenschutz \u2013\
+          \ Informationssicherheitsmanagementsysteme \u2013 Anforderungen"
     implementation_groups_definition:
     - ref_id: Clauses
       name: Clauses
@@ -3046,6 +3619,8 @@ objects:
           name: Klausuler
         es:
           name: "Cl\xE1usulas"
+        de:
+          name: Kapitel
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4
       assessable: false
       depth: 2
@@ -3063,6 +3638,8 @@ objects:
           name: Organisationens sammanhang
         es:
           name: "Contexto de la organizaci\xF3n"
+        de:
+          name: Kontext der Organisation
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
       assessable: true
       depth: 3
@@ -3100,6 +3677,11 @@ objects:
             \ en la capacidad de la organizaci\xF3n para alcanzar los objetivos de\
             \ seguridad de la informaci\xF3n, asegurando que el SGSI est\xE9 alineado\
             \ con su contexto."
+        de:
+          name: Verstehen der Organisation und ihres Kontextes
+          description: "Interne und externe Faktoren werden identifiziert, die beeinflussen,\
+            \ ob und in welchem Ausma\xDF Informationssicherheitsziele erreicht werden\
+            \ k\xF6nnen"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
       assessable: true
       depth: 3
@@ -3135,6 +3717,12 @@ objects:
           description: "Analizar las necesidades y expectativas de las partes interesadas\
             \ para incorporarlas al SGSI y abordar los requisitos de seguridad de\
             \ la informaci\xF3n pertinentes."
+        de:
+          name: Verstehen der Erfordernisse und Erwartungen interessierter Parteien
+          description: "Die Bed\xFCrfnisse und Erwartungen relevanter interessierter\
+            \ Parteien werden analysiert, um daraus resultierende Anforderungen an\
+            \ die Informationssicherheit vollst\xE4ndig zu erfassen und im ISMS zu\
+            \ ber\xFCcksichtigen"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
       assessable: true
       depth: 3
@@ -3172,6 +3760,12 @@ objects:
           description: Defina el alcance del SGSI teniendo en cuenta los factores
             internos y externos, las necesidades de las partes interesadas y las dependencias
             dentro del entorno operativo.
+        de:
+          name: Festlegen des Anwendungsbereichs des Informationssicherheitsmanagementsystems
+          description: "Der Anwendungsbereich des ISMS wird festgelegt, indem interne\
+            \ und externe Faktoren, die Anforderungen interessierter Parteien sowie\
+            \ Prozesse, Systeme, Standorte, Dienstleistungen und Abh\xE4ngigkeiten\
+            \ vollst\xE4ndig ber\xFCcksichtigt werden"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
       assessable: true
       depth: 3
@@ -3205,6 +3799,11 @@ objects:
           description: "Cree, ejecute y mejore continuamente un SGSI para gestionar\
             \ eficazmente los riesgos de seguridad de la informaci\xF3n y cumplir\
             \ los objetivos de la organizaci\xF3n."
+        de:
+          name: Informationssicherheitsmanagementsystem
+          description: Ein Informationssicherheitsmanagementsystem wird aufgebaut,
+            betrieben und kontinuierlich verbessert, um Informationssicherheitsrisiken
+            wirksam zu steuern und die festgelegten Sicherheitsziele zu erreichen
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5
       assessable: false
       depth: 2
@@ -3222,6 +3821,8 @@ objects:
           name: Ledarskap
         es:
           name: Liderazgo
+        de:
+          name: "F\xFChrung"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
       assessable: true
       depth: 3
@@ -3263,6 +3864,12 @@ objects:
           description: "Demostrar liderazgo y compromiso apoyando el SGSI, aline\xE1\
             ndolo con los objetivos de la organizaci\xF3n, asignando recursos, promoviendo\
             \ una cultura de seguridad e impulsando la mejora continua."
+        de:
+          name: "F\xFChrung und Verpflichtung"
+          description: "F\xFChrung und Engagement werden gezeigt, indem das ISMS aktiv\
+            \ unterst\xFCtzt, mit den Unternehmenszielen abgestimmt, mit erforderlichen\
+            \ Ressourcen ausgestattet und durch die F\xF6rderung einer Sicherheitskultur\
+            \ sowie kontinuierliche Verbesserungsma\xDFnahmen vorangetrieben wird."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
       assessable: true
       depth: 3
@@ -3302,6 +3909,11 @@ objects:
             n alineada con los objetivos y la direcci\xF3n estrat\xE9gica de la organizaci\xF3\
             n, delineando los compromisos de cumplimiento, mejora continua y promoci\xF3\
             n de la seguridad de la informaci\xF3n."
+        de:
+          name: Politik
+          description: "Eine Informationssicherheitspolitik wird erstellt, dokumentiert\
+            \ und kommuniziert, die Ziele, Grunds\xE4tze und Verpflichtungen beschreibt\
+            \ und im Einklang mit der strategischen Ausrichtung steht."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
       assessable: true
       depth: 3
@@ -3337,6 +3949,11 @@ objects:
           description: "Definir, asignar y comunicar roles, responsabilidades y autoridades\
             \ para garantizar la implementaci\xF3n y operaci\xF3n efectivas del SGSI,\
             \ con una rendici\xF3n de cuentas alineada con los objetivos organizacionales."
+        de:
+          name: Rollen, Verantwortlichkeiten und Befugnisse in der Organisation
+          description: "Rollen, Verantwortlichkeiten und Befugnisse werden definiert,\
+            \ zugewiesen und kommuniziert, damit Aufgaben, Zust\xE4ndigkeiten und\
+            \ Entscheidungswege klar geregelt und nachvollziehbar sind."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6
       assessable: false
       depth: 2
@@ -3354,6 +3971,8 @@ objects:
           name: Planering
         es:
           name: "Planificaci\xF3n"
+        de:
+          name: Planung
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1
       assessable: false
       depth: 3
@@ -3371,6 +3990,8 @@ objects:
           name: "\xC5tg\xE4rder f\xF6r att hantera risker och m\xF6jligheter"
         es:
           name: Acciones para abordar los riesgos y las oportunidades
+        de:
+          name: "Ma\xDFnahmen zum Umgang mit Risiken und Chancen"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
       assessable: true
       depth: 4
@@ -3412,6 +4033,11 @@ objects:
             \ de seguridad de la informaci\xF3n, teniendo en cuenta los factores internos\
             \ y externos, las necesidades de las partes interesadas y los requisitos\
             \ aplicables para garantizar que el SGSI logre sus objetivos."
+        de:
+          name: Allgemeines
+          description: "Risiken und Chancen werden identifiziert und bewertet, um\
+            \ Ma\xDFnahmen abzuleiten, die die Erreichung der Informationssicherheitsziele\
+            \ unterst\xFCtzen und unerw\xFCnschte Auswirkungen verhindern sollen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
       assessable: true
       depth: 4
@@ -3455,6 +4081,12 @@ objects:
             \ de la informaci\xF3n a intervalos planificados, utilizando criterios\
             \ definidos para evaluar las amenazas a la confidencialidad, integridad\
             \ y disponibilidad, garantizando resultados consistentes y confiables."
+        de:
+          name: Informationssicherheitsrisikobeurteilung
+          description: Ein dokumentierter und einheitlich angewendeter Prozess zur
+            Beurteilung von Informationssicherheitsrisiken wird definiert, in dem
+            Kriterien, Methoden, Eintrittswahrscheinlichkeiten und Auswirkungen beschrieben
+            werden, um Risiken nachvollziehbar zu bewerten.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
       assessable: true
       depth: 4
@@ -3496,6 +4128,11 @@ objects:
             \ la informaci\xF3n identificados mediante la selecci\xF3n de controles\
             \ adecuados, asegurando la alineaci\xF3n con los criterios de aceptaci\xF3\
             n de riesgos y document\xE1ndolos en un plan de tratamiento de riesgos."
+        de:
+          name: Informationssicherheitsrisikobehandlung
+          description: "Identifizierte Informationssicherheitsrisiken werden behandelt,\
+            \ indem Optionen zur Risikovermeidung, -minderung, -\xFCbertragung oder\
+            \ -akzeptanz bewertet, ausgew\xE4hlt, priorisiert und umgesetzt werden"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
       assessable: true
       depth: 3
@@ -3542,6 +4179,11 @@ objects:
             n alineados con el SGSI y las metas estrat\xE9gicas, y planifique acciones\
             \ que detallen las responsabilidades, los recursos, los plazos y los m\xE9\
             todos de evaluaci\xF3n para alcanzarlos."
+        de:
+          name: Informationssicherheitsziele und Planung zu deren Erreichung
+          description: Informationssicherheitsziele werden messbar formuliert, Verantwortlichkeiten
+            und Ressourcen werden festgelegt, Zeitrahmen definiert und geeignete Methoden
+            zur Bewertung des Zielerreichungsgrades bestimmt
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.3
       assessable: true
       depth: 3
@@ -3579,6 +4221,10 @@ objects:
             \ para garantizar la alineaci\xF3n con los requisitos de seguridad de\
             \ la informaci\xF3n, la integraci\xF3n perfecta en los procesos existentes\
             \ y la gesti\xF3n eficaz de los riesgos."
+        de:
+          name: "Planung von \xC4nderungen"
+          description: "\xC4nderungen am ISMS werden systematisch geplant, indem Auswirkungen\
+            \ auf Prozesse, Ressourcen und Sicherheitsanforderungen bewertet werden"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7
       assessable: false
       depth: 2
@@ -3596,6 +4242,8 @@ objects:
           name: "St\xF6d"
         es:
           name: Apoyo
+        de:
+          name: "Unterst\xFCtzung"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
       assessable: true
       depth: 3
@@ -3633,6 +4281,11 @@ objects:
           description: "Proporcionar los recursos necesarios para construir, ejecutar\
             \ y mejorar continuamente el SGSI, asegurando su funcionamiento eficaz\
             \ y su alineaci\xF3n con los objetivos de la organizaci\xF3n."
+        de:
+          name: Ressourcen
+          description: Personelle, technische, finanzielle und organisatorische Ressourcen
+            werden bereitgestellt, um Aufbau, Betrieb und Weiterentwicklung des ISMS
+            sicherzustellen.
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
       assessable: true
       depth: 3
@@ -3671,6 +4324,11 @@ objects:
           description: "Asegurar que el personal involucrado en el SGSI posea la competencia\
             \ necesaria a trav\xE9s de la educaci\xF3n, capacitaci\xF3n o experiencia\
             \ apropiada para cumplir con sus responsabilidades de manera efectiva."
+        de:
+          name: Kompetenz
+          description: "Personen, die Aufgaben im ISMS \xFCbernehmen, verf\xFCgen\
+            \ \xFCber die erforderlichen Kenntnisse, F\xE4higkeiten, Erfahrungen und\
+            \ Qualifikationen"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
       assessable: true
       depth: 3
@@ -3708,6 +4366,11 @@ objects:
           description: "Promover la concienciaci\xF3n entre el personal pertinente\
             \ sobre el SGSI, su papel en la seguridad de la informaci\xF3n y la importancia\
             \ del cumplimiento de las pol\xEDticas y requisitos de seguridad."
+        de:
+          name: Bewusstsein
+          description: "Mitarbeitende werden \xFCber ihre sicherheitsrelevanten Verantwortlichkeiten,\
+            \ Risiken, Rollen und Verhaltensanforderungen informiert, um ein ausgepr\xE4\
+            gtes Sicherheitsbewusstsein sicherzustellen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
       assessable: true
       depth: 3
@@ -3742,6 +4405,11 @@ objects:
           description: "Establecer procesos efectivos de comunicaci\xF3n interna y\
             \ externa, asegurando el intercambio oportuno y adecuado de informaci\xF3\
             n relevante para el SGSI y sus objetivos."
+        de:
+          name: Kommunikation
+          description: "Kommunikationsprozesse zu informationssicherheitsrelevanten\
+            \ Themen werden definiert, einschlie\xDFlich Inhalten, Empf\xE4ngern,\
+            \ Zust\xE4ndigkeiten und geeigneten Zeitpunkten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5
       assessable: false
       depth: 3
@@ -3759,6 +4427,8 @@ objects:
           name: Dokumenterad information
         es:
           name: "Informaci\xF3n documentada"
+        de:
+          name: Dokumentierte Information
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.1
       assessable: true
       depth: 4
@@ -3792,6 +4462,11 @@ objects:
           description: "Documente el SGSI seg\xFAn sea necesario para garantizar una\
             \ planificaci\xF3n, operaci\xF3n y control efectivos de los procesos y\
             \ la alineaci\xF3n con los requisitos de la organizaci\xF3n."
+        de:
+          name: Allgemeines
+          description: "Dokumentierte Informationen werden erstellt, aktualisiert\
+            \ und verwaltet, soweit dies f\xFCr Planung, Betrieb, Steuerung und \xDC\
+            berwachung des ISMS erforderlich ist."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
       assessable: true
       depth: 4
@@ -3824,6 +4499,11 @@ objects:
           description: "Aseg\xFArese de que la documentaci\xF3n del SGSI se cree,\
             \ actualice y controle adecuadamente, incluida la aprobaci\xF3n adecuada\
             \ y la gesti\xF3n de versiones."
+        de:
+          name: Erstellen und Aktualisieren
+          description: "Dokumente werden gepr\xFCft, genehmigt, versioniert und gepflegt,\
+            \ sodass deren Genauigkeit, Aktualit\xE4t und Eignung gew\xE4hrleistet\
+            \ ist."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
       assessable: true
       depth: 4
@@ -3858,6 +4538,10 @@ objects:
           description: "Haga que la documentaci\xF3n del SGSI sea accesible y utilizable\
             \ para quienes la necesiten, al tiempo que la protege contra el acceso\
             \ no autorizado o la p\xE9rdida."
+        de:
+          name: Steuerung dokumentierter Information
+          description: "Dokumentierte Informationen werden gesch\xFCtzt, zugriffskontrolliert,\
+            \ wiederauffindbar und vor Verlust, Missbrauch oder Besch\xE4digung gesichert"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8
       assessable: false
       depth: 2
@@ -3875,6 +4559,8 @@ objects:
           name: Verksamhet
         es:
           name: Operaciones
+        de:
+          name: Betrieb
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
       assessable: true
       depth: 3
@@ -3909,6 +4595,10 @@ objects:
           description: Planificar y controlar los procesos del SGSI, asegurando la
             coherencia con los requisitos y realizando los ajustes necesarios para
             hacer frente a los riesgos y oportunidades.
+        de:
+          name: Betriebliche Planung und Steuerung
+          description: "ISMS-relevante Prozesse werden geplant, gesteuert und \xFC\
+            berwacht"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
       assessable: true
       depth: 3
@@ -3944,6 +4634,11 @@ objects:
           description: "Implementar el proceso de evaluaci\xF3n de riesgos para identificar,\
             \ evaluar y priorizar los riesgos de seguridad de la informaci\xF3n tal\
             \ como se definen en el marco del SGSI."
+        de:
+          name: Informationssicherheitsrisikobeurteilung
+          description: "Risikobeurteilungen werden anhand der definierten Methoden\
+            \ durchgef\xFChrt, dokumentiert und aktualisiert, um relevante Risiken\
+            \ systematisch zu erfassen und zu bewerten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
       assessable: true
       depth: 3
@@ -3983,6 +4678,10 @@ objects:
             \ e implementando controles adecuados para abordar los riesgos identificados,\
             \ asegurando la alineaci\xF3n con los criterios de aceptaci\xF3n de riesgos\
             \ de la organizaci\xF3n."
+        de:
+          name: Informationssicherheitsrisikobehandlung
+          description: "Ma\xDFnahmen aus Risikobehandlungspl\xE4nen werden umgesetzt,\
+            \ deren Fortschritt \xFCberwacht und ihre Wirksamkeit bewertet"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9
       assessable: false
       depth: 2
@@ -4000,6 +4699,8 @@ objects:
           name: "Utv\xE4rdering av prestanda"
         es:
           name: "Evaluaci\xF3n del desempe\xF1o"
+        de:
+          name: Bewertung der Leistung
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
       assessable: true
       depth: 3
@@ -4035,6 +4736,11 @@ objects:
           description: "Monitorear, medir, analizar y evaluar el desempe\xF1o y la\
             \ efectividad del SGSI utilizando m\xE9todos apropiados alineados con\
             \ los objetivos de la organizaci\xF3n."
+        de:
+          name: "\xDCberwachung, Messung, Analyse und Bewertung"
+          description: "Leistungskennzahlen, \xDCberwachungsergebnisse und Analyseverfahren\
+            \ werden angewendet, um Wirksamkeit, Angemessenheit und Effizienz des\
+            \ ISMS zu bewerten"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
       assessable: false
       depth: 3
@@ -4052,6 +4758,8 @@ objects:
           name: Internrevision
         es:
           name: "Auditor\xEDa interna"
+        de:
+          name: Internes Audit
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
       assessable: true
       depth: 4
@@ -4087,6 +4795,11 @@ objects:
           description: "Llevar a cabo auditor\xEDas internas a intervalos planificados\
             \ para garantizar que el SGSI cumple con los requisitos de la norma ISO/IEC\
             \ 27001 y se implementa y mantiene de manera efectiva."
+        de:
+          name: Allgemeines
+          description: "Interne Audits werden in geplanten Abst\xE4nden durchgef\xFC\
+            hrt, um Umsetzung, Wirksamkeit und Konformit\xE4t des ISMS systematisch\
+            \ zu \xFCberpr\xFCfen"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
       assessable: true
       depth: 4
@@ -4122,6 +4835,10 @@ objects:
           description: "Planificar y realizar auditor\xEDas internas, incluida la\
             \ definici\xF3n de criterios, alcance, m\xE9todos y responsabilidades,\
             \ e informar de los resultados a la direcci\xF3n pertinente."
+        de:
+          name: Internes Auditprogramm
+          description: "Interne Audits werden geplant und durchgef\xFChrt, wobei Kriterien,\
+            \ Umfang, Methoden und Verantwortlichkeiten festgelegt werden"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
       assessable: false
       depth: 3
@@ -4139,6 +4856,8 @@ objects:
           name: "Ledningens genomg\xE5ng"
         es:
           name: "Revisi\xF3n por la direcci\xF3n"
+        de:
+          name: Managementbewertung
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
       assessable: true
       depth: 4
@@ -4172,6 +4891,11 @@ objects:
           description: "Revisar peri\xF3dicamente el SGSI para garantizar su idoneidad,\
             \ adecuaci\xF3n y eficacia en el logro de los objetivos de la organizaci\xF3\
             n."
+        de:
+          name: Allgemeines
+          description: "Managementbewertungen werden durchgef\xFChrt, um die Eignung,\
+            \ Angemessenheit und Wirksamkeit des ISMS sowie dessen Beitrag zur Erreichung\
+            \ der organisationalen Ziele zu beurteilen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
       assessable: true
       depth: 4
@@ -4206,6 +4930,11 @@ objects:
           description: "Incluya insumos como los resultados de la auditor\xEDa, el\
             \ rendimiento del SGSI, el estado del riesgo, las oportunidades de mejora\
             \ y los cambios necesarios en la revisi\xF3n por la direcci\xF3n."
+        de:
+          name: "Eingaben f\xFCr die Managementbewertung"
+          description: "F\xFCr die Managementbewertung werden Auditberichte, Leistungsindikatoren,\
+            \ Vorf\xE4lle, R\xFCckmeldungen, externe \xC4nderungen, Risiken und Chancen\
+            \ sowie identifizierte Verbesserungsm\xF6glichkeiten ber\xFCcksichtigt."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
       assessable: true
       depth: 4
@@ -4238,6 +4967,11 @@ objects:
           description: "Documentar los resultados de las revisiones de gesti\xF3n,\
             \ incluidas las decisiones sobre mejoras, cambios en el SGSI y requisitos\
             \ de recursos."
+        de:
+          name: Ergebnisse der Managementbewertung
+          description: "Die Ergebnisse der Managementbewertung umfassen Entscheidungen\
+            \ zu Verbesserungen, Ressourcenbedarf, notwendigen Anpassungen des ISMS\
+            \ sowie die Festlegung von Priorit\xE4ten"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10
       assessable: false
       depth: 2
@@ -4255,6 +4989,8 @@ objects:
           name: "F\xF6rb\xE4ttring"
         es:
           name: Mejora
+        de:
+          name: Verbesserung
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
       assessable: true
       depth: 3
@@ -4288,6 +5024,12 @@ objects:
           description: "Identificar y actuar sobre las oportunidades de mejora continua\
             \ para mejorar la eficacia del SGSI y su alineaci\xF3n con los objetivos\
             \ de la organizaci\xF3n."
+        de:
+          name: Fortlaufende Verbesserung
+          description: "Verbesserungspotenziale werden identifiziert, bewertet und\
+            \ umgesetzt, um Wirksamkeit, Effizienz und Reife des ISMS zu erh\xF6hen\
+            \ und eine bestm\xF6gliche Ausrichtung an den organisatorischen Zielen\
+            \ sicherzustellen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
       assessable: true
       depth: 3
@@ -4328,6 +5070,11 @@ objects:
           description: "Aborde las no conformidades tomando medidas correctivas, identificando\
             \ las causas ra\xEDz e implementando medidas para evitar que se repitan\
             \ mientras documenta el proceso."
+        de:
+          name: "Nichtkonformit\xE4t und Korrekturma\xDFnahmen"
+          description: "Nichtkonformit\xE4ten werden behandelt, indem Korrekturma\xDF\
+            nahmen ergriffen, die zugrunde liegenden Ursachen identifiziert und Ma\xDF\
+            nahmen umgesetzt werden, die ein erneutes Auftreten verhindern sollen"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       assessable: false
       depth: 1
@@ -4344,6 +5091,8 @@ objects:
           name: "Uttalande om till\xE4mplighet"
         es:
           name: "Declaraci\xF3n de aplicabilidad"
+        de:
+          name: "Erkl\xE4rung zur Anwendbarkeit"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       assessable: false
       depth: 2
@@ -4361,6 +5110,8 @@ objects:
           name: Organisatoriska kontroller
         es:
           name: Controles organizativos
+        de:
+          name: "Organisatorische Ma\xDFnahmen"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
       assessable: true
       depth: 3
@@ -4402,6 +5153,14 @@ objects:
             n. Las medidas incluyen la definici\xF3n del alcance, el establecimiento\
             \ de objetivos y la garant\xEDa de la alineaci\xF3n con los requisitos\
             \ de cumplimiento."
+        de:
+          name: Informationssicherheitspolitik und -richtlinien
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Richtlinien\
+            \ f\xFCr die Informationssicherheit erstellt, genehmigt und organisatorisch\
+            \ verankert werden. Die Richtlinien m\xFCssen mit den strategischen Zielen\
+            \ \xFCbereinstimmen, Verantwortlichkeiten festlegen und die Einhaltung\
+            \ gesetzlicher, regulatorischer und vertraglicher Anforderungen unterst\xFC\
+            tzen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
       assessable: true
       depth: 3
@@ -4445,6 +5204,13 @@ objects:
             \ la seguridad de la informaci\xF3n para garantizar la responsabilidad.\
             \ Las medidas incluyen documentaci\xF3n clara de las responsabilidades,\
             \ revisiones peri\xF3dicas y mecanismos de cumplimiento."
+        de:
+          name: Informationssicherheitsrollen und -verantwortlichkeiten
+          description: "Diese Steuerungsma\xDFnahme legt klare Rollen, Verantwortlichkeiten\
+            \ und Befugnisse im Bereich der Informationssicherheit fest. Sie stellt\
+            \ sicher, dass Zust\xE4ndigkeiten dokumentiert, kommuniziert und regelm\xE4\
+            \xDFig \xFCberpr\xFCft werden, um eine wirksame Umsetzung der Sicherheitsma\xDF\
+            nahmen zu gew\xE4hrleisten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
       assessable: true
       depth: 3
@@ -4483,6 +5249,13 @@ objects:
             \ reducir el riesgo de errores, fraudes y accesos no autorizados. Las\
             \ medidas incluyen la separaci\xF3n de roles, restricciones de acceso\
             \ y auditor\xEDas peri\xF3dicas."
+        de:
+          name: Aufgabentrennung
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass kritische\
+            \ oder miteinander kollidierende Aufgaben voneinander getrennt werden,\
+            \ um Risiken wie Fehler, Betrug oder unbefugte Aktivit\xE4ten zu reduzieren.\
+            \ Dies wird durch rollenspezifische Zugriffsbeschr\xE4nkungen, klare Verantwortlichkeiten\
+            \ und geeignete Kontrollen erreicht."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
       assessable: true
       depth: 3
@@ -4523,6 +5296,13 @@ objects:
             n para la seguridad de la informaci\xF3n est\xE9n claramente definidas\
             \ e implementadas. Las medidas incluyen el establecimiento de objetivos,\
             \ la asignaci\xF3n de recursos y la supervisi\xF3n del cumplimiento."
+        de:
+          name: Verantwortlichkeiten der Leitung
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass die Leitung\
+            \ Verantwortung f\xFCr die Informationssicherheit \xFCbernimmt. Dazu geh\xF6\
+            ren die Unterst\xFCtzung der Sicherheitsziele, die Bereitstellung notwendiger\
+            \ Ressourcen, das F\xF6rdern einer Sicherheitskultur sowie die \xDCberwachung\
+            \ von Umsetzung und Wirksamkeit."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
       assessable: true
       depth: 3
@@ -4565,6 +5345,13 @@ objects:
             n. Las medidas incluyen el establecimiento de protocolos de contacto,\
             \ el mantenimiento de listas de contactos actualizadas y la asignaci\xF3\
             n de responsabilidades."
+        de:
+          name: "Kontakt mit Beh\xF6rden"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass die Organisation\
+            \ angemessene Kommunikationswege mit relevanten Beh\xF6rden besitzt. Dies\
+            \ umfasst klare Zust\xE4ndigkeiten, gepflegte Kontaktlisten und definierte\
+            \ Abl\xE4ufe, insbesondere f\xFCr meldepflichtige Sicherheitsvorf\xE4\
+            lle."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.6
       assessable: true
       depth: 3
@@ -4602,6 +5389,12 @@ objects:
             s especial para mantenerse informado sobre las tendencias y pr\xE1cticas\
             \ de seguridad. Las medidas incluyen la participaci\xF3n en foros, membres\xED\
             as e iniciativas de colaboraci\xF3n."
+        de:
+          name: Kontakt mit speziellen Interessensgruppen
+          description: "Diese Steuerungsma\xDFnahme f\xF6rdert den Austausch mit relevanten\
+            \ Sicherheits- und Branchenforen, um aktuelle Trends, Bedrohungen und\
+            \ bew\xE4hrte Verfahren fr\xFChzeitig zu erkennen und im Informationssicherheitsmanagement\
+            \ zu ber\xFCcksichtigen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
       assessable: true
       depth: 3
@@ -4642,6 +5435,12 @@ objects:
             \ desarrolle y mantenga para identificar y mitigar los riesgos de seguridad.\
             \ Las medidas incluyen la supervisi\xF3n de fuentes de amenazas, el an\xE1\
             lisis de tendencias y el intercambio de informaci\xF3n procesable."
+        de:
+          name: "Informationen \xFCber die Bedrohungslage"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationen\
+            \ \xFCber aktuelle und potenzielle Bedrohungen systematisch gesammelt,\
+            \ analysiert und bewertet werden. Die gewonnenen Erkenntnisse sollen helfen,\
+            \ Risiken besser zu verstehen und wirksame Schutzma\xDFnahmen abzuleiten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
       assessable: true
       depth: 3
@@ -4682,6 +5481,12 @@ objects:
             \ las pr\xE1cticas de gesti\xF3n de proyectos. Las medidas incluyen evaluaciones\
             \ de riesgos, revisiones de cumplimiento y puntos de control de seguridad\
             \ durante los ciclos de vida del proyecto."
+        de:
+          name: Informationssicherheit im Projektmanagement
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheit\
+            \ systematisch in alle Phasen des Projektmanagements integriert wird.\
+            \ Dazu geh\xF6ren Risikoanalysen, Sicherheitsanforderungen, Compliance-Pr\xFC\
+            fungen und Sicherheitsfreigaben im Rahmen des Projektlebenszyklus."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
       assessable: true
       depth: 3
@@ -4719,6 +5524,12 @@ objects:
             \ de la informaci\xF3n y los activos asociados. Las medidas incluyen el\
             \ seguimiento de activos, auditor\xEDas peri\xF3dicas y clasificaci\xF3\
             n por sensibilidad."
+        de:
+          name: Inventar der Informationen und anderen damit verbundenen Werte
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass die Organisation\
+            \ ein aktuelles, vollst\xE4ndiges und gepflegtes Inventar von Informationen\
+            \ und zugeh\xF6rigen Werten f\xFChrt. Es dient der Verantwortlichkeitszuordnung\
+            \ und unterst\xFCtzt risikobasierte Schutzma\xDFnahmen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
       assessable: true
       depth: 3
@@ -4761,6 +5572,13 @@ objects:
             \ y los activos asociados para garantizar un manejo adecuado. Las medidas\
             \ incluyen pol\xEDticas documentadas, capacitaci\xF3n de usuarios y mecanismos\
             \ de cumplimiento."
+        de:
+          name: "Zul\xE4ssiger Gebrauch von Informationen und anderen damit verbundenen\
+            \ Werten"
+          description: "Diese Steuerungsma\xDFnahme definiert klare Regeln f\xFCr\
+            \ die zul\xE4ssige Nutzung von Informationen, Datentr\xE4gern, Ger\xE4\
+            ten und anderen Werten. Sie stellt sicher, dass Benutzer die Anforderungen\
+            \ kennen und einhalten, einschlie\xDFlich Schulungen und Richtlinien."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
       assessable: true
       depth: 3
@@ -4800,6 +5618,12 @@ objects:
             \ cuando los empleados o contratistas se van o cambian de funci\xF3n.\
             \ Las medidas incluyen listas de comprobaci\xF3n, seguimiento de activos\
             \ y protocolos de desmantelamiento."
+        de:
+          name: "R\xFCckgabe von Werten"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass s\xE4mtliche\
+            \ organisatorischen Werte \u2013 einschlie\xDFlich Ger\xE4ten, Datentr\xE4\
+            gern, Zugangsberechtigungen oder Dokumenten \u2013 bei Austritt oder Rollenwechsel\
+            \ vollst\xE4ndig und sicher zur\xFCckgegeben werden."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
       assessable: true
       depth: 3
@@ -4840,6 +5664,12 @@ objects:
             \ en funci\xF3n de su sensibilidad y valor para garantizar una protecci\xF3\
             n adecuada. Las medidas incluyen esquemas de clasificaci\xF3n, restricciones\
             \ de acceso y pautas de etiquetado."
+        de:
+          name: Klassifizierung von Informationen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationen\
+            \ gem\xE4\xDF ihrem Schutzbedarf klassifiziert werden. Die Klassifizierung\
+            \ ber\xFCcksichtigt Vertraulichkeit, Integrit\xE4t, Verf\xFCgbarkeit sowie\
+            \ gesetzliche und vertragliche Anforderungen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
       assessable: true
       depth: 3
@@ -4877,6 +5707,11 @@ objects:
           description: "Este control garantiza un etiquetado coherente de la informaci\xF3\
             n para reflejar sus requisitos de clasificaci\xF3n y manejo. Las medidas\
             \ incluyen plantillas estandarizadas, capacitaci\xF3n y auditor\xEDas."
+        de:
+          name: Kennzeichnung von Informationen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass klassifizierte\
+            \ Informationen eindeutig und korrekt gekennzeichnet werden, sodass notwendige\
+            \ Schutzma\xDFnahmen zuverl\xE4ssig angewendet werden k\xF6nnen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
       assessable: true
       depth: 3
@@ -4914,6 +5749,12 @@ objects:
           description: "Este control establece procesos seguros para la transferencia\
             \ de informaci\xF3n entre sistemas u organizaciones. Las medidas incluyen\
             \ cifrado, controles de acceso y protocolos de transferencia segura."
+        de:
+          name: "Informations\xFCbermittlung"
+          description: "Diese Steuerungsma\xDFnahme definiert Verfahren und Anforderungen\
+            \ f\xFCr die sichere \xDCbertragung von Informationen zwischen Systemen,\
+            \ Personen und Organisationen. Dazu geh\xF6ren Verschl\xFCsselung, Zugriffsbeschr\xE4\
+            nkungen und dokumentierte Kommunikationswege."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
       assessable: true
       depth: 3
@@ -4954,6 +5795,12 @@ objects:
             \ acceso para restringir el acceso a las personas autorizadas. Las medidas\
             \ incluyen el acceso basado en roles, la autenticaci\xF3n multifactor\
             \ y las revisiones peri\xF3dicas."
+        de:
+          name: Zugangssteuerung
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass der Zugang\
+            \ zu Informationen und Werten ausschlie\xDFlich autorisierten Personen\
+            \ erm\xF6glicht wird. Dies umfasst rollenbasierte Zugriffskonzepte, starke\
+            \ Authentisierungsmechanismen und regelm\xE4\xDFige \xDCberpr\xFCfungen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
       assessable: true
       depth: 3
@@ -4994,6 +5841,12 @@ objects:
             \ forma segura para garantizar un acceso preciso y fiable a los sistemas.\
             \ Las medidas incluyen la verificaci\xF3n de identidad, la gesti\xF3n\
             \ del ciclo de vida y el aprovisionamiento de acceso."
+        de:
+          name: "Identit\xE4tsmanagement"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass digitale und\
+            \ physische Identit\xE4ten \xFCber ihren gesamten Lebenszyklus hinweg\
+            \ sicher verwaltet werden \u2013 einschlie\xDFlich Identit\xE4tspr\xFC\
+            fung, Bereitstellung, \xC4nderung und Entzug von Zugriffsrechten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
       assessable: true
       depth: 3
@@ -5032,6 +5885,11 @@ objects:
             n, como las contrase\xF1as, para evitar el acceso no autorizado. Las medidas\
             \ incluyen cifrado, almacenamiento seguro y actualizaciones peri\xF3dicas\
             \ de contrase\xF1as."
+        de:
+          name: Authentisierungsinformationen
+          description: "Diese Steuerungsma\xDFnahme sch\xFCtzt Authentisierungsinformationen\
+            \ wie Passw\xF6rter, Tokens oder Schl\xFCssel vor Missbrauch, einschlie\xDF\
+            lich sicherer Speicherung, Verschl\xFCsselung und Nutzungsvorgaben."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
       assessable: true
       depth: 3
@@ -5072,6 +5930,11 @@ objects:
             \ y administren peri\xF3dicamente para alinearlos con las funciones y\
             \ responsabilidades. Las medidas incluyen auditor\xEDas peri\xF3dicas,\
             \ revocaci\xF3n de acceso y gesti\xF3n automatizada del acceso."
+        de:
+          name: Zugangsrechte
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Zugriffsrechte\
+            \ angemessen vergeben, regelm\xE4\xDFig \xFCberpr\xFCft, angepasst und\
+            \ widerrufen werden, wenn sie nicht mehr erforderlich sind."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
       assessable: true
       depth: 3
@@ -5110,6 +5973,11 @@ objects:
             n est\xE9 integrada en las relaciones y los procesos con los proveedores.\
             \ Las medidas incluyen la diligencia debida, las revisiones de seguridad\
             \ y el monitoreo continuo."
+        de:
+          name: Informationssicherheit in Lieferantenbeziehungen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheit\
+            \ in Auswahl, Bewertung, \xDCberwachung und Steuerung von Lieferantenbeziehungen\
+            \ verankert ist."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
       assessable: true
       depth: 3
@@ -5151,6 +6019,11 @@ objects:
             n dentro de los acuerdos con los proveedores. Las medidas incluyen cl\xE1\
             usulas contractuales expl\xEDcitas, auditor\xEDas de cumplimiento y sanciones\
             \ definidas por infracciones."
+        de:
+          name: Behandlung von Informationssicherheit in Lieferantenvereinbarungen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheitsanforderungen\
+            \ ausdr\xFCcklich in Vertr\xE4gen geregelt werden, einschlie\xDFlich Datenschutz,\
+            \ Zugriffskontrolle, Compliance-Vorgaben und Durchsetzungsmechanismen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
       assessable: true
       depth: 3
@@ -5193,6 +6066,14 @@ objects:
             n en la cadena de suministro de TIC para garantizar la seguridad de los\
             \ servicios y componentes. Las medidas incluyen evaluaciones de riesgos,\
             \ evaluaciones de proveedores y protocolos de respuesta a incidentes."
+        de:
+          name: Umgang mit der Informationssicherheit in der Lieferkette der IKT
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Risiken in\
+            \ der IKT-Lieferkette bewertet und angemessen gesteuert werden, um die\
+            \ Sicherheit, Integrit\xE4t und Verf\xFCgbarkeit von Systemen, Komponenten\
+            \ und Dienstleistungen zu gew\xE4hrleisten. Dazu geh\xF6ren Risikobewertungen,\
+            \ Sicherheits\xFCberpr\xFCfungen, Anforderungen an Zulieferer und Notfallma\xDF\
+            nahmen entlang der Lieferkette."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
       assessable: true
       depth: 3
@@ -5237,6 +6118,14 @@ objects:
             \ se supervisen, revisen y ajusten para mantener la seguridad de la informaci\xF3\
             n. Las medidas incluyen acuerdos de nivel de servicio, revisiones peri\xF3\
             dicas y actualizaciones de contratos."
+        de:
+          name: "\xDCberwachung, \xDCberpr\xFCfung und \xC4nderungsmanagement von\
+            \ Lieferantendienstleistungen"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Lieferantendienstleistungen\
+            \ kontinuierlich \xFCberwacht, bewertet und bei Bedarf angepasst werden,\
+            \ um Informationssicherheit, Servicequalit\xE4t und Compliance dauerhaft\
+            \ sicherzustellen. Dazu geh\xF6ren Leistungs\xFCberpr\xFCfungen, Vertragsaktualisierungen\
+            \ und Risikobewertungen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
       assessable: true
       depth: 3
@@ -5277,6 +6166,13 @@ objects:
           description: Este control garantiza el uso seguro de los servicios en la
             nube al abordar los riesgos asociados. Las medidas incluyen cifrado de
             datos, controles de acceso y revisiones de cumplimiento de proveedores.
+        de:
+          name: "Informationssicherheit f\xFCr die Nutzung von Cloud-Diensten"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Risiken im\
+            \ Zusammenhang mit der Nutzung von Cloud-Diensten identifiziert, bewertet\
+            \ und angemessen kontrolliert werden. Dazu geh\xF6ren Verschl\xFCsselung,\
+            \ Zugriffskontrollen, Compliance-Pr\xFCfungen, \xDCberwachung des Cloud-Anbieters\
+            \ sowie Anforderungen an Datenstandorte und Incident-Response."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
       assessable: true
       depth: 3
@@ -5318,6 +6214,13 @@ objects:
             n adecuadas para la gesti\xF3n de incidentes de seguridad de la informaci\xF3\
             n. Las medidas incluyen planes de respuesta a incidentes, ejercicios de\
             \ capacitaci\xF3n y protocolos de comunicaci\xF3n."
+        de:
+          name: "Planung und Vorbereitung der Handhabung von Informationssicherheitsvorf\xE4\
+            llen"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Strukturen,\
+            \ Rollen, Prozesse und Kommunikationswege f\xFCr den Umgang mit Informationssicherheitsvorf\xE4\
+            llen vorbereitet, dokumentiert und regelm\xE4\xDFig getestet werden. Dazu\
+            \ geh\xF6ren Incident-Response-Pl\xE4ne, Schulungen, \xDCbungen und Eskalationsmechanismen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
       assessable: true
       depth: 3
@@ -5361,6 +6264,13 @@ objects:
             \ acciones relacionadas con eventos de seguridad de la informaci\xF3n.\
             \ Las medidas incluyen an\xE1lisis de causa ra\xEDz, evaluaci\xF3n de\
             \ riesgos y planes de mitigaci\xF3n."
+        de:
+          name: "Beurteilung und Entscheidung \xFCber Informationssicherheitsereignisse"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheitsereignisse\
+            \ systematisch erfasst, analysiert und bewertet werden. Dazu geh\xF6rt\
+            \ die Entscheidung, ob ein Ereignis einen Sicherheitsvorfall darstellt,\
+            \ sowie die Durchf\xFChrung von Ursachenanalysen, Risikobewertungen und\
+            \ Ableitung angemessener Ma\xDFnahmen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
       assessable: true
       depth: 3
@@ -5400,6 +6310,13 @@ objects:
             \ de seguridad de la informaci\xF3n para minimizar el impacto y recuperarse\
             \ r\xE1pidamente. Las medidas incluyen informes de incidentes, protocolos\
             \ de escalada y estrategias de contenci\xF3n."
+        de:
+          name: "Reaktion auf Informationssicherheitsvorf\xE4lle"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass auf Informationssicherheitsvorf\xE4\
+            lle strukturiert, zeitnah und wirksam reagiert wird, um Auswirkungen zu\
+            \ minimieren und den Normalbetrieb schnellstm\xF6glich wiederherzustellen.\
+            \ Dazu geh\xF6ren Meldemechanismen, Eskalationswege, Eind\xE4mmungsma\xDF\
+            nahmen und Wiederherstellungsprozesse."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
       assessable: true
       depth: 3
@@ -5441,6 +6358,13 @@ objects:
             \ incidentes de seguridad de la informaci\xF3n se documenten e implementen\
             \ para mejorar los procesos. Las medidas incluyen revisiones posteriores\
             \ al incidente, planes de acci\xF3n y actualizaciones de pol\xEDticas."
+        de:
+          name: "Erkenntnisse aus Informationssicherheitsvorf\xE4llen"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Erkenntnisse\
+            \ aus Sicherheitsvorf\xE4llen gesammelt, ausgewertet, dokumentiert und\
+            \ in Verbesserungsma\xDFnahmen umgesetzt werden. Dazu geh\xF6ren Lessons-Learned-Sitzungen,\
+            \ Aktualisierung von Richtlinien und Anpassung von technischen und organisatorischen\
+            \ Ma\xDFnahmen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
       assessable: true
       depth: 3
@@ -5481,6 +6405,13 @@ objects:
             durante los incidentes de seguridad para respaldar las investigaciones.
             Las medidas incluyen procedimientos de cadena de custodia, almacenamiento
             seguro y controles de acceso.
+        de:
+          name: Sammeln von Beweismaterial
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Beweismaterial\
+            \ bei Sicherheitsvorf\xE4llen ordnungsgem\xE4\xDF gesammelt, dokumentiert,\
+            \ gesichert und gesch\xFCtzt wird, um die Integrit\xE4t, Nachvollziehbarkeit\
+            \ und gerichtliche Verwertbarkeit sicherzustellen. Dazu geh\xF6ren Chain-of-Custody-Prozesse,\
+            \ sichere Lagerung und Zugriffskontrollen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
       assessable: true
       depth: 3
@@ -5520,6 +6451,12 @@ objects:
             n se mantenga durante las interrupciones para garantizar la continuidad\
             \ de las operaciones. Las medidas incluyen planes de contingencia, sistemas\
             \ de respaldo y mecanismos de conmutaci\xF3n por error."
+        de:
+          name: "Informationssicherheit bei St\xF6rungen"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass die Informationssicherheit\
+            \ auch w\xE4hrend betrieblicher St\xF6rungen, Notf\xE4lle oder Krisen\
+            \ aufrechterhalten wird. Dazu geh\xF6ren Notfallma\xDFnahmen, alternative\
+            \ Betriebsverfahren, redundante Systeme und Priorisierung kritischer Prozesse."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
       assessable: true
       depth: 3
@@ -5561,6 +6498,12 @@ objects:
             \ continuidad del negocio a fin de minimizar el tiempo de inactividad\
             \ durante las interrupciones. Las medidas incluyen probar planes de recuperaci\xF3\
             n, sistemas redundantes y sitios de recuperaci\xF3n ante desastres."
+        de:
+          name: "IKT-Bereitschaft f\xFCr Business Continuity"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass IKT-Systeme\
+            \ und -Dienste so vorbereitet sind, dass sie Ziele der Gesch\xE4ftskontinuit\xE4\
+            t unterst\xFCtzen. Dazu geh\xF6ren Redundanzen, Wiederanlaufverfahren,\
+            \ regelm\xE4\xDFige Tests von Wiederherstellungspl\xE4nen und Ausweichstandorte."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
       assessable: true
       depth: 3
@@ -5599,6 +6542,13 @@ objects:
             \ estatutarios, reglamentarios y contractuales de seguridad de la informaci\xF3\
             n. Las medidas incluyen revisiones de pol\xEDticas, auditor\xEDas y documentaci\xF3\
             n de evidencias."
+        de:
+          name: Juristische, gesetzliche, regulatorische und vertragliche Anforderungen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass alle relevanten\
+            \ gesetzlichen, regulatorischen und vertraglichen Anforderungen identifiziert,\
+            \ dokumentiert, regelm\xE4\xDFig \xFCberpr\xFCft und eingehalten werden.\
+            \ Dazu geh\xF6ren Datenschutzvorgaben, Normen, branchenspezifische Anforderungen\
+            \ und vertragliche Verpflichtungen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.32
       assessable: true
       depth: 3
@@ -5638,6 +6588,12 @@ objects:
             \ est\xE9n protegidos a trav\xE9s de medidas de seguridad de la informaci\xF3\
             n adecuadas. Las medidas incluyen restricciones de acceso, cifrado y acuerdos\
             \ legales."
+        de:
+          name: Geistige Eigentumsrechte
+          description: "Diese Steuerungsma\xDFnahme sch\xFCtzt geistiges Eigentum\
+            \ durch geeignete technische und organisatorische Ma\xDFnahmen. Dazu geh\xF6\
+            ren Zugriffsbeschr\xE4nkungen, Verschl\xFCsselung, vertragliche Vereinbarungen\
+            \ und Schutz vor unbefugter Nutzung oder Verbreitung."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
       assessable: true
       depth: 3
@@ -5678,6 +6634,13 @@ objects:
             \ de forma segura para evitar p\xE9rdidas o accesos no autorizados. Las\
             \ medidas incluyen pol\xEDticas de retenci\xF3n, almacenamiento seguro\
             \ y controles de acceso."
+        de:
+          name: Schutz von Aufzeichnungen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Aufzeichnungen\
+            \ w\xE4hrend ihrer gesamten Aufbewahrungsdauer gesch\xFCtzt werden \u2013\
+            \ vor Verlust, Ver\xE4nderung, unbefugtem Zugriff oder Zerst\xF6rung.\
+            \ Dazu geh\xF6ren Aufbewahrungsrichtlinien, sichere Lagerung und kontrollierter\
+            \ Zugriff."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
       assessable: true
       depth: 3
@@ -5718,6 +6681,12 @@ objects:
             \ de la informaci\xF3n de identificaci\xF3n personal (PII). Las medidas\
             \ incluyen la anonimizaci\xF3n, el cifrado y el cumplimiento de las leyes\
             \ de privacidad."
+        de:
+          name: Datenschutz und Schutz von personenbezogenen Daten
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass personenbezogene\
+            \ Daten gem\xE4\xDF gesetzlichen und vertraglichen Datenschutzanforderungen\
+            \ verarbeitet und gesch\xFCtzt werden. Dazu geh\xF6ren Verschl\xFCsselung,\
+            \ Zugriffskontrolle, Minimierung und Dokumentation der Datenverarbeitung."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
       assessable: true
       depth: 3
@@ -5757,6 +6726,13 @@ objects:
             \ de la informaci\xF3n para evaluar la eficacia y el cumplimiento. Las\
             \ medidas incluyen auditor\xEDas externas, evaluaciones de riesgos y acciones\
             \ de seguimiento."
+        de:
+          name: "Unabh\xE4ngige \xDCberpr\xFCfung der Informationssicherheit"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheit\
+            \ regelm\xE4\xDFig unabh\xE4ngig bewertet wird, um Wirksamkeit, Angemessenheit\
+            \ und Konformit\xE4t des ISMS zu \xFCberpr\xFCfen. Dazu geh\xF6ren interne\
+            \ oder externe Audits, Sicherheitsbewertungen und Nachverfolgung von Ma\xDF\
+            nahmen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
       assessable: true
       depth: 3
@@ -5799,6 +6775,12 @@ objects:
             ticas, reglas y est\xE1ndares de seguridad de la informaci\xF3n. Las medidas\
             \ incluyen capacitaci\xF3n peri\xF3dica, revisiones de pol\xEDticas y\
             \ mecanismos de aplicaci\xF3n."
+        de:
+          name: Einhaltung von Richtlinien, Vorschriften und Normen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass alle Vorgaben,\
+            \ Richtlinien, Regeln und Standards zur Informationssicherheit eingehalten\
+            \ werden. Dazu geh\xF6ren Schulungen, \xDCberwachungsprozesse, Kontrollen\
+            \ und Eskalationsmechanismen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
       assessable: true
       depth: 3
@@ -5837,6 +6819,12 @@ objects:
             \ documentados para garantizar la coherencia en las pr\xE1cticas de seguridad.\
             \ Las medidas incluyen la documentaci\xF3n del proceso, el control de\
             \ versiones y la accesibilidad."
+        de:
+          name: "Dokumentierte Betriebsabl\xE4ufe"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Betriebsprozesse\
+            \ dokumentiert, gepflegt, versioniert und f\xFCr berechtigte Personen\
+            \ verf\xFCgbar sind, um konsistente, sichere und nachvollziehbare Abl\xE4\
+            ufe sicherzustellen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       assessable: false
       depth: 2
@@ -5854,6 +6842,8 @@ objects:
           name: "Kontroller f\xF6r personer"
         es:
           name: Controles de personas
+        de:
+          name: "Personenbezogene Ma\xDFnahmen"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
       assessable: true
       depth: 3
@@ -5897,6 +6887,13 @@ objects:
             n. Las medidas incluyen verificaciones de antecedentes, verificaci\xF3\
             n de identidad y evaluaci\xF3n de calificaciones para reducir los riesgos\
             \ de seguridad."
+        de:
+          name: "Sicherheits\xFCberpr\xFCfung"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass geeignete\
+            \ Hintergrundpr\xFCfungen durchgef\xFChrt werden, um die Vertrauensw\xFC\
+            rdigkeit und Eignung von Bewerbern zu best\xE4tigen. Dazu geh\xF6ren Identit\xE4\
+            tspr\xFCfung, Qualifikationsnachweise und weitere gesetzlich zul\xE4ssige\
+            \ \xDCberpr\xFCfungen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
       assessable: true
       depth: 3
@@ -5937,6 +6934,12 @@ objects:
             \ empleo incluyan responsabilidades en materia de seguridad de la informaci\xF3\
             n. Las medidas incluyen cl\xE1usulas expl\xEDcitas sobre confidencialidad,\
             \ cumplimiento de pol\xEDticas y consecuencias por infracciones."
+        de:
+          name: "Besch\xE4ftigungs- und Vertragsbedingungen"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass arbeitsvertragliche\
+            \ Vereinbarungen klare Anforderungen an Informationssicherheit, Vertraulichkeit\
+            \ und Compliance enthalten. Mitarbeitende m\xFCssen ihre sicherheitsrelevanten\
+            \ Verantwortlichkeiten verstehen und anerkennen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
       assessable: true
       depth: 3
@@ -5979,6 +6982,12 @@ objects:
             n, educaci\xF3n y formaci\xF3n peri\xF3dicas sobre la seguridad de la\
             \ informaci\xF3n. Las medidas incluyen sesiones de capacitaci\xF3n programadas,\
             \ programas de aprendizaje electr\xF3nico y ejercicios simulados de phishing."
+        de:
+          name: Informationssicherheitsbewusstsein, Ausbildung und Schulung
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass alle relevanten\
+            \ Personen regelm\xE4\xDFig Schulungen, Awareness-Ma\xDFnahmen und Unterweisungen\
+            \ zur Informationssicherheit erhalten, um Risiken zu verstehen und sichere\
+            \ Verhaltensweisen anzuwenden."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
       assessable: true
       depth: 3
@@ -6019,6 +7028,12 @@ objects:
             \ las violaciones de las pol\xEDticas de seguridad de la informaci\xF3\
             n. Las medidas incluyen directrices claras, procedimientos de escalamiento\
             \ y una aplicaci\xF3n coherente para mantener la rendici\xF3n de cuentas."
+        de:
+          name: "Ma\xDFregelungsprozess"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Verst\xF6\xDF\
+            e gegen Sicherheitsrichtlinien formal, fair und nachvollziehbar behandelt\
+            \ werden. Der Prozess legt Ma\xDFnahmen, Eskalationswege und Konsequenzen\
+            \ fest."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
       assessable: true
       depth: 3
@@ -6065,6 +7080,14 @@ objects:
             s de la terminaci\xF3n o los cambios de rol. Las medidas incluyen la revocaci\xF3\
             n de los derechos de acceso, la recopilaci\xF3n de activos de la organizaci\xF3\
             n y la realizaci\xF3n de entrevistas de salida."
+        de:
+          name: "Verantwortlichkeiten bei Beendigung oder \xC4nderung der Besch\xE4\
+            ftigung"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass bei Beendigung\
+            \ des Arbeitsverh\xE4ltnisses oder Rollenwechsels alle sicherheitsrelevanten\
+            \ Verantwortlichkeiten ber\xFCcksichtigt werden \u2013 einschlie\xDFlich\
+            \ Entzug von Zugriffsrechten, R\xFCckgabe von Werten und fortbestehender\
+            \ Vertraulichkeitspflichten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
       assessable: true
       depth: 3
@@ -6107,6 +7130,12 @@ objects:
             \ divulgaci\xF3n para proteger la informaci\xF3n confidencial. Las medidas\
             \ incluyen acuerdos firmados al comienzo del empleo, recordatorios peri\xF3\
             dicos y la aplicaci\xF3n de acciones legales en caso de violaciones."
+        de:
+          name: Vertraulichkeits- oder Geheimhaltungsvereinbarungen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Mitarbeitende\
+            \ und externe Parteien entsprechende Vertraulichkeitsvereinbarungen unterzeichnen,\
+            \ die definieren, wie sensible Informationen zu sch\xFCtzen sind \u2013\
+            \ auch nach Ende der Zusammenarbeit."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
       assessable: true
       depth: 3
@@ -6150,6 +7179,12 @@ objects:
             \ medidas incluyen acceso seguro a los sistemas corporativos, uso obligatorio\
             \ de VPN y pol\xEDticas para el manejo de datos confidenciales de forma\
             \ remota."
+        de:
+          name: Remote-Arbeit
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Risiken der\
+            \ Remote-Arbeit angemessen adressiert werden, einschlie\xDFlich sicherer\
+            \ Zugriffe, Ger\xE4teschutz, Vorgaben zum Umgang mit Informationen und\
+            \ geeigneten technischen Schutzma\xDFnahmen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
       assessable: true
       depth: 3
@@ -6194,6 +7229,12 @@ objects:
             \ incluyen canales de notificaci\xF3n de incidentes, campa\xF1as de concienciaci\xF3\
             n y procedimientos de seguimiento para investigar y abordar los eventos\
             \ denunciados."
+        de:
+          name: Meldung von Informationssicherheitsereignissen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Mitarbeitende\
+            \ Informationssicherheitsereignisse unverz\xFCglich melden k\xF6nnen.\
+            \ Dazu geh\xF6ren klare Meldewege, Sensibilisierung und definierte Prozesse\
+            \ zur Erfassung, Bewertung und Weiterleitung von Ereignissen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       assessable: false
       depth: 2
@@ -6211,6 +7252,8 @@ objects:
           name: Fysiska kontroller
         es:
           name: "Controles f\xEDsicos"
+        de:
+          name: "Physische Ma\xDFnahmen"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
       assessable: true
       depth: 3
@@ -6254,6 +7297,12 @@ objects:
             \ para proteger las \xE1reas cr\xEDticas del acceso no autorizado. Las\
             \ medidas incluyen barreras, controles de acceso y sistemas de monitoreo\
             \ para garantizar que solo las personas autorizadas puedan ingresar."
+        de:
+          name: Physische Sicherheitsperimeter
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass physische\
+            \ Sicherheitszonen eingerichtet werden, um kritische Bereiche vor unbefugtem\
+            \ Zutritt zu sch\xFCtzen. Dazu geh\xF6ren bauliche Schutzma\xDFnahmen,\
+            \ Zutrittskontrollen, \xDCberwachungssysteme und organisatorische Vorgaben."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
       assessable: true
       depth: 3
@@ -6293,6 +7342,12 @@ objects:
             \ est\xE9n controlados y supervisados para evitar el acceso no autorizado.\
             \ Las medidas incluyen sistemas de credenciales, personal de seguridad\
             \ y registros de visitantes."
+        de:
+          name: Physischer Zutritt
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass der Zutritt\
+            \ zu sicherheitsrelevanten Bereichen kontrolliert, gesteuert und \xFC\
+            berwacht wird. Dazu geh\xF6ren Zugangsausweise, Besuchermanagement, Protokollierung\
+            \ und \xDCberwachung des Zutritts."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.3
       assessable: true
       depth: 3
@@ -6332,6 +7387,12 @@ objects:
             \ est\xE9n protegidas para proteger la informaci\xF3n y los recursos.\
             \ Las medidas incluyen puertas cerradas, \xE1reas restringidas y sistemas\
             \ de vigilancia."
+        de:
+          name: "Sichern von B\xFCros, R\xE4umen und Einrichtungen"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass B\xFCros,\
+            \ R\xE4ume und Einrichtungen vor unbefugtem Zugang, Manipulation oder\
+            \ Diebstahl gesch\xFCtzt werden. Dazu geh\xF6ren Schlie\xDFsysteme, Zugangsbeschr\xE4\
+            nkungen, sichere Aufbewahrung und physische Kontrollen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
       assessable: true
       depth: 3
@@ -6369,6 +7430,12 @@ objects:
             \ f\xEDsica para detectar y responder r\xE1pidamente a las amenazas. Las\
             \ medidas incluyen sistemas de CCTV, detectores de movimiento y alertas\
             \ en tiempo real."
+        de:
+          name: "Physische Sicherheits\xFCberwachung"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass sicherheitsrelevante\
+            \ Bereiche durch geeignete \xDCberwachungseinrichtungen wie Video\xFC\
+            berwachung, Sensorik, Alarmsysteme und Benachrichtigungen \xFCberwacht\
+            \ werden, um unbefugte Aktivit\xE4ten fr\xFChzeitig zu erkennen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
       assessable: true
       depth: 3
@@ -6407,6 +7474,13 @@ objects:
             \ f\xEDsicas y ambientales. Las medidas incluyen sistemas de extinci\xF3\
             n de incendios, controles de temperatura y barreras de prevenci\xF3n de\
             \ inundaciones."
+        de:
+          name: Schutz vor physischen und umweltbedingten Bedrohungen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Systeme und\
+            \ Einrichtungen gegen physische und umweltbedingte Risiken wie Feuer,\
+            \ Wasser, Hitze, K\xE4lte, Vibrationen oder Naturereignisse gesch\xFC\
+            tzt werden. Dazu geh\xF6ren Brandschutz, Klimakontrolle, \xDCberspannungsschutz\
+            \ und bauliche Ma\xDFnahmen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.6
       assessable: true
       depth: 3
@@ -6446,6 +7520,12 @@ objects:
           description: "Este control garantiza que las \xE1reas seguras se administren\
             \ para permitir solo el acceso autorizado. Las medidas incluyen sistemas\
             \ de control de acceso, escolta de visitantes y monitoreo de actividad."
+        de:
+          name: Arbeiten in Sicherheitsbereichen
+          description: "Diese Steuerungsma\xDFnahme legt Anforderungen und Verhaltensregeln\
+            \ f\xFCr T\xE4tigkeiten in Sicherheitsbereichen fest. Dazu geh\xF6ren\
+            \ kontrollierte Zug\xE4nge, \xDCberwachung, Begleitung von Besuchern und\
+            \ organisatorische Vorgaben f\xFCr Abl\xE4ufe und Verhalten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.7
       assessable: true
       depth: 3
@@ -6487,6 +7567,12 @@ objects:
             \ no quede expuesta mediante la adopci\xF3n de pol\xEDticas de escritorio\
             \ y pantalla claras. Las medidas incluyen el bloqueo de documentos confidenciales\
             \ y el bloqueo autom\xE1tico de pantallas cuando no est\xE1n en uso."
+        de:
+          name: "Aufger\xE4umte Arbeitsumgebung und Bildschirmsperren"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass sensible Informationen\
+            \ nicht offen einsehbar sind. Dazu geh\xF6ren Clean-Desk-Regeln, sichere\
+            \ Aufbewahrung von Dokumenten, Abschlie\xDFen von Arbeitspl\xE4tzen und\
+            \ automatische Bildschirmsperren."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
       assessable: true
       depth: 3
@@ -6527,6 +7613,12 @@ objects:
             \ protegido para evitar el acceso no autorizado o el da\xF1o. Las medidas\
             \ incluyen montaje seguro, gabinetes cerrados con llave y \xE1reas de\
             \ acceso restringido."
+        de:
+          name: "Platzierung und Schutz von Ger\xE4ten und Betriebsmitteln"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Ger\xE4te\
+            \ so positioniert, installiert und gesch\xFCtzt werden, dass Risiken wie\
+            \ unbefugter Zugriff, Manipulation oder Besch\xE4digung minimiert werden.\
+            \ Dazu geh\xF6ren sichere Standorte, Schr\xE4nke, Geh\xE4use und Zutrittskontrollen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
       assessable: true
       depth: 3
@@ -6566,6 +7658,12 @@ objects:
             \ fuera de las instalaciones est\xE9n protegidos para mantener la confidencialidad\
             \ y la integridad. Las medidas incluyen cifrado, transporte seguro y seguimiento\
             \ de acceso."
+        de:
+          name: "Sicherheit von Werten au\xDFerhalb der R\xE4umlichkeiten"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Ger\xE4te,\
+            \ Datentr\xE4ger und andere Werte auch au\xDFerhalb organisatorischer\
+            \ Standorte wirksam gesch\xFCtzt werden. Dazu geh\xF6ren Verschl\xFCsselung,\
+            \ sichere Transportwege, physischer Schutz und Kontrolle \xFCber die Nutzung."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
       assessable: true
       depth: 3
@@ -6601,6 +7699,13 @@ objects:
           description: "Este control protege los medios de almacenamiento para evitar\
             \ el acceso no autorizado o la manipulaci\xF3n. Las medidas incluyen almacenamiento\
             \ seguro, cifrado y restricciones de acceso."
+        de:
+          name: Speichermedien
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Speichermedien\
+            \ w\xE4hrend ihres gesamten Lebenszyklus gesch\xFCtzt sind \u2013 bei\
+            \ Speicherung, Transport, Nutzung und Entsorgung. Dazu geh\xF6ren sichere\
+            \ Lagerung, Verschl\xFCsselung, Zugriffskontrollen und dokumentierte L\xF6\
+            schverfahren."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
       assessable: true
       depth: 3
@@ -6640,6 +7745,12 @@ objects:
             \ como los sistemas de energ\xEDa y refrigeraci\xF3n, sean fiables y est\xE9\
             n protegidos contra interrupciones. Las medidas incluyen sistemas redundantes\
             \ y seguridad f\xEDsica."
+        de:
+          name: Versorgungseinrichtungen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass essenzielle\
+            \ Versorgungseinrichtungen wie Strom, Klima, Wasser, Netzwerk oder Druckluft\
+            \ zuverl\xE4ssig betrieben und vor Ausf\xE4llen gesch\xFCtzt werden. Redundanzen\
+            \ und \xDCberwachungssysteme unterst\xFCtzen die Betriebssicherheit."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
       assessable: true
       depth: 3
@@ -6677,6 +7788,12 @@ objects:
           description: "Este control garantiza que los cables est\xE9n asegurados\
             \ para evitar intercepciones o da\xF1os no autorizados. Las medidas incluyen\
             \ conductos de protecci\xF3n, etiquetado adecuado y enrutamiento seguro."
+        de:
+          name: Sicherheit der Verkabelung
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Kommunikations-\
+            \ und Stromkabel gegen Abh\xF6ren, Manipulation, Besch\xE4digung und St\xF6\
+            rungen gesch\xFCtzt werden. Dazu geh\xF6ren Kabelschutzrohre, sichere\
+            \ Verlegung, Kennzeichnung und Zugangskontrollen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
       assessable: true
       depth: 3
@@ -6717,6 +7834,12 @@ objects:
             \ garantizar su correcto funcionamiento y evitar fallos. Las medidas incluyen\
             \ servicio regular, pr\xE1cticas de mantenimiento seguras y acceso de\
             \ personal autorizado."
+        de:
+          name: "Instandhaltung von Ger\xE4ten und Betriebsmitteln"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Ger\xE4te\
+            \ regelm\xE4\xDFig, fachgerecht und sicher gewartet werden, um Ausf\xE4\
+            lle und Sicherheitsrisiken zu vermeiden. Wartungsarbeiten d\xFCrfen nur\
+            \ von autorisiertem und qualifiziertem Personal durchgef\xFChrt werden."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
       assessable: true
       depth: 3
@@ -6757,6 +7880,13 @@ objects:
             n de equipos para proteger la informaci\xF3n confidencial. Las medidas\
             \ incluyen la desinfecci\xF3n de datos, la destrucci\xF3n f\xEDsica y\
             \ los procesos de eliminaci\xF3n certificados."
+        de:
+          name: "Sichere Entsorgung oder Wiederverwendung von Ger\xE4ten"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Ger\xE4te\
+            \ vor Entsorgung oder Weiterverwendung so bereinigt werden, dass keine\
+            \ sensiblen Informationen wiederhergestellt werden k\xF6nnen. Dazu geh\xF6\
+            ren zertifizierte L\xF6schverfahren, physische Vernichtung und dokumentierte\
+            \ Prozesse."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       assessable: false
       depth: 2
@@ -6774,6 +7904,8 @@ objects:
           name: Tekniska kontroller
         es:
           name: "Controles tecnol\xF3gicos"
+        de:
+          name: "Technologische Ma\xDFnahmen"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
       assessable: true
       depth: 3
@@ -6815,6 +7947,12 @@ objects:
             \ dispositivos m\xF3viles, mediante la implementaci\xF3n de medidas de\
             \ seguridad como la detecci\xF3n de puntos de conexi\xF3n, el cifrado\
             \ y las configuraciones seguras para minimizar los riesgos."
+        de:
+          name: "Endpunktger\xE4te des Benutzers"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Endger\xE4\
+            te wie Laptops, Desktops oder Mobilger\xE4te durch technische und organisatorische\
+            \ Ma\xDFnahmen gesch\xFCtzt werden. Dazu geh\xF6ren sichere Konfigurationen,\
+            \ Verschl\xFCsselung, Malware-Schutz, Patch-Management und Zugriffskontrollen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
       assessable: true
       depth: 3
@@ -6858,6 +7996,13 @@ objects:
             \ uso indebido y mejorar la seguridad. Las medidas incluyen controles\
             \ de acceso basados en roles, revisiones peri\xF3dicas y una estricta\
             \ gesti\xF3n de cuentas."
+        de:
+          name: Privilegierte Zugangsrechte
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass privilegierte\
+            \ Zug\xE4nge nur autorisierten Personen gew\xE4hrt werden und deren Nutzung\
+            \ \xFCberwacht, dokumentiert und regelm\xE4\xDFig \xFCberpr\xFCft wird.\
+            \ Dies umfasst starke Authentisierung, Protokollierung und strenge Verwaltung\
+            \ privilegierter Konten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
       assessable: true
       depth: 3
@@ -6897,6 +8042,12 @@ objects:
             \ en funci\xF3n de los principios de necesidad de conocer. Las medidas\
             \ incluyen la autenticaci\xF3n de usuarios, los permisos basados en roles\
             \ y las revisiones peri\xF3dicas del acceso."
+        de:
+          name: "Informationszugangsbeschr\xE4nkung"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass der Zugriff\
+            \ auf Informationen nach dem Need-to-know-Prinzip beschr\xE4nkt wird,\
+            \ um unbefugten Zugriff zu verhindern. Dazu geh\xF6ren Zugriffskontrollen,\
+            \ Rollenrechte, Authentisierung und regelm\xE4\xDFige \xDCberpr\xFCfungen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
       assessable: true
       depth: 3
@@ -6936,6 +8087,12 @@ objects:
             \ la visualizaci\xF3n, modificaci\xF3n o exposici\xF3n no autorizadas.\
             \ Las medidas incluyen control de versiones, repositorios seguros y acceso\
             \ restringido para desarrolladores."
+        de:
+          name: Zugriff auf den Quellcode
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Zugriff auf\
+            \ Quellcode kontrolliert, \xFCberwacht und gesch\xFCtzt erfolgt, um Manipulation,\
+            \ Offenlegung oder unbefugte \xC4nderung zu verhindern. Dazu geh\xF6ren\
+            \ Rechtemanagement, Versionskontrolle, Code-Reviews und abgesicherte Repositorys."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
       assessable: true
       depth: 3
@@ -6972,6 +8129,11 @@ objects:
           description: "Este control implementa mecanismos de autenticaci\xF3n seguros,\
             \ como la autenticaci\xF3n multifactor, para verificar las identidades\
             \ de los usuarios y evitar el acceso no autorizado."
+        de:
+          name: Sichere Authentisierung
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass starke Authentisierungsmechanismen\
+            \ eingesetzt werden \u2013 wie Multi-Faktor-Authentisierung, sichere Passwortrichtlinien,\
+            \ Token oder biometrische Verfahren \u2013 um unbefugten Zugriff zu verhindern."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
       assessable: true
       depth: 3
@@ -7011,6 +8173,12 @@ objects:
             \ para proporcionar un rendimiento adecuado y evitar interrupciones. Las\
             \ medidas incluyen el seguimiento del uso de los recursos y la planificaci\xF3\
             n de las necesidades futuras."
+        de:
+          name: "Kapazit\xE4tssteuerung"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Systemkapazit\xE4\
+            ten kontinuierlich \xFCberwacht, geplant und gesteuert werden, um Leistungseinbu\xDF\
+            en, Engp\xE4sse oder Ausf\xE4lle zu vermeiden. Dazu geh\xF6ren Kapazit\xE4\
+            tsplanung, Monitoring und Prognosen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
       assessable: true
       depth: 3
@@ -7046,6 +8214,12 @@ objects:
           description: "Este control implementa medidas como software antivirus, herramientas\
             \ de detecci\xF3n de amenazas y actualizaciones peri\xF3dicas para proteger\
             \ los sistemas contra malware y ataques maliciosos."
+        de:
+          name: Schutz gegen Schadsoftware
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Systeme durch\
+            \ geeignete technische und organisatorische Ma\xDFnahmen vor Malware,\
+            \ Schadsoftware und Angriffen gesch\xFCtzt werden. Dazu geh\xF6ren Antivirensoftware,\
+            \ EDR/XDR, regelm\xE4\xDFige Updates und Sensibilisierung."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
       assessable: true
       depth: 3
@@ -7083,6 +8257,12 @@ objects:
             \ t\xE9cnicas con prontitud para minimizar los riesgos de seguridad. Las\
             \ medidas incluyen el an\xE1lisis de vulnerabilidades y la gesti\xF3n\
             \ de parches."
+        de:
+          name: Handhabung von technischen Schwachstellen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass technische\
+            \ Schwachstellen zeitnah identifiziert, bewertet, priorisiert und behoben\
+            \ werden. Dazu geh\xF6ren Schwachstellenscans, Patch-Management, Risikobewertungen\
+            \ und Nachweisf\xFChrung."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
       assessable: true
       depth: 3
@@ -7116,6 +8296,12 @@ objects:
           description: "Este control garantiza una gesti\xF3n coherente de las configuraciones\
             \ del sistema para mantener la configuraci\xF3n de seguridad y evitar\
             \ cambios no autorizados."
+        de:
+          name: Konfigurationsmanagement
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Systemkonfigurationen\
+            \ definiert, dokumentiert, gesch\xFCtzt und kontrolliert ge\xE4ndert werden,\
+            \ um Sicherheitseinstellungen zu gew\xE4hrleisten und unbeabsichtigte\
+            \ \xC4nderungen zu verhindern."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
       assessable: true
       depth: 3
@@ -7151,6 +8337,13 @@ objects:
           description: "Este control garantiza que la informaci\xF3n confidencial\
             \ se elimine de forma segura cuando ya no sea necesaria para evitar la\
             \ recuperaci\xF3n o exposici\xF3n no autorizada."
+        de:
+          name: "L\xF6schung von Informationen"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationen,\
+            \ die nicht mehr ben\xF6tigt werden oder gesetzlichen Vorgaben zufolge\
+            \ gel\xF6scht werden m\xFCssen, sicher und nachvollziehbar entfernt werden.\
+            \ Dazu geh\xF6ren dokumentierte L\xF6schverfahren, sichere Methoden und\
+            \ Nachweise."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.11
       assessable: true
       depth: 3
@@ -7187,6 +8380,12 @@ objects:
           description: "Este control protege la informaci\xF3n confidencial durante\
             \ el procesamiento o la visualizaci\xF3n mediante el uso de t\xE9cnicas\
             \ de enmascaramiento de datos para ocultar los datos de usuarios no autorizados."
+        de:
+          name: Datenmaskierung
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass sensible Informationen\
+            \ w\xE4hrend Verarbeitung, Anzeige oder Test durch geeignete Maskierungsverfahren\
+            \ gesch\xFCtzt werden. Dies verhindert, dass unbefugte Personen Inhalte\
+            \ erkennen oder missbrauchen k\xF6nnen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
       assessable: true
       depth: 3
@@ -7221,6 +8420,12 @@ objects:
           description: "Este control implementa mecanismos para evitar la exposici\xF3\
             n accidental de datos confidenciales a trav\xE9s de correo electr\xF3\
             nico, medios extra\xEDbles u otros canales."
+        de:
+          name: Verhinderung von Datenlecks
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass unbeabsichtigter\
+            \ oder unbefugter Abfluss sensibler Daten durch technische und organisatorische\
+            \ Ma\xDFnahmen verhindert wird. Dazu geh\xF6ren DLP-Systeme, Richtlinien,\
+            \ \xDCberwachung und Zugriffsbeschr\xE4nkungen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
       assessable: true
       depth: 3
@@ -7256,6 +8461,12 @@ objects:
           description: "Este control garantiza que la informaci\xF3n cr\xEDtica se\
             \ respalde de forma regular y segura para garantizar su disponibilidad\
             \ en caso de incidentes o desastres."
+        de:
+          name: Sicherung von Informationen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass kritische\
+            \ Informationen regelm\xE4\xDFig, vollst\xE4ndig, gesch\xFCtzt und wiederherstellbar\
+            \ gesichert werden. Dies umfasst Backup-Strategien, Speicherorte, Tests\
+            \ und Dokumentation."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
       assessable: true
       depth: 3
@@ -7292,6 +8503,12 @@ objects:
           description: "Este control garantiza que la redundancia est\xE9 integrada\
             \ en las instalaciones de procesamiento para mantener la disponibilidad\
             \ y las operaciones durante fallas o emergencias del sistema."
+        de:
+          name: Redundanz von informationsverarbeitenden Einrichtungen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass kritische\
+            \ Systeme und Dienste durch Redundanzen, Ausweichmechanismen und Notbetriebskonzepte\
+            \ abgesichert sind, um Ausfallzeiten zu minimieren und Betriebsf\xE4higkeit\
+            \ zu erhalten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
       assessable: true
       depth: 3
@@ -7325,6 +8542,12 @@ objects:
           description: "Este control permite el registro de actividades dentro de\
             \ los sistemas para respaldar el monitoreo, la detecci\xF3n de incidentes\
             \ y las investigaciones forenses."
+        de:
+          name: Protokollierung
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass sicherheitsrelevante\
+            \ Ereignisse und Aktivit\xE4ten protokolliert, gesch\xFCtzt, \xFCberpr\xFC\
+            ft und f\xFCr Analysen sowie Ermittlungen genutzt werden k\xF6nnen. Dies\
+            \ umfasst Log-Quellen, Integrit\xE4t der Logs, Aufbewahrung und \xDCberwachung."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
       assessable: true
       depth: 3
@@ -7357,6 +8580,12 @@ objects:
           name: Seguimiento de las actividades
           description: "Este control garantiza la supervisi\xF3n continua de las actividades\
             \ del sistema para detectar, responder y mitigar las amenazas de seguridad."
+        de:
+          name: "\xDCberwachung von Aktivit\xE4ten"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Systeme, Dienste\
+            \ und Netzwerke kontinuierlich \xFCberwacht werden, um Anomalien, Angriffe\
+            \ oder sicherheitsrelevante Ereignisse fr\xFChzeitig zu erkennen und geeignete\
+            \ Gegenma\xDFnahmen einzuleiten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
       assessable: true
       depth: 3
@@ -7390,6 +8619,11 @@ objects:
           description: "Este control garantiza que los relojes del sistema est\xE9\
             n sincronizados para mantener marcas de tiempo precisas y coherentes para\
             \ los registros y otros procesos cr\xEDticos."
+        de:
+          name: Uhrensynchronisation
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass System- und\
+            \ Netzwerkuhren synchronisiert sind, um korrekte Zeitstempel f\xFCr Protokolle,\
+            \ Analysen und sicherheitsrelevante Prozesse zu gew\xE4hrleisten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
       assessable: true
       depth: 3
@@ -7422,6 +8656,12 @@ objects:
           name: Uso de programas de utilidad privilegiados
           description: Este control restringe y supervisa el uso de programas de utilidad
             con privilegios para evitar el uso indebido y las acciones no autorizadas.
+        de:
+          name: Gebrauch von Hilfsprogrammen mit privilegierten Rechten
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass der Einsatz\
+            \ privilegierter Dienstprogramme kontrolliert, \xFCberwacht und auf berechtigte\
+            \ Personen beschr\xE4nkt wird. Dies verhindert Missbrauch, Manipulation\
+            \ und unbefugte Aktivit\xE4ten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
       assessable: true
       depth: 3
@@ -7456,6 +8696,12 @@ objects:
           description: "Este control garantiza que la instalaci\xF3n de software en\
             \ los sistemas operativos se gestione de forma segura para evitar vulnerabilidades\
             \ o cambios no autorizados."
+        de:
+          name: Installation von Software auf Systemen im Betrieb
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Softwareinstallationen\
+            \ in produktiven Umgebungen kontrolliert, dokumentiert und autorisiert\
+            \ erfolgen, um Risiken durch Schadsoftware, Fehlkonfigurationen oder unbefugte\
+            \ \xC4nderungen zu vermeiden."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
       assessable: true
       depth: 3
@@ -7492,6 +8738,11 @@ objects:
           description: "Este control garantiza la seguridad de la red a trav\xE9s\
             \ de firewalls, sistemas de detecci\xF3n de intrusos y controles de acceso\
             \ para proteger contra accesos y ataques no autorizados."
+        de:
+          name: Netzwerksicherheit
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Netzwerke\
+            \ durch geeignete Sicherheitsma\xDFnahmen wie Firewalls, IDS/IPS, Segmentierung,\
+            \ \xDCberwachung und Zugriffskontrollen gesch\xFCtzt werden."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
       assessable: true
       depth: 3
@@ -7525,6 +8776,12 @@ objects:
           description: "Este control garantiza que los servicios de red est\xE9n protegidos\
             \ para mantener la confidencialidad, la integridad y la disponibilidad\
             \ durante el uso."
+        de:
+          name: Sicherheit von Netzwerkdiensten
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass genutzte Netzwerkdienste\
+            \ \u2013 intern und extern \u2013 sicher bereitgestellt, \xFCberwacht\
+            \ und gesch\xFCtzt werden. Dazu geh\xF6ren Sicherheitsvereinbarungen,\
+            \ Monitoring, Tests und Absicherung gegen Angriffe."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
       assessable: true
       depth: 3
@@ -7557,6 +8814,11 @@ objects:
           name: "Segregaci\xF3n de redes"
           description: "Este control implementa la segregaci\xF3n de la red para limitar\
             \ la propagaci\xF3n de amenazas y minimizar el impacto de posibles infracciones."
+        de:
+          name: Trennung von Netzwerken
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Netzwerke\
+            \ nach Schutzbedarf segmentiert werden, um Risiken, Angriffsfl\xE4chen\
+            \ und Auswirkungen potenzieller Vorf\xE4lle zu reduzieren."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
       assessable: true
       depth: 3
@@ -7589,6 +8851,11 @@ objects:
           name: Filtrado web
           description: "Este control usa herramientas de filtrado web para bloquear\
             \ el acceso a contenido no autorizado o da\xF1ino a trav\xE9s de Internet."
+        de:
+          name: Webfilterung
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Zugriffe auf\
+            \ sch\xE4dliche, unangemessene oder unerlaubte Webseiten durch Filtermechanismen\
+            \ eingeschr\xE4nkt oder verhindert werden."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
       assessable: true
       depth: 3
@@ -7622,6 +8889,12 @@ objects:
           description: "Este control garantiza que se apliquen t\xE9cnicas criptogr\xE1\
             ficas para proteger la confidencialidad, integridad y autenticidad de\
             \ los datos."
+        de:
+          name: Verwendung von Kryptographie
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass kryptographische\
+            \ Verfahren angemessen ausgew\xE4hlt, eingesetzt, verwaltet und gesch\xFC\
+            tzt werden, um Vertraulichkeit, Integrit\xE4t und Authentizit\xE4t von\
+            \ Informationen zu gew\xE4hrleisten."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
       assessable: true
       depth: 3
@@ -7656,6 +8929,12 @@ objects:
           description: Este control integra la seguridad en todas las etapas del ciclo
             de vida del desarrollo para garantizar que los sistemas y las aplicaciones
             se construyan de forma segura.
+        de:
+          name: Lebenszyklus einer sicheren Entwicklung
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Sicherheitsanforderungen,\
+            \ Tests, Reviews und Kontrollen in allen Phasen des Entwicklungslebenszyklus\
+            \ verankert sind \u2013 von der Planung \xFCber Design, Implementierung,\
+            \ Test bis zur \xDCbergabe."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
       assessable: true
       depth: 3
@@ -7686,6 +8965,11 @@ objects:
           name: Requisitos de seguridad de las aplicaciones
           description: Este control define y aplica los requisitos de seguridad de
             las aplicaciones para protegerse contra vulnerabilidades.
+        de:
+          name: Anforderungen an die Anwendungssicherheit
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass f\xFCr Anwendungen\
+            \ klare Sicherheitsanforderungen definiert, dokumentiert und umgesetzt\
+            \ werden, um Schwachstellen und Sicherheitsrisiken zu vermeiden."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
       assessable: true
       depth: 3
@@ -7719,6 +9003,11 @@ objects:
           name: "Arquitectura de sistemas seguros y principios de ingenier\xEDa"
           description: "Este control garantiza que se adopten los principios de dise\xF1\
             o seguro durante el desarrollo de las arquitecturas de sistemas."
+        de:
+          name: "Sichere Systemarchitektur und Entwicklungsgrunds\xE4tze"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Sicherheitsprinzipien\
+            \ wie Minimierung von Angriffsfl\xE4chen, Defense-in-Depth, sichere Standards\
+            \ und Best Practices in Architektur- und Designprozessen verankert sind."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
       assessable: true
       depth: 3
@@ -7749,6 +9038,11 @@ objects:
           name: "Codificaci\xF3n segura"
           description: "Este control implementa pr\xE1cticas de codificaci\xF3n seguras\
             \ para minimizar las vulnerabilidades en el software desarrollado."
+        de:
+          name: Sichere Codierung
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Entwickler\
+            \ sichere Coding-Praktiken anwenden, um Fehler, Schwachstellen und Angriffsfl\xE4\
+            chen zu reduzieren. Dazu geh\xF6ren Standards, Code-Reviews und Schulungen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
       assessable: true
       depth: 3
@@ -7782,6 +9076,11 @@ objects:
           description: "Este control garantiza que las pruebas de seguridad se lleven\
             \ a cabo durante las fases de desarrollo y aceptaci\xF3n para identificar\
             \ los puntos d\xE9biles."
+        de:
+          name: "Sicherheitspr\xFCfung bei Entwicklung und Abnahme"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Anwendungen\
+            \ und Systeme w\xE4hrend Entwicklung, Test und Abnahme einer Sicherheitspr\xFC\
+            fung unterzogen werden, um Schwachstellen fr\xFChzeitig zu erkennen."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.30
       assessable: true
       depth: 3
@@ -7814,6 +9113,11 @@ objects:
           name: Desarrollo externalizado
           description: Este control garantiza que los riesgos de seguridad se gestionen
             de forma eficaz cuando el desarrollo se externaliza a proveedores externos.
+        de:
+          name: Ausgegliederte Entwicklung
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass bei ausgelagerter\
+            \ Entwicklung Sicherheitsanforderungen vertraglich und organisatorisch\
+            \ geregelt, \xFCberwacht und durchgesetzt werden."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
       assessable: true
       depth: 3
@@ -7852,6 +9156,11 @@ objects:
           description: "Este control garantiza que los entornos de desarrollo, prueba\
             \ y producci\xF3n est\xE9n segregados para evitar interacciones no deseadas\
             \ y accesos no autorizados."
+        de:
+          name: Trennung von Entwicklungs-, Test- und Produktionsumgebungen
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Entwicklungs-,\
+            \ Test- und Produktionsumgebungen klar voneinander getrennt sind, um unbeabsichtigte\
+            \ \xC4nderungen, Sicherheitsrisiken oder Datenverlust zu verhindern."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
       assessable: true
       depth: 3
@@ -7884,6 +9193,12 @@ objects:
           name: "Gesti\xF3n del cambio"
           description: Este control garantiza que los cambios en los sistemas se gestionen
             de forma segura para minimizar los riesgos y mantener la estabilidad operativa.
+        de:
+          name: "\xC4nderungssteuerung"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass \xC4nderungen\
+            \ an Systemen kontrolliert, dokumentiert und risikobewertet durchgef\xFC\
+            hrt werden, um Stabilit\xE4t, Sicherheit und Nachvollziehbarkeit sicherzustellen.\
+            \ Dies umfasst Genehmigungsprozesse, Tests, Dokumentation und \xDCberwachung."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.33
       assessable: true
       depth: 3
@@ -7915,6 +9230,12 @@ objects:
           name: "Informaci\xF3n de la prueba"
           description: "Este control protege los datos de prueba para evitar la exposici\xF3\
             n de informaci\xF3n sensible o confidencial durante los procesos de prueba."
+        de:
+          name: Testdaten
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Testdaten\
+            \ \u2013 insbesondere wenn sie produktive oder vertrauliche Inhalte enthalten\
+            \ \u2013 gesch\xFCtzt, anonymisiert oder maskiert werden, um unbefugte\
+            \ Einsicht oder Missbrauch zu verhindern."
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
       assessable: true
       depth: 3
@@ -7962,3 +9283,10 @@ objects:
             \ la fuga de datos o las interrupciones. Las medidas incluyen el uso de\
             \ entornos que no son de producci\xF3n, restricciones de acceso y acuerdos\
             \ de confidencialidad para mantener la seguridad y la integridad del sistema."
+        de:
+          name: "Schutz der Informationssysteme w\xE4hrend Tests im Audit"
+          description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Systeme, Dienste\
+            \ und Daten w\xE4hrend Pr\xFCfungen gesch\xFCtzt werden, indem unbefugter\
+            \ Zugriff, Datenabfluss oder Betriebsst\xF6rungen verhindert werden. Dazu\
+            \ geh\xF6ren die Nutzung von Nicht-Produktivumgebungen, Zugriffsbeschr\xE4\
+            nkungen, sichere Verfahren und Vertraulichkeitsvereinbarungen."

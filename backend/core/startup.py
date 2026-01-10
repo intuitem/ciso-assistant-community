@@ -86,6 +86,12 @@ READER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "view_metricinstance",
+    "view_custommetricsample",
+    "view_dashboard",
+    "view_dashboardwidget",
     # integrations
     "view_syncmapping",
 ]
@@ -169,6 +175,7 @@ APPROVER_PERMISSIONS_LIST = [
 ANALYST_PERMISSIONS_LIST = [
     "add_filteringlabel",
     "view_filteringlabel",
+    "view_libraryfilteringlabel",
     "add_appliedcontrol",
     "add_asset",
     "add_complianceassessment",
@@ -400,6 +407,24 @@ ANALYST_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "view_metricinstance",
+    "add_metricinstance",
+    "change_metricinstance",
+    "delete_metricinstance",
+    "view_custommetricsample",
+    "add_custommetricsample",
+    "change_custommetricsample",
+    "delete_custommetricsample",
+    "view_dashboard",
+    "add_dashboard",
+    "change_dashboard",
+    "delete_dashboard",
+    "view_dashboardwidget",
+    "add_dashboardwidget",
+    "change_dashboardwidget",
+    "delete_dashboardwidget",
     # integrations
     "view_integrationconfiguration",
     "add_syncmapping",
@@ -411,6 +436,7 @@ ANALYST_PERMISSIONS_LIST = [
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_filteringlabel",
     "view_filteringlabel",
+    "view_libraryfilteringlabel",
     "add_appliedcontrol",
     "add_asset",
     "add_complianceassessment",
@@ -666,6 +692,27 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "add_metricdefinition",
+    "change_metricdefinition",
+    "delete_metricdefinition",
+    "view_metricinstance",
+    "add_metricinstance",
+    "change_metricinstance",
+    "delete_metricinstance",
+    "view_custommetricsample",
+    "add_custommetricsample",
+    "change_custommetricsample",
+    "delete_custommetricsample",
+    "view_dashboard",
+    "add_dashboard",
+    "change_dashboard",
+    "delete_dashboard",
+    "view_dashboardwidget",
+    "add_dashboardwidget",
+    "change_dashboardwidget",
+    "delete_dashboardwidget",
     # integrations
     "add_integrationconfiguration",
     "view_integrationconfiguration",
@@ -805,6 +852,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_filteringlabel",
     "change_filteringlabel",
     "delete_filteringlabel",
+    "add_libraryfilteringlabel",
+    "view_libraryfilteringlabel",
+    "change_libraryfilteringlabel",
+    "delete_libraryfilteringlabel",
     "add_ebiosrmstudy",
     "view_ebiosrmstudy",
     "change_ebiosrmstudy",
@@ -968,6 +1019,27 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "add_metricdefinition",
+    "change_metricdefinition",
+    "delete_metricdefinition",
+    "view_metricinstance",
+    "add_metricinstance",
+    "change_metricinstance",
+    "delete_metricinstance",
+    "view_custommetricsample",
+    "add_custommetricsample",
+    "change_custommetricsample",
+    "delete_custommetricsample",
+    "view_dashboard",
+    "add_dashboard",
+    "change_dashboard",
+    "delete_dashboard",
+    "view_dashboardwidget",
+    "add_dashboardwidget",
+    "change_dashboardwidget",
+    "delete_dashboardwidget",
     # roles,
     "add_role",
     "view_role",
@@ -1188,6 +1260,11 @@ def startup(sender: AppConfig, **kwargs):
     except Exception as e:
         logger.error("Error creating default Entity Relationships", exc_info=True)
 
+    try:
+        Terminology.create_default_metric_units()
+    except Exception as e:
+        logger.error("Error creating default Metric Units", exc_info=True)
+
     # Init integration providers
 
     try:
@@ -1197,10 +1274,22 @@ def startup(sender: AppConfig, **kwargs):
         )
     except Exception as e:
         logger.error("Error creating Jira IntegrationProvider", exc_info=True)
+    try:
+        IntegrationProvider.objects.get_or_create(
+            name="servicenow",
+            defaults={"provider_type": IntegrationProvider.ProviderType.ITSM},
+        )
+    except Exception as e:
+        logger.error("Error creating servicenow IntegrationProvider", exc_info=True)
 
     call_command("storelibraries")
     call_command("autoloadlibraries")
     call_command("sync_event_types")
+
+    try:
+        call_command("backfill_builtin_metrics")
+    except Exception as e:
+        logger.error("Error backfilling builtin metrics", exc_info=True)
 
     # add administrators group to superusers (for resiliency)
     administrators = UserGroup.objects.get(
