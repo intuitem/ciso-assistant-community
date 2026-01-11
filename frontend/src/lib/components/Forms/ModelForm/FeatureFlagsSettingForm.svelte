@@ -146,9 +146,9 @@
 				},
 				{ 
 					field: 'campaigns', 
-					label: m.campaigns() 
+					label: m.campaigns(),
 					description: m.campaignsDescription()
-				},
+				}
 			]
 		},
 		{
