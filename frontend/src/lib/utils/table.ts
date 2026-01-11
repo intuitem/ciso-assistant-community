@@ -6,11 +6,13 @@ import type { urlModel } from './types';
 import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
 import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
 import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
+import ChangeCsfFunction from '$lib/components/ContextMenu/applied-controls/ChangeCsfFunction.svelte';
 import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeStatus.svelte';
 import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
+import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -56,6 +58,13 @@ const ENTITY_CRITICALITY_OPTIONS = [
 	{ label: '3', value: '3' },
 	{ label: '4', value: '4' }
 ];
+
+const CONTENT_TYPE_OPTIONS = [
+	{ label: 'DOMAIN', value: 'DO' },
+	{ label: 'GLOBAL', value: 'GL' },
+	{ label: 'ENCLAVE', value: 'EN' }
+];
+
 const YES_NO_UNSET_OPTIONS = [
 	{ label: 'YES', value: 'YES' },
 	{ label: 'NO', value: 'NO' },
@@ -116,6 +125,25 @@ export const LABELS_FILTER: ListViewFilterConfig = {
 		optionsEndpoint: 'filtering-labels',
 		label: 'filtering_labels',
 		optionsLabelField: 'label',
+		multiple: true
+	}
+};
+
+export const LIBRARY_LABELS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'library-filtering-labels',
+		label: 'libraryFilteringLabels',
+		optionsLabelField: 'label',
+		multiple: true
+	}
+};
+
+export const CONTENT_TYPE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'contentType',
+		options: CONTENT_TYPE_OPTIONS,
 		multiple: true
 	}
 };
@@ -274,7 +302,7 @@ export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'withinTolerance',
 		options: YES_NO_UNSET_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -650,7 +678,7 @@ export const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_selected',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -659,7 +687,7 @@ export const IS_RECURRENT_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_recurrent',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -679,7 +707,7 @@ export const USER_IS_ACTIVE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_active',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -688,7 +716,7 @@ export const USER_IS_THIRD_PARTY_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_third_party',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -705,9 +733,8 @@ export const RISK_ORIGIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'risk_origin',
-		optionsEndpoint: 'ro-to/risk-origin',
-		optionsLabelField: 'label',
-		optionsValueField: 'value',
+		optionsEndpoint: 'terminologies?field_path=ro_to.risk_origin&is_visible=true',
+		optionsLabelField: 'translated_name',
 		browserCache: 'force-cache',
 		multiple: true
 	}
@@ -762,7 +789,7 @@ export const BENEFICIARY_ENTITY_FILTER: ListViewFilterConfig = {
 export const SOLUTION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
-		label: 'solution',
+		label: 'solutions',
 		optionsEndpoint: 'solutions',
 		multiple: true
 	}
@@ -899,7 +926,7 @@ const ASSET_IS_BUSINESS_FUNCTION_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_business_function',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1020,21 +1047,21 @@ export const NEXT_OCCURENCE_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
-export const HAS_UPDATE_FILTER: ListViewFilterConfig = {
+export const IS_LOADED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'loadedLibraries',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+export const IS_UPDATE_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'updateAvailable',
 		options: YES_NO_OPTIONS,
-		multiple: true
-	}
-};
-
-export const MAPPING_SUGGESTED_FILTER: ListViewFilterConfig = {
-	component: AutocompleteSelect,
-	props: {
-		label: 'mappingSuggested',
-		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1055,7 +1082,7 @@ export const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'isAssigned',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1064,7 +1091,7 @@ export const PAST_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'past',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1079,12 +1106,21 @@ export const FIELD_PATH_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const IS_CUSTOM_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'is_custom',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 export const BUILTIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'builtin',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1093,7 +1129,7 @@ export const IS_VISIBLE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_visible',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1158,9 +1194,10 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'parentDomain', 'labels'],
-		body: ['name', 'description', 'parent_folder', 'filtering_labels'],
+		head: ['name', 'description', 'contentType', 'parentDomain', 'labels'],
+		body: ['name', 'description', 'content_type', 'parent_folder', 'filtering_labels'],
 		filters: {
+			content_type: CONTENT_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER
 		}
 	},
@@ -1336,6 +1373,7 @@ export const listViewFields = {
 			'priority',
 			'status',
 			'category',
+			'csfFunction',
 			'eta',
 			'domain',
 			'owner',
@@ -1349,6 +1387,7 @@ export const listViewFields = {
 			'priority',
 			'status',
 			'category',
+			'csf_function',
 			'eta',
 			'folder',
 			'owner',
@@ -1587,9 +1626,19 @@ export const listViewFields = {
 		body: ['provider', 'name', 'description', 'locales', 'objects_meta']
 	},
 	'stored-libraries': {
-		head: ['provider', 'ref_id', 'name', 'description', 'language', 'overview', 'publication_date'],
+		head: [
+			'provider',
+			'builtin',
+			'ref_id',
+			'name',
+			'description',
+			'language',
+			'overview',
+			'publication_date'
+		],
 		body: [
 			'provider',
+			'builtin',
 			'ref_id',
 			'name',
 			'description',
@@ -1601,25 +1650,10 @@ export const listViewFields = {
 			locale: LANGUAGE_FILTER,
 			provider: PROVIDER_FILTER,
 			object_type: LIBRARY_TYPE_FILTER,
-			mapping_suggested: MAPPING_SUGGESTED_FILTER
-		}
-	},
-	'loaded-libraries': {
-		head: ['provider', 'ref_id', 'name', 'description', 'language', 'overview', 'publication_date'],
-		body: [
-			'provider',
-			'ref_id',
-			'name',
-			'description',
-			'locales',
-			'objects_meta',
-			'publication_date'
-		],
-		filters: {
-			locale: LANGUAGE_FILTER,
-			provider: PROVIDER_FILTER,
-			object_type: LIBRARY_TYPE_FILTER,
-			has_update: HAS_UPDATE_FILTER
+			is_loaded: IS_LOADED_FILTER,
+			is_custom: IS_CUSTOM_FILTER,
+			filtering_labels: LIBRARY_LABELS_FILTER,
+			is_update: IS_UPDATE_FILTER
 		}
 	},
 	'sso-settings': {
@@ -1691,7 +1725,7 @@ export const listViewFields = {
 			'endDate',
 			'providerEntity',
 			'beneficiaryEntity',
-			'solution'
+			'solutions'
 		],
 		body: [
 			'ref_id',
@@ -1702,13 +1736,13 @@ export const listViewFields = {
 			'end_date',
 			'provider_entity',
 			'beneficiary_entity',
-			'solution'
+			'solutions'
 		],
 		filters: {
 			status: CONTRACT_STATUS_FILTER,
 			provider_entity: PROVIDER_ENTITY_FILTER,
 			beneficiary_entity: BENEFICIARY_ENTITY_FILTER,
-			solution: SOLUTION_FILTER
+			solutions: SOLUTION_FILTER
 		}
 	},
 	representatives: {
@@ -1729,6 +1763,7 @@ export const listViewFields = {
 	},
 	'asset-assessments': {
 		head: [
+			'refId',
 			'asset',
 			'folder',
 			'bia',
@@ -1740,6 +1775,7 @@ export const listViewFields = {
 			'recoveryTargetsMet'
 		],
 		body: [
+			'asset_ref_id',
 			'asset',
 			'asset_folder',
 			'bia',
@@ -1961,6 +1997,7 @@ export const listViewFields = {
 			'description',
 			'ro_to_couple',
 			'fearedEvents',
+			'focusedFearedEvent',
 			'attackPaths',
 			'gravity'
 		],
@@ -1970,6 +2007,7 @@ export const listViewFields = {
 			'description',
 			'ro_to_couple',
 			'feared_events',
+			'focused_feared_event',
 			'attack_paths',
 			'gravity'
 		],
@@ -2026,7 +2064,17 @@ export const listViewFields = {
 	},
 	'elementary-actions': {
 		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'threat'],
-		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat']
+		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
+		filters: {
+			attack_stage: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'elementary-actions/attack_stage',
+					label: 'attackStage',
+					multiple: true
+				}
+			}
+		}
 	},
 	'operating-modes': {
 		head: ['ref_id', 'name', 'likelihood'],
@@ -2236,7 +2284,7 @@ export const listViewFields = {
 				props: {
 					label: 'is_selected',
 					options: YES_NO_OPTIONS,
-					multiple: true
+					multiple: false
 				}
 			},
 			risk_stage: RISK_STAGE_FILTER
@@ -2313,6 +2361,193 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
+	'metric-definitions': {
+		head: ['ref_id', 'name', 'description', 'category', 'unit', 'provider', 'labels', 'folder'],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'unit',
+			'provider',
+			'filtering_labels',
+			'folder'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			category: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metric-definitions/category',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'category',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			library: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'loaded-libraries',
+					label: 'library',
+					multiple: true
+				}
+			},
+			provider: {
+				...PROVIDER_FILTER,
+				props: {
+					...PROVIDER_FILTER.props,
+					optionsEndpoint: 'metric-definitions/provider'
+				}
+			},
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'metric-instances': {
+		head: [
+			'ref_id',
+			'name',
+			'metric_definition',
+			'rawValue',
+			'target_value',
+			'unit',
+			'status',
+			'lastRefresh',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'metric_definition',
+			'raw_value',
+			'target_value',
+			'unit',
+			'status',
+			'last_refresh',
+			'folder'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			metric_definition: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metric-definitions',
+					label: 'metricDefinition',
+					multiple: true
+				}
+			},
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metric-instances/status',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'status',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			owner: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'users',
+					optionsLabelField: 'email',
+					label: 'owner',
+					multiple: true
+				}
+			},
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'custom-metric-samples': {
+		head: ['metric_instance', 'timestamp', 'display_value'],
+		body: ['metric_instance', 'timestamp', 'display_value']
+	},
+	dashboards: {
+		head: ['ref_id', 'name', 'description', 'widget_count', 'labels', 'folder'],
+		body: ['ref_id', 'name', 'description', 'widget_count', 'filtering_labels', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
+		}
+	},
+	'dashboard-widgets': {
+		head: [
+			'display_title',
+			'metric_instance',
+			'chart_type_display',
+			'time_range_display',
+			'dashboard'
+		],
+		body: [
+			'display_title',
+			'metric_instance',
+			'chart_type_display',
+			'time_range_display',
+			'dashboard'
+		],
+		filters: {
+			folder: DOMAIN_FILTER,
+			dashboard: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/dashboards',
+					label: 'dashboard',
+					multiple: true
+				}
+			},
+			metric_instance: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/metric-instances',
+					label: 'metricInstance',
+					multiple: true
+				}
+			},
+			chart_type: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/dashboard-widgets/chart_type',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'chartType',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			}
+		}
+	},
+	'dashboard-text-widgets': {
+		head: ['display_title', 'dashboard'],
+		body: ['display_title', 'dashboard'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			dashboard: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/dashboards',
+					label: 'dashboard',
+					multiple: true
+				}
+			}
+		}
+	},
+	'dashboard-builtin-widgets': {
+		head: ['display_title', 'dashboard'],
+		body: ['display_title', 'dashboard'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			dashboard: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'metrology/dashboards',
+					label: 'dashboard',
+					multiple: true
+				}
+			}
+		}
+	},
 	extra: {
 		filters: {
 			risk: undefined,
@@ -2336,7 +2571,8 @@ export const contextMenuActions = {
 		{ component: ChangeStatus, props: {} },
 		{ component: ChangeImpact, props: {} },
 		{ component: ChangeEffort, props: {} },
-		{ component: ChangePriority, props: {} }
+		{ component: ChangePriority, props: {} },
+		{ component: ChangeCsfFunction, props: {} }
 	],
 	evidences: [{ component: EvidenceChangeStatus, props: {} }],
 	'task-nodes': [{ component: TaskNodeChangeStatus, props: {} }],
@@ -2344,7 +2580,8 @@ export const contextMenuActions = {
 	'ro-to': [{ component: SelectObject, props: {} }],
 	stakeholders: [{ component: SelectObject, props: {} }],
 	'attack-paths': [{ component: SelectObject, props: {} }],
-	'operational-scenarios': [{ component: SelectObject, props: {} }]
+	'operational-scenarios': [{ component: SelectObject, props: {} }],
+	'elementary-actions': [{ component: ChangeAttackStage, props: {} }]
 };
 
 export function getListViewFields({

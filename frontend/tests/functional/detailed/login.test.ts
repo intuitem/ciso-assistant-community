@@ -99,9 +99,11 @@ test('forgot password process is working properly', async ({
 	await resetLoginPage.page.waitForLoadState('networkidle');
 	await resetLoginPage.newPasswordInput.fill('new' + testData.user.password);
 	await resetLoginPage.confirmPasswordInput.fill('new' + testData.user.password);
+	const passwordResetToast = resetLoginPage.isToastVisible(
+		'Your password has been successfully reset'
+	);
 	await resetLoginPage.setPasswordButton.click();
-
-	await resetLoginPage.isToastVisible('Your password has been successfully reset');
+	await passwordResetToast;
 	await resetLoginPage.hasUrl(0);
 	await resetPasswordPage.close();
 

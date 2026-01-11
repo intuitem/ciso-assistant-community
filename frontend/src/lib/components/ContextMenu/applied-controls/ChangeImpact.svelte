@@ -24,12 +24,14 @@
 
 	async function changeImpact(newImpact: string) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/control_impact`;
+		// Convert '--' to empty string to clear the field
+		const impactValue = newImpact === '--' ? '' : newImpact;
 		const requestInit = {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ control_impact: newImpact })
+			body: JSON.stringify({ control_impact: impactValue })
 		};
 		try {
 			const response = await fetch(endpoint, requestInit);

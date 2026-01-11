@@ -1,9 +1,10 @@
 from itertools import chain
 import json
 from django.db import IntegrityError
-from django.db.models import F, Q, IntegerField, OuterRef, Subquery
+from django.db.models import F, Q, IntegerField, OuterRef, Subquery, Exists
+from django.db import models
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, viewsets, status
+from rest_framework import filters, generics
 from django.conf import settings
 
 from rest_framework.status import (
@@ -12,6 +13,7 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND,
+    HTTP_409_CONFLICT,
     HTTP_422_UNPROCESSABLE_ENTITY,
 )
 from rest_framework.parsers import FileUploadParser
@@ -20,7 +22,7 @@ from django.http import HttpResponse
 
 import django_filters as df
 from core.helpers import get_sorted_requirement_nodes
-from core.models import StoredLibrary, LoadedLibrary, Framework
+from core.models import StoredLibrary, LoadedLibrary, Framework, LibraryUpdater
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
@@ -75,66 +77,30 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
         ),
         method="filter_object_type",
     )
-    mapping_suggested = df.BooleanFilter(
-        method="filter_mapping_suggested",
+    is_loaded = df.BooleanFilter(
+        method="filter_is_loaded",
+    )
+    is_custom = df.BooleanFilter(
+        method="filter_is_custom",
+    )
+    is_update = df.BooleanFilter(
+        method="filter_is_update",
     )
 
-    def filter_mapping_suggested(self, queryset, name, value):
-        """
-        Returns StoredLibraries containing at least one mapping with a source framework already loaded
-        """
+    def filter_is_loaded(self, queryset, name, value):
+        return queryset.filter(is_loaded=value)
 
-        def _extract_requirement_mappings(content):
-            """Extract requirement mappings from library content, handling both dict and list formats."""
-            mapping_set = content.get("requirement_mapping_set") or content.get(
-                "requirement_mapping_sets", []
+    def filter_is_custom(self, queryset, name, value):
+        return queryset.filter(builtin=not value)
+
+    def filter_is_update(self, queryset, name, value):
+        return queryset.annotate(
+            _is_update=Exists(
+                LoadedLibrary.objects.filter(
+                    urn=OuterRef("urn"), version__lt=OuterRef("version")
+                )
             )
-
-            if isinstance(mapping_set, dict):
-                return [mapping_set]
-            elif isinstance(mapping_set, list):
-                return mapping_set
-            else:
-                return []
-
-        def _has_matching_source_framework(requirement_mappings, loaded_framework_urns):
-            """Check if any mapping has a source framework that's loaded."""
-            return any(
-                mapping.get("source_framework_urn") in loaded_framework_urns
-                for mapping in requirement_mappings
-            )
-
-        if not value:
-            return queryset
-
-        # Get all loaded framework URNs and library URNs in single queries
-        loaded_framework_urns = set(Framework.objects.values_list("urn", flat=True))
-        loaded_library_urns = set(LoadedLibrary.objects.values_list("urn", flat=True))
-
-        # Early return if no loaded frameworks
-        if not loaded_framework_urns:
-            return queryset.none()
-
-        # Filter to libraries that have requirement mappings
-        queryset_with_mappings = queryset.filter(
-            Q(content__requirement_mapping_set__isnull=False)
-            | Q(content__requirement_mapping_sets__isnull=False)
-        ).exclude(urn__in=loaded_library_urns)
-
-        # Extract libraries with matching source frameworks
-        matching_library_pks = []
-
-        for (
-            library
-        ) in queryset_with_mappings.iterator():  # Use iterator for memory efficiency
-            requirement_mappings = _extract_requirement_mappings(library.content)
-
-            if _has_matching_source_framework(
-                requirement_mappings, loaded_framework_urns
-            ):
-                matching_library_pks.append(library.pk)
-
-        return queryset.filter(pk__in=matching_library_pks)
+        ).filter(_is_update=value)
 
     def filter_object_type(self, queryset, name, value: list[str]):
         # For backward compatibility
@@ -159,6 +125,7 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
             "packager",
             "provider",
             "object_type",
+            "filtering_labels",
         ]
 
 
@@ -173,12 +140,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
     search_fields = ["name", "description", "urn", "ref_id"]
 
-    def get_queryset(self):
-        qs = super().get_queryset()
-        return qs.filter(
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        )
+    def get_queryset(self) -> models.query.QuerySet:
+        return super().get_queryset().prefetch_related("filtering_labels")
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -224,6 +187,40 @@ class StoredLibraryViewSet(BaseModelViewSet):
         lib.delete()
         return Response(status=HTTP_204_NO_CONTENT)
 
+    @action(detail=True, methods=["post"])
+    def unload(self, request, pk):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="delete_loadedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
+
+        try:
+            key = "urn" if pk.startswith("urn:") else "id"
+            libraries = StoredLibrary.objects.filter(**{key: pk})
+            library = max(libraries, key=lambda lib: lib.version)
+        except:
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+
+        loaded_library = library.get_loaded_library()
+        if loaded_library is None:
+            return Response(data="Loaded library not found.", status=HTTP_404_NOT_FOUND)
+
+        try:
+            loaded_library.delete()
+        except:
+            return Response(
+                data="Loaded library can't be deleted because it's currently being used.",
+                status=HTTP_409_CONFLICT,
+            )
+
+        # Delete a libary if it's a "fake" one (one created by the storelibraries django command to prevent invisible loaded libraries.)
+        if not library.content:
+            library.delete()
+
+        return Response({"status": "success"})
+
     @action(detail=True, methods=["post"], url_path="import")
     def import_library(self, request, pk):
         if not RoleAssignment.is_access_allowed(
@@ -232,6 +229,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             folder=Folder.get_root_folder(),
         ):
             return Response(status=HTTP_403_FORBIDDEN)
+
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             libraries = StoredLibrary.objects.filter(  # The get method raise an exception if multiple objects are found
@@ -251,7 +249,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     status=HTTP_400_BAD_REQUEST,
                 )  # This can cause translation issues
             return Response({"status": "success"})
-        except Exception:
+        except Exception as e:
+            logger.error("Failed to load library", error=e)
             return Response(
                 {"error": "Failed to load library"},  # This must translated
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
@@ -268,14 +267,13 @@ class StoredLibraryViewSet(BaseModelViewSet):
         library_objects = lib.content  # We may need caching for this
         if not (framework := library_objects.get("framework")):
             return Response(
-                data="This library does not include a framework.",
+                data="This library doesn't contain any framework.",
                 status=HTTP_400_BAD_REQUEST,
             )
 
         preview = preview_library(framework)
-        return Response(
-            get_sorted_requirement_nodes(preview.get("requirement_nodes"), None, None)
-        )
+        requirement_nodes = preview.get("requirement_nodes")
+        return Response(get_sorted_requirement_nodes(requirement_nodes, None, None))
 
     @action(detail=False, methods=["post"], url_path="upload")
     def upload_library(self, request):
@@ -293,6 +291,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
             try:
                 library = StoredLibrary.store_library_content(content)
+                if library is not None:
+                    library.load()
+
                 return Response(
                     StoredLibrarySerializer(library).data, status=HTTP_201_CREATED
                 )
@@ -482,7 +483,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(**{key: pk})
-        except:
+        except Exception:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib._objects)
 
@@ -493,7 +494,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(**{key: pk})
-        except:
+        except Exception:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         if not lib.frameworks.exists():
@@ -516,6 +517,14 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             folder=Folder.get_root_folder(),
         ):
             return Response(status=HTTP_403_FORBIDDEN)
+        strategy = request.query_params.get("action")
+        if strategy and strategy not in ["rule_of_three", "reset", "clamp"]:
+            return Response(
+                {
+                    "error": "Invalid strategy. Must be one of 'rule_of_three', 'reset', 'clamp'."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             key = "urn" if pk.startswith("urn:") else "id"
             library = LoadedLibrary.objects.get(**{key: pk})
@@ -523,13 +532,35 @@ class LoadedLibraryViewSet(BaseModelViewSet):
             return Response(
                 data="libraryNotFound", status=HTTP_404_NOT_FOUND
             )  # Error messages could be returned as JSON instead
-
-        error_msg = library.update()
+        try:
+            error_msg = library.update(strategy=strategy)
+        except LibraryUpdater.ScoreChangeDetected as e:
+            # Score boundaries changed - need user decision
+            return Response(
+                {
+                    "error": "score_change_detected",
+                    "framework_urn": e.framework_urn,
+                    "prev_scores": e.prev_scores,
+                    "new_scores": e.new_scores,
+                    "affected_assessments": e.affected_assessments,
+                    "strategies": e.strategies,
+                    "message": "Score boundaries have changed. Please choose a strategy.",
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+        except Exception as e:
+            logger.error("Failed to update library", error=e)
+            return Response(
+                {"error": "libraryUpdateFailed"},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
         if error_msg is None:
-            return Response(status=HTTP_204_NO_CONTENT)
-        return Response(
-            error_msg, status=HTTP_422_UNPROCESSABLE_ENTITY
-        )  # We must make at least one error message
+            return Response({"status": "success"})
+        else:
+            return Response(
+                {"status": "error", "error": error_msg},
+                status=HTTP_400_BAD_REQUEST,
+            )
 
     @action(methods=("get",), detail=False, url_path="available-updates")
     def available_updates(self, request):

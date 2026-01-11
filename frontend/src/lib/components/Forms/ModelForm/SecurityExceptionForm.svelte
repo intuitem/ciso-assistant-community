@@ -16,6 +16,7 @@
 	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModalStore } from '$lib/components/Modals/stores';
+	import MarkdownField from '../MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -136,6 +137,14 @@
 	disableDoubleDash="true"
 	bind:cachedValue={formDataCache['status']}
 />
+<MarkdownField
+	{form}
+	field="observation"
+	label={m.observation()}
+	helpText={m.observationHelpText()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
+/>
 <TextField
 	type="date"
 	{form}
@@ -172,6 +181,7 @@
 		<div class="mt-4">
 			<button
 				class="btn bg-gray-300 h-10 w-10"
+				aria-label={m.addAppliedControl()}
 				onclick={(_) => modalAppliedControlCreateForm('applied_controls')}
 				type="button"><i class="fa-solid fa-plus text-sm"></i></button
 			>

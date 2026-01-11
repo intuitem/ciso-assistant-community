@@ -1,15 +1,13 @@
-import hashlib
-import hmac
 import json
 import uuid
 
-from django_filters.rest_framework import DjangoFilterBackend
 import structlog
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics, permissions, status, viewsets
 from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
@@ -106,6 +104,12 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
     API endpoint for creating, viewing, updating, and deleting Integration Configurations.
     """
 
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+
     queryset = IntegrationConfiguration.objects.select_related(
         "provider", "folder"
     ).all()
@@ -172,6 +176,62 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+    @action(detail=True, methods=["post"], url_path="rpc")
+    def execute_rpc(self, request, pk=None):
+        """
+        Generic endpoint for interactive integration commands.
+        Payload: { "action": "get_tables", "params": { ... } }
+        """
+        config = get_object_or_404(IntegrationConfiguration, pk=pk)
+
+        action_name = request.data.get("action")
+        params = request.data.get("params", {})
+
+        if not action_name:
+            return Response(
+                {"error": "Action is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            orchestrator = IntegrationRegistry.get_orchestrator(config)
+
+            result = orchestrator.execute_action(action_name, params)
+
+            return Response({"result": result})
+
+        except NotImplementedError:
+            return Response(
+                {
+                    "error": f"Action '{action_name}' not supported by provider '{config.provider}'"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except ValueError:
+            logger.warning(
+                "ValueError while executing integration RPC action",
+                action_name=action_name,
+                config_id=config.pk,
+                exc_info=True,
+            )
+            return Response(
+                {"error": "Invalid request parameters"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception:
+            # Catch connectivity errors from the client
+            logger.error(
+                "RPC execution for integration config raised an exception",
+                config_id=pk,
+                action_name=action_name,
+                exc_info=True,
+            )
+            return Response(
+                {
+                    "error": "An unexpected error occurred while executing the requested action."
+                },
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
 
 @method_decorator(csrf_exempt, name="dispatch")
 class IntegrationWebhookView(View):
@@ -197,74 +257,38 @@ class IntegrationWebhookView(View):
             )
             return JsonResponse({"error": "Configuration not found"}, status=404)
 
-        # Authenticate the webhook using HMAC Signature
-
-        # Get the signature from the header (Jira uses X-Hub-Signature)
-        signature_header = request.headers.get("X-Hub-Signature")
-
-        if not signature_header:
-            logger.warning(
-                f"Webhook for config {config_id} missing X-Hub-Signature header."
-            )
-            return JsonResponse(
-                {"error": "Authentication required: Missing signature"}, status=401
-            )
-
-        if not config.webhook_secret:
-            logger.error(f"Webhook secret not configured for config {config_id}.")
+        # Instantiate the correct orchestrator
+        try:
+            orchestrator = IntegrationRegistry.get_orchestrator(config)
+        except Exception as e:
+            logger.error(f"Failed to load orchestrator for config {config_id}: {e}")
             return JsonResponse({"error": "Internal configuration error"}, status=500)
 
-        # Extract the signature hash
+        # Delegate authentication/validation
+        # The orchestrator checks headers, secrets, signatures etc.
         try:
-            method, provided_signature = signature_header.split("=", 1)
-            if method.lower() != "sha256":
-                logger.warning(
-                    "Unsupported signature method for config",
-                    method=method,
-                    config_id=config_id,
-                )
-                return JsonResponse(
-                    {"error": "Unsupported signature method"}, status=400
-                )
-        except ValueError:
-            logger.warning(f"Invalid signature header format for config {config_id}.")
-            return JsonResponse({"error": "Invalid signature format"}, status=400)
+            if not orchestrator.validate_webhook_request(request):
+                return JsonResponse({"error": "Authentication failed"}, status=401)
+        except Exception:
+            logger.warning(
+                "Webhook validation failed", config_id=config_id, exc_info=True
+            )
+            return JsonResponse({"error": "Webhook validation failed"}, status=403)
 
-        # Calculate the expected signature
-        expected_signature = hmac.new(
-            config.webhook_secret.encode("utf-8"),
-            request.body,  # request.body is bytes
-            hashlib.sha256,
-        ).hexdigest()
-
-        # Compare signatures using a constant-time comparison
-        if not hmac.compare_digest(provided_signature, expected_signature):
-            logger.warning(f"Webhook signature mismatch for config {config_id}.")
-            return JsonResponse({"error": "Invalid signature"}, status=403)
-
-        # --- Signature is valid ---
-
-        # Parse the payload
+        # Parse payload
         try:
             payload = json.loads(request.body)
         except json.JSONDecodeError:
-            logger.warning(f"Webhook for config {config_id} sent invalid JSON.")
             return JsonResponse({"error": "Invalid JSON payload"}, status=400)
 
-        # Extract provider-specific event type
-        event_type = payload.get("webhookEvent")
+        # Extract event type
+        event_type = orchestrator.extract_webhook_event_type(payload)
         if not event_type:
-            logger.warning(
-                f"Webhook payload for config {config_id} missing 'webhookEvent' field."
-            )
-            return JsonResponse({"error": "Missing event type"}, status=400)
+            return JsonResponse({"error": "Could not determine event type"}, status=400)
 
-        # Dispatch to async task
+        # 5. Dispatch to Huey
         process_webhook_event.schedule(args=(config.id, event_type, payload), delay=1)
 
-        logger.info(
-            f"Webhook event '{event_type}' for config {config_id} accepted (signature validated)."
-        )
         return HttpResponse(status=202)
 
 

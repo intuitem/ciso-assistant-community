@@ -53,6 +53,18 @@ ALLOWED_PERMISSION_APPS = (
     "tprm",
     "privacy",
     "resilience",
+    "crq",
+    "pmbok",
+    "iam",
+)
+
+IGNORED_PERMISSION_MODELS = (
+    "personalaccesstoken",
+    "role",
+    "roleassignment",
+    "usergroup",
+    "ssosettings",
+    "historicalmetric",
 )
 
 
@@ -651,13 +663,15 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 fail_silently=False,
                 html_message=email,
             )
-            logger.info("email sent", recipient=self.email, subject=subject)
+            logger.info(
+                "Email sent successfully", recipient=self.email, subject=subject
+            )
         except Exception as primary_exception:
             logger.error(
-                "primary mailer failure, trying rescue",
+                "Primary mail server failure, trying rescue",
                 recipient=self.email,
                 subject=subject,
-                error=primary_exception,
+                error=str(primary_exception),
                 email_host=EMAIL_HOST,
                 email_port=EMAIL_PORT,
                 email_host_user=EMAIL_HOST_USER,
@@ -679,13 +693,17 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
                             [self.email],
                             connection=new_connection,
                         ).send()
-                    logger.info("email sent", recipient=self.email, subject=subject)
-                except Exception as rescue_exception:
-                    logger.error(
-                        "rescue mailer failure",
+                    logger.info(
+                        "Email sent via rescue server",
                         recipient=self.email,
                         subject=subject,
-                        error=rescue_exception,
+                    )
+                except Exception as rescue_exception:
+                    logger.error(
+                        "Rescue mail server failure",
+                        recipient=self.email,
+                        subject=subject,
+                        error=str(rescue_exception),
                         email_host=EMAIL_HOST_RESCUE,
                         email_port=EMAIL_PORT_RESCUE,
                         email_username=EMAIL_HOST_USER_RESCUE,
@@ -838,20 +856,19 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         Determines if a user has specified permission on a specified folder
         """
-        add_tag_permission = Permission.objects.get(codename="add_filteringlabel")
+        add_filteringlabel = Permission.objects.get(codename="add_filteringlabel")
         for ra in RoleAssignment.get_role_assignments(user):
-            if (
-                (perm == add_tag_permission) and perm in ra.role.permissions.all()
-            ):  # Allow any user to add tags if he has the permission
-                return True
-            f = folder
-            while f is not None:
-                if (
-                    f in ra.perimeter_folders.all()
-                    and perm in ra.role.permissions.all()
-                ):
+            ra_perimeter = ra.perimeter_folders.all()
+            if perm in ra.role.permissions.all():
+                if perm == add_filteringlabel:
+                    # Allow any user to add filtering labels if he has the permission in any folder
+                    # Necessary as the labels are stored in global folder
                     return True
-                f = f.parent_folder
+                f = folder
+                while f is not None:
+                    if f in ra_perimeter:
+                        return True
+                    f = f.parent_folder
         return False
 
     @staticmethod
@@ -864,11 +881,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         obj = object_type.objects.filter(id=id).first()
         if not obj:
             return False
-        class_name = object_type.__name__.lower()
-        permission = Permission.objects.get(codename="view_" + class_name)
-        return RoleAssignment.is_access_allowed(
-            user, permission, Folder.get_folder(obj)
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_folder(obj), user, object_type
         )
+        return id in viewable_ids
 
     @staticmethod
     def get_accessible_folders(
@@ -961,6 +977,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             for p in permissions & ra_permissions:
                 for f in target_folders:
                     result_folders[f].add(p)
+
         for f in result_folders:
             if hasattr(object_type, "folder"):
                 objects_ids = object_type.objects.filter(folder=f).values_list(
@@ -982,11 +999,16 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 objects_ids = [f.id]
             elif class_name == "permission":
                 # Permissions have no folder, so we don't filter them, we just rely on view_permission
-                objects_ids = Permission.objects.filter(
-                    content_type__app_label__in=ALLOWED_PERMISSION_APPS
-                ).values_list("id", flat=True)
+                objects_ids = (
+                    Permission.objects.filter(
+                        content_type__app_label__in=ALLOWED_PERMISSION_APPS
+                    )
+                    .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
+                    .values_list("id", flat=True)
+                )
             else:
                 raise NotImplementedError("type not supported")
+
             if permission_view in result_folders[f]:
                 result_view.update(objects_ids)
             if permission_change in result_folders[f]:

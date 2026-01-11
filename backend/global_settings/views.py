@@ -138,6 +138,8 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "risk_matrix_labels": "ISO",
             "mapping_max_depth": 3,
             "allow_self_validation": False,
+            "show_warning_external_links": True,
+            "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")

@@ -96,6 +96,13 @@ function createPersistedAuditFilters() {
 				return filters;
 			});
 		},
+		setExtendedResults(id, extendedResultsArray) {
+			update((filters) => {
+				if (!filters[id]) filters[id] = {};
+				filters[id].selectedExtendedResults = extendedResultsArray;
+				return filters;
+			});
+		},
 		setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes) {
 			update((filters) => {
 				if (!filters[id]) filters[id] = {};

@@ -106,6 +106,16 @@
 	bind:cachedValue={formDataCache['associated_controls']}
 	label={m.associatedAppliedControls()}
 />
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
+	field="evidences"
+	cacheLock={cacheLocks['evidences']}
+	bind:cachedValue={formDataCache['evidences']}
+	label={m.evidences()}
+/>
 <!-- author = models.ForeignKey( -->
 <!--     User, on_delete=models.SET_NULL, null=True, related_name="authored_processings" -->
 <!-- ) -->

@@ -12,8 +12,9 @@ Note: MCP technology is still maturing so the instructions might vary.
 ### instructions
 
 1. Login to CISO Assistant and generate a PAT: click on the three dots next to the email -> my profile -> settings
-2. Under the `cli` folder, update the `.mcp.env` with your token
-3. Update the settings of mcpServers of your Claude Desktop app. The path will vary depending on your OS. On MacOS it's under `~/Library/Application\ Support/Claude/claude_desktop_config.json`. Make sure to put the **full absolute paths** for `uv` binary and the `cli` folder of your cloned repo
+2. Under the `cli` folder, copy the `.mcp.env.example` as `.mcp.env`
+3. Under the `cli` folder, update the copied `.mcp.env` with your credentials
+4. Update the settings of mcpServers of your Claude Desktop app. The path will vary depending on your OS. On MacOS it's under `~/Library/Application\ Support/Claude/claude_desktop_config.json`. Make sure to put the **full absolute paths** for `uv` binary and the `cli` folder of your cloned repo
 
 Here is a sample:
 
