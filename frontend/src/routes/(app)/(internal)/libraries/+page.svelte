@@ -67,12 +67,16 @@
 		}}
 	>
 		{#snippet quickFilters(filterValues, form, invalidateTable)}
-			<div class="flex gap-1">
-				{#each ['frameworks', 'reference_controls', 'risk_matrices', 'threats', 'metric_definitions'] as objectType}
+			<div
+				class="flex flex-wrap gap-2 p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200"
+			>
+				{#each [{ key: 'frameworks', icon: 'fa-book-open', label: safeTranslate('frameworks'), selectedClass: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-blue-200', hoverClass: 'hover:border-blue-400 hover:bg-blue-50' }, { key: 'reference_controls', icon: 'fa-shield-halved', label: safeTranslate('reference_controls'), selectedClass: 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-200', hoverClass: 'hover:border-emerald-400 hover:bg-emerald-50' }, { key: 'risk_matrices', icon: 'fa-table-cells', label: safeTranslate('risk_matrices'), selectedClass: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-amber-200', hoverClass: 'hover:border-amber-400 hover:bg-amber-50' }, { key: 'threats', icon: 'fa-triangle-exclamation', label: safeTranslate('threats'), selectedClass: 'bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-200', hoverClass: 'hover:border-red-400 hover:bg-red-50' }, { key: 'metric_definitions', icon: 'fa-chart-line', label: safeTranslate('metric_definitions'), selectedClass: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-purple-200', hoverClass: 'hover:border-purple-400 hover:bg-purple-50' }] as { key: objectType, icon, label, selectedClass, hoverClass }}
 					<button
-						class="ml-2 p-2 border-2 rounded-lg {quickFilterSelected[objectType]
-							? 'border-primary-800'
-							: 'border-primary-100 hover:border-primary-500'}"
+						class="group relative px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ease-out transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md {quickFilterSelected[
+							objectType
+						]
+							? selectedClass
+							: `bg-white text-gray-700 border-2 border-gray-300 ${hoverClass}`}"
 						onclick={() => {
 							const filterValue = filterValues['object_type'];
 							const filteredTypes = filterValue.map((obj) => obj.value);
@@ -96,8 +100,28 @@
 							});
 
 							invalidateTable();
-						}}>{safeTranslate(objectType)}</button
+						}}
 					>
+						<span class="flex items-center gap-2">
+							<i
+								class="fa-solid {icon} transition-transform duration-200 {quickFilterSelected[
+									objectType
+								]
+									? 'scale-110'
+									: 'group-hover:scale-110'}"
+							></i>
+							<span class="font-semibold">{label}</span>
+							{#if quickFilterSelected[objectType]}
+								<svg class="h-4 w-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+									<path
+										fill-rule="evenodd"
+										d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							{/if}
+						</span>
+					</button>
 				{/each}
 			</div>
 		{/snippet}
