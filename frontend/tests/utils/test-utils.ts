@@ -50,6 +50,36 @@ type Fixtures = {
 };
 
 export const test = base.extend<Fixtures>({
+	context: async ({ context }, use) => {
+		await context.addInitScript(() => {
+			// @ts-ignore
+			window.__toastLog = [];
+
+			const record = (el: Element) => {
+				const text = (el.textContent ?? '').trim();
+				if (!text) return;
+				// @ts-ignore
+				window.__toastLog.push({ text, ts: Date.now() });
+			};
+
+			const scan = (root: ParentNode) => {
+				root.querySelectorAll?.('[data-testid="toast"]').forEach(record);
+			};
+
+			document.addEventListener('DOMContentLoaded', () => scan(document));
+
+			new MutationObserver((mutations) => {
+				for (const m of mutations) {
+					for (const node of m.addedNodes) {
+						if (!(node instanceof Element)) continue;
+						if (node.matches?.('[data-testid="toast"]')) record(node);
+						scan(node);
+					}
+				}
+			}).observe(document.documentElement, { childList: true, subtree: true });
+		});
+		await use(context);
+	},
 	mailer: async ({ context }, use) => {
 		const mailer = new Mailer(await context.newPage());
 		await mailer.goto();

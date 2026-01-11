@@ -76,14 +76,36 @@ export abstract class BasePage {
 		flags?: string | undefined,
 		options?: { timeout?: number } | undefined
 	) {
-		const toast = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
+		type ToastLogEntry = { text: string; ts: number };
+		const re = new RegExp(value, flags);
+		const timeout = options?.timeout ?? 5000;
+
+		const startIndex = await this.page.evaluate(() => {
+			// @ts-ignore
+			return (window.__toastLog ?? []).length as number;
+		});
+
+		let matched: ToastLogEntry | null = null;
+
 		await expect
-			.poll(async () => (await toast.count()) > 0, { timeout: options?.timeout ?? 5000 })
+			.poll(
+				async () => {
+					const log = await this.page.evaluate(() => {
+						// @ts-ignore
+						return (window.__toastLog ?? []) as ToastLogEntry[];
+					});
+					matched = log.slice(startIndex).find((entry) => re.test(entry.text)) ?? null;
+					return !!matched;
+				},
+				{ timeout }
+			)
 			.toBeTruthy();
+
+		const toast = this.page.getByTestId('toast').filter({ hasText: re });
 		const dismissButton = toast.first().getByLabel('Dismiss toast');
 		if (await dismissButton.isVisible().catch(() => false)) {
 			await dismissButton.click();
 		}
-		return toast;
+		return { toast, matched };
 	}
 }
