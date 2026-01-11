@@ -78,8 +78,8 @@ export abstract class BasePage {
 	) {
 		const toast = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
 		await expect
-			.poll(async () => (await toast.count()) > 0)
-			.toBeTruthy({ timeout: options?.timeout ?? 5000 });
+			.poll(async () => (await toast.count()) > 0, { timeout: options?.timeout ?? 5000 })
+			.toBeTruthy();
 		const dismissButton = toast.first().getByLabel('Dismiss toast');
 		if (await dismissButton.isVisible().catch(() => false)) {
 			await dismissButton.click();
