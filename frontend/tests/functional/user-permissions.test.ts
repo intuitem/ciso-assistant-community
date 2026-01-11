@@ -42,10 +42,11 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 				last_name: vars.user.lastName,
 				user_groups: [`${vars.folderName} - ${userGroupData.name}`]
 			});
-			await usersPage.form.saveButton.click();
-			await usersPage.isToastVisible(
+			const userUpdatedToast = usersPage.isToastVisible(
 				'The user: ' + vars.user.email + ' has been successfully updated.+'
 			);
+			await usersPage.form.saveButton.click();
+			await userUpdatedToast;
 
 			await sideBar.logout();
 
@@ -75,11 +76,11 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 				await setLoginPage.newPasswordInput.fill(vars.user.password);
 				await setLoginPage.confirmPasswordInput.fill(vars.user.password);
 			}
-			await setLoginPage.setPasswordButton.click();
-
-			await setLoginPage.isToastVisible(
+			const passwordSetToast = setLoginPage.isToastVisible(
 				'Your password has been successfully set. Welcome to CISO Assistant!'
 			);
+			await setLoginPage.setPasswordButton.click();
+			await passwordSetToast;
 
 			await setLoginPage.login(vars.user.email, vars.user.password);
 			await expect(setLoginPage.page).toHaveURL('/analytics');
