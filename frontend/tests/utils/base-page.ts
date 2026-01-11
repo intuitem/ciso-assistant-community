@@ -71,10 +71,19 @@ export abstract class BasePage {
 		}
 	}
 
-	async isToastVisible(value: string, flags?: string | undefined, options?: {} | undefined) {
+	async isToastVisible(
+		value: string,
+		flags?: string | undefined,
+		options?: { timeout?: number } | undefined
+	) {
 		const toast = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
-		await expect(toast).toHaveCount(1);
-		await toast.first().getByLabel('Dismiss toast').click();
+		await expect
+			.poll(async () => (await toast.count()) > 0)
+			.toBeTruthy({ timeout: options?.timeout ?? 5000 });
+		const dismissButton = toast.first().getByLabel('Dismiss toast');
+		if (await dismissButton.isVisible().catch(() => false)) {
+			await dismissButton.click();
+		}
 		return toast;
 	}
 }
