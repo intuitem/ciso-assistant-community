@@ -302,9 +302,12 @@ test('third-party representative can fill their assigned audit', async ({
 			);
 			editedRequirementAssessment.content.click();
 			await page.waitForURL('/requirement-assessments/**');
+			const detailRequirements = page
+				.getByRole('listitem')
+				.filter({ has: page.getByRole('button', { name: /.*Observation.*/ }) });
 			for (const { index, answer } of responses) {
 				await expect(
-					assessableRequirements.nth(index).getByRole('button', { name: answer }).first()
+					detailRequirements.nth(index).getByRole('button', { name: answer }).first()
 				).toHaveClass(/.*preset-filled.*/);
 			}
 		});
