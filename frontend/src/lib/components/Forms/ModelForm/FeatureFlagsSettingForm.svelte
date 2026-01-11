@@ -144,8 +144,8 @@
 					label: m.businessImpactAnalysis(),
 					description: m.businessImpactAnalysisDescription()
 				},
-				{ 
-					field: 'campaigns', 
+				{
+					field: 'campaigns',
 					label: m.campaigns(),
 					description: m.campaignsDescription()
 				}
