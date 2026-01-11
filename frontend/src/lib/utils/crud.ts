@@ -1259,7 +1259,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'id' },
 			{ field: 'name' },
 			{ field: 'description' },
-			{ field: 'ref_id' },
 			{ field: 'category' },
 			{ field: 'retention' },
 			{ field: 'deletion_policy' },
