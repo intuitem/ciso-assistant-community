@@ -2815,6 +2815,7 @@
 	"requirementMappingSetsDescription": "Correspondances entre différents référentiels et normes",
 	"riskMatricesDescription": "Matrices de risque pour l'évaluation de probabilité et d'impact",
 	"businessImpactAnalysisDescription": "Analyse d'impact métier et plan de continuité",
+	"campaignsDescription": "Gestion de campagnes d'audit",
 	"incidentsDescription": "Incidents de sécurité et leur gestion",
 	"taskTemplatesDescription": "Tâches ponctuelles ou périodiques pour organiser vos mesures",
 	"policiesDescription": "Politiques et procédures organisationnelles",
