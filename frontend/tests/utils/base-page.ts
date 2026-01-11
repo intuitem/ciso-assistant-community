@@ -73,9 +73,8 @@ export abstract class BasePage {
 
 	async isToastVisible(value: string, flags?: string | undefined, options?: {} | undefined) {
 		const toast = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
-		await expect(toast).toBeVisible(options);
-		await toast.getByLabel('Dismiss toast').click();
-		// await expect(toast).toBeHidden();
+		await expect(toast).toHaveCount(1);
+		await toast.first().getByLabel('Dismiss toast').click();
 		return toast;
 	}
 }

@@ -61,8 +61,9 @@ test('forgot password process is working properly', async ({
 		new_password: testData.user.password,
 		confirm_new_password: testData.user.password
 	});
+	const passwordSetToast = usersPage.isToastVisible('Your password has been successfully set');
 	await usersPage.form.saveButton.click();
-	await usersPage.isToastVisible('Your password has been successfully set');
+	await passwordSetToast;
 
 	await sideBar.logout();
 
