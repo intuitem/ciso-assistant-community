@@ -305,6 +305,7 @@ test('third-party representative can fill their assigned audit', async ({
 			const detailRequirements = page
 				.getByRole('listitem')
 				.filter({ has: page.getByRole('button', { name: /.*Observation.*/ }) });
+			await expect(detailRequirements.nth(responses.length - 1)).toBeVisible();
 			for (const { index, answer } of responses) {
 				await expect(
 					detailRequirements.nth(index).getByRole('button', { name: answer }).first()
