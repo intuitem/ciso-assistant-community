@@ -866,7 +866,6 @@ export const dataTransferSchema = z.object({
 
 export const personalDataSchema = z.object({
 	...NameDescriptionMixin,
-	// ref_id: z.string().optional().default(''),
 	category: z.string(),
 	retention: z.string(),
 	deletion_policy: z.string(),
