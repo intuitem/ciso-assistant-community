@@ -222,43 +222,122 @@ python clica.py upload-attachment \
 - `--file`: Path to the file to upload
 - `--name`: Name of the existing evidence record to attach the file to
 
-### Instance Management Commands
+### Backup and Restore Commands
 
-#### `clone_instance`
+#### `backup_full`
 
-Creates a complete clone of a CISO Assistant instance by copying both the SQLite database and evidence attachments directory. This is useful for creating backups, testing environments, or migrating instances.
+Creates a complete backup of your CISO Assistant instance using a memory-efficient streaming approach. Supports resume capability for interrupted backups.
 
 ```bash
-python clica.py clone-instance \
-  --dest-db /path/to/backup/ciso-assistant.sqlite3 \
-  --dest-attachments /path/to/backup/attachments
+python clica.py backup-full --dest-dir ./db --batch-size 200 --resume
 ```
 
 **Parameters:**
 
-- `--source-db`: Path to source SQLite database (default: `../backend/db/ciso-assistant.sqlite3`)
-- `--dest-db`: Path to destination SQLite database (required)
-- `--source-attachments`: Path to source attachments directory (default: `../backend/db/attachments`)
-- `--dest-attachments`: Path to destination attachments directory (required)
-- `--force`: Overwrite destination files if they exist without prompting (optional)
+- `--dest-dir`: Destination directory to save backup files (default: `./db`)
+- `--batch-size`: Number of files to download per batch (default: 200)
+- `--resume/--no-resume`: Resume from existing manifest if backup was interrupted (default: True)
 
-**Features:**
+**Output:**
 
-- Validates source database is a valid SQLite file before cloning
-- Calculates and displays total size of data to be copied
-- Shows detailed summary before proceeding
-- Requires confirmation before starting the clone operation
-- Verifies copied database integrity after cloning
-- Provides detailed progress feedback
-- Creates necessary destination directories automatically
-- Handles permission errors and edge cases gracefully
+- `backup.json.gz`: Compressed database backup
+- `backup-manifest.jsonl`: JSON Lines manifest tracking all downloaded files with hashes
+- `attachments/evidence-revisions/`: Directory containing all attachment files with naming pattern `{evidence_id}_v{version}_{filename}`
 
-**Important Notes:**
+**How it works:**
 
-- The clone operation does not require API authentication (no TOKEN needed)
-- After cloning, update your CISO Assistant configuration to use the new database and attachments paths
-- For production use, consider stopping the CISO Assistant service before cloning to ensure data consistency
-- The cloned instance is a complete snapshot and can be used independently
+1. **Database Backup**: Downloads the database backup as `backup.json.gz`
+2. **Metadata Fetch**: Retrieves metadata for all attachments (pagination handled automatically)
+3. **Resume Logic**: Compares server metadata with local manifest to identify missing/changed files (based on SHA256 hash comparison)
+4. **Batch Download**: Downloads files in configurable batches using custom streaming protocol
+5. **Manifest Update**: Appends each successfully downloaded file to manifest (crash-safe, append-only)
+
+**Advantages:**
+
+- **No ZIP Processing**: Avoids loading large ZIP files into memory
+- **Resume Capability**: Can continue interrupted backups without re-downloading existing files
+- **Hash Verification**: Uses SHA256 hashes to detect file changes and skip unchanged files
+- **Memory Efficient**: Streams files in 1MB chunks, never loads full files in memory
+- **Progress Tracking**: Shows batch progress and total data downloaded
+
+**Notes:**
+
+- Requires `has_backup_permission` flag in your user profile
+- If backup is interrupted, simply run the same command again with `--resume` (default)
+- The manifest file tracks which files have been downloaded with their hashes
+- Files are only re-downloaded if their hash changes on the server
+
+#### `restore_full`
+
+Restores a complete backup of your CISO Assistant instance using a memory-efficient streaming approach. Supports resume capability for interrupted restores.
+
+```bash
+python clica.py restore-full --src-dir ./db --batch-size 200 --resume --verify-hashes
+```
+
+**Parameters:**
+
+- `--src-dir`: Source directory containing backup files (default: `./db`)
+- `--batch-size`: Number of files to upload per batch (default: 200)
+- `--resume/--no-resume`: Resume from existing manifest if restore was interrupted (default: True)
+- `--verify-hashes/--no-verify-hashes`: Verify local file hashes before upload (default: True)
+
+**Requirements:**
+
+- The source directory must contain `backup.json.gz`
+- The source directory must contain `backup-manifest.jsonl` (for attachments restore)
+- Attachments should be in `attachments/evidence-revisions/` directory
+- Requires `has_backup_permission` flag in your user profile
+
+**How it works:**
+
+1. **Database Restore**: Uploads and restores the database backup
+2. **Manifest Load**: Reads the backup manifest to identify files to upload
+3. **Hash Verification** (optional): Verifies local file hashes match manifest entries
+4. **Resume Logic**: Skips files already marked as uploaded in the manifest
+5. **Batch Upload**: Uploads files in configurable batches using custom streaming protocol
+6. **Server-Side Deduplication**: Server skips files if hash matches existing attachment (idempotent)
+7. **Manifest Update**: Marks successfully uploaded files in manifest after each batch
+
+**Advantages:**
+
+- **No ZIP Processing**: Avoids creating large ZIP files in memory
+- **Resume Capability**: Can continue interrupted restores without re-uploading existing files
+- **Hash Verification**: Validates file integrity before upload
+- **Idempotent**: Server skips files that already match (safe to re-run)
+- **Memory Efficient**: Streams files in batches, never loads all files in memory
+- **Partial Success Handling**: Continues processing even if some files fail, reports errors
+
+**Notes:**
+
+- The restore process happens in **two separate steps** (database first, then attachments)
+- After database restore, you'll need to regenerate your Personal Access Token
+- If restore is interrupted, run the same command again with `--resume` (default)
+- Files with hash mismatches (detected during `--verify-hashes`) are skipped and reported
+- Server validates uploaded file hashes and skips if they match existing attachments
+
+> [!WARNING]
+> Restoring a backup will **replace all existing data** in your CISO Assistant instance. Make sure you have a current backup before performing a restore operation.
+
+> [!TIP]
+> **Best Practices:**
+> - Run `backup-full` regularly to maintain disaster recovery capabilities
+> - Use `--batch-size` to tune performance based on your network and file sizes
+> - Keep the manifest file safe - it enables resume functionality
+> - After restore completes, regenerate your Personal Access Token immediately
+
+**Technical Details:**
+
+The backup/restore system uses a custom binary streaming protocol to avoid memory issues:
+
+- **Format**: Each file is transmitted as `[4-byte length][JSON header][file bytes]`
+- **Hashing**: SHA256 hashes computed using 1MB chunks (no full file in memory)
+- **Deduplication**: Files are skipped if their hash matches (both client and server-side)
+- **Manifest**: JSON Lines format allows incremental append (crash-safe)
+- **Batch Processing**: Configurable batch sizes balance efficiency vs memory usage
+
+### Instance Management Commands
+
 
 ## Data Formats
 
@@ -369,27 +448,21 @@ python clica.py upload-attachment \
   --name "Information Security Policy"
 ```
 
-### Clone Instance for Backup or Testing
+### Backup and Restore Operations
 
 ```bash
-# Create a complete backup of your instance
-python clica.py clone-instance \
-  --dest-db /backups/ciso-assistant-backup-$(date +%Y%m%d).sqlite3 \
-  --dest-attachments /backups/attachments-backup-$(date +%Y%m%d)
+# Create a full backup with timestamp
+BACKUP_DATE=$(date +%Y-%m-%d_%H-%M-%S)
+python clica.py backup-full --dest-dir "./backups/backup-$BACKUP_DATE"
 
-# Clone to a test environment
-python clica.py clone-instance \
-  --source-db /prod/db/ciso-assistant.sqlite3 \
-  --source-attachments /prod/db/attachments \
-  --dest-db /test/db/ciso-assistant.sqlite3 \
-  --dest-attachments /test/db/attachments
-```
-# Force database and attachments directory overwrite without prompts
-```bash
-python clica.py clone-instance \
-  --dest-db /backup/ciso-assistant.sqlite3 \
-  --dest-attachments /backup/attachments \
-  --force
+# List backups
+ls -lh ./backups/
+
+# Restore from a specific backup
+python clica.py restore-full --src-dir "./backups/backup-2024-01-15_10-30-00"
+
+# Automated daily backup (can be added to cron)
+python clica.py backup-full --dest-dir "/var/backups/ciso-assistant/$(date +%Y-%m-%d)"
 ```
 
 ## Troubleshooting
