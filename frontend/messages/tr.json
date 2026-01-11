@@ -1796,5 +1796,6 @@
 		}
 	],
 	"cascadeAffectedHint": "Aşağıdaki öğeler sistemde kalacak ancak bu nesneye olan bağlantılar kaldırılacaktır.",
-	"libraryFilteringLabels": "Kütüphane etiketleri"
+	"libraryFilteringLabels": "Kütüphane etiketleri",
+	"campaignsDescription": "Denetim kampanyaları yönetimi"
 }

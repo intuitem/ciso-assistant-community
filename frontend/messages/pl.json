@@ -1803,5 +1803,6 @@
 		}
 	],
 	"cascadeAffectedHint": "Poniższe elementy pozostają w systemie, ale ich linki do tego obiektu zostaną usunięte.",
-	"libraryFilteringLabels": "Etykiety biblioteki"
+	"libraryFilteringLabels": "Etykiety biblioteki",
+	"campaignsDescription": "Zarządzanie kampaniami audytowymi"
 }
