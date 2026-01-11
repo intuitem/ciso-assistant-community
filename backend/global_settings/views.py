@@ -21,16 +21,11 @@ logger = structlog.get_logger(__name__)
 
 
 class GlobalSettingsSerializerFactory(SerializerFactory):
-    """Factory to get a serializer class from a list of modules.
-    Attributes:
-    modules (list): List of module names to search for the serializer.
+    """Serializer factory that always looks for `<BaseName>Serializer` and gives precedence
+    to later modules in the provided list.
     """
 
-    def __init__(self, *modules: str):
-        # Reverse to prioritize later modules
-        self.modules = list(reversed(modules))
-
-    def get_serializer(self, base_name: str, action: str = "default"):
+    def get_serializer(self, base_name: str):
         return self._get_serializer_class(f"{base_name}Serializer")
 
 
