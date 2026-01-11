@@ -2,6 +2,9 @@
 Star the project 🌟 to get releases notification and help growing the community!
 </p>
 
+
+
+
 <p align="center">
     <a href="https://trendshift.io/repositories/9343" target="_blank"><img src="https://trendshift.io/api/badge/repositories/9343" alt="intuitem%2Fciso-assistant-community | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
     <br />
@@ -24,13 +27,14 @@ Star the project 🌟 to get releases notification and help growing the communit
 
 ![](gh_banner.png)
 
-[![CodeFactor](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community/badge)](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community)
-[![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
-[![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
-![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
-<a href="https://intuitem.gitbook.io/ciso-assistant"><img src="https://img.shields.io/static/v1?message=Documentation&logo=gitbook&logoColor=ffffff&label=%20&labelColor=5c5c5c&color=F4E28D"></a>
-<a href="https://ca-api-doc.pages.dev/"><img src="https://img.shields.io/static/v1?message=API&logo=swagger&label=%20"></a>
+![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community?style=for-the-badge)
+![GitHub contributors](https://img.shields.io/github/contributors-anon/intuitem/ciso-assistant-community?style=for-the-badge&color=%235D4596)
+![GitHub Repo stars](https://img.shields.io/github/stars/intuitem/ciso-assistant-community?style=for-the-badge)
+![GitHub forks](https://img.shields.io/github/forks/intuitem/ciso-assistant-community?style=for-the-badge&color=%235D4596)
+![Discord](https://img.shields.io/discord/1155083727932764190?style=for-the-badge&label=Discord)
+<a href="https://intuitem.gitbook.io/ciso-assistant"><img src="https://img.shields.io/static/v1?message=Documentation&logo=gitbook&logoColor=ffffff&label=%20&labelColor=5c5c5c&color=F4E28D&style=for-the-badge"></a>
+<a href="https://ca-api-doc.pages.dev/"><img src="https://img.shields.io/static/v1?message=API&logo=swagger&label=%20&style=for-the-badge"></a>
+
 
 CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
@@ -52,6 +56,46 @@ Our vision is to create a **one-stop-shop** for cybersecurity management—moder
 As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.
 
 We’re constantly evolving with input from users and customers. Like an octopus 🐙, CISO Assistant keeps growing extra arms—bringing clarity, automation, and productivity to cybersecurity teams while reducing the effort of data input and output.
+
+[![CodeFactor](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community/badge)](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community)
+[![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
+[![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
+
+---
+
+## Quick Start 🚀
+
+> [!TIP]
+> The easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
+
+Alternatively, once you have _Docker_ and _Docker-compose_ installed, on your workstation or server:
+
+clone the repo:
+
+```
+git clone --single-branch -b main https://github.com/intuitem/ciso-assistant-community.git
+```
+
+and run the starter script
+
+```sh
+./docker-compose.sh
+```
+
+If you are looking for other installation options for self-hosting, check the [config builder](./config/) and the [docs](https://intuitem.gitbook.io/ciso-assistant).
+
+> [!NOTE]
+> The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
+> If you're using **Windows**, Make sure to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed and trigger the script within a WSL command line. It will feed Docker Desktop on your behalf.
+
+The docker compose file can be adjusted to pass extra parameters to suit your setup (e.g. Mailer settings).
+
+> [!WARNING]
+> If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
+
+> [!CAUTION]
+> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our development. Either use the `tags` for stable versions or prebuilt images.
 
 ---
 
@@ -91,39 +135,6 @@ Here is an illustration of the **decoupling** principle and its advantages:
 ## System architecture
 
 ![](./documentation/system-architecture.png)
-
-## Quick Start 🚀
-
-> [!TIP]
-> The easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
-
-Alternatively, once you have _Docker_ and _Docker-compose_ installed, on your workstation or server:
-
-clone the repo:
-
-```
-git clone --single-branch -b main https://github.com/intuitem/ciso-assistant-community.git
-```
-
-and run the starter script
-
-```sh
-./docker-compose.sh
-```
-
-If you are looking for other installation options for self-hosting, check the [config builder](./config/) and the [docs](https://intuitem.gitbook.io/ciso-assistant).
-
-> [!NOTE]
-> The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
-> If you're using **Windows**, Make sure to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed and trigger the script within a WSL command line. It will feed Docker Desktop on your behalf.
-
-The docker compose file can be adjusted to pass extra parameters to suit your setup (e.g. Mailer settings).
-
-> [!WARNING]
-> If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
-
-> [!CAUTION]
-> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our development. Either use the `tags` for stable versions or prebuilt images.
 
 ## End-user Documentation
 
@@ -592,6 +603,7 @@ Set DJANGO_DEBUG=False for security reason.
 19. EL: Greek
 20. TR: Turkish
 21. HR: Croatian
+22. ZH: Chinese (Simplified)
 
 ## Contributors 🤝
 

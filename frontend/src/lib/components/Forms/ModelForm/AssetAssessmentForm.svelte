@@ -49,7 +49,7 @@
 	cacheLock={cacheLocks['asset']}
 	bind:cachedValue={formDataCache['asset']}
 	label={m.asset()}
-	hidden={initialData.asset}
+	disabled={initialData.asset}
 	helpText={m.scopedAsset()}
 />
 <AutocompleteSelect

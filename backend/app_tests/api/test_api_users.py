@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from iam.models import User
 
+
 from test_vars import USERS_ENDPOINT as API_ENDPOINT
 from test_utils import EndpointTestsQueries
 from test_vars import GROUPS_PERMISSIONS
@@ -194,3 +195,53 @@ class TestUsersAuthenticated:
             assert response.json() == {"email": ["Enter a valid email address."]}, (
                 f"users can be created with an invalid email ({email})"
             )
+
+    def test_update_only_if_admin(self, test):
+        is_admin = test.user_group == "BI-UG-ADM"
+
+        # Ensure the user exists
+        user, created = User.objects.get_or_create(
+            email=USER_EMAIL,
+            defaults={
+                "first_name": USER_FIRSTNAME,
+                "last_name": USER_NAME,
+                "password": USER_PASSWORD,
+                "is_active": True,
+            },
+        )
+
+        detail_url = reverse("users-detail", args=[user.id])
+
+        # Attempt to update another user (requires admin privileges)
+        response = test.client.patch(
+            detail_url, {"first_name": "Updated"}, format="json"
+        )
+
+        if is_admin:
+            assert response.status_code == status.HTTP_200_OK
+            user.refresh_from_db()
+            assert user.first_name == "Updated"
+        else:
+            assert response.status_code in (
+                status.HTTP_401_UNAUTHORIZED,
+                status.HTTP_403_FORBIDDEN,
+            )
+
+    def test_superuser_cannot_be_deactivated(self, test):
+        superuser, _ = User.objects.get_or_create(
+            email="admin.tests@example.com",
+            defaults={
+                "first_name": "Admin",
+                "last_name": "User",
+                "password": USER_PASSWORD,
+                "is_superuser": True,
+                "is_active": True,
+            },
+        )
+
+        url = reverse("users-detail", args=[superuser.id])
+        response = test.client.patch(url, {"is_active": False}, format="json")
+
+        superuser.refresh_from_db()
+
+        assert superuser.is_active is True

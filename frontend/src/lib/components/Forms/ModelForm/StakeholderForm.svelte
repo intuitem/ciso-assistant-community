@@ -300,7 +300,11 @@
 				/>
 			</div>
 			<div class="flex items-end">
-				<button class="btn input h-11 w-11" onclick={modalMeasureCreateForm} type="button"
+				<button
+					class="btn input h-11 w-11"
+					aria-label={m.addAppliedControl()}
+					onclick={modalMeasureCreateForm}
+					type="button"
 					><i class="fa-solid fa-plus text-sm"></i>
 				</button>
 			</div>

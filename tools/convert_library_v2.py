@@ -946,9 +946,7 @@ def create_library(
                                 if val:
                                     try:
                                         score_to_add = int(val)
-                                        if score_to_add != 0:
-                                            choices[i]["add_score"] = score_to_add
-
+                                        choices[i]["add_score"] = score_to_add
                                     except (TypeError, ValueError):
                                         raise ValueError(
                                             f"(answers_definition) Invalid add_score value '{val}' "
@@ -1320,6 +1318,113 @@ def create_library(
                 framework["requirement_nodes"] = requirement_nodes
 
             library["objects"]["framework"] = framework
+
+        elif obj_type == "metric_definitions":
+            metric_definitions = []
+            base_urn = obj["meta"].get("base_urn")
+            content_ws = obj["content_sheet"]
+            rows = list(content_ws.iter_rows())
+            if not rows:
+                continue
+            header = [
+                str(cell.value).strip().lower() if cell.value else ""
+                for cell in rows[0]
+            ]
+
+            for row in rows[1:]:
+                if not any(cell.value for cell in row):
+                    continue
+                data = {
+                    header[i]: row[i].value for i in range(len(header)) if i < len(row)
+                }
+                ref_id = str(data.get("ref_id", "")).strip()
+                if not ref_id:
+                    continue
+
+                # Clean ref_id for URN
+                ref_id_for_urn = clean_urn_suffix(ref_id, compat_mode=compat_mode)
+                if verbose and ref_id != ref_id_for_urn:
+                    print(
+                        f"💬 ⚠️  [WARNING] (metric_definitions) Cleaned ref_id (for use in URN) '{ref_id}' → '{ref_id_for_urn}'"
+                    )
+
+                entry = {
+                    "urn": f"{base_urn}:{ref_id_for_urn}",
+                    "ref_id": ref_id,
+                }
+
+                if "name" in data and data["name"]:
+                    entry["name"] = str(data["name"]).strip()
+                if "description" in data and data["description"]:
+                    entry["description"] = str(data["description"]).strip()
+                if "category" in data and data["category"]:
+                    category = str(data["category"]).strip().lower()
+                    if category not in ("quantitative", "qualitative"):
+                        raise ValueError(
+                            f"(metric_definitions) Invalid category '{category}' at row #{row[0].row}. Must be 'quantitative' or 'qualitative'."
+                        )
+                    entry["category"] = category
+                else:
+                    entry["category"] = "quantitative"  # default
+
+                if "unit" in data and data["unit"]:
+                    entry["unit"] = str(data["unit"]).strip()
+
+                # higher_is_better: default True, accept true/false/1/0/yes/no
+                if "higher_is_better" in data and data["higher_is_better"] is not None:
+                    hib = str(data["higher_is_better"]).strip().lower()
+                    entry["higher_is_better"] = hib in ("1", "true", "yes", "x")
+                else:
+                    entry["higher_is_better"] = True
+
+                # default_target: numeric value
+                if "default_target" in data and data["default_target"] is not None:
+                    try:
+                        entry["default_target"] = float(data["default_target"])
+                    except (TypeError, ValueError):
+                        raise ValueError(
+                            f"(metric_definitions) Invalid default_target '{data['default_target']}' at row #{row[0].row}. Must be a number."
+                        )
+
+                # choices_definition for qualitative metrics
+                if entry["category"] == "qualitative":
+                    if "choices_definition" in data and data["choices_definition"]:
+                        choices = []
+                        choices_raw = str(data["choices_definition"]).strip()
+                        for line in choices_raw.split("\n"):
+                            line = line.strip()
+                            if not line:
+                                continue
+                            # Format: "name|description" or just "name"
+                            if "|" in line:
+                                parts = line.split("|", 1)
+                                choices.append(
+                                    {
+                                        "name": parts[0].strip(),
+                                        "description": parts[1].strip()
+                                        if len(parts) > 1
+                                        else "",
+                                    }
+                                )
+                            else:
+                                choices.append({"name": line})
+                        if choices:
+                            entry["choices_definition"] = choices
+                    else:
+                        raise ValueError(
+                            f"(metric_definitions) Qualitative metric at row #{row[0].row} requires 'choices_definition' column."
+                        )
+
+                translations = extract_translations_from_row(header, row)
+                if translations:
+                    entry["translations"] = translations
+
+                metric_definitions.append(entry)
+
+            if library["objects"].get("metric_definitions"):
+                library["objects"]["metric_definitions"].extend(metric_definitions)
+            else:
+                library["objects"]["metric_definitions"] = metric_definitions
 
         elif obj_type == "risk_matrix":
             matrix = parse_risk_matrix(obj["meta"], obj["content_sheet"], wb)
