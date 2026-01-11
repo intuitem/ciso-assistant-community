@@ -75,11 +75,11 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 				await setLoginPage.newPasswordInput.fill(vars.user.password);
 				await setLoginPage.confirmPasswordInput.fill(vars.user.password);
 			}
-			await setLoginPage.setPasswordButton.click();
-
-			await setLoginPage.isToastVisible(
+			const passwordSetToast = setLoginPage.isToastVisible(
 				'Your password has been successfully set. Welcome to CISO Assistant!'
 			);
+			await setLoginPage.setPasswordButton.click();
+			await passwordSetToast;
 
 			await setLoginPage.login(vars.user.email, vars.user.password);
 			await expect(setLoginPage.page).toHaveURL('/analytics');
