@@ -42,10 +42,11 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 				last_name: vars.user.lastName,
 				user_groups: [`${vars.folderName} - ${userGroupData.name}`]
 			});
-			await usersPage.form.saveButton.click();
-			await usersPage.isToastVisible(
+			const userUpdatedToast = usersPage.isToastVisible(
 				'The user: ' + vars.user.email + ' has been successfully updated.+'
 			);
+			await usersPage.form.saveButton.click();
+			await userUpdatedToast;
 
 			await sideBar.logout();
 
