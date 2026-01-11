@@ -41,6 +41,10 @@
 		}
 	}
 	const chart_id = `${name}_div`;
+	const formatDonutLabel = (params) => {
+		const percent = params.percent?.toFixed(1) ?? '0.0';
+		return `${percent}% (${params.value})`;
+	};
 	onMount(async () => {
 		const echarts = await import('echarts');
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
@@ -50,8 +54,8 @@
 			tooltip: {
 				trigger: 'item',
 				formatter: function (params) {
-					// Return formatted tooltip content with just the name and value
-					return `${params.data.name}: ${params.data.value}`;
+					// Only show the translated name in the tooltip on hover
+					return params.data.name;
 				}
 			},
 			title: {
@@ -91,46 +95,26 @@
 						? {
 								show: true,
 								position: 'outside',
-								formatter: '{d}%',
-								fontSize: 10,
+								formatter: formatDonutLabel,
+								fontSize: 16,
 								fontWeight: 'bold',
-								distanceToLabelLine: 2
+								distanceToLabelLine: 2,
+								overflow: 'break'
 							}
 						: {
 								show: false,
 								position: 'center'
 							},
 					emphasis: {
-						label: {
-							show: true,
-							fontSize: 20,
-							fontWeight: 'bold',
-							formatter: function (params) {
-								// Calculate the total value
-								const total =
-									params.data.value +
-									values
-										.filter((item) => item.name !== params.data.name)
-										.reduce((sum, item) => sum + item.value, 0);
-
-								// Calculate percentage
-								const percent = ((params.data.value / total) * 100).toFixed(1);
-
-								// Return formatted center label with just the name and percentage
-								return `{value|${percent}%}`;
-							},
-							rich: {
-								name: {
+						scale: false,
+						label: showPercentage
+							? {
+									show: true,
+									formatter: formatDonutLabel,
 									fontSize: 16,
-									fontWeight: 'bold',
-									lineHeight: 30
-								},
-								value: {
-									fontSize: 14,
-									lineHeight: 20
+									fontWeight: 'bold'
 								}
-							}
-						}
+							: { show: false }
 					},
 					labelLine: {
 						show: showPercentage,
