@@ -242,26 +242,15 @@ test('third-party representative can fill their assigned audit', async ({
 		const assessableRequirements = page
 			.getByRole('listitem')
 			.filter({ has: page.getByRole('button', { name: /.*Observation.*/ }) });
-		const responses: Array<{ index: number; answer: 'Yes' | 'No' | 'N/A' }> = [
-			{ index: 0, answer: 'Yes' },
-			{ index: 1, answer: 'No' },
-			{ index: 2, answer: 'N/A' },
-			{ index: 3, answer: 'Yes' },
-			{ index: 4, answer: 'No' },
-			{ index: 5, answer: 'N/A' }
-		];
 
 		await test.step('third party respondent can fill questionnaire', async () => {
 			await expect(assessableRequirements).not.toHaveCount(0);
-
-			for (const { index, answer } of responses) {
-				await expect(assessableRequirements.nth(index)).toBeVisible();
-				await assessableRequirements
-					.nth(index)
-					.getByRole('button', { name: answer })
-					.first()
-					.click();
-			}
+			await page.getByRole('button', { name: 'Yes' }).first().click();
+			await page.getByRole('button', { name: 'No' }).nth(1).click();
+			await page.getByRole('button', { name: 'N/A' }).nth(2).click();
+			await page.getByRole('button', { name: 'Yes' }).nth(3).click();
+			await page.getByRole('button', { name: 'No' }).nth(4).click();
+			await page.getByRole('button', { name: 'N/A' }).nth(5).click();
 		});
 
 		await test.step('third party respondent can create evidence', async () => {
@@ -302,15 +291,24 @@ test('third-party representative can fill their assigned audit', async ({
 			);
 			editedRequirementAssessment.content.click();
 			await page.waitForURL('/requirement-assessments/**');
-			const detailRequirements = page
-				.getByRole('listitem')
-				.filter({ has: page.getByRole('button', { name: /.*Observation.*/ }) });
-			await expect(detailRequirements.nth(responses.length - 1)).toBeVisible();
-			for (const { index, answer } of responses) {
-				await expect(
-					detailRequirements.nth(index).getByRole('button', { name: answer }).first()
-				).toHaveClass(/.*preset-filled.*/);
-			}
+			await expect(page.getByRole('button', { name: 'Yes' }).first()).toHaveClass(
+				/.*preset-filled.*/
+			);
+			await expect(page.getByRole('button', { name: 'No' }).nth(1)).toHaveClass(
+				/.*preset-filled.*/
+			);
+			await expect(page.getByRole('button', { name: 'N/A' }).nth(2)).toHaveClass(
+				/.*preset-filled.*/
+			);
+			await expect(page.getByRole('button', { name: 'Yes' }).nth(3)).toHaveClass(
+				/.*preset-filled.*/
+			);
+			await expect(page.getByRole('button', { name: 'No' }).nth(4)).toHaveClass(
+				/.*preset-filled.*/
+			);
+			await expect(page.getByRole('button', { name: 'N/A' }).nth(5)).toHaveClass(
+				/.*preset-filled.*/
+			);
 		});
 	});
 });
