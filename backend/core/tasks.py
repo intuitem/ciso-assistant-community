@@ -196,6 +196,32 @@ def check_evidences_expiring_tomorrow():
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="40"))
+def check_evidences_expired():
+    """Check for expired Evidences"""
+    expired_evidences = Evidence.objects.filter(
+        expiry_date__lt=date.today()
+    ).prefetch_related("owner")
+
+    # Group by individual owner
+    owner_evidences = {}
+    for evidence in expired_evidences:
+        for owner in evidence.owner.all():
+            if owner.email not in owner_evidences:
+                owner_evidences[owner.email] = []
+            owner_evidences[owner.email].append(evidence)
+
+    # Send personalized email to each owner
+    for owner_email, evidences in owner_evidences.items():
+        days = 0
+        days_list = [(date.today() - ev.expiry_date).days for ev in evidences]
+        if days_list:
+            days = max(days_list)
+
+        send_notification_email_expired_evidence(owner_email, evidences, days=days)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="40"))
 def check_validation_flows_deadline_in_week():
     """Check for ValidationFlows with deadline in 7 days (only submitted status)"""
     target_date = date.today() + timedelta(days=7)
@@ -502,6 +528,29 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
     else:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
+        )
+
+
+@task()
+def send_notification_email_expired_evidence(owner_email, evidences, days=0):
+    if not check_email_configuration(owner_email, evidences):
+        return
+
+    from .email_utils import render_email_template, format_evidence_list
+
+    context = {
+        "evidence_count": len(evidences),
+        "evidence_list": format_evidence_list(evidences),
+        "expired_since": days,
+        "days_text": "day" if days == 1 else "days",
+    }
+
+    rendered = render_email_template("expired_evidences", context)
+    if rendered:
+        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+    else:
+        logger.error(
+            f"Failed to render expired_evidences email template for {owner_email}"
         )
 
 
