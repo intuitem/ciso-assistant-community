@@ -12,6 +12,7 @@ import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeS
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
+import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -301,7 +302,7 @@ export const RISK_TOLERANCE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'withinTolerance',
 		options: YES_NO_UNSET_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -677,7 +678,7 @@ export const IS_SELECTED_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_selected',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -686,7 +687,7 @@ export const IS_RECURRENT_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_recurrent',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -706,7 +707,7 @@ export const USER_IS_ACTIVE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_active',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -715,7 +716,7 @@ export const USER_IS_THIRD_PARTY_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_third_party',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -925,7 +926,7 @@ const ASSET_IS_BUSINESS_FUNCTION_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_business_function',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1051,7 +1052,7 @@ export const IS_LOADED_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'loadedLibraries',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1060,7 +1061,7 @@ export const IS_UPDATE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'updateAvailable',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1081,7 +1082,7 @@ export const IS_ASSIGNED_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'isAssigned',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1090,7 +1091,7 @@ export const PAST_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'past',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1110,7 +1111,7 @@ export const IS_CUSTOM_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_custom',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1119,7 +1120,7 @@ export const BUILTIN_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'builtin',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1128,7 +1129,7 @@ export const IS_VISIBLE_FILTER: ListViewFilterConfig = {
 	props: {
 		label: 'is_visible',
 		options: YES_NO_OPTIONS,
-		multiple: true
+		multiple: false
 	}
 };
 
@@ -1996,6 +1997,7 @@ export const listViewFields = {
 			'description',
 			'ro_to_couple',
 			'fearedEvents',
+			'focusedFearedEvent',
 			'attackPaths',
 			'gravity'
 		],
@@ -2005,6 +2007,7 @@ export const listViewFields = {
 			'description',
 			'ro_to_couple',
 			'feared_events',
+			'focused_feared_event',
 			'attack_paths',
 			'gravity'
 		],
@@ -2061,7 +2064,17 @@ export const listViewFields = {
 	},
 	'elementary-actions': {
 		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'threat'],
-		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat']
+		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
+		filters: {
+			attack_stage: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'elementary-actions/attack_stage',
+					label: 'attackStage',
+					multiple: true
+				}
+			}
+		}
 	},
 	'operating-modes': {
 		head: ['ref_id', 'name', 'likelihood'],
@@ -2271,7 +2284,7 @@ export const listViewFields = {
 				props: {
 					label: 'is_selected',
 					options: YES_NO_OPTIONS,
-					multiple: true
+					multiple: false
 				}
 			},
 			risk_stage: RISK_STAGE_FILTER
@@ -2392,8 +2405,28 @@ export const listViewFields = {
 		}
 	},
 	'metric-instances': {
-		head: ['ref_id', 'name', 'metric_definition', 'current_value', 'status', 'folder'],
-		body: ['ref_id', 'name', 'metric_definition', 'current_value', 'status', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'metric_definition',
+			'rawValue',
+			'target_value',
+			'unit',
+			'status',
+			'lastRefresh',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'metric_definition',
+			'raw_value',
+			'target_value',
+			'unit',
+			'status',
+			'last_refresh',
+			'folder'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			metric_definition: {
@@ -2547,7 +2580,8 @@ export const contextMenuActions = {
 	'ro-to': [{ component: SelectObject, props: {} }],
 	stakeholders: [{ component: SelectObject, props: {} }],
 	'attack-paths': [{ component: SelectObject, props: {} }],
-	'operational-scenarios': [{ component: SelectObject, props: {} }]
+	'operational-scenarios': [{ component: SelectObject, props: {} }],
+	'elementary-actions': [{ component: ChangeAttackStage, props: {} }]
 };
 
 export function getListViewFields({

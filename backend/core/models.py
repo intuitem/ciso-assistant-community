@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List, Optional
+from typing import Self, Union, List, Optional, Literal
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -20,7 +20,7 @@ from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.db import models, transaction
-from django.db.models import F, Q, OuterRef, Subquery
+from django.db.models import F, Q, OuterRef, Subquery, Prefetch
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -2146,16 +2146,18 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def parent_requirement(self):
-        parent_requirement = RequirementNode.objects.filter(urn=self.parent_urn).first()
-        if not parent_requirement:
+        parent = getattr(self, "_parent_requirement_obj", None)
+        if parent is None and self.parent_urn:
+            parent = RequirementNode.objects.filter(urn=self.parent_urn).first()
+        if not parent:
             return None
         return {
-            "str": parent_requirement.display_long,
-            "urn": parent_requirement.urn,
-            "id": parent_requirement.id,
-            "ref_id": parent_requirement.ref_id,
-            "name": parent_requirement.name,
-            "description": parent_requirement.description,
+            "str": parent.display_long,
+            "urn": parent.urn,
+            "id": parent.id,
+            "ref_id": parent.ref_id,
+            "name": parent.name,
+            "description": parent.description,
         }
 
     @property
@@ -2367,6 +2369,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         blank=True,
     )
     is_published = models.BooleanField(_("published"), default=True)
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     fields_to_check = ["name"]
 
@@ -4611,6 +4614,12 @@ class OrganisationObjective(
     )
     eta = models.DateField(blank=True, null=True, verbose_name=_("ETA"))
     due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    metrics = models.ManyToManyField(
+        "metrology.MetricInstance",
+        verbose_name="Tracking metrics",
+        blank=True,
+        related_name="organisation_objectives",
+    )
     fields_to_check = ["name"]
 
     class Meta:
@@ -5474,7 +5483,7 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
         return self.risk_assessment.risk_matrix.parse_json_translated()
 
     @property
-    def within_tolerance(self):
+    def within_tolerance(self) -> Literal["YES", "NO", "--"]:
         tolerance = self.risk_assessment.risk_tolerance
         if tolerance >= 0:
             if self.current_level <= tolerance:
@@ -5741,6 +5750,9 @@ class ComplianceAssessment(Assessment):
         related_name="compliance_assessments",
     )
 
+    extended_result_enabled = models.BooleanField(default=False)
+    progress_status_enabled = models.BooleanField(default=True)
+
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -5978,20 +5990,35 @@ class ComplianceAssessment(Assessment):
         Returns sorted assessable requirement assessments based on the selected implementation groups.
         If include_non_assessable is True, it returns all requirements regardless of their assessable status.
         """
-        if not self.selected_implementation_groups:
-            requirements = RequirementAssessment.objects.filter(
-                compliance_assessment=self
+        base_queryset = (
+            RequirementAssessment.objects.filter(compliance_assessment=self)
+            .select_related(
+                "folder",
+                "requirement",
+                "requirement__framework",
+                "compliance_assessment",
+                "compliance_assessment__framework",
+                "compliance_assessment__perimeter",
+                "compliance_assessment__perimeter__folder",
             )
-            if not include_non_assessable:
-                requirements = requirements.filter(requirement__assessable=True)
-            return requirements.order_by("requirement__order_id")
+            .prefetch_related(
+                Prefetch("applied_controls"),
+                Prefetch("security_exceptions"),
+                Prefetch("evidences"),
+                Prefetch("requirement__reference_controls"),
+                Prefetch("requirement__threats"),
+            )
+        )
+
+        if not include_non_assessable:
+            base_queryset = base_queryset.filter(requirement__assessable=True)
+
+        requirements = base_queryset.order_by("requirement__order_id")
+
+        if not self.selected_implementation_groups:
+            return requirements
 
         selected_implementation_groups_set = set(self.selected_implementation_groups)
-        requirements = RequirementAssessment.objects.filter(compliance_assessment=self)
-        if not include_non_assessable:
-            requirements = requirements.filter(requirement__assessable=True)
-
-        requirements = requirements.order_by("requirement__order_id")
 
         requirement_assessments_list = [
             requirement
@@ -6163,6 +6190,11 @@ class ComplianceAssessment(Assessment):
             RequirementAssessment.Status.IN_PROGRESS: "#f59e0b",
             RequirementAssessment.Status.IN_REVIEW: "#3b82f6",
             RequirementAssessment.Status.DONE: "#86efac",
+            RequirementAssessment.ExtendedResult.MAJOR_NONCONFORMITY: "#dc2626",
+            RequirementAssessment.ExtendedResult.MINOR_NONCONFORMITY: "#f97316",
+            RequirementAssessment.ExtendedResult.OBSERVATION: "#eab308",
+            RequirementAssessment.ExtendedResult.OPPORTUNITY_FOR_IMPROVEMENT: "#3b82f6",
+            RequirementAssessment.ExtendedResult.GOOD_PRACTICE: "#22c55e",
         }
 
         compliance_assessments_result = {"values": [], "labels": []}
@@ -6227,9 +6259,70 @@ class ComplianceAssessment(Assessment):
             compliance_assessments_status["values"].append(value_entry)
             compliance_assessments_status["labels"].append(status)
 
+        compliance_assessments_extended_result = {"values": [], "labels": []}
+        if self.extended_result_enabled:
+            assessable_requirements_filter = {
+                "compliance_assessment": self,
+                "requirement__assessable": True,
+            }
+
+            # Count "not_set" first (requirements without extended_result)
+            base_query_not_set = (
+                RequirementAssessment.objects.filter(**assessable_requirements_filter)
+                .filter(Q(extended_result__isnull=True) | Q(extended_result=""))
+                .distinct()
+            )
+
+            if self.selected_implementation_groups:
+                union_query_not_set = union_queries(
+                    base_query_not_set,
+                    self.selected_implementation_groups,
+                    "requirement__implementation_groups",
+                )
+            else:
+                union_query_not_set = base_query_not_set
+
+            not_set_count = union_query_not_set.count()
+            compliance_assessments_extended_result["values"].append(
+                {
+                    "name": "not_set",
+                    "localName": "notSet",
+                    "value": not_set_count,
+                    "itemStyle": {"color": "#d1d5db"},
+                }
+            )
+            compliance_assessments_extended_result["labels"].append("not_set")
+
+            # Count each extended_result value
+            for extended_result in RequirementAssessment.ExtendedResult.values:
+                base_query = RequirementAssessment.objects.filter(
+                    extended_result=extended_result, **assessable_requirements_filter
+                ).distinct()
+
+                if self.selected_implementation_groups:
+                    union_query = union_queries(
+                        base_query,
+                        self.selected_implementation_groups,
+                        "requirement__implementation_groups",
+                    )
+                else:
+                    union_query = base_query
+
+                count = union_query.count()
+                value_entry = {
+                    "name": extended_result,
+                    "localName": camel_case(extended_result),
+                    "value": count,
+                    "itemStyle": {"color": color_map[extended_result]},
+                }
+
+                compliance_assessments_extended_result["values"].append(value_entry)
+                compliance_assessments_extended_result["labels"].append(extended_result)
+
         return {
             "result": compliance_assessments_result,
             "status": compliance_assessments_status,
+            "extended_result": compliance_assessments_extended_result,
         }
 
     def quality_check(self) -> dict:
@@ -6541,6 +6634,16 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         COMPLIANT = "compliant", _("Compliant")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
 
+    class ExtendedResult(models.TextChoices):
+        MAJOR_NONCONFORMITY = "major_nonconformity", "Major nonconformity"
+        MINOR_NONCONFORMITY = "minor_nonconformity", "Minor nonconformity"
+        OBSERVATION = "observation_sensitive_point", "Observation / sensitive point"
+        OPPORTUNITY_FOR_IMPROVEMENT = (
+            "opportunity_for_improvement",
+            "Opportunity for improvement",
+        )
+        GOOD_PRACTICE = "good_practice", "Good practice"
+
     status = models.CharField(
         max_length=100,
         choices=Status.choices,
@@ -6552,6 +6655,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         choices=Result.choices,
         verbose_name=_("Result"),
         default=Result.NOT_ASSESSED,
+    )
+    extended_result = models.CharField(
+        max_length=64,
+        choices=ExtendedResult.choices,
+        verbose_name="Extended Result",
+        blank=True,
+        null=True,
     )
     is_scored = models.BooleanField(
         default=False,

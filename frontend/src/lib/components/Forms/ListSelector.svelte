@@ -381,7 +381,7 @@
 
 <div class="space-y-4">
 	{#if label}
-		<label class="text-sm font-semibold">{label}{mandatory ? ' *' : ''}</label>
+		<span class="text-sm font-semibold">{label}{mandatory ? ' *' : ''}</span>
 	{/if}
 
 	{#if $errors && $errors.length > 0}

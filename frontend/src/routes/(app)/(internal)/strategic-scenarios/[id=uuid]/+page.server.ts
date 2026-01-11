@@ -21,7 +21,11 @@ export const load: PageServerLoad = async (event) => {
 		: { results: [] };
 
 	// Fetch feared events for this strategic scenario
-	const fearedEventsIds = detailData.data.feared_events?.map((fe: any) => fe.id) || [];
+	// If a focused_feared_event is set, only show that one feared event
+	const focusedFearedEvent = detailData.data.focused_feared_event;
+	const fearedEventsIds = focusedFearedEvent
+		? [focusedFearedEvent.id]
+		: detailData.data.feared_events?.map((fe: any) => fe.id) || [];
 	const fearedEventsData = [];
 
 	if (fearedEventsIds.length > 0) {
@@ -36,7 +40,8 @@ export const load: PageServerLoad = async (event) => {
 	return {
 		...detailData,
 		attackPaths: attackPathsData.results || [],
-		fearedEventsWithAssets: fearedEventsData
+		fearedEventsWithAssets: fearedEventsData,
+		isFocusedOnFearedEvent: !!focusedFearedEvent
 	};
 };
 
