@@ -80,6 +80,14 @@ export abstract class BasePage {
 		const re = new RegExp(value, flags);
 		const timeout = options?.timeout ?? 5000;
 
+		const logStatus = await this.page.evaluate(() => ({
+			has: "__toastLog" in window,
+			len: (window as any).__toastLog?.length ?? null,
+		}));
+		if (!logStatus.has) {
+			throw new Error(`Toast observer not installed (window.__toastLog missing).`);
+		}
+
 		const startIndex = await this.page.evaluate(() => {
 			// @ts-ignore
 			return (window.__toastLog ?? []).length as number;
