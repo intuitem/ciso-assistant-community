@@ -63,6 +63,7 @@ SHEET_VARIANTS = {
     ],
     "stakeholders": [
         "3 - Base de parties prenantes",
+        "3 - Parties prenantes",
         "3 - Stakeholders",
     ],
     "stakeholder_danger_levels": [
