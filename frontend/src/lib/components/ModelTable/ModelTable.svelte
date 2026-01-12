@@ -24,6 +24,7 @@
 	import { isDark } from '$lib/utils/helpers';
 	import { contextMenuActions, listViewFields } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types.js';
+	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import type { SvelteEvent } from '@skeletonlabs/skeleton-svelte';
@@ -205,6 +206,18 @@
 
 	const user = page.data.user;
 
+	const objectsNotVisibleLabel = (count: number): string => {
+		const label = safeTranslate('objectsNotVisible', {
+			count,
+			s: count === 1 ? '' : 's'
+		});
+		return label === 'objectsNotVisible'
+			? `${count} object${count === 1 ? '' : 's'} not visible.`
+			: label;
+	};
+
+	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
+
 	// Replace $$props.class with classProp for compatibility
 	let classProp = ''; // Replacing $$props.class
 
@@ -231,6 +244,10 @@
 	);
 	const rows = handler.getRows();
 	let invalidateTable = $state(false);
+
+	const relatedFieldNames = $derived(
+		new Set(model?.foreignKeyFields?.map((field) => field.field) ?? [])
+	);
 
 	$tableHandlers[baseEndpoint] = handler;
 
@@ -597,36 +614,61 @@
 														class="base-font-family whitespace-pre-line break-words"
 													>
 														{#if Array.isArray(value)}
-															<ul class="list-disc pl-4 whitespace-normal">
-																{#each [...value].sort((a, b) => {
-																	if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
-																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
-																}) as val}
-																	<li>
-																		{#if key === 'linked_models' && typeof val === 'string'}
-																			{safeTranslate(convertLinkedModelName(val))}
-																		{:else if key === 'security_objectives' || key === 'security_capabilities'}
-																			{@const [securityObjectiveName, securityObjectiveValue] =
-																				Object.entries(val)[0]}
-																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
-																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
-																			<Anchor href={itemHref} class="anchor" stopPropagation
-																				>{val.str}</Anchor
-																			>
-																		{:else if val.str}
-																			{safeTranslate(val.str)}
-																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
-																			<span class="text"
-																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																				{val.split(':')[1]}</span
-																			>
-																		{:else}
-																			{val ?? '-'}
-																		{/if}
-																	</li>
-																{/each}
-															</ul>
+															{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
+															{@const visibleValues = isRelatedField(key)
+																? value.filter((item) => !isMaskedPlaceholder(item))
+																: value}
+															{#if visibleValues.length > 0}
+																<ul class="list-disc pl-4 whitespace-normal">
+																	{#each [...visibleValues].sort((a, b) => {
+																		if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+																		return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+																	}) as val}
+																		<li>
+																			{#if key === 'linked_models' && typeof val === 'string'}
+																				{safeTranslate(convertLinkedModelName(val))}
+																			{:else if key === 'security_objectives' || key === 'security_capabilities'}
+																				{@const [securityObjectiveName, securityObjectiveValue] =
+																					Object.entries(val)[0]}
+																				{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
+																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
+																				<Anchor href={itemHref} class="anchor" stopPropagation
+																					>{val.str}</Anchor
+																				>
+																			{:else if val.str}
+																				{safeTranslate(val.str)}
+																			{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
+																				<span class="text"
+																					>{unsafeTranslate(val.split(':')[0] + 'Colon')}
+																					{val.split(':')[1]}</span
+																				>
+																			{:else}
+																				{val ?? '-'}
+																			{/if}
+																		</li>
+																	{/each}
+																</ul>
+																{#if hiddenCount > 0}
+																	<p class="mt-1 text-xs text-yellow-700">
+																		{objectsNotVisibleLabel(hiddenCount)}
+																	</p>
+																{/if}
+															{:else if hiddenCount > 0}
+																<p class="text-xs text-yellow-700">
+																	{objectsNotVisibleLabel(hiddenCount)}
+																</p>
+															{:else}
+																--
+															{/if}
+														{:else if isMaskedPlaceholder(value)}
+															{#if isRelatedField(key)}
+																<p class="text-xs text-yellow-700">
+																	{objectsNotVisibleLabel(1)}
+																</p>
+															{:else}
+																--
+															{/if}
 														{:else if value && value.str}
 															{#if value.id}
 																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}

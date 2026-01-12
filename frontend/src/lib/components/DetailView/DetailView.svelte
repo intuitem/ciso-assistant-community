@@ -12,6 +12,7 @@
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
+	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
 
@@ -120,6 +121,19 @@
 	};
 
 	let hasWidgets = $derived(!!widgets);
+	let relatedFieldNames = $derived(
+		new Set(data.model?.foreignKeyFields?.map((field) => field.field) ?? [])
+	);
+
+	const objectsNotVisibleLabel = (count: number): string => {
+		const label = safeTranslate('objectsNotVisible', {
+			count,
+			s: count === 1 ? '' : 's'
+		});
+		return label === 'objectsNotVisible'
+			? `${count} object${count === 1 ? '' : 's'} not visible.`
+			: label;
+	};
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;

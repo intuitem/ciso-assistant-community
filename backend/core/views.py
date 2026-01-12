@@ -789,18 +789,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             return None
         return str(value)
 
-    def _mask_value(self, value):
-        """Recursively blank a value while preserving its structure."""
-        if isinstance(value, dict):
-            return {key: self._mask_value(inner) for key, inner in value.items()}
-        if isinstance(value, list):
-            return []
-        return ""
-
     def _placeholder_for(self, item):
         """Create a placeholder for a hidden related object."""
         if isinstance(item, dict):
-            return {key: self._mask_value(value) for key, value in item.items()}
+            return {}
         return ""
 
     def _filter_related_fields(self, data, field_models, allowed_ids):

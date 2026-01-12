@@ -13,6 +13,14 @@ from iam.models import Folder, User, UserGroup
 from test_vars import *
 
 
+def _is_masked_placeholder(value) -> bool:
+    if value == {}:
+        return True
+    if isinstance(value, list) and value and all(item == {} for item in value):
+        return True
+    return False
+
+
 class EndpointTestsUtils:
     """Provides utils functions for API endpoints testing"""
 
@@ -502,6 +510,10 @@ class EndpointTestsQueries:
                         assert json.loads(response_item[key]) == value, (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                         )
+                    elif _is_masked_placeholder(response_item[key]) and isinstance(
+                        value, (dict, list)
+                    ):
+                        continue
                     else:
                         assert response_item[key] == value, (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
@@ -697,6 +709,10 @@ class EndpointTestsQueries:
                         ), (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                         )
+                    elif _is_masked_placeholder(response_item[key]) and isinstance(
+                        value, (dict, list)
+                    ):
+                        continue
                     else:
                         assert response_item[key] == value, (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
@@ -852,6 +868,10 @@ class EndpointTestsQueries:
                             ), (
                                 f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
                             )
+                        elif _is_masked_placeholder(
+                            response.json()[key]
+                        ) and isinstance(value, (dict, list)):
+                            continue
                         else:
                             assert response.json()[key] == value, (
                                 f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
