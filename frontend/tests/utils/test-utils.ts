@@ -52,31 +52,44 @@ type Fixtures = {
 export const test = base.extend<Fixtures>({
 	context: async ({ context }, use) => {
 		await context.addInitScript(() => {
-			// @ts-ignore
-			window.__toastLog = [];
+			(window as any).__toastLog = [];
+			let lastText = '';
 
-			const record = (el: Element) => {
-				const text = (el.textContent ?? '').trim();
+			const isVisible = (el: Element) => {
+				const e = el as HTMLElement;
+				const style = getComputedStyle(e);
+				if (style.display === 'none' || style.visibility === 'hidden') return false;
+				if (e.hasAttribute('hidden') || e.getAttribute('aria-hidden') === 'true') return false;
+				return e.getClientRects().length > 0 && style.opacity !== '0';
+			};
+
+			const recordCurrent = () => {
+				const toast = document.querySelector('[data-testid="toast"]');
+				if (!toast) return;
+
+				const text = (toast.textContent ?? '').trim();
 				if (!text) return;
-				// @ts-ignore
-				window.__toastLog.push({ text, ts: Date.now() });
+				if (!isVisible(toast)) return;
+
+				if (text === lastText) return;
+				lastText = text;
+
+				(window as any).__toastLog.push({ text, ts: Date.now() });
 			};
 
-			const scan = (root: ParentNode) => {
-				root.querySelectorAll?.('[data-testid="toast"]').forEach(record);
-			};
+			if (document.readyState === 'loading') {
+				document.addEventListener('DOMContentLoaded', recordCurrent);
+			} else {
+				recordCurrent();
+			}
 
-			document.addEventListener('DOMContentLoaded', () => scan(document));
-
-			new MutationObserver((mutations) => {
-				for (const m of mutations) {
-					for (const node of m.addedNodes) {
-						if (!(node instanceof Element)) continue;
-						if (node.matches?.('[data-testid="toast"]')) record(node);
-						scan(node);
-					}
-				}
-			}).observe(document.documentElement, { childList: true, subtree: true });
+			new MutationObserver(() => recordCurrent()).observe(document.documentElement, {
+				subtree: true,
+				childList: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: ['class', 'style', 'hidden', 'aria-hidden']
+			});
 		});
 		await use(context);
 	},
