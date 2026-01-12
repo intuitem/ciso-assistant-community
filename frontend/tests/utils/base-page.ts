@@ -81,8 +81,8 @@ export abstract class BasePage {
 		const timeout = options?.timeout ?? 5000;
 
 		const logStatus = await this.page.evaluate(() => ({
-			has: "__toastLog" in window,
-			len: (window as any).__toastLog?.length ?? null,
+			has: '__toastLog' in window,
+			len: (window as any).__toastLog?.length ?? null
 		}));
 		if (!logStatus.has) {
 			throw new Error(`Toast observer not installed (window.__toastLog missing).`);
