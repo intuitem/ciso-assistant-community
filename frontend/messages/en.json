@@ -1432,7 +1432,7 @@
 	"ebiosRM": "Ebios RM",
 	"ebiosRMStudies": "Ebios RM studies",
 	"ebiosRMStudyARM": "Ebios RM study (ARM format)",
-	"ebiosRMStudyARMDescription": "Import an Ebios RM study from ARM Excel format",
+	"ebiosRMStudyARMDescription": "Import an Ebios RM study from ARM Excel format.\nNote that this is a proprietary format, not all objects are supported and some imports could miss because of the headers or sheets changes.",
 	"armImportPreview": "ARM Import Preview",
 	"armPreviewSummary": "The following objects will be created:",
 	"primaryAssets": "Primary assets",
