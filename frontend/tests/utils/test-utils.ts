@@ -50,49 +50,6 @@ type Fixtures = {
 };
 
 export const test = base.extend<Fixtures>({
-	context: async ({ context }, use) => {
-		await context.addInitScript(() => {
-			(window as any).__toastLog = [];
-			let lastText = '';
-
-			const isVisible = (el: Element) => {
-				const e = el as HTMLElement;
-				const style = getComputedStyle(e);
-				if (style.display === 'none' || style.visibility === 'hidden') return false;
-				if (e.hasAttribute('hidden') || e.getAttribute('aria-hidden') === 'true') return false;
-				return e.getClientRects().length > 0 && style.opacity !== '0';
-			};
-
-			const recordCurrent = () => {
-				const toast = document.querySelector('[data-testid="toast"]');
-				if (!toast) return;
-
-				const text = (toast.textContent ?? '').trim();
-				if (!text) return;
-				if (!isVisible(toast)) return;
-
-				if (text === lastText) return;
-				lastText = text;
-
-				(window as any).__toastLog.push({ text, ts: Date.now() });
-			};
-
-			if (document.readyState === 'loading') {
-				document.addEventListener('DOMContentLoaded', recordCurrent);
-			} else {
-				recordCurrent();
-			}
-
-			new MutationObserver(() => recordCurrent()).observe(document.documentElement, {
-				subtree: true,
-				childList: true,
-				characterData: true,
-				attributes: true,
-				attributeFilter: ['class', 'style', 'hidden', 'aria-hidden']
-			});
-		});
-		await use(context);
-	},
 	mailer: async ({ context }, use) => {
 		const mailer = new Mailer(await context.newPage());
 		await mailer.goto();

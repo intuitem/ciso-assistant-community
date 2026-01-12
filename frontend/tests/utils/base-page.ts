@@ -71,49 +71,10 @@ export abstract class BasePage {
 		}
 	}
 
-	async isToastVisible(
-		value: string,
-		flags?: string | undefined,
-		options?: { timeout?: number } | undefined
-	) {
-		type ToastLogEntry = { text: string; ts: number };
-		const re = new RegExp(value, flags);
-		const timeout = options?.timeout ?? 5000;
-
-		const logStatus = await this.page.evaluate(() => ({
-			has: '__toastLog' in window,
-			len: (window as any).__toastLog?.length ?? null
-		}));
-		if (!logStatus.has) {
-			throw new Error(`Toast observer not installed (window.__toastLog missing).`);
-		}
-
-		const startIndex = await this.page.evaluate(() => {
-			// @ts-ignore
-			return (window.__toastLog ?? []).length as number;
-		});
-
-		let matched: ToastLogEntry | null = null;
-
-		await expect
-			.poll(
-				async () => {
-					const log = await this.page.evaluate(() => {
-						// @ts-ignore
-						return (window.__toastLog ?? []) as ToastLogEntry[];
-					});
-					matched = log.slice(startIndex).find((entry) => re.test(entry.text)) ?? null;
-					return !!matched;
-				},
-				{ timeout }
-			)
-			.toBeTruthy();
-
-		const toast = this.page.getByTestId('toast').filter({ hasText: re });
-		const dismissButton = toast.first().getByLabel('Dismiss toast');
-		if (await dismissButton.isVisible().catch(() => false)) {
-			await dismissButton.click();
-		}
-		return { toast, matched };
+	async isToastVisible(value: string, flags?: string | undefined, options?: {} | undefined) {
+		const toast = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
+		await expect(toast).toHaveCount(1);
+		await toast.first().getByLabel('Dismiss toast').click();
+		return toast;
 	}
 }
