@@ -43,7 +43,8 @@
 	const chart_id = `${name}_div`;
 	const formatDonutLabel = (params) => {
 		const percent = params.percent?.toFixed(1) ?? '0.0';
-		return `${percent}% (${params.value})`;
+		const value = params.value ?? params.data?.value ?? 0;
+		return `${percent}% (${value})`;
 	};
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -84,7 +85,7 @@
 					name: s_label,
 					type: 'pie',
 					radius: showPercentage ? ['30%', '55%'] : ['40%', '70%'],
-					center: ['50%', '45%'],
+					center: ['50%', '55%'],
 					avoidLabelOverlap: true,
 					itemStyle: {
 						borderRadius: 10,

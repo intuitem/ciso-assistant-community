@@ -8863,9 +8863,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         differences = []
 
         # Get all requirement assessments from both audits
-        base_ras = base_audit.requirement_assessments.select_related(
-            "requirement"
-        ).all()
+        base_ras = (
+            base_audit.requirement_assessments.select_related("requirement")
+            .order_by("requirement__order_id", "requirement__urn")
+            .all()
+        )
         compare_ras_dict = {
             ra.requirement_id: ra
             for ra in compare_audit.requirement_assessments.select_related(
