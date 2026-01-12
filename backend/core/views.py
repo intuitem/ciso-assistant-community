@@ -881,6 +881,46 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         dispatch_webhook_event(instance, "updated", serializer=serializer)
         return instance
 
+    def _validate_folder_change(self, request: Request, instance) -> None:
+        if not hasattr(instance, "folder"):
+            return
+        if "folder" not in request.data:
+            return
+        folder_value = request.data.get("folder")
+        if isinstance(folder_value, list):
+            if not folder_value:
+                return
+            folder_value = folder_value[0]
+        if isinstance(folder_value, dict):
+            folder_value = folder_value.get("id")
+        if not folder_value:
+            return
+        try:
+            target_id = UUID(str(folder_value))
+        except (TypeError, ValueError):
+            return
+        if instance.folder_id and str(instance.folder_id) == str(target_id):
+            return
+        target_folder = Folder.objects.filter(id=target_id).first()
+        if not target_folder:
+            return
+        model = self.model or instance.__class__
+        perm = Permission.objects.get(
+            codename=f"add_{model._meta.model_name}",
+            content_type__app_label=model._meta.app_label,
+            content_type__model=model._meta.model_name,
+        )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=perm,
+            folder=target_folder,
+        ):
+            raise PermissionDenied(
+                {
+                    "folder": "You do not have permission to create objects in this folder"
+                }
+            )
+
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         if request.data.get("filtering_labels"):
@@ -896,6 +936,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
+        instance = self.get_object()
+        self._validate_folder_change(request, instance)
         # Experimental: process evidences on TaskTemplate update
         if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
@@ -931,6 +973,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
+        instance = self.get_object()
+        self._validate_folder_change(request, instance)
         self._process_request_data(request)
         return super().partial_update(request, *args, **kwargs)
 
@@ -5752,6 +5796,9 @@ class FolderViewSet(BaseModelViewSet):
         include_perimeters = request.query_params.get(
             "include_perimeters", "True"
         ).lower() in ["true", "1", "yes"]
+        include_enclaves = request.query_params.get(
+            "include_enclaves", "False"
+        ).lower() in ["true", "1", "yes"]
 
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
@@ -5774,14 +5821,31 @@ class FolderViewSet(BaseModelViewSet):
             .filter(id__in=needed_folders, parent_folder=Folder.get_root_folder())
             .distinct()
         ):
+            # Skip enclaves at top level if not included
+            if (
+                not include_enclaves
+                and folder.content_type == Folder.ContentType.ENCLAVE
+            ):
+                continue
             entry = {
                 "name": folder.name,
                 "uuid": folder.id,
                 "viewable": folder.id in viewable_objects,
+                "content_type": folder.content_type,
             }
+            # Add enclave-specific styling
+            if folder.content_type == Folder.ContentType.ENCLAVE:
+                entry.update(
+                    {
+                        "symbol": "triangle",
+                        "symbolSize": 12,
+                        "itemStyle": {"color": "#6366f1"},
+                    }
+                )
             folder_content = get_folder_content(
                 folder,
                 include_perimeters=include_perimeters,
+                include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
             )
@@ -11585,6 +11649,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             task_name = obj.name or f"Template_{obj.pk}"
             # Format: "1-task_name", "2-task_name", etc.
             base_name = f"{template_counter}-{task_name}"
+
+            INVALID_CHARS = r"[\\\/\?\*\[\]:]"
+            base_name = re.sub(INVALID_CHARS, "", base_name)
 
             # Excel sheet names have a 31 character limit
             sheet_name = base_name[:31]
