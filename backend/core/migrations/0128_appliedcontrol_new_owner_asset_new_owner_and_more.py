@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0126_alter_team_options"),
+        ("core", "0127_alter_team_options"),
     ]
 
     operations = [

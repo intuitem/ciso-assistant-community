@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0125_data_backfill_actors"),
+        ("core", "0126_data_backfill_actors"),
     ]
 
     operations = [

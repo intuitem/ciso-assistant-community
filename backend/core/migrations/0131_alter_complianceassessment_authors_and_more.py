@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0129_remove_appliedcontrol_new_owner_and_more"),
+        ("core", "0130_remove_appliedcontrol_new_owner_and_more"),
     ]
 
     operations = [

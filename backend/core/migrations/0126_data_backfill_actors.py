@@ -17,7 +17,7 @@ def backfill_actors(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0124_team_actor"),
+        ("core", "0125_team_actor"),
     ]
 
     operations = [

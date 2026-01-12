@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0123_organisationobjective_metrics"),
+        ("core", "0124_evidencerevision_attachment_hash"),
         ("iam", "0016_folder_filtering_labels"),
         ("tprm", "0009_migrate_solution_to_solutions"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
