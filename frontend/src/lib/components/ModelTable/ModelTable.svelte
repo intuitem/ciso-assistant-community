@@ -85,6 +85,7 @@
 		folderId?: string;
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
+		expectedCount?: number;
 		onFilterChange?: (filters: Record<string, any>) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
@@ -141,6 +142,7 @@
 		folderId = '',
 		forcePreventDelete = false,
 		forcePreventEdit = false,
+		expectedCount = undefined,
 		onFilterChange = () => {},
 		quickFilters,
 		optButton,
@@ -206,19 +208,8 @@
 
 	const user = page.data.user;
 
-	const objectsNotVisibleLabel = (count: number): string => {
-		const label = safeTranslate('objectsNotVisible', {
-			count,
-			s: count === 1 ? '' : 's'
-		});
-		return label === 'objectsNotVisible'
-			? `${count} object${count === 1 ? '' : 's'} not visible.`
-			: label;
-	};
-
 	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
 
-	// Replace $$props.class with classProp for compatibility
 	let classProp = ''; // Replacing $$props.class
 
 	let classesBase = $derived(`${classProp || backgroundColor}`);
@@ -238,16 +229,19 @@
 		{
 			rowsPerPage: pagination
 				? ($tableStates[page.url.pathname]?.rowsPerPage ?? numberRowsPerPage)
-				: 0, // Using 0 as rowsPerPage value when pagination is false disables paging.
+				: 0,
 			totalRows: source?.meta?.count
 		}
 	);
 	const rows = handler.getRows();
+	const rowCountState = handler.getRowCount();
 	let invalidateTable = $state(false);
 
 	const relatedFieldNames = $derived(
 		new Set(model?.foreignKeyFields?.map((field) => field.field) ?? [])
 	);
+
+	const hiddenRowCount = $derived(typeof expectedCount === 'number' ? expectedCount : 0);
 
 	$tableHandlers[baseEndpoint] = handler;
 
@@ -543,6 +537,13 @@
 	{@render quickFilters?.(filterValues, _form, () => {
 		invalidateTable = true;
 	})}
+	{#if hiddenRowCount > 0}
+		<div
+			class="mx-2 mb-2 rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-800"
+		>
+			{m.objectsNotVisible({ count: hiddenRowCount })}
+		</div>
+	{/if}
 	<!-- Table -->
 	<table
 		class="table caption-bottom {classesTable}"
@@ -651,12 +652,12 @@
 																</ul>
 																{#if hiddenCount > 0}
 																	<p class="mt-1 text-xs text-yellow-700">
-																		{objectsNotVisibleLabel(hiddenCount)}
+																		{m.objectsNotVisible({ count: hiddenCount })}
 																	</p>
 																{/if}
 															{:else if hiddenCount > 0}
 																<p class="text-xs text-yellow-700">
-																	{objectsNotVisibleLabel(hiddenCount)}
+																	{m.objectsNotVisible({ count: hiddenCount })}
 																</p>
 															{:else}
 																--
@@ -664,7 +665,7 @@
 														{:else if isMaskedPlaceholder(value)}
 															{#if isRelatedField(key)}
 																<p class="text-xs text-yellow-700">
-																	{objectsNotVisibleLabel(1)}
+																	{m.objectsNotVisible({ count: 1 })}
 																</p>
 															{:else}
 																--
@@ -756,7 +757,6 @@
 												meta: row.meta
 											})}{:else if row.meta[identifierField]}
 											{@const actionsComponent = fieldComponentMap[CUSTOM_ACTIONS_COMPONENT]}
-											{@const actionsURLModel = URLModel}
 											<TableRowActions
 												deleteForm={disableDelete ? null : deleteForm}
 												{model}

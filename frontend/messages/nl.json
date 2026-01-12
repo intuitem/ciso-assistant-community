@@ -961,6 +961,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} object niet zichtbaar.",
+				"countPlural=other": "{count} objecten niet zichtbaar."
+			}
+		}
+	],
 	"matchingScenarios": "Overeenkomende scenario's",
 	"select": "Selecteer",
 	"deselect": "Deselecteer",

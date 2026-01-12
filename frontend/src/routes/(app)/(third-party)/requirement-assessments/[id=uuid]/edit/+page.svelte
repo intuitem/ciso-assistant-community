@@ -538,6 +538,7 @@
 										source={page.data.tables['applied-controls']}
 										hideFilters={true}
 										URLModel="applied-controls"
+										expectedCount={page.data.requirementAssessment.applied_controls?.length}
 									/>
 								</div>
 							</Tabs.Panel>
@@ -570,6 +571,7 @@
 										source={page.data.tables['evidences']}
 										hideFilters={true}
 										URLModel="evidences"
+										expectedCount={page.data.requirementAssessment.evidences?.length}
 										baseEndpoint="/evidences?requirement_assessments={page.data
 											.requirementAssessment.id}"
 									/>
@@ -598,6 +600,7 @@
 										source={page.data.tables['security-exceptions']}
 										hideFilters={true}
 										URLModel="security-exceptions"
+										expectedCount={page.data.requirementAssessment.security_exceptions?.length}
 										baseEndpoint="/security-exceptions?requirement_assessments={page.data
 											.requirementAssessment.id}"
 									/>

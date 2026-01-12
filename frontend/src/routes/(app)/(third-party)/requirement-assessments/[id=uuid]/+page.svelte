@@ -290,6 +290,7 @@
 								source={data.tables['applied-controls']}
 								hideFilters={true}
 								URLModel="applied-controls"
+								expectedCount={data.requirementAssessment.applied_controls?.length}
 								baseEndpoint="/applied-controls?requirement_assessments={page.data
 									.requirementAssessment.id}"
 							/>
@@ -306,6 +307,7 @@
 							source={data.tables['evidences']}
 							hideFilters={true}
 							URLModel="evidences"
+							expectedCount={data.requirementAssessment.evidences?.length}
 							baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment.id}"
 						/>
 					</div>

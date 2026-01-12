@@ -965,6 +965,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objeto no visible.",
+				"countPlural=other": "{count} objetos no visibles."
+			}
+		}
+	],
 	"matchingScenarios": "Escenarios coincidentes",
 	"select": "Seleccionar",
 	"deselect": "Deseleccionar",

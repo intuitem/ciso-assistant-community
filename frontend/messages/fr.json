@@ -1966,6 +1966,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objet non visible.",
+				"countPlural=other": "{count} objets non visibles."
+			}
+		}
+	],
 	"matchingScenarios": "Scénarios correspondants",
 	"select": "Sélectionner",
 	"deselect": "Désélectionner",

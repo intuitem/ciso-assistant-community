@@ -110,6 +110,7 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	disableEdit?: boolean;
 	folderPermsNeeded?: { action: 'add' | 'view' | 'change' | 'delete'; model: string }[]; // Permissions needed on the folder to display this reverse foreign key field
 	defaultFilters?: { [key: string]: any[] }; // Default filters to initialize the table with (user can change/remove them)
+	expectedCountField?: string; // Field on parent payload that holds related items (for masked count)
 }
 
 interface Field {

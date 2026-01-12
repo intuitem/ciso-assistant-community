@@ -1672,6 +1672,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} nesne görünür değil.",
+				"countPlural=other": "{count} nesne görünür değil."
+			}
+		}
+	],
 	"serverURL": "Sunucu URL",
 	"oidcConfiguration": "openid-configuration (OIDC yapilandirmasi)",
 	"tokenAuthMethod": "Token kimlik doğrulama yontemi",

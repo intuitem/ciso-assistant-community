@@ -926,6 +926,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} عنصر غير مرئي.",
+				"countPlural=other": "{count} عناصر غير مرئية."
+			}
+		}
+	],
 	"matchingScenarios": "السيناريوهات المطابقة",
 	"select": "تحديد",
 	"deselect": "إلغاء التحديد",

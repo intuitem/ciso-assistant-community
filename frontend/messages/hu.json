@@ -958,6 +958,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objektum nem látható.",
+				"countPlural=other": "{count} objektum nem látható."
+			}
+		}
+	],
 	"matchingScenarios": "Egyező forgatókönyvek",
 	"select": "Kiválasztás",
 	"deselect": "Kijelölés megszüntetése",
