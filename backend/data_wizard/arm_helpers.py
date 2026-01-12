@@ -30,7 +30,11 @@ class ARMSheets:
     COMPLEMENTARY_MEASURES = "1 - Mesures complémentaires"
 
     # Workshop 2 - Risk Origins
-    ROTO_COUPLES = "2 - Base de couples SR OV"
+    # Multiple possible names depending on ARM version/language
+    ROTO_COUPLES_VARIANTS = [
+        "2 - Base de couples SR OV",
+        "2 - Couples SR OV",
+    ]
 
     # Workshop 3 - Stakeholders & Strategic Scenarios
     STAKEHOLDER_CATEGORIES = "3 - Catégories de partie prena"
@@ -392,15 +396,35 @@ def get_roto_sheet_data(workbook) -> list[dict]:
     Returns:
         List of dictionaries with sub-header -> value mapping
     """
-    sheet_name = ARMSheets.ROTO_COUPLES
-    if sheet_name not in workbook.sheetnames:
-        logger.warning(f"Sheet '{sheet_name}' not found in workbook")
+    # Try each possible sheet name variant
+    logger.info(
+        f"[RoTo] Looking for RoTo sheet, trying variants: {ARMSheets.ROTO_COUPLES_VARIANTS}"
+    )
+    logger.info(f"[RoTo] Available sheets: {workbook.sheetnames}")
+
+    sheet = None
+    sheet_name = None
+    for variant in ARMSheets.ROTO_COUPLES_VARIANTS:
+        if variant in workbook.sheetnames:
+            sheet_name = variant
+            sheet = workbook[variant]
+            logger.info(f"[RoTo] Found matching sheet: '{variant}'")
+            break
+
+    if sheet is None:
+        logger.warning(
+            f"[RoTo] No RoTo sheet found. Tried: {ARMSheets.ROTO_COUPLES_VARIANTS}"
+        )
         return []
 
-    sheet = workbook[sheet_name]
+    logger.info(f"[RoTo] Sheet '{sheet_name}' found, dimensions: {sheet.dimensions}")
 
-    # Get sub-headers from row 2
+    # Get headers from row 1 and sub-headers from row 2
+    headers_row1 = [cell.value for cell in sheet[1]]
     sub_headers = [cell.value for cell in sheet[2]]
+
+    logger.info(f"[RoTo] Row 1 headers: {headers_row1}")
+    logger.info(f"[RoTo] Row 2 sub-headers: {sub_headers}")
 
     rows = []
     for row_idx, row in enumerate(sheet.iter_rows(min_row=3), start=3):
@@ -411,8 +435,10 @@ def get_roto_sheet_data(workbook) -> list[dict]:
 
         # Skip empty rows
         if any(v for v in row_data.values() if v):
+            logger.info(f"[RoTo] Row {row_idx} data: {row_data}")
             rows.append(row_data)
 
+    logger.info(f"[RoTo] Total rows extracted: {len(rows)}")
     return rows
 
 
@@ -434,13 +460,22 @@ def extract_roto_couples(workbook) -> list[dict]:
         - justification: str
     """
     rows = get_roto_sheet_data(workbook)
+    logger.info(f"[RoTo Extract] get_roto_sheet_data returned {len(rows)} rows")
 
     roto_couples = []
-    for row in rows:
+    for row_idx, row in enumerate(rows):
+        logger.info(f"[RoTo Extract] Row {row_idx}: keys={list(row.keys())}")
         risk_origin = row.get("Source de risque")
         target_objective = row.get("Objectif visé")
 
+        logger.info(
+            f"[RoTo Extract] Row {row_idx}: risk_origin='{risk_origin}', target_objective='{target_objective}'"
+        )
+
         if not risk_origin or not target_objective:
+            logger.info(
+                f"[RoTo Extract] Row {row_idx}: SKIPPING - missing risk_origin or target_objective"
+            )
             continue
 
         # Parse '+' signs to numeric values
@@ -464,8 +499,13 @@ def extract_roto_couples(workbook) -> list[dict]:
             "justification": justification,
         }
         roto_couples.append(roto)
+        logger.info(
+            f"[RoTo Extract] Row {row_idx}: ADDED RoTo couple: '{risk_origin.strip()}' - '{target_objective.strip()}'"
+        )
 
-    logger.info(f"Extracted {len(roto_couples)} RoTo couples from ARM file")
+    logger.info(
+        f"[RoTo Extract] Extracted {len(roto_couples)} RoTo couples from ARM file"
+    )
     return roto_couples
 
 
@@ -677,15 +717,22 @@ def extract_strategic_scenarios(workbook) -> list[dict]:
         List of dicts with strategic scenario data
     """
     sheet_name = ARMSheets.STRATEGIC_SCENARIOS
+    logger.info(f"[Strategic Scenarios] Looking for sheet: '{sheet_name}'")
+    logger.info(f"[Strategic Scenarios] Available sheets: {workbook.sheetnames}")
+
     if sheet_name not in workbook.sheetnames:
         logger.warning(f"Sheet '{sheet_name}' not found in workbook")
         return []
 
     sheet = workbook[sheet_name]
+    logger.info(f"[Strategic Scenarios] Sheet found, dimensions: {sheet.dimensions}")
 
     # Get headers from row 1 and sub-headers from row 2
     headers_row1 = [cell.value for cell in sheet[1]]
     sub_headers = [cell.value for cell in sheet[2]]
+
+    logger.info(f"[Strategic Scenarios] Row 1 headers: {headers_row1}")
+    logger.info(f"[Strategic Scenarios] Row 2 sub-headers: {sub_headers}")
 
     # Find column indices by scanning both header rows
     # Column layout based on actual data:
@@ -727,12 +774,22 @@ def extract_strategic_scenarios(workbook) -> list[dict]:
     if scenario_name_col is None:
         scenario_name_col = 2
 
+    logger.info(
+        f"[Strategic Scenarios] Column indices detected: "
+        f"scenario_name={scenario_name_col}, scenario_ref={scenario_ref_col}, "
+        f"risk_origin={risk_origin_col}, target_objective={target_objective_col}, "
+        f"attack_path_ref={attack_path_ref_col}, attack_path_name={attack_path_name_col}"
+    )
+
     scenarios = []
+    row_num = 2  # Start counting from row 3 (data starts at row 3)
     for row in sheet.iter_rows(min_row=3):
+        row_num += 1
         row_values = [cell.value for cell in row]
 
         # Skip empty rows
         if not any(row_values):
+            logger.debug(f"[Strategic Scenarios] Row {row_num}: Empty, skipping")
             continue
 
         def get_val(col_idx):
@@ -742,6 +799,9 @@ def extract_strategic_scenarios(workbook) -> list[dict]:
 
         scenario_name = get_val(scenario_name_col)
         if not scenario_name:
+            logger.debug(
+                f"[Strategic Scenarios] Row {row_num}: No scenario name, skipping. Raw values: {row_values[:10]}"
+            )
             continue
 
         scenario = {
@@ -752,9 +812,18 @@ def extract_strategic_scenarios(workbook) -> list[dict]:
             "attack_path_ref_id": (str(get_val(attack_path_ref_col) or "")).strip(),
             "attack_path_name": (str(get_val(attack_path_name_col) or "")).strip(),
         }
+
+        logger.info(
+            f"[Strategic Scenarios] Row {row_num}: Extracted scenario: "
+            f"name='{scenario['name']}', risk_origin='{scenario['risk_origin']}', "
+            f"target_objective='{scenario['target_objective']}', "
+            f"attack_path='{scenario['attack_path_name']}'"
+        )
         scenarios.append(scenario)
 
-    logger.info(f"Extracted {len(scenarios)} strategic scenarios from ARM file")
+    logger.info(
+        f"[Strategic Scenarios] Total extracted: {len(scenarios)} strategic scenarios from ARM file"
+    )
     return scenarios
 
 
