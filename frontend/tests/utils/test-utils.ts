@@ -552,6 +552,7 @@ export class TestContent {
 				displayName: 'Perimeters',
 				modelName: 'perimeter',
 				build: {
+					str: `${vars.folderName}/${vars.perimeterName}`,
 					name: vars.perimeterName,
 					description: vars.description,
 					folder: vars.folderName,
