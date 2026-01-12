@@ -1578,5 +1578,6 @@
 		}
 	],
 	"cascadeAffectedHint": "Елементи нижче залишаються в системі, але їхні посилання на цей об'єкт будуть видалені.",
-	"libraryFilteringLabels": "Мітки бібліотеки"
+	"libraryFilteringLabels": "Мітки бібліотеки",
+	"campaignsDescription": "Керування кампаніями аудиту"
 }

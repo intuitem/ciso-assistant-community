@@ -1032,5 +1032,6 @@
 		}
 	],
 	"cascadeAffectedHint": "नीचे दिए गए आइटम सिस्टम में बने रहेंगे लेकिन इस वस्तु से उनके लिंक हटा दिए जाएंगे।",
-	"libraryFilteringLabels": "लाइब्रेरी लेबल"
+	"libraryFilteringLabels": "लाइब्रेरी लेबल",
+	"campaignsDescription": "ऑडिट अभियानों का प्रबंधन"
 }

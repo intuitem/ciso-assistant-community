@@ -1441,6 +1441,7 @@
 	],
 	"cascadeAffectedHint": "Gli elementi seguenti rimangono nel sistema ma i loro collegamenti con questo oggetto verranno rimossi.",
 	"libraryFilteringLabels": "Etichette della biblioteca",
+	"campaignsDescription": "Gestione delle campagne di audit",
 	"acceptNotes": "Note di accettazione",
 	"accepted": "Accettato",
 	"access": "Accesso / estrazione",

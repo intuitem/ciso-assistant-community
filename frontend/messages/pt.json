@@ -1063,5 +1063,6 @@
 		}
 	],
 	"cascadeAffectedHint": "Os itens abaixo permanecem no sistema, mas seus links para este objeto serão removidos.",
-	"libraryFilteringLabels": "Etiquetas de biblioteca"
+	"libraryFilteringLabels": "Etiquetas de biblioteca",
+	"campaignsDescription": "Gestão de campanhas de auditoria"
 }
