@@ -35,13 +35,13 @@ class WebhookEndpointViewSet(BaseModelViewSet):
         """
         Users can only see their own webhook endpoints.
         """
-        return WebhookEndpoint.objects.filter(owner=self.request.user)
+        return WebhookEndpoint.objects.filter(owner=self.request.user.actor)
 
     def perform_create(self, serializer):
         """
         Automatically assign the current user as the owner.
         """
-        serializer.save(owner=self.request.user)
+        serializer.save(owner=self.request.user.actor)
 
 
 class WebhookEventTypeView(APIView):
