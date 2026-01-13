@@ -1,0 +1,1359 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility Mode}'
+urn: urn:intuitem:risk:library:mapping-dora-and-finma-2023-01
+locale: en
+ref_id: mapping-dora-and-finma-2023-01
+name: DORA <-> finma-2023-01
+description: Mapping between Digital Operational Resilience Act (DORA) EU 2022/2554 and FINMA Circular 2023/1 Operational risks and resilience - banks
+copyright: JSI
+version: '2'
+publication_date: '2026-01-10'
+provider: JSI
+packager: JSI
+dependencies:
+- urn:intuitem:risk:library:dora
+- urn:intuitem:risk:library:finma-2023-01
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-dora-and-finma-2023-01
+    ref_id: mapping-dora-and-finma-2023-01
+    name: DORA <-> finma-2023-01
+    description: Mapping between Digital Operational Resilience Act (DORA) EU 2022/2554 and FINMA Circular 2023/1 Operational
+      risks and resilience - banks
+    source_framework_urn: urn:intuitem:risk:framework:dora
+    target_framework_urn: urn:intuitem:risk:framework:finma-2023-01
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:22
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:22
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:22
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:23
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:23
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:23
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:24
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.8
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:24
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.3.f
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:24
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.f
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:25
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.7.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:25
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:45.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:25
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:26
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:26
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.1.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:26
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:7.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:27
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:27
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.10
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:27
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:28
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:28
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:24.3
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:28
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node310-1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:29
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:29
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:29
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:30
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:30
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:19.4.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:30
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1.g
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:31
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:31
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:19.4.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:31
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:19.4.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:32
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:32
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:32
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:34
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:34
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:13.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:34
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.3.f
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:35
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:35
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:35
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:36
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:25.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:36
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:19.4.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:36
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:25.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:37
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:18.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:37
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:37
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:38
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:38
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:38
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:39
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:39
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:39
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node310-1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:40
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.1.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:40
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:40
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.2.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:42
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:26.6
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:42
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node310-1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:42
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:43
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1.g
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:43
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:13.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:43
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:44
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:44
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.1.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:44
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:12.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:45
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:7.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:45
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.2.f
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:45
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:46
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:7.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:46
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:46
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:45.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:47
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.6.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:47
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:47
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:13.7
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:48
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:48
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:48
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:49
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node259
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:49
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:49
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node259
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:50
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:50
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:50
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:51
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:26.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:51
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:51
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:52
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:12.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:52
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:18.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:52
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:53
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:53
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:53
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:19.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:54
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:10.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:54
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:12.6
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:54
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:55
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:55
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:55
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.3.f
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:56
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:56
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:56
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:57
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:57
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.2.i.ii
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:57
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:58
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.3.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:58
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:58
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:59
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.7.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:59
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.3.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:59
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.3.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:60
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.f
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:60
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:60
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:45.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:61
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:13.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:61
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:61
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:62
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:62
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.3.f.i
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:62
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:63
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:63
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:63
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:64
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:64
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:64
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:65
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:65
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:65
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:66
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:66
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:66
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:67
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1.f
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:67
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:12.5.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:67
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:19.4.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:68
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:68
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:19.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:68
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:69
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:69
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:69
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:70
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:70
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node368
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:70
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:45.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:71
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:71
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:71
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:72
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:72
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:18.1.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:72
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:73
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.3.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:73
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node465
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:73
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:74
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:74
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.7.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:74
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:75
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:75
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.7.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:75
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:76
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:12.3
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:76
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:76
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:77
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:77
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:77
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1.g
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:78
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.7
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:78
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:78
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:79
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.1.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:79
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:79
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1.g
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:80
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:80
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.2.g
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:80
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:81
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:81
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:18.1.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:81
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.4.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:82
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:82
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:82
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:45.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:83
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:13.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:83
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.2.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:83
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.5
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:84
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.2.i.iii
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:84
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:13.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:84
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:85
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:85
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.4.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:85
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:45.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:86
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:7.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:86
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:86
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.5
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:87
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.2.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:87
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.d
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:87
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node473
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:88
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node465
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:88
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:88
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.7
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:89
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.6.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:89
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:14.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:89
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node310-1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:90
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:14.3
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:90
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.h
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:90
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:91
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.7
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:91
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1.g
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:91
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.3.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:92
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1.f
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:92
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.7
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:92
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:93
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:93
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node403
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:93
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node310-1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:94
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:24.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:94
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.5
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:94
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:30.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:95
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node362
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:95
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node403
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:95
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:13.6
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:96
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:96
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:7.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:96
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node362
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:97
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node387
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:97
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:97
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node362
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:98
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:26.3
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:98
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:13.2.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:98
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:99
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:99
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:26.3
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:99
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node362
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:100
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.4.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:100
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.8.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:100
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:101
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node403
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:101
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.2.g
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:101
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:24.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:102
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:24.2
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:102
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:102
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:17.3.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:103
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:28.8.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:103
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:103
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:104
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:104
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:9.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:104
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:24.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:105
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:105
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.f
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:105
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node310-1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:106
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.4
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:106
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:106
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:12.5.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:107
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.2.a
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:107
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node403
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:107
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.c
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:108
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:16.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:108
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node441
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:108
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.g
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:109
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:27.1.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:109
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node404
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:109
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node477
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:110
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:18.1.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:110
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.9
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:110
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:6.8.g
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:111
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 3
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.6.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:111
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:11.2.e
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:111
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 1
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:12.5.b
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:112
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:node403
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:112
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
+    - source_requirement_urn: urn:intuitem:risk:req_node:dora:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:finma-2023-01:112
+      relationship: intersect
+      rationale: functional
+      strength_of_relationship: 2
