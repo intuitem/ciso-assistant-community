@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Evidence is expired since ${expired_since} ${days_text}"
+body: |
+  Hello,
+
+  You have ${evidence_count} evidence(s) expired since ${expired_since} ${days_text}:
+
+  ${evidence_list}
+
+  Please log in to your CISO Assistant portal to review and update these evidences:
+  ${ciso_assistant_url}
+
+  Thank you.

@@ -351,3 +351,151 @@ def resolve_task_template_id(task_name_or_id: str) -> str:
         )
 
     return tasks[0]["id"]
+
+
+# ============================================================================
+# TPRM (Third-Party Risk Management) Resolvers
+# ============================================================================
+
+
+def resolve_entity_id(entity_name_or_id: str) -> str:
+    """Helper function to resolve entity name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in entity_name_or_id and len(entity_name_or_id) == 36:
+        return entity_name_or_id
+
+    res = make_get_request("/entities/", params={"name": entity_name_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(f"Entity '{entity_name_or_id}' API error {res.status_code}")
+
+    data = res.json()
+    entities = get_paginated_results(data)
+
+    if not entities:
+        raise ValueError(f"Entity '{entity_name_or_id}' not found")
+
+    if len(entities) > 1:
+        raise ValueError(
+            f"Ambiguous entity name '{entity_name_or_id}', found {len(entities)}"
+        )
+
+    return entities[0]["id"]
+
+
+def resolve_solution_id(solution_name_or_id: str) -> str:
+    """Helper function to resolve solution name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in solution_name_or_id and len(solution_name_or_id) == 36:
+        return solution_name_or_id
+
+    res = make_get_request("/solutions/", params={"name": solution_name_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Solution '{solution_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    solutions = get_paginated_results(data)
+
+    if not solutions:
+        raise ValueError(f"Solution '{solution_name_or_id}' not found")
+
+    if len(solutions) > 1:
+        raise ValueError(
+            f"Ambiguous solution name '{solution_name_or_id}', found {len(solutions)}"
+        )
+
+    return solutions[0]["id"]
+
+
+def resolve_contract_id(contract_name_or_id: str) -> str:
+    """Helper function to resolve contract name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in contract_name_or_id and len(contract_name_or_id) == 36:
+        return contract_name_or_id
+
+    res = make_get_request("/contracts/", params={"name": contract_name_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Contract '{contract_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    contracts = get_paginated_results(data)
+
+    if not contracts:
+        raise ValueError(f"Contract '{contract_name_or_id}' not found")
+
+    if len(contracts) > 1:
+        raise ValueError(
+            f"Ambiguous contract name '{contract_name_or_id}', found {len(contracts)}"
+        )
+
+    return contracts[0]["id"]
+
+
+def resolve_entity_assessment_id(assessment_name_or_id: str) -> str:
+    """Helper function to resolve entity assessment name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in assessment_name_or_id and len(assessment_name_or_id) == 36:
+        return assessment_name_or_id
+
+    res = make_get_request(
+        "/entity-assessments/", params={"name": assessment_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Entity assessment '{assessment_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    assessments = get_paginated_results(data)
+
+    if not assessments:
+        raise ValueError(f"Entity assessment '{assessment_name_or_id}' not found")
+
+    if len(assessments) > 1:
+        raise ValueError(
+            f"Ambiguous entity assessment name '{assessment_name_or_id}', found {len(assessments)}"
+        )
+
+    return assessments[0]["id"]
+
+
+def resolve_representative_id(representative_email_or_id: str) -> str:
+    """Helper function to resolve representative email to UUID
+    If already a UUID, returns it. If an email, looks it up via API.
+    """
+    if "-" in representative_email_or_id and len(representative_email_or_id) == 36:
+        return representative_email_or_id
+
+    # Search by email since that's the unique identifier for representatives
+    res = make_get_request(
+        "/representatives/", params={"search": representative_email_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Representative '{representative_email_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    representatives = get_paginated_results(data)
+
+    if not representatives:
+        raise ValueError(f"Representative '{representative_email_or_id}' not found")
+
+    if len(representatives) > 1:
+        raise ValueError(
+            f"Ambiguous representative '{representative_email_or_id}', found {len(representatives)}"
+        )
+
+    return representatives[0]["id"]

@@ -32,7 +32,16 @@
 		var option = {
 			tooltip: {
 				trigger: 'item',
-				triggerOn: 'mousemove'
+				triggerOn: 'mousemove',
+				formatter: function (params: any) {
+					if (params.treeAncestors && params.treeAncestors.length > 0) {
+						return params.treeAncestors
+							.map((node: any) => node.name)
+							.filter((name: string) => name)
+							.join('/');
+					}
+					return params.name;
+				}
 			},
 			title: { text: title },
 			series: [
