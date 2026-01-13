@@ -913,6 +913,107 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 }
             )
 
+    def _validate_parent_field_change(self, request: Request, instance) -> None:
+        """
+        Validate that when changing parent fields for models without direct folder,
+        the user has write permission on the target folder derived from the new parent.
+
+        Models affected:
+        - Folder: changes to parent_folder affect folder hierarchy
+        - RiskScenario: changes to risk_assessment affect folder scope
+        - Representative: changes to entity affect folder scope
+        - Solution: changes to provider_entity affect folder scope
+        """
+        from iam.models import Folder
+        from tprm.models import Representative, Solution
+
+        model_class = instance.__class__
+        model_name = model_class.__name__
+
+        # Map model to (parent_field_name, parent_folder_path)
+        parent_field_config = {
+            "Folder": ("parent_folder", None),  # parent_folder IS the folder
+            "RiskScenario": ("risk_assessment", "folder"),
+            "Representative": ("entity", "folder"),
+            "Solution": ("provider_entity", "folder"),
+        }
+
+        if model_name not in parent_field_config:
+            return
+
+        parent_field_name, folder_attr_path = parent_field_config[model_name]
+
+        # Check if the parent field is being changed
+        if parent_field_name not in request.data:
+            return
+
+        new_parent_value = request.data.get(parent_field_name)
+
+        # Handle null/empty values
+        if not new_parent_value:
+            return
+
+        # Extract ID from various formats
+        if isinstance(new_parent_value, list):
+            if not new_parent_value:
+                return
+            new_parent_value = new_parent_value[0]
+        if isinstance(new_parent_value, dict):
+            new_parent_value = new_parent_value.get("id")
+
+        if not new_parent_value:
+            return
+
+        # Convert to UUID
+        try:
+            new_parent_id = UUID(str(new_parent_value))
+        except (TypeError, ValueError):
+            return
+
+        # Get current parent ID
+        current_parent_id = getattr(instance, f"{parent_field_name}_id", None)
+
+        # If not changing, no validation needed
+        if current_parent_id and str(current_parent_id) == str(new_parent_id):
+            return
+
+        # Get the target folder from the new parent
+        target_folder = None
+
+        if model_name == "Folder":
+            # For Folder, the parent_folder IS the target folder
+            target_folder = Folder.objects.filter(id=new_parent_id).first()
+        else:
+            # For other models, get parent object and extract folder
+            parent_model = instance._meta.get_field(parent_field_name).related_model
+            parent_obj = parent_model.objects.filter(id=new_parent_id).first()
+
+            if parent_obj and folder_attr_path:
+                target_folder = getattr(parent_obj, folder_attr_path, None)
+
+        if not target_folder:
+            return
+
+        # Check if user has add permission in the target folder
+        model = self.model or instance.__class__
+        perm = Permission.objects.get(
+            codename=f"add_{model._meta.model_name}",
+            content_type__app_label=model._meta.app_label,
+            content_type__model=model._meta.model_name,
+        )
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=perm,
+            folder=target_folder,
+        ):
+            field_display_name = model._meta.get_field(parent_field_name).verbose_name
+            raise PermissionDenied(
+                {
+                    parent_field_name: f"You do not have permission to move this object by changing {field_display_name}"
+                }
+            )
+
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         if request.data.get("filtering_labels"):
@@ -930,6 +1031,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def update(self, request: Request, *args, **kwargs) -> Response:
         instance = self.get_object()
         self._validate_folder_change(request, instance)
+        self._validate_parent_field_change(request, instance)
         # Experimental: process evidences on TaskTemplate update
         if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
@@ -967,6 +1069,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
         instance = self.get_object()
         self._validate_folder_change(request, instance)
+        self._validate_parent_field_change(request, instance)
         self._process_request_data(request)
         return super().partial_update(request, *args, **kwargs)
 
