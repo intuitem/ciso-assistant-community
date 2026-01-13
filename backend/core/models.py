@@ -7758,6 +7758,19 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
     )
     team_email = models.EmailField(verbose_name="Team Email", blank=True, null=True)
 
+    def get_emails(self) -> list[str]:
+        emails = []
+        if self.team_email:
+            emails.append(self.team_email)
+        leader_email = self.leader.email
+        if leader_email:
+            emails.append(leader_email)
+        deputy_emails = self.deputies.exclude(email="").values_list("email", flat=True)
+        emails.extend(deputy_emails)
+        member_emails = self.members.exclude(email="").values_list("email", flat=True)
+        emails.extend(member_emails)
+        return list(set(emails))  # Remove duplicates
+
 
 class Actor(AbstractBaseModel):
     user = models.OneToOneField(
@@ -7790,24 +7803,27 @@ class Actor(AbstractBaseModel):
     @property
     def type(self):
         """Helper to return the type of underlying instance."""
-        if self.user_id:
+        if self.user:
             return "user"
-        if self.team_id:
+        if self.team:
             return "team"
-        if self.entity_id:
+        if self.entity:
             return "entity"
         return None
 
     @property
     def specific(self):
         """Helper to return the actual underlying instance."""
-        if self.user_id:
+        if self.user:
             return self.user
-        if self.team_id:
+        if self.team:
             return self.team
-        if self.entity_id:
+        if self.entity:
             return self.entity
-        return None
+        raise ValueError("Actor has no underlying instance")
+
+    def get_emails(self) -> list[str]:
+        return self.specific.get_emails()
 
     def __str__(self):
         return str(self.specific)

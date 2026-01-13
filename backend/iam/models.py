@@ -645,6 +645,9 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """get user's short name (i.e. first_name or email before @))"""
         return self.first_name if self.first_name else self.email.split("@")[0]
 
+    def get_emails(self) -> list[str]:
+        return [self.email]
+
     def mailing(self, email_template_name, subject, object="", object_id="", pk=False):
         """
         Sending a mail to a user for password resetting or creation

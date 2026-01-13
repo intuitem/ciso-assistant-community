@@ -179,6 +179,14 @@ class Entity(
             .first()
         )
 
+    def get_emails(self) -> list[str]:
+        emails = []
+        representative_emails = self.representatives.exclude(email="").values_list(
+            "email", flat=True
+        )
+        emails.extend(representative_emails)
+        return emails
+
 
 class EntityAssessment(Assessment):
     class Conclusion(models.TextChoices):
