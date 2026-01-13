@@ -2,9 +2,6 @@
 Star the project 🌟 to get releases notification and help growing the community!
 </p>
 
-
-
-
 <p align="center">
     <a href="https://trendshift.io/repositories/9343" target="_blank"><img src="https://trendshift.io/api/badge/repositories/9343" alt="intuitem%2Fciso-assistant-community | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
     <br />
@@ -34,7 +31,6 @@ Star the project 🌟 to get releases notification and help growing the communit
 ![Discord](https://img.shields.io/discord/1155083727932764190?style=for-the-badge&label=Discord)
 <a href="https://intuitem.gitbook.io/ciso-assistant"><img src="https://img.shields.io/static/v1?message=Documentation&logo=gitbook&logoColor=ffffff&label=%20&labelColor=5c5c5c&color=F4E28D&style=for-the-badge"></a>
 <a href="https://ca-api-doc.pages.dev/"><img src="https://img.shields.io/static/v1?message=API&logo=swagger&label=%20&style=for-the-badge"></a>
-
 
 CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
@@ -230,6 +226,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 86. ISO 42001:2023 outline - Artificial Intelligence Management System, including Annex A 🤖🌐
 87. India's Digital Personal Data Protection Act (DPDPA) - 2023 🇮🇳
 88. E-ITS (Estonia's national cyber security standard) - 2024 🇪🇪
+89. Microsoft cloud security benchmark v1 - ☁️🌐
 
 ### Community contributions
 
