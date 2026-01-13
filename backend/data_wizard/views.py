@@ -2209,7 +2209,14 @@ class LoadFileView(APIView):
                 # =========================================================
                 results["details"]["roto_couples_created"] = 0
 
-                for roto_data in arm_data.get("roto_couples", []):
+                roto_couples_data = arm_data.get("roto_couples", [])
+                logger.info(
+                    f"[RoTo Import] Received {len(roto_couples_data)} RoTo couples from extraction"
+                )
+                for idx, roto_data in enumerate(roto_couples_data):
+                    logger.info(f"[RoTo Import] Processing #{idx + 1}: {roto_data}")
+
+                for roto_data in roto_couples_data:
                     try:
                         # Find or create the risk origin terminology
                         risk_origin_name = roto_data["risk_origin"]
@@ -2431,6 +2438,10 @@ class LoadFileView(APIView):
                 results["details"]["strategic_scenarios_created"] = 0
                 results["details"]["attack_paths_created"] = 0
 
+                logger.info(
+                    "[Strategic Scenarios Import] Starting strategic scenario creation"
+                )
+
                 # Build a lookup for RoTo couples by risk_origin + target_objective
                 roto_lookup = {}
                 for roto in study.roto_set.all():
@@ -2440,12 +2451,37 @@ class LoadFileView(APIView):
                         roto.target_objective.lower(),
                     )
                     roto_lookup[key] = roto
+                    logger.info(
+                        f"[Strategic Scenarios Import] RoTo lookup entry: "
+                        f"key={key}, roto_id={roto.id}, "
+                        f"risk_origin_name='{roto.risk_origin.name}', "
+                        f"target_objective='{roto.target_objective}'"
+                    )
 
-                for scenario_data in arm_data.get("strategic_scenarios", []):
+                logger.info(
+                    f"[Strategic Scenarios Import] RoTo lookup built with {len(roto_lookup)} entries"
+                )
+                logger.info(
+                    f"[Strategic Scenarios Import] RoTo lookup keys: {list(roto_lookup.keys())}"
+                )
+
+                scenarios_from_arm = arm_data.get("strategic_scenarios", [])
+                logger.info(
+                    f"[Strategic Scenarios Import] Processing {len(scenarios_from_arm)} scenarios from ARM data"
+                )
+
+                for scenario_data in scenarios_from_arm:
                     try:
                         scenario_name = scenario_data["name"]
                         if not scenario_name:
+                            logger.debug(
+                                "[Strategic Scenarios Import] Skipping scenario with no name"
+                            )
                             continue
+
+                        logger.info(
+                            f"[Strategic Scenarios Import] Processing scenario: '{scenario_name}'"
+                        )
 
                         # Find the matching RoTo couple
                         # Normalize the risk origin name the same way we do when creating terminologies
@@ -2455,33 +2491,66 @@ class LoadFileView(APIView):
                             "target_objective", ""
                         ).lower()
 
-                        roto = roto_lookup.get((risk_origin_name, target_objective))
+                        logger.info(
+                            f"[Strategic Scenarios Import] Looking for RoTo match: "
+                            f"risk_origin_raw='{risk_origin_raw}', "
+                            f"risk_origin_normalized='{risk_origin_name}', "
+                            f"target_objective='{target_objective}'"
+                        )
+
+                        # Attempt 1: Exact match with underscore normalization
+                        lookup_key_1 = (risk_origin_name, target_objective)
+                        roto = roto_lookup.get(lookup_key_1)
+                        logger.info(
+                            f"[Strategic Scenarios Import] Attempt 1 (underscore normalized): "
+                            f"key={lookup_key_1}, found={roto is not None}"
+                        )
 
                         if not roto:
-                            # Try without underscore normalization
+                            # Attempt 2: Try without underscore normalization
                             risk_origin_name_alt = risk_origin_raw.lower()
-                            roto = roto_lookup.get(
-                                (risk_origin_name_alt, target_objective)
+                            lookup_key_2 = (risk_origin_name_alt, target_objective)
+                            roto = roto_lookup.get(lookup_key_2)
+                            logger.info(
+                                f"[Strategic Scenarios Import] Attempt 2 (lowercase only): "
+                                f"key={lookup_key_2}, found={roto is not None}"
                             )
 
                         if not roto:
-                            # Try partial matching on target objective
+                            # Attempt 3: Try partial matching on target objective
+                            logger.info(
+                                f"[Strategic Scenarios Import] Attempt 3 (partial match): "
+                                f"searching for risk_origin containing '{risk_origin_name}' "
+                                f"and target_objective containing '{target_objective}'"
+                            )
                             for key, r in roto_lookup.items():
                                 if (
                                     key[0] == risk_origin_name
                                     and target_objective in key[1]
                                 ):
                                     roto = r
+                                    logger.info(
+                                        f"[Strategic Scenarios Import] Attempt 3: Partial match found with key={key}"
+                                    )
                                     break
 
                         if not roto:
+                            error_msg = f"Could not find RoTo couple for '{risk_origin_name}' - '{target_objective}'"
+                            logger.warning(
+                                f"[Strategic Scenarios Import] FAILED to match scenario '{scenario_name}': {error_msg}"
+                            )
                             results["errors"].append(
                                 {
                                     "strategic_scenario": scenario_name,
-                                    "error": f"Could not find RoTo couple for '{risk_origin_name}' - '{target_objective}'",
+                                    "error": error_msg,
                                 }
                             )
                             continue
+
+                        logger.info(
+                            f"[Strategic Scenarios Import] SUCCESS: Matched scenario '{scenario_name}' "
+                            f"to RoTo id={roto.id} ('{roto.risk_origin.name}' - '{roto.target_objective}')"
+                        )
 
                         # Create the strategic scenario
                         strategic_scenario = StrategicScenario.objects.create(
@@ -2491,6 +2560,9 @@ class LoadFileView(APIView):
                             ref_id=scenario_data.get("ref_id", ""),
                         )
                         results["details"]["strategic_scenarios_created"] += 1
+                        logger.info(
+                            f"[Strategic Scenarios Import] Created StrategicScenario id={strategic_scenario.id}, name='{scenario_name}'"
+                        )
 
                         # Create the attack path if provided
                         attack_path_name = scenario_data.get("attack_path_name", "")
@@ -2502,8 +2574,15 @@ class LoadFileView(APIView):
                                 ref_id=scenario_data.get("attack_path_ref_id", ""),
                             )
                             results["details"]["attack_paths_created"] += 1
+                            logger.info(
+                                f"[Strategic Scenarios Import] Created AttackPath id={attack_path.id}, name='{attack_path_name}'"
+                            )
 
                     except Exception as e:
+                        logger.error(
+                            f"[Strategic Scenarios Import] Exception processing scenario '{scenario_data.get('name', 'unknown')}': {str(e)}",
+                            exc_info=True,
+                        )
                         results["errors"].append(
                             {
                                 "strategic_scenario": scenario_data.get(
