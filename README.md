@@ -229,6 +229,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 85. Points de contrôle Active Directory (AD) - ANSSI 🇫🇷
 86. ISO 42001:2023 outline - Artificial Intelligence Management System, including Annex A 🤖🌐
 87. India's Digital Personal Data Protection Act (DPDPA) - 2023 🇮🇳
+88. E-ITS (Estonia's national cyber security standard) - 2024 🇪🇪
 
 ### Community contributions
 
