@@ -3071,7 +3071,7 @@
 	"addRightrequest": "Track request",
 	"addRiskacceptance": "Add risk acceptance",
 	"addRiskassessment": "Add risk assessment",
-	"addComplianceassessment": "Add compliance assessment",
+	"addComplianceassessment": "Add audit",
 	"addRiskmatrix": "Add risk matrix",
 	"addRiskscenario": "Add risk scenario",
 	"addSecurityexception": "Add exception",
