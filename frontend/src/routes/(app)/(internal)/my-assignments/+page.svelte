@@ -58,7 +58,7 @@
 				filters: APPLIED_CONTROL_FILTERS
 			}}
 			URLModel="applied-controls"
-			baseEndpoint="/applied-controls?owner={data.user.id}"
+			baseEndpoint="/applied-controls?owner={data.user.actor_id}"
 		/>
 	</div>
 	<div class="col-span-5 p-2 flex items-center justify-center">
