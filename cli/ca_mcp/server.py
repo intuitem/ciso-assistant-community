@@ -69,6 +69,27 @@ from .tools.update_tools import (
     delete_task_template,
 )
 
+from .tools.tprm_tools import (
+    # Read tools
+    get_entities,
+    get_entity_assessments,
+    get_representatives,
+    get_solutions,
+    get_contracts,
+    # Write tools
+    create_entity,
+    create_entity_assessment,
+    create_representative,
+    create_solution,
+    create_contract,
+    # Update tools
+    update_entity,
+    update_entity_assessment,
+    update_representative,
+    update_solution,
+    update_contract,
+)
+
 # Register all tools with MCP decorators
 mcp.tool()(get_risk_scenarios)
 mcp.tool()(get_applied_controls)
@@ -122,6 +143,23 @@ mcp.tool()(update_quantitative_risk_scenario)
 mcp.tool()(update_quantitative_risk_hypothesis)
 mcp.tool()(update_task_template)
 mcp.tool()(delete_task_template)
+
+# TPRM tools
+mcp.tool()(get_entities)
+mcp.tool()(get_entity_assessments)
+mcp.tool()(get_representatives)
+mcp.tool()(get_solutions)
+mcp.tool()(get_contracts)
+mcp.tool()(create_entity)
+mcp.tool()(create_entity_assessment)
+mcp.tool()(create_representative)
+mcp.tool()(create_solution)
+mcp.tool()(create_contract)
+mcp.tool()(update_entity)
+mcp.tool()(update_entity_assessment)
+mcp.tool()(update_representative)
+mcp.tool()(update_solution)
+mcp.tool()(update_contract)
 
 
 def run_server():
