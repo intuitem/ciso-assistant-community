@@ -82,10 +82,6 @@ class LoopProcessor:
         """
         rows = list(tbl_element.findall(f"{self.a_ns}tr"))
 
-        print(f"[DEBUG] Found {len(rows)} rows in table on slide {slide_num}")
-        for idx, r in enumerate(rows):
-            print(f"[DEBUG]   Row {idx}: {self._get_row_text(r)[:80]}")
-
         # Find rows with #each markers
         i = 0
         while i < len(rows):
@@ -188,17 +184,7 @@ class LoopProcessor:
                         break
 
                 # Insert new rows
-                print(
-                    f"[DEBUG] Before insert: {len(list(tbl_element.findall(f'{self.a_ns}tr')))} rows, insert_position={insert_position}"
-                )
-                for idx, r in enumerate(list(tbl_element.findall(f"{self.a_ns}tr"))):
-                    print(
-                        f"[DEBUG]   Pre-insert Row {idx}: {self._get_row_text(r)[:50]}"
-                    )
                 for j, new_row in enumerate(new_rows):
-                    print(
-                        f"[DEBUG] Inserting row {j} at position {insert_position + j}"
-                    )
                     tbl_element.insert(insert_position + j, new_row)
 
                 # Track the loop
@@ -214,11 +200,6 @@ class LoopProcessor:
 
                 # Update rows list and continue
                 rows = list(tbl_element.findall(f"{self.a_ns}tr"))
-                print(
-                    f"[DEBUG] After processing loop '{collection_name}': {len(rows)} rows remain, inserted {len(new_rows)} new rows"
-                )
-                for idx, r in enumerate(rows):
-                    print(f"[DEBUG]   Row {idx}: {self._get_row_text(r)[:80]}")
                 i += len(new_rows)
             else:
                 i += 1

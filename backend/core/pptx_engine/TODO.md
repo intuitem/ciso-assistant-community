@@ -41,7 +41,7 @@ The core PPTX template engine is **fully implemented** and tested:
 
 ## Remaining Work
 
-### Backend Integration (Priority)
+### Backend Integration ✅ Complete
 
 - [x] **`pptx_report()` view method** in `ComplianceAssessmentViewSet` (`views.py`)
   - Follow pattern from `word_report()` method
@@ -54,11 +54,16 @@ The core PPTX template engine is **fully implemented** and tested:
   - Generate chart images to temp files (for `{{image:var}}` syntax)
   - Build context dict with audit data
 
-- [ ] **Template placeholders** - Verify/update `audit_report_template_en.pptx`
-  - Ensure placeholders match context keys
-  - Create French template if needed
+- [x] **Image aspect ratio preservation** in `replacers/image.py`
+  - Added `_get_image_dimensions()` to read image dimensions
+  - Added `_fit_image_to_bounds()` to preserve aspect ratio while centering
 
-### Frontend Integration (After Backend)
+- [x] **Improved donut chart rendering** in `generators.py`
+  - Filter out zero values to avoid clutter
+  - Show percentages only for slices >= 5%
+  - Legend placed outside chart for readability
+
+### Frontend Integration ✅ Complete
 
 - [x] Create `/compliance-assessments/[id=uuid]/export/pptx/+server.ts`
   - Follow pattern from `/export/word/+server.ts`
@@ -67,6 +72,19 @@ The core PPTX template engine is **fully implemented** and tested:
 - [x] Add PPTX export option to UI
   - Add to export dropdown/menu in compliance assessment pages
   - Added `asPowerPoint` translation to en.json and fr.json
+
+### Template Design (User Task)
+
+- [ ] **Template placeholders** - Create/update `audit_report_template_en.pptx`
+  - User is designing the template with supported placeholders
+  - Create French template if needed
+
+### Bug Fixes Applied
+
+- [x] Fixed re-parsing bug in `engine.py` that discarded image/loop changes
+- [x] Fixed table row insertion position bug in `loops.py` (was using row index instead of child element index)
+- [x] Fixed `None` value handling with `NOT_FOUND` sentinel pattern
+- [x] Removed debug print statements from `loops.py`
 
 ### Testing
 
