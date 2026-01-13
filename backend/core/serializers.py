@@ -924,11 +924,13 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
             return
 
         try:
-            from iam.models import User
+            from core.models import Actor
             from .tasks import send_applied_control_assignment_notification
 
-            assigned_users = User.objects.filter(id__in=owner_ids)
-            assigned_emails = [user.email for user in assigned_users if user.email]
+            assigned_actors = Actor.objects.filter(id__in=owner_ids)
+            assigned_emails = []
+            for actor in assigned_actors:
+                assigned_emails.extend(actor.get_emails())
 
             if assigned_emails:
                 # Queue the task for async execution
@@ -1884,11 +1886,13 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             return
 
         try:
-            from iam.models import User
+            from core.models import Actor
             from .tasks import send_compliance_assessment_assignment_notification
 
-            assigned_users = User.objects.filter(id__in=author_ids)
-            assigned_emails = [user.email for user in assigned_users if user.email]
+            assigned_actors = Actor.objects.filter(id__in=author_ids)
+            assigned_emails = []
+            for actor in assigned_actors:
+                assigned_emails.extend(actor.get_emails())
 
             if assigned_emails:
                 send_compliance_assessment_assignment_notification(
