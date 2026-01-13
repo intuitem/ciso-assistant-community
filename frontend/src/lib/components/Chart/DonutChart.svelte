@@ -55,8 +55,8 @@
 			tooltip: {
 				trigger: 'item',
 				formatter: function (params) {
-					// Only show the translated name in the tooltip on hover
-					return params.data.name;
+					// Return formatted tooltip content with just the name and value
+					return `${params.data.name}: ${params.data.value}`;
 				}
 			},
 			title: {
