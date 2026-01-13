@@ -10,7 +10,7 @@ from lxml import etree
 
 from ..constants import NAMESPACES, PLACEHOLDER_PATTERN, IMAGE_PLACEHOLDER_PATTERN
 from ..exceptions import MissingContextError
-from ..utils import resolve_context_value
+from ..utils import resolve_context_value, NOT_FOUND
 
 
 class TextReplacer:
@@ -81,13 +81,13 @@ class TextReplacer:
             # Resolve the value from context
             value = resolve_context_value(self.context, placeholder_content)
 
-            if value is None:
+            if value is NOT_FOUND:
                 if self.strict:
                     raise MissingContextError(placeholder_content, slide_num)
                 # Leave placeholder as-is if not strict
                 return full_match
 
-            # Convert value to string
+            # Convert value to string (handles None -> "")
             str_value = self._value_to_string(value)
 
             # Track the replacement

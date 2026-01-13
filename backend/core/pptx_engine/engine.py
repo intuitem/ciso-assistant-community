@@ -287,10 +287,6 @@ class PPTXTemplateEngine:
             image_replacer.replace_in_slide(slide_root, slide_path, slide_num)
 
             # Step 4: Replace text placeholders
-            # Re-parse after image replacement as DOM may have changed
-            slide_root = (
-                parse_xml(slide_path) if os.path.exists(slide_path) else slide_root
-            )
             text_replacer.replace_in_slide(slide_root, slide_num)
 
             # Write modified slide

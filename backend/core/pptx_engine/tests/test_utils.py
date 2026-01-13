@@ -9,6 +9,7 @@ from ..utils import (
     find_placeholders,
     sanitize_filename,
     generate_unique_media_name,
+    NOT_FOUND,
 )
 
 
@@ -32,14 +33,19 @@ class TestResolveContextValue:
         assert resolve_context_value(context, "a.b.c.d") == "value"
 
     def test_missing_key(self):
-        """Missing key should return None."""
+        """Missing key should return NOT_FOUND sentinel."""
         context = {"name": "John"}
-        assert resolve_context_value(context, "missing") is None
+        assert resolve_context_value(context, "missing") is NOT_FOUND
 
     def test_missing_nested_key(self):
-        """Missing nested key should return None."""
+        """Missing nested key should return NOT_FOUND sentinel."""
         context = {"user": {"name": "John"}}
-        assert resolve_context_value(context, "user.email") is None
+        assert resolve_context_value(context, "user.email") is NOT_FOUND
+
+    def test_none_value(self):
+        """Key with None value should return None (not NOT_FOUND)."""
+        context = {"value": None}
+        assert resolve_context_value(context, "value") is None
 
     def test_object_attribute(self):
         """Should work with object attributes."""

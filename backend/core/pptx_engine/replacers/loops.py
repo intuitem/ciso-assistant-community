@@ -22,7 +22,7 @@ from ..constants import (
     SLIDES_DIR,
 )
 from ..exceptions import LoopError, MissingContextError
-from ..utils import resolve_context_value, parse_xml, write_xml
+from ..utils import resolve_context_value, parse_xml, write_xml, NOT_FOUND
 
 
 class LoopProcessor:
@@ -82,6 +82,10 @@ class LoopProcessor:
         """
         rows = list(tbl_element.findall(f"{self.a_ns}tr"))
 
+        print(f"[DEBUG] Found {len(rows)} rows in table on slide {slide_num}")
+        for idx, r in enumerate(rows):
+            print(f"[DEBUG]   Row {idx}: {self._get_row_text(r)[:80]}")
+
         # Find rows with #each markers
         i = 0
         while i < len(rows):
@@ -105,9 +109,11 @@ class LoopProcessor:
                 # Get the collection from context
                 collection = resolve_context_value(self.context, collection_name)
 
-                if collection is None:
+                if collection is NOT_FOUND:
                     if self.strict:
                         raise MissingContextError(collection_name, slide_num)
+                    collection = []
+                elif collection is None:
                     collection = []
 
                 if not isinstance(collection, (list, tuple)):
@@ -148,14 +154,21 @@ class LoopProcessor:
                         new_rows.append(new_row)
 
                 # Calculate positions for insertion/removal
+                # We need to find the actual index in tbl_element's children (not just rows)
+                # because tbl_element also contains tblPr, tblGrid, etc.
+                all_children = list(tbl_element)
+                row_element_index = (
+                    all_children.index(row) if row in all_children else -1
+                )
+
                 if each_row_has_only_marker:
                     # Remove the #each marker row
                     tbl_element.remove(row)
-                    insert_position = i
+                    insert_position = row_element_index  # Use actual child index
                 else:
                     # The #each row is part of template, already included in new_rows
                     tbl_element.remove(row)
-                    insert_position = i
+                    insert_position = row_element_index  # Use actual child index
 
                 # Remove template rows (if separate from #each row)
                 if each_row_has_only_marker:
@@ -175,7 +188,17 @@ class LoopProcessor:
                         break
 
                 # Insert new rows
+                print(
+                    f"[DEBUG] Before insert: {len(list(tbl_element.findall(f'{self.a_ns}tr')))} rows, insert_position={insert_position}"
+                )
+                for idx, r in enumerate(list(tbl_element.findall(f"{self.a_ns}tr"))):
+                    print(
+                        f"[DEBUG]   Pre-insert Row {idx}: {self._get_row_text(r)[:50]}"
+                    )
                 for j, new_row in enumerate(new_rows):
+                    print(
+                        f"[DEBUG] Inserting row {j} at position {insert_position + j}"
+                    )
                     tbl_element.insert(insert_position + j, new_row)
 
                 # Track the loop
@@ -191,6 +214,11 @@ class LoopProcessor:
 
                 # Update rows list and continue
                 rows = list(tbl_element.findall(f"{self.a_ns}tr"))
+                print(
+                    f"[DEBUG] After processing loop '{collection_name}': {len(rows)} rows remain, inserted {len(new_rows)} new rows"
+                )
+                for idx, r in enumerate(rows):
+                    print(f"[DEBUG]   Row {idx}: {self._get_row_text(r)[:80]}")
                 i += len(new_rows)
             else:
                 i += 1
@@ -348,9 +376,11 @@ class LoopProcessor:
         # Get the collection
         collection = resolve_context_value(self.context, collection_name)
 
-        if collection is None:
+        if collection is NOT_FOUND:
             if self.strict:
                 raise MissingContextError(collection_name)
+            collection = []
+        elif collection is None:
             collection = []
 
         if not isinstance(collection, (list, tuple)):

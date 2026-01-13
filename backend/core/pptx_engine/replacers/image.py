@@ -24,6 +24,7 @@ from ..utils import (
     get_next_shape_id,
     sanitize_filename,
     generate_unique_media_name,
+    NOT_FOUND,
 )
 
 
@@ -132,7 +133,7 @@ class ImageReplacer:
         # Get image path from context
         image_path = resolve_context_value(self.context, placeholder_name)
 
-        if image_path is None or not image_path:
+        if image_path is NOT_FOUND or not image_path:
             if self.strict:
                 raise MissingContextError(f"image:{placeholder_name}", slide_num)
             # Remove the shape if no image provided in non-strict mode

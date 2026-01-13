@@ -10,6 +10,15 @@ from lxml import etree
 from .constants import NAMESPACES, PLACEHOLDER_PATTERN
 
 
+class _NotFound:
+    """Sentinel class to distinguish 'key not found' from 'key is None'."""
+
+    pass
+
+
+NOT_FOUND = _NotFound()
+
+
 def register_namespaces():
     """Register all PPTX namespaces with lxml to preserve prefixes."""
     for prefix, uri in NAMESPACES.items():
@@ -108,21 +117,21 @@ def resolve_context_value(context: dict[str, Any], key: str) -> Any:
         key: The key to resolve (may contain dots for nested access)
 
     Returns:
-        The resolved value or None if not found
+        The resolved value, None if key exists but value is None,
+        or NOT_FOUND sentinel if key doesn't exist
     """
     parts = key.split(".")
     value = context
 
     for part in parts:
         if isinstance(value, dict):
-            value = value.get(part)
+            if part not in value:
+                return NOT_FOUND
+            value = value[part]
         elif hasattr(value, part):
             value = getattr(value, part)
         else:
-            return None
-
-        if value is None:
-            return None
+            return NOT_FOUND
 
     return value
 
