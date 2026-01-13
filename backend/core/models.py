@@ -15,7 +15,6 @@ from auditlog.registry import auditlog
 from django.utils.functional import cached_property
 import yaml
 from django.apps import apps
-from django.contrib.auth import get_user_model
 from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator

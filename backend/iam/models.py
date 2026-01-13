@@ -11,8 +11,6 @@ from django.db.models import Q, F, Prefetch
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
 from knox.models import AuthToken
