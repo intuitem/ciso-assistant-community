@@ -169,6 +169,11 @@ class ImageReplacer:
                 placeholder=placeholder_name,
             )
 
+        # Get image dimensions and adjust to preserve aspect ratio
+        img_dimensions = self._get_image_dimensions(image_path)
+        if img_dimensions:
+            dimensions = self._fit_image_to_bounds(img_dimensions, dimensions)
+
         # Copy image to media directory
         media_dir = os.path.join(self.working_dir, MEDIA_DIR)
         os.makedirs(media_dir, exist_ok=True)
@@ -372,6 +377,112 @@ class ImageReplacer:
         etree.SubElement(sp_pr, f"{a_ns}prstGeom", {"prst": "rect"})
 
         return pic
+
+    def _get_image_dimensions(self, image_path: str) -> dict[str, int] | None:
+        """
+        Get the dimensions of an image file.
+
+        Args:
+            image_path: Path to the image file
+
+        Returns:
+            Dictionary with 'width' and 'height' in pixels, or None if unable to read
+        """
+        try:
+            from PIL import Image
+
+            with Image.open(image_path) as img:
+                return {"width": img.width, "height": img.height}
+        except ImportError:
+            # PIL not available, try to read PNG/JPEG header manually
+            return self._get_image_dimensions_fallback(image_path)
+        except Exception:
+            return None
+
+    def _get_image_dimensions_fallback(self, image_path: str) -> dict[str, int] | None:
+        """
+        Fallback method to get image dimensions without PIL.
+
+        Args:
+            image_path: Path to the image file
+
+        Returns:
+            Dictionary with 'width' and 'height' in pixels, or None if unable to read
+        """
+        try:
+            with open(image_path, "rb") as f:
+                header = f.read(32)
+
+                # PNG
+                if header[:8] == b"\x89PNG\r\n\x1a\n":
+                    width = int.from_bytes(header[16:20], "big")
+                    height = int.from_bytes(header[20:24], "big")
+                    return {"width": width, "height": height}
+
+                # JPEG
+                if header[:2] == b"\xff\xd8":
+                    f.seek(0)
+                    f.read(2)  # Skip SOI marker
+                    while True:
+                        marker = f.read(2)
+                        if len(marker) < 2:
+                            break
+                        if marker[0] != 0xFF:
+                            break
+                        if marker[1] in (0xC0, 0xC1, 0xC2):  # SOF markers
+                            f.read(3)  # Skip length and precision
+                            height = int.from_bytes(f.read(2), "big")
+                            width = int.from_bytes(f.read(2), "big")
+                            return {"width": width, "height": height}
+                        else:
+                            length = int.from_bytes(f.read(2), "big")
+                            f.seek(length - 2, 1)
+
+        except Exception:
+            pass
+        return None
+
+    def _fit_image_to_bounds(
+        self, img_dims: dict[str, int], bounds: dict[str, int]
+    ) -> dict[str, int]:
+        """
+        Calculate dimensions to fit image within bounds while preserving aspect ratio.
+
+        Args:
+            img_dims: Original image dimensions (width, height in pixels)
+            bounds: Target bounds (x, y, cx, cy in EMUs)
+
+        Returns:
+            Adjusted dimensions (x, y, cx, cy in EMUs) preserving aspect ratio
+        """
+        img_width = img_dims["width"]
+        img_height = img_dims["height"]
+        bound_width = bounds["cx"]
+        bound_height = bounds["cy"]
+
+        # Calculate aspect ratios
+        img_ratio = img_width / img_height
+        bound_ratio = bound_width / bound_height
+
+        if img_ratio > bound_ratio:
+            # Image is wider than bounds - fit to width
+            new_width = bound_width
+            new_height = int(bound_width / img_ratio)
+        else:
+            # Image is taller than bounds - fit to height
+            new_height = bound_height
+            new_width = int(bound_height * img_ratio)
+
+        # Center the image within the bounds
+        x_offset = (bound_width - new_width) // 2
+        y_offset = (bound_height - new_height) // 2
+
+        return {
+            "x": bounds["x"] + x_offset,
+            "y": bounds["y"] + y_offset,
+            "cx": new_width,
+            "cy": new_height,
+        }
 
     def get_replacement_summary(self) -> dict:
         """
