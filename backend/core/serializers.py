@@ -1215,6 +1215,41 @@ class ActorReadSerializer(BaseModelSerializer):
         fields = ["id", "str", "type", "specific"]
 
 
+class TeamWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Team
+        fields = [
+            "id",
+            "name",
+            "description",
+            "folder",
+            "team_email",
+            "leader",
+            "deputies",
+            "members",
+        ]
+
+
+class TeamReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    leader = FieldsRelatedField()
+    deputies = FieldsRelatedField(many=True)
+    members = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = Team
+        fields = [
+            "id",
+            "name",
+            "description",
+            "folder",
+            "team_email",
+            "leader",
+            "deputies",
+            "members",
+        ]
+
+
 class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)

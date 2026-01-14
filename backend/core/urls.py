@@ -50,6 +50,8 @@ router.register(r"asset-class", AssetClassViewSet, basename="asset-class")
 
 router.register(r"actors", ActorViewSet, basename="actors")
 
+router.register(r"teams", TeamViewSet, basename="teams")
+
 router.register(r"users", UserViewSet, basename="users")
 router.register(r"user-groups", UserGroupViewSet, basename="user-groups")
 router.register(r"role-assignments", RoleAssignmentViewSet, basename="role-assignments")

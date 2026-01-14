@@ -5507,6 +5507,10 @@ class ActorViewSet(BaseModelViewSet):
         )
 
 
+class TeamViewSet(BaseModelViewSet):
+    model = Team
+
+
 class UserViewSet(BaseModelViewSet):
     """
     API endpoint that allows users to be viewed or edited
