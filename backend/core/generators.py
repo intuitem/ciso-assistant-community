@@ -73,7 +73,7 @@ def plot_donut(data, colors=None):
     """
     plt.close("all")
 
-    plt.figure(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
 
     values = [item["value"] for item in data]
     labels = [item["category"] for item in data]
@@ -87,25 +87,48 @@ def plot_donut(data, colors=None):
     ]
 
     plot_colors = colors if colors is not None else default_colors[: len(values)]
-    plt.pie(
+
+    # Filter out zero values to avoid cluttering
+    filtered_data = [(v, l, c) for v, l, c in zip(values, labels, plot_colors) if v > 0]
+    if filtered_data:
+        values, labels, plot_colors = zip(*filtered_data)
+        values, labels, plot_colors = list(values), list(labels), list(plot_colors)
+
+    # Create pie chart without labels on slices, percentages only for non-tiny slices
+    total = sum(values) if values else 1
+
+    def autopct_func(pct):
+        return f"{pct:.0f}%" if pct >= 5 else ""
+
+    wedges, texts, autotexts = ax.pie(
         values,
-        labels=labels,
         colors=plot_colors,
-        autopct="%1.f%%",  # Show percentage
+        autopct=autopct_func,
         startangle=90,
-        pctdistance=0.85,  # Distance of percentage from the center
-        wedgeprops={"edgecolor": "white", "linewidth": 1},
+        pctdistance=0.75,
+        wedgeprops={"edgecolor": "white", "linewidth": 2, "width": 0.4},
     )
 
-    center_circle = plt.Circle((0, 0), 0.60, fc="white", ec="white")
-    fig = plt.gcf()
-    fig.gca().add_artist(center_circle)
+    # Style the percentage text
+    for autotext in autotexts:
+        autotext.set_fontsize(10)
+        autotext.set_fontweight("bold")
 
-    plt.axis("equal")  # Equal aspect ratio ensures that pie is drawn as a circle
+    # Add legend outside the chart
+    ax.legend(
+        wedges,
+        [f"{l} ({v})" for l, v in zip(labels, values)],
+        title="",
+        loc="center left",
+        bbox_to_anchor=(1, 0, 0.5, 1),
+        fontsize=9,
+    )
+
+    ax.axis("equal")
     plt.tight_layout()
 
     chart_buffer = io.BytesIO()
-    plt.savefig(chart_buffer, format="png", dpi=300)
+    plt.savefig(chart_buffer, format="png", dpi=300, bbox_inches="tight")
     chart_buffer.seek(0)
     plt.close()
 
@@ -638,6 +661,315 @@ def gen_audit_context(id, doc, tree, lang):
         "igs": IGs,
         "category_scores": category_scores,
         "category_radar": chart_category_radar,
+    }
+
+    return context
+
+
+def gen_audit_pptx_context(id, tree, lang, temp_dir):
+    """
+    Generate context for PPTX audit report.
+
+    Similar to gen_audit_context but saves charts to temp files instead of
+    creating InlineImage objects (which are docx-specific).
+
+    Args:
+        id: ComplianceAssessment ID
+        tree: Sorted requirement nodes tree
+        lang: Language code ('en' or 'fr')
+        temp_dir: Temporary directory path for saving chart images
+
+    Returns:
+        dict: Context for PPTX template with chart paths
+    """
+    import os
+    import tempfile
+
+    def count_category_results(data):
+        def recursive_result_count(node_data):
+            result_counts = {}
+            if node_data.get("assessable", False):
+                result = node_data.get("result", "unknown")
+                result_counts[result] = 1
+            for child_id, child_data in node_data.get("children", {}).items():
+                child_results = recursive_result_count(child_data)
+                for result, count in child_results.items():
+                    result_counts[result] = result_counts.get(result, 0) + count
+            return result_counts
+
+        category_result_counts = {}
+        for node_id, node_data in data.items():
+            if node_data.get("parent_urn") is None:
+                category_result_counts[node_data["urn"]] = recursive_result_count(
+                    node_data
+                )
+        return category_result_counts
+
+    def aggregate_category_scores(data):
+        def recursive_score_calculation(node_data):
+            scores = {
+                "total_score": 0,
+                "item_count": 0,
+                "scored_count": 0,
+            }
+            if node_data.get("is_scored", False):
+                scores["item_count"] = 1
+                if node_data.get("score") is not None:
+                    scores["total_score"] = node_data["score"]
+                    scores["scored_count"] = 1
+            for child_id, child_data in node_data.get("children", {}).items():
+                child_scores = recursive_score_calculation(child_data)
+                scores["total_score"] += child_scores["total_score"]
+                scores["item_count"] += child_scores["item_count"]
+                scores["scored_count"] += child_scores["scored_count"]
+            return scores
+
+        category_scores = {}
+        for node_id, node_data in data.items():
+            scores = recursive_score_calculation(node_data)
+            average_score = 0
+            if scores["scored_count"] > 0:
+                average_score = scores["total_score"] / scores["scored_count"]
+            category_scores[node_data["urn"]] = {
+                "name": node_data["node_content"].split(":")[0],
+                "total_score": scores["total_score"],
+                "item_count": scores["item_count"],
+                "scored_count": scores["scored_count"],
+                "average_score": round(average_score, 1),
+            }
+        return category_scores
+
+    def save_chart_to_file(buffer, filename):
+        """Save a chart buffer to a temp file and return the path."""
+        filepath = os.path.join(temp_dir, filename)
+        buffer.seek(0)
+        with open(filepath, "wb") as f:
+            f.write(buffer.read())
+        return filepath
+
+    audit = ComplianceAssessment.objects.get(id=id)
+
+    authors = ", ".join([a.email for a in audit.authors.all()])
+    reviewers = ", ".join([a.email for a in audit.reviewers.all()])
+
+    spider_data = list()
+    result_counts = count_category_results(tree)
+    agg_drifts = list()
+    category_scores = aggregate_category_scores(tree)
+
+    max_score = 100
+    for node in tree.values():
+        if node.get("max_score") is not None:
+            max_score = node["max_score"]
+            break
+
+    for key, content in tree.items():
+        total = sum(result_counts[content["urn"]].values())
+        ok_items = result_counts[content["urn"]].get("compliant", 0) + result_counts[
+            content["urn"]
+        ].get("not_applicable", 0)
+        ok_perc = ceil(ok_items / total * 100) if total > 0 else 0
+        not_ok_count = total - ok_items
+        name = content["node_content"].split(":")[0]
+        spider_data.append({"category": name, "value": ok_perc})
+        agg_drifts.append({"name": name, "drift_count": not_ok_count})
+
+    aggregated = {
+        "compliant": 0,
+        "non_compliant": 0,
+        "not_applicable": 0,
+        "not_assessed": 0,
+        "partially_compliant": 0,
+    }
+
+    for node in result_counts.values():
+        for status, count in node.items():
+            if status in aggregated:
+                aggregated[status] += count
+
+    total = sum([v for v in aggregated.values()])
+    aggregated["total"] = total
+
+    i18n_dict = {
+        "en": {
+            "compliant": "Compliant",
+            "partially_compliant": "Partially compliant",
+            "non_compliant": "Non compliant",
+            "not_applicable": "Not applicable",
+            "not_assessed": "Not assessed",
+            "to_do": "To do",
+            "on_hold": "On hold",
+            "in_progress": "In progress",
+            "deprecated": "Deprecated",
+            "active": "Active",
+            "policy": "Policy",
+            "process": "Process",
+            "technical": "Technical",
+            "physical": "Physical",
+            "procedure": "Procedure",
+        },
+        "fr": {
+            "compliant": "Conformes",
+            "partially_compliant": "Partiellement conformes",
+            "non_compliant": "Non conformes",
+            "not_applicable": "Non applicables",
+            "not_assessed": "Non évalués",
+            "to_do": "À faire",
+            "on_hold": "En attente",
+            "in_progress": "En cours",
+            "deprecated": "Déprécié",
+            "active": "Actif",
+            "policy": "Politique",
+            "process": "Processus",
+            "technical": "Technique",
+            "physical": "Physique",
+            "procedure": "Procédure",
+        },
+    }
+
+    def safe_translate(lang: str, key: str) -> str:
+        if key is None or key == "--":
+            return "-"
+        return i18n_dict[lang].get(key, key)
+
+    donut_data = [
+        {
+            "category": safe_translate(lang, "compliant"),
+            "value": aggregated["compliant"],
+        },
+        {
+            "category": safe_translate(lang, "partially_compliant"),
+            "value": aggregated["partially_compliant"],
+        },
+        {
+            "category": safe_translate(lang, "non_compliant"),
+            "value": aggregated["non_compliant"],
+        },
+        {
+            "category": safe_translate(lang, "not_applicable"),
+            "value": aggregated["not_applicable"],
+        },
+        {
+            "category": safe_translate(lang, "not_assessed"),
+            "value": aggregated["not_assessed"],
+        },
+    ]
+
+    # Generate charts and save to temp files
+    custom_colors = ["#2196F3"]
+    spider_chart_buffer = plot_spider_chart(spider_data, colors=custom_colors)
+    spider_chart_path = save_chart_to_file(spider_chart_buffer, "spider_chart.png")
+
+    category_radar_buffer = plot_category_radar(
+        category_scores, max_score=max_score, colors=custom_colors
+    )
+    category_radar_path = save_chart_to_file(
+        category_radar_buffer, "category_radar.png"
+    )
+
+    requirement_assessments_objects = audit.get_requirement_assessments(
+        include_non_assessable=True
+    )
+    applied_controls = AppliedControl.objects.filter(
+        requirement_assessments__in=requirement_assessments_objects
+    ).distinct()
+    ac_total = applied_controls.count()
+    status_cnt = applied_controls.values("status").annotate(count=Count("id"))
+    ac_chart_data = [
+        {"category": safe_translate(lang, item["status"]), "value": item["count"]}
+        for item in status_cnt
+    ]
+
+    p1_controls = list()
+    full_controls = list()
+    for ac in applied_controls.filter(priority=1):
+        requirements_count = (
+            RequirementAssessment.objects.filter(compliance_assessment=audit)
+            .filter(applied_controls=ac.id)
+            .count()
+        )
+        p1_controls.append(
+            {
+                "name": ac.name,
+                "description": safe_translate(lang, ac.description),
+                "status": safe_translate(lang, ac.status),
+                "category": safe_translate(lang, ac.category),
+                "coverage": requirements_count,
+            }
+        )
+
+    for ac in applied_controls.all():
+        requirements_count = (
+            RequirementAssessment.objects.filter(compliance_assessment=audit)
+            .filter(applied_controls=ac.id)
+            .count()
+        )
+        full_controls.append(
+            {
+                "name": ac.name,
+                "description": safe_translate(lang, ac.description),
+                "prio": f"P{ac.priority}" if ac.priority else "-",
+                "status": safe_translate(lang, ac.status),
+                "eta": safe_translate(lang, ac.eta),
+                "category": safe_translate(lang, ac.category),
+                "coverage": requirements_count,
+            }
+        )
+
+    custom_colors = ["#CCC", "#46D39A", "#E55759", "#392F5A", "#F4D06F", "#BFDBFE"]
+    hbar_buffer = plot_horizontal_bar(ac_chart_data, colors=custom_colors)
+    controls_chart_path = save_chart_to_file(hbar_buffer, "controls_chart.png")
+
+    completion_bar_buffer = plot_completion_bar(spider_data, colors=custom_colors)
+    completion_bar_path = save_chart_to_file(
+        completion_bar_buffer, "completion_bar.png"
+    )
+
+    donut_buffer = plot_donut(donut_data)
+    compliance_donut_path = save_chart_to_file(donut_buffer, "compliance_donut.png")
+
+    IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
+
+    context = {
+        # Audit info
+        "audit_name": audit.name,
+        "audit_description": audit.description or "",
+        "audit_version": audit.version or "",
+        "framework_name": audit.framework.name if audit.framework else "",
+        "framework_description": audit.framework.description if audit.framework else "",
+        "date": now().strftime("%d/%m/%Y"),
+        "contributors": f"{authors}\n{reviewers}",
+        "authors": authors,
+        "reviewers": reviewers,
+        "igs": IGs,
+        # Statistics
+        "req_total": aggregated["total"],
+        "req_compliant": aggregated["compliant"],
+        "req_partially_compliant": aggregated["partially_compliant"],
+        "req_non_compliant": aggregated["non_compliant"],
+        "req_not_applicable": aggregated["not_applicable"],
+        "req_not_assessed": aggregated["not_assessed"],
+        "ac_count": ac_total,
+        # Chart images (file paths for {{image:var}} syntax)
+        "compliance_donut": compliance_donut_path,
+        "completion_bar": completion_bar_path,
+        "compliance_radar": spider_chart_path,
+        "chart_controls": controls_chart_path,
+        "category_radar": category_radar_path,
+        # Data for tables/loops
+        "drifts_per_domain": agg_drifts,
+        "p1_controls": p1_controls,
+        "full_controls": full_controls,
+        "category_scores": list(category_scores.values()),
+        "spider_data": spider_data,
+        # Raw objects for advanced templates
+        "audit": {
+            "name": audit.name,
+            "description": audit.description or "",
+            "version": audit.version or "",
+            "status": audit.status,
+            "eta": str(audit.eta) if audit.eta else "",
+        },
     }
 
     return context

@@ -350,6 +350,7 @@
 	"asCSV": "en CSV",
 	"asXLSX": "en Excel",
 	"asWord": "en Word",
+	"asPowerPoint": "en PowerPoint",
 	"asMarkdown": "en Markdown",
 	"draft": "Brouillon",
 	"riskMatrixView": "Vue matricielle",

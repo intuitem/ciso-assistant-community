@@ -65,7 +65,8 @@ from integrations.tasks import sync_object_to_integrations
 from integrations.registry import IntegrationRegistry
 from library.serializers import StoredLibrarySerializer
 from webhooks.service import dispatch_webhook_event
-from .generators import gen_audit_context
+from .generators import gen_audit_context, gen_audit_pptx_context
+from .pptx_engine import PPTXTemplateEngine
 
 from django.utils import timezone
 from django.utils.text import slugify
@@ -7923,6 +7924,71 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         response["Content-Disposition"] = "attachment; filename=exec_report.docx"
 
         return response
+
+    @action(detail=True, methods=["get"])
+    def pptx_report(self, request, pk):
+        """
+        PowerPoint report generation
+        """
+        import tempfile
+        import shutil
+
+        lang = "en"
+        if request.user.preferences.get("lang") is not None:
+            lang = request.user.preferences.get("lang")
+            if lang not in ["fr", "en"]:
+                lang = "en"
+
+        template_path = (
+            Path(settings.BASE_DIR)
+            / "core"
+            / "templates"
+            / "core"
+            / f"audit_report_template_{lang}.pptx"
+        )
+
+        # Fall back to English if language-specific template doesn't exist
+        if not template_path.exists():
+            template_path = (
+                Path(settings.BASE_DIR)
+                / "core"
+                / "templates"
+                / "core"
+                / "audit_report_template_en.pptx"
+            )
+
+        _framework = self.get_object().framework
+        tree = get_sorted_requirement_nodes(
+            RequirementNode.objects.filter(framework=_framework).all(),
+            RequirementAssessment.objects.filter(
+                compliance_assessment=self.get_object()
+            ).all(),
+            _framework.max_score,
+        )
+        implementation_groups = self.get_object().selected_implementation_groups
+        filter_graph_by_implementation_groups(tree, implementation_groups)
+
+        # Create temp directory for chart images
+        temp_dir = tempfile.mkdtemp()
+        try:
+            context = gen_audit_pptx_context(pk, tree, lang, temp_dir)
+
+            engine = PPTXTemplateEngine()
+            pptx_bytes = engine.process_to_bytes(
+                template_path=str(template_path),
+                context=context,
+            )
+
+            response = StreamingHttpResponse(
+                io.BytesIO(pptx_bytes),
+                content_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            )
+            response["Content-Disposition"] = "attachment; filename=exec_report.pptx"
+
+            return response
+        finally:
+            # Clean up temp directory
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
     @action(detail=True, name="Get action plan CSV")
     def action_plan_csv(self, request, pk):
