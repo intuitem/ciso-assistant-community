@@ -3295,5 +3295,6 @@
 	"libraryFilteringLabels": "Library labels",
 	"lastRefresh": "Last refresh",
 	"widgetCount": "Widgets count",
-	"rawValue": "Value"
+	"rawValue": "Value",
+	"appliedControlsPlaceholder": "Select applied controls..."
 }
