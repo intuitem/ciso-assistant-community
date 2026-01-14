@@ -193,9 +193,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
                 audit.create_requirement_assessments()
                 audit.reviewers.set(instance.reviewers.all())
                 representatives = instance.representatives.all()
-                users = [rep.user for rep in representatives if rep.user]
-                actors = [user.actor for user in users if user.actor]
-                audit.authors.set(actors)
+                audit.authors.set([rep.actor for rep in representatives])
                 instance.compliance_assessment = audit
                 instance.save()
         else:
