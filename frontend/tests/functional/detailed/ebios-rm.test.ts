@@ -183,7 +183,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-qualifications').getByRole('textbox').click();
 			await page.getByRole('option', { name: 'Authenticity' }).click();
 			await page.getByRole('option', { name: 'Availability' }).click();
-			await page.getByTestId('save-button').click();
+			await page.getByTestId('save-button').click({ force: true }); // the menu hides the button, so forcing is the simplest solution
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
