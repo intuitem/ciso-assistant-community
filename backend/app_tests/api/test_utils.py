@@ -920,7 +920,10 @@ class EndpointTestsQueries:
                                 f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                             )
                         else:
-                            assert update_response.json()[key] == value, (
+                            response_value = update_response.json().get(key)
+                            if hasattr(value, "id") and response_value == str(value.id):
+                                continue
+                            assert response_value == value, (
                                 f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                             )
 

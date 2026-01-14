@@ -891,7 +891,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             target_id = UUID(str(folder_value))
         except (TypeError, ValueError):
             return
-        if instance.folder_id and str(instance.folder_id) == str(target_id):
+        if instance.folder_id and instance.folder_id == target_id:
             return
         target_folder = Folder.objects.filter(id=target_id).first()
         if not target_folder:
@@ -914,105 +914,34 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             )
 
     def _validate_parent_field_change(self, request: Request, instance) -> None:
-        """
-        Validate that when changing parent fields for models without direct folder,
-        the user has write permission on the target folder derived from the new parent.
-
-        Models affected:
-        - Folder: changes to parent_folder affect folder hierarchy
-        - RiskScenario: changes to risk_assessment affect folder scope
-        - Representative: changes to entity affect folder scope
-        - Solution: changes to provider_entity affect folder scope
-        """
-        from iam.models import Folder
-        from tprm.models import Representative, Solution
-
-        model_class = instance.__class__
-        model_name = model_class.__name__
-
-        # Map model to (parent_field_name, parent_folder_path)
-        parent_field_config = {
-            "Folder": ("parent_folder", None),  # parent_folder IS the folder
-            "RiskScenario": ("risk_assessment", "folder"),
-            "Representative": ("entity", "folder"),
-            "Solution": ("provider_entity", "folder"),
+        """Block updates to immutable parent fields on indirect-parent models."""
+        parent_fields = {
+            "RiskScenario": "risk_assessment",
+            "Representative": "entity",
+            "Solution": "provider_entity",
         }
-
-        if model_name not in parent_field_config:
-            return
-
-        parent_field_name, folder_attr_path = parent_field_config[model_name]
-
-        # Check if the parent field is being changed
-        if parent_field_name not in request.data:
+        parent_field_name = parent_fields.get(instance.__class__.__name__)
+        if not parent_field_name or parent_field_name not in request.data:
             return
 
         new_parent_value = request.data.get(parent_field_name)
-
-        # Handle null/empty values
-        if not new_parent_value:
-            return
-
-        # Extract ID from various formats
         if isinstance(new_parent_value, list):
-            if not new_parent_value:
-                return
-            new_parent_value = new_parent_value[0]
+            new_parent_value = new_parent_value[0] if new_parent_value else None
         if isinstance(new_parent_value, dict):
             new_parent_value = new_parent_value.get("id")
-
         if not new_parent_value:
             return
 
-        # Convert to UUID
         try:
             new_parent_id = UUID(str(new_parent_value))
         except (TypeError, ValueError):
-            return
+            raise PermissionDenied({parent_field_name: "Invalid value"})
 
-        # Get current parent ID
         current_parent_id = getattr(instance, f"{parent_field_name}_id", None)
-
-        # If not changing, no validation needed
-        if current_parent_id and str(current_parent_id) == str(new_parent_id):
+        if current_parent_id and current_parent_id == new_parent_id:
             return
 
-        # Get the target folder from the new parent
-        target_folder = None
-
-        if model_name == "Folder":
-            # For Folder, the parent_folder IS the target folder
-            target_folder = Folder.objects.filter(id=new_parent_id).first()
-        else:
-            # For other models, get parent object and extract folder
-            parent_model = instance._meta.get_field(parent_field_name).related_model
-            parent_obj = parent_model.objects.filter(id=new_parent_id).first()
-
-            if parent_obj and folder_attr_path:
-                target_folder = getattr(parent_obj, folder_attr_path, None)
-
-        if not target_folder:
-            return
-
-        # Check if user has add permission in the target folder
-        model = self.model or instance.__class__
-        perm = Permission.objects.get(
-            codename=f"add_{model._meta.model_name}",
-            content_type__app_label=model._meta.app_label,
-            content_type__model=model._meta.model_name,
-        )
-
-        if not RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=perm,
-            folder=target_folder,
-        ):
-            field_display_name = model._meta.get_field(parent_field_name).verbose_name
-            raise PermissionDenied(
-                {
-                    parent_field_name: f"You do not have permission to move this object by changing {field_display_name}"
-                }
-            )
+        raise PermissionDenied({parent_field_name: "This field is immutable"})
 
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)

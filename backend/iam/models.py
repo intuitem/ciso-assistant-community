@@ -1016,7 +1016,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             if permission_delete in result_folders[f]:
                 result_delete.update(objects_ids)
 
-        if hasattr(object_type, "is_published") and hasattr(object_type, "folder"):
+        if hasattr(object_type, "is_published") and (
+            hasattr(object_type, "folder") or hasattr(object_type, "parent_folder")
+        ):
             # we assume only objects with a folder attribute are worth publishing
             folders_with_local_view = [
                 f for f in result_folders if permission_view in result_folders[f]
@@ -1025,11 +1027,15 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 if my_folder.content_type != Folder.ContentType.ENCLAVE:
                     my_folder2 = my_folder.parent_folder
                     while my_folder2:
-                        result_view.update(
-                            object_type.objects.filter(
+                        if hasattr(object_type, "folder"):
+                            published = object_type.objects.filter(
                                 folder=my_folder2, is_published=True
-                            ).values_list("id", flat=True)
-                        )
+                            )
+                        else:
+                            published = object_type.objects.filter(
+                                id=my_folder2.id, is_published=True
+                            )
+                        result_view.update(published.values_list("id", flat=True))
                         my_folder2 = my_folder2.parent_folder
 
         return (list(result_view), list(result_change), list(result_delete))

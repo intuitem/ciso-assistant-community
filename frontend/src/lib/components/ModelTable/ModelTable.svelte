@@ -234,7 +234,6 @@
 		}
 	);
 	const rows = handler.getRows();
-	const rowCountState = handler.getRowCount();
 	let invalidateTable = $state(false);
 
 	const relatedFieldNames = $derived(
