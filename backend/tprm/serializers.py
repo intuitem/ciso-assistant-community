@@ -200,7 +200,8 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
             if instance.compliance_assessment:
                 audit = instance.compliance_assessment
                 audit.reviewers.set(instance.reviewers.all())
-                audit.authors.set(instance.representatives.all())
+                representatives = instance.representatives.all()
+                audit.authors.set([rep.actor for rep in representatives])
             instance.save()
 
     def _assign_third_party_respondents(
