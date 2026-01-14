@@ -5484,6 +5484,15 @@ class ActorViewSet(BaseModelViewSet):
 
     model = Actor
     search_fields = []
+    ordering = [
+        "entity",
+        "team",
+        "user",
+        "user__email",
+        "entity__name",
+        "team__name",
+        "id",
+    ]
 
     def get_queryset(self):
         (viewable_entities, _, _) = RoleAssignment.get_accessible_object_ids(
