@@ -273,7 +273,7 @@ class RoleViewSet(BaseModelViewSet):
                 codename="view_globalsettings",
                 content_type__app_label="global_settings",
                 content_type__model="globalsettings",
-            )
+            ),
         )
         with transaction.atomic():
             for folder in Folder.objects.exclude(content_type="EN"):
@@ -303,7 +303,7 @@ class RoleViewSet(BaseModelViewSet):
                 codename="view_globalsettings",
                 content_type__app_label="global_settings",
                 content_type__model="globalsettings",
-            )
+            ),
         )
         ug_ids = (
             RoleAssignment.objects.filter(
