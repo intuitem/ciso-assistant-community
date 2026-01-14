@@ -48,6 +48,7 @@ export const URL_MODEL = [
 	'reference-controls',
 	'assets',
 	'actors',
+	'teams',
 	'users',
 	'user-groups',
 	'roles',
