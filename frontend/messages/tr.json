@@ -1806,5 +1806,6 @@
 		}
 	],
 	"cascadeAffectedHint": "Aşağıdaki öğeler sistemde kalacak ancak bu nesneye olan bağlantılar kaldırılacaktır.",
-	"libraryFilteringLabels": "Kütüphane etiketleri"
+	"libraryFilteringLabels": "Kütüphane etiketleri",
+	"appliedControlsPlaceholder": "Uygulanan kontrolleri seçin..."
 }

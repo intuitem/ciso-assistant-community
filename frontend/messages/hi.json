@@ -1042,5 +1042,6 @@
 		}
 	],
 	"cascadeAffectedHint": "नीचे दिए गए आइटम सिस्टम में बने रहेंगे लेकिन इस वस्तु से उनके लिंक हटा दिए जाएंगे।",
-	"libraryFilteringLabels": "लाइब्रेरी लेबल"
+	"libraryFilteringLabels": "लाइब्रेरी लेबल",
+	"appliedControlsPlaceholder": "लागू नियंत्रण चुनें..."
 }

@@ -1073,5 +1073,6 @@
 		}
 	],
 	"cascadeAffectedHint": "Az alábbi elemek a rendszerben maradnak, de a kapcsolataik ebben az objektumban törlődnek.",
-	"libraryFilteringLabels": "Könyvtári címkék"
+	"libraryFilteringLabels": "Könyvtári címkék",
+	"appliedControlsPlaceholder": "Alkalmazott kontrollok kiválasztása..."
 }

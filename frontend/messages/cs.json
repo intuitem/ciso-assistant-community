@@ -1061,5 +1061,6 @@
 	"isCustom": "Vlastní",
 	"errorUnloadingLibrary": "Chyba při uvolňování knihovny",
 	"librarySuccessfullyUnloaded": "Knihovna byla úspěšně uvolněna",
-	"libraryFilteringLabels": "Štítky knihovny"
+	"libraryFilteringLabels": "Knihovnové štítky",
+	"appliedControlsPlaceholder": "Vyberte aplikované kontroly..."
 }

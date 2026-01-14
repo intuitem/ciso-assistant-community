@@ -1588,5 +1588,6 @@
 				"countPlural=other": "{count} об'єкти невидимі."
 			}
 		}
-	]
+	],
+	"appliedControlsPlaceholder": "Виберіть застосовані контролі..."
 }

@@ -1770,5 +1770,6 @@
 				"countPlural=other": "{count} αντικείμενα δεν είναι ορατά."
 			}
 		}
-	]
+	],
+	"appliedControlsPlaceholder": "Επιλέξτε εφαρμοσμένους ελέγχους..."
 }

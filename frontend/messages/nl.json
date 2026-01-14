@@ -2938,5 +2938,6 @@
 		}
 	],
 	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd.",
-	"libraryFilteringLabels": "Bibliotheek etiketten"
+	"libraryFilteringLabels": "Bibliotheeklabels",
+	"appliedControlsPlaceholder": "Selecteer toegepaste maatregelen..."
 }

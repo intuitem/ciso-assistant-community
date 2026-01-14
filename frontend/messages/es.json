@@ -3032,6 +3032,7 @@
 	"editLayout": "Widgets",
 	"widgets": "Widgets",
 	"width": "Anchura",
+	"appliedControlsPlaceholder": "Seleccione las medidas aplicadas...",
 	"associatedMetricInstances": "Instancias de métricas asociadas",
 	"baseQuery": "Consulta base",
 	"changeAttackStage": "Cambiar fase del ataque",
