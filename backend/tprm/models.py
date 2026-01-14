@@ -185,7 +185,7 @@ class Entity(
             "email", flat=True
         )
         emails.extend(representative_emails)
-        return emails
+        return list(dict.fromkeys(emails))
 
 
 class EntityAssessment(Assessment):

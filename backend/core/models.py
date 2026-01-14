@@ -7768,7 +7768,7 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
         emails.extend(deputy_emails)
         member_emails = self.members.exclude(email="").values_list("email", flat=True)
         emails.extend(member_emails)
-        return list(set(emails))  # Remove duplicates
+        return list(dict.fromkeys(emails))
 
 
 class Actor(AbstractBaseModel):
