@@ -5483,6 +5483,7 @@ class ActorViewSet(BaseModelViewSet):
     http_method_names = ["get", "head", "options"]
 
     model = Actor
+    search_fields = []
 
     def get_queryset(self):
         (viewable_entities, _, _) = RoleAssignment.get_accessible_object_ids(
