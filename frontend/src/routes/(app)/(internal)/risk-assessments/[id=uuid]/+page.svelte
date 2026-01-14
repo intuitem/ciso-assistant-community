@@ -245,6 +245,14 @@
 							</ul>
 						</li>
 						<li>
+							<span class="font-semibold">{m.reviewers()}:</span>
+							<ul>
+								{#each risk_assessment.reviewers as reviewer}
+									<li>{reviewer.str}</li>
+								{/each}
+							</ul>
+						</li>
+						<li>
 							<span class="font-semibold">{m.createdAt()}:</span>
 							{new Date(risk_assessment.created_at).toLocaleString(getLocale())}
 						</li>
