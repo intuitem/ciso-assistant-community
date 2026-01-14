@@ -5510,6 +5510,14 @@ class ActorViewSet(BaseModelViewSet):
 class TeamViewSet(BaseModelViewSet):
     model = Team
 
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "leader")
+            .prefetch_related("members", "deputies")
+        )
+
 
 class UserViewSet(BaseModelViewSet):
     """
