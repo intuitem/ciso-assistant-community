@@ -180,12 +180,8 @@ class Entity(
         )
 
     def get_emails(self) -> list[str]:
-        emails = []
-        representative_emails = self.representatives.exclude(email="").values_list(
-            "email", flat=True
-        )
-        emails.extend(representative_emails)
-        return list(dict.fromkeys(emails))
+        emails = self.representatives.exclude(email="").values_list("email", flat=True)
+        return sorted({e.strip() for e in emails if e and e.strip()})
 
 
 class EntityAssessment(Assessment):
