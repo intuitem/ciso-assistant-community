@@ -13,7 +13,7 @@ description: 'The Microsoft cloud security benchmark provides prescriptive best 
   https://learn.microsoft.com/en-us/security/benchmark/azure/'
 copyright: Microsoft
 version: 1
-publication_date: null
+publication_date: 2023-04-03
 provider: Microsoft
 packager: intuitem
 objects:
