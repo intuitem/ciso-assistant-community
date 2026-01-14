@@ -268,6 +268,11 @@ class RoleViewSet(BaseModelViewSet):
                 codename="view_folder",
                 content_type__app_label="iam",
                 content_type__model="folder",
+            ),
+            Permission.objects.get(
+                codename="view_globalsettings",
+                content_type__app_label="global_settings",
+                content_type__model="globalsettings",
             )
         )
         with transaction.atomic():
@@ -293,6 +298,11 @@ class RoleViewSet(BaseModelViewSet):
                 codename="view_folder",
                 content_type__app_label="iam",
                 content_type__model="folder",
+            ),
+            Permission.objects.get(
+                codename="view_globalsettings",
+                content_type__app_label="global_settings",
+                content_type__model="globalsettings",
             )
         )
         ug_ids = (
