@@ -1551,7 +1551,7 @@ class EvidenceWriteSerializer(BaseModelSerializer):
         many=True, queryset=Contract.objects.all(), required=False
     )
     owner = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=User.objects.all(), required=False
+        many=True, queryset=Actor.objects.all(), required=False
     )
     attachment = serializers.FileField(required=False)
     link = serializers.URLField(required=False)
