@@ -3305,5 +3305,6 @@
 	"addTeam": "Add team",
 	"viewTeam": "View team",
 	"changeTeam": "Change team",
-	"deleteTeam": "Delete team"
+	"deleteTeam": "Delete team",
+	"appliedControlsPlaceholder": "Select applied controls..."
 }
