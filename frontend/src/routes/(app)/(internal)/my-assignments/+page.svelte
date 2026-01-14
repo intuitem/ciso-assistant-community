@@ -281,7 +281,7 @@
 				}}
 				hideFilters={true}
 				URLModel="findings"
-				baseEndpoint="/findings?owner={data.user.id}"
+				baseEndpoint="/findings?owner={data.user.actor_id}"
 			/>
 		</div>
 	{/if}
