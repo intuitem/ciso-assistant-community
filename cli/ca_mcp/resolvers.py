@@ -499,3 +499,216 @@ def resolve_representative_id(representative_email_or_id: str) -> str:
         )
 
     return representatives[0]["id"]
+
+
+# ============================================================================
+# EBIOS RM (Risk Management) Resolvers
+# ============================================================================
+
+
+def resolve_ebios_rm_study_id(study_name_or_id: str) -> str:
+    """Helper function to resolve EBIOS RM study name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in study_name_or_id and len(study_name_or_id) == 36:
+        return study_name_or_id
+
+    res = make_get_request("/ebios-rm/studies/", params={"name": study_name_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"EBIOS RM Study '{study_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    studies = get_paginated_results(data)
+
+    if not studies:
+        raise ValueError(f"EBIOS RM Study '{study_name_or_id}' not found")
+
+    if len(studies) > 1:
+        raise ValueError(
+            f"Ambiguous EBIOS RM Study name '{study_name_or_id}', found {len(studies)}"
+        )
+
+    return studies[0]["id"]
+
+
+def resolve_feared_event_id(feared_event_name_or_id: str) -> str:
+    """Helper function to resolve feared event name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in feared_event_name_or_id and len(feared_event_name_or_id) == 36:
+        return feared_event_name_or_id
+
+    res = make_get_request(
+        "/ebios-rm/feared-events/", params={"name": feared_event_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Feared event '{feared_event_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    feared_events = get_paginated_results(data)
+
+    if not feared_events:
+        raise ValueError(f"Feared event '{feared_event_name_or_id}' not found")
+
+    if len(feared_events) > 1:
+        raise ValueError(
+            f"Ambiguous feared event name '{feared_event_name_or_id}', found {len(feared_events)}"
+        )
+
+    return feared_events[0]["id"]
+
+
+def resolve_ro_to_id(ro_to_id: str) -> str:
+    """Helper function to resolve RoTo couple ID
+    RoTo couples don't have names, so only UUIDs are accepted.
+    """
+    if "-" in ro_to_id and len(ro_to_id) == 36:
+        return ro_to_id
+
+    raise ValueError(f"RoTo couple '{ro_to_id}' is not a valid UUID")
+
+
+def resolve_stakeholder_id(stakeholder_id: str) -> str:
+    """Helper function to resolve stakeholder ID
+    Stakeholders are identified by entity+category, so only UUIDs are accepted.
+    """
+    if "-" in stakeholder_id and len(stakeholder_id) == 36:
+        return stakeholder_id
+
+    raise ValueError(f"Stakeholder '{stakeholder_id}' is not a valid UUID")
+
+
+def resolve_strategic_scenario_id(scenario_name_or_id: str) -> str:
+    """Helper function to resolve strategic scenario name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in scenario_name_or_id and len(scenario_name_or_id) == 36:
+        return scenario_name_or_id
+
+    res = make_get_request(
+        "/ebios-rm/strategic-scenarios/", params={"name": scenario_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Strategic scenario '{scenario_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    scenarios = get_paginated_results(data)
+
+    if not scenarios:
+        raise ValueError(f"Strategic scenario '{scenario_name_or_id}' not found")
+
+    if len(scenarios) > 1:
+        raise ValueError(
+            f"Ambiguous strategic scenario name '{scenario_name_or_id}', found {len(scenarios)}"
+        )
+
+    return scenarios[0]["id"]
+
+
+def resolve_attack_path_id(attack_path_name_or_id: str) -> str:
+    """Helper function to resolve attack path name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in attack_path_name_or_id and len(attack_path_name_or_id) == 36:
+        return attack_path_name_or_id
+
+    res = make_get_request(
+        "/ebios-rm/attack-paths/", params={"name": attack_path_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Attack path '{attack_path_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    attack_paths = get_paginated_results(data)
+
+    if not attack_paths:
+        raise ValueError(f"Attack path '{attack_path_name_or_id}' not found")
+
+    if len(attack_paths) > 1:
+        raise ValueError(
+            f"Ambiguous attack path name '{attack_path_name_or_id}', found {len(attack_paths)}"
+        )
+
+    return attack_paths[0]["id"]
+
+
+def resolve_operational_scenario_id(scenario_id: str) -> str:
+    """Helper function to resolve operational scenario ID
+    Operational scenarios derive their name from attack paths, so only UUIDs are accepted.
+    """
+    if "-" in scenario_id and len(scenario_id) == 36:
+        return scenario_id
+
+    raise ValueError(f"Operational scenario '{scenario_id}' is not a valid UUID")
+
+
+def resolve_elementary_action_id(action_name_or_id: str) -> str:
+    """Helper function to resolve elementary action name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in action_name_or_id and len(action_name_or_id) == 36:
+        return action_name_or_id
+
+    res = make_get_request(
+        "/ebios-rm/elementary-actions/", params={"name": action_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Elementary action '{action_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    actions = get_paginated_results(data)
+
+    if not actions:
+        raise ValueError(f"Elementary action '{action_name_or_id}' not found")
+
+    if len(actions) > 1:
+        raise ValueError(
+            f"Ambiguous elementary action name '{action_name_or_id}', found {len(actions)}"
+        )
+
+    return actions[0]["id"]
+
+
+def resolve_operating_mode_id(mode_name_or_id: str) -> str:
+    """Helper function to resolve operating mode name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in mode_name_or_id and len(mode_name_or_id) == 36:
+        return mode_name_or_id
+
+    res = make_get_request(
+        "/ebios-rm/operating-modes/", params={"name": mode_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Operating mode '{mode_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    modes = get_paginated_results(data)
+
+    if not modes:
+        raise ValueError(f"Operating mode '{mode_name_or_id}' not found")
+
+    if len(modes) > 1:
+        raise ValueError(
+            f"Ambiguous operating mode name '{mode_name_or_id}', found {len(modes)}"
+        )
+
+    return modes[0]["id"]
