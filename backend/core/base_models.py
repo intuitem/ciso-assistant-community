@@ -164,10 +164,10 @@ class ActorSyncManager(models.Manager):
     Intercepts bulk_create to ensure Actors are created for every new record.
     """
 
-    def bulk_create(self, objs, batch_size=None, ignore_conflicts=False):
+    def bulk_create(self, objs, batch_size=None, ignore_conflicts=False, **kwargs):
         # Perform the standard bulk_create
         created_objs = super().bulk_create(
-            objs, batch_size=batch_size, ignore_conflicts=ignore_conflicts
+            objs, batch_size=batch_size, ignore_conflicts=ignore_conflicts, **kwargs
         )
 
         # Extract the newly created instances
