@@ -3266,5 +3266,15 @@
 	"dashboardsDescription": "Tableaux de bord personnalisés pour visualiser les métriques et indicateurs clés de performance",
 	"secretCopiedToClipboard": "Secret copié dans le presse-papier avec succès",
 	"libraryFilteringLabels": "Étiquettes de bibliothèque",
-	"appliedControlsPlaceholder": "Sélectionnez les mesures appliquées..."
+	"appliedControlsPlaceholder": "Sélectionnez les mesures appliquées...",
+	"teams": "Équipes",
+	"team": "Èquipe",
+	"teamEmail": "Addresse e-mail de l'équipe",
+	"leader": "Chef d'équipe",
+	"deputies": "Délégués",
+	"members": "Membres",
+	"addTeam": "Ajouter une équipe",
+	"viewTeam": "Voir une équipe",
+	"changeTeam": "Modifier une équipe",
+	"deleteTeam": "Supprimer une équipe"
 }
