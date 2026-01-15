@@ -5512,6 +5512,8 @@ class ActorViewSet(BaseModelViewSet):
             | Q(team__id__in=viewable_teams)
         )
 
+        queryset = queryset.select_related("user", "team", "entity")
+
         queryset = queryset.annotate(
             # Define the order: User (1), Team (2), Entity (3)
             type_rank=Case(
