@@ -101,6 +101,7 @@ from .tools.ebios_rm_tools import (
     get_operational_scenarios,
     get_elementary_actions,
     get_operating_modes,
+    get_kill_chains,
     # Write tools
     create_ebios_rm_study,
     create_feared_event,
@@ -111,6 +112,7 @@ from .tools.ebios_rm_tools import (
     create_operational_scenario,
     create_elementary_action,
     create_operating_mode,
+    create_kill_chain_step,
     # Update tools
     update_ebios_rm_study,
     update_feared_event,
@@ -120,6 +122,7 @@ from .tools.ebios_rm_tools import (
     update_attack_path,
     update_operational_scenario,
     update_operating_mode,
+    update_kill_chain_step,
 )
 
 # Register all tools with MCP decorators
@@ -203,6 +206,7 @@ mcp.tool()(get_attack_paths)
 mcp.tool()(get_operational_scenarios)
 mcp.tool()(get_elementary_actions)
 mcp.tool()(get_operating_modes)
+mcp.tool()(get_kill_chains)
 mcp.tool()(create_ebios_rm_study)
 mcp.tool()(create_feared_event)
 mcp.tool()(create_ro_to_couple)
@@ -212,6 +216,7 @@ mcp.tool()(create_attack_path)
 mcp.tool()(create_operational_scenario)
 mcp.tool()(create_elementary_action)
 mcp.tool()(create_operating_mode)
+mcp.tool()(create_kill_chain_step)
 mcp.tool()(update_ebios_rm_study)
 mcp.tool()(update_feared_event)
 mcp.tool()(update_ro_to_couple)
@@ -220,6 +225,7 @@ mcp.tool()(update_strategic_scenario)
 mcp.tool()(update_attack_path)
 mcp.tool()(update_operational_scenario)
 mcp.tool()(update_operating_mode)
+mcp.tool()(update_kill_chain_step)
 
 
 def run_server():

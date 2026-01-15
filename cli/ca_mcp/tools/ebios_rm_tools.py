@@ -17,6 +17,7 @@ from ..resolvers import (
     resolve_operational_scenario_id,
     resolve_elementary_action_id,
     resolve_operating_mode_id,
+    resolve_kill_chain_id,
     resolve_risk_matrix_id,
     resolve_asset_id,
     resolve_entity_id,
@@ -30,6 +31,169 @@ from ..utils.response_formatter import (
 
 
 # ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+
+def _normalize_for_matching(text: str) -> str:
+    """Normalize text for fuzzy matching: lowercase, strip, remove trailing 's' for plurals"""
+    normalized = text.lower().strip()
+    # Handle common plural forms
+    if normalized.endswith("s") and len(normalized) > 2:
+        normalized = normalized[:-1]
+    # Handle underscores vs spaces
+    normalized = normalized.replace("_", " ").replace("-", " ")
+    return normalized
+
+
+def _find_terminology_match(terminologies: list, user_input: str) -> dict | None:
+    """Find a terminology that matches the user input.
+
+    Matches against:
+    - Base name field (snake_case like "organized_crime")
+    - All translations in the translations dict
+
+    Uses case-insensitive, plural-insensitive matching.
+    """
+    normalized_input = _normalize_for_matching(user_input)
+
+    for term in terminologies:
+        # Match against the base name
+        if _normalize_for_matching(term.get("name", "")) == normalized_input:
+            return term
+
+        # Match against translations
+        translations = term.get("translations", {})
+        if isinstance(translations, dict):
+            for locale, locale_data in translations.items():
+                if isinstance(locale_data, dict):
+                    translated_name = locale_data.get("name", "")
+                    if (
+                        translated_name
+                        and _normalize_for_matching(translated_name) == normalized_input
+                    ):
+                        return term
+                elif isinstance(locale_data, str):
+                    # Some translations might be stored as direct strings
+                    if _normalize_for_matching(locale_data) == normalized_input:
+                        return term
+
+    return None
+
+
+def _resolve_or_create_risk_origin(risk_origin_input: str) -> tuple[str, bool]:
+    """Resolve a risk origin terminology by smart matching, or create a new one.
+
+    Args:
+        risk_origin_input: User input for risk origin (e.g., "State", "states", "organized crime")
+
+    Returns:
+        Tuple of (terminology_id, was_created)
+    """
+    # Fetch all risk origin terminologies
+    res = make_get_request(
+        "/terminologies/",
+        params={"field_path": "ro_to.risk_origin", "is_visible": "true"},
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Failed to fetch risk origin terminologies: {res.status_code}"
+        )
+
+    data = res.json()
+    terminologies = get_paginated_results(data)
+
+    # Try to find a match
+    match = _find_terminology_match(terminologies, risk_origin_input)
+    if match:
+        return match["id"], False
+
+    # No match found - create a new terminology
+    # Normalize the name to snake_case for storage
+    normalized_name = (
+        risk_origin_input.lower().strip().replace(" ", "_").replace("-", "_")
+    )
+
+    # Get the global folder for the new terminology
+    from ..config import GLOBAL_FOLDER_ID
+
+    create_payload = {
+        "name": normalized_name,
+        "field_path": "ro_to.risk_origin",
+        "folder": GLOBAL_FOLDER_ID,
+        "is_visible": True,
+        "builtin": False,
+        "translations": {
+            "en": {"name": risk_origin_input.strip().title()},
+        },
+    }
+
+    create_res = make_post_request("/terminologies/", create_payload)
+    if create_res.status_code == 201:
+        new_term = create_res.json()
+        return new_term["id"], True
+    else:
+        raise ValueError(
+            f"Failed to create risk origin terminology '{risk_origin_input}': {create_res.status_code} - {create_res.text}"
+        )
+
+
+def _resolve_or_create_stakeholder_category(category_input: str) -> tuple[str, bool]:
+    """Resolve a stakeholder category terminology by smart matching, or create a new one.
+
+    Args:
+        category_input: User input for category (e.g., "Partner", "partners", "Subcontractor")
+
+    Returns:
+        Tuple of (terminology_id, was_created)
+    """
+    # Fetch all entity relationship terminologies
+    res = make_get_request(
+        "/terminologies/",
+        params={"field_path": "entity.relationship", "is_visible": "true"},
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Failed to fetch stakeholder category terminologies: {res.status_code}"
+        )
+
+    data = res.json()
+    terminologies = get_paginated_results(data)
+
+    # Try to find a match
+    match = _find_terminology_match(terminologies, category_input)
+    if match:
+        return match["id"], False
+
+    # No match found - create a new terminology
+    normalized_name = category_input.lower().strip().replace(" ", "_").replace("-", "_")
+
+    from ..config import GLOBAL_FOLDER_ID
+
+    create_payload = {
+        "name": normalized_name,
+        "field_path": "entity.relationship",
+        "folder": GLOBAL_FOLDER_ID,
+        "is_visible": True,
+        "builtin": False,
+        "translations": {
+            "en": {"name": category_input.strip().title()},
+        },
+    }
+
+    create_res = make_post_request("/terminologies/", create_payload)
+    if create_res.status_code == 201:
+        new_term = create_res.json()
+        return new_term["id"], True
+    else:
+        raise ValueError(
+            f"Failed to create stakeholder category '{category_input}': {create_res.status_code} - {create_res.text}"
+        )
+
+
+# ============================================================================
 # READ TOOLS
 # ============================================================================
 
@@ -38,7 +202,9 @@ async def get_ebios_rm_studies(
     folder: str = None,
     status: str = None,
 ):
-    """List EBIOS RM studies
+    """List EBIOS RM studies (Workshop 1)
+
+    Shows all EBIOS RM studies including their security baseline (compliance assessments count).
 
     Args:
         folder: Folder ID/name filter
@@ -71,7 +237,7 @@ async def get_ebios_rm_studies(
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|ID|Ref|Name|Status|Version|Risk Matrix|Reference Entity|Folder|\n"
+        result += "|ID|Ref|Name|Status|Version|Security Baseline|Risk Matrix|Folder|\n"
         result += "|---|---|---|---|---|---|---|---|\n"
 
         for study in studies:
@@ -81,15 +247,21 @@ async def get_ebios_rm_studies(
             status_val = study.get("status", "N/A")
             version = study.get("version") or "N/A"
             risk_matrix = (study.get("risk_matrix") or {}).get("str", "N/A")
-            reference_entity = (study.get("reference_entity") or {}).get("str", "N/A")
             folder_name = (study.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{study_id}|{ref_id}|{name}|{status_val}|{version}|{risk_matrix}|{reference_entity}|{folder_name}|\n"
+            # Show security baseline (compliance assessments count)
+            compliance_assessments = study.get("compliance_assessments", [])
+            if compliance_assessments:
+                baseline = f"{len(compliance_assessments)} audit(s)"
+            else:
+                baseline = "Not set"
+
+            result += f"|{study_id}|{ref_id}|{name}|{status_val}|{version}|{baseline}|{risk_matrix}|{folder_name}|\n"
 
         return success_response(
             result,
             "get_ebios_rm_studies",
-            "Use this table to identify EBIOS RM study IDs for further operations",
+            "Workshop 1: Use update_ebios_rm_study to set security baseline (compliance_assessments). Use get_audits_progress to see available audits.",
         )
     except Exception as e:
         return error_response(
@@ -366,7 +538,7 @@ async def get_strategic_scenarios(
         return success_response(
             result,
             "get_strategic_scenarios",
-            "Use strategic scenario IDs to create attack paths",
+            "Workshop 3: Use strategic scenario IDs to create attack paths",
         )
     except Exception as e:
         return error_response(
@@ -440,7 +612,7 @@ async def get_attack_paths(
         return success_response(
             result,
             "get_attack_paths",
-            "Use attack path IDs to create operational scenarios",
+            "Workshop 3: Use attack path IDs. Workshop 4: create operational scenarios from these",
         )
     except Exception as e:
         return error_response(
@@ -519,7 +691,7 @@ async def get_operational_scenarios(
         return success_response(
             result,
             "get_operational_scenarios",
-            "Use operational scenario IDs to manage operating modes",
+            "Workshop 4: Use operational scenario IDs to manage operating modes",
         )
     except Exception as e:
         return error_response(
@@ -577,7 +749,7 @@ async def get_elementary_actions(
         return success_response(
             result,
             "get_elementary_actions",
-            "Use elementary action IDs to build kill chains in operating modes",
+            "Workshop 4: Use elementary action IDs to build kill chains in operating modes",
         )
     except Exception as e:
         return error_response(
@@ -645,7 +817,93 @@ async def get_operating_modes(
         return success_response(
             result,
             "get_operating_modes",
-            "Use operating mode IDs to manage kill chains and elementary actions",
+            "Workshop 4: Use operating mode IDs to manage kill chains and elementary actions",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
+async def get_kill_chains(
+    operating_mode: str,
+):
+    """List kill chain steps for an operating mode (Workshop 4)
+
+    Kill chains define the sequence of elementary actions in an attack scenario.
+    Each step has an attack stage (0=Know, 1=Enter, 2=Discover, 3=Exploit)
+    and can have antecedents (actions that must precede it).
+
+    **Workflow:**
+    1. Associate elementary actions with the operating mode (update_operating_mode)
+    2. Create kill chain steps to define the attack sequence (create_kill_chain_step)
+
+    Args:
+        operating_mode: Operating mode ID (required)
+    """
+    try:
+        operating_mode_id = resolve_operating_mode_id(operating_mode)
+
+        res = make_get_request(
+            "/ebios-rm/kill-chains/",
+            params={"operating_mode": operating_mode_id},
+        )
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        kill_chains = get_paginated_results(data)
+
+        if not kill_chains:
+            return empty_response(
+                "kill chain steps", {"operating_mode": operating_mode}
+            )
+
+        # Sort by attack stage for better visualization
+        kill_chains.sort(
+            key=lambda x: (
+                x.get("elementary_action", {}).get("attack_stage", 0)
+                if isinstance(x.get("elementary_action"), dict)
+                else 0
+            )
+        )
+
+        result = f"Found {len(kill_chains)} kill chain steps for operating mode\n\n"
+        result += "**Attack Stages:** 0=Know/Reconnaissance, 1=Enter/Initial Access, 2=Discover/Discovery, 3=Exploit/Exploitation\n\n"
+        result += "|ID|Elementary Action|Stage|Highlighted|Logic Op|Antecedents|\n"
+        result += "|---|---|---|---|---|---|\n"
+
+        for kc in kill_chains:
+            kc_id = kc.get("id", "N/A")
+            elem_action = kc.get("elementary_action", {})
+            action_name = (
+                elem_action.get("str", "N/A")
+                if isinstance(elem_action, dict)
+                else "N/A"
+            )
+            attack_stage = kc.get("attack_stage", "N/A")
+            highlighted = "Yes" if kc.get("is_highlighted") else "No"
+            logic_op = kc.get("logic_operator") or "-"
+
+            antecedents = kc.get("antecedents", [])
+            if antecedents:
+                antecedent_names = [a.get("str", "?") for a in antecedents[:2]]
+                antecedents_str = ", ".join(antecedent_names)
+                if len(antecedents) > 2:
+                    antecedents_str += f" (+{len(antecedents) - 2})"
+            else:
+                antecedents_str = "-"
+
+            result += f"|{kc_id}|{action_name}|{attack_stage}|{highlighted}|{logic_op}|{antecedents_str}|\n"
+
+        return success_response(
+            result,
+            "get_kill_chains",
+            "Workshop 4: Add more steps with create_kill_chain_step. Stage 0 actions cannot have antecedents.",
         )
     except Exception as e:
         return error_response(
@@ -671,8 +929,14 @@ async def create_ebios_rm_study(
     status: str = "planned",
     reference_entity_id: str = None,
     assets: list = None,
+    compliance_assessments: list = None,
 ) -> str:
-    """Create an EBIOS RM study
+    """Create an EBIOS RM study (Workshop 1)
+
+    **Workshop 1 - Security Baseline:**
+    The compliance_assessments parameter allows you to associate existing audits (compliance
+    assessments) with this study. These audits form the security baseline/foundation that
+    will be used throughout the EBIOS RM analysis.
 
     Args:
         name: Study name (required)
@@ -684,8 +948,11 @@ async def create_ebios_rm_study(
         status: planned | in_progress | in_review | done | deprecated
         reference_entity_id: Reference entity ID/name (the organization being studied)
         assets: List of asset IDs/names to include in the study
+        compliance_assessments: List of compliance assessment (audit) IDs/names for security baseline
     """
     try:
+        from ..resolvers import resolve_compliance_assessment_id
+
         folder_id = resolve_folder_id(folder_id)
         risk_matrix_id = resolve_risk_matrix_id(risk_matrix_id)
 
@@ -710,14 +977,27 @@ async def create_ebios_rm_study(
                 resolved_assets.append(resolve_asset_id(asset))
             payload["assets"] = resolved_assets
 
+        if compliance_assessments:
+            resolved_assessments = []
+            for assessment in compliance_assessments:
+                resolved_assessments.append(
+                    resolve_compliance_assessment_id(assessment)
+                )
+            payload["compliance_assessments"] = resolved_assessments
+
         res = make_post_request("/ebios-rm/studies/", payload)
 
         if res.status_code == 201:
             study = res.json()
+            baseline_msg = (
+                f" with {len(compliance_assessments)} audit(s) for security baseline"
+                if compliance_assessments
+                else ""
+            )
             return success_response(
-                f"Created EBIOS RM study: {study.get('name')} (ID: {study.get('id')})",
+                f"Created EBIOS RM study: {study.get('name')} (ID: {study.get('id')}){baseline_msg}",
                 "create_ebios_rm_study",
-                "Study created successfully. Next steps: add feared events, then create RoTo couples",
+                "Workshop 1: Study created. Add compliance assessments for security baseline, feared events, then RoTo couples",
             )
         else:
             return http_error_response(res.status_code, res.text)
@@ -808,7 +1088,9 @@ async def create_ro_to_couple(
 
     Args:
         ebios_rm_study_id: EBIOS RM study ID/name (required)
-        risk_origin: Risk origin terminology name (required, e.g., "State", "Organized crime")
+        risk_origin: Risk origin name (required, e.g., "State", "states", "Organized crime", "organized_crime")
+                     Supports case-insensitive and plural-insensitive matching against existing terminologies.
+                     If no match is found, a new risk origin terminology will be created.
         target_objective: Target objective description (required)
         motivation: Motivation level 0-4 (0=undefined, 1=very_low, 2=low, 3=significant, 4=strong)
         resources: Resources level 0-4 (0=undefined, 1=limited, 2=significant, 3=important, 4=unlimited)
@@ -820,29 +1102,9 @@ async def create_ro_to_couple(
     try:
         ebios_rm_study_id = resolve_ebios_rm_study_id(ebios_rm_study_id)
 
-        # First, we need to resolve the risk_origin terminology
-        # The API expects a terminology ID, so we search for it
-        term_res = make_get_request("/terminologies/", params={"name": risk_origin})
-        if term_res.status_code != 200:
-            return http_error_response(term_res.status_code, term_res.text)
-
-        term_data = term_res.json()
-        terms = get_paginated_results(term_data)
-
-        # Filter for ROTO_RISK_ORIGIN field path
-        risk_origin_terms = [
-            t for t in terms if t.get("field_path") == "roto_risk_origin"
-        ]
-
-        if not risk_origin_terms:
-            return error_response(
-                "Not Found",
-                f"Risk origin terminology '{risk_origin}' not found. Use get_risk_origins to see available options.",
-                "List available risk origins first",
-                retry_allowed=True,
-            )
-
-        risk_origin_id = risk_origin_terms[0]["id"]
+        # Smart resolve risk origin: matches against name, translations, case/plural insensitive
+        # Creates new terminology if no match found
+        risk_origin_id, was_created = _resolve_or_create_risk_origin(risk_origin)
 
         payload = {
             "ebios_rm_study": ebios_rm_study_id,
@@ -865,8 +1127,11 @@ async def create_ro_to_couple(
 
         if res.status_code == 201:
             roto = res.json()
+            created_msg = (
+                " (new risk origin terminology created)" if was_created else ""
+            )
             return success_response(
-                f"Created RoTo couple: {risk_origin} - {target_objective[:50]} (ID: {roto.get('id')})",
+                f"Created RoTo couple: {risk_origin} - {target_objective[:50]} (ID: {roto.get('id')}){created_msg}",
                 "create_ro_to_couple",
                 "RoTo couple created successfully. Create strategic scenarios based on this couple",
             )
@@ -897,7 +1162,9 @@ async def create_stakeholder(
     Args:
         ebios_rm_study_id: EBIOS RM study ID/name (required)
         entity_id: Entity ID/name (required)
-        category: Category terminology name (required, e.g., "Partner", "Supplier", "Subcontractor")
+        category: Category name (required, e.g., "Partner", "partners", "Supplier", "Subcontractor")
+                  Supports case-insensitive and plural-insensitive matching against existing terminologies.
+                  If no match is found, a new category terminology will be created.
         current_dependency: Dependency level 0-4
         current_penetration: Penetration level 0-4
         current_maturity: Maturity level 1-4
@@ -909,28 +1176,9 @@ async def create_stakeholder(
         ebios_rm_study_id = resolve_ebios_rm_study_id(ebios_rm_study_id)
         entity_id = resolve_entity_id(entity_id)
 
-        # Resolve category terminology
-        term_res = make_get_request("/terminologies/", params={"name": category})
-        if term_res.status_code != 200:
-            return http_error_response(term_res.status_code, term_res.text)
-
-        term_data = term_res.json()
-        terms = get_paginated_results(term_data)
-
-        # Filter for ENTITY_RELATIONSHIP field path
-        category_terms = [
-            t for t in terms if t.get("field_path") == "entity_relationship"
-        ]
-
-        if not category_terms:
-            return error_response(
-                "Not Found",
-                f"Category terminology '{category}' not found. Use get_stakeholder_categories to see available options.",
-                "List available categories first",
-                retry_allowed=True,
-            )
-
-        category_id = category_terms[0]["id"]
+        # Smart resolve category: matches against name, translations, case/plural insensitive
+        # Creates new terminology if no match found
+        category_id, was_created = _resolve_or_create_stakeholder_category(category)
 
         payload = {
             "ebios_rm_study": ebios_rm_study_id,
@@ -948,8 +1196,9 @@ async def create_stakeholder(
 
         if res.status_code == 201:
             sh = res.json()
+            created_msg = " (new category terminology created)" if was_created else ""
             return success_response(
-                f"Created stakeholder (ID: {sh.get('id')})",
+                f"Created stakeholder (ID: {sh.get('id')}){created_msg}",
                 "create_stakeholder",
                 "Stakeholder created successfully. Link stakeholders to attack paths",
             )
@@ -971,7 +1220,10 @@ async def create_strategic_scenario(
     description: str = "",
     ref_id: str = "",
 ) -> str:
-    """Create a strategic scenario in an EBIOS RM study
+    """Create a strategic scenario in an EBIOS RM study (Workshop 3)
+
+    Strategic scenarios are part of EBIOS RM Workshop 3 - Strategic Scenarios.
+    They describe high-level attack scenarios based on RoTo couples.
 
     Args:
         name: Scenario name (required)
@@ -1001,7 +1253,7 @@ async def create_strategic_scenario(
             return success_response(
                 f"Created strategic scenario: {scenario.get('name')} (ID: {scenario.get('id')})",
                 "create_strategic_scenario",
-                "Strategic scenario created successfully. Create attack paths for this scenario",
+                "Strategic scenario created (Workshop 3). Next: create attack paths for this scenario",
             )
         else:
             return http_error_response(res.status_code, res.text)
@@ -1023,7 +1275,10 @@ async def create_attack_path(
     justification: str = "",
     stakeholders: list = None,
 ) -> str:
-    """Create an attack path in a strategic scenario
+    """Create an attack path in a strategic scenario (Workshop 3)
+
+    Attack paths are part of EBIOS RM Workshop 3 - Strategic Scenarios.
+    They detail the paths an attacker might take through stakeholders.
 
     Args:
         name: Attack path name (required)
@@ -1037,9 +1292,28 @@ async def create_attack_path(
     try:
         strategic_scenario_id = resolve_strategic_scenario_id(strategic_scenario_id)
 
+        # Fetch the strategic scenario to get its ebios_rm_study (required by serializer)
+        scenario_res = make_get_request(
+            f"/ebios-rm/strategic-scenarios/{strategic_scenario_id}/"
+        )
+        if scenario_res.status_code != 200:
+            return http_error_response(scenario_res.status_code, scenario_res.text)
+
+        scenario_data = scenario_res.json()
+        ebios_rm_study_id = scenario_data.get("ebios_rm_study", {}).get("id")
+
+        if not ebios_rm_study_id:
+            return error_response(
+                "Invalid Data",
+                "Could not determine EBIOS RM study from strategic scenario",
+                "Verify the strategic scenario exists and has a valid study",
+                retry_allowed=False,
+            )
+
         payload = {
             "name": name,
             "strategic_scenario": strategic_scenario_id,
+            "ebios_rm_study": ebios_rm_study_id,
             "description": description,
             "is_selected": is_selected,
             "justification": justification,
@@ -1061,7 +1335,7 @@ async def create_attack_path(
             return success_response(
                 f"Created attack path: {ap.get('name')} (ID: {ap.get('id')})",
                 "create_attack_path",
-                "Attack path created successfully. Create an operational scenario for this attack path",
+                "Attack path created (Workshop 3). Next in Workshop 4: create operational scenarios",
             )
         else:
             return http_error_response(res.status_code, res.text)
@@ -1083,7 +1357,10 @@ async def create_operational_scenario(
     justification: str = "",
     threats: list = None,
 ) -> str:
-    """Create an operational scenario from an attack path
+    """Create an operational scenario from an attack path (Workshop 4)
+
+    Operational scenarios are part of EBIOS RM Workshop 4 - Operational Scenarios.
+    They describe concrete attack implementations derived from attack paths.
 
     Args:
         ebios_rm_study_id: EBIOS RM study ID/name (required)
@@ -1122,7 +1399,7 @@ async def create_operational_scenario(
             return success_response(
                 f"Created operational scenario (ID: {scenario.get('id')})",
                 "create_operational_scenario",
-                "Operational scenario created successfully. Add operating modes to detail the attack",
+                "Operational scenario created (Workshop 4). Next: add operating modes to detail the attack",
             )
         else:
             return http_error_response(res.status_code, res.text)
@@ -1144,7 +1421,10 @@ async def create_elementary_action(
     icon: str = None,
     threat_id: str = None,
 ) -> str:
-    """Create an elementary action for use in operating modes
+    """Create an elementary action for use in operating modes (Workshop 4)
+
+    Elementary actions are part of EBIOS RM Workshop 4 - Operational Scenarios.
+    They represent atomic attack steps that compose operating modes.
 
     Args:
         name: Action name (required)
@@ -1183,7 +1463,7 @@ async def create_elementary_action(
             return success_response(
                 f"Created elementary action: {action.get('name')} (ID: {action.get('id')})",
                 "create_elementary_action",
-                "Elementary action created successfully. Add it to operating modes",
+                "Elementary action created (Workshop 4). Add it to operating modes to build kill chains",
             )
         else:
             return http_error_response(res.status_code, res.text)
@@ -1204,7 +1484,10 @@ async def create_operating_mode(
     likelihood: int = -1,
     elementary_actions: list = None,
 ) -> str:
-    """Create an operating mode in an operational scenario
+    """Create an operating mode in an operational scenario (Workshop 4)
+
+    Operating modes are part of EBIOS RM Workshop 4 - Operational Scenarios.
+    They describe specific attack implementations using elementary actions.
 
     Args:
         name: Operating mode name (required)
@@ -1242,7 +1525,103 @@ async def create_operating_mode(
             return success_response(
                 f"Created operating mode: {mode.get('name')} (ID: {mode.get('id')})",
                 "create_operating_mode",
-                "Operating mode created successfully. Build the kill chain by adding elementary actions",
+                "Operating mode created (Workshop 4). Add elementary actions to build the kill chain",
+            )
+        else:
+            return http_error_response(res.status_code, res.text)
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
+async def create_kill_chain_step(
+    operating_mode_id: str,
+    elementary_action_id: str,
+    is_highlighted: bool = False,
+    logic_operator: str = None,
+    antecedents: list = None,
+) -> str:
+    """Create a kill chain step linking an elementary action to an operating mode (Workshop 4)
+
+    **Workflow:**
+    1. First, associate elementary actions with the operating mode using update_operating_mode
+       with the elementary_actions parameter
+    2. Then, create kill chain steps to define the sequence and relationships between actions
+
+    Kill chain steps define how elementary actions connect in a sequence via antecedent relationships.
+
+    **Attack Stage Rules:**
+    - Stage 0 (Know/Reconnaissance): Cannot have antecedents - these are starting points
+    - Stage 1 (Enter/Initial Access): Can have antecedents from Stage 0 or 1
+    - Stage 2 (Discover/Discovery): Can have antecedents from Stage 0, 1, or 2
+    - Stage 3 (Exploit/Exploitation): Can have antecedents from any stage
+
+    **Important:** Antecedents must already exist as kill chain steps in this operating mode.
+
+    Args:
+        operating_mode_id: Operating mode ID (required)
+        elementary_action_id: Elementary action ID/name to add as a step (required)
+        is_highlighted: Whether to highlight this step in visualizations
+        logic_operator: "AND" or "OR" - how to combine multiple antecedents
+        antecedents: List of elementary action IDs that must precede this action
+                     (Must already be kill chain steps, stage must be <= this action's stage)
+    """
+    try:
+        operating_mode_id = resolve_operating_mode_id(operating_mode_id)
+        elementary_action_id = resolve_elementary_action_id(elementary_action_id)
+
+        # Fetch the elementary action to get its attack stage for validation hints
+        action_res = make_get_request(
+            f"/ebios-rm/elementary-actions/{elementary_action_id}/"
+        )
+        if action_res.status_code != 200:
+            return http_error_response(action_res.status_code, action_res.text)
+
+        action_data = action_res.json()
+        attack_stage = action_data.get("attack_stage", 0)
+        stage_name = {0: "Know", 1: "Enter", 2: "Discover", 3: "Exploit"}.get(
+            attack_stage, "Unknown"
+        )
+
+        # Stage 0 actions cannot have antecedents
+        if attack_stage == 0 and antecedents:
+            return error_response(
+                "Validation Error",
+                f"Elementary action is at Stage 0 ({stage_name}) and cannot have antecedents. Stage 0 actions are starting points.",
+                "Remove antecedents for Stage 0 actions",
+                retry_allowed=True,
+            )
+
+        payload = {
+            "operating_mode": operating_mode_id,
+            "elementary_action": elementary_action_id,
+            "is_highlighted": is_highlighted,
+        }
+
+        if logic_operator:
+            payload["logic_operator"] = logic_operator
+
+        if antecedents:
+            resolved_antecedents = []
+            for ant in antecedents:
+                resolved_antecedents.append(resolve_elementary_action_id(ant))
+            payload["antecedents"] = resolved_antecedents
+
+        res = make_post_request("/ebios-rm/kill-chains/", payload)
+
+        if res.status_code == 201:
+            kc = res.json()
+            antecedent_info = (
+                f" with {len(antecedents)} antecedent(s)" if antecedents else ""
+            )
+            return success_response(
+                f"Added kill chain step (ID: {kc.get('id')}) - Stage {attack_stage} ({stage_name}){antecedent_info}",
+                "create_kill_chain_step",
+                "Workshop 4: Kill chain step added. Use get_kill_chains to see the full chain.",
             )
         else:
             return http_error_response(res.status_code, res.text)
@@ -1269,8 +1648,14 @@ async def update_ebios_rm_study(
     status: str = None,
     observation: str = None,
     assets: list = None,
+    compliance_assessments: list = None,
 ) -> str:
-    """Update an EBIOS RM study
+    """Update an EBIOS RM study (Workshop 1)
+
+    **Workshop 1 - Security Baseline:**
+    Use compliance_assessments to manage the audits (compliance assessments) that form
+    the security baseline for this study. You can add existing audits or suggest creating
+    new ones with create_compliance_assessment.
 
     Args:
         study_id: Study ID/name (required)
@@ -1281,8 +1666,11 @@ async def update_ebios_rm_study(
         status: planned | in_progress | in_review | done | deprecated
         observation: Observation notes
         assets: List of asset IDs/names (replaces existing)
+        compliance_assessments: List of compliance assessment (audit) IDs/names for security baseline (replaces existing)
     """
     try:
+        from ..resolvers import resolve_compliance_assessment_id
+
         resolved_study_id = resolve_ebios_rm_study_id(study_id)
 
         payload = {}
@@ -1306,6 +1694,14 @@ async def update_ebios_rm_study(
                 resolved_assets.append(resolve_asset_id(asset))
             payload["assets"] = resolved_assets
 
+        if compliance_assessments is not None:
+            resolved_assessments = []
+            for assessment in compliance_assessments:
+                resolved_assessments.append(
+                    resolve_compliance_assessment_id(assessment)
+                )
+            payload["compliance_assessments"] = resolved_assessments
+
         if not payload:
             return "Error: No fields provided to update"
 
@@ -1313,10 +1709,15 @@ async def update_ebios_rm_study(
 
         if res.status_code == 200:
             study = res.json()
+            baseline_msg = (
+                f" (security baseline: {len(compliance_assessments)} audit(s))"
+                if compliance_assessments
+                else ""
+            )
             return success_response(
-                f"Updated EBIOS RM study: {study.get('name')} (ID: {study.get('id')})",
+                f"Updated EBIOS RM study: {study.get('name')} (ID: {study.get('id')}){baseline_msg}",
                 "update_ebios_rm_study",
-                "Study updated successfully",
+                "Workshop 1: Study updated. Use get_audits_progress to see available audits for security baseline.",
             )
         else:
             return http_error_response(res.status_code, res.text)
@@ -1749,7 +2150,11 @@ async def update_operating_mode(
     likelihood: int = None,
     elementary_actions: list = None,
 ) -> str:
-    """Update an operating mode
+    """Update an operating mode (Workshop 4)
+
+    **Kill Chain Workflow:**
+    1. Use this function to associate elementary actions with the operating mode
+    2. Then use create_kill_chain_step to define the sequence and relationships
 
     Args:
         mode_id: Operating mode ID/name (required)
@@ -1757,7 +2162,8 @@ async def update_operating_mode(
         description: New description
         ref_id: New reference ID
         likelihood: Likelihood level (-1 for not rated, 0+ based on risk matrix)
-        elementary_actions: List of elementary action IDs/names (replaces existing)
+        elementary_actions: List of elementary action IDs/names to associate (replaces existing).
+                            This is the first step before creating kill chain steps.
     """
     try:
         resolved_mode_id = resolve_operating_mode_id(mode_id)
@@ -1792,6 +2198,94 @@ async def update_operating_mode(
                 f"Updated operating mode: {mode.get('name')} (ID: {mode.get('id')})",
                 "update_operating_mode",
                 "Operating mode updated successfully",
+            )
+        else:
+            return http_error_response(res.status_code, res.text)
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
+async def update_kill_chain_step(
+    kill_chain_id: str,
+    is_highlighted: bool = None,
+    logic_operator: str = None,
+    antecedents: list = None,
+) -> str:
+    """Update a kill chain step (Workshop 4)
+
+    Updates an existing kill chain step's properties (antecedents, highlighting, logic operator).
+
+    **Attack Stage Rules for antecedents:**
+    - Stage 0 (Know/Reconnaissance): Cannot have antecedents - these are starting points
+    - Stage 1 (Enter/Initial Access): Can have antecedents from Stage 0 or 1
+    - Stage 2 (Discover/Discovery): Can have antecedents from Stage 0, 1, or 2
+    - Stage 3 (Exploit/Exploitation): Can have antecedents from any stage
+
+    **Important:** Antecedents must already exist as kill chain steps in the same operating mode.
+
+    Args:
+        kill_chain_id: Kill chain step UUID (required)
+        is_highlighted: Whether to highlight this step in visualizations
+        logic_operator: "AND" or "OR" - how to combine multiple antecedents
+        antecedents: List of elementary action IDs that must precede this action
+                     (Must already be kill chain steps, stage must be <= this action's stage)
+    """
+    try:
+        resolved_kc_id = resolve_kill_chain_id(kill_chain_id)
+
+        # Fetch the kill chain step to get its elementary action's attack stage
+        kc_res = make_get_request(f"/ebios-rm/kill-chains/{resolved_kc_id}/")
+        if kc_res.status_code != 200:
+            return http_error_response(kc_res.status_code, kc_res.text)
+
+        kc_data = kc_res.json()
+        elementary_action = kc_data.get("elementary_action", {})
+        attack_stage = elementary_action.get("attack_stage", 0)
+        stage_name = {0: "Know", 1: "Enter", 2: "Discover", 3: "Exploit"}.get(
+            attack_stage, "Unknown"
+        )
+
+        # Stage 0 actions cannot have antecedents
+        if attack_stage == 0 and antecedents:
+            return error_response(
+                "Validation Error",
+                f"Elementary action is at Stage 0 ({stage_name}) and cannot have antecedents. Stage 0 actions are starting points.",
+                "Remove antecedents for Stage 0 actions",
+                retry_allowed=True,
+            )
+
+        payload = {}
+
+        if is_highlighted is not None:
+            payload["is_highlighted"] = is_highlighted
+        if logic_operator is not None:
+            payload["logic_operator"] = logic_operator
+
+        if antecedents is not None:
+            resolved_antecedents = []
+            for ant in antecedents:
+                resolved_antecedents.append(resolve_elementary_action_id(ant))
+            payload["antecedents"] = resolved_antecedents
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/ebios-rm/kill-chains/{resolved_kc_id}/", payload)
+
+        if res.status_code == 200:
+            kc = res.json()
+            antecedent_info = (
+                f" with {len(antecedents)} antecedent(s)" if antecedents else ""
+            )
+            return success_response(
+                f"Updated kill chain step (ID: {kc.get('id')}) - Stage {attack_stage} ({stage_name}){antecedent_info}",
+                "update_kill_chain_step",
+                "Workshop 4: Kill chain step updated. Use get_kill_chains to see the full chain.",
             )
         else:
             return http_error_response(res.status_code, res.text)

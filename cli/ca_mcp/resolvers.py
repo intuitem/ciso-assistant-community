@@ -263,6 +263,39 @@ def resolve_requirement_assessment_id(requirement_assessment_id: str) -> str:
     )
 
 
+def resolve_compliance_assessment_id(assessment_name_or_id: str) -> str:
+    """Helper function to resolve compliance assessment (audit) name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    # Check if it's already a UUID
+    if "-" in assessment_name_or_id and len(assessment_name_or_id) == 36:
+        return assessment_name_or_id
+
+    # Otherwise, look up by name
+    res = make_get_request(
+        "/compliance-assessments/", params={"name": assessment_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Compliance assessment '{assessment_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    assessments = get_paginated_results(data)
+
+    if not assessments:
+        raise ValueError(f"Compliance assessment '{assessment_name_or_id}' not found")
+
+    if len(assessments) > 1:
+        assessment_names = [a["name"] for a in assessments[:3]]
+        raise ValueError(
+            f"Ambiguous compliance assessment name '{assessment_name_or_id}', found {len(assessments)}: {assessment_names}"
+        )
+
+    return assessments[0]["id"]
+
+
 def resolve_id_or_name(name_or_id: str, endpoint: str) -> str:
     """Generic helper function to resolve name to UUID for any endpoint
     If already a UUID, returns it. If a name, looks it up via API.
@@ -712,3 +745,13 @@ def resolve_operating_mode_id(mode_name_or_id: str) -> str:
         )
 
     return modes[0]["id"]
+
+
+def resolve_kill_chain_id(kill_chain_id: str) -> str:
+    """Helper function to resolve kill chain step ID
+    Kill chain steps don't have names, so only UUIDs are accepted.
+    """
+    if "-" in kill_chain_id and len(kill_chain_id) == 36:
+        return kill_chain_id
+
+    raise ValueError(f"Kill chain step '{kill_chain_id}' is not a valid UUID")
