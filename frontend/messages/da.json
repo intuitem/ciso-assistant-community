@@ -1353,5 +1353,6 @@
 	"isCustom": "Brugerdefineret",
 	"errorUnloadingLibrary": "Fejl under aflæsning af bibliotek",
 	"librarySuccessfullyUnloaded": "Biblioteket blev afindlæst med succes",
-	"libraryFilteringLabels": "Bibliotek etiketter"
+	"libraryFilteringLabels": "Biblioteketiketter",
+	"appliedControlsPlaceholder": "Vælg anvendte kontroller..."
 }

@@ -1041,5 +1041,6 @@
 	"isCustom": "مخصص",
 	"errorUnloadingLibrary": "خطأ في تفريغ المكتبة",
 	"librarySuccessfullyUnloaded": "تم إلغاء تحميل المكتبة بنجاح",
-	"libraryFilteringLabels": "العلامات المكتبية"
+	"libraryFilteringLabels": "العلامات المكتبية",
+	"appliedControlsPlaceholder": "حدد عناصر التحكم المطبقة..."
 }

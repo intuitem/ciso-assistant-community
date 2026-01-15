@@ -1073,5 +1073,6 @@
 		}
 	],
 	"cascadeAffectedHint": "Os itens abaixo permanecem no sistema, mas seus links para este objeto serão removidos.",
-	"libraryFilteringLabels": "Etiquetas de biblioteca"
+	"libraryFilteringLabels": "Etiquetas de biblioteca",
+	"appliedControlsPlaceholder": "Selecione os controles aplicados..."
 }

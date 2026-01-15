@@ -531,6 +531,7 @@
 											]}
 											optionsExtraFields={[['folder', 'str']]}
 											field="applied_controls"
+											placeholder={m.appliedControlsPlaceholder()}
 										/>
 									{/key}
 									<ModelTable
