@@ -4792,7 +4792,7 @@ class UserRolesOnFolderList(generics.ListAPIView):
 
         # visibility
         visible_ids = set(
-            User.visible_users(self.request.user, view_all_users=True).values_list(
+            User.visible_users(self.request.user, view_all_users=False).values_list(
                 "id", flat=True
             )
         )
@@ -5639,7 +5639,7 @@ class UserViewSet(BaseModelViewSet):
     search_fields = ["email", "first_name", "last_name"]
 
     def get_queryset(self):
-        return User.visible_users(self.request.user, view_all_users=True)
+        return User.visible_users(self.request.user, view_all_users=False)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         user = self.get_object()

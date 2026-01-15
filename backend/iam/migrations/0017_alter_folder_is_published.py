@@ -3,17 +3,12 @@
 from django.db import migrations
 
 
-def set_enclave_is_published_false(apps, schema_editor):
-    """Set is_published=False for all ENCLAVE folders, True for others"""
+def set_is_published(apps, schema_editor):
+    """Set is_published=true for forlders (except enclaves) and users"""
     Folder = apps.get_model("iam", "Folder")
+    User = apps.get_model("iam", "User")
     Folder.objects.filter(content_type__in=["GL", "DO"]).update(is_published=True)
-    Folder.objects.filter(content_type="EN").update(is_published=False)
-
-
-def reverse_set_enclave_is_published(apps, schema_editor):
-    """Reverse the operation by setting is_published=True for all enclaves"""
-    Folder = apps.get_model("iam", "Folder")
-    Folder.objects.filter(content_type="EN").update(is_published=True)
+    User.objects.all().update(is_published=True)
 
 
 class Migration(migrations.Migration):
@@ -22,7 +17,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(
-            set_enclave_is_published_false, reverse_set_enclave_is_published
-        ),
+        migrations.RunPython(set_is_published, None),
     ]
