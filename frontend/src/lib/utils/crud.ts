@@ -2027,8 +2027,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ref_id' },
 			{ field: 'quantitative_risk_study' },
 			{ field: 'description' },
-			{ field: 'authors' },
-			{ field: 'reviewers' },
 			{ field: 'priority' },
 			{ field: 'current_ale_display' },
 			{ field: 'status' },
