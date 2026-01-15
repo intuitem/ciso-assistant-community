@@ -18,6 +18,7 @@ from typing import Dict, Any, List, Tuple
 import time
 from django.db.models import (
     F,
+    CharField,
     Count,
     Q,
     ExpressionWrapper,
@@ -5485,12 +5486,8 @@ class ActorViewSet(BaseModelViewSet):
     model = Actor
     search_fields = []
     ordering = [
-        "entity",
-        "team",
-        "user",
-        "user__email",
-        "entity__name",
-        "team__name",
+        "type_rank",
+        "display_name",
         "id",
     ]
 
@@ -5505,7 +5502,7 @@ class ActorViewSet(BaseModelViewSet):
             user=self.request.user,
             object_type=Team,
         )
-        return Actor.objects.filter(
+        queryset = Actor.objects.filter(
             Q(
                 user__id__in=User.visible_users(
                     self.request.user, view_all_users=True
@@ -5514,6 +5511,23 @@ class ActorViewSet(BaseModelViewSet):
             | Q(entity__id__in=viewable_entities)
             | Q(team__id__in=viewable_teams)
         )
+
+        queryset = queryset.annotate(
+            # Define the order: User (1), Team (2), Entity (3)
+            type_rank=Case(
+                When(user__isnull=False, then=Value(1)),
+                When(team__isnull=False, then=Value(2)),
+                When(entity__isnull=False, then=Value(3)),
+                default=Value(4),  # Fallback
+                output_field=IntegerField(),
+            ),
+            # Combine the different name fields into one column
+            display_name=Coalesce(
+                "user__email", "team__name", "entity__name", output_field=CharField()
+            ),
+        )
+
+        return queryset.order_by("type_rank", "display_name")
 
 
 class TeamViewSet(BaseModelViewSet):
