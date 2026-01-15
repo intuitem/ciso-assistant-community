@@ -27,7 +27,7 @@ class MetricDefinitionReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
     unit = FieldsRelatedField(["name", "id"])
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
 
     class Meta:
         model = MetricDefinition
@@ -63,7 +63,7 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
     )
     owner = FieldsRelatedField(many=True)
     organisation_objectives = FieldsRelatedField(many=True)
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     status = serializers.CharField(source="get_status_display", read_only=True)
     collection_frequency = serializers.CharField(
         source="get_collection_frequency_display", read_only=True
@@ -141,7 +141,7 @@ class DashboardWriteSerializer(BaseModelSerializer):
 class DashboardReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     widget_count = serializers.IntegerField(read_only=True)
 
     class Meta:

@@ -2036,8 +2036,8 @@
 			"declarations": ["input count", "local countPlural = count: plural"],
 			"selectors": ["countPlural"],
 			"match": {
-				"countPlural=one": "{count} object not visible.",
-				"countPlural=other": "{count} objects not visible."
+				"countPlural=one": "{count} object is hidden. The link may be lost when editing.",
+				"countPlural=other": "{count} objects are hidden. The links may be lost when editing."
 			}
 		}
 	],
@@ -3306,7 +3306,5 @@
 	"lastRefresh": "Last refresh",
 	"widgetCount": "Widgets count",
 	"rawValue": "Value",
-	"appliedControlsPlaceholder": "Select applied controls...",
-	"warningInvisibleRelationships": "Objects not visible: Some related objects are not visible to you",
-	"warningInvisibleRelationshipsDescription": "You have edit permissions on this object, but some related objects are not visible due to your access permissions. Editing may affect relationships you cannot see."
+	"appliedControlsPlaceholder": "Select applied controls..."
 }

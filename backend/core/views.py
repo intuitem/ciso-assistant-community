@@ -775,7 +775,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     root_folder, self.request.user, model
                 )[0]
             except (NotImplementedError, Permission.DoesNotExist):
-                allowed[model] = set()
+                # Model does not support IAM scoping; skip filtering
+                allowed[model] = None
                 continue
             allowed[model] = {str(item_id) for item_id in ids}
         return allowed

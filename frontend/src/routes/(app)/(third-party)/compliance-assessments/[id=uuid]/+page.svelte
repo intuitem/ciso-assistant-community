@@ -471,15 +471,6 @@
 			</div>
 		</div>
 	{/if}
-	{#if hasNonVisibleObjects()}
-		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
-			<i class="fas fa-exclamation-triangle text-yellow-700 mr-3"></i>
-			<div class="text-yellow-900">
-				{m.warningInvisibleRelationships()}
-				<span class="text-sm block mt-1">{m.warningInvisibleRelationshipsDescription()}</span>
-			</div>
-		</div>
-	{/if}
 
 	<div class="flex flex-col card px-6 py-4 bg-white shadow-lg w-full">
 		<div class="flex flex-row justify-between">
