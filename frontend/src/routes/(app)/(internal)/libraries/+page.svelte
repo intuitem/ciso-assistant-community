@@ -72,6 +72,12 @@
 			selectedClass: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-purple-200',
 			hoverClass: 'hover:border-purple-400 hover:bg-purple-50',
 			label: m.metricDefinitions()
+		},
+		requirement_mapping_sets: {
+			icon: 'fa-diagram-project',
+			selectedClass: 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-pink-200',
+			hoverClass: 'hover:border-pink-400 hover:bg-pink-50',
+			label: m.requirementMappingSets()
 		}
 	};
 
