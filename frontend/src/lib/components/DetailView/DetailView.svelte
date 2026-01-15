@@ -329,9 +329,35 @@
 
 	let expandedTable = $state(false);
 	const MAX_ROWS = 10;
+
+	// Check if there are non-visible objects and user can edit
+	let hasNonVisibleObjects = $derived(() => {
+		if (!canEditObject) return false;
+
+		for (const [key, value] of Object.entries(data.data)) {
+			if (Array.isArray(value)) {
+				const maskedCount = countMasked(value);
+				if (maskedCount > 0) return true;
+			} else if (isMaskedPlaceholder(value)) {
+				return true;
+			}
+		}
+		return false;
+	});
 </script>
 
 <div class="flex flex-col space-y-2">
+	<!-- Warning for non-visible objects (only for users with edit permissions) -->
+	{#if hasNonVisibleObjects()}
+		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
+			<i class="fas fa-exclamation-triangle text-yellow-700 mr-3"></i>
+			<div class="text-yellow-900">
+				{m.warningInvisibleRelationships()}
+				<span class="text-sm block mt-1">{m.warningInvisibleRelationshipsDescription()}</span>
+			</div>
+		</div>
+	{/if}
+
 	{#if data.urlModel === 'risk-acceptances' && data.data.state === 'Created'}
 		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
 			<div class="text-yelloW-900">

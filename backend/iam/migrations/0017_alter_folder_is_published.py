@@ -17,23 +17,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="folder",
-            name="is_published",
-            field=models.BooleanField(
-                default=True,
-                help_text="Designates whether this folder is published and visible to all.",
-                verbose_name="Published",
-            ),
-        ),
-        migrations.AlterField(
-            model_name="user",
-            name="is_published",
-            field=models.BooleanField(
-                default=True,
-                help_text="Designates whether this user is published and visible to other users.",
-                verbose_name="Published",
-            ),
-        ),
         migrations.RunPython(set_is_published, None),
     ]

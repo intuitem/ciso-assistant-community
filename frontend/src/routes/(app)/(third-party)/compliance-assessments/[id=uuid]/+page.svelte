@@ -444,6 +444,19 @@
 			(selectedExtendedResults.length > 0 ? 1 : 0) +
 			(displayOnlyAssessableNodes ? 1 : 0)
 	);
+
+	let hasNonVisibleObjects = $derived(() => {
+		if (!canEditObject) return false;
+		for (const [key, value] of Object.entries(data.compliance_assessment)) {
+			if (Array.isArray(value)) {
+				const maskedCount = countMasked(value);
+				if (maskedCount > 0) return true;
+			} else if (isMaskedPlaceholder(value)) {
+				return true;
+			}
+		}
+		return false;
+	});
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -458,6 +471,16 @@
 			</div>
 		</div>
 	{/if}
+	{#if hasNonVisibleObjects()}
+		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
+			<i class="fas fa-exclamation-triangle text-yellow-700 mr-3"></i>
+			<div class="text-yellow-900">
+				{m.warningInvisibleRelationships()}
+				<span class="text-sm block mt-1">{m.warningInvisibleRelationshipsDescription()}</span>
+			</div>
+		</div>
+	{/if}
+
 	<div class="flex flex-col card px-6 py-4 bg-white shadow-lg w-full">
 		<div class="flex flex-row justify-between">
 			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">

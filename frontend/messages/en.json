@@ -3306,5 +3306,7 @@
 	"lastRefresh": "Last refresh",
 	"widgetCount": "Widgets count",
 	"rawValue": "Value",
-	"appliedControlsPlaceholder": "Select applied controls..."
+	"appliedControlsPlaceholder": "Select applied controls...",
+	"warningInvisibleRelationships": "Objects not visible: Some related objects are not visible to you",
+	"warningInvisibleRelationshipsDescription": "You have edit permissions on this object, but some related objects are not visible due to your access permissions. Editing may affect relationships you cannot see."
 }

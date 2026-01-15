@@ -122,11 +122,6 @@ class Folder(NameDescriptionMixin):
         verbose_name=_("Labels"),
         related_name="folders",
     )
-    is_published = models.BooleanField(
-        default=True,
-        verbose_name=_("Published"),
-        help_text=_("Designates whether this folder is published and visible to all."),
-    )
     fields_to_check = ["name"]
 
     class Meta:
@@ -137,6 +132,11 @@ class Folder(NameDescriptionMixin):
 
     def __str__(self) -> str:
         return self.name.__str__()
+
+    def save(self, *args, **kwargs):
+        if self._state.adding and not self.is_published:
+            self.is_published = True
+        super().save(*args, **kwargs)
 
     def get_sub_folders(self) -> Generator[Self, None, None]:
         """Return the list of subfolders"""
@@ -363,9 +363,6 @@ class PublishInRootFolderMixin(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
-        # Ensure folders are published by default
-        if not hasattr(self, "is_published") or self.is_published is None:
-            self.is_published = True
         # Root folder children must be published
         if (
             getattr(self, "folder") == Folder.get_root_folder()
@@ -438,6 +435,7 @@ class UserManager(BaseUserManager):
             folder=_get_root_folder(),
             keep_local_login=extra_fields.get("keep_local_login", False),
             expiry_date=extra_fields.get("expiry_date"),
+            is_published=True,
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         if password:
@@ -561,13 +559,6 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         null=True,
         verbose_name=_("Expiry date"),
     )
-    is_published = models.BooleanField(
-        default=True,
-        verbose_name=_("Published"),
-        help_text=_(
-            "Designates whether this user is published and visible to other users."
-        ),
-    )
     objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
@@ -589,9 +580,6 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         logger.info("user deleted", user=self)
 
     def save(self, *args, **kwargs):
-        # Ensure users are published by default
-        if not hasattr(self, "is_published") or self.is_published is None:
-            self.is_published = True
         if self.is_superuser and not self.is_active:
             # avoid deactivation of superuser
             self.is_active = True
