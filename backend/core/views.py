@@ -34,6 +34,7 @@ from django.db.models import (
     OneToOneField,
     ManyToManyField,
     QuerySet,
+    Prefetch,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -804,6 +805,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             ]
         if not isinstance(data, dict):
             return data
+
+        current_user_id = (
+            str(self.request.user.id) if self.request.user.is_authenticated else None
+        )
+
         for field_name, related_model in field_models.items():
             allowed = allowed_ids.get(related_model)
             if allowed is None:
@@ -813,14 +819,29 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 filtered = []
                 for item in value:
                     item_id = self._extract_related_id(item)
-                    if not item_id or item_id in allowed:
+                    # Always include current user
+                    if (
+                        not item_id
+                        or item_id in allowed
+                        or (
+                            related_model.__name__ == "User"
+                            and item_id == current_user_id
+                        )
+                    ):
                         filtered.append(item)
                     else:
                         filtered.append(self._placeholder_for(item))
                 data[field_name] = filtered
             elif isinstance(value, dict):
                 item_id = self._extract_related_id(value)
-                if item_id and item_id not in allowed:
+                # Always include current user
+                if (
+                    item_id
+                    and item_id not in allowed
+                    and not (
+                        related_model.__name__ == "User" and item_id == current_user_id
+                    )
+                ):
                     data[field_name] = self._placeholder_for(value)
         return data
 
@@ -4790,12 +4811,13 @@ class UserRolesOnFolderList(generics.ListAPIView):
         if folder.id not in viewable_ids:
             raise PermissionDenied()
 
-        # visibility
-        visible_ids = set(
-            User.visible_users(self.request.user, view_all_users=False).values_list(
-                "id", flat=True
-            )
+        # visibility - get user IDs the current user can see via IAM filtering
+        (visible_user_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, User
         )
+        visible_ids = set(visible_user_ids) | {
+            self.request.user.id
+        }  # always include self
 
         # roles per user (no role filtering)
         raw_map = folder.get_user_roles()  # {user_id: [Role, ...]}
@@ -5639,7 +5661,22 @@ class UserViewSet(BaseModelViewSet):
     search_fields = ["email", "first_name", "last_name"]
 
     def get_queryset(self):
-        return User.visible_users(self.request.user, view_all_users=False)
+        # Use base IAM filtering
+        # but ensure current user is always included
+        queryset = super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
+
+        # Add prefetch for user_groups visibility
+        viewable_user_group_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, UserGroup
+        )[0]
+        return queryset.distinct().prefetch_related(
+            Prefetch(
+                "user_groups",
+                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
+                    "id", "builtin"
+                ),
+            )
+        )
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         user = self.get_object()

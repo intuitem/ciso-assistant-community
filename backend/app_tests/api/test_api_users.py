@@ -199,7 +199,7 @@ class TestUsersAuthenticated:
     def test_update_only_if_admin(self, test):
         is_admin = test.user_group == "BI-UG-ADM"
 
-        # Ensure the user exists
+        # Ensure the user exists with is_published=true (since Users are now IAM-filtered)
         user, created = User.objects.get_or_create(
             email=USER_EMAIL,
             defaults={
@@ -207,6 +207,7 @@ class TestUsersAuthenticated:
                 "last_name": USER_NAME,
                 "password": USER_PASSWORD,
                 "is_active": True,
+                "is_published": True,  # Users are now published and IAM-filtered
             },
         )
 
@@ -217,14 +218,17 @@ class TestUsersAuthenticated:
             detail_url, {"first_name": "Updated"}, format="json"
         )
 
+        # Non-admin users may get 404 if they don't have IAM visibility to this user
         if is_admin:
             assert response.status_code == status.HTTP_200_OK
             user.refresh_from_db()
             assert user.first_name == "Updated"
         else:
+            # Non-admin users either can't see the user (404) or don't have permission (403)
             assert response.status_code in (
                 status.HTTP_401_UNAUTHORIZED,
                 status.HTTP_403_FORBIDDEN,
+                status.HTTP_404_NOT_FOUND,  # User not visible due to IAM filtering
             )
 
     def test_superuser_cannot_be_deactivated(self, test):

@@ -78,11 +78,14 @@ class EndpointTestsUtils:
             )
             test_folder = Folder.objects.get(name=test_folder_name)
 
-        user = User.objects.create_user(TEST_USER_EMAIL)
-        UserGroup.objects.get(
+        user = User.objects.create_user(TEST_USER_EMAIL, is_published=True)
+        user_group = UserGroup.objects.get(
             name=role,
             folder=Folder.objects.get(name=GROUPS_PERMISSIONS[role]["folder"]),
-        ).user_set.add(user)
+        )
+        user.folder = user_group.folder
+        user.save()
+        user_group.user_set.add(user)
         client = APIClient()
         _auth_token = AuthToken.objects.create(user=user)
         auth_token = _auth_token[1]
@@ -427,8 +430,10 @@ class EndpointTestsQueries:
             # Creates a test object from the model
             if build_params and object:
                 if object.__name__ == "User":
+                    # Ensure new test users are published so they're visible through IAM filtering
+                    build_params_with_published = {**build_params, "is_published": True}
                     user = object.objects.create_superuser(
-                        **build_params
+                        **build_params_with_published
                     )  # no password is required in the build_params
                     # create the new user in the same group as the test user to make it visible
                     if user_group:
@@ -437,6 +442,9 @@ class EndpointTestsQueries:
                             folder__name=GROUPS_PERMISSIONS[user_group]["folder"],
                         )
                         group.user_set.add(user)
+                        # Assign user to the same folder as the group for IAM visibility
+                        user.folder = group.folder
+                        user.save()
 
                 else:
                     m2m_fields = {}

@@ -122,7 +122,11 @@ class Folder(NameDescriptionMixin):
         verbose_name=_("Labels"),
         related_name="folders",
     )
-
+    is_published = models.BooleanField(
+        default=True,
+        verbose_name=_("Published"),
+        help_text=_("Designates whether this folder is published and visible to all."),
+    )
     fields_to_check = ["name"]
 
     class Meta:
@@ -359,6 +363,10 @@ class PublishInRootFolderMixin(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
+        # Ensure folders are published by default
+        if not hasattr(self, "is_published") or self.is_published is None:
+            self.is_published = True
+        # Root folder children must be published
         if (
             getattr(self, "folder") == Folder.get_root_folder()
             and hasattr(self, "is_published")
@@ -553,6 +561,13 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         null=True,
         verbose_name=_("Expiry date"),
     )
+    is_published = models.BooleanField(
+        default=True,
+        verbose_name=_("Published"),
+        help_text=_(
+            "Designates whether this user is published and visible to other users."
+        ),
+    )
     objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
@@ -569,48 +584,14 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         #        swappable = 'AUTH_USER_MODEL'
         permissions = (("backup", "backup"), ("restore", "restore"))
 
-    @classmethod
-    def visible_users(
-        cls, for_user: AbstractBaseUser | AnonymousUser, view_all_users: bool
-    ):
-        """
-        Return a queryset of users visible to `for_user`, always including `for_user`.
-        Mirrors the logic used in UserViewSet.get_queryset().
-        """
-        if not getattr(for_user, "is_authenticated", False):
-            return User.objects.none()
-
-        (viewable_user_group_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), for_user, UserGroup
-        )
-
-        if view_all_users:
-            base_qs = User.objects.all()
-
-        else:
-            (visible_users_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), for_user, User
-            )
-            base_qs = (
-                User.objects.filter(id__in=visible_users_ids)
-                | User.objects.filter(pk=for_user.pk)
-            ).distinct()
-
-        # 🔒 Filtered prefetch for serializer
-        return base_qs.prefetch_related(
-            Prefetch(
-                "user_groups",
-                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
-                    "id", "builtin"
-                ),  # minimal
-            )
-        )
-
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
         logger.info("user deleted", user=self)
 
     def save(self, *args, **kwargs):
+        # Ensure users are published by default
+        if not hasattr(self, "is_published") or self.is_published is None:
+            self.is_published = True
         if self.is_superuser and not self.is_active:
             # avoid deactivation of superuser
             self.is_active = True
