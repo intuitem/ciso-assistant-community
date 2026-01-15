@@ -259,7 +259,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_threat",
     "view_user",
     "view_actor",
-    "viwew_team",
+    "view_team",
     "view_usergroup",
     "add_ebiosrmstudy",
     "view_ebiosrmstudy",
