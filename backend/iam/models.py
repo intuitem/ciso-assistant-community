@@ -916,7 +916,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         class_name = object_type.__name__.lower()
         if class_name == "actor":
-            return self._get_actor_accessible_ids(folder, user)
+            return RoleAssignment._get_actor_accessible_ids(folder, user)
 
         permissions_map = {
             p.codename: p
