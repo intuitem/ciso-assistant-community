@@ -59,7 +59,7 @@
 		<div class="flex items-center">{m.changeAttackStage()}</div>
 	</ContextMenu.SubTrigger>
 	<ContextMenu.SubContent
-		class="z-50 w-full max-w-[209px] outline-hidden card bg-white px-1 py-1.5 shadow-md cursor-default data-highlighted:bg-surface-50"
+		class="z-50 w-full min-w-[180px] max-w-[209px] outline-hidden card bg-white px-1 py-1.5 shadow-md border border-surface-200 cursor-default data-highlighted:bg-surface-50"
 		sideOffset={10}
 	>
 		{#each options as option}

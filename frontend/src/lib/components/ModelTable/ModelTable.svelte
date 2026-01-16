@@ -886,7 +886,7 @@
 			</ContextMenu.Trigger>
 			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
-					class="z-50 min-w-[180px] outline-hidden card bg-white px-1 py-1.5 shadow-md"
+					class="z-50 min-w-[180px] outline-hidden bg-white px-1 py-1.5 shadow-md border border-surface-200 rounded-md"
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}
