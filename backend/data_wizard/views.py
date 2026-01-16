@@ -2738,6 +2738,7 @@ class LoadFileView(APIView):
                         name=asset_data["name"],
                         folder=folder,
                         defaults={
+                            "ref_id": asset_data.get("ref_id", ""),
                             "description": asset_data.get("description", ""),
                             "type": asset_data.get("type", ""),
                         },

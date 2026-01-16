@@ -415,6 +415,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             for asset in study.assets.all():
                 assets_data.append(
                     {
+                        "ref_id": asset.ref_id or "",
                         "name": asset.name,
                         "description": asset.description or "",
                         "type": asset.type or "",

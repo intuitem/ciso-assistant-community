@@ -100,6 +100,7 @@ def extract_assets(workbook) -> list:
     for row in rows:
         assets.append(
             {
+                "ref_id": row.get("ref_id") or "",
                 "name": row.get("name") or "",
                 "description": row.get("description") or "",
                 "type": row.get("type") or "",
