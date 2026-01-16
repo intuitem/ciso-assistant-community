@@ -175,6 +175,10 @@ class ActorSyncManager(models.Manager):
     """
 
     def bulk_create(self, objs, batch_size=None, ignore_conflicts=False, **kwargs):
+        if self.model.__name__ == "Team":
+            for obj in objs:
+                obj.is_published = True
+
         # Perform the standard bulk_create
         created_objs = super().bulk_create(
             objs, batch_size=batch_size, ignore_conflicts=ignore_conflicts, **kwargs
@@ -189,7 +193,9 @@ class ActorSyncManager(models.Manager):
         actors = []
         for obj in created_objs:
             if obj.pk:  # Only link if the object was actually created
-                actors.append(Actor(**{field_name: obj}))
+                actor = Actor(**{field_name: obj})
+                actor.is_published = True
+                actors.append(actor)
 
         # Bulk create the corresponding Actors
         if actors:

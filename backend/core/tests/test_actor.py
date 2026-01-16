@@ -24,8 +24,9 @@ class TestActorSync:
         # Check Actor existence
         assert hasattr(user, "actor")
         assert user.actor is not None
-        assert Actor.objects.filter(user=user).exists()
+        assert Actor.objects.filter(user=user, is_published=True).exists()
         actor_id = user.actor.id
+        assert user.actor.is_published is True
 
         # Delete User
         user.delete()
@@ -49,8 +50,10 @@ class TestActorSync:
         # Check Actor existence
         assert hasattr(team, "actor")
         assert team.actor is not None
-        assert Actor.objects.filter(team=team).exists()
+        assert team.is_published is True
+        assert Actor.objects.filter(team=team, is_published=True).exists()
         actor_id = team.actor.id
+        assert team.actor.is_published is True
 
         # Delete Team
         team.delete()
@@ -114,6 +117,16 @@ class TestActorSync:
             assert Actor.objects.filter(team=team).exists()
 
         assert Actor.objects.filter(team__name__startswith="Bulk Team").count() == 5
+        assert (
+            Team.objects.filter(name__startswith="Bulk Team", is_published=True).count()
+            == 5
+        )
+        assert (
+            Actor.objects.filter(
+                team__name__startswith="Bulk Team", is_published=True
+            ).count()
+            == 5
+        )
 
     def test_entity_bulk_create_actor_sync(self):
         """

@@ -7757,6 +7757,10 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
     )
     team_email = models.EmailField(verbose_name="Team Email", blank=True, null=True)
 
+    def save(self, *args, **kwargs):
+        self.is_published = True
+        return super().save(*args, **kwargs)
+
     def get_emails(self) -> list[str]:
         emails = []
         if self.team_email:
@@ -7801,6 +7805,10 @@ class Actor(AbstractBaseModel):
                 name="actor_exactly_one_link",
             )
         ]
+
+    def save(self, *args, **kwargs):
+        self.is_published = True
+        return super().save(*args, **kwargs)
 
     @property
     def type(self):
