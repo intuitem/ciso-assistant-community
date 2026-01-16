@@ -1676,6 +1676,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} obiekt niewidoczny.",
+				"countPlural=other": "{count} obiekty niewidoczne."
+			}
+		}
+	],
 	"matchingScenarios": "Dopasowane scenariusze",
 	"select": "Wybierz",
 	"deselect": "Odznacz",

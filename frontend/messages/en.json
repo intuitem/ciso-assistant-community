@@ -2031,6 +2031,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} object is hidden. The link may be lost when editing.",
+				"countPlural=other": "{count} objects are hidden. The links may be lost when editing."
+			}
+		}
+	],
 	"serverURL": "Server URL",
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Token auth method",

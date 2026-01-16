@@ -412,7 +412,7 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     attack_path = FieldsRelatedField(["id", "name", "description", "form_display_name"])
     stakeholders = FieldsRelatedField(many=True)
-    ro_to = FieldsRelatedField(["risk_origin", "target_objective"])
+    ro_to = FieldsRelatedField(["id", "risk_origin", "target_objective"])
     threats = FieldsRelatedField(many=True)
     strategic_scenario = serializers.SerializerMethodField()
     likelihood = serializers.JSONField(source="get_likelihood_display")
