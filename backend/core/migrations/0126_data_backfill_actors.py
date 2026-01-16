@@ -95,7 +95,12 @@ def migrate_user_to_actor(apps, schema_editor):
             actor_id = user_to_actor_map.get(user_id)
             if actor_id:
                 new_relations.append(
-                    NewThrough(**{parent_field_name: parent_id, "actor_id": actor_id})
+                    NewThrough(
+                        **{
+                            f"{parent_field_name}_id": parent_id,
+                            "actor_id": actor_id,
+                        }
+                    )
                 )
 
         if new_relations:
