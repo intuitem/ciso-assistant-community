@@ -6,6 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0127_remove_appliedcontrol_new_owner_and_more"),
+        ("crq", "0002_fix_folder_inheritance"),
         ("crq", "0002_quantitativeriskscenario_new_owner_and_more"),
     ]
 
