@@ -955,6 +955,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} obiect nevizibil.",
+				"countPlural=other": "{count} obiecte nevizibile."
+			}
+		}
+	],
 	"matchingScenarios": "Scenarii potrivite",
 	"select": "Selectează",
 	"deselect": "Deselectează",

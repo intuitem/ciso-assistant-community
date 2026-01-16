@@ -1239,6 +1239,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objekt ikke synligt.",
+				"countPlural=other": "{count} objekter ikke synlige."
+			}
+		}
+	],
 	"matchingScenarios": "Matchende scenarier",
 	"select": "Vælg",
 	"deselect": "Fravælg",

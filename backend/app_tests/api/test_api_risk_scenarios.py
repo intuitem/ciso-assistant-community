@@ -348,13 +348,8 @@ class TestRiskScenariosAuthenticated:
             perimeter=Perimeter.objects.create(name="test", folder=test.folder),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
-        risk_assessment2 = RiskAssessment.objects.create(
-            name="test2",
-            perimeter=Perimeter.objects.create(name="test2", folder=folder),
-            risk_matrix=RiskMatrix.objects.all()[1],
-        )
         threat = Threat.objects.create(name="test", folder=test.folder)
-        threat2 = Threat.objects.create(name="test2", folder=folder)
+        threat2 = Threat.objects.create(name="test2", folder=test.folder)
         asset = Asset.objects.create(name="test", folder=folder)
         applied_controls = AppliedControl.objects.create(name="test", folder=folder)
 
@@ -389,7 +384,6 @@ class TestRiskScenariosAuthenticated:
                 "residual_level": RISK_SCENARIO_RESIDUAL_LEVEL2["value"],
                 "treatment": RISK_SCENARIO_TREATMENT_STATUS2[0],
                 "justification": "new " + RISK_SCENARIO_JUSTIFICATION,
-                "risk_assessment": str(risk_assessment2.id),
                 "threats": [str(threat2.id)],
                 "assets": [str(asset.id)],
                 "applied_controls": [str(applied_controls.id)],
