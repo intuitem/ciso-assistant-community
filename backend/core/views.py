@@ -5672,12 +5672,13 @@ class ActorViewSet(BaseModelViewSet):
             user=self.request.user,
             object_type=Team,
         )
+        (viewable_users, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=self.request.user,
+            object_type=User,
+        )
         queryset = Actor.objects.filter(
-            Q(
-                user__id__in=User.visible_users(
-                    self.request.user, view_all_users=True
-                ).values_list("id")
-            )
+            Q(user__id__in=viewable_users)
             | Q(entity__id__in=viewable_entities)
             | Q(team__id__in=viewable_teams)
         )
