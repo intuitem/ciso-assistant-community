@@ -42,6 +42,14 @@
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
 	import { tableHandlers, tableStates } from '$lib/utils/stores';
+	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
+	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import {
+		getModalStore,
+		type ModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		// Props
@@ -154,6 +162,8 @@
 		actionsHead,
 		tail
 	}: Props = $props();
+
+	const modalStore: ModalStore = getModalStore();
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	const tableSource: TableSource = $derived(
@@ -415,6 +425,89 @@
 			URLModel &&
 			!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel)
 	);
+
+	let contextMenuCanDeleteObject = $derived(
+		!preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] }) &&
+			(model
+				? page.params.id
+					? canPerformAction({
+							user,
+							action: 'delete',
+							model: model.name,
+							domain:
+								model.name === 'folder'
+									? contextMenuOpenRow?.meta.id
+									: (contextMenuOpenRow?.meta.folder?.id ??
+										contextMenuOpenRow?.meta.folder ??
+										user.root_folder_id)
+						})
+					: Object.hasOwn(user.permissions, `delete_${model.name}`)
+				: false)
+	);
+
+	let contextMenuDisplayDelete = $derived(contextMenuCanDeleteObject && deleteForm !== undefined);
+
+	function contextMenuModalConfirmDelete(
+		id: string,
+		row: { [key: string]: string | number | boolean | null }
+	): void {
+		const modalComponent: ModalComponent = {
+			ref: DeleteConfirmModal,
+			props: {
+				_form: deleteForm,
+				id: id,
+				debug: false,
+				URLModel: URLModel
+			}
+		};
+		const name =
+			URLModel === 'users' && row.first_name
+				? `${row.first_name} ${row.last_name} (${row.email})`
+				: (row.name ?? row.meta?.str ?? Object.values(row)[0]);
+		const body =
+			URLModel === 'users'
+				? m.deleteUserMessage({ name: name as string })
+				: m.deleteModalMessage({ name: name as string });
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.deleteModalTitle(),
+			body: body
+		};
+		modalStore.trigger(modal);
+	}
+
+	function contextMenuPromptModalConfirmDelete(
+		id: string,
+		row: { [key: string]: string | number | boolean | null }
+	): void {
+		const modalComponent: ModalComponent = {
+			ref: PromptConfirmModal,
+			props: {
+				_form: deleteForm,
+				id: id,
+				debug: false,
+				URLModel: URLModel,
+				formAction: '?/delete'
+			}
+		};
+		const name =
+			URLModel === 'users' && row.first_name
+				? `${row.first_name} ${row.last_name} (${row.email})`
+				: (row.name ?? Object.values(row)[0]);
+		const body =
+			URLModel === 'users'
+				? m.deleteUserMessage({ name: name as string })
+				: m.deleteModalMessage({ name: name as string });
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.deleteModalTitle(),
+			body: body
+		};
+		modalStore.trigger(modal);
+	}
+
 	let filterCount = $derived(
 		filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0)
 	);
@@ -797,7 +890,7 @@
 					</ContextMenu.Trigger>
 				{/each}
 			</tbody>
-			{#if contextMenuDisplayEdit || Object.hasOwn(contextMenuActions, URLModel)}
+			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
 					class="z-50 w-full max-w-[229px] outline-hidden card bg-white px-1 py-1.5 shadow-md cursor-default"
 				>
@@ -827,13 +920,27 @@
 							>
 						</ContextMenu.Item>
 					{/if}
-					<!-- {#if !preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] })} -->
-					<!-- 	<ContextMenu.Item -->
-					<!-- 		class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50" -->
-					<!-- 	> -->
-					<!-- 		<div class="flex items-center w-full h-full">{m.delete()}</div> -->
-					<!-- 	</ContextMenu.Item> -->
-					<!-- {/if} -->
+					{#if contextMenuDisplayDelete}
+						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
+						<ContextMenu.Item
+							class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
+							onclick={() => {
+								if (URLModel === 'folders') {
+									contextMenuPromptModalConfirmDelete(
+										contextMenuOpenRow?.meta[identifierField],
+										contextMenuOpenRow
+									);
+								} else {
+									contextMenuModalConfirmDelete(
+										contextMenuOpenRow?.meta[identifierField],
+										contextMenuOpenRow
+									);
+								}
+							}}
+						>
+							<div class="flex items-center w-full h-full text-red-500">{m.delete()}</div>
+						</ContextMenu.Item>
+					{/if}
 				</ContextMenu.Content>
 			{/if}
 		</ContextMenu.Root>
