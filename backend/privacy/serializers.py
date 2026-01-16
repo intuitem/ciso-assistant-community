@@ -41,7 +41,7 @@ class PersonalDataWriteSerializer(BaseModelSerializer):
 class PersonalDataReadSerializer(BaseModelSerializer):
     processing = FieldsRelatedField()
     folder = FieldsRelatedField()
-    assets = FieldsRelatedField(["name", "type", "folder"], many=True)
+    assets = FieldsRelatedField(["id", "name", "type", "folder"], many=True)
 
     class Meta:
         model = PersonalData
@@ -143,8 +143,8 @@ class ProcessingWriteSerializer(BaseModelSerializer):
 class ProcessingReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
-    nature = FieldsRelatedField(["name"], many=True)
-    associated_controls = FieldsRelatedField(["name"], many=True)
+    nature = FieldsRelatedField(["id", "name"], many=True)
+    associated_controls = FieldsRelatedField(["id", "name"], many=True)
     assigned_to = FieldsRelatedField(many=True)
     purposes = FieldsRelatedField(["name", "id", "legal_basis"], many=True)
 
@@ -193,7 +193,7 @@ class DataBreachReadSerializer(BaseModelSerializer):
     authorities = FieldsRelatedField(many=True)
     affected_processings = FieldsRelatedField(many=True)
     affected_personal_data = FieldsRelatedField(many=True)
-    remediation_measures = FieldsRelatedField(["name"], many=True)
+    remediation_measures = FieldsRelatedField(["id", "name"], many=True)
     incident = FieldsRelatedField()
 
     class Meta:

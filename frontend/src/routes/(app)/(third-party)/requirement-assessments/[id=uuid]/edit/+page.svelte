@@ -18,6 +18,7 @@
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
+	import { countMasked } from '$lib/utils/related-visibility';
 
 	import Question from '$lib/components/Forms/Question.svelte';
 	import List from '$lib/components/List/List.svelte';
@@ -530,6 +531,7 @@
 											]}
 											optionsExtraFields={[['folder', 'str']]}
 											field="applied_controls"
+											placeholder={m.appliedControlsPlaceholder()}
 										/>
 									{/key}
 									<ModelTable
@@ -538,6 +540,7 @@
 										source={page.data.tables['applied-controls']}
 										hideFilters={true}
 										URLModel="applied-controls"
+										expectedCount={countMasked(page.data.requirementAssessment.applied_controls)}
 									/>
 								</div>
 							</Tabs.Panel>
@@ -570,6 +573,7 @@
 										source={page.data.tables['evidences']}
 										hideFilters={true}
 										URLModel="evidences"
+										expectedCount={countMasked(page.data.requirementAssessment.evidences)}
 										baseEndpoint="/evidences?requirement_assessments={page.data
 											.requirementAssessment.id}"
 									/>
@@ -598,6 +602,7 @@
 										source={page.data.tables['security-exceptions']}
 										hideFilters={true}
 										URLModel="security-exceptions"
+										expectedCount={countMasked(page.data.requirementAssessment.security_exceptions)}
 										baseEndpoint="/security-exceptions?requirement_assessments={page.data
 											.requirementAssessment.id}"
 									/>

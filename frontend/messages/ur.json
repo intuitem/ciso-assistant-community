@@ -926,6 +926,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} چیز نظر نہیں آتی۔",
+				"countPlural=other": "{count} چیزیں نظر نہیں آتیں۔"
+			}
+		}
+	],
 	"matchingScenarios": "مطابق منظرنامے",
 	"select": "منتخب کریں",
 	"deselect": "انتخاب ختم کریں",
@@ -1031,5 +1041,6 @@
 		}
 	],
 	"cascadeAffectedHint": "نیچے دیے گئے اشیاء نظام میں باقی ہیں لیکن ان کی اس اشیاء سے لنکس ہٹا دیے جائیں گے۔",
-	"libraryFilteringLabels": "کتب خانہ لیبلز"
+	"libraryFilteringLabels": "لیبریری لیبلز",
+	"appliedControlsPlaceholder": "لگائے گئے کنٹرولز منتخب کریں..."
 }

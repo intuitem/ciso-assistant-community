@@ -34,6 +34,7 @@ from django.db.models import (
     OneToOneField,
     ManyToManyField,
     QuerySet,
+    Prefetch,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -66,6 +67,7 @@ from integrations.registry import IntegrationRegistry
 from library.serializers import StoredLibrarySerializer
 from webhooks.service import dispatch_webhook_event
 from .generators import gen_audit_context
+from .serializer_fields import FieldsRelatedField
 
 from django.utils import timezone
 from django.utils.text import slugify
@@ -78,6 +80,7 @@ from django.core.cache import cache
 from django.apps import apps
 from django.contrib.auth.models import Permission
 from django.conf import settings
+from django.core.exceptions import FieldDoesNotExist
 from django.core.files.storage import default_storage
 
 from django.db import models, transaction
@@ -730,6 +733,119 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 new_evidences.append(str(new_evidence.id))
         return new_evidences
 
+    def _resolve_related_model(self, source: str):
+        """Resolve a dotted source path (e.g. 'asset.folder') to its related model."""
+        model = self.model
+        for part in source.split("."):
+            if not model:
+                return None
+            try:
+                field = model._meta.get_field(part)
+            except FieldDoesNotExist:
+                return None
+            model = getattr(field, "related_model", None)
+        return model
+
+    def _get_fieldsrelated_map(self, serializer):
+        """Map FieldsRelatedField serializer fields to their related models."""
+        if hasattr(serializer, "child"):
+            serializer = serializer.child
+        if not hasattr(serializer, "fields"):
+            return {}
+        field_models = {}
+        for name, field in serializer.fields.items():
+            is_fields_related = isinstance(field, FieldsRelatedField)
+            if not is_fields_related and hasattr(field, "child_relation"):
+                is_fields_related = isinstance(field.child_relation, FieldsRelatedField)
+            if not is_fields_related:
+                continue
+            source = field.source if field.source not in (None, "*") else name
+            related_model = self._resolve_related_model(source)
+            if related_model:
+                field_models[name] = related_model
+        return field_models
+
+    def _get_accessible_ids_map(self, related_models):
+        """Return visible object IDs per related model for the current user."""
+        root_folder = Folder.get_root_folder()
+        allowed = {}
+        for model in related_models:
+            try:
+                ids = RoleAssignment.get_accessible_object_ids(
+                    root_folder, self.request.user, model
+                )[0]
+            except (NotImplementedError, Permission.DoesNotExist):
+                # Model does not support IAM scoping; skip filtering
+                allowed[model] = None
+                continue
+            allowed[model] = {str(item_id) for item_id in ids}
+        return allowed
+
+    def _extract_related_id(self, item):
+        """Extract a related object ID from a field payload."""
+        if isinstance(item, dict):
+            value = item.get("id")
+        else:
+            value = item
+        if value is None:
+            return None
+        return str(value)
+
+    def _placeholder_for(self, item):
+        """Create a placeholder for a hidden related object."""
+        if isinstance(item, dict):
+            return {}
+        return ""
+
+    def _filter_related_fields(self, data, field_models, allowed_ids):
+        """Mask related fields the current user is not allowed to see."""
+        if isinstance(data, list):
+            return [
+                self._filter_related_fields(item, field_models, allowed_ids)
+                for item in data
+            ]
+        if not isinstance(data, dict):
+            return data
+
+        current_user_id = (
+            str(self.request.user.id) if self.request.user.is_authenticated else None
+        )
+
+        for field_name, related_model in field_models.items():
+            allowed = allowed_ids.get(related_model)
+            if allowed is None:
+                continue
+            value = data.get(field_name)
+            if isinstance(value, list):
+                filtered = []
+                for item in value:
+                    item_id = self._extract_related_id(item)
+                    # Always include current user
+                    if (
+                        not item_id
+                        or item_id in allowed
+                        or (
+                            related_model.__name__ == "User"
+                            and item_id == current_user_id
+                        )
+                    ):
+                        filtered.append(item)
+                    else:
+                        filtered.append(self._placeholder_for(item))
+                data[field_name] = filtered
+            elif isinstance(value, dict):
+                item_id = self._extract_related_id(value)
+                # Always include current user
+                if (
+                    item_id
+                    and item_id not in allowed
+                    and not (
+                        related_model.__name__ == "User" and item_id == current_user_id
+                    )
+                ):
+                    data[field_name] = self._placeholder_for(value)
+        return data
+
     def list(self, request, *args, **kwargs):
         """
         Override the list method to inject optimized data into the serializer context.
@@ -744,9 +860,30 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         context["optimized_data"] = optimized_data
         if page is not None:
             serializer = self.get_serializer(page, many=True, context=context)
-            return self.get_paginated_response(serializer.data)
+            data = serializer.data
+            field_models = self._get_fieldsrelated_map(serializer)
+            if field_models:
+                allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+                data = self._filter_related_fields(data, field_models, allowed_ids)
+            return self.get_paginated_response(data)
         serializer = self.get_serializer(queryset, many=True, context=context)
-        return Response(serializer.data)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        return Response(data)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Return a single object with unauthorized related fields masked."""
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        return Response(data)
 
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -757,6 +894,76 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         instance = serializer.save()
         dispatch_webhook_event(instance, "updated", serializer=serializer)
         return instance
+
+    def _validate_folder_change(self, request: Request, instance) -> None:
+        if not hasattr(instance, "folder"):
+            return
+        if "folder" not in request.data:
+            return
+        folder_value = request.data.get("folder")
+        if isinstance(folder_value, list):
+            if not folder_value:
+                return
+            folder_value = folder_value[0]
+        if isinstance(folder_value, dict):
+            folder_value = folder_value.get("id")
+        if not folder_value:
+            return
+        try:
+            target_id = UUID(str(folder_value))
+        except (TypeError, ValueError):
+            return
+        if instance.folder_id and instance.folder_id == target_id:
+            return
+        target_folder = Folder.objects.filter(id=target_id).first()
+        if not target_folder:
+            return
+        model = self.model or instance.__class__
+        perm = Permission.objects.get(
+            codename=f"add_{model._meta.model_name}",
+            content_type__app_label=model._meta.app_label,
+            content_type__model=model._meta.model_name,
+        )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=perm,
+            folder=target_folder,
+        ):
+            raise PermissionDenied(
+                {
+                    "folder": "You do not have permission to create objects in this folder"
+                }
+            )
+
+    def _validate_parent_field_change(self, request: Request, instance) -> None:
+        """Block updates to immutable parent fields on indirect-parent models."""
+        parent_fields = {
+            "RiskScenario": "risk_assessment",
+            "Representative": "entity",
+            "Solution": "provider_entity",
+        }
+        parent_field_name = parent_fields.get(instance.__class__.__name__)
+        if not parent_field_name or parent_field_name not in request.data:
+            return
+
+        new_parent_value = request.data.get(parent_field_name)
+        if isinstance(new_parent_value, list):
+            new_parent_value = new_parent_value[0] if new_parent_value else None
+        if isinstance(new_parent_value, dict):
+            new_parent_value = new_parent_value.get("id")
+        if not new_parent_value:
+            return
+
+        try:
+            new_parent_id = UUID(str(new_parent_value))
+        except (TypeError, ValueError):
+            raise PermissionDenied({parent_field_name: "Invalid value"})
+
+        current_parent_id = getattr(instance, f"{parent_field_name}_id", None)
+        if current_parent_id and current_parent_id == new_parent_id:
+            return
+
+        raise PermissionDenied({parent_field_name: "This field is immutable"})
 
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
@@ -773,6 +980,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
+        instance = self.get_object()
+        self._validate_folder_change(request, instance)
+        self._validate_parent_field_change(request, instance)
         # Experimental: process evidences on TaskTemplate update
         if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
@@ -808,6 +1018,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
+        instance = self.get_object()
+        self._validate_folder_change(request, instance)
+        self._validate_parent_field_change(request, instance)
         self._process_request_data(request)
         return super().partial_update(request, *args, **kwargs)
 
@@ -1716,7 +1929,23 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "label": "description",
                 "escape": True,
             },
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
             "type": {"source": "type", "label": "type"},
+            "asset_class": {
+                "source": "asset_class",
+                "label": "asset_class",
+                # Handle missing asset_class safely and trim a leading 'assetClass/' segment if present
+                "format": lambda ac: (
+                    (
+                        ac.full_path.replace("assetClass/", "", 1)
+                        if ac.full_path.startswith("assetClass/")
+                        else ac.full_path.replace("assetClass", "")
+                    )
+                    if ac
+                    else ""
+                ),
+                "escape": True,
+            },
             "folder": {"source": "folder.name", "label": "folder", "escape": True},
             "security_objectives": {
                 "source": "get_security_objectives_display",
@@ -1754,9 +1983,15 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     escape_excel_formula(o.label) for o in qs.all()
                 ),
             },
+            "observation": {
+                "source": "observation",
+                "label": "observation",
+                "escape": True,
+            },
         },
+        "wrap_columns": ["name", "description", "observation"],
         "filename": "assets_export",
-        "select_related": ["folder"],
+        "select_related": ["folder", "asset_class"],
         "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
     }
 
@@ -4577,12 +4812,13 @@ class UserRolesOnFolderList(generics.ListAPIView):
         if folder.id not in viewable_ids:
             raise PermissionDenied()
 
-        # visibility
-        visible_ids = set(
-            User.visible_users(self.request.user, view_all_users=True).values_list(
-                "id", flat=True
-            )
+        # visibility - get user IDs the current user can see via IAM filtering
+        (visible_user_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, User
         )
+        visible_ids = set(visible_user_ids) | {
+            self.request.user.id
+        }  # always include self
 
         # roles per user (no role filtering)
         raw_map = folder.get_user_roles()  # {user_id: [Role, ...]}
@@ -5426,7 +5662,22 @@ class UserViewSet(BaseModelViewSet):
     search_fields = ["email", "first_name", "last_name"]
 
     def get_queryset(self):
-        return User.visible_users(self.request.user, view_all_users=True)
+        # Use base IAM filtering
+        # but ensure current user is always included
+        queryset = super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
+
+        # Add prefetch for user_groups visibility
+        viewable_user_group_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, UserGroup
+        )[0]
+        return queryset.distinct().prefetch_related(
+            Prefetch(
+                "user_groups",
+                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
+                    "id", "builtin"
+                ),
+            )
+        )
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         user = self.get_object()
@@ -5607,6 +5858,9 @@ class FolderViewSet(BaseModelViewSet):
         include_perimeters = request.query_params.get(
             "include_perimeters", "True"
         ).lower() in ["true", "1", "yes"]
+        include_enclaves = request.query_params.get(
+            "include_enclaves", "False"
+        ).lower() in ["true", "1", "yes"]
 
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
@@ -5629,14 +5883,31 @@ class FolderViewSet(BaseModelViewSet):
             .filter(id__in=needed_folders, parent_folder=Folder.get_root_folder())
             .distinct()
         ):
+            # Skip enclaves at top level if not included
+            if (
+                not include_enclaves
+                and folder.content_type == Folder.ContentType.ENCLAVE
+            ):
+                continue
             entry = {
                 "name": folder.name,
                 "uuid": folder.id,
                 "viewable": folder.id in viewable_objects,
+                "content_type": folder.content_type,
             }
+            # Add enclave-specific styling
+            if folder.content_type == Folder.ContentType.ENCLAVE:
+                entry.update(
+                    {
+                        "symbol": "triangle",
+                        "symbolSize": 12,
+                        "itemStyle": {"color": "#6366f1"},
+                    }
+                )
             folder_content = get_folder_content(
                 folder,
                 include_perimeters=include_perimeters,
+                include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
             )
@@ -8375,13 +8646,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def tree(self, request, pk):
         compliance_assessment = self.get_object()
         _framework = compliance_assessment.framework
-        tree = get_sorted_requirement_nodes(
+        requirement_assessments = list(
+            compliance_assessment.get_requirement_assessments(
+                include_non_assessable=True
+            )
+        )
+        requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
+            .prefetch_related("reference_controls", "threats")
             .all(),
-            compliance_assessment.requirement_assessments.select_related(
-                "requirement"
-            ).all(),
+        )
+        nodes_by_urn = {node.urn: node for node in requirement_nodes}
+        for node in requirement_nodes:
+            parent = nodes_by_urn.get(node.parent_urn)
+            if parent:
+                node._parent_requirement_obj = parent
+        for ra in requirement_assessments:
+            req = getattr(ra, "requirement", None)
+            if req:
+                parent = nodes_by_urn.get(req.parent_urn)
+                if parent:
+                    req._parent_requirement_obj = parent
+        tree = get_sorted_requirement_nodes(
+            requirement_nodes,
+            requirement_assessments,
             _framework.max_score,
         )
         implementation_groups = compliance_assessment.selected_implementation_groups
@@ -8396,14 +8685,27 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             self.request.query_params.get("assessable", "false")
         ).lower() in {"true", "1", "yes"}
         compliance_assessment = self.get_object()
-        requirement_assessments_objects = (
+        requirement_assessments_objects = list(
             compliance_assessment.get_requirement_assessments(
                 include_non_assessable=not assessable
             )
         )
-        requirements_objects = RequirementNode.objects.filter(
-            framework=compliance_assessment.framework
-        ).select_related("framework")
+        requirements_objects = list(
+            RequirementNode.objects.filter(framework=compliance_assessment.framework)
+            .select_related("framework")
+            .prefetch_related("reference_controls", "threats")
+        )
+        nodes_by_urn = {node.urn: node for node in requirements_objects}
+        for node in requirements_objects:
+            parent = nodes_by_urn.get(node.parent_urn)
+            if parent:
+                node._parent_requirement_obj = parent
+        for ra in requirement_assessments_objects:
+            req = getattr(ra, "requirement", None)
+            if req:
+                parent = nodes_by_urn.get(req.parent_urn)
+                if parent:
+                    req._parent_requirement_obj = parent
         requirement_assessments = RequirementAssessmentReadSerializer(
             requirement_assessments_objects, many=True
         ).data
@@ -11409,6 +11711,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             task_name = obj.name or f"Template_{obj.pk}"
             # Format: "1-task_name", "2-task_name", etc.
             base_name = f"{template_counter}-{task_name}"
+
+            INVALID_CHARS = r"[\\\/\?\*\[\]:]"
+            base_name = re.sub(INVALID_CHARS, "", base_name)
 
             # Excel sheet names have a 31 character limit
             sheet_name = base_name[:31]

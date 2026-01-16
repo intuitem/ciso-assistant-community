@@ -24,6 +24,7 @@
 	import { isDark } from '$lib/utils/helpers';
 	import { contextMenuActions, listViewFields } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types.js';
+	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import type { SvelteEvent } from '@skeletonlabs/skeleton-svelte';
@@ -84,6 +85,7 @@
 		folderId?: string;
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
+		expectedCount?: number;
 		onFilterChange?: (filters: Record<string, any>) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
@@ -140,6 +142,7 @@
 		folderId = '',
 		forcePreventDelete = false,
 		forcePreventEdit = false,
+		expectedCount = undefined,
 		onFilterChange = () => {},
 		quickFilters,
 		optButton,
@@ -205,7 +208,8 @@
 
 	const user = page.data.user;
 
-	// Replace $$props.class with classProp for compatibility
+	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
+
 	let classProp = ''; // Replacing $$props.class
 
 	let classesBase = $derived(`${classProp || backgroundColor}`);
@@ -225,12 +229,18 @@
 		{
 			rowsPerPage: pagination
 				? ($tableStates[page.url.pathname]?.rowsPerPage ?? numberRowsPerPage)
-				: 0, // Using 0 as rowsPerPage value when pagination is false disables paging.
+				: 0,
 			totalRows: source?.meta?.count
 		}
 	);
 	const rows = handler.getRows();
 	let invalidateTable = $state(false);
+
+	const relatedFieldNames = $derived(
+		new Set(model?.foreignKeyFields?.map((field) => field.field) ?? [])
+	);
+
+	const hiddenRowCount = $derived(typeof expectedCount === 'number' ? expectedCount : 0);
 
 	$tableHandlers[baseEndpoint] = handler;
 
@@ -527,6 +537,13 @@
 	{@render quickFilters?.(filterValues, _form, () => {
 		invalidateTable = true;
 	})}
+	{#if hiddenRowCount > 0}
+		<div
+			class="mx-2 mb-2 rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-800"
+		>
+			{m.objectsNotVisible({ count: hiddenRowCount })}
+		</div>
+	{/if}
 	<!-- Table -->
 	<table
 		class="table caption-bottom {classesTable}"
@@ -598,36 +615,61 @@
 														class="base-font-family whitespace-pre-line break-words"
 													>
 														{#if Array.isArray(value)}
-															<ul class="list-disc pl-4 whitespace-normal">
-																{#each [...value].sort((a, b) => {
-																	if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
-																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
-																}) as val}
-																	<li>
-																		{#if key === 'linked_models' && typeof val === 'string'}
-																			{safeTranslate(convertLinkedModelName(val))}
-																		{:else if key === 'security_objectives' || key === 'security_capabilities'}
-																			{@const [securityObjectiveName, securityObjectiveValue] =
-																				Object.entries(val)[0]}
-																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
-																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
-																			<Anchor href={itemHref} class="anchor" stopPropagation
-																				>{val.str}</Anchor
-																			>
-																		{:else if val.str}
-																			{safeTranslate(val.str)}
-																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
-																			<span class="text"
-																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																				{val.split(':')[1]}</span
-																			>
-																		{:else}
-																			{val ?? '-'}
-																		{/if}
-																	</li>
-																{/each}
-															</ul>
+															{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
+															{@const visibleValues = isRelatedField(key)
+																? value.filter((item) => !isMaskedPlaceholder(item))
+																: value}
+															{#if visibleValues.length > 0}
+																<ul class="list-disc pl-4 whitespace-normal">
+																	{#each [...visibleValues].sort((a, b) => {
+																		if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+																		return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+																	}) as val}
+																		<li>
+																			{#if key === 'linked_models' && typeof val === 'string'}
+																				{safeTranslate(convertLinkedModelName(val))}
+																			{:else if key === 'security_objectives' || key === 'security_capabilities'}
+																				{@const [securityObjectiveName, securityObjectiveValue] =
+																					Object.entries(val)[0]}
+																				{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
+																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
+																				<Anchor href={itemHref} class="anchor" stopPropagation
+																					>{val.str}</Anchor
+																				>
+																			{:else if val.str}
+																				{safeTranslate(val.str)}
+																			{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
+																				<span class="text"
+																					>{unsafeTranslate(val.split(':')[0] + 'Colon')}
+																					{val.split(':')[1]}</span
+																				>
+																			{:else}
+																				{val ?? '-'}
+																			{/if}
+																		</li>
+																	{/each}
+																</ul>
+																{#if hiddenCount > 0}
+																	<p class="mt-1 text-xs text-yellow-700">
+																		{m.objectsNotVisible({ count: hiddenCount })}
+																	</p>
+																{/if}
+															{:else if hiddenCount > 0}
+																<p class="text-xs text-yellow-700">
+																	{m.objectsNotVisible({ count: hiddenCount })}
+																</p>
+															{:else}
+																--
+															{/if}
+														{:else if isMaskedPlaceholder(value)}
+															{#if isRelatedField(key)}
+																<p class="text-xs text-yellow-700">
+																	{m.objectsNotVisible({ count: 1 })}
+																</p>
+															{:else}
+																--
+															{/if}
 														{:else if value && value.str}
 															{#if value.id}
 																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
@@ -715,7 +757,6 @@
 												meta: row.meta
 											})}{:else if row.meta[identifierField]}
 											{@const actionsComponent = fieldComponentMap[CUSTOM_ACTIONS_COMPONENT]}
-											{@const actionsURLModel = URLModel}
 											<TableRowActions
 												deleteForm={disableDelete ? null : deleteForm}
 												{model}
