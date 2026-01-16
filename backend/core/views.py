@@ -761,8 +761,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             source = field.source if field.source not in (None, "*") else name
             related_model = self._resolve_related_model(source)
             if related_model:
-                if related_model.__name__ == "Actor":
-                    continue
                 field_models[name] = related_model
         return field_models
 
@@ -5664,27 +5662,7 @@ class ActorViewSet(BaseModelViewSet):
     ]
 
     def get_queryset(self):
-        (viewable_entities, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=self.request.user,
-            object_type=Entity,
-        )
-        (viewable_teams, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=self.request.user,
-            object_type=Team,
-        )
-        (viewable_users, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=self.request.user,
-            object_type=User,
-        )
-        queryset = Actor.objects.filter(
-            Q(user__id__in=viewable_users)
-            | Q(entity__id__in=viewable_entities)
-            | Q(team__id__in=viewable_teams)
-        )
-
+        queryset = super().get_queryset()
         queryset = queryset.select_related("user", "team", "entity")
 
         queryset = queryset.annotate(
