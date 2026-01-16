@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0128_appliedcontrol_new_owner_asset_new_owner_and_more"),
+        ("core", "0125_team_actor"),
         ("webhooks", "0001_initial"),
     ]
 

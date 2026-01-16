@@ -7770,6 +7770,9 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
         emails.extend(member_emails)
         return list(dict.fromkeys(emails))
 
+    class Meta:
+        ordering = ["name"]
+
 
 class Actor(AbstractBaseModel):
     user = models.OneToOneField(

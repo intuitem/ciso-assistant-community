@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0130_remove_appliedcontrol_new_owner_and_more"),
+        ("core", "0127_remove_appliedcontrol_new_owner_and_more"),
         ("ebios_rm", "0022_ebiosrmstudy_new_authors_ebiosrmstudy_new_reviewers"),
     ]
 
