@@ -50,17 +50,32 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|Ref|Name|Current|Residual|Domain|\n"
-        result += "|---|---|---|---|---|\n"
+        result += "|Ref|Name|Assets|Threats|Current|Residual|\n"
+        result += "|---|---|---|---|---|---|\n"
 
         for rs in scenarios:
             ref_id = rs.get("ref_id") or "N/A"
             name = rs.get("name", "N/A")
-            current_level = rs.get("current_level", "N/A")
-            residual_level = rs.get("residual_level", "N/A")
-            domain = (rs.get("folder") or {}).get("str", "N/A")
+            current_level = (rs.get("current_level") or {}).get("name", "--")
+            residual_level = (rs.get("residual_level") or {}).get("name", "--")
 
-            result += f"|{ref_id}|{name}|{current_level}|{residual_level}|{domain}|\n"
+            # Extract asset names
+            assets = rs.get("assets", [])
+            asset_names = (
+                ", ".join(a.get("name", a.get("str", "?")) for a in assets)
+                if assets
+                else "-"
+            )
+
+            # Extract threat names
+            threats = rs.get("threats", [])
+            threat_names = (
+                ", ".join(t.get("name", t.get("str", "?")) for t in threats)
+                if threats
+                else "-"
+            )
+
+            result += f"|{ref_id}|{name}|{asset_names}|{threat_names}|{current_level}|{residual_level}|\n"
 
         return success_response(
             result,
