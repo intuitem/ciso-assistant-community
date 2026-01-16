@@ -7,6 +7,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { countMasked } from '$lib/utils/related-visibility';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
@@ -183,10 +184,18 @@
 					<i class="fa-solid fa-biohazard text-red-500"></i>
 					<span>{m.threats()}</span>
 				</h3>
+				{#if operationalScenario.threats && countMasked(operationalScenario.threats) > 0}
+					<div class="alert variant-soft-warning mb-2">
+						<i class="fa-solid fa-triangle-exclamation"></i>
+						<span>{m.objectsNotVisible({ count: countMasked(operationalScenario.threats) })}</span>
+					</div>
+				{/if}
 				<ul class="list-disc list-inside text-gray-600">
 					{#if operationalScenario.threats?.length}
 						{#each operationalScenario.threats as threat}
-							<li><a class="anchor" href="/threats/{threat.id}">{threat.str}</a></li>
+							{#if threat.id && threat.str}
+								<li><a class="anchor" href="/threats/{threat.id}">{threat.str}</a></li>
+							{/if}
 						{/each}
 					{:else}
 						<li>{m.noThreat()}</li>

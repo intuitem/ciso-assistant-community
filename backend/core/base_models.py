@@ -82,16 +82,26 @@ class AbstractBaseModel(models.Model):
 
     def get_scope(self):
         if hasattr(self, "risk_scenario") and self.risk_scenario is not None:
-            return self.__class__.objects.filter(risk_scenario=self.risk_scenario)
+            return self.__class__.objects.filter(
+                risk_scenario=self.risk_scenario
+            ).order_by("created_at", "id")
         if hasattr(self, "risk_assessment") and self.risk_assessment is not None:
-            return self.__class__.objects.filter(risk_assessment=self.risk_assessment)
+            return self.__class__.objects.filter(
+                risk_assessment=self.risk_assessment
+            ).order_by("created_at", "id")
         if hasattr(self, "perimeter") and self.perimeter is not None:
-            return self.__class__.objects.filter(perimeter=self.perimeter)
+            return self.__class__.objects.filter(perimeter=self.perimeter).order_by(
+                "created_at", "id"
+            )
         if hasattr(self, "folder") and self.folder is not None:
-            return self.__class__.objects.filter(folder=self.folder)
+            return self.__class__.objects.filter(folder=self.folder).order_by(
+                "created_at", "id"
+            )
         if hasattr(self, "parent_folder") and self.parent_folder is not None:
-            return self.__class__.objects.filter(parent_folder=self.parent_folder)
-        return self.__class__.objects.all()
+            return self.__class__.objects.filter(
+                parent_folder=self.parent_folder
+            ).order_by("created_at", "id")
+        return self.__class__.objects.all().order_by("created_at", "id")
 
     def clean(self) -> None:
         scope = self.get_scope()

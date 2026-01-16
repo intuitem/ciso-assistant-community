@@ -43,6 +43,7 @@
 	import { canPerformAction } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 
 	interface Props {
 		data: PageData;
@@ -72,6 +73,10 @@
 		});
 
 	const has_threats = data.threats.total_unique_threats > 0;
+
+	const objectsNotVisibleLabel = (count: number): string => {
+		return m.objectsNotVisible({ count });
+	};
 
 	let threatDialogOpen = $state(false);
 	let dialogElement = $state();
@@ -439,6 +444,19 @@
 			(selectedExtendedResults.length > 0 ? 1 : 0) +
 			(displayOnlyAssessableNodes ? 1 : 0)
 	);
+
+	let hasNonVisibleObjects = $derived(() => {
+		if (!canEditObject) return false;
+		for (const [key, value] of Object.entries(data.compliance_assessment)) {
+			if (Array.isArray(value)) {
+				const maskedCount = countMasked(value);
+				if (maskedCount > 0) return true;
+			} else if (isMaskedPlaceholder(value)) {
+				return true;
+			}
+		}
+		return false;
+	});
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -453,6 +471,7 @@
 			</div>
 		</div>
 	{/if}
+
 	<div class="flex flex-col card px-6 py-4 bg-white shadow-lg w-full">
 		<div class="flex flex-row justify-between">
 			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
@@ -477,26 +496,43 @@
 							>
 								{#if value}
 									{#if Array.isArray(value)}
-										<ul>
-											{#each value as val}
-												<li>
-													{#if val.str && val.id}
-														{@const itemHref = `/${
-															URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
-																(item) => item.field === key
-															)?.urlModel
-														}/${val.id}`}
-														{#if !page.data.user.is_third_party}
-															<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
-														{:else}
+										{@const hiddenCount = countMasked(value)}
+										{@const visibleValues = value.filter((item) => !isMaskedPlaceholder(item))}
+										{#if visibleValues.length > 0}
+											<ul>
+												{#each visibleValues as val}
+													<li>
+														{#if val.str && val.id}
+															{@const itemHref = `/${
+																URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
+																	(item) => item.field === key
+																)?.urlModel
+															}/${val.id}`}
+															{#if !page.data.user.is_third_party}
+																<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
+															{:else}
+																{val.str}
+															{/if}
+														{:else if val.str}
 															{val.str}
+														{:else}
+															{safeTranslate(val)}
 														{/if}
-													{:else}
-														{val}
-													{/if}
-												</li>
-											{/each}
-										</ul>
+													</li>
+												{/each}
+											</ul>
+											{#if hiddenCount > 0}
+												<p class="mt-1 text-xs text-yellow-700">
+													{objectsNotVisibleLabel(hiddenCount)}
+												</p>
+											{/if}
+										{:else if hiddenCount > 0}
+											<p class="text-xs text-yellow-700">
+												{objectsNotVisibleLabel(hiddenCount)}
+											</p>
+										{:else}
+											--
+										{/if}
 									{:else if value.str && value.id}
 										{@const itemHref = `/${
 											URL_MODEL_MAP['compliance-assessments']['foreignKeyFields']?.find(
@@ -508,6 +544,8 @@
 										{:else}
 											{value.str}
 										{/if}
+									{:else if isMaskedPlaceholder(value)}
+										<p class="text-xs text-yellow-700">{objectsNotVisibleLabel(1)}</p>
 									{:else if key === 'description'}
 										<MarkdownRenderer content={value} />
 									{:else}

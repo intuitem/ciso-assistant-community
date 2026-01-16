@@ -946,6 +946,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objekt není viditelný.",
+				"countPlural=other": "{count} objekty nejsou viditelné."
+			}
+		}
+	],
 	"matchingScenarios": "Shodné scénáře",
 	"select": "Vybrat",
 	"deselect": "Zrušit výběr",

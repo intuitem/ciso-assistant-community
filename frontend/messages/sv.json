@@ -949,6 +949,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objekt inte synligt.",
+				"countPlural=other": "{count} objekt inte synliga."
+			}
+		}
+	],
 	"matchingScenarios": "Matchande scenarier",
 	"select": "Välj",
 	"deselect": "Avmarkera",
