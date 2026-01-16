@@ -669,20 +669,14 @@
 			{/if}
 		</thead>
 		<ContextMenu.Root>
-			<tbody class="w-full border-b border-b-surface-100-900 {regionBody}">
-				{#each $rows as row, rowIndex}
-					{@const meta = row?.meta ?? row}
-					<ContextMenu.Trigger asChild>
-						{#snippet children({ builder })}
+			<ContextMenu.Trigger>
+				{#snippet child({ props })}
+					<tbody {...props} class="w-full border-b border-b-surface-100-900 {regionBody}">
+						{#each $rows as row, rowIndex}
+							{@const meta = row?.meta ?? row}
 							<tr
-								use:builder.action
-								{...builder}
-								onclick={(e) => {
-									onRowClick(e, rowIndex);
-								}}
-								onkeydown={(e) => {
-									onRowKeydown(e, rowIndex);
-								}}
+								onclick={(e) => onRowClick(e, rowIndex)}
+								onkeydown={(e) => onRowKeydown(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
 								aria-rowindex={rowIndex + 1}
 								class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
@@ -886,13 +880,13 @@
 									</td>
 								{/if}
 							</tr>
-						{/snippet}
-					</ContextMenu.Trigger>
-				{/each}
-			</tbody>
+						{/each}
+					</tbody>
+				{/snippet}
+			</ContextMenu.Trigger>
 			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
-					class="z-50 w-full max-w-[229px] outline-hidden card bg-white px-1 py-1.5 shadow-md cursor-default"
+					class="z-50 min-w-[180px] outline-hidden card bg-white px-1 py-1.5 shadow-md"
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}
@@ -902,28 +896,33 @@
 					{/if}
 					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)}
 						<ContextMenu.Item
-							class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+							onclick={() => {
+								goto(
+									`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`,
+									{
+										breadcrumbAction: 'push'
+									}
+								);
+							}}
 						>
-							<Anchor
-								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
-								class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
-								>{m.edit()}</Anchor
-							>
+							{m.edit()}
 						</ContextMenu.Item>
 						<ContextMenu.Item
-							class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+							onclick={() => {
+								goto(`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`, {
+									breadcrumbAction: 'push'
+								});
+							}}
 						>
-							<Anchor
-								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`}
-								class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
-								>{m.view()}</Anchor
-							>
+							{m.view()}
 						</ContextMenu.Item>
 					{/if}
 					{#if contextMenuDisplayDelete}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
 						<ContextMenu.Item
-							class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer text-red-500 data-highlighted:bg-surface-50"
 							onclick={() => {
 								if (URLModel === 'folders') {
 									contextMenuPromptModalConfirmDelete(
@@ -938,7 +937,7 @@
 								}
 							}}
 						>
-							<div class="flex items-center w-full h-full text-red-500">{m.delete()}</div>
+							{m.delete()}
 						</ContextMenu.Item>
 					{/if}
 				</ContextMenu.Content>

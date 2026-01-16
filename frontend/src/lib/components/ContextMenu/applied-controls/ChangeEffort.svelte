@@ -72,7 +72,7 @@
 		{#each options as option}
 			<ContextMenu.Item
 				class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! hover:bg-surface-50"
-				on:click={async () => await changeEffort(option.value)}
+				onclick={async () => await changeEffort(option.value)}
 			>
 				{safeTranslate(option.label)}
 			</ContextMenu.Item>
