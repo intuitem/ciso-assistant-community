@@ -926,6 +926,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} چیز نظر نہیں آتی۔",
+				"countPlural=other": "{count} چیزیں نظر نہیں آتیں۔"
+			}
+		}
+	],
 	"matchingScenarios": "مطابق منظرنامے",
 	"select": "منتخب کریں",
 	"deselect": "انتخاب ختم کریں",

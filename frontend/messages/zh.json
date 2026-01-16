@@ -2780,6 +2780,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个对象不可见。",
+				"countPlural=other": "{count} 个对象不可见。"
+			}
+		}
+	],
 	"days": "天",
 	"deletionPolicy": "删除策略",
 	"dependencyHelpText": "与此利益相关者的关系对我的业务至关重要吗？",

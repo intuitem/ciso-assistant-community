@@ -122,7 +122,6 @@ class Folder(NameDescriptionMixin):
         verbose_name=_("Labels"),
         related_name="folders",
     )
-
     fields_to_check = ["name"]
 
     class Meta:
@@ -133,6 +132,11 @@ class Folder(NameDescriptionMixin):
 
     def __str__(self) -> str:
         return self.name.__str__()
+
+    def save(self, *args, **kwargs):
+        if self._state.adding and not self.is_published:
+            self.is_published = True
+        super().save(*args, **kwargs)
 
     def get_sub_folders(self) -> Generator[Self, None, None]:
         """Return the list of subfolders"""
@@ -359,6 +363,7 @@ class PublishInRootFolderMixin(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
+        # Root folder children must be published
         if (
             getattr(self, "folder") == Folder.get_root_folder()
             and hasattr(self, "is_published")
@@ -430,6 +435,7 @@ class UserManager(BaseUserManager):
             folder=_get_root_folder(),
             keep_local_login=extra_fields.get("keep_local_login", False),
             expiry_date=extra_fields.get("expiry_date"),
+            is_published=True,
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         if password:
@@ -568,43 +574,6 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("users")
         #        swappable = 'AUTH_USER_MODEL'
         permissions = (("backup", "backup"), ("restore", "restore"))
-
-    @classmethod
-    def visible_users(
-        cls, for_user: AbstractBaseUser | AnonymousUser, view_all_users: bool
-    ):
-        """
-        Return a queryset of users visible to `for_user`, always including `for_user`.
-        Mirrors the logic used in UserViewSet.get_queryset().
-        """
-        if not getattr(for_user, "is_authenticated", False):
-            return User.objects.none()
-
-        (viewable_user_group_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), for_user, UserGroup
-        )
-
-        if view_all_users:
-            base_qs = User.objects.all()
-
-        else:
-            (visible_users_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), for_user, User
-            )
-            base_qs = (
-                User.objects.filter(id__in=visible_users_ids)
-                | User.objects.filter(pk=for_user.pk)
-            ).distinct()
-
-        # 🔒 Filtered prefetch for serializer
-        return base_qs.prefetch_related(
-            Prefetch(
-                "user_groups",
-                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
-                    "id", "builtin"
-                ),  # minimal
-            )
-        )
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
@@ -1016,7 +985,9 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             if permission_delete in result_folders[f]:
                 result_delete.update(objects_ids)
 
-        if hasattr(object_type, "is_published") and hasattr(object_type, "folder"):
+        if hasattr(object_type, "is_published") and (
+            hasattr(object_type, "folder") or hasattr(object_type, "parent_folder")
+        ):
             # we assume only objects with a folder attribute are worth publishing
             folders_with_local_view = [
                 f for f in result_folders if permission_view in result_folders[f]
@@ -1025,11 +996,15 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 if my_folder.content_type != Folder.ContentType.ENCLAVE:
                     my_folder2 = my_folder.parent_folder
                     while my_folder2:
-                        result_view.update(
-                            object_type.objects.filter(
+                        if hasattr(object_type, "folder"):
+                            published = object_type.objects.filter(
                                 folder=my_folder2, is_published=True
-                            ).values_list("id", flat=True)
-                        )
+                            )
+                        else:
+                            published = object_type.objects.filter(
+                                id=my_folder2.id, is_published=True
+                            )
+                        result_view.update(published.values_list("id", flat=True))
                         my_folder2 = my_folder2.parent_folder
 
         return (list(result_view), list(result_change), list(result_delete))
