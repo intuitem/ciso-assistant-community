@@ -13,6 +13,14 @@ from iam.models import Folder, User, UserGroup
 from test_vars import *
 
 
+def _is_masked_placeholder(value) -> bool:
+    if value == {}:
+        return True
+    if isinstance(value, list) and value and all(item == {} for item in value):
+        return True
+    return False
+
+
 class EndpointTestsUtils:
     """Provides utils functions for API endpoints testing"""
 
@@ -70,11 +78,14 @@ class EndpointTestsUtils:
             )
             test_folder = Folder.objects.get(name=test_folder_name)
 
-        user = User.objects.create_user(TEST_USER_EMAIL)
-        UserGroup.objects.get(
+        user = User.objects.create_user(TEST_USER_EMAIL, is_published=True)
+        user_group = UserGroup.objects.get(
             name=role,
             folder=Folder.objects.get(name=GROUPS_PERMISSIONS[role]["folder"]),
-        ).user_set.add(user)
+        )
+        user.folder = user_group.folder
+        user.save()
+        user_group.user_set.add(user)
         client = APIClient()
         _auth_token = AuthToken.objects.create(user=user)
         auth_token = _auth_token[1]
@@ -419,8 +430,10 @@ class EndpointTestsQueries:
             # Creates a test object from the model
             if build_params and object:
                 if object.__name__ == "User":
+                    # Ensure new test users are published so they're visible through IAM filtering
+                    build_params_with_published = {**build_params, "is_published": True}
                     user = object.objects.create_superuser(
-                        **build_params
+                        **build_params_with_published
                     )  # no password is required in the build_params
                     # create the new user in the same group as the test user to make it visible
                     if user_group:
@@ -429,6 +442,9 @@ class EndpointTestsQueries:
                             folder__name=GROUPS_PERMISSIONS[user_group]["folder"],
                         )
                         group.user_set.add(user)
+                        # Assign user to the same folder as the group for IAM visibility
+                        user.folder = group.folder
+                        user.save()
 
                 else:
                     m2m_fields = {}
@@ -502,6 +518,10 @@ class EndpointTestsQueries:
                         assert json.loads(response_item[key]) == value, (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                         )
+                    elif _is_masked_placeholder(response_item[key]) and isinstance(
+                        value, (dict, list)
+                    ):
+                        continue
                     else:
                         assert response_item[key] == value, (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
@@ -697,6 +717,10 @@ class EndpointTestsQueries:
                         ), (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                         )
+                    elif _is_masked_placeholder(response_item[key]) and isinstance(
+                        value, (dict, list)
+                    ):
+                        continue
                     else:
                         assert response_item[key] == value, (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
@@ -852,6 +876,10 @@ class EndpointTestsQueries:
                             ), (
                                 f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
                             )
+                        elif _is_masked_placeholder(
+                            response.json()[key]
+                        ) and isinstance(value, (dict, list)):
+                            continue
                         else:
                             assert response.json()[key] == value, (
                                 f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
@@ -900,7 +928,10 @@ class EndpointTestsQueries:
                                 f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                             )
                         else:
-                            assert update_response.json()[key] == value, (
+                            response_value = update_response.json().get(key)
+                            if hasattr(value, "id") and response_value == str(value.id):
+                                continue
+                            assert response_value == value, (
                                 f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                             )
 

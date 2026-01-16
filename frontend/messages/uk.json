@@ -1579,5 +1579,15 @@
 	],
 	"cascadeAffectedHint": "Елементи нижче залишаються в системі, але їхні посилання на цей об'єкт будуть видалені.",
 	"libraryFilteringLabels": "Мітки бібліотеки",
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} об'єкт невидимий.",
+				"countPlural=other": "{count} об'єкти невидимі."
+			}
+		}
+	],
 	"appliedControlsPlaceholder": "Виберіть застосовані контролі..."
 }
