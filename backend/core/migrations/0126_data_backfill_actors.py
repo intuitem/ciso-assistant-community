@@ -10,10 +10,10 @@ def backfill_actors(apps, schema_editor):
     User = apps.get_model("iam", "User")
 
     for user in User.objects.all():
-        Actor.objects.get_or_create(user=user)
+        Actor.objects.get_or_create(user=user, defaults={"is_published": True})
 
     for entity in Entity.objects.all():
-        Actor.objects.get_or_create(entity=entity)
+        Actor.objects.get_or_create(entity=entity, defaults={"is_published": True})
 
 
 def migrate_user_to_actor(apps, schema_editor):
