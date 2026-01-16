@@ -761,6 +761,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             source = field.source if field.source not in (None, "*") else name
             related_model = self._resolve_related_model(source)
             if related_model:
+                if related_model.__name__ == "Actor":
+                    continue
                 field_models[name] = related_model
         return field_models
 
