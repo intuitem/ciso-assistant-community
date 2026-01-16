@@ -359,6 +359,7 @@
 	"asXLSX": "as Excel",
 	"asWord": "as Word",
 	"exportPdf": "Export PDF",
+	"exportExcel": "Excel (beta)",
 	"generating": "Generating",
 	"asMarkdown": "as Markdown",
 	"draft": "Draft",
