@@ -437,7 +437,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         "ref_id": fe.ref_id,
                         "name": fe.name,
                         "description": fe.description or "",
-                        "gravity": fe.gravity,
+                        "gravity": fe.get_gravity_display().get("name", ""),
                         "is_selected": fe.is_selected,
                         "justification": fe.justification or "",
                         "assets": "\n".join([a.name for a in fe.assets.all()]),

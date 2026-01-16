@@ -1434,6 +1434,8 @@
 	"ebiosRMStudies": "Ebios RM studies",
 	"ebiosRMStudyARM": "Ebios RM study (ARM format)",
 	"ebiosRMStudyARMDescription": "Import an Ebios RM study from ARM Excel format.\nNote that this is a proprietary format, not all objects are supported and some imports could miss because of the headers or sheets changes.",
+	"ebiosRMStudyExcel": "Ebios RM study (CISO Assistant format)",
+	"ebiosRMStudyExcelDescription": "Import an Ebios RM study from a CISO Assistant Excel export. This allows sharing studies between different instances or restoring previously exported studies.",
 	"armImportPreview": "ARM Import Preview",
 	"armPreviewSummary": "The following objects will be created:",
 	"primaryAssets": "Primary assets",
