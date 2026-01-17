@@ -63,6 +63,11 @@
 			id: 'EbiosRMStudyARM',
 			label: m.ebiosRMStudyARM(),
 			description: m.ebiosRMStudyARMDescription()
+		},
+		{
+			id: 'EbiosRMStudyExcel',
+			label: m.ebiosRMStudyExcel(),
+			description: m.ebiosRMStudyExcelDescription()
 		}
 	];
 
@@ -99,7 +104,9 @@
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
 
 	let isMatrixDisabled = $derived(
-		selectedModel !== 'RiskAssessment' && selectedModel !== 'EbiosRMStudyARM'
+		selectedModel !== 'RiskAssessment' &&
+			selectedModel !== 'EbiosRMStudyARM' &&
+			selectedModel !== 'EbiosRMStudyExcel'
 	);
 
 	// Models that don't need perimeter selection
@@ -114,7 +121,8 @@
 		'Threat',
 		'Processing',
 		'TPRM',
-		'EbiosRMStudyARM'
+		'EbiosRMStudyARM',
+		'EbiosRMStudyExcel'
 	];
 
 	// Determine if perimeter selection should be disabled
