@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
@@ -35,12 +36,11 @@ def check_controls_with_expired_eta():
         .prefetch_related("owner")
     )
     # Group by individual owner
-    owner_controls = {}
+    owner_controls = defaultdict(list)
     for control in expired_controls:
         for owner in control.owner.all():
-            if owner.email not in owner_controls:
-                owner_controls[owner.email] = []
-            owner_controls[owner.email].append(control)
+            for email in owner.get_emails():
+                owner_controls[email].append(control)
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
         send_notification_email_expired_eta(owner_email, controls)
@@ -58,12 +58,11 @@ def check_compliance_assessments_due_in_week():
     )
 
     # Group by individual author
-    author_assessments = {}
+    author_assessments = defaultdict(list)
     for assessment in assessments_due_soon:
         for author in assessment.authors.all():
-            if author.email not in author_assessments:
-                author_assessments[author.email] = []
-            author_assessments[author.email].append(assessment)
+            for email in author.get_emails():
+                author_assessments[email].append(assessment)
 
     # Send personalized email to each author
     for author_email, assessments in author_assessments.items():
@@ -84,12 +83,11 @@ def check_compliance_assessments_due_tomorrow():
     )
 
     # Group by individual author
-    author_assessments = {}
+    author_assessments = defaultdict(list)
     for assessment in assessments_due_tomorrow:
         for author in assessment.authors.all():
-            if author.email not in author_assessments:
-                author_assessments[author.email] = []
-            author_assessments[author.email].append(assessment)
+            for email in author.get_emails():
+                author_assessments[email].append(assessment)
 
     # Send personalized email to each author
     for author_email, assessments in author_assessments.items():
@@ -110,12 +108,11 @@ def check_applied_controls_expiring_in_week():
     )
 
     # Group by individual owner
-    owner_controls = {}
+    owner_controls = defaultdict(list)
     for control in controls_due_soon:
         for owner in control.owner.all():
-            if owner.email not in owner_controls:
-                owner_controls[owner.email] = []
-            owner_controls[owner.email].append(control)
+            for email in owner.get_emails():
+                owner_controls[email].append(control)
 
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
@@ -134,12 +131,11 @@ def check_applied_controls_expiring_tomorrow():
     )
 
     # Group by individual owner
-    owner_controls = {}
+    owner_controls = defaultdict(list)
     for control in controls_due_tomorrow:
         for owner in control.owner.all():
-            if owner.email not in owner_controls:
-                owner_controls[owner.email] = []
-            owner_controls[owner.email].append(control)
+            for email in owner.get_emails():
+                owner_controls[email].append(control)
 
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
@@ -158,12 +154,11 @@ def check_evidences_expiring_in_week():
     )
 
     # Group by individual owner
-    owner_evidences = {}
+    owner_evidences = defaultdict(list)
     for evidence in evidences_expiring_soon:
         for owner in evidence.owner.all():
-            if owner.email not in owner_evidences:
-                owner_evidences[owner.email] = []
-            owner_evidences[owner.email].append(evidence)
+            for email in owner.get_emails():
+                owner_evidences[email].append(evidence)
 
     # Send personalized email to each owner
     for owner_email, evidences in owner_evidences.items():
@@ -182,12 +177,11 @@ def check_evidences_expiring_tomorrow():
     )
 
     # Group by individual owner
-    owner_evidences = {}
+    owner_evidences = defaultdict(list)
     for evidence in evidences_expiring_tomorrow:
         for owner in evidence.owner.all():
-            if owner.email not in owner_evidences:
-                owner_evidences[owner.email] = []
-            owner_evidences[owner.email].append(evidence)
+            for email in owner.get_emails():
+                owner_evidences[email].append(evidence)
 
     # Send personalized email to each owner
     for owner_email, evidences in owner_evidences.items():
@@ -203,12 +197,11 @@ def check_evidences_expired():
     ).prefetch_related("owner")
 
     # Group by individual owner
-    owner_evidences = {}
+    owner_evidences = defaultdict(list)
     for evidence in expired_evidences:
         for owner in evidence.owner.all():
-            if owner.email not in owner_evidences:
-                owner_evidences[owner.email] = []
-            owner_evidences[owner.email].append(evidence)
+            for email in owner.get_emails():
+                owner_evidences[email].append(evidence)
 
     # Send personalized email to each owner
     for owner_email, evidences in owner_evidences.items():

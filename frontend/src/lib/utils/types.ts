@@ -4,6 +4,7 @@ import type { RiskScenarioSchema } from './schemas';
 
 export interface User {
 	id: string;
+	actor_id: string;
 	email: string;
 	first_name: string;
 	last_name: string;
@@ -46,6 +47,8 @@ export const URL_MODEL = [
 	'validation-flows',
 	'reference-controls',
 	'assets',
+	'actors',
+	'teams',
 	'users',
 	'user-groups',
 	'roles',

@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, viewsets
+from rest_framework import filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import WebhookEndpoint, WebhookEventType
@@ -35,13 +35,13 @@ class WebhookEndpointViewSet(BaseModelViewSet):
         """
         Users can only see their own webhook endpoints.
         """
-        return WebhookEndpoint.objects.filter(owner=self.request.user)
+        return WebhookEndpoint.objects.filter(owner=self.request.user.actor)
 
     def perform_create(self, serializer):
         """
         Automatically assign the current user as the owner.
         """
-        serializer.save(owner=self.request.user)
+        serializer.save(owner=self.request.user.actor)
 
 
 class WebhookEventTypeView(APIView):
