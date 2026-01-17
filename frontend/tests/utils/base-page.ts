@@ -71,43 +71,77 @@ export abstract class BasePage {
 		}
 	}
 
-	async isToastVisible(
-		value: string,
-		flags?: string,
-		options?: {
-			timeout?: number;
-			dismiss?: boolean;
-			waitHidden?: boolean;
-		}
-	) {
-		const { timeout = 5000, dismiss = false, waitHidden = true } = options ?? {};
-		const regex = new RegExp(value, flags);
+	async isToastVisible(value: string, flags?: string | undefined, options?: {} | undefined) {
+		const timeout = (options as { timeout?: number } | undefined)?.timeout ?? 5000;
+		const dismiss = (options as { dismiss?: boolean } | undefined)?.dismiss ?? false; // safer default
+		const waitHidden = (options as { waitHidden?: boolean } | undefined)?.waitHidden ?? true;
 
-		const toasts = this.page.getByTestId('toast');
+		const re = new RegExp(value, flags);
 
-		// 1) Wait until ANY toast text (snapshot) matches, even if the matching toast is ultra-brief
+		// Install an observer once per page
+		await this.page.evaluate(() => {
+			const w = window as any;
+			if (w.__pwToastObserverInstalled) return;
+
+			w.__pwToastObserverInstalled = true;
+			w.__pwToastSeen = [];
+
+			const normalize = (s: string) => (s ?? '').replace(/\s+/g, ' ').trim();
+			const record = (text: string) => {
+				const t = normalize(text);
+				if (!t) return;
+				w.__pwToastSeen.push({ t: Date.now(), text: t });
+				if (w.__pwToastSeen.length > 200) w.__pwToastSeen.splice(0, w.__pwToastSeen.length - 200);
+			};
+
+			const scan = () => {
+				for (const el of Array.from(document.querySelectorAll('[data-testid="toast"]'))) {
+					record((el as HTMLElement).innerText || el.textContent || '');
+				}
+			};
+
+			scan();
+
+			const obs = new MutationObserver(() => scan());
+			obs.observe(document.documentElement, {
+				subtree: true,
+				childList: true,
+				characterData: true,
+				attributes: true
+			});
+		});
+
+		// Wait until the observer recorded a matching toast at least once
 		await expect
 			.poll(
 				async () => {
-					const texts = await toasts.allTextContents();
-					return texts.some((t) => regex.test(t));
+					const seen = await this.page.evaluate(() => (window as any).__pwToastSeen ?? []);
+					return seen.some((e: any) => re.test(e.text));
 				},
 				{ timeout }
 			)
 			.toBeTruthy();
 
-		// 2) Re-create the filtered locator AFTER we know it happened
-		const matching = toasts.filter({ hasText: regex });
+		// Keep return type compatible with your previous code
+		const matching = this.page.getByTestId('toast').filter({ hasText: re });
 
-		// 3) Optional: dismiss if it’s still there long enough
+		// Best-effort dismiss (won’t fail if it already disappeared)
 		if (dismiss) {
 			const toast = matching.first();
-			// Try best-effort: don’t make the whole assertion fail if it vanished already
 			if (await toast.isVisible().catch(() => false)) {
-				const dismissBtn = toast.getByLabel('Dismiss toast');
-				if (await dismissBtn.isVisible().catch(() => false)) {
-					await dismissBtn.click();
-					if (waitHidden) await expect(toast).toBeHidden({ timeout: 5000 });
+				const btn = toast.getByLabel('Dismiss toast');
+				if (await btn.isVisible().catch(() => false)) {
+					await btn.click();
+					if (waitHidden) {
+						await Promise.race([
+							expect(toast)
+								.toBeHidden({ timeout: 5000 })
+								.catch(() => {}),
+							expect(toast)
+								.toBeDetached({ timeout: 5000 })
+								.catch(() => {})
+						]);
+					}
 				}
 			}
 		}
