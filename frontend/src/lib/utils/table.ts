@@ -1535,6 +1535,10 @@ export const listViewFields = {
 			is_third_party: USER_IS_THIRD_PARTY_FILTER
 		}
 	},
+	teams: {
+		head: ['name', 'description', 'teamEmail'],
+		body: ['name', 'description', 'team_email']
+	},
 	'user-groups': {
 		head: ['name'],
 		body: ['localization_dict'],

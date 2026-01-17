@@ -132,8 +132,12 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="users?is_third_party=false"
-		optionsLabelField="email"
+		optionsEndpoint="actors?user__is_third_party=False"
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
 		field="authors"
 		cacheLock={cacheLocks['authors']}
 		bind:cachedValue={formDataCache['authors']}
@@ -143,8 +147,12 @@
 		<AutocompleteSelect
 			{form}
 			multiple
-			optionsEndpoint="users?is_third_party=false"
-			optionsLabelField="email"
+			optionsEndpoint="actors?user__is_third_party=False"
+			optionsLabelField="str"
+			optionsInfoFields={{
+				fields: [{ field: 'type', translate: true }],
+				position: 'prefix'
+			}}
 			field="reviewers"
 			cacheLock={cacheLocks['reviewers']}
 			bind:cachedValue={formDataCache['reviewers']}

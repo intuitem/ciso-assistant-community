@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.base_models import ETADueDateMixin, NameDescriptionMixin
 from core.models import (
+    Actor,
     AppliedControl,
     Asset,
     FilteringLabelMixin,
@@ -42,17 +43,17 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         blank=True,
         null=True,
     )
-    authors = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Authors"),
-        related_name="quantitative_risk_study_authors",
-    )
     reviewers = models.ManyToManyField(
-        User,
+        Actor,
         blank=True,
         verbose_name=_("Reviewers"),
         related_name="quantitative_risk_study_reviewers",
+    )
+    authors = models.ManyToManyField(
+        Actor,
+        blank=True,
+        verbose_name=_("Authors"),
+        related_name="quantitative_risk_study_authors",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     risk_tolerance = models.JSONField(
@@ -374,7 +375,7 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
         related_name="quantitative_risk_scenarios",
     )
     owner = models.ManyToManyField(
-        User,
+        "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
         related_name="quantitative_risk_scenarios",
