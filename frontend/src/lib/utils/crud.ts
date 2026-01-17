@@ -1117,7 +1117,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }, { field: 'nature' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'owner', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'entities' },
 			{ field: 'purposes', urlModel: 'purposes' },
 			{ field: 'assigned_to', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
