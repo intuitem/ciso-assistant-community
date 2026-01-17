@@ -78,31 +78,40 @@ export abstract class BasePage {
 			timeout?: number;
 			dismiss?: boolean;
 			waitHidden?: boolean;
-			mode?: 'visible' | 'attached'; // NEW (default: 'attached' for blink toasts)
 		}
 	) {
-		const {
-			timeout = 5000,
-			dismiss = false, // safer default
-			waitHidden = true,
-			mode = 'attached'
-		} = options ?? {};
+		const { timeout = 5000, dismiss = false, waitHidden = true } = options ?? {};
 		const regex = new RegExp(value, flags);
-		const toasts = this.page.getByTestId('toast').filter({ hasText: regex });
-		const toast = toasts.first();
-		if (mode === 'visible') {
-			await expect(toast).toBeVisible({ timeout });
-		} else {
-			// catches ultra-brief toasts
-			await expect(toast).toBeAttached({ timeout });
-		}
-		// If you still want to dismiss (only works if it stays long enough)
+
+		const toasts = this.page.getByTestId('toast');
+
+		// 1) Wait until ANY toast text (snapshot) matches, even if the matching toast is ultra-brief
+		await expect
+			.poll(
+				async () => {
+					const texts = await toasts.allTextContents();
+					return texts.some((t) => regex.test(t));
+				},
+				{ timeout }
+			)
+			.toBeTruthy();
+
+		// 2) Re-create the filtered locator AFTER we know it happened
+		const matching = toasts.filter({ hasText: regex });
+
+		// 3) Optional: dismiss if it’s still there long enough
 		if (dismiss) {
-			const dismissBtn = toast.getByLabel('Dismiss toast');
-			await expect(dismissBtn).toBeVisible({ timeout: Math.min(2000, timeout) });
-			await dismissBtn.click();
-			if (waitHidden) await expect(toast).toBeHidden({ timeout: 5000 });
+			const toast = matching.first();
+			// Try best-effort: don’t make the whole assertion fail if it vanished already
+			if (await toast.isVisible().catch(() => false)) {
+				const dismissBtn = toast.getByLabel('Dismiss toast');
+				if (await dismissBtn.isVisible().catch(() => false)) {
+					await dismissBtn.click();
+					if (waitHidden) await expect(toast).toBeHidden({ timeout: 5000 });
+				}
+			}
 		}
-		return toasts;
+
+		return matching;
 	}
 }
