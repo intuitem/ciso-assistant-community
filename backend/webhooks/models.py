@@ -5,6 +5,7 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from core.base_models import NameDescriptionMixin
+from core.models import Actor
 from iam.models import Folder, FolderMixin
 
 
@@ -42,10 +43,12 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
     )
 
     owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        Actor,
         related_name="webhook_endpoints",
         on_delete=models.CASCADE,
-        help_text="The user or team that owns this endpoint.",
+        help_text="The actor that owns this endpoint.",
+        blank=True,
+        null=True,
     )
 
     url = models.URLField(

@@ -6,7 +6,7 @@ import { m } from '$paraglide/messages';
 export const load = (async ({ fetch, parent }) => {
 	// Get user info from parent layout
 	const { user } = await parent();
-	const userId = user.id;
+	const userId = user.actor_id;
 
 	const endpoint = `${BASE_API_URL}/folders/my_assignments/`;
 

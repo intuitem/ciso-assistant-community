@@ -102,8 +102,12 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="users?is_third_party=false"
-	optionsLabelField="email"
+	optionsEndpoint="actors?user__is_third_party=False"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
 	field="owners"
 	cacheLock={cacheLocks['owners']}
 	bind:cachedValue={formDataCache['owners']}
