@@ -15,6 +15,8 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	let exportMenuOpen = $state(false);
+
 	interface Props {
 		data: PageData;
 		form: ActionData;
@@ -282,6 +284,31 @@
 						<i class="fa-solid fa-file-lines"></i>
 						<span>{m.report()}</span>
 					</a>
+					<!-- Export dropdown -->
+					<div class="relative">
+						<button
+							class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 w-full"
+							onclick={() => (exportMenuOpen = !exportMenuOpen)}
+							onblur={() => setTimeout(() => (exportMenuOpen = false), 150)}
+						>
+							<i class="fa-solid fa-download"></i>
+							<span>{m.exportButton()}</span>
+							<i class="fa-solid fa-chevron-down text-xs"></i>
+						</button>
+						{#if exportMenuOpen}
+							<div
+								class="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10"
+							>
+								<a
+									href={`${page.url.pathname}/export/xlsx`}
+									class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"
+								>
+									<i class="fa-solid fa-file-excel mr-2"></i>
+									{m.exportExcel()}
+								</a>
+							</div>
+						{/if}
+					</div>
 				</div>
 			{/snippet}
 			{#snippet content()}
