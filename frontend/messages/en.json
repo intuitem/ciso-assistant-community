@@ -3306,5 +3306,15 @@
 	"lastRefresh": "Last refresh",
 	"widgetCount": "Widgets count",
 	"rawValue": "Value",
+	"teams": "Teams",
+	"team": "Team",
+	"teamEmail": "Team Email",
+	"leader": "Leader",
+	"deputies": "Deputies",
+	"members": "Members",
+	"addTeam": "Add team",
+	"viewTeam": "View team",
+	"changeTeam": "Change team",
+	"deleteTeam": "Delete team",
 	"appliedControlsPlaceholder": "Select applied controls..."
 }

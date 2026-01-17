@@ -1406,6 +1406,15 @@ export const DashboardWidgetSchema = z.object({
 	widget_config: jsonSchema.default({})
 });
 
+export const teamSchema = z.object({
+	...NameDescriptionMixin,
+	team_email: z.string().email().optional(),
+	folder: z.string(),
+	members: z.array(z.string().uuid().optional()).optional(),
+	leader: z.string().uuid().optional().nullable(),
+	deputies: z.array(z.string().uuid().optional()).optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1481,7 +1490,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	dashboards: DashboardSchema,
 	'dashboard-widgets': DashboardWidgetSchema,
 	'dashboard-text-widgets': DashboardWidgetSchema,
-	'dashboard-builtin-widgets': DashboardWidgetSchema
+	'dashboard-builtin-widgets': DashboardWidgetSchema,
+	teams: teamSchema
 };
 
 export const modelSchema = (model: string) => {
