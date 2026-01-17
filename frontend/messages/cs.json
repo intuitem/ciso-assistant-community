@@ -1062,5 +1062,8 @@
 	"errorUnloadingLibrary": "Chyba při uvolňování knihovny",
 	"librarySuccessfullyUnloaded": "Knihovna byla úspěšně uvolněna",
 	"libraryFilteringLabels": "Knihovnové štítky",
-	"appliedControlsPlaceholder": "Vyberte aplikované kontroly..."
+	"appliedControlsPlaceholder": "Vyberte aplikované kontroly...",
+	"assignmentSettings": "Nastavení přiřazení",
+	"allowAssignmentsToEntities": "Povolit přiřazování entitám",
+	"allowAssignmentsToEntitiesDescription": "Umožní, aby se entity zobrazovaly jako aktéři při přiřazování vlastníků, autorů nebo recenzentů."
 }

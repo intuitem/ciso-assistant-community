@@ -1343,6 +1343,7 @@ def startup(sender: AppConfig, **kwargs):
         "daily_rate": 500,
         "mapping_max_depth": 3,
         "show_warning_external_links": True,
+        "allow_assignments_to_entities": False,
     }
     try:
         settings, _ = GlobalSettings.objects.get_or_create(

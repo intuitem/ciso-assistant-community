@@ -1065,5 +1065,8 @@
 	],
 	"cascadeAffectedHint": "Objekten nedan förblir i systemet men deras länkar till detta objekt kommer att tas bort.",
 	"libraryFilteringLabels": "Etiketter för bibliotek",
-	"appliedControlsPlaceholder": "Välj tillämpade kontroller..."
+	"appliedControlsPlaceholder": "Välj tillämpade kontroller...",
+	"assignmentSettings": "Tilldelningsinställningar",
+	"allowAssignmentsToEntities": "Tillåt tilldelningar till enheter",
+	"allowAssignmentsToEntitiesDescription": "Låter enheter visas som aktörer när ägare, författare eller granskare tilldelas."
 }
