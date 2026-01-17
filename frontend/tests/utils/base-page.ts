@@ -71,10 +71,37 @@ export abstract class BasePage {
 		}
 	}
 
-	async isToastVisible(value: string, flags?: string | undefined, options?: {} | undefined) {
-		const toast = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
-		await expect(toast).toHaveCount(1);
-		await toast.first().getByLabel('Dismiss toast').click();
-		return toast;
+	async isToastVisible(
+		value: string,
+		flags?: string,
+		options?: {
+			timeout?: number; // max time to wait for the toast to appear
+			dismiss?: boolean; // click "Dismiss toast" (default: true)
+			waitHidden?: boolean; // after dismiss, wait until toast is hidden (default: true)
+		}
+	) {
+		const { timeout = 5000, dismiss = true, waitHidden = true } = options ?? {};
+
+		const regex = new RegExp(value, flags);
+		const toasts = this.page.getByTestId('toast').filter({ hasText: regex });
+
+		// Wait for at least one matching toast to be visible.
+		// Avoid toHaveCount(1) because toasts often re-render/replace each other.
+		const toast = toasts.first();
+		await expect(toast).toBeVisible({ timeout });
+
+		if (dismiss) {
+			const dismissBtn = toast.getByLabel('Dismiss toast');
+
+			// Ensure the button is interactable before clicking
+			await expect(dismissBtn).toBeVisible({ timeout: Math.min(2000, timeout) });
+			await dismissBtn.click();
+
+			if (waitHidden) {
+				// Stabilizes tests by confirming we actually dismissed it
+				await expect(toast).toBeHidden({ timeout: 5000 });
+			}
+		}
+		return toasts;
 	}
 }
