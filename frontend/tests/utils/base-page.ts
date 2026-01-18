@@ -73,127 +73,26 @@ export abstract class BasePage {
 
 	async isToastVisible(value: string, flags?: string | undefined, options?: {} | undefined) {
 		const timeout = (options as { timeout?: number } | undefined)?.timeout ?? 5000;
-
-		// Keep backward-compat behavior: you used to dismiss by default.
-		// But dismissing makes blink-toasts even flakier; so default to false.
 		const dismiss = (options as { dismiss?: boolean } | undefined)?.dismiss ?? false;
 		const waitHidden = (options as { waitHidden?: boolean } | undefined)?.waitHidden ?? true;
 		const optional = (options as { optional?: boolean } | undefined)?.optional ?? false;
 
-		// Normalize whitespace so we don't lose on line breaks / multiple spaces
-		const normalize = (s: string) => (s ?? '').replace(/\s+/g, ' ').trim();
+		const locator = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
 
-		const expected = normalize(value);
-
-		// If flags provided, treat as regex flags, but still be whitespace-tolerant.
-		// Otherwise use a simple "includes" on normalized text.
-		const re =
-			flags !== undefined
-				? new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+'), flags)
-				: null;
-
-		// Search text anywhere in the DOM, including shadow roots
-		const scanFrameForText = async (frame: import('@playwright/test').Frame) => {
-			return await frame.evaluate(
-				({ expected, useRegex, regexSource, regexFlags }) => {
-					const normalize = (s: string) => (s ?? '').replace(/\s+/g, ' ').trim();
-					const re = useRegex ? new RegExp(regexSource, regexFlags) : null;
-
-					const matches = (t: string) => {
-						const n = normalize(t);
-						if (!n) return false;
-						return re ? re.test(n) : n.includes(expected);
-					};
-
-					// Walk DOM + shadow DOM
-					const stack: (Document | ShadowRoot)[] = [document];
-					while (stack.length) {
-						const root = stack.pop()!;
-						// Fast check: if body text already contains, return early
-						if (
-							root instanceof Document &&
-							matches(root.body?.innerText || root.body?.textContent || '')
-						) {
-							return true;
-						}
-
-						const tree = root.querySelectorAll ? root.querySelectorAll('*') : [];
-						for (const el of Array.from(tree)) {
-							const anyEl = el as any;
-
-							// Check common announcement nodes quickly
-							const role = el.getAttribute?.('role');
-							const ariaLive = el.getAttribute?.('aria-live');
-							const testid = el.getAttribute?.('data-testid');
-
-							if (
-								testid === 'toast' ||
-								role === 'alert' ||
-								ariaLive === 'polite' ||
-								ariaLive === 'assertive'
-							) {
-								const txt = (el as HTMLElement).innerText || el.textContent || '';
-								if (matches(txt)) return true;
-							}
-
-							// Dive into shadow root
-							if (anyEl.shadowRoot) stack.push(anyEl.shadowRoot);
-						}
-					}
-
-					// Last resort: whole document text
-					return matches(
-						document.documentElement?.innerText || document.documentElement?.textContent || ''
-					);
-				},
-				{
-					expected,
-					useRegex: Boolean(re),
-					regexSource: re?.source ?? '',
-					regexFlags: re?.flags ?? ''
-				}
-			);
-		};
-
-		let toastFound = false;
 		try {
-			// 1) Wait until the text appears in ANY frame (main frame or iframes)
-			await expect
-				.poll(
-					async () => {
-						const frames = this.page.frames();
-						for (const f of frames) {
-							try {
-								if (await scanFrameForText(f)) return true;
-							} catch {
-								// Ignore cross-origin / detached frame errors
-							}
-						}
-						return false;
-					},
-					{ timeout }
-				)
-				.toBeTruthy();
-			toastFound = true;
+			await expect(locator).toHaveCount(1, { timeout });
 		} catch (error) {
 			if (!optional) throw error;
-			console.warn(`[toast] Optional toast not found: "${expected}" (flags: ${flags ?? 'none'})`);
+			console.warn(`[toast] Optional toast not found: "${value}" (flags: ${flags ?? 'none'})`);
+			return locator;
 		}
 
-		// 2) Return compatible locator (as before)
-		const matching = this.page.getByTestId('toast').filter({ hasText: re ?? expected });
-
-		if (!toastFound) {
-			return matching;
-		}
-
-		// 3) Best-effort dismiss if requested (won't fail if it vanished)
 		if (dismiss) {
-			const toast = matching.first();
+			const toast = locator.first();
 			if (await toast.isVisible().catch(() => false)) {
-				const btn = toast.getByLabel('Dismiss toast');
-				if (await btn.isVisible().catch(() => false)) {
-					await btn.click();
+				const button = toast.getByLabel('Dismiss toast');
+				if (await button.isVisible().catch(() => false)) {
+					await button.click();
 					if (waitHidden) {
 						await Promise.race([
 							expect(toast)
@@ -208,6 +107,6 @@ export abstract class BasePage {
 			}
 		}
 
-		return matching;
+		return locator;
 	}
 }
