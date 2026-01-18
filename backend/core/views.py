@@ -158,6 +158,7 @@ from serdes.utils import (
 from serdes.serializers import ExportSerializer
 from django.contrib.admin.utils import NestedObjects
 from django.db import router
+from global_settings.models import GlobalSettings
 from global_settings.utils import ff_is_enabled
 
 import structlog
@@ -5679,6 +5680,14 @@ class ActorViewSet(BaseModelViewSet):
                 "user__email", "team__name", "entity__name", output_field=CharField()
             ),
         )
+
+        allow_entities = (
+            GlobalSettings.objects.filter(name=GlobalSettings.Names.GENERAL)
+            .values_list("value__allow_assignments_to_entities", flat=True)
+            .first()
+        )
+        if not allow_entities:
+            queryset = queryset.filter(entity__isnull=True)
 
         return queryset.order_by("type_rank", "display_name")
 

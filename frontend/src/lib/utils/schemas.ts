@@ -512,7 +512,8 @@ export const GeneralSettingsSchema = z.object({
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
-	show_warning_external_links: z.boolean().default(true).optional()
+	show_warning_external_links: z.boolean().default(true).optional(),
+	allow_assignments_to_entities: z.boolean().default(false).optional()
 });
 
 export const FeatureFlagsSchema = z.object({

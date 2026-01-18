@@ -306,4 +306,19 @@
 			</div>
 		{/snippet}
 	</Accordion.Item>
+	<Accordion.Item value="assignments">
+		{#snippet control()}
+			<i class="fa-solid fa-clipboard-user mr-2"></i>{m.assignmentSettings()}
+		{/snippet}
+		{#snippet panel()}
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="allow_assignments_to_entities"
+					label={m.allowAssignmentsToEntities()}
+					helpText={m.allowAssignmentsToEntitiesDescription()}
+				/>
+			</div>
+		{/snippet}
+	</Accordion.Item>
 </Accordion>

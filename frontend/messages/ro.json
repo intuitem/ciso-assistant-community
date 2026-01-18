@@ -1071,5 +1071,8 @@
 	],
 	"cascadeAffectedHint": "Obiectele de mai jos rămân în sistem, dar legăturile lor cu acest obiect vor fi eliminate.",
 	"libraryFilteringLabels": "Etichete bibliotecă",
-	"appliedControlsPlaceholder": "Selectați controalele aplicate..."
+	"appliedControlsPlaceholder": "Selectați controalele aplicate...",
+	"assignmentSettings": "Setări atribuiri",
+	"allowAssignmentsToEntities": "Permite atribuiri către entități",
+	"allowAssignmentsToEntitiesDescription": "Permite entităților să apară ca actori atunci când atribui proprietari, autori sau recenzori."
 }
