@@ -2296,5 +2296,8 @@
 	"organisationObjectives": "Obbiettivi (ISO)",
 	"origin": "Origine",
 	"relationship": "Relazione",
-	"relationships": "Relazioni"
+	"relationships": "Relazioni",
+	"assignmentSettings": "Impostazioni assegnazioni",
+	"allowAssignmentsToEntities": "Consenti assegnazioni alle entità",
+	"allowAssignmentsToEntitiesDescription": "Consente alle entità di apparire come attori quando si assegnano proprietari, autori o revisori."
 }

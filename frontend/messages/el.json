@@ -1771,5 +1771,8 @@
 			}
 		}
 	],
-	"appliedControlsPlaceholder": "Επιλέξτε εφαρμοσμένους ελέγχους..."
+	"appliedControlsPlaceholder": "Επιλέξτε εφαρμοσμένους ελέγχους...",
+	"assignmentSettings": "Ρυθμίσεις αναθέσεων",
+	"allowAssignmentsToEntities": "Να επιτρέπονται οι αναθέσεις σε οντότητες",
+	"allowAssignmentsToEntitiesDescription": "Επιτρέπει στις οντότητες να εμφανίζονται ως φορείς κατά την ανάθεση ιδιοκτητών, συντακτών ή ελεγκτών."
 }
