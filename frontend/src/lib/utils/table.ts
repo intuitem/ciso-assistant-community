@@ -2552,6 +2552,10 @@ export const listViewFields = {
 			}
 		}
 	},
+	actors: {
+		head: ['name', 'type'],
+		body: ['specific', 'type']
+	},
 	extra: {
 		filters: {
 			risk: undefined,

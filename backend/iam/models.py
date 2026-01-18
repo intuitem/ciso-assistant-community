@@ -1027,6 +1027,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         from core.models import Actor, Team
         from tprm.models import Entity
 
+        # Actor doesn't have a folder field, so use root folder as scope.
+        # The underlying User/Team/Entity permission checks will still filter
+        # properly based on what the user can access in the hierarchy.
+        if folder is None:
+            folder = Folder.get_root_folder()
+
         view_user_ids, change_user_ids, delete_user_ids = (
             RoleAssignment.get_accessible_object_ids(folder, user, User)
         )
