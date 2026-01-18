@@ -71,42 +71,16 @@ export abstract class BasePage {
 		}
 	}
 
-	async isToastVisible(value: string, flags?: string | undefined, options?: {} | undefined) {
-		const timeout = (options as { timeout?: number } | undefined)?.timeout ?? 5000;
-		const dismiss = (options as { dismiss?: boolean } | undefined)?.dismiss ?? false;
-		const waitHidden = (options as { waitHidden?: boolean } | undefined)?.waitHidden ?? true;
-		const optional = (options as { optional?: boolean } | undefined)?.optional ?? false;
-
-		const locator = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
-
+	async isToastVisible(value: string, flags?: string, options?: { optional?: boolean }) {
+		const toast = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
 		try {
-			await expect(locator).toHaveCount(1, { timeout });
+			await expect(toast).toHaveCount(1);
 		} catch (error) {
-			if (!optional) throw error;
+			if (!(options?.optional ?? false)) throw error;
 			console.warn(`[toast] Optional toast not found: "${value}" (flags: ${flags ?? 'none'})`);
-			return locator;
+			return toast;
 		}
-
-		if (dismiss) {
-			const toast = locator.first();
-			if (await toast.isVisible().catch(() => false)) {
-				const button = toast.getByLabel('Dismiss toast');
-				if (await button.isVisible().catch(() => false)) {
-					await button.click();
-					if (waitHidden) {
-						await Promise.race([
-							expect(toast)
-								.toBeHidden({ timeout: 5000 })
-								.catch(() => {}),
-							expect(toast)
-								.toBeDetached({ timeout: 5000 })
-								.catch(() => {})
-						]);
-					}
-				}
-			}
-		}
-
-		return locator;
+		await toast.first().getByLabel('Dismiss toast').click();
+		return toast;
 	}
 }
