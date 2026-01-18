@@ -1259,5 +1259,8 @@
 	],
 	"cascadeAffectedHint": "Item-item di bawah ini tetap berada di sistem tetapi tautan mereka ke objek ini akan dihapus.",
 	"libraryFilteringLabels": "Label perpustakaan",
-	"appliedControlsPlaceholder": "Pilih kontrol yang diterapkan..."
+	"appliedControlsPlaceholder": "Pilih kontrol yang diterapkan...",
+	"assignmentSettings": "Pengaturan penugasan",
+	"allowAssignmentsToEntities": "Izinkan penugasan ke entitas",
+	"allowAssignmentsToEntitiesDescription": "Memungkinkan entitas muncul sebagai aktor saat menetapkan pemilik, penulis, atau peninjau."
 }

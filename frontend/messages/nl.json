@@ -2939,5 +2939,8 @@
 	],
 	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd.",
 	"libraryFilteringLabels": "Bibliotheeklabels",
-	"appliedControlsPlaceholder": "Selecteer toegepaste maatregelen..."
+	"appliedControlsPlaceholder": "Selecteer toegepaste maatregelen...",
+	"assignmentSettings": "Toewijzingsinstellingen",
+	"allowAssignmentsToEntities": "Toewijzingen aan entiteiten toestaan",
+	"allowAssignmentsToEntitiesDescription": "Laat entiteiten als actoren verschijnen bij het toewijzen van eigenaren, auteurs of reviewers."
 }
