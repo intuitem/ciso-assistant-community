@@ -5662,6 +5662,20 @@ class ActorViewSet(BaseModelViewSet):
         "id",
     ]
 
+    def get_object(self):
+        """
+        Override get_object to bypass standard object permission check.
+        Actor doesn't have a folder field, so the standard permission check fails.
+        Instead, we verify the actor exists in the already-filtered queryset,
+        which ensures the user can only access actors they have permission to see.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        obj = get_object_or_404(queryset, **filter_kwargs)
+        # Skip check_object_permissions since queryset already filters by access
+        return obj
+
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.select_related("user", "team", "entity")
