@@ -39,13 +39,13 @@
 		"@vincjo/datatables": "^1.14.10",
 		"@vitest/coverage-v8": "^3.2.4",
 		"@vitest/ui": "^3.2.4",
-		"eslint": "^9.29.0",
-		"eslint-config-prettier": "^9.1.0",
+		"eslint": "^9.39.2",
+		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-intuitem-sveltekit": "file:plugins/eslint/eslint-plugin-intuitem-sveltekit",
-		"eslint-plugin-svelte": "^2.46.1",
+		"eslint-plugin-svelte": "^3.14.0",
 		"jsdom": "^26.1.0",
 		"prettier": "^3.6.1",
-		"prettier-plugin-svelte": "^3.4.0",
+		"prettier-plugin-svelte": "^3.4.1",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
 		"sv-typewriter": "^4.1.2",
@@ -65,13 +65,14 @@
 	"type": "module",
 	"dependencies": {
 		"@floating-ui/dom": "^1.7.1",
+		"nanoid": "^5.1.6",
 		"@fortawesome/fontawesome-free": "^6.7.2",
 		"@tailwindcss/vite": "^4.1.11",
-		"@typescript-eslint/eslint-plugin": "^8.35.0",
-		"@typescript-eslint/parser": "^8.35.0",
+		"@typescript-eslint/eslint-plugin": "^8.53.0",
+		"@typescript-eslint/parser": "^8.53.0",
 		"@unovis/svelte": "1.5.2",
 		"@unovis/ts": "1.5.2",
-		"bits-ui": "^0.22.0",
+		"bits-ui": "^2.15.4",
 		"dotenv": "^16.5.0",
 		"driver.js": "^1.3.6",
 		"echarts": "^6.0.0",
@@ -91,7 +92,9 @@
 			"glob": "^10.5.0",
 			"valibot": "^1.2.0",
 			"validator": "^13.15.22",
-			"js-yaml": "^4.1.1"
+			"js-yaml": "^4.1.1",
+			"@eslint/plugin-kit": "^0.5.1",
+			"cookie": "1.1.1"
 		}
 	}
 }
