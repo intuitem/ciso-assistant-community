@@ -1354,5 +1354,8 @@
 	"errorUnloadingLibrary": "Fejl under aflæsning af bibliotek",
 	"librarySuccessfullyUnloaded": "Biblioteket blev afindlæst med succes",
 	"libraryFilteringLabels": "Biblioteketiketter",
-	"appliedControlsPlaceholder": "Vælg anvendte kontroller..."
+	"appliedControlsPlaceholder": "Vælg anvendte kontroller...",
+	"assignmentSettings": "Tildelingsindstillinger",
+	"allowAssignmentsToEntities": "Tillad tildelinger til enheder",
+	"allowAssignmentsToEntitiesDescription": "Lader enheder optræde som aktører, når der tildeles ejere, forfattere eller gennemlæsere."
 }

@@ -2940,5 +2940,8 @@
 	],
 	"cascadeAffectedHint": "Die unten aufgeführten Elemente bleiben im System, aber ihre Verknüpfungen zu diesem Objekt werden entfernt.",
 	"libraryFilteringLabels": "Bibliotheksetiketten",
-	"appliedControlsPlaceholder": "Angewandte Kontrollen auswählen..."
+	"appliedControlsPlaceholder": "Angewandte Kontrollen auswählen...",
+	"assignmentSettings": "Zuweisungseinstellungen",
+	"allowAssignmentsToEntities": "Zuweisungen an Entitäten zulassen",
+	"allowAssignmentsToEntitiesDescription": "Ermöglicht, dass Entitäten als Akteure erscheinen, wenn Eigentümer, Autoren oder Prüfer zugewiesen werden."
 }
