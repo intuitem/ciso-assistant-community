@@ -206,10 +206,13 @@ class Folder(NameDescriptionMixin):
             return obj
         # Define paths to try in order. Each path is a list representing the traversal path.
         # NOTE: There are probably better ways to represent these, but it works.
+        # NOTE: This list is not complete.
         paths = [
             ["folder"],
             ["parent_folder"],
             ["perimeter", "folder"],
+            ["user", "folder"],
+            ["team", "folder"],
             ["entity", "folder"],
             ["provider_entity", "folder"],
             ["solution", "provider_entity", "folder"],
