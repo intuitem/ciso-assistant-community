@@ -78,6 +78,7 @@ export abstract class BasePage {
 		// But dismissing makes blink-toasts even flakier; so default to false.
 		const dismiss = (options as { dismiss?: boolean } | undefined)?.dismiss ?? false;
 		const waitHidden = (options as { waitHidden?: boolean } | undefined)?.waitHidden ?? true;
+		const optional = (options as { optional?: boolean } | undefined)?.optional ?? false;
 
 		// Normalize whitespace so we don't lose on line breaks / multiple spaces
 		const normalize = (s: string) => (s ?? '').replace(/\s+/g, ' ').trim();
@@ -154,26 +155,37 @@ export abstract class BasePage {
 			);
 		};
 
-		// 1) Wait until the text appears in ANY frame (main frame or iframes)
-		await expect
-			.poll(
-				async () => {
-					const frames = this.page.frames();
-					for (const f of frames) {
-						try {
-							if (await scanFrameForText(f)) return true;
-						} catch {
-							// Ignore cross-origin / detached frame errors
+		let toastFound = false;
+		try {
+			// 1) Wait until the text appears in ANY frame (main frame or iframes)
+			await expect
+				.poll(
+					async () => {
+						const frames = this.page.frames();
+						for (const f of frames) {
+							try {
+								if (await scanFrameForText(f)) return true;
+							} catch {
+								// Ignore cross-origin / detached frame errors
+							}
 						}
-					}
-					return false;
-				},
-				{ timeout }
-			)
-			.toBeTruthy();
+						return false;
+					},
+					{ timeout }
+				)
+				.toBeTruthy();
+			toastFound = true;
+		} catch (error) {
+			if (!optional) throw error;
+			console.warn(`[toast] Optional toast not found: "${expected}" (flags: ${flags ?? 'none'})`);
+		}
 
 		// 2) Return compatible locator (as before)
 		const matching = this.page.getByTestId('toast').filter({ hasText: re ?? expected });
+
+		if (!toastFound) {
+			return matching;
+		}
 
 		// 3) Best-effort dismiss if requested (won't fail if it vanished)
 		if (dismiss) {
