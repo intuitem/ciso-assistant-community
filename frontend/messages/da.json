@@ -1239,6 +1239,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objekt ikke synligt.",
+				"countPlural=other": "{count} objekter ikke synlige."
+			}
+		}
+	],
 	"matchingScenarios": "Matchende scenarier",
 	"select": "Vælg",
 	"deselect": "Fravælg",
@@ -1343,5 +1353,9 @@
 	"isCustom": "Brugerdefineret",
 	"errorUnloadingLibrary": "Fejl under aflæsning af bibliotek",
 	"librarySuccessfullyUnloaded": "Biblioteket blev afindlæst med succes",
-	"libraryFilteringLabels": "Bibliotek etiketter"
+	"libraryFilteringLabels": "Biblioteketiketter",
+	"appliedControlsPlaceholder": "Vælg anvendte kontroller...",
+	"assignmentSettings": "Tildelingsindstillinger",
+	"allowAssignmentsToEntities": "Tillad tildelinger til enheder",
+	"allowAssignmentsToEntitiesDescription": "Lader enheder optræde som aktører, når der tildeles ejere, forfattere eller gennemlæsere."
 }

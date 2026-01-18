@@ -48,6 +48,7 @@ from ebios_rm.serializers import (
     ElementaryActionWriteSerializer,
     EbiosRMStudyWriteSerializer,
 )
+from .ebios_rm_excel_helpers import process_excel_file as process_ebios_rm_excel
 from core.models import Terminology
 from data_wizard.arm_helpers import process_arm_file
 from tprm.models import Entity, Solution, Contract
@@ -109,6 +110,11 @@ class LoadFileView(APIView):
             # Special handling for EBIOS RM Study ARM format (multi-sheet)
             elif model_type == "EbiosRMStudyARM":
                 res = self._process_ebios_rm_study_arm(
+                    request, excel_data, folder_id, matrix_id
+                )
+            # Special handling for EBIOS RM Study Excel export format
+            elif model_type == "EbiosRMStudyExcel":
+                res = self._process_ebios_rm_study_excel(
                     request, excel_data, folder_id, matrix_id
                 )
             else:
@@ -2663,6 +2669,340 @@ class LoadFileView(APIView):
             )
         except Exception as e:
             logger.error(f"Error processing EBIOS RM Study: {str(e)}", exc_info=True)
+            results["failed"] = 1
+            results["errors"].append({"error": str(e)})
+
+        return results
+
+    def _process_ebios_rm_study_excel(self, request, excel_data, folder_id, matrix_id):
+        """
+        Process EBIOS RM Study from the Excel export format.
+        This format uses sheet prefixes like "1.1 Study", "1.3 Feared Events", etc.
+        """
+        from ebios_rm.models import OperatingMode
+
+        results = {
+            "successful": 0,
+            "failed": 0,
+            "errors": [],
+            "details": {
+                "study": None,
+                "assets_created": 0,
+                "feared_events_created": 0,
+                "ro_to_couples_created": 0,
+                "stakeholders_created": 0,
+                "strategic_scenarios_created": 0,
+                "attack_paths_created": 0,
+                "elementary_actions_created": 0,
+                "operational_scenarios_created": 0,
+                "operating_modes_created": 0,
+            },
+        }
+
+        try:
+            folder = Folder.objects.get(id=folder_id)
+            risk_matrix = RiskMatrix.objects.get(id=matrix_id) if matrix_id else None
+
+            # Build matrix mappings for looking up likelihood/gravity by display name
+            matrix_mappings = {"probability": {}, "impact": {}}
+            if risk_matrix:
+                matrix_mappings = self._build_matrix_mappings(risk_matrix)
+
+            # Parse the Excel file
+            data = process_ebios_rm_excel(excel_data.read())
+            study_data = data.get("study", {})
+
+            # Create the study
+            study_payload = {
+                "name": study_data.get("name") or f"Imported Study",
+                "description": study_data.get("description", ""),
+                "ref_id": study_data.get("ref_id", ""),
+                "version": study_data.get("version", ""),
+                "folder": str(folder.id),
+            }
+            if risk_matrix:
+                study_payload["risk_matrix"] = str(risk_matrix.id)
+
+            serializer = EbiosRMStudyWriteSerializer(
+                data=study_payload, context={"request": request}
+            )
+
+            if serializer.is_valid():
+                study = serializer.save()
+                results["details"]["study"] = str(study.id)
+
+                # Create assets and build name->id mapping
+                asset_name_to_id = {}
+                for asset_data in data.get("assets", []):
+                    asset, created = Asset.objects.get_or_create(
+                        name=asset_data["name"],
+                        folder=folder,
+                        defaults={
+                            "ref_id": asset_data.get("ref_id", ""),
+                            "description": asset_data.get("description", ""),
+                            "type": asset_data.get("type", ""),
+                        },
+                    )
+                    asset_name_to_id[asset.name] = asset
+                    if created:
+                        results["details"]["assets_created"] += 1
+
+                # Link assets to study
+                study.assets.set(asset_name_to_id.values())
+
+                # Create feared events and build name lookup
+                feared_event_lookup = {}
+                for fe_data in data.get("feared_events", []):
+                    # Map gravity display name to value
+                    gravity_val = self._map_risk_value(
+                        fe_data.get("gravity", ""), matrix_mappings["impact"]
+                    )
+                    fe = FearedEvent.objects.create(
+                        ebios_rm_study=study,
+                        name=fe_data["name"],
+                        ref_id=fe_data.get("ref_id", ""),
+                        description=fe_data.get("description", ""),
+                        gravity=gravity_val,
+                        is_selected=fe_data.get("is_selected", False),
+                        justification=fe_data.get("justification", ""),
+                        folder=folder,
+                    )
+                    # Link assets to feared event
+                    for asset_name in fe_data.get("assets", []):
+                        if asset_name in asset_name_to_id:
+                            fe.assets.add(asset_name_to_id[asset_name])
+                    feared_event_lookup[fe.name] = fe
+                    results["details"]["feared_events_created"] += 1
+
+                # Create RO/TO couples
+                roto_lookup = {}
+                for roto_data in data.get("ro_to_couples", []):
+                    risk_origin_name = roto_data.get("risk_origin", "")
+                    # Find or create risk origin terminology
+                    risk_origin = None
+                    if risk_origin_name:
+                        # Try to find existing terminology by name (case-insensitive)
+                        risk_origin = Terminology.objects.filter(
+                            field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
+                            name__iexact=risk_origin_name,
+                        ).first()
+                        if not risk_origin:
+                            risk_origin = Terminology.objects.create(
+                                name=risk_origin_name,
+                                field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
+                                folder=Folder.get_root_folder(),
+                                is_visible=True,
+                            )
+
+                    roto = RoTo.objects.create(
+                        ebios_rm_study=study,
+                        risk_origin=risk_origin,
+                        target_objective=roto_data.get("target_objective", ""),
+                        is_selected=roto_data.get("is_selected", False),
+                        justification=roto_data.get("justification", ""),
+                        folder=folder,
+                    )
+                    # Link feared events to RO/TO
+                    for fe_name in roto_data.get("feared_events", []):
+                        if fe_name in feared_event_lookup:
+                            roto.feared_events.add(feared_event_lookup[fe_name])
+                    # Build lookup key
+                    key = (
+                        risk_origin_name.lower() if risk_origin_name else "",
+                        roto_data.get("target_objective", "").lower(),
+                    )
+                    roto_lookup[key] = roto
+                    results["details"]["ro_to_couples_created"] += 1
+
+                # Create stakeholders
+                stakeholder_lookup = {}
+                for sh_data in data.get("stakeholders", []):
+                    entity_name = sh_data.get("entity", "")
+                    entity = None
+                    if entity_name:
+                        entity, _ = Entity.objects.get_or_create(
+                            name=entity_name,
+                            folder=folder,
+                        )
+
+                    category_name = sh_data.get("category", "")
+                    category = None
+                    if category_name:
+                        # Try to find existing terminology by name (case-insensitive)
+                        category = Terminology.objects.filter(
+                            field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                            name__iexact=category_name,
+                        ).first()
+                        if not category:
+                            category = Terminology.objects.create(
+                                name=category_name,
+                                field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                                folder=Folder.get_root_folder(),
+                                is_visible=True,
+                            )
+
+                    stakeholder = Stakeholder.objects.create(
+                        ebios_rm_study=study,
+                        entity=entity,
+                        category=category,
+                        current_dependency=sh_data.get("current_dependency") or 0,
+                        current_penetration=sh_data.get("current_penetration") or 0,
+                        current_maturity=sh_data.get("current_maturity") or 0,
+                        current_trust=sh_data.get("current_trust") or 0,
+                        residual_dependency=sh_data.get("residual_dependency") or 0,
+                        residual_penetration=sh_data.get("residual_penetration") or 0,
+                        residual_maturity=sh_data.get("residual_maturity") or 0,
+                        residual_trust=sh_data.get("residual_trust") or 0,
+                        is_selected=sh_data.get("is_selected", False),
+                        justification=sh_data.get("justification", ""),
+                        folder=folder,
+                    )
+                    stakeholder_lookup[str(stakeholder)] = stakeholder
+                    results["details"]["stakeholders_created"] += 1
+
+                # Create strategic scenarios
+                scenario_lookup = {}
+                for ss_data in data.get("strategic_scenarios", []):
+                    ro_name = ss_data.get("risk_origin", "").lower()
+                    to_name = ss_data.get("target_objective", "").lower()
+                    roto = roto_lookup.get((ro_name, to_name))
+
+                    scenario = StrategicScenario.objects.create(
+                        ebios_rm_study=study,
+                        name=ss_data["name"],
+                        ref_id=ss_data.get("ref_id", ""),
+                        description=ss_data.get("description", ""),
+                        ro_to_couple=roto,
+                        folder=folder,
+                    )
+                    scenario_lookup[scenario.name] = scenario
+                    results["details"]["strategic_scenarios_created"] += 1
+
+                # Create attack paths
+                attack_path_lookup = {}
+                for ap_data in data.get("attack_paths", []):
+                    scenario_name = ap_data.get("strategic_scenario", "")
+                    scenario = scenario_lookup.get(scenario_name)
+
+                    attack_path = AttackPath.objects.create(
+                        ebios_rm_study=study,
+                        name=ap_data["name"],
+                        ref_id=ap_data.get("ref_id", ""),
+                        description=ap_data.get("description", ""),
+                        strategic_scenario=scenario,
+                        is_selected=ap_data.get("is_selected", False),
+                        justification=ap_data.get("justification", ""),
+                        folder=folder,
+                    )
+                    # Link stakeholders
+                    for sh_str in ap_data.get("stakeholders", []):
+                        if sh_str in stakeholder_lookup:
+                            attack_path.stakeholders.add(stakeholder_lookup[sh_str])
+                    attack_path_lookup[attack_path.name] = attack_path
+                    results["details"]["attack_paths_created"] += 1
+
+                # Create elementary actions
+                ea_lookup = {}
+                for ea_data in data.get("elementary_actions", []):
+                    # Map attack_stage display name back to value
+                    attack_stage = 0  # Default to KNOW
+                    stage_name = ea_data.get("attack_stage", "").lower()
+                    if "initial" in stage_name or "enter" in stage_name:
+                        attack_stage = 1
+                    elif "discovery" in stage_name or "discover" in stage_name:
+                        attack_stage = 2
+                    elif "exploit" in stage_name:
+                        attack_stage = 3
+
+                    ea = ElementaryAction.objects.create(
+                        name=ea_data["name"],
+                        ref_id=ea_data.get("ref_id", ""),
+                        description=ea_data.get("description", ""),
+                        attack_stage=attack_stage,
+                        folder=folder,
+                    )
+                    ea_lookup[ea.name] = ea
+                    results["details"]["elementary_actions_created"] += 1
+
+                # Create operational scenarios
+                # Note: OperationalScenario.name is a computed property from attack_path
+                op_scenario_lookup = {}
+                for os_data in data.get("operational_scenarios", []):
+                    from ebios_rm.models import OperationalScenario
+
+                    ap_name = os_data.get("attack_path", "")
+                    attack_path = attack_path_lookup.get(ap_name)
+
+                    if not attack_path:
+                        continue
+
+                    # Map likelihood display name to value
+                    likelihood_val = self._map_risk_value(
+                        os_data.get("likelihood", ""), matrix_mappings["probability"]
+                    )
+
+                    op_scenario = OperationalScenario.objects.create(
+                        ebios_rm_study=study,
+                        attack_path=attack_path,
+                        operating_modes_description=os_data.get(
+                            "operating_modes_description", ""
+                        ),
+                        likelihood=likelihood_val,
+                        is_selected=os_data.get("is_selected", False),
+                        justification=os_data.get("justification", ""),
+                        folder=folder,
+                    )
+                    op_scenario_lookup[op_scenario.name] = op_scenario
+                    results["details"]["operational_scenarios_created"] += 1
+
+                # Create operating modes
+                for om_data in data.get("operating_modes", []):
+                    os_name = om_data.get("operational_scenario", "")
+                    op_scenario = op_scenario_lookup.get(os_name)
+
+                    if op_scenario:
+                        # Map likelihood display name to value
+                        om_likelihood = self._map_risk_value(
+                            om_data.get("likelihood", ""),
+                            matrix_mappings["probability"],
+                        )
+
+                        om = OperatingMode.objects.create(
+                            name=om_data["name"],
+                            ref_id=om_data.get("ref_id", ""),
+                            description=om_data.get("description", ""),
+                            operational_scenario=op_scenario,
+                            likelihood=om_likelihood,
+                            folder=folder,
+                        )
+                        # Link elementary actions
+                        for ea_name in om_data.get("elementary_actions", []):
+                            if ea_name in ea_lookup:
+                                om.elementary_actions.add(ea_lookup[ea_name])
+                        results["details"]["operating_modes_created"] += 1
+
+                results["successful"] = 1
+
+            else:
+                results["failed"] = 1
+                results["errors"].append(
+                    {"error": "Failed to create study", "details": serializer.errors}
+                )
+
+        except Folder.DoesNotExist:
+            results["failed"] = 1
+            results["errors"].append(
+                {"error": f"Folder with ID {folder_id} does not exist"}
+            )
+        except RiskMatrix.DoesNotExist:
+            results["failed"] = 1
+            results["errors"].append(
+                {"error": f"Risk matrix with ID {matrix_id} does not exist"}
+            )
+        except Exception as e:
+            logger.error(
+                f"Error processing EBIOS RM Study Excel: {str(e)}", exc_info=True
+            )
             results["failed"] = 1
             results["errors"].append({"error": str(e)})
 

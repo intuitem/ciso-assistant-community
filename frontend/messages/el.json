@@ -1760,5 +1760,19 @@
 		}
 	],
 	"cascadeAffectedHint": "Τα παρακάτω αντικείμενα παραμένουν στο σύστημα αλλά οι σύνδεσμοι τους με αυτό το αντικείμενο θα αφαιρεθούν.",
-	"libraryFilteringLabels": "Ετικέτες βιβλιοθήκης"
+	"libraryFilteringLabels": "Ετικέτες βιβλιοθήκης",
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} αντικείμενο δεν είναι ορατό.",
+				"countPlural=other": "{count} αντικείμενα δεν είναι ορατά."
+			}
+		}
+	],
+	"appliedControlsPlaceholder": "Επιλέξτε εφαρμοσμένους ελέγχους...",
+	"assignmentSettings": "Ρυθμίσεις αναθέσεων",
+	"allowAssignmentsToEntities": "Να επιτρέπονται οι αναθέσεις σε οντότητες",
+	"allowAssignmentsToEntitiesDescription": "Επιτρέπει στις οντότητες να εμφανίζονται ως φορείς κατά την ανάθεση ιδιοκτητών, συντακτών ή ελεγκτών."
 }

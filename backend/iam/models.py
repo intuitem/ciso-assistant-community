@@ -25,7 +25,12 @@ from core.utils import (
     BUILTIN_USERGROUP_CODENAMES,
     BUILTIN_ROLE_CODENAMES,
 )
-from core.base_models import AbstractBaseModel, NameDescriptionMixin
+from core.base_models import (
+    AbstractBaseModel,
+    ActorSyncManager,
+    ActorSyncMixin,
+    NameDescriptionMixin,
+)
 from core.utils import UserGroupCodename, RoleCodename
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
@@ -162,7 +167,6 @@ class Folder(NameDescriptionMixin):
         verbose_name=_("Labels"),
         related_name="folders",
     )
-
     fields_to_check = ["name"]
 
     class Meta:
@@ -175,6 +179,8 @@ class Folder(NameDescriptionMixin):
         return self.name.__str__()
 
     def save(self, *args, **kwargs):
+        if self._state.adding and not self.is_published:
+            self.is_published = True
         result = super().save(*args, **kwargs)
         invalidate_folders_cache()
         return result
@@ -236,10 +242,13 @@ class Folder(NameDescriptionMixin):
             return obj
         # Define paths to try in order. Each path is a list representing the traversal path.
         # NOTE: There are probably better ways to represent these, but it works.
+        # NOTE: This list is not complete.
         paths = [
             ["folder"],
             ["parent_folder"],
             ["perimeter", "folder"],
+            ["user", "folder"],
+            ["team", "folder"],
             ["entity", "folder"],
             ["provider_entity", "folder"],
             ["solution", "provider_entity", "folder"],
@@ -398,6 +407,7 @@ class PublishInRootFolderMixin(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
+        # Root folder children must be published
         if (
             getattr(self, "folder") == Folder.get_root_folder()
             and hasattr(self, "is_published")
@@ -483,6 +493,7 @@ class UserManager(BaseUserManager):
                 folder=_get_root_folder(),
                 keep_local_login=extra_fields.get("keep_local_login", False),
                 expiry_date=extra_fields.get("expiry_date"),
+                is_published=True,
             ),
         )
         if password:
@@ -550,7 +561,7 @@ class UserManager(BaseUserManager):
         return superuser
 
 
-class CaseInsensitiveUserManager(UserManager):
+class CaseInsensitiveUserManager(UserManager, ActorSyncManager):
     def get_by_natural_key(self, username):
         """
         By default, Django does a case-sensitive check on usernames™.
@@ -559,7 +570,7 @@ class CaseInsensitiveUserManager(UserManager):
         return self.get(**{self.model.USERNAME_FIELD + "__iexact": username})
 
 
-class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
+class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     """a user is a principal corresponding to a human"""
 
     last_name = models.CharField(_("last name"), max_length=150, blank=True)
@@ -623,48 +634,6 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         #        swappable = 'AUTH_USER_MODEL'
         permissions = (("backup", "backup"), ("restore", "restore"))
 
-    @classmethod
-    def visible_users(
-        cls, for_user: AbstractBaseUser | AnonymousUser, view_all_users: bool
-    ):
-        """
-        Return a queryset of users visible to `for_user`, always including `for_user`.
-        Mirrors the logic used in UserViewSet.get_queryset().
-        """
-        if not getattr(for_user, "is_authenticated", False):
-            return User.objects.none()
-
-        (viewable_user_group_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), for_user, UserGroup
-        )
-
-        if view_all_users:
-            base_qs = User.objects.all()
-
-        else:
-            (visible_users_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), for_user, User
-            )
-            user_pk = getattr(for_user, "pk", None)
-            user_self_qs = (
-                User.objects.filter(pk=user_pk)
-                if user_pk is not None
-                else User.objects.none()
-            )
-            base_qs = (
-                User.objects.filter(id__in=visible_users_ids) | user_self_qs
-            ).distinct()
-
-        # 🔒 Filtered prefetch for serializer
-        return base_qs.prefetch_related(
-            Prefetch(
-                "user_groups",
-                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
-                    "id", "builtin"
-                ),  # minimal
-            )
-        )
-
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
         logger.info("user deleted", user=self)
@@ -696,6 +665,9 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def get_short_name(self) -> str:
         """get user's short name (i.e. first_name or email before @))"""
         return self.first_name if self.first_name else self.email.split("@")[0]
+
+    def get_emails(self) -> list[str]:
+        return [self.email]
 
     def mailing(self, email_template_name, subject, object="", object_id="", pk=False):
         """
@@ -1074,6 +1046,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return ([], [], [])
 
         class_name = object_type.__name__.lower()
+        if class_name == "actor":
+            return RoleAssignment._get_actor_accessible_ids(folder, user)
         roles_state = get_roles_state()
         permissions_map = roles_state.permission_ids_by_codename
 
@@ -1219,7 +1193,48 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
 
         return (list(result_view), list(result_change), list(result_delete))
 
-    def is_user_assigned(self, user: "User") -> bool:
+    @staticmethod
+    def _get_actor_accessible_ids(
+        folder: Folder, user: AbstractBaseUser | AnonymousUser
+    ) -> Tuple[list[str], list[str], list[str]]:
+        from core.models import Actor, Team
+        from tprm.models import Entity
+
+        view_user_ids, change_user_ids, delete_user_ids = (
+            RoleAssignment.get_accessible_object_ids(folder, user, User)
+        )
+        view_team_ids, change_team_ids, delete_team_ids = (
+            RoleAssignment.get_accessible_object_ids(folder, user, Team)
+        )
+        view_entity_ids, change_entity_ids, delete_entity_ids = (
+            RoleAssignment.get_accessible_object_ids(folder, user, Entity)
+        )
+
+        def collect_actor_ids(
+            user_ids: list[str], team_ids: list[str], entity_ids: list[str]
+        ) -> list[str]:
+            filters = Q()
+            if user_ids:
+                filters |= Q(user_id__in=user_ids)
+            if team_ids:
+                filters |= Q(team_id__in=team_ids)
+            if entity_ids:
+                filters |= Q(entity_id__in=entity_ids)
+            if not filters:
+                return []
+            return list(Actor.objects.filter(filters).values_list("id", flat=True))
+
+        view_ids = collect_actor_ids(view_user_ids, view_team_ids, view_entity_ids)
+        change_ids = collect_actor_ids(
+            change_user_ids, change_team_ids, change_entity_ids
+        )
+        delete_ids = collect_actor_ids(
+            delete_user_ids, delete_team_ids, delete_entity_ids
+        )
+
+        return (view_ids, change_ids, delete_ids)
+
+    def is_user_assigned(self, user) -> bool:
         """Determines if a user is assigned to the role assignment"""
         if user == self.user:
             return True

@@ -927,6 +927,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} वस्तु दिखाई नहीं देती।",
+				"countPlural=other": "{count} वस्तुएं दिखाई नहीं देतीं।"
+			}
+		}
+	],
 	"matchingScenarios": "मैचिंग परिदृश्य",
 	"select": "चुनें",
 	"deselect": "चयन रद्द करें",
@@ -1032,5 +1042,9 @@
 		}
 	],
 	"cascadeAffectedHint": "नीचे दिए गए आइटम सिस्टम में बने रहेंगे लेकिन इस वस्तु से उनके लिंक हटा दिए जाएंगे।",
-	"libraryFilteringLabels": "लाइब्रेरी लेबल"
+	"libraryFilteringLabels": "लाइब्रेरी लेबल",
+	"appliedControlsPlaceholder": "लागू नियंत्रण चुनें...",
+	"assignmentSettings": "असाइनमेंट सेटिंग्स",
+	"allowAssignmentsToEntities": "इकाइयों को असाइनमेंट की अनुमति दें",
+	"allowAssignmentsToEntitiesDescription": "मालिकों, लेखकों या समीक्षकों को असाइन करते समय इकाइयों को अभिनेताओं के रूप में दिखाई देने दें।"
 }

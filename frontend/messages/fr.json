@@ -1369,6 +1369,8 @@
 	"ebiosRMStudies": "Études EBIOS RM",
 	"ebiosRMStudyARM": "Étude EBIOS RM (format ARM)",
 	"ebiosRMStudyARMDescription": "Importer une étude EBIOS RM depuis un fichier Excel au format ARM.\n Notez qu'il s'agit d'un format propriétaire, que tous les objets EBIOS ne sont pas compatibles et certains imports peuvent être incomplets à cause d'entêtes ou onglets manquants.",
+	"ebiosRMStudyExcel": "Étude EBIOS RM (format CISO Assistant)",
+	"ebiosRMStudyExcelDescription": "Importer une étude EBIOS RM depuis un export Excel CISO Assistant. Cela permet de partager des études entre différentes instances ou de restaurer des études précédemment exportées.",
 	"riskOrigin": "Source de risque",
 	"riskOrigins": "Sources de risque",
 	"targetObjective": "Objectif visé",
@@ -1966,6 +1968,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objet non visible. Le lien peut être perdu lors de l’édition.",
+				"countPlural=other": "{count} objets non visibles. Les liens peuvent être perdus lors de l’édition."
+			}
+		}
+	],
 	"matchingScenarios": "Scénarios correspondants",
 	"select": "Sélectionner",
 	"deselect": "Désélectionner",
@@ -2187,6 +2199,9 @@
 	"objectivesVsCapabilities": "Objectifs vs Capacités",
 	"capabilities": "Capacités",
 	"security": "Sécurité",
+	"assignmentSettings": "Affectations",
+	"allowAssignmentsToEntities": "Autoriser les affectations aux entités",
+	"allowAssignmentsToEntitiesDescription": "Permet d'inclure les entités parmi les acteurs lors des affectations.",
 	"recovery": "Reprise",
 	"hasMfaEnabled": "MFA activée",
 	"viewMore": "Voir plus",
@@ -3265,5 +3280,16 @@
 	"metricInstancesDescription": "Suivre les valeurs de métriques pour les objets de votre organisation",
 	"dashboardsDescription": "Tableaux de bord personnalisés pour visualiser les métriques et indicateurs clés de performance",
 	"secretCopiedToClipboard": "Secret copié dans le presse-papier avec succès",
-	"libraryFilteringLabels": "Étiquettes de bibliothèque"
+	"libraryFilteringLabels": "Étiquettes de bibliothèque",
+	"appliedControlsPlaceholder": "Sélectionnez les mesures appliquées...",
+	"teams": "Équipes",
+	"team": "Équipe",
+	"teamEmail": "Adresse e-mail de l'équipe",
+	"leader": "Responsable",
+	"deputies": "Adjoints",
+	"members": "Membres",
+	"addTeam": "Ajouter une équipe",
+	"viewTeam": "Voir une équipe",
+	"changeTeam": "Modifier une équipe",
+	"deleteTeam": "Supprimer une équipe"
 }

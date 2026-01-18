@@ -1336,6 +1336,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} oggetto non visibile.",
+				"countPlural=other": "{count} oggetti non visibili."
+			}
+		}
+	],
 	"matchingScenarios": "Scenari corrispondenti",
 	"select": "Seleziona",
 	"deselect": "Deseleziona",
@@ -2054,6 +2064,7 @@
 	"xRaysLoadingData": "Analisi dei dati...",
 	"xRaysView": "Visualizza",
 	"year": "Anno",
+	"appliedControlsPlaceholder": "Seleziona i controlli applicati...",
 	"accreditation": "Accreditamento",
 	"accreditationAdvanced": "Avanzato",
 	"accreditationAuthority": "Autorità di accreditamento",
@@ -2285,5 +2296,8 @@
 	"organisationObjectives": "Obbiettivi (ISO)",
 	"origin": "Origine",
 	"relationship": "Relazione",
-	"relationships": "Relazioni"
+	"relationships": "Relazioni",
+	"assignmentSettings": "Impostazioni assegnazioni",
+	"allowAssignmentsToEntities": "Consenti assegnazioni alle entità",
+	"allowAssignmentsToEntitiesDescription": "Consente alle entità di apparire come attori quando si assegnano proprietari, autori o revisori."
 }

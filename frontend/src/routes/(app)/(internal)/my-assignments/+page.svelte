@@ -58,7 +58,7 @@
 				filters: APPLIED_CONTROL_FILTERS
 			}}
 			URLModel="applied-controls"
-			baseEndpoint="/applied-controls?owner={data.user.id}"
+			baseEndpoint="/applied-controls?owner={data.user.actor_id}"
 		/>
 	</div>
 	<div class="col-span-5 p-2 flex items-center justify-center">
@@ -109,7 +109,7 @@
 				}}
 				hideFilters={true}
 				URLModel="compliance-assessments"
-				baseEndpoint="/compliance-assessments?authors={data.user.id}"
+				baseEndpoint="/compliance-assessments?authors={data.user.actor_id}"
 			/>
 		</div>
 	{/if}
@@ -133,7 +133,7 @@
 				}}
 				hideFilters={true}
 				URLModel="risk-assessments"
-				baseEndpoint="/risk-assessments?authors={data.user.id}"
+				baseEndpoint="/risk-assessments?authors={data.user.actor_id}"
 			/>
 		</div>
 	{/if}
@@ -158,7 +158,7 @@
 				}}
 				hideFilters={true}
 				URLModel="risk-scenarios"
-				baseEndpoint="/risk-scenarios?owner={data.user.id}"
+				baseEndpoint="/risk-scenarios?owner={data.user.actor_id}"
 			/>
 		</div>
 	{/if}
@@ -183,7 +183,7 @@
 				}}
 				hideFilters={true}
 				URLModel="incidents"
-				baseEndpoint="/incidents?owners={data.user.id}"
+				baseEndpoint="/incidents?owners={data.user.actor_id}"
 			/>
 		</div>
 	{/if}
@@ -208,7 +208,7 @@
 				}}
 				hideFilters={true}
 				URLModel="security-exceptions"
-				baseEndpoint="/security-exceptions?owners={data.user.id}"
+				baseEndpoint="/security-exceptions?owners={data.user.actor_id}"
 			/>
 		</div>
 	{/if}
@@ -232,7 +232,7 @@
 				}}
 				hideFilters={true}
 				URLModel="findings-assessments"
-				baseEndpoint="/findings-assessments?authors={data.user.id}"
+				baseEndpoint="/findings-assessments?authors={data.user.actor_id}"
 			/>
 		</div>
 	{/if}
@@ -281,7 +281,7 @@
 				}}
 				hideFilters={true}
 				URLModel="findings"
-				baseEndpoint="/findings?owner={data.user.id}"
+				baseEndpoint="/findings?owner={data.user.actor_id}"
 			/>
 		</div>
 	{/if}
@@ -331,7 +331,7 @@
 				}}
 				hideFilters={true}
 				URLModel="right-requests"
-				baseEndpoint="/right-requests?owner={data.user.id}"
+				baseEndpoint="/right-requests?owner={data.user.actor_id}"
 			/>
 		</div>
 	{/if}
@@ -356,7 +356,7 @@
 				}}
 				hideFilters={true}
 				URLModel="metric-instances"
-				baseEndpoint="/metric-instances?owner={data.user.id}"
+				baseEndpoint="/metric-instances?owner={data.user.actor_id}"
 			/>
 		</div>
 	{/if}

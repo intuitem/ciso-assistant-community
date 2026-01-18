@@ -28,6 +28,7 @@
 	import RepresentativesForm from './ModelForm/RepresentativeForm.svelte';
 	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
 	import UsersForm from './ModelForm/UserForm.svelte';
+	import TeamForm from './ModelForm/TeamForm.svelte';
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
@@ -491,6 +492,8 @@
 			<FrameworksForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
 		{:else if URLModel === 'users'}
 			<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {...rest} />
+		{:else if URLModel === 'teams'}
+			<TeamForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {...rest} />
 		{:else if URLModel === 'sso-settings'}
 			<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
 		{:else if URLModel === 'general-settings'}

@@ -183,7 +183,8 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-qualifications').getByRole('textbox').click();
 			await page.getByRole('option', { name: 'Authenticity' }).click();
 			await page.getByRole('option', { name: 'Availability' }).click();
-			await page.getByTestId('save-button').press('Enter');
+			await page.getByTestId('form-input-name').click(); // just to close the qualifications
+			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByTestId('add-button').click();
 			await page.getByTestId('form-input-name').click();
@@ -196,7 +197,7 @@ test('ebios rm study', async ({
 			await page.getByTestId('form-input-qualifications').getByRole('textbox').click();
 			await page.getByRole('option', { name: 'Environmental' }).click();
 			await page.getByTestId('form-input-qualifications').getByRole('textbox').press('Escape');
-			await page.getByTestId('save-button').press('Enter');
+			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await page

@@ -18,6 +18,7 @@ from typing import Dict, Any, List, Tuple
 import time
 from django.db.models import (
     F,
+    CharField,
     Count,
     Q,
     ExpressionWrapper,
@@ -34,6 +35,7 @@ from django.db.models import (
     OneToOneField,
     ManyToManyField,
     QuerySet,
+    Prefetch,
 )
 from django.db.models.functions import Greatest, Coalesce
 
@@ -62,10 +64,9 @@ from django.db.models.functions import Lower
 from docxtpl import DocxTemplate
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
-from integrations.registry import IntegrationRegistry
-from library.serializers import StoredLibrarySerializer
 from webhooks.service import dispatch_webhook_event
 from .generators import gen_audit_context
+from .serializer_fields import FieldsRelatedField
 
 from django.utils import timezone
 from django.utils.text import slugify
@@ -78,6 +79,7 @@ from django.core.cache import cache
 from django.apps import apps
 from django.contrib.auth.models import Permission
 from django.conf import settings
+from django.core.exceptions import FieldDoesNotExist
 from django.core.files.storage import default_storage
 
 from django.db import models, transaction
@@ -156,6 +158,7 @@ from serdes.utils import (
 from serdes.serializers import ExportSerializer
 from django.contrib.admin.utils import NestedObjects
 from django.db import router
+from global_settings.models import GlobalSettings
 from global_settings.utils import ff_is_enabled
 
 import structlog
@@ -737,6 +740,119 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 new_evidences.append(str(new_evidence.id))
         return new_evidences
 
+    def _resolve_related_model(self, source: str):
+        """Resolve a dotted source path (e.g. 'asset.folder') to its related model."""
+        model = self.model
+        for part in source.split("."):
+            if not model:
+                return None
+            try:
+                field = model._meta.get_field(part)
+            except FieldDoesNotExist:
+                return None
+            model = getattr(field, "related_model", None)
+        return model
+
+    def _get_fieldsrelated_map(self, serializer):
+        """Map FieldsRelatedField serializer fields to their related models."""
+        if hasattr(serializer, "child"):
+            serializer = serializer.child
+        if not hasattr(serializer, "fields"):
+            return {}
+        field_models = {}
+        for name, field in serializer.fields.items():
+            is_fields_related = isinstance(field, FieldsRelatedField)
+            if not is_fields_related and hasattr(field, "child_relation"):
+                is_fields_related = isinstance(field.child_relation, FieldsRelatedField)
+            if not is_fields_related:
+                continue
+            source = field.source if field.source not in (None, "*") else name
+            related_model = self._resolve_related_model(source)
+            if related_model:
+                field_models[name] = related_model
+        return field_models
+
+    def _get_accessible_ids_map(self, related_models):
+        """Return visible object IDs per related model for the current user."""
+        root_folder = Folder.get_root_folder()
+        allowed = {}
+        for model in related_models:
+            try:
+                ids = RoleAssignment.get_accessible_object_ids(
+                    root_folder, self.request.user, model
+                )[0]
+            except (NotImplementedError, Permission.DoesNotExist):
+                # Model does not support IAM scoping; skip filtering
+                allowed[model] = None
+                continue
+            allowed[model] = {str(item_id) for item_id in ids}
+        return allowed
+
+    def _extract_related_id(self, item):
+        """Extract a related object ID from a field payload."""
+        if isinstance(item, dict):
+            value = item.get("id")
+        else:
+            value = item
+        if value is None:
+            return None
+        return str(value)
+
+    def _placeholder_for(self, item):
+        """Create a placeholder for a hidden related object."""
+        if isinstance(item, dict):
+            return {}
+        return ""
+
+    def _filter_related_fields(self, data, field_models, allowed_ids):
+        """Mask related fields the current user is not allowed to see."""
+        if isinstance(data, list):
+            return [
+                self._filter_related_fields(item, field_models, allowed_ids)
+                for item in data
+            ]
+        if not isinstance(data, dict):
+            return data
+
+        current_user_id = (
+            str(self.request.user.id) if self.request.user.is_authenticated else None
+        )
+
+        for field_name, related_model in field_models.items():
+            allowed = allowed_ids.get(related_model)
+            if allowed is None:
+                continue
+            value = data.get(field_name)
+            if isinstance(value, list):
+                filtered = []
+                for item in value:
+                    item_id = self._extract_related_id(item)
+                    # Always include current user
+                    if (
+                        not item_id
+                        or item_id in allowed
+                        or (
+                            related_model.__name__ == "User"
+                            and item_id == current_user_id
+                        )
+                    ):
+                        filtered.append(item)
+                    else:
+                        filtered.append(self._placeholder_for(item))
+                data[field_name] = filtered
+            elif isinstance(value, dict):
+                item_id = self._extract_related_id(value)
+                # Always include current user
+                if (
+                    item_id
+                    and item_id not in allowed
+                    and not (
+                        related_model.__name__ == "User" and item_id == current_user_id
+                    )
+                ):
+                    data[field_name] = self._placeholder_for(value)
+        return data
+
     def list(self, request, *args, **kwargs):
         """
         Override the list method to inject optimized data into the serializer context.
@@ -751,9 +867,30 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         context["optimized_data"] = optimized_data
         if page is not None:
             serializer = self.get_serializer(page, many=True, context=context)
-            return self.get_paginated_response(serializer.data)
+            data = serializer.data
+            field_models = self._get_fieldsrelated_map(serializer)
+            if field_models:
+                allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+                data = self._filter_related_fields(data, field_models, allowed_ids)
+            return self.get_paginated_response(data)
         serializer = self.get_serializer(queryset, many=True, context=context)
-        return Response(serializer.data)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        return Response(data)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Return a single object with unauthorized related fields masked."""
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        return Response(data)
 
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -783,7 +920,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             target_id = UUID(str(folder_value))
         except (TypeError, ValueError):
             return
-        if instance.folder_id and str(instance.folder_id) == str(target_id):
+        if instance.folder_id and instance.folder_id == target_id:
             return
         target_folder = Folder.objects.filter(id=target_id).first()
         if not target_folder:
@@ -805,6 +942,36 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 }
             )
 
+    def _validate_parent_field_change(self, request: Request, instance) -> None:
+        """Block updates to immutable parent fields on indirect-parent models."""
+        parent_fields = {
+            "RiskScenario": "risk_assessment",
+            "Representative": "entity",
+            "Solution": "provider_entity",
+        }
+        parent_field_name = parent_fields.get(instance.__class__.__name__)
+        if not parent_field_name or parent_field_name not in request.data:
+            return
+
+        new_parent_value = request.data.get(parent_field_name)
+        if isinstance(new_parent_value, list):
+            new_parent_value = new_parent_value[0] if new_parent_value else None
+        if isinstance(new_parent_value, dict):
+            new_parent_value = new_parent_value.get("id")
+        if not new_parent_value:
+            return
+
+        try:
+            new_parent_id = UUID(str(new_parent_value))
+        except (TypeError, ValueError):
+            raise PermissionDenied({parent_field_name: "Invalid value"})
+
+        current_parent_id = getattr(instance, f"{parent_field_name}_id", None)
+        if current_parent_id and current_parent_id == new_parent_id:
+            return
+
+        raise PermissionDenied({parent_field_name: "This field is immutable"})
+
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         if request.data.get("filtering_labels"):
@@ -822,6 +989,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def update(self, request: Request, *args, **kwargs) -> Response:
         instance = self.get_object()
         self._validate_folder_change(request, instance)
+        self._validate_parent_field_change(request, instance)
         # Experimental: process evidences on TaskTemplate update
         if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
@@ -859,6 +1027,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
         instance = self.get_object()
         self._validate_folder_change(request, instance)
+        self._validate_parent_field_change(request, instance)
         self._process_request_data(request)
         return super().partial_update(request, *args, **kwargs)
 
@@ -4650,12 +4819,13 @@ class UserRolesOnFolderList(generics.ListAPIView):
         if folder.id not in viewable_ids:
             raise PermissionDenied()
 
-        # visibility
-        visible_ids = set(
-            User.visible_users(self.request.user, view_all_users=True).values_list(
-                "id", flat=True
-            )
+        # visibility - get user IDs the current user can see via IAM filtering
+        (visible_user_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, User
         )
+        visible_ids = set(visible_user_ids) | {
+            self.request.user.id
+        }  # always include self
 
         # roles per user (no role filtering)
         raw_map = folder.get_user_roles()  # {user_id: [Role, ...]}
@@ -5488,6 +5658,59 @@ class ValidationFlowViewSet(BaseModelViewSet):
             )
 
 
+class ActorViewSet(BaseModelViewSet):
+    http_method_names = ["get", "head", "options"]
+
+    model = Actor
+    search_fields = []
+    ordering = [
+        "type_rank",
+        "display_name",
+        "id",
+    ]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.select_related("user", "team", "entity")
+
+        queryset = queryset.annotate(
+            # Define the order: User (1), Team (2), Entity (3)
+            type_rank=Case(
+                When(user__isnull=False, then=Value(1)),
+                When(team__isnull=False, then=Value(2)),
+                When(entity__isnull=False, then=Value(3)),
+                default=Value(4),  # Fallback
+                output_field=IntegerField(),
+            ),
+            # Combine the different name fields into one column
+            display_name=Coalesce(
+                "user__email", "team__name", "entity__name", output_field=CharField()
+            ),
+        )
+
+        allow_entities = (
+            GlobalSettings.objects.filter(name=GlobalSettings.Names.GENERAL)
+            .values_list("value__allow_assignments_to_entities", flat=True)
+            .first()
+        )
+        if not allow_entities:
+            queryset = queryset.filter(entity__isnull=True)
+
+        return queryset.order_by("type_rank", "display_name")
+
+
+class TeamViewSet(BaseModelViewSet):
+    model = Team
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "leader")
+            .prefetch_related("members", "deputies")
+        )
+
+
 class UserViewSet(BaseModelViewSet):
     """
     API endpoint that allows users to be viewed or edited
@@ -5499,7 +5722,22 @@ class UserViewSet(BaseModelViewSet):
     search_fields = ["email", "first_name", "last_name"]
 
     def get_queryset(self):
-        return User.visible_users(self.request.user, view_all_users=True)
+        # Use base IAM filtering
+        # but ensure current user is always included
+        queryset = super().get_queryset() | User.objects.filter(pk=self.request.user.pk)
+
+        # Add prefetch for user_groups visibility
+        viewable_user_group_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, UserGroup
+        )[0]
+        return queryset.distinct().prefetch_related(
+            Prefetch(
+                "user_groups",
+                queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids).only(
+                    "id", "builtin"
+                ),
+            )
+        )
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         user = self.get_object()
@@ -5755,12 +5993,12 @@ class FolderViewSet(BaseModelViewSet):
     @action(detail=False, methods=["get"])
     def my_assignments(self, request):
         risk_assessments = RiskAssessment.objects.filter(
-            Q(authors=request.user) | Q(reviewers=request.user)
+            Q(authors=request.user.actor) | Q(reviewers=request.user.actor)
         ).distinct()
 
         audits = (
             ComplianceAssessment.objects.filter(
-                Q(authors=request.user) | Q(reviewers=request.user)
+                Q(authors=request.user.actor) | Q(reviewers=request.user.actor)
             )
             .order_by(F("eta").asc(nulls_last=True))
             .distinct()
@@ -5775,12 +6013,14 @@ class FolderViewSet(BaseModelViewSet):
             avg_progress = int(sum / audits.count())
 
         controls = (
-            AppliedControl.objects.filter(owner=request.user)
+            AppliedControl.objects.filter(owner=request.user.actor)
             .order_by(F("eta").asc(nulls_last=True))
             .distinct()
         )
         non_active_controls = controls.exclude(status="active")
-        risk_scenarios = RiskScenario.objects.filter(owner=request.user).distinct()
+        risk_scenarios = RiskScenario.objects.filter(
+            owner=request.user.actor
+        ).distinct()
         controls_progress = 0
         evidences_progress = 0
         tot_ac = controls.count()
