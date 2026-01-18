@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("iam", "0016_folder_filtering_labels"),
+        ("iam", "0017_alter_folder_is_published"),
     ]
 
     operations = [
