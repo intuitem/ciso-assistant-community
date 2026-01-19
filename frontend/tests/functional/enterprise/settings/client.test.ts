@@ -83,7 +83,11 @@ test.describe('Client settings', () => {
 	test('custom logo and favicon are not shown on login page if show_images_unauthenticated is disabled', async ({
 		page
 	}) => {
-		await page.getByTestId('form-input-show-images-unauthenticated').uncheck();
+		const checkbox = page.getByTestId('form-input-show-images-unauthenticated');
+		await expect(checkbox).toBeVisible();
+		await checkbox.scrollIntoViewIfNeeded();
+		await checkbox.setChecked(false);
+		await expect(checkbox).not.toBeChecked();
 		await page.getByRole('button', { name: 'Save' }).click();
 		await expect(page.getByTestId('toast')).toBeVisible();
 		await page.getByTestId('toast').getByLabel('Dismiss toast').click();
@@ -108,6 +112,7 @@ test.describe('Client settings', () => {
 	test('custom logo and favicon are shown on login page if show_images_unauthenticated is enabled', async ({
 		page
 	}) => {
+		await page.getByTestId('form-input-show-images-unauthenticated').waitFor({ state: 'visible' });
 		await page.getByTestId('form-input-show-images-unauthenticated').check();
 		await page.getByRole('button', { name: 'Save' }).click();
 		await expect(page.getByTestId('toast')).toBeVisible();
