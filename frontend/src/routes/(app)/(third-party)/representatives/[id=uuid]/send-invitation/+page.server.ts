@@ -6,7 +6,6 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { m } from '$paraglide/messages';
 
-
 const schema = z.object({
 	id: z.string({ required_error: 'idRequired' }).uuid('idRequired')
 });
