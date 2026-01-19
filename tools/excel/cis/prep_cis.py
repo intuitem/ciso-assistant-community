@@ -99,7 +99,7 @@ ws.append(["framework_urn", f"urn:{packager.lower()}:risk:framework:cis-controls
 ws.append(["framework_ref_id", "CIS-Controls-v8"])
 ws.append(["framework_name", "CIS Controls v8"])
 ws.append(["framework_description", "CIS Controls v8"])
-ws.append(["reference_control_base_urn", "urn:intuitem:risk:function:cis-controls-v8", "1"])
+ws.append(["reference_control_base_urn", f"urn:{packager.lower()}:risk:function:cis-controls-v8", "1"])
 ws.append(["tab", "controls", "requirements"])
 ws.append(["tab", "imp_grp", "implementation_groups"])
 ws.append(["tab", "ref_ctrl", "reference_controls"])
