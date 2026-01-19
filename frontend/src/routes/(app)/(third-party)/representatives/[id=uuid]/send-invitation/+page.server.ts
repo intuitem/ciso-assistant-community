@@ -4,6 +4,8 @@ import type { Actions } from './$types';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
+import { m } from '$paraglide/messages';
+
 
 const schema = z.object({
 	id: z.string({ required_error: 'idRequired' }).uuid('idRequired')
@@ -49,11 +51,11 @@ export const actions: Actions = {
 		});
 
 		if (!res.ok) {
-			setFlash({ type: 'error', message: 'We encountered an error to send the email' }, event);
+			setFlash({ type: 'error', message: m.anErrorOccurred() }, event);
 			return message(form, { error: 'Unable to send email' });
 		}
 
-		setFlash({ type: 'success', message: 'Invitation email has been sent.' }, event);
+		setFlash({ type: 'success', message: m.invitationSent() }, event);
 		return message(form, { success: true });
 	}
 };

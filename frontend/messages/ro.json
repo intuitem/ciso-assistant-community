@@ -529,6 +529,7 @@
 	"passwordSuccessfullySetWelcome": "Parola dvs. a fost setată cu succes. Bine ați venit la CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Vă rugăm să așteptați {timing} secunde înainte de a solicita un nou link de resetare",
 	"resetLinkSent": "Solicitarea a fost primită, ar trebui să primiți un link de resetare la următoarea adresă: {email}",
+	"invitationSent": "Invitația a fost trimisă reprezentantului",
 	"riskAcceptanceStateDoesntAllowEdit": "Starea acceptării riscului nu permite editarea acesteia",
 	"associatedRequirements": "Cerințe asociate",
 	"isPublished": "Este publicat",

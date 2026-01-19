@@ -540,6 +540,7 @@
 	"passwordSuccessfullySetWelcome": "Ваш пароль успішно встановлено. Ласкаво просимо до CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Будь ласка, зачекайте {timing} сек., перш ніж повторити запит",
 	"resetLinkSent": "Запит отримано, ви отримаєте посилання для скидання налаштувань на таку адресу: {email}",
+	"invitationSent": "Запрошення було надіслано представнику",
 	"riskAcceptanceStateDoesntAllowEdit": "Стан прийняття ризику не дозволяє його редагувати",
 	"associatedRequirements": "Супутні вимоги",
 	"isPublished": "Опубліковано",

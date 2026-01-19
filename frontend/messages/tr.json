@@ -572,6 +572,7 @@
 	"passwordSuccessfullySetWelcome": "Parolanız başarıyla ayarlandı. CISO Assistant'a hoş geldiniz!",
 	"waitBeforeRequestingResetLink": "Lütfen yeni bir sıfırlama bağlantısı istemeden önce {timing} saniye bekleyin",
 	"resetLinkSent": "İstek alındı, aşağıdaki adrese bir sıfırlama bağlantısı gelmelidir: {email}",
+	"invitationSent": "Davet temsilciye gönderildi",
 	"riskAcceptanceStateDoesntAllowEdit": "Risk kabulünün durumu düzenlemeye izin vermiyor",
 	"associatedRequirements": "İlişkili gereksinimler",
 	"isPublished": "Yayınlandı mı",

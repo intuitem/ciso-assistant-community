@@ -532,6 +532,7 @@
 	"passwordSuccessfullySetWelcome": "A jelszava sikeresen beállítva. Üdvözöljük a CISO Assistantban!",
 	"waitBeforeRequestingResetLink": "Várjon {timing} másodpercet, mielőtt új visszaállítási linket kér",
 	"resetLinkSent": "A kérés megérkezett, hamarosan visszaállítási linket kap a következő címre: {email}",
+	"invitationSent": "A meghívót elküldtük a képviselőnek",
 	"riskAcceptanceStateDoesntAllowEdit": "A kockázatelfogadás állapota nem enged szerkesztést",
 	"associatedRequirements": "Kapcsolódó követelmények",
 	"isPublished": "Közzétéve",

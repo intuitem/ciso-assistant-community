@@ -528,6 +528,7 @@
 	"passwordSuccessfullySetWelcome": "تم تعيين كلمة المرور الخاصة بك بنجاح. مرحبًا بك في مساعد CISO!",
 	"waitBeforeRequestingResetLink": "يرجى الانتظار {timing} ثانية قبل طلب رابط إعادة تعيين جديد",
 	"resetLinkSent": "تم استلام الطلب، يجب أن تتلقى رابط إعادة التعيين على العنوان التالي: {email}",
+	"invitationSent": "تم إرسال الدعوة إلى الممثل",
 	"riskAcceptanceStateDoesntAllowEdit": "حالة قبول المخاطر لا تسمح بالتحرير",
 	"associatedRequirements": "المتطلبات المرتبطة",
 	"isPublished": "منشور",

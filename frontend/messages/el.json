@@ -571,6 +571,7 @@
 	"passwordSuccessfullySetWelcome": "Ο κωδικός ορίστηκε επιτυχώς. Καλώς ήρθατε στο CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Παρακαλώ περιμένετε {timing} δευτ. πριν ζητήσετε νέο σύνδεσμο επαναφοράς",
 	"resetLinkSent": "Ελήφθη το αίτημα· σύνδεσμος επαναφοράς στάλθηκε στη διεύθυνση: {email}",
+	"invitationSent": "Η πρόσκληση στάλθηκε στον εκπρόσωπο",
 	"riskAcceptanceStateDoesntAllowEdit": "Η τρέχουσα κατάσταση δεν επιτρέπει επεξεργασία",
 	"associatedRequirements": "Συνδεδεμένες απαιτήσεις",
 	"isPublished": "Δημοσιευμένο",

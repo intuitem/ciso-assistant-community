@@ -530,6 +530,7 @@
 	"passwordSuccessfullySetWelcome": "Sua senha foi definida com sucesso. Bem-vindo ao CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Aguarde {timing} segundos antes de solicitar um novo link de redefinição",
 	"resetLinkSent": "A solicitação foi recebida, você deve receber um link de redefinição no seguinte endereço: {email}",
+	"invitationSent": "O convite foi enviado ao representante",
 	"riskAcceptanceStateDoesntAllowEdit": "O estado da aceitação de risco não permite que ele seja editado",
 	"associatedRequirements": "Requisitos associados",
 	"isPublished": "Está publicado",

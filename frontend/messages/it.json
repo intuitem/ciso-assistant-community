@@ -536,6 +536,7 @@
 	"passwordSuccessfullySetWelcome": "La tua password è stata impostata con successo. Benvenuto in CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Attendi {timing} secondi prima di richiedere un nuovo link di reset",
 	"resetLinkSent": "Richiesta ricevuta: riceverai un link di reset all'indirizzo {email}",
+	"invitationSent": "L'invito è stato inviato al rappresentante",
 	"riskAcceptanceStateDoesntAllowEdit": "Lo stato dell'accettazione del rischio non ne consente la modifica",
 	"associatedRequirements": "Requisiti associati",
 	"isPublished": "Pubblicato",

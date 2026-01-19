@@ -529,6 +529,7 @@
 	"passwordSuccessfullySetWelcome": "आपका पासवर्ड सफलतापूर्वक सेट हो गया है। CISO असिस्टेंट में आपका स्वागत है!",
 	"waitBeforeRequestingResetLink": "नया रीसेट लिंक का अनुरोध करने से पहले कृपया {timing} सेकंड प्रतीक्षा करें",
 	"resetLinkSent": "अनुरोध प्राप्त हो गया है, आपको निम्न पते पर एक रीसेट लिंक प्राप्त होना चाहिए: {email}",
+	"invitationSent": "निमंत्रण प्रतिनिधि को भेज दिया गया है",
 	"riskAcceptanceStateDoesntAllowEdit": "जोखिम स्वीकृति की स्थिति इसे संपादित करने की अनुमति नहीं देती",
 	"associatedRequirements": "संबंधित आवश्यकताएँ",
 	"isPublished": "प्रकाशित है",

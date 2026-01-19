@@ -528,6 +528,7 @@
 	"passwordSuccessfullySetWelcome": "آپ کا پاس ورڈ کامیابی کے ساتھ سیٹ ہو گیا ہے۔ CISO اسسٹنٹ میں خوش آمدید!",
 	"waitBeforeRequestingResetLink": "نیا ری سیٹ لنک کی درخواست کرنے سے پہلے براہ کرم {timing} سیکنڈ انتظار کریں",
 	"resetLinkSent": "درخواست موصول ہو گئی ہے، آپ کو درج ذیل پتے پر ری سیٹ لنک موصول ہونا چاہیے: {email}",
+	"invitationSent": "نمائندے کو دعوت نامہ بھیج دیا گیا ہے",
 	"riskAcceptanceStateDoesntAllowEdit": "خطرے کی منظوری کی حالت اس میں ترمیم کرنے کی اجازت نہیں دیتی",
 	"associatedRequirements": "وابستہ تقاضے",
 	"isPublished": "شائع شدہ",
