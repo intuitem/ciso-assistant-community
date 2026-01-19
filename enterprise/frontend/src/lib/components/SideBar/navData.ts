@@ -113,6 +113,11 @@ export const navData = {
 					href: '/users'
 				},
 				{
+					name: 'teams',
+					fa_icon: 'fa-solid fa-people-group',
+					href: '/teams'
+				},
+				{
 					name: 'userGroups',
 					fa_icon: 'fa-solid fa-users',
 					href: '/user-groups'
