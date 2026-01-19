@@ -5,10 +5,12 @@ from django.db import models
 from django.db.models import Case, When, IntegerField, Q
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from core.models import (
+    Actor,
     AppliedControl,
     Asset,
     ComplianceAssessment,
@@ -152,17 +154,17 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         blank=True,
         null=True,
     )
-    authors = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Authors"),
-        related_name="authors",
-    )
     reviewers = models.ManyToManyField(
-        User,
+        Actor,
         blank=True,
         verbose_name=_("Reviewers"),
-        related_name="reviewers",
+        related_name="ebios_rm_study_reviewers",
+    )
+    authors = models.ManyToManyField(
+        Actor,
+        blank=True,
+        verbose_name=_("Authors"),
+        related_name="ebios_rm_study_authors",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     meta = models.JSONField(
@@ -174,7 +176,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     quotation_method = models.CharField(
         max_length=100,
         choices=QuotationMethod.choices,
-        default=QuotationMethod.MANUAL,
+        default=QuotationMethod.EXPRESS,
         verbose_name=_("Quotation method"),
         help_text=_(
             "Method used to quote the study: 'manual' for manual likelihood assessment, 'express' for automatic propagation from operating modes"
@@ -189,7 +191,33 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         ordering = ["created_at"]
 
     def save(self, *args, **kwargs):
+        if self.pk:
+            old_matrix_id = (
+                EbiosRMStudy.objects.filter(pk=self.pk)
+                .values_list("risk_matrix_id", flat=True)
+                .first()
+            )
+
+            if old_matrix_id != self.risk_matrix_id:
+                probabilities = list(range(len(self.risk_matrix.probability or [])))
+                impacts = list(range(len(self.risk_matrix.impact or [])))
+                min_prob, max_prob = min(probabilities), max(probabilities)
+                min_impact, max_impact = min(impacts), max(impacts)
+                for feared_event in self.feared_events.all():
+                    if feared_event.gravity >= 0:
+                        feared_event.gravity = max(
+                            min_impact, min(feared_event.gravity, max_impact)
+                        )
+                        feared_event.save(update_fields=["gravity"])
+                for operational_scenario in self.operational_scenarios.all():
+                    if operational_scenario.likelihood >= 0:
+                        operational_scenario.likelihood = max(
+                            min_prob, min(operational_scenario.likelihood, max_prob)
+                        )
+                        operational_scenario.save(update_fields=["likelihood"])
+
         super().save(*args, **kwargs)
+
         if self.quotation_method == "express":
             for scenario in self.operational_scenarios.all():
                 scenario.update_likelihood_from_operating_modes()
@@ -300,6 +328,7 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
         on_delete=models.CASCADE,
+        related_name="feared_events",
     )
     assets = models.ManyToManyField(
         Asset,
@@ -335,6 +364,17 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
         # Ensure the folder is set to the study's folder
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
+
+    def delete(self, *args, **kwargs):
+        ebios_rm_study_id = self.ebios_rm_study.id
+        result = super().delete(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
+        return result
 
     @property
     def risk_matrix(self):
@@ -492,6 +532,17 @@ class RoTo(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
+
+    def delete(self, *args, **kwargs):
+        ebios_rm_study_id = self.ebios_rm_study.id
+        result = super().delete(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
+        return result
 
     def get_pertinence_display(self):
         PERTINENCE_MATRIX = [
@@ -609,6 +660,17 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
+
+    def delete(self, *args, **kwargs):
+        ebios_rm_study_id = self.ebios_rm_study.id
+        result = super().delete(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
+        return result
 
     @staticmethod
     def _compute_criticality(
@@ -665,6 +727,15 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         help_text=_("RO/TO couple from which the attach path is derived"),
     )
     ref_id = models.CharField(max_length=100, blank=True)
+    focused_feared_event = models.ForeignKey(
+        FearedEvent,
+        verbose_name=_("Focused feared event"),
+        related_name="focused_strategic_scenarios",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text=_("Override gravity with this specific feared event's gravity"),
+    )
 
     fields_to_check = ["ebios_rm_study", "name", "ref_id"]
 
@@ -679,11 +750,24 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
+
+    def delete(self, *args, **kwargs):
+        ebios_rm_study_id = self.ebios_rm_study.id
+        result = super().delete(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
+        return result
 
     def get_gravity_display(self):
-        return FearedEvent.format_gravity(
-            self.ro_to_couple.get_gravity(), self.ebios_rm_study.parsed_matrix
-        )
+        if self.focused_feared_event:
+            gravity = self.focused_feared_event.gravity
+        else:
+            gravity = self.ro_to_couple.get_gravity()
+        return FearedEvent.format_gravity(gravity, self.ebios_rm_study.parsed_matrix)
 
 
 class AttackPath(NameDescriptionMixin, FolderMixin):
@@ -725,6 +809,34 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         self.ebios_rm_study = self.strategic_scenario.ebios_rm_study
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
+
+    def delete(self, *args, **kwargs):
+        ebios_rm_study_id = self.ebios_rm_study.id
+        result = super().delete(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
+        return result
+
+    @classmethod
+    def get_default_ref_id(cls, strategic_scenario):
+        attack_paths_ref_ids = list(
+            strategic_scenario.attack_paths.values_list("ref_id", flat=True)
+        )
+        nb_attack_paths = len(attack_paths_ref_ids) + 1
+        candidates = [f"AP.{i:02d}" for i in range(1, nb_attack_paths + 1)]
+        return next(x for x in candidates if x not in attack_paths_ref_ids)
+
+    @property
+    def form_display_name(self):
+        """Returns attack path name with strategic scenario for form dropdown display"""
+        base_name = self.name or f"Attack Path {str(self.id)[:8]}"
+        if self.strategic_scenario:
+            return f"{base_name} ({self.strategic_scenario.name})"
+        return base_name
 
     @property
     def ro_to_couple(self):
@@ -857,11 +969,18 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
         self.folder = self.operational_scenario.folder
         super().save(*args, **kwargs)
         self.operational_scenario.update_likelihood_from_operating_modes()
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
 
     def delete(self, *args, **kwargs):
         operational_scenario = self.operational_scenario
+        ebios_rm_study_id = self.ebios_rm_study.id
         super().delete(*args, **kwargs)
         operational_scenario.update_likelihood_from_operating_modes()
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
 
     @property
     def ebios_rm_study(self):
@@ -934,6 +1053,17 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.ebios_rm_study.folder
         super().save(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
+            updated_at=timezone.now()
+        )
+
+    def delete(self, *args, **kwargs):
+        ebios_rm_study_id = self.ebios_rm_study.id
+        result = super().delete(*args, **kwargs)
+        EbiosRMStudy.objects.filter(id=ebios_rm_study_id).update(
+            updated_at=timezone.now()
+        )
+        return result
 
     @property
     def risk_matrix(self):

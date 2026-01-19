@@ -8,11 +8,13 @@
 	let { data } = $props();
 
 	const appliedControlsHead = {
+		ref_id: 'refId',
 		name: 'name',
 		status: 'status',
 		priority: 'priority',
 		category: 'category',
 		csf_function: 'csfFunction',
+		owner: 'owner',
 		eta: 'eta',
 		expiry_date: 'expiryDate',
 		effort: 'effort',
@@ -78,11 +80,13 @@
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/risk-assessments/{page.params.id}/action-plan"
 			fields={[
+				'ref_id',
 				'name',
 				'status',
 				'priority',
 				'category',
 				'csf_function',
+				'owner',
 				'eta',
 				'expiry_date',
 				'effort',

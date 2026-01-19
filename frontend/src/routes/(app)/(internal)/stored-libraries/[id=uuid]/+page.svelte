@@ -27,6 +27,7 @@
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
 	const referenceControls = libraryObjects['reference_controls'] ?? [];
 	const threats = libraryObjects['threats'] ?? [];
+	const metricDefinitions = libraryObjects['metric_definitions'] ?? [];
 	const framework = libraryObjects['framework'];
 
 	function transformToTreeView(nodes) {
@@ -68,6 +69,24 @@
 		head: { ref_id: 'ref', name: 'name', description: 'description' },
 		body: tableSourceMapper(threats, ['ref_id', 'name', 'description']),
 		meta: { count: threats.length }
+	};
+
+	const metricDefinitionsTable: TableSource = {
+		head: {
+			ref_id: 'ref',
+			name: 'name',
+			description: 'description',
+			category: 'category',
+			unit: 'unit'
+		},
+		body: tableSourceMapper(metricDefinitions, [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'unit'
+		]),
+		meta: { count: metricDefinitions.length }
 	};
 
 	function riskMatricesPreview(riskMatrices: []) {
@@ -179,6 +198,16 @@
 					<strong>{m.copyright()}</strong>: {data.library.copyright}
 				</p>
 			{/if}
+			{#if data.library.filtering_labels && data.library.filtering_labels.length > 0}
+				<p class="text-md leading-5 text-gray-700">
+					<strong>{m.labels()}</strong>:
+				</p>
+				<ul class="list-disc list-inside">
+					{#each data.library.filtering_labels as label}
+						<li>{label.label}</li>
+					{/each}
+				</ul>
+			{/if}
 		</div>
 	</div>
 
@@ -230,6 +259,24 @@
 		>
 			<ModelTable
 				source={threatsTable}
+				displayActions={false}
+				pagination={false}
+				rowCount={false}
+				rowsPerPage={false}
+				search={false}
+				interactive={false}
+			/>
+		</Dropdown>
+	{/if}
+
+	{#if metricDefinitions.length > 0}
+		<Dropdown
+			style="hover:text-indigo-700"
+			icon="fa-solid fa-chart-line"
+			header="{metricDefinitions.length} {m.metricDefinitions()}"
+		>
+			<ModelTable
+				source={metricDefinitionsTable}
 				displayActions={false}
 				pagination={false}
 				rowCount={false}

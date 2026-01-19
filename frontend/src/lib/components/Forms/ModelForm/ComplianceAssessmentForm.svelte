@@ -122,7 +122,7 @@
 		}}
 		includeAllOptionFields
 	>
-		{#snippet optionSnippet(option: Record<string, any>)}
+		{#snippet optionSnippet(option: Record)}
 			<FrameworkResultSnippet {option} />
 		{/snippet}
 	</AutocompleteSelect>
@@ -159,8 +159,12 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="users?is_third_party=false"
-	optionsLabelField="email"
+	optionsEndpoint="actors?user__is_third_party=False"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
 	field="authors"
 	cacheLock={cacheLocks['authors']}
 	bind:cachedValue={formDataCache['authors']}
@@ -184,24 +188,42 @@
 	bind:cachedValue={formDataCache['eta']}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-	{#if context === 'create' && suggestions}
+	<div class="space-y-4">
+		{#if context === 'create' && suggestions}
+			<Checkbox
+				{form}
+				field="create_applied_controls_from_suggestions"
+				label={m.suggestControls()}
+				helpText={m.createAppliedControlsFromSuggestionsHelpText()}
+				cacheLock={cacheLocks['create_applied_controls_from_suggestions']}
+				bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
+			/>
+		{/if}
 		<Checkbox
 			{form}
-			field="create_applied_controls_from_suggestions"
-			label={m.suggestControls()}
-			helpText={m.createAppliedControlsFromSuggestionsHelpText()}
-			cacheLock={cacheLocks['create_applied_controls_from_suggestions']}
-			bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
+			field="show_documentation_score"
+			label={m.useDocumentationScore()}
+			helpText={m.useDocumentationScoreHelpText()}
+			cacheLock={cacheLocks['show_documentation_score']}
+			bind:cachedValue={formDataCache['show_documentation_score']}
 		/>
-	{/if}
-	<Checkbox
-		{form}
-		field="show_documentation_score"
-		label={m.useDocumentationScore()}
-		helpText={m.useDocumentationScoreHelpText()}
-		cacheLock={cacheLocks['show_documentation_score']}
-		bind:cachedValue={formDataCache['show_documentation_score']}
-	/>
+		<Checkbox
+			{form}
+			field="extended_result_enabled"
+			label={m.extendedResultEnabled()}
+			helpText={m.extendedResultEnabledHelpText()}
+			cacheLock={cacheLocks['extended_result_enabled']}
+			bind:cachedValue={formDataCache['extended_result_enabled']}
+		/>
+		<Checkbox
+			{form}
+			field="progress_status_enabled"
+			label={m.progressStatusEnabled()}
+			helpText={m.progressStatusEnabledHelpText()}
+			cacheLock={cacheLocks['progress_status_enabled']}
+			bind:cachedValue={formDataCache['progress_status_enabled']}
+		/>
+	</div>
 	<TextField
 		{form}
 		field="ref_id"
@@ -246,8 +268,12 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="users?is_third_party=false"
-		optionsLabelField="email"
+		optionsEndpoint="actors?user__is_third_party=False"
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
 		field="reviewers"
 		cacheLock={cacheLocks['reviewers']}
 		bind:cachedValue={formDataCache['reviewers']}

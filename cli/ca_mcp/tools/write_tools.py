@@ -7,6 +7,7 @@ from ..resolvers import (
     resolve_risk_matrix_id,
     resolve_framework_id,
     resolve_risk_assessment_id,
+    resolve_applied_control_id,
 )
 from ..config import GLOBAL_FOLDER_ID
 from ..utils.response_formatter import (
@@ -307,6 +308,7 @@ async def create_risk_scenario(
     current_impact: int = None,
     assets: list = None,
     threats: list = None,
+    threat_library: str = None,
     applied_controls: list = None,
     existing_applied_controls: list = None,
 ) -> str:
@@ -322,6 +324,7 @@ async def create_risk_scenario(
         current_impact: Impact 0-4 (0=very low, 4=very high)
         assets: List of asset IDs/names
         threats: List of threat IDs/names
+        threat_library: Library URN to filter threats (e.g. "urn:intuitem:risk:library:intuitem-common-catalog")
         applied_controls: List of planned control IDs/names
         existing_applied_controls: List of existing control IDs/names
     """
@@ -359,52 +362,43 @@ async def create_risk_scenario(
         if current_impact is not None:
             payload["current_impact"] = current_impact
 
-        # Resolve asset names to IDs if provided
+        # Resolve asset names to IDs if provided (pass folder_id to scope lookup)
         if assets:
             resolved_assets = []
             for asset in assets:
-                resolved_asset_id = resolve_asset_id(asset)
+                resolved_asset_id = resolve_asset_id(asset, folder_id=folder_id)
                 resolved_assets.append(resolved_asset_id)
             payload["assets"] = resolved_assets
 
-        # Resolve threat names to IDs if provided
+        # Resolve threat names to IDs if provided (pass folder_id to scope lookup for custom threats)
         if threats:
-            from ..resolvers import resolve_id_or_name
+            from ..resolvers import resolve_threat_id
 
             resolved_threats = []
             for threat in threats:
-                # Try to resolve as UUID first, otherwise lookup by name
-                if "-" in threat and len(threat) == 36:
-                    resolved_threats.append(threat)
-                else:
-                    # Look up threat by name
-                    threat_res = make_get_request("/threats/", params={"name": threat})
-                    if threat_res.status_code == 200:
-                        threat_data = threat_res.json()
-                        from ..client import get_paginated_results
-
-                        threat_results = get_paginated_results(threat_data)
-                        if threat_results:
-                            resolved_threats.append(threat_results[0]["id"])
-                        else:
-                            raise ValueError(f"Threat '{threat}' not found")
-                    else:
-                        raise ValueError(f"Failed to look up threat '{threat}'")
+                resolved_threat_id = resolve_threat_id(
+                    threat, library=threat_library, folder_id=folder_id
+                )
+                resolved_threats.append(resolved_threat_id)
             payload["threats"] = resolved_threats
 
-        # Resolve new/planned applied control names to IDs if provided
+        # Resolve new/planned applied control names to IDs if provided (pass folder_id to scope lookup)
         if applied_controls:
             resolved_controls = []
             for control in applied_controls:
-                resolved_control_id = resolve_applied_control_id(control)
+                resolved_control_id = resolve_applied_control_id(
+                    control, folder_id=folder_id
+                )
                 resolved_controls.append(resolved_control_id)
             payload["applied_controls"] = resolved_controls
 
-        # Resolve existing applied control names to IDs if provided
+        # Resolve existing applied control names to IDs if provided (pass folder_id to scope lookup)
         if existing_applied_controls:
             resolved_existing_controls = []
             for control in existing_applied_controls:
-                resolved_control_id = resolve_applied_control_id(control)
+                resolved_control_id = resolve_applied_control_id(
+                    control, folder_id=folder_id
+                )
                 resolved_existing_controls.append(resolved_control_id)
             payload["existing_applied_controls"] = resolved_existing_controls
 
@@ -665,6 +659,7 @@ async def create_quantitative_risk_scenario(
     folder_id: str = None,
     assets: list = None,
     threats: list = None,
+    threat_library: str = None,
 ) -> str:
     """Create quantitative risk scenario in study
 
@@ -677,6 +672,7 @@ async def create_quantitative_risk_scenario(
         folder_id: Folder ID/name
         assets: List of asset IDs/names
         threats: List of threat IDs/names
+        threat_library: Library URN to filter threats (e.g. "urn:intuitem:risk:library:intuitem-common-catalog")
     """
     try:
         from ..resolvers import resolve_id_or_name, resolve_asset_id
@@ -706,35 +702,24 @@ async def create_quantitative_risk_scenario(
         if priority is not None:
             payload["priority"] = priority
 
-        # Resolve asset names to IDs if provided
+        # Resolve asset names to IDs if provided (pass folder_id to scope lookup)
         if assets:
             resolved_assets = []
             for asset in assets:
-                resolved_asset_id = resolve_asset_id(asset)
+                resolved_asset_id = resolve_asset_id(asset, folder_id=folder_id)
                 resolved_assets.append(resolved_asset_id)
             payload["assets"] = resolved_assets
 
-        # Resolve threat names to IDs if provided
+        # Resolve threat names to IDs if provided (pass folder_id to scope lookup for custom threats)
         if threats:
+            from ..resolvers import resolve_threat_id
+
             resolved_threats = []
             for threat in threats:
-                # Try to resolve as UUID first, otherwise lookup by name
-                if "-" in threat and len(threat) == 36:
-                    resolved_threats.append(threat)
-                else:
-                    # Look up threat by name
-                    threat_res = make_get_request("/threats/", params={"name": threat})
-                    if threat_res.status_code == 200:
-                        threat_data = threat_res.json()
-                        from ..client import get_paginated_results
-
-                        threat_results = get_paginated_results(threat_data)
-                        if threat_results:
-                            resolved_threats.append(threat_results[0]["id"])
-                        else:
-                            raise ValueError(f"Threat '{threat}' not found")
-                    else:
-                        raise ValueError(f"Failed to look up threat '{threat}'")
+                resolved_threat_id = resolve_threat_id(
+                    threat, library=threat_library, folder_id=folder_id
+                )
+                resolved_threats.append(resolved_threat_id)
             payload["threats"] = resolved_threats
 
         res = make_post_request("/crq/quantitative-risk-scenarios/", payload)
@@ -822,19 +807,23 @@ async def create_quantitative_risk_hypothesis(
         if folder_id:
             payload["folder"] = folder_id
 
-        # Resolve existing applied control names to IDs if provided
+        # Resolve existing applied control names to IDs if provided (pass folder_id to scope lookup)
         if existing_applied_controls:
             resolved_existing = []
             for control in existing_applied_controls:
-                resolved_control_id = resolve_applied_control_id(control)
+                resolved_control_id = resolve_applied_control_id(
+                    control, folder_id=folder_id
+                )
                 resolved_existing.append(resolved_control_id)
             payload["existing_applied_controls"] = resolved_existing
 
-        # Resolve added applied control names to IDs if provided
+        # Resolve added applied control names to IDs if provided (pass folder_id to scope lookup)
         if added_applied_controls:
             resolved_added = []
             for control in added_applied_controls:
-                resolved_control_id = resolve_applied_control_id(control)
+                resolved_control_id = resolve_applied_control_id(
+                    control, folder_id=folder_id
+                )
                 resolved_added.append(resolved_control_id)
             payload["added_applied_controls"] = resolved_added
 
@@ -901,3 +890,109 @@ async def refresh_quantitative_risk_study_simulations(study_id: str) -> str:
             return f"Error refreshing simulations: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in refresh_quantitative_risk_study_simulations: {str(e)}"
+
+
+async def create_task_template(
+    name: str,
+    folder_id: str,
+    description: str = None,
+    status: str = None,
+    observation: str = None,
+    evidences: list = None,
+    is_published: bool = False,
+    task_date: str = None,
+    is_recurrent: bool = False,
+    ref_id: str = None,
+    schedule: str = None,
+    enabled: bool = True,
+    link: str = None,
+    assigned_to: list = None,
+    assets: list = None,
+    applied_controls: list = None,
+    compliance_assessments: list = None,
+    risk_assessments: list = None,
+    findings_assessment: list = None,
+) -> str:
+    """Create task template
+
+    Args:
+        name: Task template name (required)
+        folder_id: Folder ID/name (required)
+        description: Description
+        status: Status
+        observation: Observation text
+        evidences: Array of evidence UUIDs
+        is_published: Published flag
+        task_date: Task date (YYYY-MM-DD)
+        is_recurrent: Recurrent flag
+        ref_id: Reference ID
+        schedule: Schedule definition
+        enabled: Enabled flag
+        link: Link to evidence (e.g. Jira ticket)
+        assigned_to: Array of user UUIDs
+        assets: Array of asset UUIDs
+        applied_controls: List of applied control IDs/names
+        compliance_assessments: Array of compliance assessment UUIDs
+        risk_assessments: Array of risk assessment UUIDs
+        findings_assessment: Array of finding assessment UUIDs
+    """
+    try:
+        # Resolve folder name to ID if needed
+        folder_id = resolve_folder_id(folder_id)
+
+        payload = {
+            "name": name,
+            "folder": folder_id,
+            "is_published": is_published,
+            "is_recurrent": is_recurrent,
+            "enabled": enabled,
+        }
+
+        # Add optional fields if provided
+        if description is not None:
+            payload["description"] = description
+        if status is not None:
+            valid_statuses = ["pending", "in_progress", "cancelled", "completed"]
+            if status not in valid_statuses:
+                return f"Error: Invalid status '{status}'. Must be one of: {', '.join(valid_statuses)}"
+            payload["status"] = status
+        if observation is not None:
+            payload["observation"] = observation
+        if evidences is not None:
+            payload["evidences"] = evidences
+        if task_date is not None:
+            payload["task_date"] = task_date
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+        if schedule is not None:
+            payload["schedule"] = schedule
+        if link is not None:
+            payload["link"] = link
+        if assigned_to is not None:
+            payload["assigned_to"] = assigned_to
+        if assets is not None:
+            payload["assets"] = assets
+        if applied_controls is not None:
+            resolved_controls = []
+            for control in applied_controls:
+                resolved_control_id = resolve_applied_control_id(
+                    control, folder_id=folder_id
+                )
+                resolved_controls.append(resolved_control_id)
+            payload["applied_controls"] = resolved_controls
+        if compliance_assessments is not None:
+            payload["compliance_assessments"] = compliance_assessments
+        if risk_assessments is not None:
+            payload["risk_assessments"] = risk_assessments
+        if findings_assessment is not None:
+            payload["findings_assessment"] = findings_assessment
+
+        res = make_post_request("/task-templates/", payload)
+
+        if res.status_code == 201:
+            task = res.json()
+            return f"Created task template: {task.get('name')} (ID: {task.get('id')})"
+        else:
+            return f"Error creating task template: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_task_template: {str(e)}"

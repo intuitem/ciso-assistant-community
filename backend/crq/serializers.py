@@ -89,6 +89,16 @@ class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
         source="get_risk_tolerance_display", read_only=True
     )
     loss_threshold_display = serializers.CharField(read_only=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = QuantitativeRiskStudy
@@ -101,6 +111,9 @@ class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
         exclude = ["created_at", "updated_at"]
 
     def create(self, validated_data):
+        # Inherit folder from parent study
+        validated_data["folder"] = validated_data["quantitative_risk_study"].folder
+
         # Create the quantitative risk scenario
         scenario = super().create(validated_data)
 
@@ -150,9 +163,12 @@ class QuantitativeRiskHypothesisWriteSerializer(BaseModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
+        # Inherit folder from parent scenario
+        scenario = validated_data["quantitative_risk_scenario"]
+        validated_data["folder"] = scenario.folder
+
         # Check if this is a residual hypothesis and if parameters are not set
         risk_stage = validated_data.get("risk_stage")
-        scenario = validated_data.get("quantitative_risk_scenario")
         parameters = validated_data.get("parameters", {})
 
         # Find the current hypothesis in the same scenario (for residual hypothesis logic)

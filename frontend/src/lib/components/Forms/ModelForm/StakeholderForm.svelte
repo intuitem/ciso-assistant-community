@@ -83,6 +83,24 @@
 			$formData.residual_trust
 		)
 	);
+
+	// Track selected entity option from autocomplete (with all fields included)
+	let selectedEntityOption: any[] = $state([]);
+
+	// Auto-fill current assessment fields when entity is selected
+	$effect(() => {
+		if (context === 'create' && selectedEntityOption.length > 0) {
+			const entity = selectedEntityOption[0];
+			// Only auto-fill if we have default values from the entity
+			if (entity.default_dependency !== undefined) {
+				// Update form data - RadioGroup will react to these changes now
+				$formData.current_dependency = entity.default_dependency ?? 0;
+				$formData.current_penetration = entity.default_penetration ?? 0;
+				$formData.current_maturity = entity.default_maturity ?? 1;
+				$formData.current_trust = entity.default_trust ?? 1;
+			}
+		}
+	});
 </script>
 
 <AutocompleteSelect
@@ -114,9 +132,11 @@
 					field="entity"
 					cacheLock={cacheLocks['entity']}
 					bind:cachedValue={formDataCache['entity']}
+					bind:cachedOptions={selectedEntityOption}
 					label={m.entity()}
 					hidden={initialData.entity}
 					helpText={m.stakeholderEntityHelpText()}
+					includeAllOptionFields={true}
 					optionsInfoFields={{
 						fields: [
 							{
@@ -280,7 +300,11 @@
 				/>
 			</div>
 			<div class="flex items-end">
-				<button class="btn input h-11 w-11" onclick={modalMeasureCreateForm} type="button"
+				<button
+					class="btn input h-11 w-11"
+					aria-label={m.addAppliedControl()}
+					onclick={modalMeasureCreateForm}
+					type="button"
 					><i class="fa-solid fa-plus text-sm"></i>
 				</button>
 			</div>
