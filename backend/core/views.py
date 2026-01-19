@@ -5558,6 +5558,7 @@ class UserFilter(GenericFilterSet):
             "expiry_date",
             "user_groups",
             "exclude_current",
+            "representative__entity",
         ]
 
 
