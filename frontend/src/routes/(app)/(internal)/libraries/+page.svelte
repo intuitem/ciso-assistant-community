@@ -29,9 +29,11 @@
 
 	interface QuickFilters {
 		object_type: Set<string>;
+		is_update: boolean;
 	}
 	let quickFilterValues: QuickFilters = {
-		object_type: new Set()
+		object_type: new Set(),
+		is_update: false
 	};
 
 	type FilterConfig = {
@@ -81,9 +83,17 @@
 		}
 	};
 
+	const updatableFilterConfig: FilterConfig = {
+		icon: 'fa-rotate',
+		selectedClass: 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-teal-200',
+		hoverClass: 'hover:border-teal-400 hover:bg-teal-50',
+		label: m.updateAvailable()
+	};
+
 	const filterTypes = Object.keys(filterConfiguration);
 
 	let quickFilterSelected: Record<string, boolean> = $state({});
+	let updatableFilterSelected: boolean = $state(false);
 </script>
 
 <div class="card bg-white py-2 shadow-sm">
@@ -102,6 +112,11 @@
 			filteredObjectTypes.forEach((filterKey) => {
 				quickFilterSelected[filterKey] = true;
 			});
+
+			// Handle is_update filter state
+			const isUpdateValue = filters['is_update'];
+			updatableFilterSelected = isUpdateValue === 'true' || isUpdateValue === true;
+			quickFilterValues.is_update = updatableFilterSelected;
 		}}
 	>
 		{#snippet quickFilters(filterValues, form, invalidateTable)}
@@ -162,6 +177,41 @@
 						</span>
 					</button>
 				{/each}
+				<button
+					class="group relative px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ease-out transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md
+                    {updatableFilterSelected
+						? updatableFilterConfig.selectedClass
+						: `bg-white text-gray-700 border-2 border-gray-300 ${updatableFilterConfig.hoverClass}`}"
+					onclick={() => {
+						quickFilterValues.is_update = !quickFilterValues.is_update;
+						updatableFilterSelected = quickFilterValues.is_update;
+
+						form.form.update((currentData) => {
+							currentData['is_update'] = quickFilterValues.is_update ? 'true' : null;
+							return currentData;
+						});
+
+						invalidateTable();
+					}}
+				>
+					<span class="flex items-center gap-2">
+						<i
+							class="fa-solid {updatableFilterConfig.icon} transition-transform duration-200 {updatableFilterSelected
+								? 'scale-110'
+								: 'group-hover:scale-110'}"
+						></i>
+						<span class="font-semibold">{updatableFilterConfig.label}</span>
+						{#if updatableFilterSelected}
+							<svg class="h-4 w-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									fill-rule="evenodd"
+									d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						{/if}
+					</span>
+				</button>
 			</div>
 		{/snippet}
 		{#snippet addButton()}
