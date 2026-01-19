@@ -1074,5 +1074,8 @@
 	],
 	"cascadeAffectedHint": "Az alábbi elemek a rendszerben maradnak, de a kapcsolataik ebben az objektumban törlődnek.",
 	"libraryFilteringLabels": "Könyvtári címkék",
-	"appliedControlsPlaceholder": "Alkalmazott kontrollok kiválasztása..."
+	"appliedControlsPlaceholder": "Alkalmazott kontrollok kiválasztása...",
+	"assignmentSettings": "Hozzárendelési beállítások",
+	"allowAssignmentsToEntities": "Engedélyezze a hozzárendelést entitásokhoz",
+	"allowAssignmentsToEntitiesDescription": "Lehetővé teszi, hogy az entitások szereplőként jelenjenek meg tulajdonosok, szerzők vagy lektorok kijelölésekor."
 }

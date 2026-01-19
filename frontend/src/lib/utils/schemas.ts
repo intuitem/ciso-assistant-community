@@ -512,7 +512,8 @@ export const GeneralSettingsSchema = z.object({
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
-	show_warning_external_links: z.boolean().default(true).optional()
+	show_warning_external_links: z.boolean().default(true).optional(),
+	allow_assignments_to_entities: z.boolean().default(false).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -1406,6 +1407,15 @@ export const DashboardWidgetSchema = z.object({
 	widget_config: jsonSchema.default({})
 });
 
+export const teamSchema = z.object({
+	...NameDescriptionMixin,
+	team_email: z.string().email().optional(),
+	folder: z.string(),
+	members: z.array(z.string().uuid().optional()).optional(),
+	leader: z.string().uuid().optional().nullable(),
+	deputies: z.array(z.string().uuid().optional()).optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1481,7 +1491,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	dashboards: DashboardSchema,
 	'dashboard-widgets': DashboardWidgetSchema,
 	'dashboard-text-widgets': DashboardWidgetSchema,
-	'dashboard-builtin-widgets': DashboardWidgetSchema
+	'dashboard-builtin-widgets': DashboardWidgetSchema,
+	teams: teamSchema
 };
 
 export const modelSchema = (model: string) => {

@@ -222,8 +222,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
-			{ field: 'authors', urlModel: 'users' },
-			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'authors', urlModel: 'actors' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' },
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' }
@@ -273,7 +273,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'auditor', urlModel: 'users' },
-			{ field: 'owner', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
 			{ field: 'qualifications', urlModel: 'terminologies' }
 		],
@@ -316,7 +316,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'objectives', urlModel: 'organisation-objectives' },
-			{ field: 'owner', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' },
@@ -387,7 +387,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'reference_control', urlModel: 'reference-controls', urlParams: 'category=policy' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'owner', urlModel: 'users' }
+			{ field: 'owner', urlModel: 'actors' }
 		],
 		detailViewFields: [
 			{ field: 'folder' },
@@ -594,7 +594,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'parent_assets', urlModel: 'assets' },
 			{ field: 'support_assets', urlModel: 'assets' },
 			{ field: 'children_assets', urlModel: 'assets' },
-			{ field: 'owner', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'asset_class', urlModel: 'asset-class' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
@@ -643,6 +643,19 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Users',
 		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
 		filters: []
+	},
+	teams: {
+		name: 'team',
+		localName: 'team',
+		localNamePlural: 'teams',
+		verboseName: 'Team',
+		verboseNamePlural: 'Teams',
+		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'leader', urlModel: 'users' },
+			{ field: 'deputies', urlModel: 'users' },
+			{ field: 'members', urlModel: 'users' }
+		]
 	},
 	'user-groups': {
 		name: 'usergroup',
@@ -702,7 +715,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'findings', urlModel: 'findings' },
 			{ field: 'findings_assessments', urlModel: 'findings-assessments' },
-			{ field: 'owner', urlModel: 'users' }
+			{ field: 'owner', urlModel: 'actors' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'evidence', urlModel: 'evidence-revisions' },
@@ -770,8 +783,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'campaign', urlModel: 'campaigns', endpointUrl: 'campaigns' },
 			{ field: 'framework', urlModel: 'frameworks' },
-			{ field: 'authors', urlModel: 'users' },
-			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'authors', urlModel: 'actors' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'baseline', urlModel: 'compliance-assessments' },
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm' },
 			{ field: 'assets', urlModel: 'assets' },
@@ -905,9 +918,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'solutions', urlModel: 'solutions' },
 			{ field: 'framework', urlModel: 'frameworks' },
-			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'authors', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'representatives', urlModel: 'users', urlParams: 'is_third_party=true' },
-			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'evidence', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
 		],
@@ -924,7 +937,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
-			{ field: 'owner', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
@@ -955,7 +968,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'owner', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'beneficiary_entity', urlModel: 'entities' },
 			{ field: 'evidences', urlModel: 'evidences' },
@@ -1015,8 +1028,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
-			{ field: 'authors', urlModel: 'users' },
-			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'authors', urlModel: 'actors' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' }
 		],
 		reverseForeignKeyFields: [{ field: 'bia', urlModel: 'asset-assessments' }],
@@ -1027,6 +1040,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'name' },
 			{ field: 'perimeter' },
+			{ field: 'authors' },
+			{ field: 'reviewers' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'description' },
@@ -1102,7 +1117,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }, { field: 'nature' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'owner', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'entities' },
 			{ field: 'purposes', urlModel: 'purposes' },
 			{ field: 'assigned_to', urlModel: 'users', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
@@ -1168,7 +1183,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'request_type' }, { field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'owner', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'processings', urlModel: 'processings', endpointUrl: 'processings' }
 		],
 		detailViewFields: [
@@ -1328,8 +1343,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'assets', urlModel: 'assets' },
-			{ field: 'authors', urlModel: 'users', urlParams: 'is_third_party=false' },
-			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'authors', urlModel: 'actors', urlParams: 'is_third_party=false' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'reference_entity', urlModel: 'entities' }
@@ -1622,7 +1637,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Security exception',
 		verboseNamePlural: 'Security exceptions',
 		foreignKeyFields: [
-			{ field: 'owners', urlModel: 'users' },
+			{ field: 'owners', urlModel: 'actors' },
 			{ field: 'approver', urlModel: 'users', urlParams: 'is_approver=true' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'assets', urlModel: 'assets' }
@@ -1670,9 +1685,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
-			{ field: 'authors', urlModel: 'users' },
-			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' },
-			{ field: 'owner', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'authors', urlModel: 'actors' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
+			{ field: 'owner', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		reverseForeignKeyFields: [
@@ -1686,6 +1701,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ref_id' },
 			{ field: 'name' },
 			{ field: 'description' },
+			{ field: 'authors' },
+			{ field: 'reviewers' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'version' },
@@ -1739,7 +1756,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
-			{ field: 'owners', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'owners', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'qualifications', urlModel: 'terminologies' },
 			{ field: 'entities', urlModel: 'entities' }
 		],
@@ -1967,8 +1984,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		endpointUrl: 'crq/quantitative-risk-studies',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'authors', urlModel: 'users' },
-			{ field: 'reviewers', urlModel: 'users', urlParams: 'is_third_party=false' }
+			{ field: 'authors', urlModel: 'actors' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' }
 		],
 		reverseForeignKeyFields: [
 			{
@@ -1988,6 +2005,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'id' },
 			{ field: 'status' },
 			{ field: 'authors' },
+			{ field: 'reviewers' },
 			{ field: 'eta', type: 'date' },
 			{ field: 'due_date', type: 'date' },
 			{ field: 'risk_tolerance_display' },
@@ -2012,7 +2030,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				endpointUrl: 'crq/quantitative-risk-studies'
 			},
 			{ field: 'assets', urlModel: 'assets' },
-			{ field: 'owner', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'qualifications', urlModel: 'qualifications' }
@@ -2240,7 +2258,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'metric_definition', urlModel: 'metric-definitions' },
 			{ field: 'unit', urlModel: 'terminologies' },
-			{ field: 'owner', urlModel: 'users' },
+			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'organisation_objectives', urlModel: 'organisation-objectives' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],

@@ -165,16 +165,24 @@ def resolve_risk_assessment_id(assessment_name_or_id: str) -> str:
     return assessments[0]["id"]
 
 
-def resolve_asset_id(asset_name_or_id: str) -> str:
+def resolve_asset_id(asset_name_or_id: str, folder_id: str = None) -> str:
     """Helper function to resolve asset name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
+
+    Args:
+        asset_name_or_id: Asset name or UUID
+        folder_id: Optional folder UUID to scope the lookup (avoids ambiguity)
     """
     # Check if it's already a UUID
     if "-" in asset_name_or_id and len(asset_name_or_id) == 36:
         return asset_name_or_id
 
-    # Otherwise, look up by name
-    res = make_get_request("/assets/", params={"name": asset_name_or_id})
+    # Build query params with optional folder scoping
+    params = {"name": asset_name_or_id}
+    if folder_id:
+        params["folder"] = folder_id
+
+    res = make_get_request("/assets/", params=params)
 
     if res.status_code != 200:
         raise ValueError(f"Asset '{asset_name_or_id}' API error {res.status_code}")
@@ -223,16 +231,24 @@ def resolve_risk_scenario_id(scenario_name_or_id: str) -> str:
     return scenarios[0]["id"]
 
 
-def resolve_applied_control_id(control_name_or_id: str) -> str:
+def resolve_applied_control_id(control_name_or_id: str, folder_id: str = None) -> str:
     """Helper function to resolve applied control name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
+
+    Args:
+        control_name_or_id: Control name or UUID
+        folder_id: Optional folder UUID to scope the lookup (avoids ambiguity)
     """
     # Check if it's already a UUID
     if "-" in control_name_or_id and len(control_name_or_id) == 36:
         return control_name_or_id
 
-    # Otherwise, look up by name
-    res = make_get_request("/applied-controls/", params={"name": control_name_or_id})
+    # Build query params with optional folder scoping
+    params = {"name": control_name_or_id}
+    if folder_id:
+        params["folder"] = folder_id
+
+    res = make_get_request("/applied-controls/", params=params)
 
     if res.status_code != 200:
         raise ValueError(
@@ -329,6 +345,58 @@ def resolve_id_or_name(name_or_id: str, endpoint: str) -> str:
         )
 
     return results[0]["id"]
+
+
+def resolve_threat_id(
+    threat_name_or_id: str, library: str = None, folder_id: str = None
+) -> str:
+    """Helper function to resolve threat name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+
+    Args:
+        threat_name_or_id: Threat name or UUID
+        library: Optional library URN/ID to filter threats by specific library
+        folder_id: Optional folder UUID to scope the lookup (for custom threats)
+
+    Returns:
+        UUID of the threat
+    """
+    # Check if it's already a UUID
+    if "-" in threat_name_or_id and len(threat_name_or_id) == 36:
+        return threat_name_or_id
+
+    # Build query params
+    params = {"name": threat_name_or_id}
+    if library:
+        # Resolve library URN to ID if needed
+        library_id = resolve_library_id(library)
+        params["library"] = library_id
+    if folder_id:
+        params["folder"] = folder_id
+
+    res = make_get_request("/threats/", params=params)
+
+    if res.status_code != 200:
+        raise ValueError(f"Threat '{threat_name_or_id}' API error {res.status_code}")
+
+    data = res.json()
+    threats = get_paginated_results(data)
+
+    if not threats:
+        raise ValueError(f"Threat '{threat_name_or_id}' not found")
+
+    if len(threats) > 1:
+        # Provide helpful info about which libraries have matching threats
+        threat_info = [
+            f"{t['name']} (provider: {t.get('provider', 'unknown')})"
+            for t in threats[:3]
+        ]
+        raise ValueError(
+            f"Ambiguous threat name '{threat_name_or_id}', found {len(threats)}: {threat_info}. "
+            f"Use the threat UUID or specify a library filter."
+        )
+
+    return threats[0]["id"]
 
 
 def resolve_library_id(library_urn_or_id: str) -> str:

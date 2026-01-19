@@ -15,7 +15,6 @@ from auditlog.registry import auditlog
 from django.utils.functional import cached_property
 import yaml
 from django.apps import apps
-from django.contrib.auth import get_user_model
 from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
@@ -41,7 +40,13 @@ from library.helpers import (
 
 from global_settings.models import GlobalSettings
 
-from .base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
+from .base_models import (
+    AbstractBaseModel,
+    ActorSyncManager,
+    ActorSyncMixin,
+    ETADueDateMixin,
+    NameDescriptionMixin,
+)
 from .utils import (
     camel_case,
     sha256,
@@ -2356,7 +2361,7 @@ class SecurityException(NameDescriptionMixin, FolderMixin, PublishInRootFolderMi
         verbose_name="Expiration date",
     )
     owners = models.ManyToManyField(
-        User,
+        "core.Actor",
         blank=True,
         verbose_name="Owner",
         related_name="security_exceptions",
@@ -2565,7 +2570,7 @@ class Asset(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
     owner = models.ManyToManyField(
-        User,
+        "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
         related_name="assets",
@@ -3741,7 +3746,7 @@ class Evidence(
     is_published = models.BooleanField(_("published"), default=True)
 
     owner = models.ManyToManyField(
-        User,
+        "core.Actor",
         verbose_name="Owner",
         related_name="evidences",
         blank=True,
@@ -3986,10 +3991,10 @@ class Incident(NameDescriptionMixin, FolderMixin):
         blank=True,
     )
     owners = models.ManyToManyField(
-        User,
-        related_name="incidents",
-        verbose_name="Owners",
+        "core.Actor",
         blank=True,
+        verbose_name="Owner",
+        related_name="incidents",
     )
     assets = models.ManyToManyField(
         Asset,
@@ -4198,7 +4203,7 @@ class AppliedControl(
         verbose_name=_("Status"),
     )
     owner = models.ManyToManyField(
-        User,
+        "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
         related_name="applied_controls",
@@ -4815,17 +4820,17 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         blank=True,
         null=True,
     )
-    authors = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Authors"),
-        related_name="%(class)s_authors",
-    )
     reviewers = models.ManyToManyField(
-        User,
+        "core.Actor",
         blank=True,
         verbose_name=_("Reviewers"),
         related_name="%(class)s_reviewers",
+    )
+    authors = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        verbose_name=_("Authors"),
+        related_name="%(class)s_authors",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
@@ -5509,7 +5514,7 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
     )
 
     owner = models.ManyToManyField(
-        User,
+        "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
         related_name="risk_scenarios",
@@ -7175,7 +7180,7 @@ class FindingsAssessment(Assessment):
         SELF_IDENTIFIED = "self_identified", "Self-identified"
 
     owner = models.ManyToManyField(
-        User,
+        "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
         related_name="findings_assessments",
@@ -7308,7 +7313,7 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
         blank=True,
     )
     owner = models.ManyToManyField(
-        User,
+        "core.Actor",
         blank=True,
         verbose_name=_("Owner"),
         related_name="findings",
@@ -7901,6 +7906,114 @@ class FlowEvent(AbstractBaseModel, FolderMixin):
 
     def __str__(self) -> str:
         return f"{self.validation_flow.ref_id} - {self.event_type} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
+    objects = ActorSyncManager()
+
+    leader = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="led_teams",
+        verbose_name="Team Leader",
+        help_text="The leader of the team",
+    )
+    deputies = models.ManyToManyField(
+        User,
+        related_name="deputy_teams",
+        blank=True,
+        verbose_name="Team Deputies",
+        help_text="The deputies of the team",
+    )
+    members = models.ManyToManyField(
+        User,
+        related_name="teams",
+        blank=True,
+        verbose_name="Team Members",
+        help_text="The members of the team",
+    )
+    team_email = models.EmailField(verbose_name="Team Email", blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.is_published = True
+        return super().save(*args, **kwargs)
+
+    def get_emails(self) -> list[str]:
+        emails = []
+        if self.team_email:
+            emails.append(self.team_email)
+        leader_email = self.leader.email
+        if leader_email:
+            emails.append(leader_email)
+        deputy_emails = self.deputies.exclude(email="").values_list("email", flat=True)
+        emails.extend(deputy_emails)
+        member_emails = self.members.exclude(email="").values_list("email", flat=True)
+        emails.extend(member_emails)
+        return list(dict.fromkeys(emails))
+
+    class Meta:
+        ordering = ["name"]
+
+
+class Actor(AbstractBaseModel):
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, null=True, blank=True, related_name="actor"
+    )
+    team = models.OneToOneField(
+        Team, on_delete=models.CASCADE, null=True, blank=True, related_name="actor"
+    )
+    entity = models.OneToOneField(
+        "tprm.Entity",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="actor",
+    )
+
+    class Meta:
+        constraints = [
+            # Ensure exactly one field is set (XOR logic)
+            models.CheckConstraint(
+                check=(
+                    Q(user__isnull=False, team__isnull=True, entity__isnull=True)
+                    | Q(user__isnull=True, team__isnull=False, entity__isnull=True)
+                    | Q(user__isnull=True, team__isnull=True, entity__isnull=False)
+                ),
+                name="actor_exactly_one_link",
+            )
+        ]
+
+    def save(self, *args, **kwargs):
+        self.is_published = True
+        return super().save(*args, **kwargs)
+
+    @property
+    def type(self):
+        """Helper to return the type of underlying instance."""
+        if self.user:
+            return "user"
+        if self.team:
+            return "team"
+        if self.entity:
+            return "entity"
+        return None
+
+    @property
+    def specific(self):
+        """Helper to return the actual underlying instance."""
+        if self.user:
+            return self.user
+        if self.team:
+            return self.team
+        if self.entity:
+            return self.entity
+        raise ValueError("Actor has no underlying instance")
+
+    def get_emails(self) -> list[str]:
+        return self.specific.get_emails()
+
+    def __str__(self):
+        return str(self.specific)
 
 
 common_exclude = ["created_at", "updated_at"]

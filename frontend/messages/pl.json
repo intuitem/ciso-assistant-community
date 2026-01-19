@@ -1814,5 +1814,8 @@
 	],
 	"cascadeAffectedHint": "Poniższe elementy pozostają w systemie, ale ich linki do tego obiektu zostaną usunięte.",
 	"libraryFilteringLabels": "Etykiety biblioteki",
-	"appliedControlsPlaceholder": "Wybierz stosowane kontrole..."
+	"appliedControlsPlaceholder": "Wybierz stosowane kontrole...",
+	"assignmentSettings": "Ustawienia przydziałów",
+	"allowAssignmentsToEntities": "Zezwól na przydziały do encji",
+	"allowAssignmentsToEntitiesDescription": "Pozwala, aby encje pojawiały się jako aktorzy podczas przypisywania właścicieli, autorów lub recenzentów."
 }

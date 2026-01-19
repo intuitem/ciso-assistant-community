@@ -18,6 +18,7 @@ from typing import Dict, Any, List, Tuple
 import time
 from django.db.models import (
     F,
+    CharField,
     Count,
     Q,
     ExpressionWrapper,
@@ -63,8 +64,6 @@ from django.db.models.functions import Lower
 from docxtpl import DocxTemplate
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
-from integrations.registry import IntegrationRegistry
-from library.serializers import StoredLibrarySerializer
 from webhooks.service import dispatch_webhook_event
 from .generators import gen_audit_context
 from .serializer_fields import FieldsRelatedField
@@ -159,6 +158,7 @@ from serdes.utils import (
 from serdes.serializers import ExportSerializer
 from django.contrib.admin.utils import NestedObjects
 from django.db import router
+from global_settings.models import GlobalSettings
 from global_settings.utils import ff_is_enabled
 
 import structlog
@@ -5651,6 +5651,59 @@ class ValidationFlowViewSet(BaseModelViewSet):
             )
 
 
+class ActorViewSet(BaseModelViewSet):
+    http_method_names = ["get", "head", "options"]
+
+    model = Actor
+    search_fields = []
+    ordering = [
+        "type_rank",
+        "display_name",
+        "id",
+    ]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.select_related("user", "team", "entity")
+
+        queryset = queryset.annotate(
+            # Define the order: User (1), Team (2), Entity (3)
+            type_rank=Case(
+                When(user__isnull=False, then=Value(1)),
+                When(team__isnull=False, then=Value(2)),
+                When(entity__isnull=False, then=Value(3)),
+                default=Value(4),  # Fallback
+                output_field=IntegerField(),
+            ),
+            # Combine the different name fields into one column
+            display_name=Coalesce(
+                "user__email", "team__name", "entity__name", output_field=CharField()
+            ),
+        )
+
+        allow_entities = (
+            GlobalSettings.objects.filter(name=GlobalSettings.Names.GENERAL)
+            .values_list("value__allow_assignments_to_entities", flat=True)
+            .first()
+        )
+        if not allow_entities:
+            queryset = queryset.filter(entity__isnull=True)
+
+        return queryset.order_by("type_rank", "display_name")
+
+
+class TeamViewSet(BaseModelViewSet):
+    model = Team
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "leader")
+            .prefetch_related("members", "deputies")
+        )
+
+
 class UserViewSet(BaseModelViewSet):
     """
     API endpoint that allows users to be viewed or edited
@@ -5933,12 +5986,12 @@ class FolderViewSet(BaseModelViewSet):
     @action(detail=False, methods=["get"])
     def my_assignments(self, request):
         risk_assessments = RiskAssessment.objects.filter(
-            Q(authors=request.user) | Q(reviewers=request.user)
+            Q(authors=request.user.actor) | Q(reviewers=request.user.actor)
         ).distinct()
 
         audits = (
             ComplianceAssessment.objects.filter(
-                Q(authors=request.user) | Q(reviewers=request.user)
+                Q(authors=request.user.actor) | Q(reviewers=request.user.actor)
             )
             .order_by(F("eta").asc(nulls_last=True))
             .distinct()
@@ -5953,12 +6006,14 @@ class FolderViewSet(BaseModelViewSet):
             avg_progress = int(sum / audits.count())
 
         controls = (
-            AppliedControl.objects.filter(owner=request.user)
+            AppliedControl.objects.filter(owner=request.user.actor)
             .order_by(F("eta").asc(nulls_last=True))
             .distinct()
         )
         non_active_controls = controls.exclude(status="active")
-        risk_scenarios = RiskScenario.objects.filter(owner=request.user).distinct()
+        risk_scenarios = RiskScenario.objects.filter(
+            owner=request.user.actor
+        ).distinct()
         controls_progress = 0
         evidences_progress = 0
         tot_ac = controls.count()

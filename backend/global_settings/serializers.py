@@ -19,6 +19,7 @@ GENERAL_SETTINGS_KEYS = [
     "allow_self_validation",
     "show_warning_external_links",
     "builtin_metrics_retention_days",
+    "allow_assignments_to_entities",
 ]
 
 

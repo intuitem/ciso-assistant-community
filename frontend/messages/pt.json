@@ -1074,5 +1074,8 @@
 	],
 	"cascadeAffectedHint": "Os itens abaixo permanecem no sistema, mas seus links para este objeto serão removidos.",
 	"libraryFilteringLabels": "Etiquetas de biblioteca",
-	"appliedControlsPlaceholder": "Selecione os controles aplicados..."
+	"appliedControlsPlaceholder": "Selecione os controles aplicados...",
+	"assignmentSettings": "Configurações de atribuição",
+	"allowAssignmentsToEntities": "Permitir atribuições a entidades",
+	"allowAssignmentsToEntitiesDescription": "Permite que as entidades apareçam como atores ao atribuir proprietários, autores ou revisores."
 }
