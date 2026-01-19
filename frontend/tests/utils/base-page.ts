@@ -71,9 +71,15 @@ export abstract class BasePage {
 		}
 	}
 
-	async isToastVisible(value: string, flags?: string | undefined, options?: {} | undefined) {
+	async isToastVisible(value: string, flags?: string, options?: { optional?: boolean }) {
 		const toast = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
-		await expect(toast).toHaveCount(1);
+		try {
+			await expect(toast).toHaveCount(1);
+		} catch (error) {
+			if (!(options?.optional ?? false)) throw error;
+			console.warn(`[toast] Optional toast not found: "${value}" (flags: ${flags ?? 'none'})`);
+			return toast;
+		}
 		await toast.first().getByLabel('Dismiss toast').click();
 		return toast;
 	}
