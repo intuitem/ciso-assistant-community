@@ -5661,6 +5661,7 @@ class ActorViewSet(BaseModelViewSet):
         "display_name",
         "id",
     ]
+    filterset_fields = ["user__is_third_party"]
 
     def get_queryset(self):
         queryset = super().get_queryset()
