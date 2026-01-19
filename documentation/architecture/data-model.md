@@ -351,7 +351,8 @@ erDiagram
         string type
         url    reference_link
         json   security_objectives
-        json   disaster_recovery_objectives // contient rto, rpo, mtd, ...
+        json   disaster_recovery_objectives
+               %% contains rto, rpo, mtd, ...
     }
 
     RISK_SCENARIO {
