@@ -81,10 +81,33 @@ def generate_mapping_excel(source_yaml, target_yaml):
 
     library_urn = f"urn:{packager.lower()}:risk:library:{ref_id}"
     mapping_urn = f"urn:{packager.lower()}:risk:req_mapping_set:{ref_id}"
-    source_node_base_urn = f"urn:{packager.lower()}:risk:req_node:{source_ref_id}"
-    target_node_base_urn = f"urn:{packager.lower()}:risk:req_node:{target_ref_id}"
+    
+    # --- Get Correct Source & Target Requirement Node Base URN ---
+    
+    # Source & Target Requirement Node List
+    
+    source_req_nodes = source_framework.get("requirement_nodes")
+    if not source_req_nodes:
+        raise ValueError('Source framework: Missing or empty "requirement_nodes"')
 
-    # Create a new workbook and remove default sheet
+    target_req_nodes = target_framework.get("requirement_nodes")
+    if not target_req_nodes:
+        raise ValueError('Target framework: Missing or empty "requirement_nodes"')
+    
+    # First Req node of the list
+    source_first_req_node = source_req_nodes[0]
+    target_first_req_node = target_req_nodes[0]
+    
+    # URN of the 1st Req Node
+    source_first_req_node_urn_split: str = source_first_req_node["urn"].split(":")
+    target_first_req_node_urn_split: str = target_first_req_node["urn"].split(":")
+    
+    # Get the first 5 elements of the URN forming the actual Requirement Node Base URN
+    source_node_base_urn = ":".join(source_first_req_node_urn_split[:5])
+    target_node_base_urn = ":".join(target_first_req_node_urn_split[:5])
+    
+
+    # --- Create a new workbook and remove default sheet ---
     wb_output = openpyxl.Workbook()
     default_sheet = wb_output.active
     wb_output.remove(default_sheet)
