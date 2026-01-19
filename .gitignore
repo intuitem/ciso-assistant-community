@@ -22,6 +22,3 @@ charts/ciso-assistant-next/custom.yaml
 .history/
 __pycache__
 cli/db_backup
-frontend/package-lock.json
-frontend/project.inlang/.meta.json
-frontend/project.inlang/README.md
