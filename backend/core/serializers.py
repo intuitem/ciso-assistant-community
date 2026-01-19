@@ -335,6 +335,12 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
         if old_status != "deprecated" and new_status == "deprecated":
             validated_data["is_locked"] = True
 
+        # If perimeter is being changed, update folder to match the new perimeter's folder
+        if "perimeter" in validated_data:
+            new_perimeter = validated_data["perimeter"]
+            if new_perimeter and new_perimeter.folder:
+                validated_data["folder"] = new_perimeter.folder
+
         return super().update(instance, validated_data)
 
     class Meta:
@@ -1914,7 +1920,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         return assessment
 
     def update(self, instance, validated_data):
-        # Track old authors and folder before update
+        # Track old authors, folder, and perimeter before update
         old_author_ids = set(instance.authors.values_list("id", flat=True))
         old_folder_id = instance.folder_id
 
@@ -1923,6 +1929,12 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         new_status = validated_data.get("status", old_status)
         if old_status != "deprecated" and new_status == "deprecated":
             validated_data["is_locked"] = True
+
+        # If perimeter is being changed, update folder to match the new perimeter's folder
+        if "perimeter" in validated_data:
+            new_perimeter = validated_data["perimeter"]
+            if new_perimeter and new_perimeter.folder:
+                validated_data["folder"] = new_perimeter.folder
 
         with transaction.atomic():
             # Perform the main update (fields + M2M)
@@ -2386,6 +2398,8 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
         return super().validate(attrs)
 
     def update(self, instance, validated_data):
+        # Track old folder before update
+        old_folder_id = instance.folder_id
         # Check if status is changing to deprecated
         old_status = instance.status
         new_status = validated_data.get("status", old_status)
@@ -2394,7 +2408,22 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
         if old_status != "deprecated" and new_status == "deprecated":
             validated_data["is_locked"] = True
 
-        return super().update(instance, validated_data)
+        # If perimeter is being changed, update folder to match the new perimeter's folder
+        if "perimeter" in validated_data:
+            new_perimeter = validated_data["perimeter"]
+            if new_perimeter and new_perimeter.folder:
+                validated_data["folder"] = new_perimeter.folder
+
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
+
+            # Cascade folder change to findings
+            if old_folder_id != updated_instance.folder_id:
+                Finding.objects.filter(findings_assessment=updated_instance).update(
+                    folder=updated_instance.folder
+                )
+
+        return updated_instance
 
     class Meta:
         model = FindingsAssessment
