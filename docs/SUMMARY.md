@@ -45,6 +45,7 @@
   * [User Groups](model/organization/user-groups.md)
   * [Custom roles](model/organization/custom-roles.md)
   * [Understanding the IAM model](model/organization/understanding-the-iam-model.md)
+  * [Teams](model/organization/teams.md)
 * [⚙️ Context](model/context.md)
 * [🏛️ Governance](model/governance.md)
 * [💣 Risk](model/risk.md)
