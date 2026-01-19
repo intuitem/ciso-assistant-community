@@ -18,6 +18,7 @@
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
+	import { countMasked } from '$lib/utils/related-visibility';
 
 	import Question from '$lib/components/Forms/Question.svelte';
 	import List from '$lib/components/List/List.svelte';
@@ -530,6 +531,7 @@
 											]}
 											optionsExtraFields={[['folder', 'str']]}
 											field="applied_controls"
+											placeholder={m.appliedControlsPlaceholder()}
 										/>
 									{/key}
 									<ModelTable
@@ -538,6 +540,7 @@
 										source={page.data.tables['applied-controls']}
 										hideFilters={true}
 										URLModel="applied-controls"
+										expectedCount={countMasked(page.data.requirementAssessment.applied_controls)}
 									/>
 								</div>
 							</Tabs.Panel>
@@ -570,6 +573,7 @@
 										source={page.data.tables['evidences']}
 										hideFilters={true}
 										URLModel="evidences"
+										expectedCount={countMasked(page.data.requirementAssessment.evidences)}
 										baseEndpoint="/evidences?requirement_assessments={page.data
 											.requirementAssessment.id}"
 									/>
@@ -598,6 +602,7 @@
 										source={page.data.tables['security-exceptions']}
 										hideFilters={true}
 										URLModel="security-exceptions"
+										expectedCount={countMasked(page.data.requirementAssessment.security_exceptions)}
 										baseEndpoint="/security-exceptions?requirement_assessments={page.data
 											.requirementAssessment.id}"
 									/>
@@ -623,6 +628,7 @@
 						options={page.data.model.selectOptions['status']}
 						field="status"
 						label={m.status()}
+						helpText={m.requirementAssessmentStatusHelpText()}
 					/>
 					{#if computedResult}
 						<p class="flex flex-row items-center space-x-4">
@@ -642,6 +648,16 @@
 							options={page.data.model.selectOptions['result']}
 							field="result"
 							label={m.result()}
+							helpText={m.requirementAssessmentResultHelpText()}
+						/>
+					{/if}
+					{#if page.data.requirementAssessment.compliance_assessment.extended_result_enabled}
+						<Select
+							{form}
+							options={page.data.model.selectOptions['extended_result']}
+							field="extended_result"
+							label={m.extendedResult()}
+							helpText={m.extendedResultHelpText()}
 						/>
 					{/if}
 					{#if computedScore !== null}

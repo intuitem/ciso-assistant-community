@@ -1,5 +1,9 @@
 from core.constants import COUNTRY_CHOICES
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    ExportMixin,
+    escape_excel_formula,
+)
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,6 +11,8 @@ from rest_framework import filters
 from django.db.models import Count
 from itertools import chain
 from collections import defaultdict
+
+from iam.models import Folder, RoleAssignment
 
 from .models import (
     ProcessingNature,
@@ -149,12 +155,16 @@ class DataTransferViewSet(BaseModelViewSet):
         return Response(dict(LEGAL_BASIS_CHOICES))
 
 
-def agg_countries():
-    transfer_countries = DataTransfer.objects.values("country").annotate(
-        count=Count("id")
+def agg_countries(viewable_data_transfers, viewable_data_contractors):
+    transfer_countries = (
+        DataTransfer.objects.filter(id__in=viewable_data_transfers)
+        .values("country")
+        .annotate(count=Count("id"))
     )
-    contractor_countries = DataContractor.objects.values("country").annotate(
-        count=Count("id")
+    contractor_countries = (
+        DataContractor.objects.filter(id__in=viewable_data_contractors)
+        .values("country")
+        .annotate(count=Count("id"))
     )
     country_counts = defaultdict(int)
     for item in chain(transfer_countries, contractor_countries):
@@ -173,10 +183,55 @@ def agg_countries():
     return countries
 
 
-class ProcessingViewSet(BaseModelViewSet):
+class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     model = Processing
 
     filterset_fields = ["folder", "nature", "status", "filtering_labels"]
+
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "status": {"source": "get_status_display", "label": "status"},
+            "nature": {
+                "source": "nature",
+                "label": "processing_nature",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(str(n)) for n in qs.all()
+                ),
+            },
+            "folder": {"source": "folder.name", "label": "folder", "escape": True},
+            "assigned_to": {
+                "source": "assigned_to",
+                "label": "assigned_to",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(u.email) for u in qs.all()
+                ),
+            },
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.label) for o in qs.all()
+                ),
+            },
+            "dpia_required": {"source": "dpia_required", "label": "dpia_required"},
+            "dpia_reference": {
+                "source": "dpia_reference",
+                "label": "dpia_reference",
+                "escape": True,
+            },
+        },
+        "filename": "processings_export",
+        "select_related": ["folder"],
+        "prefetch_related": ["filtering_labels", "nature", "assigned_to"],
+    }
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -188,31 +243,77 @@ class ProcessingViewSet(BaseModelViewSet):
 
     @action(detail=False, name="aggregated metrics")
     def agg_metrics(self, request):
-        pd_categories = PersonalData.get_categories_count()
-        total_categories = len(pd_categories)
-        processings_count = Processing.objects.all().count()
+        (viewable_processings, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Processing,
+        )
+        (viewable_data_contractors, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataContractor,
+        )
+        (viewable_data_transfers, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataTransfer,
+        )
+        (viewable_right_requests, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=RightRequest,
+        )
+        (viewable_data_breaches, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataBreach,
+        )
+        (viewable_personal_data, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=PersonalData,
+        )
+        processings_count = Processing.objects.filter(
+            id__in=viewable_processings
+        ).count()
 
+        pd_categories = PersonalData.get_categories_count(
+            filters={"id__in": viewable_personal_data}
+        )
+        total_categories = len(pd_categories)
         # Count distinct entities from data contractors and data transfers
         contractor_entities = (
-            DataContractor.objects.filter(entity__isnull=False)
+            DataContractor.objects.filter(
+                id__in=viewable_data_contractors, entity__isnull=False
+            )
             .values_list("entity", flat=True)
             .distinct()
         )
         transfer_entities = (
-            DataTransfer.objects.filter(entity__isnull=False)
+            DataTransfer.objects.filter(
+                id__in=viewable_data_transfers, entity__isnull=False
+            )
             .values_list("entity", flat=True)
             .distinct()
         )
         recipients_count = len(set(list(contractor_entities) + list(transfer_entities)))
 
-        open_right_requests_count = RightRequest.objects.exclude(status="done").count()
-        open_data_breaches_count = DataBreach.objects.exclude(
-            status="privacy_closed"
-        ).count()
+        open_right_requests_count = (
+            RightRequest.objects.filter(id__in=viewable_right_requests)
+            .exclude(status="done")
+            .count()
+        )
+        open_data_breaches_count = (
+            DataBreach.objects.filter(id__in=viewable_data_breaches)
+            .exclude(status="privacy_closed")
+            .count()
+        )
 
         # Aggregate data breaches by breach type
-        breach_types = DataBreach.objects.values("breach_type").annotate(
-            count=Count("id")
+        breach_types = (
+            DataBreach.objects.filter(id__in=viewable_data_breaches)
+            .values("breach_type")
+            .annotate(count=Count("id"))
         )
         breach_type_data = [
             {"name": item["breach_type"], "value": item["count"]}
@@ -220,8 +321,10 @@ class ProcessingViewSet(BaseModelViewSet):
         ]
 
         # Aggregate right requests by request type
-        request_types = RightRequest.objects.values("request_type").annotate(
-            count=Count("id")
+        request_types = (
+            RightRequest.objects.filter(id__in=viewable_right_requests)
+            .values("request_type")
+            .annotate(count=Count("id"))
         )
         request_type_data = [
             {"name": item["request_type"], "value": item["count"]}
@@ -237,7 +340,7 @@ class ProcessingViewSet(BaseModelViewSet):
         personal_data = (
             PersonalData.objects.select_related("processing")
             .prefetch_related("processing__purposes", "processing__data_transfers")
-            .all()
+            .filter(id__in=viewable_personal_data)
         )
 
         for pd in personal_data:
@@ -322,7 +425,9 @@ class ProcessingViewSet(BaseModelViewSet):
 
         return Response(
             {
-                "countries": agg_countries(),
+                "countries": agg_countries(
+                    viewable_data_transfers, viewable_data_contractors
+                ),
                 "processings_count": processings_count,
                 "recipients_count": recipients_count,
                 "pd_categories": pd_categories,

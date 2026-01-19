@@ -1,156 +1,181 @@
 <script lang="ts">
-	import { LibraryUploadSchema } from '$lib/utils/schemas';
 	import { m } from '$paraglide/messages';
-
-	import { page } from '$app/state';
-	import FileInput from '$lib/components/Forms/FileInput.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { Tabs } from '@skeletonlabs/skeleton-svelte';
-	import { superValidate } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import { tableHandlers } from '$lib/utils/stores';
-	import { LANGUAGE_FILTER, PROVIDER_FILTER } from '$lib/utils/table.js';
+	import UploadLibraryModal from '$lib/components/Modals/UploadLibraryModal.svelte';
+	import {
+		getModalStore,
+		type ModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
 
-	let { data, ...rest } = $props();
+	import { safeTranslate } from '$lib/utils/i18n';
 
-	let group: 'stored' | 'loaded' = $state(
-		data.loadedLibrariesTable.meta.count > 0 ? 'stored' : 'loaded'
-	);
+	let { data } = $props();
 
-	let fileResetSignal = $state(false);
+	const modalStore: ModalStore = getModalStore();
 
-	let availableUpdatesCount = $derived(data?.updatableLibraries?.length);
+	function modalCreateForm(): void {
+		let modalComponent: ModalComponent = {
+			ref: UploadLibraryModal
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate('addYourLibrary')
+		};
+		modalStore.trigger(modal);
+	}
 
-	$effect(() => {
-		if (data.loadedLibrariesTable.meta.count === 0) group = 'stored';
-	});
-	let mappingSuggestedCount = $derived(data?.mappingSuggested?.length);
+	interface QuickFilters {
+		object_type: Set<string>;
+	}
+	let quickFilterValues: QuickFilters = {
+		object_type: new Set()
+	};
+
+	type FilterConfig = {
+		icon: string;
+		selectedClass: string;
+		hoverClass: string;
+		label: string;
+	};
+
+	const filterConfiguration: Record<string, FilterConfig> = {
+		frameworks: {
+			icon: 'fa-book-open',
+			selectedClass: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-blue-200',
+			hoverClass: 'hover:border-blue-400 hover:bg-blue-50',
+			label: m.frameworks()
+		},
+		reference_controls: {
+			icon: 'fa-shield-halved',
+			selectedClass:
+				'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-200',
+			hoverClass: 'hover:border-emerald-400 hover:bg-emerald-50',
+			label: m.referenceControls()
+		},
+		risk_matrices: {
+			icon: 'fa-table-cells',
+			selectedClass: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-amber-200',
+			hoverClass: 'hover:border-amber-400 hover:bg-amber-50',
+			label: m.riskMatrices()
+		},
+		threats: {
+			icon: 'fa-triangle-exclamation',
+			selectedClass: 'bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-200',
+			hoverClass: 'hover:border-red-400 hover:bg-red-50',
+			label: m.threats()
+		},
+		metric_definitions: {
+			icon: 'fa-chart-line',
+			selectedClass: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-purple-200',
+			hoverClass: 'hover:border-purple-400 hover:bg-purple-50',
+			label: m.metricDefinitions()
+		},
+		requirement_mapping_sets: {
+			icon: 'fa-diagram-project',
+			selectedClass: 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-pink-200',
+			hoverClass: 'hover:border-pink-400 hover:bg-pink-50',
+			label: m.requirementMappingSets()
+		}
+	};
+
+	const filterTypes = Object.keys(filterConfiguration);
+
+	let quickFilterSelected: Record<string, boolean> = $state({});
 </script>
 
 <div class="card bg-white py-2 shadow-sm">
-	<Tabs value={group} onValueChange={(e) => (group = e.value)} listJustify="justify-center">
-		{#snippet list()}
-			<Tabs.Control value="stored" labelBase="inert">
-				{m.librariesStore()}
-				<span class="badge preset-tonal-primary">{data.storedLibrariesTable.meta.count}</span>
-				{#if mappingSuggestedCount > 0}
-					<span class="badge preset-tonal-secondary" title={m.mappingSuggestedHelpText()}
-						>{mappingSuggestedCount} <i class="fa-solid fa-diagram-project ml-1"></i></span
-					>
-				{/if}
-			</Tabs.Control>
-			<Tabs.Control value="loaded" labelBase="inert"
-				>{m.loadedLibraries()}
-				<span class="badge preset-tonal-primary">{data.loadedLibrariesTable.meta.count}</span>
-				{#if availableUpdatesCount > 0}
-					<span class="badge preset-tonal-success"
-						>{availableUpdatesCount} <i class="fa-solid fa-circle-up ml-1"></i></span
-					>
-				{/if}
-			</Tabs.Control>
-			<Tabs.Control value="mappings" labelBase="inert"
-				>{m.mappingLibraries()}
-				<span class="badge preset-tonal-primary">{data.mappingLibrariesTable.meta.count}</span>
-			</Tabs.Control>
-		{/snippet}
-		{#if data.loadedLibrariesTable.meta.count < 0}
-			<div class="card p-4 preset-tonal-secondary w-full m-4">
-				<i class="fa-solid fa-info-circle mr-2"></i>
-				{m.currentlyNoLoadedLibraries()}.
-			</div>
-		{/if}
-		{#snippet content()}
-			<Tabs.Panel value="stored">
-				{#if mappingSuggestedCount > 0}
-					<div
-						class="flex items-center justify-center w-full -mt-4 p-2 preset-tonal-secondary text-sm"
-					>
-						<span class="badge preset-tonal-secondary mr-1" title={m.mappingSuggestedHelpText()}
-							>{mappingSuggestedCount} <i class="fa-solid fa-diagram-project ml-1"></i>
-						</span>
-						<span class="">{m.mappingSuggestionTeasing()}</span>
-					</div>
-				{/if}
-				<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-					<i class="fa-solid fa-info-circle"></i>
-					<p>{m.librariesCanOnlyBeLoadedByAdmin()}</p>
-				</div>
-				<ModelTable
-					source={data.storedLibrariesTable}
-					URLModel="stored-libraries"
-					deleteForm={data.deleteForm}
-				/>
-			</Tabs.Panel>
-			<Tabs.Panel value="loaded">
-				<ModelTable
-					source={data.loadedLibrariesTable}
-					URLModel="loaded-libraries"
-					deleteForm={data.deleteForm}
-					detailQueryParameter="loaded"
-				/>
-			</Tabs.Panel>
-			<Tabs.Panel value="mappings">
-				<ModelTable
-					source={data.mappingLibrariesTable}
-					URLModel="stored-libraries"
-					baseEndpoint="mapping-libraries"
-					tableFilters={{
-						locale: LANGUAGE_FILTER,
-						provider: PROVIDER_FILTER
-					}}
-					deleteForm={data.deleteForm}
-				/>
-			</Tabs.Panel>
-		{/snippet}
-	</Tabs>
-</div>
-{#if group === 'stored' && page.data.user.is_admin}
-	<div class="card bg-white p-4 mt-4 shadow-sm">
-		{#await superValidate(zod(LibraryUploadSchema))}
-			<h1>{m.loadingLibraryUploadButton()}...</h1>
-		{:then form}
-			<SuperForm
-				class="flex flex-col space-y-3"
-				dataType="form"
-				enctype="multipart/form-data"
-				data={form}
-				validators={zod(LibraryUploadSchema)}
-				action="?/upload"
-				useFocusTrap={false}
-				onSubmit={() => {
-					const fileInput = document.querySelector(`input[type="file"]`);
-					fileInput.value = '';
-					fileResetSignal = true;
-					setTimeout(() => {
-						fileResetSignal = false;
-					}, 10);
-					// invalidate to show arrow update button
-					Object.values($tableHandlers).forEach((handler) => {
-						handler.invalidate();
-					});
-				}}
-				{...rest}
+	<ModelTable
+		source={data.storedLibrariesTable}
+		URLModel="stored-libraries"
+		deleteForm={data.deleteForm}
+		onFilterChange={(filters) => {
+			const objectTypeValues = filters['object_type'] ?? [];
+			const filteredObjectTypes = objectTypeValues.map((filter) => filter.value);
+			const filterKeys = Object.keys(quickFilterSelected);
+
+			filterKeys.forEach((filterKey) => {
+				quickFilterSelected[filterKey] = filteredObjectTypes.includes(filterKey);
+			});
+			filteredObjectTypes.forEach((filterKey) => {
+				quickFilterSelected[filterKey] = true;
+			});
+		}}
+	>
+		{#snippet quickFilters(filterValues, form, invalidateTable)}
+			<div
+				class="flex flex-wrap gap-2 p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200"
 			>
-				{#snippet children({ form })}
-					<FileInput
-						{form}
-						helpText={m.libraryFileInYaml()}
-						field="file"
-						label={m.addYourLibrary()}
-						resetSignal={fileResetSignal}
-						allowedExtensions={['yaml', 'yml']}
-					/>
+				{#each filterTypes as objectType}
+					{@const config = filterConfiguration[objectType]}
 
 					<button
-						class="btn preset-filled-primary-500 font-semibold w-full"
-						data-testid="save-button"
-						type="submit">{m.add()}</button
+						class="group relative px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ease-out transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md
+                        {quickFilterSelected[objectType]
+							? config.selectedClass
+							: `bg-white text-gray-700 border-2 border-gray-300 ${config.hoverClass}`}"
+						onclick={() => {
+							const filterValue = filterValues['object_type'];
+							const filteredTypes = filterValue.map((obj) => obj.value);
+
+							const removeFilter = quickFilterValues.object_type.has(objectType);
+							if (removeFilter) {
+								quickFilterValues.object_type.delete(objectType);
+								filterValues['object_type'] = filterValue.filter((obj) => obj.value !== objectType);
+							} else {
+								quickFilterValues.object_type.add(objectType);
+								const isSelected = filteredTypes.includes(objectType);
+								if (!isSelected) {
+									filterValues['object_type'] = [...filterValue, { value: objectType }];
+								}
+							}
+
+							const newFilteredTypes = filterValues['object_type'].map((obj) => obj.value);
+							form.form.update((currentData) => {
+								currentData['object_type'] = newFilteredTypes.length > 0 ? newFilteredTypes : null;
+								return currentData;
+							});
+
+							invalidateTable();
+						}}
 					>
-				{/snippet}
-			</SuperForm>
-		{:catch err}
-			<h1>{m.errorOccurredWhileLoadingLibrary()}: {err}</h1>
-		{/await}
-	</div>
-{/if}
+						<span class="flex items-center gap-2">
+							<i
+								class="fa-solid {config.icon} transition-transform duration-200 {quickFilterSelected[
+									objectType
+								]
+									? 'scale-110'
+									: 'group-hover:scale-110'}"
+							></i>
+							<span class="font-semibold">{config.label}</span>
+							{#if quickFilterSelected[objectType]}
+								<svg class="h-4 w-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+									<path
+										fill-rule="evenodd"
+										d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							{/if}
+						</span>
+					</button>
+				{/each}
+			</div>
+		{/snippet}
+		{#snippet addButton()}
+			<div>
+				<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+					<button
+						class="inline-block p-3 btn-mini-primary w-12 focus:relative"
+						data-testid="add-button"
+						title={m.addYourLibrary()}
+						onclick={modalCreateForm}
+						><i class="fa-solid fa-file-circle-plus"></i>
+					</button>
+				</span>
+			</div>
+		{/snippet}
+	</ModelTable>
+</div>

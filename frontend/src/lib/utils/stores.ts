@@ -13,6 +13,8 @@ showNotification.subscribe((val) => {
 });
 
 export const pageTitle = writable('');
+export const modelName = writable('');
+export const modelDescription = writable('');
 export const clientSideToast = writable(undefined);
 
 const requirementAssessmentsList: string[] = [];
@@ -91,6 +93,13 @@ function createPersistedAuditFilters() {
 			update((filters) => {
 				if (!filters[id]) filters[id] = {};
 				filters[id].selectedResults = resultsArray;
+				return filters;
+			});
+		},
+		setExtendedResults(id, extendedResultsArray) {
+			update((filters) => {
+				if (!filters[id]) filters[id] = {};
+				filters[id].selectedExtendedResults = extendedResultsArray;
 				return filters;
 			});
 		},

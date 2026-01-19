@@ -206,11 +206,12 @@ class TestModelDependencies:
 
     @pytest.mark.django_db
     def test_get_model_dependencies_no_dependency(self):
-        """Test dependencies detection with no relationships."""
+        """Test dependencies detection with self-referential relationships."""
         models_set = {Perimeter, RiskScenario}
         dependencies = get_model_dependencies(RiskScenario, models_set)
         assert Perimeter not in dependencies
-        assert len(dependencies) == 0
+        assert RiskScenario in dependencies
+        assert len(dependencies) == 1
 
 
 # ============ Dependency Graph Tests ============

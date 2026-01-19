@@ -84,6 +84,25 @@ def make_patch_request(endpoint, payload):
     )
 
 
+def make_delete_request(endpoint):
+    """
+    Make a DELETE request to the API
+
+    Args:
+        endpoint: API endpoint (e.g., "/task-templates/{id}/")
+
+    Returns:
+        Response object
+    """
+    url = f"{API_URL}{endpoint}"
+    return requests.delete(
+        url,
+        headers=get_headers(),
+        verify=VERIFY_CERTIFICATE,
+        timeout=HTTP_TIMEOUT,
+    )
+
+
 def handle_response(res, error_message="Error"):
     """
     Handle API response and check for errors

@@ -12,6 +12,7 @@ from .views import (
     SendInvitationView,
     SessionTokenView,
     SetPasswordView,
+    RevokeOtherSessionsView,
 )
 
 urlpatterns = [
@@ -28,6 +29,7 @@ urlpatterns = [
     ),
     path("send-invitation/", SendInvitationView.as_view(), name="send-invitation"),
     path("set-password/", SetPasswordView.as_view(), name="set-password"),
+    path("revoke-sessions/", RevokeOtherSessionsView.as_view()),
     path("sso/", include("iam.sso.urls")),
     path(
         "session-token/",

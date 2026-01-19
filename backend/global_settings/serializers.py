@@ -15,6 +15,11 @@ GENERAL_SETTINGS_KEYS = [
     "risk_matrix_labels",
     "currency",
     "daily_rate",
+    "mapping_max_depth",
+    "allow_self_validation",
+    "show_warning_external_links",
+    "builtin_metrics_retention_days",
+    "allow_assignments_to_entities",
 ]
 
 
@@ -57,6 +62,14 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
                 raise serializers.ValidationError(f"Invalid key: {key}")
+            # Validate builtin_metrics_retention_days minimum value
+            if key == "builtin_metrics_retention_days":
+                if not isinstance(value, int) or value < 1:
+                    raise serializers.ValidationError(
+                        {
+                            "builtin_metrics_retention_days": "Retention days must be at least 1"
+                        }
+                    )
             setattr(instance, "value", validated_data["value"])
 
         # Get new currency value
@@ -191,6 +204,21 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     project_management = serializers.BooleanField(
         source="value.project_management", required=False, default=False
     )
+    contracts = serializers.BooleanField(
+        source="value.contracts", required=False, default=False
+    )
+    reports = serializers.BooleanField(
+        source="value.reports", required=False, default=False
+    )
+    validation_flows = serializers.BooleanField(
+        source="value.validation_flows", required=False, default=False
+    )
+    outgoing_webhooks = serializers.BooleanField(
+        source="value.outgoing_webhooks", required=False, default=False
+    )
+    metrology = serializers.BooleanField(
+        source="value.metrology", required=False, default=True
+    )
 
     class Meta:
         model = GlobalSettings
@@ -215,6 +243,11 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "terminologies",
             "bia",
             "project_management",
+            "contracts",
+            "reports",
+            "validation_flows",
+            "outgoing_webhooks",
+            "metrology",
         ]
         read_only_fields = ["name"]
 

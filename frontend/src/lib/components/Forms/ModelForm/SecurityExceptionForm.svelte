@@ -16,6 +16,7 @@
 	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { getModalStore } from '$lib/components/Modals/stores';
+	import MarkdownField from '../MarkdownField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -101,8 +102,12 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="users?is_third_party=false"
-	optionsLabelField="email"
+	optionsEndpoint="actors?user__is_third_party=False"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
 	field="owners"
 	cacheLock={cacheLocks['owners']}
 	bind:cachedValue={formDataCache['owners']}
@@ -136,6 +141,14 @@
 	disableDoubleDash="true"
 	bind:cachedValue={formDataCache['status']}
 />
+<MarkdownField
+	{form}
+	field="observation"
+	label={m.observation()}
+	helpText={m.observationHelpText()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
+/>
 <TextField
 	type="date"
 	{form}
@@ -143,6 +156,17 @@
 	label={m.expirationDate()}
 	cacheLock={cacheLocks['expiration_date']}
 	bind:cachedValue={formDataCache['expiration_date']}
+/>
+<AutocompleteSelect
+	multiple
+	{form}
+	optionsEndpoint="assets"
+	optionsLabelField="auto"
+	pathField="path"
+	field="assets"
+	cacheLock={cacheLocks['assets']}
+	bind:cachedValue={formDataCache['assets']}
+	label={m.assets()}
 />
 <div class="flex flex-row space-x-2 items-center">
 	<div class="w-full">
@@ -161,6 +185,7 @@
 		<div class="mt-4">
 			<button
 				class="btn bg-gray-300 h-10 w-10"
+				aria-label={m.addAppliedControl()}
 				onclick={(_) => modalAppliedControlCreateForm('applied_controls')}
 				type="button"><i class="fa-solid fa-plus text-sm"></i></button
 			>
