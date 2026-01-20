@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from iam.models import Folder, RoleAssignment, UserGroup
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from core.models import Asset
+from core.utils import effective_folder_id
 from tprm.models import Entity, Representative, Solution, EntityAssessment, Contract
 from rest_framework.decorators import action
 import structlog
@@ -737,8 +738,12 @@ class EntityAssessmentViewSet(BaseModelViewSet):
     def metrics(self, request):
         assessments_data = []
 
+        folder_id = effective_folder_id(request)
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
         (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
+            folder=scoped_folder,
             user=request.user,
             object_type=EntityAssessment,
         )

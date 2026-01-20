@@ -126,6 +126,12 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 			request.headers.append('Authorization', `Token ${token}`);
 		}
 
+		// inject folder ID header if focus is active
+		const focusFolderId = event.cookies.get('focus_folder_id');
+		if (focusFolderId) {
+			request.headers.append('X-Focus-Folder-Id', focusFolderId);
+		}
+
 		if (unsafeMethods.has(request.method) && csrfToken) {
 			request.headers.append('X-CSRFToken', csrfToken);
 			request.headers.append('Cookie', `csrftoken=${csrfToken}`);

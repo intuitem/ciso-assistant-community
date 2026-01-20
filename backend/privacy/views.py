@@ -4,6 +4,7 @@ from core.views import (
     ExportMixin,
     escape_excel_formula,
 )
+from core.utils import effective_folder_id
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -243,28 +244,32 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="aggregated metrics")
     def agg_metrics(self, request):
+        folder_id = effective_folder_id(request)
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
         (viewable_processings, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
+            folder=scoped_folder,
             user=request.user,
             object_type=Processing,
         )
         (viewable_data_contractors, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
+            folder=scoped_folder,
             user=request.user,
             object_type=DataContractor,
         )
         (viewable_data_transfers, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
+            folder=scoped_folder,
             user=request.user,
             object_type=DataTransfer,
         )
         (viewable_right_requests, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
+            folder=scoped_folder,
             user=request.user,
             object_type=RightRequest,
         )
         (viewable_data_breaches, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
+            folder=scoped_folder,
             user=request.user,
             object_type=DataBreach,
         )

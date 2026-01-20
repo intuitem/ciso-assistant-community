@@ -9,6 +9,7 @@
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
+	import FocusModeSelector from '$lib/components/FocusMode/FocusModeSelector.svelte';
 	import { pageTitle, modelName, modelDescription, clientSideToast } from '$lib/utils/stores';
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';
@@ -180,17 +181,20 @@
 					{safeTranslate(displayModelDescription)}
 				</div>
 			{/if}
-			{#if data?.user?.is_admin}
-				<button
-					onclick={modalQuickStart}
-					class="absolute top-7 right-9 p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
-        ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
-        hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
-        focus:outline-hidden focus:ring-violet-500"
-				>
-					{m.quickStart()}
-				</button>
-			{/if}
+			<div class="absolute top-6 right-4 flex items-center gap-3">
+				<FocusModeSelector folders={data?.folders ?? []} />
+				{#if data?.user?.is_admin}
+					<button
+						onclick={modalQuickStart}
+						class="p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
+		ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
+		hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
+		focus:outline-hidden focus:ring-violet-500"
+					>
+						{m.quickStart()}
+					</button>
+				{/if}
+			</div>
 			<hr class="w-screen my-1" />
 			<Breadcrumbs />
 		{/snippet}

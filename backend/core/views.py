@@ -128,6 +128,7 @@ from core.utils import (
     _generate_occurrences,
     _create_task_dict,
 )
+from core.utils import effective_folder_id
 from dateutil import relativedelta as rd
 
 from ebios_rm.models import (
@@ -632,7 +633,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return None
 
     def get_queryset(self) -> models.query.QuerySet:
-        """the scope_folder_id query_param allows scoping the objects to retrieve"""
+        """Get the queryset for the model, scoped by user permissions and optional focus mode."""
         if not self.model:
             return None
         object_ids_view = None
@@ -648,17 +649,49 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     object_ids_view = [id]
 
         if not object_ids_view:
-            scope_folder_id = self.request.query_params.get("scope_folder_id")
-            scope_folder = (
-                get_object_or_404(Folder, id=scope_folder_id)
-                if scope_folder_id
-                else Folder.get_root_folder()
-            )
+            # Focus mode: use focus folder if set, otherwise root folder
+            focus_folder_id = getattr(self.request, "focus_folder_id", None)
+            if focus_folder_id:
+                scope_folder = get_object_or_404(Folder, id=focus_folder_id)
+            else:
+                scope_folder = Folder.get_root_folder()
             object_ids_view = RoleAssignment.get_accessible_object_ids(
                 scope_folder, self.request.user, self.model
             )[0]
 
         queryset = self.model.objects.filter(id__in=object_ids_view)
+
+        # When focus mode is active, filter to ONLY the focused folder (exclude subfolders)
+        focus_folder_id = getattr(self.request, "focus_folder_id", None)
+        if focus_folder_id:
+            # Models that are library/reference resources and should not be filtered by folder
+            GLOBAL_REFERENCE_MODELS = {
+                "Framework",
+                "ReferenceControl",
+                "RiskMatrix",
+                "Threat",
+                "Terminology",
+                "FilteringLabel",
+                "LibraryFilteringLabel",
+                "MetricDefinition",
+                "RequirementMappingSet",
+                "StoredLibrary",
+            }
+
+            if self.model.__name__ not in GLOBAL_REFERENCE_MODELS:
+                focus_folder = get_object_or_404(Folder, id=focus_folder_id)
+
+                if hasattr(self.model, "folder"):
+                    queryset = queryset.filter(folder=focus_folder)
+                elif hasattr(self.model, "risk_assessment"):
+                    queryset = queryset.filter(risk_assessment__folder=focus_folder)
+                elif hasattr(self.model, "entity"):
+                    queryset = queryset.filter(entity__folder=focus_folder)
+                elif hasattr(self.model, "provider_entity"):
+                    queryset = queryset.filter(provider_entity__folder=focus_folder)
+                elif hasattr(self.model, "parent_folder"):
+                    queryset = queryset.filter(id=focus_folder_id)
+
         return queryset
 
     def get_serializer_context(self):
@@ -1506,7 +1539,7 @@ class ThreatViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get threats count")
     def threats_count(self, request):
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
         return Response({"results": threats_count_per_name(request.user, folder_id)})
 
     @action(detail=False, methods=["get"])
@@ -2359,7 +2392,7 @@ class VulnerabilityViewSet(BaseModelViewSet):
         Returns vulnerability data structured for Sankey diagram:
         Folders -> Severity -> Status (as links)
         """
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
 
         # Get viewable vulnerabilities
         scoped_folder = (
@@ -4648,8 +4681,12 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get applied controls sunburst data")
     def sunburst_data(self, request):
+        folder_id = effective_folder_id(request)
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, AppliedControl
+            scoped_folder, request.user, AppliedControl
         )
         queryset = AppliedControl.objects.filter(id__in=viewable_objects)
 
@@ -5243,7 +5280,7 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get qualifications count")
     def qualifications_count(self, request):
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
         return Response(
             {"results": qualifications_count_per_name(request.user, folder_id)}
         )
@@ -5297,7 +5334,7 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get risk count per level")
     def count_per_level(self, request):
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
         return Response(
             {
                 "results": risks_count_per_level(
@@ -7104,7 +7141,7 @@ def get_metrics_view(request):
     """
     API endpoint that returns the counters
     """
-    folder_id = request.query_params.get("folder", None)
+    folder_id = effective_folder_id(request)
     return Response({"results": get_metrics(request.user, folder_id)})
 
 
@@ -9264,7 +9301,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """
         Returns compliance analytics data grouped by framework and domain
         """
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
         analytics_data = get_compliance_analytics(request.user, folder_id)
         return Response(analytics_data, status=status.HTTP_200_OK)
 
@@ -10041,15 +10078,14 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get security exception Sankey data")
     def sankey_data(self, request):
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, SecurityException
+            scoped_folder, request.user, SecurityException
         )
         queryset = SecurityException.objects.filter(id__in=viewable_objects)
-
-        if folder_id:
-            folder = Folder.objects.get(id=folder_id)
-            queryset = queryset.filter(folder=folder)
 
         # Get severity and status combinations
         from django.db.models import Count
@@ -10517,7 +10553,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         Returns FindingsAssessment data structured for sunburst visualization:
         Categories (pentest, audit, self-identified) -> Status
         """
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
 
         # Get viewable findings assessments
         scoped_folder = (
@@ -10627,17 +10663,16 @@ class FindingViewSet(BaseModelViewSet):
         Returns findings data structured for Sankey diagram:
         Category -> Severity -> Status
         """
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Finding
+            scoped_folder, request.user, Finding
         )
         queryset = Finding.objects.filter(id__in=viewable_objects).select_related(
             "findings_assessment"
         )
-
-        if folder_id:
-            folder = Folder.objects.get(id=folder_id)
-            queryset = queryset.filter(folder=folder)
 
         # Build Sankey data structure
 
@@ -10994,15 +11029,14 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get incident detection breakdown")
     def detection_breakdown(self, request):
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
+            scoped_folder, request.user, Incident
         )
         queryset = Incident.objects.filter(id__in=viewable_objects)
-
-        if folder_id:
-            folder = Folder.objects.get(id=folder_id)
-            queryset = queryset.filter(folder=folder)
 
         detection_stats = []
         for detection_choice in Incident.Detection.choices:
@@ -11023,15 +11057,14 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get monthly incident metrics")
     def monthly_metrics(self, request):
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
+            scoped_folder, request.user, Incident
         )
         queryset = Incident.objects.filter(id__in=viewable_objects)
-
-        if folder_id:
-            folder = Folder.objects.get(id=folder_id)
-            queryset = queryset.filter(folder=folder)
 
         # Get incidents with reported_at dates
         incidents_with_dates = queryset.filter(reported_at__isnull=False).order_by(
@@ -11088,15 +11121,14 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get incident summary statistics")
     def summary_stats(self, request):
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
+            scoped_folder, request.user, Incident
         )
         queryset = Incident.objects.filter(id__in=viewable_objects)
-
-        if folder_id:
-            folder = Folder.objects.get(id=folder_id)
-            queryset = queryset.filter(folder=folder)
 
         # Total incidents
         total_incidents = queryset.count()
@@ -11130,15 +11162,14 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get incident severity breakdown")
     def severity_breakdown(self, request):
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
+            scoped_folder, request.user, Incident
         )
         queryset = Incident.objects.filter(id__in=viewable_objects)
-
-        if folder_id:
-            folder = Folder.objects.get(id=folder_id)
-            queryset = queryset.filter(folder=folder)
 
         # Define severity colors
         severity_colors = {
@@ -11167,15 +11198,14 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="Get incident qualifications breakdown")
     def qualifications_breakdown(self, request):
-        folder_id = request.query_params.get("folder", None)
+        folder_id = effective_folder_id(request)
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
         (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Incident
+            scoped_folder, request.user, Incident
         )
         queryset = Incident.objects.filter(id__in=viewable_objects)
-
-        if folder_id:
-            folder = Folder.objects.get(id=folder_id)
-            queryset = queryset.filter(folder=folder)
 
         # Get all unique qualifications used in incidents
         from django.db.models import Count

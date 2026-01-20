@@ -12,6 +12,7 @@ from rest_framework.exceptions import ValidationError
 import structlog
 import calendar
 from dateutil import relativedelta as rd
+from uuid import UUID
 
 logger = structlog.get_logger(__name__)
 
@@ -723,3 +724,26 @@ def update_selected_implementation_groups(compliance_assessment):
 
     compliance_assessment.selected_implementation_groups = list(igs_to_select)
     compliance_assessment.save(update_fields=["selected_implementation_groups"])
+
+
+# Focus Mode Utilities
+def effective_folder_id(request) -> UUID | None:
+    # Get the effective folder ID for a request.
+
+    folder_param = request.query_params.get("folder")
+    if folder_param:
+        try:
+            return UUID(folder_param.strip())
+        except (ValueError, AttributeError) as e:
+            logger.warning(
+                "Invalid folder query parameter",
+                folder=folder_param,
+                path=request.path,
+                error=str(e),
+            )
+
+    focus_id = getattr(request, "focus_folder_id", None)
+    if focus_id:
+        return focus_id
+
+    return None
