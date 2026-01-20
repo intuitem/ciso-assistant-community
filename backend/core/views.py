@@ -5658,7 +5658,9 @@ class ActorFilterSet(GenericFilterSet):
     )
 
     def get_exclude_third_parties(self, queryset, name, value):
-        third_parties = Actor.objects.filter(user__is_third_party=not value)
+        if not value:
+            return queryset
+        third_parties = Actor.objects.filter(user__is_third_party=True)
         return queryset.exclude(id__in=third_parties)
 
     class Meta:
