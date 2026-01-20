@@ -149,7 +149,7 @@
 		<AutocompleteSelect
 			multiple
 			{form}
-			optionsEndpoint="actors?user__is_third_party=False"
+			optionsEndpoint="actors?exclude_third_parties=true"
 			optionsLabelField="str"
 			optionsInfoFields={{
 				fields: [{ field: 'type', translate: true }],
@@ -163,7 +163,7 @@
 		<AutocompleteSelect
 			multiple
 			{form}
-			optionsEndpoint="actors?user__is_third_party=False"
+			optionsEndpoint="actors?exclude_third_parties=true"
 			optionsLabelField="str"
 			optionsInfoFields={{
 				fields: [{ field: 'type', translate: true }],
