@@ -191,7 +191,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Perimeters',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
-			{ field: 'default_assignee', urlModel: 'users' }
+			{ field: 'default_assignee', urlModel: 'actors' }
 		],
 		selectFields: [{ field: 'lc_status' }],
 		reverseForeignKeyFields: [
@@ -1117,9 +1117,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'status' }, { field: 'nature' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'owner', urlModel: 'entities' },
 			{ field: 'purposes', urlModel: 'purposes' },
-			{ field: 'assigned_to', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'assigned_to', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [
@@ -1212,7 +1211,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'breach_type' }, { field: 'risk_level' }, { field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'assigned_to', urlModel: 'users', urlParams: 'is_third_party=false' },
+			{ field: 'assigned_to', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'affected_processings', urlModel: 'processings' },
 			{ field: 'affected_personal_data', urlModel: 'personal-data' },
 			{ field: 'authorities', urlModel: 'entities' },
@@ -1793,7 +1792,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Timeline entries',
 		foreignKeyFields: [
 			{ field: 'incident', urlModel: 'incidents' },
-			{ field: 'author', urlModel: 'users' },
+			{ field: 'author', urlModel: 'actors' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'entry_type' }],
@@ -1809,7 +1808,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'assigned_to', urlModel: 'users' },
+			{ field: 'assigned_to', urlModel: 'actors' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
@@ -1840,7 +1839,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'task_template', urlModel: 'task-templates' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'expected_evidence', urlModel: 'evidences' },
-			{ field: 'assigned_to', urlModel: 'users' },
+			{ field: 'assigned_to', urlModel: 'actors' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
@@ -1921,7 +1920,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'issues', urlModel: 'organisation-issues' },
 			{ field: 'tasks', urlModel: 'task-templates' },
 			{ field: 'metrics', urlModel: 'metric-instances' },
-			{ field: 'assigned_to', urlModel: 'users' }
+			{ field: 'assigned_to', urlModel: 'actors' }
 		],
 		detailViewFields: [
 			{ field: 'ref_id' },
@@ -2200,7 +2199,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'author', urlModel: 'users' },
+			{ field: 'author', urlModel: 'actors' },
 			{ field: 'checklist', urlModel: 'compliance-assessments' },
 			{ field: 'linked_collection', urlModel: 'generic-collections' },
 			{ field: 'authority', urlModel: 'entities' }
