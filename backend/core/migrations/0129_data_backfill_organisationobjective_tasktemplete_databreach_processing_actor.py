@@ -78,4 +78,8 @@ class Migration(migrations.Migration):
         ("privacy", "0014_remove_processing_owner"),
     ]
 
-    operations = [migrations.RunPython(migrate_user_to_actor)]
+    operations = [
+        migrations.RunPython(
+            migrate_user_to_actor, reverse_code=migrations.RunPython.noop
+        )
+    ]
