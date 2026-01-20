@@ -68,6 +68,7 @@ class MappingEngine:
             is_loaded=True,
         ):
             library_urn = lib.urn
+            lib_id = lib.id
             content = lib.content
 
             if isinstance(content, dict):
@@ -75,6 +76,7 @@ class MappingEngine:
                     obj = content["requirement_mapping_set"]
                     index = (obj["source_framework_urn"], obj["target_framework_urn"])
                     obj["library_urn"] = library_urn
+                    obj["id"] = str(lib_id)
                     self.all_rms[index] = self._compress_rms(obj)
 
                 if "requirement_mapping_sets" in content:
@@ -84,6 +86,7 @@ class MappingEngine:
                             obj["target_framework_urn"],
                         )
                         obj["library_urn"] = library_urn
+                        obj["id"] = str(lib_id)
                         self.all_rms[index] = self._compress_rms(obj)
 
         for src, tgt in self.all_rms:
@@ -420,10 +423,13 @@ class MappingEngine:
                     "urn": requirement_mapping_set.get("urn"),
                     "name": requirement_mapping_set.get("name"),
                     "ref_id": requirement_mapping_set.get("ref_id"),
+                    "id": requirement_mapping_set.get("id"),
                     "library_urn": requirement_mapping_set.get("library_urn"),
                 }.items()
                 if v
             }
+
+            print(f"mapping_set_info = {mapping_set_info}")
 
             mapping_inference = target_assessment.get("mapping_inference", {})
             source_requirement_assessments = mapping_inference.get(
