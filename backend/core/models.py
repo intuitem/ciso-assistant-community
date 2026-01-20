@@ -7784,43 +7784,6 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
         ordering = ["name"]
 
 
-class ActorQuerySet(models.QuerySet):
-    def with_folder(self):
-        """
-        Annotates the queryset with 'folder_id'.
-        We use 'folder_id' (not 'folder') to avoid clashing with the property.
-        """
-        return self.annotate(
-            folder_id=Coalesce(
-                "user__folder_id",
-                "team__folder_id",
-                "entity__folder_id",
-                output_field=models.UUIDField(),
-            )
-        )
-
-    def filter(self, *args, **kwargs):
-        """
-        Intercepts filters on 'folder' and maps them to 'folder_id'.
-        This makes the solution a true drop-in replacement.
-        """
-        if "folder" in kwargs:
-            value = kwargs.pop("folder")
-            # If filtering by an object instance, extract the ID
-            if hasattr(value, "pk"):
-                kwargs["folder_id"] = value.pk
-            else:
-                kwargs["folder_id"] = value
-
-        return super().filter(*args, **kwargs)
-
-
-class ActorManager(models.Manager):
-    def get_queryset(self):
-        # Apply annotation by default
-        return ActorQuerySet(self.model, using=self._db).with_folder()
-
-
 class Actor(AbstractBaseModel):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, null=True, blank=True, related_name="actor"
@@ -7835,8 +7798,6 @@ class Actor(AbstractBaseModel):
         blank=True,
         related_name="actor",
     )
-
-    objects = ActorManager()
 
     class Meta:
         constraints = [
