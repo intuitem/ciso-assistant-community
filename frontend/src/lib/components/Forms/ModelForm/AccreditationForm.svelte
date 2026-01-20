@@ -47,7 +47,6 @@
 />
 
 <AutocompleteSelect
-	<AutocompleteSelect
 	{form}
 	optionsEndpoint="actors?user__is_third_party=False"
 	optionsLabelField="str"
@@ -58,6 +57,7 @@
 	field="author"
 	cacheLock={cacheLocks['author']}
 	bind:cachedValue={formDataCache['author']}
+	nullable={true}
 	label={m.author()}
 />
 <AutocompleteSelect
