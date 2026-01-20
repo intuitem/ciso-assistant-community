@@ -1216,7 +1216,7 @@ class ActorReadSerializer(BaseModelSerializer):
         fields = ["id", "str", "type", "specific", "folder"]
 
     def get_folder(self, obj):
-        folder = obj.folder
+        folder = obj._folder
         return {"id": folder.id, "str": str(folder)} if folder else None
 
 

@@ -7838,7 +7838,7 @@ class Actor(AbstractBaseModel):
         raise ValueError("Actor has no underlying instance")
 
     @property
-    def folder(self):
+    def _folder(self):
         """Returns the folder of the underlying instance."""
         return self.specific.folder
 
