@@ -76,6 +76,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("core", "0128_alter_organisationobjective_assigned_to_and_more"),
         ("privacy", "0014_remove_processing_owner"),
+        ("pmbok", "0002_alter_accreditation_author"),
     ]
 
     operations = [
