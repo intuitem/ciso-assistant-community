@@ -49,7 +49,7 @@ def load_and_validate_yaml(path, label):
 
 
 
-def common_urn_base(req_nodes: List[Dict], *, name: str) -> str:
+def compute_base_urn(req_nodes: List[Dict], *, name: str) -> str:
     
     # Ensure the requirement nodes list exists and is not empty
     if not req_nodes:
@@ -128,8 +128,8 @@ def generate_mapping_excel(source_yaml, target_yaml):
     target_req_nodes = target_framework.get("requirement_nodes")
 
     # Compute the base URN (common prefix) for each framework
-    source_node_base_urn = common_urn_base(source_req_nodes, name="Source framework")
-    target_node_base_urn = common_urn_base(target_req_nodes, name="Target framework")
+    source_node_base_urn = compute_base_urn(source_req_nodes, name="Source framework")
+    target_node_base_urn = compute_base_urn(target_req_nodes, name="Target framework")
     
 
     # --- Create a new workbook and remove default sheet ---
