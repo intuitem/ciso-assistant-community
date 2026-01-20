@@ -106,7 +106,7 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="actors?exclude_third_parties=true"
+	optionsEndpoint="actors"
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
