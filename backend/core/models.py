@@ -21,7 +21,6 @@ from django.core.validators import MaxValueValidator, RegexValidator, MinValueVa
 from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.db.models import F, Q, OuterRef, Subquery, Prefetch
-from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
