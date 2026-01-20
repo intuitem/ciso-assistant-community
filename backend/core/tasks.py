@@ -1,15 +1,13 @@
 from collections import defaultdict
 from datetime import date, timedelta
 from huey import crontab
-from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
+from huey.contrib.djhuey import periodic_task, task, db_periodic_task
 from core.models import (
     AppliedControl,
     ComplianceAssessment,
     Evidence,
     ValidationFlow,
-    FlowEvent,
 )
-from tprm.models import EntityAssessment
 from iam.models import User
 from django.core.mail import send_mail
 from django.conf import settings
@@ -399,9 +397,9 @@ def send_applied_control_assignment_notification(control_id, assigned_user_email
 
 
 @task()
-def send_task_template_assignment_notification(task_template_id, assigned_user_emails):
+def send_task_template_assignment_notification(task_template_id, emails):
     """Send notification when TaskTemplate is assigned to users"""
-    if not assigned_user_emails:
+    if not emails:
         return
 
     try:
@@ -425,7 +423,7 @@ def send_task_template_assignment_notification(task_template_id, assigned_user_e
         "folder_name": task_template.folder.name if task_template.folder else "Default",
     }
 
-    for email in assigned_user_emails:
+    for email in emails:
         if email and check_email_configuration(email, [task_template]):
             rendered = render_email_template("task_template_assignment", context)
             if rendered:
