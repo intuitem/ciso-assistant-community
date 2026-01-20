@@ -7837,6 +7837,11 @@ class Actor(AbstractBaseModel):
             return self.entity
         raise ValueError("Actor has no underlying instance")
 
+    @property
+    def folder(self):
+        """Returns the folder of the underlying instance."""
+        return self.specific.folder
+
     def get_emails(self) -> list[str]:
         return self.specific.get_emails()
 

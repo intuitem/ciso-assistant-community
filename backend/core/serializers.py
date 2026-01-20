@@ -1208,11 +1208,12 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
 
 class ActorReadSerializer(BaseModelSerializer):
     specific = FieldsRelatedField()
+    folder = FieldsRelatedField()
     str = serializers.CharField(source="__str__")
 
     class Meta:
         model = Actor
-        fields = ["id", "str", "type", "specific"]
+        fields = ["id", "str", "type", "specific", "folder"]
 
 
 class TeamWriteSerializer(BaseModelSerializer):
