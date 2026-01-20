@@ -399,9 +399,9 @@ def send_applied_control_assignment_notification(control_id, assigned_user_email
 
 
 @task()
-def send_task_template_assignment_notification(task_template_id, assigned_user_emails):
+def send_task_template_assignment_notification(task_template_id, emails):
     """Send notification when TaskTemplate is assigned to users"""
-    if not assigned_user_emails:
+    if not emails:
         return
 
     try:
@@ -425,7 +425,7 @@ def send_task_template_assignment_notification(task_template_id, assigned_user_e
         "folder_name": task_template.folder.name if task_template.folder else "Default",
     }
 
-    for email in assigned_user_emails:
+    for email in emails:
         if email and check_email_configuration(email, [task_template]):
             rendered = render_email_template("task_template_assignment", context)
             if rendered:

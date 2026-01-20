@@ -211,7 +211,8 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "source": "assigned_to",
                 "label": "assigned_to",
                 "format": lambda qs: ",".join(
-                    escape_excel_formula(u.email) for u in qs.all()
+                    escape_excel_formula(chain.from_iterable(actor.get_emails()))
+                    for actor in qs.all()
                 ),
             },
             "labels": {

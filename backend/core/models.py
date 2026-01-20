@@ -4656,8 +4656,9 @@ class OrganisationObjective(
     )
 
     assigned_to = models.ManyToManyField(
-        User,
+        "core.Actor",
         verbose_name="Assigned to",
+        related_name="assigned_organisation_objectives",
         blank=True,
     )
     ref_id = models.CharField(
@@ -7367,7 +7368,10 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
     enabled = models.BooleanField(default=True)
 
     assigned_to = models.ManyToManyField(
-        User, verbose_name="Assigned to", blank=True, related_name="task_templates"
+        "core.Actor",
+        verbose_name="Assigned to",
+        blank=True,
+        related_name="assigned_task_templates",
     )
     evidences = models.ManyToManyField(
         Evidence,

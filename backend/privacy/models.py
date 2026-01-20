@@ -115,15 +115,13 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     dpia_required = models.BooleanField(default=False, blank=True)
     dpia_reference = models.CharField(max_length=255, blank=True)
     has_sensitive_personal_data = models.BooleanField(default=False)
-    owner = models.ForeignKey(
-        Entity, on_delete=models.SET_NULL, null=True, related_name="owned_processings"
-    )
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
     )
     assigned_to = models.ManyToManyField(
-        User,
+        Actor,
         verbose_name="Assigned to",
+        related_name="assigned_processings",
         blank=True,
     )
 
@@ -478,8 +476,9 @@ class DataBreach(NameDescriptionFolderMixin):
 
     ref_id = models.CharField(max_length=100, blank=True)
     assigned_to = models.ManyToManyField(
-        User,
+        Actor,
         verbose_name="Assigned to",
+        related_name="assigned_data_breaches",
         blank=True,
     )
     discovered_on = models.DateTimeField()
