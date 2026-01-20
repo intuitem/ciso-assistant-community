@@ -223,10 +223,15 @@
 						? append(object.ref_id, object.name || object.description)
 						: getNestedValue(object, optionsLabelField);
 
-				const extraParts = optionsExtraFields.map((fieldPath) => {
-					const value = getNestedValue(object, fieldPath[0], fieldPath[1]);
-					return value !== undefined ? value.toString() : '';
-				});
+				const extraParts =
+					object.type === 'user'
+						? []
+						: optionsExtraFields
+								.map((fieldPath) => {
+									const value = getNestedValue(object, fieldPath[0], fieldPath[1]);
+									return value !== undefined ? value.toString() : '';
+								})
+								.filter(Boolean);
 
 				const path: string[] =
 					pathField && object?.[pathField]
