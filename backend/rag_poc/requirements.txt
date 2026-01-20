@@ -1,0 +1,13 @@
+# Core dependencies
+qdrant-client>=1.9.0
+pyyaml>=6.0
+httpx>=0.27.0
+rich>=13.0.0
+
+# Embedding (choose one)
+sentence-transformers>=2.7.0  # Local embeddings (default)
+# For Ollama: install Ollama separately and use USE_OLLAMA_EMBED=true
+
+# Optional: for faster inference
+# onnxruntime>=1.17.0  # CPU
+# onnxruntime-gpu>=1.17.0  # GPU
