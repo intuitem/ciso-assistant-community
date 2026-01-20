@@ -5,6 +5,8 @@ Creates an output Excel with:
 1) library_meta
 2) mappings_meta
 3) mappings_content (source_node_id|target_node_id|relationship)
+
+Then converts the Excel mapping into YAML (Step 2).
 """
 
 import sys
@@ -80,9 +82,9 @@ def extract_mappings_content(input_file: str) -> pd.DataFrame:
 
     mapping_data = []
     for _, row in df.iterrows():
-        source_node_id = row.iloc[2]   # Column C (index 2)
-        target_node_id = row.iloc[11]  # Column L (index 11)
-        relationship = row.iloc[10]    # Column K (index 10)
+        source_node_id = row.iloc[2]    # Column C (index 2)
+        target_node_id = row.iloc[11]   # Column L (index 11)
+        relationship = row.iloc[10]     # Column K (index 10)
 
         if pd.isna(source_node_id) or pd.isna(target_node_id) or pd.isna(relationship):
             continue
@@ -115,7 +117,7 @@ def process_mapping(input_file: str, packager_name: str, output_file: str = None
     if output_file is None:
         output_file = DEFAULT_OUTPUT_FILENAME_EXCEL
 
-    # Write sheets in the required order:
+    # Sheet order:
     # 1) library_meta
     # 2) mappings_meta
     # 3) mappings_content
@@ -141,10 +143,10 @@ def main():
     )
 
     args = parser.parse_args()
-    
+
     output_excel_file = DEFAULT_OUTPUT_FILENAME_EXCEL
-    
-    # Determine output file path (add .yaml if missing)
+
+    # Output YAML: same stem as Excel + .yaml
     output_path = Path(Path(DEFAULT_OUTPUT_FILENAME_EXCEL).stem + ".yaml")
 
 
@@ -154,7 +156,7 @@ def main():
         print("###########################################\n")
 
         process_mapping(args.input_excel_file, args.packager_name_CIS, output_excel_file)
-        
+
         print("\n##########################################")
         print("##### [STEP 2] Creating YAML Mapping #####")
         print("##########################################\n")
