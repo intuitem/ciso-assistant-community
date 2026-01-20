@@ -965,6 +965,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objeto no visible.",
+				"countPlural=other": "{count} objetos no visibles."
+			}
+		}
+	],
 	"matchingScenarios": "Escenarios coincidentes",
 	"select": "Seleccionar",
 	"deselect": "Deseleccionar",
@@ -3022,6 +3032,7 @@
 	"editLayout": "Widgets",
 	"widgets": "Widgets",
 	"width": "Anchura",
+	"appliedControlsPlaceholder": "Seleccione las medidas aplicadas...",
 	"associatedMetricInstances": "Instancias de métricas asociadas",
 	"baseQuery": "Consulta base",
 	"changeAttackStage": "Cambiar fase del ataque",
@@ -3068,5 +3079,8 @@
 	"valueMapping": "Mapeo de valores",
 	"valueMappingForField": "Mapeo de {field}",
 	"valueMappingToField": "mapeado_a: {field}",
-	"widgetCount": "Número de widgets"
+	"widgetCount": "Número de widgets",
+	"assignmentSettings": "Asignaciones",
+	"allowAssignmentsToEntities": "Permitir asignaciones a entidades",
+	"allowAssignmentsToEntitiesDescription": "Permite que las entidades aparezcan como actores al asignar propietarios, autores o revisores."
 }

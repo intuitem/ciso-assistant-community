@@ -965,6 +965,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Objekt nicht sichtbar.",
+				"countPlural=other": "{count} Objekte nicht sichtbar."
+			}
+		}
+	],
 	"matchingScenarios": "Übereinstimmende Szenarien",
 	"select": "Auswählen",
 	"deselect": "Abwählen",
@@ -2929,5 +2939,9 @@
 		}
 	],
 	"cascadeAffectedHint": "Die unten aufgeführten Elemente bleiben im System, aber ihre Verknüpfungen zu diesem Objekt werden entfernt.",
-	"libraryFilteringLabels": "Bibliotheksetiketten"
+	"libraryFilteringLabels": "Bibliotheksetiketten",
+	"appliedControlsPlaceholder": "Angewandte Kontrollen auswählen...",
+	"assignmentSettings": "Zuweisungseinstellungen",
+	"allowAssignmentsToEntities": "Zuweisungen an Entitäten zulassen",
+	"allowAssignmentsToEntitiesDescription": "Ermöglicht, dass Entitäten als Akteure erscheinen, wenn Eigentümer, Autoren oder Prüfer zugewiesen werden."
 }

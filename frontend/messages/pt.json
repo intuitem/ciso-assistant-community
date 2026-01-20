@@ -958,6 +958,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objeto não visível.",
+				"countPlural=other": "{count} objetos não visíveis."
+			}
+		}
+	],
 	"matchingScenarios": "Cenários correspondentes",
 	"select": "Selecionar",
 	"deselect": "Desmarcar",
@@ -1063,5 +1073,9 @@
 		}
 	],
 	"cascadeAffectedHint": "Os itens abaixo permanecem no sistema, mas seus links para este objeto serão removidos.",
-	"libraryFilteringLabels": "Etiquetas de biblioteca"
+	"libraryFilteringLabels": "Etiquetas de biblioteca",
+	"appliedControlsPlaceholder": "Selecione os controles aplicados...",
+	"assignmentSettings": "Configurações de atribuição",
+	"allowAssignmentsToEntities": "Permitir atribuições a entidades",
+	"allowAssignmentsToEntitiesDescription": "Permite que as entidades apareçam como atores ao atribuir proprietários, autores ou revisores."
 }

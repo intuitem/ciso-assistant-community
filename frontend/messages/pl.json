@@ -1676,6 +1676,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} obiekt niewidoczny.",
+				"countPlural=other": "{count} obiekty niewidoczne."
+			}
+		}
+	],
 	"matchingScenarios": "Dopasowane scenariusze",
 	"select": "Wybierz",
 	"deselect": "Odznacz",
@@ -1803,5 +1813,9 @@
 		}
 	],
 	"cascadeAffectedHint": "Poniższe elementy pozostają w systemie, ale ich linki do tego obiektu zostaną usunięte.",
-	"libraryFilteringLabels": "Etykiety biblioteki"
+	"libraryFilteringLabels": "Etykiety biblioteki",
+	"appliedControlsPlaceholder": "Wybierz stosowane kontrole...",
+	"assignmentSettings": "Ustawienia przydziałów",
+	"allowAssignmentsToEntities": "Zezwól na przydziały do encji",
+	"allowAssignmentsToEntitiesDescription": "Pozwala, aby encje pojawiały się jako aktorzy podczas przypisywania właścicieli, autorów lub recenzentów."
 }

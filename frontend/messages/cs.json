@@ -946,6 +946,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objekt není viditelný.",
+				"countPlural=other": "{count} objekty nejsou viditelné."
+			}
+		}
+	],
 	"matchingScenarios": "Shodné scénáře",
 	"select": "Vybrat",
 	"deselect": "Zrušit výběr",
@@ -1051,5 +1061,9 @@
 	"isCustom": "Vlastní",
 	"errorUnloadingLibrary": "Chyba při uvolňování knihovny",
 	"librarySuccessfullyUnloaded": "Knihovna byla úspěšně uvolněna",
-	"libraryFilteringLabels": "Štítky knihovny"
+	"libraryFilteringLabels": "Knihovnové štítky",
+	"appliedControlsPlaceholder": "Vyberte aplikované kontroly...",
+	"assignmentSettings": "Nastavení přiřazení",
+	"allowAssignmentsToEntities": "Povolit přiřazování entitám",
+	"allowAssignmentsToEntitiesDescription": "Umožní, aby se entity zobrazovaly jako aktéři při přiřazování vlastníků, autorů nebo recenzentů."
 }

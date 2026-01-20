@@ -955,6 +955,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} obiect nevizibil.",
+				"countPlural=other": "{count} obiecte nevizibile."
+			}
+		}
+	],
 	"matchingScenarios": "Scenarii potrivite",
 	"select": "Selectează",
 	"deselect": "Deselectează",
@@ -1060,5 +1070,9 @@
 		}
 	],
 	"cascadeAffectedHint": "Obiectele de mai jos rămân în sistem, dar legăturile lor cu acest obiect vor fi eliminate.",
-	"libraryFilteringLabels": "Etichete bibliotecă"
+	"libraryFilteringLabels": "Etichete bibliotecă",
+	"appliedControlsPlaceholder": "Selectați controalele aplicate...",
+	"assignmentSettings": "Setări atribuiri",
+	"allowAssignmentsToEntities": "Permite atribuiri către entități",
+	"allowAssignmentsToEntitiesDescription": "Permite entităților să apară ca actori atunci când atribui proprietari, autori sau recenzori."
 }

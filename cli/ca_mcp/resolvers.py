@@ -165,16 +165,24 @@ def resolve_risk_assessment_id(assessment_name_or_id: str) -> str:
     return assessments[0]["id"]
 
 
-def resolve_asset_id(asset_name_or_id: str) -> str:
+def resolve_asset_id(asset_name_or_id: str, folder_id: str = None) -> str:
     """Helper function to resolve asset name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
+
+    Args:
+        asset_name_or_id: Asset name or UUID
+        folder_id: Optional folder UUID to scope the lookup (avoids ambiguity)
     """
     # Check if it's already a UUID
     if "-" in asset_name_or_id and len(asset_name_or_id) == 36:
         return asset_name_or_id
 
-    # Otherwise, look up by name
-    res = make_get_request("/assets/", params={"name": asset_name_or_id})
+    # Build query params with optional folder scoping
+    params = {"name": asset_name_or_id}
+    if folder_id:
+        params["folder"] = folder_id
+
+    res = make_get_request("/assets/", params=params)
 
     if res.status_code != 200:
         raise ValueError(f"Asset '{asset_name_or_id}' API error {res.status_code}")
@@ -223,16 +231,24 @@ def resolve_risk_scenario_id(scenario_name_or_id: str) -> str:
     return scenarios[0]["id"]
 
 
-def resolve_applied_control_id(control_name_or_id: str) -> str:
+def resolve_applied_control_id(control_name_or_id: str, folder_id: str = None) -> str:
     """Helper function to resolve applied control name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
+
+    Args:
+        control_name_or_id: Control name or UUID
+        folder_id: Optional folder UUID to scope the lookup (avoids ambiguity)
     """
     # Check if it's already a UUID
     if "-" in control_name_or_id and len(control_name_or_id) == 36:
         return control_name_or_id
 
-    # Otherwise, look up by name
-    res = make_get_request("/applied-controls/", params={"name": control_name_or_id})
+    # Build query params with optional folder scoping
+    params = {"name": control_name_or_id}
+    if folder_id:
+        params["folder"] = folder_id
+
+    res = make_get_request("/applied-controls/", params=params)
 
     if res.status_code != 200:
         raise ValueError(
@@ -261,6 +277,39 @@ def resolve_requirement_assessment_id(requirement_assessment_id: str) -> str:
     raise ValueError(
         f"Requirement assessment '{requirement_assessment_id}' is not a valid UUID"
     )
+
+
+def resolve_compliance_assessment_id(assessment_name_or_id: str) -> str:
+    """Helper function to resolve compliance assessment (audit) name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    # Check if it's already a UUID
+    if "-" in assessment_name_or_id and len(assessment_name_or_id) == 36:
+        return assessment_name_or_id
+
+    # Otherwise, look up by name
+    res = make_get_request(
+        "/compliance-assessments/", params={"name": assessment_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Compliance assessment '{assessment_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    assessments = get_paginated_results(data)
+
+    if not assessments:
+        raise ValueError(f"Compliance assessment '{assessment_name_or_id}' not found")
+
+    if len(assessments) > 1:
+        assessment_names = [a["name"] for a in assessments[:3]]
+        raise ValueError(
+            f"Ambiguous compliance assessment name '{assessment_name_or_id}', found {len(assessments)}: {assessment_names}"
+        )
+
+    return assessments[0]["id"]
 
 
 def resolve_id_or_name(name_or_id: str, endpoint: str) -> str:
@@ -296,6 +345,58 @@ def resolve_id_or_name(name_or_id: str, endpoint: str) -> str:
         )
 
     return results[0]["id"]
+
+
+def resolve_threat_id(
+    threat_name_or_id: str, library: str = None, folder_id: str = None
+) -> str:
+    """Helper function to resolve threat name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+
+    Args:
+        threat_name_or_id: Threat name or UUID
+        library: Optional library URN/ID to filter threats by specific library
+        folder_id: Optional folder UUID to scope the lookup (for custom threats)
+
+    Returns:
+        UUID of the threat
+    """
+    # Check if it's already a UUID
+    if "-" in threat_name_or_id and len(threat_name_or_id) == 36:
+        return threat_name_or_id
+
+    # Build query params
+    params = {"name": threat_name_or_id}
+    if library:
+        # Resolve library URN to ID if needed
+        library_id = resolve_library_id(library)
+        params["library"] = library_id
+    if folder_id:
+        params["folder"] = folder_id
+
+    res = make_get_request("/threats/", params=params)
+
+    if res.status_code != 200:
+        raise ValueError(f"Threat '{threat_name_or_id}' API error {res.status_code}")
+
+    data = res.json()
+    threats = get_paginated_results(data)
+
+    if not threats:
+        raise ValueError(f"Threat '{threat_name_or_id}' not found")
+
+    if len(threats) > 1:
+        # Provide helpful info about which libraries have matching threats
+        threat_info = [
+            f"{t['name']} (provider: {t.get('provider', 'unknown')})"
+            for t in threats[:3]
+        ]
+        raise ValueError(
+            f"Ambiguous threat name '{threat_name_or_id}', found {len(threats)}: {threat_info}. "
+            f"Use the threat UUID or specify a library filter."
+        )
+
+    return threats[0]["id"]
 
 
 def resolve_library_id(library_urn_or_id: str) -> str:
@@ -499,3 +600,226 @@ def resolve_representative_id(representative_email_or_id: str) -> str:
         )
 
     return representatives[0]["id"]
+
+
+# ============================================================================
+# EBIOS RM (Risk Management) Resolvers
+# ============================================================================
+
+
+def resolve_ebios_rm_study_id(study_name_or_id: str) -> str:
+    """Helper function to resolve EBIOS RM study name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in study_name_or_id and len(study_name_or_id) == 36:
+        return study_name_or_id
+
+    res = make_get_request("/ebios-rm/studies/", params={"name": study_name_or_id})
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"EBIOS RM Study '{study_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    studies = get_paginated_results(data)
+
+    if not studies:
+        raise ValueError(f"EBIOS RM Study '{study_name_or_id}' not found")
+
+    if len(studies) > 1:
+        raise ValueError(
+            f"Ambiguous EBIOS RM Study name '{study_name_or_id}', found {len(studies)}"
+        )
+
+    return studies[0]["id"]
+
+
+def resolve_feared_event_id(feared_event_name_or_id: str) -> str:
+    """Helper function to resolve feared event name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in feared_event_name_or_id and len(feared_event_name_or_id) == 36:
+        return feared_event_name_or_id
+
+    res = make_get_request(
+        "/ebios-rm/feared-events/", params={"name": feared_event_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Feared event '{feared_event_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    feared_events = get_paginated_results(data)
+
+    if not feared_events:
+        raise ValueError(f"Feared event '{feared_event_name_or_id}' not found")
+
+    if len(feared_events) > 1:
+        raise ValueError(
+            f"Ambiguous feared event name '{feared_event_name_or_id}', found {len(feared_events)}"
+        )
+
+    return feared_events[0]["id"]
+
+
+def resolve_ro_to_id(ro_to_id: str) -> str:
+    """Helper function to resolve RoTo couple ID
+    RoTo couples don't have names, so only UUIDs are accepted.
+    """
+    if "-" in ro_to_id and len(ro_to_id) == 36:
+        return ro_to_id
+
+    raise ValueError(f"RoTo couple '{ro_to_id}' is not a valid UUID")
+
+
+def resolve_stakeholder_id(stakeholder_id: str) -> str:
+    """Helper function to resolve stakeholder ID
+    Stakeholders are identified by entity+category, so only UUIDs are accepted.
+    """
+    if "-" in stakeholder_id and len(stakeholder_id) == 36:
+        return stakeholder_id
+
+    raise ValueError(f"Stakeholder '{stakeholder_id}' is not a valid UUID")
+
+
+def resolve_strategic_scenario_id(scenario_name_or_id: str) -> str:
+    """Helper function to resolve strategic scenario name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in scenario_name_or_id and len(scenario_name_or_id) == 36:
+        return scenario_name_or_id
+
+    res = make_get_request(
+        "/ebios-rm/strategic-scenarios/", params={"name": scenario_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Strategic scenario '{scenario_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    scenarios = get_paginated_results(data)
+
+    if not scenarios:
+        raise ValueError(f"Strategic scenario '{scenario_name_or_id}' not found")
+
+    if len(scenarios) > 1:
+        raise ValueError(
+            f"Ambiguous strategic scenario name '{scenario_name_or_id}', found {len(scenarios)}"
+        )
+
+    return scenarios[0]["id"]
+
+
+def resolve_attack_path_id(attack_path_name_or_id: str) -> str:
+    """Helper function to resolve attack path name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in attack_path_name_or_id and len(attack_path_name_or_id) == 36:
+        return attack_path_name_or_id
+
+    res = make_get_request(
+        "/ebios-rm/attack-paths/", params={"name": attack_path_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Attack path '{attack_path_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    attack_paths = get_paginated_results(data)
+
+    if not attack_paths:
+        raise ValueError(f"Attack path '{attack_path_name_or_id}' not found")
+
+    if len(attack_paths) > 1:
+        raise ValueError(
+            f"Ambiguous attack path name '{attack_path_name_or_id}', found {len(attack_paths)}"
+        )
+
+    return attack_paths[0]["id"]
+
+
+def resolve_operational_scenario_id(scenario_id: str) -> str:
+    """Helper function to resolve operational scenario ID
+    Operational scenarios derive their name from attack paths, so only UUIDs are accepted.
+    """
+    if "-" in scenario_id and len(scenario_id) == 36:
+        return scenario_id
+
+    raise ValueError(f"Operational scenario '{scenario_id}' is not a valid UUID")
+
+
+def resolve_elementary_action_id(action_name_or_id: str) -> str:
+    """Helper function to resolve elementary action name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in action_name_or_id and len(action_name_or_id) == 36:
+        return action_name_or_id
+
+    res = make_get_request(
+        "/ebios-rm/elementary-actions/", params={"name": action_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Elementary action '{action_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    actions = get_paginated_results(data)
+
+    if not actions:
+        raise ValueError(f"Elementary action '{action_name_or_id}' not found")
+
+    if len(actions) > 1:
+        raise ValueError(
+            f"Ambiguous elementary action name '{action_name_or_id}', found {len(actions)}"
+        )
+
+    return actions[0]["id"]
+
+
+def resolve_operating_mode_id(mode_name_or_id: str) -> str:
+    """Helper function to resolve operating mode name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in mode_name_or_id and len(mode_name_or_id) == 36:
+        return mode_name_or_id
+
+    res = make_get_request(
+        "/ebios-rm/operating-modes/", params={"name": mode_name_or_id}
+    )
+
+    if res.status_code != 200:
+        raise ValueError(
+            f"Operating mode '{mode_name_or_id}' API error {res.status_code}"
+        )
+
+    data = res.json()
+    modes = get_paginated_results(data)
+
+    if not modes:
+        raise ValueError(f"Operating mode '{mode_name_or_id}' not found")
+
+    if len(modes) > 1:
+        raise ValueError(
+            f"Ambiguous operating mode name '{mode_name_or_id}', found {len(modes)}"
+        )
+
+    return modes[0]["id"]
+
+
+def resolve_kill_chain_id(kill_chain_id: str) -> str:
+    """Helper function to resolve kill chain step ID
+    Kill chain steps don't have names, so only UUIDs are accepted.
+    """
+    if "-" in kill_chain_id and len(kill_chain_id) == 36:
+        return kill_chain_id
+
+    raise ValueError(f"Kill chain step '{kill_chain_id}' is not a valid UUID")

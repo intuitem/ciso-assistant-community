@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel, ETADueDateMixin, NameDescriptionMixin
 from core.models import (
+    Actor,
     AppliedControl,
     Asset,
     ComplianceAssessment,
@@ -153,17 +154,17 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         blank=True,
         null=True,
     )
-    authors = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Authors"),
-        related_name="authors",
-    )
     reviewers = models.ManyToManyField(
-        User,
+        Actor,
         blank=True,
         verbose_name=_("Reviewers"),
-        related_name="reviewers",
+        related_name="ebios_rm_study_reviewers",
+    )
+    authors = models.ManyToManyField(
+        Actor,
+        blank=True,
+        verbose_name=_("Authors"),
+        related_name="ebios_rm_study_authors",
     )
     observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
     meta = models.JSONField(

@@ -2780,6 +2780,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个对象不可见。",
+				"countPlural=other": "{count} 个对象不可见。"
+			}
+		}
+	],
 	"days": "天",
 	"deletionPolicy": "删除策略",
 	"dependencyHelpText": "与此利益相关者的关系对我的业务至关重要吗？",
@@ -3081,5 +3091,8 @@
 	"valueMappingForField": "{field} 映射",
 	"valueMappingToField": "映射到：{field}",
 	"widgetCount": "小部件计数",
-	"youCanSetPasswordHere": "您可以在此设置密码"
+	"youCanSetPasswordHere": "您可以在此设置密码",
+	"assignmentSettings": "分配设置",
+	"allowAssignmentsToEntities": "允许将任务分配给实体",
+	"allowAssignmentsToEntitiesDescription": "在分配所有者、作者或审阅者时，让实体显示为参与者。"
 }
