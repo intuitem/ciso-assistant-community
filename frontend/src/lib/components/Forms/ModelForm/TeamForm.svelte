@@ -48,7 +48,6 @@
 	cacheLock={cacheLocks['leader']}
 	bind:cachedValue={formDataCache['leader']}
 	label={m.leader()}
-	mandatory="true"
 />
 <AutocompleteSelect
 	{form}
