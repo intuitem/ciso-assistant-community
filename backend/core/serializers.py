@@ -1208,12 +1208,16 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
 
 class ActorReadSerializer(BaseModelSerializer):
     specific = FieldsRelatedField()
-    folder = FieldsRelatedField()
+    folder = serializers.SerializerMethodField()
     str = serializers.CharField(source="__str__")
 
     class Meta:
         model = Actor
         fields = ["id", "str", "type", "specific", "folder"]
+
+    def get_folder(self, obj):
+        folder = obj.folder
+        return {"id": folder.id, "str": str(folder)} if folder else None
 
 
 class TeamWriteSerializer(BaseModelSerializer):
