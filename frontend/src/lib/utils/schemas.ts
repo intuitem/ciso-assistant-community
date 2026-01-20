@@ -1412,7 +1412,7 @@ export const teamSchema = z.object({
 	team_email: z.string().email().optional(),
 	folder: z.string(),
 	members: z.array(z.string().uuid().optional()).optional(),
-	leader: z.string().uuid().optional().nullable(),
+	leader: z.string().uuid(),
 	deputies: z.array(z.string().uuid().optional()).optional()
 });
 
