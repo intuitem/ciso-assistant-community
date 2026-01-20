@@ -7,7 +7,6 @@ from core.views import (
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import filters
 from django.db.models import Count
 from itertools import chain
 from collections import defaultdict
@@ -211,7 +210,11 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "source": "assigned_to",
                 "label": "assigned_to",
                 "format": lambda qs: ",".join(
-                    escape_excel_formula(u.email) for u in qs.all()
+                    escape_excel_formula(
+                        escape_excel_formula(email)
+                        for actor in qs.all()
+                        for email in actor.get_emails()
+                    )
                 ),
             },
             "labels": {

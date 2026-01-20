@@ -2668,7 +2668,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
         # Send notification to newly assigned users
         if assigned_to_data:
             self._send_assignment_notifications(
-                instance, [user.id for user in assigned_to_data]
+                instance, [actor.id for actor in assigned_to_data]
             )
 
         return instance
@@ -2702,17 +2702,19 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
         return instance
 
-    def _send_assignment_notifications(self, task_template, user_ids):
-        """Send assignment notifications to the specified users"""
-        if not user_ids:
+    def _send_assignment_notifications(self, task_template, actor_ids):
+        """Send assignment notifications to the specified actors"""
+        if not actor_ids:
             return
 
         try:
-            from iam.models import User
+            from core.models import Actor
             from .tasks import send_task_template_assignment_notification
 
-            assigned_users = User.objects.filter(id__in=user_ids)
-            assigned_emails = [user.email for user in assigned_users if user.email]
+            assigned_actors = Actor.objects.filter(id__in=actor_ids)
+            assigned_emails = []
+            for actor in assigned_actors:
+                assigned_emails.extend(actor.get_emails())
 
             if assigned_emails:
                 send_task_template_assignment_notification(
