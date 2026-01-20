@@ -120,7 +120,7 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
 
     author = models.ForeignKey(
-        User,
+        "core.Actor",
         on_delete=models.SET_NULL,
         null=True,
         related_name="authored_accreditations",

@@ -20,6 +20,14 @@ class Migration(migrations.Migration):
             model_name="tasktemplate",
             name="assigned_to",
         ),
+        migrations.RemoveField(
+            model_name="perimeter",
+            name="default_assignee",
+        ),
+        migrations.RemoveField(
+            model_name="timelineentry",
+            name="author",
+        ),
         migrations.RenameField(
             model_name="organisationobjective",
             old_name="new_assigned_to",
@@ -29,5 +37,15 @@ class Migration(migrations.Migration):
             model_name="tasktemplate",
             old_name="new_assigned_to",
             new_name="assigned_to",
+        ),
+        migrations.RenameField(
+            model_name="perimeter",
+            old_name="new_default_assignee",
+            new_name="default_assignee",
+        ),
+        migrations.RenameField(
+            model_name="timelineentry",
+            old_name="new_author",
+            new_name="author",
         ),
     ]

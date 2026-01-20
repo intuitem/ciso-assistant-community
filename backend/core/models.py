@@ -2302,7 +2302,8 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Status"),
     )
     default_assignee = models.ManyToManyField(
-        User,
+        "core.actor",
+        related_name="perimeter_default_assignee",
         verbose_name="Default assignee",
         blank=True,
     )
@@ -4083,7 +4084,7 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         verbose_name="Timestamp", unique=False, default=now
     )
     author = models.ForeignKey(
-        User,
+        "core.Actor",
         on_delete=models.SET_NULL,
         related_name="timeline_entries",
         verbose_name="Author",

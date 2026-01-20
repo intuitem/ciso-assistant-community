@@ -18,6 +18,10 @@ class Migration(migrations.Migration):
             model_name="processing",
             name="assigned_to",
         ),
+        migrations.RemoveField(
+            model_name="processing",
+            name="author",
+        ),
         migrations.RenameField(
             model_name="databreach",
             old_name="new_assigned_to",
@@ -27,6 +31,11 @@ class Migration(migrations.Migration):
             model_name="processing",
             old_name="new_assigned_to",
             new_name="assigned_to",
+        ),
+        migrations.RenameField(
+            model_name="processing",
+            old_name="new_author",
+            new_name="author",
         ),
         migrations.AlterField(
             model_name="databreach",

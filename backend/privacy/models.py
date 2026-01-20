@@ -108,7 +108,7 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         max_length=20, choices=STATUS_CHOICES, default="privacy_draft"
     )
     author = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name="authored_processings"
+        Actor, on_delete=models.SET_NULL, null=True, related_name="authored_processings"
     )
     information_channel = models.CharField(max_length=255, blank=True)
     usage_channel = models.CharField(max_length=255, blank=True)
