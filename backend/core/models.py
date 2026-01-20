@@ -7837,32 +7837,6 @@ class Actor(AbstractBaseModel):
             return self.entity
         raise ValueError("Actor has no underlying instance")
 
-    @property
-    def folder(self):
-        """
-        Returns the actual Folder model instance.
-        """
-        # Optimistic Check: If the specific relation is already loaded (via select_related),
-        # return that folder directly to save a DB query.
-        if self.user_id and self.user and self.user.folder_id:
-            return self.user.folder
-        if self.team_id and self.team and self.team.folder_id:
-            return self.team.folder
-        if self.entity_id and self.entity and self.entity.folder_id:
-            return self.entity.folder
-
-        # Fallback: Use the annotated ID to fetch the object
-        # We assume the annotation 'folder_id' is present (via the Manager)
-        if hasattr(self, "folder_id") and self.folder_id:
-            # Prevent repeated DB calls for the same instance
-            if not hasattr(self, "_folder_cache"):
-                # Replace 'app_label.Folder' with your actual Folder model
-                Folder = apps.get_model("core", "Folder")
-                self._folder_cache = Folder.objects.get(pk=self.folder_id)
-            return self._folder_cache
-
-        return None
-
     def get_emails(self) -> list[str]:
         return self.specific.get_emails()
 
