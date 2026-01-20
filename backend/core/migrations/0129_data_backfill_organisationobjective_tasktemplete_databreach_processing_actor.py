@@ -9,6 +9,8 @@ def migrate_user_to_actor(apps, schema_editor):
 
     FK_MAPPINGS = [
         ("core", "TimelineEntry", "author", "new_author"),
+        ("pmbok", "Accreditation", "author", "new_author"),
+        ("privacy", "Processing", "author", "new_author"),
     ]
 
     M2M_MAPPINGS = [
