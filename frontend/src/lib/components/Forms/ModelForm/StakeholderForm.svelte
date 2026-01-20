@@ -136,6 +136,7 @@
 					label={m.entity()}
 					hidden={initialData.entity}
 					helpText={m.stakeholderEntityHelpText()}
+					optionsExtraFields={[['folder', 'str']]}
 					includeAllOptionFields={true}
 					optionsInfoFields={{
 						fields: [
