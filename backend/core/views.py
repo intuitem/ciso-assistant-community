@@ -5652,17 +5652,30 @@ class ValidationFlowViewSet(BaseModelViewSet):
             )
 
 
+class ActorFilterSet(GenericFilterSet):
+    exclude_third_parties = df.BooleanFilter(
+        method="get_exclude_third_parties", label="exclude third parties"
+    )
+
+    def get_exclude_third_parties(self, queryset, name, value):
+        third_parties = Actor.objects.filter(user__is_third_party=not value)
+        return queryset.exclude(id__in=third_parties)
+
+    class Meta:
+        fields = ["exclude_third_parties"]
+
+
 class ActorViewSet(BaseModelViewSet):
     http_method_names = ["get", "head", "options"]
 
     model = Actor
+    filterset_class = ActorFilterSet
     search_fields = []
     ordering = [
         "type_rank",
         "display_name",
         "id",
     ]
-    filterset_fields = ["user__is_third_party"]
 
     def get_queryset(self):
         queryset = super().get_queryset()
