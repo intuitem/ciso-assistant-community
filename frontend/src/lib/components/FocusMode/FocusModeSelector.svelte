@@ -55,33 +55,36 @@
 </script>
 
 <div class="focus-mode-selector relative">
-	<button
-		onclick={toggleDropdown}
-		class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200
-			{$focusMode.id
-			? 'bg-indigo-100 text-indigo-700 ring-2 ring-indigo-300 hover:bg-indigo-200'
-			: 'bg-slate-100 text-slate-600 hover:bg-slate-200'}"
-		title={m.focusModeTooltip?.() ?? 'Focus on a specific domain'}
-	>
-		<i class="fa-solid fa-crosshairs text-xs"></i>
-		<span class="max-w-32 truncate">
-			{$focusMode.name ?? m.allDomains?.() ?? 'All domains'}
-		</span>
+	<div class="relative">
+		<button
+			onclick={toggleDropdown}
+			class="flex items-center gap-2 rounded-lg text-sm font-medium transition-all duration-200
+				{$focusMode.id
+				? 'bg-indigo-100 text-indigo-700 ring-2 ring-indigo-300 hover:bg-indigo-200 pl-3 pr-8 py-1.5'
+				: 'bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-1.5'}"
+			title={m.focusModeTooltip?.() ?? 'Focus on a specific domain'}
+		>
+			<i class="fa-solid fa-crosshairs text-xs"></i>
+			<span class="max-w-32 truncate">
+				{$focusMode.name ?? m.allDomains?.() ?? 'All domains'}
+			</span>
+			{#if !$focusMode.id}
+				<i class="fa-solid fa-chevron-down text-xs"></i>
+			{/if}
+		</button>
 		{#if $focusMode.id}
 			<button
 				onclick={(e) => {
 					e.stopPropagation();
 					handleClear();
 				}}
-				class="ml-1 p-0.5 rounded hover:bg-indigo-300 transition-colors"
+				class="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-indigo-300 transition-colors z-10"
 				title={m.clearFocus?.() ?? 'Clear focus'}
 			>
 				<i class="fa-solid fa-xmark text-xs"></i>
 			</button>
-		{:else}
-			<i class="fa-solid fa-chevron-down text-xs"></i>
 		{/if}
-	</button>
+	</div>
 
 	{#if isOpen && domainFolders.length > 0}
 		<div

@@ -12,6 +12,7 @@ from rest_framework.response import Response
 
 from django.utils.formats import date_format
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.db.models import Sum, F, FloatField, Case, When, Value
 from django.db.models.functions import Cast, Greatest, Coalesce, Round
 
@@ -740,7 +741,9 @@ class EntityAssessmentViewSet(BaseModelViewSet):
 
         folder_id = effective_folder_id(request)
         scoped_folder = (
-            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+            get_object_or_404(Folder, id=folder_id)
+            if folder_id
+            else Folder.get_root_folder()
         )
         (viewable_items, _, _) = RoleAssignment.get_accessible_object_ids(
             folder=scoped_folder,
