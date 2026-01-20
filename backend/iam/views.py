@@ -225,6 +225,7 @@ class CurrentUserView(views.APIView):
         res_data = {
             "id": request.user.id,
             "actor_id": request.user.actor.id,
+            "all_actor_ids": request.user.get_all_actor_ids(),
             "email": request.user.email,
             "first_name": request.user.first_name,
             "last_name": request.user.last_name,

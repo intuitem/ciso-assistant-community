@@ -618,6 +618,39 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def get_emails(self) -> list[str]:
         return [self.email]
 
+    def get_all_actors(self) -> list:
+        """
+        Get all actors related to this user.
+        Includes:
+        - The user's own actor
+        - Actors of teams where the user is leader
+        - Actors of teams where the user is deputy
+        - Actors of teams where the user is member
+        """
+        from core.models import Actor, Team
+        from django.db.models import Q
+
+        # Get the user's own actor
+        actors = []
+        if hasattr(self, "actor") and self.actor:
+            actors.append(self.actor)
+
+        # Get actors of teams where user is leader, deputy, or member
+        team_actors = Actor.objects.filter(
+            team__in=Team.objects.filter(
+                Q(leader=self) | Q(deputies=self) | Q(members=self)
+            )
+        ).distinct()
+
+        return actors + list(team_actors)
+
+    def get_all_actor_ids(self) -> list:
+        """
+        Get all actor IDs related to this user.
+        Convenience method that returns just the UUIDs.
+        """
+        return [str(actor.id) for actor in self.get_all_actors()]
+
     def mailing(self, email_template_name, subject, object="", object_id="", pk=False):
         """
         Sending a mail to a user for password resetting or creation

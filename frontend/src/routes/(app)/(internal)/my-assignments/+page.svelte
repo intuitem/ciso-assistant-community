@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
+	import { goto } from '$app/navigation';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
 	import { listViewFields } from '$lib/utils/table';
@@ -21,19 +22,36 @@
 	// Toggle for showing/hiding empty sections
 	let showEmptySections = $state(false);
 
+	// Derive actor IDs for queries based on includeTeams
+	const actorIdsParam = $derived(
+		data.includeTeams ? data.user.all_actor_ids.join(',') : data.user.actor_id
+	);
+
+	// Toggle team assignments and navigate with updated URL parameter
+	function toggleTeamAssignments() {
+		const newIncludeTeams = !data.includeTeams;
+		goto(`/my-assignments?include_teams=${newIncludeTeams}`, { invalidateAll: true });
+	}
+
 	const counts = data.counts || {};
 </script>
 
 <div class="flex items-center justify-between p-2 mb-2">
 	<h2 class="text-xl font-semibold">{m.myAssignments()}</h2>
-	<button
-		type="button"
-		class="btn btn-sm variant-ghost-surface"
-		onclick={() => (showEmptySections = !showEmptySections)}
-	>
-		<i class="fa-solid {showEmptySections ? 'fa-eye-slash' : 'fa-eye'} mr-2"></i>
-		{showEmptySections ? m.hideEmptySections() : m.showEmptySections()}
-	</button>
+	<div class="flex gap-2">
+		<button type="button" class="btn btn-sm variant-ghost-surface" onclick={toggleTeamAssignments}>
+			<i class="fa-solid {data.includeTeams ? 'fa-users' : 'fa-user'} mr-2"></i>
+			{data.includeTeams ? m.includeTeamAssignments() : m.directAssignmentsOnly()}
+		</button>
+		<button
+			type="button"
+			class="btn btn-sm variant-ghost-surface"
+			onclick={() => (showEmptySections = !showEmptySections)}
+		>
+			<i class="fa-solid {showEmptySections ? 'fa-eye-slash' : 'fa-eye'} mr-2"></i>
+			{showEmptySections ? m.hideEmptySections() : m.showEmptySections()}
+		</button>
+	</div>
 </div>
 
 <div class="grid grid-cols-12 gap-4 p-2">
@@ -58,7 +76,7 @@
 				filters: APPLIED_CONTROL_FILTERS
 			}}
 			URLModel="applied-controls"
-			baseEndpoint="/applied-controls?owner={data.user.actor_id}"
+			baseEndpoint="/applied-controls?owner={actorIdsParam}"
 		/>
 	</div>
 	<div class="col-span-5 p-2 flex items-center justify-center">
@@ -109,7 +127,7 @@
 				}}
 				hideFilters={true}
 				URLModel="compliance-assessments"
-				baseEndpoint="/compliance-assessments?authors={data.user.actor_id}"
+				baseEndpoint="/compliance-assessments?authors={actorIdsParam}"
 			/>
 		</div>
 	{/if}
@@ -133,7 +151,7 @@
 				}}
 				hideFilters={true}
 				URLModel="risk-assessments"
-				baseEndpoint="/risk-assessments?authors={data.user.actor_id}"
+				baseEndpoint="/risk-assessments?authors={actorIdsParam}"
 			/>
 		</div>
 	{/if}
@@ -158,7 +176,7 @@
 				}}
 				hideFilters={true}
 				URLModel="risk-scenarios"
-				baseEndpoint="/risk-scenarios?owner={data.user.actor_id}"
+				baseEndpoint="/risk-scenarios?owner={actorIdsParam}"
 			/>
 		</div>
 	{/if}
@@ -183,7 +201,7 @@
 				}}
 				hideFilters={true}
 				URLModel="incidents"
-				baseEndpoint="/incidents?owners={data.user.actor_id}"
+				baseEndpoint="/incidents?owners={actorIdsParam}"
 			/>
 		</div>
 	{/if}
@@ -208,7 +226,7 @@
 				}}
 				hideFilters={true}
 				URLModel="security-exceptions"
-				baseEndpoint="/security-exceptions?owners={data.user.actor_id}"
+				baseEndpoint="/security-exceptions?owners={actorIdsParam}"
 			/>
 		</div>
 	{/if}
@@ -232,7 +250,7 @@
 				}}
 				hideFilters={true}
 				URLModel="findings-assessments"
-				baseEndpoint="/findings-assessments?authors={data.user.actor_id}"
+				baseEndpoint="/findings-assessments?authors={actorIdsParam}"
 			/>
 		</div>
 	{/if}
@@ -281,7 +299,7 @@
 				}}
 				hideFilters={true}
 				URLModel="findings"
-				baseEndpoint="/findings?owner={data.user.actor_id}"
+				baseEndpoint="/findings?owner={actorIdsParam}"
 			/>
 		</div>
 	{/if}
@@ -331,7 +349,7 @@
 				}}
 				hideFilters={true}
 				URLModel="right-requests"
-				baseEndpoint="/right-requests?owner={data.user.actor_id}"
+				baseEndpoint="/right-requests?owner={actorIdsParam}"
 			/>
 		</div>
 	{/if}
@@ -356,7 +374,7 @@
 				}}
 				hideFilters={true}
 				URLModel="metric-instances"
-				baseEndpoint="/metric-instances?owner={data.user.actor_id}"
+				baseEndpoint="/metric-instances?owner={actorIdsParam}"
 			/>
 		</div>
 	{/if}

@@ -5987,13 +5987,25 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def my_assignments(self, request):
+        # Check if team assignments should be included
+        include_teams = (
+            request.query_params.get("include_teams", "false").lower() == "true"
+        )
+
+        if include_teams:
+            # Get all actors: user's own actor + team actors
+            actors = request.user.get_all_actors()
+        else:
+            # Only user's direct actor
+            actors = [request.user.actor]
+
         risk_assessments = RiskAssessment.objects.filter(
-            Q(authors=request.user.actor) | Q(reviewers=request.user.actor)
+            Q(authors__in=actors) | Q(reviewers__in=actors)
         ).distinct()
 
         audits = (
             ComplianceAssessment.objects.filter(
-                Q(authors=request.user.actor) | Q(reviewers=request.user.actor)
+                Q(authors__in=actors) | Q(reviewers__in=actors)
             )
             .order_by(F("eta").asc(nulls_last=True))
             .distinct()
@@ -6008,14 +6020,12 @@ class FolderViewSet(BaseModelViewSet):
             avg_progress = int(sum / audits.count())
 
         controls = (
-            AppliedControl.objects.filter(owner=request.user.actor)
+            AppliedControl.objects.filter(owner__in=actors)
             .order_by(F("eta").asc(nulls_last=True))
             .distinct()
         )
         non_active_controls = controls.exclude(status="active")
-        risk_scenarios = RiskScenario.objects.filter(
-            owner=request.user.actor
-        ).distinct()
+        risk_scenarios = RiskScenario.objects.filter(owner__in=actors).distinct()
         controls_progress = 0
         evidences_progress = 0
         tot_ac = controls.count()
