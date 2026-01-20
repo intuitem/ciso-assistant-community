@@ -1,15 +1,13 @@
 from collections import defaultdict
 from datetime import date, timedelta
 from huey import crontab
-from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
+from huey.contrib.djhuey import periodic_task, task, db_periodic_task
 from core.models import (
     AppliedControl,
     ComplianceAssessment,
     Evidence,
     ValidationFlow,
-    FlowEvent,
 )
-from tprm.models import EntityAssessment
 from iam.models import User
 from django.core.mail import send_mail
 from django.conf import settings
