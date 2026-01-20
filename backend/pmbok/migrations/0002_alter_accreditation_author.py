@@ -6,17 +6,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        (
-            "core",
-            "0129_data_backfill_organisationobjective_tasktemplete_databreach_processing_actor",
-        ),
         ("pmbok", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
             model_name="accreditation",
-            name="author",
+            name="new_author",
             field=models.ForeignKey(
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
