@@ -26,7 +26,7 @@ def process_mapping(input_file: str, output_file: str = None):
         input_file: Path to input Excel file
         output_file: Path to output Excel file (optional, defaults to input_file with _mapping suffix)
     """
-    # Read the Excel file - using the 5th sheet (index 4) which is "All CIS Controls & Safeguards"
+    # Read the Excel file - using the 4th sheet (index 3) which is "All CIS Controls & Safeguards"
     df = pd.read_excel(input_file, sheet_name=3)
 
     # Extract relevant columns
