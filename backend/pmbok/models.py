@@ -1,11 +1,9 @@
 from django.db import models
-from iam.models import User, FolderMixin
+from iam.models import FolderMixin
 from core.models import (
     FilteringLabelMixin,
     FindingsAssessment,
-    I18nObjectMixin,
     Policy,
-    ReferentialObjectMixin,
     ComplianceAssessment,
     RiskAssessment,
     Evidence,
@@ -15,8 +13,7 @@ from core.models import (
 from crq.models import QuantitativeRiskStudy
 from ebios_rm.models import EbiosRMStudy
 from tprm.models import Entity, EntityAssessment
-from core.base_models import NameDescriptionMixin, AbstractBaseModel
-from django.db.models import Count
+from core.base_models import NameDescriptionMixin
 
 from auditlog.registry import auditlog
 
@@ -120,7 +117,7 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
 
     author = models.ForeignKey(
-        User,
+        "core.Actor",
         on_delete=models.SET_NULL,
         null=True,
         related_name="authored_accreditations",
