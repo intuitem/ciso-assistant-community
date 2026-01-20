@@ -21,6 +21,7 @@ from django.core.validators import MaxValueValidator, RegexValidator, MinValueVa
 from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.db.models import F, Q, OuterRef, Subquery, Prefetch
+from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -7778,6 +7779,43 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
         ordering = ["name"]
 
 
+class ActorQuerySet(models.QuerySet):
+    def with_folder(self):
+        """
+        Annotates the queryset with 'folder_id'.
+        We use 'folder_id' (not 'folder') to avoid clashing with the property.
+        """
+        return self.annotate(
+            folder_id=Coalesce(
+                "user__folder_id",
+                "team__folder_id",
+                "entity__folder_id",
+                output_field=models.UUIDField(),
+            )
+        )
+
+    def filter(self, *args, **kwargs):
+        """
+        Intercepts filters on 'folder' and maps them to 'folder_id'.
+        This makes the solution a true drop-in replacement.
+        """
+        if "folder" in kwargs:
+            value = kwargs.pop("folder")
+            # If filtering by an object instance, extract the ID
+            if hasattr(value, "pk"):
+                kwargs["folder_id"] = value.pk
+            else:
+                kwargs["folder_id"] = value
+
+        return super().filter(*args, **kwargs)
+
+
+class ActorManager(models.Manager):
+    def get_queryset(self):
+        # Apply annotation by default
+        return ActorQuerySet(self.model, using=self._db).with_folder()
+
+
 class Actor(AbstractBaseModel):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, null=True, blank=True, related_name="actor"
@@ -7792,6 +7830,8 @@ class Actor(AbstractBaseModel):
         blank=True,
         related_name="actor",
     )
+
+    objects = ActorManager()
 
     class Meta:
         constraints = [
@@ -7831,6 +7871,32 @@ class Actor(AbstractBaseModel):
         if self.entity:
             return self.entity
         raise ValueError("Actor has no underlying instance")
+
+    @property
+    def folder(self):
+        """
+        Returns the actual Folder model instance.
+        """
+        # Optimistic Check: If the specific relation is already loaded (via select_related),
+        # return that folder directly to save a DB query.
+        if self.user_id and self.user and self.user.folder_id:
+            return self.user.folder
+        if self.team_id and self.team and self.team.folder_id:
+            return self.team.folder
+        if self.entity_id and self.entity and self.entity.folder_id:
+            return self.entity.folder
+
+        # Fallback: Use the annotated ID to fetch the object
+        # We assume the annotation 'folder_id' is present (via the Manager)
+        if hasattr(self, "folder_id") and self.folder_id:
+            # Prevent repeated DB calls for the same instance
+            if not hasattr(self, "_folder_cache"):
+                # Replace 'app_label.Folder' with your actual Folder model
+                Folder = apps.get_model("core", "Folder")
+                self._folder_cache = Folder.objects.get(pk=self.folder_id)
+            return self._folder_cache
+
+        return None
 
     def get_emails(self) -> list[str]:
         return self.specific.get_emails()

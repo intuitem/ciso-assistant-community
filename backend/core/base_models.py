@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
 from django.core.exceptions import ValidationError
@@ -157,16 +157,17 @@ class ActorSyncMixin(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
-        is_new = self._state.adding
-        super().save(*args, **kwargs)
+        with transaction.atomic():
+            is_new = self._state.adding
+            super().save(*args, **kwargs)
 
-        # If this is a new record, create the actor.
-        # We use get_or_create to be safe against race conditions/re-saves.
-        if is_new:
-            from .models import Actor
+            # If this is a new record, create the actor.
+            # We use get_or_create to be safe against race conditions/re-saves.
+            if is_new:
+                from .models import Actor
 
-            field_name = self.__class__.__name__.lower()
-            Actor.objects.get_or_create(**{field_name: self})
+                field_name = self.__class__.__name__.lower()
+                Actor.objects.get_or_create(**{field_name: self})
 
 
 class ActorSyncManager(models.Manager):
