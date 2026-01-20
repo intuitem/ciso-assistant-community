@@ -4,7 +4,6 @@ from typing import Any
 import structlog
 from django.db import models
 from django.db.models import F
-from itertools import chain
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
@@ -2712,9 +2711,9 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
             from .tasks import send_task_template_assignment_notification
 
             assigned_actors = Actor.objects.filter(id__in=actor_ids)
-            assigned_emails = chain.from_iterable(
-                [actor.get_emails() for actor in assigned_actors]
-            )
+            assigned_emails = []
+            for actor in assigned_actors:
+                assigned_emails.extend(actor.get_emails())
 
             if assigned_emails:
                 send_task_template_assignment_notification(
