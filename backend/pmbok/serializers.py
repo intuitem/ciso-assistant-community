@@ -34,7 +34,7 @@ class GenericCollectionWriteSerializer(BaseModelSerializer):
 class AccreditationReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
-    author = FieldsRelatedField(["id", "first_name", "last_name"])
+    author = FieldsRelatedField()
     authority = FieldsRelatedField()
     linked_collection = FieldsRelatedField()
     collection_data = serializers.SerializerMethodField()
