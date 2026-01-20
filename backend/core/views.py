@@ -5662,7 +5662,6 @@ class ActorViewSet(BaseModelViewSet):
         "display_name",
         "id",
     ]
-    filterset_fields = ["user__is_third_party"]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -5690,6 +5689,9 @@ class ActorViewSet(BaseModelViewSet):
         )
         if not allow_entities:
             queryset = queryset.filter(entity__isnull=True)
+
+        third_parties = Actor.objects.filter(user__is_third_party=True)
+        queryset = queryset.exclude(id__in=third_parties)
 
         return queryset.order_by("type_rank", "display_name")
 
