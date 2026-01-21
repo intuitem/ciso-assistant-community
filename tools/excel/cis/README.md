@@ -53,6 +53,13 @@ python prep_mapping_cis_controls_csf_2.0.py <input_excel_file> <packager_name>
    Using the same packager name guarantees URN consistency between the CIS framework and the generated mapping libraries.
 
 
+## Example
+
+```bash
+python prep_mapping_cis_controls_csf_2.0.py CIS_Controls_v8_Mapping_to_CSF_2.0.xlsx intuitem
+```
+
+
 ---
 
 # > `prep_mapping_cis_controls_iso_27.py`
@@ -93,3 +100,10 @@ python prep_mapping_cis_controls_iso_27.py <input_excel_file> <packager_name>
   ```
 
   Using the same packager name guarantees URN consistency between the CIS framework and the generated mapping libraries.
+
+
+## Example
+
+```bash
+python prep_mapping_cis_controls_iso_27.py CIS_Controls_v8_NEW_MAPPING_to_ISO.IEC_27001.2022_2_2023.xlsx intuitem
+```
