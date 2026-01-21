@@ -1,4 +1,6 @@
-from allauth.socialaccount.providers.saml.views import AuthError as AllauthAuthError
+from allauth.socialaccount.providers.saml.views import (  # type: ignore[import-untyped]
+    AuthError as AllauthAuthError,
+)
 
 
 class AuthError(AllauthAuthError):
