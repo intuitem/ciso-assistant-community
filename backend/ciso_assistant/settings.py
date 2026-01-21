@@ -63,11 +63,11 @@ LOGGING = {
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
         # to trace all db calls, uncoment these lines
-        #"django.db.backends": {
+        # "django.db.backends": {
         #    "handlers": ["console"],
         #    "level": "DEBUG",
         #    "propagate": False,
-        #},
+        # },
     },
 }
 
@@ -230,7 +230,7 @@ MIDDLEWARE = [
     "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
-#MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
+# MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
 ROOT_URLCONF = "ciso_assistant.urls"
 # we leave these for the API UI tools - even if Django templates and Admin are not used anymore
 LOGIN_REDIRECT_URL = "/api"
