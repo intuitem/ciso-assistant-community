@@ -606,7 +606,7 @@ export const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'qualification',
-		optionsEndpoint: 'qualifications',
+		optionsEndpoint: 'terminologies?field_path=qualifications',
 		multiple: true
 	}
 };
@@ -636,7 +636,7 @@ export const SOLUTION_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'solutions/owner',
 		multiple: true
@@ -695,7 +695,7 @@ export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'assigned_to',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'task-templates/assigned_to',
 		multiple: true
@@ -1005,7 +1005,7 @@ export const OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'applied-controls/owner',
 		multiple: true
@@ -1016,7 +1016,7 @@ export const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'findings/owner',
 		multiple: true
@@ -1161,7 +1161,7 @@ export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'evidences/owner',
 		multiple: true
@@ -1800,6 +1800,15 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
+			assigned_to: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'processings/assigned_to',
+					optionsLabelField: 'str',
+					label: 'assignedTo',
+					multiple: true
+				}
+			},
 			status: PROCESSING_STATUS_FILTER,
 			nature: PROCESSING_NATURE_FILTER,
 			filtering_labels: LABELS_FILTER
@@ -1819,6 +1828,15 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
+			owner: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'right-requests/owner',
+					optionsLabelField: 'str',
+					label: 'owner',
+					multiple: true
+				}
+			},
 			request_type: {
 				component: AutocompleteSelect,
 				props: {
@@ -2455,8 +2473,8 @@ export const listViewFields = {
 			owner: {
 				component: AutocompleteSelect,
 				props: {
-					optionsEndpoint: 'users',
-					optionsLabelField: 'email',
+					optionsEndpoint: 'actors',
+					optionsLabelField: 'str',
 					label: 'owner',
 					multiple: true
 				}
