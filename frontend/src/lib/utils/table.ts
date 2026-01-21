@@ -606,7 +606,7 @@ export const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'qualification',
-		optionsEndpoint: 'qualifications',
+		optionsEndpoint: 'terminologies?field_path=qualifications',
 		multiple: true
 	}
 };
