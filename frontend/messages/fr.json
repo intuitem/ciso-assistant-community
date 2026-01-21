@@ -2029,7 +2029,7 @@
 	"showDomains": "Afficher les domaines",
 	"hideDomains": "Masquer les domaines",
 	"defaultAssignee": "Assignation par défaut",
-	"defaultAssigneeHelpText": "Cet utilisateur sera utilisé par défaut pour toutes les analyses de ce périmètre",
+	"defaultAssigneeHelpText": "Cet acteur sera utilisé par défaut pour toutes les analyses de ce périmètre",
 	"inherentRisk": "Risque inhérent",
 	"inherentProba": "Probabilité inhérente",
 	"inherentImpact": "Impact inhérent",

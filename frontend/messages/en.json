@@ -2116,7 +2116,7 @@
 	"showDomains": "Show Domains",
 	"hideDomains": "Hide Domains",
 	"defaultAssignee": "Default assignee",
-	"defaultAssigneeHelpText": "This user will be preset automatically as author for all assessments of this perimeter",
+	"defaultAssigneeHelpText": "This actor will be preset automatically as author for all assessments of this perimeter",
 	"riskTolerance": "Risk tolerance",
 	"riskToleranceHelpText": "Threshold of tolerable risk level",
 	"withinTolerance": "Within tolerance",
