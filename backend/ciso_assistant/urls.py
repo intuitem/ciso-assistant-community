@@ -42,5 +42,5 @@ urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
 ]
 
-if settings.DEBUG and settings.SILK_PROFILING_ENABLED:
+if settings.DEBUG and getattr(settings, "SILK_ENABLED", False):
     urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
