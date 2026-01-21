@@ -6048,6 +6048,9 @@ class FolderViewSet(BaseModelViewSet):
         )
         RS_serializer = RiskScenarioReadSerializer(risk_scenarios[:10], many=True)
 
+        # Return the actor IDs used for filtering so frontend can use them consistently
+        actor_ids = [str(actor.id) for actor in actors]
+
         return Response(
             {
                 "risk_assessments": RA_serializer.data,
@@ -6061,6 +6064,7 @@ class FolderViewSet(BaseModelViewSet):
                         "evidences": evidences_progress,
                     }
                 },
+                "actor_ids": actor_ids,
             }
         )
 

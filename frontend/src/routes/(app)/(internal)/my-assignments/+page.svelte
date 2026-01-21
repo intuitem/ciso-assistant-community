@@ -4,13 +4,10 @@
 	import { goto } from '$app/navigation';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
+	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import { listViewFields } from '$lib/utils/table';
 
-	interface Props {
-		data: PageData;
-	}
-
-	let { data }: Props = $props();
+	let { data }: { data: PageData } = $props();
 
 	const appliedControlFilters = listViewFields['applied-controls'].filters;
 	const APPLIED_CONTROL_FILTERS = {
@@ -19,24 +16,21 @@
 		folder: appliedControlFilters.folder
 	};
 
-	// Toggle for showing/hiding empty sections
 	let showEmptySections = $state(false);
 
-	// Helper to build query params with multiple values for the same key
-	// e.g., buildMultiParam('owner', ['id1', 'id2']) => 'owner=id1&owner=id2'
 	function buildMultiParam(key: string, values: string[]): string {
+		if (!values || values.length === 0) return '';
 		return values.map((v) => `${key}=${v}`).join('&');
 	}
 
-	// Build query params for Actor-based fields
-	const ownerParam = buildMultiParam('owner', data.actorIds);
-	const ownersParam = buildMultiParam('owners', data.actorIds);
-	const authorsParam = buildMultiParam('authors', data.actorIds);
+	let actorIds = $derived(data.actorIds || []);
+	let ownerParams = $derived(buildMultiParam('owner', actorIds));
+	let ownersParams = $derived(buildMultiParam('owners', actorIds));
+	let authorsParams = $derived(buildMultiParam('authors', actorIds));
+	let assignedToParams = $derived(buildMultiParam('assigned_to', actorIds));
 
-	// Toggle team assignments and navigate with updated URL parameter
 	function toggleTeamAssignments() {
-		const newIncludeTeams = !data.includeTeams;
-		goto(`/my-assignments?include_teams=${newIncludeTeams}`, { invalidateAll: true });
+		goto(`/my-assignments?include_teams=${!data.includeTeams}`, { invalidateAll: true });
 	}
 </script>
 
@@ -58,46 +52,11 @@
 	</div>
 </div>
 
-{#await data.streamed.counts}
-	<!-- Loading state for counts -->
-	<div class="grid grid-cols-12 gap-4 p-2">
-		<div class="col-span-7 bg-linear-to-br from-pink-200 to-pink-50 p-2 rounded">
-			<div class="font-bold mb-2">
-				<i class="fa-solid fa-fire-extinguisher mr-2"></i>{m.appliedControls()}
-				<i class="fa-solid fa-spinner fa-spin ml-2 text-sm"></i>
-			</div>
-			<ModelTable
-				source={{
-					head: {
-						ref_id: 'ref_id',
-						name: 'name',
-						status: 'status',
-						priority: 'priority',
-						eta: 'eta',
-						folder: 'folder'
-					},
-					body: [],
-					filters: APPLIED_CONTROL_FILTERS
-				}}
-				URLModel="applied-controls"
-				baseEndpoint="/applied-controls?{ownerParam}"
-			/>
-		</div>
-		<div class="col-span-5 p-2 flex items-center justify-center">
-			{#await data.streamed.dashboardData}
-				<div class="flex flex-col items-center justify-center gap-2">
-					<i class="fa-solid fa-spinner fa-spin text-2xl text-primary-500"></i>
-					<span class="text-sm text-gray-500">{m.loading()}...</span>
-				</div>
-			{:then dashboardData}
-				<ActivityTracker metrics={dashboardData.metrics} />
-			{:catch}
-				<span class="text-red-500">{m.anErrorOccurred()}</span>
-			{/await}
-		</div>
+{#await data.stream.counts}
+	<div class="flex items-center justify-center p-8">
+		<LoadingSpinner />
 	</div>
 {:then counts}
-	<!-- Counts loaded -->
 	<div class="grid grid-cols-12 gap-4 p-2">
 		<div class="col-span-7 bg-linear-to-br from-pink-200 to-pink-50 p-2 rounded">
 			<div class="font-bold mb-2">
@@ -120,20 +79,11 @@
 					filters: APPLIED_CONTROL_FILTERS
 				}}
 				URLModel="applied-controls"
-				baseEndpoint="/applied-controls?{ownerParam}"
+				baseEndpoint="/applied-controls?{ownerParams}"
 			/>
 		</div>
 		<div class="col-span-5 p-2 flex items-center justify-center">
-			{#await data.streamed.dashboardData}
-				<div class="flex flex-col items-center justify-center gap-2">
-					<i class="fa-solid fa-spinner fa-spin text-2xl text-primary-500"></i>
-					<span class="text-sm text-gray-500">{m.loading()}...</span>
-				</div>
-			{:then dashboardData}
-				<ActivityTracker metrics={dashboardData.metrics} />
-			{:catch}
-				<span class="text-red-500">{m.anErrorOccurred()}</span>
-			{/await}
+			<ActivityTracker metrics={data.data.metrics} />
 		</div>
 		{#if showEmptySections || counts.tasks > 0}
 			<div class="col-span-6 bg-linear-to-br from-violet-200 to-violet-50 p-2 rounded">
@@ -155,7 +105,7 @@
 					}}
 					hideFilters={true}
 					URLModel="task-templates"
-					baseEndpoint="/task-templates?assigned_to={data.user.id}"
+					baseEndpoint="/task-templates?{assignedToParams}"
 				/>
 			</div>
 		{/if}
@@ -180,7 +130,7 @@
 					}}
 					hideFilters={true}
 					URLModel="compliance-assessments"
-					baseEndpoint="/compliance-assessments?{authorsParam}"
+					baseEndpoint="/compliance-assessments?{authorsParams}"
 				/>
 			</div>
 		{/if}
@@ -204,7 +154,7 @@
 					}}
 					hideFilters={true}
 					URLModel="risk-assessments"
-					baseEndpoint="/risk-assessments?{authorsParam}"
+					baseEndpoint="/risk-assessments?{authorsParams}"
 				/>
 			</div>
 		{/if}
@@ -229,7 +179,7 @@
 					}}
 					hideFilters={true}
 					URLModel="risk-scenarios"
-					baseEndpoint="/risk-scenarios?{ownerParam}"
+					baseEndpoint="/risk-scenarios?{ownerParams}"
 				/>
 			</div>
 		{/if}
@@ -254,7 +204,7 @@
 					}}
 					hideFilters={true}
 					URLModel="incidents"
-					baseEndpoint="/incidents?{ownersParam}"
+					baseEndpoint="/incidents?{ownersParams}"
 				/>
 			</div>
 		{/if}
@@ -279,7 +229,7 @@
 					}}
 					hideFilters={true}
 					URLModel="security-exceptions"
-					baseEndpoint="/security-exceptions?{ownersParam}"
+					baseEndpoint="/security-exceptions?{ownersParams}"
 				/>
 			</div>
 		{/if}
@@ -303,7 +253,7 @@
 					}}
 					hideFilters={true}
 					URLModel="findings-assessments"
-					baseEndpoint="/findings-assessments?{authorsParam}"
+					baseEndpoint="/findings-assessments?{authorsParams}"
 				/>
 			</div>
 		{/if}
@@ -352,7 +302,7 @@
 					}}
 					hideFilters={true}
 					URLModel="findings"
-					baseEndpoint="/findings?{ownerParam}"
+					baseEndpoint="/findings?{ownerParams}"
 				/>
 			</div>
 		{/if}
@@ -377,7 +327,7 @@
 					}}
 					hideFilters={true}
 					URLModel="organisation-objectives"
-					baseEndpoint="/organisation-objectives?assigned_to={data.user.id}"
+					baseEndpoint="/organisation-objectives?{assignedToParams}"
 				/>
 			</div>
 		{/if}
@@ -402,7 +352,7 @@
 					}}
 					hideFilters={true}
 					URLModel="right-requests"
-					baseEndpoint="/right-requests?{ownerParam}"
+					baseEndpoint="/right-requests?{ownerParams}"
 				/>
 			</div>
 		{/if}
@@ -427,14 +377,9 @@
 					}}
 					hideFilters={true}
 					URLModel="metric-instances"
-					baseEndpoint="/metric-instances?{ownerParam}"
+					baseEndpoint="/metric-instances?{ownerParams}"
 				/>
 			</div>
 		{/if}
-	</div>
-{:catch error}
-	<div class="p-4 text-red-500">
-		<i class="fa-solid fa-exclamation-triangle mr-2"></i>
-		{m.anErrorOccurred()}: {error.message}
 	</div>
 {/await}
