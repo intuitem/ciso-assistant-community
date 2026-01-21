@@ -616,7 +616,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     ordering_fields = "__all__"
     search_fields = ["name", "description"]
     filterset_fields = []
-    model = None
+    model: type[models.Model] | None = None
 
     serializers_module = "core.serializers"
 
@@ -659,6 +659,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             )[0]
 
         queryset = self.model.objects.filter(id__in=object_ids_view)
+
+        field_names = {f.name for f in self.model._meta.get_fields()}
+        if "parent_folder" in field_names:
+            queryset = queryset.select_related("parent_folder")
+        if "filtering_labels" in field_names:
+            queryset = queryset.prefetch_related("filtering_labels")
+
         return queryset
 
     def get_serializer_context(self):
