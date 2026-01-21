@@ -120,6 +120,7 @@ logger.info("SCHEMA_VERSION: %s", SCHEMA_VERSION)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
+# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False") == "True"
 
