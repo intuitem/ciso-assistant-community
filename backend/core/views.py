@@ -5989,16 +5989,13 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def my_assignments(self, request):
-        # Check if team assignments should be included
         include_teams = (
             request.query_params.get("include_teams", "false").lower() == "true"
         )
 
         if include_teams:
-            # Get all actors: user's own actor + team actors
-            actors = request.user.get_all_actors()
+            actors = Actor.get_all_for_user(request.user)
         else:
-            # Only user's direct actor
             actors = [request.user.actor]
 
         risk_assessments = RiskAssessment.objects.filter(
