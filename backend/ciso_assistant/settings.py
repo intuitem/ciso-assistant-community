@@ -114,7 +114,6 @@ logger.info("SCHEMA_VERSION: %s", SCHEMA_VERSION)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False") == "True"
 
@@ -295,6 +294,8 @@ KNOX_TOKEN_MODEL = "knox.AuthToken"
 # Empty outside of debug mode so that allauth middleware does not raise an error
 STATIC_URL = ""
 
+SILK_PROFILING_ENABLED = ""
+
 if DEBUG:
     REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
         "rest_framework.renderers.BrowsableAPIRenderer"
@@ -315,6 +316,12 @@ if DEBUG:
     DEBUG_TOOLBAR_CONFIG = {
         "SHOW_TOOLBAR_CALLBACK": lambda request: True,
     }
+
+    SILK_PROFILING_ENABLED = os.environ.get("SILK_PROFILING_ENABLED", "False") == "True"
+
+    if SILK_PROFILING_ENABLED:
+        INSTALLED_APPS.append("silk")
+        MIDDLEWARE.insert(7, "silk.middleware.SilkyMiddleware")
 
 TEMPLATES = [
     {
