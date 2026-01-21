@@ -4151,8 +4151,8 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, name="Get all applied controls owners")
     def owner(self, request):
         return Response(
-            UserReadSerializer(
-                User.objects.filter(applied_controls__isnull=False).distinct(),
+            ActorReadSerializer(
+                Actor.objects.filter(applied_controls__isnull=False).distinct(),
                 many=True,
             ).data
         )
@@ -7648,8 +7648,8 @@ class EvidenceViewSet(BaseModelViewSet):
     @action(detail=False, name="Get all evidences owners")
     def owner(self, request):
         return Response(
-            UserReadSerializer(
-                User.objects.filter(evidences__isnull=False).distinct(),
+            ActorReadSerializer(
+                Actor.objects.filter(evidences__isnull=False).distinct(),
                 many=True,
             ).data
         )
@@ -10637,8 +10637,8 @@ class FindingViewSet(BaseModelViewSet):
     @action(detail=False, name="Get all findings owners")
     def owner(self, request):
         return Response(
-            UserReadSerializer(
-                User.objects.filter(findings__isnull=False).distinct(),
+            ActorReadSerializer(
+                Actor.objects.filter(findings__isnull=False).distinct(),
                 many=True,
             ).data
         )
@@ -11867,11 +11867,11 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
         )  # Synchronize task nodes when fetching a task template
         return Response(serializer_class(super().get_object()).data)
 
-    @action(detail=False, name="Get all task template assigned_to users")
+    @action(detail=False, name="Get all task template assigned_to actors")
     def assigned_to(self, request):
         return Response(
-            UserReadSerializer(
-                User.objects.filter(task_templates__isnull=False).distinct(),
+            ActorReadSerializer(
+                Actor.objects.filter(assigned_task_templates__isnull=False).distinct(),
                 many=True,
             ).data
         )
