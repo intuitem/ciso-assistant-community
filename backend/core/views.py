@@ -606,11 +606,26 @@ class GenericFilterSet(df.FilterSet):
         }
 
 
+class FolderOrderingFilter(filters.OrderingFilter):
+    def get_ordering(self, request, queryset, view):
+        ordering = super().get_ordering(request, queryset, view)
+        if ordering:
+            return [
+                "folder__name"
+                if f == "folder"
+                else "-folder__name"
+                if f == "-folder"
+                else f
+                for f in ordering
+            ]
+        return ordering
+
+
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        FolderOrderingFilter,
     ]
     ordering = ["created_at"]
     ordering_fields = "__all__"
