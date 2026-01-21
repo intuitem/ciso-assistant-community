@@ -271,6 +271,8 @@
 		computeRequirementScoreAndResult(data.requirementAssessment, $formStore.answers)
 	);
 
+	let expandedInferences = $state(false);
+
 	let computedResult = $derived(computedScoreAndResult.result);
 	let computedScore = $derived(computedScoreAndResult.score);
 </script>
@@ -408,7 +410,8 @@
 						<span class="text-xs text-gray-500"
 							><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
 						>
-						<ul class="list-disc ml-4">
+						<div>
+						<ul class="list-disc ml-4 {!expandedInferences ? 'hidden' : ''}">
 							{#each Object.entries(mappingInference.sourceRequirementAssessments) as [source_urn, source_requirement_assessment]}
 								<li>
 									<p>
@@ -434,6 +437,16 @@
 											{source_requirement_assessment.source_framework.name}
 										</a>
 									</p>
+									<p class="whitespace-pre-line py-1">
+											<span class="italic">{m.mapping()}</span>
+											<a
+												class="anchor badge h-fit"
+												href="/requirement-mapping-sets/{source_requirement_assessment
+													.used_mapping_set?.id}"
+											>
+												{source_requirement_assessment.used_mapping_set?.name}
+											</a>
+										</p>
 									{#if source_requirement_assessment.is_scored}
 										<p class="whitespace-pre-line py-1">
 											<span class="italic">{m.scoreSemiColon()}</span>
@@ -461,6 +474,22 @@
 							{/each}
 						</ul>
 					</div>
+					<button
+							onclick={() => (expandedInferences = !expandedInferences)}
+							class="m-5 text-blue-800"
+							aria-expanded={expandedInferences}
+						>
+							<i class="{expandedInferences ? 'fas fa-chevron-up' : 'fas fa-chevron-down'} mr-3"
+							></i>
+							{#if expandedInferences}
+								{m.hideInferences()}
+							{:else}
+								{m.showInferences()}
+							{/if}
+							({Object.keys(mappingInference.sourceRequirementAssessments).length})
+						</button>
+											</div>
+
 				{/if}
 			{/if}
 		</div>
