@@ -7845,6 +7845,26 @@ class Actor(AbstractBaseModel):
     def get_emails(self) -> list[str]:
         return self.specific.get_emails()
 
+    @classmethod
+    def get_all_for_user(cls, user) -> list["Actor"]:
+        """
+        Get all actors related to a user.
+        Includes:
+        - The user's own actor
+        - Actors of teams where the user is leader, deputy, or member
+        """
+        actors = []
+        if hasattr(user, "actor") and user.actor:
+            actors.append(user.actor)
+
+        team_actors = cls.objects.filter(
+            team__in=Team.objects.filter(
+                Q(leader=user) | Q(deputies=user) | Q(members=user)
+            )
+        ).distinct()
+
+        return actors + list(team_actors)
+
     def __str__(self):
         return str(self.specific)
 
