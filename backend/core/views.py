@@ -5595,6 +5595,7 @@ class UserFilter(GenericFilterSet):
             "expiry_date",
             "user_groups",
             "exclude_current",
+            "representative__entity",
         ]
 
 
@@ -5698,6 +5699,7 @@ class ActorViewSet(BaseModelViewSet):
         "display_name",
         "id",
     ]
+    filterset_fields = ["user__is_third_party"]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -10867,7 +10869,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
                 incident=instance,
                 entry=f"{previous_instance.get_status_display()}->{instance.get_status_display()}",
                 entry_type=TimelineEntry.EntryType.STATUS_CHANGED,
-                author=self.request.user,
+                author=self.request.user.actor,
                 timestamp=now(),
             )
 
@@ -10876,7 +10878,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
                 incident=instance,
                 entry=f"{previous_instance.get_severity_display()}->{instance.get_severity_display()}",
                 entry_type=TimelineEntry.EntryType.SEVERITY_CHANGED,
-                author=self.request.user,
+                author=self.request.user.actor,
                 timestamp=now(),
             )
 
@@ -11255,7 +11257,7 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return Response(dict(TimelineEntry.EntryType.get_manual_entry_types()))
 
     def perform_create(self, serializer):
-        instance = serializer.save(author=self.request.user)
+        instance = serializer.save(author=self.request.user.actor)
         dispatch_webhook_event(instance, "created", serializer)
         return instance
 
