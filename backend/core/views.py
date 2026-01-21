@@ -1973,7 +1973,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "source": "owner",
                 "label": "owners",
                 "format": lambda qs: ",".join(
-                    escape_excel_formula(o.email) for o in qs.all()
+                    escape_excel_formula(str(o)) for o in qs.all()
                 ),
             },
             "parent_assets": {
@@ -4012,7 +4012,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "owner": {
                 "source": "owner",
                 "label": "owner",
-                "format": lambda qs: ",".join(o.email for o in qs.all())
+                "format": lambda qs: ",".join(str(o) for o in qs.all())
                 if qs.exists()
                 else "",
             },
@@ -5153,7 +5153,7 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
                 "source": "owner",
                 "label": "owners",
                 "format": lambda qs: ",".join(
-                    escape_excel_formula(o.email) for o in qs.all()
+                    escape_excel_formula(str(o)) for o in qs.all()
                 ),
             },
             "threats": {
@@ -10018,7 +10018,7 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
                 "source": "owners",
                 "label": "owners",
                 "format": lambda qs: ",".join(
-                    escape_excel_formula(o.email) for o in qs.all()
+                    escape_excel_formula(str(o)) for o in qs.all()
                 ),
             },
             "approver": {
@@ -10276,7 +10276,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "status": finding.get_status_display(),
                 "severity": finding.get_severity_display(),
                 "folder": finding.folder.name if finding.folder else "",
-                "owner": ", ".join([user.email for user in finding.owner.all()]),
+                "owner": ", ".join([str(actor) for actor in finding.owner.all()]),
                 "applied_controls": "\n".join(
                     [
                         f"{ac.name} [{ac.get_status_display().lower()}]"
@@ -10385,11 +10385,11 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         md_content += f"- **Status**: {findings_assessment.get_status_display()}\n"
         md_content += f"- **Folder**: {findings_assessment.folder.name if findings_assessment.folder else 'N/A'}\n"
         if findings_assessment.owner.exists():
-            md_content += f"- **Owners**: {', '.join([user.email for user in findings_assessment.owner.all()])}\n"
+            md_content += f"- **Owners**: {', '.join([str(actor) for actor in findings_assessment.owner.all()])}\n"
         if findings_assessment.authors.exists():
-            md_content += f"- **Authors**: {', '.join([user.email for user in findings_assessment.authors.all()])}\n"
+            md_content += f"- **Authors**: {', '.join([str(actor) for actor in findings_assessment.authors.all()])}\n"
         if findings_assessment.reviewers.exists():
-            md_content += f"- **Reviewers**: {', '.join([user.email for user in findings_assessment.reviewers.all()])}\n"
+            md_content += f"- **Reviewers**: {', '.join([str(actor) for actor in findings_assessment.reviewers.all()])}\n"
         md_content += f"- **Created**: {findings_assessment.created_at.strftime('%Y-%m-%d %H:%M:%S') if findings_assessment.created_at else 'N/A'}\n\n"
 
         # Metrics summary
@@ -10434,7 +10434,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             md_content += f"- **Description**: {finding.description or 'N/A'}\n"
             md_content += f"- **Observation**: {finding.observation or 'N/A'}\n"
             if finding.owner.exists():
-                md_content += f"- **Owner**: {', '.join([user.email for user in finding.owner.all()])}\n"
+                md_content += f"- **Owner**: {', '.join([str(actor) for actor in finding.owner.all()])}\n"
             if finding.applied_controls.exists():
                 md_content += "- **Applied Controls**:\n"
                 for ac in finding.applied_controls.all():
@@ -10782,7 +10782,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
                 "source": "owners",
                 "label": "owners",
                 "format": lambda qs: ",".join(
-                    escape_excel_formula(o.email) for o in qs.all()
+                    escape_excel_formula(str(o)) for o in qs.all()
                 ),
             },
             "folder": {"source": "folder.name", "label": "folder", "escape": True},
@@ -10955,7 +10955,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         )
 
         if incident.owners.exists():
-            md_content += f"- **Owners**: {', '.join([user.email for user in incident.owners.all()])}\n"
+            md_content += f"- **Owners**: {', '.join([str(actor) for actor in incident.owners.all()])}\n"
 
         if incident.entities.exists():
             md_content += f"- **Related Entities**: {', '.join([entity.name for entity in incident.entities.all()])}\n"
@@ -10991,7 +10991,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
                 md_content += f"**Type**: {entry.get_entry_type_display()}\n\n"
 
                 if entry.author:
-                    md_content += f"**Author**: {entry.author.email}\n\n"
+                    md_content += f"**Author**: {str(entry.author)}\n\n"
 
                 if entry.observation:
                     md_content += f"**Observation**: {entry.observation}\n\n"
@@ -11382,8 +11382,8 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "assigned_to": {
                 "source": "assigned_to.all",
                 "label": "assigned_to",
-                "format": lambda users: ", ".join([u.email for u in users])
-                if users
+                "format": lambda actors: ", ".join([str(a) for a in actors])
+                if actors
                 else "",
             },
             "assets": {
@@ -11458,8 +11458,8 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "assigned_to": {
                 "source": "task_template.assigned_to.all",
                 "label": "assigned_to",
-                "format": lambda users: ", ".join([u.email for u in users])
-                if users
+                "format": lambda actors: ", ".join([str(a) for a in actors])
+                if actors
                 else "",
             },
             "expected_evidence": {
