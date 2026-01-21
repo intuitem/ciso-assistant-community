@@ -2138,8 +2138,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         max_length=255, null=True, blank=True, verbose_name=_("Parent URN")
     )
 
-    # FIX 1: Add a ForeignObject relation to 'self'.
-    # This teaches Django how to join 'parent_urn' to 'urn' without changing the DB schema.
     parent_node = ForeignObject(
         "self",
         on_delete=models.SET_NULL,
@@ -2168,7 +2166,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def associated_reference_controls(self):
-        # FIX 2: This is now safe IF you use the Manager's .prefetch_related('reference_controls')
         _reference_controls = self.reference_controls.all()
         reference_controls = []
         for control in _reference_controls:
@@ -2179,7 +2176,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def associated_threats(self):
-        # FIX 3: This is now safe IF you use the Manager's .prefetch_related('threats')
         _threats = self.threats.all()
         threats = []
         for control in _threats:
@@ -2190,10 +2186,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def parent_requirement(self):
-        # FIX 4: Optimized Parent Lookup
-        # We check the manual cache first, then the ORM relation (parent_node).
-        # Accessing 'self.parent_node' uses the Django internal cache if 'select_related' was used.
-
         parent = getattr(self, "_parent_requirement_obj", None)
 
         if parent is None:

@@ -202,7 +202,7 @@ class Folder(NameDescriptionMixin):
     def get_folder_full_path(self, *, include_root: bool = False) -> list["Folder"]:
         """
         Get the full path of the folder including its parents.
-        FIXED: Optimizes the ancestor lookup chain.
+        If include_root is True, the root folder is included in the path.
         """
         return get_folder_path(self.id, include_root=include_root)
 
