@@ -1136,35 +1136,37 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         result_change: set[Any] = set()
         result_delete: set[Any] = set()
 
-        # Fetch object ids per folder (DB work only here)
-        for f_id, perms in folder_perm_codes.items():
+        if folder_perm_codes:
+            folder_ids = list(folder_perm_codes.keys())
             if hasattr(object_type, "folder"):
-                objects_ids = object_type.objects.filter(folder_id=f_id).values_list(
-                    "id", flat=True
-                )
+                objects_iter = object_type.objects.filter(
+                    folder_id__in=folder_ids
+                ).values_list("id", "folder_id")
             elif object_type is Folder:
-                objects_ids = [f_id]
+                objects_iter = [(f_id, f_id) for f_id in folder_ids]
             elif hasattr(object_type, "risk_assessment"):
-                objects_ids = object_type.objects.filter(
-                    risk_assessment__folder_id=f_id
-                ).values_list("id", flat=True)
+                objects_iter = object_type.objects.filter(
+                    risk_assessment__folder_id__in=folder_ids
+                ).values_list("id", "risk_assessment__folder_id")
             elif hasattr(object_type, "entity"):
-                objects_ids = object_type.objects.filter(
-                    entity__folder_id=f_id
-                ).values_list("id", flat=True)
+                objects_iter = object_type.objects.filter(
+                    entity__folder_id__in=folder_ids
+                ).values_list("id", "entity__folder_id")
             elif hasattr(object_type, "provider_entity"):
-                objects_ids = object_type.objects.filter(
-                    provider_entity__folder_id=f_id
-                ).values_list("id", flat=True)
+                objects_iter = object_type.objects.filter(
+                    provider_entity__folder_id__in=folder_ids
+                ).values_list("id", "provider_entity__folder_id")
             else:
                 raise NotImplementedError("type not supported")
 
-            if view_code in perms:
-                result_view.update(objects_ids)
-            if change_code in perms:
-                result_change.update(objects_ids)
-            if delete_code in perms:
-                result_delete.update(objects_ids)
+            for obj_id, folder_id in objects_iter:
+                perms = folder_perm_codes.get(folder_id, set())
+                if view_code in perms:
+                    result_view.add(obj_id)
+                if change_code in perms:
+                    result_change.add(obj_id)
+                if delete_code in perms:
+                    result_delete.add(obj_id)
 
         # Published inheritance: published parents for local-view folders
         # PERF: collect all ancestor folder_ids first, then do ONE query.
