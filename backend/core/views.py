@@ -5621,6 +5621,79 @@ class ValidationFlowViewSet(BaseModelViewSet):
     filterset_class = ValidationFlowFilterSet
     search_fields = ["ref_id", "request_notes"]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        def related_model(field_name):
+            return (
+                ValidationFlow._meta.get_field(field_name).remote_field.model
+            )
+
+        events_qs = FlowEvent.objects.select_related("event_actor").order_by(
+            "-created_at"
+        )
+        compliance_qs = ComplianceAssessment.objects.select_related(
+            "perimeter__folder"
+        )
+        risk_qs = RiskAssessment.objects.select_related("perimeter__folder")
+        bia_model = related_model("business_impact_analysis")
+        bia_qs = bia_model.objects.select_related("perimeter__folder")
+        crq_model = related_model("crq_studies")
+        ebios_model = related_model("ebios_studies")
+        entity_assessment_model = related_model("entity_assessments")
+        entity_assessment_qs = entity_assessment_model.objects.select_related(
+            "perimeter__folder"
+        )
+        findings_assessment_model = related_model("findings_assessments")
+        findings_assessment_qs = (
+            findings_assessment_model.objects.select_related("perimeter__folder")
+        )
+        evidence_model = related_model("evidences")
+        security_exception_model = related_model("security_exceptions")
+        policy_model = related_model("policies")
+
+        queryset = queryset.select_related("requester", "approver").prefetch_related(
+            Prefetch("events", queryset=events_qs),
+            Prefetch("compliance_assessments", queryset=compliance_qs),
+            Prefetch("risk_assessments", queryset=risk_qs),
+            Prefetch("business_impact_analysis", queryset=bia_qs),
+            Prefetch("crq_studies", queryset=crq_model.objects.all()),
+            Prefetch("ebios_studies", queryset=ebios_model.objects.all()),
+            Prefetch("entity_assessments", queryset=entity_assessment_qs),
+            Prefetch("findings_assessments", queryset=findings_assessment_qs),
+            Prefetch(
+                "evidences",
+                queryset=evidence_model.objects.select_related("folder"),
+            ),
+            Prefetch(
+                "security_exceptions",
+                queryset=security_exception_model.objects.select_related("folder"),
+            ),
+            Prefetch(
+                "policies",
+                queryset=policy_model.objects.select_related("folder"),
+            ),
+        )
+
+        m2m_through_fields = {
+            "has_compliance_assessments": ValidationFlow.compliance_assessments.through,
+            "has_risk_assessments": ValidationFlow.risk_assessments.through,
+            "has_business_impact_analysis": ValidationFlow.business_impact_analysis.through,
+            "has_crq_studies": ValidationFlow.crq_studies.through,
+            "has_ebios_studies": ValidationFlow.ebios_studies.through,
+            "has_entity_assessments": ValidationFlow.entity_assessments.through,
+            "has_findings_assessments": ValidationFlow.findings_assessments.through,
+            "has_evidences": ValidationFlow.evidences.through,
+            "has_security_exceptions": ValidationFlow.security_exceptions.through,
+            "has_policies": ValidationFlow.policies.through,
+        }
+        annotations = {
+            alias: Exists(through.objects.filter(validationflow_id=OuterRef("pk")))
+            for alias, through in m2m_through_fields.items()
+        }
+
+        return queryset.annotate(**annotations)
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
