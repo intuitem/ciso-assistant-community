@@ -5,6 +5,7 @@ import type { RiskScenarioSchema } from './schemas';
 export interface User {
 	id: string;
 	actor_id: string;
+	all_actor_ids: string[];
 	email: string;
 	first_name: string;
 	last_name: string;
