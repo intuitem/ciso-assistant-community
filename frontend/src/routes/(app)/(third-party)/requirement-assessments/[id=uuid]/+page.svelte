@@ -69,8 +69,6 @@
 		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
 	);
 
-	console.log(mappingInference);
-
 	const max_score = data.complianceAssessmentScore.max_score;
 	const score = data.requirementAssessment.score;
 	const documentationScore = data.requirementAssessment.documentation_score;

@@ -429,8 +429,6 @@ class MappingEngine:
                 if v
             }
 
-            print(f"mapping_set_info = {mapping_set_info}")
-
             mapping_inference = target_assessment.get("mapping_inference", {})
             source_requirement_assessments = mapping_inference.get(
                 "source_requirement_assessments", {}
