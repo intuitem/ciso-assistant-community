@@ -5625,16 +5625,12 @@ class ValidationFlowViewSet(BaseModelViewSet):
         queryset = super().get_queryset()
 
         def related_model(field_name):
-            return (
-                ValidationFlow._meta.get_field(field_name).remote_field.model
-            )
+            return ValidationFlow._meta.get_field(field_name).remote_field.model
 
         events_qs = FlowEvent.objects.select_related("event_actor").order_by(
             "-created_at"
         )
-        compliance_qs = ComplianceAssessment.objects.select_related(
-            "perimeter__folder"
-        )
+        compliance_qs = ComplianceAssessment.objects.select_related("perimeter__folder")
         risk_qs = RiskAssessment.objects.select_related("perimeter__folder")
         bia_model = related_model("business_impact_analysis")
         bia_qs = bia_model.objects.select_related("perimeter__folder")
@@ -5645,8 +5641,8 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "perimeter__folder"
         )
         findings_assessment_model = related_model("findings_assessments")
-        findings_assessment_qs = (
-            findings_assessment_model.objects.select_related("perimeter__folder")
+        findings_assessment_qs = findings_assessment_model.objects.select_related(
+            "perimeter__folder"
         )
         evidence_model = related_model("evidences")
         security_exception_model = related_model("security_exceptions")
