@@ -31,6 +31,7 @@ Before running this script, ensure that:
   pip install -r requirements.txt
   ```
 
+
 ## Usage
 
 ```bash
@@ -58,7 +59,20 @@ python prep_mapping_cis_controls_csf_2.0.py <input_excel_file> <packager_name>
 
 This script generates a mapping between **CIS Controls v8** and **ISO/IEC 27001:2022**.
 
-The **overall behavior is strictly identical** to the CSF version.
+The **overall behavior is strictly identical** to the CSF version..
+
+
+## Prerequisites
+
+Before running this script, ensure that:
+
+- The official **CIS Controls v8 mapping Excel file** (downloaded from the [CIS website](https://www.cisecurity.org/)) is copied **next to this script** or that its path is correctly referenced when running the command.
+- All required Python dependencies are installed by running:
+
+  ```bash
+  pip install -r requirements.txt
+  ```
+
 
 ## Usage
 
