@@ -3845,19 +3845,40 @@ class AppliedControlFilterSet(GenericFilterSet):
         return queryset
 
     def filter_compliance_assessments(self, queryset, name, value):
-        if value:
-            compliance_assessments = ComplianceAssessment.objects.filter(
-                id__in=[x.id for x in value]
-            )
-            if len(compliance_assessments) == 0:
-                return queryset
-            requirement_assessments = chain.from_iterable(
-                [ca.requirement_assessments.all() for ca in compliance_assessments]
-            )
-            return queryset.filter(
-                requirement_assessments__in=requirement_assessments
-            ).distinct()
-        return queryset
+        if not value:
+            return queryset
+
+        # Fetch compliance assessments with related requirements to prevent N+1 queries.
+        # We need the requirement's implementation_groups for the filtering logic.
+        compliance_assessments = ComplianceAssessment.objects.filter(
+            id__in=[x.id for x in value]
+        ).prefetch_related("requirement_assessments__requirement")
+
+        if not compliance_assessments.exists():
+            return queryset
+
+        valid_ra_ids = set()
+
+        for ca in compliance_assessments:
+            selected_groups = ca.selected_implementation_groups
+            current_ras = ca.requirement_assessments.all()
+
+            # If no groups are selected in the audit, current behavior applies (show all)
+            if not selected_groups:
+                valid_ra_ids.update(ra.id for ra in current_ras)
+                continue
+
+            # Convert selected groups to a set for O(1) lookup
+            selected_set = set(selected_groups)
+
+            for ra in current_ras:
+                req_groups = ra.requirement.implementation_groups or []
+
+                # Check for intersection: Keep if ANY requirement group matches ANY selected group
+                if not selected_set.isdisjoint(req_groups):
+                    valid_ra_ids.add(ra.id)
+
+        return queryset.filter(requirement_assessments__in=valid_ra_ids).distinct()
 
     def filter_todo(self, queryset, name, value):
         if value:
