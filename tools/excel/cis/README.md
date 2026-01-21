@@ -66,7 +66,7 @@ python prep_mapping_cis_controls_csf_2.0.py CIS_Controls_v8_Mapping_to_CSF_2.0.x
 
 This script generates a mapping between **CIS Controls v8** and **ISO/IEC 27001:2022**.
 
-The **overall behavior is strictly identical** to the CSF version..
+The **overall behavior is strictly identical** to the CSF version.
 
 
 ## Prerequisites
@@ -106,4 +106,52 @@ python prep_mapping_cis_controls_iso_27.py <input_excel_file> <packager_name>
 
 ```bash
 python prep_mapping_cis_controls_iso_27.py CIS_Controls_v8_NEW_MAPPING_to_ISO.IEC_27001.2022_2_2023.xlsx intuitem
+```
+
+
+
+# > `prep_mapping_cis_controls_nist_800-53-rev5.py`
+
+This script generates a mapping between **CIS Controls v8** and **NIST 800-53 Rev. 5**.
+
+The **overall behavior is strictly identical** to the CSF version.
+
+
+## Prerequisites
+
+Before running this script, ensure that:
+
+- The official **CIS Controls v8 mapping Excel file** (downloaded from the [CIS website](https://www.cisecurity.org/)) is copied **next to this script** or that its path is correctly referenced when running the command.
+- All required Python dependencies are installed by running:
+
+  ```bash
+  pip install -r requirements.txt
+  ```
+
+
+## Usage
+
+```bash
+python prep_mapping_cis_controls_nist_800-53-rev5.py <input_excel_file> <packager_name>
+```
+
+- **`<input_excel_file>`**  
+  Path to the official CIS Controls v8 mapping Excel file used as input.  
+  This file contains the raw mapping data between CIS Controls and the target framework.
+
+- **`<packager_name>`**  
+  Identifier of the packager used in your **CIS Controls v8 framework YAML**.  
+  ⚠️ This value **must be strictly identical** to the one defined in the CIS v8 YAML file (around line ~20), for example:
+
+  ```yaml
+  packager: <packager_name>
+  ```
+
+  Using the same packager name guarantees URN consistency between the CIS framework and the generated mapping libraries.
+
+
+## Example
+
+```bash
+python prep_mapping_cis_controls_nist_800-53-rev5.py CIS_Controls_v8_Mapping_to_NIST_SP_800_53_Rev_5_Moderate_and_Low_Base.xlsx intuitem
 ```
