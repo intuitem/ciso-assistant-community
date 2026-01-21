@@ -1,4 +1,6 @@
 from core.constants import COUNTRY_CHOICES
+from core.models import Actor
+from core.serializers import ActorReadSerializer
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
@@ -185,7 +187,7 @@ def agg_countries(viewable_data_transfers, viewable_data_contractors):
 class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     model = Processing
 
-    filterset_fields = ["folder", "nature", "status", "filtering_labels"]
+    filterset_fields = ["folder", "nature", "status", "filtering_labels", "assigned_to"]
 
     export_config = {
         "fields": {
@@ -210,11 +212,7 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "source": "assigned_to",
                 "label": "assigned_to",
                 "format": lambda qs: ",".join(
-                    escape_excel_formula(
-                        escape_excel_formula(email)
-                        for actor in qs.all()
-                        for email in actor.get_emails()
-                    )
+                    escape_excel_formula(str(actor)) for actor in qs.all()
                 ),
             },
             "labels": {
@@ -239,6 +237,15 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Processing.STATUS_CHOICES))
+
+    @action(detail=False, name="Get all processing assigned_to actors")
+    def assigned_to(self, request):
+        return Response(
+            ActorReadSerializer(
+                Actor.objects.filter(assigned_processings__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
 
     @action(detail=False, name="processing metrics")
     def metrics(self, request, pk=None):
@@ -472,6 +479,15 @@ class RightRequestViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(RightRequest.STATUS_CHOICES))
+
+    @action(detail=False, name="Get all right request owners")
+    def owner(self, request):
+        return Response(
+            ActorReadSerializer(
+                Actor.objects.filter(assigned_right_requests__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
 
 
 class DataBreachViewSet(BaseModelViewSet):
