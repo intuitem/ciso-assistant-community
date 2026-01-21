@@ -302,7 +302,7 @@ KNOX_TOKEN_MODEL = "knox.AuthToken"
 # Empty outside of debug mode so that allauth middleware does not raise an error
 STATIC_URL = ""
 
-SILK_PROFILING_ENABLED = ""
+SILK_ENABLED = ""
 
 if DEBUG:
     REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
@@ -325,9 +325,9 @@ if DEBUG:
         "SHOW_TOOLBAR_CALLBACK": lambda request: True,
     }
 
-    SILK_PROFILING_ENABLED = os.environ.get("SILK_PROFILING_ENABLED", "False") == "True"
+    SILK_ENABLED = os.environ.get("SILK_ENABLED", "False") == "True"
 
-    if SILK_PROFILING_ENABLED:
+    if SILK_ENABLED:
         INSTALLED_APPS.append("silk")
         MIDDLEWARE.insert(7, "silk.middleware.SilkyMiddleware")
 
