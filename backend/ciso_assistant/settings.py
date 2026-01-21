@@ -318,10 +318,10 @@ if DEBUG:
 
     if DB_LOG:
         LOGGING["loggers"]["django.db.backends"] = {
-                "handlers": ["console"],
-                "level": "DEBUG",
-                "propagate": False,
-            }
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        }
         MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
 
 
