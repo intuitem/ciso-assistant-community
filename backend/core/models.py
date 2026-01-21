@@ -20,7 +20,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.core.files.storage import default_storage
 from django.db import models, transaction
-from django.db.models import F, Q, OuterRef, Subquery, Prefetch
+from django.db.models import F, Q, ForeignObject, OuterRef, Subquery, Prefetch
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -2083,12 +2083,34 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         return obj
 
 
+class RequirementNodeManager(models.Manager):
+    def with_relations(self):
+        """
+        Helper to eagerly load all related data in a single set of queries.
+        Usage: RequirementNode.objects.with_relations()
+        """
+        return (
+            self.get_queryset()
+            .select_related(
+                "parent_node",  # Optimized join for the string-based parent
+                "folder",
+            )
+            .prefetch_related(
+                "threats",  # Optimized batch fetch for M2M
+                "reference_controls",
+            )
+        )
+
+
 class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     class Importance(models.TextChoices):
         MANDATORY = "mandatory", _("Mandatory")
         RECOMMENDED = "recommended", _("Recommended")
         NICE_TO_HAVE = "nice_to_have", _("Nice to have")
         UNDEFINED = "undefined", _("Undefined")
+
+    # Add the custom manager
+    objects = RequirementNodeManager()
 
     threats = models.ManyToManyField(
         "Threat",
@@ -2103,16 +2125,30 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         related_name="requirements",
     )
     framework = models.ForeignKey(
-        Framework,
+        "Framework",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
         verbose_name=_("Framework"),
         related_name="requirement_nodes",
     )
+
+    # Existing CharField remains exactly as is
     parent_urn = models.CharField(
         max_length=255, null=True, blank=True, verbose_name=_("Parent URN")
     )
+
+    # FIX 1: Add a ForeignObject relation to 'self'.
+    # This teaches Django how to join 'parent_urn' to 'urn' without changing the DB schema.
+    parent_node = ForeignObject(
+        "self",
+        on_delete=models.SET_NULL,
+        from_fields=["parent_urn"],
+        to_fields=["urn"],  # Assuming 'urn' exists on this model (via Mixin)
+        related_name="child_nodes",
+        null=True,
+    )
+
     order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
     implementation_groups = models.JSONField(
         null=True, verbose_name=_("Implementation groups")
@@ -2132,6 +2168,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def associated_reference_controls(self):
+        # FIX 2: This is now safe IF you use the Manager's .prefetch_related('reference_controls')
         _reference_controls = self.reference_controls.all()
         reference_controls = []
         for control in _reference_controls:
@@ -2142,6 +2179,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def associated_threats(self):
+        # FIX 3: This is now safe IF you use the Manager's .prefetch_related('threats')
         _threats = self.threats.all()
         threats = []
         for control in _threats:
@@ -2152,11 +2190,19 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def parent_requirement(self):
+        # FIX 4: Optimized Parent Lookup
+        # We check the manual cache first, then the ORM relation (parent_node).
+        # Accessing 'self.parent_node' uses the Django internal cache if 'select_related' was used.
+
         parent = getattr(self, "_parent_requirement_obj", None)
-        if parent is None and self.parent_urn:
-            parent = RequirementNode.objects.filter(urn=self.parent_urn).first()
+
+        if parent is None:
+            # If the query used select_related('parent_node'), this line hits the cache, not the DB.
+            parent = self.parent_node
+
         if not parent:
             return None
+
         return {
             "str": parent.display_long,
             "urn": parent.urn,

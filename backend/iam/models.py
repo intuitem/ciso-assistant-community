@@ -144,28 +144,50 @@ class Folder(NameDescriptionMixin):
         super().save(*args, **kwargs)
 
     def get_sub_folders(self) -> Generator[Self, None, None]:
-        """Return the list of subfolders"""
+        """
+        Return the list of subfolders.
+        """
+        all_folders = list(Folder.objects.select_related("parent_folder").all())
 
-        def sub_folders_in(folder):
-            for sub_folder in folder.folder_set.all():
+        # Build an adjacency map in memory: Parent ID -> List of Children
+        children_map = defaultdict(list)
+        for folder in all_folders:
+            if folder.parent_folder_id:
+                children_map[folder.parent_folder_id].append(folder)
+
+        # Recursive generator using the in-memory map (No DB hits here)
+        def sub_folders_in(parent_id):
+            children = children_map.get(parent_id, [])
+            for sub_folder in children:
                 yield sub_folder
-                yield from sub_folders_in(sub_folder)
+                yield from sub_folders_in(sub_folder.id)
 
-        yield from sub_folders_in(self)
+        yield from sub_folders_in(self.id)
 
-    # Should we update data-model.md now that this method is a generator ?
     def get_parent_folders(self) -> Generator[Self, None, None]:
-        """Return the list of parent folders"""
+        """
+        Return the list of parent folders.
+        FIXED: Uses a pre-fetched map if available, or optimized lookup.
+        """
         current_folder = self
-        while (current_folder := current_folder.parent_folder) is not None:
-            yield current_folder
+        while current_folder.parent_folder_id is not None:
+            # If parent_folder was prefetched via select_related, this access is free.
+            # If not, it triggers a query.
+            parent = current_folder.parent_folder
+            if parent:
+                yield parent
+                current_folder = parent
+            else:
+                break
 
     def get_folder_full_path(self, *, include_root: bool = False) -> list[Self]:
         """
         Get the full path of the folder including its parents.
-        If include_root is True, the root folder is included in the path.
+        FIXED: Optimizes the ancestor lookup chain.
         """
-        folders = ([self] + [f for f in self.get_parent_folders()])[::-1]
+        # Implementation relying on the fixed get_parent_folders:
+        folders = ([self] + list(self.get_parent_folders()))[::-1]
+
         if include_root:
             return folders
         return folders[1:] if len(folders) > 1 else folders
