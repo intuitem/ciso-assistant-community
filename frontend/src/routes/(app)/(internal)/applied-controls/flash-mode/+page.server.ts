@@ -14,7 +14,7 @@ export const load = (async ({ fetch, url }) => {
 	for (const [key, value] of searchParams.entries()) {
 		// Don't pass through UI-specific parameters to the API
 		if (!['backUrl', 'backLabel'].includes(key)) {
-			queryParams.set(key, value);
+			queryParams.append(key, value);
 		}
 	}
 
