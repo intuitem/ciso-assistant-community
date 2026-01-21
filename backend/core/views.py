@@ -5565,6 +5565,7 @@ class UserFilter(GenericFilterSet):
             "expiry_date",
             "user_groups",
             "exclude_current",
+            "representative__entity",
         ]
 
 
@@ -5695,6 +5696,9 @@ class ActorViewSet(BaseModelViewSet):
         )
         if not allow_entities:
             queryset = queryset.filter(entity__isnull=True)
+
+        third_parties = Actor.objects.filter(user__is_third_party=True)
+        queryset = queryset.exclude(id__in=third_parties)
 
         return queryset.order_by("type_rank", "display_name")
 
@@ -5992,13 +5996,22 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def my_assignments(self, request):
+        include_teams = (
+            request.query_params.get("include_teams", "false").lower() == "true"
+        )
+
+        if include_teams:
+            actors = Actor.get_all_for_user(request.user)
+        else:
+            actors = [request.user.actor]
+
         risk_assessments = RiskAssessment.objects.filter(
-            Q(authors=request.user.actor) | Q(reviewers=request.user.actor)
+            Q(authors__in=actors) | Q(reviewers__in=actors)
         ).distinct()
 
         audits = (
             ComplianceAssessment.objects.filter(
-                Q(authors=request.user.actor) | Q(reviewers=request.user.actor)
+                Q(authors__in=actors) | Q(reviewers__in=actors)
             )
             .order_by(F("eta").asc(nulls_last=True))
             .distinct()
@@ -6013,14 +6026,12 @@ class FolderViewSet(BaseModelViewSet):
             avg_progress = int(sum / audits.count())
 
         controls = (
-            AppliedControl.objects.filter(owner=request.user.actor)
+            AppliedControl.objects.filter(owner__in=actors)
             .order_by(F("eta").asc(nulls_last=True))
             .distinct()
         )
         non_active_controls = controls.exclude(status="active")
-        risk_scenarios = RiskScenario.objects.filter(
-            owner=request.user.actor
-        ).distinct()
+        risk_scenarios = RiskScenario.objects.filter(owner__in=actors).distinct()
         controls_progress = 0
         evidences_progress = 0
         tot_ac = controls.count()
@@ -6041,6 +6052,9 @@ class FolderViewSet(BaseModelViewSet):
         )
         RS_serializer = RiskScenarioReadSerializer(risk_scenarios[:10], many=True)
 
+        # Return the actor IDs used for filtering so frontend can use them consistently
+        actor_ids = [str(actor.id) for actor in actors]
+
         return Response(
             {
                 "risk_assessments": RA_serializer.data,
@@ -6054,6 +6068,7 @@ class FolderViewSet(BaseModelViewSet):
                         "evidences": evidences_progress,
                     }
                 },
+                "actor_ids": actor_ids,
             }
         )
 
@@ -10839,7 +10854,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
                 incident=instance,
                 entry=f"{previous_instance.get_status_display()}->{instance.get_status_display()}",
                 entry_type=TimelineEntry.EntryType.STATUS_CHANGED,
-                author=self.request.user,
+                author=self.request.user.actor,
                 timestamp=now(),
             )
 
@@ -10848,7 +10863,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
                 incident=instance,
                 entry=f"{previous_instance.get_severity_display()}->{instance.get_severity_display()}",
                 entry_type=TimelineEntry.EntryType.SEVERITY_CHANGED,
-                author=self.request.user,
+                author=self.request.user.actor,
                 timestamp=now(),
             )
 
@@ -11232,7 +11247,7 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return Response(dict(TimelineEntry.EntryType.get_manual_entry_types()))
 
     def perform_create(self, serializer):
-        instance = serializer.save(author=self.request.user)
+        instance = serializer.save(author=self.request.user.actor)
         dispatch_webhook_event(instance, "created", serializer)
         return instance
 

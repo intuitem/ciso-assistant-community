@@ -2302,7 +2302,8 @@ class Perimeter(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Status"),
     )
     default_assignee = models.ManyToManyField(
-        User,
+        "core.actor",
+        related_name="perimeter_default_assignee",
         verbose_name="Default assignee",
         blank=True,
     )
@@ -4083,7 +4084,7 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         verbose_name="Timestamp", unique=False, default=now
     )
     author = models.ForeignKey(
-        User,
+        "core.Actor",
         on_delete=models.SET_NULL,
         related_name="timeline_entries",
         verbose_name="Author",
@@ -4656,8 +4657,9 @@ class OrganisationObjective(
     )
 
     assigned_to = models.ManyToManyField(
-        User,
+        "core.Actor",
         verbose_name="Assigned to",
+        related_name="assigned_organisation_objectives",
         blank=True,
     )
     ref_id = models.CharField(
@@ -7367,7 +7369,10 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
     enabled = models.BooleanField(default=True)
 
     assigned_to = models.ManyToManyField(
-        User, verbose_name="Assigned to", blank=True, related_name="task_templates"
+        "core.Actor",
+        verbose_name="Assigned to",
+        blank=True,
+        related_name="assigned_task_templates",
     )
     evidences = models.ManyToManyField(
         Evidence,
@@ -7834,6 +7839,26 @@ class Actor(AbstractBaseModel):
 
     def get_emails(self) -> list[str]:
         return self.specific.get_emails()
+
+    @classmethod
+    def get_all_for_user(cls, user) -> list["Actor"]:
+        """
+        Get all actors related to a user.
+        Includes:
+        - The user's own actor
+        - Actors of teams where the user is leader, deputy, or member
+        """
+        actors = []
+        if hasattr(user, "actor") and user.actor:
+            actors.append(user.actor)
+
+        team_actors = cls.objects.filter(
+            team__in=Team.objects.filter(
+                Q(leader=user) | Q(deputies=user) | Q(members=user)
+            )
+        ).distinct()
+
+        return actors + list(team_actors)
 
     def __str__(self):
         return str(self.specific)

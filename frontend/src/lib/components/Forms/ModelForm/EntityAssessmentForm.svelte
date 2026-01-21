@@ -124,17 +124,25 @@
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
 />
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="users?is_third_party=true"
-	optionsLabelField="email"
-	field="representatives"
-	helpText={m.entityAssessmentRepresentativesHelpText()}
-	cacheLock={cacheLocks['representatives']}
-	bind:cachedValue={formDataCache['representatives']}
-	label={m.representatives()}
-/>
+{#if $formStore?.entity}
+	{#key $formStore?.entity}
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="users"
+			optionsDetailedUrlParameters={[
+				['is_third_party', 'true'],
+				['representative__entity', $formStore?.entity || '']
+			]}
+			optionsLabelField="email"
+			field="representatives"
+			helpText={m.entityAssessmentRepresentativesHelpText()}
+			cacheLock={cacheLocks['representatives']}
+			bind:cachedValue={formDataCache['representatives']}
+			label={m.representatives()}
+		/>
+	{/key}
+{/if}
 <Select
 	{form}
 	options={model.selectOptions['conclusion']}
@@ -171,7 +179,7 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="actors?user__is_third_party=False"
+		optionsEndpoint="actors"
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -185,7 +193,7 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="actors?user__is_third_party=False"
+		optionsEndpoint="actors"
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
