@@ -29,6 +29,7 @@ from rest_framework.status import (
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 from global_settings.models import GlobalSettings
+from core.models import Actor
 from .models import Folder, PersonalAccessToken, Role, RoleAssignment
 from .serializers import (
     ChangePasswordSerializer,
@@ -211,7 +212,7 @@ class CurrentUserView(views.APIView):
         user_groups_data = list(request.user.user_groups.values("name", "builtin"))
         user_groups = [(ug["name"], ug["builtin"]) for ug in user_groups_data]
 
-        accessible_domains = RoleAssignment.get_accessible_folders(
+        accessible_domains = RoleAssignment.get_accessible_folder_ids(
             Folder.get_root_folder(), request.user, Folder.ContentType.DOMAIN
         )
 
@@ -225,6 +226,7 @@ class CurrentUserView(views.APIView):
         res_data = {
             "id": request.user.id,
             "actor_id": request.user.actor.id,
+            "all_actor_ids": [str(a.id) for a in Actor.get_all_for_user(request.user)],
             "email": request.user.email,
             "first_name": request.user.first_name,
             "last_name": request.user.last_name,

@@ -616,7 +616,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     ordering_fields = "__all__"
     search_fields = ["name", "description"]
     filterset_fields = []
-    model = None
+    model: type[models.Model] | None = None
 
     serializers_module = "core.serializers"
 
@@ -663,6 +663,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             if not hasattr(self.model.objects, "with_relations")
             else self.model.objects.with_relations().filter(id__in=object_ids_view)
         )
+
+        field_names = {f.name for f in self.model._meta.get_fields()}
+        if "parent_folder" in field_names:
+            queryset = queryset.select_related("parent_folder")
+        if "filtering_labels" in field_names:
+            queryset = queryset.prefetch_related("filtering_labels")
+
         return queryset
 
     def get_serializer_context(self):
@@ -5996,13 +6003,22 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def my_assignments(self, request):
+        include_teams = (
+            request.query_params.get("include_teams", "false").lower() == "true"
+        )
+
+        if include_teams:
+            actors = Actor.get_all_for_user(request.user)
+        else:
+            actors = [request.user.actor]
+
         risk_assessments = RiskAssessment.objects.filter(
-            Q(authors=request.user.actor) | Q(reviewers=request.user.actor)
+            Q(authors__in=actors) | Q(reviewers__in=actors)
         ).distinct()
 
         audits = (
             ComplianceAssessment.objects.filter(
-                Q(authors=request.user.actor) | Q(reviewers=request.user.actor)
+                Q(authors__in=actors) | Q(reviewers__in=actors)
             )
             .order_by(F("eta").asc(nulls_last=True))
             .distinct()
@@ -6017,14 +6033,12 @@ class FolderViewSet(BaseModelViewSet):
             avg_progress = int(sum / audits.count())
 
         controls = (
-            AppliedControl.objects.filter(owner=request.user.actor)
+            AppliedControl.objects.filter(owner__in=actors)
             .order_by(F("eta").asc(nulls_last=True))
             .distinct()
         )
         non_active_controls = controls.exclude(status="active")
-        risk_scenarios = RiskScenario.objects.filter(
-            owner=request.user.actor
-        ).distinct()
+        risk_scenarios = RiskScenario.objects.filter(owner__in=actors).distinct()
         controls_progress = 0
         evidences_progress = 0
         tot_ac = controls.count()
@@ -6045,6 +6059,9 @@ class FolderViewSet(BaseModelViewSet):
         )
         RS_serializer = RiskScenarioReadSerializer(risk_scenarios[:10], many=True)
 
+        # Return the actor IDs used for filtering so frontend can use them consistently
+        actor_ids = [str(actor.id) for actor in actors]
+
         return Response(
             {
                 "risk_assessments": RA_serializer.data,
@@ -6058,6 +6075,7 @@ class FolderViewSet(BaseModelViewSet):
                         "evidences": evidences_progress,
                     }
                 },
+                "actor_ids": actor_ids,
             }
         )
 

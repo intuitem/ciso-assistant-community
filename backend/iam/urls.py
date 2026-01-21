@@ -1,4 +1,4 @@
-import knox.views as knox_views
+import knox.views as knox_views  # type: ignore[import-untyped]
 from django.urls import include, path
 
 from .views import (

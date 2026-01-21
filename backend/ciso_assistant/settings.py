@@ -62,6 +62,12 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
+        # to trace all db calls, uncoment these lines
+        #        "django.db.backends": {
+        #            "handlers": ["console"],
+        #            "level": "DEBUG",
+        #            "propagate": False,
+        #        },
     },
 }
 
@@ -223,6 +229,7 @@ MIDDLEWARE = [
     "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
+# for DB performance measurements, uncoment the following line
 # MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
 ROOT_URLCONF = "ciso_assistant.urls"
 # we leave these for the API UI tools - even if Django templates and Admin are not used anymore
