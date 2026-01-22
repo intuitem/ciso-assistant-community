@@ -157,17 +157,19 @@
 		}
 
 		try {
-			await fetch('?/updateAppliedControl', {
+			const response = await fetch('?/updateAppliedControl', {
 				method: 'POST',
 				body: JSON.stringify({
 					id: controlToUpdate.id,
 					status: statusId
 				})
 			});
-			// Optimistic update already applied, trust it worked
+
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}`);
+			}
 		} catch (error) {
 			console.error('Error updating control status:', error);
-			// Revert only on network error
 			if (controlIndex !== -1 && previousStatus !== null) {
 				appliedControls[controlIndex] = {
 					...appliedControls[controlIndex],
