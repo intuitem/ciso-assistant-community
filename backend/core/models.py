@@ -4079,7 +4079,7 @@ class Incident(NameDescriptionMixin, FolderMixin):
 
     is_published = models.BooleanField(_("published"), default=True)
 
-    fields_to_check = ["name"]
+    fields_to_check = ["name", "ref_id"]
 
     class Meta:
         verbose_name = "Incident"
