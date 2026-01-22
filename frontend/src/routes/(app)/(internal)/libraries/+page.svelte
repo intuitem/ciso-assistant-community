@@ -29,7 +29,7 @@
 	}
 
 	// Get an icon from the sidebar (directly with data from navData.ts file)
-	function findIconInSection(sectionName: string, itemName: string, fallback: string): string {
+	function findIconInSidebar(sectionName: string, itemName: string, fallback: string): string {
 		return (
 			navData.items
 			.find((section) => section.name === sectionName)
@@ -59,7 +59,7 @@
 		frameworks: {
 			type: 'string',
 			field: 'object_type',
-			icon: findIconInSection('catalog', 'frameworks', 'fa-book-open'),
+			icon: findIconInSidebar('catalog', 'frameworks', 'fa-book-open'),
 			selectedClass: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-blue-200',
 			hoverClass: 'hover:border-blue-400 hover:bg-blue-50',
 			label: m.frameworks()
@@ -67,7 +67,7 @@
 		reference_controls: {
 			type: 'string',
 			field: 'object_type',
-			icon: findIconInSection('catalog', 'referenceControls', 'fa-shield-halved'),
+			icon: findIconInSidebar('catalog', 'referenceControls', 'fa-shield-halved'),
 			selectedClass:
 				'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-emerald-200',
 			hoverClass: 'hover:border-emerald-400 hover:bg-emerald-50',
@@ -76,7 +76,7 @@
 		risk_matrices: {
 			type: 'string',
 			field: 'object_type',
-			icon: findIconInSection('catalog', 'riskMatrices', 'fa-table-cells'),
+			icon: findIconInSidebar('catalog', 'riskMatrices', 'fa-table-cells'),
 			selectedClass: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-amber-200',
 			hoverClass: 'hover:border-amber-400 hover:bg-amber-50',
 			label: m.riskMatrices()
@@ -84,7 +84,7 @@
 		threats: {
 			type: 'string',
 			field: 'object_type',
-			icon: findIconInSection('catalog', 'threats', 'fa-triangle-exclamation'),
+			icon: findIconInSidebar('catalog', 'threats', 'fa-triangle-exclamation'),
 			selectedClass: 'bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-200',
 			hoverClass: 'hover:border-red-400 hover:bg-red-50',
 			label: m.threats()
@@ -92,7 +92,7 @@
 		metric_definitions: {
 			type: 'string',
 			field: 'object_type',
-			icon: findIconInSection('metrology', 'metricDefinitions', 'fa-chart-line'),
+			icon: findIconInSidebar('metrology', 'metricDefinitions', 'fa-chart-line'),
 			selectedClass: 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-purple-200',
 			hoverClass: 'hover:border-purple-400 hover:bg-purple-50',
 			label: m.metricDefinitions()
@@ -100,7 +100,7 @@
 		requirement_mapping_sets: {
 			type: 'string',
 			field: 'object_type',
-			icon: findIconInSection('catalog', 'requirementMappingSets', 'fa-diagram-project'),
+			icon: findIconInSidebar('catalog', 'requirementMappingSets', 'fa-diagram-project'),
 			selectedClass: 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-pink-200',
 			hoverClass: 'hover:border-pink-400 hover:bg-pink-50',
 			label: m.requirementMappingSets()
