@@ -904,7 +904,8 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
                 "error_message": mapping.error_message,
                 "provider": mapping.configuration.provider.name,
             }
-            for mapping in SyncMapping.objects.filter(local_object_id=instance.id).only(
+            for mapping in SyncMapping.objects.filter(local_object_id=instance.id)
+            .only(
                 "id",
                 "remote_id",
                 "sync_status",
@@ -913,6 +914,7 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
                 "error_message",
                 "configuration__provider__name",
             )
+            .select_related("configuration", "configuration__provider")
         ]
         if sync_mappings:
             ret["sync_mappings"] = sync_mappings
@@ -1009,7 +1011,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
                     "provider": mapping.configuration.provider.name,
                 }
                 for mapping in SyncMapping.objects.filter(local_object_id=instance.id)
-                .select_related("configuration__provider")
+                .select_related("configuration", "configuration__provider")
                 .only(
                     "id",
                     "remote_id",

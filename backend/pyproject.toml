@@ -57,6 +57,7 @@ django-stubs = "5.0.2"
 mypy = "^1.9.0"
 coverage = "7.5.4"
 pre-commit = "3.7.1"
+django-silk = "^5.4.3"
 
 [build-system]
 requires = ["poetry-core"]

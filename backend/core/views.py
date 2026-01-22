@@ -673,7 +673,11 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 scope_folder, self.request.user, self.model
             )[0]
 
-        queryset = self.model.objects.filter(id__in=object_ids_view)
+        queryset = (
+            self.model.objects.filter(id__in=object_ids_view)
+            if not hasattr(self.model.objects, "with_relations")
+            else self.model.objects.with_relations().filter(id__in=object_ids_view)
+        )
 
         field_names = {f.name for f in self.model._meta.get_fields()}
         if "parent_folder" in field_names:
@@ -4081,6 +4085,9 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
                 "objectives",  # ManyToManyField to OrganisationObjective
                 "assets",  # ManyToManyField used in table
                 "security_exceptions",  # Serialized as FieldsRelatedField
+                "requirement_assessments",
+                "risk_scenarios",
+                "stakeholders",
             )
         )
 
@@ -9435,12 +9442,16 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "compliance_assessment",  # Displayed in table and serialized
                 "compliance_assessment__perimeter",  # perimeter field uses compliance_assessment.perimeter
                 "compliance_assessment__perimeter__folder",  # Nested FieldsRelatedField optimization
+                "compliance_assessment__framework",
                 "requirement",  # Used for name (__str__), description, assessable in table
+                "requirement__parent_node",
             )
             .prefetch_related(
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "applied_controls",  # ManyToManyField to AppliedControl
                 "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
+                "requirement__threats",
+                "requirement__reference_controls",
             )
         )
 

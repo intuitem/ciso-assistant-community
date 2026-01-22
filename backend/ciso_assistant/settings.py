@@ -295,6 +295,9 @@ KNOX_TOKEN_MODEL = "knox.AuthToken"
 # Empty outside of debug mode so that allauth middleware does not raise an error
 STATIC_URL = ""
 
+SILK_ENABLED = os.environ.get("SILK_ENABLED", "False") == "True"
+
+
 if DEBUG:
     REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
         "rest_framework.renderers.BrowsableAPIRenderer"
@@ -316,6 +319,9 @@ if DEBUG:
         "SHOW_TOOLBAR_CALLBACK": lambda request: True,
     }
 
+    if SILK_ENABLED:
+        INSTALLED_APPS.append("silk")
+        MIDDLEWARE.insert(7, "silk.middleware.SilkyMiddleware")
     if DB_LOG:
         LOGGING["loggers"]["django.db.backends"] = {
             "handlers": ["console"],
