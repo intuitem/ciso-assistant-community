@@ -90,7 +90,7 @@ class StigChecklistRepository(BaseRepository[StigChecklist]):
                 action_type='assign_system',
                 entity_type='stig_checklist',
                 entity_id=checklist_id,
-                entity_name=checklist.title,
+                entity_name=f"{checklist.hostName} - {checklist.stigType}",
                 request=request,
                 old_values={'systemGroupId': str(old_system_id) if old_system_id else None},
                 new_values={'systemGroupId': str(system_group_id)}
@@ -117,7 +117,7 @@ class StigChecklistRepository(BaseRepository[StigChecklist]):
                 action_type='remove_from_system',
                 entity_type='stig_checklist',
                 entity_id=checklist_id,
-                entity_name=checklist.title,
+                entity_name=f"{checklist.hostName} - {checklist.stigType}",
                 request=request,
                 old_values={'systemGroupId': str(old_system_id) if old_system_id else None},
                 new_values={'systemGroupId': None}
@@ -135,28 +135,32 @@ class StigChecklistRepository(BaseRepository[StigChecklist]):
 
             # Store old values for audit
             old_values = {
-                'raw_ckl_content': bool(checklist.raw_ckl_content),
-                'stig_type': checklist.stig_type,
-                'stig_release': checklist.stig_release,
-                'host_name': checklist.host_name,
+                'rawCklData': bool(checklist.rawCklData),
+                'stigType': checklist.stigType,
+                'stigRelease': checklist.stigRelease,
+                'hostName': checklist.hostName,
                 'lifecycle_state': checklist.lifecycle_state
             }
 
-            # Update checklist with parsed data
-            checklist.raw_ckl_content = ckl_content
-            checklist.title = parsed_data.get("title", checklist.title)
-            checklist.stig_type = parsed_data.get("stig_type", checklist.stig_type)
-            checklist.stig_release = parsed_data.get("stig_release", checklist.stig_release)
-            checklist.stig_version = parsed_data.get("stig_version", checklist.stig_version)
-            checklist.host_name = parsed_data.get("host_name", checklist.host_name)
-            checklist.host_ip = parsed_data.get("host_ip", checklist.host_ip)
-            checklist.host_fqdn = parsed_data.get("host_fqdn", checklist.host_fqdn)
+            # Update checklist with parsed data - store raw content in rawCklData
+            checklist.rawCklData = {'raw_content': ckl_content, **parsed_data}
+            checklist.stigType = parsed_data.get("stig_type", checklist.stigType)
+            checklist.stigRelease = parsed_data.get("stig_release", checklist.stigRelease)
+            checklist.version = parsed_data.get("stig_version", checklist.version)
+            checklist.hostName = parsed_data.get("host_name", checklist.hostName)
+
+            # Update asset info with host details
+            asset_info = parsed_data.get("asset_info", {})
+            checklist.assetInfo = {
+                'HOST_IP': parsed_data.get("host_ip", ""),
+                'HOST_FQDN': parsed_data.get("host_fqdn", ""),
+                **asset_info
+            }
 
             # Asset classification from parsed data
-            asset_info = parsed_data.get("asset_info", {})
-            checklist.is_web_database = asset_info.get("web_or_database", False)
-            checklist.web_database_site = asset_info.get("web_db_site")
-            checklist.web_database_instance = asset_info.get("web_db_instance")
+            checklist.isWebDatabase = asset_info.get("web_or_database", False)
+            checklist.webDatabaseSite = asset_info.get("web_db_site", "")
+            checklist.webDatabaseInstance = asset_info.get("web_db_instance", "")
 
             # Set asset type based on inference
             inferred_asset_type = asset_info.get("inferred_asset_type", "computing")
@@ -165,7 +169,7 @@ class StigChecklistRepository(BaseRepository[StigChecklist]):
             else:
                 checklist.asset_type = "computing"  # Default fallback
 
-            checklist.lifecycle_state = StigChecklist.LifecycleState.IMPORTED
+            checklist.lifecycle_state = StigChecklist.LifecycleState.ACTIVE
 
             self.save(checklist, user_id, username, request)
 
@@ -176,14 +180,14 @@ class StigChecklistRepository(BaseRepository[StigChecklist]):
                 action_type='import_ckl',
                 entity_type='stig_checklist',
                 entity_id=checklist_id,
-                entity_name=checklist.title,
+                entity_name=f"{checklist.hostName} - {checklist.stigType}",
                 request=request,
                 old_values=old_values,
                 new_values={
-                    'raw_ckl_content': True,
-                    'stig_type': checklist.stig_type,
-                    'stig_release': checklist.stig_release,
-                    'host_name': checklist.host_name,
+                    'rawCklData': True,
+                    'stigType': checklist.stigType,
+                    'stigRelease': checklist.stigRelease,
+                    'hostName': checklist.hostName,
                     'lifecycle_state': checklist.lifecycle_state,
                     'ckl_size': len(ckl_content)
                 }
@@ -199,7 +203,7 @@ class StigChecklistRepository(BaseRepository[StigChecklist]):
         try:
             checklist = StigChecklist.objects.get(id=checklist_id)
 
-            if not checklist.raw_ckl_content:
+            if not checklist.rawCklData:
                 return None
 
             # Log the export
@@ -209,13 +213,14 @@ class StigChecklistRepository(BaseRepository[StigChecklist]):
                 action_type='export_ckl',
                 entity_type='stig_checklist',
                 entity_id=checklist_id,
-                entity_name=checklist.title,
+                entity_name=f"{checklist.hostName} - {checklist.stigType}",
                 request=request,
                 old_values=None,
                 new_values={'exported_at': str(checklist.updated_at)}
             )
 
-            return checklist.raw_ckl_content
+            # Return raw content if stored, otherwise return the JSON data
+            return checklist.rawCklData.get('raw_content', str(checklist.rawCklData))
         except StigChecklist.DoesNotExist:
             return None
 

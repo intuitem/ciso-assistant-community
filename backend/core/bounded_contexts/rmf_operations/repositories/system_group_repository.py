@@ -116,7 +116,7 @@ class SystemGroupRepository(BaseRepository[SystemGroup]):
                 action_type='update',
                 entity_type='system_group',
                 entity_id=system_id,
-                entity_name=system.title,
+                entity_name=system.name,
                 details={
                     'operation': 'statistics_update',
                     'old_values': old_values,
@@ -150,7 +150,7 @@ class SystemGroupRepository(BaseRepository[SystemGroup]):
                     action_type='activate',
                     entity_type='system_group',
                     entity_id=system_id,
-                    entity_name=system.title,
+                    entity_name=system.name,
                     request=request,
                     old_values={'lifecycle_state': 'draft'},
                     new_values={'lifecycle_state': 'active'}
@@ -177,7 +177,7 @@ class SystemGroupRepository(BaseRepository[SystemGroup]):
                     action_type='archive',
                     entity_type='system_group',
                     entity_id=system_id,
-                    entity_name=system.title,
+                    entity_name=system.name,
                     request=request,
                     old_values={'lifecycle_state': 'active'},
                     new_values={'lifecycle_state': 'archived'}
@@ -208,7 +208,7 @@ class SystemGroupRepository(BaseRepository[SystemGroup]):
                     action_type='assign_system',
                     entity_type='stig_checklist',
                     entity_id=checklist_id,
-                    entity_name=f"Checklist assigned to {system.title}",
+                    entity_name=f"Checklist assigned to {system.name}",
                     request=request,
                     old_values={'system_group_id': None},
                     new_values={'system_group_id': str(system_id)}
@@ -239,7 +239,7 @@ class SystemGroupRepository(BaseRepository[SystemGroup]):
                     action_type='remove_from_system',
                     entity_type='stig_checklist',
                     entity_id=checklist_id,
-                    entity_name=f"Checklist removed from {system.title}",
+                    entity_name=f"Checklist removed from {system.name}",
                     request=request,
                     old_values={'system_group_id': str(system_id)},
                     new_values={'system_group_id': None}

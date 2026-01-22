@@ -8,6 +8,9 @@ for template library management and usage analytics.
 from typing import Optional, List, Dict, Any
 import uuid
 
+from django.db import models
+from django.db.models import Sum
+
 from core.domain.repository import BaseRepository
 from ..aggregates.stig_template import StigTemplate
 
@@ -101,13 +104,18 @@ class StigTemplateRepository(BaseRepository[StigTemplate]):
             if not checklist:
                 return None
 
+            # Extract raw CKL content from the checklist's rawCklData JSON
+            raw_content = ''
+            if checklist.rawCklData:
+                raw_content = checklist.rawCklData.get('raw_content', str(checklist.rawCklData))
+
             template = StigTemplate()
             template.create_template(
                 name=name,
-                stig_type=checklist.stig_type or '',
-                stig_release=checklist.stig_release or '',
-                stig_version=checklist.stig_version or '',
-                raw_ckl_content=checklist.raw_ckl_content or '',
+                stig_type=checklist.stigType or '',
+                stig_release=checklist.stigRelease or '',
+                stig_version=checklist.version or '',
+                raw_ckl_content=raw_content,
                 description=description,
                 created_from_checklist_id=checklist_id
             )
