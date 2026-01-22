@@ -33,7 +33,7 @@ class PolicySerializer(serializers.ModelSerializer):
         model = Policy
         fields = [
             'id', 'version', 'created_at', 'updated_at',
-            'title', 'version', 'description',
+            'title', 'policy_version', 'description',
             'lifecycle_state',
             'ownerUserIds', 'relatedControlIds', 'applicableOrgUnitIds',
             'publication_date', 'review_cadence_days',

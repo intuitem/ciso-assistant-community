@@ -7,6 +7,7 @@ including weaknesses, milestones, and remediation tracking.
 
 import uuid
 from typing import Optional, List, Dict, Any
+from datetime import datetime
 from django.db import models
 from django.utils import timezone
 from core.domain.aggregate import AggregateRoot
@@ -551,7 +552,7 @@ class POAMItem(AggregateRoot):
             m for m in self.milestones
             if m.get('status') in ['pending', 'in_progress'] and
             m.get('target_date') and
-            timezone.datetime.fromisoformat(m['target_date']).date() >= today
+            datetime.fromisoformat(m['target_date']).date() >= today
         ]
 
     @property
@@ -562,7 +563,7 @@ class POAMItem(AggregateRoot):
             m for m in self.milestones
             if m.get('status') in ['pending', 'in_progress'] and
             m.get('target_date') and
-            timezone.datetime.fromisoformat(m['target_date']).date() < today
+            datetime.fromisoformat(m['target_date']).date() < today
         ]
 
     def __str__(self):

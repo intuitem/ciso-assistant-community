@@ -213,7 +213,7 @@ class ControlImplementationViewSet(viewsets.ModelViewSet):
 
 class PolicyAcknowledgementViewSet(viewsets.ModelViewSet):
     """ViewSet for PolicyAcknowledgement associations"""
-    
+
     queryset = PolicyAcknowledgement.objects.all()
     serializer_class = PolicyAcknowledgementSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -221,4 +221,14 @@ class PolicyAcknowledgementViewSet(viewsets.ModelViewSet):
     search_fields = ['notes']
     ordering_fields = ['acknowledged_at']
     ordering = ['-acknowledged_at']
+
+    @action(detail=True, methods=['post'])
+    def acknowledge(self, request, pk=None):
+        """Record a policy acknowledgement"""
+        acknowledgement = self.get_object()
+        method = request.data.get('method', 'clickwrap')
+        notes = request.data.get('notes')
+        acknowledgement.acknowledge(method=method, notes=notes)
+        acknowledgement.save()
+        return Response({'status': 'acknowledged'})
 

@@ -77,7 +77,7 @@ class AssetRiskViewSet(viewsets.ModelViewSet):
 
 class ThirdPartyRiskViewSet(viewsets.ModelViewSet):
     """ViewSet for ThirdPartyRisk aggregates"""
-    
+
     queryset = ThirdPartyRisk.objects.all()
     serializer_class = ThirdPartyRiskSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -85,7 +85,7 @@ class ThirdPartyRiskViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'description']
     ordering_fields = ['title', 'created_at']
     ordering = ['-created_at']
-    
+
     @action(detail=True, methods=['post'])
     def assess(self, request, pk=None):
         """Assess a risk"""
@@ -95,18 +95,19 @@ class ThirdPartyRiskViewSet(viewsets.ModelViewSet):
         inherent_score = request.data.get('inherent_score')
         residual_score = request.data.get('residual_score')
         rationale = request.data.get('rationale')
-        
+
         if all([likelihood, impact, inherent_score, residual_score]):
             risk.assess(likelihood, impact, inherent_score, residual_score, rationale)
             risk.save()
             return Response({'status': 'assessed'})
         return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     @action(detail=True, methods=['post'])
     def treat(self, request, pk=None):
         """Treat a risk"""
         risk = self.get_object()
-        risk.treat()
+        treatment_plan_id = request.data.get('treatment_plan_id')
+        risk.treat(treatment_plan_id)
         risk.save()
         return Response({'status': 'treated'})
     
@@ -129,7 +130,7 @@ class ThirdPartyRiskViewSet(viewsets.ModelViewSet):
 
 class BusinessRiskViewSet(viewsets.ModelViewSet):
     """ViewSet for BusinessRisk aggregates"""
-    
+
     queryset = BusinessRisk.objects.all()
     serializer_class = BusinessRiskSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -137,7 +138,7 @@ class BusinessRiskViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'description']
     ordering_fields = ['title', 'created_at']
     ordering = ['-created_at']
-    
+
     @action(detail=True, methods=['post'])
     def assess(self, request, pk=None):
         """Assess a risk"""
@@ -147,18 +148,19 @@ class BusinessRiskViewSet(viewsets.ModelViewSet):
         inherent_score = request.data.get('inherent_score')
         residual_score = request.data.get('residual_score')
         rationale = request.data.get('rationale')
-        
+
         if all([likelihood, impact, inherent_score, residual_score]):
             risk.assess(likelihood, impact, inherent_score, residual_score, rationale)
             risk.save()
             return Response({'status': 'assessed'})
         return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     @action(detail=True, methods=['post'])
     def treat(self, request, pk=None):
         """Treat a risk"""
         risk = self.get_object()
-        risk.treat()
+        treatment_plan_id = request.data.get('treatment_plan_id')
+        risk.treat(treatment_plan_id)
         risk.save()
         return Response({'status': 'treated'})
     

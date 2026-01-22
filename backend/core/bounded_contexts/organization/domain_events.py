@@ -79,3 +79,23 @@ class ResponsibilityRevoked(DomainEvent):
     """Raised when a responsibility is revoked"""
     pass
 
+
+class UserRemovedFromGroup(DomainEvent):
+    """Raised when a user is removed from a group"""
+    pass
+
+
+class UserRemovedFromOrgUnit(DomainEvent):
+    """Raised when a user is removed from an organizational unit"""
+    pass
+
+
+class PermissionRemovedFromGroup(DomainEvent):
+    """Raised when a permission is removed from a group"""
+    pass
+
+
+class OwnerRemovedFromOrgUnit(DomainEvent):
+    """Raised when an owner is removed from an organizational unit"""
+    pass
+

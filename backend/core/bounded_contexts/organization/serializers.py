@@ -35,6 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
             'lifecycle_state',
             'groupIds', 'orgUnitIds',
             'preferences', 'expiry_date', 'observation',
+            'password',
         ]
         read_only_fields = ['id', 'version', 'created_at', 'updated_at']
         extra_kwargs = {

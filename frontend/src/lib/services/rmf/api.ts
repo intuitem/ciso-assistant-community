@@ -310,6 +310,17 @@ export const rmfApi = {
     });
   },
 
+  async uploadMultipleCklFiles(files: File[], systemGroupId?: string): Promise<ApiResponse<{ checklist_ids: string[] }>> {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('ckl_files', file));
+    if (systemGroupId) {
+      formData.append('system_group_id', systemGroupId);
+    }
+    return api.post('/rmf/checklists/upload/batch/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+
   async getBulkUpdateCandidates(checklistId: string, statusFilter: string = 'not_reviewed'): Promise<ApiResponse<any>> {
     return api.get('/rmf/vulnerability-findings/bulk_candidates/', {
       params: { checklist_id: checklistId, status_filter: statusFilter }
@@ -324,3 +335,385 @@ export const rmfApi = {
     });
   }
 };
+
+// ============================================================================
+// Template API
+// ============================================================================
+
+export interface StigTemplate {
+  id: string;
+  title: string;
+  description?: string;
+  stigType: string;
+  version: string;
+  release: string;
+  rawChecklist?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const templateApi = {
+  async list(params?: Record<string, any>): Promise<PaginatedResponse<StigTemplate>> {
+    return api.get('/rmf/templates/', { params });
+  },
+
+  async retrieve(id: string): Promise<ApiResponse<StigTemplate>> {
+    return api.get(`/rmf/templates/${id}/`);
+  },
+
+  async create(data: Partial<StigTemplate>): Promise<ApiResponse<StigTemplate>> {
+    return api.post('/rmf/templates/', data);
+  },
+
+  async update(id: string, data: Partial<StigTemplate>): Promise<ApiResponse<StigTemplate>> {
+    return api.put(`/rmf/templates/${id}/`, data);
+  },
+
+  async destroy(id: string): Promise<ApiResponse<null>> {
+    return api.delete(`/rmf/templates/${id}/`);
+  },
+
+  async createChecklistFromTemplate(templateId: string, systemGroupId: string, hostname: string): Promise<ApiResponse<StigChecklist>> {
+    return api.post(`/rmf/templates/${templateId}/create_checklist/`, {
+      system_group_id: systemGroupId,
+      hostname
+    });
+  },
+
+  async upload(file: File, title: string, description?: string): Promise<ApiResponse<StigTemplate>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('title', title);
+    if (description) formData.append('description', description);
+    return api.post('/rmf/templates/upload/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
+};
+
+// ============================================================================
+// Nessus/ACAS API
+// ============================================================================
+
+export interface NessusScan {
+  id: string;
+  systemGroupId: string;
+  fileName: string;
+  scanDate: string;
+  criticalCount: number;
+  highCount: number;
+  mediumCount: number;
+  lowCount: number;
+  infoCount: number;
+  created_at: string;
+}
+
+export interface NessusVulnerability {
+  id: string;
+  scanId: string;
+  pluginId: string;
+  pluginName: string;
+  severity: number;
+  hostName: string;
+  hostIp: string;
+  port: string;
+  protocol: string;
+  synopsis?: string;
+  description?: string;
+  solution?: string;
+  riskFactor: string;
+  created_at: string;
+}
+
+export const nessusApi = {
+  async getScans(systemGroupId: string): Promise<PaginatedResponse<NessusScan>> {
+    return api.get('/rmf/nessus/scans/', { params: { system_group: systemGroupId } });
+  },
+
+  async getScan(id: string): Promise<ApiResponse<NessusScan>> {
+    return api.get(`/rmf/nessus/scans/${id}/`);
+  },
+
+  async getVulnerabilities(scanId: string, params?: Record<string, any>): Promise<PaginatedResponse<NessusVulnerability>> {
+    return api.get(`/rmf/nessus/scans/${scanId}/vulnerabilities/`, { params });
+  },
+
+  async getSummary(systemGroupId: string): Promise<ApiResponse<{
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+    byHost: { hostname: string; critical: number; high: number; medium: number; low: number }[];
+  }>> {
+    return api.get(`/rmf/nessus/summary/${systemGroupId}/`);
+  },
+
+  async upload(systemGroupId: string, file: File): Promise<ApiResponse<NessusScan>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('system_group_id', systemGroupId);
+    return api.post('/rmf/nessus/upload/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+
+  async exportSummaryXlsx(systemGroupId: string): Promise<Blob> {
+    const response = await fetch(`/api/v1/rmf/nessus/export/${systemGroupId}/summary/`);
+    return response.blob();
+  },
+
+  async exportByHostXlsx(systemGroupId: string): Promise<Blob> {
+    const response = await fetch(`/api/v1/rmf/nessus/export/${systemGroupId}/by-host/`);
+    return response.blob();
+  }
+};
+
+// ============================================================================
+// Compliance API
+// ============================================================================
+
+export interface ComplianceResult {
+  id: string;
+  systemGroupId: string;
+  impactLevel: 'low' | 'moderate' | 'high';
+  includePrivacy: boolean;
+  controlId: string;
+  controlNumber: string;
+  controlTitle: string;
+  controlFamily: string;
+  status: 'compliant' | 'non_compliant' | 'partially_compliant' | 'not_applicable';
+  checklistCount: number;
+  created_at: string;
+}
+
+export const complianceApi = {
+  async generate(systemGroupId: string, impactLevel: string, includePrivacy: boolean): Promise<ApiResponse<{ job_id: string }>> {
+    return api.post('/rmf/compliance/generate/', {
+      system_group_id: systemGroupId,
+      impact_level: impactLevel,
+      include_privacy: includePrivacy
+    });
+  },
+
+  async getResults(systemGroupId: string): Promise<PaginatedResponse<ComplianceResult>> {
+    return api.get('/rmf/compliance/results/', { params: { system_group: systemGroupId } });
+  },
+
+  async getStatus(jobId: string): Promise<ApiResponse<{ status: string; progress: number; results?: ComplianceResult[] }>> {
+    return api.get(`/rmf/compliance/status/${jobId}/`);
+  },
+
+  async exportXlsx(systemGroupId: string): Promise<Blob> {
+    const response = await fetch(`/api/v1/rmf/compliance/export/${systemGroupId}/`);
+    return response.blob();
+  }
+};
+
+// ============================================================================
+// Audit API
+// ============================================================================
+
+export interface AuditEntry {
+  id: string;
+  created_at: string;
+  program: string;
+  action: string;
+  username: string;
+  userId: string;
+  fullName?: string;
+  email?: string;
+  message?: string;
+  url?: string;
+  details?: Record<string, any>;
+}
+
+export const auditApi = {
+  async list(params?: Record<string, any>): Promise<PaginatedResponse<AuditEntry>> {
+    return api.get('/rmf/audit/', { params });
+  },
+
+  async retrieve(id: string): Promise<ApiResponse<AuditEntry>> {
+    return api.get(`/rmf/audit/${id}/`);
+  }
+};
+
+// ============================================================================
+// Dashboard/Metrics API
+// ============================================================================
+
+export interface DashboardMetrics {
+  totalSystems: number;
+  totalChecklists: number;
+  totalTemplates: number;
+  totalOpenVulnerabilities: number;
+  totalCat1Open: number;
+  totalCat2Open: number;
+  totalCat3Open: number;
+  systemsByStatus: { name: string; value: number }[];
+  vulnerabilitiesBySeverity: { name: string; value: number }[];
+  vulnerabilitiesByStatus: { name: string; value: number }[];
+  recentActivity: AuditEntry[];
+}
+
+export const dashboardApi = {
+  async getMetrics(): Promise<ApiResponse<DashboardMetrics>> {
+    return api.get('/rmf/dashboard/metrics/');
+  },
+
+  async getSystemMetrics(systemGroupId: string): Promise<ApiResponse<{
+    score: ChecklistScore;
+    checklistCount: number;
+    vulnerabilityBreakdown: { name: string; value: number }[];
+    statusBreakdown: { name: string; value: number }[];
+  }>> {
+    return api.get(`/rmf/dashboard/system/${systemGroupId}/`);
+  },
+
+  async getRecentActivity(limit?: number): Promise<ApiResponse<AuditEntry[]>> {
+    return api.get('/rmf/dashboard/activity/', { params: { limit: limit || 10 } });
+  }
+};
+
+// ============================================================================
+// Reports API
+// ============================================================================
+
+export interface ReportParams {
+  systemGroupId?: string;
+  checklistId?: string;
+  startDate?: string;
+  endDate?: string;
+  format?: 'json' | 'xlsx' | 'csv';
+}
+
+export const reportsApi = {
+  async getNessusPatchListing(params: ReportParams): Promise<ApiResponse<any>> {
+    return api.get('/rmf/reports/nessus-patch/', { params });
+  },
+
+  async getSystemCharts(systemGroupId: string): Promise<ApiResponse<{
+    severityBreakdown: { name: string; value: number }[];
+    statusBreakdown: { name: string; value: number }[];
+    categoryBreakdown: { name: string; value: number }[];
+  }>> {
+    return api.get(`/rmf/reports/system-charts/${systemGroupId}/`);
+  },
+
+  async getChecklistListing(params: ReportParams): Promise<ApiResponse<any>> {
+    return api.get('/rmf/reports/checklist-listing/', { params });
+  },
+
+  async getHostVulnerability(params: ReportParams & { vulnId?: string }): Promise<ApiResponse<any>> {
+    return api.get('/rmf/reports/host-vulnerability/', { params });
+  },
+
+  async getVulnerabilityBySeverity(params: ReportParams): Promise<ApiResponse<any>> {
+    return api.get('/rmf/reports/vulnerability-severity/', { params });
+  },
+
+  async getChecklistUpgrades(params: ReportParams): Promise<ApiResponse<any>> {
+    return api.get('/rmf/reports/checklist-upgrades/', { params });
+  },
+
+  async getVulnerabilityOverrides(params: ReportParams): Promise<ApiResponse<any>> {
+    return api.get('/rmf/reports/vulnerability-overrides/', { params });
+  },
+
+  async getChecklistActivity(params: ReportParams): Promise<ApiResponse<any>> {
+    return api.get('/rmf/reports/checklist-activity/', { params });
+  },
+
+  async getHostByControl(params: ReportParams & { controlId?: string }): Promise<ApiResponse<any>> {
+    return api.get('/rmf/reports/host-by-control/', { params });
+  },
+
+  async getControlsListing(params: ReportParams): Promise<ApiResponse<any>> {
+    return api.get('/rmf/reports/controls-listing/', { params });
+  },
+
+  async getNessusPatch(params: ReportParams & { severity?: string }): Promise<ApiResponse<any>> {
+    return api.get('/rmf/reports/nessus-patch/', { params });
+  },
+
+  async exportReport(reportType: string, params: ReportParams): Promise<Blob> {
+    const queryParams = new URLSearchParams(params as Record<string, string>);
+    const response = await fetch(`/api/v1/rmf/reports/${reportType}/export/?${queryParams}`);
+    return response.blob();
+  }
+};
+
+// ============================================================================
+// CCI API
+// ============================================================================
+
+export interface CCIItem {
+  id: string;
+  cciId: string;
+  definition: string;
+  references: { title: string; index: string }[];
+}
+
+export const cciApi = {
+  async get(cciId: string): Promise<ApiResponse<CCIItem>> {
+    return api.get(`/rmf/cci/${cciId}/`);
+  },
+
+  async search(query: string): Promise<PaginatedResponse<CCIItem>> {
+    return api.get('/rmf/cci/', { params: { search: query } });
+  }
+};
+
+// ============================================================================
+// Export Utilities
+// ============================================================================
+
+export const exportApi = {
+  async downloadSystemCkl(systemGroupId: string, filters?: Record<string, any>): Promise<void> {
+    const queryParams = new URLSearchParams(filters as Record<string, string>);
+    const response = await fetch(`/api/v1/rmf/system-groups/${systemGroupId}/download/ckl/?${queryParams}`);
+    const blob = await response.blob();
+    downloadBlob(blob, 'checklists.zip');
+  },
+
+  async downloadSystemXlsx(systemGroupId: string, filters?: Record<string, any>): Promise<void> {
+    const queryParams = new URLSearchParams(filters as Record<string, string>);
+    const response = await fetch(`/api/v1/rmf/system-groups/${systemGroupId}/export/xlsx/?${queryParams}`);
+    const blob = await response.blob();
+    downloadBlob(blob, 'checklists.xlsx');
+  },
+
+  async downloadChecklistCkl(checklistId: string): Promise<void> {
+    const response = await fetch(`/api/v1/rmf/checklists/${checklistId}/download/ckl/`);
+    const blob = await response.blob();
+    downloadBlob(blob, 'checklist.ckl');
+  },
+
+  async downloadChecklistXlsx(checklistId: string): Promise<void> {
+    const response = await fetch(`/api/v1/rmf/checklists/${checklistId}/export/xlsx/`);
+    const blob = await response.blob();
+    downloadBlob(blob, 'checklist.xlsx');
+  },
+
+  async downloadTestPlan(systemGroupId: string): Promise<void> {
+    const response = await fetch(`/api/v1/rmf/system-groups/${systemGroupId}/export/test-plan/`);
+    const blob = await response.blob();
+    downloadBlob(blob, 'test-plan.xlsx');
+  },
+
+  async downloadPoam(systemGroupId: string): Promise<void> {
+    const response = await fetch(`/api/v1/rmf/system-groups/${systemGroupId}/export/poam/`);
+    const blob = await response.blob();
+    downloadBlob(blob, 'poam.xlsx');
+  }
+};
+
+function downloadBlob(blob: Blob, filename: string): void {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}

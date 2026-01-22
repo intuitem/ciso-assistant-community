@@ -19,7 +19,7 @@ class ComplianceFrameworkSerializer(serializers.ModelSerializer):
         model = ComplianceFramework
         fields = [
             'id', 'version', 'created_at', 'updated_at',
-            'name', 'version', 'description',
+            'name', 'framework_version', 'description',
             'lifecycle_state',
             'requirementIds',
             'tags',

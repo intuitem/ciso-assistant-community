@@ -156,6 +156,8 @@ class ThirdParty(AggregateRoot):
             event.payload = {
                 "third_party_id": str(self.id),
                 "name": self.name,
+                "old_state": old_state,
+                "new_state": self.LifecycleState.OFFBOARDING,
             }
             self._raise_event(event)
             
@@ -178,6 +180,8 @@ class ThirdParty(AggregateRoot):
             event.payload = {
                 "third_party_id": str(self.id),
                 "name": self.name,
+                "old_state": old_state,
+                "new_state": self.LifecycleState.ARCHIVED,
             }
             self._raise_event(event)
             

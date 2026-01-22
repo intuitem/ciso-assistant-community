@@ -177,24 +177,8 @@ class SystemScoreAggregated(DomainEvent):
     pass
 
 
-# StigTemplate Events
-class StigTemplateCreated(DomainEvent):
-    """Raised when a STIG template is created"""
-    pass
-
-
+# Additional Events
 class ChecklistCreatedFromTemplate(DomainEvent):
     """Raised when a checklist is created from a template"""
-    pass
-
-
-# NessusScan Events (for future phases)
-class NessusScanUploaded(DomainEvent):
-    """Raised when a Nessus scan is uploaded"""
-    pass
-
-
-class NessusScanProcessed(DomainEvent):
-    """Raised when a Nessus scan is processed"""
     pass
 

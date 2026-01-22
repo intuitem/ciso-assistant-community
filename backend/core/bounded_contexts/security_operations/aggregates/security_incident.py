@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from core.domain.aggregate import AggregateRoot
 from core.domain.fields import EmbeddedIdArrayField
+from ..value_objects import IncidentEvent
 from ..domain_events import (
     SecurityIncidentReported,
     SecurityIncidentTriaged,
@@ -222,14 +223,17 @@ class SecurityIncident(AggregateRoot):
     
     def add_timeline_event(self, action: str, actor_user_id: uuid.UUID = None,
                           notes: str = None):
-        """Add an event to the timeline"""
-        event = {
-            "at": timezone.now().isoformat(),
-            "action": action,
-            "actorUserId": str(actor_user_id) if actor_user_id else None,
-            "notes": notes,
-        }
-        self.timeline.append(event)
+        """Add an event to the timeline using IncidentEvent value object"""
+        event = IncidentEvent.create(
+            action=action,
+            actor_user_id=str(actor_user_id) if actor_user_id else None,
+            notes=notes,
+        )
+        self.timeline.append(event.to_dict())
+
+    def get_timeline_events(self) -> List[IncidentEvent]:
+        """Get timeline events as IncidentEvent value objects"""
+        return [IncidentEvent.from_dict(e) for e in self.timeline]
     
     def add_affected_asset(self, asset_id: uuid.UUID):
         """Add an affected asset"""

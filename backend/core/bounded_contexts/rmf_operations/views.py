@@ -492,8 +492,14 @@ class StigTemplateViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description', 'stig_type']
 
     def get_queryset(self):
-        """Filter queryset based on user permissions"""
-        return StigTemplate.objects.filter(is_active=True)
+        """Filter queryset based on user permissions - defaults to active only for list"""
+        # For list action, show only active templates by default
+        # For retrieve and other actions, show all
+        if self.action == 'list':
+            include_inactive = self.request.query_params.get('include_inactive', 'false').lower() == 'true'
+            if not include_inactive:
+                return StigTemplate.objects.filter(is_active=True)
+        return StigTemplate.objects.all()
 
     @action(detail=True, methods=['post'])
     def activate(self, request, pk=None):

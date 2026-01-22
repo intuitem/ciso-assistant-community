@@ -398,9 +398,9 @@ class Artifact(AggregateRoot):
         size = self.file_size
         for unit in ['B', 'KB', 'MB', 'GB']:
             if size < 1024.0:
-                return ".1f"
+                return f"{size:.1f} {unit}"
             size /= 1024.0
-        return ".1f"
+        return f"{size:.1f} TB"
 
     def __str__(self):
         return f"Artifact({self.filename} - {self.artifact_type} - {self.human_readable_size})"

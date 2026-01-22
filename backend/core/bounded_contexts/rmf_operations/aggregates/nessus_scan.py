@@ -11,6 +11,7 @@ from typing import Optional, Dict, Any, List
 from django.db import models
 from django.utils import timezone
 from core.domain.aggregate import AggregateRoot
+from core.domain.fields import EmbeddedIdArrayField
 
 
 class NessusScan(AggregateRoot):

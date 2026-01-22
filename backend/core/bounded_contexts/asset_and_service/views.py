@@ -80,6 +80,28 @@ class AssetViewSet(viewsets.ModelViewSet):
             return Response({'status': 'service linked'})
         return Response({'error': 'service_id required'}, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=True, methods=['post'])
+    def assign_business_owner(self, request, pk=None):
+        """Assign a business owner to an asset"""
+        asset = self.get_object()
+        org_unit_id = request.data.get('org_unit_id')
+        if org_unit_id:
+            asset.assign_business_owner(org_unit_id)
+            asset.save()
+            return Response({'status': 'business owner assigned'})
+        return Response({'error': 'org_unit_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def assign_system_owner(self, request, pk=None):
+        """Assign a system owner to an asset"""
+        asset = self.get_object()
+        user_id = request.data.get('user_id')
+        if user_id:
+            asset.assign_system_owner(user_id)
+            asset.save()
+            return Response({'status': 'system owner assigned'})
+        return Response({'error': 'user_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ServiceViewSet(viewsets.ModelViewSet):
     """ViewSet for Service aggregates"""
@@ -119,6 +141,39 @@ class ServiceViewSet(viewsets.ModelViewSet):
             return Response({'status': 'asset linked'})
         return Response({'error': 'asset_id required'}, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=True, methods=['post'])
+    def link_third_party(self, request, pk=None):
+        """Link a third party to a service"""
+        service = self.get_object()
+        third_party_id = request.data.get('third_party_id')
+        if third_party_id:
+            service.link_third_party(third_party_id)
+            service.save()
+            return Response({'status': 'third party linked'})
+        return Response({'error': 'third_party_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def assign_control(self, request, pk=None):
+        """Assign a control to a service"""
+        service = self.get_object()
+        control_id = request.data.get('control_id')
+        if control_id:
+            service.assign_control(control_id)
+            service.save()
+            return Response({'status': 'control assigned'})
+        return Response({'error': 'control_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def assign_risk(self, request, pk=None):
+        """Assign a risk to a service"""
+        service = self.get_object()
+        risk_id = request.data.get('risk_id')
+        if risk_id:
+            service.assign_risk(risk_id)
+            service.save()
+            return Response({'status': 'risk assigned'})
+        return Response({'error': 'risk_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ProcessViewSet(viewsets.ModelViewSet):
     """ViewSet for Process aggregates"""
@@ -146,6 +201,50 @@ class ProcessViewSet(viewsets.ModelViewSet):
         process.retire()
         process.save()
         return Response({'status': 'retired'})
+
+    @action(detail=True, methods=['post'])
+    def assign_to_org_unit(self, request, pk=None):
+        """Assign process to an organizational unit"""
+        process = self.get_object()
+        org_unit_id = request.data.get('org_unit_id')
+        if org_unit_id:
+            process.assign_to_org_unit(org_unit_id)
+            process.save()
+            return Response({'status': 'assigned to org unit'})
+        return Response({'error': 'org_unit_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def link_asset(self, request, pk=None):
+        """Link an asset to a process"""
+        process = self.get_object()
+        asset_id = request.data.get('asset_id')
+        if asset_id:
+            process.link_asset(asset_id)
+            process.save()
+            return Response({'status': 'asset linked'})
+        return Response({'error': 'asset_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def assign_control(self, request, pk=None):
+        """Assign a control to a process"""
+        process = self.get_object()
+        control_id = request.data.get('control_id')
+        if control_id:
+            process.assign_control(control_id)
+            process.save()
+            return Response({'status': 'control assigned'})
+        return Response({'error': 'control_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def assign_risk(self, request, pk=None):
+        """Assign a risk to a process"""
+        process = self.get_object()
+        risk_id = request.data.get('risk_id')
+        if risk_id:
+            process.assign_risk(risk_id)
+            process.save()
+            return Response({'status': 'risk assigned'})
+        return Response({'error': 'risk_id required'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ServiceContractViewSet(viewsets.ModelViewSet):

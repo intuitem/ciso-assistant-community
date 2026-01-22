@@ -31,8 +31,7 @@ class OrgUnitRepository(Repository[OrgUnit]):
         return list(
             OrgUnit.objects.filter(lifecycle_state=OrgUnit.LifecycleState.ACTIVE)
         )
-    
-    def find_by_parent(self, parent_id: UUID) -> List[OrgUnit]:
-        """Find all organizational units with a specific parent"""
-        return list(OrgUnit.objects.filter(parentOrgUnitId=parent_id))
+
+    # Alias for backward compatibility
+    find_by_parent = find_children
 

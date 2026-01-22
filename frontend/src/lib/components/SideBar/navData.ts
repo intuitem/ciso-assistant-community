@@ -400,6 +400,12 @@ export const navData = {
 			name: 'rmf',
 			items: [
 				{
+					name: 'rmfDashboard',
+					fa_icon: 'fa-solid fa-gauge',
+					href: '/rmf',
+					permissions: ['view_systemgroup']
+				},
+				{
 					name: 'systemGroups',
 					fa_icon: 'fa-solid fa-network-wired',
 					href: '/rmf/system-groups',
@@ -410,6 +416,36 @@ export const navData = {
 					fa_icon: 'fa-solid fa-clipboard-check',
 					href: '/rmf/checklists',
 					permissions: ['view_stigchecklist']
+				},
+				{
+					name: 'rmfTemplates',
+					fa_icon: 'fa-solid fa-file-code',
+					href: '/rmf/templates',
+					permissions: ['view_stigchecklist']
+				},
+				{
+					name: 'rmfUpload',
+					fa_icon: 'fa-solid fa-upload',
+					href: '/rmf/upload',
+					permissions: ['add_stigchecklist']
+				},
+				{
+					name: 'rmfCompliance',
+					fa_icon: 'fa-solid fa-shield-halved',
+					href: '/rmf/compliance',
+					permissions: ['view_systemgroup']
+				},
+				{
+					name: 'rmfReports',
+					fa_icon: 'fa-solid fa-chart-pie',
+					href: '/rmf/reports',
+					permissions: ['view_systemgroup']
+				},
+				{
+					name: 'rmfAudit',
+					fa_icon: 'fa-solid fa-clock-rotate-left',
+					href: '/rmf/audit',
+					permissions: ['view_systemgroup']
 				},
 				{
 					name: 'vulnerabilityFindings',

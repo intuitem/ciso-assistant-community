@@ -11,7 +11,11 @@ from django.db import models
 from django.utils import timezone
 
 from core.domain.aggregate import AggregateRoot
-from ..domain_events import AwarenessCompletionRecorded
+from ..domain_events import (
+    AwarenessCompletionStarted,
+    AwarenessCompletionRecorded,
+    AwarenessCompletionFailed,
+)
 
 
 class AwarenessCompletion(AggregateRoot):
@@ -77,6 +81,14 @@ class AwarenessCompletion(AggregateRoot):
         """Mark as in progress"""
         if self.status == self.Status.NOT_STARTED:
             self.status = self.Status.IN_PROGRESS
+
+            event = AwarenessCompletionStarted()
+            event.payload = {
+                "completion_id": str(self.id),
+                "campaign_id": str(self.campaignId),
+                "user_id": str(self.userId),
+            }
+            self._raise_event(event)
     
     def complete(self, score: float = None, notes: str = None):
         """Mark as completed"""
@@ -100,6 +112,14 @@ class AwarenessCompletion(AggregateRoot):
         if self.status != self.Status.FAILED:
             self.status = self.Status.FAILED
             self.notes = notes
+
+            event = AwarenessCompletionFailed()
+            event.payload = {
+                "completion_id": str(self.id),
+                "campaign_id": str(self.campaignId),
+                "user_id": str(self.userId),
+            }
+            self._raise_event(event)
     
     def __str__(self):
         return f"Completion for Campaign {self.campaignId} by User {self.userId} ({self.status})"

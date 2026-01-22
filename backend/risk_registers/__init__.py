@@ -1,26 +1,25 @@
 """
-Risk Registers Bounded Context
+DEPRECATED: Legacy Risk Registers Module
 
-This bounded context manages comprehensive risk management including:
-- Asset risk assessments with CVSS scoring
-- Risk treatment planning and tracking
-- Risk register consolidation and reporting
-- Risk heat maps and analytics
-- Multi-domain risk aggregation
+This module is DEPRECATED and should not be used.
+Use core.bounded_contexts.risk_registers instead.
 
-Key aggregates:
-- AssetRisk: Individual asset risk assessments
-- RiskRegister: Master risk registers with aggregation
+This legacy module is not registered as a Django app and has no active imports.
+It is retained only for migration history reference.
 
-Key services:
-- RiskAssessmentService: Risk calculation and assessment
-- RiskReportingService: Analytics and reporting
-
-API endpoints:
-- /api/risks/asset-risks/ - Asset risk management
-- /api/risks/registers/ - Risk register management
-- /api/risks/reporting/ - Risk reporting and analytics
+For all new code, import from:
+    from core.bounded_contexts.risk_registers.aggregates import AssetRisk, BusinessRisk, ThirdPartyRisk
+    from core.bounded_contexts.risk_registers.repositories import AssetRiskRepository
 """
 
-__version__ = "1.0.0"
-__description__ = "Risk Registers Bounded Context for comprehensive risk management"
+import warnings
+
+warnings.warn(
+    "The top-level 'risk_registers' module is deprecated. "
+    "Use 'core.bounded_contexts.risk_registers' instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
+__deprecated__ = True
+__replacement__ = "core.bounded_contexts.risk_registers"

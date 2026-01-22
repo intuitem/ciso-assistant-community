@@ -2574,6 +2574,232 @@ export const listViewFields = {
 		head: ['name', 'type'],
 		body: ['specific', 'type']
 	},
+	// ============================================================================
+	// RMF Operations Tables
+	// ============================================================================
+	'stig-checklists': {
+		head: ['name', 'stig_id', 'asset', 'findings_count', 'compliance'],
+		body: ['name', 'stig_id', 'asset_hostname', 'total_findings', 'compliance_percentage'],
+		meta: ['id', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			stig_id: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'stig-checklists/stig_ids',
+					label: 'stig_id',
+					multiple: true
+				}
+			}
+		}
+	},
+	'stig-findings': {
+		head: ['vuln_id', 'rule_title', 'severity', 'status', 'checklist'],
+		body: ['vuln_id', 'rule_title', 'severity', 'status', 'checklist_name'],
+		meta: ['id', 'checklist_id'],
+		filters: {
+			severity: {
+				component: AutocompleteSelect,
+				props: {
+					options: [
+						{ label: 'CAT I', value: 'cat1' },
+						{ label: 'CAT II', value: 'cat2' },
+						{ label: 'CAT III', value: 'cat3' }
+					],
+					label: 'severity',
+					multiple: true
+				}
+			},
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					options: [
+						{ label: 'Open', value: 'open' },
+						{ label: 'Not a Finding', value: 'not_a_finding' },
+						{ label: 'Not Applicable', value: 'not_applicable' },
+						{ label: 'Not Reviewed', value: 'not_reviewed' }
+					],
+					label: 'status',
+					multiple: true
+				}
+			}
+		}
+	},
+	'checklist-scores': {
+		head: ['checklist_name', 'cat1_open', 'cat2_open', 'cat3_open', 'compliance'],
+		body: ['checklist_name', 'cat1_open', 'cat2_open', 'cat3_open', 'compliance_percentage'],
+		meta: ['checklist_id']
+	},
+	'system-groups': {
+		head: ['name', 'system_identifier', 'impact_level', 'authorization_status'],
+		body: ['name', 'system_identifier', 'impact_level', 'authorization_status'],
+		meta: ['id', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			impact_level: {
+				component: AutocompleteSelect,
+				props: {
+					options: [
+						{ label: 'Low', value: 'LOW' },
+						{ label: 'Moderate', value: 'MODERATE' },
+						{ label: 'High', value: 'HIGH' }
+					],
+					label: 'impact_level',
+					multiple: true
+				}
+			},
+			authorization_status: {
+				component: AutocompleteSelect,
+				props: {
+					options: [
+						{ label: 'ATO', value: 'ato' },
+						{ label: 'DATO', value: 'dato' },
+						{ label: 'IATO', value: 'iato' },
+						{ label: 'Denied', value: 'denied' },
+						{ label: 'Pending', value: 'pending' }
+					],
+					label: 'authorization_status',
+					multiple: true
+				}
+			}
+		}
+	},
+	'nessus-scans': {
+		head: ['filename', 'scan_date', 'total_hosts', 'total_vulnerabilities', 'processing_status'],
+		body: ['filename', 'scan_date', 'total_hosts', 'total_vulnerabilities', 'processing_status'],
+		meta: ['id', 'systemGroupId'],
+		filters: {
+			processing_status: {
+				component: AutocompleteSelect,
+				props: {
+					options: [
+						{ label: 'Uploaded', value: 'uploaded' },
+						{ label: 'Processing', value: 'processing' },
+						{ label: 'Completed', value: 'completed' },
+						{ label: 'Failed', value: 'failed' }
+					],
+					label: 'processing_status',
+					multiple: true
+				}
+			}
+		}
+	},
+	'vulnerability-findings': {
+		head: ['vulnId', 'ruleTitle', 'severity_category', 'status', 'checklistId'],
+		body: ['vulnId', 'ruleTitle', 'severity_category', 'status_display', 'checklist_name'],
+		meta: ['id', 'checklistId'],
+		filters: {
+			severity_category: {
+				component: AutocompleteSelect,
+				props: {
+					options: [
+						{ label: 'CAT I (High)', value: 'cat1' },
+						{ label: 'CAT II (Medium)', value: 'cat2' },
+						{ label: 'CAT III (Low)', value: 'cat3' }
+					],
+					label: 'severity_category',
+					multiple: true
+				}
+			},
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					options: [
+						{ label: 'Open', value: 'open' },
+						{ label: 'Not a Finding', value: 'not_a_finding' },
+						{ label: 'Not Applicable', value: 'not_applicable' },
+						{ label: 'Not Reviewed', value: 'not_reviewed' }
+					],
+					label: 'status',
+					multiple: true
+				}
+			}
+		}
+	},
+	// ============================================================================
+	// OSCAL Integration Tables
+	// ============================================================================
+	'oscal-documents': {
+		head: ['name', 'document_type', 'oscal_version', 'updated_at'],
+		body: ['name', 'document_type', 'oscal_version', 'updated_at'],
+		meta: ['id', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			document_type: {
+				component: AutocompleteSelect,
+				props: {
+					options: [
+						{ label: 'Catalog', value: 'catalog' },
+						{ label: 'Profile', value: 'profile' },
+						{ label: 'SSP', value: 'ssp' },
+						{ label: 'Component Definition', value: 'component-definition' },
+						{ label: 'Assessment Plan', value: 'assessment-plan' },
+						{ label: 'Assessment Results', value: 'assessment-results' },
+						{ label: 'POA&M', value: 'poam' }
+					],
+					label: 'document_type',
+					multiple: true
+				}
+			}
+		}
+	},
+	// ============================================================================
+	// POA&M Tables
+	// ============================================================================
+	'poam-items': {
+		head: ['poam_id', 'weakness_name', 'control_id', 'status', 'risk_rating', 'scheduled_completion'],
+		body: ['poam_id', 'weakness_name', 'control_id', 'status', 'original_risk_rating', 'scheduled_completion_date'],
+		meta: ['id', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					options: [
+						{ label: 'Open', value: 'open' },
+						{ label: 'In Progress', value: 'in_progress' },
+						{ label: 'Completed', value: 'completed' },
+						{ label: 'Delayed', value: 'delayed' }
+					],
+					label: 'status',
+					multiple: true
+				}
+			},
+			original_risk_rating: {
+				component: AutocompleteSelect,
+				props: {
+					options: [
+						{ label: 'High', value: 'HIGH' },
+						{ label: 'Moderate', value: 'MODERATE' },
+						{ label: 'Low', value: 'LOW' }
+					],
+					label: 'risk_rating',
+					multiple: true
+				}
+			},
+			deviation_type: {
+				component: AutocompleteSelect,
+				props: {
+					options: [
+						{ label: 'Operational Requirement', value: 'OR' },
+						{ label: 'False Positive', value: 'FP' },
+						{ label: 'False Report', value: 'FR' },
+						{ label: 'Vendor Dependency', value: 'VENDOR_DEPENDENCY' }
+					],
+					label: 'deviation_type',
+					multiple: true
+				}
+			}
+		}
+	},
+	// ============================================================================
+	// Questionnaire Modules Tables
+	// ============================================================================
+	'questionnaire-modules': {
+		head: ['title', 'module_id', 'version', 'framework'],
+		body: ['title', 'module_id', 'version', 'framework'],
+		meta: ['module_id']
+	},
 	extra: {
 		filters: {
 			risk: undefined,

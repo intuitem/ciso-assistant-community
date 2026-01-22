@@ -54,6 +54,28 @@ class DataAssetViewSet(viewsets.ModelViewSet):
             return Response({'status': 'category added'})
         return Response({'error': 'category required'}, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=True, methods=['post'])
+    def add_asset(self, request, pk=None):
+        """Add an asset to a data asset"""
+        data_asset = self.get_object()
+        asset_id = request.data.get('asset_id')
+        if asset_id:
+            data_asset.add_asset(asset_id)
+            data_asset.save()
+            return Response({'status': 'asset added'})
+        return Response({'error': 'asset_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def assign_owner(self, request, pk=None):
+        """Assign an owner to a data asset"""
+        data_asset = self.get_object()
+        org_unit_id = request.data.get('org_unit_id')
+        if org_unit_id:
+            data_asset.assign_owner(org_unit_id)
+            data_asset.save()
+            return Response({'status': 'owner assigned'})
+        return Response({'error': 'org_unit_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class DataFlowViewSet(viewsets.ModelViewSet):
     """ViewSet for DataFlow aggregates"""
@@ -103,4 +125,37 @@ class DataFlowViewSet(viewsets.ModelViewSet):
             flow.save()
             return Response({'status': 'data asset added'})
         return Response({'error': 'data_asset_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def add_third_party(self, request, pk=None):
+        """Add a third party to a data flow"""
+        flow = self.get_object()
+        third_party_id = request.data.get('third_party_id')
+        if third_party_id:
+            flow.add_third_party(third_party_id)
+            flow.save()
+            return Response({'status': 'third party added'})
+        return Response({'error': 'third_party_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def add_control_implementation(self, request, pk=None):
+        """Add a control implementation to a data flow"""
+        flow = self.get_object()
+        control_implementation_id = request.data.get('control_implementation_id')
+        if control_implementation_id:
+            flow.add_control_implementation(control_implementation_id)
+            flow.save()
+            return Response({'status': 'control implementation added'})
+        return Response({'error': 'control_implementation_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def add_privacy_risk(self, request, pk=None):
+        """Add a privacy risk to a data flow"""
+        flow = self.get_object()
+        risk_id = request.data.get('risk_id')
+        if risk_id:
+            flow.add_privacy_risk(risk_id)
+            flow.save()
+            return Response({'status': 'privacy risk added'})
+        return Response({'error': 'risk_id required'}, status=status.HTTP_400_BAD_REQUEST)
 

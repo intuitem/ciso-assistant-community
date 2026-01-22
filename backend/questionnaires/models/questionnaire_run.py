@@ -283,16 +283,39 @@ class QuestionnaireRun(AggregateRoot):
                 'passed': None
             }
 
-        # Calculate score based on answers
+        # Calculate score based on answers using Question scoring
         total_score = 0
         max_score = 0
 
-        # This would need access to question definitions to calculate properly
-        # For now, return placeholder logic
-        for answer_data in self.answers.values():
-            # Placeholder scoring logic
-            total_score += 1  # Simple scoring
-            max_score += 1
+        # Fetch questions for this questionnaire run
+        from .question import Question
+
+        # Get questions that are part of this run (based on visible_question_ids or answered)
+        question_ids_to_score = set(self.visible_question_ids) | set(self.answered_question_ids)
+
+        if question_ids_to_score:
+            questions = Question.objects.filter(
+                id__in=question_ids_to_score,
+                enable_scoring=True
+            )
+
+            for question in questions:
+                question_id_str = str(question.id)
+
+                # Calculate max possible score for this question
+                if question.options:
+                    # For choice questions, max is the highest option score
+                    option_scores = [opt.get('score', 0) for opt in question.options]
+                    max_score += max(option_scores) if option_scores else question.points
+                else:
+                    # For other questions, max is the points value
+                    max_score += question.points
+
+                # Calculate actual score if answered
+                if question_id_str in self.answers:
+                    answer_data = self.answers[question_id_str]
+                    answer_value = answer_data.get('value') if isinstance(answer_data, dict) else answer_data
+                    total_score += question.calculate_score(answer_value)
 
         percentage = (total_score / max_score * 100) if max_score > 0 else 0.0
 

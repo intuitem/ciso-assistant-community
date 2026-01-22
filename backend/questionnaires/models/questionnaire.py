@@ -70,7 +70,7 @@ class Questionnaire(AggregateRoot):
     )
 
     # Versioning
-    version = models.CharField(
+    questionnaire_version = models.CharField(
         max_length=20,
         default='1.0',
         help_text="Questionnaire version"
@@ -288,7 +288,7 @@ class Questionnaire(AggregateRoot):
         clone.questionnaire_type = self.questionnaire_type
         clone.category = self.category
         clone.status = 'draft'
-        clone.version = new_version or self.version
+        clone.questionnaire_version = new_version or self.questionnaire_version
         clone.estimated_duration_minutes = self.estimated_duration_minutes
         clone.is_public = self.is_public
         clone.requires_authentication = self.requires_authentication

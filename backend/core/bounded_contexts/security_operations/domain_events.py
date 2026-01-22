@@ -79,7 +79,17 @@ class AwarenessCampaignCancelled(DomainEvent):
 
 
 # AwarenessCompletion Events
+class AwarenessCompletionStarted(DomainEvent):
+    """Raised when a user starts an awareness activity"""
+    pass
+
+
 class AwarenessCompletionRecorded(DomainEvent):
     """Raised when a user completes an awareness activity"""
+    pass
+
+
+class AwarenessCompletionFailed(DomainEvent):
+    """Raised when a user fails an awareness activity"""
     pass
 

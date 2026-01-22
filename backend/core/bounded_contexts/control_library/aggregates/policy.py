@@ -32,7 +32,7 @@ class Policy(AggregateRoot):
     
     # Basic fields
     title = models.CharField(max_length=255, db_index=True)
-    version = models.CharField(max_length=50, default="1.0", db_index=True)
+    policy_version = models.CharField(max_length=50, default="1.0", db_index=True)
     description = models.TextField(blank=True, null=True)
     
     # Lifecycle
@@ -88,7 +88,7 @@ class Policy(AggregateRoot):
         Domain method that enforces business rules and raises events.
         """
         self.title = title
-        self.version = version
+        self.policy_version = version
         self.description = description
         self.publication_date = publication_date
         self.review_cadence_days = review_cadence_days
@@ -97,7 +97,7 @@ class Policy(AggregateRoot):
         event = PolicyCreated()
         event.payload = {
             "title": title,
-            "version": version,
+            "policy_version": version,
         }
         self._raise_event(event)
     
@@ -116,7 +116,7 @@ class Policy(AggregateRoot):
             event.payload = {
                 "policy_id": str(self.id),
                 "title": self.title,
-                "version": self.version,
+                "policy_version": self.policy_version,
                 "publication_date": str(self.publication_date),
             }
             self._raise_event(event)
@@ -130,7 +130,7 @@ class Policy(AggregateRoot):
             event.payload = {
                 "policy_id": str(self.id),
                 "title": self.title,
-                "version": self.version,
+                "policy_version": self.policy_version,
             }
             self._raise_event(event)
     
@@ -150,5 +150,5 @@ class Policy(AggregateRoot):
             self.applicableOrgUnitIds.append(org_unit_id)
     
     def __str__(self):
-        return f"{self.title} v{self.version}"
+        return f"{self.title} v{self.policy_version}"
 

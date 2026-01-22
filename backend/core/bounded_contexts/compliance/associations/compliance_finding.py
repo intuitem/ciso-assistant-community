@@ -25,7 +25,7 @@ class ComplianceFinding(AggregateRoot):
     class LifecycleState(models.TextChoices):
         OPEN = "open", "Open"
         TRIAGED = "triaged", "Triaged"
-        REMEDIATING = "remediating", "Remediing"
+        REMEDIATING = "remediating", "Remediating"
         VERIFIED = "verified", "Verified"
         CLOSED = "closed", "Closed"
     

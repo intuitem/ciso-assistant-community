@@ -30,7 +30,7 @@ class ComplianceFramework(AggregateRoot):
     
     # Basic fields
     name = models.CharField(max_length=255, db_index=True)
-    version = models.CharField(max_length=100, blank=True, null=True, db_index=True)
+    framework_version = models.CharField(max_length=100, blank=True, null=True, db_index=True)
     description = models.TextField(blank=True, null=True)
     
     # Lifecycle
@@ -68,7 +68,7 @@ class ComplianceFramework(AggregateRoot):
         Domain method that enforces business rules and raises events.
         """
         self.name = name
-        self.version = version
+        self.framework_version = version
         self.description = description
         self.lifecycle_state = self.LifecycleState.DRAFT
         
@@ -76,7 +76,7 @@ class ComplianceFramework(AggregateRoot):
         event.payload = {
             "framework_id": str(self.id),
             "name": name,
-            "version": version,
+            "framework_version": version,
         }
         self._raise_event(event)
     
@@ -110,5 +110,5 @@ class ComplianceFramework(AggregateRoot):
             self.requirementIds.append(requirement_id)
     
     def __str__(self):
-        return f"{self.name} {self.version}" if self.version else self.name
+        return f"{self.name} {self.framework_version}" if self.framework_version else self.name
 

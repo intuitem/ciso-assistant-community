@@ -1416,6 +1416,464 @@ export const teamSchema = z.object({
 	deputies: z.array(z.string().uuid().optional()).optional()
 });
 
+// ============================================================================
+// Base Aggregate Schema (matches backend/core/domain/aggregate.py)
+// ============================================================================
+
+/** Base fields for DDD aggregates (from AggregateRoot) - for read operations */
+export const AggregateBaseSchema = z.object({
+	id: z.string().uuid(),
+	version: z.number().int().min(0),
+	created_at: z.string().datetime(),
+	updated_at: z.string().datetime(),
+	created_by: z.string().uuid().nullable(),
+	updated_by: z.string().uuid().nullable()
+});
+
+/** Audit fields mixin for create/update forms */
+const AuditFieldsMixin = {
+	created_by: z.string().uuid().optional().nullable(),
+	updated_by: z.string().uuid().optional().nullable()
+};
+
+// ============================================================================
+// RMF Operations Schemas (matches backend/core/bounded_contexts/rmf_operations/)
+// ============================================================================
+
+/** STIG checklist lifecycle state */
+const STIGChecklistLifecycleEnum = z.enum(['draft', 'active', 'archived']);
+
+/** STIG checklist asset type */
+const STIGChecklistAssetTypeEnum = z.enum([
+	'computing',
+	'network',
+	'storage',
+	'application',
+	'database',
+	'web_server',
+	'other'
+]);
+
+/** STIG finding status */
+const STIGFindingStatusEnum = z.enum(['open', 'not_a_finding', 'not_applicable', 'not_reviewed']);
+
+/** STIG severity category */
+const STIGSeverityEnum = z.enum(['cat1', 'cat2', 'cat3']);
+
+/** Asset metadata schema (matches rmf_enhanced.AssetMetadata) */
+export const AssetMetadataSchema = z.object({
+	hostname: z.string().min(1),
+	ip_addresses: z.array(z.string()).default([]),
+	mac_addresses: z.array(z.string()).default([]),
+	fqdn: z.string().default(''),
+	technology_area: z.string().default(''),
+	asset_type: z.string().default('computing'),
+	role: z.string().default(''),
+	operating_system: z.string().default(''),
+	os_version: z.string().default(''),
+	location: z.string().default(''),
+	department: z.string().default(''),
+	system_administrator: z.string().default(''),
+	is_internet_facing: z.boolean().default(false),
+	classification: z.string().default('unclassified')
+});
+
+/** STIG vulnerability finding schema */
+export const STIGFindingSchema = z.object({
+	vuln_id: z.string().min(1),
+	rule_id: z.string().min(1),
+	stig_id: z.string().min(1),
+	severity: STIGSeverityEnum,
+	status: STIGFindingStatusEnum,
+	finding_details: z.string().default(''),
+	comments: z.string().default(''),
+	cci_ids: z.array(z.string()).default([]),
+	check_content: z.string().default(''),
+	fix_text: z.string().default(''),
+	rule_title: z.string().default(''),
+	discussion: z.string().default(''),
+	false_positives: z.string().default(''),
+	false_negatives: z.string().default(''),
+	documentable: z.boolean().default(true),
+	mitigations: z.string().default(''),
+	severity_override: z.string().default(''),
+	severity_override_guidance: z.string().default(''),
+	potential_impacts: z.string().default(''),
+	third_party_tools: z.string().default(''),
+	ia_controls: z.string().default('')
+});
+
+/** STIG checklist schema (matches aggregates/stig_checklist.py) */
+export const STIGChecklistSchema = z.object({
+	// Basic info
+	name: nameSchema,
+	description: descriptionSchema,
+	folder: z.string(),
+
+	// Identity and system relationship
+	systemGroupId: z.string().uuid().optional().nullable(),
+	hostName: z.string().min(1),
+
+	// STIG metadata
+	stigType: z.string().min(1),
+	stigRelease: z.string().default(''),
+	version: z.string().default(''),
+
+	// Lifecycle
+	lifecycle_state: STIGChecklistLifecycleEnum.default('draft'),
+
+	// Asset information
+	assetInfo: jsonSchema.optional(),
+
+	// Web/Database specific fields (OpenRMF naming convention)
+	isWebDatabase: z.boolean().default(false),
+	webDatabaseSite: z.string().default(''),
+	webDatabaseInstance: z.string().default(''),
+
+	// Asset type classification
+	asset_type: STIGChecklistAssetTypeEnum.default('computing'),
+
+	// Metadata
+	tags: z.array(z.string()).default([]),
+
+	// Legacy/convenience fields for backwards compatibility
+	stig_id: z.string().optional(),
+	stig_version: z.string().optional(),
+	release_info: z.string().optional(),
+	classification: z.string().default('unclassified'),
+	asset: AssetMetadataSchema.optional(),
+
+	// Audit fields
+	...AuditFieldsMixin
+});
+
+/** Vulnerability finding schema (matches aggregates/vulnerability_finding.py) */
+export const VulnerabilityFindingSchema = z.object({
+	// Identity and relationships
+	checklistId: z.string().uuid(),
+	vulnId: z.string().min(1),
+	stigId: z.string().min(1),
+	ruleId: z.string().min(1),
+
+	// Vulnerability details
+	ruleTitle: z.string().min(1),
+	ruleDiscussion: z.string().default(''),
+	checkContent: z.string().default(''),
+	fixText: z.string().default(''),
+
+	// Status and severity
+	status_data: z.object({
+		status: STIGFindingStatusEnum.default('not_reviewed'),
+		finding_details: z.string().nullable().default(null),
+		comments: z.string().nullable().default(null),
+		severity_override: z.string().nullable().default(null),
+		severity_justification: z.string().nullable().default(null)
+	}).default({}),
+	severity_category: STIGSeverityEnum,
+
+	// Additional metadata
+	ruleVersion: z.string().default(''),
+	cciIds: z.array(z.string()).default([]),
+
+	// Metadata
+	tags: z.array(z.string()).default([]),
+
+	// Audit fields
+	...AuditFieldsMixin
+});
+
+/** Nessus scan processing status */
+const NessusScanProcessingStatusEnum = z.enum(['uploaded', 'processing', 'completed', 'failed']);
+
+/** Nessus scan schema (matches aggregates/nessus_scan.py) */
+export const NessusScanSchema = z.object({
+	systemGroupId: z.string().uuid(),
+	folder: z.string(),
+
+	// File information
+	filename: z.string().min(1),
+
+	// Scan metadata (extracted from XML, optional on creation)
+	scan_date: z.union([z.literal('').transform(() => null), z.string().datetime()]).nullish(),
+	scanner_version: z.string().optional().nullable(),
+	policy_name: z.string().optional().nullable(),
+
+	// Statistics (computed, optional on creation)
+	total_hosts: z.number().int().min(0).default(0),
+	total_vulnerabilities: z.number().int().min(0).default(0),
+	scan_duration_seconds: z.number().int().min(0).optional().nullable(),
+
+	// Severity breakdown
+	critical_count: z.number().int().min(0).default(0),
+	high_count: z.number().int().min(0).default(0),
+	medium_count: z.number().int().min(0).default(0),
+	low_count: z.number().int().min(0).default(0),
+	info_count: z.number().int().min(0).default(0),
+
+	// Correlation data
+	correlated_checklist_ids: z.array(z.string().uuid()).default([]),
+
+	// Additional metadata
+	tags: z.array(z.string()).default([]),
+
+	// Processing status
+	processing_status: NessusScanProcessingStatusEnum.default('uploaded'),
+	processing_error: z.string().optional().nullable(),
+
+	// Audit fields
+	...AuditFieldsMixin
+});
+
+/** Checklist score schema (matches aggregates/checklist_score.py) */
+export const ChecklistScoreSchema = z.object({
+	// Identity
+	checklistId: z.string().uuid(),
+	systemGroupId: z.string().uuid().optional().nullable(),
+
+	// Host information (denormalized for queries)
+	hostName: z.string().min(1),
+	stigType: z.string().min(1),
+
+	// Category 1 (High/CAT I) counts
+	totalCat1Open: z.number().int().min(0).default(0),
+	totalCat1NotAFinding: z.number().int().min(0).default(0),
+	totalCat1NotApplicable: z.number().int().min(0).default(0),
+	totalCat1NotReviewed: z.number().int().min(0).default(0),
+
+	// Category 2 (Medium/CAT II) counts
+	totalCat2Open: z.number().int().min(0).default(0),
+	totalCat2NotAFinding: z.number().int().min(0).default(0),
+	totalCat2NotApplicable: z.number().int().min(0).default(0),
+	totalCat2NotReviewed: z.number().int().min(0).default(0),
+
+	// Category 3 (Low/CAT III) counts
+	totalCat3Open: z.number().int().min(0).default(0),
+	totalCat3NotAFinding: z.number().int().min(0).default(0),
+	totalCat3NotApplicable: z.number().int().min(0).default(0),
+	totalCat3NotReviewed: z.number().int().min(0).default(0),
+
+	// Legacy/convenience fields for backwards compatibility
+	checklist_id: z.string().uuid().optional(),
+	checklist_name: z.string().optional(),
+	cat1_open: z.number().int().min(0).optional(),
+	cat1_closed: z.number().int().min(0).optional(),
+	cat2_open: z.number().int().min(0).optional(),
+	cat2_closed: z.number().int().min(0).optional(),
+	cat3_open: z.number().int().min(0).optional(),
+	cat3_closed: z.number().int().min(0).optional(),
+	compliance_percentage: z.number().min(0).max(100).optional(),
+
+	// Audit fields
+	...AuditFieldsMixin
+});
+
+/** System group lifecycle state */
+const SystemGroupLifecycleEnum = z.enum(['draft', 'active', 'archived']);
+
+/** System group schema (matches aggregates/system_group.py) */
+export const SystemGroupSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+
+	// Lifecycle
+	lifecycle_state: SystemGroupLifecycleEnum.default('draft'),
+
+	// Embedded ID arrays (optional for creation)
+	checklistIds: z.array(z.string().uuid()).default([]),
+	assetIds: z.array(z.string().uuid()).default([]),
+	nessusScanIds: z.array(z.string().uuid()).default([]),
+
+	// Asset hierarchy and relationships
+	asset_hierarchy: jsonSchema.optional(),
+
+	// Compliance tracking
+	last_compliance_check: z
+		.union([z.literal('').transform(() => null), z.string().datetime()])
+		.nullish(),
+
+	// Metadata
+	tags: z.array(z.string()).default([]),
+
+	// Computed fields (read-only, not for form submission)
+	totalChecklists: z.number().int().min(0).optional(),
+	totalOpenVulnerabilities: z.number().int().min(0).optional(),
+	totalCat1Open: z.number().int().min(0).optional(),
+	totalCat2Open: z.number().int().min(0).optional(),
+	totalCat3Open: z.number().int().min(0).optional(),
+
+	// Legacy/convenience fields for backwards compatibility
+	system_identifier: z.string().optional(),
+	impact_level: z.enum(['LOW', 'MODERATE', 'HIGH']).default('MODERATE'),
+	authorization_status: z.enum(['ato', 'dato', 'iato', 'denied', 'pending']).default('pending'),
+	ato_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	ato_expiration: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+
+	// Audit fields
+	...AuditFieldsMixin
+});
+
+// ============================================================================
+// OSCAL Integration Schemas (matches backend/oscal_integration/services/)
+// ============================================================================
+
+/** OSCAL model type */
+const OscalModelTypeEnum = z.enum([
+	'catalog',
+	'profile',
+	'component-definition',
+	'ssp',
+	'assessment-plan',
+	'assessment-results',
+	'poam'
+]);
+
+/** OSCAL document schema */
+export const OscalDocumentSchema = z.object({
+	name: nameSchema,
+	description: descriptionSchema,
+	document_type: OscalModelTypeEnum,
+	oscal_version: z.string().default('1.1.2'),
+	content: jsonSchema,
+	folder: z.string()
+});
+
+// ============================================================================
+// FedRAMP Schemas (matches backend/oscal_integration/services/fedramp_enhanced.py)
+// ============================================================================
+
+/** FedRAMP control origination */
+const ControlOriginationEnum = z.enum([
+	'sp-corporate',
+	'sp-system',
+	'customer-configured',
+	'customer-provided',
+	'inherited',
+	'shared',
+	'hybrid'
+]);
+
+/** FedRAMP implementation status */
+const FedRAMPImplementationStatusEnum = z.enum([
+	'implemented',
+	'partially-implemented',
+	'planned',
+	'alternative-implementation',
+	'not-applicable'
+]);
+
+/** FedRAMP baseline */
+const FedRAMPBaselineEnum = z.enum(['LOW', 'MODERATE', 'HIGH', 'LI_SAAS']);
+
+/** Control origination info schema */
+export const ControlOriginationSchema = z.object({
+	control_id: z.string().min(1),
+	originations: z.array(ControlOriginationEnum).min(1),
+	description: z.string().default(''),
+	responsible_roles: z.array(z.string()).default([]),
+	implementation_status: FedRAMPImplementationStatusEnum.default('planned')
+});
+
+/** FedRAMP responsible role schema */
+export const FedRAMPRoleSchema = z.object({
+	role_id: z.string().min(1),
+	title: z.string().min(1),
+	description: z.string().default(''),
+	party_uuids: z.array(z.string().uuid()).default([])
+});
+
+// ============================================================================
+// POA&M Schemas (matches backend/poam/services/poam_export.py)
+// ============================================================================
+
+/** POA&M deviation type */
+const POAMDeviationTypeEnum = z.enum(['OR', 'FR', 'FP', 'VENDOR_DEPENDENCY']);
+
+/** POA&M risk level */
+const POAMRiskLevelEnum = z.enum(['HIGH', 'MODERATE', 'LOW']);
+
+/** POA&M status */
+const POAMStatusEnum = z.enum(['open', 'completed', 'in_progress', 'delayed']);
+
+/** POA&M milestone schema */
+export const POAMMilestoneSchema = z.object({
+	description: z.string().min(1),
+	due_date: z.string().date(),
+	completion_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	status: z.enum(['open', 'completed', 'in_progress']).default('open')
+});
+
+/** POA&M item schema */
+export const POAMItemSchema = z.object({
+	poam_id: z.string().min(1),
+	weakness_name: z.string().min(1),
+	weakness_description: z.string().default(''),
+	detector_source: z.string().default(''),
+	source_id: z.string().default(''),
+	asset_identifier: z.string().default(''),
+	point_of_contact: z.string().default(''),
+	resources_required: z.string().default(''),
+	scheduled_completion_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	milestones: z.array(POAMMilestoneSchema).default([]),
+	milestone_changes: z.string().default(''),
+	status: POAMStatusEnum.default('open'),
+	comments: z.string().default(''),
+	control_id: z.string().default(''),
+	original_risk_rating: POAMRiskLevelEnum.default('MODERATE'),
+	adjusted_risk_rating: POAMRiskLevelEnum.optional(),
+	risk_adjustment: z.string().default(''),
+	false_positive: z.boolean().default(false),
+	operational_requirement: z.boolean().default(false),
+	deviation_type: POAMDeviationTypeEnum.nullish(),
+	deviation_rationale: z.string().default(''),
+	vendor_dependency: z.boolean().default(false),
+	vendor_product_name: z.string().default(''),
+	vendor_checkin_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	supporting_documents: z.array(z.string()).default([]),
+	auto_approve: z.boolean().default(false),
+	folder: z.string()
+});
+
+// ============================================================================
+// Questionnaire Enhanced Schemas (matches backend/questionnaires/services/govready_enhanced.py)
+// ============================================================================
+
+/** Condition operator */
+const ConditionOperatorEnum = z.enum([
+	'equals',
+	'not_equals',
+	'contains',
+	'not_contains',
+	'greater_than',
+	'less_than',
+	'greater_or_equal',
+	'less_or_equal',
+	'is_empty',
+	'is_not_empty',
+	'matches',
+	'in',
+	'not_in'
+]);
+
+/** Questionnaire module schema */
+export const QuestionnaireModuleSchema = z.object({
+	module_id: z.string().min(1),
+	title: z.string().min(1),
+	description: z.string().default(''),
+	version: z.string().default('1.0'),
+	framework: z.string().optional(),
+	questions: z.array(
+		z.object({
+			id: z.string().min(1),
+			prompt: z.string().min(1),
+			type: z.enum(['text', 'choice', 'multiple-choice', 'boolean', 'date', 'number']),
+			choices: z.array(z.string()).optional(),
+			required: z.boolean().default(false),
+			conditional_logic: jsonSchema.optional()
+		})
+	).default([]),
+	control_mappings: z.record(z.array(z.string())).default({})
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1492,7 +1950,24 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'dashboard-widgets': DashboardWidgetSchema,
 	'dashboard-text-widgets': DashboardWidgetSchema,
 	'dashboard-builtin-widgets': DashboardWidgetSchema,
-	teams: teamSchema
+	teams: teamSchema,
+	// RMF Operations
+	'stig-checklists': STIGChecklistSchema,
+	'stig-findings': STIGFindingSchema,
+	'vulnerability-findings': VulnerabilityFindingSchema,
+	'checklist-scores': ChecklistScoreSchema,
+	'system-groups': SystemGroupSchema,
+	'nessus-scans': NessusScanSchema,
+	// OSCAL Integration
+	'oscal-documents': OscalDocumentSchema,
+	// FedRAMP
+	'control-originations': ControlOriginationSchema,
+	'fedramp-roles': FedRAMPRoleSchema,
+	// POA&M
+	'poam-items': POAMItemSchema,
+	'poam-milestones': POAMMilestoneSchema,
+	// Questionnaires Enhanced
+	'questionnaire-modules': QuestionnaireModuleSchema
 };
 
 export const modelSchema = (model: string) => {

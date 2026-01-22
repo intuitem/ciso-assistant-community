@@ -77,9 +77,12 @@ class BusinessRisk(AggregateRoot):
         help_text="Risk scoring: likelihood, impact, inherent_score, residual_score, rationale"
     )
     
+    # Treatment plan reference
+    treatmentPlanId = models.UUIDField(null=True, blank=True, db_index=True)
+
     # Additional fields
     tags = models.JSONField(default=list, blank=True)
-    
+
     class Meta:
         db_table = "risk_registers_business_risks"
         verbose_name = "Business Risk"
@@ -87,6 +90,7 @@ class BusinessRisk(AggregateRoot):
         indexes = [
             models.Index(fields=["lifecycle_state"]),
             models.Index(fields=["title"]),
+            models.Index(fields=["treatmentPlanId"]),
         ]
     
     def create(self, title: str, description: str = None):
@@ -137,17 +141,23 @@ class BusinessRisk(AggregateRoot):
                 "risk_id": str(self.id),
                 "likelihood": likelihood,
                 "impact": impact,
+                "inherent_score": inherent_score,
+                "residual_score": residual_score,
             }
             self._raise_event(event)
     
-    def treat(self):
+    def treat(self, treatment_plan_id: uuid.UUID = None):
         """Mark the risk as treated"""
         if self.lifecycle_state != self.LifecycleState.TREATED:
+            if treatment_plan_id:
+                self.treatmentPlanId = treatment_plan_id
+
             self.lifecycle_state = self.LifecycleState.TREATED
-            
+
             event = BusinessRiskTreated()
             event.payload = {
                 "risk_id": str(self.id),
+                "treatment_plan_id": str(treatment_plan_id) if treatment_plan_id else None,
             }
             self._raise_event(event)
     
