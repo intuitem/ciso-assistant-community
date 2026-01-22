@@ -32,9 +32,8 @@
 	function findIconInSidebar(sectionName: string, itemName: string, fallback: string): string {
 		return (
 			navData.items
-			.find((section) => section.name === sectionName)
-			?.items?.find((item) => item.name === itemName)
-			?.fa_icon ?? fallback
+				.find((section) => section.name === sectionName)
+				?.items?.find((item) => item.name === itemName)?.fa_icon ?? fallback
 		);
 	}
 
