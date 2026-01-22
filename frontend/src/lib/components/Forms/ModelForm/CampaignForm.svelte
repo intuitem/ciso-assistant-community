@@ -58,11 +58,10 @@
 	cacheLock={cacheLocks['frameworks']}
 	bind:cachedValue={formDataCache['frameworks']}
 	label={m.targetFramework()}
-	hidden={initialData.frameworks}
 	onChange={async (e) => handleFrameworkChange(e)}
 	mount={async (e) => handleFrameworkChange(e)}
 />
-{#if implementationGroupsChoices.length > 0 && !initialData.frameworks}
+{#if implementationGroupsChoices.length > 0}
 	<AutocompleteSelect
 		multiple
 		translateOptions={false}
@@ -83,7 +82,6 @@
 	cacheLock={cacheLocks['perimeters']}
 	bind:cachedValue={formDataCache['perimeters']}
 	label={m.perimeters()}
-	hidden={initialData.perimeters}
 />
 <TextField
 	type="date"
