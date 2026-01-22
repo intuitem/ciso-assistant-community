@@ -31,6 +31,7 @@ SCHEMA_VERSION = meta.SCHEMA_VERSION
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "WARNING")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
+DB_LOG = os.environ.get("DB_LOG", "").lower() == "true"
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
 FORCE_CREATE_ADMIN = os.environ.get("FORCE_CREATE_ADMIN", "False").lower() == "true"
@@ -225,7 +226,6 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     "core.focus_middleware.FocusModeMiddleware",
 ]
-# MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
 ROOT_URLCONF = "ciso_assistant.urls"
 # we leave these for the API UI tools - even if Django templates and Admin are not used anymore
 LOGIN_REDIRECT_URL = "/api"
@@ -316,6 +316,15 @@ if DEBUG:
     DEBUG_TOOLBAR_CONFIG = {
         "SHOW_TOOLBAR_CALLBACK": lambda request: True,
     }
+
+    if DB_LOG:
+        LOGGING["loggers"]["django.db.backends"] = {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        }
+        MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
+
 
 TEMPLATES = [
     {

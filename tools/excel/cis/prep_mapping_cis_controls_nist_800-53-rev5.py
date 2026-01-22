@@ -1,5 +1,5 @@
 """
-Script to extract CIS Controls to ISO/IEC 27001:2022 mapping from Excel file.
+Script to extract CIS Controls to NIST SP 800-53 Rev. 5 mapping from Excel file.
 
 Creates an output Excel with:
 1) library_meta
@@ -10,10 +10,10 @@ Then converts the Excel mapping into YAML (Step 2).
 """
 
 import sys
-import re
 import argparse
 import pandas as pd
 from pathlib import Path
+
 
 # Import helper to create base Excel file from YAML (Step 2)
 parent_dir = Path(__file__).resolve().parent.parent.parent
@@ -23,46 +23,39 @@ sys.path.insert(0, str(parent_dir))
 from convert_library_v2 import create_library as convert_excel_to_yaml
 
 
-DEFAULT_OUTPUT_FILENAME_EXCEL = "mapping-cis-controls-v8-and-iso27001-2022.xlsx"
+DEFAULT_OUTPUT_FILENAME_EXCEL = "mapping-cis-controls-v8-and-nist-sp-800-53-rev5.xlsx"
 
 
 def format_target_node_id(node_id: str) -> str:
-    """
-    Format target node ID to include dot after letter prefix.
-    Example: a5.9 -> a.5.9, a8.8 -> a.8.8
-    """
-    pattern = r"^([a-z]+)(\d)"
-    match = re.match(pattern, node_id)
-    if match:
-        return f"{match.group(1)}.{node_id[len(match.group(1)):]}"
-    return node_id
+    """Format target node ID to lowercase."""
+    return node_id.lower()
 
 
 def build_library_meta(packager_name: str) -> pd.DataFrame:
     rows = [
         ("type", "library"),
-        ("urn", f"urn:{packager_name}:risk:library:mapping-cis-controls-v8-and-iso27001-2022"),
+        ("urn", f"urn:{packager_name}:risk:library:mapping-cis-controls-v8-and-nist-sp-800-53-rev5"),
         ("version", "1"),
         ("locale", "en"),
-        ("ref_id", "mapping-cis-controls-v8-and-iso27001-2022"),
-        ("name", "CIS-Controls-v8 <-> ISO/IEC 27001:2022"),
-        ("description", "Mapping between CIS Controls v8 and International standard ISO/IEC 27001:2022"),
+        ("ref_id", "mapping-cis-controls-v8-and-nist-sp-800-53-rev5"),
+        ("name", "CIS-Controls-v8 <-> NIST-SP-800-53-rev5"),
+        ("description", "Mapping between CIS Controls v8 and NIST SP 800-53 revision 5"),
         (
             "copyright",
-            "This work is licensed under a Creative Commons Attribution-NonCommercial-No Derivatives 4.0 International Public License "
-            "(the link can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode). To further clarify the Creative Commons "
-            "license related to the CIS Controls® content, you are authorized to copy and redistribute the content as a framework for use by you, "
-            "within your organization and outside of your organization for non-commercial purposes only, provided that (i) appropriate credit is given "
-            "to CIS, and (ii) a link to the license is provided. Additionally, if you remix, transform or build upon the CIS Controls, you may not distribute "
-            "the modified materials. Users of the CIS Controls framework are also required to refer to (http://www.cisecurity.org/controls/) when referring "
-            "to the CIS Controls in order to ensure that users are employing the most up-to-date guidance. Commercial use of the CIS Controls is subject to "
-            "the prior approval of CIS® (Center for Internet Security, Inc.).",
+            "This work is licensed under a Creative Commons Attribution-Non Commercial-No Derivatives 4.0 International Public License "
+            "(the link can be found at https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode). To further clarify the Creative Commons license "
+            "related to the CIS ControlsTM content, you are authorized to copy and redistribute the content as a framework for use by you, within your "
+            "organization and outside of your organization for non-commercial purposes only, provided that (i) appropriate credit is given to CIS, and (ii) "
+            "a link to the license is provided. Additionally, if you remix, transform or build upon the CIS Controls, you may not distribute the modified "
+            "materials. Users of the CIS Controls framework are also required to refer to (http://www.cisecurity.org/controls/) when referring to the CIS "
+            "Controls in order to ensure that users are employing the most up-to-date guidance. Commercial use of the CIS Controls is subject to the prior "
+            "approval of CIS® (Center for Internet Security, Inc.).",
         ),
         ("provider", "CIS"),
         ("packager", packager_name),
         (
             "dependencies",
-            f"urn:{packager_name}:risk:library:cis-controls-v8, urn:intuitem:risk:library:iso27001-2022",
+            f"urn:{packager_name}:risk:library:cis-controls-v8, urn:intuitem:risk:library:nist-sp-800-53-rev5",
         ),
     ]
     return pd.DataFrame(rows)
@@ -71,20 +64,20 @@ def build_library_meta(packager_name: str) -> pd.DataFrame:
 def build_mappings_meta(packager_name: str) -> pd.DataFrame:
     rows = [
         ("type", "requirement_mapping_set"),
-        ("urn", f"urn:{packager_name}:risk:req_mapping_set:mapping-cis-controls-v8-and-iso27001-2022"),
-        ("ref_id", "mapping-cis-controls-v8-and-iso27001-2022"),
-        ("name", "CIS-Controls-v8 <-> ISO/IEC 27001:2022"),
-        ("description", "Mapping between CIS Controls v8 and International standard ISO/IEC 27001:2022"),
+        ("urn", f"urn:{packager_name}:risk:req_mapping_set:mapping-cis-controls-v8-and-nist-sp-800-53-rev5"),
+        ("ref_id", "mapping-cis-controls-v8-and-nist-sp-800-53-rev5"),
+        ("name", "CIS-Controls-v8 <-> NIST-SP-800-53-rev5"),
+        ("description", "Mapping between CIS Controls v8 and NIST SP 800-53 revision 5"),
         ("source_framework_urn", f"urn:{packager_name}:risk:framework:cis-controls-v8"),
-        ("target_framework_urn", "urn:intuitem:risk:framework:iso27001-2022"),
+        ("target_framework_urn", "urn:intuitem:risk:framework:nist-sp-800-53-rev5"),
         ("source_node_base_urn", f"urn:{packager_name}:risk:req_node:cis-controls-v8"),
-        ("target_node_base_urn", "urn:intuitem:risk:req_node:iso27001-2022"),
+        ("target_node_base_urn", "urn:intuitem:risk:req_node:nist-sp-800-53-rev5"),
     ]
     return pd.DataFrame(rows)
 
 
 def extract_mappings_content(input_file: str) -> pd.DataFrame:
-    # ISO mapping file: 5th sheet (index 4) = "All CIS Controls & Safeguards"
+    # Read the Excel file - using the 5th sheet (index 4) which is "All CIS Controls & Safeguards"
     df = pd.read_excel(input_file, sheet_name=4)
 
     mapping_data = []
@@ -113,7 +106,12 @@ def extract_mappings_content(input_file: str) -> pd.DataFrame:
             }
         )
 
-    return pd.DataFrame(mapping_data)
+    out_df = pd.DataFrame(mapping_data)
+
+    # Remove duplicate rows (same source/target/relationship)
+    out_df = out_df.drop_duplicates(subset=["source_node_id", "target_node_id", "relationship"])
+
+    return out_df
 
 
 def process_mapping(input_file: str, packager_name: str, output_file: str = None) -> pd.DataFrame:
@@ -141,7 +139,7 @@ def process_mapping(input_file: str, packager_name: str, output_file: str = None
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Extract CIS Controls v8 to ISO/IEC 27001:2022 mapping and generate a formatted Excel output, then YAML."
+        description="Extract CIS Controls v8 to NIST SP 800-53 Rev. 5 mapping and generate a formatted Excel output."
     )
     parser.add_argument("input_excel_file", help="Path to input Excel mapping file")
     parser.add_argument(
