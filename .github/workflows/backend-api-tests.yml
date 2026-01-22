@@ -17,7 +17,7 @@ concurrency:
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   GITHUB_WORKFLOW: github_actions
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.14"
   UBUNTU_VERSION: "ubuntu-24.04"
   BACKEND_DIR: ./backend
 
