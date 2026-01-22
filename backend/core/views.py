@@ -10241,7 +10241,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
     filterset_fields = [
         "name",
         "ref_id",
-        "owner",
         "category",
         "perimeter",
         "folder",
@@ -10260,7 +10259,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "evidences",
                 "authors",
-                "owner",
             )
         )
 
@@ -10381,7 +10379,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "status": finding.get_status_display(),
                 "severity": finding.get_severity_display(),
                 "folder": finding.folder.name if finding.folder else "",
-                "owner": ", ".join([str(actor) for actor in finding.owner.all()]),
                 "applied_controls": "\n".join(
                     [
                         f"{ac.name} [{ac.get_status_display().lower()}]"
@@ -10449,13 +10446,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         findings_assessment = (
             FindingsAssessment.objects.select_related("folder")
-            .prefetch_related("owner", "authors", "reviewers")
+            .prefetch_related("authors", "reviewers")
             .get(id=pk)
         )
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
             .select_related("folder")
-            .prefetch_related("owner", "applied_controls", "evidences")
+            .prefetch_related("applied_controls", "evidences")
             .order_by("ref_id")
         )
 
@@ -10489,8 +10486,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         md_content += f"- **Category**: {findings_assessment.get_category_display()}\n"
         md_content += f"- **Status**: {findings_assessment.get_status_display()}\n"
         md_content += f"- **Folder**: {findings_assessment.folder.name if findings_assessment.folder else 'N/A'}\n"
-        if findings_assessment.owner.exists():
-            md_content += f"- **Owners**: {', '.join([str(actor) for actor in findings_assessment.owner.all()])}\n"
         if findings_assessment.authors.exists():
             md_content += f"- **Authors**: {', '.join([str(actor) for actor in findings_assessment.authors.all()])}\n"
         if findings_assessment.reviewers.exists():
@@ -10538,8 +10533,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             md_content += f"- **Severity**: {finding.get_severity_display()}\n"
             md_content += f"- **Description**: {finding.description or 'N/A'}\n"
             md_content += f"- **Observation**: {finding.observation or 'N/A'}\n"
-            if finding.owner.exists():
-                md_content += f"- **Owner**: {', '.join([str(actor) for actor in finding.owner.all()])}\n"
             if finding.applied_controls.exists():
                 md_content += "- **Applied Controls**:\n"
                 for ac in finding.applied_controls.all():
@@ -10573,13 +10566,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         findings_assessment = (
             FindingsAssessment.objects.select_related("folder")
-            .prefetch_related("owner", "authors", "reviewers")
+            .prefetch_related("authors", "reviewers")
             .get(id=pk)
         )
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
             .select_related("folder")
-            .prefetch_related("owner", "applied_controls", "evidences")
+            .prefetch_related("applied_controls", "evidences")
             .order_by("ref_id")
         )
         metrics = findings_assessment.get_findings_metrics()
