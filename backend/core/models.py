@@ -2142,7 +2142,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         "self",
         on_delete=models.DO_NOTHING,
         from_fields=["parent_urn"],
-        to_fields=["urn"],  # Assuming 'urn' exists on this model (via Mixin)
+        to_fields=["urn"],
         related_name="child_nodes",
         null=True,
     )
