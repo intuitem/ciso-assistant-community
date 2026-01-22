@@ -7,10 +7,10 @@ def add_view_globalsettings_permission(apps, schema_editor):
     Role = apps.get_model("iam", "Role")
     Permission = apps.get_model("auth", "Permission")
 
-    permission = Permission.objects.get(
+    permission = Permission.objects.filter(
         codename="view_globalsettings",
         content_type__app_label="global_settings",
-    )
+    ).first()
 
     for role in Role.objects.all():
         if not role.permissions.filter(id=permission.id).exists():
