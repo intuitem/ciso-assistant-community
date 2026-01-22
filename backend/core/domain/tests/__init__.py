@@ -1,0 +1,4 @@
+"""
+Tests for DDD infrastructure
+"""
+

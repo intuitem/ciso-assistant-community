@@ -1,0 +1,187 @@
+# Prometheus Alert Rules for CISO Assistant
+
+groups:
+  - name: ciso_assistant_alerts
+    rules:
+      # Backend Application Alerts
+      - alert: CISOAssistantBackendDown
+        expr: up{job="ciso-assistant-backend"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CISO Assistant Backend is down"
+          description: "CISO Assistant Backend has been down for more than 5 minutes."
+
+      - alert: CISOAssistantHighErrorRate
+        expr: rate(django_http_responses_total_by_status_total{status="5xx"}[5m]) / rate(django_http_responses_total_by_status_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate on CISO Assistant Backend"
+          description: "Error rate is {{ $value | humanizePercentage }} which is above 5%."
+
+      - alert: CISOAssistantHighResponseTime
+        expr: histogram_quantile(0.95, rate(django_http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time on CISO Assistant Backend"
+          description: "95th percentile response time is {{ $value }}s."
+
+      # Database Alerts
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL has been down for more than 5 minutes."
+
+      - alert: PostgreSQLHighConnections
+        expr: pg_stat_activity_count > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High PostgreSQL connection count"
+          description: "PostgreSQL has {{ $value }} active connections."
+
+      - alert: PostgreSQLHighDiskUsage
+        expr: (1 - pg_database_size_bytes{datname="ciso_assistant"} / pg_database_size_bytes{datname="ciso_assistant"} offset 1d) > 0.1
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL database growing rapidly"
+          description: "Database size increased by more than 10% in the last day."
+
+      # Redis Cache Alerts
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache has been down for more than 5 minutes."
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis high memory usage"
+          description: "Redis memory usage is {{ $value | humanizePercentage }}."
+
+      # System Alerts
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%."
+
+      - alert: HighMemoryUsage
+        expr: 1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }}."
+
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space is below 10%."
+
+      # Business Logic Alerts
+      - alert: CriticalRiskIncrease
+        expr: increase(ciso_assistant_critical_risks_total[1h]) > 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Critical risk increase detected"
+          description: "Number of critical risks increased by {{ $value }} in the last hour."
+
+      - alert: ComplianceScoreDrop
+        expr: ciso_assistant_compliance_score < 70
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Compliance score dropped"
+          description: "Overall compliance score is {{ $value }}%."
+
+      # Security Alerts
+      - alert: FailedLoginAttemptsSpike
+        expr: increase(ciso_assistant_failed_logins_total[1h]) > 10
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Spike in failed login attempts"
+          description: "Failed login attempts increased by {{ $value }} in the last hour."
+
+      - alert: UnusualTrafficPattern
+        expr: rate(ciso_assistant_http_requests_total[5m]) > 2 * rate(ciso_assistant_http_requests_total[1h])
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unusual traffic pattern detected"
+          description: "HTTP request rate spike detected."
+
+  - name: business_logic_alerts
+    rules:
+      # Compliance Deadlines
+      - alert: ComplianceAssessmentOverdue
+        expr: ciso_assistant_overdue_assessments > 0
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Overdue compliance assessments"
+          description: "{{ $value }} compliance assessments are overdue."
+
+      # BCP Testing
+      - alert: BCPTestOverdue
+        expr: ciso_assistant_overdue_bcp_tests > 0
+        for: 24h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Overdue BCP testing"
+          description: "{{ $value }} business continuity tests are overdue."
+
+      # Privacy Compliance
+      - alert: HighPrivacyRisk
+        expr: ciso_assistant_privacy_risk_score > 80
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "High privacy risk detected"
+          description: "Privacy risk score is {{ $value }}%."
+
+      # Third Party Risk
+      - alert: NewHighRiskVendor
+        expr: increase(ciso_assistant_high_risk_vendors_total[1h]) > 0
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "New high-risk vendor onboarded"
+          description: "A new high-risk vendor has been added to the system."

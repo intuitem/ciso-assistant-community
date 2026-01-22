@@ -12,6 +12,7 @@ type SidebarBackendKeys = {
 	tprm: boolean;
 	privacy: boolean;
 	experimental: boolean;
+	rmf: boolean;
 	organisation_objectives: boolean;
 	organisation_issues: boolean;
 	quantitative_risk_studies: boolean;
@@ -38,6 +39,7 @@ type SidebarFrontendKeys = {
 	thirdPartyCategory: boolean;
 	privacy: boolean;
 	experimental: boolean;
+	rmf: boolean;
 	organisationObjectives: boolean;
 	organisationIssues: boolean;
 	quantitativeRiskStudies: boolean;
@@ -67,6 +69,7 @@ export function getSidebarVisibleItems(
 		thirdPartyCategory: featureFlags?.tprm ?? false,
 		privacy: featureFlags?.privacy ?? false,
 		experimental: featureFlags?.experimental ?? false,
+		rmf: featureFlags?.rmf ?? false,
 		organisationObjectives: featureFlags?.organisation_objectives ?? false,
 		organisationIssues: featureFlags?.organisation_issues ?? false,
 		quantitativeRiskStudies: featureFlags?.quantitative_risk_studies ?? false,

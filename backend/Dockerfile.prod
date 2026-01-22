@@ -1,0 +1,55 @@
+# Production Dockerfile for CISO Assistant Backend
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=ciso_assistant.settings
+
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        libpq-dev \
+        libxml2-dev \
+        libxslt-dev \
+        libffi-dev \
+        libssl-dev \
+        curl \
+        git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app user
+RUN groupadd -r ciso && useradd -r -g ciso ciso
+
+# Set work directory
+WORKDIR /app
+
+# Copy requirements first for better caching
+COPY requirements.txt requirements-prod.txt pyproject.toml poetry.lock ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements-prod.txt
+
+# Copy application code
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p /app/static /app/media /app/logs
+
+# Set proper permissions
+RUN chown -R ciso:ciso /app
+USER ciso
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD python manage.py check || exit 1
+
+# Collect static files
+RUN python manage.py collectstatic --noinput --clear
+
+# Expose port
+EXPOSE 8000
+
+# Run application
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "gevent", "--worker-connections", "1000", "ciso_assistant.wsgi:application"]

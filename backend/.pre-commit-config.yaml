@@ -1,0 +1,48 @@
+# Pre-commit hooks configuration
+# Install with: pre-commit install
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.7.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [django-stubs, types-all]
+        args: [--config-file=mypy.ini]
+        files: ^core/domain/
+
+  - repo: local
+    hooks:
+      - id: django-check
+        name: Django Check
+        entry: poetry run python manage.py check
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: ddd-tests
+        name: DDD Tests
+        entry: poetry run pytest core/domain/tests/ -c pytest_ddd.ini -v
+        language: system
+        pass_filenames: false
+        always_run: false
+        files: ^core/domain/
+

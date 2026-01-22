@@ -22,6 +22,7 @@ export function loadFeatureFlags() {
 		tprm: {},
 		privacy: {},
 		experimental: {},
+		rmf: {},
 		quantitativeRiskStudies: {}
 	};
 	return ff;

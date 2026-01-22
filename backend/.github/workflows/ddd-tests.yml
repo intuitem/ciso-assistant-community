@@ -1,0 +1,83 @@
+name: DDD Infrastructure Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/core/domain/**'
+      - 'backend/pytest_ddd.ini'
+      - '.github/workflows/ddd-tests.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/core/domain/**'
+      - 'backend/pytest_ddd.ini'
+      - '.github/workflows/ddd-tests.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ciso_assistant_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: backend/.venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+    
+    - name: Install dependencies
+      working-directory: ./backend
+      run: |
+        poetry install --no-interaction --no-root
+    
+    - name: Run migrations
+      working-directory: ./backend
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ciso_assistant_test
+      run: |
+        poetry run python manage.py migrate
+    
+    - name: Run DDD tests
+      working-directory: ./backend
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ciso_assistant_test
+        DJANGO_SETTINGS_MODULE: ciso_assistant.settings
+      run: |
+        poetry run pytest core/domain/tests/ -c pytest_ddd.ini
+    
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./backend/coverage.xml
+        flags: ddd
+        name: ddd-coverage
+

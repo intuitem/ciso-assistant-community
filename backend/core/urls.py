@@ -133,6 +133,21 @@ for route in ROUTES:
 urlpatterns = [
     path("", include(router.urls)),
     path("iam/", include("iam.urls")),
+    path("organization/", include("core.bounded_contexts.organization.urls")),  # Organization bounded context API
+    path("asset-service/", include("core.bounded_contexts.asset_and_service.urls")),  # Asset and Service bounded context API
+    path("control-library/", include("core.bounded_contexts.control_library.urls")),  # Control Library bounded context API
+    path("risks/", include("risk_registers.api.urls")),  # Risk Registers bounded context API
+    path("compliance/", include("core.bounded_contexts.compliance.urls")),  # Compliance bounded context API
+    path("privacy/", include("core.bounded_contexts.privacy.urls")),  # Privacy bounded context API
+    path("security-operations/", include("core.bounded_contexts.security_operations.urls")),  # SecurityOperations bounded context API
+    path("third-party-management/", include("core.bounded_contexts.third_party_management.urls")),  # ThirdPartyManagement bounded context API
+    path("business-continuity/", include("core.bounded_contexts.business_continuity.urls")),  # BusinessContinuity bounded context API
+    path("rmf/", include("core.bounded_contexts.rmf_operations.urls")),  # RMF Operations bounded context API
+    path("privacy/", include("privacy.api.urls")),  # Privacy bounded context API
+    path("security/", include("security_operations.api.urls")),  # Security Operations bounded context API
+    path("third-party/", include("third_party_management.api.urls")),  # Third Party Management bounded context API
+    path("business-continuity/", include("business_continuity.api.urls")),  # Business Continuity bounded context API
+    path("oscal/", include("oscal_integration.api.urls")),  # OSCAL Integration API
     path("serdes/", include("serdes.urls")),
     path("data-wizard/", include("data_wizard.urls")),
     path("settings/", include("global_settings.urls")),

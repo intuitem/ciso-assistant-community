@@ -397,6 +397,35 @@ export const navData = {
 			]
 		},
 		{
+			name: 'rmf',
+			items: [
+				{
+					name: 'systemGroups',
+					fa_icon: 'fa-solid fa-network-wired',
+					href: '/rmf/system-groups',
+					permissions: ['view_systemgroup']
+				},
+				{
+					name: 'stigChecklists',
+					fa_icon: 'fa-solid fa-clipboard-check',
+					href: '/rmf/checklists',
+					permissions: ['view_stigchecklist']
+				},
+				{
+					name: 'vulnerabilityFindings',
+					fa_icon: 'fa-solid fa-triangle-exclamation',
+					href: '/rmf/vulnerability-findings',
+					permissions: ['view_vulnerabilityfinding']
+				},
+				{
+					name: 'checklistScores',
+					fa_icon: 'fa-solid fa-chart-bar',
+					href: '/rmf/checklist-scores',
+					permissions: ['view_checklistscore']
+				}
+			]
+		},
+		{
 			name: 'extra',
 			items: [
 				{

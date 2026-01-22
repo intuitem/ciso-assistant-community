@@ -1,0 +1,73 @@
+# Production Requirements for CISO Assistant Backend
+# Optimized for production deployment
+
+# Core Django
+Django==4.2.7
+djangorestframework==3.14.0
+django-filter==23.3
+django-cors-headers==4.3.1
+django-structlog==8.1.0
+
+# Database
+psycopg2-binary==2.9.7
+dj-database-url==2.1.0
+
+# Caching
+redis==5.0.1
+django-redis==5.4.0
+
+# Authentication & Security
+djangorestframework-simplejwt==5.3.0
+django-allauth==0.60.1
+django-otp==2.0.0
+qrcode==7.4.2
+
+# File handling
+django-storages==1.14.2
+boto3==1.28.57
+Pillow==10.1.0
+
+# API Documentation
+drf-spectacular==0.26.5
+
+# Task Processing
+celery==5.3.4
+django-celery-beat==2.5.0
+django-celery-results==2.6.0
+
+# Monitoring & Observability
+sentry-sdk==1.38.0
+django-prometheus==2.3.1
+psutil==5.9.6
+
+# Security
+django-csp==3.8
+django-secure==1.0.2
+
+# Performance
+gunicorn==21.2.0
+gevent==23.9.1
+whitenoise==6.6.0
+
+# Logging
+structlog==23.2.0
+
+# XML/JSON Processing
+lxml==4.9.3
+xmlsec==1.3.13
+
+# OSCAL Processing
+trestle==2.7.0
+compliance-trestle-fedramp==0.0.5
+
+# Machine Learning (optional)
+scikit-learn==1.3.2
+pandas==2.1.3
+numpy==1.25.2
+
+# Development tools (only in dev)
+# pytest==7.4.3
+# pytest-django==4.7.0
+# black==23.11.0
+# isort==5.12.0
+# flake8==6.1.0

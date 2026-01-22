@@ -192,6 +192,21 @@ INSTALLED_APPS = [
     "crq",
     "metrology",
     "core",
+    "core.domain",  # DDD infrastructure
+    "core.bounded_contexts.organization",  # Organization bounded context
+    "core.bounded_contexts.asset_and_service",  # Asset and Service bounded context
+    "core.bounded_contexts.control_library",  # Control Library bounded context
+    "risk_registers",  # Risk Registers bounded context
+    "core.bounded_contexts.compliance",  # Compliance bounded context
+    "core.bounded_contexts.privacy",  # Privacy bounded context
+    "core.bounded_contexts.security_operations",  # SecurityOperations bounded context
+    "core.bounded_contexts.third_party_management",  # ThirdPartyManagement bounded context
+    "core.bounded_contexts.business_continuity",  # BusinessContinuity bounded context
+    "core.bounded_contexts.rmf_operations",  # RMF Operations bounded context
+    "privacy",  # Privacy bounded context
+    "security_operations",  # Security Operations bounded context
+    "third_party_management",  # Third Party Management bounded context
+    "business_continuity",  # Business Continuity bounded context
     "cal",
     "django_filters",
     "library",

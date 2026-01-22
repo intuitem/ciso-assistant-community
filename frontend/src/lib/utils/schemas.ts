@@ -1512,3 +1512,46 @@ export const webhookEndpointSchema = z.object({
 	target_folders: z.string().uuid().optional().array().optional(),
 	payload_format: z.enum(['thin', 'full']).default('full')
 });
+
+export const dataAssetSchema = z.object({
+	asset_id: z.string().nonempty(),
+	asset_name: z.string().nonempty(),
+	asset_description: z.string().optional(),
+	primary_data_category: z.enum([
+		'personal_data',
+		'sensitive_personal_data',
+		'special_category_data',
+		'criminal_conviction_data',
+		'genetic_data',
+		'biometric_data',
+		'health_data',
+		'financial_data',
+		'communication_data',
+		'location_data',
+		'online_identifier_data',
+		'racial_ethnic_data',
+		'political_opinion_data',
+		'religious_belief_data',
+		'trade_union_data',
+		'sexual_orientation_data'
+	]),
+	data_categories: z.array(z.string()).optional(),
+	sensitivity_level: z.enum(['public', 'internal', 'confidential', 'restricted', 'highly_restricted']),
+	data_subject_types: z.array(z.string()).optional(),
+	estimated_data_subjects: z.number().int().min(0).optional(),
+	processing_purposes: z.array(z.string()).optional(),
+	legal_bases: z.array(z.string()).optional(),
+	legitimate_interests: z.string().optional(),
+	storage_locations: z.array(z.string()).optional(),
+	retention_schedule: z.string().optional(),
+	retention_period_days: z.number().int().min(0).optional(),
+	disposal_methods: z.array(z.string()).optional(),
+	recipients: z.array(z.string()).optional(),
+	third_party_processors: z.array(z.string()).optional(),
+	security_measures: z.array(z.string()).optional(),
+	encryption_methods: z.array(z.string()).optional(),
+	access_controls: z.array(z.string()).optional(),
+	pia_required: z.boolean().default(false),
+	dpo_review_required: z.boolean().default(false),
+	tags: z.array(z.string()).optional()
+});
