@@ -28,7 +28,7 @@ class AssetRiskSerializer(serializers.ModelSerializer):
 
 class ThirdPartyRiskSerializer(serializers.ModelSerializer):
     """Serializer for ThirdPartyRisk aggregate"""
-    
+
     class Meta:
         model = ThirdPartyRisk
         fields = [
@@ -37,7 +37,7 @@ class ThirdPartyRiskSerializer(serializers.ModelSerializer):
             'lifecycle_state',
             'thirdPartyIds', 'serviceIds', 'controlImplementationIds',
             'assessmentRunIds', 'exceptionIds',
-            'scoring',
+            'scoring', 'treatmentPlanId',
             'tags',
         ]
         read_only_fields = ['id', 'version', 'created_at', 'updated_at']
@@ -45,7 +45,7 @@ class ThirdPartyRiskSerializer(serializers.ModelSerializer):
 
 class BusinessRiskSerializer(serializers.ModelSerializer):
     """Serializer for BusinessRisk aggregate"""
-    
+
     class Meta:
         model = BusinessRisk
         fields = [
@@ -53,7 +53,7 @@ class BusinessRiskSerializer(serializers.ModelSerializer):
             'title', 'description',
             'lifecycle_state',
             'processIds', 'orgUnitIds', 'controlImplementationIds', 'exceptionIds',
-            'scoring',
+            'scoring', 'treatmentPlanId',
             'tags',
         ]
         read_only_fields = ['id', 'version', 'created_at', 'updated_at']
