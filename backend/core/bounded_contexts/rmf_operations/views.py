@@ -134,6 +134,33 @@ class SystemGroupViewSet(viewsets.ModelViewSet):
         compliance_data = repo.get_compliance_summary(system.id)
         return Response(compliance_data)
 
+    @action(detail=True, methods=['get'])
+    def checklists(self, request, pk=None):
+        """Get all checklists for this system group"""
+        system = self.get_object()
+
+        # Get checklists that belong to this system group
+        checklists = StigChecklist.objects.filter(systemGroupId=system.id)
+
+        # Apply any additional filters from query params
+        lifecycle_state = request.query_params.get('lifecycle_state')
+        if lifecycle_state:
+            checklists = checklists.filter(lifecycle_state=lifecycle_state)
+
+        stig_type = request.query_params.get('stigType')
+        if stig_type:
+            checklists = checklists.filter(stigType__icontains=stig_type)
+
+        host_name = request.query_params.get('hostName')
+        if host_name:
+            checklists = checklists.filter(hostName__icontains=host_name)
+
+        serializer = StigChecklistSerializer(checklists, many=True)
+        return Response({
+            'count': checklists.count(),
+            'results': serializer.data
+        })
+
 
 class StigChecklistViewSet(viewsets.ModelViewSet):
     """ViewSet for StigChecklist aggregates"""

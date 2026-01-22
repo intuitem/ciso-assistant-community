@@ -17,6 +17,8 @@ export interface SystemGroup {
   assetIds: string[];
   nessusScanIds: string[];
   tags: string[];
+  asset_hierarchy?: Record<string, any>;
+  last_compliance_check?: string;
   totalChecklists: number;
   totalOpenVulnerabilities: number;
   totalCat1Open: number;
@@ -33,17 +35,19 @@ export interface StigChecklist {
   hostName: string;
   stigType: string;
   stigRelease: string;
-  version: string;
+  stigVersion: string;
   lifecycle_state: 'draft' | 'active' | 'archived';
   assetInfo: Record<string, any>;
+  rawCklData?: Record<string, any>;
   isWebDatabase: boolean;
   webDatabaseSite?: string;
   webDatabaseInstance?: string;
+  asset_type?: 'computing' | 'network' | 'storage' | 'application' | 'database' | 'web_server' | 'other';
   vulnerabilityFindingIds: string[];
   tags: string[];
   created_at: string;
   updated_at: string;
-  version: number;
+  aggregateVersion: number;
   // Computed fields
   assetHostname?: string;
   assetIpAddresses?: string[];
@@ -176,6 +180,10 @@ export const systemGroupApi = {
 
   async getCompliance(id: string): Promise<ApiResponse<any>> {
     return api.get(`/rmf/system-groups/${id}/compliance/`);
+  },
+
+  async getChecklists(id: string, params?: Record<string, any>): Promise<StigChecklistListResponse> {
+    return api.get(`/rmf/system-groups/${id}/checklists/`, { params });
   }
 };
 
@@ -342,12 +350,22 @@ export const rmfApi = {
 
 export interface StigTemplate {
   id: string;
-  title: string;
+  name: string;
   description?: string;
-  stigType: string;
-  version: string;
-  release: string;
-  rawChecklist?: string;
+  stig_type: string;
+  stig_version: string;
+  stig_release: string;
+  template_type: 'user' | 'system' | 'benchmark';
+  raw_ckl_content?: string;
+  benchmark_title?: string;
+  benchmark_date?: string;
+  usage_count: number;
+  last_used_at?: string;
+  is_active: boolean;
+  is_official: boolean;
+  created_from_checklist_id?: string;
+  tags: string[];
+  compatible_systems: string[];
   created_at: string;
   updated_at: string;
 }

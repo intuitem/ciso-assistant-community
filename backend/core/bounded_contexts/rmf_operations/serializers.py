@@ -78,12 +78,12 @@ class StigChecklistSerializer(serializers.ModelSerializer):
         model = StigChecklist
         fields = [
             'id', 'systemGroupId', 'hostName', 'stigType', 'stigRelease', 'version',
-            'lifecycle_state', 'assetInfo', 'isWebDatabase', 'webDatabaseSite',
+            'lifecycle_state', 'assetInfo', 'rawCklData', 'isWebDatabase', 'webDatabaseSite',
             'webDatabaseInstance', 'asset_type', 'vulnerabilityFindingIds', 'tags',
             'assetHostname', 'assetIpAddresses', 'assetMacAddresses',
-            'created_at', 'updated_at', 'version'
+            'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'version']
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
     def get_assetHostname(self, obj):
         return obj.get_asset_hostname()
@@ -389,12 +389,12 @@ class StigTemplateSerializer(serializers.ModelSerializer):
         model = StigTemplate
         fields = [
             'id', 'name', 'description', 'stig_type', 'stig_release', 'stig_version',
-            'template_type', 'benchmark_title', 'benchmark_date', 'usage_count',
+            'template_type', 'raw_ckl_content', 'benchmark_title', 'benchmark_date', 'usage_count',
             'last_used_at', 'is_active', 'is_official', 'created_from_checklist_id',
             'tags', 'compatible_systems', 'full_stig_identifier', 'is_outdated',
-            'usage_percentage', 'created_at', 'updated_at', 'version'
+            'usage_percentage', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at', 'version']
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
     def get_full_stig_identifier(self, obj):
         return obj.full_stig_identifier
