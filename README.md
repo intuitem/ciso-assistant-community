@@ -51,7 +51,63 @@ Our vision is to create a **one-stop-shop** for cybersecurity management—moder
 
 As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.
 
-We’re constantly evolving with input from users and customers. Like an octopus 🐙, CISO Assistant keeps growing extra arms—bringing clarity, automation, and productivity to cybersecurity teams while reducing the effort of data input and output.
+We're constantly evolving with input from users and customers. Like an octopus 🐙, CISO Assistant keeps growing extra arms—bringing clarity, automation, and productivity to cybersecurity teams while reducing the effort of data input and output.
+
+---
+
+## Enterprise GRC Platform Capabilities
+
+CISO Assistant includes advanced enterprise capabilities built on a **Domain-Driven Design (DDD)** architecture:
+
+### Domain-Driven Architecture
+
+The platform is organized into **9 bounded contexts**, each handling a specific domain:
+
+| Context | Purpose |
+|---------|---------|
+| **Organization** | Org units, users, groups, responsibility assignments |
+| **Asset & Service** | Asset management, service contracts, classifications |
+| **Control Library** | Controls, policies, evidence items, implementations |
+| **Risk Registers** | Business, asset, and third-party risk management |
+| **Compliance** | Frameworks, requirements, assessments, audits |
+| **Privacy** | Data assets, data flows, privacy impact assessments |
+| **Security Operations** | Incidents, awareness programs, security campaigns |
+| **Third-Party Management** | Vendor assessments, supply chain risk |
+| **Business Continuity** | BCP plans, disaster recovery, resilience planning |
+| **RMF Operations** | STIG checklists, vulnerability management, RMF workflows |
+
+For detailed architecture documentation, see [DDD Infrastructure](backend/core/domain/README.md) and the [bounded context READMEs](backend/core/bounded_contexts/).
+
+### RMF Module (OpenRMF Feature Parity)
+
+Complete **Risk Management Framework (RMF)** operations for DoD/Federal compliance:
+
+- **STIG Checklists**: Import/export CKL files, bulk operations, template management
+- **Vulnerability Management**: Nessus/ACAS integration, severity tracking, AI-powered correlation
+- **Compliance Reports**: 10+ report types including Host Vulnerability, Controls Listing, System Charts
+- **System Groups**: Organize systems with hierarchical grouping and bulk operations
+- **Audit Logging**: Complete audit trail with filters and expandable details
+
+See the [RMF Operations documentation](backend/core/bounded_contexts/rmf_operations/README.md) for details.
+
+### OSCAL & FedRAMP Integration
+
+**100% bi-directional** OSCAL support:
+
+- **SSP Conversion**: Word ↔ OSCAL System Security Plan conversion
+- **FedRAMP Validation**: Support for Low/Moderate/High/LI-SaaS baselines using compliance-trestle-fedramp
+- **compliance-trestle Integration**: Full integration with NIST's compliance-trestle toolkit
+- **OpenControl Support**: Import/export OpenControl format for component definitions
+
+### GovReady-Q Assessment Workflows
+
+Dynamic assessment capabilities inspired by GovReady-Q:
+
+- **Questionnaire System**: Conditional logic, weighted questions, scoring engine
+- **Multi-user Collaboration**: Review workflows with role-based assignments
+- **Assessment Templates**: Reusable templates with scheduling support
+
+---
 
 [![CodeFactor](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community/badge)](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community)
 [![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
@@ -131,6 +187,12 @@ Here is an illustration of the **decoupling** principle and its advantages:
 ## System architecture
 
 ![](./documentation/system-architecture.png)
+
+The backend is built on a **Domain-Driven Design (DDD)** architecture with 9 bounded contexts, event-driven communication, and aggregate-based persistence. For detailed architecture documentation:
+
+- [DDD Infrastructure Guide](backend/core/domain/README.md)
+- [Data Model Documentation](documentation/architecture/data-model.md)
+- [Enterprise Deployment Guide](deployment/docs/DEPLOYMENT_GUIDE.md)
 
 ## End-user Documentation
 
@@ -618,12 +680,19 @@ Set DJANGO_DEBUG=False for security reason.
 - [unovis](https://unovis.dev) - Complementary charting library
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Caddy](https://caddyserver.com) - The coolest reverse Proxy
+- [Nginx](https://nginx.org/) - High-performance web server for production deployments
 - [Gitbook](https://www.gitbook.com) - Documentation platform
 - [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
+- [Redis](https://redis.io/) - In-memory data store for caching and sessions
 - [Docker](https://www.docker.com/) - Container Engine
+- [Kubernetes](https://kubernetes.io/) - Container orchestration for enterprise deployments
 - [inlang](https://inlang.com/) - The ecosystem to globalize your software
 - [Huey](https://huey.readthedocs.io/en/latest/) - A lightweight task queue
+- [compliance-trestle](https://ibm.github.io/compliance-trestle/) - NIST OSCAL compliance automation
+- [lxml](https://lxml.de/) - XML processing for CKL/STIG file parsing
+- [Prometheus](https://prometheus.io/) - Monitoring and alerting
+- [Grafana](https://grafana.com/) - Observability and visualization
 
 ## Security
 

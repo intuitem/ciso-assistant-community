@@ -1,5 +1,47 @@
 # CISO Assistant Data Model
 
+## Architecture Overview
+
+CISO Assistant uses a **Domain-Driven Design (DDD)** architecture with the following key patterns:
+
+- **Bounded Contexts**: Separate domain areas with clear boundaries
+- **Aggregates**: Consistency boundaries for related entities
+- **Domain Events**: Event-driven communication between contexts
+- **Repositories**: Collection-like interfaces for aggregate persistence
+- **Value Objects**: Immutable objects representing domain concepts
+
+### Bounded Contexts
+
+The platform is organized into the following bounded contexts:
+
+| Context | Location | Description |
+|---------|----------|-------------|
+| Organization | `backend/core/bounded_contexts/organization/` | Users, groups, org units, role assignments |
+| Asset & Service | `backend/core/bounded_contexts/asset_and_service/` | Assets, services, contracts, classifications |
+| Control Library | `backend/core/bounded_contexts/control_library/` | Controls, policies, evidence, implementations |
+| Risk Registers | `backend/core/bounded_contexts/risk_registers/` | Business, asset, third-party risks |
+| Compliance | `backend/core/bounded_contexts/compliance/` | Frameworks, requirements, assessments |
+| Privacy | `backend/core/bounded_contexts/privacy/` | Data assets, data flows, privacy assessments |
+| Security Operations | `backend/core/bounded_contexts/security_operations/` | Incidents, awareness programs |
+| Third-Party Management | `backend/core/bounded_contexts/third_party_management/` | Vendor assessments, supply chain risk |
+| Business Continuity | `backend/core/bounded_contexts/business_continuity/` | BCP plans, disaster recovery |
+| RMF Operations | `backend/core/bounded_contexts/rmf_operations/` | STIG checklists, vulnerabilities, RMF workflows |
+
+For detailed documentation on each bounded context, see the README files in their respective directories.
+
+### DDD Infrastructure
+
+The core DDD infrastructure is located in `backend/core/domain/`:
+
+- [DDD Infrastructure README](../../backend/core/domain/README.md)
+- [Quick Reference Guide](../../backend/core/domain/QUICK_REFERENCE.md)
+
+---
+
+## Legacy Entity-Relationship Model
+
+The following diagrams describe the traditional entity-relationship model that underlies the bounded contexts above.
+
 ## Entity-relationship diagram
 
 ### IAM
