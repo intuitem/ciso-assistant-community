@@ -1,0 +1,101 @@
+name: DDD Tests
+permissions:
+  contents: read
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize]
+    paths:
+      - "backend/core/domain/**"
+      - "backend/core/bounded_contexts/**"
+      - ".github/workflows/ddd-tests.yml"
+  workflow_dispatch:
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  GITHUB_WORKFLOW: github_actions
+  PYTHON_VERSION: "3.12"
+  UBUNTU_VERSION: "ubuntu-24.04"
+jobs:
+  ddd-tests:
+    name: DDD Infrastructure Tests
+    runs-on: ubuntu-24.04
+    env:
+      backend-directory: ./backend
+      DJANGO_DEBUG: "True"
+      DB_HOST: localhost
+      EMAIL_HOST: localhost
+      EMAIL_PORT: 1025
+      EMAIL_HOST_USER: ""
+      EMAIL_HOST_PASSWORD: ""
+      DEFAULT_FROM_EMAIL: "ciso-assistant@alsigo.net"
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
+      CISO_ASSISTANT_URL: http://127.0.0.1:5173
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.12"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Install Poetry via pipx
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade pipx
+          python -m pipx ensurepath
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          python -m pipx install poetry
+      - name: Check Poetry version
+        shell: bash
+        run: poetry --version
+      - name: Install backend requirements
+        working-directory: ${{ env.backend-directory }}
+        run: poetry install
+      - name: Run migrations
+        working-directory: ${{ env.backend-directory }}
+        run: poetry run python manage.py migrate
+      - name: Run DDD Domain Tests
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          poetry run pytest core/domain/tests/ \
+            --html=ddd-domain-report.html \
+            --self-contained-html \
+            -v \
+            --tb=short
+      - name: Run RMF Operations Tests
+        working-directory: ${{ env.backend-directory }}
+        run: |
+          poetry run pytest core/bounded_contexts/rmf_operations/tests/ \
+            --html=rmf-operations-report.html \
+            --self-contained-html \
+            -v \
+            --tb=short
+      - name: Set current date as env variable
+        if: ${{ !cancelled() }}
+        run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+      - name: Sanitize branch name
+        if: ${{ !cancelled() }}
+        run: |
+          SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-ddd-domain-report-${{ matrix.python-version }}
+          path: ${{ env.backend-directory }}/ddd-domain-report.html
+          retention-days: 5
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-rmf-operations-report-${{ matrix.python-version }}
+          path: ${{ env.backend-directory }}/rmf-operations-report.html
+          retention-days: 5

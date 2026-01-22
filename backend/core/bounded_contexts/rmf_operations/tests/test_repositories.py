@@ -167,7 +167,14 @@ class TestStigChecklistRepository(TestCase):
         self.repo.save(checklist)
 
         system_id = uuid.uuid4()
-        success = self.repo.assign_to_system(checklist.id, system_id)
+        user_id = uuid.uuid4()
+        username = "test_user"
+        success = self.repo.assign_to_system(
+            checklist_id=checklist.id,
+            system_group_id=system_id,
+            user_id=user_id,
+            username=username
+        )
 
         assert success
         updated_checklist = self.repo.get_by_id(checklist.id)
@@ -378,3 +385,147 @@ class TestChecklistScoreRepository(TestCase):
         assert updated_score.totalCat2NotAFinding == 2
         assert updated_score.totalOpen == 3  # 2 + 1 + 0
         assert updated_score.totalNotAFinding == 4  # 1 + 2 + 1
+
+
+class TestRepositoryFieldNameFixes(TestCase):
+    """
+    Tests to verify bug fixes for field name mismatches between
+    aggregates (camelCase) and repository code.
+
+    These tests ensure that:
+    - SystemGroup.name is used instead of non-existent .title
+    - StigChecklist uses hostName, stigType instead of snake_case variants
+    - Import/export methods use correct field names
+    """
+
+    def test_system_group_uses_name_field(self):
+        """Verify SystemGroup repository uses .name not .title"""
+        repo = SystemGroupRepository()
+        system = SystemGroup()
+        system.create_system("Test System Name", "Description")
+        repo.save(system)
+
+        # Verify we can access the name field
+        retrieved = repo.get_by_id(system.id)
+        assert retrieved.name == "Test System Name"
+        # Verify there's no title attribute
+        assert not hasattr(retrieved, 'title') or getattr(retrieved, 'title', None) is None
+
+    def test_stig_checklist_uses_camelcase_fields(self):
+        """Verify StigChecklist uses camelCase field names"""
+        repo = StigChecklistRepository()
+        checklist = StigChecklist()
+        checklist.create_checklist(
+            host_name="test-host.local",
+            stig_type="Windows Server 2019",
+            stig_release="Release: 2.5",
+            version="1.0"
+        )
+        repo.save(checklist)
+
+        retrieved = repo.get_by_id(checklist.id)
+        # Verify camelCase fields exist and are correct
+        assert retrieved.hostName == "test-host.local"
+        assert retrieved.stigType == "Windows Server 2019"
+        assert retrieved.stigRelease == "Release: 2.5"
+        assert retrieved.version == "1.0"
+
+    def test_import_ckl_uses_correct_fields(self):
+        """Test that import_ckl method uses correct field names"""
+        repo = StigChecklistRepository()
+        checklist = StigChecklist()
+        checklist.create_checklist(
+            host_name="original-host.local",
+            stig_type="Windows Server 2016",
+            stig_release="Release: 1.0",
+            version="1.0"
+        )
+        repo.save(checklist)
+
+        # Import CKL data
+        ckl_content = "<CHECKLIST>test content</CHECKLIST>"
+        parsed_data = {
+            'stig_type': 'Windows Server 2019',
+            'stig_release': 'Release: 3.0',
+            'stig_version': '2.0',
+            'host_name': 'updated-host.local',
+            'host_ip': '192.168.1.100',
+            'host_fqdn': 'updated-host.local.domain.com',
+            'asset_info': {
+                'web_or_database': False,
+                'inferred_asset_type': 'computing'
+            }
+        }
+
+        user_id = uuid.uuid4()
+        username = "test_user"
+        success = repo.import_ckl(
+            checklist_id=checklist.id,
+            ckl_content=ckl_content,
+            parsed_data=parsed_data,
+            user_id=user_id,
+            username=username
+        )
+
+        assert success
+
+        # Verify fields were updated using correct camelCase names
+        updated = repo.get_by_id(checklist.id)
+        assert updated.hostName == "updated-host.local"
+        assert updated.stigType == "Windows Server 2019"
+        assert updated.stigRelease == "Release: 3.0"
+        assert updated.version == "2.0"
+        assert updated.rawCklData is not None
+        assert 'raw_content' in updated.rawCklData
+
+    def test_export_ckl_uses_correct_fields(self):
+        """Test that export_ckl method uses correct field names"""
+        repo = StigChecklistRepository()
+        checklist = StigChecklist()
+        checklist.create_checklist(
+            host_name="export-test.local",
+            stig_type="Windows Server 2019",
+            stig_release="Release: 2.5",
+            version="1.0"
+        )
+        # Set rawCklData directly
+        checklist.rawCklData = {'raw_content': '<CHECKLIST>export test</CHECKLIST>'}
+        repo.save(checklist)
+
+        user_id = uuid.uuid4()
+        username = "test_user"
+        content = repo.export_ckl(
+            checklist_id=checklist.id,
+            user_id=user_id,
+            username=username
+        )
+
+        assert content is not None
+        assert '<CHECKLIST>' in content
+
+    def test_unassign_from_system_uses_correct_fields(self):
+        """Test that unassign_from_system uses correct field names"""
+        repo = StigChecklistRepository()
+        system_id = uuid.uuid4()
+
+        checklist = StigChecklist()
+        checklist.create_checklist(
+            host_name="unassign-test.local",
+            stig_type="Windows Server 2019",
+            stig_release="Release: 2.5",
+            version="1.0",
+            system_group_id=system_id
+        )
+        repo.save(checklist)
+
+        user_id = uuid.uuid4()
+        username = "test_user"
+        success = repo.unassign_from_system(
+            checklist_id=checklist.id,
+            user_id=user_id,
+            username=username
+        )
+
+        assert success
+        updated = repo.get_by_id(checklist.id)
+        assert updated.systemGroupId is None
