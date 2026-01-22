@@ -2667,7 +2667,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
         # Send notification to newly assigned users
         if assigned_to_data:
             self._send_assignment_notifications(
-                instance, [user.id for user in assigned_to_data]
+                instance, [actor.id for actor in assigned_to_data]
             )
 
         return instance
@@ -2701,17 +2701,19 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
 
         return instance
 
-    def _send_assignment_notifications(self, task_template, user_ids):
-        """Send assignment notifications to the specified users"""
-        if not user_ids:
+    def _send_assignment_notifications(self, task_template, actor_ids):
+        """Send assignment notifications to the specified actors"""
+        if not actor_ids:
             return
 
         try:
-            from iam.models import User
+            from core.models import Actor
             from .tasks import send_task_template_assignment_notification
 
-            assigned_users = User.objects.filter(id__in=user_ids)
-            assigned_emails = [user.email for user in assigned_users if user.email]
+            assigned_actors = Actor.objects.filter(id__in=actor_ids)
+            assigned_emails = []
+            for actor in assigned_actors:
+                assigned_emails.extend(actor.get_emails())
 
             if assigned_emails:
                 send_task_template_assignment_notification(
@@ -3071,12 +3073,40 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
     filtering_labels = FieldsRelatedField(many=True)
     requester = FieldsRelatedField(["id", "email", "first_name", "last_name"])
     approver = FieldsRelatedField(["id", "email", "first_name", "last_name"])
-    linked_models = serializers.ListField(read_only=True)
+    linked_models = serializers.SerializerMethodField()
     events = FlowEventSerializer(many=True, read_only=True)
 
     class Meta:
         model = ValidationFlow
         fields = "__all__"
+
+    def get_linked_models(self, obj):
+        linked = []
+        field_map = [
+            ("compliance_assessments", "has_compliance_assessments"),
+            ("risk_assessments", "has_risk_assessments"),
+            ("business_impact_analysis", "has_business_impact_analysis"),
+            ("crq_studies", "has_crq_studies"),
+            ("ebios_studies", "has_ebios_studies"),
+            ("entity_assessments", "has_entity_assessments"),
+            ("findings_assessments", "has_findings_assessments"),
+            ("evidences", "has_evidences"),
+            ("security_exceptions", "has_security_exceptions"),
+            ("policies", "has_policies"),
+        ]
+        prefetched = getattr(obj, "_prefetched_objects_cache", {})
+        for field_name, flag_name in field_map:
+            annotated_value = getattr(obj, flag_name, None)
+            if annotated_value is not None:
+                has_items = annotated_value
+            elif field_name in prefetched:
+                has_items = bool(prefetched[field_name])
+            else:
+                manager = getattr(obj, field_name, None)
+                has_items = bool(manager and manager.exists())
+            if has_items:
+                linked.append(field_name)
+        return linked
 
 
 class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
