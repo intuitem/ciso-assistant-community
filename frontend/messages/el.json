@@ -124,6 +124,7 @@
 	"domainSemiColon": "Τομέας:",
 	"allDomains": "Όλοι οι τομείς",
 	"selectDomain": "Επιλογή τομέα",
+	"focusMode": "Λειτουργία εστίασης",
 	"focusModeTooltip": "Εστίαση σε συγκεκριμένο τομέα",
 	"clearFocus": "Εκκαθάριση εστίασης",
 	"noDomainsAvailable": "Δεν υπάρχουν διαθέσιμοι τομείς",

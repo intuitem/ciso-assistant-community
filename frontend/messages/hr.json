@@ -129,6 +129,7 @@
 	"domainSemiColon": "Domena:",
 	"allDomains": "Sve domene",
 	"selectDomain": "Odaberi domenu",
+	"focusMode": "Način fokusa",
 	"focusModeTooltip": "Fokusiraj se na određenu domenu",
 	"clearFocus": "Obriši fokus",
 	"noDomainsAvailable": "Nema dostupnih domena",

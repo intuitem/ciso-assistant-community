@@ -119,6 +119,7 @@
 	"domainSemiColon": "Domæne:",
 	"allDomains": "Alle domæner",
 	"selectDomain": "Vælg domæne",
+	"focusMode": "Fokustilstand",
 	"focusModeTooltip": "Fokuser på et specifikt domæne",
 	"clearFocus": "Ryd fokus",
 	"noDomainsAvailable": "Ingen domæner tilgængelige",

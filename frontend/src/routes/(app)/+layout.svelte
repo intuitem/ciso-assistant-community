@@ -9,7 +9,6 @@
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
-	import FocusModeSelector from '$lib/components/FocusMode/FocusModeSelector.svelte';
 	import { pageTitle, modelName, modelDescription } from '$lib/utils/stores';
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';

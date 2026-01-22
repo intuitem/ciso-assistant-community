@@ -124,6 +124,7 @@
 	"domainSemiColon": "Domena:",
 	"allDomains": "Wszystkie domeny",
 	"selectDomain": "Wybierz domenę",
+	"focusMode": "Tryb skupienia",
 	"focusModeTooltip": "Skup się na konkretnej domenie",
 	"clearFocus": "Wyczyść fokus",
 	"noDomainsAvailable": "Brak dostępnych domen",

@@ -119,6 +119,7 @@
 	"domainSemiColon": "Domínio:",
 	"allDomains": "Todos os domínios",
 	"selectDomain": "Selecionar domínio",
+	"focusMode": "Modo de foco",
 	"focusModeTooltip": "Focar em um domínio específico",
 	"clearFocus": "Limpar foco",
 	"noDomainsAvailable": "Nenhum domínio disponível",

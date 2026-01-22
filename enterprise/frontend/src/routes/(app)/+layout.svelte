@@ -157,7 +157,7 @@
 	});
 
 	$effect(() => {
-		if (browser && data?.featureflags?.focus_mode === false && $focusMode.id) {
+		if (browser && !data?.featureflags?.focus_mode && $focusMode.id) {
 			clearFocusMode();
 			invalidateAll();
 		}

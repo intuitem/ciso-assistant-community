@@ -119,6 +119,7 @@
 	"domainSemiColon": "Bereich:",
 	"allDomains": "Alle Bereiche",
 	"selectDomain": "Bereich auswählen",
+	"focusMode": "Fokusmodus",
 	"focusModeTooltip": "Auf einen bestimmten Bereich fokussieren",
 	"clearFocus": "Fokus löschen",
 	"noDomainsAvailable": "Keine Bereiche verfügbar",

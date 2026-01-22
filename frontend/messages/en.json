@@ -175,6 +175,7 @@
 	"domainSemiColon": "Domain:",
 	"allDomains": "All domains",
 	"selectDomain": "Select domain",
+	"focusMode": "Focus mode",
 	"focusModeTooltip": "Focus on a specific domain",
 	"clearFocus": "Clear focus",
 	"noDomainsAvailable": "No domains available",

@@ -121,6 +121,7 @@
 	"domainSemiColon": "Домен:",
 	"allDomains": "Всі домени",
 	"selectDomain": "Вибрати домен",
+	"focusMode": "Режим фокусу",
 	"focusModeTooltip": "Зосередитися на певному домені",
 	"clearFocus": "Очистити фокус",
 	"noDomainsAvailable": "Немає доступних доменів",

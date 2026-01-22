@@ -119,6 +119,7 @@
 	"domainSemiColon": "Tartomány:",
 	"allDomains": "Összes tartomány",
 	"selectDomain": "Tartomány kiválasztása",
+	"focusMode": "Fókusz mód",
 	"focusModeTooltip": "Fókuszálás egy adott tartományra",
 	"clearFocus": "Fókusz törlése",
 	"noDomainsAvailable": "Nincsenek elérhető tartományok",

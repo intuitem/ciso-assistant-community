@@ -119,6 +119,7 @@
 	"domainSemiColon": "Domain:",
 	"allDomains": "Semua domain",
 	"selectDomain": "Pilih domain",
+	"focusMode": "Mode fokus",
 	"focusModeTooltip": "Fokus pada domain tertentu",
 	"clearFocus": "Hapus fokus",
 	"noDomainsAvailable": "Tidak ada domain tersedia",

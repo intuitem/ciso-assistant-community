@@ -125,6 +125,7 @@
 	"domainSemiColon": "Etki Alanı:",
 	"allDomains": "Tüm etki alanları",
 	"selectDomain": "Etki alanı seç",
+	"focusMode": "Odak modu",
 	"focusModeTooltip": "Belirli bir etki alanına odaklan",
 	"clearFocus": "Odağı temizle",
 	"noDomainsAvailable": "Mevcut etki alanı yok",

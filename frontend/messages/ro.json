@@ -119,6 +119,7 @@
 	"domainSemiColon": "Domeniu:",
 	"allDomains": "Toate domeniile",
 	"selectDomain": "Selectați domeniul",
+	"focusMode": "Mod de focalizare",
 	"focusModeTooltip": "Concentrați-vă pe un domeniu specific",
 	"clearFocus": "Ștergeți focalizarea",
 	"noDomainsAvailable": "Niciun domeniu disponibil",

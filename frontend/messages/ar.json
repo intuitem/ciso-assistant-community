@@ -119,6 +119,7 @@
 	"domainSemiColon": "النطاق:",
 	"allDomains": "جميع المجالات",
 	"selectDomain": "اختر مجال",
+	"focusMode": "وضع التركيز",
 	"focusModeTooltip": "التركيز على مجال محدد",
 	"clearFocus": "مسح التركيز",
 	"noDomainsAvailable": "لا توجد مجالات متاحة",
