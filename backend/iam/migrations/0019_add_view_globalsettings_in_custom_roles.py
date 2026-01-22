@@ -6,13 +6,10 @@ from django.db import migrations
 def add_view_globalsettings_permission(apps, schema_editor):
     Role = apps.get_model("iam", "Role")
     Permission = apps.get_model("auth", "Permission")
-    ContentType = apps.get_model("contenttypes", "ContentType")
-
-    content_type = ContentType.objects.get(app_label="iam", model="globalsettings")
 
     permission = Permission.objects.get(
         codename="view_globalsettings",
-        content_type=content_type,
+        content_type__app_label="global_settings",
     )
 
     for role in Role.objects.all():
