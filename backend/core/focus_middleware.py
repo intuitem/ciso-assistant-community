@@ -10,6 +10,9 @@ import re
 import structlog
 from uuid import UUID
 
+from core.context import focus_folder_id_var
+from global_settings.utils import ff_is_enabled
+
 logger = structlog.getLogger(__name__)
 
 # Allowlist of endpoints exempt from focus mode
@@ -22,17 +25,25 @@ FOCUS_MODE_EXEMPT_PATHS = [
     "/api/get-waiting-risk-acceptances/",
     "/api/license/",
     "/api/iam/sso-settings/",
-    # Folders endpoint (needed to populate focus selector itself)
-    "/api/folders/",
 ]
 
 
-def _is_path_exempt(path: str) -> bool:
+def _is_truthy(value: str | None) -> bool:
+    if value is None:
+        return False
+    return value.strip().lower() == "true"
+
+
+def _is_path_exempt(request) -> bool:
     """
     Check if the request path should be exempt from focus mode filtering.
     """
+    if request.path == "/api/folders/":
+        # Only apply focus when explicitly requested so the focus selector
+        # and domain listing can remain unscoped.
+        return not _is_truthy(request.GET.get("apply_focus"))
     for exempt_path in FOCUS_MODE_EXEMPT_PATHS:
-        if path.startswith(exempt_path):
+        if request.path.startswith(exempt_path):
             return True
     return False
 
@@ -62,25 +73,26 @@ class FocusModeMiddleware:
     def __call__(self, request):
         request.focus_folder_id = None
 
-        if _is_path_exempt(request.path):
+        if _is_path_exempt(request):
+            focus_folder_id_var.set(None)
             return self.get_response(request)
 
         focus_header = request.headers.get("X-Focus-Folder-Id")
-
         if focus_header:
+            if not ff_is_enabled("focus_mode"):
+                focus_folder_id_var.set(None)
+                return self.get_response(request)
             folder_id = _validate_uuid(focus_header)
             if folder_id:
-                request.focus_folder_id = folder_id
-                logger.debug(
-                    "Focus mode active",
-                    focus_folder_id=str(folder_id),
-                    path=request.path,
-                )
+                # request.focus_folder_id = folder_id
+                focus_folder_id_var.set(folder_id)
             else:
                 logger.warning(
                     "Invalid X-Focus-Folder-Id header value",
                     value=focus_header,
                     path=request.path,
                 )
+        else:
+            focus_folder_id_var.set(None)
 
         return self.get_response(request)

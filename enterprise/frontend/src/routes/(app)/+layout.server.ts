@@ -26,7 +26,8 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 
 	// Fetch accessible folders for Focus Mode selector
 	let folders: { id: string; str: string; name: string; content_type: string }[] = [];
-	if (locals.user) {
+	const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
+	if (locals.user && focusModeEnabled) {
 		try {
 			const foldersRes = await fetch(`${BASE_API_URL}/folders/`);
 			if (foldersRes.ok) {

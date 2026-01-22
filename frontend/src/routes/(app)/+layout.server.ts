@@ -22,24 +22,9 @@ export const load = loadFlash(async ({ locals, url, cookies, request, fetch }) =
 		}
 	}
 
-	// Fetch accessible folders for Focus Mode selector
-	let folders: { id: string; str: string; name: string; content_type: string }[] = [];
-	if (locals.user) {
-		try {
-			const foldersRes = await fetch(`${BASE_API_URL}/folders/`);
-			if (foldersRes.ok) {
-				const data = await foldersRes.json();
-				folders = data.results ?? data ?? [];
-			}
-		} catch (e) {
-			console.error('Failed to fetch folders for focus mode:', e);
-		}
-	}
-
 	return {
 		user: locals.user,
 		settings: locals.settings,
-		featureflags: locals.featureflags,
-		folders
+		featureflags: locals.featureflags
 	};
 }) satisfies LayoutServerLoad;

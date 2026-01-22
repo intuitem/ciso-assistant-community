@@ -175,6 +175,11 @@
 						}
 					}
 				}
+				const shouldApplyFocus =
+					optionsEndpoint.startsWith('folders') && !optionsEndpoint.includes('apply_focus=');
+				if (shouldApplyFocus) {
+					urlParams.append('apply_focus', 'true');
+				}
 
 				const queryString = urlParams.toString();
 				if (queryString) {

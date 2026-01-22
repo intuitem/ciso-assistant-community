@@ -51,6 +51,8 @@ logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
 from allauth.mfa.models import Authenticator
+from core.context import focus_folder_id_var
+from django.shortcuts import get_object_or_404
 
 ALLOWED_PERMISSION_APPS = (
     "core",
@@ -836,6 +838,14 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         Determines if a user has specified permission on a specified folder
         """
+        # Apply focus mode restriction
+        focus_folder_id = focus_folder_id_var.get()
+        if focus_folder_id:
+            focus_folder = get_object_or_404(Folder, id=focus_folder_id)
+            # Check if the target folder is within focus perimeter
+            focus_perimeter = {focus_folder} | set(focus_folder.get_sub_folders())
+            if folder not in focus_perimeter:
+                return False
         add_filteringlabel = Permission.objects.get(codename="add_filteringlabel")
         for ra in RoleAssignment.get_role_assignments(user):
             ra_perimeter = ra.perimeter_folders.all()
@@ -878,6 +888,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Returns the list of the ids of the matching folders
         If permission is specified, returns accessible folders which can be altered with this specific permission
         """
+        # Apply focus mode restriction
+        focus_folder_id = focus_folder_id_var.get()
+        if focus_folder_id:
+            folder = get_object_or_404(Folder, id=focus_folder_id)
         folders_set = set()
         ref_permission = Permission.objects.get(codename=codename)
         # first get all accessible folders, independently of contentType
@@ -941,7 +955,18 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         result_delete = set()
 
         ref_permission = permissions_map["view_folder"]
-        perimeter = {folder} | set(folder.get_sub_folders())
+
+        # Build the base perimeter from the folder parameter
+        base_perimeter = {folder} | set(folder.get_sub_folders())
+        # Apply focus mode as an intersection if active
+        focus_folder_id = focus_folder_id_var.get()
+        if focus_folder_id:
+            focus_folder = get_object_or_404(Folder, id=focus_folder_id)
+            focus_perimeter = {focus_folder} | set(focus_folder.get_sub_folders())
+            # Intersection: only folders that are in BOTH base and focus perimeters
+            perimeter = base_perimeter & focus_perimeter
+        else:
+            perimeter = base_perimeter
         # Process role assignments
         role_assignments = [
             ra

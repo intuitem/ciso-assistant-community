@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
 import { persisted, type Persisted } from 'svelte-persisted-store';
 import type { Driver } from 'driver.js';
@@ -17,13 +17,15 @@ export const focusMode: Persisted<FocusModeState> = persisted('focusMode', {
 export function setFocusMode(folderId: string, folderName: string) {
 	focusMode.set({ id: folderId, name: folderName });
 	if (browser) {
-		document.cookie = `focus_folder_id=${folderId}; path=/; SameSite=Lax; Secure`;
+		const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+		document.cookie = `focus_folder_id=${folderId}; path=/; SameSite=Lax${secure}`;
 	}
 }
 export function clearFocusMode() {
 	focusMode.set({ id: null, name: null });
 	if (browser) {
-		document.cookie = 'focus_folder_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+		const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+		document.cookie = `focus_folder_id=; path=/; SameSite=Lax${secure}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
 	}
 }
 

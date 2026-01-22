@@ -7,11 +7,19 @@
 	import '../../app.css';
 
 	import { browser } from '$app/environment';
+	import { invalidateAll } from '$app/navigation';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import FocusModeSelector from '$lib/components/FocusMode/FocusModeSelector.svelte';
 	import { deleteCookie, getCookie } from '$lib/utils/cookies';
-	import { clientSideToast, pageTitle, modelName, modelDescription } from '$lib/utils/stores';
+	import {
+		clientSideToast,
+		pageTitle,
+		modelName,
+		modelDescription,
+		clearFocusMode,
+		focusMode
+	} from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/stores';
 	import type { LayoutData } from './$types';
@@ -147,6 +155,13 @@
 			interceptExternalLinks();
 		}
 	});
+
+	$effect(() => {
+		if (browser && data?.featureflags?.focus_mode === false && $focusMode.id) {
+			clearFocusMode();
+			invalidateAll();
+		}
+	});
 </script>
 
 <!-- App Shell -->
@@ -184,7 +199,9 @@
 				</div>
 			{/if}
 			<div class="absolute top-6 right-4 flex items-center gap-3">
-				<FocusModeSelector folders={data?.folders ?? []} />
+				{#if data?.featureflags?.focus_mode}
+					<FocusModeSelector folders={data?.folders ?? []} />
+				{/if}
 				{#if data?.user?.is_admin}
 					<button
 						onclick={modalQuickStart}

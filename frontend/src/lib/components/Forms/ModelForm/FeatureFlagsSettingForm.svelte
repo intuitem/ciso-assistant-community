@@ -149,6 +149,11 @@
 			description: m.extraDescription(),
 			fields: [
 				{
+					field: 'focus_mode',
+					label: 'Focus mode',
+					description: m.focusModeTooltip?.() ?? 'Focus on a specific domain'
+				},
+				{
 					field: 'terminologies',
 					label: m.terminologies(),
 					description: m.riskOriginHelpText()
