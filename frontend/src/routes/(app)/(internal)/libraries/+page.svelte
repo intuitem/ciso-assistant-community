@@ -98,8 +98,8 @@
 			type: 'boolean',
 			field: 'is_update',
 			icon: 'fa-arrows-rotate',
-			selectedClass: 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-pink-200',
-			hoverClass: 'hover:border-pink-400 hover:bg-pink-50',
+			selectedClass: 'bg-gradient-to-r from-lime-500 to-lime-600 text-white shadow-lime-200',
+			hoverClass: 'hover:border-lime-400 hover:bg-lime-50',
 			label: m.updateAvailable()
 		}
 	};
