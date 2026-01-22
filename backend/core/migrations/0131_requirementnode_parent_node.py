@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
             name="parent_node",
             field=models.ForeignObject(
                 from_fields=["parent_urn"],
+                blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.DO_NOTHING,
                 related_name="child_nodes",

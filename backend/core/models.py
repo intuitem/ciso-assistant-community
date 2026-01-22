@@ -2144,6 +2144,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         from_fields=["parent_urn"],
         to_fields=["urn"],
         related_name="child_nodes",
+        blank=True,
         null=True,
     )
 
