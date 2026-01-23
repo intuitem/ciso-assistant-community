@@ -213,7 +213,7 @@ class Command(BaseCommand):
                 folder=root_folder,
                 ref_id=f"TEST-PROC-{i + 1:04d}",
                 status=status,
-                author=random.choice(users) if users else None,
+                author=random.choice(users).actor if users else None,
                 dpia_required=dpia_required,
                 dpia_reference=f"DPIA-{i + 1:04d}" if dpia_required else "",
                 has_sensitive_personal_data=False,  # Will be updated if sensitive data added
