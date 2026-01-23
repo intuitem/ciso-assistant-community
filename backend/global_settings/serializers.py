@@ -213,9 +213,6 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     validation_flows = serializers.BooleanField(
         source="value.validation_flows", required=False, default=False
     )
-    focus_mode = serializers.BooleanField(
-        source="value.focus_mode", required=False, default=False
-    )
     outgoing_webhooks = serializers.BooleanField(
         source="value.outgoing_webhooks", required=False, default=False
     )
@@ -249,7 +246,6 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "contracts",
             "reports",
             "validation_flows",
-            "focus_mode",
             "outgoing_webhooks",
             "metrology",
         ]

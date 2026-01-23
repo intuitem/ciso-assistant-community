@@ -39,8 +39,8 @@ def _is_path_exempt(request) -> bool:
     Check if the request path should be exempt from focus mode filtering.
     """
     if request.path == "/api/folders/":
-        # Only exempt if apply_focus is set
-        return _is_truthy(request.GET.get("apply_focus"))
+        # Only exempt if no_focus is set
+        return _is_truthy(request.GET.get("no_focus"))
     for exempt_path in FOCUS_MODE_EXEMPT_PATHS:
         if request.path.startswith(exempt_path):
             return True
@@ -70,8 +70,6 @@ class FocusModeMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        request.focus_folder_id = None
-
         if _is_path_exempt(request):
             focus_folder_id_var.set(None)
             return self.get_response(request)
@@ -83,7 +81,6 @@ class FocusModeMiddleware:
                 return self.get_response(request)
             folder_id = _validate_uuid(focus_header)
             if folder_id:
-                # request.focus_folder_id = folder_id
                 focus_folder_id_var.set(folder_id)
             else:
                 logger.warning(

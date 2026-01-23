@@ -2,7 +2,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { m } from '$paraglide/messages';
 	import BackgroundCheckbox from '$lib/components/Forms/BackgroundCheckbox.svelte';
-
+	import { page } from '$app/state';
 	interface Props {
 		form: SuperValidated<any>;
 	}
@@ -24,7 +24,7 @@
 					label: m.organisationIssues(),
 					description: m.organisationIssuesDescription()
 				}
-			]
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
 		{
 			category: m.operations(),
@@ -55,7 +55,7 @@
 					label: m.metrology(),
 					description: m.metrologyDescription()
 				}
-			]
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
 		{
 			category: m.assetClassManagementAndGovernance(),
@@ -86,7 +86,7 @@
 					label: m.validationFlows(),
 					description: m.validationFlowsDescription()
 				}
-			]
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
 		{
 			category: m.complianceRiskManagement(),
@@ -142,7 +142,7 @@
 					label: m.businessImpactAnalysis(),
 					description: m.businessImpactAnalysisDescription()
 				}
-			]
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
 		{
 			category: m.extra(),
@@ -168,7 +168,7 @@
 					label: m.experimental(),
 					description: m.experimentalFeatures()
 				}
-			]
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		}
 	];
 </script>
