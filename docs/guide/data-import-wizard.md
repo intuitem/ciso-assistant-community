@@ -362,8 +362,8 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `provider_entity_ref_id`
 * `solution_ref_id`
 * `status`  can be `draft` , `active`,`expired` or `terminated`
-* `start_date`
-* `end_date`
+* `start_date` (YYY-MM-DD format [https://en.wikipedia.org/wiki/ISO\_8601](https://en.wikipedia.org/wiki/ISO_8601))
+* `end_date` (YYY-MM-DD format [https://en.wikipedia.org/wiki/ISO\_8601](https://en.wikipedia.org/wiki/ISO_8601))
 * `annual_expense`
 * `currency` (ISO 4217 format [https://en.wikipedia.org/wiki/ISO\_4217](https://en.wikipedia.org/wiki/ISO_4217))
 * `domain`
