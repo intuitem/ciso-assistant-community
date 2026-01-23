@@ -770,6 +770,15 @@ export const ENTITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const PARENT_ENTITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'parentEntity',
+		optionsEndpoint: 'entities',
+		multiple: true
+	}
+};
+
 export const PROVIDER_ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1695,7 +1704,7 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			parent_entity: ENTITY_FILTER,
+			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER
 		}
 	},
