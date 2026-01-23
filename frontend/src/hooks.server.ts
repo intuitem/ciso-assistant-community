@@ -126,6 +126,12 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 			request.headers.append('Authorization', `Token ${token}`);
 		}
 
+		// Inject focus folder ID header from cookie
+		const focusFolderId = event.cookies.get('focus_folder_id');
+		const focusModeEnabled = event.locals.featureflags?.focus_mode ?? false;
+		if (focusFolderId && focusModeEnabled) {
+			request.headers.set('X-Focus-Folder-Id', focusFolderId);
+		}
 		if (unsafeMethods.has(request.method) && csrfToken) {
 			request.headers.append('X-CSRFToken', csrfToken);
 			request.headers.append('Cookie', `csrftoken=${csrfToken}`);

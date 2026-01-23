@@ -224,6 +224,7 @@ MIDDLEWARE = [
     "django_structlog.middlewares.RequestMiddleware",
     "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "core.focus_middleware.FocusModeMiddleware",
 ]
 ROOT_URLCONF = "ciso_assistant.urls"
 # we leave these for the API UI tools - even if Django templates and Admin are not used anymore
