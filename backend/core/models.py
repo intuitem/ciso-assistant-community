@@ -2843,25 +2843,13 @@ class Asset(
         return agg_obj
 
     @classmethod
-    def _aggregate_capabilities(
-        cls,
-        supporting_descendants: set,
-        capability_field: str,
-        prefer_lower: bool = True,
-        check_enabled: bool = False,
-        parent_asset=None,
+    def _aggregate_security_capabilities(
+        cls, supporting_descendants: set, parent_asset=None
     ) -> dict:
         """
-        Aggregates capabilities from supporting descendants.
+        Aggregates security capabilities from supporting descendants (lowest value wins - worst case).
         Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
         and its descendants are excluded for that capability only (not globally).
-
-        Args:
-            supporting_descendants: Set of assets to aggregate from
-            capability_field: Field name to aggregate ('security_capabilities' or 'recovery_capabilities')
-            prefer_lower: If True, lowest value wins (worst case for security). If False, highest value wins (worst case for recovery)
-            check_enabled: If True, skip capabilities where is_enabled is False
-            parent_asset: Optional parent asset for optimized descendant lookup
         """
         # Build descendant map with constant DB queries using prefetched graph data
         descendants_map = {}
@@ -2890,9 +2878,9 @@ class Asset(
 
         agg_cap = {}
         for asset in supporting_descendants:
-            capabilities = getattr(asset, capability_field).get("objectives", {})
+            capabilities = asset.security_capabilities.get("objectives", {})
             for key, content in capabilities.items():
-                if check_enabled and not content.get("is_enabled", False):
+                if not content.get("is_enabled", False):
                     continue
 
                 value = content.get("value")
@@ -2913,34 +2901,12 @@ class Asset(
                 if skip:
                     continue
 
-                current_value = agg_cap.get(key, {}).get("value")
-                should_update = (
-                    current_value is None
-                    or (prefer_lower and value < current_value)
-                    or (not prefer_lower and value > current_value)
-                )
-
-                if should_update:
+                if key not in agg_cap or value < agg_cap.get(key, {}).get(
+                    "value", float("inf")
+                ):
                     agg_cap[key] = content.copy()
 
         return agg_cap
-
-    @classmethod
-    def _aggregate_security_capabilities(
-        cls, supporting_descendants: set, parent_asset=None
-    ) -> dict:
-        """
-        Aggregates security capabilities from supporting descendants (lowest value wins - worst case).
-        Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
-        and its descendants are excluded for that capability only (not globally).
-        """
-        return cls._aggregate_capabilities(
-            supporting_descendants,
-            capability_field="security_capabilities",
-            prefer_lower=True,
-            check_enabled=True,
-            parent_asset=parent_asset,
-        )
 
     @classmethod
     def _aggregate_recovery_capabilities(
@@ -2951,13 +2917,58 @@ class Asset(
         Supporting assets can override capabilities - when overridden, the overriding asset's value is used directly,
         and its descendants are excluded for that capability only (not globally).
         """
-        return cls._aggregate_capabilities(
-            supporting_descendants,
-            capability_field="recovery_capabilities",
-            prefer_lower=False,
-            check_enabled=False,
-            parent_asset=parent_asset,
-        )
+        # Build descendant map with constant DB queries using prefetched graph data
+        descendants_map = {}
+        if parent_asset is not None:
+            graph = cls._prefetch_graph_data([parent_asset])
+            parent_to_children = graph["parent_to_children"]
+            for asset in supporting_descendants:
+                descendants_map[asset.id] = cls._get_all_descendants(
+                    asset, parent_to_children
+                )
+        else:
+            # Fallback for when parent_asset is not provided
+            for asset in supporting_descendants:
+                descendants_map[asset.id] = asset.get_descendants()
+
+        # Track which capabilities are overridden by which assets
+        overrides = {}  # {cap_name: [list of assets that override it]}
+        for asset in supporting_descendants:
+            overridden = asset.overridden_children_capabilities.values_list(
+                "name", flat=True
+            )
+            for cap_name in overridden:
+                if cap_name not in overrides:
+                    overrides[cap_name] = []
+                overrides[cap_name].append(asset)
+
+        agg_cap = {}
+        for asset in supporting_descendants:
+            capabilities = asset.recovery_capabilities.get("objectives", {})
+            for key, content in capabilities.items():
+                value = content.get("value")
+                if value is None:
+                    continue
+
+                # Check if this asset should be skipped due to an ancestor's override
+                skip = False
+                if key in overrides:
+                    for overriding_asset in overrides[key]:
+                        # Skip if this asset is a descendant of an overriding asset
+                        if asset != overriding_asset and asset in descendants_map.get(
+                            overriding_asset.id, set()
+                        ):
+                            skip = True
+                            break
+
+                if skip:
+                    continue
+
+                current_value = agg_cap.get(key, {}).get("value")
+                if current_value is None or value > current_value:
+                    agg_cap[key] = content.copy()
+
+        return agg_cap
 
     @classmethod
     def _get_security_objective_scale(cls) -> str:
@@ -4976,6 +4987,23 @@ class RiskAssessment(Assessment):
         # --- check on the risk risk_assessment:
         _object = serializers.serialize("json", [self])
         _object = json.loads(_object)
+        root_folder_id = Folder.get_root_folder_id()
+        assessment_folder_id = self.folder_id
+        root_folder_value = str(root_folder_id) if root_folder_id else None
+        assessment_folder_value = (
+            str(assessment_folder_id) if assessment_folder_id else None
+        )
+
+        def is_domain_mismatch(folder_id) -> bool:
+            if not folder_id or not assessment_folder_value:
+                return False
+            folder_value = str(folder_id)
+            if (
+                assessment_folder_value == root_folder_value
+                or folder_value == root_folder_value
+            ):
+                return False
+            return folder_value != assessment_folder_value
 
         if self.status == Assessment.Status.IN_PROGRESS:
             info_lst.append(
@@ -6387,6 +6415,23 @@ class ComplianceAssessment(Assessment):
         # --- check on the assessment:
         _object = serializers.serialize("json", [self])
         _object = json.loads(_object)
+        root_folder_id = Folder.get_root_folder_id()
+        assessment_folder_id = self.folder_id
+        root_folder_value = str(root_folder_id) if root_folder_id else None
+        assessment_folder_value = (
+            str(assessment_folder_id) if assessment_folder_id else None
+        )
+
+        def is_domain_mismatch(folder_id) -> bool:
+            if not folder_id or not assessment_folder_value:
+                return False
+            folder_value = str(folder_id)
+            if (
+                assessment_folder_value == root_folder_value
+                or folder_value == root_folder_value
+            ):
+                return False
+            return folder_value != assessment_folder_value
 
         if self.status == Assessment.Status.IN_PROGRESS:
             info_lst.append(
