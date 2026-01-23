@@ -7004,13 +7004,6 @@ class FindingsAssessment(Assessment):
         AUDIT = "audit", "Audit"
         SELF_IDENTIFIED = "self_identified", "Self-identified"
 
-    owner = models.ManyToManyField(
-        "core.Actor",
-        blank=True,
-        verbose_name=_("Owner"),
-        related_name="findings_assessments",
-    )
-
     category = models.CharField(
         verbose_name=_("Category"),
         choices=Category.choices,
