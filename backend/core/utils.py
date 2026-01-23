@@ -12,6 +12,7 @@ from rest_framework.exceptions import ValidationError
 import structlog
 import calendar
 from dateutil import relativedelta as rd
+from uuid import UUID
 
 logger = structlog.get_logger(__name__)
 

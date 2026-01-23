@@ -1,4 +1,5 @@
 from django.conf import settings
+from global_settings.models import GlobalSettings
 from rest_framework import serializers
 from core.serializers import (
     BaseModelSerializer,
@@ -9,7 +10,9 @@ from iam.models import Folder, User, Role
 
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
-
+from global_settings.serializers import (
+    FeatureFlagsSerializer as CommunityFeatureFlagSerializer,
+)
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -168,3 +171,20 @@ class LogEntrySerializer(serializers.ModelSerializer):
         model = LogEntry
         fields = "__all__"
         read_only_fields = ["id", "timestamp", "actor", "action", "changes_text"]
+
+
+class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
+    """
+    Serializer for managing Feature Flags stored within the 'value' JSON field
+    of a GlobalSettings instance. Each flag is represented as an explicit
+    BooleanField, mapping directly to keys within the 'value' dictionary.
+    """
+
+    focus_mode = serializers.BooleanField(
+        source="value.focus_mode", required=False, default=False
+    )
+
+    class Meta:
+        model = GlobalSettings
+        fields = "__all__"
+        read_only_fields = ["name"]

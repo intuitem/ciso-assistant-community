@@ -221,6 +221,7 @@ MIDDLEWARE = [
     "django_structlog.middlewares.RequestMiddleware",
     "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "core.focus_middleware.FocusModeMiddleware",
 ]
 
 ROOT_URLCONF = "ciso_assistant.urls"
