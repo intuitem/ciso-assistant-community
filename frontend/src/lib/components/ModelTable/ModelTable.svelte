@@ -290,7 +290,7 @@
 		(!URLModel?.includes('libraries') && Object.hasOwn(row?.meta, 'urn') && row?.meta?.urn) ||
 		row?.meta?.builtin ||
 		row?.meta?.urn ||
-		(URLModel?.includes('campaigns') && row?.meta?.compliance_assessments.length > 0) ||
+		(URLModel?.includes('campaigns') && row?.meta?.compliance_assessments?.length > 0) ||
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
