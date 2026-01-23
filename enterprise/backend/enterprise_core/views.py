@@ -258,52 +258,72 @@ class RoleViewSet(BaseModelViewSet):
     model = Role
     ordering = ["builtin", "name"]
 
+    def _get_default_permissions(self):
+        return Permission.objects.filter(
+            codename__in=["view_folder", "view_globalsettings"],
+            content_type__app_label__in=["iam", "global_settings"],
+        )
+
+    def _ensure_default_permissions(self, role):
+        role.permissions.add(*self._get_default_permissions())
+
     def perform_create(self, serializer):
         """
         Create per-folder UserGroups and RoleAssignments for the new role.
         """
-        role = serializer.save()
-        role.permissions.add(
-            Permission.objects.get(
-                codename="view_folder",
-                content_type__app_label="iam",
-                content_type__model="folder",
-            )
-        )
         with transaction.atomic():
-            for folder in Folder.objects.exclude(content_type="EN"):
+            role = serializer.save()
+            self._ensure_default_permissions(role)
+
+            root_folder = Folder.get_root_folder()
+            folders = Folder.objects.exclude(content_type="EN")
+
+            user_groups = []
+            role_assignments = []
+
+            for folder in folders:
                 ug, _ = UserGroup.objects.get_or_create(
-                    folder=folder, name=role.name, defaults={"builtin": False}
+                    folder=folder,
+                    name=role.name,
+                    defaults={"builtin": False},
                 )
-                ra = RoleAssignment.objects.create(
-                    folder=Folder.get_root_folder(),
-                    role=role,
-                    user_group=ug,
-                    is_recursive=True,
+                user_groups.append(ug)
+
+                role_assignments.append(
+                    RoleAssignment(
+                        folder=root_folder,
+                        role=role,
+                        user_group=ug,
+                        is_recursive=True,
+                    )
                 )
+
+            RoleAssignment.objects.bulk_create(role_assignments)
+
+            # M2M must be handled after bulk_create
+            for ra, folder in zip(role_assignments, folders):
                 ra.perimeter_folders.add(folder)
 
     def perform_update(self, serializer):
         """
-        Update the user groups associated with the role
+        Update the user groups associated with the role.
         """
-        role = serializer.save()
-        role.permissions.add(
-            Permission.objects.get(
-                codename="view_folder",
-                content_type__app_label="iam",
-                content_type__model="folder",
+        with transaction.atomic():
+            role = serializer.save()
+            self._ensure_default_permissions(role)
+
+            ug_ids = (
+                RoleAssignment.objects.filter(
+                    role=role,
+                    user_group__isnull=False,
+                    user_group__builtin=False,
+                )
+                .values_list("user_group_id", flat=True)
+                .distinct()
             )
-        )
-        ug_ids = (
-            RoleAssignment.objects.filter(
-                role=role, user_group__isnull=False, user_group__builtin=False
-            )
-            .values_list("user_group_id", flat=True)
-            .distinct()
-        )
-        if ug_ids:
-            UserGroup.objects.filter(id__in=ug_ids).update(name=role.name)
+
+            if ug_ids:
+                UserGroup.objects.filter(id__in=ug_ids).update(name=role.name)
 
     def perform_destroy(self, instance):
         """
