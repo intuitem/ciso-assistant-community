@@ -24,6 +24,21 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		}
 	}
 
+	// Fetch accessible folders for Focus Mode selector
+	let folders: { id: string; str: string; name: string; content_type: string }[] = [];
+	const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
+	if (locals.user && focusModeEnabled) {
+		try {
+			const foldersRes = await fetch(`${BASE_API_URL}/folders?no_focus=true`);
+			if (foldersRes.ok) {
+				const data = await foldersRes.json();
+				folders = data.results ?? data ?? [];
+			}
+		} catch (e) {
+			console.error('Failed to fetch folders for focus mode:', e);
+		}
+	}
+
 	const licenseStatus = await fetch(`${BASE_API_URL}/license-status/`).then((res) => res.json());
 	const LICENSE_EXPIRATION_NOTIFY_DAYS = Object.hasOwn(env, 'PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS')
 		? env.PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS
@@ -34,6 +49,7 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		settings: locals.settings,
 		featureflags: locals.featureflags,
 		licenseStatus,
-		LICENSE_EXPIRATION_NOTIFY_DAYS
+		LICENSE_EXPIRATION_NOTIFY_DAYS,
+		folders
 	};
 }) satisfies LayoutServerLoad;
