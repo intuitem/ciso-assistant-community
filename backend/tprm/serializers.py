@@ -250,6 +250,13 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         old_representatives = set(instance.representatives.all()) - set(
             validated_data.get("representatives", [])
         )
+
+        # If perimeter is being changed, update folder to match the new perimeter's folder
+        if "perimeter" in validated_data:
+            new_perimeter = validated_data["perimeter"]
+            if new_perimeter and new_perimeter.folder:
+                validated_data["folder"] = new_perimeter.folder
+
         with transaction.atomic():
             instance = super().update(instance, validated_data)
             self._create_or_update_audit(instance, audit_data)
