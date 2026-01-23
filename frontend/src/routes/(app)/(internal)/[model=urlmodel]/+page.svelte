@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { handlers } from 'svelte/legacy';
+	import { page } from '$app/state';
 
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -166,7 +167,7 @@
 								{/if}
 								{#if URLModel === 'applied-controls'}
 									<a
-										href="{URLModel}/flash-mode/"
+										href="{URLModel}/flash-mode/{page.url.search}"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.flashMode()}
 										aria-label={m.flashMode()}

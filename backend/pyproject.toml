@@ -9,7 +9,7 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.11"
 django = "^5.2.9"
-weasyprint = "^67.0"
+weasyprint = "^68.0"
 psycopg2-binary = "^2.9.11"
 gunicorn = "^23.0.0"
 django-filter = "^24.3"
@@ -54,6 +54,7 @@ jira = "^3.10.5"
 pytest-django = "4.8.0"
 pytest-html = "4.1.1"
 django-stubs = "5.0.2"
+mypy = "^1.9.0"
 coverage = "7.5.4"
 pre-commit = "3.7.1"
 

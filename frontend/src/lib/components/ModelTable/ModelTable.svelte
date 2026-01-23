@@ -510,7 +510,7 @@
 	}
 
 	let filterCount = $derived(
-		filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0)
+		filteredFields?.reduce((acc, field) => acc + filterValues?.[field]?.length, 0)
 	);
 
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {

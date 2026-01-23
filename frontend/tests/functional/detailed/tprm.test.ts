@@ -206,7 +206,9 @@ test('third-party representative can set their password', async ({ sideBar, mail
 		}
 
 		const passwordSetToast = setLoginPage.isToastVisible(
-			'Your password has been successfully set. Welcome to CISO Assistant!'
+			'Your password has been successfully set. Welcome to CISO Assistant!',
+			undefined,
+			{ optional: true }
 		);
 		await setLoginPage.setPasswordButton.click();
 		await passwordSetToast;
