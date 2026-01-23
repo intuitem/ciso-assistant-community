@@ -102,7 +102,7 @@
 
 	function debounce<T extends (...args: any[]) => any>(
 		func: T,
-		timeout = 300
+		timeout = 500
 	): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
 		let timer: ReturnType<typeof setTimeout>;
 		return (...args: Parameters<T>) => {
@@ -134,7 +134,7 @@
 		return res;
 	}
 
-	const updateBulk = debounce(_updateBulk, 300);
+	const updateBulk = debounce(_updateBulk, 500);
 
 	// Function to update requirement assessments
 	async function update(
