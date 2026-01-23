@@ -20,10 +20,5 @@ export const load = loadFlash(async ({ locals, url, cookies, request }) => {
 			});
 		}
 	}
-
-	return {
-		user: locals.user,
-		settings: locals.settings,
-		featureflags: locals.featureflags
-	};
+	return { user: locals.user, settings: locals.settings, featureflags: locals.featureflags };
 }) satisfies LayoutServerLoad;
