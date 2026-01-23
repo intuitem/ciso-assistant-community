@@ -288,6 +288,8 @@
 	const preventDelete = (row: TableSource) =>
 		(actionsURLModel === 'stored-libraries' && (row?.meta?.builtin || row?.meta?.is_loaded)) ||
 		(!URLModel?.includes('libraries') && Object.hasOwn(row?.meta, 'urn') && row?.meta?.urn) ||
+		row?.meta?.builtin ||
+		row?.meta?.urn ||
 		(URLModel?.includes('campaigns') && row?.meta?.compliance_assessments?.length > 0) ||
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
@@ -417,7 +419,10 @@
 									user.root_folder_id)
 					})
 				: Object.hasOwn(user.permissions, `change_${model.name}`)
-			: false) && !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)
+			: false) &&
+			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
+				URLModel === 'terminologies' ||
+				URLModel === 'entities')
 	);
 
 	let contextMenuDisplayEdit = $derived(
@@ -848,7 +853,9 @@
 												{model}
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
-												editURL={!(row.meta.builtin || row.meta.urn) || URLModel === 'terminologies'
+												editURL={!(row.meta.builtin || row.meta.urn) ||
+												URLModel === 'terminologies' ||
+												URLModel === 'entities'
 													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
 													: undefined}
 												{row}
@@ -894,7 +901,7 @@
 						{/each}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
 					{/if}
-					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)}
+					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) || URLModel === 'terminologies' || URLModel === 'entities'}
 						<ContextMenu.Item
 							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
 							onclick={() => {

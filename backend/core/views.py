@@ -647,7 +647,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return None
 
     def get_queryset(self) -> models.query.QuerySet:
-        """the scope_folder_id query_param allows scoping the objects to retrieve"""
         if not self.model:
             return None
         object_ids_view = None
@@ -663,14 +662,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     object_ids_view = [id]
 
         if not object_ids_view:
-            scope_folder_id = self.request.query_params.get("scope_folder_id")
-            scope_folder = (
-                get_object_or_404(Folder, id=scope_folder_id)
-                if scope_folder_id
-                else Folder.get_root_folder()
-            )
             object_ids_view = RoleAssignment.get_accessible_object_ids(
-                scope_folder, self.request.user, self.model
+                Folder.get_root_folder(), self.request.user, self.model
             )[0]
 
         queryset = self.model.objects.filter(id__in=object_ids_view)

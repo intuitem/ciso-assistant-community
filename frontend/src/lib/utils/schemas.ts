@@ -540,6 +540,7 @@ export const FeatureFlagsSchema = z.object({
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
+	focus_mode: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
 	metrology: z.boolean().optional()
 });

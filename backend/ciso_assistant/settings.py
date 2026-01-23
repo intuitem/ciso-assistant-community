@@ -224,6 +224,7 @@ MIDDLEWARE = [
     "django_structlog.middlewares.RequestMiddleware",
     "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "core.focus_middleware.FocusModeMiddleware",
 ]
 ROOT_URLCONF = "ciso_assistant.urls"
 # we leave these for the API UI tools - even if Django templates and Admin are not used anymore
@@ -433,6 +434,9 @@ else:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": SQLITE_FILE,
+            "TEST": {
+                "NAME": BASE_DIR / "db" / "test_ciso-assistant.sqlite3",
+            },
             "OPTIONS": {
                 "timeout": 120,
             },
