@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import (
@@ -80,6 +81,19 @@ class QuantitativeRiskStudyWriteSerializer(BaseModelSerializer):
         model = QuantitativeRiskStudy
         exclude = ["created_at", "updated_at"]
 
+    def update(self, instance, validated_data):
+        old_folder_id = instance.folder_id
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
+            if old_folder_id != updated_instance.folder_id:
+                QuantitativeRiskScenario.objects.filter(
+                    quantitative_risk_study=updated_instance
+                ).update(folder=updated_instance.folder)
+                QuantitativeRiskHypothesis.objects.filter(
+                    quantitative_risk_scenario__quantitative_risk_study=updated_instance
+                ).update(folder=updated_instance.folder)
+        return updated_instance
+
 
 class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
@@ -128,6 +142,16 @@ class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
         )
 
         return scenario
+
+    def update(self, instance, validated_data):
+        old_folder_id = instance.folder_id
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
+            if old_folder_id != updated_instance.folder_id:
+                QuantitativeRiskHypothesis.objects.filter(
+                    quantitative_risk_scenario=updated_instance
+                ).update(folder=updated_instance.folder)
+        return updated_instance
 
 
 class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):

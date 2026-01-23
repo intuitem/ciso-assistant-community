@@ -1,4 +1,5 @@
 from core.serializers import BaseModelSerializer, ReferentialSerializer
+from django.db import transaction
 from core.serializer_fields import FieldsRelatedField
 from .models import (
     ProcessingNature,
@@ -118,6 +119,25 @@ class ProcessingWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Processing
         fields = "__all__"
+
+    def update(self, instance, validated_data):
+        old_folder_id = instance.folder_id
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
+            if old_folder_id != updated_instance.folder_id:
+                related_models = [
+                    Purpose,
+                    PersonalData,
+                    DataSubject,
+                    DataRecipient,
+                    DataContractor,
+                    DataTransfer,
+                ]
+                for model in related_models:
+                    model.objects.filter(processing=updated_instance).update(
+                        folder=updated_instance.folder
+                    )
+        return updated_instance
 
 
 class ProcessingReadSerializer(BaseModelSerializer):
