@@ -464,6 +464,12 @@ class LogEntryViewSet(
     serializer_class = LogEntrySerializer
 
     def get_queryset(self):
+        if not RoleAssignment.is_access_allowed(
+            user=self.request.user,
+            perm=Permission.objects.get(codename="view_logentry"),
+            folder=Folder.get_root_folder(),
+        ):
+            return LogEntry.objects.none()
         return LogEntry.objects.all().annotate(
             folder=Lower(
                 Case(
