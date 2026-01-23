@@ -433,6 +433,9 @@ else:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": SQLITE_FILE,
+            "TEST": {
+                "NAME": BASE_DIR / "db" / "test_ciso-assistant.sqlite3",
+            },
             "OPTIONS": {
                 "timeout": 120,
             },
