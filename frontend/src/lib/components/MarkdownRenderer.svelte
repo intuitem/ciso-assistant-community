@@ -67,7 +67,7 @@
 			.replace(/<\/p>\s*<ol>/g, '</p><ol>') // Remove space between paragraphs and ordered lists
 			.replace(/<\/ol>\s*<p>/g, '</ol><p>'); // Remove space between ordered lists and paragraphs
 
-		return html;
+		return html.trim();
 	}
 
 	let renderedContent = $derived(processContent(content));
