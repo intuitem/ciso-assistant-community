@@ -47,7 +47,6 @@
 	cacheLock={cacheLocks['perimeter']}
 	bind:cachedValue={formDataCache['perimeter']}
 	label={m.perimeter()}
-	hidden={initialData.perimeter}
 />
 <TextField
 	{form}
