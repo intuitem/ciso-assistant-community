@@ -40,7 +40,6 @@
 	cacheLock={cacheLocks['perimeter']}
 	bind:cachedValue={formDataCache['perimeter']}
 	label={m.perimeter()}
-	hidden={initialData.perimeter}
 />
 {#if !data.compliance_assessment}
 	<Checkbox
