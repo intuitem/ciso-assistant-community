@@ -331,10 +331,12 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 
 #### Supported fields
 
+<mark style="color:$danger;">\*</mark><mark style="color:$info;">:  Required fields</mark>
+
 #### Entities
 
-* `ref_id`
-* `name`
+* `ref_id`&#x20;
+* `name` <mark style="color:$danger;">\*</mark>
 * `description`
 * `mission`
 * `country` (Country code [https://en.wikipedia.org/wiki/ISO\_3166-1\_alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2))
@@ -344,20 +346,20 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * `penetration` (Integer in \[0,4])
 * `maturity`  (Integer in \[1,4])
 * `trust`  (Interger in \[1,4])
-* `domain`&#x20;
+* `domain` <mark style="color:$danger;">\*</mark>
 
 #### Solutions
 
 * `ref_id`
-* `name`
+* `name` <mark style="color:$danger;">\*</mark>
 * `description`
-* `provider_entity_ref_id`
+* `provider_entity_ref_id` <mark style="color:$danger;">\*</mark>
 * `criticality`  (Integer in \[1,4])
 
 #### Contracts
 
 * `ref_id`
-* `name`
+* `name` <mark style="color:$danger;">\*</mark>
 * `description`
 * `provider_entity_ref_id`
 * `solution_ref_id`
