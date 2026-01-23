@@ -4041,7 +4041,7 @@ class Incident(NameDescriptionMixin, FolderMixin):
 
     is_published = models.BooleanField(_("published"), default=True)
 
-    fields_to_check = ["name", "ref_id"]
+    fields_to_check = ["name"]
 
     class Meta:
         verbose_name = "Incident"
@@ -4989,24 +4989,6 @@ class RiskAssessment(Assessment):
         # --- check on the risk risk_assessment:
         _object = serializers.serialize("json", [self])
         _object = json.loads(_object)
-        root_folder_id = Folder.get_root_folder_id()
-        assessment_folder_id = self.folder_id
-        root_folder_value = str(root_folder_id) if root_folder_id else None
-        assessment_folder_value = (
-            str(assessment_folder_id) if assessment_folder_id else None
-        )
-
-        def is_domain_mismatch(folder_id) -> bool:
-            if not folder_id or not assessment_folder_value:
-                return False
-            folder_value = str(folder_id)
-            if (
-                assessment_folder_value == root_folder_value
-                or folder_value == root_folder_value
-            ):
-                return False
-            return folder_value != assessment_folder_value
-
         if self.status == Assessment.Status.IN_PROGRESS:
             info_lst.append(
                 {
@@ -6417,24 +6399,6 @@ class ComplianceAssessment(Assessment):
         # --- check on the assessment:
         _object = serializers.serialize("json", [self])
         _object = json.loads(_object)
-        root_folder_id = Folder.get_root_folder_id()
-        assessment_folder_id = self.folder_id
-        root_folder_value = str(root_folder_id) if root_folder_id else None
-        assessment_folder_value = (
-            str(assessment_folder_id) if assessment_folder_id else None
-        )
-
-        def is_domain_mismatch(folder_id) -> bool:
-            if not folder_id or not assessment_folder_value:
-                return False
-            folder_value = str(folder_id)
-            if (
-                assessment_folder_value == root_folder_value
-                or folder_value == root_folder_value
-            ):
-                return False
-            return folder_value != assessment_folder_value
-
         if self.status == Assessment.Status.IN_PROGRESS:
             info_lst.append(
                 {
@@ -6508,12 +6472,11 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on applied controls:
-        applied_control_qs = AppliedControl.objects.filter(
-            requirement_assessments__compliance_assessment=self
-        )
         _applied_controls = serializers.serialize(
             "json",
-            applied_control_qs.order_by("created_at"),
+            AppliedControl.objects.filter(
+                requirement_assessments__compliance_assessment=self
+            ).order_by("created_at"),
         )
         applied_controls = [x["fields"] for x in json.loads(_applied_controls)]
         for i in range(len(applied_controls)):
@@ -6535,7 +6498,9 @@ class ComplianceAssessment(Assessment):
 
         # --- check on evidence:
         evidence_objects = Evidence.objects.filter(
-            applied_controls__in=applied_control_qs
+            applied_controls__in=AppliedControl.objects.filter(
+                requirement_assessments__compliance_assessment=self
+            )
         ).order_by("created_at")
 
         for evidence_obj in evidence_objects:
@@ -7874,26 +7839,6 @@ class Actor(AbstractBaseModel):
 
     def get_emails(self) -> list[str]:
         return self.specific.get_emails()
-
-    @classmethod
-    def get_all_for_user(cls, user) -> list["Actor"]:
-        """
-        Get all actors related to a user.
-        Includes:
-        - The user's own actor
-        - Actors of teams where the user is leader, deputy, or member
-        """
-        actors = []
-        if hasattr(user, "actor") and user.actor:
-            actors.append(user.actor)
-
-        team_actors = cls.objects.filter(
-            team__in=Team.objects.filter(
-                Q(leader=user) | Q(deputies=user) | Q(members=user)
-            )
-        ).distinct()
-
-        return actors + list(team_actors)
 
     def __str__(self):
         return str(self.specific)
