@@ -100,8 +100,23 @@
 		return result;
 	}
 
+	function debounce<T extends (...args: any[]) => any>(
+		func: T,
+		timeout = 300
+	): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
+		let timer: ReturnType<typeof setTimeout>;
+		return (...args: Parameters<T>) => {
+			clearTimeout(timer);
+			return new Promise((resolve) => {
+				timer = setTimeout(() => {
+					resolve(func(...args));
+				}, timeout);
+			});
+		};
+	}
+
 	// Function to update requirement assessments, the data argument contain fields as keys and the associated values as values.
-	async function updateBulk(
+	async function _updateBulk(
 		requirementAssessment: Record<string, any>,
 		data: { [key: string]: string | number | boolean | null }
 	) {
@@ -118,6 +133,8 @@
 		});
 		return res;
 	}
+
+	const updateBulk = debounce(_updateBulk, 300);
 
 	// Function to update requirement assessments
 	async function update(
