@@ -327,6 +327,51 @@ Adding entities, solutions and contracts go through the same file to be able to 
 
 {% file src="../.gitbook/assets/third_parties_ecosystem_template (1).xlsx" %}
 
+The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Contracts"
+
+#### Supported fields
+
+#### Entities
+
+* `ref_id`
+* `name`
+* `description`
+* `mission`
+* `country` (Country code [https://en.wikipedia.org/wiki/ISO\_3166-1\_alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2))
+* `currency`  (ISO 4217 format [https://en.wikipedia.org/wiki/ISO\_4217](https://en.wikipedia.org/wiki/ISO_4217))
+* `parent_entity_id`
+* `dependency`(Integer in \[0,4])
+* `penetration` (Integer in \[0,4])
+* `maturity`  (Integer in \[1,4])
+* `trust`  (Interger in \[1,4])
+* `domain`&#x20;
+
+#### Solutions
+
+* `ref_id`
+* `name`
+* `description`
+* `provider_entity_ref_id`
+* `criticality`  (Integer in \[1,4])
+
+#### Contracts
+
+* `ref_id`
+* `name`
+* `description`
+* `provider_entity_ref_id`
+* `solution_ref_id`
+* `status`  can be `draft` , `active`,`expired` or `terminated`
+* `start_date`
+* `end_date`
+* `annual_expense`
+* `currency` (ISO 4217 format [https://en.wikipedia.org/wiki/ISO\_4217](https://en.wikipedia.org/wiki/ISO_4217))
+* `domain`
+* `lei`
+* `euid`
+* `vat`
+* `duns`
+
 ## Processings
 
 ### Template
