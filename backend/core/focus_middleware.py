@@ -39,9 +39,8 @@ def _is_path_exempt(request) -> bool:
     Check if the request path should be exempt from focus mode filtering.
     """
     if request.path == "/api/folders/":
-        # Only apply focus when explicitly requested so the focus selector
-        # and domain listing can remain unscoped.
-        return not _is_truthy(request.GET.get("apply_focus"))
+        # Only exempt if apply_focus is set
+        return _is_truthy(request.GET.get("apply_focus"))
     for exempt_path in FOCUS_MODE_EXEMPT_PATHS:
         if request.path.startswith(exempt_path):
             return True
