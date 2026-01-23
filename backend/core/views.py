@@ -7865,6 +7865,49 @@ class CampaignViewSet(BaseModelViewSet):
                 )
                 compliance_assessment.create_requirement_assessments()
 
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        campaign = serializer.instance
+        frameworks = list(campaign.frameworks.all())
+        perimeters = list(campaign.perimeters.all())
+        framework_ids = [framework.id for framework in frameworks]
+        perimeter_ids = [perimeter.id for perimeter in perimeters]
+
+        # unlink audits that doesnt match
+        ComplianceAssessment.objects.filter(campaign=campaign).exclude(
+            framework_id__in=framework_ids,
+            perimeter_id__in=perimeter_ids,
+        ).update(campaign=None)
+
+        # with the new perimeter/framework
+        existing_pairs = set(
+            ComplianceAssessment.objects.filter(campaign=campaign).values_list(
+                "perimeter_id", "framework_id"
+            )
+        )
+        for perimeter in perimeters:
+            for framework in frameworks:
+                if (perimeter.id, framework.id) in existing_pairs:
+                    continue
+                framework_implementation_groups = None
+                if campaign.selected_implementation_groups:
+                    framework_implementation_groups = [
+                        group["value"]
+                        for group in campaign.selected_implementation_groups
+                        if group["framework"] == str(framework.id)
+                    ]
+                compliance_assessment = ComplianceAssessment.objects.create(
+                    name=f"{campaign.name} - {perimeter.name} - {framework.name}",
+                    campaign=campaign,
+                    perimeter=perimeter,
+                    framework=framework,
+                    folder=perimeter.folder,
+                    selected_implementation_groups=framework_implementation_groups
+                    if framework_implementation_groups
+                    else None,
+                )
+                compliance_assessment.create_requirement_assessments()
+
 
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
