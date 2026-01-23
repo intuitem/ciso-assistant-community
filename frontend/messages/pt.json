@@ -85,6 +85,7 @@
 	"frameworks": "Frameworks",
 	"frameworksColon": "Estruturas:",
 	"domains": "Domínios",
+	"userFolderHelpText": "Domínio onde o usuário fica visível para outros com acesso a esse escopo (não afeta as permissões do usuário)",
 	"perimeters": "Âmbitos",
 	"users": "Usuários",
 	"user": "Usuário",

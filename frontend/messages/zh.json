@@ -138,6 +138,7 @@
 	"frameworks": "框架",
 	"frameworksColon": "框架：",
 	"domains": "域",
+	"userFolderHelpText": "用户对其他有该域访问权限的用户可见的域（不影响用户权限）",
 	"perimeters": "范围",
 	"users": "用户",
 	"user": "用户",

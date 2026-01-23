@@ -85,6 +85,7 @@
 	"frameworks": "Kerangka kerja",
 	"frameworksColon": "Kerangka kerja:",
 	"domains": "Domain",
+	"userFolderHelpText": "Domain di mana pengguna terlihat oleh orang lain yang memiliki akses ke domain tersebut (tidak mempengaruhi izin pengguna)",
 	"perimeters": "Lingkup",
 	"users": "Pengguna",
 	"user": "Pengguna",

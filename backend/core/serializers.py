@@ -1253,6 +1253,7 @@ class TeamReadSerializer(BaseModelSerializer):
 class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(fields=["builtin", "id"], many=True)
     has_mfa_enabled = serializers.BooleanField(read_only=True)
+    folder = FieldsRelatedField()
 
     class Meta:
         model = User
@@ -1261,6 +1262,7 @@ class UserReadSerializer(BaseModelSerializer):
             "email",
             "first_name",
             "last_name",
+            "folder",
             "is_active",
             "date_joined",
             "user_groups",
@@ -1296,6 +1298,7 @@ class UserWriteSerializer(BaseModelSerializer):
             "id",
             "email",
             "first_name",
+            "folder",
             "last_name",
             "is_active",
             "date_joined",
