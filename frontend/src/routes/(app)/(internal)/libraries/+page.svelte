@@ -10,7 +10,7 @@
 	} from '$lib/components/Modals/stores';
 
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { navData } from '$lib/components/SideBar/navData.js';
+	import { navData } from '$lib/components/SideBar/navData';
 
 	let { data } = $props();
 
