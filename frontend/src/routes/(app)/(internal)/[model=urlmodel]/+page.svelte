@@ -175,7 +175,7 @@
 									>
 									<a
 										href="{URLModel}/kanban-mode/{page.url.search}"
-										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
+										class="inline-block p-3 btn-mini-quaternary w-12 focus:relative"
 										title={m.kanbanMode()}
 										aria-label={m.kanbanMode()}
 										data-testid="kanban-mode-button"><i class="fa-solid fa-table-columns"></i></a
