@@ -155,6 +155,10 @@
 	// $inspect(data);
 </script>
 
+<svelte:head>
+	<title>CISO Assistant | {safeTranslate(displayTitle)}</title>
+</svelte:head>
+
 <!-- App Shell -->
 <div class="overflow-x-hidden">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
