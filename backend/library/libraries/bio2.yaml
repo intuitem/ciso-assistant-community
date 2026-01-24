@@ -4,7 +4,9 @@ urn: urn:intuitem:risk:library:bio2
 locale: en
 ref_id: bio2
 name: BIO2
-description: Baseline Information Security for Government 2 (BIO2)
+description: 'Baseline Information Security for Government 2 (BIO2)
+
+  24 September 2025, version 1.2 final'
 copyright: "The Baseline Information Security for Government 2 (BIO2) is entirely\
   \ structured in accordance with NEN-EN-ISO/IEC 27001, Annex A and NEN-EN-ISO/IEC\
   \ 27002. The Netherlands Standardisation Forum has included these standards in the\
@@ -31,7 +33,9 @@ provider: Rijksoverheid
 packager: intuitem
 translations:
   nl:
-    description: Baseline Informatiebeveiliging Overheid 2 (BIO2)
+    description: 'Baseline Informatiebeveiliging Overheid 2 (BIO2)
+
+      24 september 2025, versie 1.2 definitief'
     copyright: "\"De Baseline Informatiebeveiliging Overheid 2 (BIO2) is geheel gestructureerd\
       \ volgens NEN-EN-ISO/IEC 27001, bijlage A en NEN-EN-ISO/IEC 27002. Forum Standaardisatie\
       \ heeft deze normen opgenomen in de \u2018pas-toe-of-leg-uit\u2019-lijst met\
