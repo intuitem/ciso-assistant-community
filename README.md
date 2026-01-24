@@ -228,6 +228,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 88. India's Digital Personal Data Protection Act (DPDPA) - 2023 🇮🇳
 89. E-ITS (Estonia's national cyber security standard) - 2024 🇪🇪
 90. Microsoft cloud security benchmark v1 - ☁️🌐
+91. Baseline informatiebeveiliging Overheid (BIO2) 🇳🇱
 
 ### Community contributions
 
@@ -271,7 +272,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
 - ASD ISM 🇦🇺
-- Baseline informatiebeveiliging Overheid (BIO) 🇳🇱
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
