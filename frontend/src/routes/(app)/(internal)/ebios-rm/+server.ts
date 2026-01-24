@@ -5,9 +5,8 @@ import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const model = getModelInfo('ebios-rm');
-	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/${
-		url.searchParams ? '?' + url.searchParams.toString() : ''
-	}`;
+	const queryParams = url.searchParams.toString();
+	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/${queryParams ? '?' + queryParams : ''}`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
