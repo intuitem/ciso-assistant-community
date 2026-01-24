@@ -306,61 +306,73 @@ Start Claude Code and ask:
 
 ## Setup for LM Studio
 
-LM Studio supports MCP servers through its interface. The setup uses the same stdio transport.
+LM Studio supports MCP servers through an `mcp.json` configuration file, similar to Claude Desktop.
 
-### Step 1: Locate your Python/uv installation
-
-You'll need the full path to your Python or uv executable:
-
-```bash
-# Find uv
-which uv
-
-# Or find Python
-which python3
-```
-
-### Step 2: Configure in LM Studio
+### Step 1: Open the MCP configuration
 
 1. Open **LM Studio**
-2. Go to **Settings** → **MCP Servers** (or Developer/Advanced settings)
-3. Add a new MCP server with these settings:
+2. Go to **Settings** (gear icon)
+3. Click on the **Program** tab
+4. Find **Integrations** section
+5. Click the **Install** button
+6. Select **Edit mcp.json**
 
-| Setting | Value |
-|---------|-------|
-| Name | `ciso-assistant` |
-| Command | `/path/to/uv` |
-| Arguments | `--directory /path/to/ciso-assistant-community/cli run ca_mcp.py` |
-| Working Directory | `/path/to/ciso-assistant-community/cli` |
+### Step 2: Add the CISO Assistant server
 
-### Step 3: Set environment variables
+Add the following configuration to your `mcp.json`:
 
-In LM Studio's MCP configuration, add these environment variables:
+```json
+{
+  "mcpServers": {
+    "ciso-assistant": {
+      "command": "/path/to/uv",
+      "args": [
+        "--directory",
+        "/path/to/ciso-assistant-community/cli",
+        "run",
+        "ca_mcp.py"
+      ],
+      "env": {
+        "TOKEN": "your-personal-access-token",
+        "VERIFY_CERTIFICATE": "false",
+        "API_URL": "http://localhost:8000/api"
+      }
+    }
+  }
+}
+```
 
-| Variable | Value |
-|----------|-------|
-| `TOKEN` | Your Personal Access Token |
-| `API_URL` | `http://localhost:8000/api` |
-| `VERIFY_CERTIFICATE` | `false` |
+**Replace:**
+- `/path/to/uv` with your actual uv path (find it with `which uv` on macOS/Linux)
+- `/path/to/ciso-assistant-community/cli` with your actual cli folder path
+- `your-personal-access-token` with the token from Step 1
 
-### Alternative: Direct Python execution
+### Example (macOS)
 
-If you prefer not to use `uv`, you can run the MCP server directly with Python:
+```json
+{
+  "mcpServers": {
+    "ciso-assistant": {
+      "command": "/Users/yourname/.cargo/bin/uv",
+      "args": [
+        "--directory",
+        "/Users/yourname/ciso-assistant-community/cli",
+        "run",
+        "ca_mcp.py"
+      ],
+      "env": {
+        "TOKEN": "your-personal-access-token",
+        "VERIFY_CERTIFICATE": "false",
+        "API_URL": "http://localhost:8000/api"
+      }
+    }
+  }
+}
+```
 
-1. First, install dependencies:
-   ```bash
-   cd /path/to/ciso-assistant-community/cli
-   pip install -r requirements.txt
-   # or
-   pip install httpx mcp pyyaml requests python-dotenv rich
-   ```
+### Step 3: Save and restart
 
-2. Configure LM Studio:
-   | Setting | Value |
-   |---------|-------|
-   | Command | `/path/to/python3` |
-   | Arguments | `ca_mcp.py` |
-   | Working Directory | `/path/to/ciso-assistant-community/cli` |
+Save the `mcp.json` file and restart LM Studio for the changes to take effect
 
 ---
 
