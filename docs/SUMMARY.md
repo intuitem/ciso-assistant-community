@@ -98,6 +98,7 @@
   * [Jira](integration/third-party-integrations/jira.md)
   * [ServiceNow](integration/third-party-integrations/servicenow.md)
 * [Outgoing webhooks](integration/outgoing-webhooks.md)
+* [MCP setup guide](integration/mcp-setup-guide.md)
 
 ## Presentations
 
