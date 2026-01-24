@@ -85,12 +85,6 @@ objects:
       translations:
         nl:
           name: Overheidsrisico
-    - ref_id: no_gov
-      name: No Government risk
-      description: null
-      translations:
-        nl:
-          name: Geen overheidsmaatregel
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:bio2:5.01.01
       assessable: true
@@ -188,19 +182,6 @@ objects:
           description: Er is een CISO aangesteld die bevoegd is om onafhankelijk en
             zelfstandig te adviseren en te rapporteren aan het bestuur en of het controlerend
             orgaan over informatiebeveiliging.
-    - urn: urn:intuitem:risk:req_node:bio2:5.03.01
-      assessable: true
-      depth: 1
-      ref_id: 5.03.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:5.04.01
       assessable: true
       depth: 1
@@ -266,33 +247,6 @@ objects:
             over informatiebeveiliging.
 
             Dit overzicht wordt ten minste jaarlijks geactualiseerd.'
-    - urn: urn:intuitem:risk:req_node:bio2:5.06.01
-      assessable: true
-      depth: 1
-      ref_id: 5.06.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:5.07.01
-      assessable: true
-      depth: 1
-      ref_id: 5.07.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:5.08.01
       assessable: true
       depth: 1
@@ -339,31 +293,6 @@ objects:
             De volledigheid en actualiteit van de inventaris wordt periodiek gecontroleerd
             met tussenpozen die passend zijn voor de frequentie waarmee wijzigingen
             optreden.'
-    - urn: urn:intuitem:risk:req_node:bio2:5.10.01
-      assessable: true
-      depth: 1
-      ref_id: 5.10.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:5.11.01
-      assessable: true
-      depth: 1
-      ref_id: 5.11.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:5.12.01
       assessable: true
       depth: 1
@@ -383,19 +312,6 @@ objects:
 
             Hierbij wordt gebruik gemaakt van een vastgestelde impactclassificatiemethodiek
             die onderdeel is van de vastgestelde risicomanagementmethodiek.'
-    - urn: urn:intuitem:risk:req_node:bio2:5.13.01
-      assessable: true
-      depth: 1
-      ref_id: 5.13.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Ketenhygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:5.14.01
       assessable: true
       depth: 1
@@ -1040,19 +956,6 @@ objects:
             Ze worden indien relevant gemeld bij toezichthouders volgens de bepalingen
             uit de betrokken wet- en regelgeving zoals de Cbw, de Archiefwet en de
             Algemene verordening gegevensbescherming (AVG).
-    - urn: urn:intuitem:risk:req_node:bio2:5.26.01
-      assessable: true
-      depth: 1
-      ref_id: 5.26.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:5.27.01
       assessable: true
       depth: 1
@@ -1096,20 +999,6 @@ objects:
             en alle informatie om het incident te analyseren en op te lossen, is minimaal
             drie jaar. Dit betreft onder meer de informatie benodigd voor de analyse
             (waaronder logging), de oplossing en het advies.
-    - urn: urn:intuitem:risk:req_node:bio2:5.29.01
-      assessable: true
-      depth: 1
-      ref_id: 5.29.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:5.30.01
       assessable: true
       depth: 1
@@ -1138,33 +1027,6 @@ objects:
             \ de proceseigenaar kritieke systemen op basis van de vastgestelde risicomanagementmethodiek\
             \ en een expliciete risicoafweging. \nDe proceseigenaar actualiseert dit\
             \ overzicht ten minste eens per drie jaar."
-    - urn: urn:intuitem:risk:req_node:bio2:5.31.01
-      assessable: true
-      depth: 1
-      ref_id: 5.31.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - "ketenhygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:5.32.01
-      assessable: true
-      depth: 1
-      ref_id: 5.32.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:5.33.01
       assessable: true
       depth: 1
@@ -1186,19 +1048,6 @@ objects:
 
             De proceseigenaar heeft deze termijnen ook praktisch ingeregeld en toetst
             periodiek de werking hiervan.'
-    - urn: urn:intuitem:risk:req_node:bio2:5.34.01
-      assessable: true
-      depth: 1
-      ref_id: 5.34.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:5.35.01
       assessable: true
       depth: 1
@@ -1242,19 +1091,6 @@ objects:
             \ Verklaring (ICV), of een vergelijkbaar instrument, over de gehele informatiebeveiliging\
             \ van de overheidsorganisatie. De ICV of het vergelijkbare instrument\
             \ kan ook onderdeel zijn van de formele verantwoording."
-    - urn: urn:intuitem:risk:req_node:bio2:5.37.01
-      assessable: true
-      depth: 1
-      ref_id: 5.37.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:6.01.01
       assessable: true
       depth: 1
@@ -1339,58 +1175,6 @@ objects:
             medewerkers en contractanten het belang van opleiding en training op het
             gebied van informatiebeveiliging. Het management stimuleert hen actief
             deze periodiek te volgen.
-    - urn: urn:intuitem:risk:req_node:bio2:6.04.01
-      assessable: true
-      depth: 1
-      ref_id: 6.04.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:6.05.01
-      assessable: true
-      depth: 1
-      ref_id: 6.05.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:6.06.01
-      assessable: true
-      depth: 1
-      ref_id: 6.06.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:6.07.01
-      assessable: true
-      depth: 1
-      ref_id: 6.07.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:6.08.01
       assessable: true
       depth: 1
@@ -1440,58 +1224,6 @@ objects:
           description: "In geval van concrete beveiligingsrisico\u2019s worden waarschuwingen,\
             \ volgens onderlinge afspraken, verzonden aan de relevante collega\u2019\
             s binnen het beveiligingsdomein van de overheid."
-    - urn: urn:intuitem:risk:req_node:bio2:7.03.01
-      assessable: true
-      depth: 1
-      ref_id: 7.03.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:7.04.01
-      assessable: true
-      depth: 1
-      ref_id: 7.04.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:7.05.01
-      assessable: true
-      depth: 1
-      ref_id: 7.05.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:7.06.01
-      assessable: true
-      depth: 1
-      ref_id: 7.06.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:7.07.01
       assessable: true
       depth: 1
@@ -1505,32 +1237,6 @@ objects:
           description: Bij het gebruik van een chipcardtoken voor toegang tot systemen
             wordt bij het verwijderen van het token de toegangsbeveiligingsvergrendeling
             automatisch geactiveerd.
-    - urn: urn:intuitem:risk:req_node:bio2:7.08.01
-      assessable: true
-      depth: 1
-      ref_id: 7.08.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:7.09.01
-      assessable: true
-      depth: 1
-      ref_id: 7.09.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:7.10.01
       assessable: true
       depth: 1
@@ -1581,58 +1287,6 @@ objects:
         nl:
           description: Het gebruik van koeriers of transporteurs voor transport van
             geclassificeerde informatie voldoet aan vooraf opgestelde betrouwbaarheidseisen.
-    - urn: urn:intuitem:risk:req_node:bio2:7.11.01
-      assessable: true
-      depth: 1
-      ref_id: 7.11.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:7.12.01
-      assessable: true
-      depth: 1
-      ref_id: 7.12.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:7.13.01
-      assessable: true
-      depth: 1
-      ref_id: 7.13.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:7.14.01
-      assessable: true
-      depth: 1
-      ref_id: 7.14.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:8.01.01
       assessable: true
       depth: 1
@@ -1719,19 +1373,6 @@ objects:
         nl:
           description: Gebruikers kunnen alleen die informatie met specifiek belang
             inzien en verwerken die ze nodig hebben voor de uitoefening van hun taak.
-    - urn: urn:intuitem:risk:req_node:bio2:8.04.01
-      assessable: true
-      depth: 1
-      ref_id: 8.04.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:8.05.01
       assessable: true
       depth: 1
@@ -1749,19 +1390,6 @@ objects:
             wordt vooraf een risicoafweging gemaakt. De risicoafweging bepaalt onder
             welke voorwaarden en voor hoelang de leveranciers toegang krijgen. Uit
             een registratie blijkt hoe de rechten zijn toegekend.
-    - urn: urn:intuitem:risk:req_node:bio2:8.06.01
-      assessable: true
-      depth: 1
-      ref_id: 8.06.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:8.07.01
       assessable: true
       depth: 1
@@ -1927,58 +1555,6 @@ objects:
 
             Informatie afkomstig uit de Coordinated Vulnerability Disclosure (CVD)-meldingen
             is onderdeel van de incidentrapportage.'
-    - urn: urn:intuitem:risk:req_node:bio2:8.09.01
-      assessable: true
-      depth: 1
-      ref_id: 8.09.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:8.10.01
-      assessable: true
-      depth: 1
-      ref_id: 8.10.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:8.11.01
-      assessable: true
-      depth: 1
-      ref_id: 8.11.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:8.12.01
-      assessable: true
-      depth: 1
-      ref_id: 8.12.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:8.13.01
       assessable: true
       depth: 1
@@ -2040,19 +1616,6 @@ objects:
           description: De herstelprocedure wordt minimaal jaarlijks getest of na een
             grote wijziging, om de goede werking te waarborgen als deze in noodgevallen
             uitgevoerd moet worden.
-    - urn: urn:intuitem:risk:req_node:bio2:8.14.01
-      assessable: true
-      depth: 1
-      ref_id: 8.14.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:8.15.01
       assessable: true
       depth: 1
@@ -2212,19 +1775,6 @@ objects:
           description: Actieve netwerkcomponenten zijn voorzien van logging en monitoring
             van die logging om afwijkende gebeurtenissen te kunnen waarnemen en daarop
             te reageren.
-    - urn: urn:intuitem:risk:req_node:bio2:8.17.01
-      assessable: true
-      depth: 1
-      ref_id: 8.17.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:8.18.01
       assessable: true
       depth: 1
@@ -2377,19 +1927,6 @@ objects:
       translations:
         nl:
           description: Alle gescheiden groepen hebben een gedefinieerd beveiligingsniveau.
-    - urn: urn:intuitem:risk:req_node:bio2:8.23.01
-      assessable: true
-      depth: 1
-      ref_id: 8.23.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:8.24.01
       assessable: true
       depth: 1
@@ -2476,32 +2013,6 @@ objects:
             \ van een alternatieve leverancier als uit de risicoafweging blijkt dat\
             \ deze noodzakelijk zijn als onderdeel van gereedheid voor bedrijfscontinu\xEF\
             teit (beheersmaatregel 5.30)."
-    - urn: urn:intuitem:risk:req_node:bio2:8.25.01
-      assessable: true
-      depth: 1
-      ref_id: 8.25.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:8.26.01
-      assessable: true
-      depth: 1
-      ref_id: 8.26.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - "Basishygi\xEBne"
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:8.27.01
       assessable: true
       depth: 1
@@ -2518,19 +2029,6 @@ objects:
             \ en \u2018security by default\u2019 voor het ontwerpen van beveiliging\
             \ van informatiesystemen worden vastgesteld, gedocumenteerd, onderhouden\
             \ en toegepast voor alle activiteiten over het ontwikkelen van informatiesystemen."
-    - urn: urn:intuitem:risk:req_node:bio2:8.28.01
-      assessable: true
-      depth: 1
-      ref_id: 8.28.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
     - urn: urn:intuitem:risk:req_node:bio2:8.29.01
       assessable: true
       depth: 1
@@ -2622,29 +2120,3 @@ objects:
         nl:
           description: Wijzigingsbeheer vindt plaats op basis van een algemeen geaccepteerd
             beheerraamwerk.
-    - urn: urn:intuitem:risk:req_node:bio2:8.33.01
-      assessable: true
-      depth: 1
-      ref_id: 8.33.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
-    - urn: urn:intuitem:risk:req_node:bio2:8.34.01
-      assessable: true
-      depth: 1
-      ref_id: 8.34.01
-      description: No government measure, see Part 1 BIO2 Framework, obligations under
-        the BIO
-      implementation_groups:
-      - Overheidsrisico
-      - no_gov
-      translations:
-        nl:
-          description: Geen overheidsmaatregel, zie deel 1 Kader BIO2, verplichtingen
-            BIO
