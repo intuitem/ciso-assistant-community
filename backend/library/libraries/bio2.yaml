@@ -3,10 +3,15 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any
 urn: urn:intuitem:risk:library:bio2
 locale: en
 ref_id: bio2
-name: BIO2
+name: Baseline Information Security for Government 2 (BIO2)
 description: 'Baseline Information Security for Government 2 (BIO2)
 
-  24 September 2025, version 1.2 final'
+  24 September 2025, version 1.2 final
+
+  The BIO2 is the successor of the BIO 1.04zv. It is the renewed basic standard for
+  information security within the Dutch government. The BIO2 offers a uniform approach
+  and a common framework of standards for information security within the government,
+  in which risk management is central.'
 copyright: "The Baseline Information Security for Government 2 (BIO2) is entirely\
   \ structured in accordance with NEN-EN-ISO/IEC 27001, Annex A and NEN-EN-ISO/IEC\
   \ 27002. The Netherlands Standardisation Forum has included these standards in the\
@@ -28,14 +33,20 @@ copyright: "The Baseline Information Security for Government 2 (BIO2) is entirel
   \ Institute. For more information about NEN and the use of their products, see:\
   \ www.nen.nl."
 version: 1
-publication_date: 2026-01-24
+publication_date: 2026-01-25
 provider: Rijksoverheid
 packager: intuitem
 translations:
   nl:
+    name: Baseline Informatiebeveiliging Overheid 2 (BIO2)
     description: 'Baseline Informatiebeveiliging Overheid 2 (BIO2)
 
-      24 september 2025, versie 1.2 definitief'
+      24 september 2025, versie 1.2 definitief
+
+      De BIO2 is de opvolger van de BIO 1.04zv. Het is de vernieuwde basisnorm voor
+      informatiebeveiliging binnen de Nederlandse overheid. De BIO2 biedt een uniforme
+      aanpak en een gemeenschappelijk normenkader voor informatiebeveiliging binnen
+      de overheid, waarbij risicomanagement centraal staat.'
     copyright: "\"De Baseline Informatiebeveiliging Overheid 2 (BIO2) is geheel gestructureerd\
       \ volgens NEN-EN-ISO/IEC 27001, bijlage A en NEN-EN-ISO/IEC 27002. Forum Standaardisatie\
       \ heeft deze normen opgenomen in de \u2018pas-toe-of-leg-uit\u2019-lijst met\
@@ -60,12 +71,26 @@ objects:
   framework:
     urn: urn:intuitem:risk:framework:bio2
     ref_id: bio2
-    name: BIO2
-    description: Baseline Informatiebeveiliging Overheid 2 (BIO2)
+    name: Baseline Information Security for Government 2 (BIO2)
+    description: 'Baseline Information Security for Government 2 (BIO2)
+
+      24 September 2025, version 1.2 final
+
+      The BIO2 is the successor of the BIO 1.04zv. It is the renewed basic standard
+      for information security within the Dutch government. The BIO2 offers a uniform
+      approach and a common framework of standards for information security within
+      the government, in which risk management is central.'
     translations:
-      en:
-        name: BIO2
-        description: Baseline Information Security for Government 2 (BIO2)
+      nl:
+        name: Baseline Informatiebeveiliging Overheid 2 (BIO2)
+        description: 'Baseline Informatiebeveiliging Overheid 2 (BIO2)
+
+          24 september 2025, versie 1.2 definitief
+
+          De BIO2 is de opvolger van de BIO 1.04zv. Het is de vernieuwde basisnorm
+          voor informatiebeveiliging binnen de Nederlandse overheid. De BIO2 biedt
+          een uniforme aanpak en een gemeenschappelijk normenkader voor informatiebeveiliging
+          binnen de overheid, waarbij risicomanagement centraal staat.'
     implementation_groups_definition:
     - ref_id: "Basishygi\xEBne"
       name: Baseline hygiene
