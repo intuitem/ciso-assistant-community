@@ -164,6 +164,8 @@ class Purpose(NameDescriptionFolderMixin):
         max_length=255, choices=LEGAL_BASIS_CHOICES, default="privacy_other"
     )
 
+    fields_to_check = ["name", "legal_basis", "processing"]
+
     def __str__(self):
         return self.name if self.name else self.legal_basis
 
@@ -265,7 +267,7 @@ class PersonalData(NameDescriptionFolderMixin):
     is_sensitive = models.BooleanField(default=False)
     assets = models.ManyToManyField(Asset, blank=True, related_name="personal_data")
 
-    fields_to_check = ["name", "category"]
+    fields_to_check = ["name", "category", "processing"]
 
     def __str__(self):
         return self.name if self.name else self.category
@@ -328,6 +330,8 @@ class DataSubject(NameDescriptionFolderMixin):
     )
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
 
+    fields_to_check = ["name", "category", "processing"]
+
     def __str__(self):
         return self.name if self.name else self.category
 
@@ -385,6 +389,8 @@ class DataRecipient(NameDescriptionFolderMixin):
     )
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
 
+    fields_to_check = ["name", "category", "processing"]
+
     def __str__(self):
         return self.name if self.name else self.category
 
@@ -421,6 +427,8 @@ class DataContractor(NameDescriptionFolderMixin):
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
     documentation_link = models.URLField(blank=True)
 
+    fields_to_check = ["name", "relationship_type", "processing"]
+
     def __str__(self):
         return self.name if self.name else self.relationship_type
 
@@ -449,6 +457,8 @@ class DataTransfer(NameDescriptionFolderMixin):
     )
     guarantees = models.TextField(blank=True)
     documentation_link = models.URLField(blank=True)
+
+    fields_to_check = ["name", "country", "processing"]
 
     def __str__(self):
         return self.name if self.name else self.country

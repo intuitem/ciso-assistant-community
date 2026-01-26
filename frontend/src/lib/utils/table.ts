@@ -1960,16 +1960,16 @@ export const listViewFields = {
 		body: ['category', 'description', 'name']
 	},
 	'data-recipients': {
-		head: ['name', 'description', 'category'],
-		body: ['name', 'description', 'category']
+		head: ['category', 'description', 'customName'],
+		body: ['category', 'description', 'name']
 	},
 	'data-contractors': {
-		head: ['name', 'description', 'entity', 'relationshipType', 'country', 'documentationLink'],
-		body: ['name', 'description', 'entity', 'relationship_type', 'country', 'documentation_link']
+		head: ['entity', 'relationshipType', 'country', 'customName', 'documentationLink'],
+		body: ['entity', 'relationship_type', 'country', 'name', 'documentation_link']
 	},
 	'data-transfers': {
-		head: ['name', 'description', 'entity', 'country', 'legalBasis', 'documentationLink'],
-		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
+		head: ['entity', 'country', 'legalBasis', 'customName', 'documentationLink'],
+		body: ['entity', 'country', 'legal_basis', 'name', 'documentation_link']
 	},
 	'ebios-rm': {
 		head: ['name', 'description', 'domain', 'quotationMethod', 'createdAt', 'updatedAt'],
