@@ -9,20 +9,23 @@ on:
       - "backend/**"
       - ".github/workflows/backend-api-tests.yml"
   workflow_dispatch:
-# Cancel older in-progress runs for the same PR or the same ref (branch)
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   GITHUB_WORKFLOW: github_actions
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.14"
   UBUNTU_VERSION: "ubuntu-24.04"
+  BACKEND_DIR: ./backend
+
 jobs:
-  test:
+  # JOB 1: Build DB and Cache Deps
+  setup:
     runs-on: ubuntu-24.04
     env:
-      backend-directory: ./backend
       DJANGO_DEBUG: "True"
       DB_HOST: localhost
       EMAIL_HOST: localhost
@@ -35,46 +38,128 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v3
-      - name: Set up python ${{ matrix.python-version }}
+
+      - name: Set up python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: "pip"
-      - name: Install Poetry via pipx
-        shell: bash
+
+      - name: Install Poetry
         run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade pipx
-          python -m pipx ensurepath
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          python -m pipx install poetry
-      - name: Check Poetry version
-        shell: bash
-        run: poetry --version
-      - name: Install backend requirements
-        working-directory: ${{ env.backend-directory }}
+          pipx install poetry
+          poetry config virtualenvs.in-project true
+
+      - name: Cache Virtualenv
+        id: cache-venv
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.BACKEND_DIR }}/.venv
+          key: venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+
+      - name: Install dependencies
+        working-directory: ${{ env.BACKEND_DIR }}
+        if: steps.cache-venv.outputs.cache-hit != 'true'
         run: poetry install
+
       - name: Run migrations
-        working-directory: ${{env.backend-directory}}
+        working-directory: ${{ env.BACKEND_DIR }}
         run: poetry run python manage.py migrate
-      - name: Run API tests
-        working-directory: ${{env.backend-directory}}
-        run: poetry run pytest app_tests/api --html=pytest-report.html --self-contained-html
-      - name: Set current date as env variable
-        if: ${{ !cancelled() }}
-        run: echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
-      - name: Sanitize branch name
+
+      - name: Upload Database
+        uses: actions/upload-artifact@v4
+        with:
+          name: prebuilt-db
+          path: ${{ env.BACKEND_DIR }}/db/ciso-assistant.sqlite3
+          retention-days: 1
+
+  # JOB 2: Generate Matrix
+  list-files:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Find Test Files
+        id: set-matrix
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: |
+          FILES=$(find app_tests/api -name "test_*.py" ! -name "test_utils.py" | sort | jq -R -s -c 'split("\n")[:-1]')
+          echo "matrix=$FILES" >> $GITHUB_OUTPUT
+
+  # JOB 3: Run Parallel Tests
+  test:
+    needs: [setup, list-files]
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        test-file: ${{ fromJson(needs.list-files.outputs.matrix) }}
+    env:
+      DJANGO_DEBUG: "True"
+      DB_HOST: localhost
+      EMAIL_HOST: localhost
+      EMAIL_PORT: 1025
+      EMAIL_HOST_USER: ""
+      EMAIL_HOST_PASSWORD: ""
+      DEFAULT_FROM_EMAIL: "ciso-assistant@alsigo.net"
+      CISO_ASSISTANT_SUPERUSER_EMAIL: ""
+      CISO_ASSISTANT_URL: http://127.0.0.1:5173
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install Poetry
+        run: |
+          pipx install poetry
+          poetry config virtualenvs.in-project true
+
+      # Restore the exact venv created in 'setup' job to skip installation
+      - name: Restore Virtualenv Cache
+        uses: actions/cache@v4
+        id: cache-venv
+        with:
+          path: ${{ env.BACKEND_DIR }}/.venv
+          key: venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+          fail-on-cache-miss: true
+
+      - name: Download Database
+        uses: actions/download-artifact@v4
+        with:
+          name: prebuilt-db
+          path: ${{ env.BACKEND_DIR }}/db/
+
+      - name: Prepare Test Database
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: |
+          # Copy pre-built DB to the name defined in settings.py TEST config
+          cp db/ciso-assistant.sqlite3 db/test_ciso-assistant.sqlite3
+
+      - name: Run Test File
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: |
+          # Use --reuse-db to prevent pytest from destroying/recreating the DB
+          poetry run pytest ${{ matrix.test-file }} --reuse-db --html=pytest-report-${{ strategy.job-index }}.html --self-contained-html
+
+      - name: Prepare Artifact Name
         if: ${{ !cancelled() }}
         run: |
-          SAFE_NAME=$(echo "$BRANCH_NAME" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
-          echo "BRANCH_SANITIZED=$SAFE_NAME" >> $GITHUB_ENV
+          SAFE_BRANCH=$(echo "${{ env.BRANCH_NAME }}" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          echo "BRANCH_SANITIZED=$SAFE_BRANCH" >> $GITHUB_ENV
+          echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-report-${{ matrix.python-version }}
-          path: ${{ env.backend-directory }}/pytest-report.html
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-report-${{ strategy.job-index }}
+          path: ${{ env.BACKEND_DIR }}/pytest-report-${{ strategy.job-index }}.html
           retention-days: 5

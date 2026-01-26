@@ -1,4 +1,6 @@
-from allauth.socialaccount.providers.saml.provider import SAMLProvider
+from allauth.socialaccount.providers.saml.provider import (  # type: ignore[import-untyped]
+    SAMLProvider,
+)
 
 
 DEFAULT_SAML_ATTRIBUTE_MAPPING = SAMLProvider.default_attribute_mapping

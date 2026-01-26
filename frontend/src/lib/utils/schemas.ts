@@ -540,6 +540,7 @@ export const FeatureFlagsSchema = z.object({
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
+	focus_mode: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
 	metrology: z.boolean().optional()
 });
@@ -1117,7 +1118,6 @@ export const FindingsAssessmentSchema = z.object({
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
-	owner: z.string().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	category: z.string().default('--'),
 	evidences: z.string().uuid().optional().array().optional(),
@@ -1412,7 +1412,7 @@ export const teamSchema = z.object({
 	team_email: z.string().email().optional(),
 	folder: z.string(),
 	members: z.array(z.string().uuid().optional()).optional(),
-	leader: z.string().uuid().optional().nullable(),
+	leader: z.string().uuid(),
 	deputies: z.array(z.string().uuid().optional()).optional()
 });
 

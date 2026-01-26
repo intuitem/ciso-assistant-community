@@ -113,7 +113,6 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 
 <TextField
@@ -127,7 +126,7 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="actors?user__is_third_party=False"
+	optionsEndpoint="actors"
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -251,7 +250,7 @@
 		<AutocompleteSelect
 			{form}
 			multiple
-			optionsEndpoint="actors?user__is_third_party=False"
+			optionsEndpoint="actors"
 			optionsLabelField="str"
 			optionsInfoFields={{
 				fields: [{ field: 'type', translate: true }],
