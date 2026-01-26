@@ -161,6 +161,7 @@
 							baseClass="flex-1"
 							multiple
 							optionsEndpoint="actors"
+							optionsExtraFields={[['folder', 'str']]}
 							optionsLabelField="str"
 							optionsInfoFields={{
 								fields: [{ field: 'type', translate: true }],

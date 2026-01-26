@@ -79,6 +79,7 @@
 	{form}
 	optionsEndpoint="entities"
 	field="provider_entity"
+	optionsExtraFields={[['folder', 'str']]}
 	cacheLock={cacheLocks['provider_entity']}
 	bind:cachedValue={formDataCache['provider_entity']}
 	label={m.providerEntity()}
@@ -87,6 +88,7 @@
 	{form}
 	optionsEndpoint="entities"
 	field="beneficiary_entity"
+	optionsExtraFields={[['folder', 'str']]}
 	cacheLock={cacheLocks['beneficiary_entity']}
 	bind:cachedValue={formDataCache['beneficiary_entity']}
 	label={m.beneficiaryEntity()}
@@ -129,6 +131,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
