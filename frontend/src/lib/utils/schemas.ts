@@ -841,12 +841,14 @@ export const dataSubjectSchema = z.object({
 });
 export const dataRecipientSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
 	processing: z.string()
 });
 export const dataContractorSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	relationship_type: z.string(),
 	country: z.string(),
@@ -861,6 +863,7 @@ export const dataContractorSchema = z.object({
 });
 export const dataTransferSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	country: z.string(),
 	documentation_link: z
@@ -876,11 +879,11 @@ export const dataTransferSchema = z.object({
 });
 
 export const personalDataSchema = z.object({
+	...NameDescriptionMixin,
 	name: z.string().optional(),
-	description: z.string().optional().nullable(),
 	category: z.string(),
-	retention: z.string(),
-	deletion_policy: z.string(),
+	retention: z.string().optional(),
+	deletion_policy: z.string().optional(),
 	is_sensitive: z.boolean().optional(),
 	processing: z.string(),
 	assets: z.string().uuid().optional().array().optional()

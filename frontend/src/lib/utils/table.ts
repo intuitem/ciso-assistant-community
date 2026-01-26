@@ -1948,7 +1948,7 @@ export const listViewFields = {
 		}
 	},
 	'personal-data': {
-		head: ['category', 'isSensitive', 'retention', 'deletionPolicy', , 'processing'],
+		head: ['category', 'isSensitive', 'retention', 'deletionPolicy', 'customName', 'processing'],
 		body: ['category', 'is_sensitive', 'retention', 'deletion_policy', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,

@@ -262,6 +262,8 @@ class PersonalData(NameDescriptionFolderMixin):
     is_sensitive = models.BooleanField(default=False)
     assets = models.ManyToManyField(Asset, blank=True, related_name="personal_data")
 
+    fields_to_check = ["name", "category"]
+
     def __str__(self):
         return self.name if self.name else self.category
 
@@ -371,10 +373,17 @@ class DataRecipient(NameDescriptionFolderMixin):
         ("privacy_other", "Other Recipient Category"),
     )
 
+    name = models.CharField(
+        max_length=200, verbose_name=_("Name"), null=True, blank=True
+    )
+
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="data_recipients"
     )
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
+
+    def __str__(self):
+        return self.name if self.name else self.category
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -389,6 +398,11 @@ class DataContractor(NameDescriptionFolderMixin):
         ("privacy_independent_controller", "Independent Controller"),
         ("privacy_other", "Other Relationship Type"),
     )
+
+    name = models.CharField(
+        max_length=200, verbose_name=_("Name"), null=True, blank=True
+    )
+
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="contractors_involved"
     )
@@ -404,12 +418,19 @@ class DataContractor(NameDescriptionFolderMixin):
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
     documentation_link = models.URLField(blank=True)
 
+    def __str__(self):
+        return self.name if self.name else self.relationship_type
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
 
 
 class DataTransfer(NameDescriptionFolderMixin):
+    name = models.CharField(
+        max_length=200, verbose_name=_("Name"), null=True, blank=True
+    )
+
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="data_transfers"
     )
@@ -425,6 +446,9 @@ class DataTransfer(NameDescriptionFolderMixin):
     )
     guarantees = models.TextField(blank=True)
     documentation_link = models.URLField(blank=True)
+
+    def __str__(self):
+        return self.name if self.name else self.country
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder

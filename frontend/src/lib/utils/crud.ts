@@ -1307,6 +1307,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataRecipients',
 		verboseName: 'data recipient',
 		verboseNamePlural: 'data recipients',
+		customNameDescription: true,
 		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }],
 		selectFields: [{ field: 'category' }]
 	},
@@ -1317,6 +1318,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataContractors',
 		verboseName: 'data contractor',
 		verboseNamePlural: 'data contractors',
+		customNameDescription: true,
 		foreignKeyFields: [
 			{ field: 'processing', urlModel: 'processings' },
 			{ field: 'entity', urlModel: 'entities' }
@@ -1334,7 +1336,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'processings' },
 			{ field: 'entity', urlModel: 'entities' }
 		],
-		selectFields: [{ field: 'legal_basis' }, { field: 'country' }]
+		selectFields: [{ field: 'legal_basis' }, { field: 'country' }],
+		customNameDescription: true
 	},
 	'ebios-rm': {
 		endpointUrl: 'ebios-rm/studies',
