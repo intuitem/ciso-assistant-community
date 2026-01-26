@@ -722,10 +722,10 @@
 																				{@const [securityObjectiveName, securityObjectiveValue] =
 																					Object.entries(val)[0]}
 																				{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
+																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
-																					>{val.str}</Anchor
+																					>{safeTranslate(val.str)}</Anchor
 																				>
 																			{:else if val.str}
 																				{safeTranslate(val.str)}
@@ -771,11 +771,11 @@
 																	>
 																{:else}
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																		>{value.str}</Anchor
+																		>{safeTranslate(value.str)}</Anchor
 																	>
 																{/if}
 															{:else}
-																{value.str ?? '-'}
+																{safeTranslate(value.str) ?? '-'}
 															{/if}
 														{:else if value && value.hexcolor}
 															<p
