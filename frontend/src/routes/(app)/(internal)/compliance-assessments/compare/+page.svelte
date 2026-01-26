@@ -183,6 +183,7 @@
 								name="base_compliance_result"
 								title={m.compliance()}
 								orientation="horizontal"
+								showPercentage={true}
 								height="h-full"
 								values={data.baseAudit.donut_data.result.values}
 								colors={data.baseAudit.donut_data.result.values.map(
@@ -196,6 +197,7 @@
 								name="base_compliance_status"
 								title={m.progress()}
 								orientation="horizontal"
+								showPercentage={true}
 								height="h-full"
 								values={data.baseAudit.donut_data.status.values}
 								colors={data.baseAudit.donut_data.status.values.map(
@@ -239,6 +241,7 @@
 								name="compare_compliance_result"
 								title={m.compliance()}
 								orientation="horizontal"
+								showPercentage={true}
 								height="h-full"
 								values={data.compareAudit.donut_data.result.values}
 								colors={data.compareAudit.donut_data.result.values.map(
@@ -252,6 +255,7 @@
 								name="compare_compliance_status"
 								title={m.progress()}
 								orientation="horizontal"
+								showPercentage={true}
 								height="h-full"
 								values={data.compareAudit.donut_data.status.values}
 								colors={data.compareAudit.donut_data.status.values.map(
