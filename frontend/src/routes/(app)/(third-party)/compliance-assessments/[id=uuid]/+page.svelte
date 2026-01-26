@@ -573,7 +573,7 @@
 				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
-				{#if data.global_score.score >= 0}
+				{#if data.global_score && data.global_score.score >= 0}
 					<div class="w-1/4">
 						<RingProgress
 							name="global_maturity"

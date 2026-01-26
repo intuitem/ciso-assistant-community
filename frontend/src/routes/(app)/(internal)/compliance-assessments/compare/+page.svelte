@@ -154,8 +154,8 @@
 			<!-- Left: Base Audit Scores -->
 			<div class="p-6">
 				<div class="flex flex-col items-center space-y-4">
-					<div class="flex flex-col items-center h-48">
-						{#if data.baseAudit.global_score >= 0}
+					<div class="flex flex-col items-center w-full h-48">
+						{#if data.baseAudit && data.baseAudit.global_score >= 0}
 							<RingProgress
 								name="base_maturity"
 								value={data.baseAudit.global_score}
@@ -164,8 +164,7 @@
 									data.baseAudit.global_score,
 									data.baseAudit.total_max_score
 								)}
-								size={160}
-								strokeWidth={16}
+								strokeWidth={32}
 								fontSize={32}
 								title={m.maturity()}
 							/>
@@ -211,8 +210,8 @@
 			<!-- Right: Comparison Audit Scores -->
 			<div class="p-6">
 				<div class="flex flex-col items-center space-y-4">
-					<div class="flex flex-col items-center h-48">
-						{#if data.compareAudit.global_score >= 0}
+					<div class="flex flex-col items-center w-full h-48">
+						{#if data.compareAudit && data.compareAudit.global_score >= 0}
 							<RingProgress
 								name="compare_maturity"
 								value={data.compareAudit.global_score}
@@ -221,8 +220,7 @@
 									data.compareAudit.global_score,
 									data.compareAudit.total_max_score
 								)}
-								size={160}
-								strokeWidth={16}
+								strokeWidth={32}
 								fontSize={32}
 								title={m.maturity()}
 							/>

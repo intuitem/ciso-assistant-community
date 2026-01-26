@@ -9158,16 +9158,28 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 else:
                     compliance_percentage = 0
 
-                # Calculate maturity score (average score, not percentage)
+                # Calculate maturity score using weights and score_calculation_method
                 scored_list = [
                     ra
                     for ra in assessable_list
                     if ra.is_scored and ra.result != "not_applicable"
                 ]
                 if scored_list:
-                    total_score = sum(ra.score or 0 for ra in scored_list)
-                    # Calculate mean score (same as frontend nodeScore function)
-                    maturity_score = total_score / len(scored_list)
+                    weighted_score = sum(
+                        (ra.score or 0) * (ra.requirement.weight or 1)
+                        for ra in scored_list
+                    )
+                    total_weight = sum(ra.requirement.weight or 1 for ra in scored_list)
+                    if (
+                        audit.score_calculation_method
+                        == ComplianceAssessment.CalculationMethod.SUM
+                    ):
+                        maturity_score = weighted_score
+                    else:
+                        # Default to weighted average
+                        maturity_score = (
+                            weighted_score / total_weight if total_weight > 0 else 0
+                        )
                 else:
                     maturity_score = 0
 

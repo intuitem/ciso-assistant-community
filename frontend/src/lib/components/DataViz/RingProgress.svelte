@@ -33,17 +33,15 @@
 
 	const chart_id = `${name}_${crypto.randomUUID().slice(0, 8)}_div`;
 
-	// Calculate percentage without rounding for accurate gauge display
-	let percentage = $derived(max > 0 ? (value / max) * 100 : 0);
-
-	// Store actual value for display (avoid double-rounding issues)
-	let displayValue = $derived(Math.round(value * 10) / 10);
-
 	onMount(async () => {
 		const echarts = await import('echarts');
 		const el = document.getElementById(chart_id);
 		if (!el) return;
 		const chart = echarts.init(el, null, { renderer: 'svg' });
+
+		// Capture values at mount time to avoid reactive context issues in ECharts callbacks
+		const percentage = max > 0 ? (value / max) * 100 : 0;
+		const displayValue = Math.round(value * 10) / 10;
 
 		const option = {
 			title: {
@@ -101,7 +99,6 @@
 								fontWeight: 'bold',
 								color: '#333',
 								formatter: function () {
-									// Use pre-calculated displayValue to avoid double-rounding
 									return isPercentage ? `${displayValue}%` : displayValue;
 								}
 							}
@@ -132,4 +129,8 @@
 	});
 </script>
 
-<div id={chart_id} class="{width} {height} {classesContainer}"></div>
+<div
+	id={chart_id}
+	class="{width} {height} {classesContainer}"
+	style="min-width: 180px; min-height: 180px;"
+></div>
