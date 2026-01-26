@@ -66,11 +66,15 @@ export const load: PageServerLoad = async ({ fetch, parent, url }) => {
 		// Deduplicate user IDs
 		approverUserIds = [...new Set(approverUserIds)];
 		// Still fetch my_assignments for metrics display
-		const res = await fetch(`${BASE_API_URL}/folders/my_assignments/?include_teams=${includeTeams}`);
+		const res = await fetch(
+			`${BASE_API_URL}/folders/my_assignments/?include_teams=${includeTeams}`
+		);
 		data = await res.json();
 	} else {
 		// Default: current user's assignments
-		const res = await fetch(`${BASE_API_URL}/folders/my_assignments/?include_teams=${includeTeams}`);
+		const res = await fetch(
+			`${BASE_API_URL}/folders/my_assignments/?include_teams=${includeTeams}`
+		);
 		data = await res.json();
 		// Actor IDs from backend ensure consistency with backend filtering
 		actorIds = data.actor_ids || [];
