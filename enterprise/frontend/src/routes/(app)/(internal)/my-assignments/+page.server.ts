@@ -35,12 +35,13 @@ export const load: PageServerLoad = async ({ fetch, parent, url }) => {
 						filterActorLabels.push(actorData.str || actorData.name || actorId);
 
 						// Extract user IDs for validation flows approver filter
-						if (actorData.type === 'user' && actorData.user?.id) {
-							approverUserIds.push(actorData.user.id);
-						} else if (actorData.type === 'team' && actorData.team?.id) {
+						// Note: ActorReadSerializer returns 'specific' field (not 'user' or 'team')
+						if (actorData.type === 'user' && actorData.specific?.id) {
+							approverUserIds.push(actorData.specific.id);
+						} else if (actorData.type === 'team' && actorData.specific?.id) {
 							// For teams, fetch team members to get their user IDs
 							try {
-								const teamRes = await fetch(`${BASE_API_URL}/teams/${actorData.team.id}/`);
+								const teamRes = await fetch(`${BASE_API_URL}/teams/${actorData.specific.id}/`);
 								if (teamRes.ok) {
 									const teamData = await teamRes.json();
 									// Add leader, deputies, and members
