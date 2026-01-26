@@ -53,11 +53,6 @@ TRANSFER_MECHANISM_CHOICES = (
     ("privacy_derogation", "Derogation for Specific Situations (Art. 49)"),
 )
 
-# Legacy combined choices for backward compatibility (used only for backward compat)
-LEGAL_BASIS_CHOICES = (
-    ART6_LAWFUL_BASIS_CHOICES + ART9_SPECIAL_CATEGORY_CONDITION_CHOICES
-)
-
 
 class ProcessingNature(ReferentialObjectMixin, I18nObjectMixin):
     DEFAULT_PROCESSING_NATURE = [
