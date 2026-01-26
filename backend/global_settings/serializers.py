@@ -219,6 +219,18 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     metrology = serializers.BooleanField(
         source="value.metrology", required=False, default=True
     )
+    personal_data = serializers.BooleanField(
+        source="value.personal_data", required=False, default=True
+    )
+    purposes = serializers.BooleanField(
+        source="value.purposes", required=False, default=True
+    )
+    right_requests = serializers.BooleanField(
+        source="value.right_requests", required=False, default=True
+    )
+    data_breaches = serializers.BooleanField(
+        source="value.data_breaches", required=False, default=True
+    )
 
     class Meta:
         model = GlobalSettings
@@ -248,6 +260,10 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "validation_flows",
             "outgoing_webhooks",
             "metrology",
+            "personal_data",
+            "purposes",
+            "right_requests",
+            "data_breaches",
         ]
         read_only_fields = ["name"]
 
