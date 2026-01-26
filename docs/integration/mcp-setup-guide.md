@@ -7,6 +7,8 @@ description: >-
 
 # MCP setup guide
 
+Compatible with: SaaS or on-premises, CE ou Pro
+
 ### What is MCP?
 
 MCP (Model Context Protocol) allows AI assistants like Claude to interact with external tools and services. Think of it as giving your AI a set of capabilities to read and write data in CISO Assistant.
@@ -59,7 +61,7 @@ This makes it easy to update later with `git pull`.
 
 Before you begin, make sure you have:
 
-1. **CISO Assistant running** - Either locally or on a server (can be the same machine or a remote server)
+1. **CISO Assistant running** - Either locally or on a server (can be the same machine or a remote server). If you're on a SaaS instance, you need to have the API enabled. You can open a support request to do, and keep in mind that it requires ip filtering to be enabled as well.
 2. **Python 3.12+** installed
 3.  **uv** package manager (recommended) - Install with:
 
