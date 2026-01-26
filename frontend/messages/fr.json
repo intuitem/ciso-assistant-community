@@ -1073,7 +1073,7 @@
 	"filteringLabels": "Étiquettes",
 	"invalidLabel": "L'étiquette doit être alphanumérique et contenir au maximum 36 caractères",
 	"myAssignments": "Affectations",
-	"filterScope": "Portée de filtrage",
+	"filterScope": "Portée",
 	"currentUser": "Utilisateur courant",
 	"filterByActor": "Filtrer par acteur",
 	"apply": "Appliquer",
