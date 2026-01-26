@@ -187,7 +187,14 @@ def agg_countries(viewable_data_transfers, viewable_data_contractors):
 class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     model = Processing
 
-    filterset_fields = ["folder", "nature", "status", "filtering_labels", "assigned_to"]
+    filterset_fields = [
+        "folder",
+        "nature",
+        "status",
+        "filtering_labels",
+        "assigned_to",
+        "perimeters",
+    ]
 
     export_config = {
         "fields": {

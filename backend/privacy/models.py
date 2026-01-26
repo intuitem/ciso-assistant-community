@@ -1,7 +1,7 @@
 from django.db import models
 from iam.models import User, FolderMixin
 from tprm.models import Entity
-from core.models import Actor, AppliedControl, Asset, Evidence, Incident
+from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
 from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
@@ -135,6 +135,9 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         related_name="processings",
     )
 
+    perimeters = models.ManyToManyField(
+        Perimeter, blank=True, related_name="processings"
+    )
     fields_to_check = ["name"]
 
     def update_sensitive_data_flag(self):
