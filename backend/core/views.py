@@ -8058,6 +8058,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get score calculation method choices")
+    def score_calculation_method(self, request):
+        return Response(dict(ComplianceAssessment.CalculationMethod.choices))
+
     @action(
         detail=True,
         name="Get target frameworks mapping options with compliance distribution",
@@ -8796,10 +8801,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "score": compliance_assessment.get_global_score(),
                 "max_score": compliance_assessment.max_score,
                 "min_score": compliance_assessment.min_score,
+                "total_max_score": compliance_assessment.get_total_max_score(),
                 "scores_definition": get_referential_translation(
                     compliance_assessment.framework, "scores_definition", get_language()
                 ),
                 "show_documentation_score": compliance_assessment.show_documentation_score,
+                "score_calculation_method": compliance_assessment.score_calculation_method,
             }
         )
 
@@ -9194,6 +9201,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "observation": base_audit.observation,
                 "global_score": base_audit.get_global_score(),
                 "max_score": base_audit.max_score,
+                "total_max_score": base_audit.get_total_max_score(),
+                "score_calculation_method": base_audit.score_calculation_method,
                 "donut_data": base_audit.donut_render(),
                 "radar_data": aggregate_by_top_level(base_audit),
             },
@@ -9214,6 +9223,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "observation": compare_audit.observation,
                 "global_score": compare_audit.get_global_score(),
                 "max_score": compare_audit.max_score,
+                "total_max_score": compare_audit.get_total_max_score(),
+                "score_calculation_method": compare_audit.score_calculation_method,
                 "donut_data": compare_audit.donut_render(),
                 "radar_data": aggregate_by_top_level(compare_audit),
             },

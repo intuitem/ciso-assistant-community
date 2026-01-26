@@ -576,9 +576,9 @@
 								strokeWidth="18px"
 								meterStroke={displayScoreColor(
 									data.global_score.score,
-									data.global_score.max_score
+									data.global_score.total_max_score
 								)}
-								value={(data.global_score.score * 100) / data.global_score.max_score}
+								value={(data.global_score.score * 100) / data.global_score.total_max_score}
 								size="size-52"
 							>
 								<p class="font-semibold text-4xl">{data.global_score.score}</p>

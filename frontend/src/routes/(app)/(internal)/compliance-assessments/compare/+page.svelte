@@ -161,9 +161,9 @@
 								strokeWidth="20px"
 								meterStroke={displayScoreColor(
 									data.baseAudit.global_score,
-									data.baseAudit.max_score
+									data.baseAudit.total_max_score
 								)}
-								value={(data.baseAudit.global_score * 100) / data.baseAudit.max_score}
+								value={(data.baseAudit.global_score * 100) / data.baseAudit.total_max_score}
 								size="size-40"
 							>
 								<p class="font-semibold text-3xl">{data.baseAudit.global_score}</p>
@@ -217,9 +217,9 @@
 								strokeWidth="20px"
 								meterStroke={displayScoreColor(
 									data.compareAudit.global_score,
-									data.compareAudit.max_score
+									data.compareAudit.total_max_score
 								)}
-								value={(data.compareAudit.global_score * 100) / data.compareAudit.max_score}
+								value={(data.compareAudit.global_score * 100) / data.compareAudit.total_max_score}
 								size="size-40"
 							>
 								<p class="font-semibold text-3xl">{data.compareAudit.global_score}</p>
