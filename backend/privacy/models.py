@@ -9,6 +9,9 @@ from django.db.models import Count
 
 from auditlog.registry import auditlog
 
+from django.utils.translation import gettext_lazy as _
+import uuid
+
 
 class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
     class Meta:
@@ -236,6 +239,8 @@ class PersonalData(NameDescriptionFolderMixin):
         ("privacy_video_recordings", "Video Recordings"),
         ("privacy_other", "Other Personal Data"),
     )
+
+    name = models.CharField(max_length=200, verbose_name="Name", null=True, blank=True)
 
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="personal_data"
