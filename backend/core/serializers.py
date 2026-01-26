@@ -2083,7 +2083,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         if result is None and self.instance:
             result = self.instance.result
 
-        if extended_result:
+        if compliance_assessment.extended_result_enabled and extended_result:
             nonconformity_values = [
                 RequirementAssessment.ExtendedResult.MAJOR_NONCONFORMITY,
                 RequirementAssessment.ExtendedResult.MINOR_NONCONFORMITY,
