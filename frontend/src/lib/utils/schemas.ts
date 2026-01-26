@@ -827,12 +827,14 @@ export const dataBreachSchema = z.object({
 
 export const purposeSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	legal_basis: z.string(),
 	processing: z.string()
 });
 export const dataSubjectSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
 	processing: z.string()

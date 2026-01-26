@@ -1259,6 +1259,7 @@
 	"privacyPartialDeletion": "Partial Deletion",
 	"privacyBasicIdentity": "Basic Identity Information",
 	"privacyName": "Name",
+	"customName": "Custom name",
 	"privacyIdentificationNumbers": "Identification Numbers",
 	"privacyOnlineIdentifiers": "Online Identifiers",
 	"privacyLocationData": "Location Data",

@@ -1195,6 +1195,7 @@
 	"privacyPartialDeletion": "Suppression partielle",
 	"privacyBasicIdentity": "Informations d'identité de base",
 	"privacyName": "Nom",
+	"customName": "Nom personalisé",
 	"privacyIdentificationNumbers": "Numéros d'identification",
 	"privacyOnlineIdentifiers": "Identifiants en ligne",
 	"privacyLocationData": "Données de localisation",

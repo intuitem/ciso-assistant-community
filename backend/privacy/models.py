@@ -150,12 +150,19 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
 
 
 class Purpose(NameDescriptionFolderMixin):
+    name = models.CharField(
+        max_length=200, verbose_name=_("Name"), null=True, blank=True
+    )
+
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="purposes"
     )
     legal_basis = models.CharField(
         max_length=255, choices=LEGAL_BASIS_CHOICES, default="privacy_other"
     )
+
+    def __str__(self):
+        return self.name if self.name else self.legal_basis
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -240,7 +247,9 @@ class PersonalData(NameDescriptionFolderMixin):
         ("privacy_other", "Other Personal Data"),
     )
 
-    name = models.CharField(max_length=200, verbose_name="Name", null=True, blank=True)
+    name = models.CharField(
+        max_length=200, verbose_name=_("Name"), null=True, blank=True
+    )
 
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="personal_data"
@@ -252,6 +261,9 @@ class PersonalData(NameDescriptionFolderMixin):
     )
     is_sensitive = models.BooleanField(default=False)
     assets = models.ManyToManyField(Asset, blank=True, related_name="personal_data")
+
+    def __str__(self):
+        return self.name if self.name else self.category
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -302,10 +314,17 @@ class DataSubject(NameDescriptionFolderMixin):
         ("privacy_other", "Other Data Subject Category"),
     )
 
+    name = models.CharField(
+        max_length=200, verbose_name=_("Name"), null=True, blank=True
+    )
+
     processing = models.ForeignKey(
         "Processing", on_delete=models.CASCADE, related_name="data_subjects"
     )
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
+
+    def __str__(self):
+        return self.name if self.name else self.category
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder

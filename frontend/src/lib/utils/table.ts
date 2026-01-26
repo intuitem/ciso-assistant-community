@@ -1940,24 +1940,24 @@ export const listViewFields = {
 		}
 	},
 	purposes: {
-		head: ['name', 'description', 'legalBasis', 'processing'],
-		body: ['name', 'description', 'legal_basis', 'processing'],
+		head: ['legalBasis', 'description', 'customName', 'processing'],
+		body: ['legal_basis', 'description', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
 			legal_basis: LEGAL_BASIS_FILTER
 		}
 	},
 	'personal-data': {
-		head: ['processing', 'name', 'category', 'isSensitive', 'retention', 'deletionPolicy'],
-		body: ['processing', 'name', 'category', 'is_sensitive', 'retention', 'deletion_policy'],
+		head: ['category', 'isSensitive', 'retention', 'deletionPolicy', , 'processing'],
+		body: ['category', 'is_sensitive', 'retention', 'deletion_policy', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
 			category: PERSONAL_DATA_CATEGORY_FILTER
 		}
 	},
 	'data-subjects': {
-		head: ['name', 'description', 'category'],
-		body: ['name', 'description', 'category']
+		head: ['category', 'description', 'customName'],
+		body: ['category', 'description', 'name']
 	},
 	'data-recipients': {
 		head: ['name', 'description', 'category'],

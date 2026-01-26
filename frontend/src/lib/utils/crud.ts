@@ -1254,6 +1254,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'purposes',
 		verboseName: 'purpose',
 		verboseNamePlural: 'purposes',
+		customNameDescription: true,
 		selectFields: [{ field: 'legal_basis' }],
 		foreignKeyFields: [{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' }]
 	},
@@ -1264,6 +1265,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'personalData',
 		verboseName: 'personal data',
 		verboseNamePlural: 'personal data',
+		customNameDescription: true,
 		foreignKeyFields: [
 			{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' },
 			{ field: 'assets', urlModel: 'assets', endpointUrl: 'assets' }
@@ -1294,6 +1296,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataSubjects',
 		verboseName: 'data subject',
 		verboseNamePlural: 'data subjects',
+		customNameDescription: true,
 		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }],
 		selectFields: [{ field: 'category' }]
 	},
