@@ -1520,6 +1520,8 @@
 	"dataBreaches": "Datalekken",
 	"dataBreachesByType": "Datalekken per type",
 	"dataBreachesDescription": "Datalek incidenten en meldingen",
+	"gdpr": "GDPR / Privacy",
+	"gdprDescription": "Gegevensbescherming en privacy management functies (GDPR-compliance)",
 	"dataContractor": "Gegevensverwerker",
 	"dataContractors": "Gegevensverwerkers",
 	"dataFlowOverview": "Datastroomoverzicht",
