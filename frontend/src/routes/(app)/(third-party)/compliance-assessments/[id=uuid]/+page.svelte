@@ -580,7 +580,7 @@
 							value={data.global_score.score}
 							max={data.global_score.total_max_score}
 							color={getScoreHexColor(data.global_score.score, data.global_score.total_max_score)}
-							strokeWidth={32}
+							strokeWidth={35}
 							fontSize={36}
 							title={m.maturity()}
 						/>
