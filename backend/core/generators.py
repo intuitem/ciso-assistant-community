@@ -427,8 +427,12 @@ def gen_audit_context(id, doc, tree, lang):
 
     context = dict()
 
-    authors = ", ".join([a.email for a in audit.authors.all()])
-    reviewers = ", ".join([a.email for a in audit.reviewers.all()])
+    authors = ", ".join(
+        dict.fromkeys(email for a in audit.authors.all() for email in a.get_emails())
+    )
+    reviewers = ", ".join(
+        dict.fromkeys(email for r in audit.reviewers.all() for email in r.get_emails())
+    )
 
     spider_data = list()
     result_counts = count_category_results(tree)
