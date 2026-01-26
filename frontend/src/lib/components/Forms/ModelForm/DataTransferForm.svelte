@@ -59,11 +59,11 @@
 />
 <AutocompleteSelect
 	{form}
-	field="legal_basis"
-	options={model.selectOptions['legal_basis']}
-	cacheLock={cacheLocks['legal_basis']}
-	bind:cachedValue={formDataCache['legal_basis']}
-	label={m.legalBasis()}
+	field="transfer_mechanism"
+	options={model.selectOptions['transfer_mechanism']}
+	cacheLock={cacheLocks['transfer_mechanism']}
+	bind:cachedValue={formDataCache['transfer_mechanism']}
+	label={m.transferMechanism()}
 />
 <TextArea
 	{form}

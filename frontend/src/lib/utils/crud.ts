@@ -1259,7 +1259,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'purpose',
 		verboseNamePlural: 'purposes',
 		customNameDescription: true,
-		selectFields: [{ field: 'legal_basis' }],
+		selectFields: [{ field: 'legal_basis' }, { field: 'article_9_condition' }],
 		foreignKeyFields: [{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' }]
 	},
 	'personal-data': {
@@ -1340,7 +1340,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'processings' },
 			{ field: 'entity', urlModel: 'entities' }
 		],
-		selectFields: [{ field: 'legal_basis' }, { field: 'country' }],
+		selectFields: [{ field: 'transfer_mechanism' }, { field: 'country' }],
 		customNameDescription: true
 	},
 	'ebios-rm': {

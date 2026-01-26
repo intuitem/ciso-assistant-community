@@ -831,6 +831,7 @@ export const purposeSchema = z.object({
 	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	legal_basis: z.string(),
+	article_9_condition: z.string().optional().nullable(),
 	processing: z.string()
 });
 export const dataSubjectSchema = z.object({
@@ -873,7 +874,7 @@ export const dataTransferSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	legal_basis: z.string(),
+	transfer_mechanism: z.string().optional(),
 	guarantees: z.string().optional(),
 	processing: z.string(),
 	entity: z.string().optional()

@@ -18,15 +18,18 @@ class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
         abstract = True
 
 
-LEGAL_BASIS_CHOICES = (
-    # Article 6(1) Legal Bases
+# Article 6(1) Legal Bases for Processing
+ART6_LAWFUL_BASIS_CHOICES = (
     ("privacy_consent", "Consent"),
     ("privacy_contract", "Performance of a Contract"),
     ("privacy_legal_obligation", "Compliance with a Legal Obligation"),
     ("privacy_vital_interests", "Protection of Vital Interests"),
     ("privacy_public_interest", "Performance of a Task in the Public Interest"),
     ("privacy_legitimate_interests", "Legitimate Interests"),
-    # Special Category Processing - Article 9(2)
+)
+
+# Article 9(2) Special Category Conditions
+ART9_SPECIAL_CATEGORY_CONDITION_CHOICES = (
     ("privacy_explicit_consent", "Explicit Consent for Special Categories"),
     ("privacy_employment_social_security", "Employment and Social Security Law"),
     (
@@ -40,24 +43,19 @@ LEGAL_BASIS_CHOICES = (
     ("privacy_preventive_medicine", "Preventive or Occupational Medicine"),
     ("privacy_public_health", "Public Health"),
     ("privacy_archiving_research", "Archiving, Research or Statistical Purposes"),
-    # Additional GDPR Bases
-    ("privacy_child_consent", "Child's Consent with Parental Authorization"),
-    ("privacy_data_transfer_adequacy", "Transfer Based on Adequacy Decision"),
-    ("privacy_data_transfer_safeguards", "Transfer Subject to Appropriate Safeguards"),
-    (
-        "privacy_data_transfer_binding_rules",
-        "Transfer Subject to Binding Corporate Rules",
-    ),
-    (
-        "privacy_data_transfer_derogation",
-        "Transfer Based on Derogation for Specific Situations",
-    ),
-    # Common Combined Bases
-    ("privacy_consent_and_contract", "Consent and Contract"),
-    ("privacy_contract_and_legitimate_interests", "Contract and Legitimate Interests"),
-    # Other
-    ("privacy_not_applicable", "Not Applicable"),
-    ("privacy_other", "Other Legal Basis (Specify in Description)"),
+)
+
+# Chapter V Transfer Mechanisms (Articles 45-49)
+TRANSFER_MECHANISM_CHOICES = (
+    ("privacy_adequacy_decision", "Adequacy Decision (Art. 45)"),
+    ("privacy_appropriate_safeguards", "Appropriate Safeguards (Art. 46)"),
+    ("privacy_binding_corporate_rules", "Binding Corporate Rules (Art. 47)"),
+    ("privacy_derogation", "Derogation for Specific Situations (Art. 49)"),
+)
+
+# Legacy combined choices for backward compatibility (used only for backward compat)
+LEGAL_BASIS_CHOICES = (
+    ART6_LAWFUL_BASIS_CHOICES + ART9_SPECIAL_CATEGORY_CONDITION_CHOICES
 )
 
 
@@ -161,7 +159,13 @@ class Purpose(NameDescriptionFolderMixin):
         Processing, on_delete=models.CASCADE, related_name="purposes"
     )
     legal_basis = models.CharField(
-        max_length=255, choices=LEGAL_BASIS_CHOICES, default="privacy_other"
+        max_length=255, choices=ART6_LAWFUL_BASIS_CHOICES, default="privacy_consent"
+    )
+    article_9_condition = models.CharField(
+        max_length=255,
+        choices=ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
+        blank=True,
+        null=True,
     )
 
     fields_to_check = ["name", "legal_basis", "processing"]
@@ -452,8 +456,8 @@ class DataTransfer(NameDescriptionFolderMixin):
         blank=True,
     )
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
-    legal_basis = models.CharField(
-        max_length=255, choices=LEGAL_BASIS_CHOICES, blank=True
+    transfer_mechanism = models.CharField(
+        max_length=255, choices=TRANSFER_MECHANISM_CHOICES, blank=True
     )
     guarantees = models.TextField(blank=True)
     documentation_link = models.URLField(blank=True)

@@ -26,7 +26,9 @@ from .models import (
     Processing,
     RightRequest,
     DataBreach,
-    LEGAL_BASIS_CHOICES,
+    ART6_LAWFUL_BASIS_CHOICES,
+    ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
+    TRANSFER_MECHANISM_CHOICES,
 )
 
 EU_COUNTRIES_SET = {
@@ -70,11 +72,15 @@ class PurposeViewSet(BaseModelViewSet):
     """
 
     model = Purpose
-    filterset_fields = ["processing", "legal_basis"]
+    filterset_fields = ["processing", "legal_basis", "article_9_condition"]
 
     @action(detail=False, name="Get legal basis choices")
     def legal_basis(self, request):
-        return Response(dict(LEGAL_BASIS_CHOICES))
+        return Response(dict(ART6_LAWFUL_BASIS_CHOICES))
+
+    @action(detail=False, name="Get article 9 condition choices")
+    def article_9_condition(self, request):
+        return Response(dict(ART9_SPECIAL_CATEGORY_CONDITION_CHOICES))
 
 
 class PersonalDataViewSet(BaseModelViewSet):
@@ -144,16 +150,16 @@ class DataTransferViewSet(BaseModelViewSet):
     """
 
     model = DataTransfer
-    filterset_fields = ["processing"]
+    filterset_fields = ["processing", "transfer_mechanism"]
 
     # this should be cached
     @action(detail=False, name="Get countries list")
     def country(self, request):
         return Response(dict(COUNTRY_CHOICES))
 
-    @action(detail=False, name="Get legal basis choices")
-    def legal_basis(self, request):
-        return Response(dict(LEGAL_BASIS_CHOICES))
+    @action(detail=False, name="Get transfer mechanism choices")
+    def transfer_mechanism(self, request):
+        return Response(dict(TRANSFER_MECHANISM_CHOICES))
 
 
 def agg_countries(viewable_data_transfers, viewable_data_contractors):
@@ -401,15 +407,12 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                     }
                 )
 
-            # Get legal bases from purposes and data transfers
+            # Get legal bases from purposes (Art. 6 legal bases only)
             legal_bases = set()
             if pd.processing:
                 for purpose in pd.processing.purposes.all():
                     if purpose.legal_basis:
                         legal_bases.add(purpose.legal_basis)
-                for transfer in pd.processing.data_transfers.all():
-                    if transfer.legal_basis:
-                        legal_bases.add(transfer.legal_basis)
 
             # Link processing to legal bases (depth 2)
             for legal_basis in legal_bases:

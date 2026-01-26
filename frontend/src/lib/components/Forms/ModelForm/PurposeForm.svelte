@@ -34,6 +34,14 @@
 />
 <AutocompleteSelect
 	{form}
+	field="article_9_condition"
+	options={model.selectOptions['article_9_condition']}
+	cacheLock={cacheLocks['article_9_condition']}
+	bind:cachedValue={formDataCache['article_9_condition']}
+	label={m.article9Condition()}
+/>
+<AutocompleteSelect
+	{form}
 	field="processing"
 	optionsEndpoint="processings"
 	cacheLock={cacheLocks['processing']}

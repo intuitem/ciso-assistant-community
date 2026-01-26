@@ -1968,8 +1968,8 @@ export const listViewFields = {
 		body: ['entity', 'relationship_type', 'country', 'name', 'documentation_link']
 	},
 	'data-transfers': {
-		head: ['entity', 'country', 'legalBasis', 'customName', 'documentationLink'],
-		body: ['entity', 'country', 'legal_basis', 'name', 'documentation_link']
+		head: ['entity', 'country', 'transferMechanism', 'customName', 'documentationLink'],
+		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link']
 	},
 	'ebios-rm': {
 		head: ['name', 'description', 'domain', 'quotationMethod', 'createdAt', 'updatedAt'],
