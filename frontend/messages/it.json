@@ -1608,6 +1608,8 @@
 	"dataBreachRiskLevel": "Livello di rischio",
 	"dataBreachesByType": "Data breaches per tipologia",
 	"dataBreachesDescription": "Incidenti e notifiche di data breach",
+	"gdpr": "GDPR / Privacy",
+	"gdprDescription": "Funzionalità di protezione dei dati e gestione della privacy (conformità GDPR)",
 	"dataLocationProcessing": "Posizione dei dati duranmte l'elaborazione",
 	"dataLocationStorage": "Posizione dei dati (at rest)",
 	"dataWizardRiskAssessmentDescription": "Importa gli scenari di rischio ed i loro controlli associati",

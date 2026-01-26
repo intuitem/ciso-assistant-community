@@ -1523,6 +1523,8 @@
 	"dataBreaches": "Datenschutzverletzungen",
 	"dataBreachesByType": "Datenschutzverletzungen nach Typ",
 	"dataBreachesDescription": "Vorfallmanagement & Meldungen zu Datenschutzverletzungen",
+	"gdpr": "GDPR / Datenschutz",
+	"gdprDescription": "Datenschutz- und Privacy-Management-Funktionen (GDPR-Konformität)",
 	"dataContractor": "Datenverarbeiter",
 	"dataContractors": "Datenverarbeiter",
 	"dataFlowOverview": "Datenflussübersicht",

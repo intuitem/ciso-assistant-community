@@ -2990,6 +2990,8 @@
 	"purposesDescription": "Data processing purposes (GDPR)",
 	"rightRequestsDescription": "Data subject rights requests (GDPR)",
 	"dataBreachesDescription": "Data breach incidents and notifications",
+	"gdpr": "GDPR / Privacy",
+	"gdprDescription": "Data protection and privacy management features (GDPR compliance)",
 	"orderedEntryListAddNewEntry": "Add New Entry",
 	"orderedEntryListRefIdPlaceholder": "Ref ID",
 	"orderedEntryListNamePlaceholder": "Name",
