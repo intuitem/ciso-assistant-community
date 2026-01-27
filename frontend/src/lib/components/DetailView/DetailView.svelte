@@ -6,12 +6,13 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { type ModelMapEntry } from '$lib/utils/crud';
+	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
+	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
 
@@ -120,6 +121,29 @@
 	};
 
 	let hasWidgets = $derived(!!widgets);
+	let relatedFieldNames = $derived(
+		new Set(data.model?.foreignKeyFields?.map((field) => field.field) ?? [])
+	);
+
+	const getExpectedCount = (
+		urlmodel: string,
+		field?: ReverseForeignKeyField
+	): number | undefined => {
+		const candidates = [
+			field?.expectedCountField,
+			urlmodel ? urlmodel.replace(/-/g, '_') : undefined,
+			field?.field
+		].filter(Boolean) as string[];
+
+		for (const candidate of candidates) {
+			const value = data.data?.[candidate];
+			if (Array.isArray(value)) {
+				// Count how many {} (masked) objects are in the array
+				return value.filter((item) => isMaskedPlaceholder(item)).length;
+			}
+		}
+		return undefined;
+	};
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -305,9 +329,26 @@
 
 	let expandedTable = $state(false);
 	const MAX_ROWS = 10;
+
+	// Check if there are non-visible objects and user can edit
+	let hasNonVisibleObjects = $derived(() => {
+		if (!canEditObject) return false;
+
+		for (const [key, value] of Object.entries(data.data)) {
+			if (Array.isArray(value)) {
+				const maskedCount = countMasked(value);
+				if (maskedCount > 0) return true;
+			} else if (isMaskedPlaceholder(value)) {
+				return true;
+			}
+		}
+		return false;
+	});
 </script>
 
 <div class="flex flex-col space-y-2">
+	<!-- Warning for non-visible objects (only for users with edit permissions) -->
+
 	{#if data.urlModel === 'risk-acceptances' && data.data.state === 'Created'}
 		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
 			<div class="text-yelloW-900">
@@ -394,6 +435,8 @@
 			>
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
 					{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
+						{@const isRelatedField = relatedFieldNames.has(key)}
+						{@const hiddenCountForValue = isRelatedField ? countMasked(value) : 0}
 						<div
 							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-5 sm:gap-4 {index >=
 								MAX_ROWS && !expandedTable
@@ -435,8 +478,12 @@
 											? key.replace('_', '-') + '-field-value'
 											: null}
 									>
-										{#if value !== null && value !== undefined && value !== ''}
-											{#if key === 'asset_class'}
+										{#if value !== null && value !== undefined && (value !== '' || hiddenCountForValue > 0)}
+											{#if hiddenCountForValue > 0 && isMaskedPlaceholder(value) && !Array.isArray(value)}
+												<p class="text-xs text-yellow-700">
+													{m.objectsNotVisible({ count: hiddenCountForValue })}
+												</p>
+											{:else if key === 'asset_class'}
 												<!-- Special case for asset_class - Always translate the value -->
 												{#if typeof value === 'object' && (value.str || value.name)}
 													{safeTranslate(value.str || value.name)}
@@ -493,9 +540,12 @@
 													--
 												{/if}
 											{:else if Array.isArray(value)}
-												{#if Object.keys(value).length > 0}
+												{@const visibleValues = isRelatedField
+													? value.filter((item) => !isMaskedPlaceholder(item))
+													: value}
+												{#if visibleValues.length > 0}
 													<ul>
-														{#each value.sort((a, b) => {
+														{#each [...visibleValues].sort((a, b) => {
 															if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
 															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 														}) as val}
@@ -533,6 +583,15 @@
 															</li>
 														{/each}
 													</ul>
+													{#if hiddenCountForValue > 0}
+														<p class="mt-1 text-xs text-yellow-700">
+															{m.objectsNotVisible({ count: hiddenCountForValue })}
+														</p>
+													{/if}
+												{:else if hiddenCountForValue > 0}
+													<p class="text-xs text-yellow-700">
+														{m.objectsNotVisible({ count: hiddenCountForValue })}
+													</p>
 												{:else}
 													--
 												{/if}
@@ -756,6 +815,7 @@
 									disableDelete={disableDelete || model.disableDelete}
 									deleteForm={model.deleteForm}
 									URLModel={urlmodel}
+									expectedCount={getExpectedCount(urlmodel, field)}
 									fields={fieldsToUse}
 									defaultFilters={field.defaultFilters || {}}
 								>

@@ -160,8 +160,12 @@
 							form={_form}
 							baseClass="flex-1"
 							multiple
-							optionsEndpoint="users?is_third_party=false"
-							optionsLabelField="email"
+							optionsEndpoint="actors"
+							optionsLabelField="str"
+							optionsInfoFields={{
+								fields: [{ field: 'type', translate: true }],
+								position: 'prefix'
+							}}
 							field="owner"
 							label={m.owner()}
 						/>

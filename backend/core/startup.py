@@ -40,6 +40,8 @@ READER_PERMISSIONS_LIST = [
     "view_threat",
     "view_vulnerability",
     "view_user",
+    "view_actor",
+    "view_team",
     "view_usergroup",
     "view_ebiosrmstudy",
     "view_fearedevent",
@@ -86,6 +88,12 @@ READER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "view_metricinstance",
+    "view_custommetricsample",
+    "view_dashboard",
+    "view_dashboardwidget",
     # integrations
     "view_syncmapping",
 ]
@@ -116,6 +124,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_storedlibrary",
     "view_loadedlibrary",
     "view_user",
+    "view_actor",
+    "view_team",
     "view_requirementmappingset",
     "view_requirementmapping",
     "view_ebiosrmstudy",
@@ -248,6 +258,8 @@ ANALYST_PERMISSIONS_LIST = [
     "view_storedlibrary",
     "view_threat",
     "view_user",
+    "view_actor",
+    "view_team",
     "view_usergroup",
     "add_ebiosrmstudy",
     "view_ebiosrmstudy",
@@ -401,6 +413,24 @@ ANALYST_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "view_metricinstance",
+    "add_metricinstance",
+    "change_metricinstance",
+    "delete_metricinstance",
+    "view_custommetricsample",
+    "add_custommetricsample",
+    "change_custommetricsample",
+    "delete_custommetricsample",
+    "view_dashboard",
+    "add_dashboard",
+    "change_dashboard",
+    "delete_dashboard",
+    "view_dashboardwidget",
+    "add_dashboardwidget",
+    "change_dashboardwidget",
+    "delete_dashboardwidget",
     # integrations
     "view_integrationconfiguration",
     "add_syncmapping",
@@ -500,6 +530,11 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_storedlibrary",
     "view_threat",
     "view_user",
+    "view_actor",
+    "add_team",
+    "view_team",
+    "change_team",
+    "delete_team",
     "view_usergroup",
     "change_usergroup",
     "delete_usergroup",
@@ -668,6 +703,27 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "add_metricdefinition",
+    "change_metricdefinition",
+    "delete_metricdefinition",
+    "view_metricinstance",
+    "add_metricinstance",
+    "change_metricinstance",
+    "delete_metricinstance",
+    "view_custommetricsample",
+    "add_custommetricsample",
+    "change_custommetricsample",
+    "delete_custommetricsample",
+    "view_dashboard",
+    "add_dashboard",
+    "change_dashboard",
+    "delete_dashboard",
+    "view_dashboardwidget",
+    "add_dashboardwidget",
+    "change_dashboardwidget",
+    "delete_dashboardwidget",
     # integrations
     "add_integrationconfiguration",
     "view_integrationconfiguration",
@@ -681,6 +737,11 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
 ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_user",
     "view_user",
+    "view_actor",
+    "add_team",
+    "view_team",
+    "change_team",
+    "delete_team",
     "change_user",
     "delete_user",
     "view_usergroup",
@@ -1229,6 +1290,13 @@ def startup(sender: AppConfig, **kwargs):
         )
     except Exception as e:
         logger.error("Error creating Jira IntegrationProvider", exc_info=True)
+    try:
+        IntegrationProvider.objects.get_or_create(
+            name="servicenow",
+            defaults={"provider_type": IntegrationProvider.ProviderType.ITSM},
+        )
+    except Exception as e:
+        logger.error("Error creating servicenow IntegrationProvider", exc_info=True)
 
     call_command("storelibraries")
     call_command("autoloadlibraries")
@@ -1275,6 +1343,7 @@ def startup(sender: AppConfig, **kwargs):
         "daily_rate": 500,
         "mapping_max_depth": 3,
         "show_warning_external_links": True,
+        "allow_assignments_to_entities": False,
     }
     try:
         settings, _ = GlobalSettings.objects.get_or_create(

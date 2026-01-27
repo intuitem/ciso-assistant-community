@@ -8,8 +8,8 @@ description: "Information security, cybersecurity and privacy protection \u2014 
   \ security management systems \u2014 Requirements"
 copyright: This is the outline of the ISO27001-2022 standard. You can purchase the
   full standard from https://www.iso.org/standard/27001
-version: 15
-publication_date: 2025-12-04
+version: 17
+publication_date: 2026-01-10
 provider: ISO/IEC
 packager: intuitem
 translations:
@@ -46,6 +46,14 @@ translations:
       \ \u2013 Anforderungen"
     copyright: "Dies ist die Gliederung der ISO 27001:2022-Norm. Die vollst\xE4ndige\
       \ Norm kann unter https://www.iso.org/standard/27001 erworben werden."
+  zh:
+    name: "\u56FD\u9645\u6807\u51C6 ISO/IEC 27001\uFF1A2022"
+    description: "\u4FE1\u606F\u5B89\u5168\u3001\u7F51\u7EDC\u5B89\u5168\u548C\u9690\
+      \u79C1\u4FDD\u62A4\u2014\u2014\u4FE1\u606F\u5B89\u5168\u7BA1\u7406\u7CFB\u7EDF\
+      \u2014\u2014\u8981\u6C42"
+    copyright: "\u8FD9\u662FISO27001-2022\u6807\u51C6\u7684\u8F6E\u5ED3\u3002\u4F60\
+      \u53EF\u4EE5\u4ECE https://www.iso.org/standard/27001 \u8D2D\u4E70\u5168\u6807\
+      \u51C6\u7248"
 dependencies:
 - urn:intuitem:risk:library:doc-pol
 objects:
@@ -91,6 +99,13 @@ objects:
           \ verankert werden. Die Richtlinien m\xFCssen mit den strategischen Zielen\
           \ \xFCbereinstimmen, Verantwortlichkeiten festlegen und die Einhaltung gesetzlicher,\
           \ regulatorischer und vertraglicher Anforderungen unterst\xFCtzen."
+      zh:
+        name: "\u4FE1\u606F\u5B89\u5168\u653F\u7B56"
+        description: "\u8FD9\u79CD\u63A7\u5236\u5EFA\u7ACB\u5E76\u7EF4\u62A4\u4E0E\
+          \u7EC4\u7EC7\u76EE\u6807\u4E00\u81F4\u7684\u4FE1\u606F\u5B89\u5168\u653F\
+          \u7B56\u3002\u63AA\u65BD\u5305\u62EC\u754C\u5B9A\u8303\u56F4\u3001\u8BBE\
+          \u5B9A\u76EE\u6807\uFF0C\u5E76\u786E\u4FDD\u7B26\u5408\u5408\u89C4\u8981\
+          \u6C42\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.2
     ref_id: A.5.2
     name: Information security roles and responsibilities
@@ -133,6 +148,13 @@ objects:
           \ sicher, dass Zust\xE4ndigkeiten dokumentiert, kommuniziert und regelm\xE4\
           \xDFig \xFCberpr\xFCft werden, um eine wirksame Umsetzung der Sicherheitsma\xDF\
           nahmen zu gew\xE4hrleisten."
+      zh:
+        name: "\u4FE1\u606F\u5B89\u5168\u89D2\u8272\u4E0E\u804C\u8D23"
+        description: "\u8FD9\u79CD\u63A7\u5236\u5B9A\u4E49\u5E76\u5206\u914D\u4FE1\
+          \u606F\u5B89\u5168\u7684\u89D2\u8272\u548C\u8D23\u4EFB\uFF0C\u4EE5\u786E\
+          \u4FDD\u95EE\u8D23\u5236\u3002\u63AA\u65BD\u5305\u62EC\u660E\u786E\u8D23\
+          \u4EFB\u8BB0\u5F55\u3001\u5B9A\u671F\u5BA1\u67E5\u548C\u6267\u6CD5\u673A\
+          \u5236\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.3
     ref_id: A.5.3
     name: Segregation of duties
@@ -172,6 +194,13 @@ objects:
           \ wie Fehler, Betrug oder unbefugte Aktivit\xE4ten zu reduzieren. Dies wird\
           \ durch rollenspezifische Zugriffsbeschr\xE4nkungen, klare Verantwortlichkeiten\
           \ und geeignete Kontrollen erreicht."
+      zh:
+        name: "\u804C\u8D23\u5206\u79BB"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u804C\u8D23\u5206\u79BB\
+          \uFF0C\u4EE5\u964D\u4F4E\u9519\u8BEF\u3001\u6B3A\u8BC8\u548C\u672A\u7ECF\
+          \u6388\u6743\u8BBF\u95EE\u7684\u98CE\u9669\u3002\u63AA\u65BD\u5305\u62EC\
+          \u89D2\u8272\u5206\u79BB\u3001\u8BBF\u95EE\u9650\u5236\u548C\u5B9A\u671F\
+          \u5BA1\u8BA1\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.4
     ref_id: A.5.4
     name: Management responsibilities
@@ -212,6 +241,12 @@ objects:
           ren die Unterst\xFCtzung der Sicherheitsziele, die Bereitstellung notwendiger\
           \ Ressourcen, das F\xF6rdern einer Sicherheitskultur sowie die \xDCberwachung\
           \ von Umsetzung und Wirksamkeit."
+      zh:
+        name: "\u7BA1\u7406\u804C\u8D23"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u5B89\u5168\
+          \u7684\u7BA1\u7406\u804C\u8D23\u88AB\u660E\u786E\u5B9A\u4E49\u5E76\u5F97\
+          \u4EE5\u5B9E\u65BD\u3002\u63AA\u65BD\u5305\u62EC\u8BBE\u5B9A\u76EE\u6807\
+          \u3001\u5206\u914D\u8D44\u6E90\u548C\u76D1\u7763\u5408\u89C4\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.5
     ref_id: A.5.5
     name: Contact with authorities
@@ -253,6 +288,13 @@ objects:
           \ angemessene Kommunikationswege mit relevanten Beh\xF6rden besitzt. Dies\
           \ umfasst klare Zust\xE4ndigkeiten, gepflegte Kontaktlisten und definierte\
           \ Abl\xE4ufe, insbesondere f\xFCr meldepflichtige Sicherheitsvorf\xE4lle."
+      zh:
+        name: "\u4E0E\u5F53\u5C40\u7684\u8054\u7CFB"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u4FE1\u606F\u5B89\
+          \u5168\u4E8B\u4EF6\u671F\u95F4\u53CA\u65F6\u4E0E\u76F8\u5173\u90E8\u95E8\
+          \u6C9F\u901A\u3002\u63AA\u65BD\u5305\u62EC\u5EFA\u7ACB\u8054\u7CFB\u534F\
+          \u8BAE\u3001\u7EF4\u62A4\u8054\u7CFB\u4EBA\u540D\u5355\u66F4\u65B0\u4EE5\
+          \u53CA\u5206\u914D\u804C\u8D23\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.6
     ref_id: A.5.6
     name: Contact with special interest groups
@@ -290,6 +332,13 @@ objects:
           \ Sicherheits- und Branchenforen, um aktuelle Trends, Bedrohungen und bew\xE4\
           hrte Verfahren fr\xFChzeitig zu erkennen und im Informationssicherheitsmanagement\
           \ zu ber\xFCcksichtigen."
+      zh:
+        name: "\u4E0E\u7279\u6B8A\u5229\u76CA\u56E2\u4F53\u7684\u8054\u7CFB"
+        description: "\u8FD9\u79CD\u63A7\u5236\u6709\u52A9\u4E8E\u4E0E\u7279\u6B8A\
+          \u5229\u76CA\u56E2\u4F53\u4FDD\u6301\u5BF9\u5B89\u5168\u8D8B\u52BF\u548C\
+          \u5B9E\u8DF5\u7684\u4E86\u89E3\u3002\u63AA\u65BD\u5305\u62EC\u53C2\u4E0E\
+          \u8BBA\u575B\u3001\u4F1A\u5458\u8D44\u683C\u548C\u534F\u4F5C\u9879\u76EE\
+          \u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.7
     ref_id: A.5.7
     name: Threat intelligence
@@ -330,6 +379,13 @@ objects:
           \ \xFCber aktuelle und potenzielle Bedrohungen systematisch gesammelt, analysiert\
           \ und bewertet werden. Die gewonnenen Erkenntnisse sollen helfen, Risiken\
           \ besser zu verstehen und wirksame Schutzma\xDFnahmen abzuleiten."
+      zh:
+        name: "\u5A01\u80C1\u60C5\u62A5"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5A01\u80C1\u60C5\u62A5\
+          \u7684\u5F00\u53D1\u548C\u7EF4\u62A4\uFF0C\u4EE5\u8BC6\u522B\u548C\u7F13\
+          \u89E3\u5B89\u5168\u98CE\u9669\u3002\u63AA\u65BD\u5305\u62EC\u76D1\u63A7\
+          \u5A01\u80C1\u4FE1\u606F\u6D41\u3001\u5206\u6790\u8D8B\u52BF\u4EE5\u53CA\
+          \u5206\u4EAB\u53EF\u4F5C\u7684\u89C1\u89E3\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.8
     ref_id: A.5.8
     name: Information security in project management
@@ -368,6 +424,13 @@ objects:
           \ systematisch in alle Phasen des Projektmanagements integriert wird. Dazu\
           \ geh\xF6ren Risikoanalysen, Sicherheitsanforderungen, Compliance-Pr\xFC\
           fungen und Sicherheitsfreigaben im Rahmen des Projektlebenszyklus."
+      zh:
+        name: "\u9879\u76EE\u7BA1\u7406\u4E2D\u7684\u4FE1\u606F\u5B89\u5168"
+        description: "\u8FD9\u79CD\u63A7\u5236\u5C06\u4FE1\u606F\u5B89\u5168\u7EB3\
+          \u5165\u9879\u76EE\u7BA1\u7406\u5B9E\u8DF5\u4E2D\u3002\u63AA\u65BD\u5305\
+          \u62EC\u98CE\u9669\u8BC4\u4F30\u3001\u5408\u89C4\u5BA1\u67E5\u4EE5\u53CA\
+          \u9879\u76EE\u751F\u547D\u5468\u671F\u5185\u7684\u5B89\u5168\u68C0\u67E5\
+          \u70B9\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.9
     ref_id: A.5.9
     name: Inventory of information and other associated assets
@@ -405,6 +468,12 @@ objects:
           \ ein aktuelles, vollst\xE4ndiges und gepflegtes Inventar von Informationen\
           \ und zugeh\xF6rigen Werten f\xFChrt. Es dient der Verantwortlichkeitszuordnung\
           \ und unterst\xFCtzt risikobasierte Schutzma\xDFnahmen."
+      zh:
+        name: "\u4FE1\u606F\u53CA\u76F8\u5173\u8D44\u4EA7\u6E05\u5355"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u4FE1\u606F\u53CA\
+          \u76F8\u5173\u8D44\u4EA7\u7684\u51C6\u786E\u76D8\u70B9\u3002\u63AA\u65BD\
+          \u5305\u62EC\u8D44\u4EA7\u8DDF\u8E2A\u3001\u5B9A\u671F\u5BA1\u8BA1\u4EE5\
+          \u53CA\u6309\u654F\u611F\u5EA6\u5206\u7C7B\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.10
     ref_id: A.5.10
     name: Acceptable use of information and other associated assets
@@ -447,6 +516,14 @@ objects:
           \ zul\xE4ssige Nutzung von Informationen, Datentr\xE4gern, Ger\xE4ten und\
           \ anderen Werten. Sie stellt sicher, dass Benutzer die Anforderungen kennen\
           \ und einhalten, einschlie\xDFlich Schulungen und Richtlinien."
+      zh:
+        name: "\u4FE1\u606F\u53CA\u5176\u4ED6\u76F8\u5173\u8D44\u4EA7\u7684\u5408\u7406\
+          \u4F7F\u7528"
+        description: "\u8FD9\u79CD\u63A7\u5236\u5B9A\u4E49\u4E86\u4FE1\u606F\u53CA\
+          \u76F8\u5173\u8D44\u4EA7\u7684\u53EF\u63A5\u53D7\u4F7F\u7528\uFF0C\u4EE5\
+          \u786E\u4FDD\u6B63\u786E\u5904\u7406\u3002\u63AA\u65BD\u5305\u62EC\u6709\
+          \u6587\u6863\u5316\u7684\u653F\u7B56\u3001\u7528\u6237\u57F9\u8BAD\u548C\
+          \u6267\u884C\u673A\u5236\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.11
     ref_id: A.5.11
     name: Return of assets
@@ -485,6 +562,13 @@ objects:
           \ organisatorischen Werte \u2013 einschlie\xDFlich Ger\xE4ten, Datentr\xE4\
           gern, Zugangsberechtigungen oder Dokumenten \u2013 bei Austritt oder Rollenwechsel\
           \ vollst\xE4ndig und sicher zur\xFCckgegeben werden."
+      zh:
+        name: "\u8D44\u4EA7\u8FD4\u8FD8"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u5F53\u5458\u5DE5\
+          \u6216\u627F\u5305\u5546\u79BB\u804C\u6216\u66F4\u6362\u5C97\u4F4D\u65F6\
+          \uFF0C\u8D44\u4EA7\u80FD\u591F\u5B89\u5168\u56DE\u6536\u3002\u63AA\u65BD\
+          \u5305\u62EC\u6E05\u5355\u3001\u8D44\u4EA7\u8DDF\u8E2A\u548C\u9000\u5F79\
+          \u534F\u8BAE\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.12
     ref_id: A.5.12
     name: Classification of information
@@ -525,6 +609,13 @@ objects:
           \ gem\xE4\xDF ihrem Schutzbedarf klassifiziert werden. Die Klassifizierung\
           \ ber\xFCcksichtigt Vertraulichkeit, Integrit\xE4t, Verf\xFCgbarkeit sowie\
           \ gesetzliche und vertragliche Anforderungen."
+      zh:
+        name: "\u4FE1\u606F\u5206\u7C7B"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u6839\u636E\
+          \u5176\u654F\u611F\u6027\u548C\u4EF7\u503C\u8FDB\u884C\u673A\u5BC6\uFF0C\
+          \u4EE5\u786E\u4FDD\u9002\u5F53\u7684\u4FDD\u62A4\u3002\u63AA\u65BD\u5305\
+          \u62EC\u5206\u7C7B\u65B9\u6848\u3001\u8BBF\u95EE\u9650\u5236\u548C\u6807\
+          \u7B7E\u6307\u5357\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.13
     ref_id: A.5.13
     name: Labelling of information
@@ -560,6 +651,12 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass klassifizierte\
           \ Informationen eindeutig und korrekt gekennzeichnet werden, sodass notwendige\
           \ Schutzma\xDFnahmen zuverl\xE4ssig angewendet werden k\xF6nnen."
+      zh:
+        name: "\u4FE1\u606F\u6807\u7B7E"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u7684\u6807\
+          \u7B7E\u4E00\u81F4\uFF0C\u53CD\u6620\u5176\u5206\u7C7B\u548C\u5904\u7406\
+          \u8981\u6C42\u3002\u8861\u91CF\u6807\u51C6\u5305\u62EC\u6807\u51C6\u5316\
+          \u6A21\u677F\u3001\u57F9\u8BAD\u548C\u5BA1\u8BA1\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.14
     ref_id: A.5.14
     name: Information transfer
@@ -597,6 +694,12 @@ objects:
           \ f\xFCr die sichere \xDCbertragung von Informationen zwischen Systemen,\
           \ Personen und Organisationen. Dazu geh\xF6ren Verschl\xFCsselung, Zugriffsbeschr\xE4\
           nkungen und dokumentierte Kommunikationswege."
+      zh:
+        name: "\u4FE1\u606F\u4F20\u8F93"
+        description: "\u8FD9\u79CD\u63A7\u5236\u5EFA\u7ACB\u4E86\u7CFB\u7EDF\u6216\
+          \u7EC4\u7EC7\u4E4B\u95F4\u4FE1\u606F\u4F20\u8F93\u7684\u5B89\u5168\u6D41\
+          \u7A0B\u3002\u63AA\u65BD\u5305\u62EC\u52A0\u5BC6\u3001\u8BBF\u95EE\u63A7\
+          \u5236\u548C\u5B89\u5168\u4F20\u8F93\u534F\u8BAE\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.15
     ref_id: A.5.15
     name: Access control
@@ -637,6 +740,13 @@ objects:
           \ Informationen und Werten ausschlie\xDFlich autorisierten Personen erm\xF6\
           glicht wird. Dies umfasst rollenbasierte Zugriffskonzepte, starke Authentisierungsmechanismen\
           \ und regelm\xE4\xDFige \xDCberpr\xFCfungen."
+      zh:
+        name: "\u8BBF\u95EE\u63A7\u5236"
+        description: "\u8BE5\u63A7\u5236\u5B9E\u65BD\u5E76\u7EF4\u62A4\u8BBF\u95EE\
+          \u63A7\u5236\u673A\u5236\uFF0C\u9650\u5236\u6388\u6743\u4EBA\u5458\u7684\
+          \u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u57FA\u4E8E\u89D2\u8272\u7684\
+          \u8BBF\u95EE\u3001\u591A\u56E0\u7D20\u8BA4\u8BC1\u548C\u5B9A\u671F\u5BA1\
+          \u67E5\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.16
     ref_id: A.5.16
     name: Identity management
@@ -677,6 +787,13 @@ objects:
           \ physische Identit\xE4ten \xFCber ihren gesamten Lebenszyklus hinweg sicher\
           \ verwaltet werden \u2013 einschlie\xDFlich Identit\xE4tspr\xFCfung, Bereitstellung,\
           \ \xC4nderung und Entzug von Zugriffsrechten."
+      zh:
+        name: "\u8EAB\u4EFD\u7BA1\u7406"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8EAB\u4EFD\u5B89\u5168\
+          \u7BA1\u7406\uFF0C\u786E\u4FDD\u5BF9\u7CFB\u7EDF\u7684\u51C6\u786E\u53EF\
+          \u9760\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u8EAB\u4EFD\u9A8C\u8BC1\
+          \u3001\u751F\u547D\u5468\u671F\u7BA1\u7406\u548C\u8BBF\u95EE\u914D\u7F6E\
+          \u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.17
     ref_id: A.5.17
     name: Authentication information
@@ -714,6 +831,12 @@ objects:
         description: "Diese Steuerungsma\xDFnahme sch\xFCtzt Authentisierungsinformationen\
           \ wie Passw\xF6rter, Tokens oder Schl\xFCssel vor Missbrauch, einschlie\xDF\
           lich sicherer Speicherung, Verschl\xFCsselung und Nutzungsvorgaben."
+      zh:
+        name: "\u8BA4\u8BC1\u4FE1\u606F"
+        description: "\u8FD9\u79CD\u63A7\u5236\u4FDD\u62A4\u4E86\u8BA4\u8BC1\u4FE1\
+          \u606F\uFF0C\u5982\u5BC6\u7801\uFF0C\u4EE5\u9632\u6B62\u672A\u7ECF\u6388\
+          \u6743\u7684\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u52A0\u5BC6\u3001\
+          \u5B89\u5168\u5B58\u50A8\u548C\u5B9A\u671F\u66F4\u65B0\u5BC6\u7801\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.18
     ref_id: A.5.18
     name: Access rights
@@ -753,6 +876,13 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Zugriffsrechte\
           \ angemessen vergeben, regelm\xE4\xDFig \xFCberpr\xFCft, angepasst und widerrufen\
           \ werden, wenn sie nicht mehr erforderlich sind."
+      zh:
+        name: "\u8BBF\u95EE\u6743"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8BBF\u95EE\u6743\u5B9A\
+          \u671F\u5BA1\u67E5\u548C\u7BA1\u7406\uFF0C\u4EE5\u7B26\u5408\u4E0D\u540C\
+          \u89D2\u8272\u548C\u804C\u8D23\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\
+          \u5BA1\u8BA1\u3001\u8BBF\u95EE\u64A4\u9500\u548C\u81EA\u52A8\u5316\u8BBF\
+          \u95EE\u7BA1\u7406\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.19
     ref_id: A.5.19
     name: Information security in supplier relationships
@@ -790,6 +920,12 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheit\
           \ in Auswahl, Bewertung, \xDCberwachung und Steuerung von Lieferantenbeziehungen\
           \ verankert ist."
+      zh:
+        name: "\u4F9B\u5E94\u5546\u5173\u7CFB\u4E2D\u7684\u4FE1\u606F\u5B89\u5168"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u5B89\u5168\
+          \u5D4C\u5165\u4F9B\u5E94\u5546\u5173\u7CFB\u548C\u6D41\u7A0B\u4E2D\u3002\
+          \u63AA\u65BD\u5305\u62EC\u5C3D\u804C\u8C03\u67E5\u3001\u5B89\u5168\u5BA1\
+          \u67E5\u548C\u6301\u7EED\u76D1\u63A7\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.20
     ref_id: A.5.20
     name: Addressing information security within supplier agreements
@@ -829,6 +965,13 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheitsanforderungen\
           \ ausdr\xFCcklich in Vertr\xE4gen geregelt werden, einschlie\xDFlich Datenschutz,\
           \ Zugriffskontrolle, Compliance-Vorgaben und Durchsetzungsmechanismen."
+      zh:
+        name: "\u89E3\u51B3\u4F9B\u5E94\u5546\u534F\u8BAE\u4E2D\u7684\u4FE1\u606F\u5B89\
+          \u5168\u95EE\u9898"
+        description: "\u8BE5\u63A7\u5236\u9488\u5BF9\u4F9B\u5E94\u5546\u534F\u8BAE\
+          \u4E2D\u7684\u4FE1\u606F\u5B89\u5168\u8981\u6C42\u3002\u63AA\u65BD\u5305\
+          \u62EC\u660E\u786E\u7684\u5408\u540C\u6761\u6B3E\u3001\u5408\u89C4\u5BA1\
+          \u8BA1\u4EE5\u53CA\u5BF9\u8FDD\u89C4\u7684\u660E\u786E\u5904\u7F5A\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.21
     ref_id: A.5.21
     name: Managing information security in the ICT supply chain
@@ -873,6 +1016,13 @@ objects:
           \ zu gew\xE4hrleisten. Dazu geh\xF6ren Risikobewertungen, Sicherheits\xFC\
           berpr\xFCfungen, Anforderungen an Zulieferer und Notfallma\xDFnahmen entlang\
           \ der Lieferkette."
+      zh:
+        name: "\u7BA1\u7406ICT\u4F9B\u5E94\u94FE\u4E2D\u7684\u4FE1\u606F\u5B89\u5168"
+        description: "\u8BE5\u63A7\u5236\u7BA1\u7406ICT\u4F9B\u5E94\u94FE\u4E2D\u7684\
+          \u4FE1\u606F\u5B89\u5168\u98CE\u9669\uFF0C\u786E\u4FDD\u670D\u52A1\u548C\
+          \u7EC4\u4EF6\u7684\u5B89\u5168\u3002\u63AA\u65BD\u5305\u62EC\u98CE\u9669\
+          \u8BC4\u4F30\u3001\u4F9B\u5E94\u5546\u8BC4\u4F30\u548C\u4E8B\u6545\u54CD\
+          \u5E94\u534F\u8BAE\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.22
     ref_id: A.5.22
     name: Monitor, review and change management of supplier services
@@ -914,6 +1064,14 @@ objects:
           \ um Informationssicherheit, Servicequalit\xE4t und Compliance dauerhaft\
           \ sicherzustellen. Dazu geh\xF6ren Leistungs\xFCberpr\xFCfungen, Vertragsaktualisierungen\
           \ und Risikobewertungen."
+      zh:
+        name: "\u76D1\u63A7\u3001\u5BA1\u67E5\u548C\u53D8\u66F4\u4F9B\u5E94\u5546\u670D\
+          \u52A1"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4F9B\u5E94\u5546\u670D\
+          \u52A1\u5F97\u5230\u76D1\u63A7\u3001\u5BA1\u67E5\u548C\u8C03\u6574\uFF0C\
+          \u4EE5\u7EF4\u62A4\u4FE1\u606F\u5B89\u5168\u3002\u63AA\u65BD\u5305\u62EC\
+          \u670D\u52A1\u6C34\u5E73\u534F\u8BAE\u3001\u5B9A\u671F\u5BA1\u67E5\u548C\
+          \u5408\u540C\u66F4\u65B0\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.23
     ref_id: A.5.23
     name: Information security for use of cloud services
@@ -953,6 +1111,12 @@ objects:
           \ kontrolliert werden. Dazu geh\xF6ren Verschl\xFCsselung, Zugriffskontrollen,\
           \ Compliance-Pr\xFCfungen, \xDCberwachung des Cloud-Anbieters sowie Anforderungen\
           \ an Datenstandorte und Incident-Response."
+      zh:
+        name: "\u4E91\u670D\u52A1\u4F7F\u7528\u7684\u4FE1\u606F\u5B89\u5168"
+        description: "\u8FD9\u79CD\u63A7\u5236\u901A\u8FC7\u89E3\u51B3\u76F8\u5173\
+          \u98CE\u9669\uFF0C\u786E\u4FDD\u4E91\u670D\u52A1\u7684\u5B89\u5168\u4F7F\
+          \u7528\u3002\u63AA\u65BD\u5305\u62EC\u6570\u636E\u52A0\u5BC6\u3001\u8BBF\
+          \u95EE\u63A7\u5236\u548C\u63D0\u4F9B\u8005\u5408\u89C4\u5BA1\u67E5\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.24
     ref_id: A.5.24
     name: Information security incident management planning and preparation
@@ -995,6 +1159,13 @@ objects:
           \ Rollen, Prozesse und Kommunikationswege f\xFCr den Umgang mit Informationssicherheitsvorf\xE4\
           llen vorbereitet, dokumentiert und regelm\xE4\xDFig getestet werden. Dazu\
           \ geh\xF6ren Incident-Response-Pl\xE4ne, Schulungen, \xDCbungen und Eskalationsmechanismen."
+      zh:
+        name: "\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u7BA1\u7406\u89C4\u5212\u4E0E\u51C6\
+          \u5907"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u4FE1\u606F\u5B89\
+          \u5168\u4E8B\u4EF6\u7684\u5408\u7406\u89C4\u5212\u548C\u51C6\u5907\u3002\
+          \u63AA\u65BD\u5305\u62EC\u4E8B\u4EF6\u54CD\u5E94\u8BA1\u5212\u3001\u57F9\
+          \u8BAD\u6F14\u4E60\u548C\u901A\u4FE1\u534F\u8BAE\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.25
     ref_id: A.5.25
     name: Assessment and decision on information security events
@@ -1038,6 +1209,13 @@ objects:
           \ Entscheidung, ob ein Ereignis einen Sicherheitsvorfall darstellt, sowie\
           \ die Durchf\xFChrung von Ursachenanalysen, Risikobewertungen und Ableitung\
           \ angemessener Ma\xDFnahmen."
+      zh:
+        name: "\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u7684\u8BC4\u4F30\u4E0E\u51B3\u7B56"
+        description: "\u8FD9\u79CD\u63A7\u5236\u5EFA\u7ACB\u4E86\u8BC4\u4F30\u548C\
+          \u51B3\u5B9A\u4E0E\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u76F8\u5173\u884C\
+          \u52A8\u7684\u6D41\u7A0B\u3002\u63AA\u65BD\u5305\u62EC\u6839\u672C\u539F\
+          \u56E0\u5206\u6790\u3001\u98CE\u9669\u8BC4\u4F30\u548C\u7F13\u89E3\u8BA1\
+          \u5212\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.26
     ref_id: A.5.26
     name: Response to information security incidents
@@ -1078,6 +1256,13 @@ objects:
           \ minimieren und den Normalbetrieb schnellstm\xF6glich wiederherzustellen.\
           \ Dazu geh\xF6ren Meldemechanismen, Eskalationswege, Eind\xE4mmungsma\xDF\
           nahmen und Wiederherstellungsprozesse."
+      zh:
+        name: "\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u7684\u5E94\u5BF9"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u5BF9\u4FE1\u606F\
+          \u5B89\u5168\u4E8B\u4EF6\u7684\u6709\u6548\u54CD\u5E94\uFF0C\u6700\u5927\
+          \u9650\u5EA6\u5730\u51CF\u5C11\u5F71\u54CD\u5E76\u8FC5\u901F\u6062\u590D\
+          \u3002\u63AA\u65BD\u5305\u62EC\u4E8B\u4EF6\u62A5\u544A\u3001\u5347\u7EA7\
+          \u534F\u8BAE\u548C\u904F\u5236\u7B56\u7565\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.27
     ref_id: A.5.27
     name: Learning from information security incidents
@@ -1120,6 +1305,13 @@ objects:
           \ Verbesserungsma\xDFnahmen umgesetzt werden. Dazu geh\xF6ren Lessons-Learned-Sitzungen,\
           \ Aktualisierung von Richtlinien und Anpassung von technischen und organisatorischen\
           \ Ma\xDFnahmen."
+      zh:
+        name: "\u4ECE\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u4E2D\u5B66\u4E60"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u5B89\u5168\
+          \u4E8B\u4EF6\u4E2D\u5438\u53D6\u7684\u7ECF\u9A8C\u6559\u8BAD\u88AB\u8BB0\
+          \u5F55\u5E76\u52A0\u4EE5\u5B9E\u65BD\uFF0C\u4EE5\u6539\u8FDB\u6D41\u7A0B\
+          \u3002\u63AA\u65BD\u5305\u62EC\u4E8B\u4EF6\u540E\u5BA1\u67E5\u3001\u884C\
+          \u52A8\u8BA1\u5212\u548C\u653F\u7B56\u66F4\u65B0\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.28
     ref_id: A.5.28
     name: Collection of evidence
@@ -1161,6 +1353,13 @@ objects:
           \ gesichert und gesch\xFCtzt wird, um die Integrit\xE4t, Nachvollziehbarkeit\
           \ und gerichtliche Verwertbarkeit sicherzustellen. Dazu geh\xF6ren Chain-of-Custody-Prozesse,\
           \ sichere Lagerung und Zugriffskontrollen."
+      zh:
+        name: "\u8BC1\u636E\u6536\u96C6"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8BC1\u636E\u5728\u5B89\
+          \u5168\u4E8B\u4EF6\u671F\u95F4\u88AB\u6536\u96C6\u548C\u4FDD\u5B58\uFF0C\
+          \u4EE5\u652F\u6301\u8C03\u67E5\u3002\u63AA\u65BD\u5305\u62EC\u4FDD\u7BA1\
+          \u94FE\u7A0B\u5E8F\u3001\u5B89\u5168\u5B58\u50A8\u548C\u95E8\u7981\u63A7\
+          \u5236\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.29
     ref_id: A.5.29
     name: Information security during disruption
@@ -1200,6 +1399,13 @@ objects:
           \ auch w\xE4hrend betrieblicher St\xF6rungen, Notf\xE4lle oder Krisen aufrechterhalten\
           \ wird. Dazu geh\xF6ren Notfallma\xDFnahmen, alternative Betriebsverfahren,\
           \ redundante Systeme und Priorisierung kritischer Prozesse."
+      zh:
+        name: "\u4E2D\u65AD\u671F\u95F4\u7684\u4FE1\u606F\u5B89\u5168"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u5B89\u5168\
+          \u5728\u4E2D\u65AD\u671F\u95F4\u5F97\u5230\u7EF4\u62A4\uFF0C\u786E\u4FDD\
+          \u8FD0\u8425\u7684\u8FDE\u7EED\u6027\u3002\u63AA\u65BD\u5305\u62EC\u5E94\
+          \u6025\u9884\u6848\u3001\u5907\u4EFD\u7CFB\u7EDF\u548C\u6545\u969C\u5207\
+          \u6362\u673A\u5236\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.30
     ref_id: A.5.30
     name: ICT readiness for business continuity
@@ -1240,6 +1446,13 @@ objects:
           \ und -Dienste so vorbereitet sind, dass sie Ziele der Gesch\xE4ftskontinuit\xE4\
           t unterst\xFCtzen. Dazu geh\xF6ren Redundanzen, Wiederanlaufverfahren, regelm\xE4\
           \xDFige Tests von Wiederherstellungspl\xE4nen und Ausweichstandorte."
+      zh:
+        name: "ICT\u4E1A\u52A1\u8FDE\u7EED\u6027\u51C6\u5907"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDDICT\u5BF9\u4E1A\u52A1\u8FDE\
+          \u7EED\u6027\u505A\u597D\u51C6\u5907\uFF0C\u6700\u5927\u9650\u5EA6\u5730\
+          \u51CF\u5C11\u4E2D\u65AD\u671F\u95F4\u7684\u505C\u673A\u65F6\u95F4\u3002\
+          \u63AA\u65BD\u5305\u62EC\u6D4B\u8BD5\u6062\u590D\u8BA1\u5212\u3001\u5197\
+          \u4F59\u7CFB\u7EDF\u548C\u707E\u96BE\u6062\u590D\u7AD9\u70B9\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.31
     ref_id: A.5.31
     name: Legal, statutory, regulatory and contractual requirements
@@ -1279,6 +1492,13 @@ objects:
           \ dokumentiert, regelm\xE4\xDFig \xFCberpr\xFCft und eingehalten werden.\
           \ Dazu geh\xF6ren Datenschutzvorgaben, Normen, branchenspezifische Anforderungen\
           \ und vertragliche Verpflichtungen."
+      zh:
+        name: "\u6CD5\u5F8B\u3001\u6CD5\u5B9A\u3001\u76D1\u7BA1\u548C\u5408\u540C\u8981\
+          \u6C42"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7B26\u5408\u6CD5\u5F8B\
+          \u3001\u6CD5\u5B9A\u3001\u76D1\u7BA1\u548C\u5408\u540C\u4FE1\u606F\u5B89\
+          \u5168\u8981\u6C42\u3002\u63AA\u65BD\u5305\u62EC\u653F\u7B56\u5BA1\u67E5\
+          \u3001\u5BA1\u8BA1\u548C\u8BC1\u636E\u8BB0\u5F55\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.32
     ref_id: A.5.32
     name: Intellectual property rights
@@ -1317,6 +1537,12 @@ objects:
           \ geeignete technische und organisatorische Ma\xDFnahmen. Dazu geh\xF6ren\
           \ Zugriffsbeschr\xE4nkungen, Verschl\xFCsselung, vertragliche Vereinbarungen\
           \ und Schutz vor unbefugter Nutzung oder Verbreitung."
+      zh:
+        name: "\u77E5\u8BC6\u4EA7\u6743"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u77E5\u8BC6\u4EA7\u6743\
+          \u901A\u8FC7\u9002\u5F53\u7684\u4FE1\u606F\u5B89\u5168\u63AA\u65BD\u5F97\
+          \u5230\u4FDD\u62A4\u3002\u63AA\u65BD\u5305\u62EC\u8BBF\u95EE\u9650\u5236\
+          \u3001\u52A0\u5BC6\u548C\u6CD5\u5F8B\u534F\u8BAE\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.33
     ref_id: A.5.33
     name: Protection of records
@@ -1358,6 +1584,13 @@ objects:
           \ vor Verlust, Ver\xE4nderung, unbefugtem Zugriff oder Zerst\xF6rung. Dazu\
           \ geh\xF6ren Aufbewahrungsrichtlinien, sichere Lagerung und kontrollierter\
           \ Zugriff."
+      zh:
+        name: "\u6863\u6848\u4FDD\u62A4"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8BB0\u5F55\u5B89\u5168\
+          \u5B58\u50A8\u548C\u4FDD\u62A4\uFF0C\u9632\u6B62\u4E22\u5931\u6216\u672A\
+          \u7ECF\u6388\u6743\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u4FDD\u7559\
+          \u653F\u7B56\u3001\u5B89\u5168\u5B58\u50A8\u548C\u8BBF\u95EE\u63A7\u5236\
+          \u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.34
     ref_id: A.5.34
     name: Privacy and protection of PII
@@ -1397,6 +1630,12 @@ objects:
           \ Daten gem\xE4\xDF gesetzlichen und vertraglichen Datenschutzanforderungen\
           \ verarbeitet und gesch\xFCtzt werden. Dazu geh\xF6ren Verschl\xFCsselung,\
           \ Zugriffskontrolle, Minimierung und Dokumentation der Datenverarbeitung."
+      zh:
+        name: "\u4E2A\u4EBA\u9690\u79C1\u4FDD\u62A4\u4E0E\u4FDD\u62A4"
+        description: "\u8FD9\u79CD\u63A7\u5236\u4FDD\u62A4\u9690\u79C1\uFF0C\u786E\
+          \u4FDD\u4E2A\u4EBA\u8EAB\u4EFD\u4FE1\u606F\uFF08PII\uFF09\u7684\u5B89\u5168\
+          \u5904\u7406\u3002\u63AA\u65BD\u5305\u62EC\u533F\u540D\u5316\u3001\u52A0\
+          \u5BC6\u4EE5\u53CA\u9075\u5B88\u9690\u79C1\u6CD5\u5F8B\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.35
     ref_id: A.5.35
     name: Independent review of information security
@@ -1436,6 +1675,13 @@ objects:
           \ und Konformit\xE4t des ISMS zu \xFCberpr\xFCfen. Dazu geh\xF6ren interne\
           \ oder externe Audits, Sicherheitsbewertungen und Nachverfolgung von Ma\xDF\
           nahmen."
+      zh:
+        name: "\u4FE1\u606F\u5B89\u5168\u72EC\u7ACB\u5BA1\u67E5"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u5BF9\u4FE1\u606F\
+          \u5B89\u5168\u7684\u72EC\u7ACB\u5BA1\u67E5\uFF0C\u4EE5\u8BC4\u4F30\u5176\
+          \u6709\u6548\u6027\u548C\u5408\u89C4\u6027\u3002\u63AA\u65BD\u5305\u62EC\
+          \u5916\u90E8\u5BA1\u8BA1\u3001\u98CE\u9669\u8BC4\u4F30\u548C\u540E\u7EED\
+          \u884C\u52A8\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.36
     ref_id: A.5.36
     name: Compliance with policies, rules and standards for information security
@@ -1478,6 +1724,13 @@ objects:
           \ Richtlinien, Regeln und Standards zur Informationssicherheit eingehalten\
           \ werden. Dazu geh\xF6ren Schulungen, \xDCberwachungsprozesse, Kontrollen\
           \ und Eskalationsmechanismen."
+      zh:
+        name: "\u9075\u5B88\u4FE1\u606F\u5B89\u5168\u7684\u653F\u7B56\u3001\u89C4\u5219\
+          \u548C\u6807\u51C6"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u9075\u5B88\u6240\u6709\
+          \u4FE1\u606F\u5B89\u5168\u7684\u653F\u7B56\u3001\u89C4\u5219\u548C\u6807\
+          \u51C6\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\u57F9\u8BAD\u3001\u653F\
+          \u7B56\u5BA1\u67E5\u548C\u6267\u6CD5\u673A\u5236\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.5.37
     ref_id: A.5.37
     name: Documented operating procedures
@@ -1515,6 +1768,12 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Betriebsprozesse\
           \ dokumentiert, gepflegt, versioniert und f\xFCr berechtigte Personen verf\xFC\
           gbar sind, um konsistente, sichere und nachvollziehbare Abl\xE4ufe sicherzustellen."
+      zh:
+        name: "\u6587\u6863\u4F5C\u7A0B\u5E8F"
+        description: "\u8BE5\u63A7\u5236\u5236\u5B9A\u5E76\u7EF4\u62A4\u6709\u6587\
+          \u6863\u7684\u4F5C\u7A0B\u5E8F\uFF0C\u4EE5\u786E\u4FDD\u5B89\u5168\u5B9E\
+          \u8DF5\u7684\u4E00\u81F4\u6027\u3002\u63AA\u65BD\u5305\u62EC\u6D41\u7A0B\
+          \u6587\u6863\u3001\u7248\u672C\u63A7\u5236\u548C\u65E0\u969C\u788D\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.6.1
     ref_id: A.6.1
     name: Screening
@@ -1558,6 +1817,13 @@ objects:
           \ von Bewerbern zu best\xE4tigen. Dazu geh\xF6ren Identit\xE4tspr\xFCfung,\
           \ Qualifikationsnachweise und weitere gesetzlich zul\xE4ssige \xDCberpr\xFC\
           fungen."
+      zh:
+        name: "\u653E\u6620"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u8058\u7528\u524D\
+          \u5B9E\u65BD\u7B5B\u9009\u6D41\u7A0B\uFF0C\u4EE5\u9A8C\u8BC1\u5019\u9009\
+          \u4EBA\u7684\u9002\u4EFB\u6027\u3002\u63AA\u65BD\u5305\u62EC\u80CC\u666F\
+          \u8C03\u67E5\u3001\u8EAB\u4EFD\u9A8C\u8BC1\u548C\u8D44\u683C\u8BC4\u4F30\
+          \uFF0C\u4EE5\u964D\u4F4E\u5B89\u5168\u98CE\u9669\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.6.2
     ref_id: A.6.2
     name: Terms and conditions of employment
@@ -1597,6 +1863,13 @@ objects:
           \ Vereinbarungen klare Anforderungen an Informationssicherheit, Vertraulichkeit\
           \ und Compliance enthalten. Mitarbeitende m\xFCssen ihre sicherheitsrelevanten\
           \ Verantwortlichkeiten verstehen und anerkennen."
+      zh:
+        name: "\u96C7\u4F63\u6761\u6B3E\u4E0E\u6761\u4EF6"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u96C7\u4F63\u6761\u6B3E\
+          \u548C\u6761\u4EF6\u5305\u542B\u4FE1\u606F\u5B89\u5168\u8D23\u4EFB\u3002\
+          \u63AA\u65BD\u5305\u62EC\u660E\u786E\u89C4\u5B9A\u4FDD\u5BC6\u3001\u9075\
+          \u5B88\u653F\u7B56\u4EE5\u53CA\u8FDD\u89C4\u540E\u679C\u7B49\u6761\u6B3E\
+          \u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.6.3
     ref_id: A.6.3
     name: Information security awareness, education and training
@@ -1639,6 +1912,13 @@ objects:
           \ Personen regelm\xE4\xDFig Schulungen, Awareness-Ma\xDFnahmen und Unterweisungen\
           \ zur Informationssicherheit erhalten, um Risiken zu verstehen und sichere\
           \ Verhaltensweisen anzuwenden."
+      zh:
+        name: "\u4FE1\u606F\u5B89\u5168\u610F\u8BC6\u3001\u6559\u80B2\u4E0E\u57F9\u8BAD"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5458\u5DE5\u5B9A\u671F\
+          \u83B7\u5F97\u4FE1\u606F\u5B89\u5168\u610F\u8BC6\u3001\u6559\u80B2\u548C\
+          \u57F9\u8BAD\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\u57F9\u8BAD\u3001\
+          \u7535\u5B50\u5B66\u4E60\u9879\u76EE\u548C\u6A21\u62DF\u9493\u9C7C\u6F14\
+          \u4E60\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.6.4
     ref_id: A.6.4
     name: Disciplinary process
@@ -1679,6 +1959,13 @@ objects:
           e gegen Sicherheitsrichtlinien formal, fair und nachvollziehbar behandelt\
           \ werden. Der Prozess legt Ma\xDFnahmen, Eskalationswege und Konsequenzen\
           \ fest."
+      zh:
+        name: "\u7EAA\u5F8B\u5904\u5206\u7A0B\u5E8F"
+        description: "\u8BE5\u63A7\u5236\u5EFA\u7ACB\u4E86\u7EAA\u5F8B\u7A0B\u5E8F\
+          \uFF0C\u4EE5\u5904\u7406\u4FE1\u606F\u5B89\u5168\u653F\u7B56\u7684\u8FDD\
+          \u89C4\u884C\u4E3A\u3002\u63AA\u65BD\u5305\u62EC\u660E\u786E\u7684\u6307\
+          \u5BFC\u65B9\u9488\u3001\u5347\u7EA7\u7A0B\u5E8F\u548C\u6301\u7EED\u7684\
+          \u6267\u6CD5\uFF0C\u4EE5\u4FDD\u6301\u95EE\u8D23\u5236\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.6.5
     ref_id: A.6.5
     name: Responsibilities after termination or change of employment
@@ -1726,6 +2013,13 @@ objects:
           \ Verantwortlichkeiten ber\xFCcksichtigt werden \u2013 einschlie\xDFlich\
           \ Entzug von Zugriffsrechten, R\xFCckgabe von Werten und fortbestehender\
           \ Vertraulichkeitspflichten."
+      zh:
+        name: "\u79BB\u804C\u6216\u66F4\u6362\u5DE5\u4F5C\u540E\u7684\u804C\u8D23"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u5B89\u5168\
+          \u76F8\u5173\u7684\u804C\u8D23\u5728\u79BB\u804C\u6216\u804C\u4F4D\u53D8\
+          \u66F4\u540E\u5F97\u5230\u5B9A\u4E49\u548C\u6267\u884C\u3002\u63AA\u65BD\
+          \u5305\u62EC\u64A4\u9500\u8BBF\u95EE\u6743\u3001\u6536\u7F34\u7EC4\u7EC7\
+          \u8D44\u4EA7\u4EE5\u53CA\u8FDB\u884C\u79BB\u804C\u9762\u8C08\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.6.6
     ref_id: A.6.6
     name: Confidentiality or non-disclosure agreements
@@ -1768,6 +2062,13 @@ objects:
           \ und externe Parteien entsprechende Vertraulichkeitsvereinbarungen unterzeichnen,\
           \ die definieren, wie sensible Informationen zu sch\xFCtzen sind \u2013\
           \ auch nach Ende der Zusammenarbeit."
+      zh:
+        name: "\u4FDD\u5BC6\u534F\u8BAE\u6216\u4FDD\u5BC6\u534F\u8BAE"
+        description: "\u8BE5\u63A7\u5236\u5B9E\u65BD\u4FDD\u5BC6\u534F\u8BAE\u6216\
+          \u4FDD\u5BC6\u534F\u8BAE\u4EE5\u4FDD\u62A4\u654F\u611F\u4FE1\u606F\u3002\
+          \u63AA\u65BD\u5305\u62EC\u5165\u804C\u65F6\u7B7E\u7F72\u534F\u8BAE\u3001\
+          \u5B9A\u671F\u63D0\u9192\u4EE5\u53CA\u5728\u8FDD\u89C4\u65F6\u6267\u884C\
+          \u6CD5\u5F8B\u884C\u52A8\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.6.7
     ref_id: A.6.7
     name: Remote working
@@ -1808,6 +2109,14 @@ objects:
           \ Remote-Arbeit angemessen adressiert werden, einschlie\xDFlich sicherer\
           \ Zugriffe, Ger\xE4teschutz, Vorgaben zum Umgang mit Informationen und geeigneten\
           \ technischen Schutzma\xDFnahmen."
+      zh:
+        name: "\u8FDC\u7A0B\u529E\u516C"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u8FDC\u7A0B\u529E\
+          \u516C\u671F\u95F4\u4FE1\u606F\u5B89\u5168\u98CE\u9669\u7684\u5B89\u5168\
+          \u7BA1\u7406\u3002\u63AA\u65BD\u5305\u62EC\u5BF9\u4F01\u4E1A\u7CFB\u7EDF\
+          \u7684\u5B89\u5168\u8BBF\u95EE\u3001\u5F3A\u5236\u4F7F\u7528VPN\uFF0C\u4EE5\
+          \u53CA\u5236\u5B9A\u8FDC\u7A0B\u5904\u7406\u654F\u611F\u6570\u636E\u7684\
+          \u653F\u7B56\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.6.8
     ref_id: A.6.8
     name: Information security event reporting
@@ -1851,6 +2160,13 @@ objects:
           \ Informationssicherheitsereignisse unverz\xFCglich melden k\xF6nnen. Dazu\
           \ geh\xF6ren klare Meldewege, Sensibilisierung und definierte Prozesse zur\
           \ Erfassung, Bewertung und Weiterleitung von Ereignissen."
+      zh:
+        name: "\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u62A5\u544A"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5458\u5DE5\u80FD\u591F\
+          \u53CA\u65F6\u62A5\u544A\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u3002\u63AA\
+          \u65BD\u5305\u62EC\u4E8B\u4EF6\u62A5\u544A\u6E20\u9053\u3001\u5BA3\u4F20\
+          \u6D3B\u52A8\u4EE5\u53CA\u8C03\u67E5\u548C\u5904\u7406\u62A5\u544A\u4E8B\
+          \u4EF6\u7684\u540E\u7EED\u7A0B\u5E8F\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.1
     ref_id: A.7.1
     name: Physical security perimeters
@@ -1893,6 +2209,14 @@ objects:
           \ eingerichtet werden, um kritische Bereiche vor unbefugtem Zutritt zu sch\xFC\
           tzen. Dazu geh\xF6ren bauliche Schutzma\xDFnahmen, Zutrittskontrollen, \xDC\
           berwachungssysteme und organisatorische Vorgaben."
+      zh:
+        name: "\u7269\u7406\u5B89\u5168\u8FB9\u754C"
+        description: "\u8FD9\u79CD\u63A7\u5236\u5EFA\u7ACB\u4E86\u7269\u7406\u5B89\
+          \u5168\u8FB9\u754C\uFF0C\u4FDD\u62A4\u5173\u952E\u533A\u57DF\u514D\u53D7\
+          \u672A\u7ECF\u6388\u6743\u7684\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\
+          \u8BBE\u7F6E\u969C\u788D\u7269\u3001\u95E8\u7981\u63A7\u5236\u548C\u76D1\
+          \u63A7\u7CFB\u7EDF\uFF0C\u786E\u4FDD\u53EA\u6709\u6388\u6743\u4EBA\u5458\
+          \u624D\u80FD\u8FDB\u5165\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.2
     ref_id: A.7.2
     name: Physical entry
@@ -1932,6 +2256,13 @@ objects:
           \ zu sicherheitsrelevanten Bereichen kontrolliert, gesteuert und \xFCberwacht\
           \ wird. Dazu geh\xF6ren Zugangsausweise, Besuchermanagement, Protokollierung\
           \ und \xDCberwachung des Zutritts."
+      zh:
+        name: "\u5B9E\u4F53\u8FDB\u5165"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7269\u7406\u5165\u53E3\
+          \u70B9\u5F97\u5230\u63A7\u5236\u548C\u76D1\u63A7\uFF0C\u9632\u6B62\u672A\
+          \u7ECF\u6388\u6743\u7684\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u5FBD\
+          \u7AE0\u7CFB\u7EDF\u3001\u5B89\u4FDD\u4EBA\u5458\u548C\u8BBF\u5BA2\u8BB0\
+          \u5F55\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.3
     ref_id: A.7.3
     name: Securing offices, rooms and facilities
@@ -1971,6 +2302,12 @@ objects:
           ume und Einrichtungen vor unbefugtem Zugang, Manipulation oder Diebstahl\
           \ gesch\xFCtzt werden. Dazu geh\xF6ren Schlie\xDFsysteme, Zugangsbeschr\xE4\
           nkungen, sichere Aufbewahrung und physische Kontrollen."
+      zh:
+        name: "\u786E\u4FDD\u529E\u516C\u5BA4\u3001\u623F\u95F4\u548C\u8BBE\u65BD"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u529E\u516C\u5BA4\u3001\
+          \u623F\u95F4\u548C\u8BBE\u65BD\u7684\u5B89\u5168\uFF0C\u4EE5\u4FDD\u62A4\
+          \u4FE1\u606F\u548C\u8D44\u6E90\u3002\u63AA\u65BD\u5305\u62EC\u4E0A\u9501\
+          \u95E8\u3001\u9650\u5236\u533A\u57DF\u548C\u76D1\u63A7\u7CFB\u7EDF\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.4
     ref_id: A.7.4
     name: Physical security monitoring
@@ -2008,6 +2345,12 @@ objects:
           \ Bereiche durch geeignete \xDCberwachungseinrichtungen wie Video\xFCberwachung,\
           \ Sensorik, Alarmsysteme und Benachrichtigungen \xFCberwacht werden, um\
           \ unbefugte Aktivit\xE4ten fr\xFChzeitig zu erkennen."
+      zh:
+        name: "\u7269\u7406\u5B89\u5168\u76D1\u63A7"
+        description: "\u8BE5\u63A7\u5236\u5B9E\u65BD\u4E86\u7269\u7406\u5B89\u5168\
+          \u76D1\u63A7\uFF0C\u4EE5\u68C0\u6D4B\u5E76\u8FC5\u901F\u54CD\u5E94\u5A01\
+          \u80C1\u3002\u63AA\u65BD\u5305\u62EC\u95ED\u8DEF\u7535\u89C6\u7CFB\u7EDF\
+          \u3001\u8FD0\u52A8\u63A2\u6D4B\u5668\u548C\u5B9E\u65F6\u8B66\u62A5\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.5
     ref_id: A.7.5
     name: Protecting against physical and environmental threats
@@ -2047,6 +2390,12 @@ objects:
           \ Hitze, K\xE4lte, Vibrationen oder Naturereignisse gesch\xFCtzt werden.\
           \ Dazu geh\xF6ren Brandschutz, Klimakontrolle, \xDCberspannungsschutz und\
           \ bauliche Ma\xDFnahmen."
+      zh:
+        name: "\u9632\u62A4\u7269\u7406\u548C\u73AF\u5883\u5A01\u80C1"
+        description: "\u8FD9\u79CD\u63A7\u5236\u4FDD\u62A4\u7CFB\u7EDF\u548C\u8D44\
+          \u6E90\u514D\u53D7\u7269\u7406\u548C\u73AF\u5883\u5A01\u80C1\u3002\u63AA\
+          \u65BD\u5305\u62EC\u706D\u706B\u7CFB\u7EDF\u3001\u6E29\u5EA6\u63A7\u5236\
+          \u548C\u9632\u6D2A\u5C4F\u969C\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.6
     ref_id: A.7.6
     name: Working In secure areas
@@ -2085,6 +2434,12 @@ objects:
           \ f\xFCr T\xE4tigkeiten in Sicherheitsbereichen fest. Dazu geh\xF6ren kontrollierte\
           \ Zug\xE4nge, \xDCberwachung, Begleitung von Besuchern und organisatorische\
           \ Vorgaben f\xFCr Abl\xE4ufe und Verhalten."
+      zh:
+        name: "\u5728\u5B89\u5168\u533A\u57DF\u5DE5\u4F5C"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5B89\u5168\u533A\u57DF\
+          \u53EA\u5141\u8BB8\u6388\u6743\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\
+          \u95E8\u7981\u7CFB\u7EDF\u3001\u8BBF\u5BA2\u62A4\u9001\u548C\u6D3B\u52A8\
+          \u76D1\u6D4B\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.7
     ref_id: A.7.7
     name: Clear desk and clear screen
@@ -2126,6 +2481,13 @@ objects:
           \ nicht offen einsehbar sind. Dazu geh\xF6ren Clean-Desk-Regeln, sichere\
           \ Aufbewahrung von Dokumenten, Abschlie\xDFen von Arbeitspl\xE4tzen und\
           \ automatische Bildschirmsperren."
+      zh:
+        name: "\u684C\u9762\u548C\u5C4F\u5E55\u90FD\u6E05\u6670"
+        description: "\u901A\u8FC7\u91C7\u7528\u6E05\u6670\u684C\u9762\u548C\u6E05\
+          \u6670\u5C4F\u5E55\u653F\u7B56\uFF0C\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\
+          \u654F\u611F\u4FE1\u606F\u4E0D\u4F1A\u88AB\u9057\u6F0F\u3002\u63AA\u65BD\
+          \u5305\u62EC\u5C06\u654F\u611F\u6587\u4EF6\u9501\u597D\uFF0C\u5E76\u5728\
+          \u672A\u4F7F\u7528\u65F6\u81EA\u52A8\u9501\u5B9A\u5C4F\u5E55\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.8
     ref_id: A.7.8
     name: Equipment siting and protection
@@ -2164,6 +2526,13 @@ objects:
           \ positioniert, installiert und gesch\xFCtzt werden, dass Risiken wie unbefugter\
           \ Zugriff, Manipulation oder Besch\xE4digung minimiert werden. Dazu geh\xF6\
           ren sichere Standorte, Schr\xE4nke, Geh\xE4use und Zutrittskontrollen."
+      zh:
+        name: "\u8BBE\u5907\u9009\u5740\u4E0E\u9632\u62A4"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8BBE\u5907\u88AB\u5B89\
+          \u7F6E\u548C\u4FDD\u62A4\uFF0C\u4EE5\u9632\u6B62\u672A\u7ECF\u6388\u6743\
+          \u7684\u8BBF\u95EE\u6216\u635F\u574F\u3002\u63AA\u65BD\u5305\u62EC\u5B89\
+          \u5168\u5B89\u88C5\u3001\u4E0A\u9501\u67DC\u5B50\u548C\u9650\u5236\u8FDB\
+          \u5165\u533A\u57DF\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.9
     ref_id: A.7.9
     name: Security of assets off-premises
@@ -2203,6 +2572,13 @@ objects:
           ger und andere Werte auch au\xDFerhalb organisatorischer Standorte wirksam\
           \ gesch\xFCtzt werden. Dazu geh\xF6ren Verschl\xFCsselung, sichere Transportwege,\
           \ physischer Schutz und Kontrolle \xFCber die Nutzung."
+      zh:
+        name: "\u8D44\u4EA7\u5728\u573A\u5916\u7684\u5B89\u5168"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4F7F\u7528\u6216\u5B58\
+          \u653E\u5728\u573A\u5916\u7684\u8D44\u4EA7\u5F97\u5230\u4FDD\u62A4\uFF0C\
+          \u4EE5\u7EF4\u62A4\u673A\u5BC6\u6027\u548C\u5B8C\u6574\u6027\u3002\u63AA\
+          \u65BD\u5305\u62EC\u52A0\u5BC6\u3001\u5B89\u5168\u4F20\u8F93\u548C\u8BBF\
+          \u95EE\u8FFD\u8E2A\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.10
     ref_id: A.7.10
     name: Storage media
@@ -2238,6 +2614,12 @@ objects:
           \ w\xE4hrend ihres gesamten Lebenszyklus gesch\xFCtzt sind \u2013 bei Speicherung,\
           \ Transport, Nutzung und Entsorgung. Dazu geh\xF6ren sichere Lagerung, Verschl\xFC\
           sselung, Zugriffskontrollen und dokumentierte L\xF6schverfahren."
+      zh:
+        name: "\u5B58\u50A8\u4ECB\u8D28"
+        description: "\u8FD9\u79CD\u63A7\u5236\u4FDD\u62A4\u5B58\u50A8\u4ECB\u8D28\
+          \uFF0C\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u8BBF\u95EE\u6216\u7BE1\
+          \u6539\u3002\u63AA\u65BD\u5305\u62EC\u5B89\u5168\u5B58\u50A8\u3001\u52A0\
+          \u5BC6\u548C\u8BBF\u95EE\u9650\u5236\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.11
     ref_id: A.7.11
     name: Supporting utilities
@@ -2277,6 +2659,12 @@ objects:
           \ Versorgungseinrichtungen wie Strom, Klima, Wasser, Netzwerk oder Druckluft\
           \ zuverl\xE4ssig betrieben und vor Ausf\xE4llen gesch\xFCtzt werden. Redundanzen\
           \ und \xDCberwachungssysteme unterst\xFCtzen die Betriebssicherheit."
+      zh:
+        name: "\u652F\u6301\u516C\u7528\u4E8B\u4E1A"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u652F\u6301\u7684\
+          \u516C\u7528\u4E8B\u4E1A\uFF0C\u5982\u7535\u529B\u548C\u51B7\u5374\u7CFB\
+          \u7EDF\uFF0C\u53EF\u9760\u4E14\u4E0D\u53D7\u5E72\u6270\u3002\u63AA\u65BD\
+          \u5305\u62EC\u5197\u4F59\u7CFB\u7EDF\u548C\u7269\u7406\u5B89\u5168\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.12
     ref_id: A.7.12
     name: Cabling security
@@ -2313,6 +2701,13 @@ objects:
           \ und Stromkabel gegen Abh\xF6ren, Manipulation, Besch\xE4digung und St\xF6\
           rungen gesch\xFCtzt werden. Dazu geh\xF6ren Kabelschutzrohre, sichere Verlegung,\
           \ Kennzeichnung und Zugangskontrollen."
+      zh:
+        name: "\u5E03\u7EBF\u5B89\u5168"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7535\u7F06\u5F97\u5230\
+          \u5B89\u5168\u4FDD\u62A4\uFF0C\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\
+          \u62E6\u622A\u6216\u635F\u574F\u3002\u63AA\u65BD\u5305\u62EC\u4FDD\u62A4\
+          \u7BA1\u9053\u3001\u6B63\u786E\u6807\u8BC6\u548C\u5B89\u5168\u5E03\u7EBF\
+          \u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.13
     ref_id: A.7.13
     name: Equipment maintenance
@@ -2352,6 +2747,13 @@ objects:
           \xDFig, fachgerecht und sicher gewartet werden, um Ausf\xE4lle und Sicherheitsrisiken\
           \ zu vermeiden. Wartungsarbeiten d\xFCrfen nur von autorisiertem und qualifiziertem\
           \ Personal durchgef\xFChrt werden."
+      zh:
+        name: "\u8BBE\u5907\u7EF4\u62A4"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8BBE\u5907\u5F97\u5230\
+          \u7EF4\u62A4\uFF0C\u786E\u4FDD\u6B63\u5E38\u8FD0\u884C\u5E76\u9632\u6B62\
+          \u6545\u969C\u53D1\u751F\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\u4FDD\
+          \u517B\u3001\u5B89\u5168\u7EF4\u62A4\u5B9E\u8DF5\u4EE5\u53CA\u6388\u6743\
+          \u4EBA\u5458\u901A\u884C\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.7.14
     ref_id: A.7.14
     name: Secure disposal or re-use of equipment
@@ -2392,6 +2794,12 @@ objects:
           \ Entsorgung oder Weiterverwendung so bereinigt werden, dass keine sensiblen\
           \ Informationen wiederhergestellt werden k\xF6nnen. Dazu geh\xF6ren zertifizierte\
           \ L\xF6schverfahren, physische Vernichtung und dokumentierte Prozesse."
+      zh:
+        name: "\u5B89\u5168\u5904\u7F6E\u6216\u518D\u5229\u7528\u8BBE\u5907"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8BBE\u5907\u5B89\u5168\
+          \u5904\u7F6E\u6216\u518D\u5229\u7528\uFF0C\u4EE5\u4FDD\u62A4\u654F\u611F\
+          \u4FE1\u606F\u3002\u63AA\u65BD\u5305\u62EC\u6570\u636E\u51C0\u5316\u3001\
+          \u7269\u7406\u9500\u6BC1\u548C\u8BA4\u8BC1\u5904\u7406\u6D41\u7A0B\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.1
     ref_id: A.8.1
     name: User end point devices
@@ -2433,6 +2841,14 @@ objects:
           \ wie Laptops, Desktops oder Mobilger\xE4te durch technische und organisatorische\
           \ Ma\xDFnahmen gesch\xFCtzt werden. Dazu geh\xF6ren sichere Konfigurationen,\
           \ Verschl\xFCsselung, Malware-Schutz, Patch-Management und Zugriffskontrollen."
+      zh:
+        name: "\u7528\u6237\u7EC8\u7AEF\u8BBE\u5907"
+        description: "\u8FD9\u79CD\u63A7\u5236\u901A\u8FC7\u5B9E\u65BD\u7EC8\u7AEF\
+          \u68C0\u6D4B\u3001\u52A0\u5BC6\u548C\u5B89\u5168\u914D\u7F6E\u7B49\u5B89\
+          \u5168\u63AA\u65BD\uFF0C\u786E\u4FDD\u5BF9\u7B14\u8BB0\u672C\u7535\u8111\
+          \u3001\u53F0\u5F0F\u673A\u548C\u79FB\u52A8\u8BBE\u5907\u7B49\u7EC8\u7AEF\
+          \u8BBE\u5907\u7684\u4FDD\u62A4\uFF0C\u4EE5\u6700\u5927\u9650\u5EA6\u5730\
+          \u964D\u4F4E\u98CE\u9669\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.2
     ref_id: A.8.2
     name: Privileged access rights
@@ -2477,6 +2893,14 @@ objects:
           \ \xFCberwacht, dokumentiert und regelm\xE4\xDFig \xFCberpr\xFCft wird.\
           \ Dies umfasst starke Authentisierung, Protokollierung und strenge Verwaltung\
           \ privilegierter Konten."
+      zh:
+        name: "\u7279\u6743\u8BBF\u95EE\u6743"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7279\u6743\u8BBF\u95EE\
+          \u6743\u5F97\u5230\u6388\u6743\u3001\u7BA1\u7406\u548C\u4E25\u683C\u76D1\
+          \u63A7\uFF0C\u4EE5\u9632\u6B62\u6EE5\u7528\u5E76\u589E\u5F3A\u5B89\u5168\
+          \u6027\u3002\u63AA\u65BD\u5305\u62EC\u57FA\u4E8E\u89D2\u8272\u7684\u8BBF\
+          \u95EE\u63A7\u5236\u3001\u5B9A\u671F\u5BA1\u67E5\u548C\u4E25\u683C\u7684\
+          \u8D26\u6237\u7BA1\u7406\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.3
     ref_id: A.8.3
     name: Information access restriction
@@ -2516,6 +2940,13 @@ objects:
           \ auf Informationen nach dem Need-to-know-Prinzip beschr\xE4nkt wird, um\
           \ unbefugten Zugriff zu verhindern. Dazu geh\xF6ren Zugriffskontrollen,\
           \ Rollenrechte, Authentisierung und regelm\xE4\xDFige \xDCberpr\xFCfungen."
+      zh:
+        name: "\u4FE1\u606F\u8BBF\u95EE\u9650\u5236"
+        description: "\u8FD9\u79CD\u63A7\u5236\u57FA\u4E8E\u77E5\u60C5\u9700\u6C42\
+          \u539F\u5219\u9650\u5236\u4E86\u5BF9\u654F\u611F\u4FE1\u606F\u7684\u8BBF\
+          \u95EE\u3002\u63AA\u65BD\u5305\u62EC\u7528\u6237\u8BA4\u8BC1\u3001\u57FA\
+          \u4E8E\u89D2\u8272\u7684\u6743\u9650\u4EE5\u53CA\u5B9A\u671F\u7684\u8BBF\
+          \u95EE\u5BA1\u67E5\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.4
     ref_id: A.8.4
     name: Access to source code
@@ -2555,6 +2986,13 @@ objects:
           \ Quellcode kontrolliert, \xFCberwacht und gesch\xFCtzt erfolgt, um Manipulation,\
           \ Offenlegung oder unbefugte \xC4nderung zu verhindern. Dazu geh\xF6ren\
           \ Rechtemanagement, Versionskontrolle, Code-Reviews und abgesicherte Repositorys."
+      zh:
+        name: "\u6E90\u4EE3\u7801\u8BBF\u95EE"
+        description: "\u8FD9\u79CD\u63A7\u5236\u901A\u8FC7\u9632\u6B62\u672A\u7ECF\
+          \u6388\u6743\u7684\u67E5\u770B\u3001\u4FEE\u6539\u6216\u66DD\u5149\uFF0C\
+          \u4FDD\u969C\u4E86\u5BF9\u6E90\u4EE3\u7801\u7684\u8BBF\u95EE\u3002\u63AA\
+          \u65BD\u5305\u62EC\u7248\u672C\u63A7\u5236\u3001\u5B89\u5168\u4ED3\u5E93\
+          \u548C\u9650\u5236\u5F00\u53D1\u8005\u8BBF\u95EE\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.5
     ref_id: A.8.5
     name: Secure authentication
@@ -2590,6 +3028,12 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass starke Authentisierungsmechanismen\
           \ eingesetzt werden \u2013 wie Multi-Faktor-Authentisierung, sichere Passwortrichtlinien,\
           \ Token oder biometrische Verfahren \u2013 um unbefugten Zugriff zu verhindern."
+      zh:
+        name: "\u5B89\u5168\u8BA4\u8BC1"
+        description: "\u8BE5\u63A7\u5236\u5B9E\u73B0\u5F3A\u8BA4\u8BC1\u673A\u5236\
+          \uFF0C\u5982\u591A\u56E0\u7D20\u8BA4\u8BC1\uFF0C\u4EE5\u9A8C\u8BC1\u7528\
+          \u6237\u8EAB\u4EFD\u5E76\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u8BBF\
+          \u95EE\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.6
     ref_id: A.8.6
     name: Capacity management
@@ -2629,6 +3073,13 @@ objects:
           ten kontinuierlich \xFCberwacht, geplant und gesteuert werden, um Leistungseinbu\xDF\
           en, Engp\xE4sse oder Ausf\xE4lle zu vermeiden. Dazu geh\xF6ren Kapazit\xE4\
           tsplanung, Monitoring und Prognosen."
+      zh:
+        name: "\u5BB9\u91CF\u7BA1\u7406"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u5BB9\u91CF\
+          \u5F97\u5230\u7BA1\u7406\uFF0C\u4EE5\u63D0\u4F9B\u8DB3\u591F\u7684\u6027\
+          \u80FD\u5E76\u9632\u6B62\u4E2D\u65AD\u3002\u63AA\u65BD\u5305\u62EC\u76D1\
+          \u63A7\u8D44\u6E90\u4F7F\u7528\u548C\u89C4\u5212\u672A\u6765\u9700\u6C42\
+          \u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.7
     ref_id: A.8.7
     name: Protection against malware
@@ -2664,6 +3115,12 @@ objects:
           \ geeignete technische und organisatorische Ma\xDFnahmen vor Malware, Schadsoftware\
           \ und Angriffen gesch\xFCtzt werden. Dazu geh\xF6ren Antivirensoftware,\
           \ EDR/XDR, regelm\xE4\xDFige Updates und Sensibilisierung."
+      zh:
+        name: "\u9632\u8303\u6076\u610F\u8F6F\u4EF6"
+        description: "\u8BE5\u63A7\u5236\u90E8\u7F72\u4E86\u6740\u6BD2\u8F6F\u4EF6\
+          \u3001\u5A01\u80C1\u68C0\u6D4B\u5DE5\u5177\u548C\u5B9A\u671F\u66F4\u65B0\
+          \u7B49\u63AA\u65BD\uFF0C\u4EE5\u4FDD\u62A4\u7CFB\u7EDF\u514D\u53D7\u6076\
+          \u610F\u8F6F\u4EF6\u548C\u6076\u610F\u653B\u51FB\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.8
     ref_id: A.8.8
     name: Management of technical vulnerabilities
@@ -2701,6 +3158,13 @@ objects:
           \ zeitnah identifiziert, bewertet, priorisiert und behoben werden. Dazu\
           \ geh\xF6ren Schwachstellenscans, Patch-Management, Risikobewertungen und\
           \ Nachweisf\xFChrung."
+      zh:
+        name: "\u6280\u672F\u6F0F\u6D1E\u7BA1\u7406"
+        description: "\u8BE5\u63A7\u5236\u80FD\u591F\u53CA\u65F6\u8BC6\u522B\u3001\
+          \u8BC4\u4F30\u5E76\u4FEE\u590D\u6280\u672F\u6F0F\u6D1E\uFF0C\u4EE5\u6700\
+          \u5927\u9650\u5EA6\u5730\u964D\u4F4E\u5B89\u5168\u98CE\u9669\u3002\u63AA\
+          \u65BD\u5305\u62EC\u6F0F\u6D1E\u626B\u63CF\u548C\u8865\u4E01\u7BA1\u7406\
+          \u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.9
     ref_id: A.8.9
     name: Configuration management
@@ -2734,6 +3198,11 @@ objects:
           \ definiert, dokumentiert, gesch\xFCtzt und kontrolliert ge\xE4ndert werden,\
           \ um Sicherheitseinstellungen zu gew\xE4hrleisten und unbeabsichtigte \xC4\
           nderungen zu verhindern."
+      zh:
+        name: "\u914D\u7F6E\u7BA1\u7406"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u914D\u7F6E\
+          \u7684\u4E00\u81F4\u7BA1\u7406\uFF0C\u4EE5\u7EF4\u62A4\u5B89\u5168\u8BBE\
+          \u7F6E\u5E76\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u66F4\u6539\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.10
     ref_id: A.8.10
     name: Information deletion
@@ -2769,6 +3238,11 @@ objects:
           \ die nicht mehr ben\xF6tigt werden oder gesetzlichen Vorgaben zufolge gel\xF6\
           scht werden m\xFCssen, sicher und nachvollziehbar entfernt werden. Dazu\
           \ geh\xF6ren dokumentierte L\xF6schverfahren, sichere Methoden und Nachweise."
+      zh:
+        name: "\u4FE1\u606F\u5220\u9664"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u654F\u611F\u4FE1\u606F\
+          \u5728\u4E0D\u518D\u9700\u8981\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\
+          \u6062\u590D\u6216\u66DD\u5149\u65F6\u88AB\u5B89\u5168\u5220\u9664\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.11
     ref_id: A.8.11
     name: Data masking
@@ -2803,6 +3277,11 @@ objects:
           \ w\xE4hrend Verarbeitung, Anzeige oder Test durch geeignete Maskierungsverfahren\
           \ gesch\xFCtzt werden. Dies verhindert, dass unbefugte Personen Inhalte\
           \ erkennen oder missbrauchen k\xF6nnen."
+      zh:
+        name: "\u6570\u636E\u63A9\u853D"
+        description: "\u8BE5\u63A7\u5236\u901A\u8FC7\u4F7F\u7528\u6570\u636E\u63A9\
+          \u853D\u6280\u672F\u4FDD\u62A4\u654F\u611F\u4FE1\u606F\uFF0C\u9632\u6B62\
+          \u672A\u6388\u6743\u7528\u6237\u53D1\u73B0\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.12
     ref_id: A.8.12
     name: Data leakage prevention
@@ -2837,6 +3316,12 @@ objects:
           \ oder unbefugter Abfluss sensibler Daten durch technische und organisatorische\
           \ Ma\xDFnahmen verhindert wird. Dazu geh\xF6ren DLP-Systeme, Richtlinien,\
           \ \xDCberwachung und Zugriffsbeschr\xE4nkungen."
+      zh:
+        name: "\u6570\u636E\u6CC4\u9732\u9884\u9632"
+        description: "\u8BE5\u63A7\u5236\u673A\u5236\u5B9E\u73B0\u4E86\u9632\u6B62\
+          \u654F\u611F\u6570\u636E\u901A\u8FC7\u7535\u5B50\u90AE\u4EF6\u3001\u53EF\
+          \u79FB\u52A8\u5A92\u4F53\u6216\u5176\u4ED6\u6E20\u9053\u610F\u5916\u6CC4\
+          \u9732\u7684\u673A\u5236\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.13
     ref_id: A.8.13
     name: Information backup
@@ -2870,6 +3355,12 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass kritische Informationen\
           \ regelm\xE4\xDFig, vollst\xE4ndig, gesch\xFCtzt und wiederherstellbar gesichert\
           \ werden. Dies umfasst Backup-Strategien, Speicherorte, Tests und Dokumentation."
+      zh:
+        name: "\u4FE1\u606F\u5907\u4EFD"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5173\u952E\u4FE1\u606F\
+          \u80FD\u591F\u5B9A\u671F\u4E14\u5B89\u5168\u5730\u5907\u4EFD\uFF0C\u786E\
+          \u4FDD\u5728\u4E8B\u6545\u6216\u707E\u96BE\u53D1\u751F\u65F6\u5176\u53EF\
+          \u7528\u6027\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.14
     ref_id: A.8.14
     name: Redundancy of information processing facilities
@@ -2905,6 +3396,12 @@ objects:
           \ und Dienste durch Redundanzen, Ausweichmechanismen und Notbetriebskonzepte\
           \ abgesichert sind, um Ausfallzeiten zu minimieren und Betriebsf\xE4higkeit\
           \ zu erhalten."
+      zh:
+        name: "\u4FE1\u606F\u5904\u7406\u8BBE\u65BD\u7684\u5197\u4F59"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5904\u7406\u8BBE\u65BD\
+          \u5185\u7F6E\u5197\u4F59\uFF0C\u4EE5\u5728\u7CFB\u7EDF\u6545\u969C\u6216\
+          \u7D27\u6025\u60C5\u51B5\u4E0B\u4FDD\u6301\u53EF\u7528\u6027\u548C\u8FD0\
+          \u884C\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.15
     ref_id: A.8.15
     name: Logging
@@ -2938,6 +3435,11 @@ objects:
           \ Ereignisse und Aktivit\xE4ten protokolliert, gesch\xFCtzt, \xFCberpr\xFC\
           ft und f\xFCr Analysen sowie Ermittlungen genutzt werden k\xF6nnen. Dies\
           \ umfasst Log-Quellen, Integrit\xE4t der Logs, Aufbewahrung und \xDCberwachung."
+      zh:
+        name: "\u4F10\u6728"
+        description: "\u8FD9\u79CD\u63A7\u5236\u4F7F\u7CFB\u7EDF\u5185\u6D3B\u52A8\
+          \u80FD\u591F\u8BB0\u5F55\uFF0C\u4EE5\u652F\u6301\u76D1\u63A7\u3001\u4E8B\
+          \u4EF6\u68C0\u6D4B\u548C\u53D6\u8BC1\u8C03\u67E5\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.16
     ref_id: A.8.16
     name: Monitoring activities
@@ -2970,6 +3472,11 @@ objects:
           \ und Netzwerke kontinuierlich \xFCberwacht werden, um Anomalien, Angriffe\
           \ oder sicherheitsrelevante Ereignisse fr\xFChzeitig zu erkennen und geeignete\
           \ Gegenma\xDFnahmen einzuleiten."
+      zh:
+        name: "\u76D1\u6D4B\u6D3B\u52A8"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u6D3B\u52A8\
+          \u6301\u7EED\u76D1\u63A7\uFF0C\u4EE5\u68C0\u6D4B\u3001\u54CD\u5E94\u5E76\
+          \u7F13\u89E3\u5B89\u5168\u5A01\u80C1\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.17
     ref_id: A.8.17
     name: Clock synchronization
@@ -3002,6 +3509,11 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass System- und\
           \ Netzwerkuhren synchronisiert sind, um korrekte Zeitstempel f\xFCr Protokolle,\
           \ Analysen und sicherheitsrelevante Prozesse zu gew\xE4hrleisten."
+      zh:
+        name: "\u65F6\u949F\u540C\u6B65"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u65F6\u949F\
+          \u540C\u6B65\uFF0C\u4EE5\u4FDD\u6301\u65E5\u5FD7\u53CA\u5176\u4ED6\u5173\
+          \u952E\u8FDB\u7A0B\u7684\u65F6\u95F4\u6233\u51C6\u786E\u4E00\u81F4\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.18
     ref_id: A.8.18
     name: Use of privileged utility programs
@@ -3034,6 +3546,11 @@ objects:
           \ privilegierter Dienstprogramme kontrolliert, \xFCberwacht und auf berechtigte\
           \ Personen beschr\xE4nkt wird. Dies verhindert Missbrauch, Manipulation\
           \ und unbefugte Aktivit\xE4ten."
+      zh:
+        name: "\u7279\u6743\u5B9E\u7528\u7A0B\u5E8F\u7684\u4F7F\u7528"
+        description: "\u8FD9\u79CD\u63A7\u5236\u9650\u5236\u5E76\u76D1\u63A7\u7279\
+          \u6743\u5DE5\u5177\u7A0B\u5E8F\u7684\u4F7F\u7528\uFF0C\u4EE5\u9632\u6B62\
+          \u6EE5\u7528\u548C\u672A\u7ECF\u6388\u6743\u7684\u884C\u4E3A\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.19
     ref_id: A.8.19
     name: Installation of software on operational systems
@@ -3068,6 +3585,12 @@ objects:
           \ in produktiven Umgebungen kontrolliert, dokumentiert und autorisiert erfolgen,\
           \ um Risiken durch Schadsoftware, Fehlkonfigurationen oder unbefugte \xC4\
           nderungen zu vermeiden."
+      zh:
+        name: "\u4F5C\u7CFB\u7EDF\u4E0A\u7684\u8F6F\u4EF6\u5B89\u88C5"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u8FD0\u8425\u7CFB\
+          \u7EDF\u4E0A\u7684\u8F6F\u4EF6\u5B89\u88C5\u5F97\u5230\u5B89\u5168\u7BA1\
+          \u7406\uFF0C\u4EE5\u9632\u6B62\u6F0F\u6D1E\u6216\u672A\u7ECF\u6388\u6743\
+          \u7684\u66F4\u6539\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.20
     ref_id: A.8.20
     name: Networks security
@@ -3103,6 +3626,12 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Netzwerke durch\
           \ geeignete Sicherheitsma\xDFnahmen wie Firewalls, IDS/IPS, Segmentierung,\
           \ \xDCberwachung und Zugriffskontrollen gesch\xFCtzt werden."
+      zh:
+        name: "\u7F51\u7EDC\u5B89\u5168"
+        description: "\u8FD9\u79CD\u63A7\u5236\u901A\u8FC7\u9632\u706B\u5899\u3001\
+          \u5165\u4FB5\u68C0\u6D4B\u7CFB\u7EDF\u548C\u8BBF\u95EE\u63A7\u5236\u786E\
+          \u4FDD\u7F51\u7EDC\u5B89\u5168\uFF0C\u9632\u6B62\u672A\u7ECF\u6388\u6743\
+          \u7684\u8BBF\u95EE\u548C\u653B\u51FB\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.21
     ref_id: A.8.21
     name: Security of network services
@@ -3136,6 +3665,11 @@ objects:
           \ \u2013 intern und extern \u2013 sicher bereitgestellt, \xFCberwacht und\
           \ gesch\xFCtzt werden. Dazu geh\xF6ren Sicherheitsvereinbarungen, Monitoring,\
           \ Tests und Absicherung gegen Angriffe."
+      zh:
+        name: "\u7F51\u7EDC\u670D\u52A1\u7684\u5B89\u5168\u6027"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7F51\u7EDC\u670D\u52A1\
+          \u5728\u4F7F\u7528\u8FC7\u7A0B\u4E2D\u4FDD\u6301\u673A\u5BC6\u6027\u3001\
+          \u5B8C\u6574\u6027\u548C\u53EF\u7528\u6027\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.22
     ref_id: A.8.22
     name: Segregation of networks
@@ -3167,6 +3701,12 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Netzwerke nach\
           \ Schutzbedarf segmentiert werden, um Risiken, Angriffsfl\xE4chen und Auswirkungen\
           \ potenzieller Vorf\xE4lle zu reduzieren."
+      zh:
+        name: "\u7F51\u7EDC\u9694\u79BB"
+        description: "\u8FD9\u79CD\u63A7\u5236\u5B9E\u65BD\u4E86\u7F51\u7EDC\u9694\
+          \u79BB\uFF0C\u4EE5\u9650\u5236\u5A01\u80C1\u7684\u6269\u6563\uFF0C\u5E76\
+          \u6700\u5927\u9650\u5EA6\u5730\u51CF\u5C11\u6F5C\u5728\u5165\u4FB5\u7684\
+          \u5F71\u54CD\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.23
     ref_id: A.8.23
     name: Web filtering
@@ -3198,6 +3738,11 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Zugriffe auf\
           \ sch\xE4dliche, unangemessene oder unerlaubte Webseiten durch Filtermechanismen\
           \ eingeschr\xE4nkt oder verhindert werden."
+      zh:
+        name: "\u7F51\u9875\u8FC7\u6EE4"
+        description: "\u8BE5\u63A7\u5236\u5229\u7528\u7F51\u7EDC\u8FC7\u6EE4\u5DE5\
+          \u5177\u963B\u6B62\u672A\u7ECF\u6388\u6743\u6216\u6709\u5BB3\u5185\u5BB9\
+          \u901A\u8FC7\u4E92\u8054\u7F51\u8BBF\u95EE\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.24
     ref_id: A.8.24
     name: Use of cryptography
@@ -3231,6 +3776,11 @@ objects:
           \ Verfahren angemessen ausgew\xE4hlt, eingesetzt, verwaltet und gesch\xFC\
           tzt werden, um Vertraulichkeit, Integrit\xE4t und Authentizit\xE4t von Informationen\
           \ zu gew\xE4hrleisten."
+      zh:
+        name: "\u5BC6\u7801\u5B66\u7684\u5E94\u7528"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u91C7\u7528\u5BC6\u7801\
+          \u5B66\u6280\u672F\u6765\u4FDD\u62A4\u6570\u636E\u7684\u673A\u5BC6\u6027\
+          \u3001\u5B8C\u6574\u6027\u548C\u771F\u5B9E\u6027\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.25
     ref_id: A.8.25
     name: Secure development life cycle
@@ -3265,6 +3815,11 @@ objects:
           \ Tests, Reviews und Kontrollen in allen Phasen des Entwicklungslebenszyklus\
           \ verankert sind \u2013 von der Planung \xFCber Design, Implementierung,\
           \ Test bis zur \xDCbergabe."
+      zh:
+        name: "\u5B89\u5168\u5F00\u53D1\u751F\u547D\u5468\u671F"
+        description: "\u8BE5\u63A7\u5236\u5C06\u5B89\u5168\u6574\u5408\u5230\u5F00\
+          \u53D1\u751F\u547D\u5468\u671F\u7684\u6240\u6709\u9636\u6BB5\uFF0C\u786E\
+          \u4FDD\u7CFB\u7EDF\u548C\u5E94\u7528\u7684\u5B89\u5168\u6784\u5EFA\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.26
     ref_id: A.8.26
     name: Application security requirements
@@ -3294,6 +3849,11 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass f\xFCr Anwendungen\
           \ klare Sicherheitsanforderungen definiert, dokumentiert und umgesetzt werden,\
           \ um Schwachstellen und Sicherheitsrisiken zu vermeiden."
+      zh:
+        name: "\u5E94\u7528\u5B89\u5168\u8981\u6C42"
+        description: "\u8FD9\u79CD\u63A7\u5236\u5B9A\u4E49\u5E76\u6267\u884C\u5E94\
+          \u7528\u7A0B\u5E8F\u7684\u5B89\u5168\u8981\u6C42\uFF0C\u4EE5\u9632\u8303\
+          \u6F0F\u6D1E\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.27
     ref_id: A.8.27
     name: Secure system architecture and engineering principles
@@ -3326,6 +3886,11 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Sicherheitsprinzipien\
           \ wie Minimierung von Angriffsfl\xE4chen, Defense-in-Depth, sichere Standards\
           \ und Best Practices in Architektur- und Designprozessen verankert sind."
+      zh:
+        name: "\u5B89\u5168\u7CFB\u7EDF\u67B6\u6784\u4E0E\u5DE5\u7A0B\u539F\u7406"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u7CFB\u7EDF\u67B6\
+          \u6784\u5F00\u53D1\u8FC7\u7A0B\u4E2D\u91C7\u7528\u5B89\u5168\u7684\u8BBE\
+          \u8BA1\u539F\u5219\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.28
     ref_id: A.8.28
     name: Secure coding
@@ -3355,6 +3920,11 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Entwickler sichere\
           \ Coding-Praktiken anwenden, um Fehler, Schwachstellen und Angriffsfl\xE4\
           chen zu reduzieren. Dazu geh\xF6ren Standards, Code-Reviews und Schulungen."
+      zh:
+        name: "\u5B89\u5168\u7F16\u7801"
+        description: "\u8FD9\u79CD\u63A7\u5236\u5B9E\u65BD\u4E86\u5B89\u5168\u7684\
+          \u7F16\u7801\u5B9E\u8DF5\uFF0C\u4EE5\u6700\u5927\u9650\u5EA6\u5730\u51CF\
+          \u5C11\u5F00\u53D1\u8F6F\u4EF6\u4E2D\u7684\u6F0F\u6D1E\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.29
     ref_id: A.8.29
     name: Security testing in development and acceptance
@@ -3387,6 +3957,11 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Anwendungen\
           \ und Systeme w\xE4hrend Entwicklung, Test und Abnahme einer Sicherheitspr\xFC\
           fung unterzogen werden, um Schwachstellen fr\xFChzeitig zu erkennen."
+      zh:
+        name: "\u5F00\u53D1\u4E0E\u9A8C\u6536\u4E2D\u7684\u5B89\u5168\u6027\u6D4B\u8BD5"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u5F00\u53D1\u548C\
+          \u9A8C\u6536\u9636\u6BB5\u8FDB\u884C\u5B89\u5168\u6D4B\u8BD5\uFF0C\u4EE5\
+          \u8BC6\u522B\u5F31\u70B9\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.30
     ref_id: A.8.30
     name: Outsourced development
@@ -3418,6 +3993,11 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass bei ausgelagerter\
           \ Entwicklung Sicherheitsanforderungen vertraglich und organisatorisch geregelt,\
           \ \xFCberwacht und durchgesetzt werden."
+      zh:
+        name: "\u5916\u5305\u5F00\u53D1"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u5F00\u53D1\u5916\
+          \u5305\u7ED9\u7B2C\u4E09\u65B9\u4F9B\u5E94\u5546\u65F6\u5B89\u5168\u98CE\
+          \u9669\u5F97\u5230\u6709\u6548\u7BA1\u7406\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.31
     ref_id: A.8.31
     name: Separation of development, test and production environments
@@ -3454,6 +4034,13 @@ objects:
         description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Entwicklungs-,\
           \ Test- und Produktionsumgebungen klar voneinander getrennt sind, um unbeabsichtigte\
           \ \xC4nderungen, Sicherheitsrisiken oder Datenverlust zu verhindern."
+      zh:
+        name: "\u5F00\u53D1\u3001\u6D4B\u8BD5\u548C\u751F\u4EA7\u73AF\u5883\u7684\u5206\
+          \u79BB"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5F00\u53D1\u3001\u6D4B\
+          \u8BD5\u548C\u751F\u4EA7\u73AF\u5883\u88AB\u9694\u79BB\uFF0C\u4EE5\u9632\
+          \u6B62\u610F\u5916\u4EA4\u4E92\u548C\u672A\u7ECF\u6388\u6743\u7684\u8BBF\
+          \u95EE\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.32
     ref_id: A.8.32
     name: Change management
@@ -3486,6 +4073,11 @@ objects:
           \ an Systemen kontrolliert, dokumentiert und risikobewertet durchgef\xFC\
           hrt werden, um Stabilit\xE4t, Sicherheit und Nachvollziehbarkeit sicherzustellen.\
           \ Dies umfasst Genehmigungsprozesse, Tests, Dokumentation und \xDCberwachung."
+      zh:
+        name: "\u53D8\u66F4\u7BA1\u7406"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u53D8\u66F4\
+          \u5F97\u5230\u5B89\u5168\u7BA1\u7406\uFF0C\u4EE5\u964D\u4F4E\u98CE\u9669\
+          \u5E76\u4FDD\u6301\u8FD0\u8425\u7A33\u5B9A\u6027\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.33
     ref_id: A.8.33
     name: Test information
@@ -3517,6 +4109,11 @@ objects:
           \ insbesondere wenn sie produktive oder vertrauliche Inhalte enthalten \u2013\
           \ gesch\xFCtzt, anonymisiert oder maskiert werden, um unbefugte Einsicht\
           \ oder Missbrauch zu verhindern."
+      zh:
+        name: "\u6D4B\u8BD5\u4FE1\u606F"
+        description: "\u8BE5\u63A7\u5236\u4FDD\u62A4\u6D4B\u8BD5\u6570\u636E\uFF0C\
+          \u9632\u6B62\u654F\u611F\u6216\u673A\u5BC6\u4FE1\u606F\u5728\u6D4B\u8BD5\
+          \u8FC7\u7A0B\u4E2D\u6CC4\u9732\u3002"
   - urn: urn:intuitem:risk:function:doc-pol:a.8.34
     ref_id: A.8.34
     name: Protection of information systems during audit testing
@@ -3565,6 +4162,16 @@ objects:
           \ Zugriff, Datenabfluss oder Betriebsst\xF6rungen verhindert werden. Dazu\
           \ geh\xF6ren die Nutzung von Nicht-Produktivumgebungen, Zugriffsbeschr\xE4\
           nkungen, sichere Verfahren und Vertraulichkeitsvereinbarungen."
+      zh:
+        name: "\u5BA1\u8BA1\u6D4B\u8BD5\u671F\u95F4\u4FE1\u606F\u7CFB\u7EDF\u7684\u4FDD\
+          \u62A4"
+        description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u548C\u6570\
+          \u636E\u5728\u5BA1\u8BA1\u8FC7\u7A0B\u4E2D\u5F97\u5230\u4FDD\u62A4\uFF0C\
+          \u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u8BBF\u95EE\u3001\u6570\u636E\
+          \u6CC4\u9732\u6216\u4E2D\u65AD\u3002\u63AA\u65BD\u5305\u62EC\u4F7F\u7528\
+          \u975E\u751F\u4EA7\u73AF\u5883\u3001\u8BBF\u95EE\u9650\u5236\u548C\u4FDD\
+          \u5BC6\u534F\u8BAE\uFF0C\u4EE5\u7EF4\u62A4\u7CFB\u7EDF\u5B89\u5168\u548C\
+          \u5B8C\u6574\u6027\u3002"
   framework:
     urn: urn:intuitem:risk:framework:iso27001-2022
     ref_id: ISO/IEC 27001:2022
@@ -3595,6 +4202,11 @@ objects:
         name: Internationaler Standard ISO/IEC 27001:2022
         description: "Informationssicherheit, Cybersicherheit und Datenschutz \u2013\
           \ Informationssicherheitsmanagementsysteme \u2013 Anforderungen"
+      zh:
+        name: "\u56FD\u9645\u6807\u51C6 ISO/IEC 27001\uFF1A2022"
+        description: "\u4FE1\u606F\u5B89\u5168\u3001\u7F51\u7EDC\u5B89\u5168\u548C\
+          \u9690\u79C1\u4FDD\u62A4\u2014\u2014\u4FE1\u606F\u5B89\u5168\u7BA1\u7406\
+          \u7CFB\u7EDF\u2014\u2014\u8981\u6C42"
     implementation_groups_definition:
     - ref_id: Clauses
       name: Clauses
@@ -3621,6 +4233,8 @@ objects:
           name: "Cl\xE1usulas"
         de:
           name: Kapitel
+        zh:
+          name: "\u6761\u6B3E"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4
       assessable: false
       depth: 2
@@ -3640,6 +4254,8 @@ objects:
           name: "Contexto de la organizaci\xF3n"
         de:
           name: Kontext der Organisation
+        zh:
+          name: "\u7EC4\u7EC7\u80CC\u666F"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
       assessable: true
       depth: 3
@@ -3682,6 +4298,12 @@ objects:
           description: "Interne und externe Faktoren werden identifiziert, die beeinflussen,\
             \ ob und in welchem Ausma\xDF Informationssicherheitsziele erreicht werden\
             \ k\xF6nnen"
+        zh:
+          name: "\u7406\u89E3\u7EC4\u7EC7\u53CA\u5176\u80CC\u666F"
+          description: "\u8BC6\u522B\u5F71\u54CD\u7EC4\u7EC7\u5B9E\u73B0\u4FE1\u606F\
+            \u5B89\u5168\u76EE\u6807\u80FD\u529B\u7684\u5185\u90E8\u548C\u5916\u90E8\
+            \u56E0\u7D20\uFF0C\u786E\u4FDDISMS\u4E0E\u5176\u80CC\u666F\u4FDD\u6301\
+            \u4E00\u81F4\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
       assessable: true
       depth: 3
@@ -3723,6 +4345,11 @@ objects:
             \ Parteien werden analysiert, um daraus resultierende Anforderungen an\
             \ die Informationssicherheit vollst\xE4ndig zu erfassen und im ISMS zu\
             \ ber\xFCcksichtigen"
+        zh:
+          name: "\u4E86\u89E3\u76F8\u5173\u65B9\u7684\u9700\u6C42\u548C\u671F\u671B"
+          description: "\u5206\u6790\u76F8\u5173\u65B9\u7684\u9700\u6C42\u548C\u671F\
+            \u671B\uFF0C\u5C06\u5176\u7EB3\u5165ISMS\uFF0C\u5E76\u6EE1\u8DB3\u76F8\
+            \u5173\u7684\u4FE1\u606F\u5B89\u5168\u9700\u6C42\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
       assessable: true
       depth: 3
@@ -3766,6 +4393,13 @@ objects:
             \ und externe Faktoren, die Anforderungen interessierter Parteien sowie\
             \ Prozesse, Systeme, Standorte, Dienstleistungen und Abh\xE4ngigkeiten\
             \ vollst\xE4ndig ber\xFCcksichtigt werden"
+        zh:
+          name: "\u786E\u5B9A\u4FE1\u606F\u5B89\u5168\u7BA1\u7406\u7CFB\u7EDF\u7684\
+            \u8303\u56F4"
+          description: "\u901A\u8FC7\u8003\u8651\u5185\u90E8\u548C\u5916\u90E8\u56E0\
+            \u7D20\u3001\u5229\u76CA\u76F8\u5173\u8005\u9700\u6C42\u4EE5\u53CA\u8FD0\
+            \u8425\u73AF\u5883\u4E2D\u7684\u4F9D\u8D56\u5173\u7CFB\uFF0C\u5B9A\u4E49\
+            ISMS\u7684\u8303\u56F4\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
       assessable: true
       depth: 3
@@ -3804,6 +4438,11 @@ objects:
           description: Ein Informationssicherheitsmanagementsystem wird aufgebaut,
             betrieben und kontinuierlich verbessert, um Informationssicherheitsrisiken
             wirksam zu steuern und die festgelegten Sicherheitsziele zu erreichen
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u7BA1\u7406\u7CFB\u7EDF"
+          description: "\u6784\u5EFA\u3001\u8FD0\u884C\u5E76\u6301\u7EED\u6539\u8FDB\
+            ISM\uFF0C\u4EE5\u6709\u6548\u7BA1\u7406\u4FE1\u606F\u5B89\u5168\u98CE\u9669\
+            \u5E76\u5B9E\u73B0\u7EC4\u7EC7\u76EE\u6807\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5
       assessable: false
       depth: 2
@@ -3823,6 +4462,8 @@ objects:
           name: Liderazgo
         de:
           name: "F\xFChrung"
+        zh:
+          name: "\u9886\u5BFC\u5C42"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
       assessable: true
       depth: 3
@@ -3870,6 +4511,12 @@ objects:
             \ unterst\xFCtzt, mit den Unternehmenszielen abgestimmt, mit erforderlichen\
             \ Ressourcen ausgestattet und durch die F\xF6rderung einer Sicherheitskultur\
             \ sowie kontinuierliche Verbesserungsma\xDFnahmen vorangetrieben wird."
+        zh:
+          name: "\u9886\u5BFC\u529B\u4E0E\u627F\u8BFA"
+          description: "\u901A\u8FC7\u652F\u6301ISMS\u3001\u4F7F\u5176\u4E0E\u7EC4\
+            \u7EC7\u76EE\u6807\u5BF9\u9F50\u3001\u5206\u914D\u8D44\u6E90\u3001\u4FC3\
+            \u8FDB\u5B89\u5168\u6587\u5316\u5E76\u63A8\u52A8\u6301\u7EED\u6539\u8FDB\
+            \u6765\u5C55\u793A\u9886\u5BFC\u529B\u548C\u627F\u8BFA\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
       assessable: true
       depth: 3
@@ -3914,6 +4561,12 @@ objects:
           description: "Eine Informationssicherheitspolitik wird erstellt, dokumentiert\
             \ und kommuniziert, die Ziele, Grunds\xE4tze und Verpflichtungen beschreibt\
             \ und im Einklang mit der strategischen Ausrichtung steht."
+        zh:
+          name: "\u653F\u7B56"
+          description: "\u5236\u5B9A\u4E0E\u7EC4\u7EC7\u76EE\u6807\u548C\u6218\u7565\
+            \u65B9\u5411\u4E00\u81F4\u7684\u4FE1\u606F\u5B89\u5168\u653F\u7B56\uFF0C\
+            \u660E\u786E\u5408\u89C4\u3001\u6301\u7EED\u6539\u8FDB\u548C\u4FE1\u606F\
+            \u5B89\u5168\u4FC3\u8FDB\u7684\u627F\u8BFA\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
       assessable: true
       depth: 3
@@ -3954,6 +4607,12 @@ objects:
           description: "Rollen, Verantwortlichkeiten und Befugnisse werden definiert,\
             \ zugewiesen und kommuniziert, damit Aufgaben, Zust\xE4ndigkeiten und\
             \ Entscheidungswege klar geregelt und nachvollziehbar sind."
+        zh:
+          name: "\u7EC4\u7EC7\u89D2\u8272\u3001\u804C\u8D23\u4E0E\u6743\u9650"
+          description: "\u5B9A\u4E49\u3001\u5206\u914D\u5E76\u4F20\u8FBE\u89D2\u8272\
+            \u3001\u8D23\u4EFB\u548C\u6743\u9650\uFF0C\u4EE5\u786E\u4FDDISMS\u7684\
+            \u6709\u6548\u5B9E\u65BD\u548C\u8FD0\u8425\uFF0C\u5E76\u4E0E\u7EC4\u7EC7\
+            \u76EE\u6807\u4FDD\u6301\u4E00\u81F4\u7684\u95EE\u8D23\u5236\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6
       assessable: false
       depth: 2
@@ -3973,6 +4632,8 @@ objects:
           name: "Planificaci\xF3n"
         de:
           name: Planung
+        zh:
+          name: "\u89C4\u5212"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1
       assessable: false
       depth: 3
@@ -3992,6 +4653,8 @@ objects:
           name: Acciones para abordar los riesgos y las oportunidades
         de:
           name: "Ma\xDFnahmen zum Umgang mit Risiken und Chancen"
+        zh:
+          name: "\u5E94\u5BF9\u98CE\u9669\u4E0E\u673A\u9047\u7684\u884C\u52A8"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
       assessable: true
       depth: 4
@@ -4038,6 +4701,13 @@ objects:
           description: "Risiken und Chancen werden identifiziert und bewertet, um\
             \ Ma\xDFnahmen abzuleiten, die die Erreichung der Informationssicherheitsziele\
             \ unterst\xFCtzen und unerw\xFCnschte Auswirkungen verhindern sollen."
+        zh:
+          name: "\u5E38\u89C4"
+          description: "\u5EFA\u7ACB\u8BC6\u522B\u4FE1\u606F\u5B89\u5168\u98CE\u9669\
+            \u548C\u673A\u4F1A\u7684\u6D41\u7A0B\uFF0C\u8003\u8651\u5185\u90E8\u548C\
+            \u5916\u90E8\u56E0\u7D20\u3001\u5229\u76CA\u76F8\u5173\u8005\u9700\u6C42\
+            \u53CA\u9002\u7528\u8981\u6C42\uFF0C\u786E\u4FDDISMS\u5B9E\u73B0\u5176\
+            \u76EE\u6807\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
       assessable: true
       depth: 4
@@ -4087,6 +4757,13 @@ objects:
             Beurteilung von Informationssicherheitsrisiken wird definiert, in dem
             Kriterien, Methoden, Eintrittswahrscheinlichkeiten und Auswirkungen beschrieben
             werden, um Risiken nachvollziehbar zu bewerten.
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u98CE\u9669\u8BC4\u4F30\u8981\u6C42"
+          description: "\u5EFA\u7ACB\u4E00\u4E2A\u6D41\u7A0B\uFF0C\u6309\u8BA1\u5212\
+            \u95F4\u9694\u8BC4\u4F30\u4FE1\u606F\u5B89\u5168\u98CE\u9669\uFF0C\u4F7F\
+            \u7528\u5B9A\u4E49\u6807\u51C6\u8BC4\u4F30\u673A\u5BC6\u6027\u3001\u5B8C\
+            \u6574\u6027\u548C\u53EF\u7528\u6027\u7684\u5A01\u80C1\uFF0C\u786E\u4FDD\
+            \u7ED3\u679C\u4E00\u81F4\u4E14\u53EF\u9760\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
       assessable: true
       depth: 4
@@ -4133,6 +4810,14 @@ objects:
           description: "Identifizierte Informationssicherheitsrisiken werden behandelt,\
             \ indem Optionen zur Risikovermeidung, -minderung, -\xFCbertragung oder\
             \ -akzeptanz bewertet, ausgew\xE4hlt, priorisiert und umgesetzt werden"
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u98CE\u9669\u5904\u7406"
+          description: "\u5B9A\u4E49\u4E00\u4E2A\u6D41\u7A0B\uFF0C\u901A\u8FC7\u9009\
+            \u62E9\u9002\u5F53\u7684\u63A7\u5236\u63AA\u65BD\u3001\u786E\u4FDD\u4E0E\
+            \u98CE\u9669\u63A5\u53D7\u6807\u51C6\u4E00\u81F4\uFF0C\u5E76\u5728\u98CE\
+            \u9669\u5904\u7406\u8BA1\u5212\u4E2D\u8BB0\u5F55\u8FD9\u4E9B\u98CE\u9669\
+            \uFF0C\u6765\u5E94\u5BF9\u5DF2\u8BC6\u522B\u7684\u4FE1\u606F\u5B89\u5168\
+            \u98CE\u9669\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.2
       assessable: true
       depth: 3
@@ -4184,6 +4869,14 @@ objects:
           description: Informationssicherheitsziele werden messbar formuliert, Verantwortlichkeiten
             und Ressourcen werden festgelegt, Zeitrahmen definiert und geeignete Methoden
             zur Bewertung des Zielerreichungsgrades bestimmt
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u76EE\u6807\u53CA\u5176\u5B9E\u73B0\u89C4\
+            \u5212"
+          description: "\u8BBE\u5B9A\u4E0EISM\u548C\u6218\u7565\u76EE\u6807\u76F8\u4E00\
+            \u81F4\u7684\u53EF\u8861\u91CF\u4FE1\u606F\u5B89\u5168\u76EE\u6807\uFF0C\
+            \u5E76\u89C4\u5212\u5177\u4F53\u7684\u8D23\u4EFB\u3001\u8D44\u6E90\u3001\
+            \u65F6\u95F4\u8868\u53CA\u8BC4\u4F30\u65B9\u6CD5\u4EE5\u5B9E\u73B0\u8FD9\
+            \u4E9B\u76EE\u6807\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.3
       assessable: true
       depth: 3
@@ -4225,6 +4918,12 @@ objects:
           name: "Planung von \xC4nderungen"
           description: "\xC4nderungen am ISMS werden systematisch geplant, indem Auswirkungen\
             \ auf Prozesse, Ressourcen und Sicherheitsanforderungen bewertet werden"
+        zh:
+          name: "\u53D8\u9769\u89C4\u5212"
+          description: "\u7CFB\u7EDF\u6027\u89C4\u5212ISMS\u7684\u53D8\u66F4\uFF0C\
+            \u786E\u4FDD\u4E0E\u4FE1\u606F\u5B89\u5168\u8981\u6C42\u4FDD\u6301\u4E00\
+            \u81F4\uFF0C\u65E0\u7F1D\u6574\u5408\u4E8E\u73B0\u6709\u6D41\u7A0B\uFF0C\
+            \u5E76\u6709\u6548\u7BA1\u7406\u98CE\u9669\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7
       assessable: false
       depth: 2
@@ -4244,6 +4943,8 @@ objects:
           name: Apoyo
         de:
           name: "Unterst\xFCtzung"
+        zh:
+          name: "\u652F\u6301"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.1
       assessable: true
       depth: 3
@@ -4286,6 +4987,12 @@ objects:
           description: Personelle, technische, finanzielle und organisatorische Ressourcen
             werden bereitgestellt, um Aufbau, Betrieb und Weiterentwicklung des ISMS
             sicherzustellen.
+        zh:
+          name: "\u8D44\u6E90"
+          description: "\u63D0\u4F9B\u5FC5\u8981\u8D44\u6E90\u4EE5\u5EFA\u8BBE\u3001\
+            \u8FD0\u884C\u5E76\u6301\u7EED\u6539\u8FDBISMS\uFF0C\u786E\u4FDD\u5176\
+            \u6709\u6548\u8FD0\u884C\u5E76\u4E0E\u7EC4\u7EC7\u76EE\u6807\u4FDD\u6301\
+            \u4E00\u81F4\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
       assessable: true
       depth: 3
@@ -4329,6 +5036,12 @@ objects:
           description: "Personen, die Aufgaben im ISMS \xFCbernehmen, verf\xFCgen\
             \ \xFCber die erforderlichen Kenntnisse, F\xE4higkeiten, Erfahrungen und\
             \ Qualifikationen"
+        zh:
+          name: "\u804C\u6743"
+          description: "\u786E\u4FDD\u53C2\u4E0EISMS\u7684\u4EBA\u5458\u901A\u8FC7\
+            \u9002\u5F53\u7684\u6559\u80B2\u3001\u57F9\u8BAD\u6216\u7ECF\u9A8C\u5177\
+            \u5907\u5FC5\u8981\u7684\u80FD\u529B\uFF0C\u4EE5\u6709\u6548\u5C65\u884C\
+            \u804C\u8D23\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
       assessable: true
       depth: 3
@@ -4371,6 +5084,12 @@ objects:
           description: "Mitarbeitende werden \xFCber ihre sicherheitsrelevanten Verantwortlichkeiten,\
             \ Risiken, Rollen und Verhaltensanforderungen informiert, um ein ausgepr\xE4\
             gtes Sicherheitsbewusstsein sicherzustellen."
+        zh:
+          name: "\u610F\u8BC6"
+          description: "\u63D0\u9AD8\u76F8\u5173\u4EBA\u5458\u5BF9ISMS\u3001\u5176\
+            \u5728\u4FE1\u606F\u5B89\u5168\u4E2D\u4F5C\u7528\u4EE5\u53CA\u9075\u5B88\
+            \u5B89\u5168\u653F\u7B56\u548C\u8981\u6C42\u91CD\u8981\u6027\u7684\u8BA4\
+            \u8BC6\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
       assessable: true
       depth: 3
@@ -4410,6 +5129,12 @@ objects:
           description: "Kommunikationsprozesse zu informationssicherheitsrelevanten\
             \ Themen werden definiert, einschlie\xDFlich Inhalten, Empf\xE4ngern,\
             \ Zust\xE4ndigkeiten und geeigneten Zeitpunkten."
+        zh:
+          name: "\u4EA4\u901A"
+          description: "\u5EFA\u7ACB\u6709\u6548\u7684\u5185\u5916\u6C9F\u901A\u6D41\
+            \u7A0B\uFF0C\u786E\u4FDD\u53CA\u65F6\u4E14\u9002\u5F53\u5730\u4EA4\u6362\
+            \u4E0EISMS\uFF08\u56FD\u9645\u5B89\u5168\u7BA1\u7406\u7CFB\u7EDF\u53CA\
+            \u5176\u76EE\u6807\uFF09\u76F8\u5173\u7684\u4FE1\u606F\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5
       assessable: false
       depth: 3
@@ -4429,6 +5154,8 @@ objects:
           name: "Informaci\xF3n documentada"
         de:
           name: Dokumentierte Information
+        zh:
+          name: "\u6587\u732E\u4FE1\u606F"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.1
       assessable: true
       depth: 4
@@ -4467,6 +5194,12 @@ objects:
           description: "Dokumentierte Informationen werden erstellt, aktualisiert\
             \ und verwaltet, soweit dies f\xFCr Planung, Betrieb, Steuerung und \xDC\
             berwachung des ISMS erforderlich ist."
+        zh:
+          name: "\u5E38\u89C4"
+          description: "\u6839\u636E\u9700\u8981\u8BB0\u5F55ISMS\u6587\u4EF6\uFF0C\
+            \u4EE5\u786E\u4FDD\u6709\u6548\u7684\u89C4\u5212\u3001\u8FD0\u8425\u3001\
+            \u6D41\u7A0B\u63A7\u5236\u5E76\u4E0E\u7EC4\u7EC7\u9700\u6C42\u4FDD\u6301\
+            \u4E00\u81F4\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
       assessable: true
       depth: 4
@@ -4504,6 +5237,11 @@ objects:
           description: "Dokumente werden gepr\xFCft, genehmigt, versioniert und gepflegt,\
             \ sodass deren Genauigkeit, Aktualit\xE4t und Eignung gew\xE4hrleistet\
             \ ist."
+        zh:
+          name: "\u521B\u5EFA\u548C\u66F4\u65B0\u6587\u6863\u4FE1\u606F"
+          description: "\u786E\u4FDDISMS\u6587\u6863\u5F97\u5230\u9002\u5F53\u521B\
+            \u5EFA\u3001\u66F4\u65B0\u548C\u63A7\u5236\uFF0C\u5305\u62EC\u9002\u5F53\
+            \u7684\u5BA1\u6279\u548C\u7248\u672C\u7BA1\u7406\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
       assessable: true
       depth: 4
@@ -4542,6 +5280,11 @@ objects:
           name: Steuerung dokumentierter Information
           description: "Dokumentierte Informationen werden gesch\xFCtzt, zugriffskontrolliert,\
             \ wiederauffindbar und vor Verlust, Missbrauch oder Besch\xE4digung gesichert"
+        zh:
+          name: "\u5BF9\u6587\u6863\u4FE1\u606F\u7684\u63A7\u5236"
+          description: "\u8BA9ISMS\u6587\u6863\u5BF9\u6709\u9700\u8981\u7684\u4EBA\
+            \u53EF\u8BBF\u95EE\u548C\u4F7F\u7528\uFF0C\u540C\u65F6\u4FDD\u62A4\u5176\
+            \u514D\u53D7\u672A\u7ECF\u6388\u6743\u8BBF\u95EE\u6216\u4E22\u5931\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8
       assessable: false
       depth: 2
@@ -4561,6 +5304,8 @@ objects:
           name: Operaciones
         de:
           name: Betrieb
+        zh:
+          name: "\u8FD0\u8425"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
       assessable: true
       depth: 3
@@ -4599,6 +5344,11 @@ objects:
           name: Betriebliche Planung und Steuerung
           description: "ISMS-relevante Prozesse werden geplant, gesteuert und \xFC\
             berwacht"
+        zh:
+          name: "\u4F5C\u6218\u89C4\u5212\u4E0E\u63A7\u5236"
+          description: "\u89C4\u5212\u548C\u63A7\u5236ISMS\u6D41\u7A0B\uFF0C\u786E\
+            \u4FDD\u4E0E\u9700\u6C42\u4E00\u81F4\uFF0C\u5E76\u505A\u51FA\u5FC5\u8981\
+            \u8C03\u6574\u4EE5\u5E94\u5BF9\u98CE\u9669\u548C\u673A\u9047\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
       assessable: true
       depth: 3
@@ -4639,6 +5389,11 @@ objects:
           description: "Risikobeurteilungen werden anhand der definierten Methoden\
             \ durchgef\xFChrt, dokumentiert und aktualisiert, um relevante Risiken\
             \ systematisch zu erfassen und zu bewerten."
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u98CE\u9669\u8BC4\u4F30"
+          description: "\u5B9E\u65BD\u98CE\u9669\u8BC4\u4F30\u6D41\u7A0B\uFF0C\u8BC6\
+            \u522B\u3001\u8BC4\u4F30\u5E76\u4F18\u5148\u6392\u5E8FISMS\u6846\u67B6\
+            \u4E2D\u5B9A\u4E49\u7684\u4FE1\u606F\u5B89\u5168\u98CE\u9669\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
       assessable: true
       depth: 3
@@ -4682,6 +5437,13 @@ objects:
           name: Informationssicherheitsrisikobehandlung
           description: "Ma\xDFnahmen aus Risikobehandlungspl\xE4nen werden umgesetzt,\
             \ deren Fortschritt \xFCberwacht und ihre Wirksamkeit bewertet"
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u98CE\u9669\u5904\u7406"
+          description: "\u901A\u8FC7\u9009\u62E9\u548C\u5B9E\u65BD\u9002\u5F53\u7684\
+            \u63A7\u5236\u63AA\u65BD\u6765\u5E94\u5BF9\u5DF2\u8BC6\u522B\u7684\u98CE\
+            \u9669\uFF0C\u5E94\u7528\u98CE\u9669\u5904\u7406\u6D41\u7A0B\uFF0C\u786E\
+            \u4FDD\u4E0E\u7EC4\u7EC7\u7684\u98CE\u9669\u63A5\u53D7\u6807\u51C6\u4FDD\
+            \u6301\u4E00\u81F4\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9
       assessable: false
       depth: 2
@@ -4701,6 +5463,8 @@ objects:
           name: "Evaluaci\xF3n del desempe\xF1o"
         de:
           name: Bewertung der Leistung
+        zh:
+          name: "\u7EE9\u6548\u8BC4\u4F30"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
       assessable: true
       depth: 3
@@ -4741,6 +5505,11 @@ objects:
           description: "Leistungskennzahlen, \xDCberwachungsergebnisse und Analyseverfahren\
             \ werden angewendet, um Wirksamkeit, Angemessenheit und Effizienz des\
             \ ISMS zu bewerten"
+        zh:
+          name: "\u76D1\u6D4B\u3001\u6D4B\u91CF\u3001\u5206\u6790\u3001\u8BC4\u4F30"
+          description: "\u4F7F\u7528\u7B26\u5408\u7EC4\u7EC7\u76EE\u6807\u7684\u9002\
+            \u5F53\u65B9\u6CD5\uFF0C\u76D1\u63A7\u3001\u6D4B\u91CF\u3001\u5206\u6790\
+            \u548C\u8BC4\u4F30ISMS\u7684\u7EE9\u6548\u548C\u6709\u6548\u6027\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
       assessable: false
       depth: 3
@@ -4760,6 +5529,8 @@ objects:
           name: "Auditor\xEDa interna"
         de:
           name: Internes Audit
+        zh:
+          name: "\u5185\u90E8\u5BA1\u8BA1"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.1
       assessable: true
       depth: 4
@@ -4800,6 +5571,11 @@ objects:
           description: "Interne Audits werden in geplanten Abst\xE4nden durchgef\xFC\
             hrt, um Umsetzung, Wirksamkeit und Konformit\xE4t des ISMS systematisch\
             \ zu \xFCberpr\xFCfen"
+        zh:
+          name: "\u5E38\u89C4"
+          description: "\u6309\u8BA1\u5212\u95F4\u9694\u8FDB\u884C\u5185\u90E8\u5BA1\
+            \u8BA1\uFF0C\u786E\u4FDDISMS\u7B26\u5408ISO/IEC 27001\u8981\u6C42\u5E76\
+            \u6709\u6548\u5B9E\u65BD\u548C\u7EF4\u62A4\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
       assessable: true
       depth: 4
@@ -4839,6 +5615,12 @@ objects:
           name: Internes Auditprogramm
           description: "Interne Audits werden geplant und durchgef\xFChrt, wobei Kriterien,\
             \ Umfang, Methoden und Verantwortlichkeiten festgelegt werden"
+        zh:
+          name: "\u5185\u90E8\u5BA1\u8BA1\u9879\u76EE"
+          description: "\u89C4\u5212\u5E76\u6267\u884C\u5185\u90E8\u5BA1\u8BA1\uFF0C\
+            \u5305\u62EC\u5B9A\u4E49\u6807\u51C6\u3001\u8303\u56F4\u3001\u65B9\u6CD5\
+            \u548C\u804C\u8D23\uFF0C\u5E76\u5C06\u7ED3\u679C\u62A5\u544A\u7ED9\u76F8\
+            \u5173\u7BA1\u7406\u5C42\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
       assessable: false
       depth: 3
@@ -4858,6 +5640,8 @@ objects:
           name: "Revisi\xF3n por la direcci\xF3n"
         de:
           name: Managementbewertung
+        zh:
+          name: "\u7BA1\u7406\u6743\u5BA1\u67E5"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.1
       assessable: true
       depth: 4
@@ -4896,6 +5680,11 @@ objects:
           description: "Managementbewertungen werden durchgef\xFChrt, um die Eignung,\
             \ Angemessenheit und Wirksamkeit des ISMS sowie dessen Beitrag zur Erreichung\
             \ der organisationalen Ziele zu beurteilen."
+        zh:
+          name: "\u5E38\u89C4"
+          description: "\u5B9A\u671F\u5BA1\u67E5ISMS\u4EE5\u786E\u4FDD\u5176\u5728\
+            \u5B9E\u73B0\u7EC4\u7EC7\u76EE\u6807\u65B9\u9762\u7684\u9002\u7528\u6027\
+            \u3001\u5145\u5206\u6027\u548C\u6709\u6548\u6027\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
       assessable: true
       depth: 4
@@ -4935,6 +5724,12 @@ objects:
           description: "F\xFCr die Managementbewertung werden Auditberichte, Leistungsindikatoren,\
             \ Vorf\xE4lle, R\xFCckmeldungen, externe \xC4nderungen, Risiken und Chancen\
             \ sowie identifizierte Verbesserungsm\xF6glichkeiten ber\xFCcksichtigt."
+        zh:
+          name: "\u7BA1\u7406\u5BA1\u67E5\u8F93\u5165"
+          description: "\u5305\u62EC\u5BA1\u8BA1\u7ED3\u679C\u3001ISMS \u7EE9\u6548\
+            \u3001\u98CE\u9669\u72B6\u6001\u3001\u6539\u8FDB\u673A\u4F1A\u4EE5\u53CA\
+            \u7BA1\u7406\u5BA1\u67E5\u4E2D\u6240\u9700\u7684\u53D8\u66F4\u7B49\u8F93\
+            \u5165\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
       assessable: true
       depth: 4
@@ -4972,6 +5767,11 @@ objects:
           description: "Die Ergebnisse der Managementbewertung umfassen Entscheidungen\
             \ zu Verbesserungen, Ressourcenbedarf, notwendigen Anpassungen des ISMS\
             \ sowie die Festlegung von Priorit\xE4ten"
+        zh:
+          name: "\u7BA1\u7406\u5BA1\u67E5\u7ED3\u679C"
+          description: "\u8BB0\u5F55\u7BA1\u7406\u5BA1\u67E5\u7684\u7ED3\u679C\uFF0C\
+            \u5305\u62EC\u6539\u8FDB\u51B3\u7B56\u3001ISMS\u53D8\u66F4\u548C\u8D44\
+            \u6E90\u9700\u6C42\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10
       assessable: false
       depth: 2
@@ -4991,6 +5791,8 @@ objects:
           name: Mejora
         de:
           name: Verbesserung
+        zh:
+          name: "\u6539\u8FDB"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
       assessable: true
       depth: 3
@@ -5030,6 +5832,11 @@ objects:
             \ umgesetzt, um Wirksamkeit, Effizienz und Reife des ISMS zu erh\xF6hen\
             \ und eine bestm\xF6gliche Ausrichtung an den organisatorischen Zielen\
             \ sicherzustellen."
+        zh:
+          name: "\u6301\u7EED\u6539\u8FDB"
+          description: "\u8BC6\u522B\u5E76\u91C7\u53D6\u884C\u52A8\uFF0C\u4EE5\u6301\
+            \u7EED\u6539\u8FDB\uFF0C\u4EE5\u63D0\u5347ISMS\u7684\u6548\u80FD\u548C\
+            \u4E0E\u7EC4\u7EC7\u76EE\u6807\u7684\u4E00\u81F4\u6027\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
       assessable: true
       depth: 3
@@ -5075,6 +5882,12 @@ objects:
           description: "Nichtkonformit\xE4ten werden behandelt, indem Korrekturma\xDF\
             nahmen ergriffen, die zugrunde liegenden Ursachen identifiziert und Ma\xDF\
             nahmen umgesetzt werden, die ein erneutes Auftreten verhindern sollen"
+        zh:
+          name: "\u4E0D\u7B26\u5408\u89C4\u8303\u4E0E\u7EA0\u6B63\u63AA\u65BD"
+          description: "\u901A\u8FC7\u91C7\u53D6\u7EA0\u6B63\u63AA\u65BD\u3001\u8BC6\
+            \u522B\u6839\u672C\u539F\u56E0\u5E76\u5B9E\u65BD\u9632\u6B62\u590D\u53D1\
+            \u63AA\u65BD\uFF0C\u540C\u65F6\u8BB0\u5F55\u6D41\u7A0B\uFF0C\u89E3\u51B3\
+            \u4E0D\u5408\u89C4\u95EE\u9898\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:annex-a
       assessable: false
       depth: 1
@@ -5093,6 +5906,8 @@ objects:
           name: "Declaraci\xF3n de aplicabilidad"
         de:
           name: "Erkl\xE4rung zur Anwendbarkeit"
+        zh:
+          name: "\u9002\u7528\u6027\u8BF4\u660E"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5
       assessable: false
       depth: 2
@@ -5112,6 +5927,8 @@ objects:
           name: Controles organizativos
         de:
           name: "Organisatorische Ma\xDFnahmen"
+        zh:
+          name: "\u7EC4\u7EC7\u63A7\u5236"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.1
       assessable: true
       depth: 3
@@ -5161,6 +5978,13 @@ objects:
             \ \xFCbereinstimmen, Verantwortlichkeiten festlegen und die Einhaltung\
             \ gesetzlicher, regulatorischer und vertraglicher Anforderungen unterst\xFC\
             tzen."
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u653F\u7B56"
+          description: "\u8FD9\u79CD\u63A7\u5236\u5EFA\u7ACB\u5E76\u7EF4\u62A4\u4E0E\
+            \u7EC4\u7EC7\u76EE\u6807\u4E00\u81F4\u7684\u4FE1\u606F\u5B89\u5168\u653F\
+            \u7B56\u3002\u63AA\u65BD\u5305\u62EC\u754C\u5B9A\u8303\u56F4\u3001\u8BBE\
+            \u5B9A\u76EE\u6807\uFF0C\u5E76\u786E\u4FDD\u7B26\u5408\u5408\u89C4\u8981\
+            \u6C42\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.2
       assessable: true
       depth: 3
@@ -5211,6 +6035,13 @@ objects:
             \ sicher, dass Zust\xE4ndigkeiten dokumentiert, kommuniziert und regelm\xE4\
             \xDFig \xFCberpr\xFCft werden, um eine wirksame Umsetzung der Sicherheitsma\xDF\
             nahmen zu gew\xE4hrleisten."
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u89D2\u8272\u4E0E\u804C\u8D23"
+          description: "\u8FD9\u79CD\u63A7\u5236\u5B9A\u4E49\u5E76\u5206\u914D\u4FE1\
+            \u606F\u5B89\u5168\u7684\u89D2\u8272\u548C\u8D23\u4EFB\uFF0C\u4EE5\u786E\
+            \u4FDD\u95EE\u8D23\u5236\u3002\u63AA\u65BD\u5305\u62EC\u660E\u786E\u8D23\
+            \u4EFB\u8BB0\u5F55\u3001\u5B9A\u671F\u5BA1\u67E5\u548C\u6267\u6CD5\u673A\
+            \u5236\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.3
       assessable: true
       depth: 3
@@ -5256,6 +6087,13 @@ objects:
             \ um Risiken wie Fehler, Betrug oder unbefugte Aktivit\xE4ten zu reduzieren.\
             \ Dies wird durch rollenspezifische Zugriffsbeschr\xE4nkungen, klare Verantwortlichkeiten\
             \ und geeignete Kontrollen erreicht."
+        zh:
+          name: "\u804C\u8D23\u5206\u79BB"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u804C\u8D23\u5206\u79BB\
+            \uFF0C\u4EE5\u964D\u4F4E\u9519\u8BEF\u3001\u6B3A\u8BC8\u548C\u672A\u7ECF\
+            \u6388\u6743\u8BBF\u95EE\u7684\u98CE\u9669\u3002\u63AA\u65BD\u5305\u62EC\
+            \u89D2\u8272\u5206\u79BB\u3001\u8BBF\u95EE\u9650\u5236\u548C\u5B9A\u671F\
+            \u5BA1\u8BA1\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.4
       assessable: true
       depth: 3
@@ -5303,6 +6141,12 @@ objects:
             ren die Unterst\xFCtzung der Sicherheitsziele, die Bereitstellung notwendiger\
             \ Ressourcen, das F\xF6rdern einer Sicherheitskultur sowie die \xDCberwachung\
             \ von Umsetzung und Wirksamkeit."
+        zh:
+          name: "\u7BA1\u7406\u804C\u8D23"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u5B89\u5168\
+            \u7684\u7BA1\u7406\u804C\u8D23\u88AB\u660E\u786E\u5B9A\u4E49\u5E76\u5F97\
+            \u4EE5\u5B9E\u65BD\u3002\u63AA\u65BD\u5305\u62EC\u8BBE\u5B9A\u76EE\u6807\
+            \u3001\u5206\u914D\u8D44\u6E90\u548C\u76D1\u7763\u5408\u89C4\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.5
       assessable: true
       depth: 3
@@ -5352,6 +6196,13 @@ objects:
             \ umfasst klare Zust\xE4ndigkeiten, gepflegte Kontaktlisten und definierte\
             \ Abl\xE4ufe, insbesondere f\xFCr meldepflichtige Sicherheitsvorf\xE4\
             lle."
+        zh:
+          name: "\u4E0E\u5F53\u5C40\u7684\u8054\u7CFB"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u4FE1\u606F\u5B89\
+            \u5168\u4E8B\u4EF6\u671F\u95F4\u53CA\u65F6\u4E0E\u76F8\u5173\u90E8\u95E8\
+            \u6C9F\u901A\u3002\u63AA\u65BD\u5305\u62EC\u5EFA\u7ACB\u8054\u7CFB\u534F\
+            \u8BAE\u3001\u7EF4\u62A4\u8054\u7CFB\u4EBA\u540D\u5355\u66F4\u65B0\u4EE5\
+            \u53CA\u5206\u914D\u804C\u8D23\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.6
       assessable: true
       depth: 3
@@ -5395,6 +6246,13 @@ objects:
             \ Sicherheits- und Branchenforen, um aktuelle Trends, Bedrohungen und\
             \ bew\xE4hrte Verfahren fr\xFChzeitig zu erkennen und im Informationssicherheitsmanagement\
             \ zu ber\xFCcksichtigen."
+        zh:
+          name: "\u4E0E\u7279\u6B8A\u5229\u76CA\u56E2\u4F53\u7684\u8054\u7CFB"
+          description: "\u8FD9\u79CD\u63A7\u5236\u6709\u52A9\u4E8E\u4E0E\u7279\u6B8A\
+            \u5229\u76CA\u56E2\u4F53\u4FDD\u6301\u5BF9\u5B89\u5168\u8D8B\u52BF\u548C\
+            \u5B9E\u8DF5\u7684\u4E86\u89E3\u3002\u63AA\u65BD\u5305\u62EC\u53C2\u4E0E\
+            \u8BBA\u575B\u3001\u4F1A\u5458\u8D44\u683C\u548C\u534F\u4F5C\u9879\u76EE\
+            \u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.7
       assessable: true
       depth: 3
@@ -5441,6 +6299,13 @@ objects:
             \ \xFCber aktuelle und potenzielle Bedrohungen systematisch gesammelt,\
             \ analysiert und bewertet werden. Die gewonnenen Erkenntnisse sollen helfen,\
             \ Risiken besser zu verstehen und wirksame Schutzma\xDFnahmen abzuleiten."
+        zh:
+          name: "\u5A01\u80C1\u60C5\u62A5"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5A01\u80C1\u60C5\u62A5\
+            \u7684\u5F00\u53D1\u548C\u7EF4\u62A4\uFF0C\u4EE5\u8BC6\u522B\u548C\u7F13\
+            \u89E3\u5B89\u5168\u98CE\u9669\u3002\u63AA\u65BD\u5305\u62EC\u76D1\u63A7\
+            \u5A01\u80C1\u4FE1\u606F\u6D41\u3001\u5206\u6790\u8D8B\u52BF\u4EE5\u53CA\
+            \u5206\u4EAB\u53EF\u4F5C\u7684\u89C1\u89E3\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.8
       assessable: true
       depth: 3
@@ -5487,6 +6352,13 @@ objects:
             \ systematisch in alle Phasen des Projektmanagements integriert wird.\
             \ Dazu geh\xF6ren Risikoanalysen, Sicherheitsanforderungen, Compliance-Pr\xFC\
             fungen und Sicherheitsfreigaben im Rahmen des Projektlebenszyklus."
+        zh:
+          name: "\u9879\u76EE\u7BA1\u7406\u4E2D\u7684\u4FE1\u606F\u5B89\u5168"
+          description: "\u8FD9\u79CD\u63A7\u5236\u5C06\u4FE1\u606F\u5B89\u5168\u7EB3\
+            \u5165\u9879\u76EE\u7BA1\u7406\u5B9E\u8DF5\u4E2D\u3002\u63AA\u65BD\u5305\
+            \u62EC\u98CE\u9669\u8BC4\u4F30\u3001\u5408\u89C4\u5BA1\u67E5\u4EE5\u53CA\
+            \u9879\u76EE\u751F\u547D\u5468\u671F\u5185\u7684\u5B89\u5168\u68C0\u67E5\
+            \u70B9\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.9
       assessable: true
       depth: 3
@@ -5530,6 +6402,12 @@ objects:
             \ ein aktuelles, vollst\xE4ndiges und gepflegtes Inventar von Informationen\
             \ und zugeh\xF6rigen Werten f\xFChrt. Es dient der Verantwortlichkeitszuordnung\
             \ und unterst\xFCtzt risikobasierte Schutzma\xDFnahmen."
+        zh:
+          name: "\u4FE1\u606F\u53CA\u76F8\u5173\u8D44\u4EA7\u6E05\u5355"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u4FE1\u606F\u53CA\
+            \u76F8\u5173\u8D44\u4EA7\u7684\u51C6\u786E\u76D8\u70B9\u3002\u63AA\u65BD\
+            \u5305\u62EC\u8D44\u4EA7\u8DDF\u8E2A\u3001\u5B9A\u671F\u5BA1\u8BA1\u4EE5\
+            \u53CA\u6309\u654F\u611F\u5EA6\u5206\u7C7B\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.10
       assessable: true
       depth: 3
@@ -5579,6 +6457,14 @@ objects:
             \ die zul\xE4ssige Nutzung von Informationen, Datentr\xE4gern, Ger\xE4\
             ten und anderen Werten. Sie stellt sicher, dass Benutzer die Anforderungen\
             \ kennen und einhalten, einschlie\xDFlich Schulungen und Richtlinien."
+        zh:
+          name: "\u4FE1\u606F\u53CA\u5176\u4ED6\u76F8\u5173\u8D44\u4EA7\u7684\u5408\
+            \u7406\u4F7F\u7528"
+          description: "\u8FD9\u79CD\u63A7\u5236\u5B9A\u4E49\u4E86\u4FE1\u606F\u53CA\
+            \u76F8\u5173\u8D44\u4EA7\u7684\u53EF\u63A5\u53D7\u4F7F\u7528\uFF0C\u4EE5\
+            \u786E\u4FDD\u6B63\u786E\u5904\u7406\u3002\u63AA\u65BD\u5305\u62EC\u6709\
+            \u6587\u6863\u5316\u7684\u653F\u7B56\u3001\u7528\u6237\u57F9\u8BAD\u548C\
+            \u6267\u884C\u673A\u5236\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.11
       assessable: true
       depth: 3
@@ -5624,6 +6510,13 @@ objects:
             \ organisatorischen Werte \u2013 einschlie\xDFlich Ger\xE4ten, Datentr\xE4\
             gern, Zugangsberechtigungen oder Dokumenten \u2013 bei Austritt oder Rollenwechsel\
             \ vollst\xE4ndig und sicher zur\xFCckgegeben werden."
+        zh:
+          name: "\u8D44\u4EA7\u8FD4\u8FD8"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u5F53\u5458\u5DE5\
+            \u6216\u627F\u5305\u5546\u79BB\u804C\u6216\u66F4\u6362\u5C97\u4F4D\u65F6\
+            \uFF0C\u8D44\u4EA7\u80FD\u591F\u5B89\u5168\u56DE\u6536\u3002\u63AA\u65BD\
+            \u5305\u62EC\u6E05\u5355\u3001\u8D44\u4EA7\u8DDF\u8E2A\u548C\u9000\u5F79\
+            \u534F\u8BAE\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.12
       assessable: true
       depth: 3
@@ -5670,6 +6563,13 @@ objects:
             \ gem\xE4\xDF ihrem Schutzbedarf klassifiziert werden. Die Klassifizierung\
             \ ber\xFCcksichtigt Vertraulichkeit, Integrit\xE4t, Verf\xFCgbarkeit sowie\
             \ gesetzliche und vertragliche Anforderungen."
+        zh:
+          name: "\u4FE1\u606F\u5206\u7C7B"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u6839\u636E\
+            \u5176\u654F\u611F\u6027\u548C\u4EF7\u503C\u8FDB\u884C\u673A\u5BC6\uFF0C\
+            \u4EE5\u786E\u4FDD\u9002\u5F53\u7684\u4FDD\u62A4\u3002\u63AA\u65BD\u5305\
+            \u62EC\u5206\u7C7B\u65B9\u6848\u3001\u8BBF\u95EE\u9650\u5236\u548C\u6807\
+            \u7B7E\u6307\u5357\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.13
       assessable: true
       depth: 3
@@ -5712,6 +6612,12 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass klassifizierte\
             \ Informationen eindeutig und korrekt gekennzeichnet werden, sodass notwendige\
             \ Schutzma\xDFnahmen zuverl\xE4ssig angewendet werden k\xF6nnen."
+        zh:
+          name: "\u4FE1\u606F\u6807\u7B7E"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u7684\u6807\
+            \u7B7E\u4E00\u81F4\uFF0C\u53CD\u6620\u5176\u5206\u7C7B\u548C\u5904\u7406\
+            \u8981\u6C42\u3002\u8861\u91CF\u6807\u51C6\u5305\u62EC\u6807\u51C6\u5316\
+            \u6A21\u677F\u3001\u57F9\u8BAD\u548C\u5BA1\u8BA1\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.14
       assessable: true
       depth: 3
@@ -5755,6 +6661,12 @@ objects:
             \ f\xFCr die sichere \xDCbertragung von Informationen zwischen Systemen,\
             \ Personen und Organisationen. Dazu geh\xF6ren Verschl\xFCsselung, Zugriffsbeschr\xE4\
             nkungen und dokumentierte Kommunikationswege."
+        zh:
+          name: "\u4FE1\u606F\u4F20\u8F93"
+          description: "\u8FD9\u79CD\u63A7\u5236\u5EFA\u7ACB\u4E86\u7CFB\u7EDF\u6216\
+            \u7EC4\u7EC7\u4E4B\u95F4\u4FE1\u606F\u4F20\u8F93\u7684\u5B89\u5168\u6D41\
+            \u7A0B\u3002\u63AA\u65BD\u5305\u62EC\u52A0\u5BC6\u3001\u8BBF\u95EE\u63A7\
+            \u5236\u548C\u5B89\u5168\u4F20\u8F93\u534F\u8BAE\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.15
       assessable: true
       depth: 3
@@ -5801,6 +6713,13 @@ objects:
             \ zu Informationen und Werten ausschlie\xDFlich autorisierten Personen\
             \ erm\xF6glicht wird. Dies umfasst rollenbasierte Zugriffskonzepte, starke\
             \ Authentisierungsmechanismen und regelm\xE4\xDFige \xDCberpr\xFCfungen."
+        zh:
+          name: "\u8BBF\u95EE\u63A7\u5236"
+          description: "\u8BE5\u63A7\u5236\u5B9E\u65BD\u5E76\u7EF4\u62A4\u8BBF\u95EE\
+            \u63A7\u5236\u673A\u5236\uFF0C\u9650\u5236\u6388\u6743\u4EBA\u5458\u7684\
+            \u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u57FA\u4E8E\u89D2\u8272\u7684\
+            \u8BBF\u95EE\u3001\u591A\u56E0\u7D20\u8BA4\u8BC1\u548C\u5B9A\u671F\u5BA1\
+            \u67E5\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
       assessable: true
       depth: 3
@@ -5847,6 +6766,13 @@ objects:
             \ physische Identit\xE4ten \xFCber ihren gesamten Lebenszyklus hinweg\
             \ sicher verwaltet werden \u2013 einschlie\xDFlich Identit\xE4tspr\xFC\
             fung, Bereitstellung, \xC4nderung und Entzug von Zugriffsrechten."
+        zh:
+          name: "\u8EAB\u4EFD\u7BA1\u7406"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8EAB\u4EFD\u5B89\u5168\
+            \u7BA1\u7406\uFF0C\u786E\u4FDD\u5BF9\u7CFB\u7EDF\u7684\u51C6\u786E\u53EF\
+            \u9760\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u8EAB\u4EFD\u9A8C\u8BC1\
+            \u3001\u751F\u547D\u5468\u671F\u7BA1\u7406\u548C\u8BBF\u95EE\u914D\u7F6E\
+            \u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
       assessable: true
       depth: 3
@@ -5890,6 +6816,12 @@ objects:
           description: "Diese Steuerungsma\xDFnahme sch\xFCtzt Authentisierungsinformationen\
             \ wie Passw\xF6rter, Tokens oder Schl\xFCssel vor Missbrauch, einschlie\xDF\
             lich sicherer Speicherung, Verschl\xFCsselung und Nutzungsvorgaben."
+        zh:
+          name: "\u8BA4\u8BC1\u4FE1\u606F"
+          description: "\u8FD9\u79CD\u63A7\u5236\u4FDD\u62A4\u4E86\u8BA4\u8BC1\u4FE1\
+            \u606F\uFF0C\u5982\u5BC6\u7801\uFF0C\u4EE5\u9632\u6B62\u672A\u7ECF\u6388\
+            \u6743\u7684\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u52A0\u5BC6\u3001\
+            \u5B89\u5168\u5B58\u50A8\u548C\u5B9A\u671F\u66F4\u65B0\u5BC6\u7801\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
       assessable: true
       depth: 3
@@ -5935,6 +6867,13 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Zugriffsrechte\
             \ angemessen vergeben, regelm\xE4\xDFig \xFCberpr\xFCft, angepasst und\
             \ widerrufen werden, wenn sie nicht mehr erforderlich sind."
+        zh:
+          name: "\u8BBF\u95EE\u6743"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8BBF\u95EE\u6743\u5B9A\
+            \u671F\u5BA1\u67E5\u548C\u7BA1\u7406\uFF0C\u4EE5\u7B26\u5408\u4E0D\u540C\
+            \u89D2\u8272\u548C\u804C\u8D23\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\
+            \u5BA1\u8BA1\u3001\u8BBF\u95EE\u64A4\u9500\u548C\u81EA\u52A8\u5316\u8BBF\
+            \u95EE\u7BA1\u7406\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.19
       assessable: true
       depth: 3
@@ -5978,6 +6917,12 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheit\
             \ in Auswahl, Bewertung, \xDCberwachung und Steuerung von Lieferantenbeziehungen\
             \ verankert ist."
+        zh:
+          name: "\u4F9B\u5E94\u5546\u5173\u7CFB\u4E2D\u7684\u4FE1\u606F\u5B89\u5168"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u5B89\u5168\
+            \u5D4C\u5165\u4F9B\u5E94\u5546\u5173\u7CFB\u548C\u6D41\u7A0B\u4E2D\u3002\
+            \u63AA\u65BD\u5305\u62EC\u5C3D\u804C\u8C03\u67E5\u3001\u5B89\u5168\u5BA1\
+            \u67E5\u548C\u6301\u7EED\u76D1\u63A7\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.20
       assessable: true
       depth: 3
@@ -6024,6 +6969,13 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Informationssicherheitsanforderungen\
             \ ausdr\xFCcklich in Vertr\xE4gen geregelt werden, einschlie\xDFlich Datenschutz,\
             \ Zugriffskontrolle, Compliance-Vorgaben und Durchsetzungsmechanismen."
+        zh:
+          name: "\u89E3\u51B3\u4F9B\u5E94\u5546\u534F\u8BAE\u4E2D\u7684\u4FE1\u606F\
+            \u5B89\u5168\u95EE\u9898"
+          description: "\u8BE5\u63A7\u5236\u9488\u5BF9\u4F9B\u5E94\u5546\u534F\u8BAE\
+            \u4E2D\u7684\u4FE1\u606F\u5B89\u5168\u8981\u6C42\u3002\u63AA\u65BD\u5305\
+            \u62EC\u660E\u786E\u7684\u5408\u540C\u6761\u6B3E\u3001\u5408\u89C4\u5BA1\
+            \u8BA1\u4EE5\u53CA\u5BF9\u8FDD\u89C4\u7684\u660E\u786E\u5904\u7F5A\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.21
       assessable: true
       depth: 3
@@ -6074,6 +7026,13 @@ objects:
             \ und Dienstleistungen zu gew\xE4hrleisten. Dazu geh\xF6ren Risikobewertungen,\
             \ Sicherheits\xFCberpr\xFCfungen, Anforderungen an Zulieferer und Notfallma\xDF\
             nahmen entlang der Lieferkette."
+        zh:
+          name: "\u7BA1\u7406ICT\u4F9B\u5E94\u94FE\u4E2D\u7684\u4FE1\u606F\u5B89\u5168"
+          description: "\u8BE5\u63A7\u5236\u7BA1\u7406ICT\u4F9B\u5E94\u94FE\u4E2D\u7684\
+            \u4FE1\u606F\u5B89\u5168\u98CE\u9669\uFF0C\u786E\u4FDD\u670D\u52A1\u548C\
+            \u7EC4\u4EF6\u7684\u5B89\u5168\u3002\u63AA\u65BD\u5305\u62EC\u98CE\u9669\
+            \u8BC4\u4F30\u3001\u4F9B\u5E94\u5546\u8BC4\u4F30\u548C\u4E8B\u6545\u54CD\
+            \u5E94\u534F\u8BAE\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.22
       assessable: true
       depth: 3
@@ -6126,6 +7085,14 @@ objects:
             \ um Informationssicherheit, Servicequalit\xE4t und Compliance dauerhaft\
             \ sicherzustellen. Dazu geh\xF6ren Leistungs\xFCberpr\xFCfungen, Vertragsaktualisierungen\
             \ und Risikobewertungen."
+        zh:
+          name: "\u76D1\u63A7\u3001\u5BA1\u67E5\u548C\u53D8\u66F4\u4F9B\u5E94\u5546\
+            \u670D\u52A1"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4F9B\u5E94\u5546\u670D\
+            \u52A1\u5F97\u5230\u76D1\u63A7\u3001\u5BA1\u67E5\u548C\u8C03\u6574\uFF0C\
+            \u4EE5\u7EF4\u62A4\u4FE1\u606F\u5B89\u5168\u3002\u63AA\u65BD\u5305\u62EC\
+            \u670D\u52A1\u6C34\u5E73\u534F\u8BAE\u3001\u5B9A\u671F\u5BA1\u67E5\u548C\
+            \u5408\u540C\u66F4\u65B0\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.23
       assessable: true
       depth: 3
@@ -6173,6 +7140,12 @@ objects:
             \ und angemessen kontrolliert werden. Dazu geh\xF6ren Verschl\xFCsselung,\
             \ Zugriffskontrollen, Compliance-Pr\xFCfungen, \xDCberwachung des Cloud-Anbieters\
             \ sowie Anforderungen an Datenstandorte und Incident-Response."
+        zh:
+          name: "\u4E91\u670D\u52A1\u4F7F\u7528\u7684\u4FE1\u606F\u5B89\u5168"
+          description: "\u8FD9\u79CD\u63A7\u5236\u901A\u8FC7\u89E3\u51B3\u76F8\u5173\
+            \u98CE\u9669\uFF0C\u786E\u4FDD\u4E91\u670D\u52A1\u7684\u5B89\u5168\u4F7F\
+            \u7528\u3002\u63AA\u65BD\u5305\u62EC\u6570\u636E\u52A0\u5BC6\u3001\u8BBF\
+            \u95EE\u63A7\u5236\u548C\u63D0\u4F9B\u8005\u5408\u89C4\u5BA1\u67E5\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.24
       assessable: true
       depth: 3
@@ -6221,6 +7194,13 @@ objects:
             \ Rollen, Prozesse und Kommunikationswege f\xFCr den Umgang mit Informationssicherheitsvorf\xE4\
             llen vorbereitet, dokumentiert und regelm\xE4\xDFig getestet werden. Dazu\
             \ geh\xF6ren Incident-Response-Pl\xE4ne, Schulungen, \xDCbungen und Eskalationsmechanismen."
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u7BA1\u7406\u89C4\u5212\u4E0E\
+            \u51C6\u5907"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u4FE1\u606F\u5B89\
+            \u5168\u4E8B\u4EF6\u7684\u5408\u7406\u89C4\u5212\u548C\u51C6\u5907\u3002\
+            \u63AA\u65BD\u5305\u62EC\u4E8B\u4EF6\u54CD\u5E94\u8BA1\u5212\u3001\u57F9\
+            \u8BAD\u6F14\u4E60\u548C\u901A\u4FE1\u534F\u8BAE\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.25
       assessable: true
       depth: 3
@@ -6271,6 +7251,14 @@ objects:
             \ die Entscheidung, ob ein Ereignis einen Sicherheitsvorfall darstellt,\
             \ sowie die Durchf\xFChrung von Ursachenanalysen, Risikobewertungen und\
             \ Ableitung angemessener Ma\xDFnahmen."
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u7684\u8BC4\u4F30\u4E0E\u51B3\
+            \u7B56"
+          description: "\u8FD9\u79CD\u63A7\u5236\u5EFA\u7ACB\u4E86\u8BC4\u4F30\u548C\
+            \u51B3\u5B9A\u4E0E\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u76F8\u5173\u884C\
+            \u52A8\u7684\u6D41\u7A0B\u3002\u63AA\u65BD\u5305\u62EC\u6839\u672C\u539F\
+            \u56E0\u5206\u6790\u3001\u98CE\u9669\u8BC4\u4F30\u548C\u7F13\u89E3\u8BA1\
+            \u5212\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.26
       assessable: true
       depth: 3
@@ -6317,6 +7305,13 @@ objects:
             \ minimieren und den Normalbetrieb schnellstm\xF6glich wiederherzustellen.\
             \ Dazu geh\xF6ren Meldemechanismen, Eskalationswege, Eind\xE4mmungsma\xDF\
             nahmen und Wiederherstellungsprozesse."
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u7684\u5E94\u5BF9"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u5BF9\u4FE1\u606F\
+            \u5B89\u5168\u4E8B\u4EF6\u7684\u6709\u6548\u54CD\u5E94\uFF0C\u6700\u5927\
+            \u9650\u5EA6\u5730\u51CF\u5C11\u5F71\u54CD\u5E76\u8FC5\u901F\u6062\u590D\
+            \u3002\u63AA\u65BD\u5305\u62EC\u4E8B\u4EF6\u62A5\u544A\u3001\u5347\u7EA7\
+            \u534F\u8BAE\u548C\u904F\u5236\u7B56\u7565\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.27
       assessable: true
       depth: 3
@@ -6365,6 +7360,13 @@ objects:
             \ in Verbesserungsma\xDFnahmen umgesetzt werden. Dazu geh\xF6ren Lessons-Learned-Sitzungen,\
             \ Aktualisierung von Richtlinien und Anpassung von technischen und organisatorischen\
             \ Ma\xDFnahmen."
+        zh:
+          name: "\u4ECE\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u4E2D\u5B66\u4E60"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u5B89\u5168\
+            \u4E8B\u4EF6\u4E2D\u5438\u53D6\u7684\u7ECF\u9A8C\u6559\u8BAD\u88AB\u8BB0\
+            \u5F55\u5E76\u52A0\u4EE5\u5B9E\u65BD\uFF0C\u4EE5\u6539\u8FDB\u6D41\u7A0B\
+            \u3002\u63AA\u65BD\u5305\u62EC\u4E8B\u4EF6\u540E\u5BA1\u67E5\u3001\u884C\
+            \u52A8\u8BA1\u5212\u548C\u653F\u7B56\u66F4\u65B0\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.28
       assessable: true
       depth: 3
@@ -6412,6 +7414,13 @@ objects:
             \ gesichert und gesch\xFCtzt wird, um die Integrit\xE4t, Nachvollziehbarkeit\
             \ und gerichtliche Verwertbarkeit sicherzustellen. Dazu geh\xF6ren Chain-of-Custody-Prozesse,\
             \ sichere Lagerung und Zugriffskontrollen."
+        zh:
+          name: "\u8BC1\u636E\u6536\u96C6"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8BC1\u636E\u5728\u5B89\
+            \u5168\u4E8B\u4EF6\u671F\u95F4\u88AB\u6536\u96C6\u548C\u4FDD\u5B58\uFF0C\
+            \u4EE5\u652F\u6301\u8C03\u67E5\u3002\u63AA\u65BD\u5305\u62EC\u4FDD\u7BA1\
+            \u94FE\u7A0B\u5E8F\u3001\u5B89\u5168\u5B58\u50A8\u548C\u95E8\u7981\u63A7\
+            \u5236\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.29
       assessable: true
       depth: 3
@@ -6457,6 +7466,13 @@ objects:
             \ auch w\xE4hrend betrieblicher St\xF6rungen, Notf\xE4lle oder Krisen\
             \ aufrechterhalten wird. Dazu geh\xF6ren Notfallma\xDFnahmen, alternative\
             \ Betriebsverfahren, redundante Systeme und Priorisierung kritischer Prozesse."
+        zh:
+          name: "\u4E2D\u65AD\u671F\u95F4\u7684\u4FE1\u606F\u5B89\u5168"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u5B89\u5168\
+            \u5728\u4E2D\u65AD\u671F\u95F4\u5F97\u5230\u7EF4\u62A4\uFF0C\u786E\u4FDD\
+            \u8FD0\u8425\u7684\u8FDE\u7EED\u6027\u3002\u63AA\u65BD\u5305\u62EC\u5E94\
+            \u6025\u9884\u6848\u3001\u5907\u4EFD\u7CFB\u7EDF\u548C\u6545\u969C\u5207\
+            \u6362\u673A\u5236\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.30
       assessable: true
       depth: 3
@@ -6504,6 +7520,13 @@ objects:
             \ und -Dienste so vorbereitet sind, dass sie Ziele der Gesch\xE4ftskontinuit\xE4\
             t unterst\xFCtzen. Dazu geh\xF6ren Redundanzen, Wiederanlaufverfahren,\
             \ regelm\xE4\xDFige Tests von Wiederherstellungspl\xE4nen und Ausweichstandorte."
+        zh:
+          name: "ICT\u4E1A\u52A1\u8FDE\u7EED\u6027\u51C6\u5907"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDDICT\u5BF9\u4E1A\u52A1\u8FDE\
+            \u7EED\u6027\u505A\u597D\u51C6\u5907\uFF0C\u6700\u5927\u9650\u5EA6\u5730\
+            \u51CF\u5C11\u4E2D\u65AD\u671F\u95F4\u7684\u505C\u673A\u65F6\u95F4\u3002\
+            \u63AA\u65BD\u5305\u62EC\u6D4B\u8BD5\u6062\u590D\u8BA1\u5212\u3001\u5197\
+            \u4F59\u7CFB\u7EDF\u548C\u707E\u96BE\u6062\u590D\u7AD9\u70B9\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.31
       assessable: true
       depth: 3
@@ -6549,6 +7572,13 @@ objects:
             \ dokumentiert, regelm\xE4\xDFig \xFCberpr\xFCft und eingehalten werden.\
             \ Dazu geh\xF6ren Datenschutzvorgaben, Normen, branchenspezifische Anforderungen\
             \ und vertragliche Verpflichtungen."
+        zh:
+          name: "\u6CD5\u5F8B\u3001\u6CD5\u5B9A\u3001\u76D1\u7BA1\u548C\u5408\u540C\
+            \u8981\u6C42"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7B26\u5408\u6CD5\u5F8B\
+            \u3001\u6CD5\u5B9A\u3001\u76D1\u7BA1\u548C\u5408\u540C\u4FE1\u606F\u5B89\
+            \u5168\u8981\u6C42\u3002\u63AA\u65BD\u5305\u62EC\u653F\u7B56\u5BA1\u67E5\
+            \u3001\u5BA1\u8BA1\u548C\u8BC1\u636E\u8BB0\u5F55\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.32
       assessable: true
       depth: 3
@@ -6594,6 +7624,12 @@ objects:
             \ durch geeignete technische und organisatorische Ma\xDFnahmen. Dazu geh\xF6\
             ren Zugriffsbeschr\xE4nkungen, Verschl\xFCsselung, vertragliche Vereinbarungen\
             \ und Schutz vor unbefugter Nutzung oder Verbreitung."
+        zh:
+          name: "\u77E5\u8BC6\u4EA7\u6743"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u77E5\u8BC6\u4EA7\u6743\
+            \u901A\u8FC7\u9002\u5F53\u7684\u4FE1\u606F\u5B89\u5168\u63AA\u65BD\u5F97\
+            \u5230\u4FDD\u62A4\u3002\u63AA\u65BD\u5305\u62EC\u8BBF\u95EE\u9650\u5236\
+            \u3001\u52A0\u5BC6\u548C\u6CD5\u5F8B\u534F\u8BAE\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.33
       assessable: true
       depth: 3
@@ -6641,6 +7677,13 @@ objects:
             \ vor Verlust, Ver\xE4nderung, unbefugtem Zugriff oder Zerst\xF6rung.\
             \ Dazu geh\xF6ren Aufbewahrungsrichtlinien, sichere Lagerung und kontrollierter\
             \ Zugriff."
+        zh:
+          name: "\u6863\u6848\u4FDD\u62A4"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8BB0\u5F55\u5B89\u5168\
+            \u5B58\u50A8\u548C\u4FDD\u62A4\uFF0C\u9632\u6B62\u4E22\u5931\u6216\u672A\
+            \u7ECF\u6388\u6743\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u4FDD\u7559\
+            \u653F\u7B56\u3001\u5B89\u5168\u5B58\u50A8\u548C\u8BBF\u95EE\u63A7\u5236\
+            \u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.34
       assessable: true
       depth: 3
@@ -6687,6 +7730,12 @@ objects:
             \ Daten gem\xE4\xDF gesetzlichen und vertraglichen Datenschutzanforderungen\
             \ verarbeitet und gesch\xFCtzt werden. Dazu geh\xF6ren Verschl\xFCsselung,\
             \ Zugriffskontrolle, Minimierung und Dokumentation der Datenverarbeitung."
+        zh:
+          name: "\u4E2A\u4EBA\u9690\u79C1\u4FDD\u62A4\u4E0E\u4FDD\u62A4"
+          description: "\u8FD9\u79CD\u63A7\u5236\u4FDD\u62A4\u9690\u79C1\uFF0C\u786E\
+            \u4FDD\u4E2A\u4EBA\u8EAB\u4EFD\u4FE1\u606F\uFF08PII\uFF09\u7684\u5B89\u5168\
+            \u5904\u7406\u3002\u63AA\u65BD\u5305\u62EC\u533F\u540D\u5316\u3001\u52A0\
+            \u5BC6\u4EE5\u53CA\u9075\u5B88\u9690\u79C1\u6CD5\u5F8B\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.35
       assessable: true
       depth: 3
@@ -6733,6 +7782,13 @@ objects:
             \ und Konformit\xE4t des ISMS zu \xFCberpr\xFCfen. Dazu geh\xF6ren interne\
             \ oder externe Audits, Sicherheitsbewertungen und Nachverfolgung von Ma\xDF\
             nahmen."
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u72EC\u7ACB\u5BA1\u67E5"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u5BF9\u4FE1\u606F\
+            \u5B89\u5168\u7684\u72EC\u7ACB\u5BA1\u67E5\uFF0C\u4EE5\u8BC4\u4F30\u5176\
+            \u6709\u6548\u6027\u548C\u5408\u89C4\u6027\u3002\u63AA\u65BD\u5305\u62EC\
+            \u5916\u90E8\u5BA1\u8BA1\u3001\u98CE\u9669\u8BC4\u4F30\u548C\u540E\u7EED\
+            \u884C\u52A8\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.36
       assessable: true
       depth: 3
@@ -6781,6 +7837,13 @@ objects:
             \ Richtlinien, Regeln und Standards zur Informationssicherheit eingehalten\
             \ werden. Dazu geh\xF6ren Schulungen, \xDCberwachungsprozesse, Kontrollen\
             \ und Eskalationsmechanismen."
+        zh:
+          name: "\u9075\u5B88\u4FE1\u606F\u5B89\u5168\u7684\u653F\u7B56\u3001\u89C4\
+            \u5219\u548C\u6807\u51C6"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u9075\u5B88\u6240\u6709\
+            \u4FE1\u606F\u5B89\u5168\u7684\u653F\u7B56\u3001\u89C4\u5219\u548C\u6807\
+            \u51C6\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\u57F9\u8BAD\u3001\u653F\
+            \u7B56\u5BA1\u67E5\u548C\u6267\u6CD5\u673A\u5236\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.37
       assessable: true
       depth: 3
@@ -6825,6 +7888,12 @@ objects:
             \ dokumentiert, gepflegt, versioniert und f\xFCr berechtigte Personen\
             \ verf\xFCgbar sind, um konsistente, sichere und nachvollziehbare Abl\xE4\
             ufe sicherzustellen."
+        zh:
+          name: "\u6587\u6863\u4F5C\u7A0B\u5E8F"
+          description: "\u8BE5\u63A7\u5236\u5236\u5B9A\u5E76\u7EF4\u62A4\u6709\u6587\
+            \u6863\u7684\u4F5C\u7A0B\u5E8F\uFF0C\u4EE5\u786E\u4FDD\u5B89\u5168\u5B9E\
+            \u8DF5\u7684\u4E00\u81F4\u6027\u3002\u63AA\u65BD\u5305\u62EC\u6D41\u7A0B\
+            \u6587\u6863\u3001\u7248\u672C\u63A7\u5236\u548C\u65E0\u969C\u788D\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6
       assessable: false
       depth: 2
@@ -6844,6 +7913,8 @@ objects:
           name: Controles de personas
         de:
           name: "Personenbezogene Ma\xDFnahmen"
+        zh:
+          name: "\u4EBA\u5458\u63A7\u5236"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.1
       assessable: true
       depth: 3
@@ -6894,6 +7965,13 @@ objects:
             rdigkeit und Eignung von Bewerbern zu best\xE4tigen. Dazu geh\xF6ren Identit\xE4\
             tspr\xFCfung, Qualifikationsnachweise und weitere gesetzlich zul\xE4ssige\
             \ \xDCberpr\xFCfungen."
+        zh:
+          name: "\u653E\u6620"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u8058\u7528\u524D\
+            \u5B9E\u65BD\u7B5B\u9009\u6D41\u7A0B\uFF0C\u4EE5\u9A8C\u8BC1\u5019\u9009\
+            \u4EBA\u7684\u9002\u4EFB\u6027\u3002\u63AA\u65BD\u5305\u62EC\u80CC\u666F\
+            \u8C03\u67E5\u3001\u8EAB\u4EFD\u9A8C\u8BC1\u548C\u8D44\u683C\u8BC4\u4F30\
+            \uFF0C\u4EE5\u964D\u4F4E\u5B89\u5168\u98CE\u9669\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.2
       assessable: true
       depth: 3
@@ -6940,6 +8018,13 @@ objects:
             \ Vereinbarungen klare Anforderungen an Informationssicherheit, Vertraulichkeit\
             \ und Compliance enthalten. Mitarbeitende m\xFCssen ihre sicherheitsrelevanten\
             \ Verantwortlichkeiten verstehen und anerkennen."
+        zh:
+          name: "\u96C7\u4F63\u6761\u6B3E\u4E0E\u6761\u4EF6"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u96C7\u4F63\u6761\u6B3E\
+            \u548C\u6761\u4EF6\u5305\u542B\u4FE1\u606F\u5B89\u5168\u8D23\u4EFB\u3002\
+            \u63AA\u65BD\u5305\u62EC\u660E\u786E\u89C4\u5B9A\u4FDD\u5BC6\u3001\u9075\
+            \u5B88\u653F\u7B56\u4EE5\u53CA\u8FDD\u89C4\u540E\u679C\u7B49\u6761\u6B3E\
+            \u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.3
       assessable: true
       depth: 3
@@ -6988,6 +8073,14 @@ objects:
             \ Personen regelm\xE4\xDFig Schulungen, Awareness-Ma\xDFnahmen und Unterweisungen\
             \ zur Informationssicherheit erhalten, um Risiken zu verstehen und sichere\
             \ Verhaltensweisen anzuwenden."
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u610F\u8BC6\u3001\u6559\u80B2\u4E0E\u57F9\
+            \u8BAD"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5458\u5DE5\u5B9A\u671F\
+            \u83B7\u5F97\u4FE1\u606F\u5B89\u5168\u610F\u8BC6\u3001\u6559\u80B2\u548C\
+            \u57F9\u8BAD\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\u57F9\u8BAD\u3001\
+            \u7535\u5B50\u5B66\u4E60\u9879\u76EE\u548C\u6A21\u62DF\u9493\u9C7C\u6F14\
+            \u4E60\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.4
       assessable: true
       depth: 3
@@ -7034,6 +8127,13 @@ objects:
             e gegen Sicherheitsrichtlinien formal, fair und nachvollziehbar behandelt\
             \ werden. Der Prozess legt Ma\xDFnahmen, Eskalationswege und Konsequenzen\
             \ fest."
+        zh:
+          name: "\u7EAA\u5F8B\u5904\u5206\u7A0B\u5E8F"
+          description: "\u8BE5\u63A7\u5236\u5EFA\u7ACB\u4E86\u7EAA\u5F8B\u7A0B\u5E8F\
+            \uFF0C\u4EE5\u5904\u7406\u4FE1\u606F\u5B89\u5168\u653F\u7B56\u7684\u8FDD\
+            \u89C4\u884C\u4E3A\u3002\u63AA\u65BD\u5305\u62EC\u660E\u786E\u7684\u6307\
+            \u5BFC\u65B9\u9488\u3001\u5347\u7EA7\u7A0B\u5E8F\u548C\u6301\u7EED\u7684\
+            \u6267\u6CD5\uFF0C\u4EE5\u4FDD\u6301\u95EE\u8D23\u5236\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.5
       assessable: true
       depth: 3
@@ -7088,6 +8188,13 @@ objects:
             \ Verantwortlichkeiten ber\xFCcksichtigt werden \u2013 einschlie\xDFlich\
             \ Entzug von Zugriffsrechten, R\xFCckgabe von Werten und fortbestehender\
             \ Vertraulichkeitspflichten."
+        zh:
+          name: "\u79BB\u804C\u6216\u66F4\u6362\u5DE5\u4F5C\u540E\u7684\u804C\u8D23"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4FE1\u606F\u5B89\u5168\
+            \u76F8\u5173\u7684\u804C\u8D23\u5728\u79BB\u804C\u6216\u804C\u4F4D\u53D8\
+            \u66F4\u540E\u5F97\u5230\u5B9A\u4E49\u548C\u6267\u884C\u3002\u63AA\u65BD\
+            \u5305\u62EC\u64A4\u9500\u8BBF\u95EE\u6743\u3001\u6536\u7F34\u7EC4\u7EC7\
+            \u8D44\u4EA7\u4EE5\u53CA\u8FDB\u884C\u79BB\u804C\u9762\u8C08\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.6
       assessable: true
       depth: 3
@@ -7136,6 +8243,13 @@ objects:
             \ und externe Parteien entsprechende Vertraulichkeitsvereinbarungen unterzeichnen,\
             \ die definieren, wie sensible Informationen zu sch\xFCtzen sind \u2013\
             \ auch nach Ende der Zusammenarbeit."
+        zh:
+          name: "\u4FDD\u5BC6\u534F\u8BAE\u6216\u4FDD\u5BC6\u534F\u8BAE"
+          description: "\u8BE5\u63A7\u5236\u5B9E\u65BD\u4FDD\u5BC6\u534F\u8BAE\u6216\
+            \u4FDD\u5BC6\u534F\u8BAE\u4EE5\u4FDD\u62A4\u654F\u611F\u4FE1\u606F\u3002\
+            \u63AA\u65BD\u5305\u62EC\u5165\u804C\u65F6\u7B7E\u7F72\u534F\u8BAE\u3001\
+            \u5B9A\u671F\u63D0\u9192\u4EE5\u53CA\u5728\u8FDD\u89C4\u65F6\u6267\u884C\
+            \u6CD5\u5F8B\u884C\u52A8\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.7
       assessable: true
       depth: 3
@@ -7185,6 +8299,14 @@ objects:
             \ Remote-Arbeit angemessen adressiert werden, einschlie\xDFlich sicherer\
             \ Zugriffe, Ger\xE4teschutz, Vorgaben zum Umgang mit Informationen und\
             \ geeigneten technischen Schutzma\xDFnahmen."
+        zh:
+          name: "\u8FDC\u7A0B\u529E\u516C"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u8FDC\u7A0B\u529E\
+            \u516C\u671F\u95F4\u4FE1\u606F\u5B89\u5168\u98CE\u9669\u7684\u5B89\u5168\
+            \u7BA1\u7406\u3002\u63AA\u65BD\u5305\u62EC\u5BF9\u4F01\u4E1A\u7CFB\u7EDF\
+            \u7684\u5B89\u5168\u8BBF\u95EE\u3001\u5F3A\u5236\u4F7F\u7528VPN\uFF0C\u4EE5\
+            \u53CA\u5236\u5B9A\u8FDC\u7A0B\u5904\u7406\u654F\u611F\u6570\u636E\u7684\
+            \u653F\u7B56\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.6.8
       assessable: true
       depth: 3
@@ -7235,6 +8357,13 @@ objects:
             \ Informationssicherheitsereignisse unverz\xFCglich melden k\xF6nnen.\
             \ Dazu geh\xF6ren klare Meldewege, Sensibilisierung und definierte Prozesse\
             \ zur Erfassung, Bewertung und Weiterleitung von Ereignissen."
+        zh:
+          name: "\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u62A5\u544A"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5458\u5DE5\u80FD\u591F\
+            \u53CA\u65F6\u62A5\u544A\u4FE1\u606F\u5B89\u5168\u4E8B\u4EF6\u3002\u63AA\
+            \u65BD\u5305\u62EC\u4E8B\u4EF6\u62A5\u544A\u6E20\u9053\u3001\u5BA3\u4F20\
+            \u6D3B\u52A8\u4EE5\u53CA\u8C03\u67E5\u548C\u5904\u7406\u62A5\u544A\u4E8B\
+            \u4EF6\u7684\u540E\u7EED\u7A0B\u5E8F\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7
       assessable: false
       depth: 2
@@ -7254,6 +8383,8 @@ objects:
           name: "Controles f\xEDsicos"
         de:
           name: "Physische Ma\xDFnahmen"
+        zh:
+          name: "\u7269\u7406\u63A7\u5236"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.1
       assessable: true
       depth: 3
@@ -7303,6 +8434,14 @@ objects:
             \ Sicherheitszonen eingerichtet werden, um kritische Bereiche vor unbefugtem\
             \ Zutritt zu sch\xFCtzen. Dazu geh\xF6ren bauliche Schutzma\xDFnahmen,\
             \ Zutrittskontrollen, \xDCberwachungssysteme und organisatorische Vorgaben."
+        zh:
+          name: "\u7269\u7406\u5B89\u5168\u8FB9\u754C"
+          description: "\u8FD9\u79CD\u63A7\u5236\u5EFA\u7ACB\u4E86\u7269\u7406\u5B89\
+            \u5168\u8FB9\u754C\uFF0C\u4FDD\u62A4\u5173\u952E\u533A\u57DF\u514D\u53D7\
+            \u672A\u7ECF\u6388\u6743\u7684\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\
+            \u8BBE\u7F6E\u969C\u788D\u7269\u3001\u95E8\u7981\u63A7\u5236\u548C\u76D1\
+            \u63A7\u7CFB\u7EDF\uFF0C\u786E\u4FDD\u53EA\u6709\u6388\u6743\u4EBA\u5458\
+            \u624D\u80FD\u8FDB\u5165\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.2
       assessable: true
       depth: 3
@@ -7348,6 +8487,13 @@ objects:
             \ zu sicherheitsrelevanten Bereichen kontrolliert, gesteuert und \xFC\
             berwacht wird. Dazu geh\xF6ren Zugangsausweise, Besuchermanagement, Protokollierung\
             \ und \xDCberwachung des Zutritts."
+        zh:
+          name: "\u5B9E\u4F53\u8FDB\u5165"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7269\u7406\u5165\u53E3\
+            \u70B9\u5F97\u5230\u63A7\u5236\u548C\u76D1\u63A7\uFF0C\u9632\u6B62\u672A\
+            \u7ECF\u6388\u6743\u7684\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\u5FBD\
+            \u7AE0\u7CFB\u7EDF\u3001\u5B89\u4FDD\u4EBA\u5458\u548C\u8BBF\u5BA2\u8BB0\
+            \u5F55\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.3
       assessable: true
       depth: 3
@@ -7393,6 +8539,12 @@ objects:
             \ R\xE4ume und Einrichtungen vor unbefugtem Zugang, Manipulation oder\
             \ Diebstahl gesch\xFCtzt werden. Dazu geh\xF6ren Schlie\xDFsysteme, Zugangsbeschr\xE4\
             nkungen, sichere Aufbewahrung und physische Kontrollen."
+        zh:
+          name: "\u786E\u4FDD\u529E\u516C\u5BA4\u3001\u623F\u95F4\u548C\u8BBE\u65BD"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u529E\u516C\u5BA4\u3001\
+            \u623F\u95F4\u548C\u8BBE\u65BD\u7684\u5B89\u5168\uFF0C\u4EE5\u4FDD\u62A4\
+            \u4FE1\u606F\u548C\u8D44\u6E90\u3002\u63AA\u65BD\u5305\u62EC\u4E0A\u9501\
+            \u95E8\u3001\u9650\u5236\u533A\u57DF\u548C\u76D1\u63A7\u7CFB\u7EDF\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.4
       assessable: true
       depth: 3
@@ -7436,6 +8588,12 @@ objects:
             \ Bereiche durch geeignete \xDCberwachungseinrichtungen wie Video\xFC\
             berwachung, Sensorik, Alarmsysteme und Benachrichtigungen \xFCberwacht\
             \ werden, um unbefugte Aktivit\xE4ten fr\xFChzeitig zu erkennen."
+        zh:
+          name: "\u7269\u7406\u5B89\u5168\u76D1\u63A7"
+          description: "\u8BE5\u63A7\u5236\u5B9E\u65BD\u4E86\u7269\u7406\u5B89\u5168\
+            \u76D1\u63A7\uFF0C\u4EE5\u68C0\u6D4B\u5E76\u8FC5\u901F\u54CD\u5E94\u5A01\
+            \u80C1\u3002\u63AA\u65BD\u5305\u62EC\u95ED\u8DEF\u7535\u89C6\u7CFB\u7EDF\
+            \u3001\u8FD0\u52A8\u63A2\u6D4B\u5668\u548C\u5B9E\u65F6\u8B66\u62A5\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.5
       assessable: true
       depth: 3
@@ -7481,6 +8639,12 @@ objects:
             \ Wasser, Hitze, K\xE4lte, Vibrationen oder Naturereignisse gesch\xFC\
             tzt werden. Dazu geh\xF6ren Brandschutz, Klimakontrolle, \xDCberspannungsschutz\
             \ und bauliche Ma\xDFnahmen."
+        zh:
+          name: "\u9632\u62A4\u7269\u7406\u548C\u73AF\u5883\u5A01\u80C1"
+          description: "\u8FD9\u79CD\u63A7\u5236\u4FDD\u62A4\u7CFB\u7EDF\u548C\u8D44\
+            \u6E90\u514D\u53D7\u7269\u7406\u548C\u73AF\u5883\u5A01\u80C1\u3002\u63AA\
+            \u65BD\u5305\u62EC\u706D\u706B\u7CFB\u7EDF\u3001\u6E29\u5EA6\u63A7\u5236\
+            \u548C\u9632\u6D2A\u5C4F\u969C\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.6
       assessable: true
       depth: 3
@@ -7526,6 +8690,12 @@ objects:
             \ f\xFCr T\xE4tigkeiten in Sicherheitsbereichen fest. Dazu geh\xF6ren\
             \ kontrollierte Zug\xE4nge, \xDCberwachung, Begleitung von Besuchern und\
             \ organisatorische Vorgaben f\xFCr Abl\xE4ufe und Verhalten."
+        zh:
+          name: "\u5728\u5B89\u5168\u533A\u57DF\u5DE5\u4F5C"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5B89\u5168\u533A\u57DF\
+            \u53EA\u5141\u8BB8\u6388\u6743\u8BBF\u95EE\u3002\u63AA\u65BD\u5305\u62EC\
+            \u95E8\u7981\u7CFB\u7EDF\u3001\u8BBF\u5BA2\u62A4\u9001\u548C\u6D3B\u52A8\
+            \u76D1\u6D4B\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.7
       assessable: true
       depth: 3
@@ -7573,6 +8743,13 @@ objects:
             \ nicht offen einsehbar sind. Dazu geh\xF6ren Clean-Desk-Regeln, sichere\
             \ Aufbewahrung von Dokumenten, Abschlie\xDFen von Arbeitspl\xE4tzen und\
             \ automatische Bildschirmsperren."
+        zh:
+          name: "\u684C\u9762\u548C\u5C4F\u5E55\u90FD\u6E05\u6670"
+          description: "\u901A\u8FC7\u91C7\u7528\u6E05\u6670\u684C\u9762\u548C\u6E05\
+            \u6670\u5C4F\u5E55\u653F\u7B56\uFF0C\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\
+            \u654F\u611F\u4FE1\u606F\u4E0D\u4F1A\u88AB\u9057\u6F0F\u3002\u63AA\u65BD\
+            \u5305\u62EC\u5C06\u654F\u611F\u6587\u4EF6\u9501\u597D\uFF0C\u5E76\u5728\
+            \u672A\u4F7F\u7528\u65F6\u81EA\u52A8\u9501\u5B9A\u5C4F\u5E55\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.8
       assessable: true
       depth: 3
@@ -7619,6 +8796,13 @@ objects:
             \ so positioniert, installiert und gesch\xFCtzt werden, dass Risiken wie\
             \ unbefugter Zugriff, Manipulation oder Besch\xE4digung minimiert werden.\
             \ Dazu geh\xF6ren sichere Standorte, Schr\xE4nke, Geh\xE4use und Zutrittskontrollen."
+        zh:
+          name: "\u8BBE\u5907\u9009\u5740\u4E0E\u9632\u62A4"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8BBE\u5907\u88AB\u5B89\
+            \u7F6E\u548C\u4FDD\u62A4\uFF0C\u4EE5\u9632\u6B62\u672A\u7ECF\u6388\u6743\
+            \u7684\u8BBF\u95EE\u6216\u635F\u574F\u3002\u63AA\u65BD\u5305\u62EC\u5B89\
+            \u5168\u5B89\u88C5\u3001\u4E0A\u9501\u67DC\u5B50\u548C\u9650\u5236\u8FDB\
+            \u5165\u533A\u57DF\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.9
       assessable: true
       depth: 3
@@ -7664,6 +8848,13 @@ objects:
             \ Datentr\xE4ger und andere Werte auch au\xDFerhalb organisatorischer\
             \ Standorte wirksam gesch\xFCtzt werden. Dazu geh\xF6ren Verschl\xFCsselung,\
             \ sichere Transportwege, physischer Schutz und Kontrolle \xFCber die Nutzung."
+        zh:
+          name: "\u8D44\u4EA7\u5728\u573A\u5916\u7684\u5B89\u5168"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4F7F\u7528\u6216\u5B58\
+            \u653E\u5728\u573A\u5916\u7684\u8D44\u4EA7\u5F97\u5230\u4FDD\u62A4\uFF0C\
+            \u4EE5\u7EF4\u62A4\u673A\u5BC6\u6027\u548C\u5B8C\u6574\u6027\u3002\u63AA\
+            \u65BD\u5305\u62EC\u52A0\u5BC6\u3001\u5B89\u5168\u4F20\u8F93\u548C\u8BBF\
+            \u95EE\u8FFD\u8E2A\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.10
       assessable: true
       depth: 3
@@ -7706,6 +8897,12 @@ objects:
             \ Speicherung, Transport, Nutzung und Entsorgung. Dazu geh\xF6ren sichere\
             \ Lagerung, Verschl\xFCsselung, Zugriffskontrollen und dokumentierte L\xF6\
             schverfahren."
+        zh:
+          name: "\u5B58\u50A8\u4ECB\u8D28"
+          description: "\u8FD9\u79CD\u63A7\u5236\u4FDD\u62A4\u5B58\u50A8\u4ECB\u8D28\
+            \uFF0C\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u8BBF\u95EE\u6216\u7BE1\
+            \u6539\u3002\u63AA\u65BD\u5305\u62EC\u5B89\u5168\u5B58\u50A8\u3001\u52A0\
+            \u5BC6\u548C\u8BBF\u95EE\u9650\u5236\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.11
       assessable: true
       depth: 3
@@ -7751,6 +8948,12 @@ objects:
             \ Versorgungseinrichtungen wie Strom, Klima, Wasser, Netzwerk oder Druckluft\
             \ zuverl\xE4ssig betrieben und vor Ausf\xE4llen gesch\xFCtzt werden. Redundanzen\
             \ und \xDCberwachungssysteme unterst\xFCtzen die Betriebssicherheit."
+        zh:
+          name: "\u652F\u6301\u516C\u7528\u4E8B\u4E1A"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u4E86\u652F\u6301\u7684\
+            \u516C\u7528\u4E8B\u4E1A\uFF0C\u5982\u7535\u529B\u548C\u51B7\u5374\u7CFB\
+            \u7EDF\uFF0C\u53EF\u9760\u4E14\u4E0D\u53D7\u5E72\u6270\u3002\u63AA\u65BD\
+            \u5305\u62EC\u5197\u4F59\u7CFB\u7EDF\u548C\u7269\u7406\u5B89\u5168\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.12
       assessable: true
       depth: 3
@@ -7794,6 +8997,13 @@ objects:
             \ und Stromkabel gegen Abh\xF6ren, Manipulation, Besch\xE4digung und St\xF6\
             rungen gesch\xFCtzt werden. Dazu geh\xF6ren Kabelschutzrohre, sichere\
             \ Verlegung, Kennzeichnung und Zugangskontrollen."
+        zh:
+          name: "\u5E03\u7EBF\u5B89\u5168"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7535\u7F06\u5F97\u5230\
+            \u5B89\u5168\u4FDD\u62A4\uFF0C\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\
+            \u62E6\u622A\u6216\u635F\u574F\u3002\u63AA\u65BD\u5305\u62EC\u4FDD\u62A4\
+            \u7BA1\u9053\u3001\u6B63\u786E\u6807\u8BC6\u548C\u5B89\u5168\u5E03\u7EBF\
+            \u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.13
       assessable: true
       depth: 3
@@ -7840,6 +9050,13 @@ objects:
             \ regelm\xE4\xDFig, fachgerecht und sicher gewartet werden, um Ausf\xE4\
             lle und Sicherheitsrisiken zu vermeiden. Wartungsarbeiten d\xFCrfen nur\
             \ von autorisiertem und qualifiziertem Personal durchgef\xFChrt werden."
+        zh:
+          name: "\u8BBE\u5907\u7EF4\u62A4"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8BBE\u5907\u5F97\u5230\
+            \u7EF4\u62A4\uFF0C\u786E\u4FDD\u6B63\u5E38\u8FD0\u884C\u5E76\u9632\u6B62\
+            \u6545\u969C\u53D1\u751F\u3002\u63AA\u65BD\u5305\u62EC\u5B9A\u671F\u4FDD\
+            \u517B\u3001\u5B89\u5168\u7EF4\u62A4\u5B9E\u8DF5\u4EE5\u53CA\u6388\u6743\
+            \u4EBA\u5458\u901A\u884C\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.7.14
       assessable: true
       depth: 3
@@ -7887,6 +9104,12 @@ objects:
             \ sensiblen Informationen wiederhergestellt werden k\xF6nnen. Dazu geh\xF6\
             ren zertifizierte L\xF6schverfahren, physische Vernichtung und dokumentierte\
             \ Prozesse."
+        zh:
+          name: "\u5B89\u5168\u5904\u7F6E\u6216\u518D\u5229\u7528\u8BBE\u5907"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u8BBE\u5907\u5B89\u5168\
+            \u5904\u7F6E\u6216\u518D\u5229\u7528\uFF0C\u4EE5\u4FDD\u62A4\u654F\u611F\
+            \u4FE1\u606F\u3002\u63AA\u65BD\u5305\u62EC\u6570\u636E\u51C0\u5316\u3001\
+            \u7269\u7406\u9500\u6BC1\u548C\u8BA4\u8BC1\u5904\u7406\u6D41\u7A0B\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8
       assessable: false
       depth: 2
@@ -7906,6 +9129,8 @@ objects:
           name: "Controles tecnol\xF3gicos"
         de:
           name: "Technologische Ma\xDFnahmen"
+        zh:
+          name: "\u6280\u672F\u63A7\u5236"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.1
       assessable: true
       depth: 3
@@ -7953,6 +9178,14 @@ objects:
             te wie Laptops, Desktops oder Mobilger\xE4te durch technische und organisatorische\
             \ Ma\xDFnahmen gesch\xFCtzt werden. Dazu geh\xF6ren sichere Konfigurationen,\
             \ Verschl\xFCsselung, Malware-Schutz, Patch-Management und Zugriffskontrollen."
+        zh:
+          name: "\u7528\u6237\u7EC8\u7AEF\u8BBE\u5907"
+          description: "\u8FD9\u79CD\u63A7\u5236\u901A\u8FC7\u5B9E\u65BD\u7EC8\u7AEF\
+            \u68C0\u6D4B\u3001\u52A0\u5BC6\u548C\u5B89\u5168\u914D\u7F6E\u7B49\u5B89\
+            \u5168\u63AA\u65BD\uFF0C\u786E\u4FDD\u5BF9\u7B14\u8BB0\u672C\u7535\u8111\
+            \u3001\u53F0\u5F0F\u673A\u548C\u79FB\u52A8\u8BBE\u5907\u7B49\u7EC8\u7AEF\
+            \u8BBE\u5907\u7684\u4FDD\u62A4\uFF0C\u4EE5\u6700\u5927\u9650\u5EA6\u5730\
+            \u964D\u4F4E\u98CE\u9669\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
       assessable: true
       depth: 3
@@ -8003,6 +9236,14 @@ objects:
             \ \xFCberwacht, dokumentiert und regelm\xE4\xDFig \xFCberpr\xFCft wird.\
             \ Dies umfasst starke Authentisierung, Protokollierung und strenge Verwaltung\
             \ privilegierter Konten."
+        zh:
+          name: "\u7279\u6743\u8BBF\u95EE\u6743"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7279\u6743\u8BBF\u95EE\
+            \u6743\u5F97\u5230\u6388\u6743\u3001\u7BA1\u7406\u548C\u4E25\u683C\u76D1\
+            \u63A7\uFF0C\u4EE5\u9632\u6B62\u6EE5\u7528\u5E76\u589E\u5F3A\u5B89\u5168\
+            \u6027\u3002\u63AA\u65BD\u5305\u62EC\u57FA\u4E8E\u89D2\u8272\u7684\u8BBF\
+            \u95EE\u63A7\u5236\u3001\u5B9A\u671F\u5BA1\u67E5\u548C\u4E25\u683C\u7684\
+            \u8D26\u6237\u7BA1\u7406\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.3
       assessable: true
       depth: 3
@@ -8048,6 +9289,13 @@ objects:
             \ auf Informationen nach dem Need-to-know-Prinzip beschr\xE4nkt wird,\
             \ um unbefugten Zugriff zu verhindern. Dazu geh\xF6ren Zugriffskontrollen,\
             \ Rollenrechte, Authentisierung und regelm\xE4\xDFige \xDCberpr\xFCfungen."
+        zh:
+          name: "\u4FE1\u606F\u8BBF\u95EE\u9650\u5236"
+          description: "\u8FD9\u79CD\u63A7\u5236\u57FA\u4E8E\u77E5\u60C5\u9700\u6C42\
+            \u539F\u5219\u9650\u5236\u4E86\u5BF9\u654F\u611F\u4FE1\u606F\u7684\u8BBF\
+            \u95EE\u3002\u63AA\u65BD\u5305\u62EC\u7528\u6237\u8BA4\u8BC1\u3001\u57FA\
+            \u4E8E\u89D2\u8272\u7684\u6743\u9650\u4EE5\u53CA\u5B9A\u671F\u7684\u8BBF\
+            \u95EE\u5BA1\u67E5\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.4
       assessable: true
       depth: 3
@@ -8093,6 +9341,13 @@ objects:
             \ Quellcode kontrolliert, \xFCberwacht und gesch\xFCtzt erfolgt, um Manipulation,\
             \ Offenlegung oder unbefugte \xC4nderung zu verhindern. Dazu geh\xF6ren\
             \ Rechtemanagement, Versionskontrolle, Code-Reviews und abgesicherte Repositorys."
+        zh:
+          name: "\u6E90\u4EE3\u7801\u8BBF\u95EE"
+          description: "\u8FD9\u79CD\u63A7\u5236\u901A\u8FC7\u9632\u6B62\u672A\u7ECF\
+            \u6388\u6743\u7684\u67E5\u770B\u3001\u4FEE\u6539\u6216\u66DD\u5149\uFF0C\
+            \u4FDD\u969C\u4E86\u5BF9\u6E90\u4EE3\u7801\u7684\u8BBF\u95EE\u3002\u63AA\
+            \u65BD\u5305\u62EC\u7248\u672C\u63A7\u5236\u3001\u5B89\u5168\u4ED3\u5E93\
+            \u548C\u9650\u5236\u5F00\u53D1\u8005\u8BBF\u95EE\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.5
       assessable: true
       depth: 3
@@ -8134,6 +9389,12 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass starke Authentisierungsmechanismen\
             \ eingesetzt werden \u2013 wie Multi-Faktor-Authentisierung, sichere Passwortrichtlinien,\
             \ Token oder biometrische Verfahren \u2013 um unbefugten Zugriff zu verhindern."
+        zh:
+          name: "\u5B89\u5168\u8BA4\u8BC1"
+          description: "\u8BE5\u63A7\u5236\u5B9E\u73B0\u5F3A\u8BA4\u8BC1\u673A\u5236\
+            \uFF0C\u5982\u591A\u56E0\u7D20\u8BA4\u8BC1\uFF0C\u4EE5\u9A8C\u8BC1\u7528\
+            \u6237\u8EAB\u4EFD\u5E76\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u8BBF\
+            \u95EE\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.6
       assessable: true
       depth: 3
@@ -8179,6 +9440,13 @@ objects:
             ten kontinuierlich \xFCberwacht, geplant und gesteuert werden, um Leistungseinbu\xDF\
             en, Engp\xE4sse oder Ausf\xE4lle zu vermeiden. Dazu geh\xF6ren Kapazit\xE4\
             tsplanung, Monitoring und Prognosen."
+        zh:
+          name: "\u5BB9\u91CF\u7BA1\u7406"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u5BB9\u91CF\
+            \u5F97\u5230\u7BA1\u7406\uFF0C\u4EE5\u63D0\u4F9B\u8DB3\u591F\u7684\u6027\
+            \u80FD\u5E76\u9632\u6B62\u4E2D\u65AD\u3002\u63AA\u65BD\u5305\u62EC\u76D1\
+            \u63A7\u8D44\u6E90\u4F7F\u7528\u548C\u89C4\u5212\u672A\u6765\u9700\u6C42\
+            \u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.7
       assessable: true
       depth: 3
@@ -8220,6 +9488,12 @@ objects:
             \ geeignete technische und organisatorische Ma\xDFnahmen vor Malware,\
             \ Schadsoftware und Angriffen gesch\xFCtzt werden. Dazu geh\xF6ren Antivirensoftware,\
             \ EDR/XDR, regelm\xE4\xDFige Updates und Sensibilisierung."
+        zh:
+          name: "\u9632\u8303\u6076\u610F\u8F6F\u4EF6"
+          description: "\u8BE5\u63A7\u5236\u90E8\u7F72\u4E86\u6740\u6BD2\u8F6F\u4EF6\
+            \u3001\u5A01\u80C1\u68C0\u6D4B\u5DE5\u5177\u548C\u5B9A\u671F\u66F4\u65B0\
+            \u7B49\u63AA\u65BD\uFF0C\u4EE5\u4FDD\u62A4\u7CFB\u7EDF\u514D\u53D7\u6076\
+            \u610F\u8F6F\u4EF6\u548C\u6076\u610F\u653B\u51FB\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
       assessable: true
       depth: 3
@@ -8263,6 +9537,13 @@ objects:
             \ Schwachstellen zeitnah identifiziert, bewertet, priorisiert und behoben\
             \ werden. Dazu geh\xF6ren Schwachstellenscans, Patch-Management, Risikobewertungen\
             \ und Nachweisf\xFChrung."
+        zh:
+          name: "\u6280\u672F\u6F0F\u6D1E\u7BA1\u7406"
+          description: "\u8BE5\u63A7\u5236\u80FD\u591F\u53CA\u65F6\u8BC6\u522B\u3001\
+            \u8BC4\u4F30\u5E76\u4FEE\u590D\u6280\u672F\u6F0F\u6D1E\uFF0C\u4EE5\u6700\
+            \u5927\u9650\u5EA6\u5730\u964D\u4F4E\u5B89\u5168\u98CE\u9669\u3002\u63AA\
+            \u65BD\u5305\u62EC\u6F0F\u6D1E\u626B\u63CF\u548C\u8865\u4E01\u7BA1\u7406\
+            \u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
       assessable: true
       depth: 3
@@ -8302,6 +9583,11 @@ objects:
             \ definiert, dokumentiert, gesch\xFCtzt und kontrolliert ge\xE4ndert werden,\
             \ um Sicherheitseinstellungen zu gew\xE4hrleisten und unbeabsichtigte\
             \ \xC4nderungen zu verhindern."
+        zh:
+          name: "\u914D\u7F6E\u7BA1\u7406"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u914D\u7F6E\
+            \u7684\u4E00\u81F4\u7BA1\u7406\uFF0C\u4EE5\u7EF4\u62A4\u5B89\u5168\u8BBE\
+            \u7F6E\u5E76\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u66F4\u6539\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.10
       assessable: true
       depth: 3
@@ -8344,6 +9630,11 @@ objects:
             \ gel\xF6scht werden m\xFCssen, sicher und nachvollziehbar entfernt werden.\
             \ Dazu geh\xF6ren dokumentierte L\xF6schverfahren, sichere Methoden und\
             \ Nachweise."
+        zh:
+          name: "\u4FE1\u606F\u5220\u9664"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u654F\u611F\u4FE1\u606F\
+            \u5728\u4E0D\u518D\u9700\u8981\u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\
+            \u6062\u590D\u6216\u66DD\u5149\u65F6\u88AB\u5B89\u5168\u5220\u9664\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.11
       assessable: true
       depth: 3
@@ -8386,6 +9677,11 @@ objects:
             \ w\xE4hrend Verarbeitung, Anzeige oder Test durch geeignete Maskierungsverfahren\
             \ gesch\xFCtzt werden. Dies verhindert, dass unbefugte Personen Inhalte\
             \ erkennen oder missbrauchen k\xF6nnen."
+        zh:
+          name: "\u6570\u636E\u63A9\u853D"
+          description: "\u8BE5\u63A7\u5236\u901A\u8FC7\u4F7F\u7528\u6570\u636E\u63A9\
+            \u853D\u6280\u672F\u4FDD\u62A4\u654F\u611F\u4FE1\u606F\uFF0C\u9632\u6B62\
+            \u672A\u6388\u6743\u7528\u6237\u53D1\u73B0\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.12
       assessable: true
       depth: 3
@@ -8426,6 +9722,12 @@ objects:
             \ oder unbefugter Abfluss sensibler Daten durch technische und organisatorische\
             \ Ma\xDFnahmen verhindert wird. Dazu geh\xF6ren DLP-Systeme, Richtlinien,\
             \ \xDCberwachung und Zugriffsbeschr\xE4nkungen."
+        zh:
+          name: "\u6570\u636E\u6CC4\u9732\u9884\u9632"
+          description: "\u8BE5\u63A7\u5236\u673A\u5236\u5B9E\u73B0\u4E86\u9632\u6B62\
+            \u654F\u611F\u6570\u636E\u901A\u8FC7\u7535\u5B50\u90AE\u4EF6\u3001\u53EF\
+            \u79FB\u52A8\u5A92\u4F53\u6216\u5176\u4ED6\u6E20\u9053\u610F\u5916\u6CC4\
+            \u9732\u7684\u673A\u5236\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.13
       assessable: true
       depth: 3
@@ -8467,6 +9769,12 @@ objects:
             \ Informationen regelm\xE4\xDFig, vollst\xE4ndig, gesch\xFCtzt und wiederherstellbar\
             \ gesichert werden. Dies umfasst Backup-Strategien, Speicherorte, Tests\
             \ und Dokumentation."
+        zh:
+          name: "\u4FE1\u606F\u5907\u4EFD"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5173\u952E\u4FE1\u606F\
+            \u80FD\u591F\u5B9A\u671F\u4E14\u5B89\u5168\u5730\u5907\u4EFD\uFF0C\u786E\
+            \u4FDD\u5728\u4E8B\u6545\u6216\u707E\u96BE\u53D1\u751F\u65F6\u5176\u53EF\
+            \u7528\u6027\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.14
       assessable: true
       depth: 3
@@ -8509,6 +9817,12 @@ objects:
             \ Systeme und Dienste durch Redundanzen, Ausweichmechanismen und Notbetriebskonzepte\
             \ abgesichert sind, um Ausfallzeiten zu minimieren und Betriebsf\xE4higkeit\
             \ zu erhalten."
+        zh:
+          name: "\u4FE1\u606F\u5904\u7406\u8BBE\u65BD\u7684\u5197\u4F59"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5904\u7406\u8BBE\u65BD\
+            \u5185\u7F6E\u5197\u4F59\uFF0C\u4EE5\u5728\u7CFB\u7EDF\u6545\u969C\u6216\
+            \u7D27\u6025\u60C5\u51B5\u4E0B\u4FDD\u6301\u53EF\u7528\u6027\u548C\u8FD0\
+            \u884C\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.15
       assessable: true
       depth: 3
@@ -8548,6 +9862,11 @@ objects:
             \ Ereignisse und Aktivit\xE4ten protokolliert, gesch\xFCtzt, \xFCberpr\xFC\
             ft und f\xFCr Analysen sowie Ermittlungen genutzt werden k\xF6nnen. Dies\
             \ umfasst Log-Quellen, Integrit\xE4t der Logs, Aufbewahrung und \xDCberwachung."
+        zh:
+          name: "\u4F10\u6728"
+          description: "\u8FD9\u79CD\u63A7\u5236\u4F7F\u7CFB\u7EDF\u5185\u6D3B\u52A8\
+            \u80FD\u591F\u8BB0\u5F55\uFF0C\u4EE5\u652F\u6301\u76D1\u63A7\u3001\u4E8B\
+            \u4EF6\u68C0\u6D4B\u548C\u53D6\u8BC1\u8C03\u67E5\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.16
       assessable: true
       depth: 3
@@ -8586,6 +9905,11 @@ objects:
             \ und Netzwerke kontinuierlich \xFCberwacht werden, um Anomalien, Angriffe\
             \ oder sicherheitsrelevante Ereignisse fr\xFChzeitig zu erkennen und geeignete\
             \ Gegenma\xDFnahmen einzuleiten."
+        zh:
+          name: "\u76D1\u6D4B\u6D3B\u52A8"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u6D3B\u52A8\
+            \u6301\u7EED\u76D1\u63A7\uFF0C\u4EE5\u68C0\u6D4B\u3001\u54CD\u5E94\u5E76\
+            \u7F13\u89E3\u5B89\u5168\u5A01\u80C1\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.17
       assessable: true
       depth: 3
@@ -8624,6 +9948,11 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass System- und\
             \ Netzwerkuhren synchronisiert sind, um korrekte Zeitstempel f\xFCr Protokolle,\
             \ Analysen und sicherheitsrelevante Prozesse zu gew\xE4hrleisten."
+        zh:
+          name: "\u65F6\u949F\u540C\u6B65"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u65F6\u949F\
+            \u540C\u6B65\uFF0C\u4EE5\u4FDD\u6301\u65E5\u5FD7\u53CA\u5176\u4ED6\u5173\
+            \u952E\u8FDB\u7A0B\u7684\u65F6\u95F4\u6233\u51C6\u786E\u4E00\u81F4\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.18
       assessable: true
       depth: 3
@@ -8662,6 +9991,11 @@ objects:
             \ privilegierter Dienstprogramme kontrolliert, \xFCberwacht und auf berechtigte\
             \ Personen beschr\xE4nkt wird. Dies verhindert Missbrauch, Manipulation\
             \ und unbefugte Aktivit\xE4ten."
+        zh:
+          name: "\u7279\u6743\u5B9E\u7528\u7A0B\u5E8F\u7684\u4F7F\u7528"
+          description: "\u8FD9\u79CD\u63A7\u5236\u9650\u5236\u5E76\u76D1\u63A7\u7279\
+            \u6743\u5DE5\u5177\u7A0B\u5E8F\u7684\u4F7F\u7528\uFF0C\u4EE5\u9632\u6B62\
+            \u6EE5\u7528\u548C\u672A\u7ECF\u6388\u6743\u7684\u884C\u4E3A\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
       assessable: true
       depth: 3
@@ -8702,6 +10036,12 @@ objects:
             \ in produktiven Umgebungen kontrolliert, dokumentiert und autorisiert\
             \ erfolgen, um Risiken durch Schadsoftware, Fehlkonfigurationen oder unbefugte\
             \ \xC4nderungen zu vermeiden."
+        zh:
+          name: "\u4F5C\u7CFB\u7EDF\u4E0A\u7684\u8F6F\u4EF6\u5B89\u88C5"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u8FD0\u8425\u7CFB\
+            \u7EDF\u4E0A\u7684\u8F6F\u4EF6\u5B89\u88C5\u5F97\u5230\u5B89\u5168\u7BA1\
+            \u7406\uFF0C\u4EE5\u9632\u6B62\u6F0F\u6D1E\u6216\u672A\u7ECF\u6388\u6743\
+            \u7684\u66F4\u6539\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.20
       assessable: true
       depth: 3
@@ -8743,6 +10083,12 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Netzwerke\
             \ durch geeignete Sicherheitsma\xDFnahmen wie Firewalls, IDS/IPS, Segmentierung,\
             \ \xDCberwachung und Zugriffskontrollen gesch\xFCtzt werden."
+        zh:
+          name: "\u7F51\u7EDC\u5B89\u5168"
+          description: "\u8FD9\u79CD\u63A7\u5236\u901A\u8FC7\u9632\u706B\u5899\u3001\
+            \u5165\u4FB5\u68C0\u6D4B\u7CFB\u7EDF\u548C\u8BBF\u95EE\u63A7\u5236\u786E\
+            \u4FDD\u7F51\u7EDC\u5B89\u5168\uFF0C\u9632\u6B62\u672A\u7ECF\u6388\u6743\
+            \u7684\u8BBF\u95EE\u548C\u653B\u51FB\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.21
       assessable: true
       depth: 3
@@ -8782,6 +10128,11 @@ objects:
             \ \u2013 intern und extern \u2013 sicher bereitgestellt, \xFCberwacht\
             \ und gesch\xFCtzt werden. Dazu geh\xF6ren Sicherheitsvereinbarungen,\
             \ Monitoring, Tests und Absicherung gegen Angriffe."
+        zh:
+          name: "\u7F51\u7EDC\u670D\u52A1\u7684\u5B89\u5168\u6027"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7F51\u7EDC\u670D\u52A1\
+            \u5728\u4F7F\u7528\u8FC7\u7A0B\u4E2D\u4FDD\u6301\u673A\u5BC6\u6027\u3001\
+            \u5B8C\u6574\u6027\u548C\u53EF\u7528\u6027\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.22
       assessable: true
       depth: 3
@@ -8819,6 +10170,12 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Netzwerke\
             \ nach Schutzbedarf segmentiert werden, um Risiken, Angriffsfl\xE4chen\
             \ und Auswirkungen potenzieller Vorf\xE4lle zu reduzieren."
+        zh:
+          name: "\u7F51\u7EDC\u9694\u79BB"
+          description: "\u8FD9\u79CD\u63A7\u5236\u5B9E\u65BD\u4E86\u7F51\u7EDC\u9694\
+            \u79BB\uFF0C\u4EE5\u9650\u5236\u5A01\u80C1\u7684\u6269\u6563\uFF0C\u5E76\
+            \u6700\u5927\u9650\u5EA6\u5730\u51CF\u5C11\u6F5C\u5728\u5165\u4FB5\u7684\
+            \u5F71\u54CD\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.23
       assessable: true
       depth: 3
@@ -8856,6 +10213,11 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Zugriffe auf\
             \ sch\xE4dliche, unangemessene oder unerlaubte Webseiten durch Filtermechanismen\
             \ eingeschr\xE4nkt oder verhindert werden."
+        zh:
+          name: "\u7F51\u9875\u8FC7\u6EE4"
+          description: "\u8BE5\u63A7\u5236\u5229\u7528\u7F51\u7EDC\u8FC7\u6EE4\u5DE5\
+            \u5177\u963B\u6B62\u672A\u7ECF\u6388\u6743\u6216\u6709\u5BB3\u5185\u5BB9\
+            \u901A\u8FC7\u4E92\u8054\u7F51\u8BBF\u95EE\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.24
       assessable: true
       depth: 3
@@ -8895,6 +10257,11 @@ objects:
             \ Verfahren angemessen ausgew\xE4hlt, eingesetzt, verwaltet und gesch\xFC\
             tzt werden, um Vertraulichkeit, Integrit\xE4t und Authentizit\xE4t von\
             \ Informationen zu gew\xE4hrleisten."
+        zh:
+          name: "\u5BC6\u7801\u5B66\u7684\u5E94\u7528"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u91C7\u7528\u5BC6\u7801\
+            \u5B66\u6280\u672F\u6765\u4FDD\u62A4\u6570\u636E\u7684\u673A\u5BC6\u6027\
+            \u3001\u5B8C\u6574\u6027\u548C\u771F\u5B9E\u6027\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.25
       assessable: true
       depth: 3
@@ -8935,6 +10302,11 @@ objects:
             \ Tests, Reviews und Kontrollen in allen Phasen des Entwicklungslebenszyklus\
             \ verankert sind \u2013 von der Planung \xFCber Design, Implementierung,\
             \ Test bis zur \xDCbergabe."
+        zh:
+          name: "\u5B89\u5168\u5F00\u53D1\u751F\u547D\u5468\u671F"
+          description: "\u8BE5\u63A7\u5236\u5C06\u5B89\u5168\u6574\u5408\u5230\u5F00\
+            \u53D1\u751F\u547D\u5468\u671F\u7684\u6240\u6709\u9636\u6BB5\uFF0C\u786E\
+            \u4FDD\u7CFB\u7EDF\u548C\u5E94\u7528\u7684\u5B89\u5168\u6784\u5EFA\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.26
       assessable: true
       depth: 3
@@ -8970,6 +10342,11 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass f\xFCr Anwendungen\
             \ klare Sicherheitsanforderungen definiert, dokumentiert und umgesetzt\
             \ werden, um Schwachstellen und Sicherheitsrisiken zu vermeiden."
+        zh:
+          name: "\u5E94\u7528\u5B89\u5168\u8981\u6C42"
+          description: "\u8FD9\u79CD\u63A7\u5236\u5B9A\u4E49\u5E76\u6267\u884C\u5E94\
+            \u7528\u7A0B\u5E8F\u7684\u5B89\u5168\u8981\u6C42\uFF0C\u4EE5\u9632\u8303\
+            \u6F0F\u6D1E\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.27
       assessable: true
       depth: 3
@@ -9008,6 +10385,11 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Sicherheitsprinzipien\
             \ wie Minimierung von Angriffsfl\xE4chen, Defense-in-Depth, sichere Standards\
             \ und Best Practices in Architektur- und Designprozessen verankert sind."
+        zh:
+          name: "\u5B89\u5168\u7CFB\u7EDF\u67B6\u6784\u4E0E\u5DE5\u7A0B\u539F\u7406"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u7CFB\u7EDF\u67B6\
+            \u6784\u5F00\u53D1\u8FC7\u7A0B\u4E2D\u91C7\u7528\u5B89\u5168\u7684\u8BBE\
+            \u8BA1\u539F\u5219\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.28
       assessable: true
       depth: 3
@@ -9043,6 +10425,11 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Entwickler\
             \ sichere Coding-Praktiken anwenden, um Fehler, Schwachstellen und Angriffsfl\xE4\
             chen zu reduzieren. Dazu geh\xF6ren Standards, Code-Reviews und Schulungen."
+        zh:
+          name: "\u5B89\u5168\u7F16\u7801"
+          description: "\u8FD9\u79CD\u63A7\u5236\u5B9E\u65BD\u4E86\u5B89\u5168\u7684\
+            \u7F16\u7801\u5B9E\u8DF5\uFF0C\u4EE5\u6700\u5927\u9650\u5EA6\u5730\u51CF\
+            \u5C11\u5F00\u53D1\u8F6F\u4EF6\u4E2D\u7684\u6F0F\u6D1E\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.29
       assessable: true
       depth: 3
@@ -9081,6 +10468,12 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Anwendungen\
             \ und Systeme w\xE4hrend Entwicklung, Test und Abnahme einer Sicherheitspr\xFC\
             fung unterzogen werden, um Schwachstellen fr\xFChzeitig zu erkennen."
+        zh:
+          name: "\u5F00\u53D1\u4E0E\u9A8C\u6536\u4E2D\u7684\u5B89\u5168\u6027\u6D4B\
+            \u8BD5"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u5F00\u53D1\u548C\
+            \u9A8C\u6536\u9636\u6BB5\u8FDB\u884C\u5B89\u5168\u6D4B\u8BD5\uFF0C\u4EE5\
+            \u8BC6\u522B\u5F31\u70B9\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.30
       assessable: true
       depth: 3
@@ -9118,6 +10511,11 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass bei ausgelagerter\
             \ Entwicklung Sicherheitsanforderungen vertraglich und organisatorisch\
             \ geregelt, \xFCberwacht und durchgesetzt werden."
+        zh:
+          name: "\u5916\u5305\u5F00\u53D1"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5728\u5F00\u53D1\u5916\
+            \u5305\u7ED9\u7B2C\u4E09\u65B9\u4F9B\u5E94\u5546\u65F6\u5B89\u5168\u98CE\
+            \u9669\u5F97\u5230\u6709\u6548\u7BA1\u7406\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.31
       assessable: true
       depth: 3
@@ -9161,6 +10559,13 @@ objects:
           description: "Diese Steuerungsma\xDFnahme stellt sicher, dass Entwicklungs-,\
             \ Test- und Produktionsumgebungen klar voneinander getrennt sind, um unbeabsichtigte\
             \ \xC4nderungen, Sicherheitsrisiken oder Datenverlust zu verhindern."
+        zh:
+          name: "\u5F00\u53D1\u3001\u6D4B\u8BD5\u548C\u751F\u4EA7\u73AF\u5883\u7684\
+            \u5206\u79BB"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u5F00\u53D1\u3001\u6D4B\
+            \u8BD5\u548C\u751F\u4EA7\u73AF\u5883\u88AB\u9694\u79BB\uFF0C\u4EE5\u9632\
+            \u6B62\u610F\u5916\u4EA4\u4E92\u548C\u672A\u7ECF\u6388\u6743\u7684\u8BBF\
+            \u95EE\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
       assessable: true
       depth: 3
@@ -9199,6 +10604,11 @@ objects:
             \ an Systemen kontrolliert, dokumentiert und risikobewertet durchgef\xFC\
             hrt werden, um Stabilit\xE4t, Sicherheit und Nachvollziehbarkeit sicherzustellen.\
             \ Dies umfasst Genehmigungsprozesse, Tests, Dokumentation und \xDCberwachung."
+        zh:
+          name: "\u53D8\u66F4\u7BA1\u7406"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u53D8\u66F4\
+            \u5F97\u5230\u5B89\u5168\u7BA1\u7406\uFF0C\u4EE5\u964D\u4F4E\u98CE\u9669\
+            \u5E76\u4FDD\u6301\u8FD0\u8425\u7A33\u5B9A\u6027\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.33
       assessable: true
       depth: 3
@@ -9236,6 +10646,11 @@ objects:
             \ \u2013 insbesondere wenn sie produktive oder vertrauliche Inhalte enthalten\
             \ \u2013 gesch\xFCtzt, anonymisiert oder maskiert werden, um unbefugte\
             \ Einsicht oder Missbrauch zu verhindern."
+        zh:
+          name: "\u6D4B\u8BD5\u4FE1\u606F"
+          description: "\u8BE5\u63A7\u5236\u4FDD\u62A4\u6D4B\u8BD5\u6570\u636E\uFF0C\
+            \u9632\u6B62\u654F\u611F\u6216\u673A\u5BC6\u4FE1\u606F\u5728\u6D4B\u8BD5\
+            \u8FC7\u7A0B\u4E2D\u6CC4\u9732\u3002"
     - urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.34
       assessable: true
       depth: 3
@@ -9290,3 +10705,13 @@ objects:
             \ Zugriff, Datenabfluss oder Betriebsst\xF6rungen verhindert werden. Dazu\
             \ geh\xF6ren die Nutzung von Nicht-Produktivumgebungen, Zugriffsbeschr\xE4\
             nkungen, sichere Verfahren und Vertraulichkeitsvereinbarungen."
+        zh:
+          name: "\u5BA1\u8BA1\u6D4B\u8BD5\u671F\u95F4\u4FE1\u606F\u7CFB\u7EDF\u7684\
+            \u4FDD\u62A4"
+          description: "\u8FD9\u79CD\u63A7\u5236\u786E\u4FDD\u7CFB\u7EDF\u548C\u6570\
+            \u636E\u5728\u5BA1\u8BA1\u8FC7\u7A0B\u4E2D\u5F97\u5230\u4FDD\u62A4\uFF0C\
+            \u9632\u6B62\u672A\u7ECF\u6388\u6743\u7684\u8BBF\u95EE\u3001\u6570\u636E\
+            \u6CC4\u9732\u6216\u4E2D\u65AD\u3002\u63AA\u65BD\u5305\u62EC\u4F7F\u7528\
+            \u975E\u751F\u4EA7\u73AF\u5883\u3001\u8BBF\u95EE\u9650\u5236\u548C\u4FDD\
+            \u5BC6\u534F\u8BAE\uFF0C\u4EE5\u7EF4\u62A4\u7CFB\u7EDF\u5B89\u5168\u548C\
+            \u5B8C\u6574\u6027\u3002"

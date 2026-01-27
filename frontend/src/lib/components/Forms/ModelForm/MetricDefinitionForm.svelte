@@ -68,7 +68,6 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 <TextField
 	{form}
@@ -88,7 +87,7 @@
 />
 {#if isQualitative}
 	<div class="form-group">
-		<label class="text-sm font-semibold mb-2 block">{m.choicesDefinition()}</label>
+		<span class="text-sm font-semibold mb-2 block">{m.choicesDefinition()}</span>
 		<OrderedEntryList bind:entries={choicesEntries} onchange={handleChoicesChange} />
 	</div>
 {:else}

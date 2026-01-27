@@ -64,6 +64,16 @@
 		cacheLock={cacheLocks['result']}
 		bind:cachedValue={formDataCache['result']}
 	/>
+	{#if object?.compliance_assessment?.extended_result_enabled}
+		<Select
+			{form}
+			options={model.selectOptions['extended_result']}
+			field="extended_result"
+			label={m.extendedResult()}
+			cacheLock={cacheLocks['extended_result']}
+			bind:cachedValue={formDataCache['extended_result']}
+		/>
+	{/if}
 	<MarkdownField
 		{form}
 		field="observation"
@@ -71,6 +81,14 @@
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
 	/>
-	<HiddenInput {form} field="folder" />
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
+		field="folder"
+		pathField="path"
+		cacheLock={cacheLocks['folder']}
+		bind:cachedValue={formDataCache['folder']}
+		label={m.domain()}
+	/>
 	<HiddenInput {form} field="compliance_assessment" />
 {/if}

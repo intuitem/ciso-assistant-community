@@ -83,7 +83,6 @@
 	cacheLock={cacheLocks['perimeter']}
 	bind:cachedValue={formDataCache['perimeter']}
 	label={m.perimeter()}
-	hidden={initialData.perimeter}
 />
 <TextField
 	{form}
@@ -132,8 +131,12 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="users?is_third_party=false"
-		optionsLabelField="email"
+		optionsEndpoint="actors"
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
 		field="authors"
 		cacheLock={cacheLocks['authors']}
 		bind:cachedValue={formDataCache['authors']}
@@ -143,8 +146,12 @@
 		<AutocompleteSelect
 			{form}
 			multiple
-			optionsEndpoint="users?is_third_party=false"
-			optionsLabelField="email"
+			optionsEndpoint="actors"
+			optionsLabelField="str"
+			optionsInfoFields={{
+				fields: [{ field: 'type', translate: true }],
+				position: 'prefix'
+			}}
 			field="reviewers"
 			cacheLock={cacheLocks['reviewers']}
 			bind:cachedValue={formDataCache['reviewers']}

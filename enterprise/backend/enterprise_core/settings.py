@@ -221,6 +221,7 @@ MIDDLEWARE = [
     "django_structlog.middlewares.RequestMiddleware",
     "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "core.focus_middleware.FocusModeMiddleware",
 ]
 
 ROOT_URLCONF = "ciso_assistant.urls"
@@ -385,6 +386,7 @@ LANGUAGES = [
     ("el", "Greek"),
     ("tr", "Turkish"),
     ("hr", "Croatian"),
+    ("zh", "Chinese (Simplified)"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -421,8 +423,19 @@ else:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": SQLITE_FILE,
+            "TEST": {
+                "NAME": BASE_DIR / "db" / "test_ciso-assistant.sqlite3",
+            },
             "OPTIONS": {
                 "timeout": 120,
+                "transaction_mode": "IMMEDIATE",
+                "init_command": """
+                PRAGMA journal_mode=WAL;
+                PRAGMA synchronous=NORMAL;
+                PRAGMA mmap_size=134217728;
+                PRAGMA journal_size_limit=27103364;
+                PRAGMA cache_size=2000;
+            """,
             },
         }
     }
@@ -449,9 +462,8 @@ SPECTACULAR_SETTINGS = {
 # SSO with allauth
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
 # NOTE: The reauthentication flow has not been implemented in the frontend yet, hence the long timeout.
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.

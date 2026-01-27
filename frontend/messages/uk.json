@@ -118,6 +118,13 @@
 	"provider": "Постачальник",
 	"providerColon": "Постачальник:",
 	"domain": "Домен",
+	"domainSemiColon": "Домен:",
+	"allDomains": "Всі домени",
+	"selectDomain": "Вибрати домен",
+	"focusMode": "Режим фокусу",
+	"focusModeTooltip": "Зосередитися на певному домені",
+	"clearFocus": "Очистити фокус",
+	"noDomainsAvailable": "Немає доступних доменів",
 	"urn": "URN",
 	"treatmentStatus": "Статус виправлень",
 	"qualification": "Кваліфікація",
@@ -1578,5 +1585,19 @@
 		}
 	],
 	"cascadeAffectedHint": "Елементи нижче залишаються в системі, але їхні посилання на цей об'єкт будуть видалені.",
-	"libraryFilteringLabels": "Мітки бібліотеки"
+	"libraryFilteringLabels": "Мітки бібліотеки",
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} об'єкт невидимий.",
+				"countPlural=other": "{count} об'єкти невидимі."
+			}
+		}
+	],
+	"appliedControlsPlaceholder": "Виберіть застосовані контролі...",
+	"assignmentSettings": "Налаштування призначень",
+	"allowAssignmentsToEntities": "Дозволити призначення для сутностей",
+	"allowAssignmentsToEntitiesDescription": "Дозволяє сутностям відображатися як учасники під час призначення власників, авторів чи рецензентів."
 }

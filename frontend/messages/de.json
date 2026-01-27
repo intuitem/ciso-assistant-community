@@ -117,6 +117,12 @@
 	"providerColon": "Anbieter:",
 	"domain": "Bereich",
 	"domainSemiColon": "Bereich:",
+	"allDomains": "Alle Bereiche",
+	"selectDomain": "Bereich auswählen",
+	"focusMode": "Fokusmodus",
+	"focusModeTooltip": "Auf einen bestimmten Bereich fokussieren",
+	"clearFocus": "Fokus löschen",
+	"noDomainsAvailable": "Keine Bereiche verfügbar",
 	"urn": "URN",
 	"treatmentStatus": "Behandlungsstatus",
 	"qualification": "Qualifizierung",
@@ -965,6 +971,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Objekt nicht sichtbar.",
+				"countPlural=other": "{count} Objekte nicht sichtbar."
+			}
+		}
+	],
 	"matchingScenarios": "Übereinstimmende Szenarien",
 	"select": "Auswählen",
 	"deselect": "Abwählen",
@@ -1507,6 +1523,8 @@
 	"dataBreaches": "Datenschutzverletzungen",
 	"dataBreachesByType": "Datenschutzverletzungen nach Typ",
 	"dataBreachesDescription": "Vorfallmanagement & Meldungen zu Datenschutzverletzungen",
+	"gdpr": "GDPR / Datenschutz",
+	"gdprDescription": "Datenschutz- und Privacy-Management-Funktionen (GDPR-Konformität)",
 	"dataContractor": "Datenverarbeiter",
 	"dataContractors": "Datenverarbeiter",
 	"dataFlowOverview": "Datenflussübersicht",
@@ -2929,5 +2947,9 @@
 		}
 	],
 	"cascadeAffectedHint": "Die unten aufgeführten Elemente bleiben im System, aber ihre Verknüpfungen zu diesem Objekt werden entfernt.",
-	"libraryFilteringLabels": "Bibliotheksetiketten"
+	"libraryFilteringLabels": "Bibliotheksetiketten",
+	"appliedControlsPlaceholder": "Angewandte Kontrollen auswählen...",
+	"assignmentSettings": "Zuweisungseinstellungen",
+	"allowAssignmentsToEntities": "Zuweisungen an Entitäten zulassen",
+	"allowAssignmentsToEntitiesDescription": "Ermöglicht, dass Entitäten als Akteure erscheinen, wenn Eigentümer, Autoren oder Prüfer zugewiesen werden."
 }

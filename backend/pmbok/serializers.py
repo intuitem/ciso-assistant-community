@@ -18,7 +18,7 @@ class GenericCollectionReadSerializer(BaseModelSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     policies = FieldsRelatedField(many=True)
     dependencies = FieldsRelatedField(many=True)
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
 
     class Meta:
         model = GenericCollection
@@ -34,12 +34,12 @@ class GenericCollectionWriteSerializer(BaseModelSerializer):
 class AccreditationReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
-    author = FieldsRelatedField(["id", "first_name", "last_name"])
+    author = FieldsRelatedField()
     authority = FieldsRelatedField()
     linked_collection = FieldsRelatedField()
     collection_data = serializers.SerializerMethodField()
     checklist = FieldsRelatedField()
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     status = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
     checklist_progress = serializers.SerializerMethodField()

@@ -5,6 +5,7 @@ from huey.contrib.djhuey import task
 from structlog import get_logger
 
 from integrations.itsm.jira.integration import *
+from integrations.itsm.servicenow.integration import *
 from integrations.models import IntegrationConfiguration
 
 from .registry import IntegrationRegistry

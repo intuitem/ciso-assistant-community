@@ -24,6 +24,9 @@
 	let formElement: HTMLFormElement = $state();
 	let files: FileList | null = $state(null); // Fixed: Changed from HTMLInputElement to FileList
 	let selectedModel = $state('Asset'); // Default selection
+	let searchQuery = $state('');
+	let showModelDropdown = $state(false);
+	let searchInputRef: HTMLInputElement | null = $state(null);
 
 	// Model configuration
 	const modelOptions = [
@@ -53,8 +56,18 @@
 		{ id: 'Processing', label: m.processings(), description: '' },
 		{
 			id: 'TPRM',
-			label: 'TPRM (Third-Party Risk Management)',
-			description: 'Import entities, solutions, and contracts from a multi-sheet Excel file'
+			label: m.thirdPartyCategory(),
+			description: m.thirdPartiesImportHelpText()
+		},
+		{
+			id: 'EbiosRMStudyARM',
+			label: m.ebiosRMStudyARM(),
+			description: m.ebiosRMStudyARMDescription()
+		},
+		{
+			id: 'EbiosRMStudyExcel',
+			label: m.ebiosRMStudyExcel(),
+			description: m.ebiosRMStudyExcelDescription()
 		}
 	];
 
@@ -84,15 +97,22 @@
 		selectedModel === 'ComplianceAssessment' ||
 			selectedModel === 'FindingsAssessment' ||
 			selectedModel === 'RiskAssessment' ||
+			selectedModel === 'User' ||
 			selectedModel === 'Folder'
 	);
 
 	let isFrameworkDisabled = $derived(selectedModel !== 'ComplianceAssessment');
 
-	let isMatrixDisabled = $derived(selectedModel !== 'RiskAssessment');
+	let isMatrixDisabled = $derived(
+		selectedModel !== 'RiskAssessment' &&
+			selectedModel !== 'EbiosRMStudyARM' &&
+			selectedModel !== 'EbiosRMStudyExcel'
+	);
 
 	// Models that don't need perimeter selection
 	const modelsWithoutPerimeter = [
+		'Folder',
+		'User',
 		'Asset',
 		'AppliedControl',
 		'Perimeter',
@@ -100,7 +120,9 @@
 		'ReferenceControl',
 		'Threat',
 		'Processing',
-		'TPRM'
+		'TPRM',
+		'EbiosRMStudyARM',
+		'EbiosRMStudyExcel'
 	];
 
 	// Determine if perimeter selection should be disabled
@@ -113,9 +135,37 @@
 	let formSubmitted = $derived(form !== null && form !== undefined);
 
 	const authorizedExtensions = ['.xls', '.xlsx'];
+
+	// Filter models based on search query
+	let filteredModels = $derived(
+		searchQuery.length > 0
+			? modelOptions.filter(
+					(model) =>
+						model.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+						model.description.toLowerCase().includes(searchQuery.toLowerCase())
+				)
+			: modelOptions
+	);
+
+	// Get currently selected model info
+	let selectedModelInfo = $derived(modelOptions.find((m) => m.id === selectedModel));
+
+	// Close dropdown when clicking outside
+	function handleClickOutside(e: any) {
+		if (!e.target.closest('[data-model-selector]')) {
+			showModelDropdown = false;
+		}
+	}
+
+	// Focus search input when dropdown opens
+	$effect(() => {
+		if (showModelDropdown && searchInputRef) {
+			searchInputRef.focus();
+		}
+	});
 </script>
 
-<div class="grid grid-cols-4 gap-4">
+<div class="grid grid-cols-4 gap-4" onclick={handleClickOutside}>
 	<div class=" col-span-2 bg-white shadow-sm py-4 px-6 space-y-2">
 		<form enctype="multipart/form-data" method="post" use:enhance bind:this={formElement}>
 			<div>
@@ -179,102 +229,273 @@
 				</label>
 			</div>
 
-			<div class="rounded-lg p-4 mt-4 border-green-500 border-2">
-				<!--Model radio-->
-				<fieldset class="space-y-4">
-					<legend class="sr-only">{m.object()}</legend>
+			<div
+				class="rounded-lg p-6 mt-6 border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-white"
+			>
+				<!-- Model Selection Header -->
+				<div class="mb-4">
+					<label class="block text-sm font-semibold text-gray-900 mb-2">{m.object()}</label>
+					<p class="text-xs text-gray-600 mb-3">{m.dataWizardChooseModel()}</p>
+				</div>
 
-					{#each modelOptions as model, index}
-						<div>
-							<label
-								for={model.id}
-								class="flex cursor-pointer justify-between gap-4 rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-2xs hover:border-gray-200 has-checked:border-blue-500 has-checked:ring-1 has-checked:ring-blue-500"
+				<!-- Searchable Model Selector -->
+				<div class="relative" data-model-selector="true">
+					<!-- Selected Model Display -->
+					<button
+						type="button"
+						onclick={() => (showModelDropdown = !showModelDropdown)}
+						class="w-full px-4 py-3 text-left bg-white border-2 border-gray-300 rounded-lg hover:border-indigo-400 transition-colors focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+					>
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-3 flex-1 min-w-0">
+								{#if selectedModelInfo}
+									<div class="flex-1 min-w-0">
+										<p class="font-medium text-gray-900 truncate">{selectedModelInfo.label}</p>
+										{#if selectedModelInfo.description}
+											<p class="text-xs text-gray-500 truncate">{selectedModelInfo.description}</p>
+										{/if}
+									</div>
+								{/if}
+							</div>
+							<svg
+								class="h-5 w-5 text-gray-400 transition-transform {showModelDropdown
+									? 'rotate-180'
+									: ''}"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
 							>
-								<div>
-									<p class="text-gray-700">{model.label}</p>
-									{#if model.description}
-										<p class="text-gray-500 text-xs">{model.description}</p>
-									{/if}
-								</div>
-
-								<input
-									type="radio"
-									name="model"
-									value={model.id}
-									id={model.id}
-									class="size-5 border-gray-300 text-blue-500"
-									checked={index === 0}
-									bind:group={selectedModel}
-								/>
-							</label>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M19 14l-7 7m0 0l-7-7m7 7V3"
+								></path>
+							</svg>
 						</div>
-					{/each}
-				</fieldset>
+					</button>
+
+					<!-- Dropdown Panel -->
+					{#if showModelDropdown}
+						<div
+							class="absolute z-50 w-full mt-2 bg-white border-2 border-indigo-300 rounded-lg shadow-lg"
+							onclick={(e) => e.stopPropagation()}
+						>
+							<!-- Search Input -->
+							<div class="p-3 border-b border-gray-200 sticky top-0 bg-white rounded-t-lg">
+								<input
+									type="text"
+									placeholder={m.searchPlaceholder()}
+									bind:this={searchInputRef}
+									bind:value={searchQuery}
+									autofocus
+									class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200"
+								/>
+							</div>
+
+							<!-- Model Options Grid -->
+							<div class="max-h-96 overflow-y-auto">
+								{#if filteredModels.length > 0}
+									{#each filteredModels as model (model.id)}
+										<button
+											type="button"
+											onclick={() => {
+												selectedModel = model.id;
+												showModelDropdown = false;
+												searchQuery = '';
+											}}
+											class="w-full px-4 py-3 text-left hover:bg-indigo-50 border-b border-gray-100 last:border-b-0 transition-colors group"
+											class:bg-indigo-100={model.id === selectedModel}
+										>
+											<div class="flex items-start gap-3">
+												<div class="flex-1 min-w-0 pt-0.5">
+													<p
+														class="font-medium text-gray-900 group-hover:text-indigo-700 transition-colors"
+														class:text-indigo-700={model.id === selectedModel}
+													>
+														{model.label}
+													</p>
+													{#if model.description}
+														<p class="text-xs text-gray-500 mt-0.5">{model.description}</p>
+													{/if}
+												</div>
+												{#if model.id === selectedModel}
+													<div class="flex-shrink-0 mt-1">
+														<svg
+															class="h-5 w-5 text-indigo-600"
+															fill="currentColor"
+															viewBox="0 0 20 20"
+														>
+															<path
+																fill-rule="evenodd"
+																d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+																clip-rule="evenodd"
+															></path>
+														</svg>
+													</div>
+												{/if}
+											</div>
+										</button>
+									{/each}
+								{:else}
+									<div class="px-4 py-8 text-center text-gray-500">
+										<p class="text-sm">{m.noResultsFound?.() ?? 'No results found'}</p>
+									</div>
+								{/if}
+							</div>
+						</div>
+					{/if}
+
+					<!-- Hidden select for form submission -->
+					<select name="model" bind:value={selectedModel} class="sr-only">
+						{#each modelOptions as model}
+							<option value={model.id}>{model.label}</option>
+						{/each}
+					</select>
+				</div>
+
+				<!-- Selected Model Description -->
+				{#if selectedModelInfo?.description}
+					<div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+						<p class="text-xs text-blue-900">{selectedModelInfo.description}</p>
+					</div>
+				{/if}
 			</div>
 
-			<div class="rounded-lg p-4 mt-4 border-pink-500 border-2">
-				<!--Select targets -->
-				<label for="folder" class="block text-sm font-medium text-gray-900"
-					>{m.dataWizardSelectFallbackDomain()}</label
-				>
-				<select
-					id="folder"
-					name="folder"
-					disabled={isDomainDisabled}
-					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
-				>
-					{#each data.data.folders as folder}
-						<option value={folder.id}>{folder.name}</option>
-					{/each}
-				</select>
-				<label for="perimeter" class="block text-sm font-medium text-gray-900"
-					>{m.dataWizardSelectPerimeter()}</label
-				>
-				<select
-					id="perimeter"
-					name="perimeter"
-					disabled={isPerimeterDisabled}
-					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
-				>
-					{#each data.data.perimeters as perimeter}
-						<option value={perimeter.id}>{perimeter.name}</option>
-					{/each}
-				</select>
+			<div
+				class="rounded-lg p-6 mt-6 border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white space-y-4"
+			>
+				<!-- Targets Section -->
+				<div>
+					<h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+						<svg class="h-5 w-5 text-rose-600" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"
+							></path>
+							<path
+								fill-rule="evenodd"
+								d="M4 5a2 2 0 012-2 1 1 0 000 2h1a1 1 0 100-2h-1a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a1 1 0 100-2h-1a1 1 0 000 2h1v10H4V5z"
+								clip-rule="evenodd"
+							></path>
+						</svg>
+						{m.dataWizardSelectScope()}
+					</h3>
+				</div>
 
-				<label for="framework" class="block text-sm font-medium text-gray-900"
-					>{m.dataWizardSelectFramework()}</label
-				>
-				<select
-					id="framework"
-					name="framework"
-					disabled={isFrameworkDisabled}
-					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
-				>
-					{#each data.data.frameworks as framework}
-						<option value={framework.id}>{framework.name}</option>
-					{/each}
-				</select>
+				<!-- Domain Selection -->
+				<div>
+					<label for="folder" class="block text-sm font-medium text-gray-900 mb-2"
+						>{m.dataWizardSelectFallbackDomain()}</label
+					>
+					{#if !isDomainDisabled}
+						<select
+							id="folder"
+							name="folder"
+							class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
+						>
+							{#each data.data.folders as folder}
+								<option value={folder.id}>{folder.name}</option>
+							{/each}
+						</select>
+					{:else}
+						<div
+							class="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 rounded-lg text-gray-500 text-sm"
+						>
+							{m.automatic?.() ?? 'Automatic'}
+						</div>
+					{/if}
+				</div>
 
-				<label for="matrix" class="block text-sm font-medium text-gray-900"
-					>{m.dataWizardSelectRiskMatrix()}</label
-				>
-				<select
-					id="matrix"
-					name="matrix"
-					disabled={isMatrixDisabled}
-					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
-				>
-					{#each data.data.risk_matrices || [] as matrix}
-						<option value={matrix.id}>{matrix.name}</option>
-					{/each}
-				</select>
+				<!-- Perimeter Selection -->
+				<div>
+					<label for="perimeter" class="block text-sm font-medium text-gray-900 mb-2"
+						>{m.dataWizardSelectPerimeter()}</label
+					>
+					{#if !isPerimeterDisabled}
+						<select
+							id="perimeter"
+							name="perimeter"
+							class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
+						>
+							{#each data.data.perimeters as perimeter}
+								<option value={perimeter.id}>{perimeter.name}</option>
+							{/each}
+						</select>
+					{:else}
+						<div
+							class="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 rounded-lg text-gray-500 text-sm"
+						>
+							{m.notRequired?.() ?? 'Not required'}
+						</div>
+					{/if}
+				</div>
+
+				<!-- Framework Selection -->
+				<div>
+					<label for="framework" class="block text-sm font-medium text-gray-900 mb-2"
+						>{m.dataWizardSelectFramework()}</label
+					>
+					{#if !isFrameworkDisabled}
+						<select
+							id="framework"
+							name="framework"
+							class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
+						>
+							{#each data.data.frameworks as framework}
+								<option value={framework.id}>{framework.name}</option>
+							{/each}
+						</select>
+					{:else}
+						<div
+							class="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 rounded-lg text-gray-500 text-sm"
+						>
+							{m.notRequired?.() ?? 'Not required'}
+						</div>
+					{/if}
+				</div>
+
+				<!-- Risk Matrix Selection -->
+				<div>
+					<label for="matrix" class="block text-sm font-medium text-gray-900 mb-2"
+						>{m.dataWizardSelectRiskMatrix()}</label
+					>
+					{#if !isMatrixDisabled}
+						<select
+							id="matrix"
+							name="matrix"
+							class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg text-gray-900 text-sm hover:border-rose-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200 transition-colors"
+						>
+							{#each data.data.risk_matrices || [] as matrix}
+								<option value={matrix.id}>{matrix.name}</option>
+							{/each}
+						</select>
+					{:else}
+						<div
+							class="px-4 py-2.5 bg-gray-100 border-2 border-gray-200 rounded-lg text-gray-500 text-sm"
+						>
+							{m.notRequired?.() ?? 'Not required'}
+						</div>
+					{/if}
+				</div>
 			</div>
-			<div class="flex py-4">
+
+			<!-- Upload Button -->
+			<div class="flex gap-3 py-6">
 				<button
-					class="btn preset-filled mt-2 lg:mt-0 {uploadButtonStyles}"
+					class="flex-1 px-6 py-3 bg-gradient-to-r {uploadButtonStyles} from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 					type="button"
-					onclick={modalConfirm}><i class="fa-solid fa-file-arrow-up mr-2"></i>{m.upload()}</button
+					disabled={!files || files.length === 0}
+					onclick={modalConfirm}
 				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3v-6"
+						></path>
+					</svg>
+					{m.upload()}
+				</button>
 			</div>
 		</form>
 	</div>

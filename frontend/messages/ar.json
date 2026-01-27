@@ -117,6 +117,12 @@
 	"providerColon": "مزود:",
 	"domain": "النطاق",
 	"domainSemiColon": "النطاق:",
+	"allDomains": "جميع المجالات",
+	"selectDomain": "اختر مجال",
+	"focusMode": "وضع التركيز",
+	"focusModeTooltip": "التركيز على مجال محدد",
+	"clearFocus": "مسح التركيز",
+	"noDomainsAvailable": "لا توجد مجالات متاحة",
 	"urn": "URN",
 	"treatmentStatus": "حالة المعالجة",
 	"qualification": "المؤهلات",
@@ -926,6 +932,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} عنصر غير مرئي.",
+				"countPlural=other": "{count} عناصر غير مرئية."
+			}
+		}
+	],
 	"matchingScenarios": "السيناريوهات المطابقة",
 	"select": "تحديد",
 	"deselect": "إلغاء التحديد",
@@ -1031,5 +1047,9 @@
 	"isCustom": "مخصص",
 	"errorUnloadingLibrary": "خطأ في تفريغ المكتبة",
 	"librarySuccessfullyUnloaded": "تم إلغاء تحميل المكتبة بنجاح",
-	"libraryFilteringLabels": "العلامات المكتبية"
+	"libraryFilteringLabels": "العلامات المكتبية",
+	"appliedControlsPlaceholder": "حدد عناصر التحكم المطبقة...",
+	"assignmentSettings": "التعيينات",
+	"allowAssignmentsToEntities": "السماح بإسناد المهام إلى الكيانات",
+	"allowAssignmentsToEntitiesDescription": "اسمح للكيانات بالظهور كجهات عند تعيين المالكين أو المؤلفين أو المراجعين."
 }

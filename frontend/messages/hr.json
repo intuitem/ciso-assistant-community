@@ -127,6 +127,12 @@
 	"providerColon": "Pružatelj:",
 	"domain": "Domena",
 	"domainSemiColon": "Domena:",
+	"allDomains": "Sve domene",
+	"selectDomain": "Odaberi domenu",
+	"focusMode": "Način fokusa",
+	"focusModeTooltip": "Fokusiraj se na određenu domenu",
+	"clearFocus": "Obriši fokus",
+	"noDomainsAvailable": "Nema dostupnih domena",
 	"urn": "URN",
 	"treatmentStatus": "Status rješavanja",
 	"qualification": "Kvalifikacija",
@@ -1716,6 +1722,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objekt nije vidljiv.",
+				"countPlural=other": "{count} objekti nisu vidljivi."
+			}
+		}
+	],
 	"serverURL": "URL servera",
 	"oidcConfiguration": "openid-configuration",
 	"tokenAuthMethod": "Token auth method",
@@ -2028,5 +2044,9 @@
 		}
 	],
 	"cascadeAffectedHint": "Stavke ispod ostaju u sustavu, ali njihovi linkovi na ovaj objekt će biti uklonjeni.",
-	"libraryFilteringLabels": "Oznake knjižnice"
+	"libraryFilteringLabels": "Oznake knjižnice",
+	"appliedControlsPlaceholder": "Odaberi primijenjene kontrole...",
+	"assignmentSettings": "Postavke dodjele",
+	"allowAssignmentsToEntities": "Dopusti dodjele entitetima",
+	"allowAssignmentsToEntitiesDescription": "Omogućuje da se entiteti prikazuju kao akteri pri dodjeli vlasnika, autora ili recenzenata."
 }

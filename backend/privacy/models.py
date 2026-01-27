@@ -1,7 +1,7 @@
 from django.db import models
 from iam.models import User, FolderMixin
 from tprm.models import Entity
-from core.models import AppliedControl, Asset, Evidence, Incident
+from core.models import Actor, AppliedControl, Asset, Evidence, Incident
 from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
@@ -108,22 +108,20 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         max_length=20, choices=STATUS_CHOICES, default="privacy_draft"
     )
     author = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name="authored_processings"
+        Actor, on_delete=models.SET_NULL, null=True, related_name="authored_processings"
     )
     information_channel = models.CharField(max_length=255, blank=True)
     usage_channel = models.CharField(max_length=255, blank=True)
     dpia_required = models.BooleanField(default=False, blank=True)
     dpia_reference = models.CharField(max_length=255, blank=True)
     has_sensitive_personal_data = models.BooleanField(default=False)
-    owner = models.ForeignKey(
-        Entity, on_delete=models.SET_NULL, null=True, related_name="owned_processings"
-    )
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
     )
     assigned_to = models.ManyToManyField(
-        User,
+        Actor,
         verbose_name="Assigned to",
+        related_name="assigned_processings",
         blank=True,
     )
 
@@ -429,7 +427,7 @@ class RightRequest(NameDescriptionFolderMixin):
 
     ref_id = models.CharField(max_length=100, blank=True)
     owner = models.ManyToManyField(
-        User,
+        Actor,
         blank=True,
         related_name="assigned_right_requests",
     )
@@ -478,8 +476,9 @@ class DataBreach(NameDescriptionFolderMixin):
 
     ref_id = models.CharField(max_length=100, blank=True)
     assigned_to = models.ManyToManyField(
-        User,
+        Actor,
         verbose_name="Assigned to",
+        related_name="assigned_data_breaches",
         blank=True,
     )
     discovered_on = models.DateTimeField()

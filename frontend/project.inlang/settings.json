@@ -22,7 +22,8 @@
 		"uk",
 		"el",
 		"tr",
-		"hr"
+		"hr",
+		"zh"
 	],
 	"modules": [
 		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@4/dist/index.js",

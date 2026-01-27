@@ -75,7 +75,26 @@ export class PageContent extends BasePage {
 		if (page) {
 			await page.waitForLoadState('networkidle');
 		}
+
 		await this.form.fill(values);
+
+		// If parent_folder field is visible and enabled (enterprise edition) and not already provided, fill it with 'Global'
+		const parentFolderField = this.page.getByTestId('form-input-parent-folder');
+		if (
+			!values.parent_folder &&
+			(await parentFolderField.isVisible({ timeout: 1000 }).catch(() => false))
+		) {
+			const isDisabled = await parentFolderField
+				.locator('.disabled')
+				.first()
+				.isVisible()
+				.catch(() => false);
+			if (!isDisabled) {
+				await parentFolderField.click();
+				await parentFolderField.getByRole('option', { name: 'Global' }).first().click();
+			}
+		}
+
 		await this.form.saveButton.click();
 		await expect(this.form.formTitle).not.toBeVisible();
 		if (typeof this.name == 'string') {

@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel, NameDescriptionMixin
 from core.models import (
+    Actor,
     FilteringLabelMixin,
     I18nObjectMixin,
     LoadedLibrary,
@@ -126,7 +127,7 @@ class MetricInstance(
         db_index=True,
     )
     owner = models.ManyToManyField(
-        User,
+        Actor,
         blank=True,
         verbose_name=_("Owner"),
         related_name="metric_instances",
@@ -164,18 +165,34 @@ class MetricInstance(
         super().save(*args, **kwargs)
 
     def get_latest_sample(self):
-        """Returns the most recent sample for this metric instance"""
         return self.samples.first()  # ordering is important
 
+    def last_refresh(self):
+        latest_sample = self.get_latest_sample()
+        if latest_sample:
+            return latest_sample.timestamp
+        return None
+
     def current_value(self):
-        """
-        Returns the current value as a human-readable string.
-        This is the display_value of the most recent sample.
-        """
+        """Returns the formatted display value with unit from the latest sample."""
         latest_sample = self.get_latest_sample()
         if latest_sample:
             return latest_sample.display_value()
         return "N/A"
+
+    def raw_value(self):
+        """Returns the raw numeric/index value without unit from the latest sample."""
+        latest_sample = self.get_latest_sample()
+        if latest_sample:
+            return latest_sample.raw_value()
+        return None
+
+    @property
+    def unit(self):
+        """Returns the unit from the underlying metric definition, or None."""
+        if self.metric_definition and self.metric_definition.unit:
+            return self.metric_definition.unit
+        return None
 
     def is_stale(self):
         """
@@ -246,6 +263,31 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
     def __str__(self):
         return f"{self.metric_instance} - {self.timestamp}"
 
+    def raw_value(self):
+        if not self.value:
+            return None
+
+        # Parse value if it's a string
+        if isinstance(self.value, str):
+            try:
+                value_dict = json.loads(self.value)
+            except (json.JSONDecodeError, TypeError):
+                return None
+        else:
+            value_dict = self.value
+
+        metric_definition = self.metric_instance.metric_definition
+
+        # For qualitative metrics, return the choice_index
+        if metric_definition.category == MetricDefinition.Category.QUALITATIVE:
+            return value_dict.get("choice_index")
+
+        # For quantitative metrics, return the numeric result
+        elif metric_definition.category == MetricDefinition.Category.QUANTITATIVE:
+            return value_dict.get("result")
+
+        return None
+
     def display_value(self):
         """
         Returns a human-readable display value based on the metric definition type
@@ -285,14 +327,24 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
             result = value_dict.get("result")
             if result is not None:
                 if metric_definition.unit:
-                    unit = metric_definition.unit.name
+                    # Get translated unit name, fallback to raw name
+                    unit = (
+                        metric_definition.unit.get_name_translated
+                        or metric_definition.unit.name
+                    )
+                    # Handle special unit formatting
                     if metric_definition.unit.name == "percentage":
                         unit = "%"
-                    if metric_definition.unit.name in ["score", "count"]:
+                    elif metric_definition.unit.name in ["score", "count"]:
                         unit = ""
-                    if metric_definition.unit.name == "request_per_second":
+                    elif metric_definition.unit.name == "request_per_second":
                         unit = "RPS"
-                    return f"{result} {unit}"
+                    else:
+                        # Handle singular/plural: strip trailing 's' for singular values
+                        if abs(result) == 1 and unit.endswith("s") and len(unit) > 1:
+                            unit = unit[:-1]
+                    if unit:
+                        return f"{result} {unit}"
                 return str(result)
             return "N/A"
 

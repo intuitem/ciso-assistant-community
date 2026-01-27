@@ -6,7 +6,8 @@ from rest_framework.decorators import action
 
 from iam.sso.models import SSOSettings
 from integrations.models import IntegrationProvider
-
+from core.serializers import SerializerFactory
+from django.conf import settings
 from .serializers import (
     GlobalSettingsSerializer,
     GeneralSettingsSerializer,
@@ -14,6 +15,23 @@ from .serializers import (
 )
 
 from .models import GlobalSettings
+import structlog
+
+logger = structlog.get_logger(__name__)
+
+
+class GlobalSettingsSerializerFactory(SerializerFactory):
+    """Factory to get a serializer class from a list of modules.
+    Attributes:
+    modules (list): List of module names to search for the serializer.
+    """
+
+    def __init__(self, *modules: str):
+        # Reverse to prioritize later modules
+        self.modules = list(reversed(modules))
+
+    def get_serializer(self, base_name: str, action: str = "default"):
+        return self._get_serializer_class(f"{base_name}Serializer")
 
 
 class GlobalSettingsViewSet(viewsets.ModelViewSet):
@@ -43,15 +61,33 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = FeatureFlagsSerializer
     queryset = GlobalSettings.objects.filter(name="feature-flags")
+    serializers_module = "global_settings.serializers"
+
+    def get_serializer_class(self, **kwargs):
+        serializer_factory = GlobalSettingsSerializerFactory(
+            self.serializers_module, settings.MODULE_PATHS.get("serializers", [])
+        )
+        serializer_class = serializer_factory.get_serializer(
+            "FeatureFlags", kwargs.get("action", "default")
+        )
+        logger.debug(
+            "Serializer class",
+            serializer_class=serializer_class,
+            action=kwargs.get("action", self.action),
+            viewset=self,
+            module_paths=settings.MODULE_PATHS,
+        )
+
+        return serializer_class
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance)
+        serializer = self.get_serializer_class()(instance)
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data)
+        serializer = self.get_serializer_class()(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
@@ -105,6 +141,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "allow_self_validation": False,
             "show_warning_external_links": True,
             "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
+            "allow_assignments_to_entities": False,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")

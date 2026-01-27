@@ -117,6 +117,12 @@
 	"providerColon": "Aanbieder:",
 	"domain": "Domein",
 	"domainSemiColon": "Domein:",
+	"allDomains": "Alle domeinen",
+	"selectDomain": "Selecteer domein",
+	"focusMode": "Focusmodus",
+	"focusModeTooltip": "Focus op een specifiek domein",
+	"clearFocus": "Wis focus",
+	"noDomainsAvailable": "Geen domeinen beschikbaar",
 	"urn": "URN",
 	"treatmentStatus": "Behandelstatus",
 	"qualification": "Kwalificatie",
@@ -961,6 +967,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} object niet zichtbaar.",
+				"countPlural=other": "{count} objecten niet zichtbaar."
+			}
+		}
+	],
 	"matchingScenarios": "Overeenkomende scenario's",
 	"select": "Selecteer",
 	"deselect": "Deselecteer",
@@ -1504,6 +1520,8 @@
 	"dataBreaches": "Datalekken",
 	"dataBreachesByType": "Datalekken per type",
 	"dataBreachesDescription": "Datalek incidenten en meldingen",
+	"gdpr": "GDPR / Privacy",
+	"gdprDescription": "Gegevensbescherming en privacy management functies (GDPR-compliance)",
 	"dataContractor": "Gegevensverwerker",
 	"dataContractors": "Gegevensverwerkers",
 	"dataFlowOverview": "Datastroomoverzicht",
@@ -2928,5 +2946,9 @@
 		}
 	],
 	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd.",
-	"libraryFilteringLabels": "Bibliotheek etiketten"
+	"libraryFilteringLabels": "Bibliotheeklabels",
+	"appliedControlsPlaceholder": "Selecteer toegepaste maatregelen...",
+	"assignmentSettings": "Toewijzingsinstellingen",
+	"allowAssignmentsToEntities": "Toewijzingen aan entiteiten toestaan",
+	"allowAssignmentsToEntitiesDescription": "Laat entiteiten als actoren verschijnen bij het toewijzen van eigenaren, auteurs of reviewers."
 }

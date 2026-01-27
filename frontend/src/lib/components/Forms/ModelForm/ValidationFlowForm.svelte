@@ -77,7 +77,7 @@
 />
 {#if object?.id}
 	<div class="space-y-2">
-		<label class="text-sm font-medium text-gray-700">{m.requestNotes()}</label>
+		<span class="text-sm font-medium text-gray-700">{m.requestNotes()}</span>
 		<MarkdownRenderer content={object.request_notes} class="p-3 bg-gray-50 rounded-lg" />
 	</div>
 {:else}
@@ -109,7 +109,6 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 	onChange={async (e) => {
 		if (e && !object?.id) {
 			await fetchDefaultRefId();
@@ -130,7 +129,7 @@
 {#if object?.id}
 	{#if object.validation_deadline}
 		<div class="space-y-2">
-			<label class="text-sm font-medium text-gray-700">{m.validationDeadline()}</label>
+			<span class="text-sm font-medium text-gray-700">{m.validationDeadline()}</span>
 			<p class="p-3 bg-gray-50 rounded-lg text-sm">{object.validation_deadline}</p>
 		</div>
 	{/if}
