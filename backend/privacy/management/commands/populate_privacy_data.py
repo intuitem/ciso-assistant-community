@@ -13,7 +13,8 @@ from privacy.models import (
     ProcessingNature,
     RightRequest,
     DataBreach,
-    LEGAL_BASIS_CHOICES,
+    ART6_LAWFUL_BASIS_CHOICES,
+    TRANSFER_MECHANISM_CHOICES,
 )
 from iam.models import Folder, User
 from tprm.models import Entity
@@ -170,19 +171,11 @@ class Command(BaseCommand):
             "DZ",
         ]
 
-        # Legal basis choices (common ones)
-        common_legal_bases = [
-            legal_basis[0]
-            for legal_basis in LEGAL_BASIS_CHOICES
-            if legal_basis[0]
-            in [
-                "privacy_consent",
-                "privacy_contract",
-                "privacy_legal_obligation",
-                "privacy_legitimate_interests",
-                "privacy_explicit_consent",
-            ]
-        ]
+        # Legal basis choices (Art 6 bases for Purpose)
+        common_legal_bases = [choice[0] for choice in ART6_LAWFUL_BASIS_CHOICES]
+
+        # Transfer mechanism choices (Art 45-49 for DataTransfer)
+        transfer_mechanisms = [choice[0] for choice in TRANSFER_MECHANISM_CHOICES]
 
         # Create processing records
         self.stdout.write(f"Creating {num_processings} test processing records...")
@@ -359,7 +352,7 @@ class Command(BaseCommand):
                         description=f"International data transfer for {activity.lower()}",
                         entity=random.choice(entities),
                         country=random.choice(common_countries),
-                        legal_basis=random.choice(common_legal_bases),
+                        transfer_mechanism=random.choice(transfer_mechanisms),
                         guarantees="Standard contractual clauses (SCCs) in place",
                         documentation_link=f"https://example.com/transfer-{i}-{t}",
                     )
