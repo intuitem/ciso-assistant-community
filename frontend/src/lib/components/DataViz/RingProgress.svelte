@@ -133,4 +133,8 @@
 	id={chart_id}
 	class="{width} {height} {classesContainer}"
 	style="min-width: 180px; min-height: 180px;"
+	data-testid="progress-ring-svg"
+	aria-valuenow={value}
+	aria-valuemax={max}
+	role="progressbar"
 ></div>
