@@ -108,8 +108,8 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	await test.step('Verify my assignments contains created entities', async () => {
 		await page.getByTestId('accordion-item-overview').click();
 		await page.getByTestId('accordion-item-my-assignments').click();
-		await expect(page.locator('#page-title')).toHaveText('My assignments');
-		const assignmentsPage = new PageContent(page, '/my-assignments', 'My assignments');
+		await expect(page.locator('#page-title')).toHaveText('Assignments');
+		const assignmentsPage = new PageContent(page, '/my-assignments', 'Assignments');
 		await assignmentsPage.goto();
 
 		await expect(page).toHaveURL('/my-assignments');
