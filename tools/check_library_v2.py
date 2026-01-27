@@ -411,7 +411,7 @@ def validate_labels(labels_value: str, context: str, row: int):
     if labels_value is None or str(labels_value).strip() == "":
         return
 
-    raw_labels  = [x for x in re.split(r"[\s,\n]+", str(labels_value).strip()) if x]
+    raw_labels  = [x for x in re.split(CommonRegexSeparator.SPACE_COMMA_LF.value, str(labels_value).strip()) if x]
 
     for label in raw_labels:
         
@@ -2523,7 +2523,7 @@ def validate_framework_content(wb: Workbook, df: pd.DataFrame, sheet_name, exter
     optional_columns = [
         "implementation_groups", "description", "threats",
         "reference_controls", "typical_evidence", "annotation",
-        "questions", "answer", "urn_id", "importance", "weight"  
+        "questions", "answer", "urn_id", "importance", "weight"
     ]
 
     validate_content_sheet(df, sheet_name, required_columns, fct_name)
