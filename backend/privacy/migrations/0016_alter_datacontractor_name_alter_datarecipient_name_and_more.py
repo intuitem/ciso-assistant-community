@@ -51,4 +51,11 @@ class Migration(migrations.Migration):
                 blank=True, max_length=200, null=True, verbose_name="Name"
             ),
         ),
+        migrations.AddField(
+            model_name="processing",
+            name="perimeters",
+            field=models.ManyToManyField(
+                blank=True, related_name="processings", to="core.perimeter"
+            ),
+        ),
     ]

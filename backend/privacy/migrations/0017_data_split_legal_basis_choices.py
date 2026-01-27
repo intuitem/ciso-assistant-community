@@ -91,7 +91,7 @@ def migrate_legal_basis_data(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("privacy", "0017_processing_perimeters"),
+        ("privacy", "0016_alter_datacontractor_name_alter_datarecipient_name_and_more"),
     ]
 
     operations = [
