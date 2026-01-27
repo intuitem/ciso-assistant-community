@@ -60,7 +60,6 @@
 					fontWeight: 'bold',
 					fontSize: 14
 				}
-				// show: false
 			},
 			toolbox: {
 				show: true,
