@@ -790,7 +790,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'status' }, { field: 'score_calculation_method' }],
 		filters: [{ field: 'status' }]
 	},
 	requirements: {

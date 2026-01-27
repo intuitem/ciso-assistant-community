@@ -293,6 +293,7 @@ def get_sorted_requirement_nodes(
                 "score": req_as.score if req_as else None,
                 "documentation_score": req_as.documentation_score if req_as else None,
                 "max_score": max_score if req_as else None,
+                "weight": node.weight if node.weight else 1,
                 "questions": node.questions,
                 "answers": req_as.answers if req_as else None,
                 "mapping_inference": req_as.mapping_inference if req_as else None,
@@ -335,6 +336,7 @@ def get_sorted_requirement_nodes(
                     if child_req_as
                     else None,
                     "max_score": max_score if child_req_as else None,
+                    "weight": child.weight if child.weight else 1,
                     "questions": child.questions,
                     "answers": child_req_as.answers if child_req_as else None,
                     "mapping_inference": child_req_as.mapping_inference

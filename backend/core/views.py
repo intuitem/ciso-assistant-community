@@ -8058,6 +8058,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get score calculation method choices")
+    def score_calculation_method(self, request):
+        return Response(dict(ComplianceAssessment.CalculationMethod.choices))
+
     @action(
         detail=True,
         name="Get target frameworks mapping options with compliance distribution",
@@ -8796,10 +8801,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "score": compliance_assessment.get_global_score(),
                 "max_score": compliance_assessment.max_score,
                 "min_score": compliance_assessment.min_score,
+                "total_max_score": compliance_assessment.get_total_max_score(),
                 "scores_definition": get_referential_translation(
                     compliance_assessment.framework, "scores_definition", get_language()
                 ),
                 "show_documentation_score": compliance_assessment.show_documentation_score,
+                "score_calculation_method": compliance_assessment.score_calculation_method,
             }
         )
 
@@ -9151,16 +9158,28 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 else:
                     compliance_percentage = 0
 
-                # Calculate maturity score (average score, not percentage)
+                # Calculate maturity score using weights and score_calculation_method
                 scored_list = [
                     ra
                     for ra in assessable_list
                     if ra.is_scored and ra.result != "not_applicable"
                 ]
                 if scored_list:
-                    total_score = sum(ra.score or 0 for ra in scored_list)
-                    # Calculate mean score (same as frontend nodeScore function)
-                    maturity_score = total_score / len(scored_list)
+                    weighted_score = sum(
+                        (ra.score or 0) * (ra.requirement.weight or 1)
+                        for ra in scored_list
+                    )
+                    total_weight = sum(ra.requirement.weight or 1 for ra in scored_list)
+                    if (
+                        audit.score_calculation_method
+                        == ComplianceAssessment.CalculationMethod.SUM
+                    ):
+                        maturity_score = weighted_score
+                    else:
+                        # Default to weighted average
+                        maturity_score = (
+                            weighted_score / total_weight if total_weight > 0 else 0
+                        )
                 else:
                     maturity_score = 0
 
@@ -9194,6 +9213,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "observation": base_audit.observation,
                 "global_score": base_audit.get_global_score(),
                 "max_score": base_audit.max_score,
+                "total_max_score": base_audit.get_total_max_score(),
+                "score_calculation_method": base_audit.score_calculation_method,
                 "donut_data": base_audit.donut_render(),
                 "radar_data": aggregate_by_top_level(base_audit),
             },
@@ -9214,6 +9235,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "observation": compare_audit.observation,
                 "global_score": compare_audit.get_global_score(),
                 "max_score": compare_audit.max_score,
+                "total_max_score": compare_audit.get_total_max_score(),
+                "score_calculation_method": compare_audit.score_calculation_method,
                 "donut_data": compare_audit.donut_render(),
                 "radar_data": aggregate_by_top_level(compare_audit),
             },

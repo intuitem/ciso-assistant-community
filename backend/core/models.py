@@ -5774,6 +5774,10 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
 
 class ComplianceAssessment(Assessment):
+    class CalculationMethod(models.TextChoices):
+        AVG = "average", "Average"
+        SUM = "sum", "Sum"
+
     framework = models.ForeignKey(
         Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
     )
@@ -5817,6 +5821,13 @@ class ComplianceAssessment(Assessment):
 
     extended_result_enabled = models.BooleanField(default=False)
     progress_status_enabled = models.BooleanField(default=True)
+
+    score_calculation_method = models.CharField(
+        max_length=100,
+        choices=CalculationMethod.choices,
+        default=CalculationMethod.AVG,
+        verbose_name=_("Score Calculation Method"),
+    )
 
     fields_to_check = ["name", "version"]
 
@@ -6006,6 +6017,15 @@ class ComplianceAssessment(Assessment):
             return changes
 
     def get_global_score(self):
+        """
+        Calculate the global score based on the score_calculation_method.
+
+        For AVG (average): Returns weighted average = Σ(score × weight) / Σ(weight)
+        For SUM: Returns weighted sum = Σ(score × weight)
+
+        When show_documentation_score is enabled, documentation scores are included
+        in the calculation with the same weight as the main score.
+        """
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
             .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
@@ -6029,12 +6049,52 @@ class ComplianceAssessment(Assessment):
                     weighted_score += (ras.documentation_score or 0) * weight
                     total_weight += weight
 
-        if total_weight > 0:
+        if total_weight == 0:
+            return -1
+
+        if self.score_calculation_method == self.CalculationMethod.SUM:
+            # For SUM, return the weighted sum directly
+            return int(weighted_score * 10) / 10
+        else:
+            # For AVG (default), return weighted average
             global_score = weighted_score / total_weight
             # We use this instead of using the python round function so that the python backend outputs the same result as the javascript frontend.
             return int(global_score * 10) / 10
+
+    def get_total_max_score(self):
+        """
+        Calculate the theoretical total maximum score based on the score_calculation_method.
+
+        For AVG: Returns the framework's max_score (e.g., 100) since the average is bounded by it
+        For SUM: Returns max_score × Σ(weight) of all scored requirements
+        """
+        if self.score_calculation_method == self.CalculationMethod.SUM:
+            requirement_assessments_scored = (
+                RequirementAssessment.objects.filter(compliance_assessment=self)
+                .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
+                .exclude(is_scored=False)
+                .exclude(requirement__assessable=False)
+            )
+            ig = (
+                set(self.selected_implementation_groups)
+                if self.selected_implementation_groups
+                else None
+            )
+            total_weight = 0
+            for ras in requirement_assessments_scored:
+                if not (ig) or (ig & set(ras.requirement.implementation_groups or [])):
+                    weight = ras.requirement.weight if ras.requirement.weight else 1
+                    total_weight += weight
+                    if self.show_documentation_score:
+                        total_weight += weight
+
+            return (
+                (self.max_score or 100) * total_weight
+                if total_weight > 0
+                else self.max_score
+            )
         else:
-            return -1
+            return self.max_score
 
     def get_selected_implementation_groups(self):
         framework = self.framework

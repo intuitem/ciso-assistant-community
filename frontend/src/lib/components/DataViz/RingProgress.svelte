@@ -2,25 +2,36 @@
 	import { onMount } from 'svelte';
 
 	interface Props {
+		width?: string;
+		height?: string;
 		classesContainer?: string;
 		name?: string;
 		value: number;
 		max: number;
 		isPercentage?: boolean;
+		color?: string;
+		backgroundColor?: string;
+		strokeWidth?: number;
+		fontSize?: number;
+		title?: string;
 	}
 
 	let {
+		width = 'w-auto',
+		height = 'h-full',
 		classesContainer = '',
 		name = 'single_gauge',
 		value,
 		max,
-		isPercentage = false
+		isPercentage = false,
+		color = '#B075CC',
+		backgroundColor = '#E6E6E6',
+		strokeWidth = 20,
+		fontSize = 32,
+		title = ''
 	}: Props = $props();
 
-	const chart_id = `${name}_div`;
-
-	// Calculate percentage
-	let percentage = $derived(Math.round((value / max) * 100));
+	const chart_id = `${name}_${crypto.randomUUID().slice(0, 8)}_div`;
 
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -28,12 +39,23 @@
 		if (!el) return;
 		const chart = echarts.init(el, null, { renderer: 'svg' });
 
+		// Capture values at mount time to avoid reactive context issues in ECharts callbacks
+		const percentage = max > 0 ? (value / max) * 100 : 0;
+		const displayValue = Math.round(value * 10) / 10;
+
 		const option = {
+			title: {
+				text: title,
+				textStyle: {
+					fontWeight: 'bold',
+					fontSize: 14
+				}
+			},
 			series: [
 				{
 					type: 'gauge',
-					radius: '90%',
-					center: ['50%', '50%'],
+					radius: '65%',
+					center: ['50%', '45%'],
 					startAngle: 90,
 					endAngle: -270,
 					min: 0,
@@ -43,16 +65,16 @@
 					},
 					progress: {
 						show: true,
-						width: 30,
+						width: strokeWidth,
 						roundCap: true,
 						itemStyle: {
-							color: '#B075CC'
+							color: color
 						}
 					},
 					axisLine: {
 						lineStyle: {
-							width: 30,
-							color: [[1, '#E6E6E6']]
+							width: strokeWidth,
+							color: [[1, backgroundColor]]
 						}
 					},
 					splitLine: {
@@ -64,17 +86,19 @@
 					axisLabel: {
 						show: false
 					},
+					title: {
+						show: false
+					},
 					data: [
 						{
 							value: percentage,
 							detail: {
 								valueAnimation: true,
 								offsetCenter: ['0%', '0%'],
-								fontSize: 48,
+								fontSize: fontSize,
 								fontWeight: 'bold',
 								color: '#333',
-								formatter: function (value) {
-									const displayValue = Math.round((value / 100) * max);
+								formatter: function () {
 									return isPercentage ? `${displayValue}%` : displayValue;
 								}
 							}
@@ -83,7 +107,7 @@
 					detail: {
 						width: 80,
 						height: 60,
-						fontSize: 48,
+						fontSize: fontSize,
 						fontWeight: 'bold',
 						color: '#333',
 						backgroundColor: 'transparent',
@@ -105,4 +129,12 @@
 	});
 </script>
 
-<div id={chart_id} class={classesContainer} style="width: 400px; height: 400px;"></div>
+<div
+	id={chart_id}
+	class="{width} {height} {classesContainer}"
+	style="min-width: 180px; min-height: 180px;"
+	data-testid="progress-ring-svg"
+	aria-valuenow={value}
+	aria-valuemax={max}
+	role="progressbar"
+></div>
