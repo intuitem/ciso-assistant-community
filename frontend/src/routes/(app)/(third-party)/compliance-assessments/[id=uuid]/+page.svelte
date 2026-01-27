@@ -27,6 +27,7 @@
 	} from '$lib/utils/constants';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
+	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
 	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
 	import type { Node } from './types';
 
@@ -37,7 +38,7 @@
 
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
+	import { displayScoreColor, darkenColor, getScoreHexColor } from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
 	import { derived } from 'svelte/store';
 	import { canPerformAction } from '$lib/utils/access-control';
@@ -133,13 +134,15 @@
 			resultCounts[node.status] = (resultCounts[node.status] || 0) + 1;
 		}
 		if (node.is_scored && node.assessable && node.result !== 'not_applicable') {
+			const weight = node.weight || 1;
 			resultCounts['scored'] = (resultCounts['scored'] || 0) + 1;
+			resultCounts['total_weight'] = (resultCounts['total_weight'] || 0) + weight;
 			const nodeDocumentationScore = data.compliance_assessment.show_documentation_score
 				? node.documentation_score
 				: 0;
 			resultCounts['total_documentation_score'] =
-				(resultCounts['total_documentation_score'] || 0) + nodeDocumentationScore;
-			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + node.score;
+				(resultCounts['total_documentation_score'] || 0) + (nodeDocumentationScore || 0) * weight;
+			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + (node.score || 0) * weight;
 		}
 
 		if (node.children && Object.keys(node.children).length > 0) {
@@ -218,6 +221,7 @@
 					canEditRequirementAssessment,
 					hasParentNode,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
+					scoreCalculationMethod: data.compliance_assessment.score_calculation_method,
 					hidden,
 					selectedStatus
 				},
@@ -569,24 +573,19 @@
 				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
-				<div class="flex w-1/4 relative">
-					{#if data.global_score.score >= 0}
-						<div class="flex flex-col justify-center items-center w-full">
-							<ProgressRing
-								strokeWidth="18px"
-								meterStroke={displayScoreColor(
-									data.global_score.score,
-									data.global_score.max_score
-								)}
-								value={(data.global_score.score * 100) / data.global_score.max_score}
-								size="size-52"
-							>
-								<p class="font-semibold text-4xl">{data.global_score.score}</p>
-							</ProgressRing>
-							<div class="text-sm font-semibold py-2">{m.maturity()}</div>
-						</div>
-					{/if}
-				</div>
+				{#if data.global_score && data.global_score.score >= 0}
+					<div class="w-1/4">
+						<RingProgress
+							name="global_maturity"
+							value={data.global_score.score}
+							max={data.global_score.total_max_score}
+							color={getScoreHexColor(data.global_score.score, data.global_score.total_max_score)}
+							strokeWidth={35}
+							fontSize={36}
+							title={m.maturity()}
+						/>
+					</div>
+				{/if}
 				<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
 					<DonutChart
 						s_label="Result"
