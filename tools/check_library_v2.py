@@ -1407,13 +1407,13 @@ def validate_cell_line_count_alignment(
     cmp_column: str,
     sheet_name: str,
     context: str = None,
-    split_regex = r"\n+",
+    split_regex: str | CommonRegexSeparator = CommonRegexSeparator.LF,
     cmp_can_be_empty: bool = False,
 ):
     """
-    Vérifie l'alignement du nombre de "lignes internes" (split regex) entre 2 colonnes.
+    Checks the match of the number of "internal lines" (split regex) between 2 columns.
 
-    Règles (par ligne Excel) :
+    Rules (per Excel line):
     1) If ref cell is empty => cmp cell must be empty.
     2) If cmp cell is empty => ref cell must be empty.
     3) If both are not empty:
