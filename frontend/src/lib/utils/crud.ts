@@ -1118,8 +1118,29 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'purposes', urlModel: 'purposes' },
+			{ field: 'nature', urlModel: 'natures' },
 			{ field: 'assigned_to', urlModel: 'actors', urlParams: 'is_third_party=false' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'perimeters', urlModel: 'perimeters' }
+		],
+		detailViewFields: [
+			{ field: 'folder' },
+			{ field: 'perimeters' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'nature' },
+			{ field: 'status' },
+			{ field: 'purposes' },
+			{ field: 'assigned_to' },
+			{ field: 'dpia_required' },
+			{ field: 'dpia_reference' },
+			{ field: 'has_sensitive_personal_data' },
+			{ field: 'associated_controls' },
+			{ field: 'evidences' },
+			{ field: 'filtering_labels' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
 		],
 		reverseForeignKeyFields: [
 			{ field: 'processing', urlModel: 'personal-data' },
@@ -1146,22 +1167,6 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			}
-		],
-		detailViewFields: [
-			{ field: 'id' },
-			{ field: 'ref_id' },
-			{ field: 'name' },
-			{ field: 'description' },
-			{ field: 'folder' },
-			{ field: 'assigned_to' },
-			{ field: 'status' },
-			{ field: 'dpia_required' },
-			{ field: 'dpia_reference' },
-			{ field: 'nature' },
-			{ field: 'purposes' },
-			{ field: 'created_at' },
-			{ field: 'updated_at' },
-			{ field: 'filtering_labels' }
 		]
 	},
 	'processing-natures': {
@@ -1253,7 +1258,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'purposes',
 		verboseName: 'purpose',
 		verboseNamePlural: 'purposes',
-		selectFields: [{ field: 'legal_basis' }],
+		customNameDescription: true,
+		selectFields: [{ field: 'legal_basis' }, { field: 'article_9_condition' }],
 		foreignKeyFields: [{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' }]
 	},
 	'personal-data': {
@@ -1263,6 +1269,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'personalData',
 		verboseName: 'personal data',
 		verboseNamePlural: 'personal data',
+		customNameDescription: true,
 		foreignKeyFields: [
 			{ field: 'processing', urlModel: 'processings', endpointUrl: 'processings' },
 			{ field: 'assets', urlModel: 'assets', endpointUrl: 'assets' }
@@ -1293,6 +1300,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataSubjects',
 		verboseName: 'data subject',
 		verboseNamePlural: 'data subjects',
+		customNameDescription: true,
 		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }],
 		selectFields: [{ field: 'category' }]
 	},
@@ -1303,6 +1311,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataRecipients',
 		verboseName: 'data recipient',
 		verboseNamePlural: 'data recipients',
+		customNameDescription: true,
 		foreignKeyFields: [{ field: 'processing', urlModel: 'processings' }],
 		selectFields: [{ field: 'category' }]
 	},
@@ -1313,6 +1322,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'dataContractors',
 		verboseName: 'data contractor',
 		verboseNamePlural: 'data contractors',
+		customNameDescription: true,
 		foreignKeyFields: [
 			{ field: 'processing', urlModel: 'processings' },
 			{ field: 'entity', urlModel: 'entities' }
@@ -1330,7 +1340,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'processings' },
 			{ field: 'entity', urlModel: 'entities' }
 		],
-		selectFields: [{ field: 'legal_basis' }, { field: 'country' }]
+		selectFields: [{ field: 'transfer_mechanism' }, { field: 'country' }],
+		customNameDescription: true
 	},
 	'ebios-rm': {
 		endpointUrl: 'ebios-rm/studies',
