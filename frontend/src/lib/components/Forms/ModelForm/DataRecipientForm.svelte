@@ -1,8 +1,8 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import Select from '../Select.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -24,13 +24,6 @@
 	}: Props = $props();
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <AutocompleteSelect
 	{form}
 	field="category"
@@ -48,3 +41,27 @@
 	label={m.processing()}
 	hidden={initialData.processing}
 />
+
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<TextField
+		{form}
+		field="ref_id"
+		label={m.refId()}
+		cacheLock={cacheLocks['ref_id']}
+		bind:cachedValue={formDataCache['ref_id']}
+	/>
+	<TextField
+		{form}
+		field="name"
+		label={m.name()}
+		cacheLock={cacheLocks['name']}
+		bind:cachedValue={formDataCache['name']}
+	/>
+	<MarkdownField
+		{form}
+		field="description"
+		label={m.description()}
+		cacheLock={cacheLocks['description']}
+		bind:cachedValue={formDataCache['description']}
+	/>
+</Dropdown>
