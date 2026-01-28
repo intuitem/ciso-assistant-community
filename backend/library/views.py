@@ -1,5 +1,6 @@
 from itertools import chain
 import json
+import yaml
 from django.db import IntegrityError
 from django.db.models import F, Q, IntegerField, OuterRef, Subquery, Exists
 from django.db import models
@@ -26,6 +27,7 @@ from core.models import StoredLibrary, LoadedLibrary, Framework, LibraryUpdater
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
+from .importers.excel import ExcelImporter
 from .helpers import update_translations, update_translations_in_object
 from .utils import LibraryImporter, preview_library
 
@@ -285,11 +287,21 @@ class StoredLibraryViewSet(BaseModelViewSet):
         try:
             attachment = request.FILES["file"]
             validate_file_extension(attachment)
-            # Use safe_load to prevent arbitrary code execution.
-
-            content = attachment.read()  # Should we read it chunck by chunck or ensure that the file size of the library content is reasonnable before reading ?
 
             try:
+                if attachment.name.endswith(".xlsx"):
+                    try:
+                        library_dict = ExcelImporter.parse(attachment)
+                        content = yaml.dump(
+                            library_dict, sort_keys=False, allow_unicode=False
+                        ).encode("utf-8")
+                    except ValueError as e:
+                        return HttpResponse(
+                            json.dumps({"error": str(e)}), status=HTTP_400_BAD_REQUEST
+                        )
+                else:
+                    content = attachment.read()
+
                 library = StoredLibrary.store_library_content(content)
                 if library is not None:
                     library.load()
@@ -309,7 +321,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 json.dumps({"error": "libraryAlreadyLoadedError"}),
                 status=HTTP_400_BAD_REQUEST,
             )
-        except:
+        except Exception as e:
+            logger.exception("Upload library failed")
             return HttpResponse(
                 json.dumps({"error": "invalidLibraryFileError"}),
                 status=HTTP_400_BAD_REQUEST,
@@ -523,7 +536,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
                 {
                     "error": "Invalid strategy. Must be one of 'rule_of_three', 'reset', 'clamp'."
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=HTTP_400_BAD_REQUEST,
             )
         try:
             key = "urn" if pk.startswith("urn:") else "id"
@@ -546,7 +559,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
                     "strategies": e.strategies,
                     "message": "Score boundaries have changed. Please choose a strategy.",
                 },
-                status=status.HTTP_409_CONFLICT,
+                status=HTTP_409_CONFLICT,
             )
         except Exception as e:
             logger.error("Failed to update library", error=e)
