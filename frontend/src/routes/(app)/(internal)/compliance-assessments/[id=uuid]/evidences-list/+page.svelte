@@ -22,15 +22,17 @@
 </script>
 
 <div class="bg-white p-2 shadow-sm rounded-lg space-x-2 flex flex-row justify-center mb-2">
-	<p class="font-semibold text-lg">
-		{m.perimeter()}:
-		<a
-			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/perimeters/{data.compliance_assessment.perimeter.id}/"
-			>{data.compliance_assessment.perimeter.str}</a
-		>
-	</p>
-	<p>/</p>
+	{#if data.compliance_assessment.perimeter}
+		<p class="font-semibold text-lg">
+			{m.perimeter()}:
+			<a
+				class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
+				href="/perimeters/{data.compliance_assessment.perimeter.id}/"
+				>{data.compliance_assessment.perimeter.str}</a
+			>
+		</p>
+		<p>/</p>
+	{/if}
 	<p class="font-semibold text-lg">
 		{m.complianceAssessment()}:
 		<a

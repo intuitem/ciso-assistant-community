@@ -5539,7 +5539,9 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                 if not RoleAssignment.is_access_allowed(
                     risk_acceptance.get("approver"),
                     Permission.objects.get(codename="approve_riskacceptance"),
-                    scenario.risk_assessment.perimeter.folder,
+                    scenario.risk_assessment.perimeter.folder
+                    if scenario.risk_assessment.perimeter
+                    else scenario.risk_assessment.folder,
                 ):
                     raise ValidationError(
                         "The approver is not allowed to approve this risk acceptance"

@@ -95,6 +95,7 @@
 		bind:cachedValue={formDataCache['perimeter']}
 		label={m.perimeter()}
 		onChange={handlePerimeterChange}
+		nullable
 	/>
 {/key}
 {#if !data.compliance_assessment}

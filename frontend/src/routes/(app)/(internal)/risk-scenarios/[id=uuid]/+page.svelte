@@ -46,7 +46,7 @@
 		user,
 		action: 'change',
 		model: model.name,
-		domain: data.scenario.perimeter.folder.id
+		domain: data.scenario.perimeter?.folder?.id ?? data.scenario.risk_assessment.folder.id
 	});
 	let color_map = $state({});
 	color_map['--'] = '#A9A9A9';
@@ -212,13 +212,15 @@
 		<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
 			<h4 class="h4 font-semibold">{m.scope()}</h4>
 			<div class="flex flex-row justify-between">
-				<span>
-					<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
-					<Anchor
-						class="anchor text-sm font-semibold"
-						href="/perimeters/{data.scenario.perimeter.id}">{data.scenario.perimeter.str}</Anchor
-					>
-				</span>
+				{#if data.scenario.perimeter}
+					<span>
+						<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
+						<Anchor
+							class="anchor text-sm font-semibold"
+							href="/perimeters/{data.scenario.perimeter.id}">{data.scenario.perimeter.str}</Anchor
+						>
+					</span>
+				{/if}
 				<span>
 					<p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
 					<Anchor

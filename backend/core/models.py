@@ -4405,7 +4405,11 @@ class AppliedControl(
 
     @property
     def perimeters(self):
-        return {risk_assessment.perimeter for risk_assessment in self.risk_assessments}
+        return {
+            risk_assessment.perimeter
+            for risk_assessment in self.risk_assessments
+            if risk_assessment.perimeter
+        }
 
     def __str__(self):
         return self.name
@@ -4971,7 +4975,11 @@ class RiskAssessment(Assessment):
 
     @property
     def path_display(self) -> str:
-        return f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
+        if self.perimeter:
+            return (
+                f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
+            )
+        return f"{self.folder}/{self.name} - {self.version}"
 
     def get_scenario_count(self) -> int:
         count = RiskScenario.objects.filter(risk_assessment=self.id).count()

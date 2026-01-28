@@ -335,12 +335,6 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
         if old_status != "deprecated" and new_status == "deprecated":
             validated_data["is_locked"] = True
 
-        # If perimeter is being changed, update folder to match the new perimeter's folder
-        if "perimeter" in validated_data:
-            new_perimeter = validated_data["perimeter"]
-            if new_perimeter and new_perimeter.folder:
-                validated_data["folder"] = new_perimeter.folder
-
         return super().update(instance, validated_data)
 
     class Meta:
@@ -783,7 +777,7 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 
 
 class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
-    risk_assessment = FieldsRelatedField(["id", "name", "is_locked"])
+    risk_assessment = FieldsRelatedField(["id", "name", "is_locked", "folder"])
     risk_matrix = FieldsRelatedField(source="risk_assessment.risk_matrix")
     perimeter = FieldsRelatedField(
         source="risk_assessment.perimeter", fields=["id", "name", "folder"]
@@ -1930,12 +1924,6 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         if old_status != "deprecated" and new_status == "deprecated":
             validated_data["is_locked"] = True
 
-        # If perimeter is being changed, update folder to match the new perimeter's folder
-        if "perimeter" in validated_data:
-            new_perimeter = validated_data["perimeter"]
-            if new_perimeter and new_perimeter.folder:
-                validated_data["folder"] = new_perimeter.folder
-
         with transaction.atomic():
             # Perform the main update (fields + M2M)
             updated_instance = super().update(instance, validated_data)
@@ -2407,12 +2395,6 @@ class FindingsAssessmentWriteSerializer(BaseModelSerializer):
         # Auto-lock when status changes to deprecated
         if old_status != "deprecated" and new_status == "deprecated":
             validated_data["is_locked"] = True
-
-        # If perimeter is being changed, update folder to match the new perimeter's folder
-        if "perimeter" in validated_data:
-            new_perimeter = validated_data["perimeter"]
-            if new_perimeter and new_perimeter.folder:
-                validated_data["folder"] = new_perimeter.folder
 
         with transaction.atomic():
             updated_instance = super().update(instance, validated_data)

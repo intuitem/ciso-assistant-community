@@ -98,6 +98,7 @@
 		bind:cachedValue={formDataCache['perimeter']}
 		label={m.perimeter()}
 		onChange={handlePerimeterChange}
+		nullable
 	/>
 {/key}
 <TextField

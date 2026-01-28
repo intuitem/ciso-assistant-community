@@ -11,10 +11,12 @@
 <main class="p-2 m-2 main">
     <h1 class="flex justify-center">{% trans "Action plan" %}</h1>
     <div class="bg-white p-2 m-2 space-x-3 flex flex-row justify-center">
-        <p class="font-semibold text-lg"> {% trans "Domain" %}: {{ risk_assessment.perimeter.folder }}</p>
+        <p class="font-semibold text-lg"> {% trans "Domain" %}: {{ risk_assessment.folder }}</p>
         <p class="font-semibold text-lg">/</p>
+        {% if risk_assessment.perimeter %}
         <p class="font-semibold text-lg"> {% trans "Perimeter" %}: {{ risk_assessment.perimeter.name }}</p>
         <p class="font-semibold text-lg">/</p>
+        {% endif %}
         <p class="font-semibold text-lg"> {% trans "Risk Assessment" %}: {{ risk_assessment.name }} - {{ risk_assessment.version }}</p>
     </div>
     <p class="p-2 m-2 text-lg font-semibold"> {% trans "Associated applied controls" %}: </p>
@@ -32,7 +34,7 @@
                 {% endfor %}
             {% endif %}
         {% endfor %}
-        <div class="bg-white p-2 m-2 shadow overflow-hidden rounded-lg flex flex-row">  
+        <div class="bg-white p-2 m-2 shadow overflow-hidden rounded-lg flex flex-row">
             <div class="flex w-full">
                 <table class="w-full p-2 mt-2">
                     <thead>
