@@ -96,6 +96,14 @@
 {/if}
 <AutocompleteSelect
 	{form}
+	optionsEndpoint="folders"
+	field="folder"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.folder()}
+/>
+<AutocompleteSelect
+	{form}
 	optionsEndpoint="perimeters"
 	optionsExtraFields={[['folder', 'str']]}
 	field="perimeter"
@@ -155,20 +163,6 @@
 		/>
 	{/key}
 {/if}
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="actors"
-	optionsLabelField="str"
-	optionsInfoFields={{
-		fields: [{ field: 'type', translate: true }],
-		position: 'prefix'
-	}}
-	field="authors"
-	cacheLock={cacheLocks['authors']}
-	bind:cachedValue={formDataCache['authors']}
-	label={m.authors()}
-/>
 <TextField
 	{form}
 	field="version"
@@ -187,6 +181,20 @@
 	bind:cachedValue={formDataCache['eta']}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="actors"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
+	field="authors"
+	cacheLock={cacheLocks['authors']}
+	bind:cachedValue={formDataCache['authors']}
+	label={m.authors()}
+/>
 	<div class="space-y-4">
 		{#if context === 'create' && suggestions}
 			<Checkbox
