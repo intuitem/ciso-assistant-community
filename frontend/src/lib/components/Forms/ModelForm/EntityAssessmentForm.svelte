@@ -30,17 +30,73 @@
 	}: Props = $props();
 
 	const formStore = form.form;
+
+	let selectedFolder = $state<string | undefined>(undefined);
+	let folderKey = $state(0);
+	let isAutoFillingFolder = $state(false);
+
+	function handleFolderChange(folderId: string) {
+		selectedFolder = folderId;
+		// Clear perimeter when folder changes (unless we're auto-filling from perimeter)
+		if (!isAutoFillingFolder && $formStore?.perimeter) {
+			formStore.update((currentData) => ({
+				...currentData,
+				perimeter: undefined
+			}));
+		}
+		isAutoFillingFolder = false;
+	}
+
+	async function handlePerimeterChange(perimeterId: string) {
+		if (perimeterId && !selectedFolder) {
+			// Fetch perimeter to get its folder and auto-fill
+			try {
+				const response = await fetch(`/perimeters/${perimeterId}`);
+				if (response.ok) {
+					const perimeter = await response.json();
+					if (perimeter.folder?.id) {
+						isAutoFillingFolder = true;
+						selectedFolder = perimeter.folder.id;
+						// Update form data and force folder component to re-render
+						formStore.update((currentData) => ({
+							...currentData,
+							folder: perimeter.folder.id
+						}));
+						folderKey++;
+					}
+				}
+			} catch (error) {
+				console.error('Error fetching perimeter:', error);
+			}
+		}
+	}
 </script>
 
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="perimeters"
-	optionsExtraFields={[['folder', 'str']]}
-	field="perimeter"
-	cacheLock={cacheLocks['perimeter']}
-	bind:cachedValue={formDataCache['perimeter']}
-	label={m.perimeter()}
-/>
+{#key folderKey}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="folders"
+		field="folder"
+		cacheLock={cacheLocks['folder']}
+		bind:cachedValue={formDataCache['folder']}
+		label={m.folder()}
+		onChange={handleFolderChange}
+		mount={handleFolderChange}
+	/>
+{/key}
+{#key selectedFolder}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="perimeters"
+		optionsDetailedUrlParameters={selectedFolder ? [['folder', selectedFolder]] : []}
+		optionsExtraFields={[['folder', 'str']]}
+		field="perimeter"
+		cacheLock={cacheLocks['perimeter']}
+		bind:cachedValue={formDataCache['perimeter']}
+		label={m.perimeter()}
+		onChange={handlePerimeterChange}
+	/>
+{/key}
 {#if !data.compliance_assessment}
 	<Checkbox
 		{form}

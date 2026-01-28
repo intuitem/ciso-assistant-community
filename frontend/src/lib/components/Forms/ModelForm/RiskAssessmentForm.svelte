@@ -34,6 +34,46 @@
 
 	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
 
+	let selectedFolder = $state<string | undefined>(undefined);
+	let folderKey = $state(0);
+	let isAutoFillingFolder = $state(false);
+
+	function handleFolderChange(folderId: string) {
+		selectedFolder = folderId;
+		// Clear perimeter when folder changes (unless we're auto-filling from perimeter)
+		if (!isAutoFillingFolder && form.data?.perimeter) {
+			form.form.update((currentData) => ({
+				...currentData,
+				perimeter: undefined
+			}));
+		}
+		isAutoFillingFolder = false;
+	}
+
+	async function handlePerimeterChange(perimeterId: string) {
+		if (perimeterId && !selectedFolder) {
+			// Fetch perimeter to get its folder and auto-fill
+			try {
+				const response = await fetch(`/perimeters/${perimeterId}`);
+				if (response.ok) {
+					const perimeter = await response.json();
+					if (perimeter.folder?.id) {
+						isAutoFillingFolder = true;
+						selectedFolder = perimeter.folder.id;
+						// Update form data and force folder component to re-render
+						form.form.update((currentData) => ({
+							...currentData,
+							folder: perimeter.folder.id
+						}));
+						folderKey++;
+					}
+				}
+			} catch (error) {
+				console.error('Error fetching perimeter:', error);
+			}
+		}
+	}
+
 	async function handleRiskMatrixChange(id: string) {
 		riskToleranceChoices = [];
 
@@ -68,21 +108,37 @@
 	}
 </script>
 
+{#key folderKey}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="folders"
+		field="folder"
+		cacheLock={cacheLocks['folder']}
+		bind:cachedValue={formDataCache['folder']}
+		label={m.folder()}
+		onChange={handleFolderChange}
+		mount={handleFolderChange}
+	/>
+{/key}
+{#key selectedFolder}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="perimeters"
+		optionsDetailedUrlParameters={selectedFolder ? [['folder', selectedFolder]] : []}
+		optionsExtraFields={[['folder', 'str']]}
+		field="perimeter"
+		cacheLock={cacheLocks['perimeter']}
+		bind:cachedValue={formDataCache['perimeter']}
+		label={m.perimeter()}
+		onChange={handlePerimeterChange}
+	/>
+{/key}
 <TextField
 	{form}
 	field="ref_id"
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
-/>
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="perimeters"
-	optionsExtraFields={[['folder', 'str']]}
-	field="perimeter"
-	cacheLock={cacheLocks['perimeter']}
-	bind:cachedValue={formDataCache['perimeter']}
-	label={m.perimeter()}
 />
 <TextField
 	{form}
