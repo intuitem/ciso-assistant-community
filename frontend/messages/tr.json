@@ -91,6 +91,7 @@
 	"frameworks": "Çerçeveler",
 	"frameworksColon": "Çerçeveler:",
 	"domains": "Etki alanları",
+	"userFolderHelpText": "Kullanıcının bu alanı erişim sahibi olan diğerleri tarafından görüldüğü etki alanı (kullanıcı izinlerini etkilemez)",
 	"perimeters": "Çevreler",
 	"users": "Kullanıcılar",
 	"user": "Kullanıcı",

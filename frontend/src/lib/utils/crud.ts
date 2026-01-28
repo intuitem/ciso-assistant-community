@@ -641,7 +641,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'users',
 		verboseName: 'User',
 		verboseNamePlural: 'Users',
-		foreignKeyFields: [{ field: 'user_groups', urlModel: 'user-groups' }],
+		foreignKeyFields: [
+			{ field: 'user_groups', urlModel: 'user-groups' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
 		filters: []
 	},
 	teams: {

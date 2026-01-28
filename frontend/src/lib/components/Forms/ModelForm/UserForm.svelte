@@ -50,6 +50,16 @@
 		bind:cachedValue={formDataCache['last_name']}
 	/>
 {/if}
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	field="folder"
+	pathField="path"
+	helpText={m.userFolderHelpText()}
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+/>
 {#if shape.user_groups}
 	<AutocompleteSelect
 		{form}
