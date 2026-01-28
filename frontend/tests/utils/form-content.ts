@@ -53,6 +53,32 @@ export class FormContent {
 				});
 			}
 
+			// If field is not visible, try to open dropdowns/accordions that might contain it
+			if (field && !(await field.locator.isVisible({ timeout: 1000 }).catch(() => false))) {
+				// First try the "More" dropdown specifically
+				const moreDropdown = this.page.locator('[data-testid="dropdown-more"] button').first();
+				if (await moreDropdown.isVisible().catch(() => false)) {
+					await moreDropdown.click();
+					await this.page.waitForTimeout(100);
+				}
+
+				// If still not visible, try other collapsible patterns
+				if (!(await field.locator.isVisible({ timeout: 500 }).catch(() => false))) {
+					const collapsibles = this.page.locator(
+						'button[aria-expanded="false"], [data-state="closed"][role="button"], [data-state="closed"] > button'
+					);
+					for (const control of await collapsibles.all()) {
+						if (await control.isVisible()) {
+							await control.click();
+							await this.page.waitForTimeout(100);
+							if (await field.locator.isVisible({ timeout: 500 }).catch(() => false)) {
+								break;
+							}
+						}
+					}
+				}
+			}
+
 			// Check if this is a markdown field (description, observation, or justification) and handle it
 			if (
 				(key === 'description' || key === 'observation' || key === 'justification') &&

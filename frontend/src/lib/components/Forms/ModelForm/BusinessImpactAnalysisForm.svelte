@@ -137,7 +137,13 @@
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
 />
-<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-list"
+	header={m.more()}
+	testid="dropdown-more"
+>
 	{#if !page.data.user.is_third_party}
 		<AutocompleteSelect
 			{form}

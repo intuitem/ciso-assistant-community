@@ -6,14 +6,15 @@
 		open?: boolean;
 		icon: string;
 		style: string;
+		testid?: string;
 		children?: import('svelte').Snippet;
 	}
 
-	let { header, open = false, icon, style, children }: Props = $props();
+	let { header, open = false, icon, style, testid = 'dropdown', children }: Props = $props();
 	let value = $derived([open.toString()]);
 </script>
 
-<Accordion {value} onValueChange={(e) => (value = e.value)} collapsible>
+<Accordion {value} onValueChange={(e) => (value = e.value)} collapsible data-testid={testid}>
 	{#snippet iconOpen()}
 		<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
 			<path

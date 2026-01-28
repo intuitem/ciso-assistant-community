@@ -207,7 +207,13 @@
 	cacheLock={cacheLocks['conclusion']}
 	bind:cachedValue={formDataCache['conclusion']}
 />
-<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-list"
+	header={m.more()}
+	testid="dropdown-more"
+>
 	<Select
 		{form}
 		options={model.selectOptions['status']}

@@ -229,7 +229,13 @@
 	cacheLock={cacheLocks['eta']}
 	bind:cachedValue={formDataCache['eta']}
 />
-<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+<Dropdown
+	open={false}
+	style="hover:text-primary-700"
+	icon="fa-solid fa-list"
+	header={m.more()}
+	testid="dropdown-more"
+>
 	<AutocompleteSelect
 		{form}
 		multiple
