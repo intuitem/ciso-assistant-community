@@ -1517,7 +1517,13 @@ def risk_status(user: User, risk_assessment_list):
             )
 
         names.append(
-            str(risk_assessment.perimeter) + " " + str(risk_assessment.version)
+            (
+                str(risk_assessment.perimeter)
+                if risk_assessment.perimeter
+                else risk_assessment.name
+            )
+            + " "
+            + str(risk_assessment.version)
         )
 
     y_max_rsk = max(max_tmp, default=0) + 1

@@ -262,6 +262,10 @@ class TestRiskScenariosAuthenticated:
                     "name": str(risk_assessment.name),
                     "str": str(risk_assessment),
                     "is_locked": False,
+                    "folder": {
+                        "id": str(risk_assessment.folder.id),
+                        "str": str(risk_assessment.folder),
+                    },
                 },
                 "threats": [{"id": str(threat.id), "str": str(threat)}],
                 "risk_matrix": {
@@ -322,6 +326,10 @@ class TestRiskScenariosAuthenticated:
                     "str": str(risk_assessment),
                     "name": str(risk_assessment.name),
                     "is_locked": False,
+                    "folder": {
+                        "id": str(risk_assessment.folder.id),
+                        "str": str(risk_assessment.folder),
+                    },
                 },
                 "threats": [{"id": str(threat.id), "str": threat.name}],
                 "risk_matrix": {
@@ -401,6 +409,10 @@ class TestRiskScenariosAuthenticated:
                     "str": str(risk_assessment),
                     "name": str(risk_assessment.name),
                     "is_locked": False,
+                    "folder": {
+                        "id": str(risk_assessment.folder.id),
+                        "str": str(risk_assessment.folder),
+                    },
                 },
                 "threats": [{"id": str(threat.id), "str": threat.name}],
                 "risk_matrix": {

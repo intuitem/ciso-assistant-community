@@ -223,7 +223,9 @@
 		<div class="card bg-white p-4 m-4 shadow-sm flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
-					{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
+					{risk_assessment.perimeter?.str
+						? `${risk_assessment.perimeter.str}/`
+						: ''}{risk_assessment.name} - {risk_assessment.version}
 				</div>
 				<br />
 				<div class="text-sm">

@@ -127,7 +127,9 @@
 							{/if}
 						</div>
 						<button class="text-gray-700 font-semibold focus:outline-hidden" type="button">
-							{item.risk_assessment.perimeter.str}/{item.risk_assessment.name}
+							{item.risk_assessment.perimeter?.str
+								? `${item.risk_assessment.perimeter.str}/`
+								: ''}{item.risk_assessment.name}
 						</button>
 						<div>
 							{#if item.risk_assessment.quality_check.count > 0}

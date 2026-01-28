@@ -702,10 +702,12 @@
 																			{assessment.assessment_name}
 																		</div>
 																		<div class="flex items-center gap-3 text-xs text-gray-500">
-																			<div class="flex items-center gap-1">
-																				<i class="fas fa-cubes text-gray-400"></i>
-																				<span>{assessment.perimeter}</span>
-																			</div>
+																			{#if assessment.perimeter}
+																				<div class="flex items-center gap-1">
+																					<i class="fas fa-cubes text-gray-400"></i>
+																					<span>{assessment.perimeter}</span>
+																				</div>
+																			{/if}
 																			<div class="flex items-center gap-1">
 																				<div
 																					class="w-2 h-2 rounded-full {assessment.status === 'done'

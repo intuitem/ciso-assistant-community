@@ -4405,7 +4405,11 @@ class AppliedControl(
 
     @property
     def perimeters(self):
-        return {risk_assessment.perimeter for risk_assessment in self.risk_assessments}
+        return {
+            risk_assessment.perimeter
+            for risk_assessment in self.risk_assessments
+            if risk_assessment.perimeter
+        }
 
     def __str__(self):
         return self.name
@@ -4805,6 +4809,7 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         on_delete=models.CASCADE,
         verbose_name=_("Perimeter"),
         null=True,
+        blank=True,
     )
     version = models.CharField(
         max_length=100,
@@ -4847,7 +4852,9 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         abstract = True
 
     def save(self, *args, **kwargs) -> None:
-        if not self.folder or self.folder == Folder.get_root_folder():
+        if self.perimeter and (
+            not self.folder or self.folder == Folder.get_root_folder()
+        ):
             self.folder = self.perimeter.folder
         return super().save(*args, **kwargs)
 
@@ -4968,7 +4975,11 @@ class RiskAssessment(Assessment):
 
     @property
     def path_display(self) -> str:
-        return f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
+        if self.perimeter:
+            return (
+                f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
+            )
+        return f"{self.folder}/{self.name} - {self.version}"
 
     def get_scenario_count(self) -> int:
         count = RiskScenario.objects.filter(risk_assessment=self.id).count()
