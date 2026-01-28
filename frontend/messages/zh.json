@@ -2615,6 +2615,8 @@
 	"purposesDescription": "数据处理目的（GDPR）",
 	"rightRequestsDescription": "数据主体权利请求（GDPR）",
 	"dataBreachesDescription": "数据泄露事件和通知",
+	"gdpr": "GDPR / 隐私",
+	"gdprDescription": "数据保护和隐私管理功能（GDPR合规）",
 	"orderedEntryListAddNewEntry": "添加新条目",
 	"orderedEntryListRefIdPlaceholder": "参考ID",
 	"orderedEntryListNamePlaceholder": "名称",

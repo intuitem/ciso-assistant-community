@@ -222,6 +222,16 @@
 			cacheLock={cacheLocks['progress_status_enabled']}
 			bind:cachedValue={formDataCache['progress_status_enabled']}
 		/>
+		<Select
+			{form}
+			options={model.selectOptions['score_calculation_method']}
+			field="score_calculation_method"
+			label={m.scoreCalculationMethod()}
+			helpText={m.scoreCalculationMethodHelpText()}
+			cacheLock={cacheLocks['score_calculation_method']}
+			bind:cachedValue={formDataCache['score_calculation_method']}
+			disableDoubleDash
+		/>
 	</div>
 	<TextField
 		{form}

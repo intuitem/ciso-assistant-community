@@ -98,11 +98,6 @@
 					description: m.complianceAssessmentsDescription()
 				},
 				{
-					field: 'privacy',
-					label: m.privacy(),
-					description: m.privacyDescription()
-				},
-				{
 					field: 'risk_acceptances',
 					label: m.riskAcceptances(),
 					description: m.riskAcceptancesDescription()
@@ -141,6 +136,37 @@
 					field: 'bia',
 					label: m.businessImpactAnalysis(),
 					description: m.businessImpactAnalysisDescription()
+				}
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
+		},
+		{
+			category: m.gdpr(),
+			description: m.gdprDescription(),
+			fields: [
+				{
+					field: 'privacy',
+					label: m.privacy(),
+					description: m.privacyDescription()
+				},
+				{
+					field: 'personal_data',
+					label: m.personalData(),
+					description: m.personalDataDescription()
+				},
+				{
+					field: 'purposes',
+					label: m.purposes(),
+					description: m.purposesDescription()
+				},
+				{
+					field: 'right_requests',
+					label: m.rightRequests(),
+					description: m.rightRequestsDescription()
+				},
+				{
+					field: 'data_breaches',
+					label: m.dataBreaches(),
+					description: m.dataBreachesDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},

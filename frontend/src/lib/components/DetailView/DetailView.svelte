@@ -567,13 +567,13 @@
 																	{@const [securityObjectiveName, securityObjectiveValue] =
 																		Object.entries(val)[0]}
 																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
+																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel
 																	}/${val.id}`}
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																		>{val.str}</Anchor
+																		>{safeTranslate(val.str)}</Anchor
 																	>
 																{:else if val.str}
 																	{safeTranslate(val.str)}
@@ -607,7 +607,7 @@
 													>
 												{:else}
 													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-														>{value.str || value.name}</Anchor
+														>{safeTranslate(value.str || value.name)}</Anchor
 													>
 												{/if}
 												<!-- Shortcut before DetailView refactoring -->
