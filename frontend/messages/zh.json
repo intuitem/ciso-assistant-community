@@ -522,7 +522,7 @@
 	"scopedAsset": "通常是此条目要关注的主要资产/业务流程",
 	"copyright": "版权",
 	"addYourLibrary": "添加您自己的库",
-	"libraryFileInYaml": "YAML格式的库文件",
+	"libraryFileInYamlOrXlsx": "YAML格式的库文件",
 	"importBackup": "导入备份",
 	"exportBackup": "导出备份",
 	"confirmImportBackup": "确定要导入此备份吗？这将覆盖所有现有数据，包括您当前的凭据。",

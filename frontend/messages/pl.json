@@ -426,7 +426,7 @@
 	"dependencies": "Zależności",
 	"copyright": "Prawa autorskie",
 	"addYourLibrary": "Dodaj własną bibliotekę",
-	"libraryFileInYaml": "Plik biblioteki w formacie YAML",
+	"libraryFileInYamlOrXlsx": "Plik biblioteki w formacie YAML",
 	"importBackup": "Importuj kopię zapasową",
 	"exportBackup": "Eksportuj kopię zapasową",
 	"confirmImportBackup": "Czy na pewno chcesz zaimportować tę kopię zapasową? Spowoduje to nadpisanie wszystkich istniejących danych.",
