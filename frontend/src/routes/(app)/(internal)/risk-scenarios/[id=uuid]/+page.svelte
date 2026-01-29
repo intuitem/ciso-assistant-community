@@ -218,14 +218,16 @@
 						>{data.scenario.folder.str}</Anchor
 					>
 				</span>
-        {#if data.scenario.risk_assessment.perimeter}
-				<span>
-					<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
-					<Anchor class="anchor text-sm font-semibold" href="/perimeters/{data.scenario.risk_assessment.perimeter.id}"
-						>{data.scenario.risk_assessment.perimeter.str}</Anchor
-					>
-				</span>
-        {/if}
+				{#if data.scenario.risk_assessment.perimeter}
+					<span>
+						<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
+						<Anchor
+							class="anchor text-sm font-semibold"
+							href="/perimeters/{data.scenario.risk_assessment.perimeter.id}"
+							>{data.scenario.risk_assessment.perimeter.str}</Anchor
+						>
+					</span>
+				{/if}
 				<span>
 					<p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
 					<Anchor

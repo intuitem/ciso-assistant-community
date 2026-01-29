@@ -779,7 +779,7 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = RiskScenario
-        fields = "__all__"
+        exclude = ["folder"]
 
 
 class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
@@ -818,6 +818,10 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     filtering_labels = FieldsRelatedField(many=True)
 
     within_tolerance = serializers.CharField()
+
+    class Meta:
+        model = RiskScenario
+        fields = "__all__"
 
 
 class RiskScenarioImportExportSerializer(BaseModelSerializer):
