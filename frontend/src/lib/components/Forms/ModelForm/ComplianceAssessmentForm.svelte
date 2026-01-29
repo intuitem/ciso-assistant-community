@@ -153,6 +153,7 @@
 		optionsDetailedUrlParameters={selectedFolder ? [['folder', selectedFolder]] : []}
 		optionsExtraFields={[['folder', 'str']]}
 		field="perimeter"
+		nullable
 		cacheLock={cacheLocks['perimeter']}
 		bind:cachedValue={formDataCache['perimeter']}
 		label={m.perimeter()}
