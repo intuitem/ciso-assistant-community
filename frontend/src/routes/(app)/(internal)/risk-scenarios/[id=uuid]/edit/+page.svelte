@@ -127,6 +127,7 @@
 		<div class="flex flex-row space-x-2">
 			<div class="card p-2 bg-white shadow-lg w-1/2">
 				<div class="flex justify-between p-2">
+          {#if data.scenario.risk_assessment.perimeter}
 					<div>
 						<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
 						<Anchor
@@ -134,6 +135,7 @@
 							href="/perimeters/{data.scenario.perimeter.id}">{data.scenario.perimeter.str}</Anchor
 						>
 					</div>
+          {/if}
 					<div>
 						<p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
 						<Anchor
@@ -208,7 +210,7 @@
 					}}
 					field="assets"
 					optionsDetailedUrlParameters={[
-						['scope_folder_id', page.data.scenario.perimeter.folder.id]
+						['scope_folder_id', page.data.scenario.folder.id]
 					]}
 					label={m.assets()}
 				/>
@@ -217,7 +219,7 @@
 					multiple
 					optionsEndpoint="threats"
 					optionsDetailedUrlParameters={[
-						['scope_folder_id', page.data.scenario.perimeter.folder.id]
+						['scope_folder_id', page.data.scenario.folder.id]
 					]}
 					optionsExtraFields={[['folder', 'str']]}
 					optionsLabelField="auto"
@@ -229,7 +231,7 @@
 					form={_form}
 					optionsEndpoint="vulnerabilities"
 					optionsDetailedUrlParameters={[
-						['scope_folder_id', page.data.scenario.perimeter.folder.id]
+						['scope_folder_id', page.data.scenario.folder.id]
 					]}
 					optionsExtraFields={[['folder', 'str']]}
 					field="vulnerabilities"
@@ -334,7 +336,7 @@
 									optionsEndpoint="applied-controls"
 									optionsExtraFields={[['folder', 'str']]}
 									optionsDetailedUrlParameters={[
-										['scope_folder_id', page.data.scenario.perimeter.folder.id]
+										['scope_folder_id', page.data.scenario.folder.id]
 									]}
 									field="existing_applied_controls"
 									label={m.existingControls()}
@@ -410,7 +412,7 @@
 									optionsEndpoint="applied-controls"
 									optionsExtraFields={[['folder', 'str']]}
 									optionsDetailedUrlParameters={[
-										['scope_folder_id', page.data.scenario.perimeter.folder.id]
+										['scope_folder_id', page.data.scenario.folder.id]
 									]}
 									field="applied_controls"
 									label={m.extraAppliedControls()}

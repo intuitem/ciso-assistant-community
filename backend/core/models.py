@@ -5695,6 +5695,12 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         return result
 
     def save(self, *args, **kwargs):
+        # Set folder from parent risk assessment if not provided
+        if self.risk_assessment and (
+            not self.folder or self.folder == Folder.get_root_folder()
+        ):
+            self.folder = self.risk_assessment.folder
+
         if self.inherent_proba >= 0 and self.inherent_impact >= 0:
             self.inherent_level = risk_scoring(
                 self.inherent_proba,
