@@ -54,7 +54,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="risk-assessments"
-	optionsExtraFields={[['perimeter', 'str']]}
+	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="str"
 	field="risk_assessment"
 	cacheLock={cacheLocks['risk_assessment']}

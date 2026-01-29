@@ -242,7 +242,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskScenariosPage.createItem({
 			name: vars.riskScenarioName,
 			description: vars.description,
-			risk_assessment: `${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
+			risk_assessment: `${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 			threats: [`${vars.folderName}/${vars.threatName}`]
 		});
 
@@ -261,7 +261,7 @@ test('user usual routine actions are working correctly', async ({
 			folder: vars.folderName,
 			approver: LoginPage.defaultEmail,
 			risk_scenarios: [
-				`${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
+				`${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion} - ${vars.riskScenarioName}`
 			]
 		});
 

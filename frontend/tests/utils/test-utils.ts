@@ -739,7 +739,7 @@ export class TestContent {
 					str: `${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion} - ${vars.riskScenarioName}`,
 					name: vars.riskScenarioName,
 					description: vars.description,
-					risk_assessment: `${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
+					risk_assessment: `${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					threats: ['Global/' + vars.threat.name, 'Global/' + vars.threat2.name]
 				},
 				editParams: {
