@@ -777,6 +777,12 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 
         return super().validate(attrs)
 
+    def create(self, validated_data):
+        # Set folder from risk_assessment before the permission check in parent class
+        if "risk_assessment" in validated_data and validated_data["risk_assessment"]:
+            validated_data["folder"] = validated_data["risk_assessment"].folder
+        return super().create(validated_data)
+
     class Meta:
         model = RiskScenario
         exclude = ["folder"]
