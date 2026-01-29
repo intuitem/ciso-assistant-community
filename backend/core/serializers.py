@@ -785,9 +785,7 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     risk_assessment = FieldsRelatedField(["id", "name", "is_locked"])
     risk_matrix = FieldsRelatedField(source="risk_assessment.risk_matrix")
-    perimeter = FieldsRelatedField(
-        source="risk_assessment.perimeter", fields=["id", "name", "folder"]
-    )
+    folder = FieldsRelatedField()
     version = serializers.StringRelatedField(source="risk_assessment.version")
     operational_scenario = FieldsRelatedField(["id", "name", "ebios_rm_study"])
     threats = FieldsRelatedField(many=True)
