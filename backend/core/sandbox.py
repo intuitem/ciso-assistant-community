@@ -125,7 +125,7 @@ class PassthroughSandbox(Sandbox):
                 )
 
                 if result.returncode != 0:
-                    raise RuntimeError(f"Execution failed: {result.stderr}")
+                    raise RuntimeError(f"Execution failed: {result.stdout}")
 
                 return result.stdout
 
@@ -179,7 +179,7 @@ class PassthroughSandbox(Sandbox):
                 )
 
                 if result.returncode != 0:
-                    raise RuntimeError(f"Script failed: {result.stderr}")
+                    raise RuntimeError(f"Script failed: {result.stdout}")
 
                 if not os.path.exists(output_path):
                     raise RuntimeError("Script did not produce output file")
@@ -279,14 +279,14 @@ class LinuxSandbox(Sandbox):
                 )
 
                 if result.returncode != 0:
-                    stderr = result.stderr.lower()
+                    stderr = result.stdout.lower()
                     if "time limit" in stderr or "killed" in stderr:
                         raise SandboxTimeoutError("Execution timed out")
                     if any(x in stderr for x in ["permission denied", "seccomp"]):
                         raise SandboxViolationError(
-                            f"Security violation: {result.stderr}"
+                            f"Security violation: {result.stdout}"
                         )
-                    raise RuntimeError(f"Sandbox error: {result.stderr}")
+                    raise RuntimeError(f"Sandbox error: {result.stdout}")
 
                 return result.stdout
 
@@ -378,7 +378,7 @@ class LinuxSandbox(Sandbox):
                 )
 
                 if result.returncode != 0:
-                    stderr = result.stderr.lower()
+                    stderr = result.stdout.lower()
                     if "time limit" in stderr or "killed" in stderr:
                         raise SandboxTimeoutError("Script execution timed out")
                     if any(
@@ -390,9 +390,9 @@ class LinuxSandbox(Sandbox):
                         ]
                     ):
                         raise SandboxViolationError(
-                            f"Security violation: {result.stderr}"
+                            f"Security violation: {result.stdout}"
                         )
-                    raise RuntimeError(f"Script failed: {result.stderr}")
+                    raise RuntimeError(f"Script failed: {result.stdout}")
 
                 if not os.path.exists(output_path):
                     raise RuntimeError("Script did not produce output file")
