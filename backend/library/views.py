@@ -1,6 +1,5 @@
 from itertools import chain
 import json
-import yaml
 from django.db import IntegrityError
 from django.db.models import F, Q, IntegerField, OuterRef, Subquery, Exists
 from django.db import models
@@ -26,13 +25,12 @@ from django.http import HttpResponse
 import django_filters as df
 from core.excel import ExcelUploadHandler
 from core.helpers import get_sorted_requirement_nodes
-from core.models import StoredLibrary, LoadedLibrary, Framework, LibraryUpdater
+from core.models import StoredLibrary, LoadedLibrary, LibraryUpdater
 from core.sandbox import SandboxTimeoutError, SandboxViolationError
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
-from .importers.excel import ExcelImporter
-from .helpers import update_translations, update_translations_in_object
+from .helpers import update_translations
 from .utils import LibraryImporter, preview_library
 
 
@@ -454,7 +452,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 json.dumps({"error": "libraryAlreadyLoadedError"}),
                 status=HTTP_400_BAD_REQUEST,
             )
-        except Exception as e:
+        except Exception:
             logger.exception("Upload library failed")
             return HttpResponse(
                 json.dumps({"error": "invalidLibraryFileError"}),
