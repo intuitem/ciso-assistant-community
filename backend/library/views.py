@@ -16,14 +16,18 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND,
     HTTP_409_CONFLICT,
     HTTP_422_UNPROCESSABLE_ENTITY,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+    HTTP_504_GATEWAY_TIMEOUT,
 )
 from rest_framework.parsers import FileUploadParser
 
 from django.http import HttpResponse
 
 import django_filters as df
+from core.excel import ExcelUploadHandler
 from core.helpers import get_sorted_requirement_nodes
 from core.models import StoredLibrary, LoadedLibrary, Framework, LibraryUpdater
+from core.sandbox import SandboxTimeoutError, SandboxViolationError
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
@@ -134,6 +138,7 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
 import magic
 
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+
 
 class StoredLibraryViewSet(BaseModelViewSet):
     parser_classes = [FileUploadParser]
@@ -307,7 +312,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             # Check MIME type
             mime = magic.from_buffer(attachment.read(2048), mime=True)
             attachment.seek(0)
-            
+
             allowed_mimes = [
                 "text/plain",
                 "application/yaml",
@@ -315,34 +320,120 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 "application/x-yaml",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             ]
-            
+
             if mime not in allowed_mimes:
                 logger.warning("Invalid MIME type", mime=mime, filename=attachment.name)
-                # Fallback check for YAML text files sometimes identified as text/plain
-                if not (mime == "text/plain" and attachment.name.endswith((".yaml", ".yml"))):
-                     return HttpResponse(
-                        json.dumps({"error": "invalidFileFormat"}), status=HTTP_400_BAD_REQUEST
+                if not (
+                    mime == "text/plain" and attachment.name.endswith((".yaml", ".yml"))
+                ):
+                    return HttpResponse(
+                        json.dumps({"error": "invalidFileFormat"}),
+                        status=HTTP_400_BAD_REQUEST,
                     )
 
             try:
                 if attachment.name.endswith(".xlsx"):
-                    if mime != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                         return HttpResponse(
-                            json.dumps({"error": "invalidFileFormat"}), status=HTTP_400_BAD_REQUEST
-                        )
-                    try:
-                        library_dict = ExcelImporter.parse(attachment)
-                        content = yaml.dump(
-                            library_dict, sort_keys=False, allow_unicode=False
-                        ).encode("utf-8")
-                    except ValueError as e:
-                        logger.warning("Excel parsing failed", error=str(e))
+                    # Validate Excel MIME strictly
+                    if (
+                        mime
+                        != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    ):
                         return HttpResponse(
-                            json.dumps({"error": "invalidExcelFile"}), status=HTTP_400_BAD_REQUEST
+                            json.dumps({"error": "invalidFileFormat"}),
+                            status=HTTP_400_BAD_REQUEST,
                         )
+
+                    # Handle Excel conversion with sandbox
+                    try:
+                        # Get compatibility mode from request (default 0)
+                        try:
+                            compat_mode = int(request.POST.get("compat_mode", 0))
+                            if compat_mode not in settings.LIBRARY_COMPATIBILITY_MODES:
+                                return HttpResponse(
+                                    json.dumps(
+                                        {
+                                            "error": "invalidCompatMode",
+                                            "allowed_modes": list(
+                                                settings.LIBRARY_COMPATIBILITY_MODES.keys()
+                                            ),
+                                        }
+                                    ),
+                                    status=HTTP_400_BAD_REQUEST,
+                                )
+                        except (ValueError, TypeError):
+                            compat_mode = 0
+
+                        # Initialize handler (uses ENABLE_SANDBOX setting automatically)
+                        handler = ExcelUploadHandler(
+                            max_file_size=MAX_UPLOAD_SIZE,
+                            compat_mode=compat_mode,
+                            memory_limit_mb=512,
+                            time_limit_sec=30,
+                        )
+
+                        result = handler.process_upload(attachment)
+
+                        if result["status"] != 200:
+                            error_map = {
+                                400: "invalidExcelFile",
+                                413: "fileTooLarge",
+                                504: "processingTimeout",
+                                500: "processingError",
+                            }
+                            error_code = error_map.get(
+                                result["status"], "invalidExcelFile"
+                            )
+
+                            # Log security violations specifically
+                            if result["status"] == 400:
+                                logger.warning(
+                                    "Excel security violation detected",
+                                    filename=attachment.name,
+                                    error=result.get("error"),
+                                )
+
+                            return HttpResponse(
+                                json.dumps({"error": error_code}),
+                                status=result["status"],
+                            )
+
+                        # Convert YAML string to bytes for storage
+                        content = result["yaml"].encode("utf-8")
+
+                    except SandboxViolationError as e:
+                        logger.warning(
+                            "Security violation in Excel upload",
+                            error=str(e),
+                            filename=attachment.name,
+                            user=request.user.username,
+                            exc_info=True,
+                        )
+                        return HttpResponse(
+                            json.dumps({"error": "maliciousFileDetected"}),
+                            status=HTTP_400_BAD_REQUEST,
+                        )
+                    except SandboxTimeoutError:
+                        logger.warning(
+                            "Excel conversion timeout",
+                            filename=attachment.name,
+                            exc_info=True,
+                        )
+                        return HttpResponse(
+                            json.dumps({"error": "processingTimeout"}),
+                            status=HTTP_504_GATEWAY_TIMEOUT,
+                        )
+                    except FileNotFoundError as e:
+                        logger.error(f"Conversion script not found: {e}", exc_info=True)
+                        return HttpResponse(
+                            json.dumps({"error": "serverConfigurationError"}),
+                            status=HTTP_500_INTERNAL_SERVER_ERROR,
+                        )
+
                 else:
+                    # YAML file - read directly
                     content = attachment.read()
 
+                # Store the library content (YAML bytes)
                 library = StoredLibrary.store_library_content(content)
                 if library is not None:
                     library.load()
@@ -350,6 +441,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 return Response(
                     StoredLibrarySerializer(library).data, status=HTTP_201_CREATED
                 )
+
             except ValueError as e:
                 logger.error("Failed to store library content", error=e)
                 return HttpResponse(
