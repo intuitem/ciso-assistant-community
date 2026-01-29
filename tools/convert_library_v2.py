@@ -1118,7 +1118,7 @@ def create_library(
                         for i in range(len(header))
                         if i < len(row)
                     }
-                    if all(value is None for value in data.values()):
+                    if all(value is None or value == "" for value in data.values()):
                         print(f"empty line {counter}")
                         continue
                     depth = int(data.get("depth", 1))
