@@ -1,5 +1,13 @@
 # Getting your custom framework
 
+{% hint style="danger" %}
+**IMPORTANT NOTICE:** This section is _**NOT**_ up to date and will be reworked. In the meantime, you can refer to the [**dedicated README on GitHub**](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/README.md) for more up-to-date information.
+{% endhint %}
+
+{% hint style="warning" %}
+**WARNING:** This section refers to the `v1` format of frameworks. The `v1` format is deprecated. If you created your framework following this documentation and provided that you _**HAVE NOT YET**_ imported your framework into CISO Assistant, we strongly recommend updating your Excel file in `v2` format using the [`convert_v1_to_v2.py`](https://github.com/intuitem/ciso-assistant-community/tree/main/tools#-convert_v1_to_v2py) script.
+{% endhint %}
+
 CISO Assistant allows you to manage your custom frameworks. The format is a text-based YAML file that you can customize, but it can be tricky to maintain and debug. To manage this, we've introduced a simpler approach to convert Excel sheets using the `convert_library.py` utility available at the [`/tools`](https://github.com/intuitem/ciso-assistant-community/tree/main/tools) of the [Github](https://github.com/intuitem/ciso-assistant-community/) repository root.
 
 ### Structure
@@ -23,17 +31,15 @@ Implementation groups are an optional argument that can be used to create subset
 1. Clone the repo and make sure you are at its root
 2. Make sure you have Python installed (including pip), version 3.11 or higher is recommended
 3. cd to `/tools`
-4. run\
-   `pip install -r requirements.txt`\
-   to install the script dependencies
+4. run `pip install -r requirements.txt` to install the script dependencies
 5. copy the sample directory, including the file within, to a new directory at the same level, for instance, `myframework/my-custom-framework.xlsx`
-6. Edit the first tab (`library_content`) to describe your framework metadata
+6. Edit the first tab (`library_meta`) to describe your framework metadata
    1. Implementation groups and score descriptions are optional, so if they don't apply, you can simply remove lines
 7. Edit the Excel sheet according to the expected hierarchy.
    1. The order of the items is essential and will be used to build the tree on CISO Assistant. So make sure you're following the previously described structure
 8. From the tools folder, run\
    \
-   `python3 convert_library.py myframework/my-custom-framework.xlsx`\
+   `python3 convert_library_v2.py myframework/my-custom-framework.xlsx`\
    \
    to generate the yaml file, if a mandatory field is missing, you'll get an error explaining the issue.
 9. If everything is good, you'll get a message confirming the generation of the file `generating myframework/my-custom-framework.yaml`
