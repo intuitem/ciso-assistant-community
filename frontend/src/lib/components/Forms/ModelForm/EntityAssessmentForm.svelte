@@ -9,10 +9,10 @@
 	import { m } from '$paraglide/messages';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import type { SuperForm } from 'sveltekit-superforms';
+	import type { SuperValidated } from 'sveltekit-superforms';
 
 	interface Props {
-		form: SuperForm<any>;
+		form: SuperValidated<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -29,8 +29,6 @@
 		data = {}
 	}: Props = $props();
 
-	const formStore = form.form;
-
 	let selectedFolder = $state<string | undefined>(undefined);
 	let folderKey = $state(0);
 	let isAutoFillingFolder = $state(false);
@@ -38,8 +36,8 @@
 	function handleFolderChange(folderId: string) {
 		selectedFolder = folderId;
 		// Clear perimeter when folder changes (unless we're auto-filling from perimeter)
-		if (!isAutoFillingFolder && $formStore?.perimeter) {
-			formStore.update((currentData) => ({
+		if (!isAutoFillingFolder && form.data?.perimeter) {
+			form.form.update((currentData) => ({
 				...currentData,
 				perimeter: undefined
 			}));
@@ -58,7 +56,7 @@
 						isAutoFillingFolder = true;
 						selectedFolder = perimeter.folder.id;
 						// Update form data and force folder component to re-render
-						formStore.update((currentData) => ({
+						form.form.update((currentData) => ({
 							...currentData,
 							folder: perimeter.folder.id
 						}));
@@ -150,12 +148,12 @@
 	label={m.entity()}
 	hidden={initialData.entity}
 />
-{#key $formStore?.entity}
+{#key form.data?.entity}
 	<AutocompleteSelect
 		{form}
 		multiple
 		optionsEndpoint="solutions"
-		optionsDetailedUrlParameters={[['provider_entity', $formStore.entity]]}
+		optionsDetailedUrlParameters={[['provider_entity', form.data?.entity || '']]}
 		field="solutions"
 		cacheLock={cacheLocks['solutions']}
 		bind:cachedValue={formDataCache['solutions']}
@@ -180,15 +178,15 @@
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
 />
-{#if $formStore?.entity}
-	{#key $formStore?.entity}
+{#if form.data?.entity}
+	{#key form.data?.entity}
 		<AutocompleteSelect
 			{form}
 			multiple
 			optionsEndpoint="users"
 			optionsDetailedUrlParameters={[
 				['is_third_party', 'true'],
-				['representative__entity', $formStore?.entity || '']
+				['representative__entity', form.data?.entity || '']
 			]}
 			optionsLabelField="email"
 			field="representatives"
