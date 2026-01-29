@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 import structlog
+from django.conf import settings
 
 from core.sandbox import SandboxFactory, SandboxTimeoutError, SandboxViolationError
 
@@ -13,7 +14,9 @@ class ExcelUploadHandler:
     Django-specific handler for secure Excel processing using external conversion script.
     """
 
-    DEFAULT_SCRIPT_PATH = "tools/convert_library_v2.py"  # Relative to repo root
+    DEFAULT_SCRIPT_PATH = (
+        "scripts/convert_library_v2.py"  # Relative to backend directory
+    )
 
     def __init__(
         self,
@@ -35,16 +38,14 @@ class ExcelUploadHandler:
         if not self.script_path.exists():
             raise FileNotFoundError(
                 f"Conversion script not found: {self.script_path}. "
-                f"Ensure tools/convert_library_v2.py exists at repository root."
+                f"Ensure scripts/convert_library_v2.py exists in backend directory."
             )
 
     def _resolve_script_path(self) -> Path:
         """
         Resolve default script path relative to Django project structure.
         """
-        current_file = Path(__file__).resolve()
-        repo_root = current_file.parent.parent.parent  # Adjust based on your structure
-        return repo_root / "tools" / "convert_library_v2.py"
+        return settings.BASE_DIR / "scripts" / "convert_library_v2.py"
 
     def process_upload(
         self, uploaded_file, compat_mode: Optional[int] = None
@@ -99,8 +100,8 @@ class ExcelUploadHandler:
 
     def _validate_excel(self, data: bytes):
         """Basic validation to prevent zip bombs"""
-        import zipfile
         import io
+        import zipfile
 
         try:
             with zipfile.ZipFile(io.BytesIO(data)) as zf:
