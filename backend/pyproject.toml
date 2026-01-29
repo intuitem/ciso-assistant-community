@@ -49,7 +49,6 @@ icecream = "^2.1.8"
 regex = "^2025.11.3"
 prometheus-client = "^0.22.1"
 jira = "^3.10.5"
-defusedxml = "^0.7.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.8.0"
