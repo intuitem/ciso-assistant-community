@@ -136,36 +136,36 @@
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
 />
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="actors"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
+	field="authors"
+	cacheLock={cacheLocks['authors']}
+	bind:cachedValue={formDataCache['authors']}
+	label={m.authors()}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="actors"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
+	field="reviewers"
+	cacheLock={cacheLocks['reviewers']}
+	bind:cachedValue={formDataCache['reviewers']}
+	label={m.reviewers()}
+/>
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	{#if !page.data.user.is_third_party}
-		<AutocompleteSelect
-			{form}
-			multiple
-			optionsEndpoint="actors"
-			optionsLabelField="str"
-			optionsInfoFields={{
-				fields: [{ field: 'type', translate: true }],
-				position: 'prefix'
-			}}
-			field="authors"
-			cacheLock={cacheLocks['authors']}
-			bind:cachedValue={formDataCache['authors']}
-			label={m.authors()}
-		/>
-		<AutocompleteSelect
-			{form}
-			multiple
-			optionsEndpoint="actors"
-			optionsLabelField="str"
-			optionsInfoFields={{
-				fields: [{ field: 'type', translate: true }],
-				position: 'prefix'
-			}}
-			field="reviewers"
-			cacheLock={cacheLocks['reviewers']}
-			bind:cachedValue={formDataCache['reviewers']}
-			label={m.reviewers()}
-		/>
 		<Checkbox
 			{form}
 			field="is_locked"
