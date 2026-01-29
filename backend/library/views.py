@@ -131,6 +131,10 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
         ]
 
 
+import magic
+
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+
 class StoredLibraryViewSet(BaseModelViewSet):
     parser_classes = [FileUploadParser]
     filterset_class = StoredLibraryFilterSet
@@ -279,6 +283,13 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="upload")
     def upload_library(self, request):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_storedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
+
         if not request.data:
             return HttpResponse(
                 json.dumps({"error": "noFileDetected"}), status=HTTP_400_BAD_REQUEST
@@ -288,16 +299,46 @@ class StoredLibraryViewSet(BaseModelViewSet):
             attachment = request.FILES["file"]
             validate_file_extension(attachment)
 
+            if attachment.size > MAX_UPLOAD_SIZE:
+                return HttpResponse(
+                    json.dumps({"error": "fileTooLarge"}), status=HTTP_400_BAD_REQUEST
+                )
+
+            # Check MIME type
+            mime = magic.from_buffer(attachment.read(2048), mime=True)
+            attachment.seek(0)
+            
+            allowed_mimes = [
+                "text/plain",
+                "application/yaml",
+                "text/yaml",
+                "application/x-yaml",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ]
+            
+            if mime not in allowed_mimes:
+                logger.warning("Invalid MIME type", mime=mime, filename=attachment.name)
+                # Fallback check for YAML text files sometimes identified as text/plain
+                if not (mime == "text/plain" and attachment.name.endswith((".yaml", ".yml"))):
+                     return HttpResponse(
+                        json.dumps({"error": "invalidFileFormat"}), status=HTTP_400_BAD_REQUEST
+                    )
+
             try:
                 if attachment.name.endswith(".xlsx"):
+                    if mime != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                         return HttpResponse(
+                            json.dumps({"error": "invalidFileFormat"}), status=HTTP_400_BAD_REQUEST
+                        )
                     try:
                         library_dict = ExcelImporter.parse(attachment)
                         content = yaml.dump(
                             library_dict, sort_keys=False, allow_unicode=False
                         ).encode("utf-8")
                     except ValueError as e:
+                        logger.warning("Excel parsing failed", error=str(e))
                         return HttpResponse(
-                            json.dumps({"error": str(e)}), status=HTTP_400_BAD_REQUEST
+                            json.dumps({"error": "invalidExcelFile"}), status=HTTP_400_BAD_REQUEST
                         )
                 else:
                     content = attachment.read()
