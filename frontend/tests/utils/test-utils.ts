@@ -736,6 +736,7 @@ export class TestContent {
 				modelName: 'riskscenario',
 				dependency: vars.threat.library,
 				build: {
+					str: `${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion} - ${vars.riskScenarioName}`,
 					name: vars.riskScenarioName,
 					description: vars.description,
 					risk_assessment: `${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
