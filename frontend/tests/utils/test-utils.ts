@@ -766,7 +766,7 @@ export class TestContent {
 					folder: vars.folderName,
 					approver: LoginPage.defaultEmail,
 					risk_scenarios: [
-						`${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
+						`${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion} - ${vars.riskScenarioName}`
 					]
 				},
 				editParams: {
