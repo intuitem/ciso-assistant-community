@@ -144,9 +144,7 @@ class ExcelImporter:
                 None if cond.lower() == "/" else cond for cond in condition_lines
             ]
         elif not raw_condition_str and depends_on_lines:
-            raise ValueError(
-                "Missing value 'condition' to compute 'depends_on' column"
-            )
+            raise ValueError("Missing value 'condition' to compute 'depends_on' column")
 
         answer_ids = (
             [a.strip() for a in str(raw_answer_str).split("\n") if raw_answer_str]
@@ -247,9 +245,7 @@ class ExcelImporter:
 
                         depends_on_block["condition"] = condition
                         depends_on_block["question"] = depends_on_question_urn
-                        depends_on_block["answers"] = (
-                            depends_on_question_answers_urns
-                        )
+                        depends_on_block["answers"] = depends_on_question_answers_urns
 
                         question_entry["depends_on"] = depends_on_block
 
@@ -276,7 +272,7 @@ class ExcelImporter:
             # If it's a theme/tint/indexed color, this might be raw RGB if type is 'rgb'
             # But openpyxl might give theme indices.
             # For simplicity in this port, we take the value if it looks like RGB.
-            # The original script had complex HLS logic. We will omit that for brevity 
+            # The original script had complex HLS logic. We will omit that for brevity
             # unless requested, or try to keep it simple.
             # Actually, let's just return the hex if present.
             val = cell.fill.fgColor.rgb
@@ -312,7 +308,7 @@ class ExcelImporter:
             # Should we raise or return None?
             # Original script asserted.
             return None
-        
+
         index = {k: i for i, k in enumerate(header)}
         size_grid = len([h for h in header if h.startswith("grid")])
 
@@ -347,10 +343,10 @@ class ExcelImporter:
             abbrev = str(row[index["abbreviation"]].value or "").strip()
             name = str(row[index["name"]].value or "").strip()
             desc = str(row[index["description"]].value or "").strip()
-            
+
             # Simplified color logic
             # color_cell = row[index["color"]]
-            # color = ExcelImporter.get_color(wb, color_cell) 
+            # color = ExcelImporter.get_color(wb, color_cell)
 
             obj_data = {
                 "id": rid,
@@ -358,12 +354,12 @@ class ExcelImporter:
                 "name": name,
                 "description": desc,
             }
-            
-            # Getting hex color directly from value if user typed it? 
-            # The original script read cell style. 
-            # We will skip complex color reading for now to avoid dependency on colorsys helpers 
+
+            # Getting hex color directly from value if user typed it?
+            # The original script read cell style.
+            # We will skip complex color reading for now to avoid dependency on colorsys helpers
             # unless critical.
-            
+
             translations = ExcelImporter.extract_translations_from_row(header, row)
             if translations:
                 obj_data["translations"] = translations
@@ -375,7 +371,7 @@ class ExcelImporter:
                 for i in range(size_grid):
                     cell = row[index[f"grid{i}"]]
                     grid[rid].append(int(cell.value))
-                    
+
         sorted_ids = sorted(grid.keys())
         risk_matrix["grid"] = [grid[rid] for rid in sorted_ids]
 
@@ -437,9 +433,9 @@ class ExcelImporter:
 
         library_urn_raw = library_meta.get("urn")
         library_urn = ExcelImporter.clean_urn_suffix(library_urn_raw)
-        
+
         if library_urn != library_urn_raw:
-             logger.info("Cleaned library URN", old=library_urn_raw, new=library_urn)
+            logger.info("Cleaned library URN", old=library_urn_raw, new=library_urn)
 
         library = {
             "urn": library_urn,
@@ -537,7 +533,7 @@ class ExcelImporter:
         sorted_object_names = sorted(
             object_blocks.keys(),
             key=lambda k: (
-                priority_order.index(object_blocks[k]["type"]) 
+                priority_order.index(object_blocks[k]["type"])
                 if object_blocks[k]["type"] in priority_order
                 else len(priority_order)
             ),
@@ -570,17 +566,23 @@ class ExcelImporter:
                     ref_id_raw = str(data.get("ref_id", "")).strip()
                     if not ref_id_raw:
                         continue
-                        
+
                     ref_id_clean = ExcelImporter.clean_urn_suffix(ref_id_raw)
-                    
+
                     entry = {
                         "urn": f"{base_urn}:{ref_id_clean}",
                         "ref_id": ref_id_raw,
                     }
-                    
-                    for field in ["name", "category", "csf_function", "description", "annotation"]:
-                         if field in data and data[field]:
-                             entry[field] = str(data[field]).strip()
+
+                    for field in [
+                        "name",
+                        "category",
+                        "csf_function",
+                        "description",
+                        "annotation",
+                    ]:
+                        if field in data and data[field]:
+                            entry[field] = str(data[field]).strip()
 
                     translations = ExcelImporter.extract_translations_from_row(
                         header, row
@@ -627,7 +629,7 @@ class ExcelImporter:
                     if translations:
                         entry["translations"] = translations
                     threats.append(entry)
-                
+
                 if library["objects"].get("threats"):
                     library["objects"]["threats"].extend(threats)
                 else:
@@ -637,11 +639,11 @@ class ExcelImporter:
                 meta = obj["meta"]
                 content_ws = obj["content_sheet"]
                 base_urn = obj["meta"].get("base_urn")
-                
+
                 # Answers
                 answers_dict = {}
                 answers_block_name = meta.get("answers_definition")
-                
+
                 if answers_block_name and answers_block_name in object_blocks:
                     answers_sheet = object_blocks[answers_block_name]["content_sheet"]
                     rows = list(answers_sheet.iter_rows())
@@ -659,7 +661,7 @@ class ExcelImporter:
                             answer_id = str(data.get("id", "")).strip()
                             answer_type = str(data.get("question_type", "")).strip()
                             choices_raw = str(data.get("question_choices", "")).strip()
-                            
+
                             if not answer_id or not answer_type or not choices_raw:
                                 continue
 
@@ -672,43 +674,67 @@ class ExcelImporter:
                                     choices[-1]["value"] += "\n" + line[1:].strip()
                                 else:
                                     choices.append({"urn": "", "value": line})
-                            
+
                             # Optional answer fields (description, compute_result, add_score, select_implementation_groups, color)
                             # Simplified implementation for brevity, relying on the _per_choice_lines helper
-                            
+
                             # Description
-                            desc_lines = ExcelImporter._per_choice_lines(data, "description", len(choices), answer_id)
+                            desc_lines = ExcelImporter._per_choice_lines(
+                                data, "description", len(choices), answer_id
+                            )
                             if desc_lines:
                                 for i, desc in enumerate(desc_lines):
                                     if desc and desc != "/":
                                         choices[i]["description"] = desc
 
                             # Compute result
-                            comp_lines = ExcelImporter._per_choice_lines(data, "compute_result", len(choices), answer_id)
+                            comp_lines = ExcelImporter._per_choice_lines(
+                                data, "compute_result", len(choices), answer_id
+                            )
                             if comp_lines:
                                 for i, val in enumerate(comp_lines):
                                     v = val.lower()
-                                    if v == "true": choices[i]["compute_result"] = True
-                                    elif v == "false": choices[i]["compute_result"] = False
+                                    if v == "true":
+                                        choices[i]["compute_result"] = True
+                                    elif v == "false":
+                                        choices[i]["compute_result"] = False
 
                             # Add score
-                            score_lines = ExcelImporter._per_choice_lines(data, "add_score", len(choices), answer_id)
+                            score_lines = ExcelImporter._per_choice_lines(
+                                data, "add_score", len(choices), answer_id
+                            )
                             if score_lines:
                                 for i, val in enumerate(score_lines):
                                     if val:
-                                        try: choices[i]["add_score"] = int(val)
-                                        except: pass
+                                        try:
+                                            choices[i]["add_score"] = int(val)
+                                        except:
+                                            pass
 
                             # Select IGs
-                            sig_lines = ExcelImporter._per_choice_lines(data, "select_implementation_groups", len(choices), answer_id)
+                            sig_lines = ExcelImporter._per_choice_lines(
+                                data,
+                                "select_implementation_groups",
+                                len(choices),
+                                answer_id,
+                            )
                             if sig_lines:
                                 for i, val in enumerate(sig_lines):
                                     if val and val != "/":
-                                        groups = [s.strip() for s in val.split(",") if s.strip()]
-                                        if groups: choices[i]["select_implementation_groups"] = groups
-                            
+                                        groups = [
+                                            s.strip()
+                                            for s in val.split(",")
+                                            if s.strip()
+                                        ]
+                                        if groups:
+                                            choices[i][
+                                                "select_implementation_groups"
+                                            ] = groups
+
                             # Color
-                            color_lines = ExcelImporter._per_choice_lines(data, "color", len(choices), answer_id)
+                            color_lines = ExcelImporter._per_choice_lines(
+                                data, "color", len(choices), answer_id
+                            )
                             if color_lines:
                                 for i, val in enumerate(color_lines):
                                     if val and val != "/":
@@ -725,64 +751,100 @@ class ExcelImporter:
                     "name": meta.get("name"),
                     "description": meta.get("description"),
                 }
-                
-                translations = ExcelImporter.extract_translations_from_metadata(meta, "framework")
+
+                translations = ExcelImporter.extract_translations_from_metadata(
+                    meta, "framework"
+                )
                 if translations:
                     framework["translations"] = translations
 
-                if "min_score" in meta: framework["min_score"] = int(meta["min_score"])
-                if "max_score" in meta: framework["max_score"] = int(meta["max_score"])
+                if "min_score" in meta:
+                    framework["min_score"] = int(meta["min_score"])
+                if "max_score" in meta:
+                    framework["max_score"] = int(meta["max_score"])
 
                 # Scores Definition
                 score_name = meta.get("scores_definition")
                 if score_name and score_name in object_blocks:
                     score_ws = object_blocks[score_name]["content_sheet"]
                     score_rows = list(score_ws.iter_rows())
-                    score_header = [str(c.value).strip().lower() if c.value else "" for c in score_rows[0]]
+                    score_header = [
+                        str(c.value).strip().lower() if c.value else ""
+                        for c in score_rows[0]
+                    ]
                     score_defs = []
                     for row in score_rows[1:]:
-                        if not any(c.value for c in row): continue
-                        data = {score_header[i]: row[i].value for i in range(len(score_header)) if i < len(row)}
+                        if not any(c.value for c in row):
+                            continue
+                        data = {
+                            score_header[i]: row[i].value
+                            for i in range(len(score_header))
+                            if i < len(row)
+                        }
                         score_entry = {
                             "score": int(data.get("score")),
                             "name": str(data.get("name", "")).strip(),
-                            "description": str(data.get("description", "")).strip() if data.get("description") else None
+                            "description": str(data.get("description", "")).strip()
+                            if data.get("description")
+                            else None,
                         }
                         if "description_doc" in data and data["description_doc"]:
-                            score_entry["description_doc"] = str(data["description_doc"])
-                        
-                        translations = ExcelImporter.extract_translations_from_row(score_header, row)
-                        if translations: score_entry["translations"] = translations
+                            score_entry["description_doc"] = str(
+                                data["description_doc"]
+                            )
+
+                        translations = ExcelImporter.extract_translations_from_row(
+                            score_header, row
+                        )
+                        if translations:
+                            score_entry["translations"] = translations
                         score_defs.append(score_entry)
                     framework["scores_definition"] = score_defs
-                
+
                 # Implementation Groups
                 ig_name = meta.get("implementation_groups_definition")
                 if ig_name and ig_name in object_blocks:
                     ig_content = object_blocks[ig_name]["content_sheet"]
                     ig_rows = list(ig_content.iter_rows())
-                    ig_header = [str(c.value).strip().lower() if c.value else "" for c in ig_rows[0]]
+                    ig_header = [
+                        str(c.value).strip().lower() if c.value else ""
+                        for c in ig_rows[0]
+                    ]
                     ig_defs = []
                     for row in ig_rows[1:]:
-                        if not any(c.value for c in row): continue
-                        data = {ig_header[i]: row[i].value for i in range(len(ig_header)) if i < len(row)}
+                        if not any(c.value for c in row):
+                            continue
+                        data = {
+                            ig_header[i]: row[i].value
+                            for i in range(len(ig_header))
+                            if i < len(row)
+                        }
                         ig_entry = {
                             "ref_id": str(data.get("ref_id", "")).strip(),
                             "name": str(data.get("name", "")).strip(),
-                            "description": str(data.get("description", "")).strip() if data.get("description") else None,
+                            "description": str(data.get("description", "")).strip()
+                            if data.get("description")
+                            else None,
                         }
                         if data.get("default_selected") is not None:
-                            ig_entry["default_selected"] = bool(data.get("default_selected"))
-                        
-                        translations = ExcelImporter.extract_translations_from_row(ig_header, row)
-                        if translations: ig_entry["translations"] = translations
+                            ig_entry["default_selected"] = bool(
+                                data.get("default_selected")
+                            )
+
+                        translations = ExcelImporter.extract_translations_from_row(
+                            ig_header, row
+                        )
+                        if translations:
+                            ig_entry["translations"] = translations
                         ig_defs.append(ig_entry)
                     framework["implementation_groups_definition"] = ig_defs
-                
+
                 # Requirements
                 rows = list(content_ws.iter_rows())
                 if rows:
-                    header = [str(c.value).strip().lower() if c.value else "" for c in rows[0]]
+                    header = [
+                        str(c.value).strip().lower() if c.value else "" for c in rows[0]
+                    ]
                     parent_for_depth = {}
                     count_for_depth = {}
                     previous_node_urn = None
@@ -790,12 +852,17 @@ class ExcelImporter:
                     counter = 0
                     requirement_nodes = []
                     all_urns = set()
-                    
+
                     for row in rows[1:]:
                         counter += 1
-                        data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
-                        if all(value is None for value in data.values()): continue
-                        
+                        data = {
+                            header[i]: row[i].value
+                            for i in range(len(header))
+                            if i < len(row)
+                        }
+                        if all(value is None for value in data.values()):
+                            continue
+
                         depth = int(data.get("depth", 1))
                         ref_id = data.get("ref_id")
                         ref_id = str(ref_id).strip() if ref_id is not None else None
@@ -808,7 +875,9 @@ class ExcelImporter:
                         elif depth <= previous_depth:
                             pass
                         else:
-                            raise ValueError(f"Invalid depth jump from {previous_depth} to {depth}")
+                            raise ValueError(
+                                f"Invalid depth jump from {previous_depth} to {depth}"
+                            )
 
                         # URN Calculation (Mode 0)
                         if data.get("urn_id") and data.get("urn_id").strip():
@@ -827,60 +896,84 @@ class ExcelImporter:
                             else:
                                 urn = f"{base_urn}:node{c}"
                             count_for_depth[depth] = c + 1
-                        
+
                         previous_node_urn = urn
                         previous_depth = depth
                         parent_urn = parent_for_depth.get(depth)
-                        
+
                         node = {
                             "urn": urn,
                             "assessable": bool(data.get("assessable")),
                             "depth": depth,
                         }
-                        if parent_urn: node["parent_urn"] = parent_urn
-                        if ref_id: node["ref_id"] = ref_id
-                        if name: node["name"] = name
-                        if "description" in data and data["description"]: node["description"] = str(data["description"])
-                        if "annotation" in data and data["annotation"]: node["annotation"] = str(data["annotation"])
-                        if "typical_evidence" in data and data["typical_evidence"]: node["typical_evidence"] = str(data["typical_evidence"])
+                        if parent_urn:
+                            node["parent_urn"] = parent_urn
+                        if ref_id:
+                            node["ref_id"] = ref_id
+                        if name:
+                            node["name"] = name
+                        if "description" in data and data["description"]:
+                            node["description"] = str(data["description"])
+                        if "annotation" in data and data["annotation"]:
+                            node["annotation"] = str(data["annotation"])
+                        if "typical_evidence" in data and data["typical_evidence"]:
+                            node["typical_evidence"] = str(data["typical_evidence"])
                         if "importance" in data and data["importance"]:
                             imp = str(data["importance"])
                             if imp in ["mandatory", "recommended", "nice_to_have"]:
                                 node["importance"] = imp.lower()
-                        
-                        if "weight" in data and data["weight"] is not None:
-                             try:
-                                 w = int(data["weight"])
-                                 if w > 0: node["weight"] = w
-                             except: pass
 
-                        if "implementation_groups" in data and data["implementation_groups"]:
-                            node["implementation_groups"] = [s.strip() for s in str(data["implementation_groups"])
-                                                              .split(",")]
+                        if "weight" in data and data["weight"] is not None:
+                            try:
+                                w = int(data["weight"])
+                                if w > 0:
+                                    node["weight"] = w
+                            except:
+                                pass
+
+                        if (
+                            "implementation_groups" in data
+                            and data["implementation_groups"]
+                        ):
+                            node["implementation_groups"] = [
+                                s.strip()
+                                for s in str(data["implementation_groups"]).split(",")
+                            ]
 
                         if "threats" in data and data["threats"]:
-                            threats = ExcelImporter.expand_urns_from_prefixed_list(data["threats"], prefix_to_urn)
-                            if threats: node["threats"] = threats
-                        
+                            threats = ExcelImporter.expand_urns_from_prefixed_list(
+                                data["threats"], prefix_to_urn
+                            )
+                            if threats:
+                                node["threats"] = threats
+
                         if "reference_controls" in data and data["reference_controls"]:
-                             rc = ExcelImporter.expand_urns_from_prefixed_list(data["reference_controls"], prefix_to_urn)
-                             if rc: node["reference_controls"] = rc
+                            rc = ExcelImporter.expand_urns_from_prefixed_list(
+                                data["reference_controls"], prefix_to_urn
+                            )
+                            if rc:
+                                node["reference_controls"] = rc
 
                         if "questions" in data and data["questions"]:
-                            ExcelImporter.inject_questions_into_node(data, node, answers_dict)
+                            ExcelImporter.inject_questions_into_node(
+                                data, node, answers_dict
+                            )
 
-                        translations = ExcelImporter.extract_translations_from_row(header, row)
-                        if translations: node["translations"] = translations
+                        translations = ExcelImporter.extract_translations_from_row(
+                            header, row
+                        )
+                        if translations:
+                            node["translations"] = translations
 
                         if node.get("urn") in all_urns:
-                             # raise ValueError(f"urn already used: {node.get('urn')}")
-                             # Allow it? Original script raised.
-                             raise ValueError(f"urn already used: {node.get('urn')}")
+                            # raise ValueError(f"urn already used: {node.get('urn')}")
+                            # Allow it? Original script raised.
+                            raise ValueError(f"urn already used: {node.get('urn')}")
                         all_urns.add(node.get("urn"))
                         requirement_nodes.append(node)
-                    
+
                     framework["requirement_nodes"] = requirement_nodes
-                
+
                 library["objects"]["framework"] = framework
 
             elif obj_type == "metric_definitions":
@@ -889,119 +982,175 @@ class ExcelImporter:
                 base_urn = obj["meta"].get("base_urn")
                 content_ws = obj["content_sheet"]
                 rows = list(content_ws.iter_rows())
-                if not rows: continue
-                header = [str(cell.value).strip().lower() if cell.value else "" for cell in rows[0]]
+                if not rows:
+                    continue
+                header = [
+                    str(cell.value).strip().lower() if cell.value else ""
+                    for cell in rows[0]
+                ]
                 for row in rows[1:]:
-                     if not any(cell.value for cell in row): continue
-                     data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
-                     ref_id = str(data.get("ref_id", "")).strip()
-                     if not ref_id: continue
-                     
-                     ref_id_clean = ExcelImporter.clean_urn_suffix(ref_id)
-                     entry = {"urn": f"{base_urn}:{ref_id_clean}", "ref_id": ref_id}
-                     if "name" in data and data["name"]: entry["name"] = str(data["name"])
-                     if "description" in data and data["description"]: entry["description"] = str(data["description"])
-                     entry["category"] = str(data.get("category", "quantitative")).strip().lower()
-                     if "unit" in data: entry["unit"] = str(data["unit"])
-                     if "higher_is_better" in data:
-                         entry["higher_is_better"] = str(data["higher_is_better"]).lower() in ("1", "true", "yes", "x")
-                     else:
-                         entry["higher_is_better"] = True
-                     
-                     if "default_target" in data and data["default_target"] is not None:
-                         try: entry["default_target"] = float(data["default_target"])
-                         except: pass
+                    if not any(cell.value for cell in row):
+                        continue
+                    data = {
+                        header[i]: row[i].value
+                        for i in range(len(header))
+                        if i < len(row)
+                    }
+                    ref_id = str(data.get("ref_id", "")).strip()
+                    if not ref_id:
+                        continue
 
-                     if entry["category"] == "qualitative" and "choices_definition" in data:
-                         choices = []
-                         for line in str(data["choices_definition"]).split("\n"):
-                             if not line.strip(): continue
-                             if "|" in line:
-                                 parts = line.split("|", 1)
-                                 choices.append({"name": parts[0].strip(), "description": parts[1].strip()})
-                             else:
-                                 choices.append({"name": line.strip()})
-                         entry["choices_definition"] = choices
+                    ref_id_clean = ExcelImporter.clean_urn_suffix(ref_id)
+                    entry = {"urn": f"{base_urn}:{ref_id_clean}", "ref_id": ref_id}
+                    if "name" in data and data["name"]:
+                        entry["name"] = str(data["name"])
+                    if "description" in data and data["description"]:
+                        entry["description"] = str(data["description"])
+                    entry["category"] = (
+                        str(data.get("category", "quantitative")).strip().lower()
+                    )
+                    if "unit" in data:
+                        entry["unit"] = str(data["unit"])
+                    if "higher_is_better" in data:
+                        entry["higher_is_better"] = str(
+                            data["higher_is_better"]
+                        ).lower() in ("1", "true", "yes", "x")
+                    else:
+                        entry["higher_is_better"] = True
 
-                     translations = ExcelImporter.extract_translations_from_row(header, row)
-                     if translations: entry["translations"] = translations
-                     metric_definitions.append(entry)
-                
+                    if "default_target" in data and data["default_target"] is not None:
+                        try:
+                            entry["default_target"] = float(data["default_target"])
+                        except:
+                            pass
+
+                    if (
+                        entry["category"] == "qualitative"
+                        and "choices_definition" in data
+                    ):
+                        choices = []
+                        for line in str(data["choices_definition"]).split("\n"):
+                            if not line.strip():
+                                continue
+                            if "|" in line:
+                                parts = line.split("|", 1)
+                                choices.append(
+                                    {
+                                        "name": parts[0].strip(),
+                                        "description": parts[1].strip(),
+                                    }
+                                )
+                            else:
+                                choices.append({"name": line.strip()})
+                        entry["choices_definition"] = choices
+
+                    translations = ExcelImporter.extract_translations_from_row(
+                        header, row
+                    )
+                    if translations:
+                        entry["translations"] = translations
+                    metric_definitions.append(entry)
+
                 if library["objects"].get("metric_definitions"):
                     library["objects"]["metric_definitions"].extend(metric_definitions)
                 else:
                     library["objects"]["metric_definitions"] = metric_definitions
 
             elif obj_type == "risk_matrix":
-                matrix = ExcelImporter.parse_risk_matrix(obj["meta"], obj["content_sheet"], wb)
+                matrix = ExcelImporter.parse_risk_matrix(
+                    obj["meta"], obj["content_sheet"], wb
+                )
                 if matrix:
-                    if "risk_matrix" not in library["objects"]: library["objects"]["risk_matrix"] = []
+                    if "risk_matrix" not in library["objects"]:
+                        library["objects"]["risk_matrix"] = []
                     library["objects"]["risk_matrix"].append(matrix)
-            
-            elif obj_type == "requirement_mapping_set":
-                 # Implementation omitted for brevity in this step, can be added if needed. 
-                 # User asked to "help me turn this idea into a fully formed design and spec".
-                 # I am porting the code. I should include mapping set support as it is common.
-                 
-                 meta = obj["meta"]
-                 content_ws = obj["content_sheet"]
-                 source_node_base_urn = obj["meta"].get("source_node_base_urn")
-                 target_node_base_urn = obj["meta"].get("target_node_base_urn")
-                 
-                 mapping_set = {
-                     "urn": meta.get("urn"),
-                     "ref_id": meta.get("ref_id"),
-                     "name": meta.get("name"),
-                     "description": meta.get("description"),
-                     "source_framework_urn": meta.get("source_framework_urn"),
-                     "target_framework_urn": meta.get("target_framework_urn"),
-                 }
-                 # Revert logic
-                 mapping_set_revert = mapping_set.copy()
-                 mapping_set_revert["urn"] += "-revert"
-                 mapping_set_revert["ref_id"] += "-revert"
-                 mapping_set_revert["target_framework_urn"] = meta.get("source_framework_urn")
-                 mapping_set_revert["source_framework_urn"] = meta.get("target_framework_urn")
 
-                 rows = list(content_ws.iter_rows())
-                 if rows:
-                     header = [str(cell.value).strip().lower() if cell.value else "" for cell in rows[0]]
-                     mappings = []
-                     mappings_revert = []
-                     for row in rows[1:]:
-                         if not any(cell.value for cell in row): continue
-                         data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
-                         
-                         source_id = ExcelImporter.clean_urn_suffix(str(data.get("source_node_id", "")).strip())
-                         target_id = ExcelImporter.clean_urn_suffix(str(data.get("target_node_id", "")).strip())
-                         
-                         if not source_id or not target_id: continue
-                         
-                         entry = {
-                             "source_requirement_urn": f"{source_node_base_urn}:{source_id}",
-                             "target_requirement_urn": f"{target_node_base_urn}:{target_id}",
-                             "relationship": str(data.get("relationship", "")).strip()
-                         }
-                         
-                         rel_map = {"subset": "superset", "superset": "subset"}
-                         rev_rel = rel_map.get(entry["relationship"], entry["relationship"])
-                         
-                         entry_revert = {
-                             "source_requirement_urn": entry["target_requirement_urn"],
-                             "target_requirement_urn": entry["source_requirement_urn"],
-                             "relationship": rev_rel
-                         }
-                         
-                         if "rationale" in data:
-                             entry["rationale"] = str(data["rationale"])
-                             entry_revert["rationale"] = entry["rationale"]
-                        
-                         mappings.append(entry)
-                         mappings_revert.append(entry_revert)
-                     
-                     mapping_set["requirement_mappings"] = mappings
-                     mapping_set_revert["requirement_mappings"] = mappings_revert
-                     
-                     library["objects"]["requirement_mapping_sets"] = [mapping_set, mapping_set_revert]
+            elif obj_type == "requirement_mapping_set":
+                # Implementation omitted for brevity in this step, can be added if needed.
+                # User asked to "help me turn this idea into a fully formed design and spec".
+                # I am porting the code. I should include mapping set support as it is common.
+
+                meta = obj["meta"]
+                content_ws = obj["content_sheet"]
+                source_node_base_urn = obj["meta"].get("source_node_base_urn")
+                target_node_base_urn = obj["meta"].get("target_node_base_urn")
+
+                mapping_set = {
+                    "urn": meta.get("urn"),
+                    "ref_id": meta.get("ref_id"),
+                    "name": meta.get("name"),
+                    "description": meta.get("description"),
+                    "source_framework_urn": meta.get("source_framework_urn"),
+                    "target_framework_urn": meta.get("target_framework_urn"),
+                }
+                # Revert logic
+                mapping_set_revert = mapping_set.copy()
+                mapping_set_revert["urn"] += "-revert"
+                mapping_set_revert["ref_id"] += "-revert"
+                mapping_set_revert["target_framework_urn"] = meta.get(
+                    "source_framework_urn"
+                )
+                mapping_set_revert["source_framework_urn"] = meta.get(
+                    "target_framework_urn"
+                )
+
+                rows = list(content_ws.iter_rows())
+                if rows:
+                    header = [
+                        str(cell.value).strip().lower() if cell.value else ""
+                        for cell in rows[0]
+                    ]
+                    mappings = []
+                    mappings_revert = []
+                    for row in rows[1:]:
+                        if not any(cell.value for cell in row):
+                            continue
+                        data = {
+                            header[i]: row[i].value
+                            for i in range(len(header))
+                            if i < len(row)
+                        }
+
+                        source_id = ExcelImporter.clean_urn_suffix(
+                            str(data.get("source_node_id", "")).strip()
+                        )
+                        target_id = ExcelImporter.clean_urn_suffix(
+                            str(data.get("target_node_id", "")).strip()
+                        )
+
+                        if not source_id or not target_id:
+                            continue
+
+                        entry = {
+                            "source_requirement_urn": f"{source_node_base_urn}:{source_id}",
+                            "target_requirement_urn": f"{target_node_base_urn}:{target_id}",
+                            "relationship": str(data.get("relationship", "")).strip(),
+                        }
+
+                        rel_map = {"subset": "superset", "superset": "subset"}
+                        rev_rel = rel_map.get(
+                            entry["relationship"], entry["relationship"]
+                        )
+
+                        entry_revert = {
+                            "source_requirement_urn": entry["target_requirement_urn"],
+                            "target_requirement_urn": entry["source_requirement_urn"],
+                            "relationship": rev_rel,
+                        }
+
+                        if "rationale" in data:
+                            entry["rationale"] = str(data["rationale"])
+                            entry_revert["rationale"] = entry["rationale"]
+
+                        mappings.append(entry)
+                        mappings_revert.append(entry_revert)
+
+                    mapping_set["requirement_mappings"] = mappings
+                    mapping_set_revert["requirement_mappings"] = mappings_revert
+
+                    library["objects"]["requirement_mapping_sets"] = [
+                        mapping_set,
+                        mapping_set_revert,
+                    ]
 
         return library

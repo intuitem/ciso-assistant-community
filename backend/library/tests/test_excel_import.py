@@ -27,6 +27,8 @@ class ExcelImporterTest(SimpleTestCase):
     def test_parse_invalid_file(self):
         # Create a dummy file that isn't a valid Excel
         dummy_file = io.BytesIO(b"not an excel file")
-        
-        with self.assertRaises(Exception): # openpyxl will raise an error (BadZipFile or similar)
+
+        with self.assertRaises(
+            Exception
+        ):  # openpyxl will raise an error (BadZipFile or similar)
             ExcelImporter.parse(dummy_file)
