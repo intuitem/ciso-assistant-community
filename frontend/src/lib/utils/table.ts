@@ -770,6 +770,15 @@ export const ENTITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const PARENT_ENTITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'parentEntity',
+		optionsEndpoint: 'entities',
+		multiple: true
+	}
+};
+
 export const PROVIDER_ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1695,7 +1704,7 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			parent_entity: ENTITY_FILTER,
+			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER
 		}
 	},
@@ -1931,36 +1940,36 @@ export const listViewFields = {
 		}
 	},
 	purposes: {
-		head: ['name', 'description', 'legalBasis', 'processing'],
-		body: ['name', 'description', 'legal_basis', 'processing'],
+		head: ['legalBasis', 'description', 'customName', 'processing'],
+		body: ['legal_basis', 'description', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
 			legal_basis: LEGAL_BASIS_FILTER
 		}
 	},
 	'personal-data': {
-		head: ['processing', 'name', 'category', 'isSensitive', 'retention', 'deletionPolicy'],
-		body: ['processing', 'name', 'category', 'is_sensitive', 'retention', 'deletion_policy'],
+		head: ['category', 'isSensitive', 'retention', 'deletionPolicy', 'customName', 'processing'],
+		body: ['category', 'is_sensitive', 'retention', 'deletion_policy', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
 			category: PERSONAL_DATA_CATEGORY_FILTER
 		}
 	},
 	'data-subjects': {
-		head: ['name', 'description', 'category'],
-		body: ['name', 'description', 'category']
+		head: ['category', 'description', 'customName'],
+		body: ['category', 'description', 'name']
 	},
 	'data-recipients': {
-		head: ['name', 'description', 'category'],
-		body: ['name', 'description', 'category']
+		head: ['category', 'description', 'customName'],
+		body: ['category', 'description', 'name']
 	},
 	'data-contractors': {
-		head: ['name', 'description', 'entity', 'relationshipType', 'country', 'documentationLink'],
-		body: ['name', 'description', 'entity', 'relationship_type', 'country', 'documentation_link']
+		head: ['entity', 'relationshipType', 'country', 'customName', 'documentationLink'],
+		body: ['entity', 'relationship_type', 'country', 'name', 'documentation_link']
 	},
 	'data-transfers': {
-		head: ['name', 'description', 'entity', 'country', 'legalBasis', 'documentationLink'],
-		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
+		head: ['entity', 'country', 'transferMechanism', 'customName', 'documentationLink'],
+		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link']
 	},
 	'ebios-rm': {
 		head: ['name', 'description', 'domain', 'quotationMethod', 'createdAt', 'updatedAt'],

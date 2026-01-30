@@ -42,6 +42,9 @@
 @utility btn-mini-tertiary {
 	@apply text-gray-50 bg-sky-500 hover:bg-sky-400;
 }
+@utility btn-mini-quaternary {
+	@apply text-gray-50 bg-teal-500 hover:bg-teal-400;
+}
 
 @layer utilities {
 	/* (all other styles here...) */

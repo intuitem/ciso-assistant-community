@@ -58,6 +58,8 @@ logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
 from allauth.mfa.models import Authenticator
+from core.context import focus_folder_id_var
+from django.shortcuts import get_object_or_404
 from iam.cache_builders import (
     CacheNotReadyError,
     FolderCacheState,
@@ -255,6 +257,7 @@ class Folder(NameDescriptionMixin):
             ["risk_assessment", "perimeter", "folder"],
             ["risk_scenario", "risk_assessment", "perimeter", "folder"],
             ["compliance_assessment", "perimeter", "folder"],
+            ["processing", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -946,6 +949,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return False
 
         state = get_folder_state()
+        focus_folder_id = focus_folder_id_var.get()
+        if focus_folder_id:
+            focus_ids = set(
+                iter_descendant_ids(state, focus_folder_id, include_start=True)
+            )
+            if folder.id not in focus_ids:
+                return False
         roles_state = get_roles_state()
 
         for a in _iter_assignment_lites_for_user(user):
@@ -1000,6 +1010,15 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         roles_state = get_roles_state()
 
         perimeter_ids = set(iter_descendant_ids(state, folder.id, include_start=True))
+        state = get_folder_state()
+        perimeter_ids = set(iter_descendant_ids(state, folder.id, include_start=True))
+
+        focus_folder_id = focus_folder_id_var.get()
+        if focus_folder_id:
+            focus_ids = set(
+                iter_descendant_ids(state, focus_folder_id, include_start=True)
+            )
+            perimeter_ids &= focus_ids
 
         accessible_ids: Set[uuid.UUID] = set()
 
@@ -1067,6 +1086,13 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         state = get_folder_state()
 
         perimeter_ids = set(iter_descendant_ids(state, folder.id, include_start=True))
+
+        focus_folder_id = focus_folder_id_var.get()
+        if focus_folder_id:
+            focus_ids = set(
+                iter_descendant_ids(state, focus_folder_id, include_start=True)
+            )
+            perimeter_ids &= focus_ids
 
         # folder_id -> set of granted permission codenames ("view_x", "change_x", "delete_x")
         folder_perm_codes: dict[uuid.UUID, set[str]] = defaultdict(set)

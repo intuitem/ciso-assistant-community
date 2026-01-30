@@ -173,6 +173,13 @@
 										aria-label={m.flashMode()}
 										data-testid="flash-mode-button"><i class="fa-solid fa-bolt mr-2"></i></a
 									>
+									<a
+										href="{URLModel}/kanban-mode/{page.url.search}"
+										class="inline-block p-3 btn-mini-quaternary w-12 focus:relative"
+										title={m.kanbanMode()}
+										aria-label={m.kanbanMode()}
+										data-testid="kanban-mode-button"><i class="fa-solid fa-table-columns"></i></a
+									>
 								{/if}
 								{#if ['threats', 'reference-controls', 'metric-definitions'].includes(URLModel)}
 									{@const title =

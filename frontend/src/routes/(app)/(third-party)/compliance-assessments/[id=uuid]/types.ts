@@ -12,4 +12,5 @@ export interface Node {
 	extended_result?: string; // Extended audit result (nonconformities, observations, etc.)
 	score?: number; // Assuming that the score field exists in nodes similar to leaves
 	is_scored?: boolean; // Assuming that the is_scored field exists in nodes similar to leaves
+	weight?: number; // Weight multiplier for score calculations
 }

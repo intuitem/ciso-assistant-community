@@ -272,14 +272,12 @@ python clica.py backup-full --dest-dir ./db --batch-size 200 --resume
 Restores a complete backup of your CISO Assistant instance using a memory-efficient streaming approach. Supports resume capability for interrupted restores.
 
 ```bash
-python clica.py restore-full --src-dir ./db --batch-size 200 --resume --verify-hashes
+python clica.py restore-full --src-dir ./db --verify-hashes
 ```
 
 **Parameters:**
 
 - `--src-dir`: Source directory containing backup files (default: `./db`)
-- `--batch-size`: Number of files to upload per batch (default: 200)
-- `--resume/--no-resume`: Resume from existing manifest if restore was interrupted (default: True)
 - `--verify-hashes/--no-verify-hashes`: Verify local file hashes before upload (default: True)
 
 **Requirements:**

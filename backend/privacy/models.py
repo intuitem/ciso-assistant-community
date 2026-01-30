@@ -1,7 +1,7 @@
 from django.db import models
 from iam.models import User, FolderMixin
 from tprm.models import Entity
-from core.models import Actor, AppliedControl, Asset, Evidence, Incident
+from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
 from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
@@ -9,21 +9,27 @@ from django.db.models import Count
 
 from auditlog.registry import auditlog
 
+from django.utils.translation import gettext_lazy as _
+import uuid
+
 
 class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
     class Meta:
         abstract = True
 
 
-LEGAL_BASIS_CHOICES = (
-    # Article 6(1) Legal Bases
+# Article 6(1) Legal Bases for Processing
+ART6_LAWFUL_BASIS_CHOICES = (
     ("privacy_consent", "Consent"),
     ("privacy_contract", "Performance of a Contract"),
     ("privacy_legal_obligation", "Compliance with a Legal Obligation"),
     ("privacy_vital_interests", "Protection of Vital Interests"),
     ("privacy_public_interest", "Performance of a Task in the Public Interest"),
     ("privacy_legitimate_interests", "Legitimate Interests"),
-    # Special Category Processing - Article 9(2)
+)
+
+# Article 9(2) Special Category Conditions
+ART9_SPECIAL_CATEGORY_CONDITION_CHOICES = (
     ("privacy_explicit_consent", "Explicit Consent for Special Categories"),
     ("privacy_employment_social_security", "Employment and Social Security Law"),
     (
@@ -37,24 +43,14 @@ LEGAL_BASIS_CHOICES = (
     ("privacy_preventive_medicine", "Preventive or Occupational Medicine"),
     ("privacy_public_health", "Public Health"),
     ("privacy_archiving_research", "Archiving, Research or Statistical Purposes"),
-    # Additional GDPR Bases
-    ("privacy_child_consent", "Child's Consent with Parental Authorization"),
-    ("privacy_data_transfer_adequacy", "Transfer Based on Adequacy Decision"),
-    ("privacy_data_transfer_safeguards", "Transfer Subject to Appropriate Safeguards"),
-    (
-        "privacy_data_transfer_binding_rules",
-        "Transfer Subject to Binding Corporate Rules",
-    ),
-    (
-        "privacy_data_transfer_derogation",
-        "Transfer Based on Derogation for Specific Situations",
-    ),
-    # Common Combined Bases
-    ("privacy_consent_and_contract", "Consent and Contract"),
-    ("privacy_contract_and_legitimate_interests", "Contract and Legitimate Interests"),
-    # Other
-    ("privacy_not_applicable", "Not Applicable"),
-    ("privacy_other", "Other Legal Basis (Specify in Description)"),
+)
+
+# Chapter V Transfer Mechanisms (Articles 45-49)
+TRANSFER_MECHANISM_CHOICES = (
+    ("privacy_adequacy_decision", "Adequacy Decision (Art. 45)"),
+    ("privacy_appropriate_safeguards", "Appropriate Safeguards (Art. 46)"),
+    ("privacy_binding_corporate_rules", "Binding Corporate Rules (Art. 47)"),
+    ("privacy_derogation", "Derogation for Specific Situations (Art. 49)"),
 )
 
 
@@ -132,6 +128,9 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         related_name="processings",
     )
 
+    perimeters = models.ManyToManyField(
+        Perimeter, blank=True, related_name="processings"
+    )
     fields_to_check = ["name"]
 
     def update_sensitive_data_flag(self):
@@ -147,12 +146,27 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
 
 
 class Purpose(NameDescriptionFolderMixin):
+    name = models.CharField(
+        max_length=200, verbose_name=_("Name"), null=True, blank=True
+    )
+
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="purposes"
     )
     legal_basis = models.CharField(
-        max_length=255, choices=LEGAL_BASIS_CHOICES, default="privacy_other"
+        max_length=255, choices=ART6_LAWFUL_BASIS_CHOICES, default="privacy_consent"
     )
+    article_9_condition = models.CharField(
+        max_length=255,
+        choices=ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
+        blank=True,
+        null=True,
+    )
+
+    fields_to_check = ["name", "legal_basis", "processing"]
+
+    def __str__(self):
+        return self.name if self.name else self.legal_basis
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -237,6 +251,10 @@ class PersonalData(NameDescriptionFolderMixin):
         ("privacy_other", "Other Personal Data"),
     )
 
+    name = models.CharField(
+        max_length=200, verbose_name=_("Name"), null=True, blank=True
+    )
+
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="personal_data"
     )
@@ -247,6 +265,11 @@ class PersonalData(NameDescriptionFolderMixin):
     )
     is_sensitive = models.BooleanField(default=False)
     assets = models.ManyToManyField(Asset, blank=True, related_name="personal_data")
+
+    fields_to_check = ["name", "category", "processing"]
+
+    def __str__(self):
+        return self.name if self.name else self.category
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -297,10 +320,19 @@ class DataSubject(NameDescriptionFolderMixin):
         ("privacy_other", "Other Data Subject Category"),
     )
 
+    name = models.CharField(
+        max_length=200, verbose_name=_("Name"), null=True, blank=True
+    )
+
     processing = models.ForeignKey(
         "Processing", on_delete=models.CASCADE, related_name="data_subjects"
     )
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
+
+    fields_to_check = ["name", "category", "processing"]
+
+    def __str__(self):
+        return self.name if self.name else self.category
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -347,10 +379,19 @@ class DataRecipient(NameDescriptionFolderMixin):
         ("privacy_other", "Other Recipient Category"),
     )
 
+    name = models.CharField(
+        max_length=200, verbose_name=_("Name"), null=True, blank=True
+    )
+
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="data_recipients"
     )
     category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
+
+    fields_to_check = ["name", "category", "processing"]
+
+    def __str__(self):
+        return self.name if self.name else self.category
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
@@ -365,6 +406,11 @@ class DataContractor(NameDescriptionFolderMixin):
         ("privacy_independent_controller", "Independent Controller"),
         ("privacy_other", "Other Relationship Type"),
     )
+
+    name = models.CharField(
+        max_length=200, verbose_name=_("Name"), null=True, blank=True
+    )
+
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="contractors_involved"
     )
@@ -380,12 +426,21 @@ class DataContractor(NameDescriptionFolderMixin):
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
     documentation_link = models.URLField(blank=True)
 
+    fields_to_check = ["name", "relationship_type", "processing"]
+
+    def __str__(self):
+        return self.name if self.name else self.relationship_type
+
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
         super().save(*args, **kwargs)
 
 
 class DataTransfer(NameDescriptionFolderMixin):
+    name = models.CharField(
+        max_length=200, verbose_name=_("Name"), null=True, blank=True
+    )
+
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="data_transfers"
     )
@@ -396,11 +451,16 @@ class DataTransfer(NameDescriptionFolderMixin):
         blank=True,
     )
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
-    legal_basis = models.CharField(
-        max_length=255, choices=LEGAL_BASIS_CHOICES, blank=True
+    transfer_mechanism = models.CharField(
+        max_length=255, choices=TRANSFER_MECHANISM_CHOICES, blank=True
     )
     guarantees = models.TextField(blank=True)
     documentation_link = models.URLField(blank=True)
+
+    fields_to_check = ["name", "country", "processing"]
+
+    def __str__(self):
+        return self.name if self.name else self.country
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder

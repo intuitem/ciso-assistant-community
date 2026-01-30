@@ -70,7 +70,6 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 <AutocompleteSelect
 	multiple
@@ -119,6 +118,16 @@
 	cacheLock={cacheLocks['evidences']}
 	bind:cachedValue={formDataCache['evidences']}
 	label={m.evidences()}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="perimeters"
+	optionsExtraFields={[['folder', 'str']]}
+	field="perimeters"
+	cacheLock={cacheLocks['perimeters']}
+	bind:cachedValue={formDataCache['perimeters']}
+	label={m.perimeters()}
 />
 <!-- author = models.ForeignKey( -->
 <!--     User, on_delete=models.SET_NULL, null=True, related_name="authored_processings" -->
