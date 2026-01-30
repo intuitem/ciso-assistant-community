@@ -406,6 +406,10 @@ export CISO_SUPERUSER_EMAIL=<XXX>
 # To set a fixed secret key, use the environment variable DJANGO_SECRET_KEY.
 export DJANGO_SECRET_KEY=...
 
+# Sandbox mode for running untrusted code (e.g. library excel files)
+# WARNING: Sandboxing must be enabled in production environments.
+export ENABLE_SANDBOX=True  # optional, default value is True in production enfironments (DJANGO_DEBUG=False) and False in development environments (DJANGO_DEBUG=True).
+
 # Logging configuration
 export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBUG, INFO, WARNING, ERROR, CRITICAL
 export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
