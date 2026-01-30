@@ -9,7 +9,8 @@ let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
 const entityAssessment = {
 	name: 'Test entity assessment',
-	perimeter: vars.perimeterName,
+	folder: vars.folderName,
+	perimeter: vars.folderName + '/' + vars.perimeterName,
 	create_audit: true,
 	framework: vars.questionnaire.name,
 	representatives: 'third-party@tests.com'
