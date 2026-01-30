@@ -306,7 +306,7 @@ def data_wizard_import(model_type: str):
             r = requests.post(url, headers=headers, data=file_data, verify=VERIFY_CERTIFICATE)
             try:
                 response_text = json.dumps(r.json(), indent=2)
-            except:
+            except Exception:
                 response_text = r.text
             print(f"{r.status_code} {r.reason} {r.url}:\n\n{response_text}")
 
