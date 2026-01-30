@@ -300,7 +300,13 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 assert isinstance(library, StoredLibrary), (
                     "The library variable isn't of type StoredLibrary, but no error were detected!"
                 )
-                library.load()
+                error = library.load()
+                if error is not None:
+                    return HttpResponse(
+                        json.dumps({"error": error}),
+                        status=HTTP_422_UNPROCESSABLE_ENTITY,
+                    )
+
                 return Response(
                     StoredLibrarySerializer(library).data, status=HTTP_201_CREATED
                 )
