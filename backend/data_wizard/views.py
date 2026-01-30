@@ -686,7 +686,7 @@ class LoadFileView(APIView):
                                 matrix_id,
                             )
 
-        except AssertionError:
+        except AssertionError as e:
             logger.error(f"Unknown model type", exc_info=e)
             return Response(
                 {"error": "UnknownModelType"},
