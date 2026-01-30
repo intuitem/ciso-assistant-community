@@ -502,7 +502,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
                 context={"request": self.request},
             )
 
-            if serializer.is_valid(raise_exception=True):
+            if serializer.is_valid():
                 findings_assessment: FindingsAssessment = serializer.save()
                 logger.info(
                     f"Created follow-up: {assessment_name} with ID {findings_assessment.id}"
