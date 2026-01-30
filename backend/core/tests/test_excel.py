@@ -123,8 +123,6 @@ class TestExcelUploadHandler:
         assert call_args["script_path"]
         assert call_args["input_filename"] == "library.xlsx"
 
-
-
     @patch("core.excel.openpyxl.load_workbook")
     def test_process_upload_cis_prep(
         self, mock_load_workbook, excel_handler, valid_excel_content, mock_sandbox
