@@ -5683,7 +5683,7 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         return extra_controls
 
     def __str__(self):
-        return f"{self.folder}/{self.risk_assessment} - {self.name}"
+        return f"{self.folder}/{self.risk_assessment}/{self.name}"
 
     def delete(self, *args, **kwargs):
         risk_assessment_id = self.risk_assessment.id

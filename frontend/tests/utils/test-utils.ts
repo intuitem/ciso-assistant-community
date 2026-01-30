@@ -736,7 +736,7 @@ export class TestContent {
 				modelName: 'riskscenario',
 				dependency: vars.threat.library,
 				build: {
-					str: `${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion} - ${vars.riskScenarioName}`,
+					str: `${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`,
 					name: vars.riskScenarioName,
 					description: vars.description,
 					risk_assessment: `${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
@@ -767,7 +767,7 @@ export class TestContent {
 					folder: vars.folderName,
 					approver: LoginPage.defaultEmail,
 					risk_scenarios: [
-						`${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion} - ${vars.riskScenarioName}`
+						`${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
 					]
 				},
 				editParams: {
