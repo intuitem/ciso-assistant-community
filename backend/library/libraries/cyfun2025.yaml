@@ -14,7 +14,7 @@ description: "The CyberFundamentals Framework is a framework owned by the Centre
   \ 103305-1).\nhttps://cyfun.eu/sites/default/files/2025-10/CyFun2025_Booklet-ESSENTIAL.pdf\n\
   Version 2025-10-01"
 copyright: "\u24B8 Centre for Cybersecurity Belgium (CCB)"
-version: 3
+version: 4
 publication_date: null
 provider: CCB
 packager: intuitem
@@ -264,10 +264,17 @@ objects:
       - E
       - IG
       - EG
+    - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc
+      ref_id: GV.OC-04
+      description: Critical objectives, capabilities, and services that external stakeholders
+        depend on or expect from the organisation are understood and communicated.
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-03
+      parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04
       ref_id: GV.OC-04.1
       description: The organisation shall identify, document, and communicate the
         critical objectives, capabilities, and services relied upon by external stakeholders,
@@ -294,7 +301,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.2
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-03
+      parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04
       ref_id: GV.OC-04.2
       description: The organisation shall define and document cybersecurity requirements
         for essential operations, validate them through testing and audits, maintain
@@ -329,7 +336,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.3
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-03
+      parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04
       ref_id: GV.OC-04.3
       description: Redundancy shall be implemented to meet availability requirements
         as defined by the organisation, legislation and/or regulations
@@ -352,7 +359,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04.4
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-03
+      parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-04
       ref_id: GV.OC-04.4
       description: Recovery time and recovery point objectives for the resumption
         of essential ICT/OT system processes shall be defined and monitored.
@@ -389,10 +396,17 @@ objects:
         \ objectives based on lessons learned from incidents and audits."
       implementation_groups:
       - E
+    - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-05
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc
+      ref_id: GV.OC-05
+      description: Outcomes, capabilities, and services that the organization depends
+        on are understood and communicated.
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-05.1
       assessable: true
       depth: 4
-      parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-03
+      parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.oc-05
       ref_id: GV.OC-05.1
       description: The organisation shall identify, document, and communicate its
         role in the supply chain, including the external capabilities, services, and
@@ -775,8 +789,8 @@ objects:
         \ and partners specific to OT (e.g., ICS vendors) and IT (e.g., cloud providers)."
       implementation_groups:
       - I
-      - IK
       - E
+      - IK
       - EK
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-02.2
       assessable: true
@@ -2945,8 +2959,8 @@ objects:
         \ coordination with engineering teams."
       implementation_groups:
       - I
-      - IK
       - E
+      - IK
       - EK
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.ra-08.2
       assessable: true
