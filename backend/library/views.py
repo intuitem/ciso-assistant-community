@@ -290,10 +290,17 @@ class StoredLibraryViewSet(BaseModelViewSet):
             content = attachment.read()  # Should we read it chunck by chunck or ensure that the file size of the library content is reasonnable before reading ?
 
             try:
-                library = StoredLibrary.store_library_content(content)
-                if library is not None:
-                    library.load()
+                library, error = StoredLibrary.store_library_content(content)
+                if error is not None:
+                    return HttpResponse(
+                        json.dumps({"error": error}),
+                        status=HTTP_422_UNPROCESSABLE_ENTITY,
+                    )
 
+                assert isinstance(library, StoredLibrary), (
+                    "The library variable isn't of type StoredLibrary, but no error were detected!"
+                )
+                library.load()
                 return Response(
                     StoredLibrarySerializer(library).data, status=HTTP_201_CREATED
                 )
