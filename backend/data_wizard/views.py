@@ -593,7 +593,7 @@ class LoadFileView(APIView):
         res = None
         try:
             if model_type is None:
-                logger.error(f"Unknown model type", exc_info=e)
+                logger.error(f"Unknown model type: {repr(model_type_string)}")
                 return Response(
                     {"error": "UnknownModelType"},
                     status=status.HTTP_400_BAD_REQUEST,
