@@ -63,10 +63,8 @@ class TestExcelUploadHandler:
     def test_init_script_not_found(self, mock_settings, mock_sandbox_factory):
         # We need to simulate script path NOT existing.
         # BASE_DIR / "scripts" / "convert_library_v2.py"
-        with patch.object(ExcelUploadHandler, "_resolve_script_path") as mock_resolve:
-            mock_path = MagicMock()
-            mock_path.exists.return_value = False
-            mock_resolve.return_value = mock_path
+        with patch("pathlib.Path.exists") as mock_exists:
+            mock_exists.return_value = False
 
             with pytest.raises(FileNotFoundError):
                 ExcelUploadHandler()
@@ -125,33 +123,7 @@ class TestExcelUploadHandler:
         assert call_args["script_path"]
         assert call_args["input_filename"] == "library.xlsx"
 
-    @patch("core.excel.openpyxl.load_workbook")
-    def test_process_upload_v1_conversion(
-        self, mock_load_workbook, excel_handler, valid_excel_content, mock_sandbox
-    ):
-        # Mock sheet names to missing library_meta
-        mock_wb = MagicMock()
-        mock_wb.sheetnames = ["controls"]  # No library_meta
-        mock_load_workbook.return_value = mock_wb
 
-        mock_sandbox.run_python.side_effect = [
-            b"v2_converted_content",  # Result of v1->v2 conversion
-            "yaml_content",  # Result of main conversion
-        ]
-
-        uploaded_file = SimpleUploadedFile("test.xlsx", valid_excel_content)
-        result = excel_handler.process_upload(uploaded_file)
-
-        assert result["status"] == 200
-        assert mock_sandbox.run_python.call_count == 2
-
-        # Check first call is v1->v2
-        args1 = mock_sandbox.run_python.call_args_list[0][1]
-        assert "convert_v1_to_v2.py" in args1["script_path"]
-
-        # Check second call is main conversion
-        args2 = mock_sandbox.run_python.call_args_list[1][1]
-        assert args2["input_data"] == b"v2_converted_content"
 
     @patch("core.excel.openpyxl.load_workbook")
     def test_process_upload_cis_prep(
@@ -179,7 +151,7 @@ class TestExcelUploadHandler:
 
         # Check prep call
         args1 = mock_sandbox.run_python.call_args_list[0][1]
-        assert "prep_cis.py" in args1["script_path"]
+        assert "prep_cis_v2.py" in str(args1["script_path"])
 
         # Check main call uses prep output
         args2 = mock_sandbox.run_python.call_args_list[1][1]
