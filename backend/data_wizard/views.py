@@ -531,7 +531,9 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             filtering_label_names = record_filtering_labels.split(
                 self.FILTERING_LABEL_SEPARATOR
             )
-            filtering_label_names = [label_name.strip() for label_name in filtering_label_names]
+            filtering_label_names = [
+                label_name.strip() for label_name in filtering_label_names
+            ]
         else:
             filtering_label_names = []
 
