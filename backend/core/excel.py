@@ -22,11 +22,8 @@ class ExcelUploadHandler:
         / "convert_library_v2.py"  # Relative to backend directory
     )
 
-    # TODO: if imported excel (or ) lacks the 'library_meta' sheet,
-    V1_TO_V2_SCRIPT_PATH = settings.BASE_DIR / "scripts" / "convert_v1_to_v2.py"
-
-    CIS_V8_PREP_SCRIPT_PATH = settings.BASE_DIR / "scripts" / "prep_cis.py"
-    CSA_CCM_PREP_SCRIPT_PATH = settings.BASE_DIR / "scripts" / "convert_ccm.py"
+    CIS_V8_PREP_SCRIPT_PATH = settings.BASE_DIR / "scripts" / "prep_cis_v2.py"
+    CSA_CCM_PREP_SCRIPT_PATH = settings.BASE_DIR / "scripts" / "convert_ccm_v2.py"
 
     # Default packager name to use when running prep scripts
     DEFAULT_PACKAGER = "intuitem"
@@ -124,23 +121,6 @@ class ExcelUploadHandler:
                     output_filename=prep_output_filename,
                     args=["--packager", self.DEFAULT_PACKAGER],
                     binary_output=True,
-                )
-
-            # V1 compatibility
-
-            sheet_names = self._get_sheet_names(content)
-            if "library_meta" not in sheet_names:
-                logger.info(
-                    "Detected V1 library format; running V1 to V2 conversion",
-                    sheet_names=sheet_names,
-                )
-                content = self.sandbox.run_python(
-                    script_path=self.V1_TO_V2_SCRIPT_PATH,
-                    input_data=content,
-                    input_filename=prep_output_filename or "input.xlsx",
-                    output_filename="library.xlsx",
-                    args=[],
-                    binary_output=True,  # This outputs bytes for next step
                 )
 
             # Main Conversion
