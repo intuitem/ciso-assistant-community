@@ -39,7 +39,9 @@
 		form,
 		importFolder = false,
 		model,
-		customNameDescription = model.customNameDescription ?? false,
+		customNameDescription = model.customNameDescription ??
+			model.info?.customNameDescription ??
+			false,
 		duplicate = false,
 		invalidateAll = true,
 		formAction = '?/create',

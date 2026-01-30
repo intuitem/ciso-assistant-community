@@ -647,7 +647,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return None
 
     def get_queryset(self) -> models.query.QuerySet:
-        """the scope_folder_id query_param allows scoping the objects to retrieve"""
         if not self.model:
             return None
         object_ids_view = None
@@ -663,14 +662,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     object_ids_view = [id]
 
         if not object_ids_view:
-            scope_folder_id = self.request.query_params.get("scope_folder_id")
-            scope_folder = (
-                get_object_or_404(Folder, id=scope_folder_id)
-                if scope_folder_id
-                else Folder.get_root_folder()
-            )
             object_ids_view = RoleAssignment.get_accessible_object_ids(
-                scope_folder, self.request.user, self.model
+                Folder.get_root_folder(), self.request.user, self.model
             )[0]
 
         queryset = self.model.objects.filter(id__in=object_ids_view)
@@ -8065,6 +8058,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get score calculation method choices")
+    def score_calculation_method(self, request):
+        return Response(dict(ComplianceAssessment.CalculationMethod.choices))
+
     @action(
         detail=True,
         name="Get target frameworks mapping options with compliance distribution",
@@ -8803,10 +8801,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "score": compliance_assessment.get_global_score(),
                 "max_score": compliance_assessment.max_score,
                 "min_score": compliance_assessment.min_score,
+                "total_max_score": compliance_assessment.get_total_max_score(),
                 "scores_definition": get_referential_translation(
                     compliance_assessment.framework, "scores_definition", get_language()
                 ),
                 "show_documentation_score": compliance_assessment.show_documentation_score,
+                "score_calculation_method": compliance_assessment.score_calculation_method,
             }
         )
 
@@ -9158,16 +9158,28 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 else:
                     compliance_percentage = 0
 
-                # Calculate maturity score (average score, not percentage)
+                # Calculate maturity score using weights and score_calculation_method
                 scored_list = [
                     ra
                     for ra in assessable_list
                     if ra.is_scored and ra.result != "not_applicable"
                 ]
                 if scored_list:
-                    total_score = sum(ra.score or 0 for ra in scored_list)
-                    # Calculate mean score (same as frontend nodeScore function)
-                    maturity_score = total_score / len(scored_list)
+                    weighted_score = sum(
+                        (ra.score or 0) * (ra.requirement.weight or 1)
+                        for ra in scored_list
+                    )
+                    total_weight = sum(ra.requirement.weight or 1 for ra in scored_list)
+                    if (
+                        audit.score_calculation_method
+                        == ComplianceAssessment.CalculationMethod.SUM
+                    ):
+                        maturity_score = weighted_score
+                    else:
+                        # Default to weighted average
+                        maturity_score = (
+                            weighted_score / total_weight if total_weight > 0 else 0
+                        )
                 else:
                     maturity_score = 0
 
@@ -9201,6 +9213,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "observation": base_audit.observation,
                 "global_score": base_audit.get_global_score(),
                 "max_score": base_audit.max_score,
+                "total_max_score": base_audit.get_total_max_score(),
+                "score_calculation_method": base_audit.score_calculation_method,
                 "donut_data": base_audit.donut_render(),
                 "radar_data": aggregate_by_top_level(base_audit),
             },
@@ -9221,6 +9235,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "observation": compare_audit.observation,
                 "global_score": compare_audit.get_global_score(),
                 "max_score": compare_audit.max_score,
+                "total_max_score": compare_audit.get_total_max_score(),
+                "score_calculation_method": compare_audit.score_calculation_method,
                 "donut_data": compare_audit.donut_render(),
                 "radar_data": aggregate_by_top_level(compare_audit),
             },
@@ -10241,7 +10257,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
     filterset_fields = [
         "name",
         "ref_id",
-        "owner",
         "category",
         "perimeter",
         "folder",
@@ -10260,7 +10275,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "evidences",
                 "authors",
-                "owner",
             )
         )
 
@@ -10381,7 +10395,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "status": finding.get_status_display(),
                 "severity": finding.get_severity_display(),
                 "folder": finding.folder.name if finding.folder else "",
-                "owner": ", ".join([str(actor) for actor in finding.owner.all()]),
                 "applied_controls": "\n".join(
                     [
                         f"{ac.name} [{ac.get_status_display().lower()}]"
@@ -10449,13 +10462,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         findings_assessment = (
             FindingsAssessment.objects.select_related("folder")
-            .prefetch_related("owner", "authors", "reviewers")
+            .prefetch_related("authors", "reviewers")
             .get(id=pk)
         )
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
             .select_related("folder")
-            .prefetch_related("owner", "applied_controls", "evidences")
+            .prefetch_related("applied_controls", "evidences")
             .order_by("ref_id")
         )
 
@@ -10489,8 +10502,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         md_content += f"- **Category**: {findings_assessment.get_category_display()}\n"
         md_content += f"- **Status**: {findings_assessment.get_status_display()}\n"
         md_content += f"- **Folder**: {findings_assessment.folder.name if findings_assessment.folder else 'N/A'}\n"
-        if findings_assessment.owner.exists():
-            md_content += f"- **Owners**: {', '.join([str(actor) for actor in findings_assessment.owner.all()])}\n"
         if findings_assessment.authors.exists():
             md_content += f"- **Authors**: {', '.join([str(actor) for actor in findings_assessment.authors.all()])}\n"
         if findings_assessment.reviewers.exists():
@@ -10538,8 +10549,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             md_content += f"- **Severity**: {finding.get_severity_display()}\n"
             md_content += f"- **Description**: {finding.description or 'N/A'}\n"
             md_content += f"- **Observation**: {finding.observation or 'N/A'}\n"
-            if finding.owner.exists():
-                md_content += f"- **Owner**: {', '.join([str(actor) for actor in finding.owner.all()])}\n"
             if finding.applied_controls.exists():
                 md_content += "- **Applied Controls**:\n"
                 for ac in finding.applied_controls.all():
@@ -10573,13 +10582,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
 
         findings_assessment = (
             FindingsAssessment.objects.select_related("folder")
-            .prefetch_related("owner", "authors", "reviewers")
+            .prefetch_related("authors", "reviewers")
             .get(id=pk)
         )
         findings = (
             Finding.objects.filter(findings_assessment_id=pk)
             .select_related("folder")
-            .prefetch_related("owner", "applied_controls", "evidences")
+            .prefetch_related("applied_controls", "evidences")
             .order_by("ref_id")
         )
         metrics = findings_assessment.get_findings_metrics()

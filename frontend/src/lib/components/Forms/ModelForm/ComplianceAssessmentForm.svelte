@@ -102,7 +102,6 @@
 	cacheLock={cacheLocks['perimeter']}
 	bind:cachedValue={formDataCache['perimeter']}
 	label={m.perimeter()}
-	hidden={initialData.perimeter && context !== 'clone'}
 />
 {#if context === 'fromBaseline' && initialData.baseline}
 	<AutocompleteSelect
@@ -222,6 +221,16 @@
 			helpText={m.progressStatusEnabledHelpText()}
 			cacheLock={cacheLocks['progress_status_enabled']}
 			bind:cachedValue={formDataCache['progress_status_enabled']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['score_calculation_method']}
+			field="score_calculation_method"
+			label={m.scoreCalculationMethod()}
+			helpText={m.scoreCalculationMethodHelpText()}
+			cacheLock={cacheLocks['score_calculation_method']}
+			bind:cachedValue={formDataCache['score_calculation_method']}
+			disableDoubleDash
 		/>
 	</div>
 	<TextField

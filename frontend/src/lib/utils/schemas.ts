@@ -433,6 +433,7 @@ export const ComplianceAssessmentSchema = z.object({
 	show_documentation_score: z.boolean().optional().default(false),
 	extended_result_enabled: z.boolean().optional().default(false),
 	progress_status_enabled: z.boolean().optional().default(true),
+	score_calculation_method: z.string().optional().default('average'),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
@@ -540,8 +541,13 @@ export const FeatureFlagsSchema = z.object({
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
+	focus_mode: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
-	metrology: z.boolean().optional()
+	metrology: z.boolean().optional(),
+	personal_data: z.boolean().optional(),
+	purposes: z.boolean().optional(),
+	right_requests: z.boolean().optional(),
+	data_breaches: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -774,7 +780,8 @@ export const processingSchema = z.object({
 	nature: z.string().optional().array().optional(),
 	associated_controls: z.array(z.string().optional()).optional(),
 	evidences: z.string().optional().array().optional(),
-	assigned_to: z.string().uuid().optional().array().optional()
+	assigned_to: z.string().uuid().optional().array().optional(),
+	perimeters: z.string().uuid().optional().array().optional()
 });
 
 export const rightRequestSchema = z.object({
@@ -822,24 +829,29 @@ export const dataBreachSchema = z.object({
 
 export const purposeSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	legal_basis: z.string(),
+	article_9_condition: z.string().optional().nullable(),
 	processing: z.string()
 });
 export const dataSubjectSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
 	processing: z.string()
 });
 export const dataRecipientSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
 	processing: z.string()
 });
 export const dataContractorSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	relationship_type: z.string(),
 	country: z.string(),
@@ -854,6 +866,7 @@ export const dataContractorSchema = z.object({
 });
 export const dataTransferSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	country: z.string(),
 	documentation_link: z
@@ -862,7 +875,7 @@ export const dataTransferSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	legal_basis: z.string(),
+	transfer_mechanism: z.string().optional(),
 	guarantees: z.string().optional(),
 	processing: z.string(),
 	entity: z.string().optional()
@@ -870,9 +883,10 @@ export const dataTransferSchema = z.object({
 
 export const personalDataSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	category: z.string(),
-	retention: z.string(),
-	deletion_policy: z.string(),
+	retention: z.string().optional(),
+	deletion_policy: z.string().optional(),
 	is_sensitive: z.boolean().optional(),
 	processing: z.string(),
 	assets: z.string().uuid().optional().array().optional()
@@ -1117,7 +1131,6 @@ export const FindingsAssessmentSchema = z.object({
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
-	owner: z.string().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	category: z.string().default('--'),
 	evidences: z.string().uuid().optional().array().optional(),
