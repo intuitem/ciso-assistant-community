@@ -438,9 +438,16 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     # YAML file - read directly
                     content = attachment.read()
 
+                dry_run = request.query_params.get("dry_run", "false").lower() == "true"
+
                 # Store the library content (YAML bytes)
-                library = StoredLibrary.store_library_content(content)
+                library = StoredLibrary.store_library_content(content, dry_run=dry_run)
+                if dry_run:
+                    logger.info("Dry run library upload successful")
+                    return Response(library)
+
                 if library is not None:
+                    logger.info("Attempting to load newly uploaded library")
                     library.load()
 
                 return Response(
