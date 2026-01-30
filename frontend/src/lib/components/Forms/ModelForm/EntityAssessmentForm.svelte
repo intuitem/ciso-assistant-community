@@ -17,7 +17,7 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
-		data?: Record<string, any>;
+		object?: Record<string, any>;
 	}
 
 	let {
@@ -26,7 +26,7 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		data = {}
+		object = {}
 	}: Props = $props();
 
 	let selectedFolder = $state<string | undefined>(undefined);
@@ -35,6 +35,16 @@
 
 	let createAudit = $state(form.data?.create_audit ?? false);
 	let selectedEntity = $state<string | undefined>(form.data?.entity || initialData.entity);
+	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
+
+	// Reactive audit data that updates when object.compliance_assessment changes
+	let auditData = $derived(
+		object.compliance_assessment && typeof object.compliance_assessment === 'object'
+			? object.compliance_assessment
+			: object.compliance_assessment
+				? { id: object.compliance_assessment, str: '', name: '' }
+				: null
+	);
 
 	function handleFolderChange(folderId: string) {
 		selectedFolder = folderId;
@@ -99,7 +109,22 @@
 		onChange={handlePerimeterChange}
 	/>
 {/key}
-{#if !data.compliance_assessment}
+{#if auditData}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="compliance-assessments"
+		optionsExtraFields={[['folder', 'str']]}
+		field="compliance_assessment"
+		cacheLock={cacheLocks['compliance_assessment']}
+		bind:cachedValue={formDataCache['compliance_assessment']}
+		label={m.complianceAssessment()}
+		disabled
+	/>
+	<a href="/compliance-assessments/{auditData.id}" class="anchor flex items-center space-x-2">
+		<span>{m.jumpTo()}</span>
+		<i class="fa-solid fa-link text-xs"></i>
+	</a>
+{:else}
 	<Checkbox
 		{form}
 		field="create_audit"
@@ -123,24 +148,27 @@
 					.then((r) => r.json())
 					.then((r) => {
 						const implementation_groups = r['implementation_groups_definition'] || [];
-						model.selectOptions['selected_implementation_groups'] = implementation_groups.map(
-							(group) => ({ label: group.name, value: group.ref_id })
-						);
+						implementationGroupsChoices = implementation_groups.map((group) => ({
+							label: group.name,
+							value: group.ref_id
+						}));
 					});
 			}
 		}}
 	/>
-	{#if model.selectOptions['selected_implementation_groups'] && model.selectOptions['selected_implementation_groups'].length}
-		<AutocompleteSelect
-			multiple
-			translateOptions={false}
-			{form}
-			options={model.selectOptions['selected_implementation_groups']}
-			field="selected_implementation_groups"
-			cacheLock={cacheLocks['selected_implementation_groups']}
-			bind:cachedValue={formDataCache['selected_implementation_groups']}
-			label={m.selectedImplementationGroups()}
-		/>
+	{#if implementationGroupsChoices.length > 0}
+		{#key implementationGroupsChoices}
+			<AutocompleteSelect
+				multiple
+				translateOptions={false}
+				{form}
+				options={implementationGroupsChoices}
+				field="selected_implementation_groups"
+				cacheLock={cacheLocks['selected_implementation_groups']}
+				bind:cachedValue={formDataCache['selected_implementation_groups']}
+				label={m.selectedImplementationGroups()}
+			/>
+		{/key}
 	{/if}
 {/if}
 <AutocompleteSelect
@@ -262,17 +290,6 @@
 		cacheLock={cacheLocks['reviewers']}
 		bind:cachedValue={formDataCache['reviewers']}
 		label={m.reviewers()}
-	/>
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="compliance-assessments"
-		optionsExtraFields={[['folder', 'str']]}
-		field="compliance_assessment"
-		cacheLock={cacheLocks['compliance_assessment']}
-		bind:cachedValue={formDataCache['compliance_assessment']}
-		label={m.complianceAssessment()}
-		disabled={createAudit}
-		hidden={createAudit}
 	/>
 	<AutocompleteSelect
 		{form}
