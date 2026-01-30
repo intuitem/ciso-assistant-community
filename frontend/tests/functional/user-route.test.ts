@@ -159,6 +159,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.complianceAssessmentsPage.createItem({
 			name: vars.assessmentName,
 			description: vars.description,
+			folder: vars.folderName,
 			perimeter: vars.folderName + '/' + vars.perimeterName,
 			version: '1.4.2',
 			status: 'Done',
@@ -210,6 +211,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskAssessmentsPage.createItem({
 			name: vars.riskAssessmentName,
 			description: vars.description,
+			folder: vars.folderName,
 			perimeter: vars.folderName + '/' + vars.perimeterName,
 			version: vars.riskAssessmentVersion,
 			status: 'Done',
