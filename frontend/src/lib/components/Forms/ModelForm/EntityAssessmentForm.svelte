@@ -33,6 +33,9 @@
 	let folderKey = $state(0);
 	let isAutoFillingFolder = $state(false);
 
+	let createAudit = $state(form.data?.create_audit ?? false);
+	let selectedEntity = $state<string | undefined>(form.data?.entity || initialData.entity);
+
 	function handleFolderChange(folderId: string) {
 		selectedFolder = folderId;
 		// Clear perimeter when folder changes (unless we're auto-filling from perimeter)
@@ -102,12 +105,13 @@
 		field="create_audit"
 		label={m.createAudit()}
 		helpText={m.createAuditHelpText()}
+		onChange={(checked) => (createAudit = checked)}
 	/>
 	<AutocompleteSelect
 		{form}
-		disabled={!data.create_audit}
+		disabled={!createAudit}
 		mandatory
-		hidden={!data.create_audit}
+		hidden={!createAudit}
 		optionsEndpoint="frameworks"
 		field="framework"
 		cacheLock={cacheLocks['framework']}
@@ -147,13 +151,14 @@
 	bind:cachedValue={formDataCache['entity']}
 	label={m.entity()}
 	hidden={initialData.entity}
+	onChange={(entityId) => (selectedEntity = entityId)}
 />
-{#key form.data?.entity}
+{#key selectedEntity}
 	<AutocompleteSelect
 		{form}
 		multiple
 		optionsEndpoint="solutions"
-		optionsDetailedUrlParameters={[['provider_entity', form.data?.entity || '']]}
+		optionsDetailedUrlParameters={[['provider_entity', selectedEntity || '']]}
 		field="solutions"
 		cacheLock={cacheLocks['solutions']}
 		bind:cachedValue={formDataCache['solutions']}
@@ -178,15 +183,15 @@
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
 />
-{#if form.data?.entity}
-	{#key form.data?.entity}
+{#if selectedEntity}
+	{#key selectedEntity}
 		<AutocompleteSelect
 			{form}
 			multiple
 			optionsEndpoint="users"
 			optionsDetailedUrlParameters={[
 				['is_third_party', 'true'],
-				['representative__entity', form.data?.entity || '']
+				['representative__entity', selectedEntity || '']
 			]}
 			optionsLabelField="email"
 			field="representatives"
@@ -266,8 +271,8 @@
 		cacheLock={cacheLocks['compliance_assessment']}
 		bind:cachedValue={formDataCache['compliance_assessment']}
 		label={m.complianceAssessment()}
-		disabled={data.create_audit}
-		hidden={data.create_audit}
+		disabled={createAudit}
+		hidden={createAudit}
 	/>
 	<AutocompleteSelect
 		{form}

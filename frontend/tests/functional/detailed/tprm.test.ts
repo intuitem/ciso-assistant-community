@@ -7,9 +7,9 @@ import { SideBar } from '../../utils/sidebar.js';
 let vars = TestContent.generateTestVars();
 let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
-// Note: folder is auto-filled from the entity when creating from entity context
 const entityAssessment = {
 	name: 'Test entity assessment',
+	folder: vars.folderName,
 	perimeter: vars.folderName + '/' + vars.perimeterName,
 	create_audit: true,
 	framework: vars.questionnaire.name,
