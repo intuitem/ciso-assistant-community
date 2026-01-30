@@ -4802,7 +4802,7 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
     perimeter = models.ForeignKey(
         Perimeter,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Perimeter"),
         null=True,
         blank=True,
