@@ -914,6 +914,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Entity assessment',
 		verboseNamePlural: 'Entity assessments',
 		foreignKeyFields: [
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'solutions', urlModel: 'solutions' },
