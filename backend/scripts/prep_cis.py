@@ -17,12 +17,18 @@ parser = argparse.ArgumentParser(
     description="convert CIS controls offical Excel file to CISO Assistant Excel file",
 )
 parser.add_argument("filename", help="name of CIS controls Excel file")
-parser.add_argument("packager", help="name of packager entity")
-
+parser.add_argument(
+    "--output",
+    type=str,
+    help="Custom output file name (only used in non-bulk mode).",
+    default="cis-controls-v8.xlsx",
+)
+parser.add_argument("--packager", help="name of packager entity")
 args = parser.parse_args()
+
 input_file_name = args.filename
 packager = args.packager
-output_file_name = "cis-controls-v8.xlsx"
+output_file_name = args.output
 
 print(f'⌛ Parsing "{input_file_name}"...')
 

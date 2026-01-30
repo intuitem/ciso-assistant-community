@@ -320,7 +320,12 @@ class StoredLibraryViewSet(BaseModelViewSet):
             ]
 
             if mime not in allowed_mimes:
-                logger.warning("Invalid MIME type", mime=mime, filename=attachment.name)
+                logger.warning(
+                    "Invalid MIME type",
+                    expected_mime=" or ".join(allowed_mimes),
+                    actual_mime=mime,
+                    filename=attachment.name,
+                )
                 if not (
                     mime == "text/plain" and attachment.name.endswith((".yaml", ".yml"))
                 ):
@@ -338,6 +343,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     ):
                         return HttpResponse(
                             json.dumps({"error": "invalidFileFormat"}),
+                            expected_mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            actual_mime=mime,
                             status=HTTP_400_BAD_REQUEST,
                         )
 

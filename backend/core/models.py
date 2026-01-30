@@ -331,6 +331,7 @@ class StoredLibrary(LibraryMixin):
 
         urn = library_data["urn"].lower()
         if not match_urn(urn):
+            logger.error("Library URN is badly formatted", urn=urn)
             raise ValueError("Library URN is badly formatted")
         locale = library_data.get("locale", "en")
         version = int(library_data["version"])

@@ -97,7 +97,7 @@ def clean_urn_suffix(value: str, compat_mode: int = 0):
     """
     # [+] Compat check
     if 1 <= compat_mode <= 2:
-        value = value.lower().replace(" ", "-")
+        value = value.lower().replace(" ", "-").replace(".", "_")
     else:  # Default behavior
         # Normalize to separate characters from their accents (e.g., é → e + ́)
         value = (

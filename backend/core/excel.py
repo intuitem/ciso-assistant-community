@@ -1,8 +1,10 @@
 from pathlib import Path
 from typing import Any, Optional
 
+import openpyxl
 import structlog
 from django.conf import settings
+from django.core.files.uploadedfile import UploadedFile
 
 from core.sandbox import SandboxFactory, SandboxTimeoutError, SandboxViolationError
 
@@ -17,6 +19,15 @@ class ExcelUploadHandler:
     DEFAULT_SCRIPT_PATH = (
         "scripts/convert_library_v2.py"  # Relative to backend directory
     )
+
+    # TODO: if imported excel (or ) lacks the 'library_meta' sheet,
+    V1_TO_V2_SCRIPT_PATH = "scripts/convert_v1_to_v2.py"
+
+    CIS_V8_PREP_SCRIPT_PATH = "scripts/prep_cis.py"
+    CSA_CCM_PREP_SCRIPT_PATH = "scripts/convert_ccm.py"
+
+    # Default packager name to use when running prep scripts
+    DEFAULT_PACKAGER = "intuitem"
 
     def __init__(
         self,
@@ -47,13 +58,37 @@ class ExcelUploadHandler:
         """
         return settings.BASE_DIR / "scripts" / "convert_library_v2.py"
 
+    def _get_sheet_names(self, content: bytes) -> list[str]:
+        """
+        Extract sheet names from the Excel file content without full parsing.
+        """
+        import io
+
+        try:
+            # read_only=True and data_only=True for performance and safety
+            wb = openpyxl.load_workbook(
+                io.BytesIO(content), read_only=True, data_only=True
+            )
+            return wb.sheetnames
+        except Exception:
+            logger.warning("Failed to parse sheet names from Excel file", exc_info=True)
+            return []
+
     def process_upload(
-        self, uploaded_file, compat_mode: Optional[int] = None
+        self, uploaded_file: UploadedFile, compat_mode: Optional[int] = None
     ) -> dict[str, Any]:
         """
         Process Django UploadedFile using external conversion script.
         """
+        if not uploaded_file.size:
+            logger.error("No file uploaded or file is empty")
+            return {"error": "No file uploaded", "status": 400}
         if uploaded_file.size > self.max_file_size:
+            logger.error(
+                "Uploaded file exceeds maximum size",
+                uploaded_file_size=uploaded_file.size,
+                max_size=self.max_file_size,
+            )
             return {
                 "error": f"File too large (max {self.max_file_size} bytes)",
                 "status": 413,
@@ -67,6 +102,53 @@ class ExcelUploadHandler:
             # Validate it's actually an Excel file (zip bomb check)
             self._validate_excel(content)
 
+            # Framework Pre-processing
+
+            sheet_names = self._get_sheet_names(content)
+            prep_script = ""
+            prep_output_filename = ""
+
+            # Check for CIS V8
+            if any(s.strip().lower().startswith("controls v8") for s in sheet_names):
+                prep_script = self.CIS_V8_PREP_SCRIPT_PATH
+                prep_output_filename = "cis-controls-v8.xlsx"
+
+            # Check for CSA CCM
+            elif "CCM" in sheet_names:
+                prep_script = self.CSA_CCM_PREP_SCRIPT_PATH
+                prep_output_filename = "ccm-controls-v4.xlsx"
+
+            # If a prep script is identified, run it first
+            if prep_script:
+                logger.info(f"Detected framework requiring prep script: {prep_script}")
+                content = self.sandbox.run_python(
+                    script_path=prep_script,
+                    input_data=content,
+                    input_filename="input.xlsx",
+                    output_filename=prep_output_filename,
+                    args=["--packager", self.DEFAULT_PACKAGER],
+                    binary_output=True,
+                )
+
+            # V1 compatibility
+
+            sheet_names = self._get_sheet_names(content)
+            if "library_meta" not in sheet_names:
+                logger.info(
+                    "Detected V1 library format; running V1 to V2 conversion",
+                    sheet_names=sheet_names,
+                )
+                content = self.sandbox.run_python(
+                    script_path=self.V1_TO_V2_SCRIPT_PATH,
+                    input_data=content,
+                    input_filename=prep_output_filename or "input.xlsx",
+                    output_filename="library.xlsx",
+                    args=[],
+                    binary_output=True,  # This outputs bytes for next step
+                )
+
+            # Main Conversion
+
             # Run the external script in sandbox
             yaml_output = self.sandbox.run_python(
                 script_path=str(self.script_path),
@@ -77,7 +159,8 @@ class ExcelUploadHandler:
                     "--compat",
                     str(mode),
                     "--verbose",
-                ],  # Add verbose for debugging if needed
+                ],
+                binary_output=False,
             )
 
             return {"yaml": yaml_output, "status": 200}

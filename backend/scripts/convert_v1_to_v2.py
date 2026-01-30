@@ -215,13 +215,18 @@ def main():
         description="Convert Excel library v1 to v2 format."
     )
     parser.add_argument("input_file", type=str, help="Path to the v1 Excel file")
+    parser.add_argument(
+        "--output",
+        type=str,
+        help="Custom output file name (only used in non-bulk mode).",
+    )
     args = parser.parse_args()
 
     input_path = Path(args.input_file)
     if not input_path.exists():
         raise FileNotFoundError(f"File not found: {input_path}")
 
-    output_path = input_path.with_name(f"{input_path.stem}_new.xlsx")
+    output_path = args.output or input_path.with_name(f"{input_path.stem}_new.xlsx")
     convert_v1_to_v2(str(input_path), str(output_path))
 
 

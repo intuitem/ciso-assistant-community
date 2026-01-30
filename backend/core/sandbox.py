@@ -1,5 +1,5 @@
 import io
-import logging
+import structlog
 import os
 import platform
 import subprocess
@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class SandboxViolationError(Exception):
@@ -58,7 +58,8 @@ class Sandbox(ABC):
         input_filename: str = "input.xlsx",
         output_filename: str = "output.yaml",
         args: Optional[List[str]] = None,
-    ) -> str:
+        binary_output: bool = False,
+    ) -> str | bytes:
         pass
 
     def _validate_excel_size(self, data: bytes, max_ratio: int = 50):
@@ -125,9 +126,9 @@ class PassthroughSandbox(Sandbox):
                 )
 
                 if result.returncode != 0:
-                    raise RuntimeError(f"Execution failed: {result.stdout}")
+                    raise RuntimeError(f"Execution failed: {result.stderr}")
 
-                return result.stdout
+                return result.stderr
 
             except subprocess.TimeoutExpired:
                 raise SandboxTimeoutError("Execution exceeded time limit")
@@ -139,7 +140,8 @@ class PassthroughSandbox(Sandbox):
         input_filename: str = "input.xlsx",
         output_filename: str = "output.yaml",
         args: Optional[List[str]] = None,
-    ) -> str:
+        binary_output: bool = False,
+    ) -> str | bytes:
         """Execute script directly (no sandbox)"""
         script_path = Path(script_path).resolve()
         if not script_path.exists():
@@ -179,12 +181,15 @@ class PassthroughSandbox(Sandbox):
                 )
 
                 if result.returncode != 0:
-                    raise RuntimeError(f"Script failed: {result.stdout}")
+                    raise RuntimeError(f"Script failed: {result.stderr}")
 
                 if not os.path.exists(output_path):
                     raise RuntimeError("Script did not produce output file")
 
-                with open(output_path, "r", encoding="utf-8") as f:
+                mode = "rb" if binary_output else "r"
+                encoding = None if binary_output else "utf-8"
+
+                with open(output_path, mode, encoding=encoding) as f:
                     return f.read()
 
             except subprocess.TimeoutExpired:
@@ -279,16 +284,16 @@ class LinuxSandbox(Sandbox):
                 )
 
                 if result.returncode != 0:
-                    stderr = result.stdout.lower()
+                    stderr = result.stderr.lower()
                     if "time limit" in stderr or "killed" in stderr:
                         raise SandboxTimeoutError("Execution timed out")
                     if any(x in stderr for x in ["permission denied", "seccomp"]):
                         raise SandboxViolationError(
-                            f"Security violation: {result.stdout}"
+                            f"Security violation: {result.stderr}"
                         )
-                    raise RuntimeError(f"Sandbox error: {result.stdout}")
+                    raise RuntimeError(f"Sandbox error: {result.stderr}")
 
-                return result.stdout
+                return result.stderr
 
             except subprocess.TimeoutExpired:
                 raise SandboxTimeoutError("Execution exceeded time limit")
@@ -300,7 +305,8 @@ class LinuxSandbox(Sandbox):
         input_filename="input.xlsx",
         output_filename="output.yaml",
         args=None,
-    ):
+        binary_output=False,
+    ) -> str | bytes:
         # ... (previous implementation) ...
         script_path = Path(script_path).resolve()
         if not script_path.exists():
@@ -378,7 +384,7 @@ class LinuxSandbox(Sandbox):
                 )
 
                 if result.returncode != 0:
-                    stderr = result.stdout.lower()
+                    stderr = result.stderr.lower()
                     if "time limit" in stderr or "killed" in stderr:
                         raise SandboxTimeoutError("Script execution timed out")
                     if any(
@@ -390,16 +396,18 @@ class LinuxSandbox(Sandbox):
                         ]
                     ):
                         raise SandboxViolationError(
-                            f"Security violation: {result.stdout}"
+                            f"Security violation: {result.stderr}"
                         )
-                    raise RuntimeError(f"Script failed: {result.stdout}")
+                    raise RuntimeError(f"Script failed: {result.stderr}")
 
                 if not os.path.exists(output_path):
                     raise RuntimeError("Script did not produce output file")
 
-                with open(output_path, "r", encoding="utf-8") as f:
-                    return f.read()
+                mode = "rb" if binary_output else "r"
+                encoding = None if binary_output else "utf-8"
 
+                with open(output_path, mode, encoding=encoding) as f:
+                    return f.read()
             except subprocess.TimeoutExpired:
                 raise SandboxTimeoutError("Script execution exceeded time limit")
 
