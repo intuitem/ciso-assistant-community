@@ -128,7 +128,7 @@ class PassthroughSandbox(Sandbox):
                 if result.returncode != 0:
                     raise RuntimeError(f"Execution failed: {result.stderr}")
 
-                return result.stderr
+                return result.stdout + result.stderr
 
             except subprocess.TimeoutExpired:
                 raise SandboxTimeoutError("Execution exceeded time limit")
@@ -293,7 +293,7 @@ class LinuxSandbox(Sandbox):
                         )
                     raise RuntimeError(f"Sandbox error: {result.stderr}")
 
-                return result.stderr
+                return result.stdout + result.stderr
 
             except subprocess.TimeoutExpired:
                 raise SandboxTimeoutError("Execution exceeded time limit")
