@@ -589,9 +589,13 @@ class LoadFileView(APIView):
         file_type: RecordFileType = RecordFileType.XLSX
         res = None
         try:
-            assert model_type is not None, (
-                f"Unknown model type {repr(model_type_string)}"
-            )
+            if model_type is None:
+                logger.error(f"Unknown model type", exc_info=e)
+                return Response(
+                    {"error": "UnknownModelType"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             # Special handling for TPRM multi-sheet import
             match model_type:
                 case ModelType.TPRM:
@@ -685,13 +689,6 @@ class LoadFileView(APIView):
                                 framework_id,
                                 matrix_id,
                             )
-
-        except AssertionError as e:
-            logger.error(f"Unknown model type", exc_info=e)
-            return Response(
-                {"error": "UnknownModelType"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         except Exception as e:
             logger.error(f"Error parsing {file_type} file", exc_info=e)
