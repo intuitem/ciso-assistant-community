@@ -3310,7 +3310,12 @@ class Asset(
             real_value = capabilities.get(key)
 
             verdict = None
-            if isinstance(exp_value, int) and isinstance(real_value, int):
+            if (
+                isinstance(exp_value, int)
+                and isinstance(real_value, int)
+                and exp_value > 0
+                and real_value > 0
+            ):
                 verdict = real_value <= exp_value
 
             result.append(
