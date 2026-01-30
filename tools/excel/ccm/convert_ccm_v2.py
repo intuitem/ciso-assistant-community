@@ -40,7 +40,11 @@ def prettify_content(content) -> str:
         line = raw_line.rstrip()
         if not line:
             continue
-        res = f"{res}\n{line}" if stop_join and res else (line if res is None else f"{res} {line}")
+        res = (
+            f"{res}\n{line}"
+            if stop_join and res
+            else (line if res is None else f"{res} {line}")
+        )
         if line.endswith(":"):
             stop_join = True
     return res or ""
@@ -120,7 +124,9 @@ def attach_caiq_questions(sheet, control_lookup: Dict[str, dict]) -> None:
         if not question_text:
             continue
         existing = control.get("questions", "")
-        control["questions"] = question_text if not existing else f"{existing}\n{question_text}"
+        control["questions"] = (
+            question_text if not existing else f"{existing}\n{question_text}"
+        )
         control["answer"] = "A1"
 
 
@@ -159,7 +165,9 @@ def build_v2_workbook(
     ws_framework_meta.append(["ref_id", LIBRARY_REF_ID])
     ws_framework_meta.append(["name", LIBRARY_NAME])
     ws_framework_meta.append(["description", LIBRARY_DESCRIPTION])
-    ws_framework_meta.append(["implementation_groups_definition", IMPLEMENTATION_GROUPS_BASE_NAME])
+    ws_framework_meta.append(
+        ["implementation_groups_definition", IMPLEMENTATION_GROUPS_BASE_NAME]
+    )
     ws_framework_meta.append(["answers_definition", ANSWERS_BASE_NAME])
 
     # framework_content
@@ -230,7 +238,7 @@ def main():
         description="Convert CCM official Excel file to a CISO Assistant v2 Excel file.",
     )
     parser.add_argument("filename", help="Path to the CCM Excel file")
-    parser.add_argument("packager", help="Name of the packager entity")
+    parser.add_argument("--packager", help="Name of the packager entity")
     parser.add_argument(
         "-o",
         "--output",
@@ -253,7 +261,7 @@ def main():
         print(f'❌ [ERROR] The file is not a valid Excel file: "{args.filename}"')
         sys.exit(1)
     except Exception as exc:  # noqa: BLE001
-        print(f'❌ [ERROR] Unexpected error while loading Excel file: {exc}')
+        print(f"❌ [ERROR] Unexpected error while loading Excel file: {exc}")
         sys.exit(1)
 
     framework_rows: List[dict] = []
@@ -282,7 +290,9 @@ def main():
     try:
         build_v2_workbook(args.packager, framework_rows, library_copyright, args.output)
     except PermissionError:
-        print(f'❌ [ERROR] Permission denied. The file may be open or locked: "{args.output}"')
+        print(
+            f'❌ [ERROR] Permission denied. The file may be open or locked: "{args.output}"'
+        )
         sys.exit(1)
     except OSError as exc:  # noqa: BLE001
         print(f'❌ [ERROR] OS error while saving the file: "{exc}"')

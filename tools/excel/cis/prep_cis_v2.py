@@ -57,7 +57,9 @@ def parse_controls_sheet(sheet) -> Tuple[List[dict], List[dict]]:
 
     for row in sheet.iter_rows(values_only=True):
         try:
-            control, safeguard, _asset_type, sf, title, description, ig1, ig2, ig3 = row[:9]
+            control, safeguard, _asset_type, sf, title, description, ig1, ig2, ig3 = (
+                row[:9]
+            )
         except ValueError:
             continue
 
@@ -80,9 +82,7 @@ def parse_controls_sheet(sheet) -> Tuple[List[dict], List[dict]]:
 
         safeguard_index += 1
         safeguard_ref = f"{control_str}.{safeguard_index}"
-        implementation_groups = (
-            "IG1,IG2,IG3" if ig1 else "IG2,IG3" if ig2 else "IG3"
-        )
+        implementation_groups = "IG1,IG2,IG3" if ig1 else "IG2,IG3" if ig2 else "IG3"
 
         framework_rows.append(
             {
@@ -125,9 +125,7 @@ def build_v2_workbook(
     library_urn = f"urn:{packager_slug}:risk:library:{LIBRARY_SLUG}"
     framework_urn = f"urn:{packager_slug}:risk:framework:{LIBRARY_SLUG}"
     framework_base_urn = f"urn:{packager_slug}:risk:req_node:{LIBRARY_SLUG}"
-    reference_control_base_urn = (
-        f"urn:{packager_slug}:risk:function:{LIBRARY_SLUG}"
-    )
+    reference_control_base_urn = f"urn:{packager_slug}:risk:function:{LIBRARY_SLUG}"
 
     wb = Workbook()
 
@@ -153,7 +151,9 @@ def build_v2_workbook(
     ws_framework_meta.append(["ref_id", LIBRARY_REF_ID])
     ws_framework_meta.append(["name", LIBRARY_NAME])
     ws_framework_meta.append(["description", LIBRARY_DESCRIPTION])
-    ws_framework_meta.append(["implementation_groups_definition", IMPLEMENTATION_GROUPS_SHEET_BASE])
+    ws_framework_meta.append(
+        ["implementation_groups_definition", IMPLEMENTATION_GROUPS_SHEET_BASE]
+    )
 
     # framework_content sheet
     ws_framework_content = wb.create_sheet(f"{FRAMEWORK_SHEET_BASE}_content")
@@ -201,9 +201,7 @@ def build_v2_workbook(
             "For enterprises managing IT infrastructure of multiple departments with differing risk profiles.",
         ]
     )
-    ws_impl_content.append(
-        ["IG3", "IG3", "To secure sensitive and confidential data."]
-    )
+    ws_impl_content.append(["IG3", "IG3", "To secure sensitive and confidential data."])
 
     # reference_controls sheets
     ws_ref_meta = wb.create_sheet(f"{REFERENCE_CONTROLS_SHEET_BASE}_meta")
@@ -228,9 +226,7 @@ def build_v2_workbook(
 
     ws_prefix_content = wb.create_sheet(f"{URN_PREFIX_SHEET_BASE}_content")
     ws_prefix_content.append(["prefix_id", "prefix_value"])
-    ws_prefix_content.append(
-        [REFERENCE_CONTROL_PREFIX_ID, reference_control_base_urn]
-    )
+    ws_prefix_content.append([REFERENCE_CONTROL_PREFIX_ID, reference_control_base_urn])
 
     wb.save(output_filename)
     print(f'✅ Excel file saved successfully: "{output_filename}"')
@@ -242,7 +238,7 @@ def main():
         description="Convert CIS Controls official Excel file to a CISO Assistant v2 Excel file.",
     )
     parser.add_argument("filename", help="Path to the CIS Controls Excel file")
-    parser.add_argument("packager", help="Name of the packager entity")
+    parser.add_argument("--packager", help="Name of the packager entity")
     parser.add_argument(
         "-o",
         "--output",
@@ -265,7 +261,7 @@ def main():
         print(f'❌ [ERROR] The file is not a valid Excel file: "{args.filename}"')
         sys.exit(1)
     except Exception as exc:  # noqa: BLE001
-        print(f'❌ [ERROR] Unexpected error while loading Excel file: {exc}')
+        print(f"❌ [ERROR] Unexpected error while loading Excel file: {exc}")
         sys.exit(1)
 
     framework_rows: List[dict] = []
