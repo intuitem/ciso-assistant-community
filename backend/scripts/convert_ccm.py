@@ -6,7 +6,10 @@ import openpyxl
 import re
 import sys
 import argparse
+import io  # Added for MIME optimization
+import zipfile  # Added for MIME optimization
 from openpyxl.utils.exceptions import InvalidFileException
+
 
 def pretify_content(content):
     res = None
@@ -50,12 +53,12 @@ except InvalidFileException:
     print(f'❌ [ERROR] The file is not a valid Excel file: "{input_file_name}"')
     sys.exit(1)
 except Exception as e:
-    print(f'❌ [ERROR] Unexpected error while loading Excel file: {e}')
+    print(f"❌ [ERROR] Unexpected error while loading Excel file: {e}")
     sys.exit(1)
 
 
-
 output_table = []
+library_copyright = ""
 
 for tab in dataframe:
     print("⌛ Parsing tab", tab.title)
@@ -83,11 +86,13 @@ for tab in dataframe:
                     )
                 )
             else:
-                if "End of Standard" in domain:
+                if domain and "End of Standard" in domain:
                     eos = True
-                else:
-                    (d, id) = domain.split(" - ")
-                    output_table.append(("", 1, id, d, "", None, None))
+                elif domain:
+                    parts = domain.split(" - ")
+                    if len(parts) == 2:
+                        (d, id) = parts
+                        output_table.append(("", 1, id, d, "", None, None))
     elif title == "CAIQ":
         line = 0
         eos = False
@@ -98,13 +103,14 @@ for tab in dataframe:
             (question_id, question) = (r.value for r in row[4:6])
             if question_id:
                 q = re.match(r"(.*)\.\d+$", question_id)
-                id = q.group(1)
-                for i in range(len(output_table)):
-                    if output_table[i][2] == id:
-                        a = output_table[i][6]
-                        b = pretify_content(question)
-                        c = b if a == "" else a + "\n" + b
-                        output_table[i] = output_table[i][0:6] + (c,) + ("A1",)
+                if q:
+                    id = q.group(1)
+                    for i in range(len(output_table)):
+                        if output_table[i][2] == id:
+                            a = output_table[i][6]
+                            b = pretify_content(question)
+                            c = b if a == "" else a + "\n" + b
+                            output_table[i] = output_table[i][0:6] + (c,) + ("A1",)
     else:
         print(f"⏩ Ignored tab: {title}")
 
@@ -140,7 +146,7 @@ ws1.append(
         "description",
         "implementation_groups",
         "questions",
-        "answer"
+        "answer",
     ]
 )
 for row in output_table:
@@ -166,11 +172,46 @@ ws3.append(
 )
 
 try:
-    wb_output.save(output_file_name)
+    # --- MIME Type Optimization Block ---
+    # We save to memory first, then repack into the final file to ensure
+    # [Content_Types].xml is the FIRST file in the zip archive.
+
+    print("⌛ Optimizing file structure for MIME detection...")
+
+    buffer = io.BytesIO()
+    wb_output.save(buffer)
+    buffer.seek(0)
+
+    with zipfile.ZipFile(buffer, "r") as z_in:
+        with zipfile.ZipFile(
+            output_file_name, "w", compression=zipfile.ZIP_DEFLATED
+        ) as z_out:
+            # Files required by libmagic/file-command to identify 'application/vnd.openxml...'
+            # reliably within the first 2KB of the file.
+            priority_files = [
+                "[Content_Types].xml",
+                "_rels/.rels",
+                "docProps/app.xml",
+                "docProps/core.xml",
+            ]
+
+            # 1. Write priority files first
+            for filename in priority_files:
+                if filename in z_in.namelist():
+                    z_out.writestr(filename, z_in.read(filename))
+
+            # 2. Write the rest of the files (worksheets, styles, etc.)
+            for filename in z_in.namelist():
+                if filename not in priority_files:
+                    z_out.writestr(filename, z_in.read(filename))
+
     print(f'✅ Excel file saved successfully: "{output_file_name}"')
     sys.exit(0)
+
 except PermissionError:
-    print(f'❌ [ERROR] Permission denied. The file may be open or locked: "{output_file_name}"')
+    print(
+        f'❌ [ERROR] Permission denied. The file may be open or locked: "{output_file_name}"'
+    )
     sys.exit(1)
 except FileNotFoundError:
     print(f'❌ [ERROR] Invalid path. Cannot save to: "{output_file_name}"')

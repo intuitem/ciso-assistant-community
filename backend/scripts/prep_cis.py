@@ -1,3 +1,5 @@
+# scripts/prep_cis.py
+
 """
 simple script to transform the official CIS Excel file to another Excel file for CISO assistant framework conversion tool
 """
@@ -6,6 +8,8 @@ import sys
 import re
 import openpyxl
 import argparse
+import io
+import zipfile
 from openpyxl.utils.exceptions import InvalidFileException
 
 parser = argparse.ArgumentParser(
@@ -37,9 +41,9 @@ except InvalidFileException:
     print(f'❌ [ERROR] The file is not a valid Excel file: "{input_file_name}"')
     sys.exit(1)
 except Exception as e:
-    print(f'❌ [ERROR] Unexpected error while loading Excel file: {e}')
+    print(f"❌ [ERROR] Unexpected error while loading Excel file: {e}")
     sys.exit(1)
-    
+
 output_table = []
 output_table_ref_ctrl = []
 
@@ -48,7 +52,7 @@ for tab in dataframe:
     title = tab.title
     if title == "License for Use":
         library_copyright = tab["B11"].value + "\n" + tab["B13"].value
-    # The script previously ignored the controls sheet because the title wasn't an exact match 
+    # The script previously ignored the controls sheet because the title wasn't an exact match
     # in the latest version of the CIS Controls .xlsx file (e.g., "Controls V8.1.2" instead of "Controls V8").
     # Using startswith() allows the script to work with all version changes going forward.
     elif title.lower().startswith("controls v"):
@@ -67,13 +71,26 @@ for tab in dataframe:
                     implementation_groups = (
                         "IG1,IG2,IG3" if ig1 else "IG2,IG3" if ig2 else "IG3"
                     )
-                    
+
                     # "," replace by "." because "," is used as a separator in the "reference_controls" column
                     output_table.append(
-                        ("x", 2, safeguard.replace(",", "."), title, description, implementation_groups, "1:"+safeguard.replace(",", "."))
+                        (
+                            "x",
+                            2,
+                            safeguard.replace(",", "."),
+                            title,
+                            description,
+                            implementation_groups,
+                            "1:" + safeguard.replace(",", "."),
+                        )
                     )
                     output_table_ref_ctrl.append(
-                        (safeguard.replace(",", "."), title, sf.strip().lower(), description)
+                        (
+                            safeguard.replace(",", "."),
+                            title,
+                            sf.strip().lower(),
+                            description,
+                        )
                     )
     else:
         print(f'⏩ Ignored tab: "{title}"')
@@ -99,7 +116,9 @@ ws.append(["framework_urn", f"urn:{packager.lower()}:risk:framework:cis-controls
 ws.append(["framework_ref_id", "CIS-Controls-v8"])
 ws.append(["framework_name", "CIS Controls v8"])
 ws.append(["framework_description", "CIS Controls v8"])
-ws.append(["reference_control_base_urn", "urn:intuitem:risk:function:cis-controls-v8", "1"])
+ws.append(
+    ["reference_control_base_urn", "urn:intuitem:risk:function:cis-controls-v8", "1"]
+)
 ws.append(["tab", "controls", "requirements"])
 ws.append(["tab", "imp_grp", "implementation_groups"])
 ws.append(["tab", "ref_ctrl", "reference_controls"])
@@ -107,7 +126,15 @@ ws.append(["tab", "ref_ctrl", "reference_controls"])
 # Framework
 ws1 = wb_output.create_sheet("controls")
 ws1.append(
-    ["assessable", "depth", "ref_id", "name", "description", "implementation_groups", "reference_controls"]
+    [
+        "assessable",
+        "depth",
+        "ref_id",
+        "name",
+        "description",
+        "implementation_groups",
+        "reference_controls",
+    ]
 )
 for row in output_table:
     ws1.append(row)
@@ -134,18 +161,51 @@ ws2.append(["IG3", "IG3", "To secure sensitive and confidential data."])
 
 # Reference Controls
 ws3 = wb_output.create_sheet("ref_ctrl")
-ws3.append(
-    ["ref_id", "name", "csf_function", "description"]
-)
+ws3.append(["ref_id", "name", "csf_function", "description"])
 for row in output_table_ref_ctrl:
     ws3.append(row)
 
 
 try:
-    wb_output.save(output_file_name)
+    # --- MIME Type Optimization Block ---
+    # Instead of saving directly to disk, we save to memory and repack the zip
+    # to ensure [Content_Types].xml is the FIRST file. This allows strict
+    # MIME type detectors (like libmagic reading the first 2KB) to identify it correctly.
+
+    print("⌛ Optimizing file structure for MIME detection...")
+
+    buffer = io.BytesIO()
+    wb_output.save(buffer)
+    buffer.seek(0)
+
+    with zipfile.ZipFile(buffer, "r") as z_in:
+        with zipfile.ZipFile(
+            output_file_name, "w", compression=zipfile.ZIP_DEFLATED
+        ) as z_out:
+            # Files required by libmagic to identify 'application/vnd.openxml...'
+            priority_files = [
+                "[Content_Types].xml",
+                "_rels/.rels",
+                "docProps/app.xml",
+                "docProps/core.xml",
+            ]
+
+            # 1. Write priority files first
+            for filename in priority_files:
+                if filename in z_in.namelist():
+                    z_out.writestr(filename, z_in.read(filename))
+
+            # 2. Write the rest of the files (worksheets, styles, etc.)
+            for filename in z_in.namelist():
+                if filename not in priority_files:
+                    z_out.writestr(filename, z_in.read(filename))
+
     print(f'✅ Excel file saved successfully: "{output_file_name}"')
+
 except PermissionError:
-    print(f'❌ [ERROR] Permission denied. The file may be open or locked: "{output_file_name}"')
+    print(
+        f'❌ [ERROR] Permission denied. The file may be open or locked: "{output_file_name}"'
+    )
     sys.exit(1)
 except FileNotFoundError:
     print(f'❌ [ERROR] Invalid path. Cannot save to: "{output_file_name}"')
