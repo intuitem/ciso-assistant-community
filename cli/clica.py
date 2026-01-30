@@ -295,12 +295,14 @@ def data_wizard_import(model_type: str):
         GLOBAL_FOLDER_ID = get_global_folder_id()
         if GLOBAL_FOLDER_ID is None:
             return
+        
+        filename = Path(file).name
 
         headers = {
             "Authorization": f"Token {TOKEN}",
             "X-Model-Type": model_type, # "Asset"
             'X-Folder-Id': GLOBAL_FOLDER_ID,
-            "Content-Disposition": f'attachment; filename="{file}"',
+            "Content-Disposition": f'attachment; filename="{filename}"',
         }
 
         url = f"{API_URL}/data-wizard/load-file/"
