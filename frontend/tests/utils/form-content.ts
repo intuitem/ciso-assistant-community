@@ -95,12 +95,10 @@ export class FormContent {
 								);
 								await field.locator.click();
 								await expect(
-									field.locator
-										.getByRole('option', { name: values[key].value, exact: true })
-										.first()
+									field.locator.getByRole('option', { name: values[key].value }).first()
 								).toBeVisible({ timeout: 10_000 });
 								await field.locator
-									.getByRole('option', { name: values[key].value, exact: true })
+									.getByRole('option', { name: values[key].value })
 									.first()
 									.click();
 
@@ -108,12 +106,9 @@ export class FormContent {
 							} else {
 								await field.locator.click();
 								await expect(
-									field.locator.getByRole('option', { name: values[key], exact: true }).first()
+									field.locator.getByRole('option', { name: values[key] }).first()
 								).toBeVisible({ timeout: 10_000 });
-								await field.locator
-									.getByRole('option', { name: values[key], exact: true })
-									.first()
-									.click();
+								await field.locator.getByRole('option', { name: values[key] }).first().click();
 							}
 						}
 					}).toPass({ timeout: 22_000, intervals: [500, 1000, 10_000] });
@@ -121,10 +116,8 @@ export class FormContent {
 				case FormFieldType.SELECT_MULTIPLE_AUTOCOMPLETE:
 					await field.locator.click();
 					for (const val of values[key]) {
-						await expect(
-							field.locator.getByRole('option', { name: val, exact: true }).first()
-						).toBeVisible();
-						await field.locator.getByRole('option', { name: val, exact: true }).first().click();
+						await expect(field.locator.getByRole('option', { name: val }).first()).toBeVisible();
+						await field.locator.getByRole('option', { name: val }).first().click();
 					}
 					if (
 						(await field.locator.isEnabled()) &&
