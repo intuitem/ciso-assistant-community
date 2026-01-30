@@ -12,6 +12,7 @@ import os
 from dotenv import load_dotenv
 import json
 from rich import print as rprint
+from typing import Optional
 
 from icecream import ic
 
@@ -64,23 +65,23 @@ def ids_map(model, folder=None):
     return my_map
 
 
-def _get_folders():
-    if not TOKEN:
-        print(
-            "No authentication token available. Please set PAT token in .clica.env.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
+def get_global_folder_id() -> Optional[str]:
     url = f"{API_URL}/folders/"
     headers = {"Authorization": f"Token {TOKEN}"}
+
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
     if res.status_code == 200:
         output = res.json()
         for folder in output["results"]:
             if folder["content_type"] == "GLOBAL":
                 GLOBAL_FOLDER_ID = folder["id"]
-                return GLOBAL_FOLDER_ID, output.get("results")
+                return GLOBAL_FOLDER_ID
+            
+    else:
+        print(
+            f"The server didn't reply as expected: {res.status_code} {res.reason}: {res.text}",
+            file=sys.stderr,
+        )
 
 
 @click.command()
@@ -291,7 +292,9 @@ def data_wizard_import(model_type: str):
             )
             sys.exit(1)
 
-        GLOBAL_FOLDER_ID, _ = _get_folders()
+        GLOBAL_FOLDER_ID = get_global_folder_id()
+        if GLOBAL_FOLDER_ID is None:
+            return
 
         headers = {
             "Authorization": f"Token {TOKEN}",
