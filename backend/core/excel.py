@@ -17,14 +17,16 @@ class ExcelUploadHandler:
     """
 
     DEFAULT_SCRIPT_PATH = (
-        "scripts/convert_library_v2.py"  # Relative to backend directory
+        settings.BASE_DIR
+        / "scripts"
+        / "convert_library_v2.py"  # Relative to backend directory
     )
 
     # TODO: if imported excel (or ) lacks the 'library_meta' sheet,
-    V1_TO_V2_SCRIPT_PATH = "scripts/convert_v1_to_v2.py"
+    V1_TO_V2_SCRIPT_PATH = settings.BASE_DIR / "scripts" / "convert_v1_to_v2.py"
 
-    CIS_V8_PREP_SCRIPT_PATH = "scripts/prep_cis.py"
-    CSA_CCM_PREP_SCRIPT_PATH = "scripts/convert_ccm.py"
+    CIS_V8_PREP_SCRIPT_PATH = settings.BASE_DIR / "scripts" / "prep_cis.py"
+    CSA_CCM_PREP_SCRIPT_PATH = settings.BASE_DIR / "scripts" / "convert_ccm.py"
 
     # Default packager name to use when running prep scripts
     DEFAULT_PACKAGER = "intuitem"
@@ -42,7 +44,7 @@ class ExcelUploadHandler:
 
         # Resolve script path relative to Django settings or repo root
         if script_path is None:
-            self.script_path = self._resolve_script_path()
+            self.script_path = self.DEFAULT_SCRIPT_PATH
         else:
             self.script_path = Path(script_path).resolve()
 
@@ -51,12 +53,6 @@ class ExcelUploadHandler:
                 f"Conversion script not found: {self.script_path}. "
                 f"Ensure scripts/convert_library_v2.py exists in backend directory."
             )
-
-    def _resolve_script_path(self) -> Path:
-        """
-        Resolve default script path relative to Django project structure.
-        """
-        return settings.BASE_DIR / "scripts" / "convert_library_v2.py"
 
     def _get_sheet_names(self, content: bytes) -> list[str]:
         """

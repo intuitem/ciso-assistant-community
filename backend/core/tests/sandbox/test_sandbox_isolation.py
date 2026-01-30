@@ -1,5 +1,6 @@
 import pytest
 import os
+import shutil
 from core.sandbox import SandboxViolationError, SandboxTimeoutError
 
 def test_filesystem_access(sandbox, is_secure_env):
@@ -59,13 +60,13 @@ except Exception as e:
             pytest.skip(f"Network check failed in passthrough (no internet?): {output}")
         assert "connected" in output
 
-@pytest.mark.skipif(condition=lambda: not os.path.exists("/usr/local/bin/nsjail"), reason="Memory limit test requires nsjail") 
+@pytest.mark.skipif(condition=lambda: not os.path.exists("/usr/bin/bwrap") and not shutil.which("bwrap"), reason="Memory limit test requires bubblewrap") 
 # Using the fixture value in 'if' is better, but skipif runs at collection time.
 # We can check the fixture inside the test and skip.
 def test_memory_limit(sandbox, is_secure_env):
     """Test memory limits."""
     if not is_secure_env:
-        pytest.skip("Memory limits only enforced in secure environment (nsjail)")
+        pytest.skip("Memory limits only enforced in secure environment (bubblewrap)")
         
     code = """
 l = []
@@ -74,6 +75,6 @@ while True:
 """
     # default limit is 512MB
     
-    with pytest.raises((SandboxTimeoutError, RuntimeError)):
+    with pytest.raises((SandboxTimeoutError, RuntimeError, SandboxViolationError)):
         # It might be killed by OOM (RuntimeError or specific SandboxTimeoutError logic in wrapper)
         sandbox.run(code)

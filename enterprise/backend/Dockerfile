@@ -26,18 +26,7 @@ RUN apt-get update && apt-get install -y \
   libjpeg-dev \
   zlib1g-dev \
   libmagic1 \
-  autoconf \
-  bison \
-  flex \
-  gcc \
-  g++ \
-  git \
-  libprotobuf-dev \
-  libnl-route-3-dev \
-  libtool \
-  make \
-  pkg-config \
-  protobuf-compiler \
+  bubblewrap \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   && locale-gen en_US.UTF-8 \
@@ -56,18 +45,6 @@ RUN apt-get update && apt-get install -y \
   && locale-gen sv_SE.UTF-8 \
   && locale-gen id_ID.UTF-8 \
   && pip install --no-cache-dir --upgrade pip poetry==2.2.1
-
-
-RUN git clone https://github.com/google/nsjail.git
-WORKDIR /code/nsjail
-RUN make
-RUN mv nsjail /usr/local/bin/nsjail && \
-  chmod +x /usr/local/bin/nsjail && \
-  chmod u+s /usr/local/bin/nsjail
-
-WORKDIR /code
-RUN rm -rf nsjail
-
 
 COPY backend/pyproject.toml backend/poetry.lock ./
 RUN poetry install --no-root \

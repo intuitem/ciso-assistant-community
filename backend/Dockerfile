@@ -21,19 +21,8 @@ RUN apt-get update && apt-get install -y \
   fontconfig \
   fonts-freefont-ttf \
   zlib1g-dev \
-  wget \
-  libprotobuf-dev \
-  autoconf \
-  bison \
-  flex \
-  gcc \
-  g++ \
-  git \
-  libnl-route-3-dev \
-  libtool \
-  make \
-  pkg-config \
-  protobuf-compiler \
+  libmagic1 \
+  bubblewrap \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   && locale-gen en_US.UTF-8 \
@@ -53,26 +42,13 @@ RUN apt-get update && apt-get install -y \
   && locale-gen id_ID.UTF-8 \
   && pip install --no-cache-dir --upgrade pip poetry==2.2.1
 
-RUN git clone https://github.com/google/nsjail.git
-WORKDIR /code/nsjail
-RUN make
-RUN mv nsjail /usr/local/bin/nsjail && \
-  chmod +x /usr/local/bin/nsjail && \
-  chmod u+s /usr/local/bin/nsjail
-
-WORKDIR /code
-RUN rm -rf nsjail
-
-
 COPY pyproject.toml poetry.lock ./
 
 RUN poetry install --no-root \
   && rm -rf $POETRY_CACHE_DIR
 
+#watch out for local files during dev and maintenance of .dockerignore
 COPY . .
 
-RUN mkdir -p /tmp/sandbox && chmod 777 /tmp/sandbox
-
 EXPOSE 8000
-
 ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]

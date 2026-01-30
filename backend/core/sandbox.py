@@ -1,7 +1,7 @@
 import io
-import structlog
 import os
 import platform
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -9,6 +9,8 @@ import zipfile
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional
+
+import structlog
 
 logger = structlog.get_logger(__name__)
 
@@ -92,7 +94,7 @@ class PassthroughSandbox(Sandbox):
     """
     Development sandbox without OS-level isolation.
     Still uses subprocess for crash protection and timeout enforcement,
-    but without nsjail/sandbox-exec restrictions.
+    but without bubblewrap restrictions.
     """
 
     def run(
@@ -201,102 +203,102 @@ class PassthroughSandbox(Sandbox):
 
 
 class LinuxSandbox(Sandbox):
-    """Production sandbox using nsjail"""
+    """Production sandbox using bubblewrap (bwrap)"""
 
-    NSJAIL_PATH = "/usr/local/bin/nsjail"
+    BWRAP_PATH = shutil.which("bwrap") or "/usr/bin/bwrap"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._check_nsjail()
+        self._check_bwrap()
 
-    def _check_nsjail(self):
-        if not os.path.exists(self.NSJAIL_PATH):
+    def _check_bwrap(self):
+        if not os.path.exists(self.BWRAP_PATH):
             raise RuntimeError(
-                f"nsjail not found at {self.NSJAIL_PATH}. "
-                "Install or set ENABLE_SANDBOX=False for development."
+                f"bubblewrap not found at {self.BWRAP_PATH}. "
+                "Install with 'apt-get install bubblewrap' or set ENABLE_SANDBOX=False."
             )
 
+    def _get_base_bwrap_cmd(self, tmpdir: str) -> List[str]:
+        uid = os.getuid()
+        gid = os.getgid()
+
+        cmd = [
+            self.BWRAP_PATH,
+            "--unshare-all",
+            "--die-with-parent",
+            "--uid",
+            str(uid),
+            "--gid",
+            str(gid),
+            "--tmpfs",
+            "/tmp",
+            # Standard system paths
+            "--ro-bind",
+            "/usr",
+            "/usr",
+            "--ro-bind",
+            "/bin",
+            "/bin",
+            "--ro-bind",
+            "/lib",
+            "/lib",
+            "--ro-bind",
+            "/etc/alternatives",
+            "/etc/alternatives",
+        ]
+
+        # 1. Mount /usr/local (Crucial for Docker/Pip packages)
+        if os.path.exists("/usr/local"):
+            cmd.extend(["--ro-bind", "/usr/local", "/usr/local"])
+
+        # 2. Handle 64-bit libraries if they exist
+        if os.path.exists("/lib64"):
+            cmd.extend(["--ro-bind", "/lib64", "/lib64"])
+
+        # 3. Explicitly find and bind site-packages (Replicates your nsjail logic)
+        # This ensures 'openpyxl' and other dependencies are visible to the sandbox python
+        site_packages = None
+        for path in sys.path:
+            if "site-packages" in path and os.path.exists(path):
+                site_packages = path
+                break
+
+        if site_packages:
+            # We bind the host's site-packages to the sandbox's dist-packages
+            # This forces the sandbox Python to see these libraries.
+            cmd.extend(["--ro-bind", site_packages, "/usr/lib/python3/dist-packages"])
+
+        # Bind the working directory
+        cmd.extend(["--bind", tmpdir, "/sandbox"])
+
+        if self.enable_network:
+            cmd.remove("--unshare-all")
+            cmd.extend(["--unshare-ipc", "--unshare-uts"])
+
+        return cmd
+
     def run(self, code, input_data=None, input_filename="input.bin", extra_args=None):
-        # ... (previous implementation) ...
         with tempfile.TemporaryDirectory() as tmpdir:
-            input_path = None
+            input_path = os.path.join(tmpdir, input_filename)
             if input_data:
-                input_path = os.path.join(tmpdir, input_filename)
                 with open(input_path, "wb") as f:
                     f.write(input_data)
-                os.chmod(input_path, 0o444)
 
-            cmd = [
-                self.NSJAIL_PATH,
-                "--mode",
-                "once",
-                "--user",
-                "65534",
-                "--group",
-                "65534",
-                "--time_limit",
-                str(self.time_limit),
-                "--rlimit_as",
-                str(self.memory_limit),
-                "--rlimit_cpu",
-                str(self.time_limit),
-                "--rlimit_fsize",
-                "10",
-                "--disable_proc",
-                "--quiet",
-            ]
+            # 1024*1024 multiplier for MB to Bytes
+            mem_bytes = self.memory_limit * 1024 * 1024
+            # fsize limit in blocks (approx) or bytes depending on system,
+            # usually bytes for prlimit. Setting strict limit.
+            prlimit_cmd = ["prlimit", f"--as={mem_bytes}"]
 
-            if not self.enable_network:
-                cmd.append("--disable_clone_newnet")
+            cmd = prlimit_cmd + self._get_base_bwrap_cmd(tmpdir)
+            cmd.extend(["--chdir", "/sandbox", "--", "/usr/bin/python3", "-c", code])
 
-            cmd.extend(["--bindmount", f"{tmpdir}:/sandbox:rw"])
-
-            # Add site-packages for imports
-            import sys
-
-            site_packages = None
-            for path in sys.path:
-                if "site-packages" in path and os.path.exists(path):
-                    site_packages = path
-                    break
-
-            if site_packages:
-                cmd.extend(
-                    [
-                        "--bindmount",
-                        f"{site_packages}:/usr/lib/python3/dist-packages:ro",
-                    ]
-                )
-
-            cmd.extend(["--", "/usr/bin/python3", "-c", code])
-            if input_path:
+            if input_data:
                 cmd.append(f"/sandbox/{input_filename}")
             if extra_args:
                 cmd.extend(extra_args)
 
-            try:
-                result = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
-                    timeout=self.time_limit + 5,
-                    cwd=tmpdir,
-                )
-
-                if result.returncode != 0:
-                    stderr = result.stderr.lower()
-                    if "time limit" in stderr or "killed" in stderr:
-                        raise SandboxTimeoutError("Execution timed out")
-                    if any(x in stderr for x in ["permission denied", "seccomp"]):
-                        raise SandboxViolationError(
-                            f"Security violation: {result.stderr}"
-                        )
-                    raise RuntimeError(f"Sandbox error: {result.stderr}")
-
-                return result.stdout + result.stderr
-
-            except subprocess.TimeoutExpired:
-                raise SandboxTimeoutError("Execution exceeded time limit")
+            return self._execute(cmd, tmpdir)
 
     def run_python(
         self,
@@ -307,7 +309,6 @@ class LinuxSandbox(Sandbox):
         args=None,
         binary_output=False,
     ) -> str | bytes:
-        # ... (previous implementation) ...
         script_path = Path(script_path).resolve()
         if not script_path.exists():
             raise FileNotFoundError(f"Script not found: {script_path}")
@@ -316,100 +317,75 @@ class LinuxSandbox(Sandbox):
         script_name = script_path.name
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            input_path = os.path.join(tmpdir, input_filename)
             if input_data:
-                with open(input_path, "wb") as f:
+                with open(os.path.join(tmpdir, input_filename), "wb") as f:
                     f.write(input_data)
-                os.chmod(input_path, 0o444)
 
             output_path = os.path.join(tmpdir, output_filename)
+            mem_bytes = self.memory_limit * 1024 * 1024
+            prlimit_cmd = ["prlimit", f"--as={mem_bytes}"]
 
-            cmd = [
-                self.NSJAIL_PATH,
-                "--mode",
-                "once",
-                "--user",
-                "65534",
-                "--group",
-                "65534",
-                "--time_limit",
-                str(self.time_limit),
-                "--rlimit_as",
-                str(self.memory_limit),
-                "--rlimit_cpu",
-                str(self.time_limit),
-                "--rlimit_fsize",
-                "50",
-                "--disable_proc",
-                "--quiet",
-                "--bindmount",
-                f"{tmpdir}:/sandbox:rw",
-                "--bindmount",
-                f"{script_dir}:/scripts:ro",
-            ]
+            cmd = prlimit_cmd + self._get_base_bwrap_cmd(tmpdir)
 
-            if not self.enable_network:
-                cmd.append("--disable_clone_newnet")
+            # Add script directory bind
+            cmd.extend(["--ro-bind", script_dir, "/scripts"])
 
-            import sys
-
-            site_packages = None
-            for path in sys.path:
-                if "site-packages" in path and os.path.exists(path):
-                    site_packages = path
-                    break
-
-            if site_packages:
-                cmd.extend(
-                    [
-                        "--bindmount",
-                        f"{site_packages}:/usr/lib/python3/dist-packages:ro",
-                    ]
-                )
-
-            cmd.extend(["--", "/usr/bin/python3", f"/scripts/{script_name}"])
-            cmd.append(f"/sandbox/{input_filename}")
-            cmd.extend(["--output", f"/sandbox/{output_filename}"])
+            cmd.extend(
+                [
+                    "--chdir",
+                    "/sandbox",
+                    "--",
+                    "/usr/bin/python3",
+                    f"/scripts/{script_name}",
+                    f"/sandbox/{input_filename}",
+                    "--output",
+                    f"/sandbox/{output_filename}",
+                ]
+            )
 
             if args:
                 cmd.extend(args)
 
-            try:
-                result = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
-                    timeout=self.time_limit + 5,
-                    cwd=tmpdir,
+            self._execute(cmd, tmpdir)
+
+            mode = "rb" if binary_output else "r"
+            encoding = None if binary_output else "utf-8"
+
+            if not os.path.exists(output_path):
+                raise RuntimeError(
+                    "Sandbox script finished but did not produce output file"
                 )
 
-                if result.returncode != 0:
-                    stderr = result.stderr.lower()
-                    if "time limit" in stderr or "killed" in stderr:
-                        raise SandboxTimeoutError("Script execution timed out")
-                    if any(
-                        x in stderr
-                        for x in [
-                            "permission denied",
-                            "seccomp",
-                            "operation not permitted",
-                        ]
-                    ):
-                        raise SandboxViolationError(
-                            f"Security violation: {result.stderr}"
-                        )
-                    raise RuntimeError(f"Script failed: {result.stderr}")
+            with open(output_path, mode, encoding=encoding) as f:
+                return f.read()
 
-                if not os.path.exists(output_path):
-                    raise RuntimeError("Script did not produce output file")
+    def _execute(self, cmd: List[str], cwd: str) -> str:
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=self.time_limit,
+                cwd=cwd,
+            )
 
-                mode = "rb" if binary_output else "r"
-                encoding = None if binary_output else "utf-8"
+            if result.returncode != 0:
+                stderr = result.stderr.lower()
+                if result.returncode == 137 or "memory" in stderr:
+                    raise SandboxViolationError("Memory limit exceeded")
 
-                with open(output_path, mode, encoding=encoding) as f:
-                    return f.read()
-            except subprocess.TimeoutExpired:
-                raise SandboxTimeoutError("Script execution exceeded time limit")
+                # Check for other common bwrap failures
+                if "bind" in stderr or "permissions" in stderr:
+                    raise SandboxViolationError(
+                        f"Security/Mount error: {result.stderr}"
+                    )
+
+                raise RuntimeError(f"Sandbox error: {result.stderr}")
+
+            return result.stdout + result.stderr
+
+        except subprocess.TimeoutExpired:
+            raise SandboxTimeoutError("Execution exceeded time limit")
 
 
 class SandboxFactory:
@@ -425,7 +401,7 @@ class SandboxFactory:
 
         Settings:
             ENABLE_SANDBOX (bool): Default True. Set to False to disable
-                                   nsjail/sandbox-exec in development.
+                                   bubblewrap in development.
         """
         # Lazy import to avoid AppRegistryNotReady during module import
         try:
