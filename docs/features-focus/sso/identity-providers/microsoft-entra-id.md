@@ -4,6 +4,10 @@ description: Configure Microsoft Entra ID as an Identity Provider for CISO Assis
 
 # Microsoft Entra ID
 
+{% tabs %}
+{% tab title="SAML" %}
+
+
 Go into your **Azure portal home**
 
 1.  Open the sidebar menu and click on **Microsoft Entra ID**<br>
@@ -39,25 +43,95 @@ Go into your **Azure portal home**
 
     <figure><img src="../../../.gitbook/assets/entra-sso-step-10.png" alt=""><figcaption></figcaption></figure>
 
+
+12. You can now [configure CISO Assistant](../#configure-ciso-assistant-with-saml) with the <mark style="color:purple;">**3 parameters**</mark> you've retrieved.
+{% endtab %}
+
+{% tab title="OIDC" %}
+### 1. Introduction
+
+Go to your Microsoft Azure Portal
+
+![Introduction](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fm4G5LxhDhqZY4sSpYhSGjd_doc.png?alt=media\&token=04407fa3-8e47-422c-9e4c-bcd259e24484)
+
+#### 2. Navigate to App Registrations
+
+Click the App registrations section to add a new application for OIDC configuration. You can also use the search bar if you don't find it in the suggestions.
+
+![Navigate to App Registrations](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2F6dcTNYFYT7zChVjPkeqre1_doc.png?alt=media\&token=428002ca-9fdb-442d-ba79-fc1e7669548b)
+
+#### 3. Start New Application Registration
+
+![Start New Application Registration](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fn1ck8yYsiBMzghUPSN3Dar_doc.png?alt=media\&token=66e344b8-d903-4e4d-ac4e-e86489fdb97f)
+
+#### 4. Name your application
+
+![Name your application](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FuWGj4A8xJKEtJT2i2wVDot_doc.png?alt=media\&token=3475459a-00cf-4dea-be4d-1b411d008d57)
+
+#### 5. Select Web Platform in Redirect URI options
+
+![Select Web Platform in Redirect URI options](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FpgpbWJE36ZGMCBp1ZNpr9Q_doc.png?alt=media\&token=744b2a8d-dfa7-4670-b469-f78d1ef19aa6)
+
+#### 6. Enter the callback URL of your instance
+
+The callback URL is: `<ciso_assistant_url>/api/accounts/oidc/openid_connect/login/callback/`
+
+for instance, for localhost: `http://localhost:8000/api/accounts/oidc/openid_connect/login/callback/`
+
+![Enter the callback URL of your instance](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2F9LgYQFoBu4jzwReWtZ8RQj_doc.png?alt=media\&token=cb4a3f36-94a7-4adc-b1f6-bd45d1a052cb)
+
+#### 7. Complete Application Registration
+
+![Complete Application Registration](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FaE46UDqv6Qj353WczPYjib_doc.png?alt=media\&token=f9eda0d1-d7c1-4c35-adec-6e6cc6162d40)
+
+#### 8. Copy the Application Client ID
+
+![Copy the Application Client ID](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fj4HxbA933shMF4YLiTQpKN_doc.png?alt=media\&token=978107bd-5427-44a0-a81a-22aee9f6f7de)
+
+#### 9. Paste it into the Client ID field
+
+![Past it into the Client ID field](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FmfJwdmC6XW98TwQtBi1tDE_doc.png?alt=media\&token=377911a6-1a42-4929-8195-4572c1f5b3bc)
+
+#### 10. Open Certificates & Secrets
+
+![Open Certificates & Secrets](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FtSEeuLJhWcgbv2kCSDFa5W_doc.png?alt=media\&token=25b1bfdd-b26e-484e-b904-e3b40610bea0)
+
+#### 11. Create a New Client Secret
+
+![Create a New Client Secret](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2F2bUjbaZCmeRE4tAm5wXYmV_doc.png?alt=media\&token=b04156e4-b8d4-45ee-846d-81364ffce675)
+
+#### 12. Add your Client Secret
+
+![Add your Client Secret](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FquPjbc42FSLh4gdRxQtNbJ_doc.png?alt=media\&token=91060f91-e8ca-47fa-9204-7bdc5445ac29)
+
+#### 13. Copy the fresh Client Secret Value
+
+![Copy the fresh Client Secret Value](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FfhUvXygLkKLWcU2FRbUWCm_doc.png?alt=media\&token=61f31781-64cd-473a-8077-8dc9a6f955b1)
+
+#### 14. Past it into the Secret field
+
+![Past it into the Secret field](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FdeXjQnv7rSz5g9VfNd6iqJ_doc.png?alt=media\&token=e5285754-c937-49c5-8c91-b7f8480576ed)
+
+#### 15. Go back to your App Overview
+
+![Go back to your App Overview](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fs9M4ELtFdgpD3XUBov8yzi_doc.png?alt=media\&token=94c2a00c-5ed4-43fb-a6ab-24dc4d976962)
+
+#### 16. Inside Endpoints copy the OpenID Connect metadata document URL
+
+![Inside Endpoints copy the OpenID Connect metadata document URL](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fek7LxvurULGuoRMHnd5CaE_doc.png?alt=media\&token=ecb2dcb2-3dd6-4bf6-ad80-d0d4a6a8e1df)
+
+#### 17. Paste it into the Server URL field
+
+![Paste it into the Server URL field](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fk4VkipPBEeDSWX95eva89a_doc.png?alt=media\&token=c142ef97-eca5-456d-b59b-2ec5caf8c601)
+
+#### 18. Save your configuration
+
+![Save your configuration](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FdecHPQUuEQRJt82tDzpzkA_doc.png?alt=media\&token=20c4d2ae-0f00-45e0-9220-7f6599b162b7)
+
+You have successfully configured OpenID Connect (OIDC) integration with EntraID.
+{% endtab %}
+{% endtabs %}
+
 {% hint style="warning" %}
-<mark style="color:orange;">Add a user in your application doesn't automatically create the user on CISO Assistant</mark>
+<mark style="color:orange;">Adding a user in your Entra application doesn't automatically create the user on CISO Assistant</mark>
 {% endhint %}
-
-You can now [configure CISO Assistant](../#configure-ciso-assistant-with-saml) with the <mark style="color:purple;">**3 parameters**</mark> you've retrieved.
-
-
-
-### Using Open ID connect
-
-
-
-* head to Entra ID
-* Under manage, select `App registrations` and create a `New registration` and use the default settings.
-* Once createad, copy the `Application (client) ID` and use it as first parameter on CISO Assistant.
-* under the manage section of the app, select `certificates and secrets`
-* Create a `new client secret` under the client secrets, copy its value and use it as second parameter on CISO Assistant.
-* Go back to Overview of the app, and click Endpoints. Use the value on `OpenID Connect metadata document` as third parameter on CISO Assistant.
-* Under the `Authentication (Preview)` of the app, click `add redirect URI`, and select `web` , the value should be something like `<ciso_assistant_backend_url>/api/accounts/oidc/openid_connect/login/callback/` for instance, for localhost, `http://localhost:8000/api/accounts/oidc/openid_connect/login/callback/`
-
-
-
