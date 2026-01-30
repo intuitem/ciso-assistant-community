@@ -48,7 +48,7 @@ Go into your **Azure portal home**
 {% endtab %}
 
 {% tab title="OIDC" %}
-### 1. Introduction
+#### 1. Introduction
 
 Go to your Microsoft Azure Portal
 
@@ -62,7 +62,7 @@ Click the App registrations section to add a new application for OIDC configurat
 
 #### 3. Start New Application Registration
 
-![Start New Application Registration](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fn1ck8yYsiBMzghUPSN3Dar_doc.png?alt=media\&token=66e344b8-d903-4e4d-ac4e-e86489fdb97f)
+![Start New Application Registration](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fn1ck8yYsiBMzghUPSN3Dar_doc.png?alt=media\&token=033fd114-1ec0-46cc-94dc-fb716357048f)
 
 #### 4. Name your application
 
@@ -74,7 +74,7 @@ Click the App registrations section to add a new application for OIDC configurat
 
 #### 6. Enter the callback URL of your instance
 
-The callback URL is: `<ciso_assistant_url>/api/accounts/oidc/openid_connect/login/callback/`
+The callback URL is: `<ciso_assistant_url>/api/accounts/oidc/openid_connect/login/callback/` for
 
 for instance, for localhost: `http://localhost:8000/api/accounts/oidc/openid_connect/login/callback/`
 
@@ -86,15 +86,15 @@ for instance, for localhost: `http://localhost:8000/api/accounts/oidc/openid_con
 
 #### 8. Copy the Application Client ID
 
-![Copy the Application Client ID](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fj4HxbA933shMF4YLiTQpKN_doc.png?alt=media\&token=978107bd-5427-44a0-a81a-22aee9f6f7de)
+![Copy the Application Client ID](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fj4HxbA933shMF4YLiTQpKN_doc.png?alt=media\&token=7d23b6bd-824f-4e8e-ab24-c8d19cb76ef7)
 
-#### 9. Paste it into the Client ID field
+#### 9. Past it into the Client ID field
 
-![Past it into the Client ID field](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FmfJwdmC6XW98TwQtBi1tDE_doc.png?alt=media\&token=377911a6-1a42-4929-8195-4572c1f5b3bc)
+![Past it into the Client ID field](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FmfJwdmC6XW98TwQtBi1tDE_doc.png?alt=media\&token=f785e518-1d5b-4a5a-b329-56a767012b6e)
 
 #### 10. Open Certificates & Secrets
 
-![Open Certificates & Secrets](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FtSEeuLJhWcgbv2kCSDFa5W_doc.png?alt=media\&token=25b1bfdd-b26e-484e-b904-e3b40610bea0)
+![Open Certificates & Secrets](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FtSEeuLJhWcgbv2kCSDFa5W_doc.png?alt=media\&token=c4cb2f78-ab54-4647-a3eb-7c7abe4231b9)
 
 #### 11. Create a New Client Secret
 
@@ -106,27 +106,27 @@ for instance, for localhost: `http://localhost:8000/api/accounts/oidc/openid_con
 
 #### 13. Copy the fresh Client Secret Value
 
-![Copy the fresh Client Secret Value](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FfhUvXygLkKLWcU2FRbUWCm_doc.png?alt=media\&token=61f31781-64cd-473a-8077-8dc9a6f955b1)
+![Copy the fresh Client Secret Value](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FfhUvXygLkKLWcU2FRbUWCm_doc.png?alt=media\&token=19ce3280-9d37-4066-940d-a8056e6c292f)
 
 #### 14. Past it into the Secret field
 
-![Past it into the Secret field](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FdeXjQnv7rSz5g9VfNd6iqJ_doc.png?alt=media\&token=e5285754-c937-49c5-8c91-b7f8480576ed)
+![Past it into the Secret field](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FdeXjQnv7rSz5g9VfNd6iqJ_doc.png?alt=media\&token=72bbf1c7-548e-4acc-abf9-07981f7cdeb5)
 
 #### 15. Go back to your App Overview
 
-![Go back to your App Overview](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fs9M4ELtFdgpD3XUBov8yzi_doc.png?alt=media\&token=94c2a00c-5ed4-43fb-a6ab-24dc4d976962)
+![Go back to your App Overview](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fs9M4ELtFdgpD3XUBov8yzi_doc.png?alt=media\&token=59fb365d-fd30-4a1e-9169-fc2288ef6300)
 
-#### 16. Inside Endpoints copy the OpenID Connect metadata document URL
+#### 16. Inside Endpoints copy the OpenID Connect metadata URL
 
-![Inside Endpoints copy the OpenID Connect metadata document URL](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fek7LxvurULGuoRMHnd5CaE_doc.png?alt=media\&token=ecb2dcb2-3dd6-4bf6-ad80-d0d4a6a8e1df)
+![Inside Endpoints copy the OpenID Connect metadata URL](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fek7LxvurULGuoRMHnd5CaE_doc.png?alt=media\&token=e60904ee-e5bb-4229-9aca-dff74b73a177)
 
 #### 17. Paste it into the Server URL field
 
-![Paste it into the Server URL field](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fk4VkipPBEeDSWX95eva89a_doc.png?alt=media\&token=c142ef97-eca5-456d-b59b-2ec5caf8c601)
+![Paste it into the Server URL field](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2Fk4VkipPBEeDSWX95eva89a_doc.png?alt=media\&token=959cd638-397a-465f-8502-1d8a0a8369d9)
 
 #### 18. Save your configuration
 
-![Save your configuration](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FdecHPQUuEQRJt82tDzpzkA_doc.png?alt=media\&token=20c4d2ae-0f00-45e0-9220-7f6599b162b7)
+![Save your configuration](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FdecHPQUuEQRJt82tDzpzkA_doc.png?alt=media\&token=38769a0b-9b81-4013-9a86-6319b84b6de7)
 
 You have successfully configured OpenID Connect (OIDC) integration with EntraID.
 {% endtab %}
