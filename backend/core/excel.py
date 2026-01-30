@@ -26,7 +26,7 @@ class ExcelUploadHandler:
     CSA_CCM_PREP_SCRIPT_PATH = settings.BASE_DIR / "scripts" / "convert_ccm_v2.py"
 
     # Default packager name to use when running prep scripts
-    DEFAULT_PACKAGER = "intuitem"
+    DEFAULT_PACKAGER = "local"
 
     def __init__(
         self,
