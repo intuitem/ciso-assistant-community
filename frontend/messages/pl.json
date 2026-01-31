@@ -837,6 +837,7 @@
 	"graph": "Wykres",
 	"startDate": "Data rozpoczęcia",
 	"startDateHelpText": "Data rozpoczęcia (przydatna dla osi czasu)",
+	"expirationDateMustBeOnOrAfterStartDate": "Data wygaśnięcia musi być równa lub późniejsza niż data rozpoczęcia",
 	"backupLoadingError": "Wystąpił błąd podczas ładowania kopii zapasowej.",
 	"backupVersionError": "Nie można załadować kopii zapasowej, wersja kopii zapasowej jest nieprawidłowa",
 	"confirmYes": "Potwierdź wpisując 'Tak' poniżej:",

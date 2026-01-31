@@ -957,6 +957,7 @@
 	"graph": "Graphique",
 	"startDate": "Date de début",
 	"startDateHelpText": "Date de début (utile pour la chronologie)",
+	"expirationDateMustBeOnOrAfterStartDate": "La date d'expiration doit être postérieure ou égale à la date de début",
 	"backupLoadingError": "Une erreur s'est produite lors du chargement de la sauvegarde.",
 	"backupVersionError": "Impossible de charger la sauvegarde, la version de la sauvegarde est invalide",
 	"confirmYes": "Confirmez en écrivant 'oui' puis validez :",

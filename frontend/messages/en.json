@@ -1018,6 +1018,7 @@
 	"timelineEntries": "Timeline",
 	"graph": "Graph",
 	"startDateHelpText": "Start date (useful for timeline)",
+	"expirationDateMustBeOnOrAfterStartDate": "Expiration date must be on or after start date",
 	"backupLoadingError": "An error occurred while loading the backup.",
 	"backupVersionError": "Can't load the backup, the version of the backup is invalid",
 	"confirmYes": "Confirm by typing 'yes' below:",
