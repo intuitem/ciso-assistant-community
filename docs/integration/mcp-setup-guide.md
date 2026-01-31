@@ -9,6 +9,8 @@ description: >-
 
 Compatible with: SaaS or on-premises, CE or Pro
 
+Tested MCP clients: Claude Desktop, Claude Code, LM Studio, OpenWebUI
+
 ### What is MCP?
 
 MCP (Model Context Protocol) allows AI assistants like Claude to interact with external tools and services. Think of it as giving your AI a set of capabilities to read and write data in CISO Assistant.
