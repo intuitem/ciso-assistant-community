@@ -7,13 +7,13 @@ description: >-
 
 # MCP setup guide
 
-Compatible with: SaaS or on-premises, CE ou Pro
+Compatible with: SaaS or on-premises, CE or Pro
 
 ### What is MCP?
 
 MCP (Model Context Protocol) allows AI assistants like Claude to interact with external tools and services. Think of it as giving your AI a set of capabilities to read and write data in CISO Assistant.
 
-The CISO Assistant MCP server provides **80+ tools** covering:
+The CISO Assistant MCP server provides **90+ tools** covering:
 
 * Risk management (assessments, scenarios, matrices)
 * Compliance audits (frameworks, requirements)
@@ -465,6 +465,11 @@ Once connected, try these example prompts:
 * "What contracts are expiring soon?"
 
 ***
+
+### FAQ
+
+* What about ChatGPT compatiblity?
+  * chatGPT custom mcp support has been introduced on Q4/2025 but is not mature enough yet. Users can set it up but would require enabling developper mode, some extra proxification and internet exposure which we don't recommend for now. We're monitoring their MCP support and we'll update the page accordingly.
 
 ### Need Help?
 
