@@ -240,7 +240,7 @@
 					: {
 							fields: [
 								{ field: 'version', translate: true },
-								{ field: 'perimeter', path: 'str', translate: false },
+								{ field: 'folder', path: 'str', translate: false },
 								{ field: 'status', translate: true }
 							],
 							position: 'suffix',

@@ -4830,9 +4830,10 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
     perimeter = models.ForeignKey(
         Perimeter,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Perimeter"),
         null=True,
+        blank=True,
     )
     version = models.CharField(
         max_length=100,
@@ -4875,7 +4876,9 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         abstract = True
 
     def save(self, *args, **kwargs) -> None:
-        if not self.folder or self.folder == Folder.get_root_folder():
+        if self.perimeter and (
+            not self.folder or self.folder == Folder.get_root_folder()
+        ):
             self.folder = self.perimeter.folder
         return super().save(*args, **kwargs)
 
@@ -5338,7 +5341,7 @@ def risk_scoring(probability, impact, risk_matrix: RiskMatrix) -> int:
     return risk_index
 
 
-class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
+class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
     TREATMENT_OPTIONS = [
         ("open", _("Open")),
         ("mitigate", _("Mitigate")),
@@ -5708,7 +5711,7 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
         return extra_controls
 
     def __str__(self):
-        return str(self.parent_perimeter()) + _(": ") + str(self.name)
+        return f"{self.folder}/{self.risk_assessment}/{self.name}"
 
     def delete(self, *args, **kwargs):
         risk_assessment_id = self.risk_assessment.id
@@ -5720,6 +5723,12 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
         return result
 
     def save(self, *args, **kwargs):
+        # Set folder from parent risk assessment if not provided
+        if self.risk_assessment and (
+            not self.folder or self.folder == Folder.get_root_folder()
+        ):
+            self.folder = self.risk_assessment.folder
+
         if self.inherent_proba >= 0 and self.inherent_impact >= 0:
             self.inherent_level = risk_scoring(
                 self.inherent_proba,

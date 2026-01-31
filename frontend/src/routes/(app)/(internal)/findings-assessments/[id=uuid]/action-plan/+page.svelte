@@ -41,12 +41,21 @@
 
 <div class="bg-white p-2 shadow-sm rounded-lg space-x-2 flex flex-row justify-center mb-2">
 	<p class="font-semibold text-lg">
-		{m.perimeter()}:
-		<a
-			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/perimeters/{data.findings_assessment.perimeter.id}/"
-			>{data.findings_assessment.perimeter.str}</a
-		>
+		{#if data.findings_assessment.perimeter}
+			{m.perimeter()}:
+			<a
+				class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
+				href="/perimeters/{data.findings_assessment.perimeter.id}/"
+				>{data.findings_assessment.perimeter.str}</a
+			>
+		{:else}
+			{m.folder()}:
+			<a
+				class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
+				href="/folders/{data.findings_assessment.folder.id}/"
+				>{data.findings_assessment.folder.str}</a
+			>
+		{/if}
 	</p>
 	<p>/</p>
 	<p class="font-semibold text-lg">
