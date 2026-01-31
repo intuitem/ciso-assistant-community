@@ -9,15 +9,27 @@
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
 
+	function deriveInitialTab(): string {
+		if (page.state?.settingsTab) return page.state.settingsTab;
+		return page.url.pathname.endsWith('/client-settings') ? 'clientSettings' : 'general';
+	}
+
 	// Use string-based state for the active tab for better readability and maintenance.
-	// Defaulting to 'general' which corresponds to the original tabSet = 0.
-	let group = $state('general');
+	let group = $state(deriveInitialTab());
+
+	$effect(() => {
+		const nextTab = deriveInitialTab();
+		if (group !== nextTab) {
+			group = nextTab;
+		}
+	});
 
 	let { data } = $props();
 
 	// Centralized handler for tab changes.
 	async function handleTabChange(newValue: string) {
 		group = newValue;
+		const nextState = { ...page.state, settingsTab: newValue };
 
 		// Preserve the special data-loading logic for the Client Settings tab.
 		// This now triggers when the tab with value 'clientSettings' is selected.
@@ -29,14 +41,18 @@
 			if (result.type === 'loaded' && result.status === 200) {
 				// Use pushState to update the page store without a full navigation.
 				// This keeps the UI fast and responsive.
-				pushState(href, { ...page.state, clientSettings: result.data });
+				pushState(href, { ...nextState, clientSettings: result.data });
 			} else {
 				// Fallback to a full navigation if preloading fails for any reason.
-				goto(href);
+				goto(href, { state: nextState });
 			}
+			return;
+		}
+
+		if (page.url.pathname !== '/settings') {
+			goto('/settings', { state: nextState });
 		} else {
-			const href = `/settings`;
-			goto(href);
+			pushState('/settings', nextState);
 		}
 	}
 </script>
