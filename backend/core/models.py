@@ -306,11 +306,11 @@ class StoredLibrary(LibraryMixin):
     @classmethod
     def store_library_content(
         cls, library_content: bytes, builtin: bool = False
-    ) -> "StoredLibrary | None":
+    ) -> tuple["StoredLibrary", None] | tuple[None, str]:
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             # We do not store the library if its hash checksum is in the database.
-            return None
+            return None, "This library already exists."
         try:
             library_data = yaml.safe_load(library_content)
             if not isinstance(library_data, dict):
@@ -345,10 +345,13 @@ class StoredLibrary(LibraryMixin):
             logger.info("update hash", urn=urn)
             same_version_lib.hash_checksum = hash_checksum
             same_version_lib.save()
-            return None
+            return None, "This library already exists."
 
         if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
-            return None  # We do not accept to store outdated libraries
+            return (
+                None,
+                "This library is outdated.",
+            )  # We do not accept to store outdated libraries
 
         with transaction.atomic():
             # This code allows adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
@@ -402,7 +405,7 @@ class StoredLibrary(LibraryMixin):
                 ),  # autoload is true if the library contains requirement mapping sets
             )
             new_library.filtering_labels.set(filtering_labels)
-            return new_library
+            return new_library, None
 
     @classmethod
     def store_library_file(
