@@ -836,6 +836,7 @@
 	"graph": "Grafik",
 	"startDate": "Başlangıç tarihi",
 	"startDateHelpText": "Başlangıç tarihi (zaman çizelgesi için yararlıdır)",
+	"expirationDateMustBeOnOrAfterStartDate": "Bitiş tarihi, başlangıç tarihiyle aynı gün veya sonrasında olmalıdır",
 	"backupLoadingError": "Yedek yüklenirken bir hata oluştu.",
 	"backupVersionError": "Yedek yüklenemiyor, yedeğin sürümü geçersiz",
 	"confirmYes": "Aşağıya 'evet' yazarak onaylayın:",

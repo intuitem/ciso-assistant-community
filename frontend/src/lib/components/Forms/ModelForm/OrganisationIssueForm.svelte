@@ -48,6 +48,15 @@
 	cacheLock={cacheLocks['category']}
 	bind:cachedValue={formDataCache['category']}
 />
+<Select
+	{form}
+	options={model.selectOptions['status']}
+	field="status"
+	label={m.status()}
+	disableDoubleDash={true}
+	cacheLock={cacheLocks['status']}
+	bind:cachedValue={formDataCache['status']}
+/>
 <AutocompleteSelect
 	{form}
 	multiple
@@ -82,4 +91,20 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
+/>
+<TextField
+	type="date"
+	{form}
+	field="start_date"
+	label={m.startDate()}
+	cacheLock={cacheLocks['start_date']}
+	bind:cachedValue={formDataCache['start_date']}
+/>
+<TextField
+	type="date"
+	{form}
+	field="expiration_date"
+	label={m.expiryDate()}
+	cacheLock={cacheLocks['expiration_date']}
+	bind:cachedValue={formDataCache['expiration_date']}
 />

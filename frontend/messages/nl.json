@@ -790,6 +790,7 @@
 	"graph": "Grafiek",
 	"startDate": "Startdatum",
 	"startDateHelpText": "Startdatum (handig voor tijdlijn)",
+	"expirationDateMustBeOnOrAfterStartDate": "De vervaldatum moet gelijk zijn aan of later zijn dan de startdatum",
 	"backupLoadingError": "Er is een fout opgetreden tijdens het laden van de back-up.",
 	"backupGreaterVersionError": "De back-up kan niet worden geladen. De versie van de back-up is hoger dan de huidige versie van uw applicatie.",
 	"backupLowerVersionError": "Er is een fout opgetreden. Mogelijk is de back-upversie te oud. Als dat zo is, moet u deze bijwerken voordat u het opnieuw probeert.",

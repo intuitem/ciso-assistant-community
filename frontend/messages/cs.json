@@ -785,6 +785,7 @@
 	"graph": "Graf",
 	"startDate": "Datum začátku",
 	"startDateHelpText": "Datum začátku (užitečné pro časovou osu)",
+	"expirationDateMustBeOnOrAfterStartDate": "Datum ukončení musí být stejné nebo pozdější než datum začátku",
 	"backupLoadingError": "Při načítání zálohy došlo k chybě.",
 	"backupGreaterVersionError": "Nelze načíst zálohu, verze zálohy je vyšší než současná verze vaší aplikace.",
 	"backupLowerVersionError": "Došlo k chybě, verze zálohy může být příliš stará, pokud ano, musí být aktualizována před opětovným pokusem.",
