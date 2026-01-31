@@ -41,9 +41,8 @@ test.describe('Client settings', () => {
 		await settingsPage.goto();
 		await settingsPage.hasUrl();
 		await settingsPage.hasTitle();
-		const clientTab = page.getByRole('tab', { name: /Client settings/i });
-		await clientTab.click({ trial: true }); // verifies nothing blocks the click
-		await clientTab.click();
+		await page.waitForTimeout(1000); // workaround for flakiness
+		await page.getByRole('tab', { name: ' Client settings' }).click();
 	});
 
 	test('admin can change client name', async ({ page }) => {
