@@ -153,3 +153,17 @@ class TestStoreLibraryContent:
         )
         assert stored_library is not None
         assert stored_library.autoload is False
+
+    @pytest.mark.django_db
+    def test_store_library_content_dry_run(self):
+        library_data = StoredLibrary.store_library_content(
+            SAMPLE_YAML_LIB_NO_MAPPINGS, dry_run=True
+        )
+        assert isinstance(library_data, dict)
+        assert library_data["urn"] == "urn:intuitem:test:library:nist-csf-1.1"
+        assert library_data["version"] == 5
+        assert library_data["objects_meta"]["framework"] == 1
+        # Check that no object was created
+        assert not StoredLibrary.objects.filter(
+            urn="urn:intuitem:test:library:nist-csf-1.1"
+        ).exists()

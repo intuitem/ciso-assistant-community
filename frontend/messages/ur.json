@@ -389,7 +389,7 @@
 	"dependencies": "انحصار",
 	"copyright": "کاپی رائٹ",
 	"addYourLibrary": "اپنی لائبریری شامل کریں",
-	"libraryFileInYaml": "YAML فارمیٹ میں لائبریری فائل",
+	"libraryFileInYamlOrXlsx": "YAML فارمیٹ میں لائبریری فائل",
 	"importBackup": "بیک اپ درآمد کریں",
 	"exportBackup": "بیک اپ برآمد کریں",
 	"confirmImportBackup": "کیا آپ کو یقین ہے کہ آپ اس بیک اپ کو درآمد کرنا چاہتے ہیں؟ اس سے تمام موجودہ ڈیٹا اوور رائٹ ہو جائے گا۔",
