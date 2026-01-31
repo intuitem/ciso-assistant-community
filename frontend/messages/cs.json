@@ -554,6 +554,7 @@
 	"mediumSOK": "Síla znalostí podporujících hodnocení je střední",
 	"highSOK": "Síla znalostí podporujících hodnocení je vysoká",
 	"libraryLoadingError": "Došlo k chybě během načítání vaší knihovny",
+	"processingError": "Chyba zpracování",
 	"libraryAlreadyLoadedError": "Tato knihovna již byla načtena",
 	"invalidLibraryFileError": "Neplatný soubor knihovny. Ujistěte se, že formát je správný.",
 	"taintedFormMessage": "Chcete opustit tuto stránku? Změny, které jste provedli, nemusí být uloženy.",

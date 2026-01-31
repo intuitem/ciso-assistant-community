@@ -560,6 +560,7 @@
 	"mediumSOK": "Styrken af viden der understøtter vurderingen er middel",
 	"highSOK": "Styrken af viden der understøtter vurderingen er høj",
 	"libraryLoadingError": "Der opstod en fejl under indlæsning af biblioteket",
+	"processingError": "Behandlingsfejl",
 	"libraryAlreadyLoadedError": "Dette bibliotek er allerede indlæst",
 	"invalidLibraryFileError": "Ugyldig biblioteksfil. Kontroller at formatet er korrekt",
 	"taintedFormMessage": "Vil du forlade denne side? Ændringer du har lavet gemmes muligvis ikke",

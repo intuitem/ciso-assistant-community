@@ -556,6 +556,7 @@
 	"mediumSOK": "Az értékelést alátámasztó ismeretek erőssége közepes.",
 	"highSOK": "Az értékelést alátámasztó ismeretek erőssége magas.",
 	"libraryLoadingError": "Hiba történt a könyvtár betöltésekor.",
+	"processingError": "Feldolgozási hiba",
 	"libraryAlreadyLoadedError": "Ez a könyvtár már be van töltve.",
 	"invalidLibraryFileError": "Érvénytelen könyvtárfájl. Ellenőrizze, hogy a formátum helyes-e.",
 	"taintedFormMessage": "Biztosan elhagyja ezt az oldalt? Az el nem mentett módosítások elveszhetnek.",
