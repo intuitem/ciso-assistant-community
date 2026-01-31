@@ -391,7 +391,7 @@
 	"dependencies": "Függőségek",
 	"copyright": "Szerzői jog",
 	"addYourLibrary": "Saját könyvtár hozzáadása",
-	"libraryFileInYaml": "YAML formátumú könyvtárfájl",
+	"libraryFileInYamlOrXlsx": "YAML formátumú könyvtárfájl",
 	"importBackup": "Biztonsági mentés importálása",
 	"exportBackup": "Biztonsági mentés exportálása",
 	"confirmImportBackup": "Biztosan importálni szeretné ezt a biztonsági mentést? Ez felülír minden meglévő adatot.",
