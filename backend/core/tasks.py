@@ -6,6 +6,7 @@ from core.models import (
     AppliedControl,
     ComplianceAssessment,
     Evidence,
+    OrganisationIssue,
     ValidationFlow,
 )
 from iam.models import User
@@ -255,6 +256,23 @@ def check_validation_flows_deadline_tomorrow():
     # Send personalized email to each approver
     for approver_email, validations in approver_validations.items():
         send_validation_deadline_notification(approver_email, validations, days=1)
+
+
+@db_periodic_task(crontab(hour="6", minute="50"))
+def check_expired_organisation_issues():
+    expired_issues_query = OrganisationIssue.objects.filter(
+        expiration_date__lt=date.today(), status=OrganisationIssue.Status.ACTIVE
+    )
+    expired_issues = list(expired_issues_query)
+
+    for issue in expired_issues:
+        issue.status = OrganisationIssue.Status.INACTIVE
+
+    OrganisationIssue.objects.bulk_update(
+        expired_issues,
+        ["status"],
+        batch_size=100,
+    )
 
 
 @task()

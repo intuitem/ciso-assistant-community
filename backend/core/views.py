@@ -7932,6 +7932,11 @@ class OrganisationIssueViewSet(BaseModelViewSet):
     def origin(self, request):
         return Response(dict(OrganisationIssue.Origin.choices))
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(OrganisationIssue.Status.choices))
+
 
 class CampaignViewSet(BaseModelViewSet):
     model = Campaign

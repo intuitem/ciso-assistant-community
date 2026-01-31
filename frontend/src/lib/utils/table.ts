@@ -2238,8 +2238,8 @@ export const listViewFields = {
 		}
 	},
 	'organisation-issues': {
-		head: ['refId', 'name', 'category', 'origin', 'domain'],
-		body: ['ref_id', 'name', 'category', 'origin', 'folder'],
+		head: ['refId', 'name', 'category', 'origin', 'status', 'domain'],
+		body: ['ref_id', 'name', 'category', 'origin', 'status', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER
 		}
