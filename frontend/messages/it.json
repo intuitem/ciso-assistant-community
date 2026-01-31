@@ -391,7 +391,7 @@
 	"dependencies": "Dipendenze",
 	"copyright": "Copyright",
 	"addYourLibrary": "Aggiungi la tua libreria",
-	"libraryFileInYaml": "File della libreria in formato YAML",
+	"libraryFileInYamlOrXlsx": "File della libreria in formato YAML",
 	"importBackup": "Importa backup",
 	"exportBackup": "Esporta backup",
 	"confirmImportBackup": "Sei sicuro di voler importare questo backup? Sovrascriverai tutti i dati esistenti, incluse le credenziali attuali.",

@@ -44,11 +44,11 @@
 				{#snippet children({ form })}
 					<FileInput
 						{form}
-						helpText={m.libraryFileInYaml()}
+						helpText={m.libraryFileInYamlOrXlsx()}
 						field="file"
 						label={m.addYourLibrary()}
 						resetSignal={fileResetSignal}
-						allowedExtensions={['yaml', 'yml']}
+						allowedExtensions={['yaml', 'yml', 'xlsx']}
 					/>
 					<button
 						class="btn preset-filled-primary-500 font-semibold w-full"
