@@ -789,6 +789,7 @@
 	"graph": "Grafik",
 	"startDate": "Tanggal mulai",
 	"startDateHelpText": "Tanggal mulai (berguna untuk linimasa)",
+	"expirationDateMustBeOnOrAfterStartDate": "Tanggal kedaluwarsa harus sama atau setelah tanggal mulai",
 	"backupLoadingError": "Terjadi kesalahan saat memuat cadangan.",
 	"backupGreaterVersionError": "Tidak dapat memuat cadangan, versi cadangan lebih tinggi daripada versi aplikasi Anda saat ini.",
 	"backupLowerVersionError": "Terjadi kesalahan, versi cadangan mungkin terlalu lama, jika demikian, cadangan harus diperbarui sebelum mencoba lagi.",

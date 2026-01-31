@@ -802,6 +802,7 @@
 	"graph": "Grafico",
 	"startDate": "Data di inizio",
 	"startDateHelpText": "Data di inizio (utile per la linea temporale)",
+	"expirationDateMustBeOnOrAfterStartDate": "La data di scadenza deve essere uguale o successiva alla data di inizio",
 	"backupLoadingError": "Errore durante il caricamento del backup.",
 	"backupVersionError": "Impossibile caricare il backup: la versione non è valida",
 	"confirmYes": "Conferma digitando 'sì':",
