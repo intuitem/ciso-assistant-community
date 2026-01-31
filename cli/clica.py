@@ -12,6 +12,7 @@ import os
 from dotenv import load_dotenv
 import json
 from rich import print as rprint
+from typing import Optional
 
 from icecream import ic
 
@@ -64,23 +65,23 @@ def ids_map(model, folder=None):
     return my_map
 
 
-def _get_folders():
-    if not TOKEN:
-        print(
-            "No authentication token available. Please set PAT token in .clica.env.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
+def get_global_folder_id() -> Optional[str]:
     url = f"{API_URL}/folders/"
     headers = {"Authorization": f"Token {TOKEN}"}
+
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
     if res.status_code == 200:
         output = res.json()
         for folder in output["results"]:
             if folder["content_type"] == "GLOBAL":
                 GLOBAL_FOLDER_ID = folder["id"]
-                return GLOBAL_FOLDER_ID, output.get("results")
+                return GLOBAL_FOLDER_ID
+            
+    else:
+        print(
+            f"The server didn't reply as expected: {res.status_code} {res.reason}: {res.text}",
+            file=sys.stderr,
+        )
 
 
 @click.command()
@@ -281,46 +282,48 @@ def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
             rprint(res.json())
             rprint(data)
 
+def data_wizard_import(model_type: str):
+    def import_func(file):
+        """import assets from a csv. Check the samples for format."""
+        if not TOKEN:
+            print(
+                "No authentication token available. Please set PAT token in .clica.env.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        GLOBAL_FOLDER_ID = get_global_folder_id()
+        if GLOBAL_FOLDER_ID is None:
+            return
+        
+        filename = Path(file).name
+
+        headers = {
+            "Authorization": f"Token {TOKEN}",
+            "X-Model-Type": model_type, # "Asset"
+            'X-Folder-Id': GLOBAL_FOLDER_ID,
+            "Content-Disposition": f'attachment; filename="{filename}"',
+        }
+
+        url = f"{API_URL}/data-wizard/load-file/"
+        with open(file, "rb") as csv_file:
+            file_data = csv_file.read()
+            r = requests.post(url, headers=headers, data=file_data, verify=VERIFY_CERTIFICATE)
+            try:
+                response_text = json.dumps(r.json(), indent=2)
+            except Exception:
+                response_text = r.text
+            print(f"{r.status_code} {r.reason} {r.url}:\n\n{response_text}")
+
+    return import_func
 
 @click.command()
 @click.option("--file", required=True, help="Path of the csv file with assets")
 def import_assets(file):
     """import assets from a csv. Check the samples for format."""
-    if not TOKEN:
-        print(
-            "No authentication token available. Please set PAT token in .clica.env.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
 
-    GLOBAL_FOLDER_ID, _ = _get_folders()
-    df = pd.read_csv(file)
-    url = f"{API_URL}/assets/"
-    headers = {
-        "Authorization": f"Token {TOKEN}",
-    }
-    if click.confirm(f"I'm about to create {len(df)} assets. Are you sure?"):
-        for _, row in df.iterrows():
-            asset_type = "SP"
-            name = row["name"]
-            if row["type"].lower() == "primary":
-                asset_type = "PR"
-            else:
-                asset_type = "SP"
-
-            data = {
-                "name": name,
-                "folder": GLOBAL_FOLDER_ID,
-                "type": asset_type,
-            }
-            res = requests.post(
-                url, json=data, headers=headers, verify=VERIFY_CERTIFICATE
-            )
-            if res.status_code != 201:
-                click.echo("❌ something went wrong", err=True)
-                rprint(res.json())
-            else:
-                rprint(f"✅ {name} created", file=sys.stderr)
+    import_func = data_wizard_import("Asset")
+    import_func(file)
 
 
 @click.command()
@@ -329,42 +332,9 @@ def import_assets(file):
 )
 def import_controls(file):
     """import applied controls. Check the samples for format."""
-    if not TOKEN:
-        print(
-            "No authentication token available. Please set PAT token in .clica.env.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
 
-    df = pd.read_csv(file)
-    GLOBAL_FOLDER_ID, _ = _get_folders()
-    url = f"{API_URL}/applied-controls/"
-    headers = {
-        "Authorization": f"Token {TOKEN}",
-    }
-    if click.confirm(f"I'm about to create {len(df)} applied controls. Are you sure?"):
-        for _, row in df.iterrows():
-            name = row["name"]
-            description = row["description"]
-            csf_function = row["csf_function"]
-            category = row["category"]
-
-            data = {
-                "name": name,
-                "folder": GLOBAL_FOLDER_ID,
-                "description": description,
-                "csf_function": csf_function.lower(),
-                "category": category.lower(),
-            }
-            res = requests.post(
-                url, json=data, headers=headers, verify=VERIFY_CERTIFICATE
-            )
-            if res.status_code != 201:
-                click.echo("❌ something went wrong", err=True)
-                rprint(res.json())
-            else:
-                rprint(f"✅ {name} created", file=sys.stderr)
-
+    import_func = data_wizard_import("AppliedControl")
+    import_func(file)
 
 @click.command()
 @click.option(
@@ -372,38 +342,9 @@ def import_controls(file):
 )
 def import_evidences(file):
     """Import evidences. Check the samples for format."""
-    if not TOKEN:
-        print(
-            "No authentication token available. Please set PAT token in .clica.env.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
 
-    df = pd.read_csv(file)
-    GLOBAL_FOLDER_ID, _ = _get_folders()
-
-    url = f"{API_URL}/evidences/"
-    headers = {
-        "Authorization": f"Token {TOKEN}",
-    }
-    if click.confirm(f"I'm about to create {len(df)} evidences. Are you sure?"):
-        for _, row in df.iterrows():
-            data = {
-                "name": row["name"],
-                "description": row["description"],
-                "folder": GLOBAL_FOLDER_ID,
-                "applied_controls": [],
-                "requirement_assessments": [],
-            }
-            res = requests.post(
-                url, json=data, headers=headers, verify=VERIFY_CERTIFICATE
-            )
-            if res.status_code != 201:
-                click.echo("❌ something went wrong", err=True)
-                rprint(res.json())
-            else:
-                rprint(f"✅ {row['name']} created", file=sys.stderr)
-
+    import_func = data_wizard_import("Evidence")
+    import_func(file)
 
 @click.command()
 @click.option("--file", required=True, help="Path to the attachment to upload")
