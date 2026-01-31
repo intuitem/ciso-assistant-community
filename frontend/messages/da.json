@@ -391,7 +391,7 @@
 	"dependencies": "Afhængigheder",
 	"copyright": "Ophavsret",
 	"addYourLibrary": "Tilføj dit eget bibliotek",
-	"libraryFileInYaml": "Biblioteksfil i YAML-format",
+	"libraryFileInYamlOrXlsx": "Biblioteksfil i YAML-format",
 	"importBackup": "Importér backup",
 	"exportBackup": "Eksportér backup",
 	"confirmImportBackup": "Er du sikker på, at du vil importere denne backup? Dette vil overskrive alle eksisterende data, inklusive dine nuværende legitimationsoplysninger.",

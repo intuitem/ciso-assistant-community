@@ -526,7 +526,7 @@
 	"scopedAsset": "Usually a primary asset / business process to focus on for this entry",
 	"copyright": "Copyright",
 	"addYourLibrary": "Add your own library",
-	"libraryFileInYaml": "Library file in YAML format",
+	"libraryFileInYamlOrXlsx": "Library file in .yaml or .xlsx format",
 	"importBackup": "Import backup",
 	"exportBackup": "Export backup",
 	"confirmImportBackup": "Are you sure you want to import this backup? This will overwrite all existing data inlcuding your actual credentials.",
