@@ -790,6 +790,7 @@
 	"graph": "Graph",
 	"startDate": "Startdatum",
 	"startDateHelpText": "Startdatum (nützlich für die Zeitleiste)",
+	"expirationDateMustBeOnOrAfterStartDate": "Das Ablaufdatum muss am selben Tag oder nach dem Startdatum liegen",
 	"backupLoadingError": "Beim Laden der Sicherung ist ein Fehler aufgetreten.",
 	"backupGreaterVersionError": "Backup kann nicht geladen werden. Die Backup-Version ist neuer als die Version Ihrer Anwendung.",
 	"backupLowerVersionError": "Fehler: Die Sicherungsversion ist möglicherweise zu alt und muss vor der Wiederherstellung aktualisiert werden.",

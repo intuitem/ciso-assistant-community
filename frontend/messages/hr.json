@@ -848,6 +848,7 @@
 	"graph": "Graf",
 	"startDate": "Početni datum",
 	"startDateHelpText": "Početni datum (korisno za lentu)",
+	"expirationDateMustBeOnOrAfterStartDate": "Datum završetka mora biti isti ili kasniji od početnog datuma",
 	"backupLoadingError": "Došlo je do pogreške pri učitavanju backupa.",
 	"backupVersionError": "Nije moguće učitati backup, verzija backupa je neispravna",
 	"confirmYes": "Potvrdite upisivanjem 'yes' ispod:",

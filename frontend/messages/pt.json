@@ -788,6 +788,7 @@
 	"graph": "Gráfico",
 	"startDate": "Data de início",
 	"startDateHelpText": "Data de início (útil para linha do tempo)",
+	"expirationDateMustBeOnOrAfterStartDate": "A data de expiração deve ser igual ou posterior à data de início",
 	"backupLoadingError": "Ocorreu um erro ao carregar o backup.",
 	"backupGreaterVersionError": "Não é possível carregar o backup, a versão do backup é superior à versão atual do seu aplicativo.",
 	"backupLowerVersionError": "Ocorreu um erro, a versão de backup pode ser muito antiga. Se for o caso, ela deve ser atualizada antes de tentar novamente.",
