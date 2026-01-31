@@ -41,6 +41,7 @@ test.describe('Client settings', () => {
 		await settingsPage.goto();
 		await settingsPage.hasUrl();
 		await settingsPage.hasTitle();
+		await page.waitForTimeout(1000); // workaround for flakiness
 		await page.getByRole('tab', { name: ' Client settings' }).click();
 	});
 
