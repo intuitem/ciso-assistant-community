@@ -788,6 +788,7 @@
 	"graph": "Grafikon",
 	"startDate": "Kezdési dátum",
 	"startDateHelpText": "Kezdési dátum (hasznos az idővonalhoz)",
+	"expirationDateMustBeOnOrAfterStartDate": "A lejárati dátumnak meg kell egyeznie a kezdés dátumával, vagy későbbinek kell lennie",
 	"backupLoadingError": "Hiba történt a biztonsági mentés betöltésekor.",
 	"backupGreaterVersionError": "A biztonsági mentés nem tölthető be, mert a mentés verziója újabb, mint az alkalmazás jelenlegi verziója.",
 	"backupLowerVersionError": "Hiba történt. A mentés verziója túl régi lehet. Ha igen, frissítse a mentést, mielőtt újra próbálkozik.",

@@ -799,6 +799,7 @@
 	"graph": "Graf",
 	"startDate": "Startdato",
 	"startDateHelpText": "Startdato (nyttig til tidslinje)",
+	"expirationDateMustBeOnOrAfterStartDate": "Udløbsdatoen skal være på samme dag eller efter startdatoen",
 	"backupLoadingError": "Der opstod en fejl under indlæsning af backup",
 	"backupVersionError": "Kan ikke indlæse backup, versionen er ugyldig",
 	"confirmYes": "Bekræft ved at skrive 'yes' nedenfor:",

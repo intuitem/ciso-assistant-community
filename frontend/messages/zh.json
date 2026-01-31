@@ -3025,6 +3025,7 @@
 	"stakeholderEntityHelpText": "生态系统中的利益相关者",
 	"stakeholderIsSelectedHelpText": "为研究选择利益相关者",
 	"startDateHelpText": "开始日期（用于时间线）",
+	"expirationDateMustBeOnOrAfterStartDate": "结束日期必须与开始日期相同或晚于开始日期",
 	"step": "步骤 {number}",
 	"strategicScenarioHelpText": "从风险来源到预期目标的攻击路径集合",
 	"studyAssetHelpText": "与研究对象相关的主要（业务资产）和支持资产",
