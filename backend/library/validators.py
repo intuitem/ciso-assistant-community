@@ -29,7 +29,7 @@ def validate_file_extension(file):
     Args:
         file: file to check
     """
-    allowed_extensions = ["yaml", "yml"]
+    allowed_extensions = ["yaml", "yml", "xlsx"]
     validator = FileExtensionValidator(allowed_extensions)
     validator(file)
 

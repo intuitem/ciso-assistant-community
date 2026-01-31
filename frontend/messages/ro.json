@@ -390,7 +390,7 @@
 	"dependencies": "Dependențe",
 	"copyright": "Drepturi de autor",
 	"addYourLibrary": "Adaugă propria ta bibliotecă",
-	"libraryFileInYaml": "Fișier bibliotecă în format YAML",
+	"libraryFileInYamlOrXlsx": "Fișier bibliotecă în format YAML",
 	"importBackup": "Importă backup",
 	"exportBackup": "Exportă backup",
 	"confirmImportBackup": "Sunteți sigur că doriți să importați acest backup? Acest lucru va suprascrie toate datele existente.",

@@ -391,7 +391,7 @@
 	"dependencies": "Afhankelijkheden",
 	"copyright": "Auteursrecht",
 	"addYourLibrary": "Voeg je eigen bibliotheek toe",
-	"libraryFileInYaml": "Bibliotheekbestand in YAML-indeling",
+	"libraryFileInYamlOrXlsx": "Bibliotheekbestand in YAML-indeling",
 	"importBackup": "Back-up importeren",
 	"exportBackup": "Back-up exporteren",
 	"confirmImportBackup": "Weet je zeker dat je deze back-up wilt importeren? Dit overschrijft alle bestaande gegevens.",
