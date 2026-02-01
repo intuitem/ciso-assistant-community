@@ -555,6 +555,7 @@
 	"mediumSOK": "Kunskapens styrka som stöder bedömningen är medel",
 	"highSOK": "Kunskapens styrka som stöder bedömningen är hög",
 	"libraryLoadingError": "Ett fel inträffade vid laddning av biblioteket",
+	"processingError": "Bearbetningsfel",
 	"libraryAlreadyLoadedError": "Detta bibliotek har redan laddats",
 	"invalidLibraryFileError": "Ogiltig biblioteksfil. Kontrollera att formatet är korrekt.",
 	"taintedFormMessage": "Vill du lämna denna sida? Ändringar du gjort kan gå förlorade.",

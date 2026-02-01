@@ -556,6 +556,7 @@
 	"mediumSOK": "De sterkte van de kennis die de beoordeling ondersteunt is medium",
 	"highSOK": "De sterkte van de kennis die de beoordeling ondersteunt is hoog",
 	"libraryLoadingError": "Er is een fout opgetreden tijdens het laden van uw bibliotheek",
+	"processingError": "Verwerkingsfout",
 	"libraryAlreadyLoadedError": "Deze bibliotheek is al geladen.",
 	"invalidLibraryFileError": "Ongeldig bibliotheekbestand. Zorg ervoor dat het formaat correct is.",
 	"taintedFormMessage": "Wil je deze pagina verlaten? Wijzigingen die je hebt aangebracht, worden mogelijk niet opgeslagen.",
