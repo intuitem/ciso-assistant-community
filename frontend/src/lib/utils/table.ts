@@ -1742,8 +1742,26 @@ export const listViewFields = {
 		}
 	},
 	'entity-assessments': {
-		head: ['name', 'entity', 'perimeter', 'status', 'dueDate', 'criticality', 'conclusion'],
-		body: ['name', 'entity', 'perimeter', 'status', 'due_date', 'criticality', 'conclusion'],
+		head: [
+			'name',
+			'entity',
+			'perimeter',
+			'status',
+			'dueDate',
+			'criticality',
+			'conclusion',
+			'folder'
+		],
+		body: [
+			'name',
+			'entity',
+			'perimeter',
+			'status',
+			'due_date',
+			'criticality',
+			'conclusion',
+			'folder'
+		],
 		filters: {
 			perimeter: PERIMETER_FILTER,
 			entity: ENTITY_FILTER,

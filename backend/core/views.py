@@ -6092,6 +6092,60 @@ class FolderViewSet(BaseModelViewSet):
             my_map[item.name] = item.id
         return Response(my_map)
 
+    def _get_quality_checks_for_folders(self, folders):
+        """
+        Helper method to aggregate quality checks for a queryset of folders.
+        """
+        res = {
+            str(f.id): {
+                "folder": FolderReadSerializer(f).data,
+                "compliance_assessments": {"objects": {}},
+                "risk_assessments": {"objects": {}},
+            }
+            for f in folders
+        }
+        for ca in ComplianceAssessment.objects.filter(folder__in=folders):
+            res[str(ca.folder.id)]["compliance_assessments"]["objects"][str(ca.id)] = {
+                "object": ComplianceAssessmentReadSerializer(ca).data,
+                "quality_check": ca.quality_check(),
+            }
+        for ra in RiskAssessment.objects.filter(folder__in=folders):
+            res[str(ra.folder.id)]["risk_assessments"]["objects"][str(ra.id)] = {
+                "object": RiskAssessmentReadSerializer(ra).data,
+                "quality_check": ra.quality_check(),
+            }
+        return res
+
+    @action(detail=False, methods=["get"])
+    def quality_check(self, request):
+        """
+        Returns the quality check of assessments grouped by folder.
+        """
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(), user=request.user, object_type=Folder
+        )
+        folders = Folder.objects.filter(id__in=viewable_objects).exclude(
+            content_type=Folder.ContentType.ROOT
+        )
+        return Response({"results": self._get_quality_checks_for_folders(folders)})
+
+    @action(detail=True, methods=["get"], url_path="quality_check")
+    def quality_check_detail(self, request, pk):
+        """
+        Returns the quality check of assessments for a specific folder.
+        """
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(), user=request.user, object_type=Folder
+        )
+        if UUID(pk) not in viewable_objects:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        folder = self.get_object()
+        result = self._get_quality_checks_for_folders(
+            Folder.objects.filter(pk=folder.pk)
+        )
+        return Response(result.get(str(folder.id), {}))
+
     @action(detail=False, methods=["get"])
     def my_assignments(self, request):
         include_teams = (
